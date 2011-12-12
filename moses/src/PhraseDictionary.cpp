@@ -136,7 +136,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
       m_filePath += ".gz";
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
-    
+
     PhraseDictionaryHiero* pdm  = new PhraseDictionaryHiero(m_numScoreComponent,this);
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
@@ -154,7 +154,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
       m_filePath += ".gz";
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
-    
+
     PhraseDictionaryALSuffixArray* pdm  = new PhraseDictionaryALSuffixArray(m_numScoreComponent,this);
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
@@ -255,18 +255,18 @@ PhraseDictionaryFeature::~PhraseDictionaryFeature()
 
 std::string PhraseDictionaryFeature::GetScoreProducerDescription(unsigned idx) const
 {
-  if (idx < GetNumInputScores()){
+  if (idx < GetNumInputScores()) {
     return "InputScore";
-  }else{
+  } else {
     return "PhraseModel";
   }
 }
 
 std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned idx) const
 {
-  if (idx < GetNumInputScores()){
+  if (idx < GetNumInputScores()) {
     return "I";
-  }else{
+  } else {
     return "tm";
   }
 }

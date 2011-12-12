@@ -304,8 +304,10 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
   return clone;
 }
 
-namespace {
-void MosesShouldUseExceptions(bool value) {
+namespace
+{
+void MosesShouldUseExceptions(bool value)
+{
   if (!value) {
     std::cerr << "Could not parse alignment info" << std::endl;
     abort();

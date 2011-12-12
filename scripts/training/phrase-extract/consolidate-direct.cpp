@@ -88,21 +88,20 @@ int main(int argc, char* argv[])
 
   char* &fileNameConsolidated = argv[2];
   ostream *fileConsolidated;
-	
-	if (strcmp(fileNameConsolidated, "-") == 0) {
-		fileConsolidated = &cout;
-	}
-	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNameConsolidated);
-		if (outputFile->fail()) {
-			cerr << "ERROR: could not open file phrase table file "
-			<< fileNameConsolidated << endl;
-			exit(1);
-		}
-		fileConsolidated = outputFile;
-	}
-	
+
+  if (strcmp(fileNameConsolidated, "-") == 0) {
+    fileConsolidated = &cout;
+  } else {
+    ofstream *outputFile = new ofstream();
+    outputFile->open(fileNameConsolidated);
+    if (outputFile->fail()) {
+      cerr << "ERROR: could not open file phrase table file "
+           << fileNameConsolidated << endl;
+      exit(1);
+    }
+    fileConsolidated = outputFile;
+  }
+
   int i=0;
   while(true) {
     i++;
@@ -118,8 +117,8 @@ int main(int argc, char* argv[])
 
     // output alignment and probabilities
     (*fileConsolidated)	<< itemDirect[2]						// prob direct
-                      << " 2.718" // phrase count feature
-                      << " ||| " << itemDirect[3];	// alignment
+                        << " 2.718" // phrase count feature
+                        << " ||| " << itemDirect[3];	// alignment
 
     // counts
     (*fileConsolidated) << "||| 0 " << itemDirect[4]; // indirect
@@ -127,12 +126,12 @@ int main(int argc, char* argv[])
 
   }
 
-	fileConsolidated->flush();
-	if (fileConsolidated != &cout) {
-		(dynamic_cast<ofstream*>(fileConsolidated))->close();
-		delete fileConsolidated;
-	}
-	
+  fileConsolidated->flush();
+  if (fileConsolidated != &cout) {
+    (dynamic_cast<ofstream*>(fileConsolidated))->close();
+    delete fileConsolidated;
+  }
+
   cerr << "Finished" << endl;
 }
 

@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -21,13 +21,16 @@
 
 #include "Util.h"
 
-namespace Moses {
+namespace Moses
+{
 
-ChartTrellisDetourQueue::~ChartTrellisDetourQueue() {
+ChartTrellisDetourQueue::~ChartTrellisDetourQueue()
+{
   RemoveAllInColl(m_queue);
 }
 
-void ChartTrellisDetourQueue::Push(const ChartTrellisDetour *detour) {
+void ChartTrellisDetourQueue::Push(const ChartTrellisDetour *detour)
+{
   if (m_capacity == 0 || m_queue.size() < m_capacity) {
     m_queue.insert(detour);
   } else if (detour->GetTotalScore() > (*m_queue.rbegin())->GetTotalScore()) {
@@ -43,7 +46,8 @@ void ChartTrellisDetourQueue::Push(const ChartTrellisDetour *detour) {
   }
 }
 
-const ChartTrellisDetour *ChartTrellisDetourQueue::Pop() {
+const ChartTrellisDetour *ChartTrellisDetourQueue::Pop()
+{
   QueueType::iterator p = m_queue.begin();
   const ChartTrellisDetour *top = *p;
   m_queue.erase(p);

@@ -41,7 +41,10 @@ bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
 bool logProbFlag = false;
 bool outputNTLengths = false;
-inline float maybeLogProb( float a ) { return logProbFlag ? log(a) : a; }
+inline float maybeLogProb( float a )
+{
+  return logProbFlag ? log(a) : a;
+}
 
 char line[LINE_MAX_LENGTH];
 void processFiles( char*, char*, char*, char* );
@@ -75,7 +78,7 @@ int main(int argc, char* argv[])
       cerr << "not including the phrase count feature\n";
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
-      if (i+1==argc) { 
+      if (i+1==argc) {
         cerr << "ERROR: specify count of count files for Good Turing discounting!\n";
         exit(1);
       }
@@ -83,7 +86,7 @@ int main(int argc, char* argv[])
       cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
     } else if (strcmp(argv[i],"--KneserNey") == 0) {
       kneserNeyFlag = true;
-      if (i+1==argc) { 
+      if (i+1==argc) {
         cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
         exit(1);
       }
@@ -134,7 +137,7 @@ void loadCountOfCounts( char* fileNameCountOfCounts )
   if (goodTuringFlag) {
     goodTuringDiscount.push_back(0.01); // floor value
     for( size_t i=1; i<countOfCounts.size()-1; i++ ) {
-      goodTuringDiscount.push_back(((float)i+1)/(float)i*((countOfCounts[i+1]+0.1) / ((float)countOfCounts[i]+0.1))); 
+      goodTuringDiscount.push_back(((float)i+1)/(float)i*((countOfCounts[i+1]+0.1) / ((float)countOfCounts[i]+0.1)));
       if (goodTuringDiscount[i]>1)
         goodTuringDiscount[i] = 1;
       if (goodTuringDiscount[i]<goodTuringDiscount[i-1])
@@ -232,21 +235,21 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     float adjustedCountEF_indirect = adjustedCountEF;
 
     // Kneser Ney discounting [Foster et al, 2006]
-   if (kneserNeyFlag) {
-     float D = kneserNey_D3;
-     if (countEF < 2) D = kneserNey_D1;
-     if (countEF < 3) D = kneserNey_D2;
-     if (D > countEF) D = countEF - 0.01; // sanity constraint
+    if (kneserNeyFlag) {
+      float D = kneserNey_D3;
+      if (countEF < 2) D = kneserNey_D1;
+      if (countEF < 3) D = kneserNey_D2;
+      if (D > countEF) D = countEF - 0.01; // sanity constraint
 
-     float p_b_E = n1_E / totalCount; // target phrase prob based on distinct
-     float alpha_F = D * n1_F / countF; // available mass
-     adjustedCountEF = countEF - D + countF * alpha_F * p_b_E;
+      float p_b_E = n1_E / totalCount; // target phrase prob based on distinct
+      float alpha_F = D * n1_F / countF; // available mass
+      adjustedCountEF = countEF - D + countF * alpha_F * p_b_E;
 
-     // for indirect
-     float p_b_F = n1_F / totalCount; // target phrase prob based on distinct
-     float alpha_E = D * n1_E / countE; // available mass
-     adjustedCountEF_indirect = countEF - D + countE * alpha_E * p_b_F;
-   }
+      // for indirect
+      float p_b_F = n1_F / totalCount; // target phrase prob based on distinct
+      float alpha_E = D * n1_E / countE; // available mass
+      adjustedCountEF_indirect = countEF - D + countE * alpha_E * p_b_F;
+    }
 
     // prob indirect
     if (!onlyDirectFlag) {
@@ -274,11 +277,10 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // counts, for debugging
     fileConsolidated << "||| " << countE << " " << countF; // << " " << countEF;
 
-    if (outputNTLengths)
-    {
+    if (outputNTLengths) {
       fileConsolidated << " ||| " << itemDirect[5];
     }
-    
+
     fileConsolidated << endl;
   }
   fileDirect.Close();

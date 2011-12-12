@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
-      sentenceIdFlag = true;  
+      sentenceIdFlag = true;
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;

@@ -11,13 +11,14 @@
 
 #include "PhraseDictionarySCFG.h"
 
-namespace Moses {
-  
+namespace Moses
+{
+
 class PhraseDictionaryALSuffixArray : public PhraseDictionarySCFG
 {
 public:
   PhraseDictionaryALSuffixArray(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-  : PhraseDictionarySCFG(numScoreComponent,feature) {}
+    : PhraseDictionarySCFG(numScoreComponent,feature) {}
 
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
@@ -34,9 +35,9 @@ protected:
   const LMList *m_languageModels;
   const WordPenaltyProducer *m_wpProducer;
   const std::vector<float> *m_weight;
-  
+
 };
-  
+
 
 }
 

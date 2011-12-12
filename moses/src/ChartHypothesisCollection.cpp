@@ -101,8 +101,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
     VERBOSE(3,"worse than matching hyp " << hypoExisting->GetId() << ", recombining" << std::endl)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
-    } 
-    else {
+    } else {
       ChartHypothesis::Delete(hypo);
     }
     return false;

@@ -56,9 +56,9 @@
 typedef struct _list LIST;
 
 struct _list {
-    LIST    *next;
-    LIST    *tail;      /* only valid in head node */
-    char    *string;    /* private copy */
+  LIST    *next;
+  LIST    *tail;      /* only valid in head node */
+  char    *string;    /* private copy */
 };
 
 /*
@@ -70,8 +70,8 @@ typedef struct _lol LOL;
 # define LOL_MAX 19
 
 struct _lol {
-    int count;
-    LIST    *list[ LOL_MAX ];
+  int count;
+  LIST    *list[ LOL_MAX ];
 };
 
 LIST *  list_append( LIST *l, LIST *nl );

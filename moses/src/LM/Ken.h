@@ -26,12 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TypeDef.h"
 
-namespace Moses {
+namespace Moses
+{
 
 class ScoreIndexManager;
 class LanguageModel;
 
-// This will also load.  
+// This will also load.
 LanguageModel *ConstructKenLM(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy);
 
 } // namespace Moses

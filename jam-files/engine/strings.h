@@ -7,14 +7,13 @@
 
 # include <stddef.h>
 
-typedef struct string
-{
-    char* value;
-    unsigned long size;
-    unsigned long capacity;
-    char opt[32];
+typedef struct string {
+  char* value;
+  unsigned long size;
+  unsigned long capacity;
+  char opt[32];
 #ifndef NDEBUG
-    char magic[4];
+  char magic[4];
 #endif
 } string;
 

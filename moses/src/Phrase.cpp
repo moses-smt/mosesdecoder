@@ -143,9 +143,9 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
   for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
     Word &word = AddWord();
     size_t index = 0;
-    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
-        factor_it && (index < factorOrder.size()); 
-        ++factor_it, ++index) {
+    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter));
+         factor_it && (index < factorOrder.size());
+         ++factor_it, ++index) {
       word[factorOrder[index]] = factorCollection.AddFactor(*factor_it);
     }
     if (index != factorOrder.size()) {

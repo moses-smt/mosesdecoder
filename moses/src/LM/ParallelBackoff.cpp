@@ -347,7 +347,8 @@ const FFState *LanguageModelParallelBackoff::GetBeginSentenceState() const
 
 }
 
-LanguageModelMultiFactor *NewParallelBackoff() {
+LanguageModelMultiFactor *NewParallelBackoff()
+{
   return new LanguageModelParallelBackoff();
 }
 

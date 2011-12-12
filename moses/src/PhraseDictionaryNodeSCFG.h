@@ -186,7 +186,7 @@ public:
   }
 
   void Clear();
-  
+
   TO_STRING();
 };
 

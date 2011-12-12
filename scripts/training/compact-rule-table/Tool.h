@@ -6,13 +6,17 @@
 #include <iostream>
 #include <string>
 
-namespace moses {
+namespace moses
+{
 
-class Tool {
- public:
+class Tool
+{
+public:
   Tool(const std::string &name) : m_name(name) {}
 
-  const std::string &getName() const { return m_name; }
+  const std::string &getName() const {
+    return m_name;
+  }
 
   virtual int main(int argc, char *argv[]) = 0;
 
@@ -25,7 +29,7 @@ class Tool {
     std::exit(1);
   }
 
- private:
+private:
   std::string m_name;
 };
 

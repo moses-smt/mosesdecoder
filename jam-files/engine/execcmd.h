@@ -18,22 +18,21 @@
 
 #include <time.h>
 
-typedef struct timing_info
-{
-    double system;
-    double user;
-    time_t start;
-    time_t end;
+typedef struct timing_info {
+  double system;
+  double user;
+  time_t start;
+  time_t end;
 } timing_info;
 
 void exec_cmd
 (
-    char * string,
-    void (* func)( void * closure, int status, timing_info *, char *, char * ),
-    void * closure,
-    LIST * shell,
-    char * action,
-    char * target
+  char * string,
+  void (* func)( void * closure, int status, timing_info *, char *, char * ),
+  void * closure,
+  LIST * shell,
+  char * action,
+  char * target
 );
 
 int exec_wait();

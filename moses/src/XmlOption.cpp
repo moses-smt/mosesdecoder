@@ -83,8 +83,8 @@ string TrimXml(const string& str, const std::string& lbrackStr, const std::strin
  */
 bool isXmlTag(const string& tag, const std::string& lbrackStr, const std::string& rbrackStr)
 {
-   return (tag.substr(0,lbrackStr.length()) == lbrackStr &&
-	   (tag[lbrackStr.length()] == '/' ||
+  return (tag.substr(0,lbrackStr.length()) == lbrackStr &&
+          (tag[lbrackStr.length()] == '/' ||
            (tag[lbrackStr.length()] >= 'a' && tag[lbrackStr.length()] <= 'z') ||
            (tag[lbrackStr.length()] >= 'A' && tag[lbrackStr.length()] <= 'Z')));
 }
@@ -111,7 +111,7 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
   // walk thorugh the string (loop vver cpos)
   while (cpos != str.size()) {
     // find the next opening "<" of an xml tag
-       lpos = str.find(lbrack, cpos);			// lpos = str.find_first_of(lbrack, cpos);
+    lpos = str.find(lbrack, cpos);			// lpos = str.find_first_of(lbrack, cpos);
     if (lpos != string::npos) {
       // find the end of the xml tag
       rpos = str.find(rbrack, lpos+lbrackStr.length()-1);			// rpos = str.find_first_of(rbrack, lpos);
@@ -149,8 +149,8 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param lbrackStr xml tag's left bracket string, typically "<"
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
-bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls, 
-	const std::string& lbrackStr, const std::string& rbrackStr)
+bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls,
+                            const std::string& lbrackStr, const std::string& rbrackStr)
 {
   //parse XML markup in translation line
 

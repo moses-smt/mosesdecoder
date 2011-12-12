@@ -210,13 +210,13 @@ void OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset,
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments();
-  
+
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignment = **it;
     out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
   }
-  
+
 }
 
 void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
@@ -227,7 +227,7 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     const Hypothesis &edge = *edges[currEdge];
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-    
+
     OutputAlignment(out, tp.GetAlignmentInfo(), sourceOffset, targetOffset);
 
     targetOffset += tp.GetSize();
@@ -239,7 +239,7 @@ void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<co
 {
   ostringstream out;
   OutputAlignment(out, edges);
-  
+
   collector->Write(lineNo,out.str());
 }
 
@@ -412,18 +412,18 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (pds.size() > 0) {
 
       for( size_t i=0; i<pds.size(); i++ ) {
-	size_t pd_numinputscore = pds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = pds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+        for (size_t j = 0; j<scores.size(); ++j) {
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ) {
+            if ((j == 0) || (j == pd_numinputscore)) {
+              lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 
@@ -432,18 +432,18 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (gds.size() > 0) {
 
       for( size_t i=0; i<gds.size(); i++ ) {
-	size_t pd_numinputscore = gds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = gds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+        for (size_t j = 0; j<scores.size(); ++j) {
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ) {
+            if ((j == 0) || (j == pd_numinputscore)) {
+              lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 
@@ -477,7 +477,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
         const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignmentInfo();
-        
+
         OutputAlignment(out, ai, sourceOffset, targetOffset);
 
       }

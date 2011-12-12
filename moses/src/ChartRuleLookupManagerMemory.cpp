@@ -77,19 +77,19 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // get list of all rules that apply to spans at same starting position
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
-  
+
   const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
 
   // loop through the rules
-  // (note that expandableDottedRuleList can be expanded as the loop runs 
+  // (note that expandableDottedRuleList can be expanded as the loop runs
   //  through calls to ExtendPartialRuleApplication())
   for (size_t ind = 0; ind < expandableDottedRuleList.size(); ++ind) {
     // rule we are about to extend
     const DottedRuleInMemory &prevDottedRule = *expandableDottedRuleList[ind];
     // we will now try to extend it, starting after where it ended
     size_t startPos = prevDottedRule.IsRoot()
-                    ? range.GetStartPos()
-                    : prevDottedRule.GetWordsRange().GetEndPos() + 1;
+                      ? range.GetStartPos()
+                      : prevDottedRule.GetWordsRange().GetEndPos() + 1;
 
     // search for terminal symbol
     // (if only one more word position needs to be covered)
@@ -102,15 +102,15 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
       // if we found a new rule -> create it and add it to the list
       if (node != NULL) {
-				// create the rule
+        // create the rule
 #ifdef USE_BOOST_POOL
         DottedRuleInMemory *dottedRule = m_dottedRulePool.malloc();
         new (dottedRule) DottedRuleInMemory(*node, sourceWordLabel,
                                             prevDottedRule);
 #else
         DottedRuleInMemory *dottedRule = new DottedRuleInMemory(*node,
-                                                                sourceWordLabel,
-                                                                prevDottedRule);
+            sourceWordLabel,
+            prevDottedRule);
 #endif
         dottedRuleCol.Add(relEndPos+1, dottedRule);
       }
@@ -136,9 +136,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
       // word.
       endPos = absEndPos - 1;
       stackInd = relEndPos;
-    }
-    else 
-    {
+    } else {
       endPos = absEndPos;
       stackInd = relEndPos + 1;
     }
@@ -215,7 +213,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
   // We'll do whichever minimises the number of lookups:
   if (numCombinations <= numChildren*2) {
 
-		// loop over possible source non-terminal labels (as found in input tree)
+    // loop over possible source non-terminal labels (as found in input tree)
     NonTerminalSet::const_iterator p = sourceNonTerms.begin();
     NonTerminalSet::const_iterator sEnd = sourceNonTerms.end();
     for (; p != sEnd; ++p) {
@@ -242,14 +240,12 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         new (rule) DottedRuleInMemory(*child, cellLabel, prevDottedRule);
 #else
         DottedRuleInMemory *rule = new DottedRuleInMemory(*child, cellLabel,
-                                                          prevDottedRule);
+            prevDottedRule);
 #endif
         dottedRuleColl.Add(stackInd, rule);
       }
     }
-  } 
-  else 
-  {
+  } else {
     // loop over possible expansions of the rule
     PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator p;
     PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator end =
@@ -274,7 +270,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       new (rule) DottedRuleInMemory(child, *cellLabel, prevDottedRule);
 #else
       DottedRuleInMemory *rule = new DottedRuleInMemory(child, *cellLabel,
-                                                        prevDottedRule);
+          prevDottedRule);
 #endif
       dottedRuleColl.Add(stackInd, rule);
     }

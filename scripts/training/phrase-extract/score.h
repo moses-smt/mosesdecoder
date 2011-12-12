@@ -18,8 +18,7 @@ typedef std::vector<PhraseAlignment*>          PhraseAlignmentCollection;
 class PhraseAlignmentCollectionOrderer
 {
 public:
-	bool operator()(const PhraseAlignmentCollection &collA, const PhraseAlignmentCollection &collB) const
-	{
+  bool operator()(const PhraseAlignmentCollection &collA, const PhraseAlignmentCollection &collB) const {
     assert(collA.size() > 0);
     assert(collB.size() > 0);
 
@@ -28,7 +27,7 @@ public:
     bool ret = objA < objB;
 
     return ret;
-	}
+  }
 };
 
 
@@ -48,8 +47,9 @@ public:
 
   std::pair<Coll::iterator,bool> insert ( const PhraseAlignmentCollection& obj );
 
-  const SortedColl &GetSortedColl() const
-  { return m_sortedColl; }
+  const SortedColl &GetSortedColl() const {
+    return m_sortedColl;
+  }
 
 private:
   SortedColl m_sortedColl;

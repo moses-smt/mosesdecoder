@@ -57,24 +57,24 @@ bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
   InputFileStream inFile(filePath);
 
   std::auto_ptr<RuleTableLoader> loader =
-      RuleTableLoaderFactory::Create(filePath);
+    RuleTableLoaderFactory::Create(filePath);
   bool ret = loader->Load(input, output, inFile, weight, tableLimit,
                           languageModels, wpProducer, *this);
   return ret;
 }
 
 TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
-                                                                                const Phrase &source
-                                                                                , const TargetPhrase &target
-                                                                                , const Word &sourceLHS)
+  const Phrase &source
+  , const TargetPhrase &target
+  , const Word &sourceLHS)
 {
   PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target, sourceLHS);
   return currNode.GetOrCreateTargetPhraseCollection();
 }
 
 PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &source
-                                                                , const TargetPhrase &target
-                                                                , const Word &sourceLHS)
+    , const TargetPhrase &target
+    , const Word &sourceLHS)
 {
   const size_t size = source.GetSize();
 
@@ -102,12 +102,12 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
 
     CHECK(currNode != NULL);
   }
-  
+
   // finally, the source LHS
   //currNode = currNode->GetOrCreateChild(sourceLHS);
   //CHECK(currNode != NULL);
 
-  
+
   return *currNode;
 }
 
@@ -135,8 +135,7 @@ ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(
 
 void PhraseDictionarySCFG::SortAndPrune()
 {
-  if (GetTableLimit())
-  {
+  if (GetTableLimit()) {
     m_collection.Sort(GetTableLimit());
   }
 }

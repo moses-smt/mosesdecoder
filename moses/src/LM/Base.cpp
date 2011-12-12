@@ -30,20 +30,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
-namespace Moses {
+namespace Moses
+{
 
-LanguageModel::LanguageModel() {
-  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
+LanguageModel::LanguageModel()
+{
+  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature();
 }
 
-void LanguageModel::Init(ScoreIndexManager &scoreIndexManager) {
+void LanguageModel::Init(ScoreIndexManager &scoreIndexManager)
+{
   scoreIndexManager.AddScoreProducer(this);
 }
 
 LanguageModel::~LanguageModel() {}
 
 // don't inline virtual funcs...
-size_t LanguageModel::GetNumScoreComponents() const {
+size_t LanguageModel::GetNumScoreComponents() const
+{
   if (m_enableOOVFeature) {
     return 2;
   } else {
@@ -51,13 +55,15 @@ size_t LanguageModel::GetNumScoreComponents() const {
   }
 }
 
-float LanguageModel::GetWeight() const {
+float LanguageModel::GetWeight() const
+{
   size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
                    GetBeginIndex(GetScoreBookkeepingID());
   return StaticData::Instance().GetAllWeights()[lmIndex];
 }
 
-float LanguageModel::GetOOVWeight() const {
+float LanguageModel::GetOOVWeight() const
+{
   if (!m_enableOOVFeature) return 0;
   size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
                    GetBeginIndex(GetScoreBookkeepingID());

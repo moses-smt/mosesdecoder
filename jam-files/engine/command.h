@@ -38,22 +38,21 @@
 
 typedef struct _cmd CMD;
 
-struct _cmd
-{
-    CMD  * next;
-    CMD  * tail;   /* valid on in head */
-    RULE * rule;   /* rule->actions contains shell script */
-    LIST * shell;  /* $(SHELL) value */
-    LOL    args;   /* LISTs for $(<), $(>) */
-    char * buf;    /* actual commands */
+struct _cmd {
+  CMD  * next;
+  CMD  * tail;   /* valid on in head */
+  RULE * rule;   /* rule->actions contains shell script */
+  LIST * shell;  /* $(SHELL) value */
+  LOL    args;   /* LISTs for $(<), $(>) */
+  char * buf;    /* actual commands */
 };
 
 CMD * cmd_new
 (
-    RULE * rule,     /* rule (referenced) */
-    LIST * targets,  /* $(<) (freed) */
-    LIST * sources,  /* $(>) (freed) */
-    LIST * shell     /* $(SHELL) (freed) */
+  RULE * rule,     /* rule (referenced) */
+  LIST * targets,  /* $(<) (freed) */
+  LIST * sources,  /* $(>) (freed) */
+  LIST * shell     /* $(SHELL) (freed) */
 );
 
 void cmd_free( CMD * );

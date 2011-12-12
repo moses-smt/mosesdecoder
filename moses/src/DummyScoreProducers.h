@@ -36,9 +36,9 @@ public:
     const ChartHypothesis&,
     int /* featureID */,
     ScoreComponentCollection*) const {
-		CHECK(0); // feature function not valid in chart decoder
-		return NULL;
-	}
+    CHECK(0); // feature function not valid in chart decoder
+    return NULL;
+  }
 };
 
 /** Doesn't do anything but provide a key into the global

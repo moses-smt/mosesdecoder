@@ -37,7 +37,7 @@ class ChartCellCollection;
 // of translations and provdes an estimate of the best score.
 class ChartTranslationOption
 {
- public:
+public:
   ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
                          const DottedRule &dottedRule,
                          const WordsRange &wordsRange,
@@ -45,16 +45,17 @@ class ChartTranslationOption
     : m_dottedRule(dottedRule)
     , m_targetPhraseCollection(targetPhraseColl)
     , m_wordsRange(wordsRange)
-    , m_estimateOfBestScore(0)
-  {
+    , m_estimateOfBestScore(0) {
     CalcEstimateOfBestScore(allChartCells);
   }
 
   ~ChartTranslationOption() {}
 
-  const DottedRule &GetDottedRule() const { return m_dottedRule; }
+  const DottedRule &GetDottedRule() const {
+    return m_dottedRule;
+  }
 
-  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+  const TargetPhraseCollection &GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
   }
 
@@ -65,9 +66,11 @@ class ChartTranslationOption
   // return an estimate of the best score possible with this translation option.
   // the estimate is the sum of the top target phrase's estimated score plus the
   // scores of the best child hypotheses.
-  inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
+  inline float GetEstimateOfBestScore() const {
+    return m_estimateOfBestScore;
+  }
 
- private:
+private:
   // not implemented
   ChartTranslationOption &operator=(const ChartTranslationOption &);
 

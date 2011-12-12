@@ -47,7 +47,7 @@ class ChartTranslationOption;
 // is used to order items in the cube's priority queue.
 class RuleCubeItemScoreOrderer
 {
- public:
+public:
   bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
     return p->GetScore() < q->GetScore();
   }
@@ -58,7 +58,7 @@ class RuleCubeItemScoreOrderer
 // during search.
 class RuleCubeItemPositionOrderer
 {
- public:
+public:
   bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
     return *p < *q;
   }
@@ -66,7 +66,7 @@ class RuleCubeItemPositionOrderer
 
 class RuleCubeItemHasher
 {
- public:
+public:
   size_t operator()(const RuleCubeItem *p) const {
     size_t seed = 0;
     boost::hash_combine(seed, p->GetHypothesisDimensions());
@@ -77,7 +77,7 @@ class RuleCubeItemHasher
 
 class RuleCubeItemEqualityPred
 {
- public:
+public:
   bool operator()(const RuleCubeItem *p, const RuleCubeItem *q) const {
     return p->GetHypothesisDimensions() == q->GetHypothesisDimensions() &&
            p->GetTranslationDimension() == q->GetTranslationDimension();
@@ -86,7 +86,7 @@ class RuleCubeItemEqualityPred
 
 class RuleCube
 {
- public:
+public:
   RuleCube(const ChartTranslationOption &, const ChartCellCollection &,
            ChartManager &);
 
@@ -100,26 +100,28 @@ class RuleCube
 
   RuleCubeItem *Pop(ChartManager &);
 
-  bool IsEmpty() const { return m_queue.empty(); }
+  bool IsEmpty() const {
+    return m_queue.empty();
+  }
 
   const ChartTranslationOption &GetTranslationOption() const {
     return m_transOpt;
   }
 
- private:
+private:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
   typedef boost::unordered_set<RuleCubeItem*,
-                               RuleCubeItemHasher,
-                               RuleCubeItemEqualityPred
-                              > ItemSet;
+          RuleCubeItemHasher,
+          RuleCubeItemEqualityPred
+          > ItemSet;
 #else
   typedef std::set<RuleCubeItem*, RuleCubeItemPositionOrderer> ItemSet;
 #endif
 
   typedef std::priority_queue<RuleCubeItem*,
-                              std::vector<RuleCubeItem*>,
-                              RuleCubeItemScoreOrderer
-                             > Queue;
+          std::vector<RuleCubeItem*>,
+          RuleCubeItemScoreOrderer
+          > Queue;
 
   RuleCube(const RuleCube &);  // Not implemented
   RuleCube &operator=(const RuleCube &);  // Not implemented

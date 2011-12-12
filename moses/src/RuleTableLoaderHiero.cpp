@@ -11,22 +11,23 @@
 
 using namespace std;
 
-namespace Moses {
-  
+namespace Moses
+{
+
 bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
-          const std::vector<FactorType> &output,
-          std::istream &inStream,
-          const std::vector<float> &weight,
-          size_t tableLimit,
-          const LMList &languageModels,
-          const WordPenaltyProducer* wpProducer,
-          PhraseDictionarySCFG &ruleTable)
+                                const std::vector<FactorType> &output,
+                                std::istream &inStream,
+                                const std::vector<float> &weight,
+                                size_t tableLimit,
+                                const LMList &languageModels,
+                                const WordPenaltyProducer* wpProducer,
+                                PhraseDictionarySCFG &ruleTable)
 {
   bool ret = RuleTableLoaderStandard::Load(HieroFormat
-              ,input, output
-              ,inStream, weight
-              ,tableLimit, languageModels
-              ,wpProducer, ruleTable);
+             ,input, output
+             ,inStream, weight
+             ,tableLimit, languageModels
+             ,wpProducer, ruleTable);
   return ret;
 }
 

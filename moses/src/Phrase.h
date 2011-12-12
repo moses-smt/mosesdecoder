@@ -61,7 +61,7 @@ public:
   /** Fills phrase with words from format string, typically from phrase table or sentence input
   	* \param factorOrder factor types of each element in 2D string vector
   	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter between factors.  
+  	*	\param factorDelimiter delimiter between factors.
   */
   void CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter);
 

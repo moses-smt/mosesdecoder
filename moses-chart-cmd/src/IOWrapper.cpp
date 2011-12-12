@@ -129,7 +129,8 @@ IOWrapper::~IOWrapper()
   delete m_singleBestOutputCollector;
 }
 
-void IOWrapper::ResetTranslationId() {
+void IOWrapper::ResetTranslationId()
+{
   m_translationId = StaticData::Instance().GetStartTranslationId();
 }
 
@@ -369,18 +370,18 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     if (pds.size() > 0) {
 
       for( size_t i=0; i<pds.size(); i++ ) {
-	size_t pd_numinputscore = pds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = pds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+        for (size_t j = 0; j<scores.size(); ++j) {
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ) {
+            if ((j == 0) || (j == pd_numinputscore)) {
+              lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 
@@ -394,18 +395,18 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     if (gds.size() > 0) {
 
       for( size_t i=0; i<gds.size(); i++ ) {
-	size_t pd_numinputscore = gds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = gds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+        for (size_t j = 0; j<scores.size(); ++j) {
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ) {
+            if ((j == 0) || (j == pd_numinputscore)) {
+              lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 

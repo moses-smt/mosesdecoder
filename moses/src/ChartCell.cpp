@@ -98,8 +98,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // add all trans opt into queue. using only 1st child node.
   ChartTranslationOptionList::const_iterator iterList;
-  for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) 
-  {
+  for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) {
     const ChartTranslationOption &transOpt = **iterList;
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);
@@ -107,8 +106,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // pluck things out of queue and add to hypo collection
   const size_t popLimit = staticData.GetCubePruningPopLimit();
-  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
-  {
+  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);
   }

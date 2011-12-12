@@ -8,10 +8,12 @@
 #include <utility>
 #include <vector>
 
-namespace moses {
+namespace moses
+{
 
-class RuleTableParser {
- public:
+class RuleTableParser
+{
+public:
   struct Entry {
     std::string sourceLhs;
     std::vector<std::string> sourceRhs;
@@ -26,8 +28,12 @@ class RuleTableParser {
   RuleTableParser();
   RuleTableParser(std::istream &);
 
-  const Entry &operator*() const { return m_value; }
-  const Entry *operator->() const { return &m_value; }
+  const Entry &operator*() const {
+    return m_value;
+  }
+  const Entry *operator->() const {
+    return &m_value;
+  }
 
   RuleTableParser &operator++();
   RuleTableParser operator++(int);
@@ -35,7 +41,7 @@ class RuleTableParser {
   friend bool operator==(const RuleTableParser &, const RuleTableParser &);
   friend bool operator!=(const RuleTableParser &, const RuleTableParser &);
 
- private:
+private:
   Entry m_value;
   std::istream *m_input;
   std::string m_line;

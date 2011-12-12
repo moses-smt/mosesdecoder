@@ -30,17 +30,17 @@ namespace Moses
 {
 
 ChartTrellisPath::ChartTrellisPath(const ChartHypothesis &hypo)
-    : m_finalNode(new ChartTrellisNode(hypo))
-    , m_deviationPoint(NULL)
-    , m_scoreBreakdown(hypo.GetScoreBreakdown())
-    , m_totalScore(hypo.GetTotalScore())
+  : m_finalNode(new ChartTrellisNode(hypo))
+  , m_deviationPoint(NULL)
+  , m_scoreBreakdown(hypo.GetScoreBreakdown())
+  , m_totalScore(hypo.GetTotalScore())
 {
 }
 
 ChartTrellisPath::ChartTrellisPath(const ChartTrellisDetour &detour)
-   : m_finalNode(new ChartTrellisNode(detour, m_deviationPoint))
-   , m_scoreBreakdown(detour.GetBasePath().m_scoreBreakdown)
-   , m_totalScore(0)
+  : m_finalNode(new ChartTrellisNode(detour, m_deviationPoint))
+  , m_scoreBreakdown(detour.GetBasePath().m_scoreBreakdown)
+  , m_totalScore(0)
 {
   CHECK(m_deviationPoint);
   ScoreComponentCollection scoreChange;

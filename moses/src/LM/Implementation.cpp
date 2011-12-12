@@ -68,8 +68,9 @@ void LanguageModelImplementation::GetState(
   GetValueForgotState(contextFactor, state);
 }
 
-// Calculate score of a phrase.  
-void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+// Calculate score of a phrase.
+void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
+{
   fullScore  = 0;
   ngramScore = 0;
 
@@ -81,7 +82,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
   vector<const Word*> contextFactor;
   contextFactor.reserve(GetNGramOrder());
   std::auto_ptr<FFState> state(NewState((phrase.GetWord(0) == GetSentenceStartArray()) ?
-                               GetBeginSentenceState() : GetNullContextState()));
+                                        GetBeginSentenceState() : GetNullContextState()));
   size_t currPos = 0;
   while (currPos < phraseSize) {
     const Word &word = phrase.GetWord(currPos);
@@ -108,7 +109,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
         fullScore += result.score;
         if (contextFactor.size() == GetNGramOrder())
           ngramScore += result.score;
-        if (result.unknown) ++oovCount;  
+        if (result.unknown) ++oovCount;
       }
     }
 
@@ -116,7 +117,8 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
   }
 }
 
-FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const {
+FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const
+{
   // In this function, we only compute the LM scores of n-grams that overlap a
   // phrase boundary. Phrase-internal scores are taken directly from the
   // translation option.
@@ -178,9 +180,7 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
         contextFactor[i] = &hypo.GetWord((size_t)currPos);
     }
     lmScore += GetValueForgotState(contextFactor, *res).score;
-  }
-  else
-  {
+  } else {
     if (endPos < currEndPos) {
       //need to get the LM state (otherwise the last LM state is fine)
       for (size_t currPos = endPos+1; currPos <= currEndPos; currPos++) {
@@ -207,10 +207,11 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
   return res;
 }
 
-namespace {
+namespace
+{
 
-// This is the FFState used by LanguageModelImplementation::EvaluateChart.  
-// Though svn blame goes back to heafield, don't blame me.  I just moved this from LanguageModelChartState.cpp and ChartHypothesis.cpp.  
+// This is the FFState used by LanguageModelImplementation::EvaluateChart.
+// Though svn blame goes back to heafield, don't blame me.  I just moved this from LanguageModelChartState.cpp and ChartHypothesis.cpp.
 class LanguageModelChartState : public FFState
 {
 private:
@@ -223,12 +224,11 @@ private:
 
   const ChartHypothesis &m_hypo;
 
-  /** Construct the prefix string of up to specified size 
+  /** Construct the prefix string of up to specified size
    * \param ret prefix string
    * \param size maximum size (typically max lm context window)
    */
-  size_t CalcPrefix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
-  {
+  size_t CalcPrefix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
       target.GetAlignmentInfo().GetNonTermIndexMap();
@@ -257,13 +257,12 @@ private:
     return size;
   }
 
-  /** Construct the suffix phrase of up to specified size 
+  /** Construct the suffix phrase of up to specified size
    * will always be called after the construction of prefix phrase
    * \param ret suffix phrase
    * \param size maximum size of suffix
    */
-  size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
-  {
+  size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const {
     CHECK(m_contextPrefix.GetSize() <= m_numTargetTerminals);
 
     // special handling for small hypotheses
@@ -292,8 +291,7 @@ private:
           size_t nonTermInd = nonTermIndexMap[pos];
           const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
           size = static_cast<const LanguageModelChartState*>(prevHypo->GetFFState(featureID))->CalcSuffix(*prevHypo, featureID, ret, size);
-        }
-        else {
+        } else {
           ret.PrependWord(hypo.GetCurrTargetPhrase().GetWord(pos));
           size--;
         }
@@ -309,11 +307,10 @@ private:
 
 public:
   LanguageModelChartState(const ChartHypothesis &hypo, int featureID, size_t order)
-      :m_lmRightContext(NULL)
-      ,m_contextPrefix(order - 1)
-      ,m_contextSuffix( order - 1)
-      ,m_hypo(hypo)
-  {
+    :m_lmRightContext(NULL)
+    ,m_contextPrefix(order - 1)
+    ,m_contextSuffix( order - 1)
+    ,m_hypo(hypo) {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
 
     for (std::vector<const ChartHypothesis*>::const_iterator i = hypo.GetPrevHypos().begin(); i != hypo.GetPrevHypos().end(); ++i) {
@@ -334,8 +331,12 @@ public:
     m_lmRightContext = rightState;
   }
 
-  float GetPrefixScore() const { return m_prefixScore; }
-  FFState* GetRightContext() const { return m_lmRightContext; }
+  float GetPrefixScore() const {
+    return m_prefixScore;
+  }
+  FFState* GetRightContext() const {
+    return m_lmRightContext;
+  }
 
   size_t GetNumTargetTerminals() const {
     return m_numTargetTerminals;
@@ -353,8 +354,7 @@ public:
       dynamic_cast<const LanguageModelChartState &>( o );
 
     // prefix
-    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) // not for "<s> ..."
-    {
+    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) { // not for "<s> ..."
       int ret = GetPrefix().Compare(other.GetPrefix());
       if (ret != 0)
         return ret;
@@ -362,8 +362,7 @@ public:
 
     // suffix
     size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
-    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1)// not for "... </s>"
-    {
+    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1) { // not for "... </s>"
       int ret = other.GetRightContext()->Compare(*m_lmRightContext);
       if (ret != 0)
         return ret;
@@ -374,7 +373,8 @@ public:
 
 } // namespace
 
-FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out, const LanguageModel *scorer) const {
+FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out, const LanguageModel *scorer) const
+{
   LanguageModelChartState *ret = new LanguageModelChartState(hypo, featureID, GetNGramOrder());
   // data structure for factored context phrase (history and predicted word)
   vector<const Word*> contextFactor;
@@ -394,33 +394,28 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   // loop over rule
   for (size_t phrasePos = 0, wordPos = 0;
        phrasePos < hypo.GetCurrTargetPhrase().GetSize();
-       phrasePos++)
-  {
+       phrasePos++) {
     // consult rule for either word or non-terminal
     const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
 
     // regular word
-    if (!word.IsNonTerminal())
-    {
+    if (!word.IsNonTerminal()) {
       ShiftOrPush(contextFactor, word);
 
       // beginning of sentence symbol <s>? -> just update state
-      if (word == GetSentenceStartArray())
-      {
+      if (word == GetSentenceStartArray()) {
         CHECK(phrasePos == 0);
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }
       // score a regular word added by the rule
-      else
-      {
+      else {
         updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
       }
     }
 
     // non-terminal, add phrase from underlying hypothesis
-    else
-    {
+    else {
       // look up underlying hypothesis
       size_t nonTermIndex = nonTermIndexMap[phrasePos];
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
@@ -444,8 +439,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
         // push suffix
         int suffixPos = prevState->GetSuffix().GetSize() - (GetNGramOrder()-1);
         if (suffixPos < 0) suffixPos = 0; // push all words if less than order
-        for(;(size_t)suffixPos < prevState->GetSuffix().GetSize(); suffixPos++)
-        {
+        for(; (size_t)suffixPos < prevState->GetSuffix().GetSize(); suffixPos++) {
           const Word &word = prevState->GetSuffix().GetWord(suffixPos);
           ShiftOrPush(contextFactor, word);
           wordPos++;
@@ -453,22 +447,19 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
       }
 
       // internal non-terminal
-      else
-      {
+      else {
         // score its prefix
         for(size_t prefixPos = 0;
             prefixPos < GetNGramOrder()-1 // up to LM order window
-              && prefixPos < subPhraseLength; // up to length
-            prefixPos++)
-        {
+            && prefixPos < subPhraseLength; // up to length
+            prefixPos++) {
           const Word &word = prevState->GetPrefix().GetWord(prefixPos);
           ShiftOrPush(contextFactor, word);
           updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
         }
 
         // check if we are dealing with a large sub-phrase
-        if (subPhraseLength > GetNGramOrder() - 1)
-        {
+        if (subPhraseLength > GetNGramOrder() - 1) {
           // add its finalized language model score
           finalizedScore +=
             prevHypo->GetScoreBreakdown().GetScoresForProducer(scorer)[0] // full score
@@ -503,11 +494,11 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   return ret;
 }
 
-void LanguageModelImplementation::updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const {
+void LanguageModelImplementation::updateChartScore(float *prefixScore, float *finalizedScore, float score, size_t wordPos) const
+{
   if (wordPos < GetNGramOrder()) {
     *prefixScore += score;
-  }
-  else {
+  } else {
     *finalizedScore += score;
   }
 }

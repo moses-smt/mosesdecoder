@@ -39,7 +39,7 @@ class ChartManager;
 // is used to order items in the priority queue.
 class RuleCubeOrderer
 {
- public:
+public:
   bool operator()(const RuleCube *p, const RuleCube *q) const {
     return p->GetTopScore() < q->GetTopScore();
   }
@@ -47,17 +47,19 @@ class RuleCubeOrderer
 
 class RuleCubeQueue
 {
- public:
+public:
   RuleCubeQueue(ChartManager &manager) : m_manager(manager) {}
   ~RuleCubeQueue();
 
   void Add(RuleCube *);
   ChartHypothesis *Pop();
-  bool IsEmpty() const { return m_queue.empty(); }
+  bool IsEmpty() const {
+    return m_queue.empty();
+  }
 
- private:
+private:
   typedef std::priority_queue<RuleCube*, std::vector<RuleCube*>,
-                              RuleCubeOrderer > Queue;
+          RuleCubeOrderer > Queue;
 
   Queue m_queue;
   ChartManager &m_manager;

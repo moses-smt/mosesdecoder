@@ -24,10 +24,10 @@ extern bool hierarchicalFlag;
 template<typename T>
 inline T Scan(const std::string &input)
 {
-	std::stringstream stream(input);
-	T ret;
-	stream >> ret;
-	return ret;
+  std::stringstream stream(input);
+  T ret;
+  stream >> ret;
+  return ret;
 }
 
 
@@ -35,11 +35,10 @@ inline T Scan(const std::string &input)
 template<typename T>
 inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
 {
-	output.resize(input.size());
-	for (size_t i = 0 ; i < input.size() ; i++)
-	{
-		output[i] = Scan<T>( input[i] );
-	}
+  output.resize(input.size());
+  for (size_t i = 0 ; i < input.size() ; i++) {
+    output[i] = Scan<T>( input[i] );
+  }
 }
 
 
@@ -51,7 +50,7 @@ inline void Tokenize(std::vector<std::string> &output
   std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
   // Find first "non-delimiter".
   std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-  
+
   while (std::string::npos != pos || std::string::npos != lastPos) {
     // Found a token, add it to the vector.
     output.push_back(str.substr(lastPos, pos - lastPos));
@@ -65,12 +64,12 @@ inline void Tokenize(std::vector<std::string> &output
 // speeded up version of above
 template<typename T>
 inline void Tokenize( std::vector<T> &output
-										 , const std::string &input
-										 , const std::string& delimiters = " \t")
+                      , const std::string &input
+                      , const std::string& delimiters = " \t")
 {
-	std::vector<std::string> stringVector;
-	Tokenize(stringVector, input, delimiters);
-	return Scan<T>(output, stringVector );
+  std::vector<std::string> stringVector;
+  Tokenize(stringVector, input, delimiters);
+  return Scan<T>(output, stringVector );
 }
 
 // read in a phrase pair and store it
@@ -90,8 +89,7 @@ void PhraseAlignment::create( char line[], int lineID )
 
     else if (item == 2) { // target phrase
       phraseT.push_back( vcbT.storeIfNew( token[j] ) );
-    }
-    else if (item == 3) { // alignment
+    } else if (item == 3) { // alignment
       int s,t;
       sscanf(token[j].c_str(), "%d-%d", &s, &t);
       if (t >= phraseT.size() || s >= phraseS.size()) {
@@ -108,8 +106,7 @@ void PhraseAlignment::create( char line[], int lineID )
       }
     } else if (item == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
-    }
-    else if (item == 5) { // non-term lengths
+    } else if (item == 5) { // non-term lengths
       addNTLength(token[j]);
     }
   }
@@ -127,17 +124,17 @@ void PhraseAlignment::create( char line[], int lineID )
 void PhraseAlignment::addNTLength(const std::string &tok)
 {
   vector< string > tokens;
-  
+
   Tokenize(tokens, tok, "=");
   assert(tokens.size() == 2);
-  
+
   size_t sourcePos = Scan<size_t>(tokens[0]);
   assert(sourcePos < phraseS.size());
-  
+
   vector< size_t > ntLengths;
   Tokenize<size_t>(ntLengths, tokens[1], ",");
   assert(ntLengths.size() == 2);
-  
+
   m_ntLengths[sourcePos] = std::pair<size_t, size_t>(ntLengths[0], ntLengths[1]);
 }
 
@@ -203,13 +200,13 @@ int PhraseAlignment::Compare(const PhraseAlignment &other) const
   if (this == &other) // comparing with itself
     return 0;
 
-  if (GetTarget() != other.GetTarget()) 
+  if (GetTarget() != other.GetTarget())
     return ( GetTarget() < other.GetTarget() ) ? -1 : +1;
 
   if (GetSource() != other.GetSource())
-   return ( GetSource() < other.GetSource() ) ? -1 : +1;
+    return ( GetSource() < other.GetSource() ) ? -1 : +1;
 
-  if (!hierarchicalFlag) 
+  if (!hierarchicalFlag)
     return 0;
 
   // loop over all words (note: 0 = left hand side of rule)
@@ -220,15 +217,14 @@ int PhraseAlignment::Compare(const PhraseAlignment &other) const
 
       if (alignedToT[i].size() != 1 ||
           other.alignedToT[i].size() != 1 ||
-          thisAlign != otherAlign)
-      {
+          thisAlign != otherAlign) {
         int ret = (thisAlign < otherAlign) ? -1 : +1;
         return ret;
       }
     }
   }
   return 0;
-  
+
 }
 
 

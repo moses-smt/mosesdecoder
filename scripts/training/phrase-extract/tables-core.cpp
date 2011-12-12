@@ -29,8 +29,9 @@ vector<string> tokenize( const char* input )
   return token;
 }
 
-bool isNonTerminal( const WORD &symbol ) {
-   return symbol.substr(0, 1) == "[" && symbol.substr(symbol.size()-1, 1) == "]";
+bool isNonTerminal( const WORD &symbol )
+{
+  return symbol.substr(0, 1) == "[" && symbol.substr(symbol.size()-1, 1) == "]";
 }
 
 WORD_ID Vocabulary::storeIfNew( const WORD& word )
