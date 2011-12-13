@@ -238,9 +238,9 @@ private:
 	void appendNgram(const Word& word, bool& skip, std::string& ngram) const;
 	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
 	void MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
-			size_t numberOfStartPos = 1) const;
+			      size_t numberOfStartPos = 1, size_t offset = 0) const;
 	void MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
-			size_t numberOfEndPos = 1) const;
+			      size_t numberOfEndPos = 1, size_t offset = 0) const;
 
 	std::vector<FactorType> GetFactorType() const {
 		std::vector<FactorType> factorType;
