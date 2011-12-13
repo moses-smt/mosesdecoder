@@ -209,7 +209,7 @@ public:
 	size_t GetNumInputScores() const;
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
-  float GetSparseProducerWeight() { return m_sparseProducerWeight; }
+  float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
 	virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 

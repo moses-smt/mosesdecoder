@@ -175,8 +175,12 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
            << values[i] << endl;
     }
   } else {
-    cout << ff->GetScoreProducerDescription() << " " <<
-         ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
+  	if (ff->GetSparseProducerWeight() == 1)
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  				ff->GetScoreProducerWeightShortName() << " sparse" << endl;
+  	else
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  				ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
   }
 }
 

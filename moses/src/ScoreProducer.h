@@ -54,6 +54,8 @@ public:
 
   void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }
   bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; } 
+
+  virtual float GetSparseProducerWeight() const { return 1; }
 };
 
 
