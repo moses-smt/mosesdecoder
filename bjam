@@ -1,6 +1,5 @@
 #!/bin/bash
 set -e
-set -x
 if
   bjam="$(which bjam 2>/dev/null)" && #exists
   [ ${#bjam} != 0 ] && #paranoia about which printing nothing then returning true
