@@ -190,7 +190,7 @@ public:
 class TargetNgramFeature : public StatefulFeatureFunction, public LanguageModelPointerState {
 public:
 	TargetNgramFeature(FactorType factorType = 0, size_t n = 3, bool lower_ngrams = true):
-     StatefulFeatureFunction("dlmn", ScoreProducer::unlimited),
+     StatefulFeatureFunction("dlm", ScoreProducer::unlimited),
      m_factorType(factorType),
      m_n(n),
      m_lower_ngrams(lower_ngrams),
