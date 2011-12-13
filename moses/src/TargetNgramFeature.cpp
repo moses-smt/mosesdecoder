@@ -278,8 +278,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		delete lmState;
       		lmState = NewState( prevState->GetRightContext() );
 
-      		// push suffix
-//      		cerr << "suffix of NT in the beginning" << endl;
+//       		cerr << "suffix of NT in the beginning" << endl;
       		collectForPrefix = false;
       		int suffixPos = prevState->GetSuffix().GetSize() - (GetNGramOrder()-1);
       		if (suffixPos < 0) suffixPos = 0; // push all words if less than order
@@ -304,9 +303,11 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		if (phrasePos == cur_hypo.GetCurrTargetPhrase().GetSize()-1)
       			makeSuffix = true;
       	}
+      	else {
+//      		cerr << "prefix of subphrase for left context" << endl;
+      		collectForPrefix = true;
+      	}
 
-      	cerr << "prefix of subphrase for left context" << endl;
-      	collectForPrefix = true;
         // score its prefix
         for(size_t prefixPos = 0;
             prefixPos < GetNGramOrder()-1 // up to LM order window
@@ -314,7 +315,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
             prefixPos++)
         {
           const Word &word = prevState->GetPrefix().GetWord(prefixPos);
-          cerr << "NT --> " << word << endl;
+//          cerr << "NT --> " << word << endl;
           contextFactor.push_back(&word);
         }
 
@@ -325,7 +326,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
         // check if we are dealing with a large sub-phrase
         if (next && subPhraseLength > GetNGramOrder() - 1) 
         {
- //       	cerr << "large sub phrase" << endl;
+//        	cerr << "large sub phrase" << endl;
         	// clear up pending ngrams
         	MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
         	contextFactor.clear();
@@ -415,7 +416,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
   }
 
   ret->Set(lmState);
-  cerr << endl;
+//  cerr << endl;
   return ret;
 }
 
