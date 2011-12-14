@@ -165,22 +165,25 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 }
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
-
   size_t numScoreComps = ff->GetNumScoreComponents();
   if (numScoreComps != ScoreProducer::unlimited) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
-    for (size_t i = 0; i < numScoreComps; ++i) {
+    for (size_t i = 0; i < numScoreComps; ++i) 
       cout << ff->GetScoreProducerDescription() <<  " "
            << ff->GetScoreProducerWeightShortName() << " "
            << values[i] << endl;
-    }
-  } else {
-  	if (ff->GetSparseProducerWeight() == 1)
-  		cout << ff->GetScoreProducerDescription() << " " <<
-  				ff->GetScoreProducerWeightShortName() << " sparse" << endl;
-  	else
-  		cout << ff->GetScoreProducerDescription() << " " <<
-  				ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
+  }
+}
+
+static void PrintSparseFeatureWeight(const FeatureFunction* ff)
+{
+  if (ff->GetNumScoreComponents() == ScoreProducer::unlimited) {
+    if (ff->GetSparseProducerWeight() == 1)
+      cout << ff->GetScoreProducerDescription() << " " <<
+	ff->GetScoreProducerWeightShortName() << " sparse" << endl;
+    else
+      cout << ff->GetScoreProducerDescription() << " " <<
+	ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
   }
 }
 
@@ -204,6 +207,9 @@ static void ShowWeights()
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     PrintFeatureWeight(slf[i]);
+  }
+  for (size_t i = 0; i < sff.size(); ++i) {
+    PrintSparseFeatureWeight(sff[i]);
   }
 }
 
