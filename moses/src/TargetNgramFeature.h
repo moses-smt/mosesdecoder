@@ -29,25 +29,17 @@ class TargetNgramState : public FFState {
 class TargetNgramChartState : public FFState
 {
 private:
-  FFState* m_lmRightContext;
-
   Phrase m_contextPrefix, m_contextSuffix;
 
   size_t m_numTargetTerminals; // This isn't really correct except for the surviving hypothesis
 
-  const ChartHypothesis &m_hypo;
-
-  bool m_prefixCalc, m_suffixCalc;
-
-  size_t m_order;
-
-  int m_featureId;
+  size_t m_startPos, m_endPos, m_inputSize;
 
   /** Construct the prefix string of up to specified size
    * \param ret prefix string
    * \param size maximum size (typically max lm context window)
    */
-  size_t CalcPrefix(const ChartHypothesis &hypo, const int featureId, Phrase &ret, size_t size)
+  size_t CalcPrefix(const ChartHypothesis &hypo, const int featureId, Phrase &ret, size_t size) const
   {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
@@ -61,10 +53,9 @@ private:
       if (word.IsNonTerminal()) {
         size_t nonTermInd = nonTermIndexMap[pos];
         const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
-
-        const TargetNgramChartState *state = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId));
-        TargetNgramChartState *nonConst_state = const_cast<TargetNgramChartState*> (state);
-        size = nonConst_state->CalcPrefix(*prevHypo, featureId, ret, size);
+        size = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId))->CalcPrefix(*prevHypo, featureId, ret, size);
+//        Phrase phrase = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId))->GetPrefix();
+//        size = phrase.GetSize();
       }
       // for words, add word
       else {
@@ -85,7 +76,7 @@ private:
    * \param ret suffix phrase
    * \param size maximum size of suffix
    */
-  size_t CalcSuffix(const ChartHypothesis &hypo, int featureId, Phrase &ret, size_t size)
+  size_t CalcSuffix(const ChartHypothesis &hypo, int featureId, Phrase &ret, size_t size) const
   {
   	size_t prefixSize = m_contextPrefix.GetSize();
     assert(prefixSize <= m_numTargetTerminals);
@@ -116,10 +107,7 @@ private:
         if (word.IsNonTerminal()) {
           size_t nonTermInd = nonTermIndexMap[pos];
           const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
-
-          const TargetNgramChartState *state = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId));
-          TargetNgramChartState *nonConst_state = const_cast<TargetNgramChartState*> (state);
-          size = nonConst_state->CalcSuffix(*prevHypo, featureId, ret, size);
+          size = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId))->CalcSuffix(*prevHypo, featureId, ret, size);
         }
         else {
           ret.PrependWord(word);
@@ -136,16 +124,14 @@ private:
 
 public:
   TargetNgramChartState(const ChartHypothesis &hypo, int featureId, size_t order)
-      :m_lmRightContext(NULL),
-      m_contextPrefix(Output, order - 1),
-      m_contextSuffix(Output, order - 1),
-      m_hypo(hypo),
-      m_prefixCalc(false),
-      m_suffixCalc(false),
-      m_order(order),
-      m_featureId(featureId)
+      :m_contextPrefix(Output, order - 1),
+      m_contextSuffix(Output, order - 1)
   {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
+    const WordsRange range = hypo.GetCurrSourceRange();
+    m_startPos = range.GetStartPos();
+    m_endPos = range.GetEndPos();
+    m_inputSize = hypo.GetManager().GetSource().GetSize();
 
     const std::vector<const ChartHypothesis*> prevHypos = hypo.GetPrevHypos();
     for (std::vector<const ChartHypothesis*>::const_iterator i = prevHypos.begin(); i != prevHypos.end(); ++i) {
@@ -153,62 +139,36 @@ public:
       m_numTargetTerminals += static_cast<const TargetNgramChartState*>((*i)->GetFFState(featureId))->GetNumTargetTerminals();
     }
 
-//    CalcPrefix(hypo, featureId, m_contextPrefix, order - 1);
-//    CalcSuffix(hypo, featureId, m_contextSuffix, order - 1);
-  }
-
-  ~TargetNgramChartState() {
-    delete m_lmRightContext;
-  }
-
-  void Set(FFState *rightState) {
-    m_lmRightContext = rightState;
-  }
-
-  FFState* GetRightContext() const {
-  	return m_lmRightContext;
+    CalcPrefix(hypo, featureId, m_contextPrefix, order - 1);
+    CalcSuffix(hypo, featureId, m_contextSuffix, order - 1);
   }
 
   size_t GetNumTargetTerminals() const {
     return m_numTargetTerminals;
   }
 
-  const Phrase &GetPrefix() {
-  	if (!m_prefixCalc) {
-  		CalcPrefix(m_hypo, m_featureId, m_contextPrefix, m_order - 1);
-  		m_prefixCalc = true;
-  	}
+  const Phrase &GetPrefix() const {
     return m_contextPrefix;
   }
-  const Phrase &GetSuffix() {
-  	if (!m_suffixCalc) {
-  		CalcSuffix(m_hypo, m_featureId, m_contextSuffix, m_order - 1);
-  		m_suffixCalc = true;
-  	}
+  const Phrase &GetSuffix() const {
     return m_contextSuffix;
   }
 
   int Compare(const FFState& o) const {
     const TargetNgramChartState &other =
-      dynamic_cast<const TargetNgramChartState &>( o );
-    TargetNgramChartState &nonConst_other = const_cast<TargetNgramChartState&> (other);
-    TargetNgramChartState *nonConst_this = const_cast<TargetNgramChartState*> (this);
-
-    const WordsRange sourceRange = m_hypo.GetCurrSourceRange();
+      static_cast<const TargetNgramChartState &>( o );
 
     // prefix
-    if (sourceRange.GetStartPos() > 0) // not for "<s> ..."
+    if (m_startPos > 0) // not for "<s> ..."
     {
-      int ret = nonConst_this->GetPrefix().Compare(nonConst_other.GetPrefix());
+      int ret = GetPrefix().Compare(other.GetPrefix());
       if (ret != 0)
         return ret;
     }
 
-    // suffix
-    size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
-    if (sourceRange.GetEndPos() < inputSize - 1)// not for "... </s>"
+    if (m_endPos < m_inputSize - 1)// not for "... </s>"
     {
-      int ret = other.GetRightContext()->Compare(*m_lmRightContext);
+      int ret = GetSuffix().Compare(other.GetSuffix());
       if (ret != 0)
         return ret;
     }
@@ -218,7 +178,7 @@ public:
 
 /** Sets the features of observed ngrams.
  */
-class TargetNgramFeature : public StatefulFeatureFunction, public LanguageModelPointerState {
+class TargetNgramFeature : public StatefulFeatureFunction {
 public:
 	TargetNgramFeature(FactorType factorType = 0, size_t n = 3, bool lower_ngrams = true):
      StatefulFeatureFunction("dlm", ScoreProducer::unlimited),
@@ -230,14 +190,9 @@ public:
     FactorCollection& factorCollection = FactorCollection::Instance();
     const Factor* bosFactor = factorCollection.AddFactor(Output,m_factorType,BOS_);
     m_bos.SetFactor(m_factorType,bosFactor);
-
-    std::vector<FactorType> factorTypeVector;
-    factorTypeVector.push_back(m_factorType);
-  	m_factorTypeVector = factorTypeVector;
   }
 
 	bool Load(const std::string &filePath);
-	bool Load(const std::string&, Moses::FactorType, size_t);
 
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 	size_t GetNumInputScores() const;
@@ -253,15 +208,8 @@ public:
   virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
                                   ScoreComponentCollection* accumulator) const;
 
-  LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
-
-  size_t GetNGramOrder() const {
-		return m_n;
-	}
-
 private:
   FactorType m_factorType;
-  std::vector<FactorType> m_factorTypeVector;
   Word m_bos;
 	std::set<std::string> m_vocab;
 	size_t m_n;
@@ -270,8 +218,7 @@ private:
 	// additional weight that all sparse weights are scaled with
 	float m_sparseProducerWeight;
 
-	void appendNgram(const Word& word, bool& skip, std::string& ngram) const;
-	void ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const;
+	void appendNgram(const Word& word, bool& skip, std::stringstream& ngram) const;
 	void MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
 			      size_t numberOfStartPos = 1, size_t offset = 0) const;
 	void MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,

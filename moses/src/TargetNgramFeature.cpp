@@ -5,6 +5,8 @@
 #include "ScoreComponentCollection.h"
 #include "ChartHypothesis.h"
 
+#include "LM/SingleFactor.h"
+
 namespace Moses {
 
 using namespace std;
@@ -75,7 +77,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
                                        const FFState* prev_state,
                                        ScoreComponentCollection* accumulator) const
 {
-  const TargetNgramState* tnState = dynamic_cast<const TargetNgramState*>(prev_state);
+  const TargetNgramState* tnState = static_cast<const TargetNgramState*>(prev_state);
   assert(tnState);
 
   // current hypothesis target phrase
@@ -84,7 +86,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
   // extract all ngrams from current hypothesis
   vector<Word> prev_words = tnState->GetWords();
-  string curr_ngram;
+  stringstream curr_ngram;
   bool skip = false;
 
   // include lower order ngrams?
@@ -93,7 +95,9 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
   for (size_t n = m_n; n >= smallest_n; --n) { // iterate over ngram size
   	for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
-  		const string& curr_w = targetPhrase.GetWord(i).GetFactor(m_factorType)->GetString();
+//  		const string& curr_w = targetPhrase.GetWord(i).GetFactor(m_factorType)->GetString();
+  		const string& curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
+
   		if (m_vocab.size() && (m_vocab.find(curr_w) == m_vocab.end())) continue; // skip ngrams
 
   		if (n > 1) {
@@ -128,23 +132,23 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
       }
 
   		if (!skip) {
-  			curr_ngram.append(curr_w);
-  			accumulator->PlusEquals(this,curr_ngram,1);
+  			curr_ngram << curr_w;
+  			accumulator->PlusEquals(this,curr_ngram.str(),1);
       }
-  		curr_ngram.clear();
+  		curr_ngram.str("");
   	}
   }
 
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
   	for (size_t n = m_n; n >= smallest_n; --n) {
-  		string last_ngram;
+  		stringstream last_ngram;
   		skip = false;
   		for (size_t i = cur_hypo.GetSize() - n + 1; i <  cur_hypo.GetSize() && !skip; ++i)
   			appendNgram(cur_hypo.GetWord(i), skip, last_ngram);
 
   		if (n > 1 && !skip) {
-  			last_ngram.append(EOS_);
-  			accumulator->PlusEquals(this,last_ngram,1);
+  			last_ngram << EOS_;
+  			accumulator->PlusEquals(this, last_ngram.str(), 1);
     	}
   	}
   	return NULL;
@@ -168,23 +172,20 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
   return new TargetNgramState(new_prev_words);
 }
 
-void TargetNgramFeature::appendNgram(const Word& word, bool& skip, string& ngram) const {
-	const string& w = word.GetFactor(m_factorType)->GetString();
+void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream &ngram) const {
+//	const string& w = word.GetFactor(m_factorType)->GetString();
+	const string& w = word.GetString(m_factorType);
 	if (m_vocab.size() && (m_vocab.find(w) == m_vocab.end())) skip = true;
 	else {
-		ngram.append(w);
-		ngram.append(":");
+		ngram << w;
+		ngram << ":";
 	}
 }
 
 FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
 {
-	TargetNgramChartState *ret = new TargetNgramChartState(cur_hypo, featureId, GetNGramOrder());
 	vector<const Word*> contextFactor;
-	contextFactor.reserve(GetNGramOrder());
-
-  // language model context state
-  FFState *lmState = NULL;
+	contextFactor.reserve(m_n);
 
   // get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
@@ -199,12 +200,11 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
   bool onlyTerminals = true;
   bool prev_is_NT = false;
   size_t prev_subPhraseLength = 0;
-  TargetNgramChartState* recentPrevState = NULL;
   for (size_t phrasePos = 0; phrasePos < cur_hypo.GetCurrTargetPhrase().GetSize(); phrasePos++)
   {
     // consult rule for either word or non-terminal
     const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(phrasePos);
-    //    cerr << "word: " << word << endl;
+//    cerr << "word: " << word << endl;
 
     // regular word
     if (!word.IsNonTerminal()) {
@@ -217,15 +217,15 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       	makeSuffix = true;
       
       // beginning of sentence symbol <s>?
-      if (word.GetString(m_factorTypeVector, false).compare("<s>") == 0)
+      string w = word.GetString(m_factorType);
+      if (w.compare("<s>") == 0)
       	prefixTerminals++;
       // end of sentence symbol </s>?
-      else if (word.GetString(m_factorTypeVector, false).compare("</s>") == 0)
+      else if (w.compare("</s>") == 0)
       	suffixTerminals++;
       // everything else
       else {
-      	string curr_ngram = word.GetString(m_factorTypeVector, false);
-      	accumulator->PlusEquals(this,curr_ngram,1);
+      	accumulator->PlusEquals(this, word.GetString(m_factorType), 1);
 
       	if (collectForPrefix)
       		prefixTerminals++;
@@ -235,17 +235,14 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     }
 
     // non-terminal, add phrase from underlying hypothesis
-    else if (GetNGramOrder() > 1)
+    else if (m_n > 1)
     {
       // look up underlying hypothesis
       size_t nonTermIndex = nonTermIndexMap[phrasePos];
       const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermIndex);
 
-      const TargetNgramChartState* const_prevState =
+      const TargetNgramChartState* prevState =
       		static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId));
-      TargetNgramChartState* prevState = const_cast<TargetNgramChartState*> (const_prevState);
-      recentPrevState = prevState;
-
       size_t subPhraseLength = prevState->GetNumTargetTerminals();
 
       // special case: rule starts with non-terminal
@@ -255,18 +252,18 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		++prefixTerminals;
 
       		const Word &word = prevState->GetSuffix().GetWord(0);
-		//      		cerr << "NT0 --> : " << word << endl;
+//      		cerr << "NT0 --> : " << word << endl;
       		contextFactor.push_back(&word);
       	}
       	else {
       		onlyTerminals = false;
       		collectForPrefix = false;
-      		int suffixPos = prevState->GetSuffix().GetSize() - (GetNGramOrder()-1);
+      		int suffixPos = prevState->GetSuffix().GetSize() - (m_n-1);
       		if (suffixPos < 0) suffixPos = 0; // push all words if less than order
       		for(;(size_t)suffixPos < prevState->GetSuffix().GetSize(); suffixPos++)
       		{
       			const Word &word = prevState->GetSuffix().GetWord(suffixPos);
-			//      			cerr << "NT0 --> : " << word << endl;
+//      			cerr << "NT0 --> : " << word << endl;
       			contextFactor.push_back(&word);
       		}
       	}
@@ -276,11 +273,11 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       else
       {
       	// push its prefix
-      	for(size_t prefixPos = 0; prefixPos < GetNGramOrder()-1
+      	for(size_t prefixPos = 0; prefixPos < m_n-1
               && prefixPos < subPhraseLength; prefixPos++)
         {
           const Word &word = prevState->GetPrefix().GetWord(prefixPos);
-	  //          cerr << "NT --> " << word << endl;
+//          cerr << "NT --> " << word << endl;
           contextFactor.push_back(&word);
         }
 
@@ -301,7 +298,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		bool wordFollowing = (phrasePos < cur_hypo.GetCurrTargetPhrase().GetSize() - 1)? true : false;
 
       		// check if we are dealing with a large sub-phrase
-      		if (wordFollowing && subPhraseLength > GetNGramOrder() - 1)
+      		if (wordFollowing && subPhraseLength > m_n - 1)
       		{
       			// clear up pending ngrams
       			MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
@@ -313,15 +310,15 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       			suffixTerminals = 0;
 
       			// push its suffix
-      			size_t remainingWords = (remainingWords > GetNGramOrder()-1) ? GetNGramOrder()-1 : subPhraseLength - (GetNGramOrder()-1);
+      			size_t remainingWords = (remainingWords > m_n-1) ? m_n-1 : subPhraseLength - (m_n-1);
       			for(size_t suffixPos = 0; suffixPos < prevState->GetSuffix().GetSize(); suffixPos++) {
       				const Word &word = prevState->GetSuffix().GetWord(suffixPos);
-				//      				cerr << "NT --> : " << word << endl;
+//      				cerr << "NT --> : " << word << endl;
       				contextFactor.push_back(&word);
       			}
       		}
       		// subphrase can be used as suffix and as prefix for the next part
-      		else if (wordFollowing && subPhraseLength == GetNGramOrder() - 1)
+      		else if (wordFollowing && subPhraseLength == m_n - 1)
       		{
       			// clear up pending ngrams
       			MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
@@ -333,8 +330,8 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		}
       		else if (prev_is_NT && prev_subPhraseLength > 1 && subPhraseLength > 1) {
       			// two NTs in a row: make transition
-      			MakePrefixNgrams(contextFactor, accumulator, 1, GetNGramOrder()-2);
-      			MakeSuffixNgrams(contextFactor, accumulator, 1, GetNGramOrder()-2);
+      			MakePrefixNgrams(contextFactor, accumulator, 1, m_n-2);
+      			MakeSuffixNgrams(contextFactor, accumulator, 1, m_n-2);
       			makePrefix = false;
       			makeSuffix = false;
       			collectForPrefix = false;
@@ -342,11 +339,11 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       			suffixTerminals = 0;
 		
       			// remove duplicates
-      			string curr_ngram;
-      			curr_ngram.append((*contextFactor[GetNGramOrder()-2]).GetString(m_factorTypeVector, false));
-      			curr_ngram.append(":");
-      			curr_ngram.append((*contextFactor[GetNGramOrder()-1]).GetString(m_factorTypeVector, false));
-      			accumulator->MinusEquals(this,curr_ngram,1);
+      			stringstream curr_ngram;
+      			curr_ngram << (*contextFactor[m_n-2]).GetString(m_factorType);
+      			curr_ngram << ":";
+      			curr_ngram << (*contextFactor[m_n-1]).GetString(m_factorType);
+      			accumulator->MinusEquals(this,curr_ngram.str(),1);
       		}
       	}
       }
@@ -355,7 +352,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     }
   }
 
-  if (GetNGramOrder() > 1) {
+  if (m_n > 1) {
     if (onlyTerminals) {
     	MakePrefixNgrams(contextFactor, accumulator, prefixTerminals-1);
     }
@@ -366,93 +363,57 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       	MakeSuffixNgrams(contextFactor, accumulator, suffixTerminals);
 
       // remove duplicates
-      if (makePrefix && makeSuffix && (contextFactor.size() <= GetNGramOrder())) {
-      	string curr_ngram;
-      	for (size_t i = 0; i < contextFactor.size(); ++i) {
-      		curr_ngram.append((*contextFactor[i]).GetString(m_factorTypeVector, false));
-      		if (i < contextFactor.size()-1)
-      			curr_ngram.append(":");
+      size_t size = contextFactor.size();
+      if (makePrefix && makeSuffix && (size <= m_n)) {
+      	stringstream curr_ngram;
+      	for (size_t i = 0; i < size; ++i) {
+      		curr_ngram << (*contextFactor[i]).GetString(m_factorType);
+      		if (i < size-1)
+      			curr_ngram << ":";
       	}
-      	accumulator->MinusEquals(this,curr_ngram,1);
+      	accumulator->MinusEquals(this, curr_ngram.str(), 1);
       }
     }
   }
 
-  if (recentPrevState != NULL)
-  	lmState = NewState( recentPrevState->GetRightContext() );
-  else
-  	lmState = NewState( GetBeginSentenceState() );
-  ret->Set(lmState);
-  //  cerr << endl;
-  return ret;
-}
-
-void TargetNgramFeature::ShiftOrPush(std::vector<const Word*> &contextFactor, const Word &word) const
-{
-  if (contextFactor.size() < GetNGramOrder()) {
-    contextFactor.push_back(&word);
-  } else {
-    // shift
-    for (size_t currNGramOrder = 0 ; currNGramOrder < GetNGramOrder() - 1 ; currNGramOrder++) {
-      contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
-    }
-    contextFactor[GetNGramOrder() - 1] = &word;
-  }
+//  cerr << endl;
+  return new TargetNgramChartState(cur_hypo, featureId, m_n);
 }
 
 void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfStartPos, size_t offset) const {
-	string curr_ngram;
-  size_t size = contextFactor.size();
+	stringstream ngram;
+	size_t size = contextFactor.size();
   for (size_t k = 0; k < numberOfStartPos; ++k) {
-    size_t max_end = (size < GetNGramOrder()+k+offset)? size: GetNGramOrder()+k+offset;
+    size_t max_end = (size < m_n+k+offset)? size: m_n+k+offset;
     for (size_t end_pos = 1+k+offset; end_pos < max_end; ++end_pos) {
       for (size_t i=k+offset; i <= end_pos; ++i) {
       	if (i > k+offset)
-      		curr_ngram.append(":");
-      	curr_ngram.append((*contextFactor[i]).GetString(m_factorTypeVector, false));
+      		ngram << ":";
+      	ngram << (*contextFactor[i]).GetString(m_factorType);
+      	const Word w = *contextFactor[i];
       }
-      if (curr_ngram != "<s>" && curr_ngram != "</s>") {
-	//      	cerr << "p-ngram: " << curr_ngram << endl;
-      	accumulator->PlusEquals(this,curr_ngram,1);
-      }
-      curr_ngram.clear();
+//      cerr << "p-ngram: " << ngram.str() << endl;
+      accumulator->PlusEquals(this, ngram.str(), 1);
+      ngram.str("");
     }
   }
 }
 
 void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfEndPos, size_t offset) const {
-  string curr_ngram;
-  size_t size = contextFactor.size();
+	stringstream ngram;
   for (size_t k = 0; k < numberOfEndPos; ++k) {
-    size_t end_pos = size-1-k-offset;
-    for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < GetNGramOrder()); --start_pos) {
+    size_t end_pos = contextFactor.size()-1-k-offset;
+    for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < m_n); --start_pos) {
       for (size_t j=start_pos; j <= end_pos; ++j){
-      	curr_ngram.append((*contextFactor[j]).GetString(m_factorTypeVector, false));
+      	ngram << (*contextFactor[j]).GetString(m_factorType);
       	if (j < end_pos)
-      		curr_ngram.append(":");
+      		ngram << ":";
       }
-      if (curr_ngram != "<s>" && curr_ngram != "</s>") {
-	//      	cerr << "s-ngram: " << curr_ngram << endl;
-      	accumulator->PlusEquals(this,curr_ngram,1);
-      }
-      curr_ngram.clear();
+//      cerr << "s-ngram: " << ngram.str() << endl;
+      accumulator->PlusEquals(this, ngram.str(), 1);
+      ngram.str("");
     }
   }
-}
-
-bool TargetNgramFeature::Load(const std::string &filePath, FactorType factorType, size_t nGramOrder) {
-	// dummy
-	cerr << "This method has not been implemented.." << endl;
-	assert(false);
-	return false;
-}
-
-LMResult TargetNgramFeature::GetValue(const std::vector<const Word*> &contextFactor, State* finalState) const {
-	// dummy
-	LMResult* result = new LMResult();
-	cerr << "This method has not been implemented.." << endl;
-	assert(false);
-	return *result;
 }
 
 }
