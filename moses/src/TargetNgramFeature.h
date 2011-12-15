@@ -37,11 +37,17 @@ private:
 
   const ChartHypothesis &m_hypo;
 
+  bool m_prefixCalc, m_suffixCalc;
+
+  size_t m_order;
+
+  int m_featureId;
+
   /** Construct the prefix string of up to specified size
    * \param ret prefix string
    * \param size maximum size (typically max lm context window)
    */
-  size_t CalcPrefix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
+  size_t CalcPrefix(const ChartHypothesis &hypo, const int featureId, Phrase &ret, size_t size)
   {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
@@ -55,11 +61,14 @@ private:
       if (word.IsNonTerminal()) {
         size_t nonTermInd = nonTermIndexMap[pos];
         const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
-        size = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureID))->CalcPrefix(*prevHypo, featureID, ret, size);
+
+        const TargetNgramChartState *state = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId));
+        TargetNgramChartState *nonConst_state = const_cast<TargetNgramChartState*> (state);
+        size = nonConst_state->CalcPrefix(*prevHypo, featureId, ret, size);
       }
       // for words, add word
       else {
-        ret.AddWord(target.GetWord(pos));
+        ret.AddWord(word);
         size--;
       }
 
@@ -76,15 +85,16 @@ private:
    * \param ret suffix phrase
    * \param size maximum size of suffix
    */
-  size_t CalcSuffix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
+  size_t CalcSuffix(const ChartHypothesis &hypo, int featureId, Phrase &ret, size_t size)
   {
-    assert(m_contextPrefix.GetSize() <= m_numTargetTerminals);
+  	size_t prefixSize = m_contextPrefix.GetSize();
+    assert(prefixSize <= m_numTargetTerminals);
 
     // special handling for small hypotheses
     // does the prefix match the entire hypothesis string? -> just copy prefix
-    if (m_contextPrefix.GetSize() == m_numTargetTerminals) {
-      size_t maxCount = std::min(m_contextPrefix.GetSize(), size);
-      size_t pos= m_contextPrefix.GetSize() - 1;
+    if (prefixSize == m_numTargetTerminals) {
+      size_t maxCount = std::min(prefixSize, size);
+      size_t pos= prefixSize - 1;
 
       for (size_t ind = 0; ind < maxCount; ++ind) {
         const Word &word = m_contextPrefix.GetWord(pos);
@@ -97,18 +107,22 @@ private:
     }
     // construct suffix analogous to prefix
     else {
+    	const TargetPhrase targetPhrase = hypo.GetCurrTargetPhrase();
       const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-        hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-      for (int pos = (int) hypo.GetCurrTargetPhrase().GetSize() - 1; pos >= 0 ; --pos) {
-        const Word &word = hypo.GetCurrTargetPhrase().GetWord(pos);
+      		targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
+      for (int pos = (int) targetPhrase.GetSize() - 1; pos >= 0 ; --pos) {
+        const Word &word = targetPhrase.GetWord(pos);
 
         if (word.IsNonTerminal()) {
           size_t nonTermInd = nonTermIndexMap[pos];
           const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
-          size = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureID))->CalcSuffix(*prevHypo, featureID, ret, size);
+
+          const TargetNgramChartState *state = static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId));
+          TargetNgramChartState *nonConst_state = const_cast<TargetNgramChartState*> (state);
+          size = nonConst_state->CalcSuffix(*prevHypo, featureId, ret, size);
         }
         else {
-          ret.PrependWord(hypo.GetCurrTargetPhrase().GetWord(pos));
+          ret.PrependWord(word);
           size--;
         }
 
@@ -121,21 +135,26 @@ private:
   }
 
 public:
-  TargetNgramChartState(const ChartHypothesis &hypo, int featureID, size_t order)
-      :m_lmRightContext(NULL)
-      ,m_contextPrefix(Output, order - 1)
-      ,m_contextSuffix(Output, order - 1)
-      ,m_hypo(hypo)
+  TargetNgramChartState(const ChartHypothesis &hypo, int featureId, size_t order)
+      :m_lmRightContext(NULL),
+      m_contextPrefix(Output, order - 1),
+      m_contextSuffix(Output, order - 1),
+      m_hypo(hypo),
+      m_prefixCalc(false),
+      m_suffixCalc(false),
+      m_order(order),
+      m_featureId(featureId)
   {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
 
-    for (std::vector<const ChartHypothesis*>::const_iterator i = hypo.GetPrevHypos().begin(); i != hypo.GetPrevHypos().end(); ++i) {
+    const std::vector<const ChartHypothesis*> prevHypos = hypo.GetPrevHypos();
+    for (std::vector<const ChartHypothesis*>::const_iterator i = prevHypos.begin(); i != prevHypos.end(); ++i) {
       // keep count of words (= length of generated string)
-      m_numTargetTerminals += static_cast<const TargetNgramChartState*>((*i)->GetFFState(featureID))->GetNumTargetTerminals();
+      m_numTargetTerminals += static_cast<const TargetNgramChartState*>((*i)->GetFFState(featureId))->GetNumTargetTerminals();
     }
 
-    CalcPrefix(hypo, featureID, m_contextPrefix, order - 1);
-    CalcSuffix(hypo, featureID, m_contextSuffix, order - 1);
+//    CalcPrefix(hypo, featureId, m_contextPrefix, order - 1);
+//    CalcSuffix(hypo, featureId, m_contextSuffix, order - 1);
   }
 
   ~TargetNgramChartState() {
@@ -154,28 +173,40 @@ public:
     return m_numTargetTerminals;
   }
 
-  const Phrase &GetPrefix() const {
+  const Phrase &GetPrefix() {
+  	if (!m_prefixCalc) {
+  		CalcPrefix(m_hypo, m_featureId, m_contextPrefix, m_order - 1);
+  		m_prefixCalc = true;
+  	}
     return m_contextPrefix;
   }
-  const Phrase &GetSuffix() const {
+  const Phrase &GetSuffix() {
+  	if (!m_suffixCalc) {
+  		CalcSuffix(m_hypo, m_featureId, m_contextSuffix, m_order - 1);
+  		m_suffixCalc = true;
+  	}
     return m_contextSuffix;
   }
 
   int Compare(const FFState& o) const {
     const TargetNgramChartState &other =
       dynamic_cast<const TargetNgramChartState &>( o );
+    TargetNgramChartState &nonConst_other = const_cast<TargetNgramChartState&> (other);
+    TargetNgramChartState *nonConst_this = const_cast<TargetNgramChartState*> (this);
+
+    const WordsRange sourceRange = m_hypo.GetCurrSourceRange();
 
     // prefix
-    if (m_hypo.GetCurrSourceRange().GetStartPos() > 0) // not for "<s> ..."
+    if (sourceRange.GetStartPos() > 0) // not for "<s> ..."
     {
-      int ret = GetPrefix().Compare(other.GetPrefix());
+      int ret = nonConst_this->GetPrefix().Compare(nonConst_other.GetPrefix());
       if (ret != 0)
         return ret;
     }
 
     // suffix
     size_t inputSize = m_hypo.GetManager().GetSource().GetSize();
-    if (m_hypo.GetCurrSourceRange().GetEndPos() < inputSize - 1)// not for "... </s>"
+    if (sourceRange.GetEndPos() < inputSize - 1)// not for "... </s>"
     {
       int ret = other.GetRightContext()->Compare(*m_lmRightContext);
       if (ret != 0)
@@ -197,9 +228,12 @@ public:
      m_sparseProducerWeight(1)
   {
     FactorCollection& factorCollection = FactorCollection::Instance();
-    const Factor* bosFactor =
-       factorCollection.AddFactor(Output,m_factorType,BOS_);
+    const Factor* bosFactor = factorCollection.AddFactor(Output,m_factorType,BOS_);
     m_bos.SetFactor(m_factorType,bosFactor);
+
+    std::vector<FactorType> factorTypeVector;
+    factorTypeVector.push_back(m_factorType);
+  	m_factorTypeVector = factorTypeVector;
   }
 
 	bool Load(const std::string &filePath);
@@ -216,7 +250,7 @@ public:
 	virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
 	                          ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
+  virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
                                   ScoreComponentCollection* accumulator) const;
 
   LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
@@ -227,6 +261,7 @@ public:
 
 private:
   FactorType m_factorType;
+  std::vector<FactorType> m_factorTypeVector;
   Word m_bos;
 	std::set<std::string> m_vocab;
 	size_t m_n;
@@ -241,12 +276,6 @@ private:
 			      size_t numberOfStartPos = 1, size_t offset = 0) const;
 	void MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
 			      size_t numberOfEndPos = 1, size_t offset = 0) const;
-
-	std::vector<FactorType> GetFactorType() const {
-		std::vector<FactorType> factorType;
-		factorType.push_back(m_factorType);
-		return factorType;
-	}
 };
 
 }

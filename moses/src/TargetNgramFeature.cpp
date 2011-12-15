@@ -177,15 +177,14 @@ void TargetNgramFeature::appendNgram(const Word& word, bool& skip, string& ngram
 	}
 }
 
-FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator) const
+FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
 {
-	TargetNgramChartState *ret = new TargetNgramChartState(cur_hypo, featureID, GetNGramOrder());
-	// data structure for factored context phrase (history and predicted word)
-  vector<const Word*> contextFactor;
-  contextFactor.reserve(GetNGramOrder());
+	TargetNgramChartState *ret = new TargetNgramChartState(cur_hypo, featureId, GetNGramOrder());
+	vector<const Word*> contextFactor;
+	contextFactor.reserve(GetNGramOrder());
 
-  // initialize language model context state
-  FFState *lmState = NewState( GetNullContextState() );
+  // language model context state
+  FFState *lmState = NULL;
 
   // get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
@@ -197,44 +196,35 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
   bool collectForPrefix = true;
   size_t prefixTerminals = 0;
   size_t suffixTerminals = 0;
-  size_t totalTerminals = 0;
   bool onlyTerminals = true;
   bool prev_is_NT = false;
   size_t prev_subPhraseLength = 0;
+  TargetNgramChartState* recentPrevState = NULL;
   for (size_t phrasePos = 0; phrasePos < cur_hypo.GetCurrTargetPhrase().GetSize(); phrasePos++)
   {
     // consult rule for either word or non-terminal
     const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(phrasePos);
-//    cerr << "word: " << word << endl;
+    cerr << "word: " << word << endl;
 
     // regular word
     if (!word.IsNonTerminal()) {
+    	contextFactor.push_back(&word);
     	prev_is_NT = false;
-      ++totalTerminals;
 
       if (phrasePos==0)
       	makePrefix = true;
       if (phrasePos==cur_hypo.GetCurrTargetPhrase().GetSize()-1 || prev_is_NT)
       	makeSuffix = true;
       
-      contextFactor.push_back(&word);
-
       // beginning of sentence symbol <s>?
-      if (word.GetString(GetFactorType(), false).compare("<s>") == 0)
-      {
-      	assert(phrasePos == 0);
-      	delete lmState;
-        lmState = NewState( GetBeginSentenceState() );
-        prefixTerminals++;
-      }
+      if (word.GetString(m_factorTypeVector, false).compare("<s>") == 0)
+      	prefixTerminals++;
       // end of sentence symbol </s>?
-      else if (word.GetString(GetFactorType(), false).compare("</s>") == 0) {
+      else if (word.GetString(m_factorTypeVector, false).compare("</s>") == 0)
       	suffixTerminals++;
-      }
       // everything else
       else {
-      	string curr_ngram = word.GetString(GetFactorType(), false);
-//      	cerr << "ngram: " << curr_ngram << endl;
+      	string curr_ngram = word.GetString(m_factorTypeVector, false);
       	accumulator->PlusEquals(this,curr_ngram,1);
 
       	if (collectForPrefix)
@@ -247,45 +237,36 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     // non-terminal, add phrase from underlying hypothesis
     else if (GetNGramOrder() > 1)
     {
-      onlyTerminals = false;
-
       // look up underlying hypothesis
       size_t nonTermIndex = nonTermIndexMap[phrasePos];
       const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermIndex);
 
-      const TargetNgramChartState* prevState =
-        static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureID));
+      const TargetNgramChartState* const_prevState =
+      		static_cast<const TargetNgramChartState*>(prevHypo->GetFFState(featureId));
+      TargetNgramChartState* prevState = const_cast<TargetNgramChartState*> (const_prevState);
+      recentPrevState = prevState;
 
       size_t subPhraseLength = prevState->GetNumTargetTerminals();
 
-      // special case: rule starts with non-terminal -> copy everything
+      // special case: rule starts with non-terminal
       if (phrasePos == 0) {
       	if (subPhraseLength == 1) {
       		makePrefix = true;
-      		collectForPrefix = true;
-      		prefixTerminals++;
-
-      		// get language model state
-      		delete lmState;
-      		lmState = NewState( prevState->GetRightContext() );
+      		++prefixTerminals;
 
       		const Word &word = prevState->GetSuffix().GetWord(0);
-//      		cerr << "NT0 --> : " << word << endl;
+      		cerr << "NT0 --> : " << word << endl;
       		contextFactor.push_back(&word);
       	}
       	else {
-      		// get language model state
-      		delete lmState;
-      		lmState = NewState( prevState->GetRightContext() );
-
-//       		cerr << "suffix of NT in the beginning" << endl;
+      		onlyTerminals = false;
       		collectForPrefix = false;
       		int suffixPos = prevState->GetSuffix().GetSize() - (GetNGramOrder()-1);
       		if (suffixPos < 0) suffixPos = 0; // push all words if less than order
       		for(;(size_t)suffixPos < prevState->GetSuffix().GetSize(); suffixPos++)
       		{
       			const Word &word = prevState->GetSuffix().GetWord(suffixPos);
-//      			cerr << "NT0 --> : " << word << endl;
+      			cerr << "NT0 --> : " << word << endl;
       			contextFactor.push_back(&word);
       		}
       	}
@@ -294,98 +275,80 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       // internal non-terminal
       else
       {
+      	// push its prefix
+      	for(size_t prefixPos = 0; prefixPos < GetNGramOrder()-1
+              && prefixPos < subPhraseLength; prefixPos++)
+        {
+          const Word &word = prevState->GetPrefix().GetWord(prefixPos);
+          cerr << "NT --> " << word << endl;
+          contextFactor.push_back(&word);
+        }
+
       	if (subPhraseLength==1) {
       		if (collectForPrefix)
-      			prefixTerminals++;
+      			++prefixTerminals;
       		else
-      			suffixTerminals++;
+      			++suffixTerminals;
 
       		if (phrasePos == cur_hypo.GetCurrTargetPhrase().GetSize()-1)
       			makeSuffix = true;
       	}
       	else {
-//      		cerr << "prefix of subphrase for left context" << endl;
+      		onlyTerminals = false;
       		collectForPrefix = true;
-      	}
 
-        // score its prefix
-        for(size_t prefixPos = 0;
-            prefixPos < GetNGramOrder()-1 // up to LM order window
-              && prefixPos < subPhraseLength; // up to length
-            prefixPos++)
-        {
-          const Word &word = prevState->GetPrefix().GetWord(prefixPos);
-//          cerr << "NT --> " << word << endl;
-          contextFactor.push_back(&word);
-        }
+      		// check if something follows this NT
+      		bool wordFollowing = (phrasePos < cur_hypo.GetCurrTargetPhrase().GetSize() - 1)? true : false;
 
-        bool next = false;
-        if (phrasePos < cur_hypo.GetCurrTargetPhrase().GetSize() - 1) // there is something after this phrase
-        	next = true;
+      		// check if we are dealing with a large sub-phrase
+      		if (wordFollowing && subPhraseLength > GetNGramOrder() - 1)
+      		{
+      			// clear up pending ngrams
+      			MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
+      			contextFactor.clear();
+      			makePrefix = false;
+      			makeSuffix = true;
+      			collectForPrefix = false;
+      			prefixTerminals = 0;
+      			suffixTerminals = 0;
 
-        // check if we are dealing with a large sub-phrase
-        if (next && subPhraseLength > GetNGramOrder() - 1) 
-        {
-//        	cerr << "large sub phrase" << endl;
-        	// clear up pending ngrams
-        	MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
-        	contextFactor.clear();
-        	makePrefix = false;
-        	makeSuffix = true;
-        	collectForPrefix = false;
-        	prefixTerminals = 0;
-        	suffixTerminals = 0;
-
-//        	cerr << "suffix of subphrase for right context (only if something is following)" << endl;
-        	// copy language model state
-        	delete lmState;
-        	lmState = NewState( prevState->GetRightContext() );
-
-        	// push its suffix
-        	size_t remainingWords = subPhraseLength - (GetNGramOrder()-1);
-        	if (remainingWords > GetNGramOrder()-1) {
-        		// only what is needed for the history window
-        		remainingWords = GetNGramOrder()-1;
-        	}
-        	for(size_t suffixPos = 0; suffixPos < prevState->GetSuffix().GetSize(); suffixPos++) {
-        		const Word &word = prevState->GetSuffix().GetWord(suffixPos);
-//        		cerr << "NT --> : " << word << endl;
-        		contextFactor.push_back(&word);
-        	}
-        }
-        // subphrase can be used as suffix and as prefix for the next part
-        else if (next && subPhraseLength == GetNGramOrder() - 1)
-        {
-        	// clear up pending ngrams
-        	MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
-        	makePrefix = false;
-        	makeSuffix = true;
-        	collectForPrefix = false;
-        	prefixTerminals = 0;
-        	suffixTerminals = 0;
-
-//        	cerr << "(reuse) suffix of subphrase for right context (only if something is following)" << endl;
-        	// copy language model state
-        	delete lmState;
-        	lmState = NewState( prevState->GetRightContext() );
-        }
-        else if (prev_is_NT && prev_subPhraseLength > 1 && subPhraseLength > 1) {
-        	// two NTs in a row: make transition
-        	MakePrefixNgrams(contextFactor, accumulator, 1, GetNGramOrder()-2);
-        	MakeSuffixNgrams(contextFactor, accumulator, 1, GetNGramOrder()-2);
-        	makePrefix = false;
-        	makeSuffix = false;
-        	collectForPrefix = false;
-        	prefixTerminals = 0;
-        	suffixTerminals = 0;
+      			// push its suffix
+      			size_t remainingWords = (remainingWords > GetNGramOrder()-1) ? GetNGramOrder()-1 : subPhraseLength - (GetNGramOrder()-1);
+      			for(size_t suffixPos = 0; suffixPos < prevState->GetSuffix().GetSize(); suffixPos++) {
+      				const Word &word = prevState->GetSuffix().GetWord(suffixPos);
+      				cerr << "NT --> : " << word << endl;
+      				contextFactor.push_back(&word);
+      			}
+      		}
+      		// subphrase can be used as suffix and as prefix for the next part
+      		else if (wordFollowing && subPhraseLength == GetNGramOrder() - 1)
+      		{
+      			// clear up pending ngrams
+      			MakePrefixNgrams(contextFactor, accumulator, prefixTerminals);
+      			makePrefix = false;
+      			makeSuffix = true;
+      			collectForPrefix = false;
+      			prefixTerminals = 0;
+      			suffixTerminals = 0;
+      		}
+      		else if (prev_is_NT && prev_subPhraseLength > 1 && subPhraseLength > 1) {
+      			// two NTs in a row: make transition
+      			MakePrefixNgrams(contextFactor, accumulator, 1, GetNGramOrder()-2);
+      			MakeSuffixNgrams(contextFactor, accumulator, 1, GetNGramOrder()-2);
+      			makePrefix = false;
+      			makeSuffix = false;
+      			collectForPrefix = false;
+      			prefixTerminals = 0;
+      			suffixTerminals = 0;
 		
-        	// remove duplicates
-        	string curr_ngram;
-        	curr_ngram.append((*contextFactor[GetNGramOrder()-2]).GetString(GetFactorType(), false));
-        	curr_ngram.append(":");
-        	curr_ngram.append((*contextFactor[GetNGramOrder()-1]).GetString(GetFactorType(), false));
-        	accumulator->MinusEquals(this,curr_ngram,1);
-        }
+      			// remove duplicates
+      			string curr_ngram;
+      			curr_ngram.append((*contextFactor[GetNGramOrder()-2]).GetString(m_factorTypeVector, false));
+      			curr_ngram.append(":");
+      			curr_ngram.append((*contextFactor[GetNGramOrder()-1]).GetString(m_factorTypeVector, false));
+      			accumulator->MinusEquals(this,curr_ngram,1);
+      		}
+      	}
       }
       prev_is_NT = true;
       prev_subPhraseLength = subPhraseLength;
@@ -394,7 +357,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
 
   if (GetNGramOrder() > 1) {
     if (onlyTerminals) {
-      MakePrefixNgrams(contextFactor, accumulator, totalTerminals-1);
+    	MakePrefixNgrams(contextFactor, accumulator, prefixTerminals-1);
     }
     else {
       if (makePrefix)
@@ -406,7 +369,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       if (makePrefix && makeSuffix && (contextFactor.size() <= GetNGramOrder())) {
       	string curr_ngram;
       	for (size_t i = 0; i < contextFactor.size(); ++i) {
-      		curr_ngram.append((*contextFactor[i]).GetString(GetFactorType(), false));
+      		curr_ngram.append((*contextFactor[i]).GetString(m_factorTypeVector, false));
       		if (i < contextFactor.size()-1)
       			curr_ngram.append(":");
       	}
@@ -415,8 +378,12 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     }
   }
 
+  if (recentPrevState != NULL)
+  	lmState = NewState( recentPrevState->GetRightContext() );
+  else
+  	lmState = NewState( GetBeginSentenceState() );
   ret->Set(lmState);
-//  cerr << endl;
+  cerr << endl;
   return ret;
 }
 
@@ -444,10 +411,10 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
       for (size_t i=k+offset; i <= end_pos; ++i) {
       	if (i > k+offset)
       		curr_ngram.append(":");
-      	curr_ngram.append((*contextFactor[i]).GetString(GetFactorType(), false));
+      	curr_ngram.append((*contextFactor[i]).GetString(m_factorTypeVector, false));
       }
       if (curr_ngram != "<s>" && curr_ngram != "</s>") {
-//      	cerr << "p-ngram: " << curr_ngram << endl;
+      	cerr << "p-ngram: " << curr_ngram << endl;
       	accumulator->PlusEquals(this,curr_ngram,1);
       }
       curr_ngram.clear();
@@ -464,12 +431,12 @@ void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFacto
 //      cerr << "start: " << start_pos << endl;
 //      cerr << "end: " << end_pos << endl;
       for (size_t j=start_pos; j <= end_pos; ++j){
-      	curr_ngram.append((*contextFactor[j]).GetString(GetFactorType(), false));
+      	curr_ngram.append((*contextFactor[j]).GetString(m_factorTypeVector, false));
       	if (j < end_pos)
       		curr_ngram.append(":");
       }
       if (curr_ngram != "<s>" && curr_ngram != "</s>") {
-//      	cerr << "s-ngram: " << curr_ngram << endl;
+      	cerr << "s-ngram: " << curr_ngram << endl;
       	accumulator->PlusEquals(this,curr_ngram,1);
       }
       curr_ngram.clear();
