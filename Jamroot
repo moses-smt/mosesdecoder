@@ -45,11 +45,11 @@
 #
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
-#
 # --notrace                      compiles without TRACE macros
 #
 # --enable-boost-pool            uses Boost pools for the memory SCFG table
 #
+# --enable-mpi                   switch on mpi
 #
 #CONTROLLING THE BUILD
 #-a to build from scratch
@@ -137,6 +137,8 @@ rule boost_lib ( name macro ) {
 boost_lib thread THREAD_DYN_DLL ;
 boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
 boost_lib unit_test_framework TEST_DYN_LINK ;
+boost_lib mpi MPI_DYN_LINK ;
+boost_lib serialization SERIALIZATION_DYN_LINK ;
 
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
 rule external_lib ( name ) {
@@ -153,10 +155,19 @@ if [ test_flags "-lSegfault" ] {
   requirements += <library>SegFault ;
 }
 
+if [ option.get "enable-mpi" : : "yes" ] {
+  import mpi ;
+  using mpi ;
+  requirements += <define>MPI_ENABLE ;
+  requirements += <library>mpi ;
+  requirements += <library>boost_mpi ;
+  requirements += <library>boost_serialization ;
+}
+
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
-
 import os ;
+
 
 cxxflags = [ os.environ "CXXFLAGS" ] ;
 cflags = [ os.environ "CFLAGS" ] ;
