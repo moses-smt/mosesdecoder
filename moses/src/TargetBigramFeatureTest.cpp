@@ -111,7 +111,7 @@ BOOST_AUTO_TEST_CASE(score_components)
 
 BOOST_AUTO_TEST_CASE(empty_hypo) 
 {
-  Sentence s(Input);
+  Sentence s;
   TargetBigramFeature tbf;
   auto_ptr<const FFState> ffs(tbf.EmptyHypothesisState(s));
   BOOST_CHECK(ffs.get());
@@ -160,7 +160,7 @@ BOOST_AUTO_TEST_CASE(evaluate_empty)
   HypothesisFixture hypos;
   TargetBigramFeature tbf;
   BOOST_CHECK(tbf.Load("*"));
-  auto_ptr<const FFState> prevState(tbf.EmptyHypothesisState(Sentence(Input)));
+  auto_ptr<const FFState> prevState(tbf.EmptyHypothesisState(Sentence()));
   ScoreComponentCollection scc;
   auto_ptr<const FFState> currState(
     tbf.Evaluate(*hypos.empty(),prevState.get(),&scc));

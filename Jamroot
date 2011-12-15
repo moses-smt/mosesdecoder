@@ -188,6 +188,7 @@ build-project mert ;
 build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 build-project mira ;
+build-project moses/src ;
 #Scripts have their own binaries.
 build-project scripts ;
 #Regression tests (only does anything if --with-regtest is passed)

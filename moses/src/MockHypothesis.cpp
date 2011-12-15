@@ -35,8 +35,8 @@ MockHypothesisGuard::MockHypothesisGuard(
     const string& sourceSentence,
     const vector<Alignment>& alignments,
     const vector<string>& targetSegments) 
-: m_emptyTarget(Input),
-  m_sentence(Input),
+: m_emptyTarget(),
+  m_sentence(),
   m_system("mock",&m_wp,&m_uwp,&m_dist),
   m_manager(m_sentence,Normal,&m_system)
 {
