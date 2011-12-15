@@ -204,7 +204,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
   {
     // consult rule for either word or non-terminal
     const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(phrasePos);
-    cerr << "word: " << word << endl;
+    //    cerr << "word: " << word << endl;
 
     // regular word
     if (!word.IsNonTerminal()) {
@@ -255,7 +255,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		++prefixTerminals;
 
       		const Word &word = prevState->GetSuffix().GetWord(0);
-      		cerr << "NT0 --> : " << word << endl;
+		//      		cerr << "NT0 --> : " << word << endl;
       		contextFactor.push_back(&word);
       	}
       	else {
@@ -266,7 +266,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       		for(;(size_t)suffixPos < prevState->GetSuffix().GetSize(); suffixPos++)
       		{
       			const Word &word = prevState->GetSuffix().GetWord(suffixPos);
-      			cerr << "NT0 --> : " << word << endl;
+			//      			cerr << "NT0 --> : " << word << endl;
       			contextFactor.push_back(&word);
       		}
       	}
@@ -280,7 +280,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
               && prefixPos < subPhraseLength; prefixPos++)
         {
           const Word &word = prevState->GetPrefix().GetWord(prefixPos);
-          cerr << "NT --> " << word << endl;
+	  //          cerr << "NT --> " << word << endl;
           contextFactor.push_back(&word);
         }
 
@@ -316,7 +316,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       			size_t remainingWords = (remainingWords > GetNGramOrder()-1) ? GetNGramOrder()-1 : subPhraseLength - (GetNGramOrder()-1);
       			for(size_t suffixPos = 0; suffixPos < prevState->GetSuffix().GetSize(); suffixPos++) {
       				const Word &word = prevState->GetSuffix().GetWord(suffixPos);
-      				cerr << "NT --> : " << word << endl;
+				//      				cerr << "NT --> : " << word << endl;
       				contextFactor.push_back(&word);
       			}
       		}
@@ -383,7 +383,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
   else
   	lmState = NewState( GetBeginSentenceState() );
   ret->Set(lmState);
-  cerr << endl;
+  //  cerr << endl;
   return ret;
 }
 
@@ -406,15 +406,13 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
   for (size_t k = 0; k < numberOfStartPos; ++k) {
     size_t max_end = (size < GetNGramOrder()+k+offset)? size: GetNGramOrder()+k+offset;
     for (size_t end_pos = 1+k+offset; end_pos < max_end; ++end_pos) {
-//      cerr << "start: " << k+offset << endl;
-//      cerr << "end: " << end_pos << endl;
       for (size_t i=k+offset; i <= end_pos; ++i) {
       	if (i > k+offset)
       		curr_ngram.append(":");
       	curr_ngram.append((*contextFactor[i]).GetString(m_factorTypeVector, false));
       }
       if (curr_ngram != "<s>" && curr_ngram != "</s>") {
-      	cerr << "p-ngram: " << curr_ngram << endl;
+	//      	cerr << "p-ngram: " << curr_ngram << endl;
       	accumulator->PlusEquals(this,curr_ngram,1);
       }
       curr_ngram.clear();
@@ -428,15 +426,13 @@ void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFacto
   for (size_t k = 0; k < numberOfEndPos; ++k) {
     size_t end_pos = size-1-k-offset;
     for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < GetNGramOrder()); --start_pos) {
-//      cerr << "start: " << start_pos << endl;
-//      cerr << "end: " << end_pos << endl;
       for (size_t j=start_pos; j <= end_pos; ++j){
       	curr_ngram.append((*contextFactor[j]).GetString(m_factorTypeVector, false));
       	if (j < end_pos)
       		curr_ngram.append(":");
       }
       if (curr_ngram != "<s>" && curr_ngram != "</s>") {
-      	cerr << "s-ngram: " << curr_ngram << endl;
+	//      	cerr << "s-ngram: " << curr_ngram << endl;
       	accumulator->PlusEquals(this,curr_ngram,1);
       }
       curr_ngram.clear();
