@@ -1,0 +1,6 @@
+exe mira :
+[ glob *.cpp ]
+ ../moses/src//moses ../OnDiskPt//OnDiskPt ..//boost_program_options ;
+
+alias programs : mira ;
+

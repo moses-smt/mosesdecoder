@@ -89,7 +89,7 @@ namespace Mira {
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
 
-  	m_sentence = new Sentence(Input);
+  	m_sentence = new Sentence();
     stringstream in(source + "\n");
     const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
     m_sentence->Read(in,inputFactorOrder);
