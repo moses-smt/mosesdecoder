@@ -5,8 +5,6 @@
 #include "ScoreComponentCollection.h"
 #include "ChartHypothesis.h"
 
-#include "LM/SingleFactor.h"
-
 namespace Moses {
 
 using namespace std;
@@ -60,6 +58,11 @@ bool TargetNgramFeature::Load(const std::string &filePath)
 string TargetNgramFeature::GetScoreProducerWeightShortName(unsigned) const
 {
 	return "dlm";
+}
+
+string TargetNgramFeature::GetShortNameWithSEP() const
+{
+	return "dlm_";
 }
 
 size_t TargetNgramFeature::GetNumInputScores() const
@@ -225,7 +228,10 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       	suffixTerminals++;
       // everything else
       else {
-      	accumulator->PlusEquals(this, word.GetString(m_factorType), 1);
+      	stringstream ngram;
+      	ngram << GetShortNameWithSEP();
+      	ngram << word.GetString(m_factorType);
+      	accumulator->SparsePlusEquals(ngram.str(), 1);
 
       	if (collectForPrefix)
       		prefixTerminals++;
@@ -340,10 +346,11 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
 		
       			// remove duplicates
       			stringstream curr_ngram;
+      			curr_ngram << GetShortNameWithSEP();
       			curr_ngram << (*contextFactor[m_n-2]).GetString(m_factorType);
       			curr_ngram << ":";
       			curr_ngram << (*contextFactor[m_n-1]).GetString(m_factorType);
-      			accumulator->MinusEquals(this,curr_ngram.str(),1);
+      			accumulator->SparseMinusEquals(curr_ngram.str(),1);
       		}
       	}
       }
@@ -366,12 +373,13 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       size_t size = contextFactor.size();
       if (makePrefix && makeSuffix && (size <= m_n)) {
       	stringstream curr_ngram;
+      	curr_ngram << GetShortNameWithSEP();
       	for (size_t i = 0; i < size; ++i) {
       		curr_ngram << (*contextFactor[i]).GetString(m_factorType);
       		if (i < size-1)
       			curr_ngram << ":";
       	}
-      	accumulator->MinusEquals(this, curr_ngram.str(), 1);
+      	accumulator->SparseMinusEquals(curr_ngram.str(), 1);
       }
     }
   }
@@ -386,14 +394,15 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
   for (size_t k = 0; k < numberOfStartPos; ++k) {
     size_t max_end = (size < m_n+k+offset)? size: m_n+k+offset;
     for (size_t end_pos = 1+k+offset; end_pos < max_end; ++end_pos) {
-      for (size_t i=k+offset; i <= end_pos; ++i) {
+      ngram << GetShortNameWithSEP();
+    	for (size_t i=k+offset; i <= end_pos; ++i) {
       	if (i > k+offset)
       		ngram << ":";
       	ngram << (*contextFactor[i]).GetString(m_factorType);
       	const Word w = *contextFactor[i];
       }
 //      cerr << "p-ngram: " << ngram.str() << endl;
-      accumulator->PlusEquals(this, ngram.str(), 1);
+      accumulator->SparsePlusEquals(ngram.str(), 1);
       ngram.str("");
     }
   }
@@ -404,13 +413,14 @@ void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFacto
   for (size_t k = 0; k < numberOfEndPos; ++k) {
     size_t end_pos = contextFactor.size()-1-k-offset;
     for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < m_n); --start_pos) {
-      for (size_t j=start_pos; j <= end_pos; ++j){
+    	ngram << GetShortNameWithSEP();
+    	for (size_t j=start_pos; j <= end_pos; ++j){
       	ngram << (*contextFactor[j]).GetString(m_factorType);
       	if (j < end_pos)
       		ngram << ":";
       }
 //      cerr << "s-ngram: " << ngram.str() << endl;
-      accumulator->PlusEquals(this, ngram.str(), 1);
+      accumulator->SparsePlusEquals(ngram.str(), 1);
       ngram.str("");
     }
   }

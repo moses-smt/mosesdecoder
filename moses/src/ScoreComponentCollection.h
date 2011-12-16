@@ -157,6 +157,14 @@ public:
     m_scores[fname] -= score;
   }
 
+  //For features which have an unbounded number of components
+  void SparseMinusEquals(const std::string& full_name, float score)
+  {
+    FName fname(full_name);
+    m_scores[fname] -= score;
+  }
+
+
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components
 	//! produced by sp
@@ -195,6 +203,13 @@ public:
   {
     assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] += score;
+  }
+
+  //For features which have an unbounded number of components
+  void SparsePlusEquals(const std::string& full_name, float score)
+  {
+  	FName fname(full_name);
     m_scores[fname] += score;
   }
 
