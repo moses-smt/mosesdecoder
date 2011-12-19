@@ -16,7 +16,7 @@ while(<WEIGHT>) {
     if (/^\[weight\-(\S+)\]/) {
 	$current_weight = $1;
     }
-  elsif ($current_weight && /^([\-\d\.]+)([Ee][+-]?[\d]+)?$/) {
+  elsif ($current_weight && /^(([\-\d\.]+)([Ee][+-]?[\d]+)?)$/) {
 	push @{$WEIGHT{$current_weight}},$1;
     }
     elsif (/^\[/) {
