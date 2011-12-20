@@ -256,17 +256,10 @@ namespace Moses {
   }
 
   FVector& FVector::operator+= (const FVector& rhs) {
-    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size())
       resize(rhs.m_coreFeatures.size());
-    }
-    for (iterator i = begin(); i != end(); ++i) {
-      set(i->first,i->second + rhs.get(i->first));
-    }
-    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-      if (!hasNonDefaultValue(i->first)) {
-        set(i->first,i->second);
-      }
-    }
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
+    	set(i->first, get(i->first) + i->second);
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       if (i < rhs.m_coreFeatures.size()) {
         m_coreFeatures[i] += rhs.m_coreFeatures[i];
@@ -276,17 +269,10 @@ namespace Moses {
   }
   
   FVector& FVector::operator-= (const FVector& rhs) {
-    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size())
       resize(rhs.m_coreFeatures.size());
-    }
-    for (iterator i = begin(); i != end(); ++i) {
-      set(i->first,i->second - rhs.get(i->first));
-    }
-    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-      if (!hasNonDefaultValue(i->first)) {
-        set(i->first,-(i->second));
-      }
-    }
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
+    	set(i->first, get(i->first) -(i->second));
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       if (i < rhs.m_coreFeatures.size()) {
         m_coreFeatures[i] -= rhs.m_coreFeatures[i];
@@ -336,28 +322,6 @@ namespace Moses {
     }
     return *this;
   }
-  
-	FVector& FVector::max_equals(const FVector& rhs) {
-    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
-      resize(rhs.m_coreFeatures.size());
-    }
-		for (iterator i = begin(); i != end(); ++i) {
-		  set(i->first, max(i->second , rhs.get(i->first) ));
-		}
-		for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i) {
-      if (!hasNonDefaultValue(i->first)) {
-			  set(i->first, i->second);
-      }
-		}
-    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
-      if (i < rhs.m_coreFeatures.size()) {
-        m_coreFeatures[i] = max(m_coreFeatures[i], rhs.m_coreFeatures[i]);
-      } else {
-        m_coreFeatures[i] = max(m_coreFeatures[i],(float)0);
-      }
-    }
-		return *this;
-	}
   
   FVector& FVector::operator*= (const FValue& rhs) {
     //NB Could do this with boost::bind ?
@@ -437,11 +401,7 @@ namespace Moses {
   const FVector operator/(const FVector& lhs, const FValue& rhs) {
     return FVector(lhs) /= rhs;
   }
-  
-  const FVector fvmax(const FVector& lhs, const FVector& rhs) {
-    return FVector(lhs).max_equals(rhs);
-  }
-  
+
   FValue inner_product(const FVector& lhs, const FVector& rhs) {
     if (lhs.size() >= rhs.size()) {
       return rhs.inner_product(lhs);

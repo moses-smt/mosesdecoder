@@ -224,26 +224,6 @@ BOOST_AUTO_TEST_CASE(core_scalar)
 
 }
 
-BOOST_AUTO_TEST_CASE(core_max) 
-{
-  FVector f1(2);
-  FVector f2(2);
-  FName n1("a");
-  FName n2("b");
-  FName n3("c");
-  f1[0] = 1.1; f1[1] = -0.1; ; f1[n2] = -1.5; f1[n3] = 2.2;
-  f2[0] = 0.5; f2[1] = 0.25; f2[n1] = 1; f2[n3] = 2.4;
-
-  FVector m = fvmax(f1,f2);
-
-  BOOST_CHECK_CLOSE((FValue)m[0], 1.1 , TOL);
-  BOOST_CHECK_CLOSE((FValue)m[1], 0.25 , TOL);
-  BOOST_CHECK_CLOSE((FValue)m[n1], 1 , TOL);
-  BOOST_CHECK_CLOSE((FValue)m[n2],0  , TOL);
-  BOOST_CHECK_CLOSE((FValue)m[n3],2.4  , TOL);
-
-}
-
 BOOST_AUTO_TEST_CASE(l1norm) 
 {
   FVector f1(3);

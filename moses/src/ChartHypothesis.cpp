@@ -150,15 +150,18 @@ void ChartHypothesis::CalcScore()
   // lm, sparse features, etc
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+  ScoreComponentCollection currLMScoreBreakdown;
   for (unsigned i = 0; i < ffs.size(); ++i) {
 	  if (ffs[i]->GetScoreProducerWeightShortName() == "lm")
-	  	m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_lmCurrScoreBreakdown);
+	  	m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&currLMScoreBreakdown);
 	  else
 	  	m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_currScoreBreakdown);
   }
 
-  m_lmScore = m_lmCurrScoreBreakdown.GetWeightedScore();
-  m_currScoreBreakdown.PlusEquals(m_lmCurrScoreBreakdown);
+  // add lm scores to current scores
+  m_currScoreBreakdown.PlusEquals(currLMScoreBreakdown);
+
+  m_lmScore = currLMScoreBreakdown.GetWeightedScore();
   m_totalScore	= m_currScoreBreakdown.GetWeightedScore();
 
   std::vector<const ChartHypothesis*>::iterator iter;

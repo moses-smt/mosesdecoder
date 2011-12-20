@@ -72,8 +72,8 @@ protected:
 
   unsigned m_id; /* pkoehn wants to log the order in which hypotheses were generated */
 
-  mutable std::auto_ptr<ScoreComponentCollection> m_lmScoreBreakdown;
-  ScoreComponentCollection m_lmCurrScoreBreakdown;
+//  mutable std::auto_ptr<ScoreComponentCollection> m_lmScoreBreakdown;
+//  ScoreComponentCollection m_currLMScoreBreakdown;
 
   LMList m_lmList;
 
@@ -150,7 +150,6 @@ public:
         }
 
         m_scoreBreakdown->PlusEquals(prevScoreBreakdown);
-//        m_scoreBreakdown->PlusEquals(prevHypo.GetScoreBreakdown());
       }
     }
 
