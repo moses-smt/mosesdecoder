@@ -1888,6 +1888,7 @@ sub get_training_setting {
     my $source_syntax = &get("GENERAL:input-parser");
     my $target_syntax = &get("GENERAL:output-parser");
     my $score_settings = &get("TRAINING:score-settings");
+    my $parallel = &get("TRAINING:parallel");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -1909,6 +1910,7 @@ sub get_training_setting {
     $cmd .= "-source-syntax " if $source_syntax;
     $cmd .= "-glue-grammar " if $hierarchical;
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
+    $cmd .= "-parallel " if $parallel;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
