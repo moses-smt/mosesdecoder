@@ -1275,7 +1275,8 @@ sub check_if_crashed {
 	foreach my $pattern (@{$ERROR{&defined_step_id($i)}},
 			     'error','killed','core dumped','can\'t read',
 			     'no such file or directory','unknown option',
-			     'died at','exit code','permission denied') {
+			     'died at','exit code','permission denied',
+           "Can't locate") {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
