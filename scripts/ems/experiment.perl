@@ -2264,12 +2264,13 @@ sub define_reporting_report {
 ### subs for step definition
 
 sub get_output_and_input {
-    my ($step_id) = @_;
+  my ($step_id) = @_;
 
-    my $step = $DO_STEP[$step_id];
-    my $output = &get_default_file(&deconstruct_name($step));
+  my $step = $DO_STEP[$step_id];
+  my $output = &get_default_file(&deconstruct_name($step));
 
-    my @INPUT;
+  my @INPUT;
+  if (defined($USES_INPUT{$step_id})) { 
     for(my $i=0; $i<scalar @{$USES_INPUT{$step_id}}; $i++) {
 	# get name of input file needed
 	my $in_file = $USES_INPUT{$step_id}[$i];
@@ -2301,7 +2302,8 @@ sub get_output_and_input {
 	push @INPUT,&get_specified_or_default_file(&deconstruct_name($in_file),
 						   &deconstruct_name($prev_step));
     }
-    return ($output,@INPUT);
+  }
+  return ($output,@INPUT);
 }
 
 sub define_template {
@@ -2400,6 +2402,9 @@ sub define_template {
     }
     # input is defined as IN or IN0, IN1, IN2
     else {
+  if ($cmd =~ /([^ANS])IN/ && scalar(@INPUT) == 0) {
+    die("ERROR: Step $step requires input from prior steps, but none defined.");
+  }
 	$cmd =~ s/([^ANS])IN(\d+)/$1$INPUT[$2]/g;  # a bit trickier to
 	$cmd =~ s/([^ANS])IN/$1$INPUT[0]/g;        # avoid matching TRAINING, RECASING
 	$cmd =~ s/^IN(\d+)/$INPUT[$2]/g;

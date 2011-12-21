@@ -136,10 +136,15 @@ raw-stem = $wmt10-data/training/undoc.2000.$pair-extension
 [LM]
 
 ### tool to be used for language model training
-# for instance: ngram-count (SRILM), train-lm-on-disk.perl (Edinburgh) 
-# 
+# srilm 
 lm-training = $srilm-dir/ngram-count
 settings = "-interpolate -kndiscount -unk"
+
+# irstlm
+#lm-training = "$moses-script-dir/generic/trainlm-irst.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/lm"
+#settings = ""
+
+# order of the language model
 order = 5
 
 ### tool to be used for training randomized language model from scratch
