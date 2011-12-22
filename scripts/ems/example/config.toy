@@ -207,6 +207,10 @@ raw-corpus = $toy-data/nc-5k.$output-extension
 #lowercased-tuning = 
 #split-tuning = 
 
+### group language models for hierarchical interpolation
+# (flat interpolation is limited to 10 language models)
+#group = "first,second fourth,fifth"
+
 ### script to use for binary table format for irstlm or kenlm
 # (default: no binarization)
 
