@@ -1838,12 +1838,15 @@ sub define_training_interpolated_lm_interpolate {
 	$interpolation_script, $tuning, @LM) 
 	= &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
+    my $group = &get("INTERPOLATED-LM:group");
 
+    # get list of language model files
     my $lm_list = "";
     foreach (@LM) {
 	$lm_list .= $_.",";
     }
     chop($lm_list);
+
 
     # sanity checks on order and factors
     my @LM_SETS = &get_sets("LM");
@@ -1868,7 +1871,30 @@ sub define_training_interpolated_lm_interpolate {
 	}
     }
 
+    # if grouping, identify position in list
+    my $numbered_string = "";
+    if (defined($group)) {
+      my %POSITION;
+      foreach my $set (@LM_SETS) {
+        $POSITION{$set} = scalar keys %POSITION;
+      }
+      my $group_string = $group;
+      $group_string =~ s/\s+/ /g;
+      $group_string =~ s/ *, */,/g;
+      $group_string =~ s/^ //;
+      $group_string =~ s/ $//;
+      $group_string .= " ";
+      while($group_string =~ /^([^ ,]+)([ ,]+)(.*)$/) {
+        die("ERROR: unknown set $1 in INTERPOLATED-LM:group definition")
+          if ! defined($POSITION{$1});
+        $numbered_string .= $POSITION{$1}.$2;
+        $group_string = $3;
+      }
+      chop($numbered_string);
+    }
+
     my $cmd = "$interpolation_script --tuning $tuning --name $interpolated_lm --srilm $srilm_dir --lm $lm_list";
+    $cmd .= " --group \"$numbered_string\"" if defined($group);
 
     &create_step($step_id,$cmd);
 }

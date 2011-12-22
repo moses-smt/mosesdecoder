@@ -107,7 +107,7 @@ consolidate
 	default-name: truecaser/corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
-        in: tokenized-stem
+  in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	default-name: truecaser/truecase-model
@@ -253,7 +253,7 @@ split-tuning
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 interpolate
 	in: script split-tuning LM:lm
-	rerun-on-change: srilm-dir
+	rerun-on-change: srilm-dir group
 	out: lm
 	default-name: lm/interpolated-lm
 randomize
