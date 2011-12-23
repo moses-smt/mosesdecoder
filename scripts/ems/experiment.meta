@@ -207,6 +207,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
+  error: set kMaxOrder to at least this value
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -260,20 +261,19 @@ randomize
 	in: lm
 	out: rlm
 	pass-unless: lm-randomizer
-	default-name: lm/rlm
+	default-name: lm/interpolated-rlm
 quantize
 	in: rlm
 	out: qlm
 	pass-unless: lm-quantizer
 	default-name: lm/interpolated-qlm
-	template: $lm-quantizer IN OUT
 binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
-	template: $lm-binarizer IN OUT
+  error: set kMaxOrder to at least this value
 
 [TRAINING] single
 consolidate
@@ -370,17 +370,9 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 create-config
-	in: reordering-table phrase-translation-table generation-table LM:binlm
-	out: config
-	ignore-if: use-hiero INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
-	default-name: model/moses.ini
-	error: Unknown option
-create-config-interpolated-lm
-	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm
+	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
-	ignore-unless: INTERPOLATED-LM:script
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
 	default-name: model/moses.ini
 	error: Unknown option
