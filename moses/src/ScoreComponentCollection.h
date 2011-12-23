@@ -326,6 +326,7 @@ public:
   void L1Normalise();
   float GetL1Norm() const;
   float GetL2Norm() const;
+  float GetLInfNorm() const;
   void Save(const std::string& filename) const;
   void Save(std::ostream&) const;
 

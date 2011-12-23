@@ -839,28 +839,19 @@ int main(int argc, char** argv) {
 				if (rank == 0 && (epoch >= 2)) {
 					ScoreComponentCollection firstDiff(mixedAverageWeights);
 					firstDiff.MinusEquals(mixedAverageWeightsPrevious);
-					VERBOSE(1, "Average weight changes since previous epoch: " << firstDiff << endl);
+					VERBOSE(1, "Average weight changes since previous epoch: " << firstDiff << 
+						" (max: " << firstDiff.GetLInfNorm() << ")" << endl);
 					ScoreComponentCollection secondDiff(mixedAverageWeights);
 					secondDiff.MinusEquals(mixedAverageWeightsBeforePrevious);
-					VERBOSE(1, "Average weight changes since before previous epoch: " << secondDiff << endl << endl);
+					VERBOSE(1, "Average weight changes since before previous epoch: " << secondDiff << 
+						" (max: " << secondDiff.GetLInfNorm() << ")" << endl << endl);
 
 					// check whether stopping criterion has been reached
 					// (both difference vectors must have all weight changes smaller than min_weight_change)
-					FVector changes1 = firstDiff.GetScoresVector();
-					FVector changes2 = secondDiff.GetScoresVector();
-					FVector::const_iterator iterator1 = changes1.cbegin();
-					FVector::const_iterator iterator2 = changes2.cbegin();
-					while (iterator1 != changes1.cend()) {
-						if (abs((*iterator1).second) >= min_weight_change || abs(
-								(*iterator2).second) >= min_weight_change) {
-							reached = false;
-							break;
-						}
-
-						++iterator1;
-						++iterator2;
-					}
-
+					if (firstDiff.GetLInfNorm() >= min_weight_change)
+					  reached = false;
+					if (secondDiff.GetLInfNorm() >= min_weight_change)
+					  reached = false;
 					if (reached) {
 						// stop MIRA
 						stop = true;

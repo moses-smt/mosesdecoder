@@ -175,6 +175,7 @@ namespace Moses {
     /** norms and sums */
     FValue l1norm() const;
     FValue l2norm() const;
+    FValue linfnorm() const;
     FValue sum() const;
     
     /** pretty printing */

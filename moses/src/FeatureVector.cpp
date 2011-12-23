@@ -332,7 +332,6 @@ namespace Moses {
     return *this;
   }
   
-  
   FVector& FVector::operator/= (const FValue& rhs) {
     for (iterator i = begin(); i != end(); ++i) {
       i->second /= rhs;
@@ -352,6 +351,25 @@ namespace Moses {
     return norm;
   }
   
+  FValue FVector::l2norm() const {
+    return sqrt(inner_product(*this));
+  }
+
+  FValue FVector::linfnorm() const {
+    FValue norm = 0;
+    for (const_iterator i = cbegin(); i != cend(); ++i) {
+      float absValue = abs(i->second);
+      if (absValue > norm)
+	norm = absValue;
+    }
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      float absValue = m_coreFeatures[i];
+      if (absValue > norm)
+	norm = absValue;
+    }
+    return norm;
+  }
+
   FValue FVector::sum() const {
     FValue sum = 0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
@@ -360,11 +378,7 @@ namespace Moses {
     sum += m_coreFeatures.sum();
     return sum;
   }
-  
-  FValue FVector::l2norm() const {
-    return sqrt(inner_product(*this));
-  }
-  
+    
   FValue FVector::inner_product(const FVector& rhs) const {
     assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     FValue product = 0.0;

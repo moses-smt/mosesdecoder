@@ -100,6 +100,10 @@ float ScoreComponentCollection::GetL2Norm() const {
   return m_scores.l2norm();
 }
 
+float ScoreComponentCollection::GetLInfNorm() const {
+  return m_scores.linfnorm();
+}
+
 void ScoreComponentCollection::Save(ostream& out) const {
   ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
   for (; iter != s_scoreIndexes.end(); ++iter ) {
