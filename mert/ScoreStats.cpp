@@ -132,3 +132,19 @@ ostream& operator<<(ostream& o, const ScoreStats& e)
     o << e.get(i) << " ";
   return o;
 }
+
+//ADDED_BY_TS
+bool operator==(const ScoreStats& s1, const ScoreStats& s2) {
+  size_t size = s1.size();
+
+  if (size != s2.size())
+    return false;
+
+  for (size_t k=0; k < size; k++) {
+    if (s1.get(k) != s2.get(k))
+      return false;
+  }
+  
+  return true;
+}
+//END_ADDED

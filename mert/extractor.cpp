@@ -182,6 +182,10 @@ int main(int argc, char** argv)
 
     PrintUserTime("Nbest entries loaded and scored");
 
+    //ADDED_BY_TS
+    data.remove_duplicates();
+    //END_ADDED
+
     if (binmode)
       cerr << "Binary write mode is selected" << endl;
     else
