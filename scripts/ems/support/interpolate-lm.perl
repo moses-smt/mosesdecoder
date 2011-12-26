@@ -12,13 +12,14 @@ binmode(STDERR, ":utf8");
 
 my $SRILM = "/home/pkoehn/moses/srilm/bin/i686-m64";
 my $TEMPDIR = "/tmp";
-my ($TUNING,$LM,$NAME);
+my ($TUNING,$LM,$NAME,$GROUP);
 
-die("interpolate-lm.perl --tuning set --name out-lm --lm lm1,lm2,lm3 [--srilm srtilm-dir --tempdir tempdir]")
+die("interpolate-lm.perl --tuning set --name out-lm --lm lm0,lm1,lm2,lm3 [--srilm srilm-dir --tempdir tempdir --group \"0,1 2,3\"]")
     unless &GetOptions('tuning=s' => => \$TUNING,
 		       'name=s' => \$NAME,
 		       'srilm=s' => \$SRILM,
 		       'tempdir=s' => \$TEMPDIR,
+           'group=s' => \$GROUP,
 		       'lm=s' => \$LM);
 
 # check and set default to unset parameters
@@ -52,49 +53,109 @@ foreach my $lm (@LM) {
 }
 print STDERR "language models have order $order.\n";
 
-my $tmp = tempdir(DIR=>$TEMPDIR);
+# too many language models? group them first
+if (!defined($GROUP) && scalar(@LM) > 10) {
+  print STDERR "more than 10, automatically grouping language models.\n";
+  my $num_groups = int(scalar(@LM)/10 + 0.99);
+  my $size_groups = int(scalar(@LM)/$num_groups + 0.99);
 
-# compute perplexity
-my $i = 0;
-foreach my $lm (@LM) {
-  print STDERR "compute perplexity for $lm\n";
-  safesystem("$SRILM/ngram -unk -order $order -lm $lm -ppl $TUNING -debug 2 > $tmp/iplm.$$.$i") or die "Failed to compute perplexity for $lm\n";
-  print STDERR `tail -n 2 $tmp/iplm.$$.$i`;
-  $i++;
+  $GROUP = "";
+  for(my $i=0;$i<$num_groups;$i++) {
+    $GROUP .= " " unless $i==0;
+    for(my $j=0;$j<$size_groups;$j++) {
+      my $lm_i = $i*$size_groups+$j;
+      next if $lm_i >= scalar(@LM);
+      $GROUP .= "," unless $j==0;
+      $GROUP .= $lm_i;
+    }
+  }
+  print STDERR "groups: $GROUP\n";
 }
 
-# compute lambdas
-print STDERR "computing lambdas...\n";
-my $cmd = "$SRILM/compute-best-mix";
-for(my $i=0;$i<scalar(@LM);$i++) {
-  $cmd .= " $tmp/iplm.$$.$i";
+# normal interpolation
+if (!defined($GROUP)) {
+  &interpolate($NAME,@LM);
+  exit;
 }
-my ($mixout, $mixerr, $mixexitcode) = saferun3($cmd);
-die "Failed to mix models: $mixerr" if $mixexitcode != 0;
-my $mix = $mixout;
-`rm $tmp/iplm.$$.*`;
-$mix =~ /best lambda \(([\d\. ]+)\)/ || die("ERROR: computing lambdas failed: $mix");
-my @LAMBDA = split(/ /,$1);
 
-# create new language models
-print STDERR "creating new language model...\n";
-$i = 0;
-$cmd = "$SRILM/ngram -unk -order $order -write-lm $NAME";
-foreach my $lm (@LM) {
-  $cmd .= " -lm " if $i==0;
-  $cmd .= " -mix-lm " if $i==1;
-  $cmd .= " -mix-lm$i " if $i>1;
-  $cmd .= $lm;
-  $cmd .= " -lambda " if $i==0;
-  $cmd .= " -mix-lambda$i " if $i>1;
-  $cmd .= $LAMBDA[$i] if $i!=1;
-  $i++;
+# group language models into sub-interpolated models
+my %ALREADY;
+my $g = 0;
+my @SUB_NAME;
+foreach my $subgroup (split(/ /,$GROUP)) {
+  my @SUB_LM;
+  foreach my $lm_i (split(/,/,$subgroup)) {
+    die("ERROR: LM id $lm_i in group definition out of range") if $lm_i >= scalar(@LM);
+    push @SUB_LM,$LM[$lm_i];
+    $ALREADY{$lm_i} = 1;
+  }
+  #if (scalar @SUB_NAME == 0 && scalar keys %ALREADY == scalar @LM) {
+  #  print STDERR "WARNING: grouped all language models into one, perform normal interpolation\n";
+  #  &interpolate($NAME,@LM);
+  #  exit;
+  #}
+  my $name = $NAME.".group-".chr(97+($g++));
+  push @SUB_NAME,$name;
+  print STDERR "\n=== BUILDING SUB LM $name from\n\t".join("\n\t",@SUB_LM)."\n===\n\n";
+  &interpolate($name, @SUB_LM);
 }
-safesystem($cmd) or die "Failed.";
+for(my $lm_i=0; $lm_i < scalar(@LM); $lm_i++) {
+  next if defined($ALREADY{$lm_i});
+  push @SUB_NAME, $LM[$lm_i];
+}
+print STDERR "\n=== BUILDING FINAL LM ===\n\n";
+&interpolate($NAME, @SUB_NAME);
 
-rmtree($tmp); # remove the temp dir
-print STDERR "done.\n";
+# main interpolation function
+sub interpolate {
+  my ($name,@LM) = @_;
 
+  die("cannot interpolate more than 10 language models at once.")
+    if scalar(@LM) > 10;
+
+  my $tmp = tempdir(DIR=>$TEMPDIR);
+
+  # compute perplexity
+  my $i = 0;
+  foreach my $lm (@LM) {
+    print STDERR "compute perplexity for $lm\n";
+    safesystem("$SRILM/ngram -unk -order $order -lm $lm -ppl $TUNING -debug 2 > $tmp/iplm.$$.$i") or die "Failed to compute perplexity for $lm\n";
+    print STDERR `tail -n 2 $tmp/iplm.$$.$i`;
+    $i++;
+  }
+
+  # compute lambdas
+  print STDERR "computing lambdas...\n";
+  my $cmd = "$SRILM/compute-best-mix";
+  for(my $i=0;$i<scalar(@LM);$i++) {
+    $cmd .= " $tmp/iplm.$$.$i";
+  }
+  my ($mixout, $mixerr, $mixexitcode) = saferun3($cmd);
+  die "Failed to mix models: $mixerr" if $mixexitcode != 0;
+  my $mix = $mixout;
+  `rm $tmp/iplm.$$.*`;
+  $mix =~ /best lambda \(([\d\. ]+)\)/ || die("ERROR: computing lambdas failed: $mix");
+  my @LAMBDA = split(/ /,$1);
+
+  # create new language model
+  print STDERR "creating new language model...\n";
+  $i = 0;
+  $cmd = "$SRILM/ngram -unk -order $order -write-lm $name";
+  foreach my $lm (@LM) {
+    $cmd .= " -lm " if $i==0;
+    $cmd .= " -mix-lm " if $i==1;
+    $cmd .= " -mix-lm$i " if $i>1;
+    $cmd .= $lm;
+    $cmd .= " -lambda " if $i==0;
+    $cmd .= " -mix-lambda$i " if $i>1;
+    $cmd .= $LAMBDA[$i] if $i!=1;
+    $i++;
+  }
+  safesystem($cmd) or die "Failed.";
+
+  rmtree($tmp); # remove the temp dir
+  print STDERR "done.\n";
+}
 
 sub safesystem {
   print STDERR "Executing: @_\n";

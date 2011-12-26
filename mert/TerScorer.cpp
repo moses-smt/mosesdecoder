@@ -84,7 +84,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
     } else if ( result.scoreAv() > tmp_result.scoreAv() ) {
       result = tmp_result;
     }
-
+    delete evaluation;
   }
   ostringstream stats;
   // multiplication by 100 in order to keep the average precision
