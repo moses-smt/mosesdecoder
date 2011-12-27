@@ -184,7 +184,7 @@ if(!defined $_MGIZA ){
 	print STDERR "Using single-thread GIZA\n";
 }
 else {
-    $GIZA = "$BINDIR/mgizapp";
+    $GIZA = "$BINDIR/mgiza";
 	print STDERR "Using multi-thread GIZA\n";	
     if (!defined($_MGIZA_CPUS)) {
         $_MGIZA_CPUS=4;
