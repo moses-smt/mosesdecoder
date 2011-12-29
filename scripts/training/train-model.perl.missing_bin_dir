@@ -304,6 +304,8 @@ my $___CONTINUE = 0;
 $___CONTINUE = $_CONTINUE if $_CONTINUE;
 
 my $___MAX_PHRASE_LENGTH = "7";
+$___MAX_PHRASE_LENGTH = "10" if $_HIERARCHICAL;
+
 my $___LEXICAL_WEIGHTING = 1;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
@@ -1308,6 +1310,8 @@ sub extract_phrase {
     my $cmd;
     if ($_HIERARCHICAL)
     {
+        my $max_length = &get_max_phrase_length($table_number);
+
         $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
@@ -1315,6 +1319,7 @@ sub extract_phrase {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
         }
+        $cmd .= " --MaxSpan $max_length";
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     else
