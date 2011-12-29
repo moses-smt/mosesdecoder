@@ -553,6 +553,7 @@ sub bleu_score {
     my $score = 0;
     my $iscore = 0;
     my $len_score = min (0, 1-$shortest_ref_length/$tst_ngrams->[1]);
+    print "length ratio: ".($tst_ngrams->[1]/$shortest_ref_length)." ($tst_ngrams->[1]/$shortest_ref_length), penalty (log): $len_score\n";
 
     for (my $j=1; $j<=$max_Ngram; $j++) {
         if ($matching_ngrams->[$j] == 0) {
