@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -61,6 +62,13 @@ bool LanguageModelIRST::Load(const std::string &filePath,
                              size_t nGramOrder)
 {
   cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
+
+  const StaticData &staticData = StaticData::Instance();
+  if (staticData.ThreadCount() != 1)
+  {
+    UserMessage::Add("IRST LM not-threadsafe");
+    return false;
+  }
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 
