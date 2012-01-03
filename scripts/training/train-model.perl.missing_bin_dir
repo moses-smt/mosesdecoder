@@ -40,7 +40,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/pkoehn/statmt/bin";
+my $BINDIR="/home/azouzi/SMT-Engine/Tools/Giza";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -179,20 +179,30 @@ foreach my $step (@step_conf) {
 # supporting binaries from other packages
 my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
 my $GIZA;
+my $SNT2COOC;
+
 if(!defined $_MGIZA ){
 	$GIZA = "$BINDIR/GIZA++";
+	if (-x "$BINDIR/snt2cooc.out") {
+   		$SNT2COOC = "$BINDIR/snt2cooc.out";
+	} elsif (-x "$BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same   
+		$SNT2COOC = "$BINDIR/snt2cooc";
+	}
 	print STDERR "Using single-thread GIZA\n";
-}
-else {
-    $GIZA = "$BINDIR/mgiza";
+} else {
+    	$GIZA = "$BINDIR/mgiza";
+	if (-x "$BINDIR/snt2cooc") {
+                $SNT2COOC = "$BINDIR/snt2cooc";
+        } elsif (-x "$BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $BINDIR 
+                $SNT2COOC = "$BINDIR/snt2cooc.out";
+        }
 	print STDERR "Using multi-thread GIZA\n";	
-    if (!defined($_MGIZA_CPUS)) {
-        $_MGIZA_CPUS=4;
-    }
+    	if (!defined($_MGIZA_CPUS)) {
+        	$_MGIZA_CPUS=4;
+    	}
     die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
 }
 
-my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
 my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
@@ -219,8 +229,8 @@ my $BZCAT = "bzcat";
 # do a sanity check to make sure we can find the necessary binaries since
 # these are not installed by default
 # not needed if we start after step 2
-die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
-                                       (-x $GIZA && -x $SNT2COOC && -x $MKCLS));
+die("ERROR: Cannot find mkcls, GIZA++/mgiza, & snt2cooc.out/snt2cooc in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
+                                       (-x $GIZA && defined($SNT2COOC) && -x $MKCLS));
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";
@@ -1042,8 +1052,13 @@ sub run_single_snt2cooc {
     my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
     print STDERR "(2.1a) running snt2cooc $f-$e @ ".`date`."\n";
     safesystem("mkdir -p $dir") or die("ERROR");
+    if ($SNT2COOC eq "$BINDIR/snt2cooc.out") {
     print "$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc\n";
     safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc") or die("ERROR");
+    } else {
+    print "$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train\n";
+    safesystem("$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train") or die("ERROR");
+    } 
 }
 
 ### (3) CREATE WORD ALIGNMENT FROM GIZA ALIGNMENTS
