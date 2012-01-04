@@ -110,7 +110,7 @@ class ExtractLex
   void Output(const std::map<const std::string*, WordCount> &coll, std::ofstream &outStream);
 
 public:
-  void Process(std::vector<std::string> &toksTarget, std::vector<std::string> &toksSource, std::vector<std::string> &toksAlign);
+  void Process(std::vector<std::string> &toksTarget, std::vector<std::string> &toksSource, std::vector<std::string> &toksAlign, size_t lineCount);
   void Output(std::ofstream &streamLexS2T, std::ofstream &streamLexT2S);
 
 };
