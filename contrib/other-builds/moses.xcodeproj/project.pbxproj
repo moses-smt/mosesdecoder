@@ -280,6 +280,8 @@
 		1EC7387F14B977AB00238410 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7374214B977AB00238410 /* XmlOption.cpp */; };
 		1EC7388014B977AB00238410 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7374314B977AB00238410 /* XmlOption.h */; };
 		1EC7388114B977AB00238410 /* XmlOption.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC7374514B977AB00238410 /* XmlOption.o */; };
+		1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */; };
+		1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF0709214B9EFCC0052152A /* ParallelBackoff.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -571,6 +573,8 @@
 		1EC7374314B977AB00238410 /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = ../../moses/src/XmlOption.h; sourceTree = "<group>"; };
 		1EC7374414B977AB00238410 /* XmlOption.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = XmlOption.lo; path = ../../moses/src/XmlOption.lo; sourceTree = "<group>"; };
 		1EC7374514B977AB00238410 /* XmlOption.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = XmlOption.o; path = ../../moses/src/XmlOption.o; sourceTree = "<group>"; };
+		1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelBackoff.cpp; sourceTree = "<group>"; };
+		1EF0709214B9EFCC0052152A /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallelBackoff.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -901,6 +905,8 @@
 		1EC7365B14B977AA00238410 /* LM */ = {
 			isa = PBXGroup;
 			children = (
+				1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */,
+				1EF0709214B9EFCC0052152A /* ParallelBackoff.h */,
 				1EC7365C14B977AA00238410 /* Base.cpp */,
 				1EC7365E14B977AA00238410 /* Base.h */,
 				1EC7368714B977AA00238410 /* Factory.cpp */,
@@ -1088,6 +1094,7 @@
 				1EC7387A14B977AB00238410 /* WordsBitmap.h in Headers */,
 				1EC7387D14B977AB00238410 /* WordsRange.h in Headers */,
 				1EC7388014B977AB00238410 /* XmlOption.h in Headers */,
+				1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1266,6 +1273,7 @@
 				1EC7387914B977AB00238410 /* WordsBitmap.cpp in Sources */,
 				1EC7387C14B977AB00238410 /* WordsRange.cpp in Sources */,
 				1EC7387F14B977AB00238410 /* XmlOption.cpp in Sources */,
+				1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

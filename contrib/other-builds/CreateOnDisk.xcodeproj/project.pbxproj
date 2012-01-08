@@ -8,6 +8,9 @@
 
 /* Begin PBXBuildFile section */
 		1EBA432514B97B35003CC0EA /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA432314B97B35003CC0EA /* Main.cpp */; };
+		1EF0707114B9EE800052152A /* liblm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBA45C014B97EF1003CC0EA /* liblm.a */; };
+		1EF0707214B9EE800052152A /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBA432E14B97CA1003CC0EA /* libmoses.a */; };
+		1EF0707314B9EE800052152A /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EBA433714B97CA6003CC0EA /* libOnDiskPt.a */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -30,6 +33,27 @@
 			containerPortal = 1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = 1EE8C2E91476A48E002496F2;
+			remoteInfo = lm;
+		};
+		1EF0707614B9EE930052152A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+		1EF0707814B9EE980052152A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EBA432614B97CA1003CC0EA /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1EF0707A14B9EE9C0052152A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EE8C2E81476A48E002496F2;
 			remoteInfo = lm;
 		};
 /* End PBXContainerItemProxy section */
@@ -60,6 +84,9 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EF0707114B9EE800052152A /* liblm.a in Frameworks */,
+				1EF0707214B9EE800052152A /* libmoses.a in Frameworks */,
+				1EF0707314B9EE800052152A /* libOnDiskPt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -69,12 +96,12 @@
 		08FB7794FE84155DC02AAC07 /* CreateOnDisk */ = {
 			isa = PBXGroup;
 			children = (
-				1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */,
-				1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */,
-				1EBA432614B97CA1003CC0EA /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
+				1EBA432614B97CA1003CC0EA /* moses.xcodeproj */,
+				1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */,
+				1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */,
 			);
 			name = CreateOnDisk;
 			sourceTree = "<group>";
@@ -141,6 +168,9 @@
 			buildRules = (
 			);
 			dependencies = (
+				1EF0707B14B9EE9C0052152A /* PBXTargetDependency */,
+				1EF0707914B9EE980052152A /* PBXTargetDependency */,
+				1EF0707714B9EE930052152A /* PBXTargetDependency */,
 			);
 			name = CreateOnDisk;
 			productInstallPath = "$(HOME)/bin";
@@ -221,6 +251,24 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		1EF0707714B9EE930052152A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1EF0707614B9EE930052152A /* PBXContainerItemProxy */;
+		};
+		1EF0707914B9EE980052152A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 1EF0707814B9EE980052152A /* PBXContainerItemProxy */;
+		};
+		1EF0707B14B9EE9C0052152A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = lm;
+			targetProxy = 1EF0707A14B9EE9C0052152A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin XCBuildConfiguration section */
 		1DEB923208733DC60010E9CD /* Debug */ = {
 			isa = XCBuildConfiguration;
@@ -249,7 +297,6 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PRODUCT_NAME = CreateOnDisk;
@@ -280,7 +327,6 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lkenlm",
 					"-lrandlm",
 				);
 				PRODUCT_NAME = CreateOnDisk;
