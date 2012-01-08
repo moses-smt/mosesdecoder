@@ -7,39 +7,30 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1ED4FB4B11BDBAA7004E826A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ED4FB4911BDBAA7004E826A /* Main.cpp */; };
-		1ED4FB6011BDBAFB004E826A /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */; };
-		1ED4FB6111BDBB00004E826A /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1ED4FB5611BDBAD7004E826A /* libmoses.a */; };
+		1EBA432514B97B35003CC0EA /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA432314B97B35003CC0EA /* Main.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
-		1ED4FB5511BDBAD7004E826A /* PBXContainerItemProxy */ = {
+		1EBA432D14B97CA1003CC0EA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */;
+			containerPortal = 1EBA432614B97CA1003CC0EA /* moses.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = moses;
 		};
-		1ED4FB5E11BDBAE6004E826A /* PBXContainerItemProxy */ = {
+		1EBA433614B97CA6003CC0EA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */;
+			containerPortal = 1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = D2AAC046055464E500DB518D;
 			remoteInfo = OnDiskPt;
 		};
-		1ED4FB7211BDBC05004E826A /* PBXContainerItemProxy */ = {
+		1EBA45BF14B97EF1003CC0EA /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = 1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = moses;
-		};
-		1ED4FB7411BDBC09004E826A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = 1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */;
-			proxyType = 1;
-			remoteGlobalIDString = D2AAC045055464E500DB518D;
-			remoteInfo = OnDiskPt;
+			containerPortal = 1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1EE8C2E91476A48E002496F2;
+			remoteInfo = lm;
 		};
 /* End PBXContainerItemProxy section */
 
@@ -57,10 +48,11 @@
 
 /* Begin PBXFileReference section */
 		1E4FC4861251FFBF00FB0D9D /* CreateOnDisk */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = CreateOnDisk; sourceTree = BUILT_PRODUCTS_DIR; };
-		1ED4FB4911BDBAA7004E826A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
-		1ED4FB4A11BDBAA7004E826A /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
-		1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
-		1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1EBA432314B97B35003CC0EA /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = ../../OnDiskPt/Main.cpp; sourceTree = "<group>"; };
+		1EBA432414B97B35003CC0EA /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Main.h; path = ../../OnDiskPt/Main.h; sourceTree = "<group>"; };
+		1EBA432614B97CA1003CC0EA /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = moses.xcodeproj; sourceTree = "<group>"; };
+		1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = OnDiskPt.xcodeproj; sourceTree = "<group>"; };
+		1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = lm.xcodeproj; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,8 +60,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1ED4FB6111BDBB00004E826A /* libmoses.a in Frameworks */,
-				1ED4FB6011BDBAFB004E826A /* libOnDiskPt.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -79,8 +69,9 @@
 		08FB7794FE84155DC02AAC07 /* CreateOnDisk */ = {
 			isa = PBXGroup;
 			children = (
-				1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */,
-				1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */,
+				1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */,
+				1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */,
+				1EBA432614B97CA1003CC0EA /* moses.xcodeproj */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,
@@ -91,8 +82,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1ED4FB4911BDBAA7004E826A /* Main.cpp */,
-				1ED4FB4A11BDBAA7004E826A /* Main.h */,
+				1EBA432314B97B35003CC0EA /* Main.cpp */,
+				1EBA432414B97B35003CC0EA /* Main.h */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -105,18 +96,26 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1ED4FB4F11BDBAD7004E826A /* Products */ = {
+		1EBA432714B97CA1003CC0EA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1ED4FB5611BDBAD7004E826A /* libmoses.a */,
+				1EBA432E14B97CA1003CC0EA /* libmoses.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1ED4FB5811BDBAE6004E826A /* Products */ = {
+		1EBA433014B97CA6003CC0EA /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */,
+				1EBA433714B97CA6003CC0EA /* libOnDiskPt.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EBA45B514B97EF1003CC0EA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EBA45C014B97EF1003CC0EA /* liblm.a */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -142,8 +141,6 @@
 			buildRules = (
 			);
 			dependencies = (
-				1ED4FB7311BDBC05004E826A /* PBXTargetDependency */,
-				1ED4FB7511BDBC09004E826A /* PBXTargetDependency */,
 			);
 			name = CreateOnDisk;
 			productInstallPath = "$(HOME)/bin";
@@ -170,12 +167,16 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = 1ED4FB4F11BDBAD7004E826A /* Products */;
-					ProjectRef = 1ED4FB4E11BDBAD7004E826A /* moses.xcodeproj */;
+					ProductGroup = 1EBA45B514B97EF1003CC0EA /* Products */;
+					ProjectRef = 1EBA45B414B97EF1003CC0EA /* lm.xcodeproj */;
 				},
 				{
-					ProductGroup = 1ED4FB5811BDBAE6004E826A /* Products */;
-					ProjectRef = 1ED4FB5711BDBAE6004E826A /* OnDiskPt.xcodeproj */;
+					ProductGroup = 1EBA432714B97CA1003CC0EA /* Products */;
+					ProjectRef = 1EBA432614B97CA1003CC0EA /* moses.xcodeproj */;
+				},
+				{
+					ProductGroup = 1EBA433014B97CA6003CC0EA /* Products */;
+					ProjectRef = 1EBA432F14B97CA6003CC0EA /* OnDiskPt.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -186,18 +187,25 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		1ED4FB5611BDBAD7004E826A /* libmoses.a */ = {
+		1EBA432E14B97CA1003CC0EA /* libmoses.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libmoses.a;
-			remoteRef = 1ED4FB5511BDBAD7004E826A /* PBXContainerItemProxy */;
+			remoteRef = 1EBA432D14B97CA1003CC0EA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
-		1ED4FB5F11BDBAE6004E826A /* libOnDiskPt.a */ = {
+		1EBA433714B97CA6003CC0EA /* libOnDiskPt.a */ = {
 			isa = PBXReferenceProxy;
 			fileType = archive.ar;
 			path = libOnDiskPt.a;
-			remoteRef = 1ED4FB5E11BDBAE6004E826A /* PBXContainerItemProxy */;
+			remoteRef = 1EBA433614B97CA6003CC0EA /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EBA45C014B97EF1003CC0EA /* liblm.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liblm.a;
+			remoteRef = 1EBA45BF14B97EF1003CC0EA /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -207,24 +215,11 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1ED4FB4B11BDBAA7004E826A /* Main.cpp in Sources */,
+				1EBA432514B97B35003CC0EA /* Main.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXSourcesBuildPhase section */
-
-/* Begin PBXTargetDependency section */
-		1ED4FB7311BDBC05004E826A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = moses;
-			targetProxy = 1ED4FB7211BDBC05004E826A /* PBXContainerItemProxy */;
-		};
-		1ED4FB7511BDBC09004E826A /* PBXTargetDependency */ = {
-			isa = PBXTargetDependency;
-			name = OnDiskPt;
-			targetProxy = 1ED4FB7411BDBC09004E826A /* PBXContainerItemProxy */;
-		};
-/* End PBXTargetDependency section */
 
 /* Begin XCBuildConfiguration section */
 		1DEB923208733DC60010E9CD /* Debug */ = {
@@ -236,12 +231,15 @@
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = (
+					../../,
+					../../irstlm/include,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib,
-					../srilm/lib/macosx,
-					../randlm/lib,
-					../kenlm,
+					../../irstlm/lib,
+					../../srilm/lib/macosx,
+					../../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -264,12 +262,15 @@
 				ALWAYS_SEARCH_USER_PATHS = NO;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = (
+					../../,
+					../../irstlm/include,
+				);
 				INSTALL_PATH = /usr/local/bin;
 				LIBRARY_SEARCH_PATHS = (
-					../irstlm/lib,
-					../srilm/lib/macosx,
-					../randlm/lib,
-					../kenlm,
+					../../irstlm/lib,
+					../../srilm/lib/macosx,
+					../../randlm/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",

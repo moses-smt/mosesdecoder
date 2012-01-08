@@ -23,6 +23,7 @@
 #include <string>
 #include <vector>
 #include <iterator>
+#include <cassert>
 #include "../moses/src/InputFileStream.h"
 #include "../moses/src/Util.h"
 #include "../moses/src/UserMessage.h"
