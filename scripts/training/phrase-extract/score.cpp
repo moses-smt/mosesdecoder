@@ -267,7 +267,7 @@ void writeCountOfCounts( const char* fileNameCountOfCounts )
 	}
 
   // Kneser-Ney needs the total number of phrase pairs
-  countOfCountsFile << totalDistinct;
+  countOfCountsFile << totalDistinct << endl;
 
   // write out counts
   for(int i=1; i<=COC_MAX; i++) {
