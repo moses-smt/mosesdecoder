@@ -190,12 +190,13 @@ public:
     FactorCollection& factorCollection = FactorCollection::Instance();
     const Factor* bosFactor = factorCollection.AddFactor(Output,m_factorType,BOS_);
     m_bos.SetFactor(m_factorType,bosFactor);
+    m_baseName = GetScoreProducerDescription();
+    m_baseName.append("_");
   }
 
 	bool Load(const std::string &filePath);
 
 	std::string GetScoreProducerWeightShortName(unsigned) const;
-	std::string GetShortNameWithSEP() const;
 	size_t GetNumInputScores() const;
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
@@ -218,6 +219,8 @@ private:
 
 	// additional weight that all sparse weights are scaled with
 	float m_sparseProducerWeight;
+
+	std::string m_baseName;
 
 	void appendNgram(const Word& word, bool& skip, std::stringstream& ngram) const;
 	void MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
