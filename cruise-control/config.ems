@@ -172,7 +172,7 @@ raw-corpus = $toy-data/nc-5k.$output-extension
 #################################################################
 # INTERPOLATING LANGUAGE MODELS
 
-[INTERPOLATED-LM]
+[INTERPOLATED-LM] IGNORE
 
 # if multiple language models are used, these may be combined
 # by optimizing perplexity on a tuning set
