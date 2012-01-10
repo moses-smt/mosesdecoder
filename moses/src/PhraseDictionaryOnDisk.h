@@ -25,9 +25,9 @@
 #include <vector>
 #include <string>
 #include "PhraseDictionary.h"
-#include "../../OnDiskPt/src/OnDiskWrapper.h"
-#include "../../OnDiskPt/src/Word.h"
-#include "../../OnDiskPt/src/PhraseNode.h"
+#include "../../OnDiskPt/OnDiskWrapper.h"
+#include "../../OnDiskPt/Word.h"
+#include "../../OnDiskPt/PhraseNode.h"
 
 namespace Moses
 {

@@ -47,6 +47,99 @@ Data::~Data() {
   }
 }
 
+//ADDED BY TS
+void Data::remove_duplicates() {
+
+  size_t nSentences = featdata->size();
+  assert(scoredata->size() == nSentences);
+
+  for (size_t s=0; s < nSentences; s++) {
+
+    FeatureArray& feat_array =  featdata->get(s);
+    ScoreArray& score_array =  scoredata->get(s);
+
+    assert(feat_array.size() == score_array.size());
+
+    //serves as a hash-map:
+    std::map<double, std::vector<size_t> > lookup;
+
+    size_t end_pos = feat_array.size() - 1;
+
+    size_t nRemoved = 0;
+    for (size_t k=0; k <= end_pos; k++) {
+
+      const FeatureStats& cur_feats = feat_array.get(k);
+
+      double sum = 0.0;
+      for (size_t l=0; l < cur_feats.size(); l++)
+	sum += cur_feats.get(l);
+
+      if (lookup.find(sum) != lookup.end()) {
+
+	//std::cerr << "hit" << std::endl;
+
+	std::vector<size_t>& cur_list = lookup[sum];
+
+	size_t l=0;
+	for (l=0; l < cur_list.size(); l++) {
+	  
+	  size_t j=cur_list[l];
+
+	  if (cur_feats == feat_array.get(j)
+	      && score_array.get(k) == score_array.get(j)) {
+
+	    if (k < end_pos) {
+	      
+	      feat_array.swap(k,end_pos);
+	      score_array.swap(k,end_pos);
+	      
+	      k--;
+	    }
+	    
+	    end_pos--;
+	    nRemoved++;
+	    break;
+	  }
+	}
+
+	if (l == lookup[sum].size())
+	  cur_list.push_back(k);
+      }
+      else
+	lookup[sum].push_back(k);
+
+      // for (size_t j=0; j < k; j++) {
+
+      // 	if (feat_array.get(k) == feat_array.get(j)
+      // 	    && score_array.get(k) == score_array.get(j)) {
+
+      // 	  if (k < end_pos) {
+
+      // 	    feat_array.swap(k,end_pos);
+      // 	    score_array.swap(k,end_pos);
+
+      // 	    k--;
+      // 	  }
+
+      //          end_pos--;
+      // 	  nRemoved++;
+      //          break;
+      // 	}
+      // }
+    }
+
+    std::cerr << "removed " << nRemoved << "/" << feat_array.size() << std::endl;
+
+    if (nRemoved > 0) {
+
+      feat_array.resize(end_pos+1);
+      score_array.resize(end_pos+1);
+    }
+  }
+}
+//END_ADDED
+
+
 void Data::loadnbest(const std::string &file)
 {
   TRACE_ERR("loading nbest from " << file << std::endl);

@@ -21,7 +21,7 @@
 #ifndef moses_ChartRuleLookupManagerOnDisk_h
 #define moses_ChartRuleLookupManagerOnDisk_h
 
-#include "../../OnDiskPt/src/OnDiskWrapper.h"
+#include "../../OnDiskPt/OnDiskWrapper.h"
 
 #include "ChartRuleLookupManager.h"
 #include "ChartTranslationOptionList.h"

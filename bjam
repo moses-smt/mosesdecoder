@@ -1,13 +1,14 @@
 #!/bin/bash
 set -e
-if 
-  which bjam >/dev/null 2>/dev/null && #Have a bjam in path
-  ! grep UFIHGUFIHBDJKNCFZXAEVA "$(which bjam)" >/dev/null && #bjam in path isn't this script
-  bjam --help >/dev/null 2>/dev/null && #bjam in path isn't broken (i.e. has boost-build)
-  bjam --version |grep "Boost.Build 201" >/dev/null 2>/dev/null #It's recent enough.  
+if
+  bjam="$(which bjam 2>/dev/null)" && #exists
+  [ ${#bjam} != 0 ] && #paranoia about which printing nothing then returning true
+  ! grep UFIHGUFIHBDJKNCFZXAEVA "${bjam}" </dev/null >/dev/null && #bjam in path isn't this script
+  "${bjam}" --help >/dev/null 2>/dev/null && #bjam in path isn't broken (i.e. has boost-build)
+  "${bjam}" --version |grep "Boost.Build 201" >/dev/null 2>/dev/null #It's recent enough.  
 then
   #Delegate to system bjam
-  exec bjam "$@"
+  exec "${bjam}" "$@"
 fi
 
 top="$(dirname "$0")"

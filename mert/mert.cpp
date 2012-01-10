@@ -1,5 +1,5 @@
 /**
- * \description The is the main for the new version of the mert algorithm developed during the 2nd MT marathon
+ * \description This is the main for the new version of the mert algorithm developed during the 2nd MT marathon
 */
 
 #include <limits>
@@ -260,6 +260,7 @@ int main (int argc, char **argv)
       if(j<pdim) {
         cerr<<initfile<<":Too few minimum weights." << endl;
         cerr<<"error could not initialize start point with " << initfile << endl;
+	std::cerr << "j: " << j << ", pdim: " << pdim << std::endl;
         exit(3);
       }
       max.resize(pdim);
@@ -296,6 +297,10 @@ int main (int argc, char **argv)
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i)  << " and " << FeatureDataFiles.at(i) << endl;
     D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
+
+  //ADDED_BY_TS
+  D.remove_duplicates();
+  //END_ADDED
 
   PrintUserTime("Data loaded");
 

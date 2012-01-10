@@ -56,18 +56,26 @@
 #-j$NCPUS to compile in parallel
 #--clean to clean
 
+import option ;
+import modules ;
+
 path-constant TOP : . ;
 
 # Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str ) {
+rule trim-nl ( str extras * ) {
   return [ MATCH "([^
-]*)" : $(str) ] ;
+]*)" : $(str) ] $(extras) ;
 }
-rule _shell ( cmd ) {
-  return [ trim-nl [ SHELL $(cmd) ] ] ;
+rule _shell ( cmd : extras * ) {
+  return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
-import option ;
+local cleaning = [ option.get "clean" : : yes ] ;
+cleaning ?= [ option.get "clean-all" : no : yes ] ;
+if "clean" in [ modules.peek : ARGV ] {
+  cleaning = yes ;
+}
+constant CLEANING : $(cleaning) ;
 
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags ) {
@@ -101,16 +109,16 @@ if $(with-boost) {
   boost-include = ;
 }
 
-boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp |grep '#define BOOST_VERSION '" : exit-status ] ;
-if $(boost-shell[2]) != 0 {
+boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '" : exit-status ] ;
+if $(boost-shell[2]) != 0 && $(CLEANING) = no {
   exit Boost does not seem to be installed or g++ is confused. : 1 ;
 }
 boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
-if $(boost-version) < 103600 {
+if $(boost-version) < 103600 && $(cleaning) = no {
   exit You have Boost $(boost-version).  Moses requires at least 103600 (and preferably newer). : 1 ;
 }
 #Are we linking static binaries against shared boost?
-boost-auto-shared = [ auto_shared "boost_program_options" : L-boost-search ] ;
+boost-auto-shared = [ auto_shared "boost_program_options" : $(L-boost-search) ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost_lib ( name macro ) {
   #Link multi-threaded programs against the -mt version if available.  Old 
@@ -137,14 +145,16 @@ rule external_lib ( name ) {
 
 external_lib z ;
 
+requirements = ;
+
 #libSegFault prints a stack trace on segfault.  Link against it if available.  
 if [ test_flags "-lSegfault" ] {
   external_lib SegFault ;
-  segfault = <library>SegFault ;
+  requirements += <library>SegFault ;
 }
 
-trace = [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
-boost-pool = [ option.get "enable-boost-pool" : : "<define>USE_BOOST_POOL" ] ;
+requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
+requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 
 import os ;
 
@@ -164,9 +174,7 @@ project : requirements
   <threading>multi:<define>WITH_THREADS
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
-  $(segfault)
-  $(trace)
-  $(boost-pool)
+  $(requirements)
   <cxxflags>$(cxxflags)
   <cflags>$(cflags)
   <linkflags>$(ldflags)
@@ -181,7 +189,7 @@ build-project moses-cmd/src ;
 build-project moses-chart-cmd/src ;
 #Scripts have their own binaries.
 build-project scripts ;
-#Regression tests (only enabled if --data-dir is passed)
+#Regression tests (only does anything if --with-regtest is passed)
 build-project regression-testing ;
 
 if [ option.get "git" : : "yes" ] {
@@ -191,7 +199,7 @@ if [ option.get "git" : : "yes" ] {
   constant GITTAG : "" ;
 }
 
-alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs CreateOnDisk/src//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
 
 prefix = [ option.get "prefix" : $(TOP)/dist$(GITTAG) ] ;
 bindir = [ option.get "bindir" : $(prefix)/bin ] ;

@@ -101,11 +101,11 @@ template <class Model> class LanguageModelKen : public LanguageModel {
       lm::WordIndex *end = indices + m_ngram->Order() - 1;
       int position = hypo.GetCurrTargetWordsRange().GetEndPos();
       for (; ; ++index, --position) {
+        if (index == end) return index;
         if (position == -1) {
           *index = m_ngram->GetVocabulary().BeginSentence();
           return index + 1;
         }
-        if (index == end) return index;
         *index = TranslateID(hypo.GetWord(position));
       }
     }
@@ -198,7 +198,7 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
     } else {
       lm::WordIndex index = TranslateID(word);
       if (index == m_ngram->GetVocabulary().BeginSentence()) {
-        std::cerr << "Your data contains <s> in a position other than the first word." << std::endl;
+        std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
         abort();
       }
       float score = TransformLMScore(m_ngram->Score(*state0, index, *state1));

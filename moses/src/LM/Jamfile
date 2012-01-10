@@ -1,25 +1,21 @@
-import option ;
+import option path build-system ;
 
-with-irstlm = [ option.get "with-irstlm" ] ;
-if $(with-irstlm) != ""
-{
+local dependencies = ;
+
+local with-irstlm = [ option.get "with-irstlm" ] ;
+if $(with-irstlm) {
   lib irstlm : : <search>$(with-irstlm)/lib ;
   obj IRST.o : IRST.cpp ..//headers : <include>$(with-irstlm)/include ;
   alias irst : IRST.o irstlm : : : <define>LM_IRST ;
-  echo "" ;
+  dependencies += irst ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
   echo "!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "" ;
-} else {
-  alias irst ;
 }
 
-with-srilm = [ option.get "with-srilm" ] ;
-if $(with-srilm) != ""
-{
-  if [ option.get "with-srilm-dynamic" : no : yes ] = yes
-  {
+local with-srilm = [ option.get "with-srilm" ] ;
+if $(with-srilm) {
+  if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
     alias sri-libs : srilm ;
   } else {
     sri-arch = [ option.get "with-srilm-arch" ] ;
@@ -37,19 +33,52 @@ if $(with-srilm) != ""
   obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <warnings>off ;
   obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <warnings>off ;
   alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
-} else {
-  alias sri ;
+  dependencies += sri ;
 }
 
-with-randlm = [ option.get "with-randlm" ] ;
-if $(with-randlm) != ""
-{
+local with-randlm = [ option.get "with-randlm" ] ;
+if $(with-randlm) {
   lib randlm : : <search>$(with-randlm)/lib ;
   obj Rand.o : Rand.cpp randlm ..//headers : <include>$(with-randlm)/include ;
   alias rand : Rand.o : : : <define>LM_RAND ;
-} else {
-  alias rand ;
+  dependencies += rand ;
 }
 
-lib LM : Base.cpp Factory.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp 
-  ../../../lm//kenlm irst sri rand ..//headers ;
+obj Factory.o : Factory.cpp ..//headers $(dependencies) ;
+
+lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp 
+  ../../../lm//kenlm ..//headers $(dependencies) ;
+
+#Huge kludge to force building if different --with options are passed.  
+#Could have used features like <srilm>on but getting these to apply only to linking was ugly and it still didn't trigger an install (since the install path doesn't encode features).  
+path-constant LM-LOG : bin/lm.log ;
+#Is there no other way to read a file with bjam?  
+local previous = none ;
+if [ path.exists $(LM-LOG) ] {
+  previous = [ _shell "cat $(LM-LOG)" ] ;
+}
+current = "" ;
+for local i in srilm irstlm randlm {
+  local optval = [ option.get "with-$(i)" ] ;
+  if $(optval) {
+    current = "$(current) --with-$(i)=$(optval)" ;
+  }
+}
+
+if $(current) != $(previous) {
+  #Write inconsistent while the build is running
+  if [ path.exists $(LM-LOG) ] {
+    local ignored = @($(LM-LOG):E=inconsistent) ;
+  }
+  #Write $(current) to $(LM-LOG) after the build completes.  
+  rule post-build ( ok ? ) {
+    if $(ok) {
+      local ignored = @($(LM-LOG):E=$(current)) ;
+    }
+  }
+  IMPORT $(__name__) : post-build : : $(__name__).post-build ;
+  build-system.set-post-build-hook $(__name__).post-build ;
+
+  always Factory.o ;
+  always LM ;
+}
