@@ -425,7 +425,7 @@ Model* Model::createModel(ModelScore* modelscore, const string& config, const st
 void Model::createSmoothing(double w)
 {
   scorer->createSmoothing(modelscore->get_scores_fe_prev(), w, smoothing_prev);
-  scorer->createSmoothing(modelscore->get_scores_fe_prev(), w, smoothing_next);
+  scorer->createSmoothing(modelscore->get_scores_fe_next(), w, smoothing_next);
 }
 
 void Model::createConstSmoothing(double w)
