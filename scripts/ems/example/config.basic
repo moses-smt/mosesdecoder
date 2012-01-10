@@ -18,25 +18,34 @@ pair-extension = fr-en
 # moses
 moses-src-dir = /home/pkoehn/moses
 #
+# moses binaries
+moses-bin-dir = $moses-src-dir/dist/bin
+#
 # moses scripts
-moses-script-dir = /home/pkoehn/moses/scripts
+moses-script-dir = $moses-src-dir/scripts
 #
 # srilm
 srilm-dir = $moses-src-dir/srilm/bin/i686
 #
+# irstlm
+irstlm-dir = $moses-src-dir/irstlm/bin
+#
+# randlm
+randlm-dir = $moses-src-dir/randlm/bin
+#
 # data
-wmt10-data = $working-dir/data
+wmt12-data = $working-dir/data
 
 ### basic tools
 #
 # moses decoder
-decoder = $moses-src-dir/dist/bin/moses
+decoder = $moses-bin-dir/moses
 
 # conversion of phrase table into binary on-disk format
-ttable-binarizer = $moses-src-dir/dist/bin/processPhraseTable
+ttable-binarizer = $moses-bin-dir/processPhraseTable
 
 # conversion of rule table into binary on-disk format
-#ttable-binarizer = "$moses-src-dir/dist/bin/CreateOnDiskPt 1 1 5 100 2"
+#ttable-binarizer = "$moses-bin-dir/CreateOnDiskPt 1 1 5 100 2"
 
 # tokenizers - comment out if all your data is already tokenized
 input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
@@ -95,7 +104,7 @@ max-sentence-length = 80
 
 ### raw corpus files (untokenized, but sentence aligned)
 # 
-raw-stem = $wmt10-data/training/europarl-v5.$pair-extension
+raw-stem = $wmt12-data/training/europarl-v7.$pair-extension
 
 ### tokenized corpus files (may contain long sentences)
 #
@@ -112,10 +121,10 @@ raw-stem = $wmt10-data/training/europarl-v5.$pair-extension
 #lowercased-stem = 
 
 [CORPUS:nc]
-raw-stem = $wmt10-data/training/news-commentary10.$pair-extension
+raw-stem = $wmt12-data/training/news-commentary-v7.$pair-extension
 
 [CORPUS:un] IGNORE
-raw-stem = $wmt10-data/training/undoc.2000.$pair-extension
+raw-stem = $wmt12-data/training/undoc.2000.$pair-extension
 
 #################################################################
 # LANGUAGE MODEL TRAINING
@@ -123,10 +132,15 @@ raw-stem = $wmt10-data/training/undoc.2000.$pair-extension
 [LM]
 
 ### tool to be used for language model training
-# for instance: ngram-count (SRILM), train-lm-on-disk.perl (Edinburgh) 
-# 
+# srilm 
 lm-training = $srilm-dir/ngram-count
 settings = "-interpolate -kndiscount -unk"
+
+# irstlm
+#lm-training = "$moses-script-dir/generic/trainlm-irst.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/lm"
+#settings = ""
+
+# order of the language model
 order = 5
 
 ### tool to be used for training randomized language model from scratch
@@ -138,27 +152,21 @@ order = 5
 # (default: no binarization)
 
 # irstlm
-#lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
+#lm-binarizer = $irstlm-dir/compile-lm
 
 # kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/dist/bin/build_binary
-#type = 8
-
-#
-# if binarized, set type (default srilm; if binarized: irstlm)
-#
-# set to 8 when using kenlm
-#type = 8
+lm-binarizer = $moses-bin-dir/build_binary
+type = 8
 
 ### script to create quantized language model format (irstlm)
 # (default: no quantization)
 # 
-#lm-quantizer = $moses-src-dir/irstlm/bin/quantize-lm
+#lm-quantizer = $irstlm-dir/quantize-lm
 
 ### script to use for converting into randomized table format
 # (default: no randomization)
 #
-#lm-randomizer = "$moses-src-dir/randlm/bin/buildlm -falsepos 8 -values 8"
+#lm-randomizer = "$randlm-dir/buildlm -falsepos 8 -values 8"
 
 ### each language model to be used has its own section here
 
@@ -170,7 +178,7 @@ order = 5
 
 ### raw corpus (untokenized)
 #
-raw-corpus = $wmt10-data/training/europarl-v5.$output-extension
+raw-corpus = $wmt12-data/training/europarl-v7.$output-extension
 
 ### tokenized corpus files (may contain long sentences)
 #
@@ -182,13 +190,13 @@ raw-corpus = $wmt10-data/training/europarl-v5.$output-extension
 #lm = 
 
 [LM:nc]
-raw-corpus = $wmt10-data/training/news-commentary10.$pair-extension.$output-extension
+raw-corpus = $wmt12-data/training/news-commentary-v7.$pair-extension.$output-extension
 
 [LM:un] IGNORE
-raw-corpus = $wmt10-data/training/undoc.2000.$pair-extension.$output-extension
+raw-corpus = $wmt12-data/training/undoc.2000.$pair-extension.$output-extension
 
 [LM:news] IGNORE
-raw-corpus = $wmt10-data/training/news.$output-extension.shuffled
+raw-corpus = $wmt12-data/training/news.$output-extension.shuffled
 
 
 #################################################################
@@ -208,32 +216,36 @@ script = $moses-script-dir/ems/support/interpolate-lm.perl
 ### tuning set
 # you may use the same set that is used for mert tuning (reference set)
 #
-tuning-sgm = $wmt10-data/dev/news-test2008-ref.$output-extension.sgm
+tuning-sgm = $wmt12-data/dev/newstest2010-ref.$output-extension.sgm
 #raw-tuning =
 #tokenized-tuning = 
 #factored-tuning = 
 #lowercased-tuning = 
 #split-tuning = 
 
+### group language models for hierarchical interpolation
+# (flat interpolation is limited to 10 language models)
+#group = "first,second fourth,fifth"
+
 ### script to use for binary table format for irstlm or kenlm
 # (default: no binarization)
 
 # irstlm
-#lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
+#lm-binarizer = $irstlm-dir/compile-lm
 
 # kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/dist/bin/build_binary
-#type = 8
+lm-binarizer = $moses-bin-dir/build_binary
+type = 8
 
 ### script to create quantized language model format (irstlm)
 # (default: no quantization)
 # 
-#lm-quantizer = $moses-src-dir/irstlm/bin/quantize-lm
+#lm-quantizer = $irstlm-dir/quantize-lm
 
 ### script to use for converting into randomized table format
 # (default: no randomization)
 #
-#lm-randomizer = "$moses-src-dir/randlm/bin/buildlm -falsepos 8 -values 8"
+#lm-randomizer = "$randlm-dir/buildlm -falsepos 8 -values 8"
 
 #################################################################
 # TRANSLATION MODEL TRAINING
@@ -261,12 +273,18 @@ script = $moses-script-dir/training/train-model.perl
 #generation-factors = "word -> pos"
 #decoding-steps = "t0, g0"
 
+### parallelization of data preparation step
+# the two directions of the data preparation can be run in parallel
+# comment out if not needed
+#
+parallel = yes
+
 ### pre-computation for giza++
 # giza++ has a more efficient data structure that needs to be
 # initialized with snt2cooc. if run in parallel, this may reduces
 # memory requirements. set here the number of parts
 #
-run-giza-in-parts = 5
+#run-giza-in-parts = 5
 
 ### symmetrization method to obtain word alignments from giza output
 # (commonly used: grow-diag-final-and)
@@ -355,18 +373,18 @@ score-settings = "--GoodTuring"
 ### tuning script to be used
 #
 tuning-script = $moses-script-dir/training/mert-moses.pl
-tuning-settings = "-mertdir $moses-src-dir/mert"
+tuning-settings = "-mertdir $moses-bin-dir"
 
 ### specify the corpus used for tuning 
 # it should contain 1000s of sentences
 #
-input-sgm = $wmt10-data/dev/news-test2008-src.$input-extension.sgm
+input-sgm = $wmt12-data/dev/newstest2010-src.$input-extension.sgm
 #raw-input = 
 #tokenized-input = 
 #factorized-input = 
 #input =
 # 
-reference-sgm = $wmt10-data/dev/news-test2008-ref.$output-extension.sgm
+reference-sgm = $wmt12-data/dev/newstest2010-ref.$output-extension.sgm
 #raw-reference = 
 #tokenized-reference = 
 #factorized-reference = 
@@ -394,14 +412,14 @@ decoder-settings = ""
 # and also point to a configuration file that contains
 # pointers to all relevant model files
 #
-#config = 
+#config-with-reused-weights = 
 
 #########################################################
 ## RECASER: restore case, this part only trains the model
 
 [RECASING]
 
-#decoder = $moses-src-dir/moses-cmd/src/moses.1521.srilm
+#decoder = $moses-bin-dir/moses
 
 ### training data
 # raw input needs to be still tokenized,
@@ -448,6 +466,11 @@ trainer = $moses-script-dir/recaser/train-truecaser.perl
 
 ### additional decoder settings
 # switches for the Moses decoder
+# common choices: 
+#   "-threads N" for multi-threading
+#   "-mbr" for MBR decoding
+#   "-drop-unknown" for dropping unknown source words
+#   "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000" for cube pruning
 #
 decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
 
@@ -470,8 +493,8 @@ wrapping-script = "$moses-script-dir/ems/support/wrap-xml.perl $output-extension
 
 ### BLEU
 #
-nist-bleu = $moses-script-dir/generic/mteval-v12.pl
-nist-bleu-c = "$moses-script-dir/generic/mteval-v12.pl -c"
+nist-bleu = $moses-script-dir/generic/mteval-v13a.pl
+nist-bleu-c = "$moses-script-dir/generic/mteval-v13a.pl -c"
 #multi-bleu = $moses-script-dir/generic/multi-bleu.perl
 #ibm-bleu =
 
@@ -502,11 +525,11 @@ report-segmentation = yes
 # further precision breakdown by factor
 #precision-by-coverage-factor = pos
 
-[EVALUATION:newstest2009]
+[EVALUATION:newstest2011]
 
 ### input data
 #
-input-sgm = $wmt10-data/dev/newstest2009-src.$input-extension.sgm
+input-sgm = $wmt12-data/dev/newstest2011-src.$input-extension.sgm
 # raw-input = 
 # tokenized-input = 
 # factorized-input =
@@ -514,7 +537,7 @@ input-sgm = $wmt10-data/dev/newstest2009-src.$input-extension.sgm
 
 ### reference data
 #
-reference-sgm = $wmt10-data/dev/newstest2009-ref.$output-extension.sgm
+reference-sgm = $wmt12-data/dev/newstest2011-ref.$output-extension.sgm
 # raw-reference =
 # tokenized-reference = 
 # reference = 
