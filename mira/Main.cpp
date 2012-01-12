@@ -120,6 +120,7 @@ int main(int argc, char** argv) {
 	float max_length_dev_hypos;
 	float max_length_dev_reference;
 	float relax_BP;
+	bool stabiliseLength;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -176,6 +177,7 @@ int main(int argc, char** argv) {
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
+		("stabilise-length", po::value<bool>(&stabiliseLength)->default_value(false), "Stabilise word penalty when length ratio >= 1")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
@@ -408,6 +410,9 @@ int main(int argc, char** argv) {
 	ScoreComponentCollection mixedAverageWeightsPrevious;
 	ScoreComponentCollection mixedAverageWeightsBeforePrevious;
 
+	// when length ratio >= 1, set this to true
+	bool fixLength = false;
+
 	bool stop = false;
 //	int sumStillViolatedConstraints;
 	float *sendbuf, *recvbuf;
@@ -425,6 +430,10 @@ int main(int argc, char** argv) {
 
 		// number of weight dumps this epoch
 		size_t weightEpochDump = 0;
+
+		// sum lengths of dev hypothesis/references to calculate translation length ratio for this epoch
+		size_t dev_hypothesis_length;
+		size_t dev_reference_length;
 
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
@@ -459,7 +468,7 @@ int main(int argc, char** argv) {
 			for (size_t batchPosition = 0; batchPosition < batchSize && sid
 			    != shard.end(); ++batchPosition) {
 				string& input = inputSentences[*sid];
-				const vector<string>& refs = referenceSentences[*sid];
+//				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
 
 				vector<ScoreComponentCollection> newFeatureValues;
@@ -473,7 +482,7 @@ int main(int argc, char** argv) {
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newBleuScores);
 					bleuScoresFear.push_back(newBleuScores);
-					if (historyOf1best) {
+					if (historyOf1best || stabiliseLength) {
 						dummyFeatureValues.push_back(newFeatureValues);
 						dummyBleuScores.push_back(newBleuScores);
 					}
@@ -492,13 +501,16 @@ int main(int argc, char** argv) {
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 
 					vector<const Word*> bestModel;
-					if (historyOf1best) {
+					if (historyOf1best || stabiliseLength) {
 						// MODEL (for updating the history only, using dummy vectors)
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history)" << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
 						bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
 								distinctNbest, rank, epoch);
 						decoder->cleanup();
+						cerr << endl;
+						dev_hypothesis_length += bestModel.size();
+						dev_reference_length += reference_length;
 					}
 
 					// FEAR
@@ -575,6 +587,10 @@ int main(int argc, char** argv) {
 					oneBests.push_back(bestModel);
 					float model_length_ratio = (float)bestModel.size()/reference_length;
 					cerr << ", l-ratio model: " << model_length_ratio << endl;
+					if (stabiliseLength) {
+						dev_hypothesis_length += bestModel.size();
+						dev_reference_length += reference_length;
+					}
 
 					// FEAR
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
@@ -620,6 +636,19 @@ int main(int argc, char** argv) {
 				    mosesWeights.Assign(*iter, 0);
 				    break;
 				  }
+
+				// set word penalty to 0 before optimising (if 'stabilise-length' is active)
+				if (fixLength) {
+					iter = featureFunctions.begin();
+					for (; iter != featureFunctions.end(); ++iter) {
+						if ((*iter)->GetScoreProducerWeightShortName() == "w") {
+							ignoreWPFeature(featureValues, (*iter));
+							ignoreWPFeature(featureValuesHope, (*iter));
+							ignoreWPFeature(featureValuesFear, (*iter));
+							break;
+						}
+					}
+				}
 
 				// take logs of feature values
 				if (logFeatureValues) {
@@ -803,6 +832,14 @@ int main(int argc, char** argv) {
 			}// end dumping
 		} // end of shard loop, end of this epoch
 
+		if (stabiliseLength && !fixLength) {
+			float lengthRatio = (float)(dev_hypothesis_length+1) / dev_reference_length;
+			if (lengthRatio >= 1) {
+				cerr << "Rank " << rank << ", epoch " << epoch << ", length ratio >= 1, fixing word penalty. " << endl;
+				fixLength = 1;
+			}
+		}
+
 		if (verbosity > 0) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;
 			decoder->printBleuFeatureHistory(cerr);
@@ -981,16 +1018,20 @@ void printFeatureValues(vector<vector<ScoreComponentCollection> > &featureValues
 }
 
 void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues, StrFloatMap &coreWeightMap) {
-	for (size_t i = 0; i < featureValues.size(); ++i) {
+	for (size_t i = 0; i < featureValues.size(); ++i)
 		for (size_t j = 0; j < featureValues[i].size(); ++j) {
 			// set all core features to 0
 			StrFloatMap::iterator p;
 			for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-			{
 				featureValues[i][j].Assign(p->first, 0);
-			}
 		}
-	}
+}
+
+void ignoreWPFeature(vector<vector<ScoreComponentCollection> > &featureValues, const ScoreProducer* sp) {
+	for (size_t i = 0; i < featureValues.size(); ++i)
+		for (size_t j = 0; j < featureValues[i].size(); ++j)
+			// set WP feature to 0
+			featureValues[i][j].Assign(sp, 0);
 }
 
 void takeLogs(vector<vector<ScoreComponentCollection> > &featureValues, size_t base) {

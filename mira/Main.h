@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "ScoreComponentCollection.h"
 #include "Word.h"
+#include "ScoreProducer.h"
 
 typedef std::map<const std::string, float> StrFloatMap;
 typedef std::pair<const std::string, float> StrFloatPair;
@@ -46,6 +47,7 @@ bool loadWeights(const std::string& filename, StrFloatMap& coreWeightMap);
 bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size);
 void printFeatureValues(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues);
 void ignoreCoreFeatures(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, StrFloatMap &coreWeightMap);
+void ignoreWPFeature(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, const Moses::ScoreProducer* sp);
 void takeLogs(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t base);
 void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translations);
 
