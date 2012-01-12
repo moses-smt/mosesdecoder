@@ -50,6 +50,8 @@ public:
 
   const SortedColl &GetSortedColl() const
   { return m_sortedColl; }
+  size_t GetSize() const
+  { return m_coll.size(); }
 
 private:
   SortedColl m_sortedColl;
