@@ -99,6 +99,7 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
 {
 	m_refs.clear();
     FactorCollection& fc = FactorCollection::Instance();
+    cerr << "Number of reference files: " << refs.size() << endl; 
     for (size_t file_id = 0; file_id < refs.size(); file_id++) {
       for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
           const string& ref = refs[file_id][ref_id];

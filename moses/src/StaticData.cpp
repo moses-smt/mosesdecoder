@@ -1442,7 +1442,7 @@ bool StaticData::LoadReferences()
     }
     string line;
     while (getline(in,line)) {
-      references.back().push_back(line);
+      references[i].push_back(line);
     }
     if (i > 0) {
       if (references[i].size() != references[i-1].size()) {

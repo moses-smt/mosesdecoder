@@ -178,8 +178,9 @@ my @refs;
 if (ref($reference_files) eq 'ARRAY') {
     @refs = @$reference_files;
 } else {
-    @refs = glob $reference_files;
+    @refs = glob $reference_files . "*"
 }
+my $arr_refs = \@refs;
 
 if (!$skipTrain) {
 #write the script
@@ -209,15 +210,15 @@ print TRAIN "\\\n";
 if ($burn_in) {
     print TRAIN "--burn-in 1 \\\n";
     print TRAIN "--burn-in-input-file $burn_in_input_file \\\n";
-    my @refs;
+    my @burnin_refs;
     if (ref($burn_in_reference_files) eq 'ARRAY') {
-	@refs = @$burn_in_reference_files;
+	@burnin_refs = @$burn_in_reference_files;
     } else {
-	@refs = glob $burn_in_reference_files;
+	@burnin_refs = glob $burn_in_reference_files . "*";
     }
-    for my $ref (@refs) {
-	&check_exists("burn-in ref file",  $ref);
-	print TRAIN "--burn-in-reference-files $ref ";
+    for my $burnin_ref (@burnin_refs) {
+	&check_exists("burn-in ref file",  $burnin_ref);
+	print TRAIN "--burn-in-reference-files $burnin_ref ";
     }
     print TRAIN "\\\n";
 }
@@ -323,7 +324,7 @@ while(1) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "devtest", $devtest_ini_file, $devtest_input_file, $devtest_reference_files, $skip_submit_test);
     }
     if (!$skip_dev) {
-	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $refs[0], $skip_submit_test);
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $reference_files, $skip_submit_test);
     }
 }
 
