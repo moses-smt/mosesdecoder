@@ -72,6 +72,9 @@ my $moses_ini_file = &param_required("train.moses-ini-file");
 my $input_file = &param_required("train.input-file");
 &check_exists ("train input file", $input_file);
 my $reference_files = &param_required("train.reference-files");
+for my $ref (glob $reference_files . "*") {
+    &check_exists ("ref files", $ref);
+}
 my $trainer_exe = &param_required("train.trainer");
 &check_exists("Training executable", $trainer_exe);
 #my $weights_file = &param_required("train.weights-file");
@@ -94,20 +97,21 @@ my $burn_in_reference_files = &param("train.burn-in-reference-files");
 my $skipTrain = &param("train.skip", 0);
 
 #devtest configuration
-my ($devtest_input_file, $devtest_reference_file,$devtest_ini_file,$bleu_script,$use_moses);
+my ($devtest_input_file, $devtest_reference_files,$devtest_ini_file,$bleu_script,$use_moses);
 my $test_exe = &param("devtest.moses");
 &check_exists("test executable", $test_exe);
 $bleu_script  = &param_required("devtest.bleu");
 &check_exists("multi-bleu script", $bleu_script);
 $devtest_input_file = &param_required("devtest.input-file");
-$devtest_reference_file = &param_required("devtest.reference-file");
 &check_exists ("devtest input file", $devtest_input_file);
-
-for my $ref (glob $devtest_reference_file . "*") {
+$devtest_reference_files = &param_required("devtest.reference-file");
+for my $ref (glob $devtest_reference_files . "*") {
     &check_exists ("devtest ref file", $ref);
 }
 $devtest_ini_file = &param_required("devtest.moses-ini-file");
 &check_exists ("devtest ini file", $devtest_ini_file);
+
+
 my $weight_file_stem = "$name-weights";
 my $extra_memory_devtest = &param("devtest.extra-memory",0);
 my $skip_devtest = &param("devtest.skip-devtest",0);
@@ -198,7 +202,6 @@ print TRAIN "-f $moses_ini_file \\\n";
 print TRAIN "-i $input_file \\\n";
 
 for my $ref (@refs) {
-    &check_exists("train ref file",  $ref);
     print TRAIN "-r $ref ";
 }
 print TRAIN "\\\n";
@@ -317,7 +320,7 @@ while(1) {
     my $suffix = "";
     print "weight file exists? ".(-e $new_weight_file)."\n";
     if (!$skip_devtest) {
-	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "devtest", $devtest_ini_file, $devtest_input_file, $devtest_reference_file, $skip_submit_test);
+	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "devtest", $devtest_ini_file, $devtest_input_file, $devtest_reference_files, $skip_submit_test);
     }
     if (!$skip_dev) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $refs[0], $skip_submit_test);
