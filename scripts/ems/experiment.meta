@@ -745,11 +745,12 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: wrapped-output reference-sgm
+	in: cleaned-output reference
 	out: meteor-score
-	default-name: evaluation/detokenized.sgm.METEOR
+	default-name: evaluation/meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
+	template: $meteor IN IN1 $meteor-params > OUT
 analysis
 	in: recased-output reference input
 	out: analysis
