@@ -64,7 +64,7 @@ class MosesDecoder {
     size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
-    void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
+//    void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
     void printBleuFeatureHistory(std::ostream& out);
     void printReferenceLength(const std::vector<size_t>& ref_ids);
     size_t getReferenceLength(size_t ref_id);

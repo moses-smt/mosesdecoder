@@ -184,9 +184,9 @@ namespace Mira {
 	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids, rank, epoch);
   }
 
-  void MosesDecoder::loadReferenceSentences(const vector<vector<string> >& refs) {
+/*  void MosesDecoder::loadReferenceSentences(const vector<vector<string> >& refs) {
   	m_bleuScoreFeature->LoadReferences(refs);
-  }
+  }*/
 
   void MosesDecoder::printBleuFeatureHistory(std::ostream& out) {
   	m_bleuScoreFeature->PrintHistory(out);
