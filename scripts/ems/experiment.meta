@@ -294,12 +294,14 @@ run-giza
 	ignore-if: use-berkeley
 	rerun-on-change: giza-settings training-options script
 	default-name: giza
+	error: not found
 run-giza-inverse
 	in: prepared-data
 	out: giza-alignment-inverse
 	rerun-on-change: giza-settings training-options script
 	ignore-if: use-berkeley
 	default-name: giza-inverse
+	error: not found	
 run-berkeley
 	in: corpus
 	out: berkeley-alignment
