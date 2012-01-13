@@ -64,7 +64,7 @@ int main(int argc, char* argv[])
           << toksAlign.size() << " " << lineAlign << endl;
     */
 
-    extractSingleton.Process(toksTarget, toksSource, toksAlign);
+    extractSingleton.Process(toksTarget, toksSource, toksAlign, lineCount);
    
     ++lineCount; 
   }
@@ -86,7 +86,7 @@ const std::string *Vocab::GetOrAdd(const std::string &word)
   return ret;
 }
 
-void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource, vector<string> &toksAlign)
+void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource, vector<string> &toksAlign, size_t lineCount)
 {
   std::vector<bool> m_sourceAligned(toksSource.size(), false)
                     , m_targetAligned(toksTarget.size(), false);
@@ -99,6 +99,18 @@ void ExtractLex::Process(vector<string> &toksTarget, vector<string> &toksSource,
     vector<size_t> alignPos;
     Tokenize(alignPos, alignTok, "-");
     assert(alignPos.size() == 2);
+
+	if (alignPos[0] >= toksSource.size())
+	{
+		cerr << "ERROR: alignment over source length. Alignment " << alignPos[0] << " at line " << lineCount << endl;
+		continue;
+	}
+	if (alignPos[1] >= toksTarget.size())
+	{
+		cerr << "ERROR: alignment over target length. Alignment " << alignPos[1] << " at line " << lineCount << endl;
+		continue;
+	}
+	
     assert(alignPos[0] < toksSource.size());
     assert(alignPos[1] < toksTarget.size());
 

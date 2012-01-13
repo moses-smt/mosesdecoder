@@ -107,7 +107,7 @@ consolidate
 	default-name: truecaser/corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
-        in: tokenized-stem
+  in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	default-name: truecaser/truecase-model
@@ -207,6 +207,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
+  error: set kMaxOrder to at least this value
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -253,27 +254,27 @@ split-tuning
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 interpolate
 	in: script split-tuning LM:lm
-	rerun-on-change: srilm-dir
+	rerun-on-change: srilm-dir group
 	out: lm
 	default-name: lm/interpolated-lm
 randomize
 	in: lm
 	out: rlm
 	pass-unless: lm-randomizer
-	default-name: lm/rlm
+	default-name: lm/interpolated-rlm
 quantize
 	in: rlm
 	out: qlm
 	pass-unless: lm-quantizer
 	default-name: lm/interpolated-qlm
-	template: $lm-quantizer IN OUT
 binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
+	ignore-unless: script
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
-	template: $lm-binarizer IN OUT
+  error: set kMaxOrder to at least this value
 
 [TRAINING] single
 consolidate
@@ -372,17 +373,9 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 create-config
-	in: reordering-table phrase-translation-table generation-table LM:binlm
-	out: config
-	ignore-if: use-hiero INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
-	default-name: model/moses.ini
-	error: Unknown option
-create-config-interpolated-lm
-	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm
+	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
-	ignore-unless: INTERPOLATED-LM:script
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
 	default-name: model/moses.ini
 	error: Unknown option
@@ -754,11 +747,12 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: wrapped-output reference-sgm
+	in: cleaned-output reference
 	out: meteor-score
-	default-name: evaluation/detokenized.sgm.METEOR
+	default-name: evaluation/meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
+	template: $meteor IN IN1 $meteor-params > OUT
 analysis
 	in: recased-output reference input
 	out: analysis

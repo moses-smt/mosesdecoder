@@ -71,7 +71,7 @@ template <class Model> class LanguageModelKen : public LanguageModel {
 
     std::string GetScoreProducerDescription(unsigned) const {
       std::ostringstream oss;
-      oss << "LM_" << m_ngram->Order() << "gram";
+      oss << "LM_" << (unsigned)m_ngram->Order() << "gram";
       return oss.str();
     }
 
@@ -101,11 +101,11 @@ template <class Model> class LanguageModelKen : public LanguageModel {
       lm::WordIndex *end = indices + m_ngram->Order() - 1;
       int position = hypo.GetCurrTargetWordsRange().GetEndPos();
       for (; ; ++index, --position) {
+        if (index == end) return index;
         if (position == -1) {
           *index = m_ngram->GetVocabulary().BeginSentence();
           return index + 1;
         }
-        if (index == end) return index;
         *index = TranslateID(hypo.GetWord(position));
       }
     }
