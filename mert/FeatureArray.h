@@ -32,7 +32,6 @@ protected:
   featarray_t array_;
   size_t number_of_features;
   std::string features;
-  bool _sparse_flag;
 
 public:
   FeatureArray();
@@ -40,10 +39,6 @@ public:
 
   inline void clear() {
     array_.clear();
-  }
-
-  inline bool hasSparseFeatures() const {
-    return _sparse_flag;
   }
 
   inline std::string getIndex() const {
@@ -89,10 +84,10 @@ public:
     save("/dev/stdout",bin);
   }
 
-  void loadtxt(ifstream& inFile, size_t n);
+  void loadtxt(ifstream& inFile, const SparseVector& sparseWeights, size_t n);
   void loadbin(ifstream& inFile, size_t n);
-  void load(ifstream& inFile);
-  void load(const std::string &file);
+  void load(ifstream& inFile, const SparseVector& sparseWeights);
+  //void load(const std::string &file);
 
   bool check_consistency() const;
 };

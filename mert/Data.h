@@ -27,7 +27,7 @@ private:
   Scorer* theScorer;
   std::string score_type;
   size_t number_of_scores;
-  bool _sparse_flag;
+  SparseVector sparse_weights;
 
 protected:
   // TODO: Use smart pointers for exceptional-safety.
@@ -35,8 +35,7 @@ protected:
   FeatureData* featdata;
 
 public:
-  explicit Data(Scorer& sc);
-  Data();
+  explicit Data(Scorer& sc, const std::string& sparseweightsfile="");
   ~Data();
 
   inline void clear() {
@@ -69,16 +68,12 @@ public:
     featdata->Features(f);
   }
 
-  inline bool hasSparseFeatures() const { return _sparse_flag; }
-  void mergeSparseFeatures();
 
   void loadnbest(const std::string &file);
 
   void load(const std::string &featfile,const std::string &scorefile) {
-    featdata->load(featfile);
+    featdata->load(featfile, sparse_weights);
     scoredata->load(scorefile);
-    if (featdata->hasSparseFeatures())
-      _sparse_flag = true;
   }
 
   void save(const std::string &featfile,const std::string &scorefile, bool bin=false) {

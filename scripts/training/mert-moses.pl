@@ -746,6 +746,7 @@ while(1) {
 
   $cmd .= $file_settings;
 
+  my %sparse_weights; # sparse features
   # pro optimization
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
     $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
@@ -757,13 +758,31 @@ while(1) {
     my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
     &submit_or_exec($pro_cmd,"run$run.pro.out","run$run.pro.err");
     # ... get results ...
-    my %dummy;
-    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%dummy);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);
+    # Get the pro outputs ready for mert. Add the weight ranges,
+    # and a weight and range for the single sparse feature
+    $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
+    open(MERT_START,$1);
     open(PRO_START,">run$run.init.pro");
-    print PRO_START $bestpoint."\n";
+    print PRO_START $bestpoint." 1\n";
+    my $mert_line = <MERT_START>;
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 0\n";
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 1\n";
     close(PRO_START);
+
+    # Write the sparse weights to file so mert can use them
+    open(SPARSE_WEIGHTS,">run$run.merge-weights");
+    foreach my $fname (keys %sparse_weights) {
+      print SPARSE_WEIGHTS "$fname $sparse_weights{$fname}\n";
+    }
+    close(SPARSE_WEIGHTS);
+    $cmd = $cmd." --sparse-weights run$run.merge-weights";
+
     # ... and run mert
-    $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
     &submit_or_exec($cmd.$mert_settings,$mert_outfile,$mert_logfile);
   }
   # just mert
@@ -784,8 +803,8 @@ while(1) {
 
   print "run $run end at ".`date`;
 
-  my %sparse_weights; # sparse features
   ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+  my $merge_weight = 0;
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -794,6 +813,10 @@ while(1) {
 
   # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
+
+  if ($___PRO_STARTING_POINT) {
+    $merge_weight = pop @newweights;
+  }
 
   # interpolate with prior's interation weight, if historic-interpolation is specified
   if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
@@ -833,7 +856,11 @@ while(1) {
     $sparse_weights_file = "run".($run+1).".sparse-weights";
     open(SPARSE,">".$sparse_weights_file);
     foreach my $feature (keys %sparse_weights) {
-      print SPARSE "$feature $sparse_weights{$feature}\n";
+      my $sparse_weight = $sparse_weights{$feature};
+      if ($___PRO_STARTING_POINT) {
+        $sparse_weight *= $merge_weight;
+      }
+      print SPARSE "$feature $sparse_weight\n";
     }
     close(SPARSE);
   }

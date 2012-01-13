@@ -17,23 +17,23 @@
 #include "ScorerFactory.h"
 #include "Util.h"
 
-Data::Data()
-  : theScorer(NULL),
-    number_of_scores(0),
-    _sparse_flag(false),
-    scoredata(NULL),
-    featdata(NULL) {}
-
-Data::Data(Scorer& ptr)
+Data::Data(Scorer& ptr, const std::string& sparseweightsfile)
     : theScorer(&ptr),
       score_type(theScorer->getName()),
       number_of_scores(0),
-      _sparse_flag(false),
       scoredata(new ScoreData(*theScorer)),
       featdata(new FeatureData)
 {
   TRACE_ERR("Data::score_type " << score_type << std::endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
+  if (sparseweightsfile.size()) {
+    sparse_weights.load(sparseweightsfile);
+    ostringstream msg;
+    msg << "Data::sparse_weights {";
+    sparse_weights.write(msg,"=");
+    msg << "}";
+    TRACE_ERR(msg.str() << std::endl);
+  }
 }
 
 Data::~Data() {
@@ -130,7 +130,6 @@ void Data::loadnbest(const std::string &file)
         std::string name = subsubstring;
         getNextPound(substring, subsubstring);
         featentry.addSparse( name, atof(subsubstring.c_str()) );
-        _sparse_flag = true;
       }
     }
     //cerr << "number of sparse features: " << featentry.getSparse().size() << endl;
@@ -140,11 +139,6 @@ void Data::loadnbest(const std::string &file)
   inp.close();
 }
 
-// TODO
-void Data::mergeSparseFeatures() {
-  std::cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
-  exit(1);
-}
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
                         std::vector<Data>& shards)
@@ -179,7 +173,6 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     shards.push_back(Data(*scorer));
     shards.back().score_type = score_type;
     shards.back().number_of_scores = number_of_scores;
-    shards.back()._sparse_flag = _sparse_flag;
     for (size_t i = 0; i < shard_contents.size(); ++i) {
       shards.back().featdata->add(featdata->get(shard_contents[i]));
       shards.back().scoredata->add(scoredata->get(shard_contents[i]));
