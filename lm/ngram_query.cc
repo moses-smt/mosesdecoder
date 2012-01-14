@@ -1,12 +1,5 @@
 #include "lm/ngram_query.hh"
 
-
-template <class Model> void Query(const char *name) {
-  lm::ngram::Config config;
-  Model model(name, config, std::cin, std::cout);
-  Query(model);
-}
-
 int main(int argc, char *argv[]) {
   if (!(argc == 2 || (argc == 3 && !strcmp(argv[2], "null")))) {
     std::cerr << "Usage: " << argv[0] << " lm_file [null]" << std::endl;
