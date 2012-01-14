@@ -121,6 +121,7 @@ int main(int argc, char** argv) {
 	float max_length_dev_reference;
 	float relax_BP;
 	bool stabiliseLength;
+	bool delayUpdates;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -135,6 +136,7 @@ int main(int argc, char** argv) {
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
+		("delay-updates", po::value<bool>(&delayUpdates)->default_value(false), "Delay all updates until the end of an epoch")
 		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
@@ -413,6 +415,9 @@ int main(int argc, char** argv) {
 	// when length ratio >= 1, set this to true
 	bool fixLength = false;
 
+	// for accumulating delayed updates
+	ScoreComponentCollection delayedWeightUpdates;
+
 	bool stop = false;
 //	int sumStillViolatedConstraints;
 	float *sendbuf, *recvbuf;
@@ -432,8 +437,10 @@ int main(int argc, char** argv) {
 		size_t weightEpochDump = 0;
 
 		// sum lengths of dev hypothesis/references to calculate translation length ratio for this epoch
-		size_t dev_hypothesis_length;
-		size_t dev_reference_length;
+		size_t dev_hypothesis_length = 0;
+		size_t dev_reference_length = 0;
+
+		delayedWeightUpdates.ZeroAll();
 
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
@@ -682,24 +689,28 @@ int main(int argc, char** argv) {
 				// Run optimiser on batch:
 				VERBOSE(1, "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl);
 				size_t update_status;
+				ScoreComponentCollection weightUpdate;
 				if (perceptron_update) {
 					vector<vector<float> > dummy1;
-					update_status = optimiser->updateWeightsHopeFear(mosesWeights,
+					update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
 							featureValuesHope, featureValuesFear, dummy1, dummy1, learning_rate, rank, epoch);
 				}
 				else if (hope_fear) {
-					update_status = optimiser->updateWeightsHopeFear(mosesWeights,
+					update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
 							featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
 				}
 				else {
 					// model_hope_fear
-					update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights,
+					update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights, weightUpdate,
 							featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, learning_rate, rank, epoch);
 				}
 
 //			sumStillViolatedConstraints += update_status;
 
 				if (update_status == 0) {	 // if weights were updated
+					// apply weight update
+					mosesWeights.PlusEquals(weightUpdate);
+
 					if (normaliseWeights) {
 						mosesWeights.L1Normalise();
 					}
@@ -718,8 +729,11 @@ int main(int argc, char** argv) {
 						mosesWeights = averageWeights;
 					}
 
-					// set new Moses weights
-					decoder->setWeights(mosesWeights);
+					if (delayUpdates)
+						delayedWeightUpdates.PlusEquals(weightUpdate);
+					else
+						// set new Moses weights
+						decoder->setWeights(mosesWeights);
 				}
 
 				// update history (for approximate document Bleu)
@@ -830,7 +844,16 @@ int main(int argc, char** argv) {
 			    }
 			  }
 			}// end dumping
+
 		} // end of shard loop, end of this epoch
+
+		if (delayUpdates) {
+			// apply all updates from this epoch to the weight vector
+			ScoreComponentCollection mosesWeights = decoder->getWeights();
+			mosesWeights.PlusEquals(delayedWeightUpdates);
+			decoder->setWeights(mosesWeights);
+			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, new moses weights: " << mosesWeights << endl;
+		}
 
 		if (stabiliseLength && !fixLength) {
 			float lengthRatio = (float)(dev_hypothesis_length+1) / dev_reference_length;

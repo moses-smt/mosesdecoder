@@ -7,7 +7,9 @@ using namespace std;
 
 namespace Mira {
 
-size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
+size_t MiraOptimiser::updateWeights(
+		ScoreComponentCollection& currWeights,
+		ScoreComponentCollection& weightUpdate,
     const vector<vector<ScoreComponentCollection> >& featureValues,
     const vector<vector<float> >& losses,
     const vector<vector<float> >& bleuScores,
@@ -142,9 +144,7 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	}
 
 	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
-
-	// apply update to weight vector
-	currWeights.PlusEquals(summedUpdate);
+	weightUpdate.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
 /*	int violatedConstraintsAfter = 0;
@@ -164,7 +164,9 @@ size_t MiraOptimiser::updateWeights(ScoreComponentCollection& currWeights,
 	return 0;
 }
 
-size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& currWeights,
+size_t MiraOptimiser::updateWeightsHopeFear(
+		Moses::ScoreComponentCollection& currWeights,
+		Moses::ScoreComponentCollection& weightUpdate,
 		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
 		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 		const std::vector<std::vector<float> >& bleuScoresHope,
@@ -299,9 +301,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(Moses::ScoreComponentCollection& cur
 	}
 
 	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
-
-	// apply update to weight vector
-	currWeights.PlusEquals(summedUpdate);
+	weightUpdate.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
 /*	int violatedConstraintsAfter = 0;
