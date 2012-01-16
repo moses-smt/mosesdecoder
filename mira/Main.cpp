@@ -116,9 +116,10 @@ int main(int argc, char** argv) {
 	int threadcount;
 	size_t adapt_after_epoch;
 	size_t bleu_smoothing_scheme;
-	float max_length_deviation;
+	float max_length_dev_all;
 	float max_length_dev_hypos;
-	float max_length_dev_reference;
+	float max_length_dev_hope_ref;
+	float max_length_dev_fear_ref;
 	float relax_BP;
 	bool stabiliseLength;
 	bool delayUpdates;
@@ -151,9 +152,10 @@ int main(int argc, char** argv) {
 		("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 		("margin-incr", po::value<float>(&margin_slack_incr)->default_value(0), "Increment margin slack after every epoch by this amount")
 		("margin-slack", po::value<float>(&margin_slack)->default_value(0), "Slack when comparing left and right hand side of constraints")
-		("max-length-deviation", po::value<float>(&max_length_deviation)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope/fear translations and w.r.t. reference translations")
-		("max-length-dev-hypos", po::value<float>(&max_length_dev_hypos)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hop/fear translations")
-		("max-length-dev-reference", po::value<float>(&max_length_dev_reference)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation of hope/fear translations w.r.t. reference translations")
+		("max-length-dev-all", po::value<float>(&max_length_dev_all)->default_value(-1), "Make use of all 3 following options")
+		("max-length-dev-hypos", po::value<float>(&max_length_dev_hypos)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and fear translations")
+		("max-length-dev-hope-ref", po::value<float>(&max_length_dev_hope_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and reference translations")
+		("max-length-dev-fear-ref", po::value<float>(&max_length_dev_fear_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between fear and reference translations")
 		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
 		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
@@ -363,9 +365,10 @@ int main(int argc, char** argv) {
 		bleuScoreWeight_hope = bleuScoreWeight;
 	}
 
-	if (max_length_deviation != -1) {
-		max_length_dev_reference = max_length_deviation;
-		max_length_dev_hypos = max_length_deviation;
+	if (max_length_dev_all != -1) {
+		max_length_dev_hypos = max_length_dev_all;
+		max_length_dev_hope_ref = max_length_dev_all;
+		max_length_dev_fear_ref = max_length_dev_all;
 	}
 
 #ifdef MPI_ENABLE
@@ -546,11 +549,12 @@ int main(int argc, char** argv) {
 					float length_diff_fear = abs(1 - fear_length_ratio);
 					size_t length_diff_hope_fear = abs((int)oracle.size() - (int)fear.size());
 					cerr << "Rank " << rank << ", epoch " << epoch << ", abs-length hope-fear: " << length_diff_hope_fear << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
-
 					bool skip = false;
-					if (max_length_dev_reference != -1 && (length_diff_hope > max_length_dev_reference || length_diff_fear > max_length_dev_reference))
-						skip = true;
 					if (max_length_dev_hypos != -1 && (length_diff_hope_fear > avg_ref_length * max_length_dev_hypos))
+						skip = true;
+					if (max_length_dev_hope_ref != -1 && length_diff_hope > max_length_dev_hope_ref)
+						skip = true;
+					if (max_length_dev_fear_ref != -1 && length_diff_fear > max_length_dev_fear_ref)
 						skip = true;
 					if (skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << fear_length_ratio << ", " << length_diff_hope_fear << ").. " << endl;

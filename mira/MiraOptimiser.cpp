@@ -107,7 +107,7 @@ size_t MiraOptimiser::updateWeights(
 	  // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
 	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 	  	float alpha = alphas[k];
-	  	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl);
+	  	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 	    
@@ -264,7 +264,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 	  // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
 	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 	  	float alpha = alphas[k];
-	  	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl);
+	  	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 

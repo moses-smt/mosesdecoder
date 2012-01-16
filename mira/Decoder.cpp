@@ -124,6 +124,8 @@ namespace Mira {
 
     	Phrase bestPhrase = path.GetTargetPhrase();
 
+    	if (iter != sentences.begin())
+    		cerr << endl;
     	cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
     	Phrase phrase = path.GetTargetPhrase();
     	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
