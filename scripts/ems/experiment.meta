@@ -540,6 +540,7 @@ apply-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.weight-reused.ini
 	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
+	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference
 	out: hiero-weight-config
@@ -620,6 +621,7 @@ filter
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
 	rerun-on-change: filter-settings report-precision-by-coverage
+	error: already exists. Please delete
 decode
 	in: filtered-config input
 	out: system-output
