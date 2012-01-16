@@ -98,37 +98,47 @@ void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRe
 void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::string > >& refs)
 {
 	m_refs.clear();
-    FactorCollection& fc = FactorCollection::Instance();
-    cerr << "Number of reference files: " << refs.size() << endl; 
-    for (size_t file_id = 0; file_id < refs.size(); file_id++) {
-      for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
-          const string& ref = refs[file_id][ref_id];
-          vector<string> refTokens  = Tokenize(ref);
-          m_refs[ref_id] = pair<size_t,NGrams>();
-           pair<size_t,NGrams>& ref_pair = m_refs[ref_id];
-          ref_pair.first = refTokens.size();
-          for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {
-              for (size_t end_idx = order; end_idx <= refTokens.size(); end_idx++) {
-                  Phrase ngram(Output,1);
-                  for (size_t s_idx = end_idx - order; s_idx < end_idx; s_idx++) {
-                      const Factor* f = fc.AddFactor(Output, 0, refTokens[s_idx]);
-                      Word w;
-                      w.SetFactor(0, f);
-                      ngram.AddWord(w);
-                  }
-                  ref_pair.second[ngram] += 1;
-              }
-          }
-      }
-    }
+	FactorCollection& fc = FactorCollection::Instance();
+	for (size_t file_id = 0; file_id < refs.size(); file_id++) {
+		for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
+			const string& ref = refs[file_id][ref_id];
+			vector<string> refTokens  = Tokenize(ref);
+			if (file_id == 0)
+				m_refs[ref_id] = pair<vector<size_t>,NGrams>();
+			pair<vector<size_t>,NGrams>& ref_pair = m_refs[ref_id];
+			(ref_pair.first).push_back(refTokens.size());
+			for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {
+				for (size_t end_idx = order; end_idx <= refTokens.size(); end_idx++) {
+					Phrase ngram(Output,1);
+					for (size_t s_idx = end_idx - order; s_idx < end_idx; s_idx++) {
+						const Factor* f = fc.AddFactor(Output, 0, refTokens[s_idx]);
+						Word w;
+						w.SetFactor(0, f);
+						ngram.AddWord(w);
+					}
+					ref_pair.second[ngram] += 1;
+				}
+			}
+   	}
+	}
+
+//	for (size_t i = 0; i < m_refs.size(); ++i) {
+//		cerr << "ref id " << i << ", number of entries: " << (m_refs[i].first).size() << endl;
+//	}
 }
 
 void BleuScoreFeature::SetCurrentSourceLength(size_t source_length) {
     m_cur_source_length = source_length;
 }
 
-void BleuScoreFeature::SetCurrentReference(size_t ref_id) {
-    m_cur_ref_length = m_refs[ref_id].first;
+void BleuScoreFeature::SetCurrentShortestReference(size_t ref_id) {
+		// look for shortest reference
+		int shortestRef = -1;
+		for (size_t i = 0; i < (m_refs[ref_id].first).size(); ++i) {
+			if (shortestRef == -1 || (m_refs[ref_id].first)[i] < shortestRef)
+				shortestRef = (m_refs[ref_id].first)[i];
+		}
+    m_cur_ref_length = shortestRef;
     m_cur_ref_ngrams = m_refs[ref_id].second;
 }
 
@@ -163,15 +173,16 @@ void BleuScoreFeature::UpdateHistory(const vector< const Word* >& hypo) {
  * Update history with a batch of translations
  */
 void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypos, vector<size_t>& sourceLengths, vector<size_t>& ref_ids, size_t rank, size_t epoch) {
-	for (size_t batchPosition = 0; batchPosition < hypos.size(); ++batchPosition){
-	    Phrase phrase(Output, hypos[batchPosition]);
+	for (size_t ref_id = 0; ref_id < hypos.size(); ++ref_id){
+	    Phrase phrase(Output, hypos[ref_id]);
 	    std::vector< size_t > ngram_counts(BleuScoreState::bleu_order);
 	    std::vector< size_t > ngram_matches(BleuScoreState::bleu_order);
 
 	    // set current source and reference information for each oracle in the batch
-	    size_t cur_source_length = sourceLengths[batchPosition];
-	    size_t cur_ref_length = m_refs[ref_ids[batchPosition]].first;
-	    NGrams cur_ref_ngrams = m_refs[ref_ids[batchPosition]].second;
+	    size_t cur_source_length = sourceLengths[ref_id];
+	    size_t hypo_length = hypos[ref_id].size();
+	    size_t cur_ref_length = GetClosestReferenceLength(ref_ids[ref_id], hypo_length);
+	    NGrams cur_ref_ngrams = m_refs[ref_ids[ref_id]].second;
 	    cerr << "reference length: " << cur_ref_length << endl;
 
 	    // compute vector c(e;{r_k}):
@@ -184,7 +195,7 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 	        m_match_history[i] += ngram_matches[i];
 
 	        // do this for last position in batch
-	        if (batchPosition == hypos.size() - 1) {
+	        if (ref_id == hypos.size() - 1) {
 	        	m_count_history[i] *= m_historySmoothing;
 	        	m_match_history[i] *= m_historySmoothing;
 	        }
@@ -192,11 +203,11 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 
 	    // update counts for reference and target length
 	    m_source_length_history += cur_source_length;
-	    m_target_length_history += hypos[batchPosition].size();
+	    m_target_length_history += hypos[ref_id].size();
 	    m_ref_length_history += cur_ref_length;
 
 	    // do this for last position in batch
-	    if (batchPosition == hypos.size() - 1) {
+	    if (ref_id == hypos.size() - 1) {
 	    	cerr << "Rank " << rank << ", epoch " << epoch << " ,source length history: " << m_source_length_history << " --> " << m_source_length_history * m_historySmoothing << endl;
 	    	cerr << "Rank " << rank << ", epoch " << epoch << " ,target length history: " << m_target_length_history << " --> " << m_target_length_history * m_historySmoothing << endl;
 	    	m_source_length_history *= m_historySmoothing;
@@ -209,15 +220,24 @@ void BleuScoreFeature::UpdateHistory(const vector< vector< const Word* > >& hypo
 /*
  * Print batch of reference translations
  */
-void BleuScoreFeature::PrintReferenceLength(const vector<size_t>& ref_ids) {
-	for (size_t batchPosition = 0; batchPosition < ref_ids.size(); ++batchPosition){
-	    size_t cur_ref_length = m_refs[ref_ids[batchPosition]].first;
+/*void BleuScoreFeature::PrintReferenceLength(const vector<size_t>& ref_ids) {
+	for (size_t ref_id = 0; ref_id < ref_ids.size(); ++ref_id){
+	    size_t cur_ref_length = (m_refs[ref_ids[ref_id]].first)[0]; // TODO!!
 	    cerr << "reference length: " << cur_ref_length << endl;
 	}
-}
+}*/
 
-size_t BleuScoreFeature::GetReferenceLength(size_t ref_id) {
-	size_t cur_ref_length = m_refs[ref_id].first;
+size_t BleuScoreFeature::GetClosestReferenceLength(size_t ref_id, int hypoLength) {
+	// look for closest reference
+	int currentDist = -1;
+	int closestRef = -1;
+	for (size_t i = 0; i < (m_refs[ref_id].first).size(); ++i) {
+		if (closestRef == -1 || abs(hypoLength - (int)(m_refs[ref_id].first)[i]) < currentDist) {
+			closestRef = (m_refs[ref_id].first)[i];
+			currentDist = abs(hypoLength - (int)(m_refs[ref_id].first)[i]);
+		}
+	}
+	size_t cur_ref_length = closestRef;
 	return cur_ref_length;
 }
 

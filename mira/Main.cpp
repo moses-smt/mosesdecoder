@@ -352,6 +352,8 @@ int main(int argc, char** argv) {
 		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
+	if (historyOf1best || historyOfOracles)
+		sentenceLevelBleu = false;
 	if (!sentenceLevelBleu) {
 		if (!historyOf1best && !historyOfOracles) {
 			historyOf1best = true;
@@ -495,7 +497,8 @@ int main(int argc, char** argv) {
 					}
 				}
 
-				size_t reference_length = decoder->getReferenceLength(*sid);
+				size_t ref_length;
+				float avg_ref_length;
 				if (hope_fear || perceptron_update) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
@@ -504,7 +507,9 @@ int main(int argc, char** argv) {
 							distinctNbest, rank, epoch);
 					size_t current_input_length = decoder->getCurrentInputLength();
 					decoder->cleanup();
-					float hope_length_ratio = (float)oracle.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
+					avg_ref_length = ref_length;
+					float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 
 					vector<const Word*> bestModel;
@@ -516,8 +521,9 @@ int main(int argc, char** argv) {
 								distinctNbest, rank, epoch);
 						decoder->cleanup();
 						cerr << endl;
+						ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 						dev_hypothesis_length += bestModel.size();
-						dev_reference_length += reference_length;
+						dev_reference_length += ref_length;
 					}
 
 					// FEAR
@@ -526,7 +532,10 @@ int main(int argc, char** argv) {
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					float fear_length_ratio = (float)fear.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
+					avg_ref_length += ref_length;
+					avg_ref_length /= 2;
+					float fear_length_ratio = (float)fear.size()/ref_length;
 					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
@@ -541,7 +550,7 @@ int main(int argc, char** argv) {
 					bool skip = false;
 					if (max_length_dev_reference != -1 && (length_diff_hope > max_length_dev_reference || length_diff_fear > max_length_dev_reference))
 						skip = true;
-					if (max_length_dev_hypos != -1 && (length_diff_hope_fear > reference_length * max_length_dev_hypos))
+					if (max_length_dev_hypos != -1 && (length_diff_hope_fear > avg_ref_length * max_length_dev_hypos))
 						skip = true;
 					if (skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << fear_length_ratio << ", " << length_diff_hope_fear << ").. " << endl;
@@ -579,7 +588,8 @@ int main(int argc, char** argv) {
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
-					float hope_length_ratio = (float)oracle.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
+					float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
@@ -592,11 +602,12 @@ int main(int argc, char** argv) {
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
-					float model_length_ratio = (float)bestModel.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
+					float model_length_ratio = (float)bestModel.size()/ref_length;
 					cerr << ", l-ratio model: " << model_length_ratio << endl;
 					if (stabiliseLength) {
 						dev_hypothesis_length += bestModel.size();
-						dev_reference_length += reference_length;
+						dev_reference_length += ref_length;
 					}
 
 					// FEAR
@@ -606,7 +617,8 @@ int main(int argc, char** argv) {
 							featureValues[batchPosition], bleuScores[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					float fear_length_ratio = (float)fear.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
+					float fear_length_ratio = (float)fear.size()/ref_length;
 					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];

@@ -44,7 +44,7 @@ class BleuScoreFeature : public StatefulFeatureFunction {
 public:
 
   typedef boost::unordered_map< Phrase, size_t > NGrams;
-  typedef boost::unordered_map<size_t, std::pair<size_t,NGrams> > RefCounts;
+  typedef boost::unordered_map<size_t, std::pair<std::vector<size_t>,NGrams> > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
 
 	BleuScoreFeature():
@@ -75,11 +75,11 @@ public:
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentSourceLength(size_t);
-    void SetCurrentReference(size_t);
+    void SetCurrentShortestReference(size_t);
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
-    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
-    size_t GetReferenceLength(size_t ref_id);
+//    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
+    size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
     void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
     		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
   		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP);

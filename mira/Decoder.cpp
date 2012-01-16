@@ -103,7 +103,7 @@ namespace Mira {
     staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
 
     m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
-    m_bleuScoreFeature->SetCurrentReference(sentenceid);
+    m_bleuScoreFeature->SetCurrentShortestReference(sentenceid);
 
     //run the decoder
     m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
@@ -192,12 +192,12 @@ namespace Mira {
   	m_bleuScoreFeature->PrintHistory(out);
   }
 
-  void MosesDecoder::printReferenceLength(const vector<size_t>& ref_ids) {
+/*  void MosesDecoder::printReferenceLength(const vector<size_t>& ref_ids) {
   	m_bleuScoreFeature->PrintReferenceLength(ref_ids);
-  }
+  }*/
 
-  size_t MosesDecoder::getReferenceLength(size_t ref_id) {
-  	return m_bleuScoreFeature->GetReferenceLength(ref_id);
+  size_t MosesDecoder::getClosestReferenceLength(size_t ref_id, int hypoLength) {
+  	return m_bleuScoreFeature->GetClosestReferenceLength(ref_id, hypoLength);
   }
 
   void MosesDecoder::setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
