@@ -123,6 +123,7 @@ int main(int argc, char** argv) {
 	float relax_BP;
 	bool stabiliseLength;
 	bool delayUpdates;
+	float min_oracle_bleu;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -157,7 +158,8 @@ int main(int argc, char** argv) {
 		("max-length-dev-hope-ref", po::value<float>(&max_length_dev_hope_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and reference translations")
 		("max-length-dev-fear-ref", po::value<float>(&max_length_dev_fear_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between fear and reference translations")
 		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
-		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+		("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
+	        ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(5), "How often per epoch to mix weights, when using mpi")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
@@ -665,10 +667,9 @@ int main(int argc, char** argv) {
 					iter = featureFunctions.begin();
 					for (; iter != featureFunctions.end(); ++iter) {
 						if ((*iter)->GetScoreProducerWeightShortName() == "w") {
-							ignoreWPFeature(featureValues, (*iter));
-							ignoreWPFeature(featureValuesHope, (*iter));
-							ignoreWPFeature(featureValuesFear, (*iter));
-							break;
+							ignoreFeature(featureValues, (*iter));
+							ignoreFeature(featureValuesHope, (*iter));
+							ignoreFeature(featureValuesFear, (*iter));							
 						}
 					}
 				}
@@ -712,8 +713,11 @@ int main(int argc, char** argv) {
 							featureValuesHope, featureValuesFear, dummy1, dummy1, learning_rate, rank, epoch);
 				}
 				else if (hope_fear) {
-					update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
-							featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
+				  if (bleuScoresHope[0][0] >= min_oracle_bleu)
+				    update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
+				       featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
+				  else
+				    update_status = -1;										     
 				}
 				else {
 					// model_hope_fear
@@ -1066,10 +1070,10 @@ void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues
 		}
 }
 
-void ignoreWPFeature(vector<vector<ScoreComponentCollection> > &featureValues, const ScoreProducer* sp) {
+void ignoreFeature(vector<vector<ScoreComponentCollection> > &featureValues, const ScoreProducer* sp) {
 	for (size_t i = 0; i < featureValues.size(); ++i)
 		for (size_t j = 0; j < featureValues[i].size(); ++j)
-			// set WP feature to 0
+			// set feature to 0
 			featureValues[i][j].Assign(sp, 0);
 }
 

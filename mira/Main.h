@@ -47,7 +47,7 @@ bool loadWeights(const std::string& filename, StrFloatMap& coreWeightMap);
 bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size);
 void printFeatureValues(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues);
 void ignoreCoreFeatures(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, StrFloatMap &coreWeightMap);
-void ignoreWPFeature(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, const Moses::ScoreProducer* sp);
+void ignoreFeature(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, const Moses::ScoreProducer* sp);
 void takeLogs(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t base);
 void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translations);
 
