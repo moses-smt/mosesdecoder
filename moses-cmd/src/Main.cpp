@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * Moses main, for single-threaded and multi-threaded.
  **/
 
+#include <exception>
 #include <fstream>
 #include <sstream>
 #include <vector>
@@ -323,178 +324,184 @@ static void ShowWeights()
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
-
+  try {
+  
 #ifdef HAVE_PROTOBUF
-  GOOGLE_PROTOBUF_VERIFY_VERSION;
+    GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
-
-  // echo command line, if verbose
-  IFVERBOSE(1) {
-    TRACE_ERR("command: ");
-    for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
-    TRACE_ERR(endl);
-  }
-
-  // set number of significant decimals in output
-  fix(cout,PRECISION);
-  fix(cerr,PRECISION);
-
-  // load all the settings into the Parameter class
-  // (stores them as strings, or array of strings)
-  Parameter* params = new Parameter();
-  if (!params->LoadParam(argc,argv)) {
-    params->Explain();
-    exit(1);
-  }
-
-
-  // initialize all "global" variables, which are stored in StaticData
-  // note: this also loads models such as the language model, etc.
-  if (!StaticData::LoadDataStatic(params)) {
-    exit(1);
-  }
-
-  // setting "-show-weights" -> just dump out weights and exit
-  if (params->isParamSpecified("show-weights")) {
-    ShowWeights();
-    exit(0);
-  }
-
-  // shorthand for accessing information in StaticData
-  const StaticData& staticData = StaticData::Instance();
-
-
-  //initialise random numbers
-  srand(time(NULL));
-
-  // set up read/writing class
-  IOWrapper* ioWrapper = GetIODevice(staticData);
-  if (!ioWrapper) {
-    cerr << "Error; Failed to create IO object" << endl;
-    exit(1);
-  }
-
-  // check on weights
-  vector<float> weights = staticData.GetAllWeights();
-  IFVERBOSE(2) {
-    TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-    TRACE_ERR("The global weight vector looks like this:");
-    for (size_t j=0; j<weights.size(); j++) {
-      TRACE_ERR(" " << weights[j]);
-    }
-    TRACE_ERR("\n");
-  }
-  // every score must have a weight!  check that here:
-  if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-    TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-    exit(1);
-  }
-
-  // initialize output streams
-  // note: we can't just write to STDOUT or files
-  // because multithreading may return sentences in shuffled order
-  auto_ptr<OutputCollector> outputCollector; // for translations
-  auto_ptr<OutputCollector> nbestCollector;  // for n-best lists
-  auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
-  auto_ptr<ofstream> nbestOut;
-  auto_ptr<ofstream> latticeSamplesOut;
-  size_t nbestSize = staticData.GetNBestSize();
-  string nbestFile = staticData.GetNBestFilePath();
-  bool output1best = true;
-  if (nbestSize) {
-    if (nbestFile == "-" || nbestFile == "/dev/stdout") {
-      // nbest to stdout, no 1-best
-      nbestCollector.reset(new OutputCollector());
-      output1best = false;
-    } else {
-      // nbest to file, 1-best to stdout
-      nbestOut.reset(new ofstream(nbestFile.c_str()));
-      if (!nbestOut->good()) {
-        TRACE_ERR("ERROR: Failed to open " << nbestFile << " for nbest lists" << endl);
-        exit(1);
-      }
-      nbestCollector.reset(new OutputCollector(nbestOut.get()));
-    }
-  }
-  size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
-  string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
-  if (latticeSamplesSize) {
-    if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
-      latticeSamplesCollector.reset(new OutputCollector());
-      output1best = false;
-    } else {
-      latticeSamplesOut.reset(new ofstream(latticeSamplesFile.c_str()));
-      if (!latticeSamplesOut->good()) {
-        TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
-        exit(1);
-      }
-      latticeSamplesCollector.reset(new OutputCollector(latticeSamplesOut.get()));
-    }
-  }
-  if (output1best) {
-    outputCollector.reset(new OutputCollector());
-  }
-
-  // initialize stream for word graph (aka: output lattice)
-  auto_ptr<OutputCollector> wordGraphCollector;
-  if (staticData.GetOutputWordGraph()) {
-    wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
-  }
-
-  // initialize stream for search graph
-  // note: this is essentially the same as above, but in a different format
-  auto_ptr<OutputCollector> searchGraphCollector;
-  if (staticData.GetOutputSearchGraph()) {
-    searchGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputSearchGraphStream())));
-  }
-
-  // initialize stram for details about the decoder run
-  auto_ptr<OutputCollector> detailedTranslationCollector;
-  if (staticData.IsDetailedTranslationReportingEnabled()) {
-    detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
-  }
-
-  // initialize stram for word alignment between input and output
-  auto_ptr<OutputCollector> alignmentInfoCollector;
-  if (!staticData.GetAlignmentOutputFile().empty()) {
-    alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
-  }
-
-#ifdef WITH_THREADS
-  ThreadPool pool(staticData.ThreadCount());
-#endif
-
-  // main loop over set of input sentences
-  InputType* source = NULL;
-  size_t lineCount = 0;
-  while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+  
+    // echo command line, if verbose
     IFVERBOSE(1) {
-      ResetUserTime();
+      TRACE_ERR("command: ");
+      for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
+      TRACE_ERR(endl);
     }
-    // set up task of translating one sentence
-    TranslationTask* task =
-      new TranslationTask(lineCount,source, outputCollector.get(),
-                          nbestCollector.get(),
-                          latticeSamplesCollector.get(),
-                          wordGraphCollector.get(),
-                          searchGraphCollector.get(),
-                          detailedTranslationCollector.get(),
-                          alignmentInfoCollector.get() );
-    // execute task
+  
+    // set number of significant decimals in output
+    fix(cout,PRECISION);
+    fix(cerr,PRECISION);
+  
+    // load all the settings into the Parameter class
+    // (stores them as strings, or array of strings)
+    Parameter* params = new Parameter();
+    if (!params->LoadParam(argc,argv)) {
+      params->Explain();
+      exit(1);
+    }
+  
+  
+    // initialize all "global" variables, which are stored in StaticData
+    // note: this also loads models such as the language model, etc.
+    if (!StaticData::LoadDataStatic(params)) {
+      exit(1);
+    }
+  
+    // setting "-show-weights" -> just dump out weights and exit
+    if (params->isParamSpecified("show-weights")) {
+      ShowWeights();
+      exit(0);
+    }
+  
+    // shorthand for accessing information in StaticData
+    const StaticData& staticData = StaticData::Instance();
+  
+  
+    //initialise random numbers
+    srand(time(NULL));
+  
+    // set up read/writing class
+    IOWrapper* ioWrapper = GetIODevice(staticData);
+    if (!ioWrapper) {
+      cerr << "Error; Failed to create IO object" << endl;
+      exit(1);
+    }
+  
+    // check on weights
+    vector<float> weights = staticData.GetAllWeights();
+    IFVERBOSE(2) {
+      TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
+      TRACE_ERR("The global weight vector looks like this:");
+      for (size_t j=0; j<weights.size(); j++) {
+        TRACE_ERR(" " << weights[j]);
+      }
+      TRACE_ERR("\n");
+    }
+    // every score must have a weight!  check that here:
+    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
+      TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
+      exit(1);
+    }
+  
+    // initialize output streams
+    // note: we can't just write to STDOUT or files
+    // because multithreading may return sentences in shuffled order
+    auto_ptr<OutputCollector> outputCollector; // for translations
+    auto_ptr<OutputCollector> nbestCollector;  // for n-best lists
+    auto_ptr<OutputCollector> latticeSamplesCollector; //for lattice samples
+    auto_ptr<ofstream> nbestOut;
+    auto_ptr<ofstream> latticeSamplesOut;
+    size_t nbestSize = staticData.GetNBestSize();
+    string nbestFile = staticData.GetNBestFilePath();
+    bool output1best = true;
+    if (nbestSize) {
+      if (nbestFile == "-" || nbestFile == "/dev/stdout") {
+        // nbest to stdout, no 1-best
+        nbestCollector.reset(new OutputCollector());
+        output1best = false;
+      } else {
+        // nbest to file, 1-best to stdout
+        nbestOut.reset(new ofstream(nbestFile.c_str()));
+        if (!nbestOut->good()) {
+          TRACE_ERR("ERROR: Failed to open " << nbestFile << " for nbest lists" << endl);
+          exit(1);
+        }
+        nbestCollector.reset(new OutputCollector(nbestOut.get()));
+      }
+    }
+    size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
+    string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
+    if (latticeSamplesSize) {
+      if (latticeSamplesFile == "-" || latticeSamplesFile == "/dev/stdout") {
+        latticeSamplesCollector.reset(new OutputCollector());
+        output1best = false;
+      } else {
+        latticeSamplesOut.reset(new ofstream(latticeSamplesFile.c_str()));
+        if (!latticeSamplesOut->good()) {
+          TRACE_ERR("ERROR: Failed to open " << latticeSamplesFile << " for lattice samples" << endl);
+          exit(1);
+        }
+        latticeSamplesCollector.reset(new OutputCollector(latticeSamplesOut.get()));
+      }
+    }
+    if (output1best) {
+      outputCollector.reset(new OutputCollector());
+    }
+  
+    // initialize stream for word graph (aka: output lattice)
+    auto_ptr<OutputCollector> wordGraphCollector;
+    if (staticData.GetOutputWordGraph()) {
+      wordGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputWordGraphStream())));
+    }
+  
+    // initialize stream for search graph
+    // note: this is essentially the same as above, but in a different format
+    auto_ptr<OutputCollector> searchGraphCollector;
+    if (staticData.GetOutputSearchGraph()) {
+      searchGraphCollector.reset(new OutputCollector(&(ioWrapper->GetOutputSearchGraphStream())));
+    }
+  
+    // initialize stram for details about the decoder run
+    auto_ptr<OutputCollector> detailedTranslationCollector;
+    if (staticData.IsDetailedTranslationReportingEnabled()) {
+      detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
+    }
+  
+    // initialize stram for word alignment between input and output
+    auto_ptr<OutputCollector> alignmentInfoCollector;
+    if (!staticData.GetAlignmentOutputFile().empty()) {
+      alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
+    }
+  
 #ifdef WITH_THREADS
-  pool.Submit(task);
-#else
-    task->Run();
+    ThreadPool pool(staticData.ThreadCount());
 #endif
-
-    source = NULL; //make sure it doesn't get deleted
-    ++lineCount;
-  }
-
+  
+    // main loop over set of input sentences
+    InputType* source = NULL;
+    size_t lineCount = 0;
+    while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+      IFVERBOSE(1) {
+        ResetUserTime();
+      }
+      // set up task of translating one sentence
+      TranslationTask* task =
+        new TranslationTask(lineCount,source, outputCollector.get(),
+                            nbestCollector.get(),
+                            latticeSamplesCollector.get(),
+                            wordGraphCollector.get(),
+                            searchGraphCollector.get(),
+                            detailedTranslationCollector.get(),
+                            alignmentInfoCollector.get() );
+      // execute task
+#ifdef WITH_THREADS
+    pool.Submit(task);
+#else
+      task->Run();
+#endif
+  
+      source = NULL; //make sure it doesn't get deleted
+      ++lineCount;
+    }
+  
   // we are done, finishing up
 #ifdef WITH_THREADS
-  pool.Stop(true); //flush remaining jobs
+    pool.Stop(true); //flush remaining jobs
 #endif
+
+  } catch (const std::exception &e) {
+    std::cerr << "Exception: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)
