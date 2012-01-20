@@ -63,8 +63,8 @@ void ScoreComponentCollection::MultiplyEquals(float scalar)
 
 // Multiply all weights of this sparse producer by a given scalar
 void ScoreComponentCollection::MultiplyEquals(const ScoreProducer* sp, float scalar) {
-	CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
-  std::string prefix = sp->GetScoreProducerWeightShortName() + FName::SEP;
+	assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+  std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
@@ -98,6 +98,10 @@ float ScoreComponentCollection::GetL1Norm() const {
 
 float ScoreComponentCollection::GetL2Norm() const {
   return m_scores.l2norm();
+}
+
+float ScoreComponentCollection::GetLInfNorm() const {
+  return m_scores.linfnorm();
 }
 
 void ScoreComponentCollection::Save(ostream& out) const {

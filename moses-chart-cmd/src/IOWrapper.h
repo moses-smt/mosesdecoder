@@ -44,6 +44,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "OutputCollector.h"
 #include "ChartHypothesis.h"
 
+#include "ChartTrellisPath.h"
+
 namespace Moses
 {
 class FactorCollection;
@@ -82,6 +84,7 @@ public:
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
+  void OutputSparseFeatureScores(std::ostream& out, const Moses::ChartTrellisPath &path, const Moses::FeatureFunction *ff, std::string &lastName);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 

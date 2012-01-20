@@ -24,7 +24,9 @@ using namespace std;
 
 namespace Mira {
 
-size_t Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeights,
+size_t Perceptron::updateWeightsHopeFear(
+		ScoreComponentCollection& currWeights,
+		ScoreComponentCollection& weightUpdate,
 		const vector< vector<ScoreComponentCollection> >& featureValuesHope,
 		const vector< vector<ScoreComponentCollection> >& featureValuesFear,
 		const vector< vector<float> >& dummy1,
@@ -39,7 +41,7 @@ size_t Perceptron::updateWeightsHopeFear(ScoreComponentCollection& currWeights,
 	featureValueDiff.MinusEquals(featureValuesFear[0][0]);
 	cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
 	featureValueDiff.MultiplyEquals(perceptron_learning_rate);
-	currWeights.PlusEquals(featureValueDiff);
+	weightUpdate.PlusEquals(featureValueDiff);
 	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << featureValueDiff << endl;
 	return 0;
 }

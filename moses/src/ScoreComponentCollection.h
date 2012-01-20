@@ -150,6 +150,21 @@ public:
 	  m_scores -= rhs.m_scores;
 	}
 
+  //For features which have an unbounded number of components
+  void MinusEquals(const ScoreProducer*sp, const std::string& name, float score)
+  {
+    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] -= score;
+  }
+
+  //For features which have an unbounded number of components
+  void SparseMinusEquals(const std::string& full_name, float score)
+  {
+    FName fname(full_name);
+    m_scores[fname] -= score;
+  }
+
 
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components
@@ -189,6 +204,13 @@ public:
   {
     CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
+    m_scores[fname] += score;
+  }
+
+  //For features which have an unbounded number of components
+  void SparsePlusEquals(const std::string& full_name, float score)
+  {
+  	FName fname(full_name);
     m_scores[fname] += score;
   }
 
@@ -307,6 +329,7 @@ public:
   void L1Normalise();
   float GetL1Norm() const;
   float GetL2Norm() const;
+  float GetLInfNorm() const;
   void Save(const std::string& filename) const;
   void Save(std::ostream&) const;
 

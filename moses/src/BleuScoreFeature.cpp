@@ -81,11 +81,13 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
   }
 }
 
-void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength, bool scaleByTargetLength,
-		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
+void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
+		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
+		float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_ref_length = scaleByRefLength;
-	m_scale_by_target_length = scaleByTargetLength;
+	m_scale_by_target_length_linear = scaleByTargetLengthLinear;
+	m_scale_by_target_length_trend = scaleByTargetLengthTrend;
 	m_scale_by_avg_length = scaleByAvgLength;
 	m_scale_by_x = scaleByX;
 	m_historySmoothing = historySmoothing;
@@ -97,6 +99,7 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
 {
 	m_refs.clear();
     FactorCollection& fc = FactorCollection::Instance();
+    cerr << "Number of reference files: " << refs.size() << endl; 
     for (size_t file_id = 0; file_id < refs.size(); file_id++) {
       for (size_t ref_id = 0; ref_id < refs[file_id].size(); ref_id++) {
           const string& ref = refs[file_id][ref_id];
@@ -430,13 +433,19 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   else if (m_scale_by_ref_length) {
     precision *= m_ref_length_history + m_cur_ref_length;
   }
-  else if (m_scale_by_target_length) {
-  	precision *= m_target_length_history + state->m_target_length;
+  else if (m_scale_by_target_length_linear) {
+  	// length of current hypothesis + number of words still to translate from source (rest being translated 1-to-1)
+  	float scaled_target_length = state->m_target_length + (m_cur_source_length - state->m_source_length);
+  	precision *= m_target_length_history + scaled_target_length;
+  }
+  else if (m_scale_by_target_length_trend) {
+  	// length of full target if remaining words were translated with the same fertility as so far
+  	float scaled_target_length = ((float)m_cur_source_length/state->m_source_length) * state->m_target_length;
+  	precision *= m_target_length_history + scaled_target_length;
   }
   else if (m_scale_by_avg_length) {
     precision *= (m_source_length_history + m_ref_length_history + m_cur_source_length +  + m_cur_ref_length) / 2;
   }
-
   return precision*m_scale_by_x;
 }
 

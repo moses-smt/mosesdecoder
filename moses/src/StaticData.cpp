@@ -1442,7 +1442,7 @@ bool StaticData::LoadReferences()
     }
     string line;
     while (getline(in,line)) {
-      references.back().push_back(line);
+      references[i].push_back(line);
     }
     if (i > 0) {
       if (references[i].size() != references[i-1].size()) {
@@ -1459,14 +1459,12 @@ bool StaticData::LoadReferences()
 
 bool StaticData::LoadDiscrimLMFeature()
 {
-	cerr << "Loading discriminative language models.. ";
-
-  // only load if specified
+	// only load if specified
   const vector<string> &wordFile = m_parameter->GetParam("discrim-lmodel-file");
   if (wordFile.empty()) {
     return true;
   }
-  cerr << wordFile.size() << " models" << endl;
+  cerr << "Loading " << wordFile.size() << " discriminative language model(s).." << endl;
 
   // if this weight is specified, the sparse DLM weights will be scaled with an additional weight
   vector<string> dlmWeightStr = m_parameter->GetParam("weight-dlm");
@@ -1495,6 +1493,11 @@ bool StaticData::LoadDiscrimLMFeature()
   		}
   	}
   	else {
+  		if (m_searchAlgorithm == ChartDecoding && !include_lower_ngrams) {
+  			UserMessage::Add("Excluding lower order DLM ngrams is currently not supported for chart decoding.");
+  			return false;
+  		}
+
   		m_targetNgramFeatures.push_back(new TargetNgramFeature(factorId, order, include_lower_ngrams));
   		if (i < dlmWeights.size())
   			m_targetNgramFeatures[i]->SetSparseProducerWeight(dlmWeights[i]);

@@ -85,6 +85,15 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
   return strme.str();
 }
 
+std::string Word::GetString(FactorType factorType) const
+{
+	const Factor *factor = m_factorArray[factorType];
+  if (factor != NULL)
+  	return factor->GetString();
+  else
+  	return NULL;
+}
+
 void Word::CreateFromString(FactorDirection direction
                             , const std::vector<FactorType> &factorOrder
                             , const std::string &str
@@ -94,7 +103,8 @@ void Word::CreateFromString(FactorDirection direction
 
   vector<string> wordVec;
   Tokenize(wordVec, str, "|");
-  CHECK(wordVec.size() == factorOrder.size());
+  if (!isNonTerminal)
+  	assert(wordVec.size() == factorOrder.size());
 
   const Factor *factor;
   for (size_t ind = 0; ind < wordVec.size(); ++ind) {

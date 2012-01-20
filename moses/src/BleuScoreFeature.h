@@ -80,7 +80,8 @@ public:
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     size_t GetReferenceLength(size_t ref_id);
-    void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength, bool scaleByTargetLength,
+    void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
+    		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
   		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
@@ -125,8 +126,11 @@ private:
     // scale BLEU score by (history of) reference length
     bool m_scale_by_ref_length;
 
-    // scale BLEU score by (history of) target length
-    bool m_scale_by_target_length;
+    // scale BLEU score by (history of) target length (linear future estimate)
+    bool m_scale_by_target_length_linear;
+
+    // scale BLEU score by (history of) target length (trend-based future estimate)
+        bool m_scale_by_target_length_trend;
 
     // scale BLEU score by (history of) the average of input and reference length
     bool m_scale_by_avg_length;
