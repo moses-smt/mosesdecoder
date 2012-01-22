@@ -22,14 +22,16 @@ float average(const vector<float>& list);
 float stdDeviation(const vector<float>& list, float avg);
 string int2string(int n);
 
+
+
 void usage()
 {
-  cerr<<"usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate cand1[,cand2[,cand3...]] "<<endl;
-  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate candFile "<<endl;
+  cerr<<"[--sctype|-s] the scorer type (default BLEU). You can specify more scorers (separated by ;)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc "<<endl;
   cerr<<"[--reference|-R] comma separated list of reference files"<<endl;
-  cerr<<"[--candidate|-C] comma separated list of candidate files"<<endl;
+  cerr<<"[--candidate|-C] candidate file"<<endl;
   cerr<<"[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)"<<endl;
   cerr<<"[--rseed|-r] the random seed for bootstraping (defaults to system clock)"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
@@ -101,29 +103,21 @@ int main(int argc, char** argv)
 
   try {
     vector<string> refFiles;
-    vector<string> candFiles;
+    vector<string> scorerTypes;
 
     if (reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
     split(reference,',',refFiles);
 
     if (candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
-    split(candidate,',',candFiles);
+    split(scorerType,';',scorerTypes);
 
-    scorer = ScorerFactory::getScorer(scorerType,scorerConfig);
-    cerr << "Using scorer: " << scorer->getName() << endl;
-
-    scorer->setReferenceFiles(refFiles);
-    PrintUserTime("Reference files loaded");
-
-
-    for (vector<string>::const_iterator it = candFiles.begin(); it != candFiles.end(); ++it)
+    for (vector<string>::const_iterator it = scorerTypes.begin(); it != scorerTypes.end(); ++it)
     {
-      evaluate(*it);
+        scorer = ScorerFactory::getScorer(*it,scorerConfig);
+        scorer->setReferenceFiles(refFiles);
+        evaluate(candidate);
+        delete scorer;
     }
-
-    PrintUserTime("Evaluation done");
-
-    delete scorer;
 
     return EXIT_SUCCESS;
   } catch (const exception& e) {
@@ -148,8 +142,6 @@ void evaluate(const string& candFile)
     scorer->prepareStats(entries.size(), line, scoreentry);
     entries.push_back(scoreentry);
   }
-
-  PrintUserTime("Candidate file " + candFile + " loaded and stats prepared");
 
   int n = entries.size();
   if (bootstrap)
@@ -177,7 +169,7 @@ void evaluate(const string& candFile)
 
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
-    cout << "File: " << candFile << "\t" << scorer->getName() << " Average score: " << avg << "\tStandard deviation: " << dev << endl;
+    cout << scorer->getName() << "\t" << avg << " [+-" << dev << "]"<< endl;
   }
   else
   {
@@ -195,7 +187,7 @@ void evaluate(const string& candFile)
 
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
-    cout << "File: " << candFile << "\t" << scorer->getName() << " Score: " << score << endl;
+    cout << scorer->getName() << "\t" << score << endl;
   }
 }
 
