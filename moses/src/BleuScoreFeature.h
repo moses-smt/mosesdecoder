@@ -53,14 +53,15 @@ public:
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
-
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
 	                                 m_scale_by_ref_length(false),
 	                                 m_scale_by_avg_length(false),
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.7),
-	                                 m_smoothing_scheme(PLUS_ONE) {}
+	                                 m_smoothing_scheme(PLUS_ONE),
+	                                 m_relax_BP(1),
+	                                 m_correction(1) {}
 
     std::string GetScoreProducerDescription() const
     {
@@ -107,6 +108,14 @@ public:
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
 
+    void SetCorrection(float correction) {
+    	m_correction = correction;
+    }
+
+    float GetCorrection() {
+    	return m_correction;
+    }
+
 private:
     // counts for pseudo-document
     std::vector< float > m_count_history;
@@ -145,6 +154,9 @@ private:
 
     // relax application of the BP by setting a value between 0 and 1
     float m_relax_BP;
+
+    // correct scaling issues
+    float m_correction;
 };
 
 } // Namespace.

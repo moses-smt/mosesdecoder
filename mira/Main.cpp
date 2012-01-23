@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
 	bool stabiliseLength;
 	bool delayUpdates;
 	float min_oracle_bleu;
+	bool correctScaling;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -136,6 +137,7 @@ int main(int argc, char** argv) {
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+		("correct-scaling", po::value<bool>(&correctScaling)->default_value(false), "Try to correct for scaling issues")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 		("delay-updates", po::value<bool>(&delayUpdates)->default_value(false), "Delay all updates until the end of an epoch")
@@ -515,6 +517,7 @@ int main(int argc, char** argv) {
 					avg_ref_length = ref_length;
 					float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
 
 					vector<const Word*> bestModel;
 					if (historyOf1best || stabiliseLength) {
@@ -873,6 +876,32 @@ int main(int argc, char** argv) {
 			}// end dumping
 
 		} // end of shard loop, end of this epoch
+
+		if (correctScaling && epoch == 0) {
+			float averageRatio = ((MiraOptimiser*) optimiser)->getSumRatios();
+			averageRatio /= numberOfUpdatesThisEpoch;
+			cerr << "Rank " << rank << ", epoch " << epoch << ", average ratio: " << averageRatio << endl;
+			float correctionFactor = 0.9;
+			float mixedAverageRatio = 0;
+#ifdef MPI_ENABLE
+		    // average across processes
+		    mpi::reduce(world, averageRatio, mixedAverageRatio, SCCPlus(), 0);
+			  if (rank == 0) {
+			  	mixedAverageRatio /= size;
+			  	mixedAverageRatio *= correctionFactor;
+					mpi::broadcast(world, mixedAverageRatio, 0);
+			  }
+#endif
+#ifndef MPI_ENABLE
+		    mixedAverageRatio = averageRatio;
+		    mixedAverageRatio *= correctionFactor;
+#endif
+
+			decoder->setCorrection(mixedAverageRatio);
+			cerr <<  "Rank " << rank << ", epoch " << epoch << ", setting scaling correction to " << mixedAverageRatio << "." << endl;
+			decoder->setWeights(initialWeights);
+			cerr <<  "Rank " << rank << ", epoch " << epoch << ", resetting decoder weights to initial weights." << endl;
+		}
 
 		if (delayUpdates) {
 			// apply all updates from this epoch to the weight vector

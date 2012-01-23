@@ -73,7 +73,11 @@ class MosesDecoder {
   		  float scaleByX, float historySmoothing, size_t scheme, float relax_BP);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
-	void cleanup();
+    void cleanup();
+
+    void setCorrection(float correction) {
+    	m_bleuScoreFeature->SetCorrection(correction);
+    }
 		
 	private:
     float getBleuScore(const Moses::ScoreComponentCollection& scores);
