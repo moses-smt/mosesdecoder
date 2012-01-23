@@ -10,7 +10,6 @@
 		1EAF9DC614B9F8CD005E8EBD /* liblm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EAF9DC314B9F8BA005E8EBD /* liblm.a */; };
 		1EAF9DC714B9F8CD005E8EBD /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EAF9DAD14B9F8AD005E8EBD /* libmoses.a */; };
 		1EAF9DC814B9F8CD005E8EBD /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EAF9DB614B9F8B1005E8EBD /* libOnDiskPt.a */; };
-		1EAF9DCA14B9F8CD005E8EBD /* libutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EAF9DC914B9F8CD005E8EBD /* libutil.a */; };
 		1EF0719F14B9F1D40052152A /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0718A14B9F1D40052152A /* IOWrapper.cpp */; };
 		1EF071A214B9F1D40052152A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0718E14B9F1D40052152A /* Main.cpp */; };
 		1EF071A414B9F1D40052152A /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0719114B9F1D40052152A /* mbr.cpp */; };
@@ -78,7 +77,6 @@
 		1EAF9DA514B9F8AD005E8EBD /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = moses.xcodeproj; sourceTree = "<group>"; };
 		1EAF9DAE14B9F8B1005E8EBD /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = OnDiskPt.xcodeproj; sourceTree = "<group>"; };
 		1EAF9DB714B9F8B9005E8EBD /* lm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = lm.xcodeproj; sourceTree = "<group>"; };
-		1EAF9DC914B9F8CD005E8EBD /* libutil.a */ = {isa = PBXFileReference; lastKnownFileType = file; name = libutil.a; path = ../../util/build/Release/libutil.a; sourceTree = "<group>"; };
 		1EF0718A14B9F1D40052152A /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = "../../moses-chart-cmd/src/IOWrapper.cpp"; sourceTree = "<group>"; };
 		1EF0718B14B9F1D40052152A /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = "../../moses-chart-cmd/src/IOWrapper.h"; sourceTree = "<group>"; };
 		1EF0718E14B9F1D40052152A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = "../../moses-chart-cmd/src/Main.cpp"; sourceTree = "<group>"; };
@@ -95,7 +93,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1EAF9DCA14B9F8CD005E8EBD /* libutil.a in Frameworks */,
 				1EAF9DC614B9F8CD005E8EBD /* liblm.a in Frameworks */,
 				1EAF9DC714B9F8CD005E8EBD /* libmoses.a in Frameworks */,
 				1EAF9DC814B9F8CD005E8EBD /* libOnDiskPt.a in Frameworks */,
@@ -108,7 +105,6 @@
 		08FB7794FE84155DC02AAC07 /* moses-chart-cmd */ = {
 			isa = PBXGroup;
 			children = (
-				1EAF9DC914B9F8CD005E8EBD /* libutil.a */,
 				08FB7795FE84155DC02AAC07 /* Source */,
 				C6859E8C029090F304C91782 /* Documentation */,
 				1AB674ADFE9D54B511CA2CBB /* Products */,

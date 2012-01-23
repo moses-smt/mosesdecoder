@@ -7,6 +7,15 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1EAC363514CDC79300DF97C3 /* Loader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC362C14CDC79300DF97C3 /* Loader.h */; };
+		1EAC363614CDC79300DF97C3 /* LoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */; };
+		1EAC363714CDC79300DF97C3 /* LoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */; };
+		1EAC363814CDC79300DF97C3 /* LoaderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC362F14CDC79300DF97C3 /* LoaderFactory.cpp */; };
+		1EAC363914CDC79300DF97C3 /* LoaderFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363014CDC79300DF97C3 /* LoaderFactory.h */; };
+		1EAC363A14CDC79300DF97C3 /* LoaderHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC363114CDC79300DF97C3 /* LoaderHiero.cpp */; };
+		1EAC363B14CDC79300DF97C3 /* LoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363214CDC79300DF97C3 /* LoaderHiero.h */; };
+		1EAC363C14CDC79300DF97C3 /* LoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */; };
+		1EAC363D14CDC79300DF97C3 /* LoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363414CDC79300DF97C3 /* LoaderStandard.h */; };
 		1EC7374614B977AB00238410 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D314B977AA00238410 /* AlignmentInfo.cpp */; };
 		1EC7374714B977AB00238410 /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735D414B977AA00238410 /* AlignmentInfo.h */; };
 		1EC7374814B977AB00238410 /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */; };
@@ -204,15 +213,6 @@
 		1EC7382714B977AB00238410 /* RuleCubeItem.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736DF14B977AB00238410 /* RuleCubeItem.h */; };
 		1EC7382814B977AB00238410 /* RuleCubeQueue.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736E014B977AB00238410 /* RuleCubeQueue.cpp */; };
 		1EC7382914B977AB00238410 /* RuleCubeQueue.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736E114B977AB00238410 /* RuleCubeQueue.h */; };
-		1EC7382A14B977AB00238410 /* RuleTableLoader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736E214B977AB00238410 /* RuleTableLoader.h */; };
-		1EC7382B14B977AB00238410 /* RuleTableLoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736E314B977AB00238410 /* RuleTableLoaderCompact.cpp */; };
-		1EC7382C14B977AB00238410 /* RuleTableLoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736E414B977AB00238410 /* RuleTableLoaderCompact.h */; };
-		1EC7382D14B977AB00238410 /* RuleTableLoaderFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736E514B977AB00238410 /* RuleTableLoaderFactory.cpp */; };
-		1EC7382E14B977AB00238410 /* RuleTableLoaderFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736E614B977AB00238410 /* RuleTableLoaderFactory.h */; };
-		1EC7382F14B977AB00238410 /* RuleTableLoaderHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736E714B977AB00238410 /* RuleTableLoaderHiero.cpp */; };
-		1EC7383014B977AB00238410 /* RuleTableLoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736E814B977AB00238410 /* RuleTableLoaderHiero.h */; };
-		1EC7383114B977AB00238410 /* RuleTableLoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736E914B977AB00238410 /* RuleTableLoaderStandard.cpp */; };
-		1EC7383214B977AB00238410 /* RuleTableLoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736EA14B977AB00238410 /* RuleTableLoaderStandard.h */; };
 		1EC7383314B977AB00238410 /* ScoreComponentCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736EB14B977AB00238410 /* ScoreComponentCollection.cpp */; };
 		1EC7383414B977AB00238410 /* ScoreComponentCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736EC14B977AB00238410 /* ScoreComponentCollection.h */; };
 		1EC7383514B977AB00238410 /* ScoreIndexManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736ED14B977AB00238410 /* ScoreIndexManager.cpp */; };
@@ -270,21 +270,26 @@
 		1EC7387414B977AB00238410 /* Word.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7373314B977AB00238410 /* Word.h */; };
 		1EC7387614B977AB00238410 /* WordLattice.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7373614B977AB00238410 /* WordLattice.cpp */; };
 		1EC7387714B977AB00238410 /* WordLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7373714B977AB00238410 /* WordLattice.h */; };
-		1EC7387814B977AB00238410 /* WordLattice.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC7373914B977AB00238410 /* WordLattice.o */; };
 		1EC7387914B977AB00238410 /* WordsBitmap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7373A14B977AB00238410 /* WordsBitmap.cpp */; };
 		1EC7387A14B977AB00238410 /* WordsBitmap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7373B14B977AB00238410 /* WordsBitmap.h */; };
-		1EC7387B14B977AB00238410 /* WordsBitmap.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC7373D14B977AB00238410 /* WordsBitmap.o */; };
 		1EC7387C14B977AB00238410 /* WordsRange.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7373E14B977AB00238410 /* WordsRange.cpp */; };
 		1EC7387D14B977AB00238410 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7373F14B977AB00238410 /* WordsRange.h */; };
-		1EC7387E14B977AB00238410 /* WordsRange.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC7374114B977AB00238410 /* WordsRange.o */; };
 		1EC7387F14B977AB00238410 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7374214B977AB00238410 /* XmlOption.cpp */; };
 		1EC7388014B977AB00238410 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7374314B977AB00238410 /* XmlOption.h */; };
-		1EC7388114B977AB00238410 /* XmlOption.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC7374514B977AB00238410 /* XmlOption.o */; };
 		1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */; };
 		1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF0709214B9EFCC0052152A /* ParallelBackoff.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1EAC362C14CDC79300DF97C3 /* Loader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Loader.h; path = ../../moses/src/RuleTable/Loader.h; sourceTree = "<group>"; };
+		1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderCompact.cpp; path = ../../moses/src/RuleTable/LoaderCompact.cpp; sourceTree = "<group>"; };
+		1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderCompact.h; path = ../../moses/src/RuleTable/LoaderCompact.h; sourceTree = "<group>"; };
+		1EAC362F14CDC79300DF97C3 /* LoaderFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderFactory.cpp; path = ../../moses/src/RuleTable/LoaderFactory.cpp; sourceTree = "<group>"; };
+		1EAC363014CDC79300DF97C3 /* LoaderFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderFactory.h; path = ../../moses/src/RuleTable/LoaderFactory.h; sourceTree = "<group>"; };
+		1EAC363114CDC79300DF97C3 /* LoaderHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderHiero.cpp; path = ../../moses/src/RuleTable/LoaderHiero.cpp; sourceTree = "<group>"; };
+		1EAC363214CDC79300DF97C3 /* LoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderHiero.h; path = ../../moses/src/RuleTable/LoaderHiero.h; sourceTree = "<group>"; };
+		1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderStandard.cpp; path = ../../moses/src/RuleTable/LoaderStandard.cpp; sourceTree = "<group>"; };
+		1EAC363414CDC79300DF97C3 /* LoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderStandard.h; path = ../../moses/src/RuleTable/LoaderStandard.h; sourceTree = "<group>"; };
 		1EC735D314B977AA00238410 /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = ../../moses/src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1EC735D414B977AA00238410 /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = ../../moses/src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = ../../moses/src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
@@ -493,15 +498,6 @@
 		1EC736DF14B977AB00238410 /* RuleCubeItem.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeItem.h; path = ../../moses/src/RuleCubeItem.h; sourceTree = "<group>"; };
 		1EC736E014B977AB00238410 /* RuleCubeQueue.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleCubeQueue.cpp; path = ../../moses/src/RuleCubeQueue.cpp; sourceTree = "<group>"; };
 		1EC736E114B977AB00238410 /* RuleCubeQueue.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleCubeQueue.h; path = ../../moses/src/RuleCubeQueue.h; sourceTree = "<group>"; };
-		1EC736E214B977AB00238410 /* RuleTableLoader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoader.h; path = ../../moses/src/RuleTableLoader.h; sourceTree = "<group>"; };
-		1EC736E314B977AB00238410 /* RuleTableLoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderCompact.cpp; path = ../../moses/src/RuleTableLoaderCompact.cpp; sourceTree = "<group>"; };
-		1EC736E414B977AB00238410 /* RuleTableLoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderCompact.h; path = ../../moses/src/RuleTableLoaderCompact.h; sourceTree = "<group>"; };
-		1EC736E514B977AB00238410 /* RuleTableLoaderFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderFactory.cpp; path = ../../moses/src/RuleTableLoaderFactory.cpp; sourceTree = "<group>"; };
-		1EC736E614B977AB00238410 /* RuleTableLoaderFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderFactory.h; path = ../../moses/src/RuleTableLoaderFactory.h; sourceTree = "<group>"; };
-		1EC736E714B977AB00238410 /* RuleTableLoaderHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderHiero.cpp; path = ../../moses/src/RuleTableLoaderHiero.cpp; sourceTree = "<group>"; };
-		1EC736E814B977AB00238410 /* RuleTableLoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderHiero.h; path = ../../moses/src/RuleTableLoaderHiero.h; sourceTree = "<group>"; };
-		1EC736E914B977AB00238410 /* RuleTableLoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = RuleTableLoaderStandard.cpp; path = ../../moses/src/RuleTableLoaderStandard.cpp; sourceTree = "<group>"; };
-		1EC736EA14B977AB00238410 /* RuleTableLoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = RuleTableLoaderStandard.h; path = ../../moses/src/RuleTableLoaderStandard.h; sourceTree = "<group>"; };
 		1EC736EB14B977AB00238410 /* ScoreComponentCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreComponentCollection.cpp; path = ../../moses/src/ScoreComponentCollection.cpp; sourceTree = "<group>"; };
 		1EC736EC14B977AB00238410 /* ScoreComponentCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreComponentCollection.h; path = ../../moses/src/ScoreComponentCollection.h; sourceTree = "<group>"; };
 		1EC736ED14B977AB00238410 /* ScoreIndexManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreIndexManager.cpp; path = ../../moses/src/ScoreIndexManager.cpp; sourceTree = "<group>"; };
@@ -559,20 +555,12 @@
 		1EC7373314B977AB00238410 /* Word.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Word.h; path = ../../moses/src/Word.h; sourceTree = "<group>"; };
 		1EC7373614B977AB00238410 /* WordLattice.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice.cpp; path = ../../moses/src/WordLattice.cpp; sourceTree = "<group>"; };
 		1EC7373714B977AB00238410 /* WordLattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordLattice.h; path = ../../moses/src/WordLattice.h; sourceTree = "<group>"; };
-		1EC7373814B977AB00238410 /* WordLattice.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = WordLattice.lo; path = ../../moses/src/WordLattice.lo; sourceTree = "<group>"; };
-		1EC7373914B977AB00238410 /* WordLattice.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = WordLattice.o; path = ../../moses/src/WordLattice.o; sourceTree = "<group>"; };
 		1EC7373A14B977AB00238410 /* WordsBitmap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordsBitmap.cpp; path = ../../moses/src/WordsBitmap.cpp; sourceTree = "<group>"; };
 		1EC7373B14B977AB00238410 /* WordsBitmap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsBitmap.h; path = ../../moses/src/WordsBitmap.h; sourceTree = "<group>"; };
-		1EC7373C14B977AB00238410 /* WordsBitmap.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = WordsBitmap.lo; path = ../../moses/src/WordsBitmap.lo; sourceTree = "<group>"; };
-		1EC7373D14B977AB00238410 /* WordsBitmap.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = WordsBitmap.o; path = ../../moses/src/WordsBitmap.o; sourceTree = "<group>"; };
 		1EC7373E14B977AB00238410 /* WordsRange.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordsRange.cpp; path = ../../moses/src/WordsRange.cpp; sourceTree = "<group>"; };
 		1EC7373F14B977AB00238410 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = ../../moses/src/WordsRange.h; sourceTree = "<group>"; };
-		1EC7374014B977AB00238410 /* WordsRange.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = WordsRange.lo; path = ../../moses/src/WordsRange.lo; sourceTree = "<group>"; };
-		1EC7374114B977AB00238410 /* WordsRange.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = WordsRange.o; path = ../../moses/src/WordsRange.o; sourceTree = "<group>"; };
 		1EC7374214B977AB00238410 /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = ../../moses/src/XmlOption.cpp; sourceTree = "<group>"; };
 		1EC7374314B977AB00238410 /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = ../../moses/src/XmlOption.h; sourceTree = "<group>"; };
-		1EC7374414B977AB00238410 /* XmlOption.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = XmlOption.lo; path = ../../moses/src/XmlOption.lo; sourceTree = "<group>"; };
-		1EC7374514B977AB00238410 /* XmlOption.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = XmlOption.o; path = ../../moses/src/XmlOption.o; sourceTree = "<group>"; };
 		1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelBackoff.cpp; sourceTree = "<group>"; };
 		1EF0709214B9EFCC0052152A /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallelBackoff.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -583,10 +571,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				1EC7387814B977AB00238410 /* WordLattice.o in Frameworks */,
-				1EC7387B14B977AB00238410 /* WordsBitmap.o in Frameworks */,
-				1EC7387E14B977AB00238410 /* WordsRange.o in Frameworks */,
-				1EC7388114B977AB00238410 /* XmlOption.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -606,6 +590,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EAC362B14CDC76200DF97C3 /* RuleTable */,
 				1EC735D314B977AA00238410 /* AlignmentInfo.cpp */,
 				1EC735D414B977AA00238410 /* AlignmentInfo.h */,
 				1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */,
@@ -770,15 +755,6 @@
 				1EC736DF14B977AB00238410 /* RuleCubeItem.h */,
 				1EC736E014B977AB00238410 /* RuleCubeQueue.cpp */,
 				1EC736E114B977AB00238410 /* RuleCubeQueue.h */,
-				1EC736E214B977AB00238410 /* RuleTableLoader.h */,
-				1EC736E314B977AB00238410 /* RuleTableLoaderCompact.cpp */,
-				1EC736E414B977AB00238410 /* RuleTableLoaderCompact.h */,
-				1EC736E514B977AB00238410 /* RuleTableLoaderFactory.cpp */,
-				1EC736E614B977AB00238410 /* RuleTableLoaderFactory.h */,
-				1EC736E714B977AB00238410 /* RuleTableLoaderHiero.cpp */,
-				1EC736E814B977AB00238410 /* RuleTableLoaderHiero.h */,
-				1EC736E914B977AB00238410 /* RuleTableLoaderStandard.cpp */,
-				1EC736EA14B977AB00238410 /* RuleTableLoaderStandard.h */,
 				1EC736EB14B977AB00238410 /* ScoreComponentCollection.cpp */,
 				1EC736EC14B977AB00238410 /* ScoreComponentCollection.h */,
 				1EC736ED14B977AB00238410 /* ScoreIndexManager.cpp */,
@@ -836,20 +812,12 @@
 				1EC7373314B977AB00238410 /* Word.h */,
 				1EC7373614B977AB00238410 /* WordLattice.cpp */,
 				1EC7373714B977AB00238410 /* WordLattice.h */,
-				1EC7373814B977AB00238410 /* WordLattice.lo */,
-				1EC7373914B977AB00238410 /* WordLattice.o */,
 				1EC7373A14B977AB00238410 /* WordsBitmap.cpp */,
 				1EC7373B14B977AB00238410 /* WordsBitmap.h */,
-				1EC7373C14B977AB00238410 /* WordsBitmap.lo */,
-				1EC7373D14B977AB00238410 /* WordsBitmap.o */,
 				1EC7373E14B977AB00238410 /* WordsRange.cpp */,
 				1EC7373F14B977AB00238410 /* WordsRange.h */,
-				1EC7374014B977AB00238410 /* WordsRange.lo */,
-				1EC7374114B977AB00238410 /* WordsRange.o */,
 				1EC7374214B977AB00238410 /* XmlOption.cpp */,
 				1EC7374314B977AB00238410 /* XmlOption.h */,
-				1EC7374414B977AB00238410 /* XmlOption.lo */,
-				1EC7374514B977AB00238410 /* XmlOption.o */,
 				1E16D086144DAA3F00B60B4F /* LM */,
 			);
 			name = Source;
@@ -868,6 +836,22 @@
 			children = (
 			);
 			name = LM;
+			sourceTree = "<group>";
+		};
+		1EAC362B14CDC76200DF97C3 /* RuleTable */ = {
+			isa = PBXGroup;
+			children = (
+				1EAC362C14CDC79300DF97C3 /* Loader.h */,
+				1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */,
+				1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */,
+				1EAC362F14CDC79300DF97C3 /* LoaderFactory.cpp */,
+				1EAC363014CDC79300DF97C3 /* LoaderFactory.h */,
+				1EAC363114CDC79300DF97C3 /* LoaderHiero.cpp */,
+				1EAC363214CDC79300DF97C3 /* LoaderHiero.h */,
+				1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */,
+				1EAC363414CDC79300DF97C3 /* LoaderStandard.h */,
+			);
+			name = RuleTable;
 			sourceTree = "<group>";
 		};
 		1EC7361314B977AA00238410 /* DynSAInclude */ = {
@@ -1056,11 +1040,6 @@
 				1EC7382514B977AB00238410 /* RuleCube.h in Headers */,
 				1EC7382714B977AB00238410 /* RuleCubeItem.h in Headers */,
 				1EC7382914B977AB00238410 /* RuleCubeQueue.h in Headers */,
-				1EC7382A14B977AB00238410 /* RuleTableLoader.h in Headers */,
-				1EC7382C14B977AB00238410 /* RuleTableLoaderCompact.h in Headers */,
-				1EC7382E14B977AB00238410 /* RuleTableLoaderFactory.h in Headers */,
-				1EC7383014B977AB00238410 /* RuleTableLoaderHiero.h in Headers */,
-				1EC7383214B977AB00238410 /* RuleTableLoaderStandard.h in Headers */,
 				1EC7383414B977AB00238410 /* ScoreComponentCollection.h in Headers */,
 				1EC7383614B977AB00238410 /* ScoreIndexManager.h in Headers */,
 				1EC7383814B977AB00238410 /* ScoreProducer.h in Headers */,
@@ -1095,6 +1074,11 @@
 				1EC7387D14B977AB00238410 /* WordsRange.h in Headers */,
 				1EC7388014B977AB00238410 /* XmlOption.h in Headers */,
 				1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */,
+				1EAC363514CDC79300DF97C3 /* Loader.h in Headers */,
+				1EAC363714CDC79300DF97C3 /* LoaderCompact.h in Headers */,
+				1EAC363914CDC79300DF97C3 /* LoaderFactory.h in Headers */,
+				1EAC363B14CDC79300DF97C3 /* LoaderHiero.h in Headers */,
+				1EAC363D14CDC79300DF97C3 /* LoaderStandard.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1239,10 +1223,6 @@
 				1EC7382414B977AB00238410 /* RuleCube.cpp in Sources */,
 				1EC7382614B977AB00238410 /* RuleCubeItem.cpp in Sources */,
 				1EC7382814B977AB00238410 /* RuleCubeQueue.cpp in Sources */,
-				1EC7382B14B977AB00238410 /* RuleTableLoaderCompact.cpp in Sources */,
-				1EC7382D14B977AB00238410 /* RuleTableLoaderFactory.cpp in Sources */,
-				1EC7382F14B977AB00238410 /* RuleTableLoaderHiero.cpp in Sources */,
-				1EC7383114B977AB00238410 /* RuleTableLoaderStandard.cpp in Sources */,
 				1EC7383314B977AB00238410 /* ScoreComponentCollection.cpp in Sources */,
 				1EC7383514B977AB00238410 /* ScoreIndexManager.cpp in Sources */,
 				1EC7383714B977AB00238410 /* ScoreProducer.cpp in Sources */,
@@ -1274,6 +1254,10 @@
 				1EC7387C14B977AB00238410 /* WordsRange.cpp in Sources */,
 				1EC7387F14B977AB00238410 /* XmlOption.cpp in Sources */,
 				1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */,
+				1EAC363614CDC79300DF97C3 /* LoaderCompact.cpp in Sources */,
+				1EAC363814CDC79300DF97C3 /* LoaderFactory.cpp in Sources */,
+				1EAC363A14CDC79300DF97C3 /* LoaderHiero.cpp in Sources */,
+				1EAC363C14CDC79300DF97C3 /* LoaderStandard.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
