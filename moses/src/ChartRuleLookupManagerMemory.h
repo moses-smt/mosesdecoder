@@ -23,11 +23,8 @@
 
 #include <vector>
 
-#if HAVE_CONFIG_H
-#include "config.h"
 #ifdef USE_BOOST_POOL
 #include <boost/pool/object_pool.hpp>
-#endif
 #endif
 
 #include "ChartRuleLookupManager.h"
