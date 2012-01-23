@@ -1819,8 +1819,8 @@ sub define_training_create_config {
       }
     }
   }
+  shift @LM;
   }
-  shift @LM; # remove interpolated lm
 
 	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
