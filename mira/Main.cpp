@@ -883,9 +883,17 @@ int main(int argc, char** argv) {
 			cerr << "Rank " << rank << ", epoch " << epoch << ", average ratio: " << averageRatio << endl;
 			float correctionFactor = 0.9;
 			float mixedAverageRatio = 0;
+			float *sendbuf_float, *recvbuf_float;
+			sendbuf_float = (float *) malloc(sizeof(float));
+			recvbuf_float = (float *) malloc(sizeof(float));
 #ifdef MPI_ENABLE
-		    // average across processes
-		    mpi::reduce(world, averageRatio, mixedAverageRatio, SCCPlus(), 0);
+			// average across processes
+			//		    mpi::reduce(world, averageRatio, mixedAverageRatio, SCCPlus(), 0);
+			sendbuf_float[0] = averageRatio;
+			recvbuf_float[0] = 0;
+			MPI_Reduce(sendbuf_float, recvbuf_float, 1, MPI_FLOAT, MPI_SUM, 0, world);
+			mixedAverageRatio = recvbuf_float[0];
+
 			  if (rank == 0) {
 			  	mixedAverageRatio /= size;
 			  	mixedAverageRatio *= correctionFactor;
