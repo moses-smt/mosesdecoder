@@ -282,29 +282,28 @@ function output_score($id,$info) {
 
     $each_score = explode(" ; ",$score);
     for($i=0;$i<count($each_score);$i++) {
-      if (preg_match('/([\d\(\)\.\s]+) (BLEU[\-c]*)/',$each_score[$i],$match) ||
-          preg_match('/([\d\(\)\.\s]+) (IBM[\-c]*)/',$each_score[$i],$match)) {
-        if ($i>0) { print "<BR>"; }
-	$opened_a_tag = 0;
-        if ($set != "avg") { 
-	  if (file_exists("$dir/evaluation/$set.cleaned.$id")) {
-	    print "<a href=\"?$state&show=evaluation/$set.cleaned.$id\">"; 
-            $opened_a_tag = 1;
-	  }
-          else if (file_exists("$dir/evaluation/$set.output.$id")) {
-            print "<a href=\"?$state&show=evaluation/$set.output.$id\">"; 
-	    $opened_a_tag = 1;
-          }
-        }
-        if ($set == "avg" && count($each_score)>1) { print $match[2].": "; }
-        print $match[1];
-        if ($opened_a_tag) { print "</a>"; }
+      if (preg_match('/([\d\(\)\.\s]+) (\S*)/',$each_score[$i],$match)) {
+          //if ($i>0) { print "&nbsp;"; }
+	      $opened_a_tag = 0;
+          if ($set != "avg") { 
+	          if (file_exists("$dir/evaluation/$set.cleaned.$id")) {
+	            print "<a href=\"?$state&show=evaluation/$set.cleaned.$id\">"; 
+                    $opened_a_tag = 1;
+	          }
+              else if (file_exists("$dir/evaluation/$set.output.$id")) {
+                print "<a href=\"?$state&show=evaluation/$set.output.$id\">"; 
+	            $opened_a_tag = 1;
+              }
+            }
+          if ($set == "avg" && count($each_score)>1) { print $match[2].": "; }
+           print "<div title=". $match[2] ." class=". $match[2] .">".$match[1]."</div>";
+          if ($opened_a_tag) { print "</a>"; }
       }
       else {
-        print "-";
+          print "-";
       }
     }
-
+    
     print "</td>";
     if ($has_analysis && array_key_exists($set,$has_analysis)) {
       print "<td align=center>";

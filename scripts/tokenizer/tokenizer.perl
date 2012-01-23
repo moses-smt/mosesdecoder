@@ -23,6 +23,7 @@ my $AGGRESSIVE = 0;
 
 while (@ARGV) {
 	$_ = shift;
+	/^-b$/ && ($| = 1, next);
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
@@ -31,6 +32,10 @@ while (@ARGV) {
 
 if ($HELP) {
 	print "Usage ./tokenizer.perl (-l [en|de|...]) < textfile > tokenizedfile\n";
+        print "Options:\n";
+        print "  -q  ... quiet.\n";
+        print "  -a  ... aggressive hyphen splitting.\n";
+        print "  -b  ... disable Perl buffering.\n";
 	exit;
 }
 if (!$QUIET) {

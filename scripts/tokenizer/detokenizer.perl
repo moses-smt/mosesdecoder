@@ -1,12 +1,9 @@
 #!/usr/bin/perl -w
 
-# $Id$
+# $Id: detokenizer.perl 4134 2011-08-08 15:30:54Z bgottesman $
 # Sample De-Tokenizer
 # written by Josh Schroeder, based on code by Philipp Koehn
 # further modifications by Ondrej Bojar
-
-# This added by Herve Saint-Amand for compatibility with translate.cgi
-$|++;
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
@@ -20,6 +17,7 @@ my $UPPERCASE_SENT = 0;
 
 while (@ARGV) {
 	$_ = shift;
+	/^-b$/ && ($| = 1, next);
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
@@ -31,6 +29,7 @@ if ($HELP) {
         print "Options:\n";
         print "  -u  ... uppercase the first char in the final sentence.\n";
         print "  -q  ... don't report detokenizer revision.\n";
+        print "  -b  ... disable Perl buffering.\n";
 	exit;
 }
 
@@ -38,7 +37,7 @@ die "No built-in rules for language $language, claim en for default behaviour."
 	if $language !~ /^(cs|en|fr|it)$/;
 
 if (!$QUIET) {
-	print STDERR "Detokenizer Version ".'$Revision$'."\n";
+	print STDERR "Detokenizer Version ".'$Revision: 4134 $'."\n";
 	print STDERR "Language: $language\n";
 }
 
