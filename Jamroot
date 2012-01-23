@@ -19,6 +19,8 @@
 #Indicates where binaries GIZA++, snt2cooc.out, and mkcls live.  
 #Builds scripts/training/train-model.perl using these paths. 
 #
+#Thread-caching malloc (optional):
+#--with-tcmalloc
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
@@ -151,6 +153,11 @@ requirements = ;
 if [ test_flags "-lSegfault" ] {
   external_lib SegFault ;
   requirements += <library>SegFault ;
+}
+
+if [ option.get "with-tcmalloc" : : "yes" ] {
+  external_lib tcmalloc ;
+  requirements += <library>tcmalloc ;
 }
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
