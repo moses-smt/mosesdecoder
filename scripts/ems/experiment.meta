@@ -271,7 +271,6 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
-	ignore-unless: script
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
   error: set kMaxOrder to at least this value
