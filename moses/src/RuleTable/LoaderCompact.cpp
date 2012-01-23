@@ -23,7 +23,7 @@
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
 #include "LMList.h"
-#include "PhraseDictionarySCFG.h"
+#include "RuleTable/Trie.h"
 #include "UserMessage.h"
 #include "Util.h"
 #include "Word.h"
@@ -41,7 +41,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
                                   size_t /* tableLimit */,
                                   const LMList &languageModels,
                                   const WordPenaltyProducer* wpProducer,
-                                  PhraseDictionarySCFG &ruleTable)
+                                  RuleTableTrie &ruleTable)
 {
   PrintUserTime("Start loading compact rule table");
 
@@ -173,7 +173,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const LMList &languageModels,
     const WordPenaltyProducer *wpProducer,
     const std::vector<float> &weights,
-    PhraseDictionarySCFG &ruleTable)
+    RuleTableTrie &ruleTable)
 {
   // Read rule count.
   reader.ReadLine();

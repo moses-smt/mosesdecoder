@@ -23,7 +23,7 @@ public:
             size_t tableLimit,
             const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
+            RuleTableTrie &);
 
 };
 
