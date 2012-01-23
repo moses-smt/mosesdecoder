@@ -23,6 +23,7 @@
 #include "PhraseDictionaryNodeSCFG.h"
 #include "InputType.h"
 #include "NonTerminal.h"
+#include "RuleTable/Trie.h"
 
 namespace Moses
 {
@@ -30,7 +31,7 @@ namespace Moses
 /*** Implementation of a SCFG rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
  */
-class PhraseDictionarySCFG : public PhraseDictionary
+class PhraseDictionarySCFG : public RuleTableTrie
 {
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
   friend class RuleTableLoader;
@@ -38,31 +39,9 @@ class PhraseDictionarySCFG : public PhraseDictionary
  public:
   PhraseDictionarySCFG(size_t numScoreComponents,
                        PhraseDictionaryFeature* feature)
-      : PhraseDictionary(numScoreComponents, feature) {}
+      : RuleTableTrie(numScoreComponents, feature) {}
 
-  virtual ~PhraseDictionarySCFG();
-
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , const LMList &languageModels
-            , const WordPenaltyProducer* wpProducer);
-
-  const std::string &GetFilePath() const { return m_filePath; }
   const PhraseDictionaryNodeSCFG &GetRootNode() const { return m_collection; }
-
-  // Required by PhraseDictionary.
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const
-  {
-    CHECK(false);
-    return NULL;
-  }
-
-  void InitializeForInput(const InputType& i);
-
-  void CleanUp();
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
@@ -81,7 +60,6 @@ class PhraseDictionarySCFG : public PhraseDictionary
   void SortAndPrune();
 
   PhraseDictionaryNodeSCFG m_collection;
-  std::string m_filePath;
 };
 
 }  // namespace Moses
