@@ -28,7 +28,7 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
                                  , const WordPenaltyProducer* wpProducer)
 {
   // file path is the directory of the rules for eacg, NOT the file of all the rules
-  m_filePath = filePath;
+  SetFilePath(filePath);
   m_tableLimit = tableLimit;
 
   m_input = &input;
@@ -48,7 +48,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
   
-  string grammarFile = m_filePath + "/grammar.out." + SPrint(translationId);
+  string grammarFile = GetFilePath() + "/grammar.out." + SPrint(translationId);
   
   // data from file
   InputFileStream inFile(grammarFile);

@@ -32,7 +32,7 @@ namespace Moses
 {
 
 class LMList;
-class PhraseDictionarySCFG;
+class RuleTableTrie;
 class WordPenaltyProducer;
 
 class RuleTableLoaderCompact : public RuleTableLoader
@@ -45,7 +45,7 @@ class RuleTableLoaderCompact : public RuleTableLoader
             size_t tableLimit,
             const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
+            RuleTableTrie &);
 
  private:
   struct LineReader {
@@ -81,7 +81,7 @@ class RuleTableLoaderCompact : public RuleTableLoader
                        const LMList &languageModels,
                        const WordPenaltyProducer *wpProducer,
                        const std::vector<float> &weights,
-                       PhraseDictionarySCFG &ruleTable);
+                       RuleTableTrie &ruleTable);
 
   // Like Tokenize() but records starting positions of tokens (instead of
   // copying substrings) and assumes delimiter is ASCII space character.
