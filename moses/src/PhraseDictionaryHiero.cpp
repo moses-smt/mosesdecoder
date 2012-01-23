@@ -10,8 +10,8 @@
 #include "PhraseDictionaryHiero.h"
 #include "PhraseDictionarySCFG.h"
 #include "InputFileStream.h"
-#include "RuleTableLoader.h"
-#include "RuleTableLoaderFactory.h"
+#include "RuleTable/Loader.h"
+#include "RuleTable/LoaderFactory.h"
 
 using namespace std;
 
