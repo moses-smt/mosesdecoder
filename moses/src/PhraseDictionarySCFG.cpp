@@ -24,8 +24,8 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
-#include "RuleTableLoader.h"
-#include "RuleTableLoaderFactory.h"
+#include "RuleTable/Loader.h"
+#include "RuleTable/LoaderFactory.h"
 #include "PhraseDictionarySCFG.h"
 #include "FactorCollection.h"
 #include "Word.h"
