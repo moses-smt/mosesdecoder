@@ -174,7 +174,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       // go through each TARGET lhs
       ChartCellLabelSet::const_iterator iterChartNonTerm;
       for (iterChartNonTerm = chartNonTermSet.begin(); iterChartNonTerm != chartNonTermSet.end(); ++iterChartNonTerm) {
-        const ChartCellLabel &cellLabel = *iterChartNonTerm;
+        const ChartCellLabel &cellLabel = iterChartNonTerm->second;
 
         //cerr << sourceLHS << " " << defaultSourceNonTerm << " " << chartNonTerm << " " << defaultTargetNonTerm << endl;
 

@@ -225,7 +225,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
       ChartCellLabelSet::const_iterator q = targetNonTerms.begin();
       ChartCellLabelSet::const_iterator tEnd = targetNonTerms.end();
       for (; q != tEnd; ++q) {
-        const ChartCellLabel &cellLabel = *q;
+        const ChartCellLabel &cellLabel = q->second;
 
         // try to match both source and target non-terminal
         const PhraseDictionaryNodeSCFG * child =
