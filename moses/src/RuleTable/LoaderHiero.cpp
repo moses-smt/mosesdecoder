@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include "RuleTableLoaderHiero.h"
+#include "RuleTable/LoaderHiero.h"
 
 using namespace std;
 

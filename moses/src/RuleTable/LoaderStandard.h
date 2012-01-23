@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "RuleTableLoader.h"
+#include "RuleTable/Loader.h"
 
 namespace Moses
 {

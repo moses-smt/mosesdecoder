@@ -17,12 +17,12 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "RuleTableLoaderFactory.h"
+#include "RuleTable/LoaderFactory.h"
 
 #include "InputFileStream.h"
-#include "RuleTableLoaderCompact.h"
-#include "RuleTableLoaderHiero.h"
-#include "RuleTableLoaderStandard.h"
+#include "RuleTable/LoaderCompact.h"
+#include "RuleTable/LoaderHiero.h"
+#include "RuleTable/LoaderStandard.h"
 #include "UserMessage.h"
 #include "Util.h"
 
