@@ -20,7 +20,7 @@
 #pragma once
 
 #include "Phrase.h"
-#include "RuleTableLoader.h"
+#include "RuleTable/Loader.h"
 #include "TypeDef.h"
 #include "Word.h"
 
