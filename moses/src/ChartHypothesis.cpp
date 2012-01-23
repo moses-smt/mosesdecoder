@@ -61,8 +61,6 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
   {
     m_prevHypos.push_back(iter->GetHypothesis());
   }
-
-  m_lmList = m_manager.GetTranslationSystem()->GetLanguageModels();
 }
 
 ChartHypothesis::~ChartHypothesis()
@@ -143,32 +141,36 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 
 void ChartHypothesis::CalcScore()
 {
-  // translation models & word penalty
-  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
-  m_currScoreBreakdown.PlusEquals(scoreBreakdown);
-
-  // lm, sparse features, etc
-  const std::vector<const StatefulFeatureFunction*>& ffs =
-    m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
-  ScoreComponentCollection currLMScoreBreakdown;
-  for (unsigned i = 0; i < ffs.size(); ++i) {
-	  if (ffs[i]->GetScoreProducerWeightShortName() == "lm")
-	  	m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&currLMScoreBreakdown);
-	  else
-	  	m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_currScoreBreakdown);
-  }
-
-  // add lm scores to current scores
-  m_currScoreBreakdown.PlusEquals(currLMScoreBreakdown);
-
-  m_lmScore = currLMScoreBreakdown.GetWeightedScore();
-  m_totalScore	= m_currScoreBreakdown.GetWeightedScore();
-
+  // total scores from prev hypos
   std::vector<const ChartHypothesis*>::iterator iter;
   for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
-	  const ChartHypothesis &prevHypo = **iter;
-	  m_totalScore += prevHypo.GetTotalScore() - prevHypo.GetLMScore();
+    const ChartHypothesis &prevHypo = **iter;
+    const ScoreComponentCollection &scoreBreakdown = prevHypo.GetScoreBreakdown();
+
+    m_scoreBreakdown.PlusEquals(scoreBreakdown);
   }
+
+  // translation models & word penalty
+  const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
+  m_scoreBreakdown.PlusEquals(scoreBreakdown);
+
+	// compute values of stateless feature functions that were not
+  // cached in the translation option-- there is no principled distinction
+
+  //const vector<const StatelessFeatureFunction*>& sfs =
+  //  m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
+	// TODO!
+  //for (unsigned i = 0; i < sfs.size(); ++i) {
+  //  sfs[i]->ChartEvaluate(m_targetPhrase, &m_scoreBreakdown);
+  //}
+
+  const std::vector<const StatefulFeatureFunction*>& ffs =
+    m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+  for (unsigned i = 0; i < ffs.size(); ++i) {
+		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+  }
+
+  m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
 
 void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)

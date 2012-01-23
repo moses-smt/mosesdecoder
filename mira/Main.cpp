@@ -436,9 +436,10 @@ int main(int argc, char** argv) {
 
 		numberOfUpdatesThisEpoch = 0;
 		// Sum up weights over one epoch, final average uses weights from last epoch
-		if (!accumulateWeights) {
+		if (!accumulateWeights)
 			cumulativeWeights.ZeroAll();
-		}
+
+		delayedWeightUpdates.ZeroAll();
 
 		// number of weight dumps this epoch
 		size_t weightEpochDump = 0;
@@ -446,8 +447,6 @@ int main(int argc, char** argv) {
 		// sum lengths of dev hypothesis/references to calculate translation length ratio for this epoch
 		size_t dev_hypothesis_length = 0;
 		size_t dev_reference_length = 0;
-
-		delayedWeightUpdates.ZeroAll();
 
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
@@ -713,9 +712,14 @@ int main(int argc, char** argv) {
 							featureValuesHope, featureValuesFear, dummy1, dummy1, learning_rate, rank, epoch);
 				}
 				else if (hope_fear) {
-				  if (bleuScoresHope[0][0] >= min_oracle_bleu)
-				    update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
-				       featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
+					if (bleuScoresHope[0][0] >= min_oracle_bleu)
+						if (hope_n == 1 && fear_n ==1)
+							update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights, weightUpdate,
+									featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
+									learning_rate, rank, epoch);
+						else
+							update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
+									featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
 				  else
 				    update_status = -1;										     
 				}
@@ -729,31 +733,34 @@ int main(int argc, char** argv) {
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
-					mosesWeights.PlusEquals(weightUpdate);
-
-					if (normaliseWeights) {
-						mosesWeights.L1Normalise();
+					if (delayUpdates) {
+						delayedWeightUpdates.PlusEquals(weightUpdate);
+						cerr << "\nRank " << rank << ", epoch " << epoch << ", keeping update: " << weightUpdate << endl;
+						++numberOfUpdatesThisEpoch;
 					}
+					else {
+						mosesWeights.PlusEquals(weightUpdate);
+						if (normaliseWeights)
+							mosesWeights.L1Normalise();
 
-					cumulativeWeights.PlusEquals(mosesWeights);
-					++numberOfUpdates;
-					++numberOfUpdatesThisEpoch;
-					if (averageWeights) {
-						ScoreComponentCollection averageWeights(cumulativeWeights);
-						if (accumulateWeights) {
-							averageWeights.DivideEquals(numberOfUpdates);
-						} else {
-							averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
+						cumulativeWeights.PlusEquals(mosesWeights);
+						++numberOfUpdates;
+						++numberOfUpdatesThisEpoch;
+						if (averageWeights) {
+							ScoreComponentCollection averageWeights(cumulativeWeights);
+							if (accumulateWeights) {
+								averageWeights.DivideEquals(numberOfUpdates);
+							} else {
+								averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
+							}
+
+							mosesWeights = averageWeights;
 						}
 
-						mosesWeights = averageWeights;
+						if (!delayUpdates)
+							// set new Moses weights
+							decoder->setWeights(mosesWeights);
 					}
-
-					if (delayUpdates)
-						delayedWeightUpdates.PlusEquals(weightUpdate);
-					else
-						// set new Moses weights
-						decoder->setWeights(mosesWeights);
 				}
 
 				// update history (for approximate document Bleu)
@@ -808,7 +815,7 @@ int main(int argc, char** argv) {
 			} // end mixing
 
 			// Dump weights?
-			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
+			if (!delayUpdates && evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
 			  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
 			  bool proceed = false;
 			  if (accumulateWeights) {
@@ -837,25 +844,25 @@ int main(int argc, char** argv) {
 			      
 			      // normalise weights after averaging
 			      if (normaliseWeights) {
-				mixedAverageWeights.L1Normalise();
+			      	mixedAverageWeights.L1Normalise();
 			      }
 			      
 			      // dump final average weights
 			      ostringstream filename;
 			      if (epoch < 10) {
-				filename << weightDumpStem << "_0" << epoch;
+			      	filename << weightDumpStem << "_0" << epoch;
 			      } else {
-				filename << weightDumpStem << "_" << epoch;
+			      	filename << weightDumpStem << "_" << epoch;
 			      }
 			      
 			      if (weightDumpFrequency > 1) {
-				filename << "_" << weightEpochDump;
+			      	filename << "_" << weightEpochDump;
 			      }
 			      
 			      if (accumulateWeights) {
-				cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+			      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
 			      } else {
-				cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+			      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
 			      }
 			      
 			      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
@@ -870,9 +877,65 @@ int main(int argc, char** argv) {
 		if (delayUpdates) {
 			// apply all updates from this epoch to the weight vector
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
+			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, old moses weights: " << mosesWeights << endl;
 			mosesWeights.PlusEquals(delayedWeightUpdates);
+			cumulativeWeights.PlusEquals(mosesWeights);
 			decoder->setWeights(mosesWeights);
 			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, new moses weights: " << mosesWeights << endl;
+
+		  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
+		  bool proceed = false;
+		  if (accumulateWeights) {
+		    if (numberOfUpdatesThisEpoch > 0) {
+		      tmpAverageWeights.DivideEquals(epoch+1);
+		      proceed = true;
+		    }
+		  }
+		  else {
+		    if (numberOfUpdatesThisEpoch > 0)
+		      proceed = true;
+		  }
+
+		  if (proceed) {
+#ifdef MPI_ENABLE
+		    // average across processes
+		    mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
+#endif
+#ifndef MPI_ENABLE
+		    mixedAverageWeights = tmpAverageWeights;
+#endif
+		    if (rank == 0 && !weightDumpStem.empty()) {
+		      // divide by number of processes
+		      mixedAverageWeights.DivideEquals(size);
+
+		      // normalise weights after averaging
+		      if (normaliseWeights) {
+		      	mixedAverageWeights.L1Normalise();
+		      }
+
+		      // dump final average weights
+		      ostringstream filename;
+		      if (epoch < 10) {
+		      	filename << weightDumpStem << "_0" << epoch;
+		      } else {
+		      	filename << weightDumpStem << "_" << epoch;
+		      }
+
+		      if (weightDumpFrequency > 1) {
+		      	filename << "_" << weightEpochDump;
+		      }
+
+		      if (accumulateWeights) {
+		      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+		      } else {
+		      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+		      }
+
+		      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
+		      mixedAverageWeights.Save(filename.str());
+		      ++weightEpochDump;
+		    }
+		  }
 		}
 
 		if (stabiliseLength && !fixLength) {

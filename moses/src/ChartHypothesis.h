@@ -56,9 +56,7 @@ protected:
 
   WordsRange					m_currSourceWordsRange;
 	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
-  //ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
-  mutable std::auto_ptr<ScoreComponentCollection> m_scoreBreakdown; /*! detailed score break-down by components (for instance language model, word penalty, etc) */
-  ScoreComponentCollection m_currScoreBreakdown /*! scores for this hypothesis */
+  ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   ,m_lmNGram
   ,m_lmPrefix;
   float m_totalScore;
@@ -71,13 +69,6 @@ protected:
   ChartManager& m_manager;
 
   unsigned m_id; /* pkoehn wants to log the order in which hypotheses were generated */
-
-//  mutable std::auto_ptr<ScoreComponentCollection> m_lmScoreBreakdown;
-//  ScoreComponentCollection m_currLMScoreBreakdown;
-
-  LMList m_lmList;
-
-  float m_lmScore;
 
   ChartHypothesis(); // not implemented
   ChartHypothesis(const ChartHypothesis &copy); // not implemented
@@ -134,34 +125,10 @@ public:
   void SetWinningHypo(const ChartHypothesis *hypo);
 
   const ScoreComponentCollection &GetScoreBreakdown() const {
-  	if (!m_scoreBreakdown.get()) {
-      m_scoreBreakdown.reset(new ScoreComponentCollection(m_currScoreBreakdown));
-
-      std::vector<const ChartHypothesis*>::const_iterator iter;
-      for (iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
-        const ChartHypothesis &prevHypo = **iter;
-
-        ScoreComponentCollection prevScoreBreakdown = prevHypo.GetScoreBreakdown();
-        // remove LM scores before adding previous score breakdown
-        LMList::const_iterator lm_iter;
-        for (lm_iter = m_lmList.begin(); lm_iter != m_lmList.end(); ++lm_iter) {
-        	LanguageModel *lm = *lm_iter;
-        	prevScoreBreakdown.Assign(lm, 0);
-        }
-
-        m_scoreBreakdown->PlusEquals(prevScoreBreakdown);
-      }
-    }
-
-    return *m_scoreBreakdown;
+    return m_scoreBreakdown;
   }
-
   float GetTotalScore() const {
     return m_totalScore;
-  }
-
-  float GetLMScore() const {
-    return m_lmScore;
   }
 
   const std::vector<const ChartHypothesis*> &GetPrevHypos() const {

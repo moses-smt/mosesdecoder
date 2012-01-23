@@ -88,6 +88,15 @@ namespace Mira {
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);
+     size_t updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
+    		 Moses::ScoreComponentCollection& weightUpdate,
+    		 Moses::ScoreComponentCollection& featureValuesHope,
+    		 Moses::ScoreComponentCollection& featureValuesFear,
+    		 float bleuScoresHope,
+    		 float bleuScoresFear,
+    		 float learning_rate,
+    		 size_t rank,
+    		 size_t epoch);
 
      void setSlack(float slack) {
     	 m_slack = slack;
