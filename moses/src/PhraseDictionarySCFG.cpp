@@ -24,8 +24,8 @@
 #include <string>
 #include <iterator>
 #include <algorithm>
-#include "RuleTableLoader.h"
-#include "RuleTableLoaderFactory.h"
+#include "RuleTable/Loader.h"
+#include "RuleTable/LoaderFactory.h"
 #include "PhraseDictionarySCFG.h"
 #include "FactorCollection.h"
 #include "Word.h"
@@ -40,28 +40,6 @@ using namespace std;
 
 namespace Moses
 {
-
-bool PhraseDictionarySCFG::Load(const std::vector<FactorType> &input
-                                , const std::vector<FactorType> &output
-                                , const string &filePath
-                                , const vector<float> &weight
-                                , size_t tableLimit
-                                , const LMList &languageModels
-                                , const WordPenaltyProducer* wpProducer)
-{
-  m_filePath = filePath;
-  m_tableLimit = tableLimit;
-
-
-  // data from file
-  InputFileStream inFile(filePath);
-
-  std::auto_ptr<RuleTableLoader> loader =
-      RuleTableLoaderFactory::Create(filePath);
-  bool ret = loader->Load(input, output, inFile, weight, tableLimit,
-                          languageModels, wpProducer, *this);
-  return ret;
-}
 
 TargetPhraseCollection &PhraseDictionarySCFG::GetOrCreateTargetPhraseCollection(
                                                                                 const Phrase &source
@@ -109,21 +87,6 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
 
   
   return *currNode;
-}
-
-void PhraseDictionarySCFG::InitializeForInput(const InputType& /* input */)
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
-}
-
-PhraseDictionarySCFG::~PhraseDictionarySCFG()
-{
-  CleanUp();
-}
-
-void PhraseDictionarySCFG::CleanUp()
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
 
 ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(

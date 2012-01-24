@@ -68,13 +68,6 @@ const float DEFAULT_EARLY_DISCARDING_THRESHOLD		= 0.0f;
 const float DEFAULT_TRANSLATION_OPTION_THRESHOLD	= 0.0f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
-/////////////////////////////////////////////////
-// for those using autoconf/automake
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
-/////////////////////////////////////////////////
-
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
 

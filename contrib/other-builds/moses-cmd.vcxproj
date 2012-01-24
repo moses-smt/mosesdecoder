@@ -47,7 +47,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -58,7 +58,7 @@
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>zdll.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zdll.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;$(SolutionDir)$(Configuration)\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <RandomizedBaseAddress>false</RandomizedBaseAddress>
@@ -69,7 +69,7 @@
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
@@ -78,7 +78,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>zdll.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zdll.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;$(SolutionDir)$(Configuration)\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -90,28 +90,20 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="src\IOWrapper.h" />
-    <ClInclude Include="src\LatticeMBR.h" />
-    <ClInclude Include="src\Main.h" />
-    <ClInclude Include="src\mbr.h" />
-    <ClInclude Include="src\TranslationAnalysis.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="src\IOWrapper.cpp" />
-    <ClCompile Include="src\LatticeMBR.cpp" />
-    <ClCompile Include="src\Main.cpp" />
-    <ClCompile Include="src\mbr.cpp" />
-    <ClCompile Include="src\TranslationAnalysis.cpp" />
+    <ClInclude Include="..\..\moses-cmd\src\IOWrapper.h" />
+    <ClInclude Include="..\..\moses-cmd\src\LatticeMBR.h" />
+    <ClInclude Include="..\..\moses-cmd\src\Main.h" />
+    <ClInclude Include="..\..\moses-cmd\src\mbr.h" />
+    <ClInclude Include="..\..\moses-cmd\src\TranslationAnalysis.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\moses\moses.vcxproj">
-      <Project>{8122157a-0de5-44ff-8e5b-024ed6ace7af}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\OnDiskPt\OnDiskPt.vcxproj">
-      <Project>{8b07671b-cbaf-4514-affd-ce238cd427e9}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+    <ClCompile Include="..\..\moses-cmd\src\IOWrapper.cpp" />
+    <ClCompile Include="..\..\moses-cmd\src\LatticeMBR.cpp" />
+    <ClCompile Include="..\..\moses-cmd\src\Main.cpp" />
+    <ClCompile Include="..\..\moses-cmd\src\mbr.cpp" />
+    <ClCompile Include="..\..\moses-cmd\src\TranslationAnalysis.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

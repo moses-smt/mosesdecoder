@@ -10,6 +10,28 @@
       <Platform>Win32</Platform>
     </ProjectConfiguration>
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\OnDiskPt\Main.h" />
+    <ClInclude Include="..\..\OnDiskPt\OnDiskWrapper.h" />
+    <ClInclude Include="..\..\OnDiskPt\Phrase.h" />
+    <ClInclude Include="..\..\OnDiskPt\PhraseNode.h" />
+    <ClInclude Include="..\..\OnDiskPt\SourcePhrase.h" />
+    <ClInclude Include="..\..\OnDiskPt\TargetPhrase.h" />
+    <ClInclude Include="..\..\OnDiskPt\TargetPhraseCollection.h" />
+    <ClInclude Include="..\..\OnDiskPt\Vocab.h" />
+    <ClInclude Include="..\..\OnDiskPt\Word.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\OnDiskPt\Main.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\OnDiskWrapper.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\Phrase.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\PhraseNode.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\SourcePhrase.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\TargetPhrase.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\TargetPhraseCollection.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\Vocab.cpp" />
+    <ClCompile Include="..\..\OnDiskPt\Word.cpp" />
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8B07671B-CBAF-4514-AFFD-CE238CD427E9}</ProjectGuid>
     <RootNamespace>OnDiskPt</RootNamespace>
@@ -55,7 +77,7 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -69,29 +91,9 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>$(SolutionDir)/moses/src;$(SolutionDir)/kenlm;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
   </ItemDefinitionGroup>
-  <ItemGroup>
-    <ClCompile Include="src\OnDiskWrapper.cpp" />
-    <ClCompile Include="src\Phrase.cpp" />
-    <ClCompile Include="src\PhraseNode.cpp" />
-    <ClCompile Include="src\SourcePhrase.cpp" />
-    <ClCompile Include="src\TargetPhrase.cpp" />
-    <ClCompile Include="src\TargetPhraseCollection.cpp" />
-    <ClCompile Include="src\Vocab.cpp" />
-    <ClCompile Include="src\Word.cpp" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="src\OnDiskWrapper.h" />
-    <ClInclude Include="src\Phrase.h" />
-    <ClInclude Include="src\PhraseNode.h" />
-    <ClInclude Include="src\SourcePhrase.h" />
-    <ClInclude Include="src\TargetPhrase.h" />
-    <ClInclude Include="src\TargetPhraseCollection.h" />
-    <ClInclude Include="src\Vocab.h" />
-    <ClInclude Include="src\Word.h" />
-  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

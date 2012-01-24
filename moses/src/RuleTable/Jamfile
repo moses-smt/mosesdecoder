@@ -1,0 +1,1 @@
+lib RuleTable : [ glob *.cpp ] ..//headers ;
