@@ -914,6 +914,13 @@ sub check_translation_old_sge(){
       print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       return 1;
     }
+	
+	if ($nbestflag && )
+	{???
+      print STDERR "N-best list doesn't exist";
+      return 1;	
+	}
+	
   }
   return 0; 
 }
