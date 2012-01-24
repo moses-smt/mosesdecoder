@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "PhraseDictionarySCFG.h"
+#include "RuleTable/Trie.h"
 #include "TypeDef.h"
 
 #include <istream>
@@ -32,7 +32,7 @@ class LMList;
 class WordPenaltyProducer;
 
 // Abstract base class defining RuleTableLoader interface.  Friend of
-// PhraseDictionarySCFG.
+// RuleTableTrie.
 class RuleTableLoader
 {
  public:
@@ -45,18 +45,18 @@ class RuleTableLoader
                     size_t tableLimit,
                     const LMList &languageModels,
                     const WordPenaltyProducer* wpProducer,
-                    PhraseDictionarySCFG &) = 0;
+                    RuleTableTrie &) = 0;
 
  protected:
-  // Provide access to PhraseDictionarySCFG's private SortAndPrune function.
-  void SortAndPrune(PhraseDictionarySCFG &ruleTable) {
+  // Provide access to RuleTableTrie's private SortAndPrune function.
+  void SortAndPrune(RuleTableTrie &ruleTable) {
     ruleTable.SortAndPrune();
   }
 
-  // Provide access to PhraseDictionarySCFG's private
+  // Provide access to RuleTableTrie's private
   // GetOrCreateTargetPhraseCollection function.
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-      PhraseDictionarySCFG &ruleTable
+      RuleTableTrie &ruleTable
       , const Phrase &source
       , const TargetPhrase &target
       , const Word &sourceLHS) {

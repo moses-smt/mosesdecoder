@@ -35,9 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "WordsBitmap.h"
 #include "Search.h"
 #include "SearchCubePruning.h"
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 namespace Moses
 {

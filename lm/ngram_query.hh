@@ -15,6 +15,9 @@
 #include <sys/time.h>
 #endif
 
+namespace lm {
+namespace ngram {
+
 #if !defined(_WIN32) && !defined(_WIN64)
 float FloatSec(const struct timeval &tv) {
   return static_cast<float>(tv.tv_sec) + (static_cast<float>(tv.tv_usec) / 1000000000.0);
@@ -43,48 +46,57 @@ void PrintUsage(const char *message) {
 #endif
 }
 
-template <class Model> void Query(const Model &model, bool sentence_context, std::istream &inStream, std::ostream &outStream) {
+template <class Model> void Query(const Model &model, bool sentence_context, std::istream &in_stream, std::ostream &out_stream) {
   PrintUsage("Loading statistics:\n");
   typename Model::State state, out;
   lm::FullScoreReturn ret;
   std::string word;
 
-  while (inStream) {
+  while (in_stream) {
     state = sentence_context ? model.BeginSentenceState() : model.NullContextState();
     float total = 0.0;
     bool got = false;
     unsigned int oov = 0;
-    while (inStream >> word) {
+    while (in_stream >> word) {
       got = true;
       lm::WordIndex vocab = model.GetVocabulary().Index(word);
       if (vocab == 0) ++oov;
       ret = model.FullScore(state, vocab, out);
       total += ret.prob;
-      outStream << word << '=' << vocab << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\t';
+      out_stream << word << '=' << vocab << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\t';
       state = out;
       char c;
       while (true) {
-        c = inStream.get();
-        if (!inStream) break;
+        c = in_stream.get();
+        if (!in_stream) break;
         if (c == '\n') break;
         if (!isspace(c)) {
-          inStream.unget();
+          in_stream.unget();
           break;
         }
       }
       if (c == '\n') break;
     }
-    if (!got && !inStream) break;
+    if (!got && !in_stream) break;
     if (sentence_context) {
       ret = model.FullScore(state, model.GetVocabulary().EndSentence(), out);
       total += ret.prob;
-      outStream << "</s>=" << model.GetVocabulary().EndSentence() << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\t';
+      out_stream << "</s>=" << model.GetVocabulary().EndSentence() << ' ' << static_cast<unsigned int>(ret.ngram_length)  << ' ' << ret.prob << '\t';
     }
-    outStream << "Total: " << total << " OOV: " << oov << '\n';
-  }
+    out_stream << "Total: " << total << " OOV: " << oov << '\n';
+ }
   PrintUsage("After queries:\n");
 }
 
+template <class M> void Query(const char *file, bool sentence_context, std::istream &in_stream, std::ostream &out_stream) {
+  Config config;
+//  config.load_method = util::LAZY;
+  M model(file, config);
+  Query(model, sentence_context, in_stream, out_stream);
+}
+
+} // namespace ngram
+} // namespace lm
 
 #endif // LM_NGRAM_QUERY__
 
