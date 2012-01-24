@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include "RuleTableLoaderHiero.h"
+#include "RuleTable/LoaderHiero.h"
 
 using namespace std;
 
@@ -20,7 +20,7 @@ bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
           size_t tableLimit,
           const LMList &languageModels,
           const WordPenaltyProducer* wpProducer,
-          PhraseDictionarySCFG &ruleTable)
+          RuleTableTrie &ruleTable)
 {
   bool ret = RuleTableLoaderStandard::Load(HieroFormat
               ,input, output

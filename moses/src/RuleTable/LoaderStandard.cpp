@@ -17,14 +17,14 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "RuleTableLoaderStandard.h"
+#include "RuleTable/LoaderStandard.h"
 
 #include <fstream>
 #include <string>
 #include <iterator>
 #include <algorithm>
 #include <sys/stat.h>
-#include "PhraseDictionarySCFG.h"
+#include "RuleTable/Trie.h"
 #include "FactorCollection.h"
 #include "Word.h"
 #include "Util.h"
@@ -47,7 +47,7 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
                                    , size_t tableLimit
                                    , const LMList &languageModels
                                    , const WordPenaltyProducer* wpProducer
-                                   , PhraseDictionarySCFG &ruleTable)
+                                   , RuleTableTrie &ruleTable)
 {
   bool ret = Load(MosesFormat
                   ,input, output
@@ -149,7 +149,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
                                 , size_t /* tableLimit */
                                 , const LMList &languageModels
                                 , const WordPenaltyProducer* wpProducer
-                                , PhraseDictionarySCFG &ruleTable)
+                                , RuleTableTrie &ruleTable)
 {
   PrintUserTime("Start loading new format pt model");
 

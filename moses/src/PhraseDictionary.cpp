@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryTreeAdaptor.h"
 #include "PhraseDictionarySCFG.h"
 #include "PhraseDictionaryOnDisk.h"
-#include "PhraseDictionaryHiero.h"
 #include "PhraseDictionaryALSuffixArray.h"
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
@@ -111,33 +110,19 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                , system->GetWeightWordPenalty());
     CHECK(ret);
     return pdta;
-  } else if (m_implementation == SCFG) {
+  } else if (m_implementation == SCFG || m_implementation == Hiero) {
     // memory phrase table
-    VERBOSE(2,"using New Format phrase tables" << std::endl);
+    if (m_implementation == Hiero) {
+      VERBOSE(2,"using Hiero format phrase tables" << std::endl);
+    } else {
+      VERBOSE(2,"using New Format phrase tables" << std::endl);
+    }
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
 
     PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(m_numScoreComponent,this);
-    bool ret = pdm->Load(GetInput()
-                         , GetOutput()
-                         , m_filePath
-                         , m_weight
-                         , m_tableLimit
-                         , system->GetLanguageModels()
-                         , system->GetWordPenaltyProducer());
-    CHECK(ret);
-    return pdm;
-  } else if (m_implementation == Hiero) {
-    // memory phrase table
-    VERBOSE(2,"using Hiero format phrase tables" << std::endl);
-    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-      m_filePath += ".gz";
-      VERBOSE(2,"Using gzipped file" << std::endl);
-    }
-    
-    PhraseDictionaryHiero* pdm  = new PhraseDictionaryHiero(m_numScoreComponent,this);
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath

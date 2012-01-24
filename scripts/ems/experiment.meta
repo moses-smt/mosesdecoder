@@ -294,12 +294,14 @@ run-giza
 	ignore-if: use-berkeley
 	rerun-on-change: giza-settings training-options script
 	default-name: giza
+	error: not found
 run-giza-inverse
 	in: prepared-data
 	out: giza-alignment-inverse
 	rerun-on-change: giza-settings training-options script
 	ignore-if: use-berkeley
 	default-name: giza-inverse
+	error: not found	
 run-berkeley
 	in: corpus
 	out: berkeley-alignment
@@ -538,6 +540,7 @@ apply-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.weight-reused.ini
 	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
+	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference
 	out: hiero-weight-config
@@ -618,6 +621,7 @@ filter
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
 	rerun-on-change: filter-settings report-precision-by-coverage
+	error: already exists. Please delete
 decode
 	in: filtered-config input
 	out: system-output
@@ -745,11 +749,12 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: wrapped-output reference-sgm
+	in: cleaned-output reference
 	out: meteor-score
-	default-name: evaluation/detokenized.sgm.METEOR
+	default-name: evaluation/meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
+	template: $meteor IN IN1 $meteor-params > OUT
 analysis
 	in: recased-output reference input
 	out: analysis

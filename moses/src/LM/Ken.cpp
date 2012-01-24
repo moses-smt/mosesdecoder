@@ -71,7 +71,7 @@ template <class Model> class LanguageModelKen : public LanguageModel {
 
     std::string GetScoreProducerDescription(unsigned) const {
       std::ostringstream oss;
-      oss << "LM_" << m_ngram->Order() << "gram";
+      oss << "LM_" << (unsigned)m_ngram->Order() << "gram";
       return oss.str();
     }
 
