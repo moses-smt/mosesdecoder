@@ -25,6 +25,8 @@ string int2string(int n);
 bool moreFiles = false;
 bool moreScorers = false;
 
+float alpha = 0.05;
+
 void usage()
 {
   cerr<<"usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate cand1[,cand2[,cand3...]] "<<endl;
@@ -184,17 +186,24 @@ void evaluate(const string& candFile)
       float score = scorer->score(candidates);
       scores.push_back(score);
       delete scoredata;
-    }
+    } 
 
     float avg = average(scores);
-    float dev = stdDeviation(scores, avg);
+    
+    sort(scores.begin(), scores.end());
+    
+    int lbIdx = scores.size() * (alpha / 2);
+    int rbIdx = scores.size() * (1 - alpha / 2);
+
+    float lb = scores[lbIdx];
+    float rb = scores[rbIdx];
 
     if (moreFiles) cout << candFile << "\t";
     if (moreScorers) cout << scorer->getName() << "\t";
 
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
-    cout << avg << " [+-" << dev << "]"<< endl;
+    cout << avg << "\t[" << lb << "," << rb << "]"<< endl;
   }
   else
   {
@@ -233,13 +242,4 @@ float average(const vector<float>& list)
     sum += *it;
 
   return sum / list.size();
-}
-
-float stdDeviation(const vector<float>& list, float avg)
-{
-  vector<float> tmp;
-  for (vector<float>::const_iterator it = list.begin(); it != list.end(); ++it)
-    tmp.push_back(pow(*it - avg, 2));
-
-  return sqrt(average(tmp));
 }
