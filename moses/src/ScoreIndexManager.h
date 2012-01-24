@@ -5,9 +5,6 @@
 
 #include <iostream>
 #include <vector>
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
 #endif

@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "RuleTableLoader.h"
+#include "RuleTable/Loader.h"
 
 namespace Moses
 {
@@ -42,7 +42,7 @@ protected:
             size_t tableLimit,
             const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
+            RuleTableTrie &);
  public:
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
@@ -51,7 +51,7 @@ protected:
             size_t tableLimit,
             const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
+            RuleTableTrie &);
 };
 
 }  // namespace Moses

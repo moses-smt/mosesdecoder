@@ -9,7 +9,7 @@
 #ifndef moses_RuleTableLoaderHiero_h
 #define moses_RuleTableLoaderHiero_h
 
-#include "RuleTableLoaderStandard.h"
+#include "RuleTable/LoaderStandard.h"
 
 namespace Moses {
 
@@ -23,7 +23,7 @@ public:
             size_t tableLimit,
             const LMList &languageModels,
             const WordPenaltyProducer* wpProducer,
-            PhraseDictionarySCFG &);
+            RuleTableTrie &);
 
 };
 
