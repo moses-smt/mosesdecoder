@@ -22,19 +22,29 @@ float average(const vector<float>& list);
 float stdDeviation(const vector<float>& list, float avg);
 string int2string(int n);
 
-
+bool moreFiles = false;
+bool moreScorers = false;
 
 void usage()
 {
-  cerr<<"usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate candFile "<<endl;
-  cerr<<"[--sctype|-s] the scorer type (default BLEU). You can specify more scorers (separated by ;)"<<endl;
+  cerr<<"usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate cand1[,cand2[,cand3...]] "<<endl;
+  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
   cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
   cerr<<"\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc "<<endl;
   cerr<<"[--reference|-R] comma separated list of reference files"<<endl;
-  cerr<<"[--candidate|-C] candidate file"<<endl;
+  cerr<<"[--candidate|-C] comma separated list of candidate files"<<endl;
   cerr<<"[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)"<<endl;
   cerr<<"[--rseed|-r] the random seed for bootstraping (defaults to system clock)"<<endl;
   cerr<<"[--help|-h] print this message and exit"<<endl;
+  cerr<<endl;
+  cerr<<"Evaluator is able to compute more metrics at once. To do this,"<<endl;
+  cerr<<"separate scorers with semicolon (note that comma is used to separate"<<endl;
+  cerr<<"scorers in the interpolated scorer)."<<endl;
+  cerr<<endl;
+  cerr<<"If you specify only one metric and one candidate file, only the final score"<<endl;
+  cerr<<"will be printed to stdout. Otherwise each line will contain metric name"<<endl;
+  cerr<<"and/or filename and the final score. Since most of the metrics prints some"<<endl;
+  cerr<<"debuging info, consider redirecting stderr to /dev/null."<<endl;
   exit(1);
 }
 
@@ -103,20 +113,32 @@ int main(int argc, char** argv)
 
   try {
     vector<string> refFiles;
+    vector<string> candFiles;
     vector<string> scorerTypes;
+
+    
 
     if (reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
     split(reference,',',refFiles);
 
     if (candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
-    split(scorerType,';',scorerTypes);
+    split(candidate,',',candFiles);
 
-    for (vector<string>::const_iterator it = scorerTypes.begin(); it != scorerTypes.end(); ++it)
+    if (scorerType.length() == 0) throw runtime_error("You have to specify at least one scorer.");
+    split(scorerType,';',scorerTypes);
+    
+    if (candFiles.size() > 1) moreFiles = true;
+    if (scorerTypes.size() > 1) moreScorers = true;
+        
+    for (vector<string>::const_iterator fileIt = candFiles.begin(); fileIt != candFiles.end(); ++fileIt)
     {
-        scorer = ScorerFactory::getScorer(*it,scorerConfig);
-        scorer->setReferenceFiles(refFiles);
-        evaluate(candidate);
-        delete scorer;
+        for (vector<string>::const_iterator scorerIt = scorerTypes.begin(); scorerIt != scorerTypes.end(); ++scorerIt)
+        {
+            scorer = ScorerFactory::getScorer(*scorerIt,scorerConfig);
+            scorer->setReferenceFiles(refFiles);
+            evaluate(*fileIt);
+            delete scorer;
+        }
     }
 
     return EXIT_SUCCESS;
@@ -167,9 +189,12 @@ void evaluate(const string& candFile)
     float avg = average(scores);
     float dev = stdDeviation(scores, avg);
 
+    if (moreFiles) cout << candFile << "\t";
+    if (moreScorers) cout << scorer->getName() << "\t";
+
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
-    cout << scorer->getName() << "\t" << avg << " [+-" << dev << "]"<< endl;
+    cout << avg << " [+-" << dev << "]"<< endl;
   }
   else
   {
@@ -184,10 +209,13 @@ void evaluate(const string& candFile)
     candidates_t candidates(n, 0);
     float score = scorer->score(candidates);
     delete scoredata;
-
+    
+    if (moreFiles) cout << candFile << "\t";
+    if (moreScorers) cout << scorer->getName() << "\t";
+    
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
-    cout << scorer->getName() << "\t" << score << endl;
+    cout << score << endl;
   }
 }
 
