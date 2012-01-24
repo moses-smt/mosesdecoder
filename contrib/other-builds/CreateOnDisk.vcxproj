@@ -55,10 +55,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>zdll.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zdll.lib;$(SolutionDir)/$(Configuration)/moses.lib;$(SolutionDir)/$(Configuration)/kenlm.lib;$(SolutionDir)/$(Configuration)/OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <TargetMachine>MachineX86</TargetMachine>
@@ -75,10 +75,10 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/moses/src;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>zdll.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>zdll.lib;$(SolutionDir)/$(Configuration)/moses.lib;$(SolutionDir)/$(Configuration)/kenlm.lib;$(SolutionDir)/$(Configuration)/OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
@@ -87,20 +87,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="src\Main.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="src\Main.h" />
+    <ClInclude Include="..\..\OnDiskPt\Main.h" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\moses\moses.vcxproj">
-      <Project>{8122157a-0de5-44ff-8e5b-024ed6ace7af}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\OnDiskPt\OnDiskPt.vcxproj">
-      <Project>{8b07671b-cbaf-4514-affd-ce238cd427e9}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
+    <ClCompile Include="..\..\OnDiskPt\Main.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
