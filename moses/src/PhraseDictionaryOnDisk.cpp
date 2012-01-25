@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -23,8 +22,8 @@
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "TargetPhraseCollection.h"
-#include "DotChartOnDisk.h"
-#include "ChartRuleLookupManagerOnDisk.h"
+#include "CYKPlusParser/DotChartOnDisk.h"
+#include "CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
 
 using namespace std;
 

@@ -25,7 +25,6 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
-#include "DotChart.h"
 #include "Util.h"
 
 using namespace std;

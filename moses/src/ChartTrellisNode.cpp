@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -25,7 +24,6 @@
 #include "ChartTrellisDetour.h"
 #include "ChartTrellisPath.h"
 #include "StaticData.h"
-#include "DotChart.h"
 
 namespace Moses
 {

@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 
 /***********************************************************************
@@ -34,7 +33,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "ChartRuleLookupManagerMemory.h"
+#include "CYKPlusParser/ChartRuleLookupManagerMemory.h"
 
 using namespace std;
 
