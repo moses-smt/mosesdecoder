@@ -78,10 +78,6 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
   Phrase ret(ARRAY_SIZE_INCR);
 
-  const ChartTranslationOption &transOpt = m_hypo.GetTranslationOption();
-
-  VERBOSE(3, "Trans Opt:" << transOpt.GetDottedRule() << ": " << m_hypo.GetCurrTargetPhrase().GetTargetLHS() << "->" << m_hypo.GetCurrTargetPhrase() << std::endl);
-
   const Phrase &currTargetPhrase = m_hypo.GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     m_hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();

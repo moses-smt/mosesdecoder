@@ -1,7 +1,6 @@
-// $Id$
 /***********************************************************************
- Moses - factored phrase-based language decoder
- Copyright (C) 2010 Hieu Hoang
+ Moses - statistical machine translation system
+ Copyright (C) 2006-2012 University of Edinburgh
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -18,20 +17,15 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "DotChart.h"
+#pragma once
+
+#include "HypoList.h"
+
+#include <vector>
 
 namespace Moses
 {
 
-std::ostream &operator<<(std::ostream &out, const DottedRule &rule)
-{
-  if (!rule.IsRoot()) {
-    out << rule.GetWordsRange() << "=" << rule.GetSourceWord() << " ";
-    if (!rule.m_prev->IsRoot()) {
-      out << " " << *rule.m_prev;
-    }
-  }
-  return out;
-}
+typedef std::vector<const HypoList *> StackVec;
 
 }

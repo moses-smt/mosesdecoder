@@ -98,7 +98,8 @@ public:
     }
 
     if (staticData.IsDetailedTranslationReportingEnabled()) {
-      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, lineNumber);
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
     }
 
     // n-best

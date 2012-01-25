@@ -60,8 +60,6 @@ class DottedRuleOnDisk : public DottedRule
 
 class DottedRuleCollOnDisk
 {
-  friend std::ostream& operator<<(std::ostream&, const DottedRuleCollOnDisk&);
-
 protected:
   typedef std::vector<const DottedRuleOnDisk*> CollType;
   CollType m_coll;

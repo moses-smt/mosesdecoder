@@ -35,7 +35,7 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   const InputType &src,
   const ChartCellCollection &cellColl,
   const PhraseDictionarySCFG &ruleTable)
-  : ChartRuleLookupManager(src, cellColl)
+  : ChartRuleLookupManagerCYKPlus(src, cellColl)
   , m_ruleTable(ruleTable)
 {
   CHECK(m_dottedRuleColls.size() == 0);
@@ -152,25 +152,24 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   DottedRuleList &rules = dottedRuleCol.Get(relEndPos + 1);
 
   // look up target sides for the rules
-  size_t rulesLimit = StaticData::Instance().GetRuleLimit();
+  const size_t ruleLimit = StaticData::Instance().GetRuleLimit();
   DottedRuleList::const_iterator iterRule;
   for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
     const DottedRuleInMemory &dottedRule = **iterRule;
     const PhraseDictionaryNodeSCFG &node = dottedRule.GetLastNode();
 
     // look up target sides
-    const TargetPhraseCollection *targetPhraseCollection = node.GetTargetPhraseCollection();
+    const TargetPhraseCollection *tpc = node.GetTargetPhraseCollection();
 
     // add the fully expanded rule (with lexical target side)
-    if (targetPhraseCollection != NULL) {
-      outColl.Add(*targetPhraseCollection, dottedRule,
-                  GetCellCollection(), adhereTableLimit, rulesLimit);
+    if (tpc != NULL) {
+      AddCompletedRule(dottedRule, *tpc, ruleLimit, adhereTableLimit, outColl);
     }
   }
 
   dottedRuleCol.Clear(relEndPos+1);
 
-  outColl.CreateChartRules(rulesLimit);
+  outColl.CreateChartRules(ruleLimit);
 }
 
 // Given a partial rule application ending at startPos-1 and given the sets of

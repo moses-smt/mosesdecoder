@@ -1,7 +1,6 @@
-// $Id$
 /***********************************************************************
- Moses - factored phrase-based language decoder
- Copyright (C) 2010 Hieu Hoang
+ Moses - statistical machine translation system
+ Copyright (C) 2006-2012 University of Edinburgh
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,41 +16,16 @@
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
-#include <algorithm>
-#include "DotChartOnDisk.h"
-#include "Util.h"
-#include "../../OnDiskPt/PhraseNode.h"
 
-using namespace std;
+#pragma once
+
+#include <vector>
 
 namespace Moses
 {
-DottedRuleStackOnDisk::DottedRuleStackOnDisk(size_t size)
-  :m_coll(size)
-{
-  for (size_t ind = 0; ind < size; ++ind) {
-    m_coll[ind] = new DottedRuleCollOnDisk();
-  }
+
+class ChartHypothesis;
+
+typedef std::vector<const ChartHypothesis*> HypoList;
+
 }
-
-DottedRuleStackOnDisk::~DottedRuleStackOnDisk()
-{
-  RemoveAllInColl(m_coll);
-  RemoveAllInColl(m_savedNode);
-}
-
-class SavedNodesOderer
-{
-public:
-  bool operator()(const SavedNodeOnDisk* a, const SavedNodeOnDisk* b) const {
-    bool ret = a->GetDottedRule().GetLastNode().GetCount(0) > b->GetDottedRule().GetLastNode().GetCount(0);
-    return ret;
-  }
-};
-
-void DottedRuleStackOnDisk::SortSavedNodes()
-{
-  sort(m_savedNode.begin(), m_savedNode.end(), SavedNodesOderer());
-}
-
-};
