@@ -14,4 +14,4 @@ if [ option.get "with-synlm" : no : yes ] = yes
 lib moses :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : ThreadPool.cpp SyntacticLanguageModel.cpp ]
-synlm ThreadPool LM//LM RuleTable//RuleTable headers ../..//z ../../OnDiskPt//OnDiskPt ;
+synlm ThreadPool CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable headers ../..//z ../../OnDiskPt//OnDiskPt ;

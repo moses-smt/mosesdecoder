@@ -53,7 +53,6 @@ void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   node = &dottedRule;
   while (rank > 0) {
     if (node->IsNonTerminal()) {
-      // add the score of the best underlying hypothesis
       const ChartCellLabel &cellLabel = node->GetChartCellLabel();
       const HypoList *stack = cellLabel.GetStack();
       assert(stack);

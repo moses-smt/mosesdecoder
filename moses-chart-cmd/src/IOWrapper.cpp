@@ -45,7 +45,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTranslationOption.h"
 #include "ChartHypothesis.h"
-#include "DotChart.h"
 
 
 using namespace std;

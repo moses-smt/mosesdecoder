@@ -33,7 +33,6 @@
 #include "WordsRange.h"
 #include "UserMessage.h"
 #include "ChartTranslationOptionList.h"
-#include "DotChart.h"
 #include "FactorCollection.h"
 
 using namespace std;
