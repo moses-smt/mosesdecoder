@@ -43,7 +43,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const std::vector<FactorType> &outputFactorsVec,
   const std::vector<float> &weight,
   const std::string &filePath)
-  : ChartRuleLookupManager(sentence, cellColl)
+  : ChartRuleLookupManagerCYKPlus(sentence, cellColl)
   , m_dictionary(dictionary)
   , m_dbWrapper(dbWrapper)
   , m_languageModels(languageModels)
@@ -260,8 +260,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
           CHECK(targetPhraseCollection);
           if (!targetPhraseCollection->IsEmpty()) {
-            outColl.Add(*targetPhraseCollection, prevDottedRule,
-                        GetCellCollection(), adhereTableLimit, rulesLimit);
+            AddCompletedRule(prevDottedRule, *targetPhraseCollection,
+                             rulesLimit, adhereTableLimit, outColl);
           }
 
         } // if (node)

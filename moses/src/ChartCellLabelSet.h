@@ -55,9 +55,10 @@ class ChartCellLabelSet
     m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w)));
   }
 
-  void AddConstituent(const Word &w, const ChartHypothesisCollection &stack)
+  void AddConstituent(const Word &w, const ChartHypothesisCollection &coll)
   {
-    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, &stack)));
+    const HypoList *stack = &(coll.GetSortedHypotheses());
+    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, stack)));
   }
 
   bool Empty() const { return m_map.empty(); }

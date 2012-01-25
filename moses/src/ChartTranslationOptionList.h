@@ -100,8 +100,7 @@ public:
   }
 
   void Add(const TargetPhraseCollection &targetPhraseCollection
-           , const DottedRule &dottedRule
-           , const ChartCellCollection &
+           , const StackVec &stackVec
            , bool ruleLimit
            , size_t tableLimit);
   void Add(ChartTranslationOption *transOpt);

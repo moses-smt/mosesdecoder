@@ -26,8 +26,6 @@ namespace Moses
 
 class DottedRule
 {
-  friend std::ostream& operator<<(std::ostream &, const DottedRule &);
-
  public:
   // used only to init dot stack.
   DottedRule()

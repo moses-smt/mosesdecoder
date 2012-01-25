@@ -82,7 +82,7 @@ public:
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
-  void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, long translationId);
+  void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
   void ResetTranslationId();

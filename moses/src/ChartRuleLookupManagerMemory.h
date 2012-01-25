@@ -27,11 +27,12 @@
 #include <boost/pool/object_pool.hpp>
 #endif
 
-#include "ChartRuleLookupManager.h"
+#include "ChartRuleLookupManagerCYKPlus.h"
 #include "DotChartInMemory.h"
 #include "NonTerminal.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "PhraseDictionarySCFG.h"
+#include "StackVec.h"
 
 namespace Moses
 {
@@ -41,9 +42,9 @@ class DottedRuleColl;
 class WordsRange;
 
 // Implementation of ChartRuleLookupManager for in-memory rule tables.
-class ChartRuleLookupManagerMemory : public ChartRuleLookupManager
+class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 {
-public:
+ public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
                                const ChartCellCollection &cellColl,
                                const PhraseDictionarySCFG &ruleTable);
@@ -55,7 +56,7 @@ public:
     bool adhereTableLimit,
     ChartTranslationOptionList &outColl);
 
-private:
+ private:
   void ExtendPartialRuleApplication(
     const DottedRuleInMemory &prevDottedRule,
     size_t startPos,

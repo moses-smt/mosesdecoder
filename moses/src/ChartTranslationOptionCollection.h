@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -26,6 +25,7 @@
 #include "DecodeGraph.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartRuleLookupManager.h"
+#include "StackVec.h"
 
 namespace Moses
 {
@@ -49,7 +49,7 @@ protected:
   std::vector< std::vector< ChartTranslationOptionList > > m_collection; /*< contains translation options */
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
-  std::list<std::vector<DottedRule*>* > m_dottedRuleCache;
+  StackVec m_emptyStackVec;
 
   // for adding 1 trans opt in unknown word proc
   void Add(ChartTranslationOption *transOpt, size_t pos);

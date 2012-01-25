@@ -19,6 +19,8 @@
 
 #pragma once
 
+#include "StackVec.h"
+
 #include <vector>
 
 namespace Moses
@@ -28,7 +30,6 @@ class ChartCellCollection;
 class ChartHypothesis;
 class ChartManager;
 class ChartTranslationOption;
-class DottedRule;
 class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
@@ -130,8 +131,7 @@ class RuleCubeItem
   RuleCubeItem(const RuleCubeItem &);  // Not implemented
   RuleCubeItem &operator=(const RuleCubeItem &);  // Not implemented
 
-  void CreateHypothesisDimensions(const DottedRule &,
-                                  const ChartCellCollection &);
+  void CreateHypothesisDimensions(const StackVec &);
 
   TranslationDimension m_translationDimension;
   std::vector<HypothesisDimension> m_hypothesisDimensions;

@@ -19,20 +19,20 @@
 
 #pragma once
 
+#include "HypoList.h"
 #include "Word.h"
 #include "WordsRange.h"
 
 namespace Moses
 {
 
-class ChartHypothesisCollection;
 class Word;
 
 class ChartCellLabel
 {
  public:
   ChartCellLabel(const WordsRange &coverage, const Word &label,
-                 const ChartHypothesisCollection *stack=NULL)
+                 const HypoList *stack=NULL)
     : m_coverage(coverage)
     , m_label(label)
     , m_stack(stack)
@@ -40,7 +40,7 @@ class ChartCellLabel
 
   const WordsRange &GetCoverage() const { return m_coverage; }
   const Word &GetLabel() const { return m_label; }
-  const ChartHypothesisCollection *GetStack() const { return m_stack; }
+  const HypoList *GetStack() const { return m_stack; }
 
   bool operator<(const ChartCellLabel &other) const
   {
@@ -55,7 +55,7 @@ class ChartCellLabel
  private:
   const WordsRange &m_coverage;
   const Word &m_label;
-  const ChartHypothesisCollection *m_stack;
+  const HypoList *m_stack;
 };
 
 }
