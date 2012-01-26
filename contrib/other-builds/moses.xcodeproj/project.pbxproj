@@ -37,12 +37,7 @@
 		1EC7375814B977AB00238410 /* ChartHypothesisCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735E514B977AA00238410 /* ChartHypothesisCollection.h */; };
 		1EC7375914B977AB00238410 /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735E614B977AA00238410 /* ChartManager.cpp */; };
 		1EC7375A14B977AB00238410 /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735E714B977AA00238410 /* ChartManager.h */; };
-		1EC7375B14B977AB00238410 /* ChartRuleLookupManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735E814B977AA00238410 /* ChartRuleLookupManager.cpp */; };
 		1EC7375C14B977AB00238410 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735E914B977AA00238410 /* ChartRuleLookupManager.h */; };
-		1EC7375D14B977AB00238410 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735EA14B977AA00238410 /* ChartRuleLookupManagerMemory.cpp */; };
-		1EC7375E14B977AB00238410 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735EB14B977AA00238410 /* ChartRuleLookupManagerMemory.h */; };
-		1EC7375F14B977AB00238410 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735EC14B977AA00238410 /* ChartRuleLookupManagerOnDisk.cpp */; };
-		1EC7376014B977AB00238410 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735ED14B977AA00238410 /* ChartRuleLookupManagerOnDisk.h */; };
 		1EC7376114B977AB00238410 /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735EE14B977AA00238410 /* ChartTranslationOption.cpp */; };
 		1EC7376214B977AB00238410 /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735EF14B977AA00238410 /* ChartTranslationOption.h */; };
 		1EC7376314B977AB00238410 /* ChartTranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735F014B977AA00238410 /* ChartTranslationOptionCollection.cpp */; };
@@ -72,12 +67,6 @@
 		1EC7377B14B977AB00238410 /* DecodeStepTranslation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7360814B977AA00238410 /* DecodeStepTranslation.h */; };
 		1EC7377C14B977AB00238410 /* Dictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7360914B977AA00238410 /* Dictionary.cpp */; };
 		1EC7377D14B977AB00238410 /* Dictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7360A14B977AA00238410 /* Dictionary.h */; };
-		1EC7377E14B977AB00238410 /* DotChart.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7360B14B977AA00238410 /* DotChart.cpp */; };
-		1EC7377F14B977AB00238410 /* DotChart.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7360C14B977AA00238410 /* DotChart.h */; };
-		1EC7378014B977AB00238410 /* DotChartInMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7360D14B977AA00238410 /* DotChartInMemory.cpp */; };
-		1EC7378114B977AB00238410 /* DotChartInMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7360E14B977AA00238410 /* DotChartInMemory.h */; };
-		1EC7378214B977AB00238410 /* DotChartOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7360F14B977AA00238410 /* DotChartOnDisk.cpp */; };
-		1EC7378314B977AB00238410 /* DotChartOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361014B977AA00238410 /* DotChartOnDisk.h */; };
 		1EC7378414B977AB00238410 /* DummyScoreProducers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7361114B977AA00238410 /* DummyScoreProducers.cpp */; };
 		1EC7378514B977AB00238410 /* DummyScoreProducers.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361214B977AA00238410 /* DummyScoreProducers.h */; };
 		1EC7378614B977AB00238410 /* fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361414B977AA00238410 /* fdstream.h */; };
@@ -180,22 +169,12 @@
 		1EC7380614B977AB00238410 /* Phrase.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736BD14B977AA00238410 /* Phrase.h */; };
 		1EC7380714B977AB00238410 /* PhraseDictionary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736BE14B977AA00238410 /* PhraseDictionary.cpp */; };
 		1EC7380814B977AB00238410 /* PhraseDictionary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736BF14B977AA00238410 /* PhraseDictionary.h */; };
-		1EC7380914B977AB00238410 /* PhraseDictionaryALSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736C014B977AA00238410 /* PhraseDictionaryALSuffixArray.cpp */; };
-		1EC7380A14B977AB00238410 /* PhraseDictionaryALSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736C114B977AA00238410 /* PhraseDictionaryALSuffixArray.h */; };
 		1EC7380B14B977AB00238410 /* PhraseDictionaryDynSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736C214B977AA00238410 /* PhraseDictionaryDynSuffixArray.cpp */; };
 		1EC7380C14B977AB00238410 /* PhraseDictionaryDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736C314B977AA00238410 /* PhraseDictionaryDynSuffixArray.h */; };
-		1EC7380D14B977AB00238410 /* PhraseDictionaryHiero.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736C414B977AA00238410 /* PhraseDictionaryHiero.cpp */; };
-		1EC7380E14B977AB00238410 /* PhraseDictionaryHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736C514B977AA00238410 /* PhraseDictionaryHiero.h */; };
 		1EC7380F14B977AB00238410 /* PhraseDictionaryMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736C614B977AA00238410 /* PhraseDictionaryMemory.cpp */; };
 		1EC7381014B977AB00238410 /* PhraseDictionaryMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736C714B977AA00238410 /* PhraseDictionaryMemory.h */; };
 		1EC7381114B977AB00238410 /* PhraseDictionaryNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736C814B977AA00238410 /* PhraseDictionaryNode.cpp */; };
 		1EC7381214B977AB00238410 /* PhraseDictionaryNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736C914B977AA00238410 /* PhraseDictionaryNode.h */; };
-		1EC7381314B977AB00238410 /* PhraseDictionaryNodeSCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736CA14B977AA00238410 /* PhraseDictionaryNodeSCFG.cpp */; };
-		1EC7381414B977AB00238410 /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736CB14B977AA00238410 /* PhraseDictionaryNodeSCFG.h */; };
-		1EC7381514B977AB00238410 /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736CC14B977AA00238410 /* PhraseDictionaryOnDisk.cpp */; };
-		1EC7381614B977AB00238410 /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736CD14B977AA00238410 /* PhraseDictionaryOnDisk.h */; };
-		1EC7381714B977AB00238410 /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736CE14B977AA00238410 /* PhraseDictionarySCFG.cpp */; };
-		1EC7381814B977AB00238410 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736CF14B977AA00238410 /* PhraseDictionarySCFG.h */; };
 		1EC7381914B977AB00238410 /* PhraseDictionaryTree.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736D014B977AA00238410 /* PhraseDictionaryTree.cpp */; };
 		1EC7381A14B977AB00238410 /* PhraseDictionaryTree.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC736D114B977AA00238410 /* PhraseDictionaryTree.h */; };
 		1EC7381B14B977AB00238410 /* PhraseDictionaryTreeAdaptor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC736D214B977AA00238410 /* PhraseDictionaryTreeAdaptor.cpp */; };
@@ -276,6 +255,44 @@
 		1EC7387D14B977AB00238410 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7373F14B977AB00238410 /* WordsRange.h */; };
 		1EC7387F14B977AB00238410 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7374214B977AB00238410 /* XmlOption.cpp */; };
 		1EC7388014B977AB00238410 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7374314B977AB00238410 /* XmlOption.h */; };
+		1EDA804F14D19EEF003D2191 /* ApplicableRuleTrie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA803614D19EEF003D2191 /* ApplicableRuleTrie.cpp */; };
+		1EDA805014D19EEF003D2191 /* ApplicableRuleTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA803714D19EEF003D2191 /* ApplicableRuleTrie.h */; };
+		1EDA805614D19EEF003D2191 /* IntermediateVarSpanNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804314D19EEF003D2191 /* IntermediateVarSpanNode.h */; };
+		1EDA805814D19EEF003D2191 /* Parser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA804514D19EEF003D2191 /* Parser.cpp */; };
+		1EDA805914D19EEF003D2191 /* Parser.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804614D19EEF003D2191 /* Parser.h */; };
+		1EDA805A14D19EEF003D2191 /* SentenceMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804714D19EEF003D2191 /* SentenceMap.h */; };
+		1EDA805B14D19EEF003D2191 /* StackLattice.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804814D19EEF003D2191 /* StackLattice.h */; };
+		1EDA805C14D19EEF003D2191 /* StackLatticeBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA804914D19EEF003D2191 /* StackLatticeBuilder.cpp */; };
+		1EDA805D14D19EEF003D2191 /* StackLatticeBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804A14D19EEF003D2191 /* StackLatticeBuilder.h */; };
+		1EDA805E14D19EEF003D2191 /* StackLatticeSearcher.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804B14D19EEF003D2191 /* StackLatticeSearcher.h */; };
+		1EDA805F14D19EEF003D2191 /* VarSpanNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804C14D19EEF003D2191 /* VarSpanNode.h */; };
+		1EDA806014D19EEF003D2191 /* VarSpanTrieBuilder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA804D14D19EEF003D2191 /* VarSpanTrieBuilder.cpp */; };
+		1EDA806114D19EEF003D2191 /* VarSpanTrieBuilder.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804E14D19EEF003D2191 /* VarSpanTrieBuilder.h */; };
+		1EDA806D14D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA806214D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.cpp */; };
+		1EDA806E14D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA806314D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.h */; };
+		1EDA806F14D19F12003D2191 /* ChartRuleLookupManagerMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA806414D19F12003D2191 /* ChartRuleLookupManagerMemory.cpp */; };
+		1EDA807014D19F12003D2191 /* ChartRuleLookupManagerMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA806514D19F12003D2191 /* ChartRuleLookupManagerMemory.h */; };
+		1EDA807114D19F12003D2191 /* ChartRuleLookupManagerOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA806614D19F12003D2191 /* ChartRuleLookupManagerOnDisk.cpp */; };
+		1EDA807214D19F12003D2191 /* ChartRuleLookupManagerOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA806714D19F12003D2191 /* ChartRuleLookupManagerOnDisk.h */; };
+		1EDA807314D19F12003D2191 /* DotChart.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA806814D19F12003D2191 /* DotChart.h */; };
+		1EDA807414D19F12003D2191 /* DotChartInMemory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA806914D19F12003D2191 /* DotChartInMemory.cpp */; };
+		1EDA807514D19F12003D2191 /* DotChartInMemory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA806A14D19F12003D2191 /* DotChartInMemory.h */; };
+		1EDA807614D19F12003D2191 /* DotChartOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA806B14D19F12003D2191 /* DotChartOnDisk.cpp */; };
+		1EDA807714D19F12003D2191 /* DotChartOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA806C14D19F12003D2191 /* DotChartOnDisk.h */; };
+		1EDA808614D19FBF003D2191 /* PhraseDictionaryALSuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA807814D19FBF003D2191 /* PhraseDictionaryALSuffixArray.cpp */; };
+		1EDA808714D19FBF003D2191 /* PhraseDictionaryALSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA807914D19FBF003D2191 /* PhraseDictionaryALSuffixArray.h */; };
+		1EDA808814D19FBF003D2191 /* PhraseDictionaryNodeSCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA807A14D19FBF003D2191 /* PhraseDictionaryNodeSCFG.cpp */; };
+		1EDA808914D19FBF003D2191 /* PhraseDictionaryNodeSCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA807B14D19FBF003D2191 /* PhraseDictionaryNodeSCFG.h */; };
+		1EDA808A14D19FBF003D2191 /* PhraseDictionaryOnDisk.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA807C14D19FBF003D2191 /* PhraseDictionaryOnDisk.cpp */; };
+		1EDA808B14D19FBF003D2191 /* PhraseDictionaryOnDisk.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA807D14D19FBF003D2191 /* PhraseDictionaryOnDisk.h */; };
+		1EDA808C14D19FBF003D2191 /* PhraseDictionarySCFG.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA807E14D19FBF003D2191 /* PhraseDictionarySCFG.cpp */; };
+		1EDA808D14D19FBF003D2191 /* PhraseDictionarySCFG.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA807F14D19FBF003D2191 /* PhraseDictionarySCFG.h */; };
+		1EDA808E14D19FBF003D2191 /* Trie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA808014D19FBF003D2191 /* Trie.cpp */; };
+		1EDA808F14D19FBF003D2191 /* Trie.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA808114D19FBF003D2191 /* Trie.h */; };
+		1EDA809014D19FBF003D2191 /* UTrie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA808214D19FBF003D2191 /* UTrie.cpp */; };
+		1EDA809114D19FBF003D2191 /* UTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA808314D19FBF003D2191 /* UTrie.h */; };
+		1EDA809214D19FBF003D2191 /* UTrieNode.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA808414D19FBF003D2191 /* UTrieNode.cpp */; };
+		1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA808514D19FBF003D2191 /* UTrieNode.h */; };
 		1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */; };
 		1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF0709214B9EFCC0052152A /* ParallelBackoff.h */; };
 /* End PBXBuildFile section */
@@ -311,12 +328,7 @@
 		1EC735E514B977AA00238410 /* ChartHypothesisCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartHypothesisCollection.h; path = ../../moses/src/ChartHypothesisCollection.h; sourceTree = "<group>"; };
 		1EC735E614B977AA00238410 /* ChartManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartManager.cpp; path = ../../moses/src/ChartManager.cpp; sourceTree = "<group>"; };
 		1EC735E714B977AA00238410 /* ChartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartManager.h; path = ../../moses/src/ChartManager.h; sourceTree = "<group>"; };
-		1EC735E814B977AA00238410 /* ChartRuleLookupManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManager.cpp; path = ../../moses/src/ChartRuleLookupManager.cpp; sourceTree = "<group>"; };
 		1EC735E914B977AA00238410 /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = ../../moses/src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
-		1EC735EA14B977AA00238410 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = ../../moses/src/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
-		1EC735EB14B977AA00238410 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = ../../moses/src/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
-		1EC735EC14B977AA00238410 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = ../../moses/src/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
-		1EC735ED14B977AA00238410 /* ChartRuleLookupManagerOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerOnDisk.h; path = ../../moses/src/ChartRuleLookupManagerOnDisk.h; sourceTree = "<group>"; };
 		1EC735EE14B977AA00238410 /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = ../../moses/src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
 		1EC735EF14B977AA00238410 /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = ../../moses/src/ChartTranslationOption.h; sourceTree = "<group>"; };
 		1EC735F014B977AA00238410 /* ChartTranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionCollection.cpp; path = ../../moses/src/ChartTranslationOptionCollection.cpp; sourceTree = "<group>"; };
@@ -346,12 +358,6 @@
 		1EC7360814B977AA00238410 /* DecodeStepTranslation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DecodeStepTranslation.h; path = ../../moses/src/DecodeStepTranslation.h; sourceTree = "<group>"; };
 		1EC7360914B977AA00238410 /* Dictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Dictionary.cpp; path = ../../moses/src/Dictionary.cpp; sourceTree = "<group>"; };
 		1EC7360A14B977AA00238410 /* Dictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Dictionary.h; path = ../../moses/src/Dictionary.h; sourceTree = "<group>"; };
-		1EC7360B14B977AA00238410 /* DotChart.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChart.cpp; path = ../../moses/src/DotChart.cpp; sourceTree = "<group>"; };
-		1EC7360C14B977AA00238410 /* DotChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChart.h; path = ../../moses/src/DotChart.h; sourceTree = "<group>"; };
-		1EC7360D14B977AA00238410 /* DotChartInMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartInMemory.cpp; path = ../../moses/src/DotChartInMemory.cpp; sourceTree = "<group>"; };
-		1EC7360E14B977AA00238410 /* DotChartInMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartInMemory.h; path = ../../moses/src/DotChartInMemory.h; sourceTree = "<group>"; };
-		1EC7360F14B977AA00238410 /* DotChartOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartOnDisk.cpp; path = ../../moses/src/DotChartOnDisk.cpp; sourceTree = "<group>"; };
-		1EC7361014B977AA00238410 /* DotChartOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartOnDisk.h; path = ../../moses/src/DotChartOnDisk.h; sourceTree = "<group>"; };
 		1EC7361114B977AA00238410 /* DummyScoreProducers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DummyScoreProducers.cpp; path = ../../moses/src/DummyScoreProducers.cpp; sourceTree = "<group>"; };
 		1EC7361214B977AA00238410 /* DummyScoreProducers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DummyScoreProducers.h; path = ../../moses/src/DummyScoreProducers.h; sourceTree = "<group>"; };
 		1EC7361414B977AA00238410 /* fdstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdstream.h; sourceTree = "<group>"; };
@@ -464,22 +470,12 @@
 		1EC736BD14B977AA00238410 /* Phrase.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Phrase.h; path = ../../moses/src/Phrase.h; sourceTree = "<group>"; };
 		1EC736BE14B977AA00238410 /* PhraseDictionary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionary.cpp; path = ../../moses/src/PhraseDictionary.cpp; sourceTree = "<group>"; };
 		1EC736BF14B977AA00238410 /* PhraseDictionary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionary.h; path = ../../moses/src/PhraseDictionary.h; sourceTree = "<group>"; };
-		1EC736C014B977AA00238410 /* PhraseDictionaryALSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryALSuffixArray.cpp; path = ../../moses/src/PhraseDictionaryALSuffixArray.cpp; sourceTree = "<group>"; };
-		1EC736C114B977AA00238410 /* PhraseDictionaryALSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryALSuffixArray.h; path = ../../moses/src/PhraseDictionaryALSuffixArray.h; sourceTree = "<group>"; };
 		1EC736C214B977AA00238410 /* PhraseDictionaryDynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryDynSuffixArray.cpp; path = ../../moses/src/PhraseDictionaryDynSuffixArray.cpp; sourceTree = "<group>"; };
 		1EC736C314B977AA00238410 /* PhraseDictionaryDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryDynSuffixArray.h; path = ../../moses/src/PhraseDictionaryDynSuffixArray.h; sourceTree = "<group>"; };
-		1EC736C414B977AA00238410 /* PhraseDictionaryHiero.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryHiero.cpp; path = ../../moses/src/PhraseDictionaryHiero.cpp; sourceTree = "<group>"; };
-		1EC736C514B977AA00238410 /* PhraseDictionaryHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryHiero.h; path = ../../moses/src/PhraseDictionaryHiero.h; sourceTree = "<group>"; };
 		1EC736C614B977AA00238410 /* PhraseDictionaryMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryMemory.cpp; path = ../../moses/src/PhraseDictionaryMemory.cpp; sourceTree = "<group>"; };
 		1EC736C714B977AA00238410 /* PhraseDictionaryMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryMemory.h; path = ../../moses/src/PhraseDictionaryMemory.h; sourceTree = "<group>"; };
 		1EC736C814B977AA00238410 /* PhraseDictionaryNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNode.cpp; path = ../../moses/src/PhraseDictionaryNode.cpp; sourceTree = "<group>"; };
 		1EC736C914B977AA00238410 /* PhraseDictionaryNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNode.h; path = ../../moses/src/PhraseDictionaryNode.h; sourceTree = "<group>"; };
-		1EC736CA14B977AA00238410 /* PhraseDictionaryNodeSCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSCFG.cpp; path = ../../moses/src/PhraseDictionaryNodeSCFG.cpp; sourceTree = "<group>"; };
-		1EC736CB14B977AA00238410 /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = ../../moses/src/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
-		1EC736CC14B977AA00238410 /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = ../../moses/src/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
-		1EC736CD14B977AA00238410 /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = ../../moses/src/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
-		1EC736CE14B977AA00238410 /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = ../../moses/src/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
-		1EC736CF14B977AA00238410 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = ../../moses/src/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
 		1EC736D014B977AA00238410 /* PhraseDictionaryTree.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTree.cpp; path = ../../moses/src/PhraseDictionaryTree.cpp; sourceTree = "<group>"; };
 		1EC736D114B977AA00238410 /* PhraseDictionaryTree.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTree.h; path = ../../moses/src/PhraseDictionaryTree.h; sourceTree = "<group>"; };
 		1EC736D214B977AA00238410 /* PhraseDictionaryTreeAdaptor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTreeAdaptor.cpp; path = ../../moses/src/PhraseDictionaryTreeAdaptor.cpp; sourceTree = "<group>"; };
@@ -561,6 +557,44 @@
 		1EC7373F14B977AB00238410 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = ../../moses/src/WordsRange.h; sourceTree = "<group>"; };
 		1EC7374214B977AB00238410 /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = ../../moses/src/XmlOption.cpp; sourceTree = "<group>"; };
 		1EC7374314B977AB00238410 /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = ../../moses/src/XmlOption.h; sourceTree = "<group>"; };
+		1EDA803614D19EEF003D2191 /* ApplicableRuleTrie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ApplicableRuleTrie.cpp; path = ../../moses/src/Scope3Parser/ApplicableRuleTrie.cpp; sourceTree = "<group>"; };
+		1EDA803714D19EEF003D2191 /* ApplicableRuleTrie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ApplicableRuleTrie.h; path = ../../moses/src/Scope3Parser/ApplicableRuleTrie.h; sourceTree = "<group>"; };
+		1EDA804314D19EEF003D2191 /* IntermediateVarSpanNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IntermediateVarSpanNode.h; path = ../../moses/src/Scope3Parser/IntermediateVarSpanNode.h; sourceTree = "<group>"; };
+		1EDA804514D19EEF003D2191 /* Parser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Parser.cpp; path = ../../moses/src/Scope3Parser/Parser.cpp; sourceTree = "<group>"; };
+		1EDA804614D19EEF003D2191 /* Parser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Parser.h; path = ../../moses/src/Scope3Parser/Parser.h; sourceTree = "<group>"; };
+		1EDA804714D19EEF003D2191 /* SentenceMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceMap.h; path = ../../moses/src/Scope3Parser/SentenceMap.h; sourceTree = "<group>"; };
+		1EDA804814D19EEF003D2191 /* StackLattice.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StackLattice.h; path = ../../moses/src/Scope3Parser/StackLattice.h; sourceTree = "<group>"; };
+		1EDA804914D19EEF003D2191 /* StackLatticeBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StackLatticeBuilder.cpp; path = ../../moses/src/Scope3Parser/StackLatticeBuilder.cpp; sourceTree = "<group>"; };
+		1EDA804A14D19EEF003D2191 /* StackLatticeBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StackLatticeBuilder.h; path = ../../moses/src/Scope3Parser/StackLatticeBuilder.h; sourceTree = "<group>"; };
+		1EDA804B14D19EEF003D2191 /* StackLatticeSearcher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StackLatticeSearcher.h; path = ../../moses/src/Scope3Parser/StackLatticeSearcher.h; sourceTree = "<group>"; };
+		1EDA804C14D19EEF003D2191 /* VarSpanNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VarSpanNode.h; path = ../../moses/src/Scope3Parser/VarSpanNode.h; sourceTree = "<group>"; };
+		1EDA804D14D19EEF003D2191 /* VarSpanTrieBuilder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = VarSpanTrieBuilder.cpp; path = ../../moses/src/Scope3Parser/VarSpanTrieBuilder.cpp; sourceTree = "<group>"; };
+		1EDA804E14D19EEF003D2191 /* VarSpanTrieBuilder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = VarSpanTrieBuilder.h; path = ../../moses/src/Scope3Parser/VarSpanTrieBuilder.h; sourceTree = "<group>"; };
+		1EDA806214D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerCYKPlus.cpp; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp; sourceTree = "<group>"; };
+		1EDA806314D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerCYKPlus.h; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerCYKPlus.h; sourceTree = "<group>"; };
+		1EDA806414D19F12003D2191 /* ChartRuleLookupManagerMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemory.cpp; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerMemory.cpp; sourceTree = "<group>"; };
+		1EDA806514D19F12003D2191 /* ChartRuleLookupManagerMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemory.h; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerMemory.h; sourceTree = "<group>"; };
+		1EDA806614D19F12003D2191 /* ChartRuleLookupManagerOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerOnDisk.cpp; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp; sourceTree = "<group>"; };
+		1EDA806714D19F12003D2191 /* ChartRuleLookupManagerOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerOnDisk.h; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerOnDisk.h; sourceTree = "<group>"; };
+		1EDA806814D19F12003D2191 /* DotChart.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChart.h; path = ../../moses/src/CYKPlusParser/DotChart.h; sourceTree = "<group>"; };
+		1EDA806914D19F12003D2191 /* DotChartInMemory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartInMemory.cpp; path = ../../moses/src/CYKPlusParser/DotChartInMemory.cpp; sourceTree = "<group>"; };
+		1EDA806A14D19F12003D2191 /* DotChartInMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartInMemory.h; path = ../../moses/src/CYKPlusParser/DotChartInMemory.h; sourceTree = "<group>"; };
+		1EDA806B14D19F12003D2191 /* DotChartOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DotChartOnDisk.cpp; path = ../../moses/src/CYKPlusParser/DotChartOnDisk.cpp; sourceTree = "<group>"; };
+		1EDA806C14D19F12003D2191 /* DotChartOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DotChartOnDisk.h; path = ../../moses/src/CYKPlusParser/DotChartOnDisk.h; sourceTree = "<group>"; };
+		1EDA807814D19FBF003D2191 /* PhraseDictionaryALSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryALSuffixArray.cpp; path = ../../moses/src/RuleTable/PhraseDictionaryALSuffixArray.cpp; sourceTree = "<group>"; };
+		1EDA807914D19FBF003D2191 /* PhraseDictionaryALSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryALSuffixArray.h; path = ../../moses/src/RuleTable/PhraseDictionaryALSuffixArray.h; sourceTree = "<group>"; };
+		1EDA807A14D19FBF003D2191 /* PhraseDictionaryNodeSCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryNodeSCFG.cpp; path = ../../moses/src/RuleTable/PhraseDictionaryNodeSCFG.cpp; sourceTree = "<group>"; };
+		1EDA807B14D19FBF003D2191 /* PhraseDictionaryNodeSCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryNodeSCFG.h; path = ../../moses/src/RuleTable/PhraseDictionaryNodeSCFG.h; sourceTree = "<group>"; };
+		1EDA807C14D19FBF003D2191 /* PhraseDictionaryOnDisk.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryOnDisk.cpp; path = ../../moses/src/RuleTable/PhraseDictionaryOnDisk.cpp; sourceTree = "<group>"; };
+		1EDA807D14D19FBF003D2191 /* PhraseDictionaryOnDisk.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryOnDisk.h; path = ../../moses/src/RuleTable/PhraseDictionaryOnDisk.h; sourceTree = "<group>"; };
+		1EDA807E14D19FBF003D2191 /* PhraseDictionarySCFG.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionarySCFG.cpp; path = ../../moses/src/RuleTable/PhraseDictionarySCFG.cpp; sourceTree = "<group>"; };
+		1EDA807F14D19FBF003D2191 /* PhraseDictionarySCFG.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionarySCFG.h; path = ../../moses/src/RuleTable/PhraseDictionarySCFG.h; sourceTree = "<group>"; };
+		1EDA808014D19FBF003D2191 /* Trie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Trie.cpp; path = ../../moses/src/RuleTable/Trie.cpp; sourceTree = "<group>"; };
+		1EDA808114D19FBF003D2191 /* Trie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Trie.h; path = ../../moses/src/RuleTable/Trie.h; sourceTree = "<group>"; };
+		1EDA808214D19FBF003D2191 /* UTrie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UTrie.cpp; path = ../../moses/src/RuleTable/UTrie.cpp; sourceTree = "<group>"; };
+		1EDA808314D19FBF003D2191 /* UTrie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UTrie.h; path = ../../moses/src/RuleTable/UTrie.h; sourceTree = "<group>"; };
+		1EDA808414D19FBF003D2191 /* UTrieNode.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = UTrieNode.cpp; path = ../../moses/src/RuleTable/UTrieNode.cpp; sourceTree = "<group>"; };
+		1EDA808514D19FBF003D2191 /* UTrieNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UTrieNode.h; path = ../../moses/src/RuleTable/UTrieNode.h; sourceTree = "<group>"; };
 		1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelBackoff.cpp; sourceTree = "<group>"; };
 		1EF0709214B9EFCC0052152A /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallelBackoff.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -590,6 +624,10 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EDA803514D19ECD003D2191 /* Scope3Parser */,
+				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
+				1EC7365B14B977AA00238410 /* LM */,
+				1EC7361314B977AA00238410 /* DynSAInclude */,
 				1EAC362B14CDC76200DF97C3 /* RuleTable */,
 				1EC735D314B977AA00238410 /* AlignmentInfo.cpp */,
 				1EC735D414B977AA00238410 /* AlignmentInfo.h */,
@@ -612,12 +650,7 @@
 				1EC735E514B977AA00238410 /* ChartHypothesisCollection.h */,
 				1EC735E614B977AA00238410 /* ChartManager.cpp */,
 				1EC735E714B977AA00238410 /* ChartManager.h */,
-				1EC735E814B977AA00238410 /* ChartRuleLookupManager.cpp */,
 				1EC735E914B977AA00238410 /* ChartRuleLookupManager.h */,
-				1EC735EA14B977AA00238410 /* ChartRuleLookupManagerMemory.cpp */,
-				1EC735EB14B977AA00238410 /* ChartRuleLookupManagerMemory.h */,
-				1EC735EC14B977AA00238410 /* ChartRuleLookupManagerOnDisk.cpp */,
-				1EC735ED14B977AA00238410 /* ChartRuleLookupManagerOnDisk.h */,
 				1EC735EE14B977AA00238410 /* ChartTranslationOption.cpp */,
 				1EC735EF14B977AA00238410 /* ChartTranslationOption.h */,
 				1EC735F014B977AA00238410 /* ChartTranslationOptionCollection.cpp */,
@@ -647,15 +680,8 @@
 				1EC7360814B977AA00238410 /* DecodeStepTranslation.h */,
 				1EC7360914B977AA00238410 /* Dictionary.cpp */,
 				1EC7360A14B977AA00238410 /* Dictionary.h */,
-				1EC7360B14B977AA00238410 /* DotChart.cpp */,
-				1EC7360C14B977AA00238410 /* DotChart.h */,
-				1EC7360D14B977AA00238410 /* DotChartInMemory.cpp */,
-				1EC7360E14B977AA00238410 /* DotChartInMemory.h */,
-				1EC7360F14B977AA00238410 /* DotChartOnDisk.cpp */,
-				1EC7361014B977AA00238410 /* DotChartOnDisk.h */,
 				1EC7361114B977AA00238410 /* DummyScoreProducers.cpp */,
 				1EC7361214B977AA00238410 /* DummyScoreProducers.h */,
-				1EC7361314B977AA00238410 /* DynSAInclude */,
 				1EC7362C14B977AA00238410 /* DynSuffixArray.cpp */,
 				1EC7362D14B977AA00238410 /* DynSuffixArray.h */,
 				1EC7362E14B977AA00238410 /* Factor.cpp */,
@@ -699,7 +725,6 @@
 				1EC7365714B977AA00238410 /* LexicalReorderingState.h */,
 				1EC7365814B977AA00238410 /* LexicalReorderingTable.cpp */,
 				1EC7365914B977AA00238410 /* LexicalReorderingTable.h */,
-				1EC7365B14B977AA00238410 /* LM */,
 				1EC736A914B977AA00238410 /* LMList.cpp */,
 				1EC736AA14B977AA00238410 /* LMList.h */,
 				1EC736AB14B977AA00238410 /* LVoc.cpp */,
@@ -721,22 +746,12 @@
 				1EC736BD14B977AA00238410 /* Phrase.h */,
 				1EC736BE14B977AA00238410 /* PhraseDictionary.cpp */,
 				1EC736BF14B977AA00238410 /* PhraseDictionary.h */,
-				1EC736C014B977AA00238410 /* PhraseDictionaryALSuffixArray.cpp */,
-				1EC736C114B977AA00238410 /* PhraseDictionaryALSuffixArray.h */,
 				1EC736C214B977AA00238410 /* PhraseDictionaryDynSuffixArray.cpp */,
 				1EC736C314B977AA00238410 /* PhraseDictionaryDynSuffixArray.h */,
-				1EC736C414B977AA00238410 /* PhraseDictionaryHiero.cpp */,
-				1EC736C514B977AA00238410 /* PhraseDictionaryHiero.h */,
 				1EC736C614B977AA00238410 /* PhraseDictionaryMemory.cpp */,
 				1EC736C714B977AA00238410 /* PhraseDictionaryMemory.h */,
 				1EC736C814B977AA00238410 /* PhraseDictionaryNode.cpp */,
 				1EC736C914B977AA00238410 /* PhraseDictionaryNode.h */,
-				1EC736CA14B977AA00238410 /* PhraseDictionaryNodeSCFG.cpp */,
-				1EC736CB14B977AA00238410 /* PhraseDictionaryNodeSCFG.h */,
-				1EC736CC14B977AA00238410 /* PhraseDictionaryOnDisk.cpp */,
-				1EC736CD14B977AA00238410 /* PhraseDictionaryOnDisk.h */,
-				1EC736CE14B977AA00238410 /* PhraseDictionarySCFG.cpp */,
-				1EC736CF14B977AA00238410 /* PhraseDictionarySCFG.h */,
 				1EC736D014B977AA00238410 /* PhraseDictionaryTree.cpp */,
 				1EC736D114B977AA00238410 /* PhraseDictionaryTree.h */,
 				1EC736D214B977AA00238410 /* PhraseDictionaryTreeAdaptor.cpp */,
@@ -818,7 +833,6 @@
 				1EC7373F14B977AB00238410 /* WordsRange.h */,
 				1EC7374214B977AB00238410 /* XmlOption.cpp */,
 				1EC7374314B977AB00238410 /* XmlOption.h */,
-				1E16D086144DAA3F00B60B4F /* LM */,
 			);
 			name = Source;
 			sourceTree = "<group>";
@@ -831,16 +845,23 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
-		1E16D086144DAA3F00B60B4F /* LM */ = {
-			isa = PBXGroup;
-			children = (
-			);
-			name = LM;
-			sourceTree = "<group>";
-		};
 		1EAC362B14CDC76200DF97C3 /* RuleTable */ = {
 			isa = PBXGroup;
 			children = (
+				1EDA807814D19FBF003D2191 /* PhraseDictionaryALSuffixArray.cpp */,
+				1EDA807914D19FBF003D2191 /* PhraseDictionaryALSuffixArray.h */,
+				1EDA807A14D19FBF003D2191 /* PhraseDictionaryNodeSCFG.cpp */,
+				1EDA807B14D19FBF003D2191 /* PhraseDictionaryNodeSCFG.h */,
+				1EDA807C14D19FBF003D2191 /* PhraseDictionaryOnDisk.cpp */,
+				1EDA807D14D19FBF003D2191 /* PhraseDictionaryOnDisk.h */,
+				1EDA807E14D19FBF003D2191 /* PhraseDictionarySCFG.cpp */,
+				1EDA807F14D19FBF003D2191 /* PhraseDictionarySCFG.h */,
+				1EDA808014D19FBF003D2191 /* Trie.cpp */,
+				1EDA808114D19FBF003D2191 /* Trie.h */,
+				1EDA808214D19FBF003D2191 /* UTrie.cpp */,
+				1EDA808314D19FBF003D2191 /* UTrie.h */,
+				1EDA808414D19FBF003D2191 /* UTrieNode.cpp */,
+				1EDA808514D19FBF003D2191 /* UTrieNode.h */,
 				1EAC362C14CDC79300DF97C3 /* Loader.h */,
 				1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */,
 				1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */,
@@ -918,6 +939,44 @@
 			path = ../../moses/src/LM;
 			sourceTree = "<group>";
 		};
+		1EDA803414D19EB8003D2191 /* CYKPlusParser */ = {
+			isa = PBXGroup;
+			children = (
+				1EDA806214D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.cpp */,
+				1EDA806314D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.h */,
+				1EDA806414D19F12003D2191 /* ChartRuleLookupManagerMemory.cpp */,
+				1EDA806514D19F12003D2191 /* ChartRuleLookupManagerMemory.h */,
+				1EDA806614D19F12003D2191 /* ChartRuleLookupManagerOnDisk.cpp */,
+				1EDA806714D19F12003D2191 /* ChartRuleLookupManagerOnDisk.h */,
+				1EDA806814D19F12003D2191 /* DotChart.h */,
+				1EDA806914D19F12003D2191 /* DotChartInMemory.cpp */,
+				1EDA806A14D19F12003D2191 /* DotChartInMemory.h */,
+				1EDA806B14D19F12003D2191 /* DotChartOnDisk.cpp */,
+				1EDA806C14D19F12003D2191 /* DotChartOnDisk.h */,
+			);
+			name = CYKPlusParser;
+			sourceTree = "<group>";
+		};
+		1EDA803514D19ECD003D2191 /* Scope3Parser */ = {
+			isa = PBXGroup;
+			children = (
+				1EDA803614D19EEF003D2191 /* ApplicableRuleTrie.cpp */,
+				1EDA803714D19EEF003D2191 /* ApplicableRuleTrie.h */,
+				1EDA804314D19EEF003D2191 /* IntermediateVarSpanNode.h */,
+				1EDA804514D19EEF003D2191 /* Parser.cpp */,
+				1EDA804614D19EEF003D2191 /* Parser.h */,
+				1EDA804714D19EEF003D2191 /* SentenceMap.h */,
+				1EDA804814D19EEF003D2191 /* StackLattice.h */,
+				1EDA804914D19EEF003D2191 /* StackLatticeBuilder.cpp */,
+				1EDA804A14D19EEF003D2191 /* StackLatticeBuilder.h */,
+				1EDA804B14D19EEF003D2191 /* StackLatticeSearcher.h */,
+				1EDA804C14D19EEF003D2191 /* VarSpanNode.h */,
+				1EDA804D14D19EEF003D2191 /* VarSpanTrieBuilder.cpp */,
+				1EDA804E14D19EEF003D2191 /* VarSpanTrieBuilder.h */,
+			);
+			name = Scope3Parser;
+			sourceTree = "<group>";
+		};
 		C6A0FF2B0290797F04C91782 /* Documentation */ = {
 			isa = PBXGroup;
 			children = (
@@ -945,8 +1004,6 @@
 				1EC7375814B977AB00238410 /* ChartHypothesisCollection.h in Headers */,
 				1EC7375A14B977AB00238410 /* ChartManager.h in Headers */,
 				1EC7375C14B977AB00238410 /* ChartRuleLookupManager.h in Headers */,
-				1EC7375E14B977AB00238410 /* ChartRuleLookupManagerMemory.h in Headers */,
-				1EC7376014B977AB00238410 /* ChartRuleLookupManagerOnDisk.h in Headers */,
 				1EC7376214B977AB00238410 /* ChartTranslationOption.h in Headers */,
 				1EC7376414B977AB00238410 /* ChartTranslationOptionCollection.h in Headers */,
 				1EC7376614B977AB00238410 /* ChartTranslationOptionList.h in Headers */,
@@ -962,9 +1019,6 @@
 				1EC7377914B977AB00238410 /* DecodeStepGeneration.h in Headers */,
 				1EC7377B14B977AB00238410 /* DecodeStepTranslation.h in Headers */,
 				1EC7377D14B977AB00238410 /* Dictionary.h in Headers */,
-				1EC7377F14B977AB00238410 /* DotChart.h in Headers */,
-				1EC7378114B977AB00238410 /* DotChartInMemory.h in Headers */,
-				1EC7378314B977AB00238410 /* DotChartOnDisk.h in Headers */,
 				1EC7378514B977AB00238410 /* DummyScoreProducers.h in Headers */,
 				1EC7378614B977AB00238410 /* fdstream.h in Headers */,
 				1EC7378814B977AB00238410 /* file.h in Headers */,
@@ -1023,14 +1077,9 @@
 				1EC7380414B977AB00238410 /* PDTAimp.h in Headers */,
 				1EC7380614B977AB00238410 /* Phrase.h in Headers */,
 				1EC7380814B977AB00238410 /* PhraseDictionary.h in Headers */,
-				1EC7380A14B977AB00238410 /* PhraseDictionaryALSuffixArray.h in Headers */,
 				1EC7380C14B977AB00238410 /* PhraseDictionaryDynSuffixArray.h in Headers */,
-				1EC7380E14B977AB00238410 /* PhraseDictionaryHiero.h in Headers */,
 				1EC7381014B977AB00238410 /* PhraseDictionaryMemory.h in Headers */,
 				1EC7381214B977AB00238410 /* PhraseDictionaryNode.h in Headers */,
-				1EC7381414B977AB00238410 /* PhraseDictionaryNodeSCFG.h in Headers */,
-				1EC7381614B977AB00238410 /* PhraseDictionaryOnDisk.h in Headers */,
-				1EC7381814B977AB00238410 /* PhraseDictionarySCFG.h in Headers */,
 				1EC7381A14B977AB00238410 /* PhraseDictionaryTree.h in Headers */,
 				1EC7381C14B977AB00238410 /* PhraseDictionaryTreeAdaptor.h in Headers */,
 				1EC7381D14B977AB00238410 /* PrefixTree.h in Headers */,
@@ -1079,6 +1128,28 @@
 				1EAC363914CDC79300DF97C3 /* LoaderFactory.h in Headers */,
 				1EAC363B14CDC79300DF97C3 /* LoaderHiero.h in Headers */,
 				1EAC363D14CDC79300DF97C3 /* LoaderStandard.h in Headers */,
+				1EDA805014D19EEF003D2191 /* ApplicableRuleTrie.h in Headers */,
+				1EDA805614D19EEF003D2191 /* IntermediateVarSpanNode.h in Headers */,
+				1EDA805914D19EEF003D2191 /* Parser.h in Headers */,
+				1EDA805A14D19EEF003D2191 /* SentenceMap.h in Headers */,
+				1EDA805B14D19EEF003D2191 /* StackLattice.h in Headers */,
+				1EDA805D14D19EEF003D2191 /* StackLatticeBuilder.h in Headers */,
+				1EDA805E14D19EEF003D2191 /* StackLatticeSearcher.h in Headers */,
+				1EDA805F14D19EEF003D2191 /* VarSpanNode.h in Headers */,
+				1EDA806114D19EEF003D2191 /* VarSpanTrieBuilder.h in Headers */,
+				1EDA806E14D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.h in Headers */,
+				1EDA807014D19F12003D2191 /* ChartRuleLookupManagerMemory.h in Headers */,
+				1EDA807214D19F12003D2191 /* ChartRuleLookupManagerOnDisk.h in Headers */,
+				1EDA807314D19F12003D2191 /* DotChart.h in Headers */,
+				1EDA807514D19F12003D2191 /* DotChartInMemory.h in Headers */,
+				1EDA807714D19F12003D2191 /* DotChartOnDisk.h in Headers */,
+				1EDA808714D19FBF003D2191 /* PhraseDictionaryALSuffixArray.h in Headers */,
+				1EDA808914D19FBF003D2191 /* PhraseDictionaryNodeSCFG.h in Headers */,
+				1EDA808B14D19FBF003D2191 /* PhraseDictionaryOnDisk.h in Headers */,
+				1EDA808D14D19FBF003D2191 /* PhraseDictionarySCFG.h in Headers */,
+				1EDA808F14D19FBF003D2191 /* Trie.h in Headers */,
+				1EDA809114D19FBF003D2191 /* UTrie.h in Headers */,
+				1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1143,9 +1214,6 @@
 				1EC7375514B977AB00238410 /* ChartHypothesis.cpp in Sources */,
 				1EC7375714B977AB00238410 /* ChartHypothesisCollection.cpp in Sources */,
 				1EC7375914B977AB00238410 /* ChartManager.cpp in Sources */,
-				1EC7375B14B977AB00238410 /* ChartRuleLookupManager.cpp in Sources */,
-				1EC7375D14B977AB00238410 /* ChartRuleLookupManagerMemory.cpp in Sources */,
-				1EC7375F14B977AB00238410 /* ChartRuleLookupManagerOnDisk.cpp in Sources */,
 				1EC7376114B977AB00238410 /* ChartTranslationOption.cpp in Sources */,
 				1EC7376314B977AB00238410 /* ChartTranslationOptionCollection.cpp in Sources */,
 				1EC7376514B977AB00238410 /* ChartTranslationOptionList.cpp in Sources */,
@@ -1160,9 +1228,6 @@
 				1EC7377814B977AB00238410 /* DecodeStepGeneration.cpp in Sources */,
 				1EC7377A14B977AB00238410 /* DecodeStepTranslation.cpp in Sources */,
 				1EC7377C14B977AB00238410 /* Dictionary.cpp in Sources */,
-				1EC7377E14B977AB00238410 /* DotChart.cpp in Sources */,
-				1EC7378014B977AB00238410 /* DotChartInMemory.cpp in Sources */,
-				1EC7378214B977AB00238410 /* DotChartOnDisk.cpp in Sources */,
 				1EC7378414B977AB00238410 /* DummyScoreProducers.cpp in Sources */,
 				1EC7378714B977AB00238410 /* file.cpp in Sources */,
 				1EC7378B14B977AB00238410 /* params.cpp in Sources */,
@@ -1207,14 +1272,9 @@
 				1EC7380214B977AB00238410 /* PCNTools.cpp in Sources */,
 				1EC7380514B977AB00238410 /* Phrase.cpp in Sources */,
 				1EC7380714B977AB00238410 /* PhraseDictionary.cpp in Sources */,
-				1EC7380914B977AB00238410 /* PhraseDictionaryALSuffixArray.cpp in Sources */,
 				1EC7380B14B977AB00238410 /* PhraseDictionaryDynSuffixArray.cpp in Sources */,
-				1EC7380D14B977AB00238410 /* PhraseDictionaryHiero.cpp in Sources */,
 				1EC7380F14B977AB00238410 /* PhraseDictionaryMemory.cpp in Sources */,
 				1EC7381114B977AB00238410 /* PhraseDictionaryNode.cpp in Sources */,
-				1EC7381314B977AB00238410 /* PhraseDictionaryNodeSCFG.cpp in Sources */,
-				1EC7381514B977AB00238410 /* PhraseDictionaryOnDisk.cpp in Sources */,
-				1EC7381714B977AB00238410 /* PhraseDictionarySCFG.cpp in Sources */,
 				1EC7381914B977AB00238410 /* PhraseDictionaryTree.cpp in Sources */,
 				1EC7381B14B977AB00238410 /* PhraseDictionaryTreeAdaptor.cpp in Sources */,
 				1EC7381E14B977AB00238410 /* PrefixTreeMap.cpp in Sources */,
@@ -1258,6 +1318,22 @@
 				1EAC363814CDC79300DF97C3 /* LoaderFactory.cpp in Sources */,
 				1EAC363A14CDC79300DF97C3 /* LoaderHiero.cpp in Sources */,
 				1EAC363C14CDC79300DF97C3 /* LoaderStandard.cpp in Sources */,
+				1EDA804F14D19EEF003D2191 /* ApplicableRuleTrie.cpp in Sources */,
+				1EDA805814D19EEF003D2191 /* Parser.cpp in Sources */,
+				1EDA805C14D19EEF003D2191 /* StackLatticeBuilder.cpp in Sources */,
+				1EDA806014D19EEF003D2191 /* VarSpanTrieBuilder.cpp in Sources */,
+				1EDA806D14D19F12003D2191 /* ChartRuleLookupManagerCYKPlus.cpp in Sources */,
+				1EDA806F14D19F12003D2191 /* ChartRuleLookupManagerMemory.cpp in Sources */,
+				1EDA807114D19F12003D2191 /* ChartRuleLookupManagerOnDisk.cpp in Sources */,
+				1EDA807414D19F12003D2191 /* DotChartInMemory.cpp in Sources */,
+				1EDA807614D19F12003D2191 /* DotChartOnDisk.cpp in Sources */,
+				1EDA808614D19FBF003D2191 /* PhraseDictionaryALSuffixArray.cpp in Sources */,
+				1EDA808814D19FBF003D2191 /* PhraseDictionaryNodeSCFG.cpp in Sources */,
+				1EDA808A14D19FBF003D2191 /* PhraseDictionaryOnDisk.cpp in Sources */,
+				1EDA808C14D19FBF003D2191 /* PhraseDictionarySCFG.cpp in Sources */,
+				1EDA808E14D19FBF003D2191 /* Trie.cpp in Sources */,
+				1EDA809014D19FBF003D2191 /* UTrie.cpp in Sources */,
+				1EDA809214D19FBF003D2191 /* UTrieNode.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1302,6 +1378,7 @@
 					"\"$(SRCROOT)/../../moses/src/LM/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 					"\"$(SRCROOT)/../../moses/src/LM/bin/darwin-4.2.1/release/link-static/threading-multi\"",
 					"\"$(SRCROOT)/../../moses/src/LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
+					"\"$(SRCROOT)/../../moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 				);
 				PRODUCT_NAME = moses;
 			};
@@ -1343,6 +1420,7 @@
 					"\"$(SRCROOT)/../../moses/src/LM/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 					"\"$(SRCROOT)/../../moses/src/LM/bin/darwin-4.2.1/release/link-static/threading-multi\"",
 					"\"$(SRCROOT)/../../moses/src/LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
+					"\"$(SRCROOT)/../../moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 				);
 				PRODUCT_NAME = moses;
 			};
