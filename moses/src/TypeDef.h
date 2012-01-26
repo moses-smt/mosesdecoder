@@ -1,5 +1,3 @@
-// $Id$
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -158,6 +156,11 @@ enum XmlInputType {
 enum DictionaryFind {
   Best		= 0
   ,All		= 1
+};
+
+enum ParsingAlgorithm {
+  ParseCYKPlus = 0,
+  ParseScope3 = 1
 };
 
 enum SearchAlgorithm {
