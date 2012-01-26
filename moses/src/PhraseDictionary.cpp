@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 
 /***********************************************************************
@@ -28,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
 #endif
+#include "RuleTable/UTrie.h"
 
 #include "StaticData.h"
 #include "InputType.h"
@@ -122,16 +122,21 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
 
-    PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(m_numScoreComponent,this);
-    bool ret = pdm->Load(GetInput()
+    RuleTableTrie *dict;
+    if (staticData.GetParsingAlgorithm() == ParseScope3) {
+      dict = new RuleTableUTrie(m_numScoreComponent, this);
+    } else {
+      dict = new PhraseDictionarySCFG(m_numScoreComponent, this);
+    }
+    bool ret = dict->Load(GetInput()
                          , GetOutput()
                          , m_filePath
                          , m_weight
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
-    CHECK(ret);
-    return pdm;
+    assert(ret);
+    return dict;
   } else if (m_implementation == ALSuffixArray) {
     // memory phrase table
     VERBOSE(2,"using Hiero format phrase tables" << std::endl);
