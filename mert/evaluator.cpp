@@ -14,18 +14,18 @@
 
 using namespace std;
 
-Scorer* scorer;
-int bootstrap = 0;
 void evaluate(const string& candFile);
 void addStats(vector<int>& stats1, const vector<int>& stats2);
 float average(const vector<float>& list);
 float stdDeviation(const vector<float>& list, float avg);
 string int2string(int n);
 
-bool moreFiles = false;
-bool moreScorers = false;
+Scorer* g_scorer = NULL;
+int g_bootstrap = 0;
 
-float alpha = 0.05;
+bool g_has_more_files = false;
+bool g_has_more_scorers = false;
+const float g_alpha = 0.05;
 
 void usage()
 {
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
         candidate = string(optarg);
         break;
       case 'b':
-        bootstrap = atoi(optarg);
+        g_bootstrap = atoi(optarg);
         break;
       case 'r':
         seed = strtol(optarg, NULL, 10);
@@ -102,7 +102,7 @@ int main(int argc, char** argv)
     }
   }
 
-  if (bootstrap)
+  if (g_bootstrap)
   {
     if (hasSeed) {
       cerr << "Seeding random numbers with " << seed << endl;
@@ -118,8 +118,6 @@ int main(int argc, char** argv)
     vector<string> candFiles;
     vector<string> scorerTypes;
 
-    
-
     if (reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
     split(reference,',',refFiles);
 
@@ -128,18 +126,18 @@ int main(int argc, char** argv)
 
     if (scorerType.length() == 0) throw runtime_error("You have to specify at least one scorer.");
     split(scorerType,';',scorerTypes);
-    
-    if (candFiles.size() > 1) moreFiles = true;
-    if (scorerTypes.size() > 1) moreScorers = true;
-        
+
+    if (candFiles.size() > 1) g_has_more_files = true;
+    if (scorerTypes.size() > 1) g_has_more_scorers = true;
+
     for (vector<string>::const_iterator fileIt = candFiles.begin(); fileIt != candFiles.end(); ++fileIt)
     {
         for (vector<string>::const_iterator scorerIt = scorerTypes.begin(); scorerIt != scorerTypes.end(); ++scorerIt)
         {
-            scorer = ScorerFactory::getScorer(*scorerIt,scorerConfig);
-            scorer->setReferenceFiles(refFiles);
+            g_scorer = ScorerFactory::getScorer(*scorerIt,scorerConfig);
+            g_scorer->setReferenceFiles(refFiles);
             evaluate(*fileIt);
-            delete scorer;
+            delete g_scorer;
         }
     }
 
@@ -163,43 +161,43 @@ void evaluate(const string& candFile)
   string line;
   while (getline(cand, line))
   {
-    scorer->prepareStats(entries.size(), line, scoreentry);
+    g_scorer->prepareStats(entries.size(), line, scoreentry);
     entries.push_back(scoreentry);
   }
 
   int n = entries.size();
-  if (bootstrap)
+  if (g_bootstrap)
   {
     vector<float> scores;
-    for (int i = 0; i < bootstrap; ++i)
+    for (int i = 0; i < g_bootstrap; ++i)
     {
       // TODO: Use smart pointer for exceptional-safety.
-      ScoreData* scoredata = new ScoreData(*scorer);
+      ScoreData* scoredata = new ScoreData(*g_scorer);
       for (int j = 0; j < n; ++j)
       {
         int randomIndex = random() % n;
         string str_j = int2string(j);
         scoredata->add(entries[randomIndex], str_j);
       }
-      scorer->setScoreData(scoredata);
+      g_scorer->setScoreData(scoredata);
       candidates_t candidates(n, 0);
-      float score = scorer->score(candidates);
+      float score = g_scorer->score(candidates);
       scores.push_back(score);
       delete scoredata;
-    } 
+    }
 
     float avg = average(scores);
-    
+
     sort(scores.begin(), scores.end());
-    
-    int lbIdx = scores.size() * (alpha / 2);
-    int rbIdx = scores.size() * (1 - alpha / 2);
+
+    int lbIdx = scores.size() * (g_alpha / 2);
+    int rbIdx = scores.size() * (1 - g_alpha / 2);
 
     float lb = scores[lbIdx];
     float rb = scores[rbIdx];
 
-    if (moreFiles) cout << candFile << "\t";
-    if (moreScorers) cout << scorer->getName() << "\t";
+    if (g_has_more_files) cout << candFile << "\t";
+    if (g_has_more_scorers) cout << g_scorer->getName() << "\t";
 
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
@@ -208,20 +206,20 @@ void evaluate(const string& candFile)
   else
   {
     // TODO: Use smart pointer for exceptional-safety.
-    ScoreData* scoredata = new ScoreData(*scorer);
+    ScoreData* scoredata = new ScoreData(*g_scorer);
     for (int sid = 0; sid < n; ++sid)
     {
       string str_sid = int2string(sid);
       scoredata->add(entries[sid], str_sid);
     }
-    scorer->setScoreData(scoredata);
+    g_scorer->setScoreData(scoredata);
     candidates_t candidates(n, 0);
-    float score = scorer->score(candidates);
+    float score = g_scorer->score(candidates);
     delete scoredata;
-    
-    if (moreFiles) cout << candFile << "\t";
-    if (moreScorers) cout << scorer->getName() << "\t";
-    
+
+    if (g_has_more_files) cout << candFile << "\t";
+    if (g_has_more_scorers) cout << g_scorer->getName() << "\t";
+
     cout.setf(ios::fixed,ios::floatfield);
     cout.precision(4);
     cout << score << endl;
