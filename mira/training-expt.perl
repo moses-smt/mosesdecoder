@@ -72,8 +72,12 @@ my $moses_ini_file = &param_required("train.moses-ini-file");
 my $input_file = &param_required("train.input-file");
 &check_exists ("train input file", $input_file);
 my $reference_files = &param_required("train.reference-files");
-for my $ref (glob $reference_files . "*") {
-    &check_exists ("ref files", $ref);
+my $singleRef = 1;
+if (&check_exists_noThrow ("ref files", $reference_files) != 0) {
+    for my $ref (glob $reference_files . "*") {
+	&check_exists ("ref files", $ref);
+    }
+    $singleRef = 0;
 }
 my $trainer_exe = &param_required("train.trainer");
 &check_exists("Training executable", $trainer_exe);
@@ -105,8 +109,10 @@ $bleu_script  = &param_required("devtest.bleu");
 $devtest_input_file = &param_required("devtest.input-file");
 &check_exists ("devtest input file", $devtest_input_file);
 $devtest_reference_files = &param_required("devtest.reference-file");
-for my $ref (glob $devtest_reference_files . "*") {
-    &check_exists ("devtest ref file", $ref);
+if (&check_exists_noThrow ("devtest ref file", $devtest_reference_files) != 0) {
+    for my $ref (glob $devtest_reference_files . "*") {
+	&check_exists ("devtest ref file", $ref);
+    }
 }
 $devtest_ini_file = &param_required("devtest.moses-ini-file");
 &check_exists ("devtest ini file", $devtest_ini_file);
@@ -177,6 +183,8 @@ my $train_job_id = 0;
 my @refs;
 if (ref($reference_files) eq 'ARRAY') {
     @refs = @$reference_files;
+} elsif ($singleRef){
+    $refs[0] = $reference_files;
 } else {
     @refs = glob $reference_files . "*"
 }
@@ -214,7 +222,7 @@ if ($burn_in) {
     if (ref($burn_in_reference_files) eq 'ARRAY') {
 	@burnin_refs = @$burn_in_reference_files;
     } else {
-	@burnin_refs = glob $burn_in_reference_files . "*";
+	@burnin_refs = glob $burn_in_reference_files . "*"; # TODO:
     }
     for my $burnin_ref (@burnin_refs) {
 	&check_exists("burn-in ref file",  $burnin_ref);
@@ -644,6 +652,12 @@ sub header {
 sub check_exists {
     my ($name,$filename) = @_;
     die "Error: unable to read $name: \"$filename\"" if ! -r $filename;
+}
+
+sub check_exists_noThrow {
+    my ($name,$filename) = @_;
+    return 1 if ! -r $filename;
+    return 0;
 }
 
 #
