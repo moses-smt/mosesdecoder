@@ -7,10 +7,9 @@
 #include <math.h>
 
 #include "Scorer.h"
+#include "ScorerFactory.h"
 #include "Timer.h"
 #include "Util.h"
-
-#include "ScorerFactory.h"
 
 using namespace std;
 
@@ -29,35 +28,35 @@ const float g_alpha = 0.05;
 
 void usage()
 {
-  cerr<<"usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate cand1[,cand2[,cand3...]] "<<endl;
-  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
-  cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
-  cerr<<"\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc "<<endl;
-  cerr<<"[--reference|-R] comma separated list of reference files"<<endl;
-  cerr<<"[--candidate|-C] comma separated list of candidate files"<<endl;
-  cerr<<"[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)"<<endl;
-  cerr<<"[--rseed|-r] the random seed for bootstraping (defaults to system clock)"<<endl;
-  cerr<<"[--help|-h] print this message and exit"<<endl;
-  cerr<<endl;
-  cerr<<"Evaluator is able to compute more metrics at once. To do this,"<<endl;
-  cerr<<"separate scorers with semicolon (note that comma is used to separate"<<endl;
-  cerr<<"scorers in the interpolated scorer)."<<endl;
-  cerr<<endl;
-  cerr<<"If you specify only one metric and one candidate file, only the final score"<<endl;
-  cerr<<"will be printed to stdout. Otherwise each line will contain metric name"<<endl;
-  cerr<<"and/or filename and the final score. Since most of the metrics prints some"<<endl;
-  cerr<<"debuging info, consider redirecting stderr to /dev/null."<<endl;
+  cerr << "usage: evaluator [options] --reference ref1[,ref2[,ref3...]] --candidate cand1[,cand2[,cand3...]] " << endl;
+  cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
+  cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
+  cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
+  cerr << "[--reference|-R] comma separated list of reference files" << endl;
+  cerr << "[--candidate|-C] comma separated list of candidate files" << endl;
+  cerr << "[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)" << endl;
+  cerr << "[--rseed|-r] the random seed for bootstraping (defaults to system clock)" << endl;
+  cerr << "[--help|-h] print this message and exit" << endl;
+  cerr << endl;
+  cerr << "Evaluator is able to compute more metrics at once. To do this," << endl;
+  cerr << "separate scorers with semicolon (note that comma is used to separate" << endl;
+  cerr << "scorers in the interpolated scorer)." << endl;
+  cerr << endl;
+  cerr << "If you specify only one metric and one candidate file, only the final score" << endl;
+  cerr << "will be printed to stdout. Otherwise each line will contain metric name" << endl;
+  cerr << "and/or filename and the final score. Since most of the metrics prints some" << endl;
+  cerr << "debuging info, consider redirecting stderr to /dev/null." << endl;
   exit(1);
 }
 
 static struct option long_options[] = {
-  {"sctype",required_argument,0,'s'},
-  {"scconfig",required_argument,0,'c'},
-  {"reference",required_argument,0,'R'},
-  {"candidate",required_argument,0,'C'},
-  {"bootstrap",required_argument,0,'b'},
-  {"rseed",required_argument,0,'r'},
-  {"help",no_argument,0,'h'},
+  {"sctype", required_argument, 0, 's'},
+  {"scconfig", required_argument, 0, 'c'},
+  {"reference", required_argument, 0, 'R'},
+  {"candidate", required_argument, 0, 'C'},
+  {"bootstrap", required_argument, 0, 'b'},
+  {"rseed", required_argument, 0, 'r'},
+  {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
 int option_index;
@@ -76,7 +75,7 @@ int main(int argc, char** argv)
   bool hasSeed = false;
 
   int c;
-  while ((c=getopt_long (argc,argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
     switch(c) {
       case 's':
         scorerType = string(optarg);
@@ -119,13 +118,13 @@ int main(int argc, char** argv)
     vector<string> scorerTypes;
 
     if (reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
-    split(reference,',',refFiles);
+    split(reference, ',', refFiles);
 
     if (candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
-    split(candidate,',',candFiles);
+    split(candidate, ',', candFiles);
 
     if (scorerType.length() == 0) throw runtime_error("You have to specify at least one scorer.");
-    split(scorerType,';',scorerTypes);
+    split(scorerType, ';', scorerTypes);
 
     if (candFiles.size() > 1) g_has_more_files = true;
     if (scorerTypes.size() > 1) g_has_more_scorers = true;
@@ -134,19 +133,17 @@ int main(int argc, char** argv)
     {
         for (vector<string>::const_iterator scorerIt = scorerTypes.begin(); scorerIt != scorerTypes.end(); ++scorerIt)
         {
-            g_scorer = ScorerFactory::getScorer(*scorerIt,scorerConfig);
+            g_scorer = ScorerFactory::getScorer(*scorerIt, scorerConfig);
             g_scorer->setReferenceFiles(refFiles);
             evaluate(*fileIt);
             delete g_scorer;
         }
     }
-
     return EXIT_SUCCESS;
   } catch (const exception& e) {
     cerr << "Exception: " << e.what() << endl;
     return EXIT_FAILURE;
   }
-
 }
 
 void evaluate(const string& candFile)
@@ -199,9 +196,9 @@ void evaluate(const string& candFile)
     if (g_has_more_files) cout << candFile << "\t";
     if (g_has_more_scorers) cout << g_scorer->getName() << "\t";
 
-    cout.setf(ios::fixed,ios::floatfield);
+    cout.setf(ios::fixed, ios::floatfield);
     cout.precision(4);
-    cout << avg << "\t[" << lb << "," << rb << "]"<< endl;
+    cout << avg << "\t[" << lb << "," << rb << "]" << endl;
   }
   else
   {
@@ -220,7 +217,7 @@ void evaluate(const string& candFile)
     if (g_has_more_files) cout << candFile << "\t";
     if (g_has_more_scorers) cout << g_scorer->getName() << "\t";
 
-    cout.setf(ios::fixed,ios::floatfield);
+    cout.setf(ios::fixed, ios::floatfield);
     cout.precision(4);
     cout << score << endl;
   }
