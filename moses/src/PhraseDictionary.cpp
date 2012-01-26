@@ -22,9 +22,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryTreeAdaptor.h"
-#include "PhraseDictionarySCFG.h"
-#include "PhraseDictionaryOnDisk.h"
-#include "PhraseDictionaryALSuffixArray.h"
+#include "RuleTable/PhraseDictionarySCFG.h"
+#include "RuleTable/PhraseDictionaryOnDisk.h"
+#include "RuleTable/PhraseDictionaryALSuffixArray.h"
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
 #endif

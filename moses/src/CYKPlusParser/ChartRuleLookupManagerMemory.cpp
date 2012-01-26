@@ -19,7 +19,7 @@
 
 #include "ChartRuleLookupManagerMemory.h"
 
-#include "PhraseDictionarySCFG.h"
+#include "RuleTable/PhraseDictionarySCFG.h"
 #include "InputType.h"
 #include "ChartTranslationOptionList.h"
 #include "CellCollection.h"

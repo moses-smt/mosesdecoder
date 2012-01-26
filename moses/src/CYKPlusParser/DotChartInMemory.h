@@ -20,7 +20,7 @@
 #pragma once
 
 #include "DotChart.h"
-#include "PhraseDictionaryNodeSCFG.h"
+#include "RuleTable/PhraseDictionaryNodeSCFG.h"
 
 #include "util/check.hh"
 #include <vector>

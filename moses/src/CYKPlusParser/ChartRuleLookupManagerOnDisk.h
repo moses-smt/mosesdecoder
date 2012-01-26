@@ -21,13 +21,13 @@
 #ifndef moses_ChartRuleLookupManagerOnDisk_h
 #define moses_ChartRuleLookupManagerOnDisk_h
 
-#include "../../OnDiskPt/OnDiskWrapper.h"
+#include "../../../OnDiskPt/OnDiskWrapper.h"
 
 #include "ChartRuleLookupManagerCYKPlus.h"
 #include "ChartTranslationOptionList.h"
 #include "DotChartOnDisk.h"
 #include "InputType.h"
-#include "PhraseDictionaryOnDisk.h"
+#include "RuleTable/PhraseDictionaryOnDisk.h"
 
 namespace Moses
 {

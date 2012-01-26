@@ -21,7 +21,7 @@
 
 #include <algorithm>
 
-#include "PhraseDictionaryOnDisk.h"
+#include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
 #include "ChartTranslationOptionList.h"
