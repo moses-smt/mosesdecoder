@@ -879,7 +879,8 @@ int main(int argc, char** argv) {
 
 		if (correctScaling && epoch == 0) {
 			float averageRatio = ((MiraOptimiser*) optimiser)->getSumRatios();
-			averageRatio /= numberOfUpdatesThisEpoch;
+			size_t ratioCount = ((MiraOptimiser*) optimiser)->getRatioCount();
+			averageRatio /= ratioCount;
 			cerr << "Rank " << rank << ", epoch " << epoch << ", average ratio: " << averageRatio << endl;
 			float correctionFactor = 0.9;
 			float mixedAverageRatio = 0;
@@ -894,11 +895,13 @@ int main(int argc, char** argv) {
 			MPI_Reduce(sendbuf_float, recvbuf_float, 1, MPI_FLOAT, MPI_SUM, 0, world);
 			mixedAverageRatio = recvbuf_float[0];
 
-			  if (rank == 0) {
-			  	mixedAverageRatio /= size;
-			  	mixedAverageRatio *= correctionFactor;
-					mpi::broadcast(world, mixedAverageRatio, 0);
-			  }
+			if (rank == 0) {
+				mixedAverageRatio /= size;
+				cerr << "Mixed average ratio: " << mixedAverageRatio << endl;
+				mixedAverageRatio *= correctionFactor;
+				cerr << "Mixed average ratio corrected: " << mixedAverageRatio << endl;
+				mpi::broadcast(world, mixedAverageRatio, 0);
+			}
 #endif
 #ifndef MPI_ENABLE
 		    mixedAverageRatio = averageRatio;

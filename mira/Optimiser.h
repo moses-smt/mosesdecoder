@@ -68,7 +68,8 @@ namespace Mira {
 		  m_scale_margin(scale_margin),
 		  m_scale_update(scale_update),
 		  m_margin_slack(margin_slack),
-		  m_sum_ratios(0) { }
+		  m_sum_ratios(0),
+		  m_count_ratios(0) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
 	  								Moses::ScoreComponentCollection& weightUpdate,
@@ -111,6 +112,10 @@ namespace Mira {
      	return m_sum_ratios;
      }
 
+     size_t getRatioCount() {
+     	return m_count_ratios;
+     }
+
    private:
 
       // add only violated constraints to the optimisation problem
@@ -129,6 +134,7 @@ namespace Mira {
 
       // collect (loss diff/model score diff) ratios from first epoch
       float m_sum_ratios;
+      size_t m_count_ratios;
   };
 }
 
