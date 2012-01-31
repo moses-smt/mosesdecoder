@@ -641,6 +641,7 @@ sub reduce_factors {
         # available factors
         my $inh = open_or_zcat($full);
         my $firstline = <$inh>;
+        die "Corpus file $full is empty" unless $firstline;
         close $inh;
         # pick first word
         $firstline =~ s/^\s*//;
