@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
 #include "GlobalLexicalModel.h"
+#include "GlobalLexicalModelUnlimited.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
@@ -55,27 +56,21 @@ namespace Moses {
       m_languageModels.Add(languageModel);
       AddFeatureFunction(languageModel);
     }
-    
-    
+
     void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff) {
       m_decodeGraphs.push_back(decodeGraph);
       m_decodeGraphBackoff.push_back(backoff);
     }
-    
-    
+
     void TranslationSystem::AddReorderModel(LexicalReordering* reorderModel) {
       m_reorderingTables.push_back(reorderModel);
       AddFeatureFunction(reorderModel);
     }
-    
-    
+
     void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel) {
       m_globalLexicalModels.push_back(globalLexicalModel);
       AddFeatureFunction(globalLexicalModel);
     }
-    
-    
-    
     
     void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff) {
 			m_producers.push_back(ff);
@@ -121,6 +116,10 @@ namespace Moses {
       }
       for(size_t i=0;i<m_globalLexicalModels.size();++i) {
         m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
+      }
+      for(size_t i=0;i<m_statelessFFs.size();++i) {
+    	if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm")
+    	  ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
       }
   
       LMList::const_iterator iterLM;

@@ -34,6 +34,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LM/Factory.h"
 #include "LexicalReordering.h"
 #include "GlobalLexicalModel.h"
+#include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
 #include "PhraseDictionary.h"
@@ -530,6 +531,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
   if (!LoadGlobalLexicalModel()) return false;
+  if (!LoadGlobalLexicalModelUnlimited()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
   if (!LoadDiscrimLMFeature()) return false;
@@ -655,8 +657,8 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetBigramFeature);
     }
     if (m_targetNgramFeatures.size() > 0) {
-    	for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-    		m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetNgramFeatures[i]);
+      for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
+    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetNgramFeatures[i]);
     }
     if (m_phrasePairFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phrasePairFeature);
@@ -686,14 +688,34 @@ bool StaticData::LoadData(Parameter *parameter)
         m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sparsePhraseDictionary[i]);
       }
     }
+    if (m_globalLexicalModelsUnlimited.size() > 0) {
+      for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
+    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
+    }
   }
 
   //Load extra feature weights
   //NB: These are common to all translation systems (at the moment!)
   vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
   if (extraWeightConfig.size()) {
-    if (extraWeightConfig.size() > 1) {
-      UserMessage::Add("Only one argument should be supplied for weight-file");
+	  if (extraWeightConfig.size() != 1) {
+		  UserMessage::Add("One argument should be supplied for weight-file");
+		  return false;
+	  }
+	  ScoreComponentCollection extraWeights;
+	  if (!extraWeights.Load(extraWeightConfig[0])) {
+		  UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
+	      return false;
+	  }
+
+	  m_allWeights.PlusEquals(extraWeights);
+  }
+
+  // DLM weight file
+  extraWeightConfig = m_parameter->GetParam("dlm-weight-file");
+  if (extraWeightConfig.size()) {
+    if (extraWeightConfig.size() != 1) {
+      UserMessage::Add("One argument should be supplied for dlm-weight-file");
       return false;
     }
     ScoreComponentCollection extraWeights;
@@ -711,6 +733,30 @@ bool StaticData::LoadData(Parameter *parameter)
 
     m_allWeights.PlusEquals(extraWeights);
   }
+
+  // GLOBAL LEXICON MODEL weight file
+  extraWeightConfig = m_parameter->GetParam("glm-weight-file");
+  if (extraWeightConfig.size()) {
+	  if (extraWeightConfig.size() != 1) {
+        UserMessage::Add("One argument should be supplied for glm-weight-file");
+        std::cerr << "number: " << extraWeightConfig.size() << std::endl;
+        return false;
+      }
+      ScoreComponentCollection extraWeights;
+      if (!extraWeights.Load(extraWeightConfig[0])) {
+        UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
+        return false;
+      }
+
+      // apply additional weight to sparse features if applicable
+      for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
+      	float glmWeight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
+      	if (glmWeight != 1)
+      		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], glmWeight);
+      }
+
+      m_allWeights.PlusEquals(extraWeights);
+    }
 
   return true;
 }
@@ -778,6 +824,8 @@ StaticData::~StaticData()
   delete m_targetWordInsertionFeature;
   delete m_sourceWordDeletionFeature;
   delete m_wordTranslationFeature;
+  for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
+  	delete m_globalLexicalModelsUnlimited[i];
 
   //delete m_parameter;
 
@@ -939,6 +987,31 @@ bool StaticData::LoadGlobalLexicalModel()
     vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
     m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], inputFactors, outputFactors ) );
     SetWeight(m_globalLexicalModels.back(),weight[i]);
+  }
+  return true;
+}
+
+bool StaticData::LoadGlobalLexicalModelUnlimited()
+{
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-glm"));
+  const vector<string> &file = m_parameter->GetParam("glm");
+
+  if (weight.size() != file.size()) {
+    std::cerr << "number of sparse producer weights and models for the global lexical model "
+    		"does not match (" << weight.size() << " != " << file.size() << ")" << std::endl;
+    return false;
+  }
+
+  for (size_t i = 0; i < weight.size(); i++ ) {
+	vector< string > factors = Tokenize(file[i],"-");
+    if ( factors.size() != 2 ) {
+      std::cerr << "wrong factor definition for global lexical model: " << file[i] << endl;
+      return false;
+    }
+    const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
+    const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
+    m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors));
+    m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
   }
   return true;
 }

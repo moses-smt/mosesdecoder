@@ -15,7 +15,6 @@ GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
 {
 	std::cerr << "Creating global lexical model...\n";
 
-
 	// load model
 	LoadData( filePath, inFactors, outFactors );
 	
@@ -156,7 +155,7 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 
   float score = ScorePhrase( targetPhrase );
   m_cache->insert( pair<const TargetPhrase*, float>(&targetPhrase, score) );
-  std::cerr << "add to cache " << targetPhrase << ": " << score << endl;
+//  std::cerr << "add to cache " << targetPhrase << ": " << score << endl;
   return score;
 }
 
@@ -164,5 +163,4 @@ void GlobalLexicalModel::Evaluate(const TargetPhrase& targetPhrase, ScoreCompone
 {
   accumulator->PlusEquals( this, GetFromCacheOrScorePhrase( targetPhrase ) );
 }
-
 }

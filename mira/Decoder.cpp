@@ -59,7 +59,10 @@ namespace Mira {
 		  mosesargv[BASE_ARGC + i] = cstr;
 	  }
 
-	  params->LoadParam(BASE_ARGC + argc,mosesargv);
+	  if (!params->LoadParam(BASE_ARGC + argc,mosesargv)) {
+		  cerr << "Loading static data failed, exit." << endl;
+		  exit(1);
+	  }
 	  StaticData::LoadDataStatic(params);
 	  for (int i = 0; i < BASE_ARGC; ++i) {
 		  delete[] mosesargv[i];

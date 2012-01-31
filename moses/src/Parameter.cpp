@@ -45,11 +45,15 @@ Parameter::Parameter()
   AddParam("config", "f", "location of the configuration file");
   AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
+  AddParam("dlm", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
+  AddParam("dlm-weight-file", "feature weights file for discriminative language models");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
+  AddParam("glm", "Factor types for global lexicon models, format Factor-Factor.");
+  AddParam("glm-weight-file", "discriminatively trained global lexical translation model file (perceptron-trained)");
   AddParam("input-factors", "list of factors in the input");
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
@@ -95,6 +99,7 @@ Parameter::Parameter()
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-lex", "lex", "weight for global lexical model");
+	AddParam("weight-glm", "glm", "weight for global lexical model");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
@@ -147,7 +152,6 @@ Parameter::Parameter()
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
 	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
-	AddParam("discrim-lmodel-file", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
   AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
