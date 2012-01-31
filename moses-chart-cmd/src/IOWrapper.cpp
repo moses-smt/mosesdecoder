@@ -45,7 +45,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTranslationOption.h"
 #include "ChartHypothesis.h"
-#include "DotChart.h"
 
 
 using namespace std;
@@ -227,14 +226,71 @@ void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
 }
 */
 
-void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, long translationId)
+namespace {
+
+typedef std::vector<std::pair<Word, WordsRange> > ApplicationContext;
+
+// Given a hypothesis and sentence, reconstructs the 'application context' --
+// the source RHS symbols of the SCFG rule that was applied, plus their spans.
+void ReconstructApplicationContext(const ChartHypothesis &hypo,
+                                   const Sentence &sentence,
+                                   ApplicationContext &context)
 {
+  context.clear();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo.GetPrevHypos();
+  std::vector<const ChartHypothesis*>::const_iterator p = prevHypos.begin();
+  std::vector<const ChartHypothesis*>::const_iterator end = prevHypos.end();
+  const WordsRange &span = hypo.GetCurrSourceRange();
+  size_t i = span.GetStartPos();
+  while (i <= span.GetEndPos()) {
+    if (p == end || i < (*p)->GetCurrSourceRange().GetStartPos()) {
+      // Symbol is a terminal.
+      const Word &symbol = sentence.GetWord(i);
+      context.push_back(std::make_pair(symbol, WordsRange(i, i)));
+      ++i;
+    } else {
+      // Symbol is a non-terminal.
+      const Word &symbol = (*p)->GetTargetLHS();
+      const WordsRange &range = (*p)->GetCurrSourceRange();
+      context.push_back(std::make_pair(symbol, range));
+      i = range.GetEndPos()+1;
+      ++p;
+    }
+  }
+}
+
+// Emulates the old operator<<(ostream &, const DottedRule &) function.  The
+// output format is a bit odd (reverse order and double spacing between symbols)
+// but there are scripts and tools that expect the output of -T to look like
+// that.
+void WriteApplicationContext(std::ostream &out,
+                             const ApplicationContext &context)
+{
+  assert(!context.empty());
+  ApplicationContext::const_reverse_iterator p = context.rbegin();
+  while (true) {
+    out << p->second << "=" << p->first << " ";
+    if (++p == context.rend()) {
+      break;
+    }
+    out << " ";
+  }
+}
+
+}  // anonymous namespace
+
+void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+{
+  static ApplicationContext applicationContext;
+
   // recursive
   if (hypo != NULL) {
+    ReconstructApplicationContext(*hypo, sentence, applicationContext);
     out << "Trans Opt " << translationId
         << " " << hypo->GetCurrSourceRange()
-        << ": " << hypo->GetTranslationOption().GetDottedRule()
-        << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
+        << ": ";
+    WriteApplicationContext(out, applicationContext);
+    out << ": " << hypo->GetCurrTargetPhrase().GetTargetLHS()
         << "->" << hypo->GetCurrTargetPhrase()
         << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
         << endl;
@@ -244,19 +300,20 @@ void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, lo
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
-    OutputTranslationOptions(out, prevHypo, translationId);
+    OutputTranslationOptions(out, prevHypo, sentence, translationId);
   }
 }
 
 void IOWrapper::OutputDetailedTranslationReport(
   const ChartHypothesis *hypo,
+  const Sentence &sentence,
   long translationId)
 {
   if (hypo == NULL) {
     return;
   }
   std::ostringstream out;
-  OutputTranslationOptions(out, hypo, translationId);
+  OutputTranslationOptions(out, hypo, sentence, translationId);
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }

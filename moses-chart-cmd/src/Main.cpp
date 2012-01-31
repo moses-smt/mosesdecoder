@@ -58,13 +58,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#else
-// those not using autoconf have to build MySQL support for now
-#  define USE_MYSQL 1
-#endif
-
 using namespace std;
 using namespace Moses;
 
@@ -105,7 +98,8 @@ public:
     }
 
     if (staticData.IsDetailedTranslationReportingEnabled()) {
-      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, lineNumber);
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
     }
 
     // n-best

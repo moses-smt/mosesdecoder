@@ -2693,7 +2693,7 @@ sub get_default_file {
 
 sub long_file_name {
     my ($file,$module,$set) = @_;
-    return $file if $file =~ /^\//;
+    return $file if $file =~ /^\// || $file =~ / \//;
 
     if ($file !~ /\//) {
 	my $dir = $module;

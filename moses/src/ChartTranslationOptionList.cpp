@@ -54,8 +54,7 @@ public:
 };
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseCollection
-                                     , const DottedRule &dottedRule
-                                     , const ChartCellCollection &chartCellColl
+                                     , const StackVec &stackVec
                                      , bool /* adhereTableLimit */
                                      , size_t ruleLimit)
 {
@@ -66,15 +65,14 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseC
   if (m_collection.size() < ruleLimit) {
     // not yet filled out quota. add everything
     ChartTranslationOption *option = new ChartTranslationOption(
-        targetPhraseCollection, dottedRule, m_range, chartCellColl);
+        targetPhraseCollection, stackVec, m_range);
     m_collection.push_back(option);
     float score = option->GetEstimateOfBestScore();
     m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
   }
   else {
     // full but not bursting. add if better than worst score
-    ChartTranslationOption option(targetPhraseCollection, dottedRule,
-                                  m_range, chartCellColl);
+    ChartTranslationOption option(targetPhraseCollection, stackVec, m_range);
     float score = option.GetEstimateOfBestScore();
     if (score > m_scoreThreshold) {
       // dynamic allocation deferred until here on the assumption that most

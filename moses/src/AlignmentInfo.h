@@ -51,6 +51,8 @@ class AlignmentInfo
     return m_nonTermIndexMap;
   }
 
+  size_t GetSize() const { return m_collection.size(); }
+
   std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
   
  private:

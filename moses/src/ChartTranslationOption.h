@@ -1,4 +1,3 @@
-// $Id$
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -20,6 +19,7 @@
 
 #pragma once
 
+#include "StackVec.h"
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
 #include "WordsRange.h"
@@ -30,29 +30,25 @@
 namespace Moses
 {
 
-class DottedRule;
-class ChartCellCollection;
-
 // Similar to a DottedRule, but contains a direct reference to a list
 // of translations and provdes an estimate of the best score.
 class ChartTranslationOption
 {
  public:
   ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
-                         const DottedRule &dottedRule,
-                         const WordsRange &wordsRange,
-                         const ChartCellCollection &allChartCells)
-    : m_dottedRule(dottedRule)
-    , m_targetPhraseCollection(targetPhraseColl)
-    , m_wordsRange(wordsRange)
-    , m_estimateOfBestScore(0)
+                         const StackVec &stackVec,
+                         const WordsRange &wordsRange)
+      : m_stackVec(stackVec)
+      , m_targetPhraseCollection(targetPhraseColl)
+      , m_wordsRange(wordsRange)
+      , m_estimateOfBestScore(0)
   {
-    CalcEstimateOfBestScore(allChartCells);
+    CalcEstimateOfBestScore();
   }
 
   ~ChartTranslationOption() {}
 
-  const DottedRule &GetDottedRule() const { return m_dottedRule; }
+  const StackVec &GetStackVec() const { return m_stackVec; }
 
   const TargetPhraseCollection &GetTargetPhraseCollection() const { 
     return m_targetPhraseCollection;
@@ -71,9 +67,9 @@ class ChartTranslationOption
   // not implemented
   ChartTranslationOption &operator=(const ChartTranslationOption &);
 
-  void CalcEstimateOfBestScore(const ChartCellCollection &);
+  void CalcEstimateOfBestScore();
 
-  const DottedRule &m_dottedRule;
+  const StackVec m_stackVec;
   const TargetPhraseCollection &m_targetPhraseCollection;
   const WordsRange &m_wordsRange;
   float m_estimateOfBestScore;
