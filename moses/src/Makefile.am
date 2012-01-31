@@ -51,6 +51,7 @@ libmoses_la_HEADERS = \
         FloydWarshall.h \
         GenerationDictionary.h \
         GlobalLexicalModel.h \
+	GlobalLexicalModelUnlimited.h \
         gzfilebuf.h \
         hash.h \
         Hypothesis.h \
@@ -207,8 +208,8 @@ libmoses_la_SOURCES = \
         DotChartInMemory.cpp \
         DotChartOnDisk.cpp \
         DummyScoreProducers.cpp \
-	      DynSAInclude/file.cpp \
-	      DynSAInclude/vocab.cpp \
+	DynSAInclude/file.cpp \
+	DynSAInclude/vocab.cpp \
         DynSuffixArray.cpp \
         FFState.cpp \
         Factor.cpp \
@@ -219,6 +220,7 @@ libmoses_la_SOURCES = \
         FloydWarshall.cpp \
         GenerationDictionary.cpp \
         GlobalLexicalModel.cpp \
+	GlobalLexicalModelUnlimited.cpp \
         hash.cpp \
         Hypothesis.cpp \
         HypothesisStack.cpp \
