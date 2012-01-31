@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -26,7 +25,6 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
-#include "DotChart.h"
 #include "Util.h"
 
 using namespace std;
@@ -59,15 +57,6 @@ ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
 {
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhraseCollection);
-
-  std::list<std::vector<DottedRule*>* >::iterator iterOuter;
-  for (iterOuter = m_dottedRuleCache.begin(); iterOuter != m_dottedRuleCache.end(); ++iterOuter) {
-    std::vector<DottedRule*> &inner = **iterOuter;
-    RemoveAllInColl(inner);
-  }
-
-  RemoveAllInColl(m_dottedRuleCache);
-
 }
 
 void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
@@ -203,12 +192,6 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
   //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
-    // create dotted rules
-    std::vector<DottedRule*> *dottedRuleList = new std::vector<DottedRule*>();
-    m_dottedRuleCache.push_back(dottedRuleList);
-    dottedRuleList->push_back(new DottedRule());
-    dottedRuleList->push_back(new DottedRule(sourceWordLabel, *(dottedRuleList->back())));
-
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;
@@ -243,9 +226,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
       // chart rule
       ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
-          , *dottedRuleList->back()
-          , range
-          , m_hypoStackColl);
+          , m_emptyStackVec
+          , range);
       transOptColl.Add(chartRule);
     } // for (iterLHS
   } else {
@@ -271,17 +253,10 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
 
-      // words consumed
-      std::vector<DottedRule*> *dottedRuleList = new std::vector<DottedRule*>();
-      m_dottedRuleCache.push_back(dottedRuleList);
-      dottedRuleList->push_back(new DottedRule());
-      dottedRuleList->push_back(new DottedRule(sourceWordLabel, *(dottedRuleList->back())));
-
       // chart rule
       ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
-          , *dottedRuleList->back()
-          , range
-          , m_hypoStackColl);
+          , m_emptyStackVec
+          , range);
       transOptColl.Add(chartRule);
     }
   }

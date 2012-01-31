@@ -101,7 +101,7 @@ def filterRuleTable(ruleTable, inputSentences, N, options):
         match = False
         for sentenceIndex in sentences:
             sentenceLength = len(inputSentences[sentenceIndex])
-            for indexSeq in enumerateIndexSeqs(ngramMaps, sentenceIndex):
+            for indexSeq in enumerateIndexSeqs(ngramMaps, sentenceIndex, 0):
                 if matchSegments(segments, indexSeq, sentenceLength):
                     print line,
                     match = True
@@ -184,16 +184,19 @@ def matchSegments(segments, indexSeq, sentenceLength):
             maxPos = minPos
     return True
 
-def enumerateIndexSeqs(ngramMaps, sentenceIndex):
+def enumerateIndexSeqs(ngramMaps, sentenceIndex, minFirstIndex):
     assert len(ngramMaps) > 0
     if len(ngramMaps) == 1:
         for index in ngramMaps[0][sentenceIndex]:
-            yield [index]
+            if index >= minFirstIndex:
+                yield [index]
         return
     for index in ngramMaps[0][sentenceIndex]:
-        for seq in enumerateIndexSeqs(ngramMaps[1:], sentenceIndex):
-            if seq[0] > index:
-                yield [index] + seq
+        if index < minFirstIndex:
+            continue
+        for seq in enumerateIndexSeqs(ngramMaps[1:], sentenceIndex, index+1):
+            assert seq[0] > index
+            yield [index] + seq
 
 if __name__ == "__main__":
     main()

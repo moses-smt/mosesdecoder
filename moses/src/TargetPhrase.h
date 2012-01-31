@@ -30,9 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/string_piece.hh"
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
 #endif

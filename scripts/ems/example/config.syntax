@@ -262,6 +262,9 @@ type = 8
 script = $moses-script-dir/training/train-model.perl
 
 ### general options
+# these are options that are passed on to train-model.perl, for instance
+# * "-mgiza -mgiza-cpus 8" to use mgiza instead of giza
+# * "-sort-buffer-size 8G" to reduce on-disk sorting
 #
 #training-options = ""
 

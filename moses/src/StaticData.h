@@ -47,11 +47,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
-//#include "UnknownWordHandler.h"
-
 namespace Moses
 {
 
@@ -134,6 +129,7 @@ protected:
   bool m_recoverPath;
   bool m_outputHypoScore;
 
+  ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
   size_t m_numInputScores;
@@ -435,6 +431,9 @@ public:
   void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
   InputTypeEnum GetInputType() const {
     return m_inputType;
+  }
+  ParsingAlgorithm GetParsingAlgorithm() const {
+    return m_parsingAlgorithm;
   }
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;

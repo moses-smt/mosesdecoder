@@ -1,0 +1,24 @@
+--- train-model.perl	2011-11-01 15:17:04.763230934 +0100
++++ train-model.perl	2011-11-01 15:17:00.033229220 +0100
+@@ -1185,15 +1185,21 @@
+ 
+     open(F2E,">$lexical_file.f2e") or die "ERROR: Can't write $lexical_file.f2e";
+     open(E2F,">$lexical_file.e2f") or die "ERROR: Can't write $lexical_file.e2f";
++    open(F2E2,">$lexical_file.counts.f2e") or die "ERROR: Can't write $lexical_file.counts.f2e";
++    open(E2F2,">$lexical_file.counts.e2f") or die "ERROR: Can't write $lexical_file.counts.e2f";
+ 
+     foreach my $f (keys %WORD_TRANSLATION) {
+ 	foreach my $e (keys %{$WORD_TRANSLATION{$f}}) {
+ 	    printf F2E "%s %s %.7f\n",$e,$f,$WORD_TRANSLATION{$f}{$e}/$TOTAL_FOREIGN{$f};
+ 	    printf E2F "%s %s %.7f\n",$f,$e,$WORD_TRANSLATION{$f}{$e}/$TOTAL_ENGLISH{$e};
++	    printf F2E2 "%s %s %i %i\n",$e,$f,$WORD_TRANSLATION{$f}{$e},$TOTAL_FOREIGN{$f};
++	    printf E2F2 "%s %s %i %i\n",$f,$e,$WORD_TRANSLATION{$f}{$e},$TOTAL_ENGLISH{$e};
+ 	}
+     }
+     close(E2F);
+     close(F2E);
++    close(E2F2);
++    close(F2E2);
+     print STDERR "Saved: $lexical_file.f2e and $lexical_file.e2f\n";
+ }
+ 
