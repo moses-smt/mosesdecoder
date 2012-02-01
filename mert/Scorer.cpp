@@ -6,28 +6,32 @@ Scorer::Scorer(const string& name, const string& config)
       m_encoder(new Encoder),
       m_score_data(0),
       m_enable_preserve_case(true) {
-//    cerr << "Scorer config string: " << config << endl;
-  size_t start = 0;
-  while (start < config.size()) {
-    size_t end = config.find(",",start);
-    if (end == string::npos) {
-      end = config.size();
-    }
-    string nv = config.substr(start,end-start);
-    size_t split = nv.find(":");
-    if (split == string::npos) {
-      throw runtime_error("Missing colon when processing scorer config: " + config);
-    }
-    string name = nv.substr(0,split);
-    string value = nv.substr(split+1,nv.size()-split-1);
-    cerr << "name: " << name << " value: " << value << endl;
-    m_config[name] = value;
-    start = end+1;
-  }
+  InitConfig(config);
 }
 
 Scorer::~Scorer() {
   delete m_encoder;
+}
+
+void Scorer::InitConfig(const string& config) {
+//    cerr << "Scorer config string: " << config << endl;
+  size_t start = 0;
+  while (start < config.size()) {
+    size_t end = config.find(",", start);
+    if (end == string::npos) {
+      end = config.size();
+    }
+    string nv = config.substr(start, end - start);
+    size_t split = nv.find(":");
+    if (split == string::npos) {
+      throw runtime_error("Missing colon when processing scorer config: " + config);
+    }
+    const string name = nv.substr(0, split);
+    const string value = nv.substr(split + 1, nv.size() - split - 1);
+    cerr << "name: " << name << " value: " << value << endl;
+    m_config[name] = value;
+    start = end + 1;
+  }
 }
 
 Scorer::Encoder::Encoder() {}

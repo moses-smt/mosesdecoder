@@ -37,21 +37,19 @@ class Scorer
    * Set the reference files. This must be called before prepareStats().
    */
   virtual void setReferenceFiles(const vector<string>& referenceFiles) {
-    //do nothing
+    // do nothing
   }
 
   /**
    * Process the given guessed text, corresponding to the given reference sindex
    * and add the appropriate statistics to the entry.
    */
-  virtual void prepareStats(size_t sindex, const string& text, ScoreStats& entry)
-  {}
+  virtual void prepareStats(size_t sindex, const string& text, ScoreStats& entry) {
+    // do nothing.
+  }
 
   virtual void prepareStats(const string& sindex, const string& text, ScoreStats& entry) {
-
-//            cerr << sindex << endl;
     this->prepareStats(static_cast<size_t>(atoi(sindex.c_str())), text, entry);
-    //cerr << text << std::endl;
   }
 
   /**
@@ -110,6 +108,8 @@ class Scorer
    private:
     std::map<std::string, int> m_vocab;
   };
+
+  void InitConfig(const string& config);
 
   string m_name;
   Encoder* m_encoder;
