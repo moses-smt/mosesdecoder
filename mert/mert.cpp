@@ -80,6 +80,19 @@ class OptimizationTask : public Moses::Task {
   statscore_t m_score;
 };
 
+bool WriteFinalWeights(const char* filename, const Point& point) {
+  ofstream ofs(filename);
+  if (!ofs) {
+    cerr << "Cannot open " << filename << endl;
+    return false;
+  }
+
+  ofs << point << endl;
+
+  return true;
+}
+
+
 void usage(int ret)
 {
   cerr << "usage: mert -d <dimensions> (mandatory)" << endl;
@@ -473,8 +486,10 @@ int main(int argc, char **argv)
   }
 
   cerr << "Best point: " << finalP << " => " << final << endl;
-  ofstream res(kOutputFile);
-  res << finalP << endl;
+
+  if (!WriteFinalWeights(kOutputFile, finalP)) {
+    cerr << "Warning: Failed to write the final point" << endl;
+  }
 
   for (size_t i = 0; i < allTasks.size(); ++i) {
     allTasks[i][0]->resetOptimizer();
