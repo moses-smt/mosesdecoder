@@ -25,16 +25,16 @@ public:
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 
-  virtual void whoami() const {
-    cerr << "I AM TerScorer" << std::endl;
-  }
-
   virtual size_t NumberOfScores() const {
     // cerr << "TerScorer: " << (LENGTH + 1) << endl;
     return kLENGTH + 1;
   }
 
   virtual float calculateScore(const vector<int>& comps) const;
+
+  void whoami() const {
+    cerr << "I AM TerScorer" << std::endl;
+  }
 
 private:
   const int kLENGTH;
