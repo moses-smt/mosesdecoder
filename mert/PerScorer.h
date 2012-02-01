@@ -45,8 +45,8 @@ private:
   PerScorer& operator=(const PerScorer&);
 
   // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
+  vector<size_t> m_ref_lengths;
+  vector<multiset<int> > m_ref_tokens;
 };
 
 #endif  // __PERSCORER_H__

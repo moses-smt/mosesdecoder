@@ -10,7 +10,7 @@ CderScorer::~CderScorer() {}
 void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   //make sure reference data is clear
-  ref_sentences.clear();
+  m_ref_sentences.clear();
 
   //load reference data
   for (size_t rid = 0; rid < referenceFiles.size(); ++rid) {
@@ -18,12 +18,12 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
     if (!refin) {
       throw runtime_error("Unable to open: " + referenceFiles[rid]);
     }
-    ref_sentences.push_back(vector<sent_t>());
+    m_ref_sentences.push_back(vector<sent_t>());
     string line;
     while (getline(refin,line)) {
       sent_t encoded;
       encode(line, encoded);
-      ref_sentences[rid].push_back(encoded);
+      m_ref_sentences[rid].push_back(encoded);
     }
   }
 }
@@ -34,8 +34,8 @@ void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>&
   encode(text, cand);
 
   float max = -2;
-  for (size_t rid = 0; rid < ref_sentences.size(); ++rid) {
-    sent_t& ref = ref_sentences[rid][sid];
+  for (size_t rid = 0; rid < m_ref_sentences.size(); ++rid) {
+    sent_t& ref = m_ref_sentences[rid][sid];
     vector<int> tmp = computeCD(cand, ref);
     if (calculateScore(tmp) > max) {
       stats = tmp;

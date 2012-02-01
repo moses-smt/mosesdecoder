@@ -24,7 +24,7 @@ class ScoreStats;
 class Scorer
 {
 private:
-  string _name;
+  string m_name;
 
 public:
   Scorer(const string& name, const string& config);
@@ -66,7 +66,7 @@ public:
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores) const {
     //dummy impl
-    if (!_scoreData) {
+    if (!m_score_data) {
       throw runtime_error("score data not loaded");
     }
     scores.push_back(0);
@@ -87,12 +87,12 @@ public:
   }
 
   const string& getName() const {
-    return _name;
+    return m_name;
   }
 
   size_t getReferenceSize() const {
-    if (_scoreData) {
-      return _scoreData->size();
+    if (m_score_data) {
+      return m_score_data->size();
     }
     return 0;
   }
@@ -101,24 +101,23 @@ public:
    * Set the score data, prior to scoring.
    */
   void setScoreData(ScoreData* data) {
-    _scoreData = data;
+    m_score_data = data;
   }
 
 protected:
   typedef map<string,int> encodings_t;
   typedef map<string,int>::iterator encodings_it;
 
-  ScoreData* _scoreData;
-  encodings_t _encodings;
-
-  bool _preserveCase;
+  ScoreData* m_score_data;
+  encodings_t m_encodings;
+  bool m_enable_preserve_case;
 
   /**
    * Get value of config variable. If not provided, return default.
    */
   string getConfig(const string& key, const string& def="") const {
-    map<string,string>::const_iterator i = _config.find(key);
-    if (i == _config.end()) {
+    map<string,string>::const_iterator i = m_config.find(key);
+    if (i == m_config.end()) {
       return def;
     } else {
       return i->second;
@@ -135,16 +134,16 @@ protected:
     istringstream in (line);
     string token;
     while (in >> token) {
-      if (!_preserveCase) {
+      if (!m_enable_preserve_case) {
         for (string::iterator i = token.begin(); i != token.end(); ++i) {
           *i = tolower(*i);
         }
       }
-      encodings_it encoding = _encodings.find(token);
+      encodings_it encoding = m_encodings.find(token);
       int encoded_token;
-      if (encoding == _encodings.end()) {
-        encoded_token = static_cast<int>(_encodings.size());
-        _encodings[token] = encoded_token;
+      if (encoding == m_encodings.end()) {
+        encoded_token = static_cast<int>(m_encodings.size());
+        m_encodings[token] = encoded_token;
         //cerr << encoded_token << "(n) ";
       } else {
         encoded_token = encoding->second;
@@ -156,7 +155,7 @@ protected:
   }
 
 private:
-  map<string,string> _config;
+  map<string, string> m_config;
 };
 
 
@@ -179,8 +178,8 @@ protected:
   virtual statscore_t calculateScore(const vector<int>& totals) const = 0;
 
   // regularisation
-  ScorerRegularisationStrategy _regularisationStrategy;
-  size_t  _regularisationWindow;
+  ScorerRegularisationStrategy m_regularization_type;
+  size_t  m_regularization_window;
 };
 
 #endif // __SCORER_H__

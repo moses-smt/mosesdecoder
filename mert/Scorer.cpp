@@ -2,7 +2,7 @@
 #include <limits>
 
 Scorer::Scorer(const string& name, const string& config)
-    : _name(name), _scoreData(0), _preserveCase(true) {
+    : m_name(name), m_score_data(0), m_enable_preserve_case(true) {
 //    cerr << "Scorer config string: " << config << endl;
   size_t start = 0;
   while (start < config.size()) {
@@ -18,7 +18,7 @@ Scorer::Scorer(const string& name, const string& config)
     string name = nv.substr(0,split);
     string value = nv.substr(split+1,nv.size()-split-1);
     cerr << "name: " << name << " value: " << value << endl;
-    _config[name] = value;
+    m_config[name] = value;
     start = end+1;
   }
 }
@@ -63,46 +63,46 @@ StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& c
 
   string type = getConfig(KEY_TYPE,TYPE_NONE);
   if (type == TYPE_NONE) {
-    _regularisationStrategy = REG_NONE;
+    m_regularization_type = REG_NONE;
   } else if (type == TYPE_AVERAGE) {
-    _regularisationStrategy = REG_AVERAGE;
+    m_regularization_type = REG_AVERAGE;
   } else if (type == TYPE_MINIMUM) {
-    _regularisationStrategy = REG_MINIMUM;
+    m_regularization_type = REG_MINIMUM;
   } else {
     throw runtime_error("Unknown scorer regularisation strategy: " + type);
   }
   //    cerr << "Using scorer regularisation strategy: " << type << endl;
 
-  string window = getConfig(KEY_WINDOW,"0");
-  _regularisationWindow = atoi(window.c_str());
-  //    cerr << "Using scorer regularisation window: " << _regularisationWindow << endl;
+  const string& window = getConfig(KEY_WINDOW, "0");
+  m_regularization_window = atoi(window.c_str());
+  //    cerr << "Using scorer regularisation window: " << m_regularization_window << endl;
 
-  string preservecase = getConfig(KEY_CASE,TRUE);
-  if (preservecase == TRUE) {
-    _preserveCase = true;
-  } else if (preservecase == FALSE) {
-    _preserveCase = false;
+  const string& preserve_case = getConfig(KEY_CASE,TRUE);
+  if (preserve_case == TRUE) {
+    m_enable_preserve_case = true;
+  } else if (preserve_case == FALSE) {
+    m_enable_preserve_case = false;
   }
-  //    cerr << "Using case preservation: " << _preserveCase << endl;
+  //    cerr << "Using case preservation: " << m_enable_preserve_case << endl;
 }
 
 void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t& diffs,
                                    statscores_t& scores) const
 {
-  if (!_scoreData) {
+  if (!m_score_data) {
     throw runtime_error("Score data not loaded");
   }
   // calculate the score for the candidates
-  if (_scoreData->size() == 0) {
+  if (m_score_data->size() == 0) {
     throw runtime_error("Score data is empty");
   }
   if (candidates.size() == 0) {
     throw runtime_error("No candidates supplied");
   }
-  int numCounts = _scoreData->get(0,candidates[0]).size();
+  int numCounts = m_score_data->get(0,candidates[0]).size();
   vector<int> totals(numCounts);
   for (size_t i = 0; i < candidates.size(); ++i) {
-    ScoreStats stats = _scoreData->get(i,candidates[i]);
+    ScoreStats stats = m_score_data->get(i,candidates[i]);
     if (stats.size() != totals.size()) {
       stringstream msg;
       msg << "Statistics for (" << "," << candidates[i] << ") have incorrect "
@@ -124,8 +124,8 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
       size_t nid = diffs[i][j].second;
       size_t last_nid = last_candidates[sid];
       for (size_t k  = 0; k < totals.size(); ++k) {
-        int diff = _scoreData->get(sid,nid).get(k)
-                   - _scoreData->get(sid,last_nid).get(k);
+        int diff = m_score_data->get(sid,nid).get(k)
+                   - m_score_data->get(sid,last_nid).get(k);
         totals[k] += diff;
       }
       last_candidates[sid] = nid;
@@ -135,7 +135,7 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
 
   // Regularisation. This can either be none, or the min or average as described in
   // Cer, Jurafsky and Manning at WMT08.
-  if (_regularisationStrategy == REG_NONE || _regularisationWindow <= 0) {
+  if (m_regularization_type == REG_NONE || m_regularization_window <= 0) {
     // no regularisation
     return;
   }
@@ -144,11 +144,11 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
   statscores_t raw_scores(scores);      // copy scores
   for (size_t i = 0; i < scores.size(); ++i) {
     size_t start = 0;
-    if (i >= _regularisationWindow) {
-      start = i - _regularisationWindow;
+    if (i >= m_regularization_window) {
+      start = i - m_regularization_window;
     }
-    size_t end = min(scores.size(), i + _regularisationWindow+1);
-    if (_regularisationStrategy == REG_AVERAGE) {
+    const size_t end = min(scores.size(), i + m_regularization_window + 1);
+    if (m_regularization_type == REG_AVERAGE) {
       scores[i] = score_average(raw_scores,start,end);
     } else {
       scores[i] = score_min(raw_scores,start,end);

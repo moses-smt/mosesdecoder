@@ -38,7 +38,7 @@ public:
 
 private:
   typedef vector<int> sent_t;
-  vector<vector<sent_t> > ref_sentences;
+  vector<vector<sent_t> > m_ref_sentences;
 
   vector<int> computeCD(const sent_t& cand, const sent_t& ref) const;
   int distance(int word1, int word2) const
