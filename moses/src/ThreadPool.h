@@ -43,9 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
   * Classes to implement a ThreadPool.
   **/
 
-namespace Moses
-{
-
+namespace Moses {
 
 /**
 * A task to be executed by the ThreadPool
@@ -54,7 +52,7 @@ class Task
 {
 public:
   virtual void Run() = 0;
-  virtual bool DeleteAfterExecution() {return true;}
+  virtual bool DeleteAfterExecution() { return true; }
   virtual ~Task() {}
 };
 
@@ -62,12 +60,15 @@ public:
 
 class ThreadPool
 {
-public:
+ public:
   /**
-    * Construct a thread pool of a fixed size.
-    **/
-  ThreadPool(size_t numThreads);
+   * Construct a thread pool of a fixed size.
+   **/
+  explicit ThreadPool(size_t numThreads);
 
+  ~ThreadPool() {
+    Stop();
+  }
 
   /**
    * Add a job to the threadpool.
@@ -75,21 +76,15 @@ public:
   void Submit(Task* task);
 
   /**
-    * Wait until all queued jobs have completed, and shut down
-    * the ThreadPool.
-    **/
+   * Wait until all queued jobs have completed, and shut down
+   * the ThreadPool.
+   **/
   void Stop(bool processRemainingJobs = false);
-
-  ~ThreadPool() {
-    Stop();
-  }
-
-
 
 private:
   /**
-    * The main loop executed by each thread.
-    **/
+   * The main loop executed by each thread.
+   **/
   void Execute();
 
   std::queue<Task*> m_tasks;
@@ -99,14 +94,13 @@ private:
   boost::condition_variable m_threadAvailable;
   bool m_stopped;
   bool m_stopping;
-
 };
-
 
 class TestTask : public Task
 {
 public:
   TestTask(int id) : m_id(id) {}
+
   virtual void Run() {
 #ifdef BOOST_HAS_PTHREADS
     pthread_t tid = pthread_self();
@@ -124,5 +118,5 @@ private:
 
 #endif //WITH_THREADS
 
-}
-#endif
+} // namespace Moses
+#endif  // moses_ThreadPool_h
