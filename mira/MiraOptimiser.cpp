@@ -340,7 +340,7 @@ size_t MiraOptimiser::updateWeightsAnalytically(
  // cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear << endl;
   ScoreComponentCollection featureValueDiff = featureValuesHope;
   featureValueDiff.MinusEquals(featureValuesFear);
-  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
+  //  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
   float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float loss = bleuScoreHope - bleuScoreFear;
   float diff = 0;
