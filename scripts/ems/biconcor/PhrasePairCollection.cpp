@@ -87,6 +87,7 @@ bool PhrasePairCollection::GetCollection( const vector< string > sourceString )
     }
   }
   sort(m_collection.begin(), m_collection.end(), CompareBySize());
+  return true;
 }
 
 void PhrasePairCollection::Print()
