@@ -29,6 +29,12 @@ using namespace std;
 
 namespace {
 
+const char kDefaultOptimizer[] = "powell";
+const char kDefaultScorer[] = "BLEU";
+const char kDefaultScorerFile[] = "statscore.data";
+const char kDefaultFeatureFile[] = "features.data";
+const char kDefaultInitFile[] = "init.opt";
+
 /**
  * Runs an optimisation, or a random restart.
  */
@@ -77,13 +83,13 @@ void usage(int ret)
   cerr << "[-n] retry ntimes (default 1)" << endl;
   cerr << "[-m] number of random directions in powell (default 0)"<< endl;
   cerr << "[-o] the indexes to optimize(default all)" << endl;
-  cerr << "[-t] the optimizer(default powell)" << endl;
+  cerr << "[-t] the optimizer(default " << kDefaultOptimizer << ")" << endl;
   cerr << "[-r] the random seed (defaults to system clock)" << endl;
-  cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
+  cerr << "[--sctype|-s] the scorer type (default " << kDefaultScorer << ")" << endl;
   cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
-  cerr << "[--scfile|-S] comma separated list of scorer data files (default score.data)" << endl;
-  cerr << "[--ffile|-F] comma separated list of feature data files (default feature.data)" << endl;
-  cerr << "[--ifile|-i] the starting point data file (default init.opt)" << endl;
+  cerr << "[--scfile|-S] comma separated list of scorer data files (default " << kDefaultScorerFile << ")" << endl;
+  cerr << "[--ffile|-F] comma separated list of feature data files (default " << kDefaultFeatureFile << ")" << endl;
+  cerr << "[--ifile|-i] the starting point data file (default " << kDefaultInitFile << ")" << endl;
 #ifdef WITH_THREADS
   cerr << "[--threads|-T] use multiple threads (default 1)" << endl;
 #endif
@@ -141,12 +147,12 @@ struct ProgramOption {
         nrandom(0),
         seed(0),
         has_seed(false),
-        optimize_type("powell"),
-        scorer_type("BLEU"),
+        optimize_type(kDefaultOptimizer),
+        scorer_type(kDefaultScorer),
         scorer_config(""),
-        scorer_file("statscore.data"),
-        feature_file("features.data"),
-        init_file("init.opt"),
+        scorer_file(kDefaultScorerFile),
+        feature_file(kDefaultFeatureFile),
+        init_file(kDefaultInitFile),
         num_threads(1),
         shard_size(0),
         shard_count(0) { }
