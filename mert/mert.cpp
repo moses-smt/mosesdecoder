@@ -25,10 +25,53 @@
 
 #include "../moses/src/ThreadPool.h"
 
+using namespace std;
+
+namespace {
 
 float min_interval = 1e-3;
 
-using namespace std;
+/**
+ * Runs an optimisation, or a random restart.
+ */
+class OptimizationTask : public Moses::Task {
+ public:
+  OptimizationTask(Optimizer* optimizer, const Point& point)
+      : m_optimizer(optimizer), m_point(point) {}
+
+  ~OptimizationTask() {}
+
+  void resetOptimizer() {
+    if (m_optimizer) {
+      delete m_optimizer;
+      m_optimizer = NULL;
+    }
+  }
+
+  bool DeleteAfterExecution() const {
+    return false;
+  }
+
+  void Run() {
+    m_score = m_optimizer->Run(m_point);
+  }
+
+  statscore_t getScore() const {
+    return m_score;
+  }
+
+  const Point& getPoint() const  {
+    return m_point;
+  }
+
+ private:
+  // Do not allow the user to instanciate without arguments.
+  OptimizationTask() {}
+
+  Optimizer* m_optimizer;
+  Point m_point;
+  statscore_t m_score;
+};
 
 void usage(int ret)
 {
@@ -77,48 +120,7 @@ static struct option long_options[] = {
 };
 int option_index;
 
-/**
- * Runs an optimisation, or a random restart.
- */
-class OptimizationTask : public Moses::Task
-{
- public:
-  OptimizationTask(Optimizer* optimizer, const Point& point) :
-      m_optimizer(optimizer), m_point(point) {}
-
-  ~OptimizationTask() {}
-
-  void resetOptimizer() {
-    if (m_optimizer) {
-      delete m_optimizer;
-      m_optimizer = NULL;
-    }
-  }
-
-  bool DeleteAfterExecution() {
-    return false;
-  }
-
-  void Run() {
-    m_score = m_optimizer->Run(m_point);
-  }
-
-  statscore_t getScore() const {
-    return m_score;
-  }
-
-  const Point& getPoint() const  {
-    return m_point;
-  }
-
- private:
-  // Do not allow the user to instanciate without arguments.
-  OptimizationTask() {}
-
-  Optimizer* m_optimizer;
-  Point m_point;
-  statscore_t m_score;
-};
+} // anonymous namespace
 
 int main (int argc, char **argv)
 {
