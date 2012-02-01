@@ -44,7 +44,7 @@ class BleuScoreFeature : public StatefulFeatureFunction {
 public:
 
   typedef boost::unordered_map< Phrase, size_t > NGrams;
-  typedef boost::unordered_map<size_t, std::pair<size_t,NGrams> > RefCounts;
+  typedef boost::unordered_map<size_t, std::pair<std::vector<size_t>,NGrams> > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
 
 	BleuScoreFeature():
@@ -53,14 +53,15 @@ public:
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
-
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
 	                                 m_scale_by_ref_length(false),
 	                                 m_scale_by_avg_length(false),
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.7),
-	                                 m_smoothing_scheme(PLUS_ONE) {}
+	                                 m_smoothing_scheme(PLUS_ONE),
+	                                 m_relax_BP(1),
+	                                 m_correction(1) {}
 
     std::string GetScoreProducerDescription() const
     {
@@ -75,11 +76,12 @@ public:
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrentSourceLength(size_t);
-    void SetCurrentReference(size_t);
+    void SetCurrentShortestReference(size_t);
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     size_t GetReferenceLength(size_t ref_id);
+    size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
     void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
     		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
   		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
@@ -106,6 +108,14 @@ public:
                                     }
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
+
+    void SetCorrection(float correction) {
+    	m_correction = correction;
+    }
+
+    float GetCorrection() {
+    	return m_correction;
+    }
 
 private:
     // counts for pseudo-document
@@ -145,6 +155,9 @@ private:
 
     // relax application of the BP by setting a value between 0 and 1
     float m_relax_BP;
+
+    // correct scaling issues
+    float m_correction;
 };
 
 } // Namespace.

@@ -107,7 +107,7 @@ size_t MiraOptimiser::updateWeights(
 	  // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
 	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 	  	float alpha = alphas[k];
-	  	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl);
+	  	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 	    
@@ -233,7 +233,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 					addConstraint = false;
 				}
 
-				float lossMinusModelScoreDiff = loss - modelScoreDiff;
+				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);
 				if (addConstraint) {
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
@@ -264,7 +264,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 	  // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
 	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 	  	float alpha = alphas[k];
-	  	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl);
+	  	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
 	  	ScoreComponentCollection update(featureValueDiffs[k]);
 	    update.MultiplyEquals(alpha);
 
@@ -319,6 +319,97 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);*/
 //	return violatedConstraintsAfter;
 	return 0;
+}
+
+size_t MiraOptimiser::updateWeightsAnalytically(
+		ScoreComponentCollection& currWeights,
+		ScoreComponentCollection& weightUpdate,
+		ScoreComponentCollection& featureValuesHope,
+    ScoreComponentCollection& featureValuesFear,
+    float bleuScoreHope,
+    float bleuScoreFear,
+    float learning_rate,
+    size_t rank,
+    size_t epoch) {
+
+  float epsilon = 0.0001;
+  float oldDistanceFromOptimum = 0;
+  bool constraintViolatedBefore = false;
+
+ // cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << featureValuesHope << endl;
+ // cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear << endl;
+  ScoreComponentCollection featureValueDiff = featureValuesHope;
+  featureValueDiff.MinusEquals(featureValuesFear);
+  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
+  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+  float loss = bleuScoreHope - bleuScoreFear;
+  float diff = 0;
+  float ratio = (modelScoreDiff == 0) ? 0 : loss / modelScoreDiff;
+  cerr << "Rank " << rank << ", epoch " << epoch << ", ratio model/loss: " << ratio << endl;
+  if (loss > (modelScoreDiff + m_margin_slack)) {
+  	diff = loss - (modelScoreDiff + m_margin_slack);
+  }
+  cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+
+  if (epoch == 0)
+  	m_sum_ratios += ratio;
+
+  if (diff > epsilon) {
+    // constraint violated
+    oldDistanceFromOptimum += diff;
+    constraintViolatedBefore = true;
+
+    // compute alpha for given constraint: (loss - model score diff) / || feature value diff ||^2
+    // featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm() == featureValueDiff.InnerProduct(featureValueDiff)
+    // from Crammer&Singer 2006: alpha = min {C , l_t/ ||x||^2}
+    float squaredNorm = featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm();
+
+    if (squaredNorm > 0) {
+    	float alpha = diff / squaredNorm;
+    	if (m_slack > 0 ) {
+    		if (alpha > m_slack) {
+    			alpha = m_slack;
+    		}
+    		else if (alpha < m_slack*(-1)) {
+    			alpha = m_slack*(-1);
+    		}
+    	}
+
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
+    	featureValueDiff.MultiplyEquals(alpha);
+    	weightUpdate.PlusEquals(featureValueDiff);
+    }
+    else {
+    	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", no update because squared norm is 0" << endl);
+    }
+  }
+
+  if (!constraintViolatedBefore) {
+    // constraint satisfied, nothing to do
+  	cerr << "Rank " << rank << ", epoch " << epoch << ", constraint already satisfied" << endl;
+    return 1;
+  }
+
+  // sanity check: constraint still violated after optimisation?
+/*  ScoreComponentCollection newWeights(currWeights);
+  newWeights.PlusEquals(weightUpdate);
+  bool constraintViolatedAfter = false;
+  float newDistanceFromOptimum = 0;
+  featureValueDiff = featureValuesHope;
+  featureValueDiff.MinusEquals(featureValuesFear);
+  modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
+  diff = loss - (modelScoreDiff + m_margin_slack);
+  // approximate comparison between floats!
+  if (diff > epsilon) {
+    constraintViolatedAfter = true;
+    newDistanceFromOptimum += (loss - modelScoreDiff);
+  }
+
+  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, constraint violated before? " << constraintViolatedBefore << ", after? " << constraintViolatedAfter << endl);
+  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
+*/
+
+  return 0;
 }
 
 }

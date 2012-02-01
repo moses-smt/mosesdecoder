@@ -67,7 +67,8 @@ namespace Mira {
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
 		  m_scale_update(scale_update),
-		  m_margin_slack(margin_slack) { }
+		  m_margin_slack(margin_slack),
+		  m_sum_ratios(0) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
 	  								Moses::ScoreComponentCollection& weightUpdate,
@@ -88,6 +89,15 @@ namespace Mira {
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);
+     size_t updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
+    		 Moses::ScoreComponentCollection& weightUpdate,
+    		 Moses::ScoreComponentCollection& featureValuesHope,
+    		 Moses::ScoreComponentCollection& featureValuesFear,
+    		 float bleuScoresHope,
+    		 float bleuScoresFear,
+    		 float learning_rate,
+    		 size_t rank,
+    		 size_t epoch);
 
      void setSlack(float slack) {
     	 m_slack = slack;
@@ -95,6 +105,10 @@ namespace Mira {
 
      void setMarginSlack(float margin_slack) {
     	 m_margin_slack = margin_slack;
+     }
+
+     float getSumRatios() {
+     	return m_sum_ratios;
      }
 
    private:
@@ -112,6 +126,9 @@ namespace Mira {
 
       // scale update with log 10 of oracle BLEU score
       size_t m_scale_update;
+
+      // collect (loss diff/model score diff) ratios from first epoch
+      float m_sum_ratios;
   };
 }
 

@@ -295,17 +295,13 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
            << ff->GetScoreProducerWeightShortName() << " "
            << values[i] << endl;
   }
-}
-
-static void PrintSparseFeatureWeight(const FeatureFunction* ff)
-{
-  if (ff->GetNumScoreComponents() == ScoreProducer::unlimited) {
-    if (ff->GetSparseProducerWeight() == 1)
-      cout << ff->GetScoreProducerDescription() << " " <<
-	ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
-    else
-      cout << ff->GetScoreProducerDescription() << " " <<
-	ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
+  else {
+  	if (ff->GetSparseProducerWeight() == 1)
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
+  	else
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
   }
 }
 
@@ -322,16 +318,13 @@ static void ShowWeights()
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    PrintFeatureWeight(slf[i]);
+  	PrintFeatureWeight(slf[i]);
   }
   for (size_t i = 0; i < pds.size(); ++i) {
     PrintFeatureWeight(pds[i]);
   }
   for (size_t i = 0; i < gds.size(); ++i) {
     PrintFeatureWeight(gds[i]);
-  }
-  for (size_t i = 0; i < sff.size(); ++i) {
-    PrintSparseFeatureWeight(sff[i]);
   }
 }
 

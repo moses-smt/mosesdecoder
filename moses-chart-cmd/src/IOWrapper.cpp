@@ -367,6 +367,12 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
     std::string lastName = "";
 
+    // output stateful sparse features
+    const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
+    for( size_t i=0; i<sff.size(); i++ )
+    	if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
+    		OutputSparseFeatureScores( out, path, sff[i], lastName );
+
     // translation components
     const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
     if (pds.size() > 0) {
@@ -408,18 +414,13 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
       }
     }
 
-    // output sparse features
+    // output stateless sparse features
     lastName = "";
-    const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
-    for( size_t i=0; i<sff.size(); i++ )
-    	if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
-    		OutputSparseFeatureScores( out, path, sff[i], lastName );
 
     const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
     for( size_t i=0; i<slf.size(); i++ )
     	if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
     		OutputSparseFeatureScores( out, path, slf[i], lastName );
-
 
     // total
     out << " ||| " << path.GetTotalScore();

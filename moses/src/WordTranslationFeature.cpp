@@ -60,9 +60,9 @@ void WordTranslationFeature::Evaluate(const TargetPhrase& targetPhrase,
     if (m_unrestricted || sourceExists || targetExists) {
       // construct feature name
       stringstream featureName;
-      featureName << (sourceExists ? sourceWord : "OTHER");
+      featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
       featureName << "|";
-      featureName << (targetExists ? targetWord : "OTHER");
+      featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
       accumulator->PlusEquals(this,featureName.str(),1);
     }
   }

@@ -116,12 +116,15 @@ int main(int argc, char** argv) {
 	int threadcount;
 	size_t adapt_after_epoch;
 	size_t bleu_smoothing_scheme;
-	float max_length_deviation;
+	float max_length_dev_all;
 	float max_length_dev_hypos;
-	float max_length_dev_reference;
+	float max_length_dev_hope_ref;
+	float max_length_dev_fear_ref;
 	float relax_BP;
 	bool stabiliseLength;
 	bool delayUpdates;
+	float min_oracle_bleu;
+	bool correctScaling;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -134,6 +137,7 @@ int main(int argc, char** argv) {
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+		("correct-scaling", po::value<bool>(&correctScaling)->default_value(false), "Try to correct for scaling issues")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 		("delay-updates", po::value<bool>(&delayUpdates)->default_value(false), "Delay all updates until the end of an epoch")
@@ -151,11 +155,13 @@ int main(int argc, char** argv) {
 		("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 		("margin-incr", po::value<float>(&margin_slack_incr)->default_value(0), "Increment margin slack after every epoch by this amount")
 		("margin-slack", po::value<float>(&margin_slack)->default_value(0), "Slack when comparing left and right hand side of constraints")
-		("max-length-deviation", po::value<float>(&max_length_deviation)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope/fear translations and w.r.t. reference translations")
-		("max-length-dev-hypos", po::value<float>(&max_length_dev_hypos)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hop/fear translations")
-		("max-length-dev-reference", po::value<float>(&max_length_dev_reference)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation of hope/fear translations w.r.t. reference translations")
+		("max-length-dev-all", po::value<float>(&max_length_dev_all)->default_value(-1), "Make use of all 3 following options")
+		("max-length-dev-hypos", po::value<float>(&max_length_dev_hypos)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and fear translations")
+		("max-length-dev-hope-ref", po::value<float>(&max_length_dev_hope_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and reference translations")
+		("max-length-dev-fear-ref", po::value<float>(&max_length_dev_fear_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between fear and reference translations")
 		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
-		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+		("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
+	        ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(5), "How often per epoch to mix weights, when using mpi")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
@@ -352,6 +358,8 @@ int main(int argc, char** argv) {
 		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
+	if (historyOf1best || historyOfOracles)
+		sentenceLevelBleu = false;
 	if (!sentenceLevelBleu) {
 		if (!historyOf1best && !historyOfOracles) {
 			historyOf1best = true;
@@ -361,9 +369,10 @@ int main(int argc, char** argv) {
 		bleuScoreWeight_hope = bleuScoreWeight;
 	}
 
-	if (max_length_deviation != -1) {
-		max_length_dev_reference = max_length_deviation;
-		max_length_dev_hypos = max_length_deviation;
+	if (max_length_dev_all != -1) {
+		max_length_dev_hypos = max_length_dev_all;
+		max_length_dev_hope_ref = max_length_dev_all;
+		max_length_dev_fear_ref = max_length_dev_all;
 	}
 
 #ifdef MPI_ENABLE
@@ -429,9 +438,10 @@ int main(int argc, char** argv) {
 
 		numberOfUpdatesThisEpoch = 0;
 		// Sum up weights over one epoch, final average uses weights from last epoch
-		if (!accumulateWeights) {
+		if (!accumulateWeights)
 			cumulativeWeights.ZeroAll();
-		}
+
+		delayedWeightUpdates.ZeroAll();
 
 		// number of weight dumps this epoch
 		size_t weightEpochDump = 0;
@@ -495,7 +505,8 @@ int main(int argc, char** argv) {
 					}
 				}
 
-				size_t reference_length = decoder->getReferenceLength(*sid);
+				size_t ref_length;
+				float avg_ref_length;
 				if (hope_fear || perceptron_update) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
@@ -504,8 +515,11 @@ int main(int argc, char** argv) {
 							distinctNbest, rank, epoch);
 					size_t current_input_length = decoder->getCurrentInputLength();
 					decoder->cleanup();
-					float hope_length_ratio = (float)oracle.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
+					avg_ref_length = ref_length;
+					float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
 
 					vector<const Word*> bestModel;
 					if (historyOf1best || stabiliseLength) {
@@ -516,8 +530,9 @@ int main(int argc, char** argv) {
 								distinctNbest, rank, epoch);
 						decoder->cleanup();
 						cerr << endl;
+						ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 						dev_hypothesis_length += bestModel.size();
-						dev_reference_length += reference_length;
+						dev_reference_length += ref_length;
 					}
 
 					// FEAR
@@ -526,7 +541,10 @@ int main(int argc, char** argv) {
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					float fear_length_ratio = (float)fear.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
+					avg_ref_length += ref_length;
+					avg_ref_length /= 2;
+					float fear_length_ratio = (float)fear.size()/ref_length;
 					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
@@ -537,11 +555,12 @@ int main(int argc, char** argv) {
 					float length_diff_fear = abs(1 - fear_length_ratio);
 					size_t length_diff_hope_fear = abs((int)oracle.size() - (int)fear.size());
 					cerr << "Rank " << rank << ", epoch " << epoch << ", abs-length hope-fear: " << length_diff_hope_fear << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
-
 					bool skip = false;
-					if (max_length_dev_reference != -1 && (length_diff_hope > max_length_dev_reference || length_diff_fear > max_length_dev_reference))
+					if (max_length_dev_hypos != -1 && (length_diff_hope_fear > avg_ref_length * max_length_dev_hypos))
 						skip = true;
-					if (max_length_dev_hypos != -1 && (length_diff_hope_fear > reference_length * max_length_dev_hypos))
+					if (max_length_dev_hope_ref != -1 && length_diff_hope > max_length_dev_hope_ref)
+						skip = true;
+					if (max_length_dev_fear_ref != -1 && length_diff_fear > max_length_dev_fear_ref)
 						skip = true;
 					if (skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << fear_length_ratio << ", " << length_diff_hope_fear << ").. " << endl;
@@ -579,7 +598,8 @@ int main(int argc, char** argv) {
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);
-					float hope_length_ratio = (float)oracle.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
+					float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
@@ -592,11 +612,12 @@ int main(int argc, char** argv) {
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
-					float model_length_ratio = (float)bestModel.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
+					float model_length_ratio = (float)bestModel.size()/ref_length;
 					cerr << ", l-ratio model: " << model_length_ratio << endl;
 					if (stabiliseLength) {
 						dev_hypothesis_length += bestModel.size();
-						dev_reference_length += reference_length;
+						dev_reference_length += ref_length;
 					}
 
 					// FEAR
@@ -606,7 +627,8 @@ int main(int argc, char** argv) {
 							featureValues[batchPosition], bleuScores[batchPosition], true,
 							distinctNbest, rank, epoch);
 					decoder->cleanup();
-					float fear_length_ratio = (float)fear.size()/reference_length;
+					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
+					float fear_length_ratio = (float)fear.size()/ref_length;
 					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 					for (size_t i = 0; i < fear.size(); ++i) {
 						delete fear[i];
@@ -649,10 +671,9 @@ int main(int argc, char** argv) {
 					iter = featureFunctions.begin();
 					for (; iter != featureFunctions.end(); ++iter) {
 						if ((*iter)->GetScoreProducerWeightShortName() == "w") {
-							ignoreWPFeature(featureValues, (*iter));
-							ignoreWPFeature(featureValuesHope, (*iter));
-							ignoreWPFeature(featureValuesFear, (*iter));
-							break;
+							ignoreFeature(featureValues, (*iter));
+							ignoreFeature(featureValuesHope, (*iter));
+							ignoreFeature(featureValuesFear, (*iter));							
 						}
 					}
 				}
@@ -696,8 +717,16 @@ int main(int argc, char** argv) {
 							featureValuesHope, featureValuesFear, dummy1, dummy1, learning_rate, rank, epoch);
 				}
 				else if (hope_fear) {
-					update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
-							featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
+					if (bleuScoresHope[0][0] >= min_oracle_bleu)
+						if (hope_n == 1 && fear_n ==1)
+							update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights, weightUpdate,
+									featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
+									learning_rate, rank, epoch);
+						else
+							update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
+									featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
+				  else
+				    update_status = -1;										     
 				}
 				else {
 					// model_hope_fear
@@ -709,31 +738,34 @@ int main(int argc, char** argv) {
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
-					mosesWeights.PlusEquals(weightUpdate);
-
-					if (normaliseWeights) {
-						mosesWeights.L1Normalise();
+					if (delayUpdates) {
+						delayedWeightUpdates.PlusEquals(weightUpdate);
+						cerr << "\nRank " << rank << ", epoch " << epoch << ", keeping update: " << weightUpdate << endl;
+						++numberOfUpdatesThisEpoch;
 					}
+					else {
+						mosesWeights.PlusEquals(weightUpdate);
+						if (normaliseWeights)
+							mosesWeights.L1Normalise();
 
-					cumulativeWeights.PlusEquals(mosesWeights);
-					++numberOfUpdates;
-					++numberOfUpdatesThisEpoch;
-					if (averageWeights) {
-						ScoreComponentCollection averageWeights(cumulativeWeights);
-						if (accumulateWeights) {
-							averageWeights.DivideEquals(numberOfUpdates);
-						} else {
-							averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
+						cumulativeWeights.PlusEquals(mosesWeights);
+						++numberOfUpdates;
+						++numberOfUpdatesThisEpoch;
+						if (averageWeights) {
+							ScoreComponentCollection averageWeights(cumulativeWeights);
+							if (accumulateWeights) {
+								averageWeights.DivideEquals(numberOfUpdates);
+							} else {
+								averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
+							}
+
+							mosesWeights = averageWeights;
 						}
 
-						mosesWeights = averageWeights;
+						if (!delayUpdates)
+							// set new Moses weights
+							decoder->setWeights(mosesWeights);
 					}
-
-					if (delayUpdates)
-						delayedWeightUpdates.PlusEquals(weightUpdate);
-					else
-						// set new Moses weights
-						decoder->setWeights(mosesWeights);
 				}
 
 				// update history (for approximate document Bleu)
@@ -788,7 +820,7 @@ int main(int argc, char** argv) {
 			} // end mixing
 
 			// Dump weights?
-			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
+			if (!delayUpdates && evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
 			  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
 			  bool proceed = false;
 			  if (accumulateWeights) {
@@ -817,25 +849,25 @@ int main(int argc, char** argv) {
 			      
 			      // normalise weights after averaging
 			      if (normaliseWeights) {
-				mixedAverageWeights.L1Normalise();
+			      	mixedAverageWeights.L1Normalise();
 			      }
 			      
 			      // dump final average weights
 			      ostringstream filename;
 			      if (epoch < 10) {
-				filename << weightDumpStem << "_0" << epoch;
+			      	filename << weightDumpStem << "_0" << epoch;
 			      } else {
-				filename << weightDumpStem << "_" << epoch;
+			      	filename << weightDumpStem << "_" << epoch;
 			      }
 			      
 			      if (weightDumpFrequency > 1) {
-				filename << "_" << weightEpochDump;
+			      	filename << "_" << weightEpochDump;
 			      }
 			      
 			      if (accumulateWeights) {
-				cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+			      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
 			      } else {
-				cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+			      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
 			      }
 			      
 			      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
@@ -847,12 +879,102 @@ int main(int argc, char** argv) {
 
 		} // end of shard loop, end of this epoch
 
+		if (correctScaling && epoch == 0) {
+			float averageRatio = ((MiraOptimiser*) optimiser)->getSumRatios();
+			averageRatio /= numberOfUpdatesThisEpoch;
+			cerr << "Rank " << rank << ", epoch " << epoch << ", average ratio: " << averageRatio << endl;
+			float correctionFactor = 0.9;
+			float mixedAverageRatio = 0;
+			float *sendbuf_float, *recvbuf_float;
+			sendbuf_float = (float *) malloc(sizeof(float));
+			recvbuf_float = (float *) malloc(sizeof(float));
+#ifdef MPI_ENABLE
+			// average across processes
+			//		    mpi::reduce(world, averageRatio, mixedAverageRatio, SCCPlus(), 0);
+			sendbuf_float[0] = averageRatio;
+			recvbuf_float[0] = 0;
+			MPI_Reduce(sendbuf_float, recvbuf_float, 1, MPI_FLOAT, MPI_SUM, 0, world);
+			mixedAverageRatio = recvbuf_float[0];
+
+			  if (rank == 0) {
+			  	mixedAverageRatio /= size;
+			  	mixedAverageRatio *= correctionFactor;
+					mpi::broadcast(world, mixedAverageRatio, 0);
+			  }
+#endif
+#ifndef MPI_ENABLE
+		    mixedAverageRatio = averageRatio;
+		    mixedAverageRatio *= correctionFactor;
+#endif
+
+			decoder->setCorrection(mixedAverageRatio);
+			cerr <<  "Rank " << rank << ", epoch " << epoch << ", setting scaling correction to " << mixedAverageRatio << "." << endl;
+			decoder->setWeights(initialWeights);
+			cerr <<  "Rank " << rank << ", epoch " << epoch << ", resetting decoder weights to initial weights." << endl;
+		}
+
 		if (delayUpdates) {
 			// apply all updates from this epoch to the weight vector
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
+			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, old moses weights: " << mosesWeights << endl;
 			mosesWeights.PlusEquals(delayedWeightUpdates);
+			cumulativeWeights.PlusEquals(mosesWeights);
 			decoder->setWeights(mosesWeights);
 			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, new moses weights: " << mosesWeights << endl;
+
+		  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
+		  bool proceed = false;
+		  if (accumulateWeights) {
+		    if (numberOfUpdatesThisEpoch > 0) {
+		      tmpAverageWeights.DivideEquals(epoch+1);
+		      proceed = true;
+		    }
+		  }
+		  else {
+		    if (numberOfUpdatesThisEpoch > 0)
+		      proceed = true;
+		  }
+
+		  if (proceed) {
+#ifdef MPI_ENABLE
+		    // average across processes
+		    mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
+#endif
+#ifndef MPI_ENABLE
+		    mixedAverageWeights = tmpAverageWeights;
+#endif
+		    if (rank == 0 && !weightDumpStem.empty()) {
+		      // divide by number of processes
+		      mixedAverageWeights.DivideEquals(size);
+
+		      // normalise weights after averaging
+		      if (normaliseWeights) {
+		      	mixedAverageWeights.L1Normalise();
+		      }
+
+		      // dump final average weights
+		      ostringstream filename;
+		      if (epoch < 10) {
+		      	filename << weightDumpStem << "_0" << epoch;
+		      } else {
+		      	filename << weightDumpStem << "_" << epoch;
+		      }
+
+		      if (weightDumpFrequency > 1) {
+		      	filename << "_" << weightEpochDump;
+		      }
+
+		      if (accumulateWeights) {
+		      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+		      } else {
+		      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+		      }
+
+		      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
+		      mixedAverageWeights.Save(filename.str());
+		      ++weightEpochDump;
+		    }
+		  }
 		}
 
 		if (stabiliseLength && !fixLength) {
@@ -1050,10 +1172,10 @@ void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues
 		}
 }
 
-void ignoreWPFeature(vector<vector<ScoreComponentCollection> > &featureValues, const ScoreProducer* sp) {
+void ignoreFeature(vector<vector<ScoreComponentCollection> > &featureValues, const ScoreProducer* sp) {
 	for (size_t i = 0; i < featureValues.size(); ++i)
 		for (size_t j = 0; j < featureValues[i].size(); ++j)
-			// set WP feature to 0
+			// set feature to 0
 			featureValues[i][j].Assign(sp, 0);
 }
 

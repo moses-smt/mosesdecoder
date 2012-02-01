@@ -68,12 +68,18 @@ class MosesDecoder {
     void printBleuFeatureHistory(std::ostream& out);
     void printReferenceLength(const std::vector<size_t>& ref_ids);
     size_t getReferenceLength(size_t ref_id);
+//    void printReferenceLength(const std::vector<size_t>& ref_ids);
+    size_t getClosestReferenceLength(size_t ref_id, int hypoLength);
     void setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
     		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
   		  float scaleByX, float historySmoothing, size_t scheme, float relax_BP);
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
-	void cleanup();
+    void cleanup();
+
+    void setCorrection(float correction) {
+    	m_bleuScoreFeature->SetCorrection(correction);
+    }
 		
 	private:
     float getBleuScore(const Moses::ScoreComponentCollection& scores);
