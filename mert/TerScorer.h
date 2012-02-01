@@ -11,8 +11,6 @@
 
 using namespace std;
 
-// enum TerReferenceLengthStrategy { TER_AVERAGE, TER_SHORTEST, TER_CLOSEST };
-
 class ScoreStats;
 
 /**

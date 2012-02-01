@@ -10,8 +10,6 @@
 
 using namespace std;
 
-// enum MergeReferenceLengthStrategy { MERGE_AVERAGE, MERGE_SHORTEST, MERGE_CLOSEST };
-
 class PerScorer;
 class ScoreStats;
 
