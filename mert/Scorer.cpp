@@ -63,11 +63,11 @@ StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& c
 
   string type = getConfig(KEY_TYPE,TYPE_NONE);
   if (type == TYPE_NONE) {
-    m_regularization_type = REG_NONE;
+    m_regularization_type = NONE;
   } else if (type == TYPE_AVERAGE) {
-    m_regularization_type = REG_AVERAGE;
+    m_regularization_type = AVERAGE;
   } else if (type == TYPE_MINIMUM) {
-    m_regularization_type = REG_MINIMUM;
+    m_regularization_type = MINIMUM;
   } else {
     throw runtime_error("Unknown scorer regularisation strategy: " + type);
   }
@@ -135,7 +135,7 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
 
   // Regularisation. This can either be none, or the min or average as described in
   // Cer, Jurafsky and Manning at WMT08.
-  if (m_regularization_type == REG_NONE || m_regularization_window <= 0) {
+  if (m_regularization_type == NONE || m_regularization_window <= 0) {
     // no regularisation
     return;
   }
@@ -148,7 +148,7 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
       start = i - m_regularization_window;
     }
     const size_t end = min(scores.size(), i + m_regularization_window + 1);
-    if (m_regularization_type == REG_AVERAGE) {
+    if (m_regularization_type == AVERAGE) {
       scores[i] = score_average(raw_scores,start,end);
     } else {
       scores[i] = score_min(raw_scores,start,end);

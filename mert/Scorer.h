@@ -11,8 +11,6 @@
 
 using namespace std;
 
-enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
-
 class ScoreStats;
 
 /**
@@ -165,20 +163,27 @@ private:
  */
 class StatisticsBasedScorer : public Scorer
 {
-public:
+ public:
   StatisticsBasedScorer(const string& name, const string& config);
   virtual ~StatisticsBasedScorer() {}
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores) const;
 
-protected:
+ protected:
+
+  enum RegularisationType {
+    NONE,
+    AVERAGE,
+    MINIMUM,
+  };
+
   /**
    * Calculate the actual score.
    */
   virtual statscore_t calculateScore(const vector<int>& totals) const = 0;
 
   // regularisation
-  ScorerRegularisationStrategy m_regularization_type;
+  RegularisationType m_regularization_type;
   size_t  m_regularization_window;
 };
 
