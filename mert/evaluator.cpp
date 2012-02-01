@@ -159,7 +159,55 @@ static struct option long_options[] = {
   {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
-int option_index;
+// int option_index;
+
+// Options used in evaluator.
+struct ProgramOption {
+  string scorer_type;
+  string scorer_config;
+  string reference;
+  string candidate;
+  int seed;
+  bool has_seed;
+
+  ProgramOption()
+      : scorer_type("BLEU"),
+        scorer_config(""),
+        reference(""),
+        candidate(""),
+        seed(0),
+        has_seed(false) { }
+};
+
+void ParseOptions(int argc, char** argv, ProgramOption* opt) {
+  int c;
+  int option_index;
+  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
+    switch(c) {
+      case 's':
+        opt->scorer_type = string(optarg);
+        break;
+      case 'c':
+        opt->scorer_config = string(optarg);
+        break;
+      case 'R':
+        opt->reference = string(optarg);
+        break;
+      case 'C':
+        opt->candidate = string(optarg);
+        break;
+      case 'b':
+        g_bootstrap = atoi(optarg);
+        break;
+      case 'r':
+        opt->seed = strtol(optarg, NULL, 10);
+        opt->has_seed = true;
+        break;
+      default:
+        usage();
+    }
+  }
+}
 
 } // anonymous namespace
 
@@ -167,47 +215,14 @@ int main(int argc, char** argv)
 {
   ResetUserTime();
 
-  //defaults
-  string scorerType("BLEU");
-  string scorerConfig("");
-  string reference("");
-  string candidate("");
-
-  int seed = 0;
-  bool hasSeed = false;
-
-  int c;
-  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
-    switch(c) {
-      case 's':
-        scorerType = string(optarg);
-        break;
-      case 'c':
-        scorerConfig = string(optarg);
-        break;
-      case 'R':
-        reference = string(optarg);
-        break;
-      case 'C':
-        candidate = string(optarg);
-        break;
-      case 'b':
-        g_bootstrap = atoi(optarg);
-        break;
-      case 'r':
-        seed = strtol(optarg, NULL, 10);
-        hasSeed = true;
-        break;
-      default:
-        usage();
-    }
-  }
+  ProgramOption option;
+  ParseOptions(argc, argv, &option);
 
   if (g_bootstrap)
   {
-    if (hasSeed) {
-      cerr << "Seeding random numbers with " << seed << endl;
-      srandom(seed);
+    if (option.has_seed) {
+      cerr << "Seeding random numbers with " << option.seed << endl;
+      srandom(option.seed);
     } else {
       cerr << "Seeding random numbers with system clock " << endl;
       srandom(time(NULL));
@@ -219,14 +234,14 @@ int main(int argc, char** argv)
     vector<string> candFiles;
     vector<string> scorerTypes;
 
-    if (reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
-    split(reference, ',', refFiles);
+    if (option.reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
+    split(option.reference, ',', refFiles);
 
-    if (candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
-    split(candidate, ',', candFiles);
+    if (option.candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
+    split(option.candidate, ',', candFiles);
 
-    if (scorerType.length() == 0) throw runtime_error("You have to specify at least one scorer.");
-    split(scorerType, ';', scorerTypes);
+    if (option.scorer_type.length() == 0) throw runtime_error("You have to specify at least one scorer.");
+    split(option.scorer_type, ';', scorerTypes);
 
     if (candFiles.size() > 1) g_has_more_files = true;
     if (scorerTypes.size() > 1) g_has_more_scorers = true;
@@ -235,7 +250,7 @@ int main(int argc, char** argv)
     {
         for (vector<string>::const_iterator scorerIt = scorerTypes.begin(); scorerIt != scorerTypes.end(); ++scorerIt)
         {
-            g_scorer = ScorerFactory::getScorer(*scorerIt, scorerConfig);
+            g_scorer = ScorerFactory::getScorer(*scorerIt, option.scorer_config);
             g_scorer->setReferenceFiles(refFiles);
             EvaluatorUtil::evaluate(*fileIt);
             delete g_scorer;
