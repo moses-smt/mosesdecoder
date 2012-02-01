@@ -35,6 +35,9 @@ const char kDefaultScorerFile[] = "statscore.data";
 const char kDefaultFeatureFile[] = "features.data";
 const char kDefaultInitFile[] = "init.opt";
 
+// Used when saving optimized weights.
+const char kOutputFile[] = "weights.txt";
+
 /**
  * Runs an optimisation, or a random restart.
  */
@@ -470,7 +473,7 @@ int main(int argc, char **argv)
   }
 
   cerr << "Best point: " << finalP << " => " << final << endl;
-  ofstream res("weights.txt");
+  ofstream res(kOutputFile);
   res << finalP << endl;
 
   for (size_t i = 0; i < allTasks.size(); ++i) {
