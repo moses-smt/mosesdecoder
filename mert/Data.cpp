@@ -255,8 +255,8 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     vector<size_t> shard_contents;
     if (shard_size == 0) {
       //split into roughly equal size shards
-      size_t shard_start = floor(0.5 + shard_id * (float)data_size / shard_count);
-      size_t shard_end = floor(0.5 + (shard_id+1) * (float)data_size / shard_count);
+      const size_t shard_start = floor(0.5 + shard_id * static_cast<float>(data_size) / shard_count);
+      const size_t shard_end = floor(0.5 + (shard_id + 1) * static_cast<float>(data_size) / shard_count);
       for (size_t i = shard_start; i < shard_end; ++i) {
         shard_contents.push_back(i);
       }

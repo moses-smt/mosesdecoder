@@ -459,8 +459,8 @@ int main(int argc, char **argv)
       }
     }
 
-    mean /= (float)option.ntry;
-    var /= (float)option.ntry;
+    mean /= static_cast<float>(option.ntry);
+    var /= static_cast<float>(option.ntry);
     var = sqrt(abs(var - mean * mean));
 
     if (verboselevel() > 1) {
@@ -481,7 +481,7 @@ int main(int argc, char **argv)
     cerr << "bestP: " << finalP << endl;
 
   // L1-Normalization of the best Point
-  if ((int)to_optimize.size() == option.pdim) {
+  if (static_cast<int>(to_optimize.size()) == option.pdim) {
     finalP.NormalizeL1();
   }
 
