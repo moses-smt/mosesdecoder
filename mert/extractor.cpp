@@ -22,34 +22,34 @@ namespace {
 
 void usage()
 {
-  cerr<<"usage: extractor [options])"<<endl;
-  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
-  cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
-  cerr<<"\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc "<<endl;
-  cerr<<"[--reference|-r] comma separated list of reference files"<<endl;
-  cerr<<"[--binary|-b] use binary output format (default to text )"<<endl;
-  cerr<<"[--nbest|-n] the nbest file"<<endl;
-  cerr<<"[--scfile|-S] the scorer data output file"<<endl;
-  cerr<<"[--ffile|-F] the feature data output file"<<endl;
-  cerr<<"[--prev-ffile|-E] comma separated list of previous feature data" <<endl;
-  cerr<<"[--prev-scfile|-R] comma separated list of previous scorer data"<<endl;
-  cerr<<"[-v] verbose level"<<endl;
-  cerr<<"[--help|-h] print this message and exit"<<endl;
+  cerr << "usage: extractor [options])" << endl;
+  cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
+  cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
+  cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
+  cerr << "[--reference|-r] comma separated list of reference files" << endl;
+  cerr << "[--binary|-b] use binary output format (default to text )" << endl;
+  cerr << "[--nbest|-n] the nbest file" << endl;
+  cerr << "[--scfile|-S] the scorer data output file" << endl;
+  cerr << "[--ffile|-F] the feature data output file" << endl;
+  cerr << "[--prev-ffile|-E] comma separated list of previous feature data" << endl;
+  cerr << "[--prev-scfile|-R] comma separated list of previous scorer data" << endl;
+  cerr << "[-v] verbose level" << endl;
+  cerr << "[--help|-h] print this message and exit" << endl;
   exit(1);
 }
 
 static struct option long_options[] = {
-  {"sctype",required_argument,0,'s'},
-  {"scconfig",required_argument,0,'c'},
-  {"reference",required_argument,0,'r'},
-  {"binary",no_argument,0,'b'},
-  {"nbest",required_argument,0,'n'},
-  {"scfile",required_argument,0,'S'},
-  {"ffile",required_argument,0,'F'},
-  {"prev-scfile",required_argument,0,'R'},
-  {"prev-ffile",required_argument,0,'E'},
-  {"verbose",required_argument,0,'v'},
-  {"help",no_argument,0,'h'},
+  {"sctype", required_argument, 0, 's'},
+  {"scconfig", required_argument,0, 'c'},
+  {"reference", required_argument, 0, 'r'},
+  {"binary", no_argument, 0, 'b'},
+  {"nbest", required_argument, 0, 'n'},
+  {"scfile", required_argument, 0, 'S'},
+  {"ffile", required_argument, 0, 'F'},
+  {"prev-scfile", required_argument, 0, 'R'},
+  {"prev-ffile", required_argument, 0, 'E'},
+  {"verbose", required_argument, 0, 'v'},
+  {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
 
@@ -83,7 +83,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
 
-  while ((c = getopt_long(argc,argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
     switch (c) {
       case 's':
         opt->scorerType = string(optarg);
@@ -189,14 +189,14 @@ int main(int argc, char** argv)
     Data data(*scorer);
 
     // load old data
-    for (size_t i=0; i < prevScoreDataFiles.size(); i++) {
+    for (size_t i = 0; i < prevScoreDataFiles.size(); i++) {
       data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
     }
 
     PrintUserTime("Previous data loaded");
 
     // computing score statistics of each nbest file
-    for (size_t i=0; i < nbestFiles.size(); i++) {
+    for (size_t i = 0; i < nbestFiles.size(); i++) {
       data.loadnbest(nbestFiles.at(i));
     }
 
