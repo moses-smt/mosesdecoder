@@ -121,7 +121,6 @@ int main(int argc, char** argv) {
 	float max_length_dev_hope_ref;
 	float max_length_dev_fear_ref;
 	float relax_BP;
-	bool stabiliseLength;
 	bool delayUpdates;
 	float min_oracle_bleu;
 	bool correctScaling;
@@ -185,7 +184,6 @@ int main(int argc, char** argv) {
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
-		("stabilise-length", po::value<bool>(&stabiliseLength)->default_value(false), "Stabilise word penalty when length ratio >= 1")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
@@ -235,27 +233,6 @@ int main(int argc, char** argv) {
 	if (!referenceFiles.size()) {
 		cerr << "Error: No reference files specified" << endl;
 		return 1;
-	}
-
-	StrFloatMap coreWeightMap;
-	if (!coreWeightFile.empty()) {
-		if (!hope_fear) {
-			cerr << "Error: using pre-tuned core weights is only implemented for hope/fear updates at the moment" << endl;
-			return 1;
-		}
-
-		if (!loadWeights(coreWeightFile, coreWeightMap)) {
-				cerr << "Error: Failed to load core weights from " << coreWeightFile << endl;
-				return 1;
-		}
-		else {
-			cerr << "Loaded core weights from " << coreWeightFile << ": " << endl;
-			StrFloatMap::iterator p;
-			for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-			{
-				cerr << p->first << ": " << p->second << endl;
-			}
-		}
 	}
 
 	// load input and references
@@ -395,10 +372,26 @@ int main(int argc, char** argv) {
 	const vector<const ScoreProducer*> featureFunctions =
 		    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 
+	// read core weight file
+	ProducerWeightMap coreWeightMap;
+	if (!coreWeightFile.empty()) {
+		if (!hope_fear) {
+			cerr << "Error: using pre-tuned core weights is only implemented for hope/fear updates at the moment" << endl;
+			return 1;
+		}
+
+		if (!loadCoreWeights(coreWeightFile, coreWeightMap, featureFunctions)) {
+				cerr << "Error: Failed to load core weights from " << coreWeightFile << endl;
+				return 1;
+		}
+		else
+			cerr << "Loaded core weights from " << coreWeightFile << "." << endl;
+	}
+
 	// set core weights
 	ScoreComponentCollection initialWeights = decoder->getWeights();
 	if (coreWeightMap.size() > 0) {
-		StrFloatMap::iterator p;
+		ProducerWeightMap::iterator p;
 		for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
 		{
 			initialWeights.Assign(p->first, p->second);
@@ -421,9 +414,6 @@ int main(int argc, char** argv) {
 	ScoreComponentCollection mixedAverageWeightsPrevious;
 	ScoreComponentCollection mixedAverageWeightsBeforePrevious;
 
-	// when length ratio >= 1, set this to true
-	bool fixLength = false;
-
 	// for accumulating delayed updates
 	ScoreComponentCollection delayedWeightUpdates;
 
@@ -445,10 +435,6 @@ int main(int argc, char** argv) {
 
 		// number of weight dumps this epoch
 		size_t weightEpochDump = 0;
-
-		// sum lengths of dev hypothesis/references to calculate translation length ratio for this epoch
-		size_t dev_hypothesis_length = 0;
-		size_t dev_reference_length = 0;
 
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
@@ -497,7 +483,7 @@ int main(int argc, char** argv) {
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newBleuScores);
 					bleuScoresFear.push_back(newBleuScores);
-					if (historyOf1best || stabiliseLength) {
+					if (historyOf1best) {
 						dummyFeatureValues.push_back(newFeatureValues);
 						dummyBleuScores.push_back(newBleuScores);
 					}
@@ -520,7 +506,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
 
 					vector<const Word*> bestModel;
-					if (historyOf1best || stabiliseLength) {
+					if (historyOf1best) {
 						// MODEL (for updating the history only, using dummy vectors)
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
 						bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
@@ -529,8 +515,6 @@ int main(int argc, char** argv) {
 						decoder->cleanup();
 						cerr << endl;
 						ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
-						dev_hypothesis_length += bestModel.size();
-						dev_reference_length += ref_length;
 					}
 
 					// FEAR
@@ -613,10 +597,6 @@ int main(int argc, char** argv) {
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 					float model_length_ratio = (float)bestModel.size()/ref_length;
 					cerr << ", l-ratio model: " << model_length_ratio << endl;
-					if (stabiliseLength) {
-						dev_hypothesis_length += bestModel.size();
-						dev_reference_length += ref_length;
-					}
 
 					// FEAR
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
@@ -663,18 +643,6 @@ int main(int argc, char** argv) {
 				    mosesWeights.Assign(*iter, 0);
 				    break;
 				  }
-
-				// set word penalty to 0 before optimising (if 'stabilise-length' is active)
-				if (fixLength) {
-					iter = featureFunctions.begin();
-					for (; iter != featureFunctions.end(); ++iter) {
-						if ((*iter)->GetScoreProducerWeightShortName() == "w") {
-							ignoreFeature(featureValues, (*iter));
-							ignoreFeature(featureValuesHope, (*iter));
-							ignoreFeature(featureValuesFear, (*iter));							
-						}
-					}
-				}
 
 				// take logs of feature values
 				if (logFeatureValues) {
@@ -978,14 +946,6 @@ int main(int argc, char** argv) {
 		  }
 		}
 
-		if (stabiliseLength && !fixLength) {
-			float lengthRatio = (float)(dev_hypothesis_length+1) / dev_reference_length;
-			if (lengthRatio >= 1) {
-				cerr << "Rank " << rank << ", epoch " << epoch << ", length ratio >= 1, fixing word penalty. " << endl;
-				fixLength = 1;
-			}
-		}
-
 		if (verbosity > 0) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;
 			decoder->printBleuFeatureHistory(cerr);
@@ -1113,23 +1073,49 @@ bool loadSentences(const string& filename, vector<string>& sentences) {
 	return true;
 }
 
-bool loadWeights(const string& filename, StrFloatMap& coreWeightMap) {
+bool loadCoreWeights(const string& filename, ProducerWeightMap& coreWeightMap, const vector<const ScoreProducer*> &featureFunctions) {
 	ifstream in(filename.c_str());
 	if (!in)
 		return false;
 	string line;
+	vector< float > store_weights;
+	cerr << "Loading core weights:" << endl;
 	while (getline(in, line)) {
 		// split weight name from value
 		vector<string> split_line;
 		boost::split(split_line, line, boost::is_any_of(" "));
-
 		float weight;
 		if(!from_string<float>(weight, split_line[1], std::dec))
 		{
-			cerr << "from_string failed" << endl;
+			cerr << "reading in float failed.." << endl;
 			return false;
 		}
-		coreWeightMap.insert(StrFloatPair(split_line[0], weight));
+
+		// find producer for this score
+		string name = split_line[0];
+		for (size_t i=0; i < featureFunctions.size(); ++i) {
+			std::string prefix = featureFunctions[i]->GetScoreProducerDescription();
+			if (name.substr( 0, prefix.length() ).compare( prefix ) == 0) {
+				if (featureFunctions[i]->GetNumScoreComponents() == 1) {
+					vector< float > weights;
+					weights.push_back(weight);
+					coreWeightMap.insert(ProducerWeightPair(featureFunctions[i], weights));
+					cerr << "insert 1 weight for " << featureFunctions[i]->GetScoreProducerDescription();
+					cerr << " (" << weight << ")" << endl;
+				}
+				else {
+					store_weights.push_back(weight);
+					if (store_weights.size() == featureFunctions[i]->GetNumScoreComponents()) {
+						coreWeightMap.insert(ProducerWeightPair(featureFunctions[i], store_weights));
+						cerr << "insert " << store_weights.size() << " weights for " << featureFunctions[i]->GetScoreProducerDescription() << " (";
+						for (size_t j=0; j < store_weights.size(); ++j)
+							cerr << store_weights[j] << " ";
+						cerr << ")" << endl;
+						store_weights.clear();
+					}
+				}
+			}
+		}
 	}
 	return true;
 }
@@ -1163,21 +1149,22 @@ void printFeatureValues(vector<vector<ScoreComponentCollection> > &featureValues
 	cerr << endl;
 }
 
-void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues, StrFloatMap &coreWeightMap) {
+void ignoreCoreFeatures(vector<vector<ScoreComponentCollection> > &featureValues, ProducerWeightMap &coreWeightMap) {
 	for (size_t i = 0; i < featureValues.size(); ++i)
 		for (size_t j = 0; j < featureValues[i].size(); ++j) {
 			// set all core features to 0
-			StrFloatMap::iterator p;
-			for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-				featureValues[i][j].Assign(p->first, 0);
+			ProducerWeightMap::iterator p;
+			for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p) {
+				if ((p->first)->GetNumScoreComponents() == 1)
+					featureValues[i][j].Assign(p->first, 0);
+				else {
+					vector< float > weights;
+					for (size_t k=0; k < (p->first)->GetNumScoreComponents(); ++k)
+						weights.push_back(0);
+					featureValues[i][j].Assign(p->first, weights);
+				}
+			}
 		}
-}
-
-void ignoreFeature(vector<vector<ScoreComponentCollection> > &featureValues, const ScoreProducer* sp) {
-	for (size_t i = 0; i < featureValues.size(); ++i)
-		for (size_t j = 0; j < featureValues[i].size(); ++j)
-			// set feature to 0
-			featureValues[i][j].Assign(sp, 0);
 }
 
 void takeLogs(vector<vector<ScoreComponentCollection> > &featureValues, size_t base) {
