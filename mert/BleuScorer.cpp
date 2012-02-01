@@ -11,7 +11,7 @@
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU",config),
       kLENGTH(4),
-      _refLengthStrategy(BLEU_CLOSEST) {
+      m_ref_length_type(CLOSEST) {
   //configure regularisation
   static string KEY_REFLEN = "reflen";
   static string REFLEN_AVERAGE = "average";
@@ -20,11 +20,11 @@ BleuScorer::BleuScorer(const string& config)
 
   string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
-    _refLengthStrategy = BLEU_AVERAGE;
+    m_ref_length_type = AVERAGE;
   } else if (reflen == REFLEN_SHORTEST) {
-    _refLengthStrategy = BLEU_SHORTEST;
+    m_ref_length_type = SHORTEST;
   } else if (reflen == REFLEN_CLOSEST) {
-    _refLengthStrategy = BLEU_CLOSEST;
+    m_ref_length_type = CLOSEST;
   } else {
     throw runtime_error("Unknown reference length strategy: " + reflen);
   }
@@ -133,18 +133,18 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   vector<float> stats(kLENGTH*2);;
   size_t length = countNgrams(text,testcounts,kLENGTH);
   //dump_counts(testcounts);
-  if (_refLengthStrategy == BLEU_SHORTEST) {
+  if (m_ref_length_type == SHORTEST) {
     //cerr << reflengths.size() << " " << sid << endl;
     int shortest = *min_element(_reflengths[sid].begin(),_reflengths[sid].end());
     stats.push_back(shortest);
-  } else if (_refLengthStrategy == BLEU_AVERAGE) {
+  } else if (m_ref_length_type == AVERAGE) {
     int total = 0;
     for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
       total += _reflengths[sid][i];
     }
     const float mean = static_cast<float>(total) /_reflengths[sid].size();
     stats.push_back(mean);
-  } else if (_refLengthStrategy == BLEU_CLOSEST)  {
+  } else if (m_ref_length_type == CLOSEST)  {
     int min_diff = INT_MAX;
     int min_idx = 0;
     for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
