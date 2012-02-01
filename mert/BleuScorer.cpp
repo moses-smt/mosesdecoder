@@ -37,7 +37,7 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
 {
   vector<int> encoded_tokens;
   //cerr << line << endl;
-  encode(line,encoded_tokens);
+  TokenizeAndEncode(line, encoded_tokens);
   //copy(encoded_tokens.begin(), encoded_tokens.end(), ostream_iterator<int>(cerr," "));
   //cerr << endl;
   for (size_t k = 1; k <= n; ++k) {
@@ -70,7 +70,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
   //make sure reference data is clear
   m_ref_counts.reset();
   m_ref_lengths.clear();
-  m_encodings.clear();
+  ClearEncoder();
 
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {

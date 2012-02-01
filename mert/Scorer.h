@@ -21,12 +21,9 @@ class ScoreStats;
  */
 class Scorer
 {
-private:
-  string m_name;
-
-public:
+ public:
   Scorer(const string& name, const string& config);
-  virtual ~Scorer() {}
+  virtual ~Scorer();
 
   /**
    * Return the number of statistics needed for the computation of the score.
@@ -102,12 +99,24 @@ public:
     m_score_data = data;
   }
 
-protected:
-  typedef map<string,int> encodings_t;
-  typedef map<string,int>::iterator encodings_it;
+ private:
+  class Encoder {
+   public:
+    Encoder();
+    virtual ~Encoder();
+    int Encode(const std::string& token);
+    void Clear() { m_vocab.clear(); }
 
+   private:
+    std::map<std::string, int> m_vocab;
+  };
+
+  string m_name;
+  Encoder* m_encoder;
+  map<string, string> m_config;
+
+ protected:
   ScoreData* m_score_data;
-  encodings_t m_encodings;
   bool m_enable_preserve_case;
 
   /**
@@ -122,38 +131,13 @@ protected:
     }
   }
 
-
   /**
    * Tokenise line and encode.
    * Note: We assume that all tokens are separated by single spaces.
    */
-  void encode(const string& line, vector<int>& encoded) {
-    //cerr << line << endl;
-    istringstream in (line);
-    string token;
-    while (in >> token) {
-      if (!m_enable_preserve_case) {
-        for (string::iterator i = token.begin(); i != token.end(); ++i) {
-          *i = tolower(*i);
-        }
-      }
-      encodings_it encoding = m_encodings.find(token);
-      int encoded_token;
-      if (encoding == m_encodings.end()) {
-        encoded_token = static_cast<int>(m_encodings.size());
-        m_encodings[token] = encoded_token;
-        //cerr << encoded_token << "(n) ";
-      } else {
-        encoded_token = encoding->second;
-        //cerr << encoded_token << " ";
-      }
-      encoded.push_back(encoded_token);
-    }
-    //cerr << endl;
-  }
+  void TokenizeAndEncode(const string& line, vector<int>& encoded);
 
-private:
-  map<string, string> m_config;
+  void ClearEncoder() { m_encoder->Clear(); }
 };
 
 

@@ -30,7 +30,7 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
   int sid = 0;
   while (getline(in,line)) {
     vector<int> tokens;
-    encode(line,tokens);
+    TokenizeAndEncode(line, tokens);
     m_ref_tokens.push_back(multiset<int>());
     for (size_t i = 0; i < tokens.size(); ++i) {
       m_ref_tokens.back().insert(tokens[i]);
@@ -55,7 +55,7 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   // Calculate correct, output_length and ref_length for
   // the line and store it in entry
   vector<int> testtokens;
-  encode(text,testtokens);
+  TokenizeAndEncode(text, testtokens);
   multiset<int> testtokens_all(testtokens.begin(),testtokens.end());
   set<int> testtokens_unique(testtokens.begin(),testtokens.end());
   int correct = 0;
