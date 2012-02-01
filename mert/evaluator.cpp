@@ -16,7 +16,6 @@ using namespace std;
 namespace {
 
 Scorer* g_scorer = NULL;
-int g_bootstrap = 0;
 bool g_has_more_files = false;
 bool g_has_more_scorers = false;
 const float g_alpha = 0.05;
@@ -24,7 +23,7 @@ const float g_alpha = 0.05;
 
 class EvaluatorUtil {
  public:
-  static void evaluate(const string& candFile);
+  static void evaluate(const string& candFile, int bootstrap);
   static float average(const vector<float>& list);
   static string int2string(int n);
 
@@ -33,7 +32,7 @@ class EvaluatorUtil {
   ~EvaluatorUtil() {}
 };
 
-void EvaluatorUtil::evaluate(const string& candFile)
+void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
 {
   ifstream cand(candFile.c_str());
   if (!cand.good()) throw runtime_error("Error opening candidate file");
@@ -50,10 +49,10 @@ void EvaluatorUtil::evaluate(const string& candFile)
   }
 
   int n = entries.size();
-  if (g_bootstrap)
+  if (bootstrap)
   {
     vector<float> scores;
-    for (int i = 0; i < g_bootstrap; ++i)
+    for (int i = 0; i < bootstrap; ++i)
     {
       // TODO: Use smart pointer for exceptional-safety.
       ScoreData* scoredata = new ScoreData(*g_scorer);
@@ -167,6 +166,7 @@ struct ProgramOption {
   string scorer_config;
   string reference;
   string candidate;
+  int bootstrap;
   int seed;
   bool has_seed;
 
@@ -175,6 +175,7 @@ struct ProgramOption {
         scorer_config(""),
         reference(""),
         candidate(""),
+        bootstrap(0),
         seed(0),
         has_seed(false) { }
 };
@@ -197,7 +198,7 @@ void ParseOptions(int argc, char** argv, ProgramOption* opt) {
         opt->candidate = string(optarg);
         break;
       case 'b':
-        g_bootstrap = atoi(optarg);
+        opt->bootstrap = atoi(optarg);
         break;
       case 'r':
         opt->seed = strtol(optarg, NULL, 10);
@@ -206,6 +207,16 @@ void ParseOptions(int argc, char** argv, ProgramOption* opt) {
       default:
         usage();
     }
+  }
+}
+
+void InitSeed(const ProgramOption *opt) {
+  if (opt->has_seed) {
+    cerr << "Seeding random numbers with " << opt->seed << endl;
+    srandom(opt->seed);
+  } else {
+    cerr << "Seeding random numbers with system clock " << endl;
+    srandom(time(NULL));
   }
 }
 
@@ -218,15 +229,9 @@ int main(int argc, char** argv)
   ProgramOption option;
   ParseOptions(argc, argv, &option);
 
-  if (g_bootstrap)
+  if (option.bootstrap)
   {
-    if (option.has_seed) {
-      cerr << "Seeding random numbers with " << option.seed << endl;
-      srandom(option.seed);
-    } else {
-      cerr << "Seeding random numbers with system clock " << endl;
-      srandom(time(NULL));
-    }
+    InitSeed(&option);
   }
 
   try {
@@ -252,7 +257,7 @@ int main(int argc, char** argv)
         {
             g_scorer = ScorerFactory::getScorer(*scorerIt, option.scorer_config);
             g_scorer->setReferenceFiles(refFiles);
-            EvaluatorUtil::evaluate(*fileIt);
+            EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
             delete g_scorer;
         }
     }
