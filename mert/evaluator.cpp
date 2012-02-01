@@ -158,7 +158,6 @@ static struct option long_options[] = {
   {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
-// int option_index;
 
 // Options used in evaluator.
 struct ProgramOption {
@@ -180,7 +179,7 @@ struct ProgramOption {
         has_seed(false) { }
 };
 
-void ParseOptions(int argc, char** argv, ProgramOption* opt) {
+void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
   while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
@@ -227,7 +226,7 @@ int main(int argc, char** argv)
   ResetUserTime();
 
   ProgramOption option;
-  ParseOptions(argc, argv, &option);
+  ParseCommandOptions(argc, argv, &option);
 
   if (option.bootstrap)
   {
