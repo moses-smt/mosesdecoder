@@ -46,14 +46,12 @@ Parameter::Parameter()
   AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
   AddParam("dlm", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
-  AddParam("dlm-weight-file", "feature weights file for discriminative language models");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
   AddParam("glm", "Factor types for global lexicon models, format Factor-Factor.");
-  AddParam("glm-weight-file", "discriminatively trained global lexical translation model file (perceptron-trained)");
   AddParam("input-factors", "list of factors in the input");
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");

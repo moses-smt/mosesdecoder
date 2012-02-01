@@ -708,55 +708,22 @@ bool StaticData::LoadData(Parameter *parameter)
 	      return false;
 	  }
 
-	  m_allWeights.PlusEquals(extraWeights);
-  }
-
-  // DLM weight file
-  extraWeightConfig = m_parameter->GetParam("dlm-weight-file");
-  if (extraWeightConfig.size()) {
-    if (extraWeightConfig.size() != 1) {
-      UserMessage::Add("One argument should be supplied for dlm-weight-file");
-      return false;
-    }
-    ScoreComponentCollection extraWeights;
-    if (!extraWeights.Load(extraWeightConfig[0])) {
-      UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
-      return false;
-    }
-
-    // apply additional weight to sparse features if applicable
+    // DLM: apply additional weight to sparse features if applicable
     for (size_t i = 0; i < m_targetNgramFeatures.size(); ++i) {
     	float dlmWeight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
     	if (dlmWeight != 1)
     		extraWeights.MultiplyEquals(m_targetNgramFeatures[i], dlmWeight);
     }
 
-    m_allWeights.PlusEquals(extraWeights);
-  }
-
-  // GLOBAL LEXICON MODEL weight file
-  extraWeightConfig = m_parameter->GetParam("glm-weight-file");
-  if (extraWeightConfig.size()) {
-	  if (extraWeightConfig.size() != 1) {
-        UserMessage::Add("One argument should be supplied for glm-weight-file");
-        std::cerr << "number: " << extraWeightConfig.size() << std::endl;
-        return false;
-      }
-      ScoreComponentCollection extraWeights;
-      if (!extraWeights.Load(extraWeightConfig[0])) {
-        UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
-        return false;
-      }
-
-      // apply additional weight to sparse features if applicable
-      for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
-      	float glmWeight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
-      	if (glmWeight != 1)
-      		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], glmWeight);
-      }
-
-      m_allWeights.PlusEquals(extraWeights);
+    // GLM: apply additional weight to sparse features if applicable
+    for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
+    	float glmWeight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
+    	if (glmWeight != 1)
+    		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], glmWeight);
     }
+
+	  m_allWeights.PlusEquals(extraWeights);
+  }
 
   return true;
 }
