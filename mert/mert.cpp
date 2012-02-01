@@ -39,19 +39,19 @@ class OptimizationTask : public Moses::Task {
 
   ~OptimizationTask() {}
 
+  virtual void Run() {
+    m_score = m_optimizer->Run(m_point);
+  }
+
+  virtual bool DeleteAfterExecution() {
+    return false;
+  }
+
   void resetOptimizer() {
     if (m_optimizer) {
       delete m_optimizer;
       m_optimizer = NULL;
     }
-  }
-
-  bool DeleteAfterExecution() {
-    return false;
-  }
-
-  void Run() {
-    m_score = m_optimizer->Run(m_point);
   }
 
   statscore_t getScore() const {
