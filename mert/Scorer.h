@@ -55,7 +55,7 @@ public:
   virtual void prepareStats(const string& sindex, const string& text, ScoreStats& entry) {
 
 //            cerr << sindex << endl;
-    this->prepareStats((size_t) atoi(sindex.c_str()), text, entry);
+    this->prepareStats(static_cast<size_t>(atoi(sindex.c_str())), text, entry);
     //cerr << text << std::endl;
   }
 
@@ -143,7 +143,7 @@ protected:
       encodings_it encoding = _encodings.find(token);
       int encoded_token;
       if (encoding == _encodings.end()) {
-        encoded_token = (int)_encodings.size();
+        encoded_token = static_cast<int>(_encodings.size());
         _encodings[token] = encoded_token;
         //cerr << encoded_token << "(n) ";
       } else {

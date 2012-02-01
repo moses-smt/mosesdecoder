@@ -142,18 +142,21 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
       total += _reflengths[sid][i];
     }
-    float mean = static_cast<float>(total) /_reflengths[sid].size();
+    const float mean = static_cast<float>(total) /_reflengths[sid].size();
     stats.push_back(mean);
   } else if (_refLengthStrategy == BLEU_CLOSEST)  {
     int min_diff = INT_MAX;
     int min_idx = 0;
     for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
-      int reflength = _reflengths[sid][i];
-      if (abs(reflength-(int)length) < abs(min_diff)) { //look for the closest reference
-        min_diff = reflength-length;
+      const int reflength = _reflengths[sid][i];
+      const int diff = reflength - static_cast<int>(length);
+      const int absolute_diff = abs(diff) - abs(min_diff);
+
+      if (absolute_diff < 0) { //look for the closest reference
+        min_diff = diff;
         min_idx = i;
-      } else if (abs(reflength-(int)length) == abs(min_diff)) { // if two references has the same closest length, take the shortest
-        if (reflength < (int)_reflengths[sid][min_idx]) {
+      } else if (absolute_diff == 0) { // if two references has the same closest length, take the shortest
+        if (reflength < static_cast<int>(_reflengths[sid][min_idx])) {
           min_idx = i;
         }
       }

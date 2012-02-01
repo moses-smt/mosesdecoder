@@ -57,8 +57,9 @@ public:
   inline bool exists(const std::string& sent_idx) const {
     return exists(getIndex(sent_idx));
   }
+
   inline bool exists(int sent_idx) const {
-    return (sent_idx > -1 && sent_idx < (int)array_.size()) ? true : false;
+    return (sent_idx > -1 && sent_idx < static_cast<int>(array_.size())) ? true : false;
   }
 
   inline ScoreStats& get(size_t i, size_t j) {
