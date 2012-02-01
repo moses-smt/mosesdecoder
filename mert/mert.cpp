@@ -73,47 +73,47 @@ class OptimizationTask : public Moses::Task {
 
 void usage(int ret)
 {
-  cerr<<"usage: mert -d <dimensions> (mandatory )"<<endl;
-  cerr<<"[-n] retry ntimes (default 1)"<<endl;
-  cerr<<"[-m] number of random directions in powell (default 0)"<<endl;
-  cerr<<"[-o] the indexes to optimize(default all)"<<endl;
-  cerr<<"[-t] the optimizer(default powell)"<<endl;
-  cerr<<"[-r] the random seed (defaults to system clock)"<<endl;
-  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
-  cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
-  cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
-  cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
-  cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
+  cerr << "usage: mert -d <dimensions> (mandatory)" << endl;
+  cerr << "[-n] retry ntimes (default 1)" << endl;
+  cerr << "[-m] number of random directions in powell (default 0)"<< endl;
+  cerr << "[-o] the indexes to optimize(default all)" << endl;
+  cerr << "[-t] the optimizer(default powell)" << endl;
+  cerr << "[-r] the random seed (defaults to system clock)" << endl;
+  cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
+  cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
+  cerr << "[--scfile|-S] comma separated list of scorer data files (default score.data)" << endl;
+  cerr << "[--ffile|-F] comma separated list of feature data files (default feature.data)" << endl;
+  cerr << "[--ifile|-i] the starting point data file (default init.opt)" << endl;
 #ifdef WITH_THREADS
-  cerr<<"[--threads|-T] use multiple threads (default 1)"<<endl;
+  cerr << "[--threads|-T] use multiple threads (default 1)" << endl;
 #endif
-  cerr<<"[--shard-count] Split data into shards, optimize for each shard and average"<<endl;
-  cerr<<"[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards"<<endl;
-  cerr<<"[-v] verbose level"<<endl;
-  cerr<<"[--help|-h] print this message and exit"<<endl;
+  cerr << "[--shard-count] Split data into shards, optimize for each shard and average" << endl;
+  cerr << "[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards" << endl;
+  cerr << "[-v] verbose level" << endl;
+  cerr << "[--help|-h] print this message and exit" << endl;
   exit(ret);
 }
 
 static struct option long_options[] = {
   {"pdim", 1, 0, 'd'},
-  {"ntry",1,0,'n'},
-  {"nrandom",1,0,'m'},
-  {"rseed",required_argument,0,'r'},
-  {"optimize",1,0,'o'},
-  {"pro",required_argument,0,'p'},
-  {"type",1,0,'t'},
-  {"sctype",1,0,'s'},
-  {"scconfig",required_argument,0,'c'},
-  {"scfile",1,0,'S'},
-  {"ffile",1,0,'F'},
-  {"ifile",1,0,'i'},
+  {"ntry", 1, 0, 'n'},
+  {"nrandom", 1, 0, 'm'},
+  {"rseed", required_argument, 0, 'r'},
+  {"optimize", 1, 0, 'o'},
+  {"pro", required_argument, 0, 'p'},
+  {"type", 1, 0, 't'},
+  {"sctype", 1, 0, 's'},
+  {"scconfig", required_argument, 0, 'c'},
+  {"scfile", 1, 0, 'S'},
+  {"ffile", 1, 0, 'F'},
+  {"ifile", 1, 0, 'i'},
 #ifdef WITH_THREADS
-  {"threads", required_argument,0,'T'},
+  {"threads", required_argument, 0, 'T'},
 #endif
   {"shard-count", required_argument, 0, 'a'},
   {"shard-size", required_argument, 0, 'b'},
-  {"verbose",1,0,'v'},
-  {"help",no_argument,0,'h'},
+  {"verbose", 1, 0, 'v'},
+  {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
 
@@ -317,7 +317,7 @@ int main(int argc, char **argv)
   Data D(*TheScorer);
 
   for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
-    cerr<<"Loading Data from: "<< ScoreDataFiles.at(i)  << " and " << FeatureDataFiles.at(i) << endl;
+    cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
     D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
 
@@ -376,11 +376,11 @@ int main(int argc, char **argv)
   vector<Point> startingPoints;
 
   for (size_t i = 0; i < start_list.size(); ++i) {
-    startingPoints.push_back(Point(start_list[i],min,max));
+    startingPoints.push_back(Point(start_list[i], min, max));
   }
 
   for (int i = 0; i < option.ntry; ++i) {
-    startingPoints.push_back(Point(start_list[0],min,max));
+    startingPoints.push_back(Point(start_list[0], min, max));
     startingPoints.back().Randomize();
   }
 
@@ -394,7 +394,7 @@ int main(int argc, char **argv)
   }
 
   // launch tasks
-  for (size_t i = 0 ; i < allTasks.size(); ++i) {
+  for (size_t i = 0; i < allTasks.size(); ++i) {
     Data& data = D;
     if (option.shard_count)
       data = shards[i]; //use the sharded data if it exists
@@ -455,7 +455,7 @@ int main(int argc, char **argv)
   Point finalP = totalP * (1.0 / allTasks.size());
   statscore_t final = total / allTasks.size();
 
-  if (verboselevel()>1)
+  if (verboselevel() > 1)
     cerr << "bestP: " << finalP << endl;
 
   // L1-Normalization of the best Point
