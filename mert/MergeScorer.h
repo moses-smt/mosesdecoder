@@ -34,15 +34,6 @@ protected:
  private:
   const int kLENGTH;
 
-  string javaEnv;
-  string tercomEnv;
-
-  // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
-  vector<vector<int> > m_references;
-  string m_pid;
-
   // no copying allowed
   MergeScorer(const MergeScorer&);
   MergeScorer& operator=(const MergeScorer&);

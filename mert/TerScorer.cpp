@@ -24,8 +24,8 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
     stringstream convert;
     m_references.clear();
 
-    _reftokens.clear();
-    _reflengths.clear();
+    m_ref_tokens.clear();
+    m_ref_lengths.clear();
     ifstream in ( referenceFiles.at ( incRefs ).c_str() );
     if ( !in ) {
       throw runtime_error ( "Unable to open " + referenceFiles.at ( incRefs ) );

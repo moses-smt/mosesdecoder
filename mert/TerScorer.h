@@ -39,12 +39,12 @@ public:
 private:
   const int kLENGTH;
 
-  string javaEnv;
-  string tercomEnv;
+  string m_java_env;
+  string m_ter_com_env;
 
   // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
+  vector<size_t> m_ref_lengths;
+  vector<multiset<int> > m_ref_tokens;
   vector<vector<int> > m_references;
   vector<vector<vector<int> > > m_multi_references;
   string m_pid;
