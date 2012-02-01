@@ -108,7 +108,7 @@ class OptimizerFactory
 {
 public:
   static vector<string> GetTypeNames();
-  static Optimizer* BuildOptimizer(unsigned dim, vector<unsigned> tooptimize, vector<parameter_t> start, string type, unsigned int nrandom);
+  static Optimizer* BuildOptimizer(unsigned dim, vector<unsigned> tooptimize, vector<parameter_t> start, const string& type, unsigned int nrandom);
 
 private:
   OptimizerFactory() {}
@@ -122,9 +122,13 @@ private:
     NOPTIMIZER
   };
 
-  static OptType GetOType(string);
-  static vector<string> typenames;
+  // Get optimizer type.
+  static OptType GetOType(const string& type);
+
+  // Setup optimization types.
   static void SetTypeNames();
+
+  static vector<string> typenames;
 };
 
 #endif  // OPTIMIZER_H
