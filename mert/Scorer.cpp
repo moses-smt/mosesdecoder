@@ -2,7 +2,10 @@
 #include <limits>
 
 Scorer::Scorer(const string& name, const string& config)
-    : m_name(name), m_score_data(0), m_enable_preserve_case(true) {
+    : m_name(name),
+      m_encoder(new Encoder),
+      m_score_data(0),
+      m_enable_preserve_case(true) {
 //    cerr << "Scorer config string: " << config << endl;
   size_t start = 0;
   while (start < config.size()) {
@@ -20,6 +23,41 @@ Scorer::Scorer(const string& name, const string& config)
     cerr << "name: " << name << " value: " << value << endl;
     m_config[name] = value;
     start = end+1;
+  }
+}
+
+Scorer::~Scorer() {
+  delete m_encoder;
+}
+
+Scorer::Encoder::Encoder() {}
+
+Scorer::Encoder::~Encoder() {}
+
+int Scorer::Encoder::Encode(const string& token) {
+  map<string, int>::iterator it = m_vocab.find(token);
+  int encoded_token;
+  if (it == m_vocab.end()) {
+    // Add an new entry to the vocaburary.
+    encoded_token = static_cast<int>(m_vocab.size());
+    m_vocab[token] = encoded_token;
+  } else {
+    encoded_token = it->second;
+  }
+  return encoded_token;
+}
+
+void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
+  std::istringstream in(line);
+  std::string token;
+  while (in >> token) {
+    if (!m_enable_preserve_case) {
+      for (std::string::iterator it = token.begin();
+           it != token.end(); ++it) {
+        *it = tolower(*it);
+      }
+    }
+    encoded.push_back(m_encoder->Encode(token));
   }
 }
 

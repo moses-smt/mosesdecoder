@@ -34,7 +34,7 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
     int sid = 0;
     while ( getline ( in, line ) ) {
       vector<int> tokens;
-      encode ( line, tokens );
+      TokenizeAndEncode(line, tokens);
       m_references.push_back ( tokens );
       TRACE_ERR ( "." );
       ++sid;
@@ -74,7 +74,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
       averageLength+=(double)m_multi_references.at ( incRefsBis ).at ( sid ).size();
     }
     averageLength=averageLength/( double ) m_multi_references.size();
-    encode ( text, testtokens );
+    TokenizeAndEncode(text, testtokens);
     terCalc * evaluation=new terCalc();
     evaluation->setDebugMode ( false );
     terAlignment tmp_result = evaluation->TER ( reftokens, testtokens );

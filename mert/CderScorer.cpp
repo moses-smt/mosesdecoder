@@ -22,7 +22,7 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
     string line;
     while (getline(refin,line)) {
       sent_t encoded;
-      encode(line, encoded);
+      TokenizeAndEncode(line, encoded);
       m_ref_sentences[rid].push_back(encoded);
     }
   }
@@ -31,7 +31,7 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
 void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>& stats)
 {
   sent_t cand;
-  encode(text, cand);
+  TokenizeAndEncode(text, cand);
 
   float max = -2;
   for (size_t rid = 0; rid < m_ref_sentences.size(); ++rid) {
