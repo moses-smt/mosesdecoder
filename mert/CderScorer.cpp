@@ -1,6 +1,16 @@
 #include "CderScorer.h"
+
+#include <iterator>
 #include <fstream>
 #include <stdexcept>
+
+namespace {
+
+inline int CalcDistance(int word1, int word2) {
+  return word1 == word2 ? 0 : 1;
+}
+
+} // namespace
 
 CderScorer::CderScorer(const string& config)
     : StatisticsBasedScorer("CDER",config) {}
@@ -26,6 +36,17 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
       m_ref_sentences[rid].push_back(encoded);
     }
   }
+}
+
+void CderScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
+{
+  vector<int> stats;
+  prepareStatsVector(sid, text, stats);
+
+  stringstream sout;
+  copy(stats.begin(), stats.end(), ostream_iterator<float>(sout," "));
+  string stats_str = sout.str();
+  entry.set(stats_str);
 }
 
 void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>& stats)
@@ -75,7 +96,7 @@ vector<int> CderScorer::computeCD(const sent_t& cand, const sent_t& ref) const
       vector<int> possibleCosts;
       if (i > 0) {
         possibleCosts.push_back((*nextRow)[i-1] + 1); // Deletion
-        possibleCosts.push_back((*row)[i-1] + distance(ref[l-1], cand[i-1])); // Substitution/Identity
+        possibleCosts.push_back((*row)[i-1] + CalcDistance(ref[l-1], cand[i-1])); // Substitution/Identity
       }
       possibleCosts.push_back((*row)[i] + 1); // Insertion
       (*nextRow)[i] = *min_element(possibleCosts.begin(), possibleCosts.end());
