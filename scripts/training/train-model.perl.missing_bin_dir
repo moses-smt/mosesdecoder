@@ -1338,8 +1338,8 @@ sub extract_phrase {
         if (!defined($_GHKM)) {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
+          $cmd .= " --MaxSpan $max_length";
         }
-        $cmd .= " --MaxSpan $max_length";
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     else
