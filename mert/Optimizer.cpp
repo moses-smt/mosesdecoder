@@ -496,7 +496,7 @@ vector<string> OptimizerFactory::GetTypeNames()
   return typenames;
 }
 
-OptimizerFactory::OptType OptimizerFactory::GetOType(string type)
+OptimizerFactory::OptType OptimizerFactory::GetOType(const string& type)
 {
   unsigned int thetype;
   if (typenames.empty())
@@ -507,7 +507,7 @@ OptimizerFactory::OptType OptimizerFactory::GetOType(string type)
   return((OptType)thetype);
 }
 
-Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim, vector<unsigned> i2o, vector<parameter_t> start, string type, unsigned int nrandom)
+Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim, vector<unsigned> i2o, vector<parameter_t> start, const string& type, unsigned int nrandom)
 {
   OptType T = GetOType(type);
   if (T == NOPTIMIZER) {
