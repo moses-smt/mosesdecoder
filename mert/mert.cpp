@@ -29,8 +29,6 @@ using namespace std;
 
 namespace {
 
-float min_interval = 1e-3;
-
 /**
  * Runs an optimisation, or a random restart.
  */
@@ -131,7 +129,7 @@ int main (int argc, char **argv)
    timer.start("Starting...");
   */
 
-  int c,pdim,i;
+  int c,pdim;
   pdim=-1;
   int ntry=1;
   int nrandom=0;
