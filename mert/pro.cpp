@@ -76,7 +76,7 @@ static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
 		logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
 	}
 	logbleu /= bleu_order;
-	float brevity = 1.0 - (float)stats[(bleu_order*2)]/stats[1];
+	const float brevity = 1.0 - static_cast<float>(stats[(bleu_order*2)]) / stats[1];
 	if (brevity < 0.0) {
 		logbleu += brevity;
 	}

@@ -54,7 +54,7 @@ void Point::Randomize()
   CHECK(m_max.size()==Point::dim);
   for (unsigned int i=0; i<size(); i++) {
     operator[](i) = m_min[i] +
-                   (float)random()/(float)RAND_MAX * (float)(m_max[i]-m_min[i]);
+                    static_cast<float>(random()) / static_cast<float>(RAND_MAX) * (m_max[i] - m_min[i]);
   }
 }
 

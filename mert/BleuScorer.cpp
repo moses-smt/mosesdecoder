@@ -142,7 +142,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
       total += _reflengths[sid][i];
     }
-    float mean = (float)total/_reflengths[sid].size();
+    float mean = static_cast<float>(total) /_reflengths[sid].size();
     stats.push_back(mean);
   } else if (_refLengthStrategy == BLEU_CLOSEST)  {
     int min_diff = INT_MAX;
@@ -196,7 +196,7 @@ float BleuScorer::calculateScore(const vector<int>& comps) const
 
   }
   logbleu /= kLENGTH;
-  float brevity = 1.0 - (float)comps[kLENGTH*2]/comps[1];//reflength divided by test length
+  const float brevity = 1.0 - static_cast<float>(comps[kLENGTH*2]) / comps[1];//reflength divided by test length
   if (brevity < 0.0) {
     logbleu += brevity;
   }
