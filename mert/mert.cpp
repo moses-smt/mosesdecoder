@@ -320,15 +320,15 @@ int main(int argc, char **argv)
   Scorer *TheScorer = ScorerFactory::getScorer(option.scorer_type, option.scorer_config);
 
   //load data
-  Data D(*TheScorer);
+  Data data(*TheScorer);
 
   for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
-    D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
+    data.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
 
   //ADDED_BY_TS
-  D.remove_duplicates();
+  data.remove_duplicates();
   //END_ADDED
 
   PrintUserTime("Data loaded");
@@ -347,7 +347,7 @@ int main(int argc, char **argv)
     int index;
     while (!option.to_optimize_str.empty()) {
       getNextPound(option.to_optimize_str, substring, ",");
-      index = D.getFeatureIndex(substring);
+      index = data.getFeatureIndex(substring);
       cerr << "FeatNameIndex:" << index << " to insert" << endl;
       //index = strtol(substring.c_str(), NULL, 10);
       if (index >= 0 && index < option.pdim) {
@@ -365,8 +365,8 @@ int main(int argc, char **argv)
   }
 
   // treat sparse features just like regular features
-  if (D.hasSparseFeatures()) {
-    D.mergeSparseFeatures();
+  if (data.hasSparseFeatures()) {
+    data.mergeSparseFeatures();
   }
 
 
@@ -395,23 +395,23 @@ int main(int argc, char **argv)
   //optional sharding
   vector<Data> shards;
   if (option.shard_count) {
-    D.createShards(option.shard_count, option.shard_size, option.scorer_config, shards);
+    data.createShards(option.shard_count, option.shard_size, option.scorer_config, shards);
     allTasks.resize(option.shard_count);
   }
 
   // launch tasks
   for (size_t i = 0; i < allTasks.size(); ++i) {
-    Data& data = D;
+    Data& data_ref = data;
     if (option.shard_count)
-      data = shards[i]; //use the sharded data if it exists
+      data_ref = shards[i]; //use the sharded data if it exists
 
     vector<OptimizationTask*>& tasks = allTasks[i];
-    Optimizer *O = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, start_list[0], option.optimize_type, option.nrandom);
-    O->SetScorer(data.getScorer());
-    O->SetFData(data.getFeatureData());
-    //A task for each start point
+    Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, start_list[0], option.optimize_type, option.nrandom);
+    optimizer->SetScorer(data_ref.getScorer());
+    optimizer->SetFData(data_ref.getFeatureData());
+    // A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
-      OptimizationTask* task = new OptimizationTask(O, startingPoints[j]);
+      OptimizationTask* task = new OptimizationTask(optimizer, startingPoints[j]);
       tasks.push_back(task);
 #ifdef WITH_THREADS
       pool.Submit(task);
