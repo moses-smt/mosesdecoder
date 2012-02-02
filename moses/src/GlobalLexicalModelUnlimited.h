@@ -35,8 +35,6 @@ private:
 
   CharHash m_punctuationHash;
 
-//  FactorMask m_inputFactors;
-//  FactorMask m_outputFactors;
   std::vector< FactorType > m_inputFactors;
   std::vector< FactorType > m_outputFactors;
 
