@@ -17,6 +17,11 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorTyp
 
 	// load model
 	LoadData( inFactors, outFactors );
+
+	// compile a list of punctuation characters
+	char punctuation[] = "\"'!?¿·()#_,:;&-/\\0123456789";
+	for (size_t i=0; i < sizeof(punctuation)-1; ++i)
+		m_punctuationHash[punctuation[i]] = 1;
 }
 
 GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
@@ -24,8 +29,6 @@ GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
 void GlobalLexicalModelUnlimited::LoadData(const vector< FactorType >& inFactors,
                                   const vector< FactorType >& outFactors)
 {
-//  m_inputFactors = FactorMask(inFactors);
-//  m_outputFactors = FactorMask(outFactors);
 	m_inputFactors = inFactors;
 	m_outputFactors = outFactors;
 }
@@ -38,25 +41,33 @@ void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
 void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
 {
   for(size_t targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
-	const Word& targetWord = targetPhrase.GetWord( targetIndex );
-//	cerr << endl;
-	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
-	for(size_t inputIndex = 0; inputIndex < m_input->GetSize(); inputIndex++ ) {
-	  const Word& inputWord = m_input->GetWord( inputIndex );
-	  if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
-		stringstream feature("glm_");
-		feature << targetWord.GetString(m_outputFactors, false);
-		feature << "~";
-		feature << inputWord.GetString(m_inputFactors, false);
-//		cerr << "feature: " << feature.str() << endl;
-		accumulator->PlusEquals(this, feature.str(), 1);
-		alreadyScored.insert( &inputWord );
-	  }
-	}
+  	const Word& targetWord = targetPhrase.GetWord( targetIndex );
 
-	// Hal Daume says: 1/( 1 + exp [ - sum_i w_i * f_i ] )
-//	VERBOSE(2," p=" << FloorScore( log(1/(1+exp(-sum))) ) << endl);
-//	score += FloorScore( log(1/(1+exp(-sum))) );
+  	// check if first char is punctuation
+		char firstChar = (targetWord.GetString(m_inputFactors, false)).at(0);
+		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+		if(charIterator != m_punctuationHash.end())
+			continue;
+
+  	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
+  	for(size_t inputIndex = 0; inputIndex < m_input->GetSize(); inputIndex++ ) {
+  		const Word& inputWord = m_input->GetWord( inputIndex );
+
+  		// check if first char is punctuation
+  		firstChar = (inputWord.GetString(m_inputFactors, false)).at(0);
+  		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+  		if(charIterator != m_punctuationHash.end())
+  			continue;
+
+  		if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
+  			stringstream feature("glm_");
+  			feature << targetWord.GetString(m_outputFactors, false);
+  			feature << "~";
+  			feature << inputWord.GetString(m_inputFactors, false);
+  			accumulator->PlusEquals(this, feature.str(), 1);
+  			alreadyScored.insert( &inputWord );
+  		}
+  	}
   }
 }
 
