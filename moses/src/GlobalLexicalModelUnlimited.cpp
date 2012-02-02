@@ -45,9 +45,9 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
 	  const Word& inputWord = m_input->GetWord( inputIndex );
 	  if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
 		stringstream feature("glm_");
-		feature << inputWord.GetString(m_inputFactors, false);
-		feature << "~";
 		feature << targetWord.GetString(m_outputFactors, false);
+		feature << "~";
+		feature << inputWord.GetString(m_inputFactors, false);
 //		cerr << "feature: " << feature.str() << endl;
 		accumulator->PlusEquals(this, feature.str(), 1);
 		alreadyScored.insert( &inputWord );
