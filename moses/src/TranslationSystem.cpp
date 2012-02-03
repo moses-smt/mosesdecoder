@@ -154,11 +154,6 @@ void TranslationSystem::CleanUpAfterSentenceProcessing() const
     LanguageModel &languageModel = **iterLM;
     languageModel.CleanUpAfterSentenceProcessing();
   }
-
-  for(size_t i=0; i<m_globalLexicalModels.size(); ++i) {
-    m_globalLexicalModels[i]->CleanUp();
-  }
-
 }
 
 float TranslationSystem::GetWeightWordPenalty() const

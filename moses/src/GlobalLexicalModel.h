@@ -48,15 +48,10 @@ private:
   DoubleHash m_hash;
 #ifdef WITH_THREADS
   boost::thread_specific_ptr<ThreadLocalStorage> m_local;
-  //boost::thread_specific_ptr<_LexiconCache> m_cache;
-  //boost::thread_specific_ptr<const Sentence*> m_input;
 #else
   std::auto_ptr<ThreadLocalStorage> m_local;
-  //std::auto_ptr<_LexiconCache> m_cache;
-  // std::auto_ptr<const Sentence> m_input;
 #endif
 
-  // const Sentence *m_input;
   Word *m_bias;
 
   FactorMask m_inputFactors;
@@ -89,7 +84,6 @@ public:
   };
 
   void InitializeForInput( Sentence const& in );
-  void CleanUp() {};
 
   void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
 };
