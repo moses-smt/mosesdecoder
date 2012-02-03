@@ -19,9 +19,9 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorTyp
 	LoadData( inFactors, outFactors );
 
 	// compile a list of punctuation characters
-	char punctuation[] = "\"'!?¿·()#_,.:;&-/\\0123456789";
+/*	char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
 	for (size_t i=0; i < sizeof(punctuation)-1; ++i)
-		m_punctuationHash[punctuation[i]] = 1;
+		m_punctuationHash[punctuation[i]] = 1;*/
 }
 
 GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
@@ -41,31 +41,34 @@ void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
 void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
 {
   for(size_t targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
-  	const Word& targetWord = targetPhrase.GetWord( targetIndex );
+  	string targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
 
   	// check if first char is punctuation
-		char firstChar = (targetWord.GetString(m_inputFactors, false)).at(0);
+/*  	char firstChar = targetString.at(0);
 		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
 		if(charIterator != m_punctuationHash.end())
-			continue;
+			continue;*/
 
-  	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
+//  	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
+  	StringHash alreadyScored;
   	for(size_t inputIndex = 0; inputIndex < m_input->GetSize(); inputIndex++ ) {
-  		const Word& inputWord = m_input->GetWord( inputIndex );
+  		string inputString = m_input->GetWord(inputIndex).GetString(0); // TODO: change for other factors
 
   		// check if first char is punctuation
-  		firstChar = (inputWord.GetString(m_inputFactors, false)).at(0);
+/*  		firstChar = inputString.at(0);
   		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
   		if(charIterator != m_punctuationHash.end())
-  			continue;
+  			continue;*/
 
-  		if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
+  		//if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
+  		if ( alreadyScored.find(inputString) == alreadyScored.end()) {
   			stringstream feature("glm_");
-  			feature << targetWord.GetString(m_outputFactors, false);
+  			feature << targetString;
   			feature << "~";
-  			feature << inputWord.GetString(m_inputFactors, false);
+  			feature << inputString;
   			accumulator->PlusEquals(this, feature.str(), 1);
-  			alreadyScored.insert( &inputWord );
+  			//alreadyScored.insert( &inputWord );
+  			alreadyScored[inputString] = 1;
   		}
   	}
   }
