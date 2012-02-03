@@ -29,13 +29,13 @@ class InputType;
 
 class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
-  typedef std::map< const Word*, std::map< const Word*, float, WordComparer >, WordComparer > DoubleHash;
-  typedef std::map< const Word*, float, WordComparer > SingleHash;
+//	typedef std::map< char, short > CharHash;
+	typedef std::map< std::string, short > StringHash;
 private:
   const Sentence *m_input;
 
-//  FactorMask m_inputFactors;
-//  FactorMask m_outputFactors;
+//  CharHash m_punctuationHash;
+
   std::vector< FactorType > m_inputFactors;
   std::vector< FactorType > m_outputFactors;
 
