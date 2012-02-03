@@ -40,7 +40,7 @@ class VarSpanTrieBuilder
   typedef std::vector<IntermediateVarSpanNode> NodeVec;
   struct NodeVecState
   {
-    size_t m_size;
+    std::size_t m_size;
     IntermediateVarSpanNode m_lastNode;
   };
   void Build(ApplicableRuleTrie &, NodeVec &, VarSpanNode &);
