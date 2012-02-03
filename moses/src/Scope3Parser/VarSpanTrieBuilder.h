@@ -23,6 +23,7 @@
 
 #include <memory>
 #include <vector>
+#include <cstddef>
 
 namespace Moses
 {
