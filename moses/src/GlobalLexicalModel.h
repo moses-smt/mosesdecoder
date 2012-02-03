@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "Factor.h"
 #include "Phrase.h"
 #include "TypeDef.h"
@@ -12,6 +13,10 @@
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"
+
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#endif
 
 namespace Moses
 {
@@ -31,10 +36,27 @@ class GlobalLexicalModel : public StatelessFeatureFunction
 {
   typedef std::map< const Word*, std::map< const Word*, float, WordComparer >, WordComparer > DoubleHash;
   typedef std::map< const Word*, float, WordComparer > SingleHash;
+  typedef std::map< const TargetPhrase*, float > LexiconCache;
+
+  struct ThreadLocalStorage
+  {
+    LexiconCache cache;
+    const Sentence *input;
+  };
+
 private:
   DoubleHash m_hash;
-  std::map< const TargetPhrase*, float > *m_cache;
-  const Sentence *m_input;
+#ifdef WITH_THREADS
+  boost::thread_specific_ptr<ThreadLocalStorage> m_local;
+  //boost::thread_specific_ptr<_LexiconCache> m_cache;
+  //boost::thread_specific_ptr<const Sentence*> m_input;
+#else
+  std::auto_ptr<ThreadLocalStorage> m_local;
+  //std::auto_ptr<_LexiconCache> m_cache;
+  // std::auto_ptr<const Sentence> m_input;
+#endif
+
+  // const Sentence *m_input;
   Word *m_bias;
 
   FactorMask m_inputFactors;
@@ -67,6 +89,7 @@ public:
   };
 
   void InitializeForInput( Sentence const& in );
+  void CleanUp() {};
 
   void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
 };
