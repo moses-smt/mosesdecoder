@@ -91,10 +91,10 @@ rule test_flags ( flags ) {
 #Determine if a library can be compiled statically.  
 rule auto_shared ( name : additional ? ) {
   additional ?= "" ;
-  if [ test_flags $(additional)" -shared -l"$(name) ] {
+  if [ test_flags $(additional)" -static -l"$(name) ] {
     return ;
   } else {
-    return "<link>static" ;
+    return "<link>shared" ;
   }
 }
 
