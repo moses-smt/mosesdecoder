@@ -344,17 +344,10 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float loss = bleuScoreHope - bleuScoreFear;
   float diff = 0;
-  float ratio = (modelScoreDiff == 0) ? 0 : loss / modelScoreDiff;
-  cerr << "Rank " << rank << ", epoch " << epoch << ", ratio loss/model: " << ratio << endl;
   if (loss > (modelScoreDiff + m_margin_slack)) {
   	diff = loss - (modelScoreDiff + m_margin_slack);
   }
   cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
-
-  if (epoch == 0 && modelScoreDiff > 0) {
-  	m_sum_ratios += ratio;
-  	m_count_ratios++;
-  }
 
   if (diff > epsilon) {
     // constraint violated
