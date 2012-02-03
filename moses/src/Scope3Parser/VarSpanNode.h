@@ -115,7 +115,7 @@ struct VarSpanNode
     key[4] = first->m_numSplitPoints;
 
     std::pair<MapType::iterator, bool> result = m_children.insert(
-        std::make_pair<KeyType, VarSpanNode>(key, VarSpanNode()));
+        std::make_pair(key, VarSpanNode()));
     VarSpanNode &child = result.first->second;
     if (result.second) {
       child.m_parent = this;
