@@ -5,6 +5,7 @@
 *.a
 *.swp
 *~
+*.gch
 dist*
 jam-files/bjam
 jam-files/engine/bootstrap
