@@ -160,7 +160,7 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 
   float score = ScorePhrase( targetPhrase );
   m_cache.insert( pair<const TargetPhrase*, float>(&targetPhrase, score) );
-  std::cerr << "add to cache " << targetPhrase << ": " << score << endl;
+  //VERBOSE(2, "add to cache " << targetPhrase << ": " << score << endl);
   return score;
 }
 
