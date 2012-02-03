@@ -601,6 +601,7 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
     }
     break;
   }
+  return "";
 }
 
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
