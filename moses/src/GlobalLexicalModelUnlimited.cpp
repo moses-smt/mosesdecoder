@@ -35,11 +35,14 @@ void GlobalLexicalModelUnlimited::LoadData(const vector< FactorType >& inFactors
 
 void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
 {
-  m_input = &in;
+//  m_input = &in;
+  m_local.reset(new ThreadLocalStorage);
+  m_local->input = &in;
 }
 
 void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
 {
+	const Sentence& input = *(m_local->input);
   for(size_t targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
   	string targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
 
@@ -51,8 +54,8 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
 
 //  	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
   	StringHash alreadyScored;
-  	for(size_t inputIndex = 0; inputIndex < m_input->GetSize(); inputIndex++ ) {
-  		string inputString = m_input->GetWord(inputIndex).GetString(0); // TODO: change for other factors
+  	for(size_t inputIndex = 0; inputIndex < input.GetSize(); inputIndex++ ) {
+  		string inputString = input.GetWord(inputIndex).GetString(0); // TODO: change for other factors
 
   		// check if first char is punctuation
 /*  		firstChar = inputString.at(0);
@@ -66,7 +69,7 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
   			feature << targetString;
   			feature << "~";
   			feature << inputString;
-  			accumulator->PlusEquals(this, feature.str(), 1);
+  			accumulator->SparsePlusEquals(feature.str(), 1);
   			//alreadyScored.insert( &inputWord );
   			alreadyScored[inputString] = 1;
   		}

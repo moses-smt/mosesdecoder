@@ -13,6 +13,10 @@
 #include "FactorTypeSet.h"
 #include "Sentence.h"
 
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#endif
+
 namespace Moses
 {
 
@@ -31,6 +35,19 @@ class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
 //	typedef std::map< char, short > CharHash;
 	typedef std::map< std::string, short > StringHash;
+
+  struct ThreadLocalStorage
+  {
+    const Sentence *input;
+  };
+
+private:
+#ifdef WITH_THREADS
+  boost::thread_specific_ptr<ThreadLocalStorage> m_local;
+#else
+  std::auto_ptr<ThreadLocalStorage> m_local;
+#endif
+
 private:
   const Sentence *m_input;
 
