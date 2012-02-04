@@ -42,7 +42,6 @@ GlobalLexicalModel::~GlobalLexicalModel()
     }
     delete iter->first; // delete output word
   }
-  // if (m_cache != NULL) delete m_cache;
 }
 
 void GlobalLexicalModel::LoadData(const string &filePath,
