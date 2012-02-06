@@ -24,19 +24,21 @@
 namespace Moses
 {
 
-void ChartTranslationOption::CalcEstimateOfBestScore()
+float ChartTranslationOption::CalcEstimateOfBestScore(
+    const TargetPhraseCollection &tpc,
+    const StackVec &stackVec)
 {
-  const TargetPhrase &targetPhrase = **(m_targetPhraseCollection.begin());
-  m_estimateOfBestScore = targetPhrase.GetFutureScore();
-
-  for (StackVec::const_iterator p = m_stackVec.begin(); p != m_stackVec.end();
+  const TargetPhrase &targetPhrase = **(tpc.begin());
+  float estimateOfBestScore = targetPhrase.GetFutureScore();
+  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
        ++p) {
     const HypoList *stack = *p;
     assert(stack);
     assert(!stack->empty());
     const ChartHypothesis &bestHypo = **(stack->begin());
-    m_estimateOfBestScore += bestHypo.GetTotalScore();
+    estimateOfBestScore += bestHypo.GetTotalScore();
   }
+  return estimateOfBestScore;
 }
 
 }

@@ -85,25 +85,19 @@ void ChartManager::ProcessSentence()
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
-      //TRACE_ERR(" " << range << "=");
 
       // create trans opt
-      m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
-      //if (g_debug)
-      //	cerr << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
+      m_transOptColl.CreateTranslationOptionsForRange(range);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
-      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
+      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
                            ,m_hypoStackColl);
+      m_transOptColl.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
       cell.SortHypotheses();
-
-      //cerr << cell.GetSize();
-      //cerr << cell << endl;
-      //cell.OutputSizes(cerr);
     }
   }
 
