@@ -75,7 +75,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t maxSpan = decodeGraph.GetMaxChartSpan();
     if (maxSpan == 0 || (endPos-startPos+1) <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, true, chartRuleColl);
+      ruleLookupManager.GetChartRuleCollection(wordsRange, chartRuleColl);
     }
   }
 
@@ -111,7 +111,7 @@ void ChartTranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t numTransOpt = fullList.GetSize();
     if (numTransOpt == 0) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, false, fullList);
+      ruleLookupManager.GetChartRuleCollection(wordsRange, fullList);
     }
   }
   CHECK(iterRuleLookupManagers == m_ruleLookupManagers.end());

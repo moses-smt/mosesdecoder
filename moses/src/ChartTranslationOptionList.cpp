@@ -55,7 +55,6 @@ public:
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseCollection
                                      , const StackVec &stackVec
-                                     , bool /* adhereTableLimit */
                                      , size_t ruleLimit)
 {
   if (targetPhraseCollection.IsEmpty()) {
