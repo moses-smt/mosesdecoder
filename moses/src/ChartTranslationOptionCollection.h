@@ -51,23 +51,13 @@ protected:
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
   StackVec m_emptyStackVec;
 
-  // for adding 1 trans opt in unknown word proc
-  void Add(ChartTranslationOption *transOpt, size_t pos);
-
   ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
   const ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
 
-  void ProcessUnknownWord(size_t startPos, size_t endPos);
-
-  // taken from ChartTranslationOptionCollectionText.
-  void ProcessUnknownWord(size_t sourcePos);
 
   //! special handling of ONE unknown words.
   virtual void ProcessOneUnknownWord(const Word &sourceWord
                                      , size_t sourcePos, size_t length = 1);
-
-  //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-  void Prune(size_t startPos, size_t endPos);
 
   //! sort all trans opt in each list for cube pruning */
   void Sort(size_t startPos, size_t endPos);
