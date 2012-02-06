@@ -88,7 +88,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     }
   }
 
-  Sort(startPos, endPos);
+  chartRuleColl.ApplyThreshold();
 }
 
 ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
@@ -221,13 +221,6 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       transOptColl.Add(chartRule);
     }
   }
-}
-
-//! sort all trans opt in each list for cube pruning */
-void ChartTranslationOptionCollection::Sort(size_t startPos, size_t endPos)
-{
-  ChartTranslationOptionList &list = GetTranslationOptionList(startPos, endPos);
-  list.Sort();
 }
 
 }  // namespace

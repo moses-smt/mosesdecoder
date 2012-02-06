@@ -120,7 +120,7 @@ void ChartTranslationOptionList::CreateChartRules(size_t ruleLimit)
 }
 
 
-void ChartTranslationOptionList::Sort()
+void ChartTranslationOptionList::ApplyThreshold()
 {
   // keep only those over best + threshold
 
@@ -134,18 +134,15 @@ void ChartTranslationOptionList::Sort()
 
   scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
 
-  size_t ind = 0;
-  while (ind < m_collection.size()) {
-    const ChartTranslationOption *transOpt = m_collection[ind];
-    if (transOpt->GetEstimateOfBestScore() < scoreThreshold) {
-      delete transOpt;
-      m_collection.erase(m_collection.begin() + ind);
-    } else {
-      ind++;
-    }
+  CollType::iterator bound = std::partition(m_collection.begin(),
+                                            m_collection.end(),
+                                            ScoreThresholdPred(scoreThreshold));
+
+  for (CollType::iterator p = bound; p != m_collection.end(); ++p) {
+    delete *p;
   }
 
-  std::sort(m_collection.begin(), m_collection.end(), ChartTranslationOptionOrderer());
+  m_collection.erase(bound, m_collection.end());
 }
 
 }

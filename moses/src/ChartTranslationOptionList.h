@@ -38,6 +38,16 @@ class ChartTranslationOptionList
 {
   friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionList&);
 
+  struct ScoreThresholdPred
+  {
+    ScoreThresholdPred(float threshold) : m_thresholdScore(threshold) {}
+    bool operator()(const ChartTranslationOption *option)
+    {
+      return option->GetEstimateOfBestScore() >= m_thresholdScore;
+    }
+    float m_thresholdScore;
+  };
+
 protected:
 #ifdef USE_HYPO_POOL
   static ObjectPool<ChartTranslationOptionList> s_objectPool;
@@ -87,9 +97,6 @@ public:
     return *m_collection[ind];
   }
 
-  //! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
-//	void Sort(size_t tableLimit);
-
   //! number of target phrases in this collection
   size_t GetSize() const {
     return m_collection.size();
@@ -110,9 +117,7 @@ public:
     return m_range;
   }
 
-  void Sort();
-
-
+  void ApplyThreshold();
 };
 
 }
