@@ -14,22 +14,25 @@ use strict;
 use FindBin qw($Bin);
 use Getopt::Long;
 
-my $order;
+my $order = 3;
 my $corpusPath;
 my $lmPath;
 my $cores = 2;
 my $irstPath;
 my $tempPath = "tmp";
+my $temp;
 
 GetOptions("order=s"  => \$order,
            "text=s"   => \$corpusPath,
            "lm=s"     => \$lmPath,
            "cores=s"  => \$cores,
            "irst-dir=s"  => \$irstPath,
-           "temp-dir=s"  => \$tempPath
+           "temp-dir=s"  => \$tempPath,
+	   "interpolate!" => \$temp,  #ignore
+	   "kndiscount!" => \$temp    #ignore
 	   ) or exit 1;
 
-die("ERROR: please set order") unless defined($order);
+#die("ERROR: please set order") unless defined($order);
 die("ERROR: please set text") unless defined($corpusPath);
 die("ERROR: please set lm") unless defined($lmPath);
 die("ERROR: please set irst-dir") unless defined($irstPath);
