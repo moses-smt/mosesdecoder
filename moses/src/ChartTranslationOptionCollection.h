@@ -59,9 +59,6 @@ protected:
   virtual void ProcessOneUnknownWord(const Word &sourceWord
                                      , size_t sourcePos, size_t length = 1);
 
-  //! sort all trans opt in each list for cube pruning */
-  void Sort(size_t startPos, size_t endPos);
-
 public:
   ChartTranslationOptionCollection(InputType const& source
                               , const TranslationSystem* system
