@@ -34,7 +34,7 @@ namespace Moses
 void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   const DottedRule &dottedRule,
   const TargetPhraseCollection &tpc,
-  size_t ruleLimit,
+  const WordsRange &range,
   ChartTranslationOptionList &outColl)
 {
   // Determine the rule's rank.
@@ -61,7 +61,7 @@ void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   }
 
   // Add the (TargetPhraseCollection, StackVec) pair to the collection.
-  outColl.Add(tpc, m_stackVec, ruleLimit);
+  outColl.Add(tpc, m_stackVec, range);
 }
 
 }  // namespace Moses

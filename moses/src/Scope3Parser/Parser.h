@@ -65,16 +65,16 @@ class Scope3Parser : public ChartRuleLookupManager
   struct MatchCallback
   {
     public:
-      MatchCallback(size_t ruleLimit,
+      MatchCallback(const WordsRange &range,
                     ChartTranslationOptionList &out)
-          : m_ruleLimit(ruleLimit)
+          : m_range(range)
           , m_out(out)
           , m_tpc(NULL) {}
       void operator()(const StackVec &stackVec)
       {
-        m_out.Add(*m_tpc, stackVec, m_ruleLimit);
+        m_out.Add(*m_tpc, stackVec, m_range);
       }
-      size_t m_ruleLimit;
+      const WordsRange &m_range;
       ChartTranslationOptionList &m_out;
       const TargetPhraseCollection *m_tpc;
   };

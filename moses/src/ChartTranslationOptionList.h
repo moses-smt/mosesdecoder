@@ -1,5 +1,3 @@
-// $Id$
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -21,22 +19,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include <queue>
-#include <vector>
-#include <list>
-#include <set>
 #include "ChartTranslationOption.h"
-#include "TargetPhrase.h"
-#include "Util.h"
-#include "TargetPhraseCollection.h"
-#include "ObjectPool.h"
+#include "StackVec.h"
+
+#include <vector>
 
 namespace Moses
 {
+
+class TargetPhraseCollection;
+class WordsRange;
+
 //! a list of target phrases that is trsnalated from the same source phrase
 class ChartTranslationOptionList
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionList&);
+ public:
+  ChartTranslationOptionList(size_t);
+  ~ChartTranslationOptionList();
+
+  const ChartTranslationOption &Get(size_t i) const { return *m_collection[i]; }
+
+  //! number of translation options
+  size_t GetSize() const { return m_size; }
+
+  void Add(const TargetPhraseCollection &, const StackVec &,
+           const WordsRange &);
+
+  void Clear();
+  void ShrinkToLimit();
+  void ApplyThreshold();
+
+ private:
+  typedef std::vector<ChartTranslationOption*> CollType;
 
   struct ScoreThresholdPred
   {
@@ -48,76 +62,10 @@ class ChartTranslationOptionList
     float m_thresholdScore;
   };
 
-protected:
-#ifdef USE_HYPO_POOL
-  static ObjectPool<ChartTranslationOptionList> s_objectPool;
-#endif
-  typedef std::vector<ChartTranslationOption*> CollType;
   CollType m_collection;
+  size_t m_size;
   float m_scoreThreshold;
-  WordsRange m_range;
-
-public:
-  // iters
-  typedef CollType::iterator iterator;
-  typedef CollType::const_iterator const_iterator;
-
-  iterator begin() {
-    return m_collection.begin();
-  }
-  iterator end() {
-    return m_collection.end();
-  }
-  const_iterator begin() const {
-    return m_collection.begin();
-  }
-  const_iterator end() const {
-    return m_collection.end();
-  }
-
-#ifdef USE_HYPO_POOL
-  void *operator new(size_t /* num_bytes */) {
-    void *ptr = s_objectPool.getPtr();
-    return ptr;
-  }
-
-  static void Delete(ChartTranslationOptionList *obj) {
-    s_objectPool.freeObject(obj);
-  }
-#else
-  static void Delete(ChartTranslationOptionList *obj) {
-    delete obj;
-  }
-#endif
-
-  ChartTranslationOptionList(const WordsRange &range);
-  ~ChartTranslationOptionList();
-
-  const ChartTranslationOption &Get(size_t ind) const {
-    return *m_collection[ind];
-  }
-
-  //! number of target phrases in this collection
-  size_t GetSize() const {
-    return m_collection.size();
-  }
-  //! wether collection has any phrases
-  bool IsEmpty() const {
-    return m_collection.empty();
-  }
-
-  void Add(const TargetPhraseCollection &targetPhraseCollection
-           , const StackVec &stackVec
-           , size_t ruleLimit);
-  void Add(ChartTranslationOption *transOpt);
-
-  void CreateChartRules(size_t ruleLimit);
-
-  const WordsRange &GetSourceRange() const {
-    return m_range;
-  }
-
-  void ApplyThreshold();
+  const size_t m_ruleLimit;
 };
 
 }

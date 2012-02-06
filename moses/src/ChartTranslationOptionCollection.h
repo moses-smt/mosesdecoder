@@ -38,7 +38,6 @@ class ChartCellCollection;
 
 class ChartTranslationOptionCollection
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionCollection&);
 protected:
   const InputType &m_source;
   const TranslationSystem* m_system;
@@ -46,18 +45,13 @@ protected:
   const ChartCellCollection &m_hypoStackColl;
   const std::vector<ChartRuleLookupManager*> &m_ruleLookupManagers;
 
-  std::vector< std::vector< ChartTranslationOptionList > > m_collection; /*< contains translation options */
+  ChartTranslationOptionList m_translationOptionList;
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
   StackVec m_emptyStackVec;
 
-  ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
-  const ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
-
-
   //! special handling of ONE unknown words.
-  virtual void ProcessOneUnknownWord(const Word &sourceWord
-                                     , size_t sourcePos, size_t length = 1);
+  virtual void ProcessOneUnknownWord(const Word &, const WordsRange &);
 
 public:
   ChartTranslationOptionCollection(InputType const& source
@@ -65,14 +59,14 @@ public:
                               , const ChartCellCollection &hypoStackColl
                               , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers);
   virtual ~ChartTranslationOptionCollection();
-  void CreateTranslationOptionsForRange(size_t startPos
-                                        , size_t endPos);
+  void CreateTranslationOptionsForRange(const WordsRange &);
 
-  const ChartTranslationOptionList &GetTranslationOptionList(const WordsRange &range) const {
-    return GetTranslationOptionList(range.GetStartPos(), range.GetEndPos());
+  const ChartTranslationOptionList &GetTranslationOptionList() const {
+    return m_translationOptionList;
   }
+
+  void Clear() { m_translationOptionList.Clear(); }
 
 };
 
 }
-
