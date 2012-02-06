@@ -101,8 +101,7 @@ public:
 
   void Add(const TargetPhraseCollection &targetPhraseCollection
            , const StackVec &stackVec
-           , bool ruleLimit
-           , size_t tableLimit);
+           , size_t ruleLimit);
   void Add(ChartTranslationOption *transOpt);
 
   void CreateChartRules(size_t ruleLimit);

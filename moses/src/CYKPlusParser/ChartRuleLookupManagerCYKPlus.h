@@ -42,7 +42,6 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
     const DottedRule &dottedRule,
     const TargetPhraseCollection &tpc,
     size_t ruleLimit,
-    bool adhereTableLimit,
     ChartTranslationOptionList &outColl);
 
   StackVec m_stackVec;

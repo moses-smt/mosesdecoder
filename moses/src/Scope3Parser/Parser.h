@@ -58,7 +58,6 @@ class Scope3Parser : public ChartRuleLookupManager
 
   void GetChartRuleCollection(
     const WordsRange &range,
-    bool adhereTableLimit,
     ChartTranslationOptionList &outColl);
 
  private:
@@ -67,18 +66,15 @@ class Scope3Parser : public ChartRuleLookupManager
   {
     public:
       MatchCallback(size_t ruleLimit,
-                    bool adhereTableLimit,
                     ChartTranslationOptionList &out)
           : m_ruleLimit(ruleLimit)
-          , m_adhereTableLimit(adhereTableLimit)
           , m_out(out)
           , m_tpc(NULL) {}
       void operator()(const StackVec &stackVec)
       {
-        m_out.Add(*m_tpc, stackVec, m_adhereTableLimit, m_ruleLimit);
+        m_out.Add(*m_tpc, stackVec, m_ruleLimit);
       }
       size_t m_ruleLimit;
-      bool m_adhereTableLimit;
       ChartTranslationOptionList &m_out;
       const TargetPhraseCollection *m_tpc;
   };

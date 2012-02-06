@@ -66,7 +66,6 @@ ChartRuleLookupManagerMemory::~ChartRuleLookupManagerMemory()
 
 void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   const WordsRange &range,
-  bool adhereTableLimit,
   ChartTranslationOptionList &outColl)
 {
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
@@ -163,7 +162,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
     // add the fully expanded rule (with lexical target side)
     if (tpc != NULL) {
-      AddCompletedRule(dottedRule, *tpc, ruleLimit, adhereTableLimit, outColl);
+      AddCompletedRule(dottedRule, *tpc, ruleLimit, outColl);
     }
   }
 

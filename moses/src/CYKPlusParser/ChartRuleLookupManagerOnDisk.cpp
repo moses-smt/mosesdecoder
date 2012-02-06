@@ -81,7 +81,6 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
-  bool adhereTableLimit,
   ChartTranslationOptionList &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
@@ -261,7 +260,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           CHECK(targetPhraseCollection);
           if (!targetPhraseCollection->IsEmpty()) {
             AddCompletedRule(prevDottedRule, *targetPhraseCollection,
-                             rulesLimit, adhereTableLimit, outColl);
+                             rulesLimit, outColl);
           }
 
         } // if (node)
