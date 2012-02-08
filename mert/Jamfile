@@ -1,3 +1,5 @@
+import testing ;
+
 lib m ;
 
 lib mert_lib :
@@ -40,5 +42,7 @@ exe evaluator : evaluator.cpp mert_lib ;
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 alias programs : mert extractor evaluator pro ;
+
+unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
 
 install legacy : programs : <location>. ;
