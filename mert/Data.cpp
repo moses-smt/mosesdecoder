@@ -21,8 +21,8 @@ Data::Data()
   : theScorer(NULL),
     number_of_scores(0),
     _sparse_flag(false),
-    scoredata(NULL),
-    featdata(NULL) {}
+    scoredata(),
+    featdata() {}
 
 Data::Data(Scorer& ptr)
     : theScorer(&ptr),
@@ -34,17 +34,6 @@ Data::Data(Scorer& ptr)
 {
   TRACE_ERR("Data::score_type " << score_type << std::endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
-}
-
-Data::~Data() {
-  if (featdata) {
-    delete featdata;
-    featdata = NULL;
-  }
-  if (scoredata) {
-    delete scoredata;
-    scoredata = NULL;
-  }
 }
 
 //ADDED BY TS
@@ -128,7 +117,6 @@ void Data::remove_duplicates() {
       // }
     }
 
-    std::cerr << "removed " << nRemoved << "/" << feat_array.size() << std::endl;
 
     if (nRemoved > 0) {
 

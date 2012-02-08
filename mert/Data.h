@@ -15,11 +15,16 @@ using namespace std;
 #include <vector>
 #include <iostream>
 
+#include<boost/shared_ptr.hpp>
+
 #include "Util.h"
 #include "FeatureData.h"
 #include "ScoreData.h"
 
 class Scorer;
+
+typedef boost::shared_ptr<ScoreData> ScoreDataHandle;
+typedef boost::shared_ptr<FeatureData> FeatureDataHandle;
 
 class Data
 {
@@ -30,25 +35,26 @@ private:
   bool _sparse_flag;
 
 protected:
-  // TODO: Use smart pointers for exceptional-safety.
-  ScoreData* scoredata;
-  FeatureData* featdata;
+  ScoreDataHandle scoredata;
+  FeatureDataHandle featdata;
 
 public:
   explicit Data(Scorer& sc);
   Data();
-  ~Data();
+
+  //Note that there is no copy constructor implemented, so only the 
+  //compiler synthesised shallow copy is available
 
   inline void clear() {
     scoredata->clear();
     featdata->clear();
   }
 
-  ScoreData* getScoreData() {
+  ScoreDataHandle getScoreData() {
     return scoredata;
   }
 
-  FeatureData* getFeatureData() {
+  FeatureDataHandle getFeatureData() {
     return featdata;
   }
 
