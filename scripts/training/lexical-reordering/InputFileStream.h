@@ -1,4 +1,4 @@
-// $Id: InputFileStream.cpp 2780 2010-01-29 17:11:17Z bojar $
+// $Id: InputFileStream.h 2939 2010-02-24 11:15:44Z jfouet $
 
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -19,48 +19,31 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "InputFileStream.h"
-#include "gzfilebuf.h"
-#include <iostream>
+#ifndef moses_InputFileStream_h
+#define moses_InputFileStream_h
 
-using namespace std;
+#include <cstdlib>
+#include <fstream>
+#include <string>
 
 namespace Moses
 {
-InputFileStream::InputFileStream(const std::string &filePath)
-  : std::istream(NULL)
-  , m_streambuf(NULL)
+
+/** Used in place of std::istream, can read zipped files if it ends in .gz
+ */
+class InputFileStream : public std::istream
 {
-  if (filePath.size() > 3 &&
-      filePath.substr(filePath.size() - 3, 3) == ".gz") {
-    m_streambuf = new gzfilebuf(filePath.c_str());
-  } else {
-    std::filebuf* fb = new std::filebuf();
-    fb = fb->open(filePath.c_str(), std::ios::in);
-    if (! fb) {
-      cerr << "Can't read " << filePath.c_str() << endl;
-      exit(1);
-    }
-    m_streambuf = fb;
-  }
-  ifstream dd;
-  istream &d = dd;
+protected:
+  std::streambuf *m_streambuf;
+public:
 
-  d.close();
-  
-  this->init(m_streambuf);
-}
+  InputFileStream(const std::string &filePath);
+  ~InputFileStream();
 
-InputFileStream::~InputFileStream()
-{
-  delete m_streambuf;
-  m_streambuf = NULL;
-}
-
-void InputFileStream::Close()
-{
-}
-
+  void Open(const std::string &filePath);
+  void Close();
+};
 
 }
 
+#endif

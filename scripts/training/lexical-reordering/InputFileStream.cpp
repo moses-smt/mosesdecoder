@@ -31,6 +31,16 @@ InputFileStream::InputFileStream(const std::string &filePath)
   : std::istream(NULL)
   , m_streambuf(NULL)
 {
+  Open(filePath);
+}
+
+InputFileStream::~InputFileStream()
+{
+  Close();
+}
+
+void InputFileStream::Open(const std::string &filePath)
+{
   if (filePath.size() > 3 &&
       filePath.substr(filePath.size() - 3, 3) == ".gz") {
     m_streambuf = new gzfilebuf(filePath.c_str());
@@ -43,22 +53,13 @@ InputFileStream::InputFileStream(const std::string &filePath)
     }
     m_streambuf = fb;
   }
-  ifstream dd;
-  istream &d = dd;
-
-  d.close();
-  
   this->init(m_streambuf);
-}
-
-InputFileStream::~InputFileStream()
-{
-  delete m_streambuf;
-  m_streambuf = NULL;
 }
 
 void InputFileStream::Close()
 {
+  delete m_streambuf;
+  m_streambuf = NULL;
 }
 
 
