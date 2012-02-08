@@ -37,25 +37,26 @@ class ChartTranslationOption
  public:
   ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
                          const StackVec &stackVec,
-                         const WordsRange &wordsRange)
+                         const WordsRange &wordsRange,
+                         float score)
       : m_stackVec(stackVec)
-      , m_targetPhraseCollection(targetPhraseColl)
-      , m_wordsRange(wordsRange)
-      , m_estimateOfBestScore(0)
-  {
-    CalcEstimateOfBestScore();
-  }
+      , m_targetPhraseCollection(&targetPhraseColl)
+      , m_wordsRange(&wordsRange)
+      , m_estimateOfBestScore(score) {}
 
   ~ChartTranslationOption() {}
+
+  static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
+                                       const StackVec &);
 
   const StackVec &GetStackVec() const { return m_stackVec; }
 
   const TargetPhraseCollection &GetTargetPhraseCollection() const { 
-    return m_targetPhraseCollection;
+    return *m_targetPhraseCollection;
   }
 
   const WordsRange &GetSourceWordsRange() const {
-    return m_wordsRange;
+    return *m_wordsRange;
   }
 
   // return an estimate of the best score possible with this translation option.
@@ -64,14 +65,10 @@ class ChartTranslationOption
   inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
 
  private:
-  // not implemented
-  ChartTranslationOption &operator=(const ChartTranslationOption &);
 
-  void CalcEstimateOfBestScore();
-
-  const StackVec m_stackVec;
-  const TargetPhraseCollection &m_targetPhraseCollection;
-  const WordsRange &m_wordsRange;
+  StackVec m_stackVec;
+  const TargetPhraseCollection *m_targetPhraseCollection;
+  const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;
 };
 

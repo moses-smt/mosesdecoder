@@ -1,6 +1,16 @@
 #include "CderScorer.h"
+
+#include <iterator>
 #include <fstream>
 #include <stdexcept>
+
+namespace {
+
+inline int CalcDistance(int word1, int word2) {
+  return word1 == word2 ? 0 : 1;
+}
+
+} // namespace
 
 CderScorer::CderScorer(const string& config)
     : StatisticsBasedScorer("CDER",config) {}
@@ -10,7 +20,7 @@ CderScorer::~CderScorer() {}
 void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   //make sure reference data is clear
-  ref_sentences.clear();
+  m_ref_sentences.clear();
 
   //load reference data
   for (size_t rid = 0; rid < referenceFiles.size(); ++rid) {
@@ -18,24 +28,35 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
     if (!refin) {
       throw runtime_error("Unable to open: " + referenceFiles[rid]);
     }
-    ref_sentences.push_back(vector<sent_t>());
+    m_ref_sentences.push_back(vector<sent_t>());
     string line;
     while (getline(refin,line)) {
       sent_t encoded;
-      encode(line, encoded);
-      ref_sentences[rid].push_back(encoded);
+      TokenizeAndEncode(line, encoded);
+      m_ref_sentences[rid].push_back(encoded);
     }
   }
+}
+
+void CderScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
+{
+  vector<int> stats;
+  prepareStatsVector(sid, text, stats);
+
+  stringstream sout;
+  copy(stats.begin(), stats.end(), ostream_iterator<float>(sout," "));
+  string stats_str = sout.str();
+  entry.set(stats_str);
 }
 
 void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>& stats)
 {
   sent_t cand;
-  encode(text, cand);
+  TokenizeAndEncode(text, cand);
 
   float max = -2;
-  for (size_t rid = 0; rid < ref_sentences.size(); ++rid) {
-    sent_t& ref = ref_sentences[rid][sid];
+  for (size_t rid = 0; rid < m_ref_sentences.size(); ++rid) {
+    sent_t& ref = m_ref_sentences[rid][sid];
     vector<int> tmp = computeCD(cand, ref);
     if (calculateScore(tmp) > max) {
       stats = tmp;
@@ -75,7 +96,7 @@ vector<int> CderScorer::computeCD(const sent_t& cand, const sent_t& ref) const
       vector<int> possibleCosts;
       if (i > 0) {
         possibleCosts.push_back((*nextRow)[i-1] + 1); // Deletion
-        possibleCosts.push_back((*row)[i-1] + distance(ref[l-1], cand[i-1])); // Substitution/Identity
+        possibleCosts.push_back((*row)[i-1] + CalcDistance(ref[l-1], cand[i-1])); // Substitution/Identity
       }
       possibleCosts.push_back((*row)[i] + 1); // Insertion
       (*nextRow)[i] = *min_element(possibleCosts.begin(), possibleCosts.end());

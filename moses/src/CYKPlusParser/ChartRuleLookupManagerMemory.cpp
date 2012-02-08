@@ -66,7 +66,6 @@ ChartRuleLookupManagerMemory::~ChartRuleLookupManagerMemory()
 
 void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   const WordsRange &range,
-  bool adhereTableLimit,
   ChartTranslationOptionList &outColl)
 {
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
@@ -152,7 +151,6 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   DottedRuleList &rules = dottedRuleCol.Get(relEndPos + 1);
 
   // look up target sides for the rules
-  const size_t ruleLimit = StaticData::Instance().GetRuleLimit();
   DottedRuleList::const_iterator iterRule;
   for (iterRule = rules.begin(); iterRule != rules.end(); ++iterRule) {
     const DottedRuleInMemory &dottedRule = **iterRule;
@@ -163,13 +161,13 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
     // add the fully expanded rule (with lexical target side)
     if (tpc != NULL) {
-      AddCompletedRule(dottedRule, *tpc, ruleLimit, adhereTableLimit, outColl);
+      AddCompletedRule(dottedRule, *tpc, range, outColl);
     }
   }
 
   dottedRuleCol.Clear(relEndPos+1);
 
-  outColl.CreateChartRules(ruleLimit);
+  outColl.ShrinkToLimit();
 }
 
 // Given a partial rule application ending at startPos-1 and given the sets of

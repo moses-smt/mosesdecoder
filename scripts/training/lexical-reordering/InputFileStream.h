@@ -1,6 +1,8 @@
+// $Id: InputFileStream.h 2939 2010-02-24 11:15:44Z jfouet $
+
 /***********************************************************************
- Moses - statistical machine translation system
- Copyright (C) 2006-2012 University of Edinburgh
+ Moses - factored phrase-based language decoder
+ Copyright (C) 2006 University of Edinburgh
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,34 +19,31 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#pragma once
+#ifndef moses_InputFileStream_h
+#define moses_InputFileStream_h
 
-#include "Scope3Parser/IntermediateVarSpanNode.h"
-
-#include <memory>
-#include <vector>
+#include <cstdlib>
+#include <fstream>
+#include <string>
 
 namespace Moses
 {
 
-class ApplicableRuleTrie;
-class VarSpanNode;
-
-class VarSpanTrieBuilder
+/** Used in place of std::istream, can read zipped files if it ends in .gz
+ */
+class InputFileStream : public std::istream
 {
- public:
-  std::auto_ptr<VarSpanNode> Build(ApplicableRuleTrie &);
+protected:
+  std::streambuf *m_streambuf;
+public:
 
- private:
-  typedef std::vector<IntermediateVarSpanNode> NodeVec;
-  struct NodeVecState
-  {
-    std::size_t m_size;
-    IntermediateVarSpanNode m_lastNode;
-  };
-  void Build(ApplicableRuleTrie &, NodeVec &, VarSpanNode &);
-  void RecordState(const NodeVec &, NodeVecState &);
-  void RestoreState(const NodeVecState &, NodeVec &);
+  InputFileStream(const std::string &filePath);
+  ~InputFileStream();
+
+  void Open(const std::string &filePath);
+  void Close();
 };
 
 }
+
+#endif

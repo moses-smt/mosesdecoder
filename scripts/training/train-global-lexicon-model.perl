@@ -2,20 +2,22 @@
 
 use strict;
 use Getopt::Long "GetOptions";
+use Switch;
 
 ### paths
 
 # MegaM --- available from http://www.cs.utah.edu/~hal/megam/
-my $megam = "/home/pkoehn/statmt/bin/megam_i686.opt";
+my $megam = "/home/marsik/megam/bin/megam_i686.opt";
 
 # temporary dir - you may need something bigger
 my $tmpdir = "/tmp";
 
 # input parameters
-my ($corpus_stem,$lex_dir,$f,$e,$model);
+my ($action, $corpus_stem,$lex_dir,$f,$e,$model);
 
-die("syntax: train-global-lexicon-model.perl --corpus-stem FILESTEM --lex-dir DIR --f EXT --e EXT --model FILE [--tmp-dir DIR]\n")
-    unless &GetOptions('corpus-stem=s' => \$corpus_stem,
+die("syntax: train-global-lexicon-model.perl --action [list|train|consolidate] --corpus-stem FILESTEM --lex-dir DIR --f EXT --e EXT --model FILE [--tmp-dir DIR]\n")
+    unless &GetOptions('action=s' => \$action,
+                       'corpus-stem=s' => \$corpus_stem,
 		       'lex-dir=s' => \$lex_dir,
 		       'f=s' => \$f,
 		       'e=s' => \$e,
@@ -24,7 +26,8 @@ die("syntax: train-global-lexicon-model.perl --corpus-stem FILESTEM --lex-dir DI
     && defined($e) && defined($f)
     && defined($lex_dir) && -e "$lex_dir/$f.vcb" && -e "$lex_dir/$e.vcb"
     && defined($corpus_stem)
-    && (    (-e "$corpus_stem.$e"    && -e "$corpus_stem.$f") 
+    && defined($action)
+    && (    (-e "$corpus_stem.$e"    && -e "$corpus_stem.$f")
 	 || (-e "$corpus_stem.$e.gz" && -e "$corpus_stem.$f.gz"));
 
 # read lexicon index
@@ -32,48 +35,32 @@ my (%LEX_E,%LEX_F,%DELEX_E,%DELEX_F,%COUNT_E,%COUNT_F);
 &read_lex("$lex_dir/$f.vcb",\%LEX_F,\%DELEX_F,\%COUNT_F);
 &read_lex("$lex_dir/$e.vcb",\%LEX_E,\%DELEX_E,\%COUNT_E);
 
-# specified word? do just that one
-if (defined($ARGV[0])) {
-  my $ew = $ARGV[0];
-  &process_one_word(&decode_word($ew));
-  exit;
+switch ($action) {
+    case "list"
+    { foreach my $ew (keys %LEX_E) {
+        print $ew."\n";
+      }
+    }
+    case "train"
+    { while (<STDIN>) {
+        chomp;
+        my $ew = $_;
+        my $file = &efile($ew);
+        if (not -e $file) {
+            &process_one_word($ew);
+        }
+        print $file.".model\n";
+      }
+    }
+    case "consolidate"
+    { &consolidate() }
 }
-
-### cluster code --- needs to be adapted
-if (`hostname` =~ /centaur/) {
-  my $i=0;
-  foreach my $ew (keys %LEX_E) {
-    #next unless $COUNT_E{$ew}<=1;
-    next if $ew eq "UNK";
-    my $file = &efile($ew);
-    my $jobfile = $file;
-    $jobfile =~ s/(\/.\/.\/.\/)/$1job-/;
-    next if -e $file || -e $file.".model";
-    #next if -e $jobfile;
-    open(SH,">$jobfile.bash");
-    print SH "#!/bin/bash\n/home/pkoehn/experiment/disc-lex/train-discriminative-lexicon.perl ".&encode_word($ew)."\n";
-    close(SH);
-    print "qsub -e $jobfile.err -o $jobfile.out $jobfile.bash\n";
-    `qsub -e $jobfile.err -o $jobfile.out $jobfile.bash`;
-    exit if $i++ > 8000;
-  }
-  exit;
-}
-
-### process all words
-foreach my $ew (keys %LEX_E) {
-  next if $ew eq "UNK";
-  my $file = &efile($ew);
-  next if -e $file;
-  &process_one_word($ew);
-}
-&consolidate();
 
 ### sub: process one word
 sub process_one_word {
   my ($ew) = @_;
 
-  print "$ew\n";
+  print STDERR "$ew\n";
   my $file = &efile($ew);
   `touch $file`;
 
@@ -101,12 +88,12 @@ sub process_one_word {
       $COOC{$fw}++;
     }
   }
-  print "\tcoocurs with ".(scalar keys %COOC)." foreign words.\n";
+  print STDERR "\tcoocurs with ".(scalar keys %COOC)." foreign words.\n";
   close(E);
   close(F);
 
   # create training file
-  print "\tfile $file\n";
+  print STDERR "\tfile $file\n";
   open(EW,">$file");
   if (-e "$corpus_stem.$f.gz") {
       open(F,"zcat $corpus_stem.$f.gz|");
@@ -139,7 +126,7 @@ sub process_one_word {
   }
   close(EW);
 
-  # run training 
+  # run training
   `$megam -maxi 100 binary $file 1>$file.model 2>$file.log`;
   `rm $file`;
   close(E);
@@ -148,36 +135,19 @@ sub process_one_word {
 
 sub consolidate {
   open(MODEL,">$model");
-  open(LEVEL1,"ls $tmpdir|");
-  while (my $dir1 = <LEVEL1>) {
-    chop($dir1);
-    open(LEVEL2,"ls $tmpdir/$dir1|");
-    while (my $dir2 = <LEVEL2>) {
-      chop($dir2);
-      open(LEVEL3,"ls $tmpdir/$dir1/$dir2|");
-      while (my $dir3 = <LEVEL3>) {
-        chop($dir3);
-        open(DIR,"ls $tmpdir/$dir1/$dir2/$dir3|");
-        while(my $file = <DIR>) {
-          chop($file);
-          next unless $file =~ /^(.+).model$/;
-          my $word = $1;
-          &decode_word(\$word);
-          &consolidate_file("$tmpdir/$dir1/$dir2/$dir3/$file",$word);
-        }
-        close(DIR);
-      }
-      close(LEVEL3);
-    }
-    close(LEVEL2);
+  while (my $modelfile = <STDIN>) {
+      chomp $modelfile;
+      $modelfile =~ /\/([^\/]+).model$/;
+      my $word = $1;
+      &decode_word(\$word);
+      &consolidate_file($modelfile, $word);
   }
-  close(LEVEL1);
   close(MODEL);
 }
 
 sub consolidate_file {
   my($file,$word) = @_;
-  print $file."\n";
+  print STDERR $file."\n";
   open(FILE,$file);
   while(<FILE>) {
     chomp;
@@ -195,7 +165,6 @@ sub efile {
   my $second = &code_letter(substr($word."___",1,1));
   my $third  = &code_letter(substr($word."___",2,1));
   `mkdir -p $tmpdir/$first/$second/$third`;
-  &encode_word(\$word);
   return "$tmpdir/$first/$second/$third/".&encode_word($word);
 }
 
