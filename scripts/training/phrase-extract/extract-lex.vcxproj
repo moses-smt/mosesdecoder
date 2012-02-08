@@ -12,9 +12,11 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="extract-lex.cpp" />
+    <ClCompile Include="InputFileStream.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="extract-lex.h" />
+    <ClInclude Include="InputFileStream.h" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{808BF985-CA18-4E55-8AAC-70E04DC25117}</ProjectGuid>
