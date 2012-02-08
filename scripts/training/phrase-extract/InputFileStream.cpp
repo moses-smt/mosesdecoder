@@ -43,11 +43,6 @@ InputFileStream::InputFileStream(const std::string &filePath)
     }
     m_streambuf = fb;
   }
-  ifstream dd;
-  istream &d = dd;
-
-  d.close();
-  
   this->init(m_streambuf);
 }
 
