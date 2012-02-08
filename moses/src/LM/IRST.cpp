@@ -50,7 +50,7 @@ LanguageModelIRST::~LanguageModelIRST()
 
 #ifndef WIN32
   TRACE_ERR( "reset mmap\n");
-  m_lmtb->reset_mmap();
+  if (m_lmtb) m_lmtb->reset_mmap();
 #endif
 
   delete m_lmtb;
