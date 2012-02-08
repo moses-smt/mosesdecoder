@@ -44,9 +44,11 @@ if $(with-randlm) {
   dependencies += rand ;
 }
 
-obj Factory.o : Factory.cpp ..//headers $(dependencies) ;
+obj ORLM.o : ORLM.cpp ..//headers ../DynSAInclude//dynsa : : : <include>../DynSAInclude ;
 
-lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp 
+obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclude ;
+
+lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
   ../../../lm//kenlm ..//headers $(dependencies) ;
 
 #Huge kludge to force building if different --with options are passed.  
