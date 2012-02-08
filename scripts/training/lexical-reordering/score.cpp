@@ -13,6 +13,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
+#include "InputFileStream.h"
 
 #include "reordering_classes.h"
 
@@ -37,7 +38,7 @@ int main(int argc, char* argv[])
   double smoothingValue = atof(argv[2]);
   string filepath = argv[3];
 
-  ifstream eFile(extractFileName);
+  Moses::InputFileStream eFile(extractFileName);
   if (!eFile) {
     cerr << "Could not open the extract file " << extractFileName <<"for scoring of lexical reordering models\n";
     exit(1);
@@ -118,8 +119,8 @@ int main(int argc, char* argv[])
     }
 
     //reopen eFile
-    eFile.close();
-    eFile.open(extractFileName);
+    eFile.Close();
+    eFile.Open(extractFileName);
   } else {
     //constant smoothing
     for (int i=0; i<models.size(); ++i) {

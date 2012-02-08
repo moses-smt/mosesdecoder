@@ -20,8 +20,8 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
   if (referenceFiles.size() != 1) {
     throw runtime_error("PER only supports a single reference");
   }
-  _reftokens.clear();
-  _reflengths.clear();
+  m_ref_tokens.clear();
+  m_ref_lengths.clear();
   ifstream in(referenceFiles[0].c_str());
   if (!in) {
     throw runtime_error("Unable to open " + referenceFiles[0]);
@@ -30,12 +30,12 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
   int sid = 0;
   while (getline(in,line)) {
     vector<int> tokens;
-    encode(line,tokens);
-    _reftokens.push_back(multiset<int>());
+    TokenizeAndEncode(line, tokens);
+    m_ref_tokens.push_back(multiset<int>());
     for (size_t i = 0; i < tokens.size(); ++i) {
-      _reftokens.back().insert(tokens[i]);
+      m_ref_tokens.back().insert(tokens[i]);
     }
-    _reflengths.push_back(tokens.size());
+    m_ref_lengths.push_back(tokens.size());
     if (sid > 0 && sid % 100 == 0) {
       TRACE_ERR(".");
     }
@@ -47,7 +47,7 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
 void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-  if (sid >= _reflengths.size()) {
+  if (sid >= m_ref_lengths.size()) {
     stringstream msg;
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
@@ -55,18 +55,18 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   // Calculate correct, output_length and ref_length for
   // the line and store it in entry
   vector<int> testtokens;
-  encode(text,testtokens);
+  TokenizeAndEncode(text, testtokens);
   multiset<int> testtokens_all(testtokens.begin(),testtokens.end());
   set<int> testtokens_unique(testtokens.begin(),testtokens.end());
   int correct = 0;
   for (set<int>::iterator i = testtokens_unique.begin();
        i != testtokens_unique.end(); ++i) {
     int token = *i;
-    correct += min(_reftokens[sid].count(token), testtokens_all.count(token));
+    correct += min(m_ref_tokens[sid].count(token), testtokens_all.count(token));
   }
 
   ostringstream stats;
-  stats << correct << " " << testtokens.size() << " " << _reflengths[sid] << " " ;
+  stats << correct << " " << testtokens.size() << " " << m_ref_lengths[sid] << " " ;
   string stats_str = stats.str();
   entry.set(stats_str);
 }

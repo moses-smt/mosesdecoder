@@ -88,10 +88,8 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   RuleCubeQueue queue(m_manager);
 
   // add all trans opt into queue. using only 1st child node.
-  ChartTranslationOptionList::const_iterator iterList;
-  for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) 
-  {
-    const ChartTranslationOption &transOpt = **iterList;
+  for (size_t i = 0; i < transOptList.GetSize(); ++i) {
+    const ChartTranslationOption &transOpt = transOptList.Get(i);
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);
   }

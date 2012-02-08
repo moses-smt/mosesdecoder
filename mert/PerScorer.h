@@ -28,10 +28,6 @@ public:
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 
-  virtual void whoami() const {
-    cerr << "I AM PerScorer" << std::endl;
-  }
-
   virtual size_t NumberOfScores() const {
     // cerr << "PerScorer: 3" << endl;
     return 3;
@@ -39,14 +35,18 @@ public:
 
   virtual float calculateScore(const vector<int>& comps) const;
 
+  void whoami() const {
+    cerr << "I AM PerScorer" << std::endl;
+  }
+
 private:
   // no copying allowed
   PerScorer(const PerScorer&);
   PerScorer& operator=(const PerScorer&);
 
   // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
+  vector<size_t> m_ref_lengths;
+  vector<multiset<int> > m_ref_tokens;
 };
 
 #endif  // __PERSCORER_H__

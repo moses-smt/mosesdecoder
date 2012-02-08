@@ -11,7 +11,7 @@
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU",config),
       kLENGTH(4),
-      _refLengthStrategy(BLEU_CLOSEST) {
+      m_ref_length_type(CLOSEST) {
   //configure regularisation
   static string KEY_REFLEN = "reflen";
   static string REFLEN_AVERAGE = "average";
@@ -20,11 +20,11 @@ BleuScorer::BleuScorer(const string& config)
 
   string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
-    _refLengthStrategy = BLEU_AVERAGE;
+    m_ref_length_type = AVERAGE;
   } else if (reflen == REFLEN_SHORTEST) {
-    _refLengthStrategy = BLEU_SHORTEST;
+    m_ref_length_type = SHORTEST;
   } else if (reflen == REFLEN_CLOSEST) {
-    _refLengthStrategy = BLEU_CLOSEST;
+    m_ref_length_type = CLOSEST;
   } else {
     throw runtime_error("Unknown reference length strategy: " + reflen);
   }
@@ -37,7 +37,7 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
 {
   vector<int> encoded_tokens;
   //cerr << line << endl;
-  encode(line,encoded_tokens);
+  TokenizeAndEncode(line, encoded_tokens);
   //copy(encoded_tokens.begin(), encoded_tokens.end(), ostream_iterator<int>(cerr," "));
   //cerr << endl;
   for (size_t k = 1; k <= n; ++k) {
@@ -68,9 +68,9 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   //make sure reference data is clear
-  _refcounts.reset();
-  _reflengths.clear();
-  _encodings.clear();
+  m_ref_counts.reset();
+  m_ref_lengths.clear();
+  ClearEncoder();
 
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
@@ -85,29 +85,29 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
       //cerr << line << endl;
       if (i == 0) {
         counts_t *counts = new counts_t; //these get leaked
-        _refcounts.push_back(counts);
+        m_ref_counts.push_back(counts);
         vector<size_t> lengths;
-        _reflengths.push_back(lengths);
+        m_ref_lengths.push_back(lengths);
       }
-      if (_refcounts.size() <= sid) {
+      if (m_ref_counts.size() <= sid) {
         throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
       }
       counts_t counts;
       size_t length = countNgrams(line,counts,kLENGTH);
       //for any counts larger than those already there, merge them in
       for (counts_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-        counts_iterator oldcount_it = _refcounts[sid]->find(ci->first);
+        counts_iterator oldcount_it = m_ref_counts[sid]->find(ci->first);
         int oldcount = 0;
-        if (oldcount_it != _refcounts[sid]->end()) {
+        if (oldcount_it != m_ref_counts[sid]->end()) {
           oldcount = oldcount_it->second;
         }
         int newcount = ci->second;
         if (newcount > oldcount) {
-          _refcounts[sid]->operator[](ci->first) = newcount;
+          m_ref_counts[sid]->operator[](ci->first) = newcount;
         }
       }
       //add in the length
-      _reflengths[sid].push_back(length);
+      m_ref_lengths[sid].push_back(length);
       if (sid > 0 && sid % 100 == 0) {
         TRACE_ERR(".");
       }
@@ -122,8 +122,8 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
 //      cerr << text << endl;
 //      cerr << sid << endl;
-  //dump_counts(*_refcounts[sid]);
-  if (sid >= _refcounts.size()) {
+  //dump_counts(*m_ref_counts[sid]);
+  if (sid >= m_ref_counts.size()) {
     stringstream msg;
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
@@ -133,22 +133,22 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   vector<float> stats(kLENGTH*2);;
   size_t length = countNgrams(text,testcounts,kLENGTH);
   //dump_counts(testcounts);
-  if (_refLengthStrategy == BLEU_SHORTEST) {
+  if (m_ref_length_type == SHORTEST) {
     //cerr << reflengths.size() << " " << sid << endl;
-    int shortest = *min_element(_reflengths[sid].begin(),_reflengths[sid].end());
+    int shortest = *min_element(m_ref_lengths[sid].begin(), m_ref_lengths[sid].end());
     stats.push_back(shortest);
-  } else if (_refLengthStrategy == BLEU_AVERAGE) {
+  } else if (m_ref_length_type == AVERAGE) {
     int total = 0;
-    for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
-      total += _reflengths[sid][i];
+    for (size_t i = 0; i < m_ref_lengths[sid].size(); ++i) {
+      total += m_ref_lengths[sid][i];
     }
-    const float mean = static_cast<float>(total) /_reflengths[sid].size();
+    const float mean = static_cast<float>(total) / m_ref_lengths[sid].size();
     stats.push_back(mean);
-  } else if (_refLengthStrategy == BLEU_CLOSEST)  {
+  } else if (m_ref_length_type == CLOSEST)  {
     int min_diff = INT_MAX;
     int min_idx = 0;
-    for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
-      const int reflength = _reflengths[sid][i];
+    for (size_t i = 0; i < m_ref_lengths[sid].size(); ++i) {
+      const int reflength = m_ref_lengths[sid][i];
       const int diff = reflength - static_cast<int>(length);
       const int absolute_diff = abs(diff) - abs(min_diff);
 
@@ -156,12 +156,12 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
         min_diff = diff;
         min_idx = i;
       } else if (absolute_diff == 0) { // if two references has the same closest length, take the shortest
-        if (reflength < static_cast<int>(_reflengths[sid][min_idx])) {
+        if (reflength < static_cast<int>(m_ref_lengths[sid][min_idx])) {
           min_idx = i;
         }
       }
     }
-    stats.push_back(_reflengths[sid][min_idx]);
+    stats.push_back(m_ref_lengths[sid][min_idx]);
   } else {
     throw runtime_error("Unsupported reflength strategy");
   }
@@ -169,10 +169,10 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   //precision on each ngram type
   for (counts_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    counts_iterator refcounts_it = _refcounts[sid]->find(testcounts_it->first);
+    counts_iterator refcounts_it = m_ref_counts[sid]->find(testcounts_it->first);
     int correct = 0;
     int guess = testcounts_it->second;
-    if (refcounts_it != _refcounts[sid]->end()) {
+    if (refcounts_it != m_ref_counts[sid]->end()) {
       correct = min(refcounts_it->second,guess);
     }
     size_t len = testcounts_it->first.size();

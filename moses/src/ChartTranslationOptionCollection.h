@@ -38,7 +38,6 @@ class ChartCellCollection;
 
 class ChartTranslationOptionCollection
 {
-  friend std::ostream& operator<<(std::ostream&, const ChartTranslationOptionCollection&);
 protected:
   const InputType &m_source;
   const TranslationSystem* m_system;
@@ -46,31 +45,13 @@ protected:
   const ChartCellCollection &m_hypoStackColl;
   const std::vector<ChartRuleLookupManager*> &m_ruleLookupManagers;
 
-  std::vector< std::vector< ChartTranslationOptionList > > m_collection; /*< contains translation options */
+  ChartTranslationOptionList m_translationOptionList;
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
   StackVec m_emptyStackVec;
 
-  // for adding 1 trans opt in unknown word proc
-  void Add(ChartTranslationOption *transOpt, size_t pos);
-
-  ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
-  const ChartTranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
-
-  void ProcessUnknownWord(size_t startPos, size_t endPos);
-
-  // taken from ChartTranslationOptionCollectionText.
-  void ProcessUnknownWord(size_t sourcePos);
-
   //! special handling of ONE unknown words.
-  virtual void ProcessOneUnknownWord(const Word &sourceWord
-                                     , size_t sourcePos, size_t length = 1);
-
-  //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-  void Prune(size_t startPos, size_t endPos);
-
-  //! sort all trans opt in each list for cube pruning */
-  void Sort(size_t startPos, size_t endPos);
+  virtual void ProcessOneUnknownWord(const Word &, const WordsRange &);
 
 public:
   ChartTranslationOptionCollection(InputType const& source
@@ -78,14 +59,14 @@ public:
                               , const ChartCellCollection &hypoStackColl
                               , const std::vector<ChartRuleLookupManager*> &ruleLookupManagers);
   virtual ~ChartTranslationOptionCollection();
-  void CreateTranslationOptionsForRange(size_t startPos
-                                        , size_t endPos);
+  void CreateTranslationOptionsForRange(const WordsRange &);
 
-  const ChartTranslationOptionList &GetTranslationOptionList(const WordsRange &range) const {
-    return GetTranslationOptionList(range.GetStartPos(), range.GetEndPos());
+  const ChartTranslationOptionList &GetTranslationOptionList() const {
+    return m_translationOptionList;
   }
+
+  void Clear() { m_translationOptionList.Clear(); }
 
 };
 
 }
-
