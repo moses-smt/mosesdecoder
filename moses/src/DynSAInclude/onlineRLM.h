@@ -19,7 +19,7 @@ template<typename T>
 class OnlineRLM: public PerfectHash<T> {
 public:
   OnlineRLM(uint16_t MBs, int width, int bucketRange, count_t order, 
-    Vocab* v, float qBase = 8): PerfectHash<T>(MBs, width, bucketRange, qBase), 
+    Moses::Vocab* v, float qBase = 8): PerfectHash<T>(MBs, width, bucketRange, qBase), 
     vocab_(v), bAdapting_(false), order_(order), corpusSize_(0), alpha_(0) {
     CHECK(vocab_ != 0);
     //instantiate quantizer class here
@@ -71,7 +71,7 @@ public:
   int cleanUpHPD();
   void clearMarkings();
   void removeNonMarked();
-  Vocab* vocab_;
+  Moses::Vocab* vocab_;
 protected:
   void markQueried(const uint64_t& index);
   void markQueried(hpdEntry_t& value);
@@ -390,7 +390,7 @@ template<typename T>
 void OnlineRLM<T>::load(FileHandler* fin) {
   cerr << "Loading ORLM...\n";
   // load vocab first
-  vocab_ = new Vocab(fin);
+  vocab_ = new Moses::Vocab(fin);
   CHECK(vocab_ != 0);
   fin->read((char*)&corpusSize_, sizeof(corpusSize_));
   cerr << "\tCorpus size = " << corpusSize_ << endl;
