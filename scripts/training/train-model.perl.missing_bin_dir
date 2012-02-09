@@ -1441,6 +1441,10 @@ sub score_phrase_phrase_extract {
     my @children;
 
     for my $direction ("f2e","e2f") {
+      if ($___NOFORK and @children > 0) {
+        waitpid((shift @children), 0);
+		  $substep+=2;
+      }
       my $pid = fork();
     
       if ($pid == 0)
@@ -1480,13 +1484,6 @@ sub score_phrase_phrase_extract {
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
         if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
-        
-        # sorting inverse phrase-table-half to sync up with regular one
-        print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
-        if ($direction eq "e2f" && ! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
-    	    safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
-    	    if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
-        }
 
         exit();
       }
@@ -1509,6 +1506,13 @@ sub score_phrase_phrase_extract {
         die "shouldn't be here";
     }
 
+        
+    # sorting inverse phrase-table-half to sync up with regular one
+    print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
+    if (! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
+        safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
+        if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
+    }
 
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
