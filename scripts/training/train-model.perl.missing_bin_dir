@@ -175,6 +175,8 @@ foreach my $step (@step_conf) {
   }
 }
 
+# don't fork
+my $___NOFORK = !defined $_PARALLEL;
 
 
 # supporting binaries from other packages
@@ -208,6 +210,11 @@ my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+if ($___NOFORK == 0)
+{
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 split sort $PHRASE_EXTRACT";
+}
+
 my $RULE_EXTRACT;
 if (defined($_GHKM)) {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-ghkm/tools/extract-ghkm";
@@ -215,6 +222,11 @@ if (defined($_GHKM)) {
 else {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
 }
+if ($___NOFORK == 0)
+{
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 split sort $RULE_EXTRACT";
+}
+
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $EPPEX = "$SCRIPTS_ROOTDIR/training/eppex/eppex";
@@ -355,9 +367,6 @@ $___PARTS = $_PARTS if $_PARTS;
 
 my $___DIRECTION = 0;
 $___DIRECTION = $_DIRECTION if $_DIRECTION;
-
-# don't fork
-my $___NOFORK = !defined $_PARALLEL;
 
 my $___ONLY_PRINT_GIZA = 0;
 $___ONLY_PRINT_GIZA = 1 if $_ONLY_PRINT_GIZA;
