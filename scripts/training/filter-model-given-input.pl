@@ -37,8 +37,10 @@ my $ZCAT = "gzip -cd";
 my $opt_hierarchical = 0;
 my $binarizer = undef;
 my $opt_min_non_initial_rule_count = undef;
+my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 
 GetOptions(
+    "gzip!" => \$opt_gzip,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
@@ -118,6 +120,7 @@ while(<INI>) {
         elsif ($binarizer && $phrase_table_impl == 0) {
     	  print INI_OUT "1 $source_factor $t $w $new_name\n";
         } else {
+          $new_name .= ".gz" if $opt_gzip;
     	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
         }
     	push @TABLE_NEW_NAME,$new_name;
@@ -223,7 +226,14 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       $openstring = "< $file";
     }
 
-    open(FILE_OUT,">$new_file") or die "Can't write $new_file";
+    my $new_openstring;
+    if ($new_file =~ /\.gz$/) {
+      $new_openstring = "| gzip -c > $new_file";
+    } else {
+      $new_openstring = ">$new_file";
+    }
+
+    open(FILE_OUT,$new_openstring) or die "Can't write to $new_openstring";
 
     if ($opt_hierarchical) {
         my $tmp_input = $TMP_INPUT_FILENAME{$factors};
