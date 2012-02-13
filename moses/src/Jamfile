@@ -15,3 +15,5 @@ lib moses :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : ThreadPool.cpp SyntacticLanguageModel.cpp ]
 synlm ThreadPool CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
+
+alias headers-to-install : [ glob-tree *.h ] ;
