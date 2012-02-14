@@ -43,7 +43,8 @@ namespace Mira {
 
   MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
 		: m_manager(NULL) {
-	  static int BASE_ARGC = 5;
+//	  static int BASE_ARGC = 5;
+  	static int BASE_ARGC = 4;
 	  Parameter* params = new Parameter();
 	  char ** mosesargv = new char*[BASE_ARGC + argc];
 	  mosesargv[0] = strToChar("-f");
@@ -52,7 +53,7 @@ namespace Mira {
 	  stringstream dbgin;
 	  dbgin << debuglevel;
 	  mosesargv[3] = strToChar(dbgin.str());
-	  mosesargv[4] = strToChar("-mbr"); //so we can do nbest
+//	  mosesargv[4] = strToChar("-mbr"); //so we can do nbest
 
 	  for (int i = 0; i < argc; ++i) {
 		  char *cstr = &(decoder_params[i])[0];

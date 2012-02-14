@@ -545,9 +545,8 @@ int main(int argc, char** argv) {
 						fear_length_ratio = (float)fear.size()/ref_length;
 						fearSize = (int)fear.size();
 						cerr << ", l-ratio fear: " << fear_length_ratio << endl;
-						for (size_t i = 0; i < fear.size(); ++i) {
+						for (size_t i = 0; i < fear.size(); ++i)
 							delete fear[i];
-						}
 
 						// Bleu-related example selection
 						bleuRatioHopeFear = bleuScoresHope[batchPosition][0] / bleuScoresFear[batchPosition][0];
