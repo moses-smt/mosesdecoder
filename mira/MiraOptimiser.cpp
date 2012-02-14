@@ -40,7 +40,7 @@ size_t MiraOptimiser::updateWeights(
 			ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
 			featureValueDiff.MinusEquals(featureValues[i][j]);
 
-			cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
+			//			cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
 			if (featureValueDiff.GetL1Norm() == 0) {
 				// skip constraint
 				continue;
@@ -196,7 +196,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 			for (size_t k = 0; k < featureValuesFear[i].size(); ++k) {
 				ScoreComponentCollection featureValueDiff = featureValuesHope[i][j];
 				featureValueDiff.MinusEquals(featureValuesFear[i][k]);
-				cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
+				//				cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
 				if (featureValueDiff.GetL1Norm() == 0) {
 					// skip constraint
 					continue;
