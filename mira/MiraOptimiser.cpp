@@ -143,7 +143,7 @@ size_t MiraOptimiser::updateWeights(
 		}
 	}
 
-	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
+	//	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
 	weightUpdate.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
@@ -300,7 +300,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 		}
 	}
 
-	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
+	//	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
 	weightUpdate.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
