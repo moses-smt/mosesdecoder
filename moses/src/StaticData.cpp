@@ -718,6 +718,8 @@ bool StaticData::LoadData(Parameter *parameter)
     // GLM: apply additional weight to sparse features if applicable
     for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
     	float glmWeight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
+    	cerr << "Set sparse producer weight: " << glmWeight << endl;
+    	cerr << "Size of loaded model: " << extraWeights.Size() << endl;
     	if (glmWeight != 1)
     		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], glmWeight);
     }
@@ -961,18 +963,18 @@ bool StaticData::LoadGlobalLexicalModel()
 bool StaticData::LoadGlobalLexicalModelUnlimited()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-glm"));
-  const vector<string> &file = m_parameter->GetParam("glm");
+  const vector<string> &modelSpec = m_parameter->GetParam("glm");
 
-  if (weight.size() != file.size()) {
-    std::cerr << "number of sparse producer weights and models for the global lexical model "
-    		"does not match (" << weight.size() << " != " << file.size() << ")" << std::endl;
+  if (weight.size() != modelSpec.size()) {
+    std::cerr << "number of sparse producer weights and model specs for the global lexical model unlimited "
+    		"does not match (" << weight.size() << " != " << modelSpec.size() << ")" << std::endl;
     return false;
   }
 
   for (size_t i = 0; i < weight.size(); i++ ) {
-	vector< string > factors = Tokenize(file[i],"-");
+	vector< string > factors = Tokenize(modelSpec[i],"-");
     if ( factors.size() != 2 ) {
-      std::cerr << "wrong factor definition for global lexical model: " << file[i] << endl;
+      std::cerr << "wrong factor definition for global lexical model unlimited: " << modelSpec[i] << endl;
       return false;
     }
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");

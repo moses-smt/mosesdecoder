@@ -65,7 +65,8 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
 
   		//if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
   		if ( alreadyScored.find(inputString) == alreadyScored.end()) {
-  			stringstream feature("glm_");
+  			stringstream feature;
+  			feature << "glm_";
   			feature << targetString;
   			feature << "~";
   			feature << inputString;

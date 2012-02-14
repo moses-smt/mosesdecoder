@@ -531,43 +531,44 @@ int main(int argc, char** argv) {
 
 					// FEAR
 					float fear_length_ratio = 0;
+					float bleuRatioHopeFear = 0;
 					int fearSize = 0;
 					if (!skip) {
-					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
-					vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight_fear,
-							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
-							distinctNbest, rank, epoch);
-					decoder->cleanup();
-					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
-					avg_ref_length += ref_length;
-					avg_ref_length /= 2;
-					fear_length_ratio = (float)fear.size()/ref_length;
-					fearSize = (int)fear.size();
-					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
-					for (size_t i = 0; i < fear.size(); ++i) {
-						delete fear[i];
-					}
-					}
+						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
+						vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight_fear,
+								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
+								distinctNbest, rank, epoch);
+						decoder->cleanup();
+						ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
+						avg_ref_length += ref_length;
+						avg_ref_length /= 2;
+						fear_length_ratio = (float)fear.size()/ref_length;
+						fearSize = (int)fear.size();
+						cerr << ", l-ratio fear: " << fear_length_ratio << endl;
+						for (size_t i = 0; i < fear.size(); ++i) {
+							delete fear[i];
+						}
 
-					// Bleu-related example selection
-					float bleuRatioHopeFear = bleuScoresHope[batchPosition][0] / bleuScoresFear[batchPosition][0];
-					if (minBleuRatio != -1 && bleuRatioHopeFear < minBleuRatio) 
-					  skip = true;
-					if(maxBleuRatio != -1 && bleuRatioHopeFear > maxBleuRatio)
-					  skip = true;
+						// Bleu-related example selection
+						bleuRatioHopeFear = bleuScoresHope[batchPosition][0] / bleuScoresFear[batchPosition][0];
+						if (minBleuRatio != -1 && bleuRatioHopeFear < minBleuRatio)
+							skip = true;
+						if(maxBleuRatio != -1 && bleuRatioHopeFear > maxBleuRatio)
+							skip = true;
 
-					// Length-related example selection
-					float length_diff_fear = abs(1 - fear_length_ratio);
-					size_t length_diff_hope_fear = abs(oracleSize - fearSize);
-					cerr << "Rank " << rank << ", epoch " << epoch << ", abs-length hope-fear: " << length_diff_hope_fear << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
-					if (max_length_dev_hypos != -1 && (length_diff_hope_fear > avg_ref_length * max_length_dev_hypos))
-						skip = true;
+						// Length-related example selection
+						float length_diff_fear = abs(1 - fear_length_ratio);
+						size_t length_diff_hope_fear = abs(oracleSize - fearSize);
+						cerr << "Rank " << rank << ", epoch " << epoch << ", abs-length hope-fear: " << length_diff_hope_fear << ", BLEU hope-fear: " << bleuScoresHope[batchPosition][0] - bleuScoresFear[batchPosition][0] << endl;
+						if (max_length_dev_hypos != -1 && (length_diff_hope_fear > avg_ref_length * max_length_dev_hypos))
+							skip = true;
+
+						if (max_length_dev_fear_ref != -1 && length_diff_fear > max_length_dev_fear_ref)
+							skip = true;
+					}
 					
-					if (max_length_dev_fear_ref != -1 && length_diff_fear > max_length_dev_fear_ref)
-						skip = true;
 					if (skip) {
-					        cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (bleuRatioHopeFear: " << bleuRatioHopeFear << ").. " << endl;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << fear_length_ratio << ", " << length_diff_hope_fear << ").. " << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << bleuRatioHopeFear << ").. " << endl;
 						featureValuesHope[batchPosition].clear();
 						featureValuesFear[batchPosition].clear();
 						bleuScoresHope[batchPosition].clear();
