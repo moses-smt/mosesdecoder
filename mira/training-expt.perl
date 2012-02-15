@@ -99,6 +99,7 @@ my $burn_in = &param("train.burn-in",0);
 my $burn_in_input_file = &param("train.burn-in-input-file");
 my $burn_in_reference_files = &param("train.burn-in-reference-files");
 my $skipTrain = &param("train.skip", 0);
+my $train_decoder_settings = &param("train.decoder-settings", "");
 
 #devtest configuration
 my ($devtest_input_file, $devtest_reference_files,$devtest_ini_file,$bleu_script,$use_moses);
@@ -244,7 +245,8 @@ if ($weight_dump_frequency != -1) {
 }
 print TRAIN "--epochs $epochs \\\n";
 print TRAIN "-b $batch \\\n";
-print TRAIN "--decoder-settings \"$decoder_settings\" \\\n";
+my $settings = $decoder_settings." ".$train_decoder_settings;
+print TRAIN "--decoder-settings \"$settings\" \\\n";
 print TRAIN $extra_args;
 print TRAIN "\n";
 if ($jobs == 1) {
