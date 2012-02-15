@@ -33,7 +33,7 @@ class InputType;
 
 class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
-//	typedef std::map< char, short > CharHash;
+	typedef std::map< char, short > CharHash;
 	typedef std::map< std::string, short > StringHash;
 
   struct ThreadLocalStorage
@@ -51,7 +51,8 @@ private:
 private:
   const Sentence *m_input;
 
-//  CharHash m_punctuationHash;
+  CharHash m_punctuationHash;
+  bool m_ignorePunctuation;
 
   std::vector< FactorType > m_inputFactors;
   std::vector< FactorType > m_outputFactors;
@@ -63,7 +64,8 @@ private:
 
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors,
-	                            const std::vector< FactorType >& outFactors);
+	                            const std::vector< FactorType >& outFactors,
+	                            bool ignorePunctuation);
 
   virtual ~GlobalLexicalModelUnlimited();
 

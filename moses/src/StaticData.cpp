@@ -972,14 +972,25 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
   }
 
   for (size_t i = 0; i < weight.size(); i++ ) {
-	vector< string > factors = Tokenize(modelSpec[i],"-");
+    bool ignorePunctuation = false;
+    vector< string > factors;
+    vector< string > factors_punctuation = Tokenize(modelSpec[i]," ");
+
+    // read optional punctuation specification
+    if (factors_punctuation.size() > 0) {
+    	factors = Tokenize(factors_punctuation[0],"-");
+    	ignorePunctuation = Scan<int>(factors_punctuation[1]);
+    }
+    else
+    	factors = Tokenize(modelSpec[i],"-");
+
     if ( factors.size() != 2 ) {
       std::cerr << "wrong factor definition for global lexical model unlimited: " << modelSpec[i] << endl;
       return false;
     }
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors));
+    m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, ignorePunctuation));
     m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
   }
   return true;
