@@ -101,7 +101,8 @@ if ($numParallel > 1)
   `$extractCmd`;
   `$extractInvCmd`;
 
-  if (-e "$TMPDIR/extract.0.o")
+  my $numStr = NumStr(0);
+  if (-e "$TMPDIR/extract.$numStr.o")
   {
     `$extractOrderingCmd`;
   }
