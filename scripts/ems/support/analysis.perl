@@ -358,7 +358,7 @@ sub ttable_coverage {
     push @DISTRIBUTION, $SCORE[$p_e_given_f_score]; # forward probability
   }
   my $entropy = &compute_entropy(@DISTRIBUTION);
-  print REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
+  printf REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
   $TTABLE_ENTROPY{$last_size}{$last_in} = $entropy;
   close(REPORT);
   close(TTABLE);
