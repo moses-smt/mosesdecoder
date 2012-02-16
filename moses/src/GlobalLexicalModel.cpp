@@ -106,13 +106,13 @@ void GlobalLexicalModel::LoadData(const string &filePath,
 
 void GlobalLexicalModel::InitializeForInput( Sentence const& in )
 {
-  m_input = &in;
-  if (m_cache != NULL) delete m_cache;
-  m_cache = new map< const TargetPhrase*, float >;
+  m_local.reset(new ThreadLocalStorage);
+  m_local->input = &in;
 }
 
 float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
 {
+  const Sentence& input = *(m_local->input);
   float score = 0;
   for(size_t targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
     float sum = 0;
@@ -127,8 +127,8 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
       }
 
       set< const Word*, WordComparer > alreadyScored; // do not score a word twice
-      for(size_t inputIndex = 0; inputIndex < m_input->GetSize(); inputIndex++ ) {
-        const Word& inputWord = m_input->GetWord( inputIndex );
+      for(size_t inputIndex = 0; inputIndex < input.GetSize(); inputIndex++ ) {
+        const Word& inputWord = input.GetWord( inputIndex );
         if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
           SingleHash::const_iterator inputWordHash = targetWordHash->second.find( &inputWord );
           if( inputWordHash != targetWordHash->second.end() ) {
@@ -148,13 +148,14 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
 
 float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const
 {
-  map< const TargetPhrase*, float >::const_iterator query = m_cache->find( &targetPhrase );
-  if ( query != m_cache->end() ) {
+  LexiconCache& m_cache = m_local->cache;
+  map< const TargetPhrase*, float >::const_iterator query = m_cache.find( &targetPhrase );
+  if ( query != m_cache.end() ) {
     return query->second;
   }
 
   float score = ScorePhrase( targetPhrase );
-  m_cache->insert( pair<const TargetPhrase*, float>(&targetPhrase, score) );
+  m_cache.insert( pair<const TargetPhrase*, float>(&targetPhrase, score) );
 //  std::cerr << "add to cache " << targetPhrase << ": " << score << endl;
   return score;
 }

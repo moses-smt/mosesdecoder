@@ -13,6 +13,10 @@
 #include "FactorTypeSet.h"
 #include "Sentence.h"
 
+#ifdef WITH_THREADS
+#include <boost/thread/tss.hpp>
+#endif
+
 namespace Moses
 {
 
@@ -31,8 +35,21 @@ class GlobalLexicalModel : public StatelessFeatureFunction
 {
   typedef std::map< const Word*, std::map< const Word*, float, WordComparer >, WordComparer > DoubleHash;
   typedef std::map< const Word*, float, WordComparer > SingleHash;
+  typedef std::map< const TargetPhrase*, float > LexiconCache;
+
+  struct ThreadLocalStorage
+  {
+    LexiconCache cache;
+    const Sentence *input;
+  };
+
 private:
   DoubleHash m_hash;
+#ifdef WITH_THREADS
+  boost::thread_specific_ptr<ThreadLocalStorage> m_local;
+#else
+  std::auto_ptr<ThreadLocalStorage> m_local;
+#endif
   std::map< const TargetPhrase*, float > *m_cache;
   const Sentence *m_input;
   Word *m_bias;
