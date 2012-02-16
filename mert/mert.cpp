@@ -370,6 +370,9 @@ int main(int argc, char **argv)
         to_optimize.push_back(index);
       } else {
         cerr << "Index " << index << " is out of bounds. Allowed indexes are [0," << option.pdim - 1 << "]." << endl;
+
+        // Note: this is temporary bug fix.
+        to_optimize.push_back(index);
       }
     }
   } else {
