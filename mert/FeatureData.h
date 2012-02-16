@@ -136,6 +136,9 @@ public:
   }
 
   void setFeatureMap(const std::string& feat);
+
+  /* For debugging */
+  std::string ToString() const;
 };
 
 #endif  // FEATURE_DATA_H
