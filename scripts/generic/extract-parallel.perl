@@ -112,7 +112,9 @@ else
   rename "$TMPDIR/extract.0", "$extract";
   rename "$TMPDIR/extract.0.inv", "$extract.inv";
 
-  if (-e "$TMPDIR/extract.0.o")
+
+  my $numStr = NumStr(0);
+  if (-e "$TMPDIR/extract.$numStr.o")
   {
     rename "$TMPDIR/extract.0.o", "$extract.o";
   }
