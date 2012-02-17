@@ -53,6 +53,7 @@ private:
 
   CharHash m_punctuationHash;
   bool m_ignorePunctuation;
+  bool m_biasFeature;
 
   std::vector< FactorType > m_inputFactors;
   std::vector< FactorType > m_outputFactors;
@@ -65,7 +66,8 @@ private:
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors,
 	                            const std::vector< FactorType >& outFactors,
-	                            bool ignorePunctuation);
+			            bool ignorePunctuation,
+			            bool biasFeature);
 
   virtual ~GlobalLexicalModelUnlimited();
 

@@ -973,13 +973,17 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
 
   for (size_t i = 0; i < weight.size(); i++ ) {
     bool ignorePunctuation = false;
+    bool biasFeature = false;
     vector< string > factors;
-    vector< string > factors_punctuation = Tokenize(modelSpec[i]," ");
+    vector< string > factors_punct_bias = Tokenize(modelSpec[i]," ");
 
-    // read optional punctuation specification
-    if (factors_punctuation.size() > 0) {
-    	factors = Tokenize(factors_punctuation[0],"-");
-    	ignorePunctuation = Scan<int>(factors_punctuation[1]);
+    // read optional punctuation and bias specifications
+    if (factors_punct_bias.size() > 0) {
+    	factors = Tokenize(factors_punct_bias[0],"-");
+	if (factors_punct_bias.size() >= 2)
+	  ignorePunctuation = Scan<int>(factors_punct_bias[1]);
+	if (factors_punct_bias.size() >= 3)
+	  biasFeature = Scan<int>(factors_punct_bias[2]);
     }
     else
     	factors = Tokenize(modelSpec[i],"-");
@@ -990,7 +994,7 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     }
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, ignorePunctuation));
+    m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, ignorePunctuation, biasFeature));
     m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
   }
   return true;

@@ -10,10 +10,12 @@ namespace Moses
 {
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorType >& inFactors,
                                                          const vector< FactorType >& outFactors,
-                                                         bool ignorePunctuation)
+                                                         bool ignorePunctuation,
+							 bool biasFeature)
 : StatelessFeatureFunction("glm",ScoreProducer::unlimited),
   m_sparseProducerWeight(1),
-  m_ignorePunctuation(ignorePunctuation)
+  m_ignorePunctuation(ignorePunctuation),
+  m_biasFeature(biasFeature)
 {
 	std::cerr << "Creating global lexical model unlimited.. ";
 
@@ -22,12 +24,12 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorTyp
 
 	// compile a list of punctuation characters
 	if (m_ignorePunctuation) {
-		cerr << "ignoring punctuation";
+		cerr << "ignoring punctuation.. ";
 		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
 		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
 			m_punctuationHash[punctuation[i]] = 1;
 	}
-	cerr << endl;
+	cerr << "done." << endl;
 }
 
 GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
@@ -53,12 +55,21 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
   	string targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
 
   	if (m_ignorePunctuation) {
-  		// check if first char is punctuation
-  		char firstChar = targetString.at(0);
-  		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-  		if(charIterator != m_punctuationHash.end())
-  			continue;
+	  // check if first char is punctuation
+	  char firstChar = targetString.at(0);
+	  CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+	  if(charIterator != m_punctuationHash.end())
+	    continue;	 
   	}
+
+	if (m_biasFeature) {
+	  stringstream feature;
+	  feature << "glm_";
+	  feature << targetString;
+	  feature << "~";
+	  feature << "**BIAS**";
+	  accumulator->SparsePlusEquals(feature.str(), 1);
+	}
 
 //  	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
   	StringHash alreadyScored;
@@ -69,8 +80,8 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
   			// check if first char is punctuation
   			char firstChar = inputString.at(0);
   			CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-  			if(charIterator != m_punctuationHash.end())
-  				continue;
+  			if(charIterator != m_punctuationHash.end()) 
+			  continue;			
   		}
 
   		//if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
