@@ -361,6 +361,7 @@ size_t MiraOptimiser::updateWeightsAnalytically(
 
     if (squaredNorm > 0) {
     	float alpha = diff / squaredNorm;
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", unclipped alpha: " << alpha << endl;
     	if (m_slack > 0 ) {
     		if (alpha > m_slack) {
     			alpha = m_slack;
@@ -370,9 +371,15 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     		}
     	}
 
-    	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
+    	// apply learning rate
+    	if (learning_rate != 1)
+     		alpha = alpha * learning_rate;
+
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", clipped alpha: " << alpha << endl;
+//    	cerr << "Rank " << rank << ", epoch " << epoch << ", feature diff: " << featureValueDiff << endl;
     	featureValueDiff.MultiplyEquals(alpha);
     	weightUpdate.PlusEquals(featureValueDiff);
+//    	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
     }
     else {
     	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", no update because squared norm is 0" << endl);

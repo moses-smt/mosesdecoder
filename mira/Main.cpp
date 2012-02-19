@@ -299,6 +299,7 @@ int main(int argc, char** argv) {
 	if (learner == "mira") {
 		if (rank == 0) {
 			cerr << "Optimising using Mira" << endl;
+			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
 		}
 		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, margin_slack);
 		learning_rate = mira_learning_rate;
