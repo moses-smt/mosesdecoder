@@ -67,7 +67,8 @@ void Tokenize(const char *str, const char delim,
   while (1) {
     const char *begin = str;
     while (*str != delim && *str) str++;
-    res->push_back(std::string(begin, str));
+    if (begin != str)            // Don't create empty string objects.
+      res->push_back(std::string(begin, str));
     if (*str++ == 0) break;
   }
 }
