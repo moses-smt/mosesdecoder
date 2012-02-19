@@ -23,9 +23,6 @@
 
 using namespace std;
 
-#define US_NOSET (numeric_limits<unsigned short>::max())
-#define MAX_LINE  1024
-
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
 #else
@@ -52,6 +49,12 @@ size_t getNextPound(std::string &str, std::string &substr,
 
 void split(const std::string &s, char delim, std::vector<std::string> &elems);
 
+/**
+ * Split the string 'str' with specified delimitter 'delim' into tokens.
+ * The resulting tokens are set to 'res'.
+ *
+ * ex. "a,b,c" => {"a", "b", "c"}.
+ */
 void Tokenize(const char *str, const char delim, std::vector<std::string> *res);
 
 template<typename T>
