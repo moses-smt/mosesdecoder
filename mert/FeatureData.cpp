@@ -1,6 +1,6 @@
 /*
  *  FeatureData.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
