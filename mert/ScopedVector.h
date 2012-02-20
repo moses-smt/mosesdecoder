@@ -1,5 +1,5 @@
-#ifndef SCOPEDVECTOR_H_
-#define SCOPEDVECTOR_H_
+#ifndef MERT_SCOPED_VECTOR_H_
+#define MERT_SCOPED_VECTOR_H_
 
 #include <vector>
 
@@ -51,4 +51,4 @@ class ScopedVector {
   void operator=(const ScopedVector<T>&);
 };
 
-#endif // SCOPEDVECTOR_H_
+#endif // MERT_SCOPED_VECTOR_H_

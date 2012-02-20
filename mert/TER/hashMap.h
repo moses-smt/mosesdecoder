@@ -2,8 +2,8 @@
  * Generic hashmap manipulation functions
  */
 
-#ifndef __HASHMAP_H__
-#define __HASHMAP_H__
+#ifndef MERT_TER_HASHMAP_H_
+#define MERT_TER_HASHMAP_H_
 
 #include "stringHasher.h"
 #include <vector>
@@ -40,4 +40,4 @@ public:
 
 }
 
-#endif  // __HASHMAP_H__
+#endif  // MERT_TER_HASHMAP_H_

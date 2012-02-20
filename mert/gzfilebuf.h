@@ -1,5 +1,5 @@
-#ifndef _GZFILEBUF_H_
-#define _GZFILEBUF_H_
+#ifndef MERT_GZFILEBUF_H_
+#define MERT_GZFILEBUF_H_
 
 #include <streambuf>
 #include <zlib.h>
@@ -82,4 +82,4 @@ private:
   char _buff[_buffsize];
 };
 
-#endif  // _GZFILEBUF_H_
+#endif  // MERT_GZFILEBUF_H_

@@ -1,5 +1,5 @@
-#ifndef __TERCPPTERSHIFT_H__
-#define __TERCPPTERSHIFT_H__
+#ifndef MERT_TER_TER_SHIFT_H_
+#define MERT_TER_TER_SHIFT_H_
 
 #include <vector>
 #include <stdio.h>
@@ -41,4 +41,4 @@ public:
 
 }
 
-#endif  // __TERCPPTERSHIFT_H__
+#endif  // MERT_TER_TER_SHIFT_H_

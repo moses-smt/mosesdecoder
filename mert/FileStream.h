@@ -1,5 +1,5 @@
-#ifndef FILESTREAM_H_
-#define FILESTREAM_H_
+#ifndef MERT_FILE_STREAM_H_
+#define MERT_FILE_STREAM_H_
 
 #include <fstream>
 #include <streambuf>
@@ -31,4 +31,4 @@ public:
   void close();
 };
 
-#endif // FILESTREAM_H_
+#endif // MERT_FILE_STREAM_H_

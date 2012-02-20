@@ -1,5 +1,5 @@
-#ifndef __TERCPPTOOLS_H__
-#define __TERCPPTOOLS_H__
+#ifndef MERT_TER_TOOLS_H_
+#define MERT_TER_TOOLS_H_
 
 #include <vector>
 #include <iostream>
@@ -62,4 +62,4 @@ param copyParam(param p);
 
 }
 
-#endif  // __TERCPPTOOLS_H__
+#endif  // MERT_TER_TOOLS_H_

@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef DATA_H
-#define DATA_H
+#ifndef MERT_DATA_H_
+#define MERT_DATA_H_
 
 using namespace std;
 
@@ -122,4 +122,4 @@ public:
                     std::vector<Data>& shards);
 };
 
-#endif  // DATA_H
+#endif  // MERT_DATA_H_

@@ -1,5 +1,5 @@
-#ifndef __PERSCORER_H__
-#define __PERSCORER_H__
+#ifndef MERT_PER_SCORER_H_
+#define MERT_PER_SCORER_H_
 
 #include <iostream>
 #include <set>
@@ -49,4 +49,4 @@ private:
   vector<multiset<int> > m_ref_tokens;
 };
 
-#endif  // __PERSCORER_H__
+#endif  // MERT_PER_SCORER_H_

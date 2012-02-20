@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef FEATURE_STATS_H
-#define FEATURE_STATS_H
+#ifndef MERT_FEATURE_STATS_H_
+#define MERT_FEATURE_STATS_H_
 
 #include <cstring>
 #include <fstream>
@@ -138,4 +138,4 @@ public:
 bool operator==(const FeatureStats& f1, const FeatureStats& f2);
 //END_ADDED
 
-#endif  // FEATURE_STATS_H
+#endif  // MERT_FEATURE_STATS_H_
