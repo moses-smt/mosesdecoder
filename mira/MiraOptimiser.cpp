@@ -13,8 +13,10 @@ size_t MiraOptimiser::updateWeights(
     const vector<vector<ScoreComponentCollection> >& featureValues,
     const vector<vector<float> >& losses,
     const vector<vector<float> >& bleuScores,
+    const vector<vector<float> >& modelScores,
     const vector<ScoreComponentCollection>& oracleFeatureValues,
     const vector<float> oracleBleuScores,
+    const vector<float> oracleModelScores,
     float learning_rate,
     size_t rank,
     size_t epoch) {
@@ -63,7 +65,8 @@ size_t MiraOptimiser::updateWeights(
 		  	// check if constraint is violated
 		    bool violated = false;
 		    bool addConstraint = true;
-		    float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+//		    float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+		    float modelScoreDiff = oracleModelScores[i] - modelScores[i][j];
 		    float diff = 0;
 			if (loss > (modelScoreDiff + m_margin_slack)) {
 				diff = loss - (modelScoreDiff + m_margin_slack);
@@ -171,6 +174,8 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 		const std::vector<std::vector<float> >& bleuScoresHope,
 		const std::vector<std::vector<float> >& bleuScoresFear,
+		const std::vector<std::vector<float> >& modelScoresHope,
+		const std::vector<std::vector<float> >& modelScoresFear,
 		float learning_rate,
 		size_t rank,
 		size_t epoch) {
@@ -220,7 +225,8 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 				// check if constraint is violated
 				bool violated = false;
 				bool addConstraint = true;
-				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+//				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+				float modelScoreDiff = modelScoresHope[i][j] - modelScoresFear[i][k];
 				float diff = 0;
 				if (loss > (modelScoreDiff + m_margin_slack)) {
 					diff = loss - (modelScoreDiff + m_margin_slack);
@@ -341,6 +347,8 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     ScoreComponentCollection& featureValuesFear,
     float bleuScoreHope,
     float bleuScoreFear,
+    float modelScoreHope,
+    float modelScoreFear,
     float learning_rate,
     size_t rank,
     size_t epoch) {
@@ -354,7 +362,8 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   ScoreComponentCollection featureValueDiff = featureValuesHope;
   featureValueDiff.MinusEquals(featureValuesFear);
   //  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
-  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+//  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+  float modelScoreDiff = modelScoreHope - modelScoreFear;
   float loss = bleuScoreHope - bleuScoreFear;
   float diff = 0;
   if (loss > (modelScoreDiff + m_margin_slack)) {

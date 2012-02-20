@@ -56,7 +56,8 @@ class MosesDecoder {
                           float bleuObjectiveweight, //weight of bleu in objective
                           float bleuScoreWeight, //weight of bleu in score
                           std::vector< Moses::ScoreComponentCollection>& featureValues,
-                          std::vector< float>& scores,
+                          std::vector< float>& bleuScores,
+                          std::vector< float>& modelScores,
                           bool oracle,
                           bool distinct,
                           size_t rank,

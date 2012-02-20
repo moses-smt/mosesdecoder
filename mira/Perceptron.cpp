@@ -31,6 +31,8 @@ size_t Perceptron::updateWeightsHopeFear(
 		const vector< vector<ScoreComponentCollection> >& featureValuesFear,
 		const vector< vector<float> >& dummy1,
 		const vector< vector<float> >& dummy2,
+		const vector< vector<float> >& dummy3,
+		const vector< vector<float> >& dummy4,
 		float perceptron_learning_rate,
 		size_t rank,
 		size_t epoch)

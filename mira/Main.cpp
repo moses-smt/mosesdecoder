@@ -86,7 +86,7 @@ int main(int argc, char** argv) {
 	bool scaleByTargetLengthTrend;
 	bool scaleByAvgLength;
 	float scaleByX;
-	float slack;
+	float slack, dummy;
 	float slack_step;
 	float slack_min;
 	bool averageWeights;
@@ -127,6 +127,7 @@ int main(int argc, char** argv) {
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
+		("dummy", po::value<float>(&dummy)->default_value(-1), "Dummy variable for slack")
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
@@ -222,6 +223,9 @@ int main(int argc, char** argv) {
     exit(1);
   }
 #endif
+
+  if (dummy != -1)
+    slack = dummy;
 
 	if (mosesConfigFile.empty()) {
 		cerr << "Error: No moses ini file specified" << endl;
@@ -451,14 +455,18 @@ int main(int argc, char** argv) {
 			// feature values for hypotheses i,j (matrix: batchSize x 3*n x featureValues)
 			vector<vector<ScoreComponentCollection> > featureValues;
 			vector<vector<float> > bleuScores;
+			vector<vector<float> > modelScores;
 
 			// variables for hope-fear/perceptron setting
 			vector<vector<ScoreComponentCollection> > featureValuesHope;
 			vector<vector<ScoreComponentCollection> > featureValuesFear;
 			vector<vector<float> > bleuScoresHope;
 			vector<vector<float> > bleuScoresFear;
+			vector<vector<float> > modelScoresHope;
+			vector<vector<float> > modelScoresFear;
 			vector<vector<ScoreComponentCollection> > dummyFeatureValues;
 			vector<vector<float> > dummyBleuScores;
+			vector<vector<float> > dummyModelScores;
 
 			// get moses weights
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
@@ -466,6 +474,7 @@ int main(int argc, char** argv) {
 
 			// BATCHING: produce nbest lists for all input sentences in batch
 			vector<float> oracleBleuScores;
+			vector<float> oracleModelScores;
 			vector<vector<const Word*> > oracles;
 			vector<vector<const Word*> > oneBests;
 			vector<ScoreComponentCollection> oracleFeatureValues;
@@ -482,19 +491,23 @@ int main(int argc, char** argv) {
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
 
 				vector<ScoreComponentCollection> newFeatureValues;
-				vector<float> newBleuScores;
+				vector<float> newScores;
 				if (model_hope_fear) {
 					featureValues.push_back(newFeatureValues);
-					bleuScores.push_back(newBleuScores);
+					bleuScores.push_back(newScores);
+					modelScores.push_back(newScores);
 				}
 				else {
 					featureValuesHope.push_back(newFeatureValues);
 					featureValuesFear.push_back(newFeatureValues);
-					bleuScoresHope.push_back(newBleuScores);
-					bleuScoresFear.push_back(newBleuScores);
+					bleuScoresHope.push_back(newScores);
+					bleuScoresFear.push_back(newScores);
+					modelScoresHope.push_back(newScores);
+					modelScoresFear.push_back(newScores);
 					if (historyOf1best) {
 						dummyFeatureValues.push_back(newFeatureValues);
-						dummyBleuScores.push_back(newBleuScores);
+						dummyBleuScores.push_back(newScores);
+						dummyModelScores.push_back(newScores);
 					}
 				}
 
@@ -504,8 +517,8 @@ int main(int argc, char** argv) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
-							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], true,
-							distinctNbest, rank, epoch);
+							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
+							true, distinctNbest, rank, epoch);
 					size_t current_input_length = decoder->getCurrentInputLength();
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
@@ -527,8 +540,8 @@ int main(int argc, char** argv) {
 						// MODEL (for updating the history only, using dummy vectors)
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
 						bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
-								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], true,
-								distinctNbest, rank, epoch);
+								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
+								true, distinctNbest, rank, epoch);
 						decoder->cleanup();
 						cerr << endl;
 						ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
@@ -541,8 +554,8 @@ int main(int argc, char** argv) {
 					if (!skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 						vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight_fear,
-								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], true,
-								distinctNbest, rank, epoch);
+								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
+								true,	distinctNbest, rank, epoch);
 						decoder->cleanup();
 						ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 						avg_ref_length += ref_length;
@@ -600,8 +613,8 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight_hope,
-							featureValues[batchPosition], bleuScores[batchPosition], true,
-							distinctNbest, rank, epoch);
+							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
+							true,	distinctNbest, rank, epoch);
 					// needed for history
 					inputLengths.push_back(decoder->getCurrentInputLength());
 					ref_ids.push_back(*sid);
@@ -613,12 +626,13 @@ int main(int argc, char** argv) {
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
 					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
+					oracleModelScores.push_back(modelScores[batchPosition][oraclePos]);
 
 					// MODEL
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
 					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
-							featureValues[batchPosition], bleuScores[batchPosition], true,
-							distinctNbest, rank, epoch);
+							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
+							true,	distinctNbest, rank, epoch);
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
@@ -629,8 +643,8 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
 					size_t fearPos = featureValues[batchPosition].size();
 					vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight_fear,
-							featureValues[batchPosition], bleuScores[batchPosition], true,
-							distinctNbest, rank, epoch);
+							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
+							true, distinctNbest, rank, epoch);
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 					float fear_length_ratio = (float)fear.size()/ref_length;
@@ -707,24 +721,25 @@ int main(int argc, char** argv) {
 				if (perceptron_update) {
 					vector<vector<float> > dummy1;
 					update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
-							featureValuesHope, featureValuesFear, dummy1, dummy1, learning_rate, rank, epoch);
+							featureValuesHope, featureValuesFear, dummy1, dummy1, dummy1, dummy1, learning_rate, rank, epoch);
 				}
 				else if (hope_fear) {
 					if (bleuScoresHope[0][0] >= min_oracle_bleu)
 						if (hope_n == 1 && fear_n ==1)
 							update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights, weightUpdate,
 									featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
-									learning_rate, rank, epoch);
+									modelScoresHope[0][0], modelScoresFear[0][0], learning_rate, rank, epoch);
 						else
 							update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
-									featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear, learning_rate, rank, epoch);
+									featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
+									modelScoresHope, modelScoresFear, learning_rate, rank, epoch);
 				  else
 				    update_status = -1;										     
 				}
 				else {
 					// model_hope_fear
 					update_status = ((MiraOptimiser*) optimiser)->updateWeights(mosesWeights, weightUpdate,
-							featureValues, losses, bleuScores, oracleFeatureValues, oracleBleuScores, learning_rate, rank, epoch);
+							featureValues, losses, bleuScores, modelScores, oracleFeatureValues, oracleBleuScores, oracleModelScores, learning_rate, rank, epoch);
 				}
 
 //			sumStillViolatedConstraints += update_status;

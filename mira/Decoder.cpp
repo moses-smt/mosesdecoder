@@ -86,6 +86,7 @@ namespace Mira {
                               float bleuScoreWeight,
                               vector< ScoreComponentCollection>& featureValues,
                               vector< float>& bleuScores,
+                              vector< float>& modelScores,
                               bool oracle,
                               bool distinct,
                               size_t rank,
@@ -125,6 +126,7 @@ namespace Mira {
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
+    	modelScores.push_back(scoreWithoutBleu);
 
     	Phrase bestPhrase = path.GetTargetPhrase();
 

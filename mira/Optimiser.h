@@ -37,6 +37,8 @@ namespace Mira {
 				  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 				  const std::vector<std::vector<float> >& bleuScoresHope,
 				  const std::vector<std::vector<float> >& bleuScoresFear,
+				  const std::vector<std::vector<float> >& modelScoresHope,
+				  const std::vector<std::vector<float> >& modelScoresFear,
 				  float learning_rate,
 				  size_t rank,
 				  size_t epoch) = 0;
@@ -51,6 +53,8 @@ namespace Mira {
 					const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
 					const std::vector<std::vector<float> >& bleuScoresHope,
 					const std::vector<std::vector<float> >& bleuScoresFear,
+					const std::vector<std::vector<float> >& modelScoresHope,
+					const std::vector<std::vector<float> >& modelScoresFear,
 					float learning_rate,
 					size_t rank,
 					size_t epoch);
@@ -75,8 +79,10 @@ namespace Mira {
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
       						  const std::vector<std::vector<float> >& losses,
       						  const std::vector<std::vector<float> >& bleuScores,
+      						  const std::vector<std::vector<float> >& modelScores,
       						  const std::vector< Moses::ScoreComponentCollection>& oracleFeatureValues,
       						  const std::vector< float> oracleBleuScores,
+      						  const std::vector< float> oracleModelScores,
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);
@@ -86,6 +92,8 @@ namespace Mira {
       						  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
       						  const std::vector<std::vector<float> >& bleuScoresHope,
       						  const std::vector<std::vector<float> >& bleuScoresFear,
+      						  const std::vector<std::vector<float> >& modelScoresHope,
+      						  const std::vector<std::vector<float> >& modelScoresFear,
       						  float learning_rate,
       						  size_t rank,
       						  size_t epoch);
@@ -93,8 +101,10 @@ namespace Mira {
     		 Moses::ScoreComponentCollection& weightUpdate,
     		 Moses::ScoreComponentCollection& featureValuesHope,
     		 Moses::ScoreComponentCollection& featureValuesFear,
-    		 float bleuScoresHope,
-    		 float bleuScoresFear,
+    		 float bleuScoreHope,
+    		 float bleuScoreFear,
+    		 float modelScoreHope,
+    		 float modelScoreFear,
     		 float learning_rate,
     		 size_t rank,
     		 size_t epoch);
