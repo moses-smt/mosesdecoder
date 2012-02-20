@@ -108,10 +108,9 @@ int main(int argc, char** argv) {
 	float margin_slack;
 	float margin_slack_incr;
 	bool perceptron_update;
-	bool hope_fear;
-	bool model_hope_fear;
-	int hope_n;
-	int fear_n;
+	bool hope_fear, hope_fear_rank;
+	bool model_hope_fear, rank_only;
+	int hope_n, fear_n, rank_n;
 	int threadcount;
 	size_t adapt_after_epoch;
 	size_t bleu_smoothing_scheme;
@@ -151,6 +150,7 @@ int main(int argc, char** argv) {
 		("history-of-oracles", po::value<bool>(&historyOfOracles)->default_value(false), "Use oracle translations to update the history")
 		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.7), "Adjust the factor for history smoothing")
 		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
+		("hope-fear-rank", po::value<bool>(&hope_fear_rank)->default_value(false), "Use hope and fear translations for optimisation, use model for ranking")
 		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
 		("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
 		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
@@ -161,11 +161,11 @@ int main(int argc, char** argv) {
 		("max-length-dev-hypos", po::value<float>(&max_length_dev_hypos)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and fear translations")
 		("max-length-dev-hope-ref", po::value<float>(&max_length_dev_hope_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and reference translations")
 		("max-length-dev-fear-ref", po::value<float>(&max_length_dev_fear_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between fear and reference translations")
-	        ("min-bleu-ratio", po::value<float>(&minBleuRatio)->default_value(-1), "Set a minimum BLEU ratio between hope and fear")
-	        ("max-bleu-ratio", po::value<float>(&maxBleuRatio)->default_value(-1), "Set a maximum BLEU ratio between hope and fear")
-	        ("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
+		("min-bleu-ratio", po::value<float>(&minBleuRatio)->default_value(-1), "Set a minimum BLEU ratio between hope and fear")
+		("max-bleu-ratio", po::value<float>(&maxBleuRatio)->default_value(-1), "Set a maximum BLEU ratio between hope and fear")
+		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
 		("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
-	        ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(5), "How often per epoch to mix weights, when using mpi")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
@@ -174,6 +174,8 @@ int main(int argc, char** argv) {
 		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
+		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
@@ -184,14 +186,14 @@ int main(int argc, char** argv) {
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
-	        ("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
+		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-	        ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
+		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
 	po::options_description cmdline_options;
@@ -318,7 +320,9 @@ int main(int argc, char** argv) {
 		learning_rate = perceptron_learning_rate;
 		perceptron_update = true;
 		model_hope_fear = false; // mira only
+		rank_only = false; // mira only
 		hope_fear = false; // mira only
+		hope_fear_rank = false; // mira only
 		n = 1;
 		hope_n = 1;
 		fear_n = 1;
@@ -337,11 +341,19 @@ int main(int argc, char** argv) {
 		hope_n = n;
 	if (fear_n == -1)
 		fear_n = n;
+	if (rank_n == -1)
+		rank_n = n;
 
 	if (model_hope_fear && hope_fear) {
 		hope_fear = false; // is true by default
 	}
-	if (learner == "mira" && !(hope_fear || model_hope_fear)) {
+	if (rank_only && hope_fear) {
+		hope_fear = false; // is true by default
+	}
+	if (hope_fear_rank && hope_fear) {
+		hope_fear = false; // is true by default
+	}
+	if (learner == "mira" && !(hope_fear || model_hope_fear || rank_only || hope_fear_rank)) {
 		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
@@ -492,12 +504,12 @@ int main(int argc, char** argv) {
 
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newScores;
-				if (model_hope_fear) {
+				if (model_hope_fear || rank_only || hope_fear_rank) {
 					featureValues.push_back(newFeatureValues);
 					bleuScores.push_back(newScores);
 					modelScores.push_back(newScores);
 				}
-				else {
+				if (hope_fear || hope_fear_rank || perceptron_update) {
 					featureValuesHope.push_back(newFeatureValues);
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newScores);
@@ -513,7 +525,7 @@ int main(int argc, char** argv) {
 
 				size_t ref_length;
 				float avg_ref_length;
-				if (hope_fear || perceptron_update) {
+				if (hope_fear || hope_fear_rank || perceptron_update) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
@@ -608,7 +620,21 @@ int main(int argc, char** argv) {
 						examples_in_batch++;
 					}
 				}
-				else {
+				if (rank_only || hope_fear_rank) {
+					// MODEL
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
+					vector<const Word*> bestModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuScoreWeight,
+							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
+							true,	distinctNbest, rank, epoch);
+					decoder->cleanup();
+					oneBests.push_back(bestModel);
+					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
+					float model_length_ratio = (float)bestModel.size()/ref_length;
+					cerr << ", l-ratio model: " << model_length_ratio << endl;
+
+					examples_in_batch++;
+				}
+				if (model_hope_fear) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
@@ -698,7 +724,7 @@ int main(int argc, char** argv) {
 				// print out the feature values
 				if (print_feature_values) {
 					cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
-					if (model_hope_fear) printFeatureValues(featureValues);
+					if (model_hope_fear || rank_only) printFeatureValues(featureValues);
 					else {
 						cerr << "hope: " << endl;
 						printFeatureValues(featureValuesHope);
@@ -735,6 +761,17 @@ int main(int argc, char** argv) {
 									modelScoresHope, modelScoresFear, learning_rate, rank, epoch);
 				  else
 				    update_status = -1;										     
+				}
+				else if (rank_only) {
+					// learning ranking of model translations
+					update_status = ((MiraOptimiser*) optimiser)->updateWeightsRankModel(mosesWeights, weightUpdate,
+							featureValues, bleuScores, modelScores, learning_rate, rank, epoch);
+				}
+				else if (hope_fear_rank) {
+					// hope-fear + learning ranking of model translations
+					update_status = ((MiraOptimiser*) optimiser)->updateWeightsHopeFearAndRankModel(mosesWeights, weightUpdate,
+							featureValuesHope, featureValuesFear, featureValues, bleuScoresHope, bleuScoresFear, bleuScores,
+							modelScoresHope, modelScoresFear, modelScores, learning_rate, rank, epoch);
 				}
 				else {
 					// model_hope_fear

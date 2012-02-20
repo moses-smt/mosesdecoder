@@ -108,6 +108,29 @@ namespace Mira {
     		 float learning_rate,
     		 size_t rank,
     		 size_t epoch);
+     size_t updateWeightsRankModel(Moses::ScoreComponentCollection& currWeights,
+    		 Moses::ScoreComponentCollection& weightUpdate,
+    		 const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
+    		 const std::vector<std::vector<float> >& bleuScores,
+    		 const std::vector<std::vector<float> >& modelScores,
+    		 float learning_rate,
+    		 size_t rank,
+    		 size_t epoch);
+     size_t updateWeightsHopeFearAndRankModel(
+     		Moses::ScoreComponentCollection& currWeights,
+     		Moses::ScoreComponentCollection& weightUpdate,
+     		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
+     		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
+     		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
+     		const std::vector<std::vector<float> >& bleuScoresHope,
+     		const std::vector<std::vector<float> >& bleuScoresFear,
+     		const std::vector<std::vector<float> >& bleuScores,
+     		const std::vector<std::vector<float> >& modelScoresHope,
+     		const std::vector<std::vector<float> >& modelScoresFear,
+     		const std::vector<std::vector<float> >& modelScores,
+     		float learning_rate,
+     		size_t rank,
+     		size_t epoch);
 
      void setSlack(float slack) {
     	 m_slack = slack;
