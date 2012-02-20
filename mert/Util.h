@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef UTIL_H
-#define UTIL_H
+#ifndef MERT_UTIL_H_
+#define MERT_UTIL_H_
 
 #include <cstdlib>
 #include <stdexcept>
@@ -100,4 +100,4 @@ void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
-#endif  // UTIL_H
+#endif  // MERT_UTIL_H_

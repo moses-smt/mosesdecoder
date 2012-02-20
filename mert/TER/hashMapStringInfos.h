@@ -1,8 +1,8 @@
 /*
  * Generic hashmap manipulation functions
  */
-#ifndef __HASHMAPSTRINGINFOS_H__
-#define __HASHMAPSTRINGINFOS_H__
+#ifndef MERT_TER_HASHMAP_STRING_INFOS_H_
+#define MERT_TER_HASHMAP_STRING_INFOS_H_
 
 #include "stringInfosHasher.h"
 #include <vector>
@@ -39,4 +39,4 @@ public:
 
 }
 
-#endif  // __HASHMAPSTRINGINFOS_H__
+#endif  // MERT_TER_HASHMAP_STRING_INFOS_H_

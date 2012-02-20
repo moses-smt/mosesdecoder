@@ -1,5 +1,5 @@
-#ifndef POINT_H
-#define POINT_H
+#ifndef MERT_POINT_H_
+#define MERT_POINT_H_
 
 #include <fstream>
 #include <map>
@@ -100,4 +100,4 @@ public:
   void SetScore(statscore_t score) { score_ = score; }
 };
 
-#endif  // POINT_H
+#endif  // MERT_POINT_H

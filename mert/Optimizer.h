@@ -1,5 +1,5 @@
-#ifndef OPTIMIZER_H
-#define OPTIMIZER_H
+#ifndef MERT_OPTIMIZER_H_
+#define MERT_OPTIMIZER_H_
 
 #include <vector>
 #include <string>

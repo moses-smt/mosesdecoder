@@ -1,5 +1,5 @@
-#ifndef TIMER_H
-#define TIMER_H
+#ifndef MERT_TIMER_H_
+#define MERT_TIMER_H_
 
 #include <ctime>
 #include <iostream>
@@ -64,4 +64,4 @@ inline std::ostream& operator<<(std::ostream& os, Timer& t)
   return os;
 }
 
-#endif  // TIMER_H
+#endif  // MERT_TIMER_H_

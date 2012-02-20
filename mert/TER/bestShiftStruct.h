@@ -1,12 +1,13 @@
-#ifndef __TERCPPALIGNMENTSTRUCT_H__
-#define __TERCPPALIGNMENTSTRUCT_H__
-
+#ifndef MERT_TER_BEST_SHIFT_STRUCT_H_
+#define MERT_TER_BEST_SHIFT_STRUCT_H_
 
 #include <vector>
 #include <stdio.h>
 #include <string>
 #include <sstream>
 #include "tools.h"
+#include "terShift.h"
+#include "terAlignment.h"
 
 
 using namespace std;
@@ -14,7 +15,7 @@ using namespace Tools;
 
 namespace TERCpp
 {
-class alignmentStruct
+class bestShiftStruct
 {
 private:
 public:
@@ -33,15 +34,17 @@ public:
 //   int end;
 //   int moveto;
 //   int newloc;
-  vector<string> nwords; // The words we shifted
-  vector<char> alignment ; // for pra_more output
-  vector<vecInt> aftershift; // for pra_more output
+  terShift m_best_shift;
+  terAlignment m_best_align;
+  bool m_empty;
+//   vector<string> nwords; // The words we shifted
+//   char* alignment ; // for pra_more output
+//   vector<vecInt> aftershift; // for pra_more output
   // This is used to store the cost of a shift, so we don't have to
   // calculate it multiple times.
-  double cost;
-  string toString();
+//   double cost;
 };
 
 }
 
-#endif  // __TERCPPALIGNMENTSTRUCT_H__
+#endif  // MERT_TER_BEST_SHIFT_STRUCT_H_

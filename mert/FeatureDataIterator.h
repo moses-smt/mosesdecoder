@@ -17,8 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef _FEATURE_DATA_ITERATOR_
-#define _FEATURE_DATA_ITERATOR_
+#ifndef MERT_FEATURE_DATA_ITERATOR_H_
+#define MERT_FEATURE_DATA_ITERATOR_H_
 
 /**
   * For loading from the feature data file.
@@ -88,4 +88,4 @@ class FeatureDataIterator :
     std::vector<FeatureDataItem> m_next;
 };
 
-#endif
+#endif  // MERT_FEATURE_DATA_ITERATOR_H_

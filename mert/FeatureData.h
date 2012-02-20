@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef FEATURE_DATA_H
-#define FEATURE_DATA_H
+#ifndef MERT_FEATURE_DATA_H_
+#define MERT_FEATURE_DATA_H_
 
 using namespace std;
 
@@ -141,4 +141,4 @@ public:
   std::string ToString() const;
 };
 
-#endif  // FEATURE_DATA_H
+#endif  // MERT_FEATURE_DATA_H_

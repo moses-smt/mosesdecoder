@@ -1,5 +1,5 @@
-#ifndef __CDERSCORER_H__
-#define __CDERSCORER_H__
+#ifndef MERT_CDER_SCORER_H_
+#define MERT_CDER_SCORER_H_
 
 #include <algorithm>
 #include <iostream>
@@ -39,4 +39,4 @@ private:
   CderScorer& operator=(const CderScorer&);
 };
 
-#endif  // __CDERSCORER_H__
+#endif  // MERT_CDER_SCORER_H_

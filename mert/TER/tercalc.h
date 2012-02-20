@@ -1,5 +1,5 @@
-#ifndef _TERCPPTERCALC_H___
-#define _TERCPPTERCALC_H___
+#ifndef MERT_TER_TER_CALC_H_
+#define MERT_TER_TER_CALC_H_
 
 #include <vector>
 #include <stdio.h>
@@ -79,4 +79,4 @@ public:
 
 }
 
-#endif  // _TERCPPTERCALC_H___
+#endif  // MERT_TER_TER_CALC_H_

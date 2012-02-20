@@ -6,8 +6,8 @@
  *
  */
 
-#ifndef SCORE_ARRAY_H
-#define SCORE_ARRAY_H
+#ifndef MERT_SCORE_ARRAY_H_
+#define MERT_SCORE_ARRAY_H_
 
 using namespace std;
 
@@ -108,4 +108,4 @@ public:
   bool check_consistency() const;
 };
 
-#endif  // SCORE_ARRAY_H
+#endif  // MERT_SCORE_ARRAY_H_
