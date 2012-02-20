@@ -5,11 +5,11 @@
 #define BOOST_TEST_MODULE MertData
 #include <boost/test/unit_test.hpp>
 
-
+#include <boost/scoped_ptr.hpp>
 
 //very basic test of sharding
 BOOST_AUTO_TEST_CASE(shard_basic) {
-  Scorer* scorer = ScorerFactory::getScorer("BLEU", "");
+  boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
   Data data(*scorer);
   FeatureArray fa1, fa2, fa3, fa4;
   ScoreArray sa1, sa2, sa3, sa4;
