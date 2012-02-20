@@ -123,8 +123,10 @@ int main(int argc, char** argv) {
 	bool delayUpdates;
 	float min_oracle_bleu;
 	float minBleuRatio, maxBleuRatio;
+	bool boost;
 	po::options_description desc("Allowed options");
 	desc.add_options()
+		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
@@ -132,8 +134,9 @@ int main(int argc, char** argv) {
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
 		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-	        ("bleu-score-weight-fear", po::value<float>(&bleuScoreWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+	  ("bleu-score-weight-fear", po::value<float>(&bleuScoreWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
+		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
@@ -182,7 +185,6 @@ int main(int argc, char** argv) {
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
 	        ("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
@@ -301,7 +303,7 @@ int main(int argc, char** argv) {
 			cerr << "Optimising using Mira" << endl;
 			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
 		}
-		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, margin_slack);
+		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, margin_slack, boost);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {
@@ -326,10 +328,12 @@ int main(int argc, char** argv) {
 		batchSize = 1;
 		cerr << "Info: Setting batch size to 1 for perceptron update" << endl;
 	}
-	if (hope_n == -1 && fear_n == -1) {
+
+	if (hope_n == -1)
 		hope_n = n;
+	if (fear_n == -1)
 		fear_n = n;
-	}
+
 	if (model_hope_fear && hope_fear) {
 		hope_fear = false; // is true by default
 	}

@@ -178,6 +178,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 	// vector of feature values differences for all created constraints
 	vector<ScoreComponentCollection> featureValueDiffs;
 	vector<float> lossMinusModelScoreDiffs;
+	vector<float> modelScoreDiffs;
 	vector<float> all_losses;
 
 	// most violated constraint in batch
@@ -237,6 +238,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 				if (addConstraint) {
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
+					modelScoreDiffs.push_back(modelScoreDiff);
 					all_losses.push_back(loss);
 
 					if (violated) {
@@ -265,11 +267,22 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
 	  	float alpha = alphas[k];
 	  	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
-	  	ScoreComponentCollection update(featureValueDiffs[k]);
-	    update.MultiplyEquals(alpha);
+	  	if (alpha != 0) {
+	  		// apply boosting factor
+	  		if (m_boost && modelScoreDiffs[k] <= 0) {
+	  			// factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
+	  			float factor = min(1.5, log2(bleuScoresHope[0][0]));
+	  			factor = min(3.0f, factor);
+	  			alpha = alpha * factor;
+	  			cerr << "Rank " << rank << ", epoch " << epoch << ", apply boosting factor " << factor << " to update." << endl;
+	  		}
 
-	    // sum updates
-	    summedUpdate.PlusEquals(update);
+	  		ScoreComponentCollection update(featureValueDiffs[k]);
+	  		update.MultiplyEquals(alpha);
+
+	  		// sum updates
+	  		summedUpdate.PlusEquals(update);
+	  	}
 	  }
 	}
 	else {
@@ -374,9 +387,17 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     	// apply learning rate
     	if (learning_rate != 1)
      		alpha = alpha * learning_rate;
-
     	cerr << "Rank " << rank << ", epoch " << epoch << ", clipped alpha: " << alpha << endl;
-//    	cerr << "Rank " << rank << ", epoch " << epoch << ", feature diff: " << featureValueDiff << endl;
+
+    	// apply boosting factor
+    	if (m_boost && modelScoreDiff <= 0) {
+    		// factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
+    		float factor = min(1.5, log2(bleuScoreHope));
+    		factor = min(3.0f, factor);
+    		alpha = alpha * factor;
+    		cerr << "Rank " << rank << ", epoch " << epoch << ", boosted alpha: " << alpha << endl;
+    	}
+
     	featureValueDiff.MultiplyEquals(alpha);
     	weightUpdate.PlusEquals(featureValueDiff);
 //    	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
@@ -407,10 +428,14 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     newDistanceFromOptimum += (loss - modelScoreDiff);
   }
 
-  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, constraint violated before? " << constraintViolatedBefore << ", after? " << constraintViolatedAfter << endl);
-  VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
-*/
+  float hopeScore = featureValuesHope.InnerProduct(newWeights);
+  float fearScore = featureValuesFear.InnerProduct(newWeights);
+  cerr << "New hope score: " << hopeScore << endl;
+  cerr << "New fear score: " << fearScore << endl;
 
+  VERBOSE(0, "Rank " << rank << ", epoch " << epoch << ", check, constraint violated before? " << constraintViolatedBefore << ", after? " << constraintViolatedAfter << endl);
+  VERBOSE(0, "Rank " << rank << ", epoch " << epoch << ", check, error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
+*/
   return 0;
 }
 

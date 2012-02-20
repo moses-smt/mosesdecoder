@@ -61,13 +61,14 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, size_t scale_update, float margin_slack) :
+	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, size_t scale_update, float margin_slack, bool boost) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
 		  m_scale_update(scale_update),
-		  m_margin_slack(margin_slack) { }
+		  m_margin_slack(margin_slack),
+		  m_boost(boost) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
 	  								Moses::ScoreComponentCollection& weightUpdate,
@@ -121,6 +122,9 @@ namespace Mira {
 
       // scale update with log 10 of oracle BLEU score
       size_t m_scale_update;
+
+      // boosting of updates on misranked candidates
+      bool m_boost;
   };
 }
 
