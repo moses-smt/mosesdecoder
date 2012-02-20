@@ -14,9 +14,11 @@ public:
           _buff+sizeof(int),     // read position
           _buff+sizeof(int));    // end position
   }
-  ~gzfilebuf() {
+
+  virtual ~gzfilebuf() {
     gzclose(_gzf);
   }
+
 protected:
   virtual int_type overflow (int_type c) {
     throw;
