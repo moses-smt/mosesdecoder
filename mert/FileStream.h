@@ -13,7 +13,8 @@ protected:
 
 public:
   explicit inputfilestream(const std::string &filePath);
-  ~inputfilestream();
+  virtual ~inputfilestream();
+
   bool good() const { return is_good; }
   void close();
 };
@@ -26,7 +27,8 @@ protected:
 
 public:
   explicit outputfilestream(const std::string &filePath);
-  ~outputfilestream();
+  virtual ~outputfilestream();
+
   bool good() const { return is_good; }
   void close();
 };
