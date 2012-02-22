@@ -448,7 +448,7 @@ sub input_annotation {
   while(<INPUT>) {
     chop;
     s/\|\S+//g; # remove additional factors
-    s/<[^>]+>//g; # remove xml markup
+    s/<\S[^>]*>//g; # remove xml markup
     s/\s+/ /g; s/^ //; s/ $//; # remove redundant spaces
     print OUT $_."\t";
     my @WORD = split;
