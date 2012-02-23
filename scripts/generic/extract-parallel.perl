@@ -35,12 +35,15 @@ my $linesPerSplit = int($totalLines / $numParallel) + 1;
 print "total=$totalLines line-per-split=$linesPerSplit \n";
 
 my $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 # run extract
@@ -55,7 +58,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
     $isParent = 0;
     my $numStr = NumStr($i);
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs \n";
-    print $cmd;
+    print STDERR $cmd;
     `$cmd`;
 
     exit();
@@ -95,9 +98,9 @@ if ($numParallel > 1)
   $extractCmd .= "> $extract \n";
   $extractInvCmd .= "> $extract.inv \n";
   $extractOrderingCmd .= "> $extract.o \n";
-  print $extractCmd;
-  print $extractInvCmd;
-  print $extractOrderingCmd;
+  print STDERR $extractCmd;
+  print STDERR $extractInvCmd;
+  print STDERR $extractOrderingCmd;
   `$extractCmd`;
   `$extractInvCmd`;
 
@@ -122,10 +125,10 @@ else
 
 
 $cmd = "rm -rf $TMPDIR \n";
-print $cmd;
+print STDERR $cmd;
 `$cmd`;
 
-print "Finished ".localtime() ."\n";
+print STDERR "Finished ".localtime() ."\n";
 
 
 sub NumStr($)
