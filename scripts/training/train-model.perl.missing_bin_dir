@@ -40,7 +40,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/azouzi/SMT-Engine/Tools/Giza";
+my $BINDIR="/Users/hieuhoang/workspace/bin";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -209,10 +209,28 @@ if(!defined $_MGIZA ){
 my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
+
+# parallel extract
+my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+if($SPLIT_EXEC) {
+  $SPLIT_EXEC = 'gsplit';
+}
+else {
+  $SPLIT_EXEC = 'split';
+}
+
+my $SORT_EXEC = `gsort --help 2>/dev/null`; 
+if($SORT_EXEC) {
+  $SORT_EXEC = 'gsort';
+}
+else {
+  $SORT_EXEC = 'sort';
+}
+
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
 if ($___NOFORK == 0)
 {
-  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 split sort $PHRASE_EXTRACT";
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $PHRASE_EXTRACT";
 }
 
 my $RULE_EXTRACT;
@@ -224,7 +242,7 @@ else {
 }
 if ($___NOFORK == 0)
 {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 split sort $RULE_EXTRACT";
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $RULE_EXTRACT";
 }
 
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
