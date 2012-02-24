@@ -1,6 +1,6 @@
 /*
  *  ScoreData.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
@@ -106,7 +106,10 @@ void ScoreData::add(const ScoreStats& e, const std::string& sent_idx)
     a.NumberOfScores(number_of_scores);
     a.add(e);
     a.setIndex(sent_idx);
-    add(a);
+    size_t idx = array_.size();
+    array_.push_back(a);
+    idx2arrayname_[idx] = sent_idx;
+    arrayname2idx_[sent_idx]=idx;
     //          TRACE_ERR("size: " << size() << " -> " << a.size() << std::endl);
   }
 }

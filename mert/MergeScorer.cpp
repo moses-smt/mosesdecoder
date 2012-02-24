@@ -8,8 +8,8 @@
 #include "PerScorer.h"
 #include "CderScorer.h"
 
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
+#include "TER/tercalc.h"
+#include "TER/terAlignment.h"
 
 using namespace TERCpp;
 

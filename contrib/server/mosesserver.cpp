@@ -12,9 +12,7 @@
 #include "PhraseDictionaryDynSuffixArray.h"
 #include "TranslationSystem.h"
 #include "LMList.h"
-#ifdef LM_ORLM
-#  include "LanguageModelORLM.h"
-#endif
+#include "LM/ORLM.h"
 
 using namespace Moses;
 using namespace std;
@@ -67,20 +65,12 @@ public:
   string source_, target_, alignment_;
   bool bounded_, add2ORLM_;
   void updateORLM() {
-#ifdef LM_ORLM
+    // TODO(level101): this belongs in the language model, not in moseserver.cpp
     vector<string> vl;
     map<vector<string>, int> ngSet;
     LMList lms = StaticData::Instance().GetLMList(); // get LM
     LMList::const_iterator lmIter = lms.begin();
-    const LanguageModel* lm = *lmIter; 
-    /* currently assumes a single LM that is a ORLM */
-#ifdef WITH_THREADS
-    boost::shared_ptr<LanguageModelORLM> orlm; 
-    orlm = boost::dynamic_pointer_cast<LanguageModelORLM>(lm->GetLMImplementation()); 
-#else 
-    LanguageModelORLM* orlm; 
-    orlm = (LanguageModelORLM*)lm->GetLMImplementation(); 
-#endif
+    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(static_cast<LMRefCount*>(*lmIter)->MosesServerCppShouldNotHaveLMCode());
     if(orlm == 0) {
       cerr << "WARNING: Unable to add target sentence to ORLM\n";
       return;
@@ -113,7 +103,6 @@ public:
           orlm->UpdateORLM(it->first, it->second);
       }
     }
-#endif
   }
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");

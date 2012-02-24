@@ -30,6 +30,8 @@
 #--prefix=/path/to/prefix sets the install prefix [dist].
 #--bindir=/path/to/prefix/bin sets the bin directory [PREFIX/bin]
 #--libdir=/path/to/prefix/lib sets the lib directory [PREFIX/lib]
+#--includedir=/path/to/prefix/include installs headers.  
+#  Does not install if missing.  No argument defaults to PREFIX/include .
 #--install-scripts=/path/to/scripts copies scripts into a directory.
 #--git appends the git revision to the prefix directory.
 #
@@ -213,3 +215,9 @@ bindir = [ option.get "bindir" : $(prefix)/bin ] ;
 libdir = [ option.get "libdir" : $(prefix)/lib ] ;
 install prefix-bin : programs : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
 install prefix-lib : programs : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
+
+includedir = [ option.get "includedir" : : $(prefix)/include ] ;
+if $(includedir) {
+  install prefix-header : [ glob-tree *.h *.hh : jam-files dist kenlm moses ] : <location>$(includedir) <install-source-root>. ;
+  install prefix-moses-header : moses/src//headers-to-install : <location>$(includedir) <install-source-root>moses/src ;
+}

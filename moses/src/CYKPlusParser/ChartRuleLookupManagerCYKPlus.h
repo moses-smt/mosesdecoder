@@ -29,6 +29,7 @@ namespace Moses
 
 class DottedRule;
 class TargetPhraseCollection;
+class WordsRange;
 
 class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
 {
@@ -41,8 +42,7 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
   void AddCompletedRule(
     const DottedRule &dottedRule,
     const TargetPhraseCollection &tpc,
-    size_t ruleLimit,
-    bool adhereTableLimit,
+    const WordsRange &range,
     ChartTranslationOptionList &outColl);
 
   StackVec m_stackVec;

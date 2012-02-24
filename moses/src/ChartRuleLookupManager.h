@@ -54,7 +54,6 @@ public:
 
   virtual void GetChartRuleCollection(
     const WordsRange &range,
-    bool adhereTableLimit,
     ChartTranslationOptionList &outColl) = 0;
 
 private:

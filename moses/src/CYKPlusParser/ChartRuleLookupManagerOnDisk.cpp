@@ -81,12 +81,8 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
-  bool adhereTableLimit,
   ChartTranslationOptionList &outColl)
 {
-  const StaticData &staticData = StaticData::Instance();
-  size_t rulesLimit = staticData.GetRuleLimit();
-
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 
@@ -261,7 +257,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
           CHECK(targetPhraseCollection);
           if (!targetPhraseCollection->IsEmpty()) {
             AddCompletedRule(prevDottedRule, *targetPhraseCollection,
-                             rulesLimit, adhereTableLimit, outColl);
+                             range, outColl);
           }
 
         } // if (node)
@@ -272,7 +268,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
     }
   } // for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
 
-  outColl.CreateChartRules(rulesLimit);
+  outColl.ShrinkToLimit();
 
   //cerr << numDerivations << " ";
 }

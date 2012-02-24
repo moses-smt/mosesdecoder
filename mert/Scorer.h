@@ -1,5 +1,5 @@
-#ifndef __SCORER_H__
-#define __SCORER_H__
+#ifndef MERT_SCORER_H_
+#define MERT_SCORER_H_
 
 #include <iostream>
 #include <sstream>
@@ -171,4 +171,4 @@ class StatisticsBasedScorer : public Scorer
   size_t  m_regularization_window;
 };
 
-#endif // __SCORER_H__
+#endif // MERT_SCORER_H_

@@ -1,5 +1,5 @@
-#ifndef FILESTREAM_H_
-#define FILESTREAM_H_
+#ifndef MERT_FILE_STREAM_H_
+#define MERT_FILE_STREAM_H_
 
 #include <fstream>
 #include <streambuf>
@@ -13,7 +13,8 @@ protected:
 
 public:
   explicit inputfilestream(const std::string &filePath);
-  ~inputfilestream();
+  virtual ~inputfilestream();
+
   bool good() const { return is_good; }
   void close();
 };
@@ -26,9 +27,10 @@ protected:
 
 public:
   explicit outputfilestream(const std::string &filePath);
-  ~outputfilestream();
+  virtual ~outputfilestream();
+
   bool good() const { return is_good; }
   void close();
 };
 
-#endif // FILESTREAM_H_
+#endif // MERT_FILE_STREAM_H_

@@ -1,5 +1,5 @@
-#ifndef MERT_GZFILEBUF_H_
-#define MERT_GZFILEBUF_H_
+#ifndef moses_gzfile_buf_h
+#define moses_gzfile_buf_h
 
 #include <streambuf>
 #include <zlib.h>
@@ -8,17 +8,15 @@
 class gzfilebuf : public std::streambuf
 {
 public:
-  explicit gzfilebuf(const char *filename) {
+  gzfilebuf(const char *filename) {
     _gzf = gzopen(filename, "rb");
     setg (_buff+sizeof(int),     // beginning of putback area
           _buff+sizeof(int),     // read position
           _buff+sizeof(int));    // end position
   }
-
-  virtual ~gzfilebuf() {
+  ~gzfilebuf() {
     gzclose(_gzf);
   }
-
 protected:
   virtual int_type overflow (int_type c) {
     throw;
@@ -35,7 +33,7 @@ protected:
     throw;
   }
 
-  // read one character
+  //read one character
   virtual int_type underflow () {
     // is read position before end of _buff?
     if (gptr() < egptr()) {
@@ -84,4 +82,4 @@ private:
   char _buff[_buffsize];
 };
 
-#endif  // MERT_GZFILEBUF_H_
+#endif

@@ -37,13 +37,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_RAND
 #  include "LM/Rand.h"
 #endif
-#ifdef LM_ORLM
-#  include "LM/ORLM.h"
-#endif
+
+#include "LM/ORLM.h"
+
 #ifdef LM_REMOTE
 #	include "LM/Remote.h"
 #endif
+
 #include "LM/Ken.h"
+
 #ifdef LM_DMAP
 #   include "LM/DMapLM.h"
 #endif
@@ -77,9 +79,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
 #endif
     break;
   case ORLM:
-#ifdef LM_ORLM
     lm = new LanguageModelORLM();
-#endif
     break;
   case Remote:
 #ifdef LM_REMOTE

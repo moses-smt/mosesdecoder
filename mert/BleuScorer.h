@@ -1,5 +1,5 @@
-#ifndef __BLEUSCORER_H__
-#define __BLEUSCORER_H__
+#ifndef MERT_BLEU_SCORER_H_
+#define MERT_BLEU_SCORER_H_
 
 #include <iostream>
 #include <string>
@@ -80,4 +80,4 @@ private:
   BleuScorer& operator=(const BleuScorer&);
 };
 
-#endif  // __BLEUSCORER_H__
+#endif  // MERT_BLEU_SCORER_H_

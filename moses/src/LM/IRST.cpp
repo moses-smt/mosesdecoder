@@ -50,7 +50,7 @@ LanguageModelIRST::~LanguageModelIRST()
 
 #ifndef WIN32
   TRACE_ERR( "reset mmap\n");
-  m_lmtb->reset_mmap();
+  if (m_lmtb) m_lmtb->reset_mmap();
 #endif
 
   delete m_lmtb;
@@ -64,9 +64,10 @@ bool LanguageModelIRST::Load(const std::string &filePath,
   cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
 
   const StaticData &staticData = StaticData::Instance();
-  if (staticData.ThreadCount() != 1)
+  int threadCount = staticData.ThreadCount();
+  if (threadCount != 1)
   {
-    UserMessage::Add("IRST LM not-threadsafe");
+    UserMessage::Add(threadCount + " number of threads specified but IRST LM is not threadsafe.");
     return false;
   }
 

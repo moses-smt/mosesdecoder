@@ -1,13 +1,13 @@
 /*
  *  FeatureData.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef FEATURE_DATA_H
-#define FEATURE_DATA_H
+#ifndef MERT_FEATURE_DATA_H_
+#define MERT_FEATURE_DATA_H_
 
 using namespace std;
 
@@ -136,6 +136,9 @@ public:
   }
 
   void setFeatureMap(const std::string& feat);
+
+  /* For debugging */
+  std::string ToString() const;
 };
 
-#endif  // FEATURE_DATA_H
+#endif  // MERT_FEATURE_DATA_H_

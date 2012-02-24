@@ -1,5 +1,5 @@
-#ifndef __INFOSHASHER_H__
-#define __INFOSHASHER_H__
+#ifndef MERT_TER_INFO_SHASHER_H_
+#define MERT_TER_INFO_SHASHER_H_
 
 #include <string>
 #include <stdio.h>
@@ -28,4 +28,4 @@ public:
 
 }
 
-#endif  // __INFOSHASHER_H__
+#endif  // MERT_TER_INFO_SHASHER_H_

@@ -1,6 +1,8 @@
+// $Id: InputFileStream.h 2939 2010-02-24 11:15:44Z jfouet $
+
 /***********************************************************************
  Moses - factored phrase-based language decoder
- Copyright (C) 2010 Hieu Hoang
+ Copyright (C) 2006 University of Edinburgh
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,28 +19,31 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "ChartTranslationOption.h"
+#ifndef moses_InputFileStream_h
+#define moses_InputFileStream_h
 
-#include "ChartHypothesis.h"
+#include <cstdlib>
+#include <fstream>
+#include <string>
 
 namespace Moses
 {
 
-float ChartTranslationOption::CalcEstimateOfBestScore(
-    const TargetPhraseCollection &tpc,
-    const StackVec &stackVec)
+/** Used in place of std::istream, can read zipped files if it ends in .gz
+ */
+class InputFileStream : public std::istream
 {
-  const TargetPhrase &targetPhrase = **(tpc.begin());
-  float estimateOfBestScore = targetPhrase.GetFutureScore();
-  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
-       ++p) {
-    const HypoList *stack = *p;
-    assert(stack);
-    assert(!stack->empty());
-    const ChartHypothesis &bestHypo = **(stack->begin());
-    estimateOfBestScore += bestHypo.GetTotalScore();
-  }
-  return estimateOfBestScore;
-}
+protected:
+  std::streambuf *m_streambuf;
+public:
+
+  InputFileStream(const std::string &filePath);
+  ~InputFileStream();
+
+  void Open(const std::string &filePath);
+  void Close();
+};
 
 }
+
+#endif

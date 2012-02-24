@@ -1,13 +1,13 @@
 /*
  *  ScoreData.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef SCORE_DATA_H
-#define SCORE_DATA_H
+#ifndef MERT_SCORE_DATA_H_
+#define MERT_SCORE_DATA_H_
 
 #include <fstream>
 #include <vector>
@@ -114,4 +114,4 @@ public:
   }
 };
 
-#endif  // SCORE_DATA_H
+#endif  // MERT_SCORE_DATA_H_

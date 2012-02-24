@@ -358,19 +358,31 @@ int main(int argc, char **argv)
   if (option.to_optimize_str.length() > 0) {
     cerr << "Weights to optimize: " << option.to_optimize_str << endl;
 
-    // Parse string to get weights to optimize, and set them as active
-    string substring;
-    int index;
-    while (!option.to_optimize_str.empty()) {
-      getNextPound(option.to_optimize_str, substring, ",");
-      index = data.getFeatureIndex(substring);
-      cerr << "FeatNameIndex:" << index << " to insert" << endl;
-      //index = strtol(substring.c_str(), NULL, 10);
-      if (index >= 0 && index < option.pdim) {
-        to_optimize.push_back(index);
-      } else {
-        cerr << "Index " << index << " is out of bounds. Allowed indexes are [0," << option.pdim - 1 << "]." << endl;
+    // Parse the string to get weights to optimize, and set them as active.
+    vector<string> features;
+    Tokenize(option.to_optimize_str.c_str(), ',', &features);
+
+    if (option.pdim != static_cast<int>(features.size())) {
+      cerr << "Error: pdim and the specified number of features are not equal: "
+           << "pdim = " << option.pdim
+           << ", the number of features = " << features.size() << endl;
+      exit(1);
+    }
+
+    for (vector<string>::const_iterator it = features.begin();
+         it != features.end(); ++it) {
+      const int feature_index = data.getFeatureIndex(*it);
+
+      // Note: previous implementaion checked whether
+      // feature_index is less than option.pdim.
+      // However, it does not make sense when we optimize 'discrete' features,
+      // given by '-o' option like -o "d_0,lm_0,tm_2,tm_3,tm_4,w_0".
+      if (feature_index < 0) {
+        cerr << "Error: invalid feature index = " << feature_index << endl;
+        exit(1);
       }
+      cerr << "FeatNameIndex: " << feature_index << " to insert" << endl;
+      to_optimize.push_back(feature_index);
     }
   } else {
     //set all weights as active

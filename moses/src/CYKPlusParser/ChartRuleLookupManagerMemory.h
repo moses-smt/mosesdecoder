@@ -53,7 +53,6 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 
   virtual void GetChartRuleCollection(
     const WordsRange &range,
-    bool adhereTableLimit,
     ChartTranslationOptionList &outColl);
 
  private:

@@ -1,13 +1,13 @@
 /*
  *  ScoreStats.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef SCORE_STATS_H
-#define SCORE_STATS_H
+#ifndef MERT_SCORE_STATS_H_
+#define MERT_SCORE_STATS_H_
 
 #include <vector>
 #include <iostream>
@@ -101,7 +101,7 @@ public:
 };
 
 //ADDED_BY_TS
-bool operator==(const ScoreStats& s1, const ScoreStats& s2); 
+bool operator==(const ScoreStats& s1, const ScoreStats& s2);
 //END_ADDED
 
-#endif  // SCORE_STATS_H
+#endif  // MERT_SCORE_STATS_H_
