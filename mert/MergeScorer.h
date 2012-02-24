@@ -1,5 +1,5 @@
-#ifndef __MERGESCORER_H__
-#define __MERGESCORER_H__
+#ifndef MERT_MERGE_SCORER_H_
+#define MERT_MERGE_SCORER_H_
 
 #include <iostream>
 #include <set>
@@ -40,4 +40,4 @@ protected:
   MergeScorer& operator=(const MergeScorer&);
 };
 
-#endif  //__TERSCORER_H
+#endif  // MERT_MERGE_SCORER_H_

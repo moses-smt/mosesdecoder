@@ -5,8 +5,8 @@
 #include <stdexcept>
 
 #include "ScoreStats.h"
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
+#include "TER/tercalc.h"
+#include "TER/terAlignment.h"
 #include "Util.h"
 
 using namespace TERCpp;

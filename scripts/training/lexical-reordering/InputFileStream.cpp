@@ -1,6 +1,8 @@
+// $Id: InputFileStream.cpp 2780 2010-01-29 17:11:17Z bojar $
+
 /***********************************************************************
  Moses - factored phrase-based language decoder
- Copyright (C) 2010 Hieu Hoang
+ Copyright (C) 2006 University of Edinburgh
 
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,28 +19,49 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "ChartTranslationOption.h"
+#include "InputFileStream.h"
+#include "gzfilebuf.h"
+#include <iostream>
 
-#include "ChartHypothesis.h"
+using namespace std;
 
 namespace Moses
 {
-
-float ChartTranslationOption::CalcEstimateOfBestScore(
-    const TargetPhraseCollection &tpc,
-    const StackVec &stackVec)
+InputFileStream::InputFileStream(const std::string &filePath)
+  : std::istream(NULL)
+  , m_streambuf(NULL)
 {
-  const TargetPhrase &targetPhrase = **(tpc.begin());
-  float estimateOfBestScore = targetPhrase.GetFutureScore();
-  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
-       ++p) {
-    const HypoList *stack = *p;
-    assert(stack);
-    assert(!stack->empty());
-    const ChartHypothesis &bestHypo = **(stack->begin());
-    estimateOfBestScore += bestHypo.GetTotalScore();
-  }
-  return estimateOfBestScore;
+  Open(filePath);
 }
 
+InputFileStream::~InputFileStream()
+{
+  Close();
 }
+
+void InputFileStream::Open(const std::string &filePath)
+{
+  if (filePath.size() > 3 &&
+      filePath.substr(filePath.size() - 3, 3) == ".gz") {
+    m_streambuf = new gzfilebuf(filePath.c_str());
+  } else {
+    std::filebuf* fb = new std::filebuf();
+    fb = fb->open(filePath.c_str(), std::ios::in);
+    if (! fb) {
+      cerr << "Can't read " << filePath.c_str() << endl;
+      exit(1);
+    }
+    m_streambuf = fb;
+  }
+  this->init(m_streambuf);
+}
+
+void InputFileStream::Close()
+{
+  delete m_streambuf;
+  m_streambuf = NULL;
+}
+
+
+}
+

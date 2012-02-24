@@ -39,16 +39,14 @@ namespace Moses
 
 void Scope3Parser::GetChartRuleCollection(
     const WordsRange &range,
-    bool adhereTableLimit,
     ChartTranslationOptionList &outColl)
 {
   const size_t start = range.GetStartPos();
   const size_t end = range.GetEndPos();
-  const size_t ruleLimit = StaticData::Instance().GetRuleLimit();
 
   std::vector<std::pair<const UTrieNode *, const VarSpanNode *> > &pairVec = m_ruleApplications[start][end-start+1];
 
-  MatchCallback matchCB(ruleLimit, adhereTableLimit, outColl);
+  MatchCallback matchCB(range, outColl);
   for (std::vector<std::pair<const UTrieNode *, const VarSpanNode *> >::const_iterator p = pairVec.begin(); p != pairVec.end(); ++p) {
     const UTrieNode &ruleNode = *(p->first);
     const VarSpanNode &varSpanNode = *(p->second);

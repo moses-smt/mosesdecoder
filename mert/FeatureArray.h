@@ -1,13 +1,13 @@
 /*
  *  FeatureArray.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef FEATURE_ARRAY_H
-#define FEATURE_ARRAY_H
+#ifndef MERT_FEATURE_ARRAY_H_
+#define MERT_FEATURE_ARRAY_H_
 
 #include <vector>
 #include <iostream>
@@ -107,4 +107,4 @@ public:
   bool check_consistency() const;
 };
 
-#endif  // FEATURE_ARRAY_H
+#endif  // MERT_FEATURE_ARRAY_H_

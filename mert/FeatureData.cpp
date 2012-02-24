@@ -1,6 +1,6 @@
 /*
  *  FeatureData.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
@@ -11,6 +11,7 @@
 #include <limits>
 #include "FileStream.h"
 #include "Util.h"
+#include <cstdio>
 
 static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
 static const float MAX_FLOAT=numeric_limits<float>::max();
@@ -145,4 +146,32 @@ void FeatureData::setFeatureMap(const std::string& feat)
     idx2featname_[idx2featname_.size()] = substring;
     number_of_features++;
   }
+}
+
+string FeatureData::ToString() const {
+  string res;
+  char buf[100];
+
+  snprintf(buf, sizeof(buf), "number of features: %lu, ", number_of_features);
+  res.append(buf);
+
+  snprintf(buf, sizeof(buf), "features: ");
+  res.append(buf);
+  res.append(features);
+
+  snprintf(buf, sizeof(buf), ", sparse flag: %s, ", (_sparse_flag) ? "yes" : "no");
+  res.append(buf);
+
+  snprintf(buf, sizeof(buf), "feature_id_map = { ");
+  res.append(buf);
+  for (map<string, size_t>::const_iterator it = featname2idx_.begin();
+       it != featname2idx_.end(); ++it) {
+    snprintf(buf, sizeof(buf), "%s => %lu, ",
+                  it->first.c_str(), it->second);
+    res.append(buf);
+  }
+  snprintf(buf, sizeof(buf), "}");
+  res.append(buf);
+
+  return res;
 }

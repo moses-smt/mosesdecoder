@@ -1,8 +1,9 @@
-#ifndef OPTIMIZER_H
-#define OPTIMIZER_H
+#ifndef MERT_OPTIMIZER_H_
+#define MERT_OPTIMIZER_H_
 
 #include <vector>
 #include <string>
+#include "Data.h"
 #include "FeatureData.h"
 #include "Scorer.h"
 #include "Types.h"
@@ -20,13 +21,13 @@ class Optimizer
 {
 protected:
   Scorer *scorer;      // no accessor for them only child can use them
-  FeatureData *FData;  // no accessor for them only child can use them
+  FeatureDataHandle FData;  // no accessor for them only child can use them
   unsigned int number_of_random_directions;
 
 public:
   Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom);
   void SetScorer(Scorer *_scorer);
-  void SetFData(FeatureData *_FData);
+  void SetFData(FeatureDataHandle _FData);
   virtual ~Optimizer();
 
   unsigned size() const {

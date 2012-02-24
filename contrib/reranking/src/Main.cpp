@@ -14,7 +14,7 @@
 #include "NBest.h"
 #include "Tools.h"
 
-#include "Util.h" // from Moses
+#include "../../../moses/src/Util.h"
 
 
 using namespace std;
@@ -33,7 +33,7 @@ int main (int argc, char *argv[])
   ifstream inpf;
   PARAM_VEC p=parameter->GetParam("input-file");
   if (p.size()<1 || p.size()>2) Error("The option -input-file requires one or two arguments");
-  int in_n=p.size()>1 ? Scan<int>(p[1]) : 0;
+  int in_n=p.size()>1 ? Moses::Scan<int>(p[1]) : 0;
   cout << "NBest version 0.1, written by Holger.Schwenk@lium.univ-lemans.fr" << endl
        << " - reading input from file '" << p[0] << "'";
   if (in_n>0) cout << " (limited to the first " << in_n << " hypothesis)";
@@ -48,7 +48,7 @@ int main (int argc, char *argv[])
   ofstream outf;
   p=parameter->GetParam("output-file");
   if (p.size()<1 || p.size()>2) Error("The option -output-file requires one or two arguments");
-  int out_n=p.size()>1 ? Scan<int>(p[1]) : 0;
+  int out_n=p.size()>1 ? Moses::Scan<int>(p[1]) : 0;
   cout << " - writing output to file '" << p[0] << "'";
   if (out_n>0) cout << " (limited to the first " << out_n << " hypothesis)";
   cout << endl;

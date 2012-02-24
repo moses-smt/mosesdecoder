@@ -141,7 +141,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   m_reorderingConstraint.InitializeWalls( GetSize() );
 
   // set reordering walls, if "-monotone-at-punction" is set
-  if (staticData.UseReorderingConstraint()) {
+  if (staticData.UseReorderingConstraint() && GetSize()>0) {
     m_reorderingConstraint.SetMonotoneAtPunctuation( GetSubString( WordsRange(0,GetSize()-1 ) ) );
   }
 

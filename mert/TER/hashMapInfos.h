@@ -1,8 +1,8 @@
 /*
  * Generic hashmap manipulation functions
  */
-#ifndef __HASHMAPINFOS_H__
-#define __HASHMAPINFOS_H__
+#ifndef MERT_TER_HASHMAP_INFOS_H_
+#define MERT_TER_HASHMAP_INFOS_H_
 
 #include "infosHasher.h"
 #include <vector>
@@ -39,4 +39,4 @@ public:
 
 }
 
-#endif  // __HASHMAPINFOS_H__
+#endif  // MERT_TER_HASHMAP_INFOS_H_

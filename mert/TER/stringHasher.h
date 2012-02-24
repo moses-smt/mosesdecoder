@@ -1,5 +1,5 @@
-#ifndef __STRINGHASHER_H__
-#define __STRINGHASHER_H__
+#ifndef MERT_TER_STRING_HASHER_H_
+#define MERT_TER_STRING_HASHER_H_
 
 #include <string>
 #include <iostream>
@@ -25,4 +25,4 @@ public:
 
 }
 
-#endif  // __STRINGHASHER_H__
+#endif  // MERT_TER_STRING_HASHER_H_

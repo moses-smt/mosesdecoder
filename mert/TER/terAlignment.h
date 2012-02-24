@@ -1,5 +1,5 @@
-#ifndef __TERCPPTERALIGNMENT_H__
-#define __TERCPPTERALIGNMENT_H__
+#ifndef MERT_TER_TER_ALIGNMENT_H_
+#define MERT_TER_TER_ALIGNMENT_H_
 
 #include <vector>
 #include <stdio.h>
@@ -48,4 +48,4 @@ public:
 
 }
 
-#endif  // __TERCPPTERALIGNMENT_H__
+#endif  // MERT_TER_TER_ALIGNMENT_H__
