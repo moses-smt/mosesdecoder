@@ -2575,7 +2575,7 @@ sub create_step {
     $subdir = "lm" if $subdir eq "interpolated-lm";
     open(STEP,">$file");
     print STEP "#!/bin/bash\n\n";
-    print STEP "PATH=".$ENV{"PATH"}."\n";
+    print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
     print STEP "cd $dir\n";
     print STEP "echo 'starting at '`date`' on '`hostname`\n";
     print STEP "mkdir -p $dir/$subdir\n\n";
