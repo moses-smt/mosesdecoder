@@ -272,12 +272,14 @@ void BleuScorer::CalcClosest(size_t sentence_id,
   int min_idx = 0;
   for (size_t i = 0; i < m_ref_lengths[sentence_id].size(); ++i) {
     const int reflength = m_ref_lengths[sentence_id][i];
+    const int length_diff = abs(reflength - static_cast<int>(length));
+
     // Look for the closest reference
-    if (abs(reflength - static_cast<int>(length)) < abs(min_diff)) {
+    if (length_diff < abs(min_diff)) {
       min_diff = reflength - length;
       min_idx = i;
-      // if two references has the same closest length, take the shortest
-    } else if (abs(reflength - static_cast<int>(length)) == abs(min_diff)) {
+    // if two references has the same closest length, take the shortest
+    } else if (length_diff == abs(min_diff)) {
       if (reflength < static_cast<int>(m_ref_lengths[sentence_id][min_idx])) {
         min_idx = i;
       }
