@@ -24,16 +24,13 @@ public:
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
   virtual float calculateScore(const vector<int>& comps) const;
-
-  virtual size_t NumberOfScores() const {
-    return 2 * kLENGTH + 1;
-  }
+  virtual size_t NumberOfScores() const { return 2 * kLENGTH + 1; }
 
 private:
   enum ReferenceLengthType {
     AVERAGE,
     SHORTEST,
-    CLOSEST,
+    CLOSEST
   };
 
   //Used to construct the ngram map
@@ -44,16 +41,14 @@ private:
       const size_t bs = b.size();
       for (i = 0; i < as && i < bs; ++i) {
         if (a[i] < b[i]) {
-          //cerr << "true" << endl;
           return true;
         }
         if (a[i] > b[i]) {
-          //cerr << "false" << endl;
           return false;
         }
       }
       //entries are equal, shortest wins
-      return as < bs;;
+      return as < bs;
     }
   };
 
