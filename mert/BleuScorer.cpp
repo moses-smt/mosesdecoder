@@ -183,12 +183,12 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     throw runtime_error(msg.str());
   }
   NgramCounts testcounts;
-  //stats for this line
-  vector<float> stats(kLENGTH*2);;
-  size_t length = countNgrams(text,testcounts,kLENGTH);
+  // stats for this line
+  vector<ScoreStatsType> stats(kLENGTH * 2);;
+  const size_t length = countNgrams(text, testcounts, kLENGTH);
 
   if (m_ref_length_type == SHORTEST) {
-    int shortest = *min_element(m_ref_lengths[sid].begin(), m_ref_lengths[sid].end());
+    const int shortest = *min_element(m_ref_lengths[sid].begin(), m_ref_lengths[sid].end());
     stats.push_back(shortest);
   } else if (m_ref_length_type == AVERAGE) {
     int total = 0;
@@ -196,7 +196,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
       total += m_ref_lengths[sid][i];
     }
     const float mean = static_cast<float>(total) / m_ref_lengths[sid].size();
-    stats.push_back(mean);
+    stats.push_back(static_cast<ScoreStatsType>(mean));
   } else if (m_ref_length_type == CLOSEST)  {
     int min_diff = INT_MAX;
     int min_idx = 0;
@@ -223,18 +223,15 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
        testcounts_it != testcounts.end(); ++testcounts_it) {
     NgramCounts::const_iterator refcounts_it = m_ref_counts[sid]->find(testcounts_it->first);
     int correct = 0;
-    int guess = testcounts_it->second;
+    const int guess = testcounts_it->second;
     if (refcounts_it != m_ref_counts[sid]->end()) {
       correct = min(refcounts_it->second,guess);
     }
-    size_t len = testcounts_it->first.size();
+    const size_t len = testcounts_it->first.size();
     stats[len*2-2] += correct;
     stats[len*2-1] += guess;
   }
-  stringstream sout;
-  copy(stats.begin(),stats.end(),ostream_iterator<float>(sout," "));
-  string stats_str = sout.str();
-  entry.set(stats_str);
+  entry.set(stats);
 }
 
 float BleuScorer::calculateScore(const vector<int>& comps) const

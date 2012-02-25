@@ -66,7 +66,16 @@ public:
     return array_;
   }
 
+  // NOTE: deprecated because this is inefficient.
   void set(std::string &theString);
+
+  // Much more efficient than the above.
+  void set(const std::vector<ScoreStatsType>& stats) {
+    reset();
+    for (size_t i = 0; i < stats.size(); ++i) {
+      add(stats[i]);
+    }
+  }
 
   inline size_t bytes() const {
     return GetArraySizeWithBytes();
