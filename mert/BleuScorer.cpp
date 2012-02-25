@@ -4,7 +4,7 @@
 #include <cmath>
 #include <climits>
 #include <fstream>
-#include <iterator>
+#include <iostream>
 #include <stdexcept>
 #include "Util.h"
 
@@ -236,14 +236,21 @@ float BleuScorer::calculateScore(const vector<int>& comps) const
   return exp(logbleu);
 }
 
-void BleuScorer::dump_counts(const NgramCounts& counts) const {
-  for (NgramCounts::const_iterator i = counts.begin();
-       i != counts.end(); ++i) {
-    cerr << "(";
-    copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
-    cerr << ") " << i->second << ", ";
+void BleuScorer::dump_counts(ostream* os,
+                             const NgramCounts& counts) const {
+  for (NgramCounts::const_iterator it = counts.begin();
+       it != counts.end(); ++it) {
+    *os << "(";
+    const NgramCounts::Key& keys = it->first;
+    for (size_t i = 0; i < keys.size(); ++i) {
+      if (i != 0) {
+        *os << " ";
+      }
+      *os << keys[i];
+    }
+    *os << ") : " << it->second << ", ";
   }
-  cerr << endl;
+  *os << endl;
 }
 
 void BleuScorer::CalcAverage(size_t sentence_id,

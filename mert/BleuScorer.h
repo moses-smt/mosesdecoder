@@ -1,7 +1,7 @@
 #ifndef MERT_BLEU_SCORER_H_
 #define MERT_BLEU_SCORER_H_
 
-#include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -45,7 +45,7 @@ private:
    */
   size_t countNgrams(const string& line, NgramCounts& counts, unsigned int n);
 
-  void dump_counts(const NgramCounts& counts) const;
+  void dump_counts(std::ostream* os, const NgramCounts& counts) const;
 
   // For calculating effective reference length.
   void CalcAverage(size_t sentence_id,
