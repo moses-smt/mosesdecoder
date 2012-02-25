@@ -187,37 +187,21 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   vector<ScoreStatsType> stats(kLENGTH * 2);;
   const size_t length = countNgrams(text, testcounts, kLENGTH);
 
-  if (m_ref_length_type == SHORTEST) {
-    const int shortest = *min_element(m_ref_lengths[sid].begin(), m_ref_lengths[sid].end());
-    stats.push_back(shortest);
-  } else if (m_ref_length_type == AVERAGE) {
-    int total = 0;
-    for (size_t i = 0; i < m_ref_lengths[sid].size(); ++i) {
-      total += m_ref_lengths[sid][i];
-    }
-    const float mean = static_cast<float>(total) / m_ref_lengths[sid].size();
-    stats.push_back(static_cast<ScoreStatsType>(mean));
-  } else if (m_ref_length_type == CLOSEST)  {
-    int min_diff = INT_MAX;
-    int min_idx = 0;
-    for (size_t i = 0; i < m_ref_lengths[sid].size(); ++i) {
-      const int reflength = m_ref_lengths[sid][i];
-      const int diff = reflength - static_cast<int>(length);
-      const int absolute_diff = abs(diff) - abs(min_diff);
-
-      if (absolute_diff < 0) { //look for the closest reference
-        min_diff = diff;
-        min_idx = i;
-      } else if (absolute_diff == 0) { // if two references has the same closest length, take the shortest
-        if (reflength < static_cast<int>(m_ref_lengths[sid][min_idx])) {
-          min_idx = i;
-        }
-      }
-    }
-    stats.push_back(m_ref_lengths[sid][min_idx]);
-  } else {
-    throw runtime_error("Unsupported reflength strategy");
+  // Calculate effective reference length.
+  switch (m_ref_length_type) {
+    case SHORTEST:
+      CalcShortest(sid, stats);
+      break;
+    case AVERAGE:
+      CalcAverage(sid, stats);
+      break;
+    case CLOSEST:
+      CalcClosest(sid, length, stats);
+      break;
+    default:
+      throw runtime_error("Unsupported reflength strategy");
   }
+
   //precision on each ngram type
   for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
@@ -260,4 +244,44 @@ void BleuScorer::dump_counts(const NgramCounts& counts) const {
     cerr << ") " << i->second << ", ";
   }
   cerr << endl;
+}
+
+void BleuScorer::CalcAverage(size_t sentence_id,
+                             vector<ScoreStatsType>& stats) const {
+  int total = 0;
+  for (size_t i = 0;
+       i < m_ref_lengths[sentence_id].size(); ++i) {
+    total += m_ref_lengths[sentence_id][i];
+  }
+  const float mean = static_cast<float>(total) /
+                     m_ref_lengths[sentence_id].size();
+  stats.push_back(static_cast<ScoreStatsType>(mean));
+}
+
+void BleuScorer::CalcClosest(size_t sentence_id,
+                             size_t length,
+                             vector<ScoreStatsType>& stats) const {
+  int min_diff = INT_MAX;
+  int min_idx = 0;
+  for (size_t i = 0; i < m_ref_lengths[sentence_id].size(); ++i) {
+    const int reflength = m_ref_lengths[sentence_id][i];
+    // Look for the closest reference
+    if (abs(reflength - static_cast<int>(length)) < abs(min_diff)) {
+      min_diff = reflength - length;
+      min_idx = i;
+      // if two references has the same closest length, take the shortest
+    } else if (abs(reflength - static_cast<int>(length)) == abs(min_diff)) {
+      if (reflength < static_cast<int>(m_ref_lengths[sentence_id][min_idx])) {
+        min_idx = i;
+      }
+    }
+  }
+  stats.push_back(m_ref_lengths[sentence_id][min_idx]);
+}
+
+void BleuScorer::CalcShortest(size_t sentence_id,
+                              vector<ScoreStatsType>& stats) const {
+  const int shortest = *min_element(m_ref_lengths[sentence_id].begin(),
+                                    m_ref_lengths[sentence_id].end());
+  stats.push_back(shortest);
 }
