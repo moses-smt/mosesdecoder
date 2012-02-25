@@ -47,6 +47,14 @@ private:
 
   void dump_counts(const NgramCounts& counts) const;
 
+  // For calculating effective reference length.
+  void CalcAverage(size_t sentence_id,
+                   vector<ScoreStatsType>& stats) const;
+  void CalcClosest(size_t sentence_id, size_t length,
+                   vector<ScoreStatsType>& stats) const;
+  void CalcShortest(size_t sentence_id,
+                    vector<ScoreStatsType>& stats) const;
+
   const int kLENGTH;
   ReferenceLengthType m_ref_length_type;
 
