@@ -8,6 +8,16 @@
 #include <stdexcept>
 #include "Util.h"
 
+namespace {
+
+// configure regularisation
+const char KEY_REFLEN[] = "reflen";
+const char REFLEN_AVERAGE[] = "average";
+const char REFLEN_SHORTEST[] = "shortest";
+const char REFLEN_CLOSEST[] = "closest";
+
+} // namespace
+
 // A simple STL-map based n-gram counts.
 // Basically, we provide typical accessors and mutaors, but
 // we intentionally does not allow erasing elements.
@@ -77,13 +87,7 @@ BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
       kLENGTH(4),
       m_ref_length_type(CLOSEST) {
-  //configure regularisation
-  static string KEY_REFLEN = "reflen";
-  static string REFLEN_AVERAGE = "average";
-  static string REFLEN_SHORTEST = "shortest";
-  static string REFLEN_CLOSEST = "closest";
-
-  string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
+  const string reflen = getConfig(KEY_REFLEN, REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
     m_ref_length_type = AVERAGE;
   } else if (reflen == REFLEN_SHORTEST) {
