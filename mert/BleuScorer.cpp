@@ -170,7 +170,6 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
       }
       ++sid;
     }
-    TRACE_ERR(endl);
   }
 }
 
