@@ -8,6 +8,71 @@
 #include <stdexcept>
 #include "Util.h"
 
+// A simple STL-map based n-gram counts.
+// Basically, we provide typical accessors and mutaors, but
+// we intentionally does not allow erasing elements.
+class BleuScorer::NgramCounts {
+ public:
+  // Used to construct the ngram map
+  struct NgramComparator {
+    bool operator()(const vector<int>& a, const vector<int>& b) const {
+      size_t i;
+      const size_t as = a.size();
+      const size_t bs = b.size();
+      for (i = 0; i < as && i < bs; ++i) {
+        if (a[i] < b[i]) {
+          return true;
+        }
+        if (a[i] > b[i]) {
+          return false;
+        }
+      }
+      // entries are equal, shortest wins
+      return as < bs;
+    }
+  };
+
+  typedef vector<int> Key;
+  typedef int Value;
+  typedef map<Key, Value, NgramComparator>::iterator iterator;
+  typedef map<Key, Value, NgramComparator>::const_iterator const_iterator;
+
+  NgramCounts() : kDefaultCount(1) { }
+  virtual ~NgramCounts() { }
+
+  // If the specified "ngram" is found, we add counts.
+  // If not, we insert the default count in the container.
+  void add(const Key& ngram) {
+    const_iterator it = find(ngram);
+    if (it != end()) {
+      m_counts[ngram] = it->second + 1;
+    } else {
+      m_counts[ngram] = kDefaultCount;
+    }
+  }
+
+  void clear() { m_counts.clear(); }
+
+  bool empty() const { return m_counts.empty(); }
+
+  size_t size() const { return m_counts.size(); }
+  size_t max_size() const { return m_counts.max_size(); }
+
+  iterator find(const Key& ngram) { return m_counts.find(ngram); }
+  const_iterator find(const Key& ngram) const { return m_counts.find(ngram); }
+
+  Value& operator[](const Key& ngram) { return m_counts[ngram]; }
+
+  iterator begin() { return m_counts.begin(); }
+  const_iterator begin() const { return m_counts.begin(); }
+  iterator end() { return m_counts.end(); }
+  const_iterator end() const { return m_counts.end(); }
+
+ private:
+  const int kDefaultCount;
+  map<Key, Value, NgramComparator> m_counts;
+};
+
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
       kLENGTH(4),
@@ -32,7 +97,8 @@ BleuScorer::BleuScorer(const string& config)
 
 BleuScorer::~BleuScorer() {}
 
-size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned int n)
+size_t BleuScorer::countNgrams(const string& line, NgramCounts& counts,
+                               unsigned int n)
 {
   vector<int> encoded_tokens;
   TokenizeAndEncode(line, encoded_tokens);
@@ -46,12 +112,7 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
       for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
         ngram.push_back(encoded_tokens[j]);
       }
-      int count = 1;
-      counts_iterator oldcount = counts.find(ngram);
-      if (oldcount != counts.end()) {
-        count = (oldcount->second) + 1;
-      }
-      counts[ngram] = count;
+      counts.add(ngram);
     }
   }
   return encoded_tokens.size();
@@ -75,7 +136,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
     size_t sid = 0; //sentence counter
     while (getline(refin,line)) {
       if (i == 0) {
-        counts_t *counts = new counts_t; //these get leaked
+        NgramCounts *counts = new NgramCounts; //these get leaked
         m_ref_counts.push_back(counts);
         vector<size_t> lengths;
         m_ref_lengths.push_back(lengths);
@@ -83,11 +144,12 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
       if (m_ref_counts.size() <= sid) {
         throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
       }
-      counts_t counts;
-      size_t length = countNgrams(line,counts,kLENGTH);
+      NgramCounts counts;
+      size_t length = countNgrams(line, counts, kLENGTH);
+
       //for any counts larger than those already there, merge them in
-      for (counts_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-        counts_iterator oldcount_it = m_ref_counts[sid]->find(ci->first);
+      for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
+        NgramCounts::const_iterator oldcount_it = m_ref_counts[sid]->find(ci->first);
         int oldcount = 0;
         if (oldcount_it != m_ref_counts[sid]->end()) {
           oldcount = oldcount_it->second;
@@ -116,7 +178,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
   }
-  counts_t testcounts;
+  NgramCounts testcounts;
   //stats for this line
   vector<float> stats(kLENGTH*2);;
   size_t length = countNgrams(text,testcounts,kLENGTH);
@@ -153,9 +215,9 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     throw runtime_error("Unsupported reflength strategy");
   }
   //precision on each ngram type
-  for (counts_iterator testcounts_it = testcounts.begin();
+  for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    counts_iterator refcounts_it = m_ref_counts[sid]->find(testcounts_it->first);
+    NgramCounts::const_iterator refcounts_it = m_ref_counts[sid]->find(testcounts_it->first);
     int correct = 0;
     int guess = testcounts_it->second;
     if (refcounts_it != m_ref_counts[sid]->end()) {
@@ -189,8 +251,9 @@ float BleuScorer::calculateScore(const vector<int>& comps) const
   return exp(logbleu);
 }
 
-void BleuScorer::dump_counts(counts_t& counts) const {
-  for (counts_const_iterator i = counts.begin(); i != counts.end(); ++i) {
+void BleuScorer::dump_counts(const NgramCounts& counts) const {
+  for (NgramCounts::const_iterator i = counts.begin();
+       i != counts.end(); ++i) {
     cerr << "(";
     copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
     cerr << ") " << i->second << ", ";
