@@ -28,10 +28,7 @@ class Scorer
   /**
    * Return the number of statistics needed for the computation of the score.
    */
-  virtual size_t NumberOfScores() const {
-    cerr << "Scorer: 0" << endl;
-    return 0;
-  }
+  virtual size_t NumberOfScores() const = 0;
 
   /**
    * Set the reference files. This must be called before prepareStats().
@@ -57,7 +54,9 @@ class Scorer
    * applying each in turn, and calculating a new score each time.
    */
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores) const {
+                     statscores_t& scores) const = 0;
+  /*
+  {
     //dummy impl
     if (!m_score_data) {
       throw runtime_error("score data not loaded");
@@ -67,6 +66,7 @@ class Scorer
       scores.push_back(0);
     }
   }
+  */
 
   /**
    * Calculate the score of the sentences corresponding to the list of candidate
@@ -93,7 +93,7 @@ class Scorer
   /**
    * Set the score data, prior to scoring.
    */
-  void setScoreData(ScoreData* data) {
+  virtual void setScoreData(ScoreData* data) {
     m_score_data = data;
   }
 
