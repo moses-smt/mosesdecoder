@@ -400,11 +400,6 @@ int main(int argc, char** argv) {
 	// read core weight file
 	ProducerWeightMap coreWeightMap;
 	if (!coreWeightFile.empty()) {
-		if (!hope_fear) {
-			cerr << "Error: using pre-tuned core weights is only implemented for hope/fear updates at the moment" << endl;
-			return 1;
-		}
-
 		if (!loadCoreWeights(coreWeightFile, coreWeightMap, featureFunctions)) {
 				cerr << "Error: Failed to load core weights from " << coreWeightFile << endl;
 				return 1;
