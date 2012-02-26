@@ -1,14 +1,14 @@
 #include "Timer.h"
 #include "Util.h"
 
-double Timer::elapsed_time()
+double Timer::elapsed_time() const
 {
   time_t now;
   time(&now);
   return difftime(now, m_start_time);
 }
 
-double Timer::get_elapsed_time()
+double Timer::get_elapsed_time() const
 {
   return elapsed_time();
 }
