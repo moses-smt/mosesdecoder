@@ -50,24 +50,33 @@ private:
 
 private:
   const Sentence *m_input;
-
   CharHash m_punctuationHash;
-  bool m_ignorePunctuation;
-  bool m_biasFeature;
 
   std::vector< FactorType > m_inputFactors;
   std::vector< FactorType > m_outputFactors;
 
+  bool m_ignorePunctuation;
+  bool m_biasFeature;
+
+  std::set<std::string> m_vocabSource;
+  std::set<std::string> m_vocabTarget;
+  bool m_unrestricted;
+
   float m_sparseProducerWeight;
 
-  void LoadData(const std::vector< FactorType >& inFactors,
-                const std::vector< FactorType >& outFactors);
+  bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors,
 	                            const std::vector< FactorType >& outFactors,
-			            bool ignorePunctuation,
-			            bool biasFeature);
+	                            bool biasFeature,
+	                            bool ignorePunctuation);
+
+  GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors,
+	                            const std::vector< FactorType >& outFactors,
+	                            bool biasFeature,
+	                            std::string vocabSource,
+	                            std::string vocabTarget);
 
   virtual ~GlobalLexicalModelUnlimited();
 

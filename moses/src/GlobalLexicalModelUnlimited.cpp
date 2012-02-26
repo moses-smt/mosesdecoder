@@ -10,17 +10,17 @@ namespace Moses
 {
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorType >& inFactors,
                                                          const vector< FactorType >& outFactors,
-                                                         bool ignorePunctuation,
-							 bool biasFeature)
+                                                         bool biasFeature,
+                                                         bool ignorePunctuation)
 : StatelessFeatureFunction("glm",ScoreProducer::unlimited),
   m_sparseProducerWeight(1),
+  m_inputFactors(inFactors),
+  m_outputFactors(outFactors),
+  m_biasFeature(biasFeature),
   m_ignorePunctuation(ignorePunctuation),
-  m_biasFeature(biasFeature)
+  m_unrestricted(true)
 {
 	std::cerr << "Creating global lexical model unlimited.. ";
-
-	// load model
-	LoadData( inFactors, outFactors );
 
 	// compile a list of punctuation characters
 	if (m_ignorePunctuation) {
@@ -32,14 +32,28 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorTyp
 	cerr << "done." << endl;
 }
 
-GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
-
-void GlobalLexicalModelUnlimited::LoadData(const vector< FactorType >& inFactors,
-                                  const vector< FactorType >& outFactors)
+GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorType >& inFactors,
+                                                         const vector< FactorType >& outFactors,
+                                                         bool biasFeature,
+                                                         string vocabSource,
+                                                         string vocabTarget)
+: StatelessFeatureFunction("glm",ScoreProducer::unlimited),
+  m_sparseProducerWeight(1),
+  m_inputFactors(inFactors),
+  m_outputFactors(outFactors),
+  m_biasFeature(biasFeature),
+  m_ignorePunctuation(false),
+  m_unrestricted(false)
 {
-	m_inputFactors = inFactors;
-	m_outputFactors = outFactors;
+	std::cerr << "Creating global lexical model unlimited.. ";
+
+	// load vocabs
+	Load( vocabSource, vocabTarget );
+
+	cerr << "done." << endl;
 }
+
+GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
 
 void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
 {
@@ -86,17 +100,62 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
 
   		//if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
   		if ( alreadyScored.find(inputString) == alreadyScored.end()) {
-  			stringstream feature;
-  			feature << "glm_";
-  			feature << targetString;
-  			feature << "~";
-  			feature << inputString;
-  			accumulator->SparsePlusEquals(feature.str(), 1);
-  			//alreadyScored.insert( &inputWord );
-  			alreadyScored[inputString] = 1;
+  			bool sourceExists, targetExists;
+  			if (!m_unrestricted) {
+  				sourceExists = m_vocabSource.find( inputString ) != m_vocabSource.end();
+  			  targetExists = m_vocabTarget.find( targetString) != m_vocabTarget.end();
+  			}
+
+  			// no feature if vocab is in use and both words are not in restricted vocabularies
+  			if (m_unrestricted || sourceExists || targetExists) {
+  				stringstream feature;
+  				feature << "glm_";
+  				feature << targetString;
+  				feature << "~";
+  				feature << inputString;
+  				accumulator->SparsePlusEquals(feature.str(), 1);
+  				//alreadyScored.insert( &inputWord );
+  				alreadyScored[inputString] = 1;
+  			}
   		}
   	}
   }
+}
+
+bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
+																			 const std::string &filePathTarget)
+{
+  // restricted source word vocabulary
+  ifstream inFileSource(filePathSource.c_str());
+  if (!inFileSource)
+  {
+      cerr << "could not open file " << filePathSource << endl;
+      return false;
+  }
+
+  std::string line;
+  while (getline(inFileSource, line)) {
+    m_vocabSource.insert(line);
+  }
+
+  inFileSource.close();
+
+  // restricted target word vocabulary
+  ifstream inFileTarget(filePathTarget.c_str());
+  if (!inFileTarget)
+  {
+      cerr << "could not open file " << filePathTarget << endl;
+      return false;
+  }
+
+  while (getline(inFileTarget, line)) {
+    m_vocabTarget.insert(line);
+  }
+
+  inFileTarget.close();
+
+  m_unrestricted = false;
+  return true;
 }
 
 }

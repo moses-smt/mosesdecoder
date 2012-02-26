@@ -974,27 +974,37 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
   for (size_t i = 0; i < weight.size(); i++ ) {
     bool ignorePunctuation = false;
     bool biasFeature = false;
+    bool restricted = false;
+    string vocabSource, vocabTarget;
     vector< string > factors;
-    vector< string > factors_punct_bias = Tokenize(modelSpec[i]," ");
+    vector< string > spec = Tokenize(modelSpec[i]," ");
 
     // read optional punctuation and bias specifications
-    if (factors_punct_bias.size() > 0) {
-    	factors = Tokenize(factors_punct_bias[0],"-");
-	if (factors_punct_bias.size() >= 2)
-	  ignorePunctuation = Scan<int>(factors_punct_bias[1]);
-	if (factors_punct_bias.size() >= 3)
-	  biasFeature = Scan<int>(factors_punct_bias[2]);
+    if (spec.size() > 0) {
+    	factors = Tokenize(spec[0],"-");
+    	if (spec.size() >= 2)
+    		ignorePunctuation = Scan<int>(spec[1]);
+    	if (spec.size() >= 3)
+    		biasFeature = Scan<int>(spec[2]);
+    	if (spec.size() == 5) {
+    		vocabSource = spec[3];
+    		vocabTarget = spec[4];
+    		restricted = true;
+    	}
     }
     else
     	factors = Tokenize(modelSpec[i],"-");
 
     if ( factors.size() != 2 ) {
-      std::cerr << "wrong factor definition for global lexical model unlimited: " << modelSpec[i] << endl;
-      return false;
+    	std::cerr << "wrong factor definition for global lexical model unlimited: " << modelSpec[i] << endl;
+    	return false;
     }
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, ignorePunctuation, biasFeature));
+    if (restricted)
+    	m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, vocabSource, vocabTarget));
+    else
+    	m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation));
     m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
   }
   return true;
