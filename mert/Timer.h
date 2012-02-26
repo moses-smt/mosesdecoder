@@ -15,8 +15,8 @@ class Timer
   friend std::ostream& operator<<(std::ostream& os, Timer& t);
 
 private:
-  bool running;
-  time_t start_time;
+  bool m_is_running;
+  time_t m_start_time;
 
   /**
    * Return the total time that the timer has been in the "running"
@@ -29,10 +29,10 @@ private:
 
 public:
   /**
-   * 'running' is initially false. A timer needs to be explicitly started
+   * 'm_is_running' is initially false. A timer needs to be explicitly started
    * using 'start' or 'restart'.
    */
-  Timer() : running(false), start_time(0) { }
+  Timer() : m_is_running(false), m_start_time(0) { }
 
   /**
    * Start a timer.  If it is already running, let it continue running.
@@ -60,7 +60,7 @@ public:
 inline std::ostream& operator<<(std::ostream& os, Timer& t)
 {
   //os << std::setprecision(2) << std::setiosflags(std::ios::fixed) << (t.running ? t.elapsed_time() : 0);
-  os << (t.running ? t.elapsed_time() : 0);
+  os << (t.m_is_running ? t.elapsed_time() : 0);
   return os;
 }
 

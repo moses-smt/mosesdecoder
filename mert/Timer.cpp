@@ -5,7 +5,7 @@ double Timer::elapsed_time()
 {
   time_t now;
   time(&now);
-  return difftime(now, start_time);
+  return difftime(now, m_start_time);
 }
 
 double Timer::get_elapsed_time()
@@ -19,13 +19,13 @@ void Timer::start(const char* msg)
   if (msg) TRACE_ERR( msg << std::endl);
 
   // Return immediately if the timer is already running
-  if (running) return;
+  if (m_is_running) return;
 
   // Change timer status to running
-  running = true;
+  m_is_running = true;
 
   // Set the start time;
-  time(&start_time);
+  time(&m_start_time);
 }
 
 /***
@@ -69,5 +69,5 @@ void Timer::check(const char* msg)
   if (msg) TRACE_ERR( msg << " : ");
 
 //  TRACE_ERR( "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
-  TRACE_ERR( "[" << (running ? elapsed_time() : 0) << "] seconds\n");
+  TRACE_ERR( "[" << (m_is_running ? elapsed_time() : 0) << "] seconds\n");
 }
