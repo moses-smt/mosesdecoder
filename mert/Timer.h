@@ -1,38 +1,50 @@
 #ifndef MERT_TIMER_H_
 #define MERT_TIMER_H_
 
-#include <ctime>
-#include <iostream>
-#include <iomanip>
+#include <ostream>
+#include <string>
+#include <stdint.h>
 
 class Timer
 {
  private:
-  bool m_is_running;
-  time_t m_start_time;
+  // Time values are stored in microseconds.
+  struct CPUTime {
+    uint64_t user_time;                 // user CPU time
+    uint64_t sys_time;                  // system CPU time
 
-  /**
-   * Return the total time that the timer has been in the "running"
-   * state since it was first "started" or last "restarted".  For
-   * "short" time periods (less than an hour), the actual cpu time
-   * used is reported instead of the elapsed time.
-   * TODO in seconds?
-   */
-  double elapsed_time() const;
+    CPUTime() : user_time(0), sys_time(0) { }
+  };
+
+  CPUTime GetCPUTimeMicroSeconds() const;
+
+  bool m_is_running;
+  uint64_t m_wall;                      // wall-clock time in microseconds
+  CPUTime m_start_time;
 
  public:
   /**
    * 'm_is_running' is initially false. A timer needs to be explicitly started
    * using 'start'.
    */
-  Timer() : m_is_running(false), m_start_time(0) { }
-  ~Timer() { }
+  Timer()
+      : m_is_running(false),
+        m_wall(0),
+        m_start_time() {}
+
+  ~Timer() {}
 
   /**
    * Start a timer.  If it is already running, let it continue running.
    * Print an optional message.
    */
   void start(const char* msg = 0);
+
+  /**
+   * Restart the timer iff the timer is already running.
+   * if the timer is not running, just start the timer.
+   */
+  void restart(const char* msg = 0);
 
   /**
    * Print out an optional message followed by the current timer timing.
@@ -44,13 +56,32 @@ class Timer
   bool is_running() const { return m_is_running; }
 
   /**
-   * Return the total time that the timer has been in the "running"
-   * state since it was first "started" or last "restarted".  For
-   * "short" time periods (less than an hour), the actual cpu time
+   * Return the total time in seconds that the timer has been in the
+   * "running" state since it was first "started" or last "restarted".
+   * For "short" time periods (less than an hour), the actual cpu time
    * used is reported instead of the elapsed time.
-   * This function is the public version of elapsed_time()
    */
-  double get_elapsed_time() const;
+  double get_elapsed_cpu_time() const;
+
+  /**
+   * Return the total time in microseconds.
+   */
+  uint64_t get_elapsed_cpu_time_microseconds() const;
+
+  /**
+   * Get elapsed wall-clock time in seconds.
+   */
+  double get_elapsed_wall_time() const;
+
+  /**
+   * Get elapsed wall-clock time in microseconds.
+   */
+  uint64_t get_elapsed_wall_time_microseconds() const;
+
+  /**
+   * Return a string that has the user CPU time, system time, and total time.
+   */
+  std::string ToString() const;
 };
 
 /**
@@ -58,9 +89,12 @@ class Timer
  * for an ostream 'os' and a timer 't'.  For example, "cout << t" will
  * print out the total amount of time 't' has been "running".
  */
-inline std::ostream& operator<<(std::ostream& os, const Timer& t)
-{
-  os << (t.is_running() ? t.get_elapsed_time() : 0);
+inline std::ostream& operator<<(std::ostream& os, const Timer& t) {
+  if (t.is_running()) {
+    os << t.ToString();
+  } else {
+    os << "timer is not running.";
+  }
   return os;
 }
 
