@@ -39,8 +39,6 @@ public:
    * Print an optional message.
    */
   void start(const char* msg = 0);
-//  void restart(const char* msg = 0);
-//  void stop(const char* msg = 0);
 
   /**
    * Print out an optional message followed by the current timer timing.
@@ -59,7 +57,6 @@ public:
 
 inline std::ostream& operator<<(std::ostream& os, Timer& t)
 {
-  //os << std::setprecision(2) << std::setiosflags(std::ios::fixed) << (t.running ? t.elapsed_time() : 0);
   os << (t.m_is_running ? t.elapsed_time() : 0);
   return os;
 }
