@@ -12,6 +12,7 @@ FeatureStats.cpp FeatureArray.cpp FeatureData.cpp
 FeatureDataIterator.cpp
 Data.cpp
 BleuScorer.cpp
+InterpolatedScorer.cpp
 Point.cpp
 PerScorer.cpp
 Scorer.cpp

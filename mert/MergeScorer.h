@@ -24,6 +24,11 @@ public:
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 
+  virtual size_t NumberOfScores() const
+  {
+    return 0;
+  }
+
   void whoami() const {
     cerr << "I AM MergeScorer" << endl;
   }
