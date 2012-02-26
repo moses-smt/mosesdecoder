@@ -31,7 +31,7 @@ private:
 public:
   ScoreStats();
   explicit ScoreStats(const size_t size);
-  explicit ScoreStats(std::string &theString);
+
   ~ScoreStats();
 
   // We intentionally allow copying.
@@ -66,8 +66,7 @@ public:
     return array_;
   }
 
-  // NOTE: deprecated because this is inefficient.
-  void set(std::string &theString);
+  void set(const std::string& str);
 
   // Much more efficient than the above.
   void set(const std::vector<ScoreStatsType>& stats) {
