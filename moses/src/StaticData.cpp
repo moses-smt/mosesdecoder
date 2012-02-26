@@ -975,7 +975,8 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     bool ignorePunctuation = false;
     bool biasFeature = false;
     bool restricted = false;
-    string vocabSource, vocabTarget;
+    bool sourceContext = false;
+    string filenameSource, filenameTarget;
     vector< string > factors;
     vector< string > spec = Tokenize(modelSpec[i]," ");
 
@@ -986,9 +987,11 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     		ignorePunctuation = Scan<int>(spec[1]);
     	if (spec.size() >= 3)
     		biasFeature = Scan<int>(spec[2]);
-    	if (spec.size() == 5) {
-    		vocabSource = spec[3];
-    		vocabTarget = spec[4];
+    	if (spec.size() >= 4)
+    	  sourceContext = Scan<int>(spec[3]);
+    	if (spec.size() == 6) {
+    		filenameSource = spec[4];
+    		filenameTarget = spec[5];
     		restricted = true;
     	}
     }
@@ -1001,10 +1004,15 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     }
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    if (restricted)
-    	m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, vocabSource, vocabTarget));
-    else
-    	m_globalLexicalModelsUnlimited.push_back(new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation));
+    GlobalLexicalModelUnlimited* glmu = new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, sourceContext);
+    m_globalLexicalModelsUnlimited.push_back(glmu);
+    if (restricted) {
+      cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
+      if (!glmu->Load(filenameSource, filenameTarget)) {
+        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+        return false;
+      }
+    }
     m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
   }
   return true;
@@ -1728,7 +1736,7 @@ bool StaticData::LoadWordTranslationFeature()
   }
 
   vector<string> tokens = Tokenize(parameters[0]);
-  if (tokens.size() != 2 && tokens.size() != 4) {
+  if (tokens.size() != 2 && tokens.size() != 3 && tokens.size() != 5) {
     UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [filename-src filename-tgt]");
     return false;
   }
@@ -1741,12 +1749,16 @@ bool StaticData::LoadWordTranslationFeature()
   // set factor
   FactorType factorIdSource = Scan<size_t>(tokens[0]);
   FactorType factorIdTarget = Scan<size_t>(tokens[1]);
-  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource,factorIdTarget);
+  bool sourceContext = false;
+  if (tokens.size() >= 3)
+  	sourceContext = Scan<size_t>(tokens[2]);
+
+  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource,factorIdTarget, sourceContext);
 
   // load word list for restricted feature set
-  if (tokens.size() == 4) {
-    string filenameSource = tokens[2];
-    string filenameTarget = tokens[3];
+  if (tokens.size() == 5) {
+    string filenameSource = tokens[3];
+    string filenameTarget = tokens[4];
     cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
     if (!m_wordTranslationFeature->Load(filenameSource, filenameTarget)) {
       UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);

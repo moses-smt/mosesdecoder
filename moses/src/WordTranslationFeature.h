@@ -19,13 +19,15 @@ private:
   FactorType m_factorTypeSource;
   FactorType m_factorTypeTarget;
   bool m_unrestricted;
+  bool m_sourceContext;
 
 public:
-	WordTranslationFeature(FactorType factorTypeSource = 0, FactorType factorTypeTarget = 0):
+	WordTranslationFeature(FactorType factorTypeSource = 0, FactorType factorTypeTarget = 0, bool sourceContext = false):
      StatelessFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
-     m_unrestricted(true)
+     m_unrestricted(true),
+     m_sourceContext(sourceContext)
   {}
       
 	bool Load(const std::string &filePathSource, const std::string &filePathTarget);

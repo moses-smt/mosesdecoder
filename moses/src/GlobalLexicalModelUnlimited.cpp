@@ -11,13 +11,15 @@ namespace Moses
 GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorType >& inFactors,
                                                          const vector< FactorType >& outFactors,
                                                          bool biasFeature,
-                                                         bool ignorePunctuation)
+                                                         bool ignorePunctuation,
+                                                         bool sourceContext)
 : StatelessFeatureFunction("glm",ScoreProducer::unlimited),
   m_sparseProducerWeight(1),
   m_inputFactors(inFactors),
   m_outputFactors(outFactors),
   m_biasFeature(biasFeature),
   m_ignorePunctuation(ignorePunctuation),
+  m_sourceContext(sourceContext),
   m_unrestricted(true)
 {
 	std::cerr << "Creating global lexical model unlimited.. ";
@@ -29,27 +31,6 @@ GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorTyp
 		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
 			m_punctuationHash[punctuation[i]] = 1;
 	}
-	cerr << "done." << endl;
-}
-
-GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorType >& inFactors,
-                                                         const vector< FactorType >& outFactors,
-                                                         bool biasFeature,
-                                                         string vocabSource,
-                                                         string vocabTarget)
-: StatelessFeatureFunction("glm",ScoreProducer::unlimited),
-  m_sparseProducerWeight(1),
-  m_inputFactors(inFactors),
-  m_outputFactors(outFactors),
-  m_biasFeature(biasFeature),
-  m_ignorePunctuation(false),
-  m_unrestricted(false)
-{
-	std::cerr << "Creating global lexical model unlimited.. ";
-
-	// load vocabs
-	Load( vocabSource, vocabTarget );
-
 	cerr << "done." << endl;
 }
 
@@ -108,14 +89,36 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
 
   			// no feature if vocab is in use and both words are not in restricted vocabularies
   			if (m_unrestricted || (sourceExists && targetExists)) {
-  				stringstream feature;
-  				feature << "glm_";
-  				feature << targetString;
-  				feature << "~";
-  				feature << inputString;
-  				accumulator->SparsePlusEquals(feature.str(), 1);
-  				//alreadyScored.insert( &inputWord );
-  				alreadyScored[inputString] = 1;
+  				if (m_sourceContext) {
+  					// add source words right to current source word as context
+  					for(size_t contextIndex = inputIndex+1; contextIndex < input.GetSize(); contextIndex++ ) {
+  						string contextString = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  						bool contextExists;
+  						if (!m_unrestricted)
+  							contextExists = m_vocabSource.find( contextString ) != m_vocabSource.end();
+  						if (m_unrestricted || contextIndex == inputIndex+1 || contextExists) { // always add adjacent context words
+  	  					stringstream feature;
+  	  					feature << "glm_";
+  	  					feature << targetString;
+  	  					feature << "~";
+  	  					feature << inputString;
+  	  					feature << ",";
+  	  					feature << contextString;
+  	  					accumulator->SparsePlusEquals(feature.str(), 1);
+  	  					alreadyScored[inputString] = 1;
+  						}
+  					}
+  				}
+  				else {
+  					stringstream feature;
+  					feature << "glm_";
+  					feature << targetString;
+  					feature << "~";
+  					feature << inputString;
+  					accumulator->SparsePlusEquals(feature.str(), 1);
+  					//alreadyScored.insert( &inputWord );
+  					alreadyScored[inputString] = 1;
+  				}
   			}
   		}
   	}

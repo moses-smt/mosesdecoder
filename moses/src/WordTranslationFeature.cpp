@@ -52,18 +52,49 @@ void WordTranslationFeature::Evaluate(const TargetPhrase& targetPhrase,
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
     // look up words
-    const string &sourceWord = targetPhrase.GetSourcePhrase().GetWord(alignmentPoint->first).GetFactor(m_factorTypeSource)->GetString();
+  	const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
+  	size_t alignedSourcePos = alignmentPoint->first;
+    const string &sourceWord = sourcePhrase.GetWord(alignedSourcePos).GetFactor(m_factorTypeSource)->GetString();
     const string &targetWord = targetPhrase.GetWord(alignmentPoint->second).GetFactor(m_factorTypeTarget)->GetString();
     bool sourceExists = m_vocabSource.find( sourceWord ) != m_vocabSource.end();
     bool targetExists = m_vocabTarget.find( targetWord ) != m_vocabTarget.end();
     // no feature if both words are not in restricted vocabularies
     if (m_unrestricted || (sourceExists && targetExists)) {
-      // construct feature name
-      stringstream featureName;
-      featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
-      featureName << "|";
-      featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
-      accumulator->PlusEquals(this,featureName.str(),1);
+    	if (m_sourceContext) {
+    		// construct feature name, left context
+    		if (alignedSourcePos-1 > 0) {
+    			const string &leftContext =
+    					sourcePhrase.GetWord(alignedSourcePos-1).GetFactor(m_factorTypeSource)->GetString();
+    			stringstream featureName;
+    			featureName << leftContext;
+    			featureName << ",";
+    			featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
+    			featureName << "|";
+    			featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
+    			accumulator->PlusEquals(this,featureName.str(),1);
+    		}
+
+    		// construct feature name, right context
+    		if (alignedSourcePos+1 < sourcePhrase.GetSize()) {
+    			const string &rightContext =
+    			    					sourcePhrase.GetWord(alignedSourcePos+1).GetFactor(m_factorTypeSource)->GetString();
+    			stringstream featureName;
+    			featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
+    			featureName << ",";
+    			featureName << rightContext;
+    			featureName << "|";
+    			featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
+    			accumulator->PlusEquals(this,featureName.str(),1);
+    		}
+    	}
+    	else {
+    		// construct feature name
+    		stringstream featureName;
+    		featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
+    		featureName << "|";
+    		featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
+    		accumulator->PlusEquals(this,featureName.str(),1);
+    	}
     }
   }
 }

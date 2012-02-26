@@ -62,27 +62,24 @@ private:
   std::set<std::string> m_vocabTarget;
   bool m_unrestricted;
 
-  float m_sparseProducerWeight;
+  bool m_sourceContext;
 
-  bool Load(const std::string &filePathSource, const std::string &filePathTarget);
+  float m_sparseProducerWeight;
 
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors,
 	                            const std::vector< FactorType >& outFactors,
 	                            bool biasFeature,
+	                            bool sourceContext,
 	                            bool ignorePunctuation);
-
-  GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors,
-	                            const std::vector< FactorType >& outFactors,
-	                            bool biasFeature,
-	                            std::string vocabSource,
-	                            std::string vocabTarget);
 
   virtual ~GlobalLexicalModelUnlimited();
 
   virtual std::string GetScoreProducerWeightShortName(unsigned) const {
     return "glm";
   };
+
+  bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
   void InitializeForInput( Sentence const& in );
 
