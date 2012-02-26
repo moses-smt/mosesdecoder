@@ -1,6 +1,5 @@
 #include "CderScorer.h"
 
-#include <iterator>
 #include <fstream>
 #include <stdexcept>
 
@@ -42,11 +41,7 @@ void CderScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   vector<int> stats;
   prepareStatsVector(sid, text, stats);
-
-  stringstream sout;
-  copy(stats.begin(), stats.end(), ostream_iterator<float>(sout," "));
-  string stats_str = sout.str();
-  entry.set(stats_str);
+  entry.set(stats);
 }
 
 void CderScorer::prepareStatsVector(size_t sid, const string& text, vector<int>& stats)
