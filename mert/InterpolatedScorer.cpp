@@ -20,7 +20,7 @@ InterpolatedScorer::InterpolatedScorer (const string& name, const string& config
   if (_scorers.size() == 0) {
     throw runtime_error("There are no scorers");
   }
-  cout << "Number of scorers: " << _scorers.size() << endl;
+  cerr << "Number of scorers: " << _scorers.size() << endl;
 
   //TODO debug this
   string wtype = getConfig("weights","");
@@ -55,7 +55,7 @@ InterpolatedScorer::InterpolatedScorer (const string& name, const string& config
   for (vector<float>::iterator it = _scorerWeights.begin(); it < _scorerWeights.end(); it++) {
     cerr << *it << " " ;
   }
-  cout <<endl;
+  cerr <<endl;
 
 
 }
