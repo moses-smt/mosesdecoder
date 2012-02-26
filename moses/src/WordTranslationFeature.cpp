@@ -57,7 +57,7 @@ void WordTranslationFeature::Evaluate(const TargetPhrase& targetPhrase,
     bool sourceExists = m_vocabSource.find( sourceWord ) != m_vocabSource.end();
     bool targetExists = m_vocabTarget.find( targetWord ) != m_vocabTarget.end();
     // no feature if both words are not in restricted vocabularies
-    if (m_unrestricted || sourceExists || targetExists) {
+    if (m_unrestricted || (sourceExists && targetExists)) {
       // construct feature name
       stringstream featureName;
       featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");

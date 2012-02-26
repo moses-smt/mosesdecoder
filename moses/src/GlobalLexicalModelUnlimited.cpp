@@ -107,7 +107,7 @@ void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, Sco
   			}
 
   			// no feature if vocab is in use and both words are not in restricted vocabularies
-  			if (m_unrestricted || sourceExists || targetExists) {
+  			if (m_unrestricted || (sourceExists && targetExists)) {
   				stringstream feature;
   				feature << "glm_";
   				feature << targetString;
