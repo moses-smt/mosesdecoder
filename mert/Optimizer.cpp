@@ -72,7 +72,6 @@ statscore_t Optimizer::GetStatScore(const Point& param) const
 {
   vector<unsigned> bests;
   Get1bests(param, bests);
-  //copy(bests.begin(),bests.end(),ostream_iterator<unsigned>(cerr," "));
   statscore_t score = GetStatScore(bests);
   return score;
 }
