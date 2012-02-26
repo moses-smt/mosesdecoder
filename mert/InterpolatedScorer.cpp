@@ -50,6 +50,10 @@ InterpolatedScorer::InterpolatedScorer (const string& name, const string& config
         *it /= tot;
       }
     }
+    
+    if (_scorers.size() != _scorerWeights.size()) {
+      throw runtime_error("The number of weights does not equal the number of scorers!");
+    }
   }
   cerr << "The weights for the interpolated scorers are: " << endl;
   for (vector<float>::iterator it = _scorerWeights.begin(); it < _scorerWeights.end(); it++) {
