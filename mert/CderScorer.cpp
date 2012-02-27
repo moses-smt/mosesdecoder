@@ -1,5 +1,6 @@
 #include "CderScorer.h"
 
+#include <algorithm>
 #include <fstream>
 #include <stdexcept>
 
