@@ -983,7 +983,7 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     // read optional punctuation and bias specifications
     if (spec.size() > 0) {
       if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
-	UserMessage::Add("Format of glm feature is: --glm <factor-src> <factor-tgt> [use-bias] [ignore-punct] [use-source-context] [filename-src filename\
+	UserMessage::Add("Format of glm feature is: --glm <factor-src> <factor-tgt> [ignore-punct] [use-bias] [use-source-context] [filename-src filename\
 -tgt]");
 	return false;
       }
