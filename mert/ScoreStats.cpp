@@ -24,12 +24,6 @@ ScoreStats::ScoreStats(const size_t size)
   memset(array_, 0, GetArraySizeWithBytes());
 }
 
-ScoreStats::ScoreStats(std::string &theString)
-    : available_(0), entries_(0), array_(NULL)
-{
-  set(theString);
-}
-
 ScoreStats::~ScoreStats()
 {
   if (array_) {
@@ -73,14 +67,14 @@ void ScoreStats::add(ScoreStatsType v)
   array_[entries_++]=v;
 }
 
-void ScoreStats::set(std::string &theString)
+void ScoreStats::set(const std::string& str)
 {
-  std::string substring, stringBuf;
   reset();
-
-  while (!theString.empty()) {
-    getNextPound(theString, substring);
-    add(ConvertStringToScoreStatsType(substring));
+  vector<string> out;
+  Tokenize(str.c_str(), ' ', &out);
+  for (vector<string>::const_iterator it = out.begin();
+       it != out.end(); ++it) {
+    add(ConvertStringToScoreStatsType(*it));
   }
 }
 
@@ -144,7 +138,7 @@ bool operator==(const ScoreStats& s1, const ScoreStats& s2) {
     if (s1.get(k) != s2.get(k))
       return false;
   }
-  
+
   return true;
 }
 //END_ADDED

@@ -206,15 +206,8 @@ int main(int argc, char** argv)
     data.remove_duplicates();
     //END_ADDED
 
-    if (option.binmode)
-      cerr << "Binary write mode is selected" << endl;
-    else
-      cerr << "Binary write mode is NOT selected" << endl;
-
     data.save(option.featureDataFile, option.scoreDataFile, option.binmode);
     PrintUserTime("Stopping...");
-
-    // timer.stop("Stopping...");
 
     delete scorer;
 

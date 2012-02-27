@@ -181,7 +181,7 @@ if ($opt_hierarchical)
 my %PHRASE_USED;
 if (!$opt_hierarchical) {
     # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
-    open(INPUT,$input) or die "Can't read $input";
+    open(INPUT,mk_open_string($input)) or die "Can't read $input";
     while(my $line = <INPUT>) {
         chomp($line);
         my @WORD = split(/ +/,$line);
@@ -207,6 +207,22 @@ if (!$opt_hierarchical) {
     close(INPUT);
 }
 
+sub mk_open_string {
+  my $file = shift;
+  my $openstring;
+  if ($file !~ /\.gz$/ && -e "$file.gz") {
+    $openstring = "$ZCAT $file.gz |";
+  } elsif ($file =~ /\.gz$/) {
+    $openstring = "$ZCAT $file |";
+  } elsif ($opt_hierarchical) {
+    $openstring = "cat $file |";
+  } else {
+    $openstring = "< $file";
+  }
+  return $openstring;
+}
+
+
 # filter files
 for(my $i=0;$i<=$#TABLE;$i++) {
     my ($used,$total) = (0,0);
@@ -215,16 +231,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     my $new_file = $TABLE_NEW_NAME[$i];
     print STDERR "filtering $file -> $new_file...\n";
 
-    my $openstring;
-    if ($file !~ /\.gz$/ && -e "$file.gz") {
-      $openstring = "$ZCAT $file.gz |";
-    } elsif ($file =~ /\.gz$/) {
-      $openstring = "$ZCAT $file |";
-    } elsif ($opt_hierarchical) {
-      $openstring = "cat $file |";
-    } else {
-      $openstring = "< $file";
-    }
+    my $openstring = mk_open_string($file);
 
     my $new_openstring;
     if ($new_file =~ /\.gz$/) {
@@ -303,7 +310,7 @@ close(INFO);
 
 
 print "To run the decoder, please call:
-  moses -f $dir/moses.ini < $input\n";
+  moses -f $dir/moses.ini -i $input\n";
 
 sub safesystem {
   print STDERR "Executing: @_\n";
