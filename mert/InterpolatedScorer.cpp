@@ -1,4 +1,3 @@
-#include "Scorer.h"
 #include "ScorerFactory.h"
 #include "InterpolatedScorer.h"
 #include "Util.h"
@@ -50,7 +49,7 @@ InterpolatedScorer::InterpolatedScorer (const string& name, const string& config
         *it /= tot;
       }
     }
-    
+
     if (_scorers.size() != _scorerWeights.size()) {
       throw runtime_error("The number of weights does not equal the number of scorers!");
     }
@@ -60,15 +59,13 @@ InterpolatedScorer::InterpolatedScorer (const string& name, const string& config
     cerr << *it << " " ;
   }
   cerr <<endl;
-
-
 }
 
 void InterpolatedScorer::setScoreData(ScoreData* data)
 {
   size_t last = 0;
   m_score_data = data;
-  for (vector<Scorer*>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::iterator itsc = _scorers.begin(); itsc!=_scorers.end(); itsc++) {
     int numScoresScorer = (*itsc)->NumberOfScores();
     ScoreData* newData =new ScoreData(**itsc);
     for (size_t i = 0; i < data->size(); i++) {
@@ -95,6 +92,11 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
       newData->add(newScoreArray);
     }
     //newData->dump();
+
+    // NOTE: This class takes the ownership of the heap allocated
+    // ScoreData objects to avoid the memory leak issues.
+    m_scorers_score_data.push_back(newData);
+
     (*itsc)->setScoreData(newData);
     last += numScoresScorer;
   }
@@ -104,12 +106,11 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
 /** The interpolated scorer calls a vector of scorers and combines them with
     weights **/
 void InterpolatedScorer::score(const candidates_t& candidates, const diffs_t& diffs,
-                                statscores_t& scores) const
+                               statscores_t& scores) const
 {
-
   //cout << "*******InterpolatedScorer::score" << endl;
   size_t scorerNum = 0;
-  for (vector<Scorer*>::const_iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::const_iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
     //int numScores = (*itsc)->NumberOfScores();
     statscores_t tscores;
     (*itsc)->score(candidates,diffs,tscores);
@@ -138,7 +139,7 @@ void InterpolatedScorer::score(const candidates_t& candidates, const diffs_t& di
 
 void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
-  for (vector<Scorer *>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
     (*itsc)->setReferenceFiles(referenceFiles);
   }
 }
@@ -147,7 +148,7 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
 {
   stringstream buff;
   int i=0;
-  for (vector<Scorer*>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
     ScoreStats tempEntry;
     (*itsc)->prepareStats(sid, text, tempEntry);
     if (i > 0) buff <<  " ";
@@ -158,4 +159,3 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
   string str = buff.str();
   entry.set(str);
 }
-
