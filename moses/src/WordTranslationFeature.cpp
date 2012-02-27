@@ -53,7 +53,7 @@ void WordTranslationFeature::Evaluate(const TargetPhrase& targetPhrase,
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
     // look up words
   	const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
-  	size_t alignedSourcePos = alignmentPoint->first;
+  	int alignedSourcePos = alignmentPoint->first;
     const string &sourceWord = sourcePhrase.GetWord(alignedSourcePos).GetFactor(m_factorTypeSource)->GetString();
     const string &targetWord = targetPhrase.GetWord(alignmentPoint->second).GetFactor(m_factorTypeTarget)->GetString();
     bool sourceExists = m_vocabSource.find( sourceWord ) != m_vocabSource.end();
