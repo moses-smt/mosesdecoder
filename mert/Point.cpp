@@ -38,6 +38,7 @@ Point::Point(const vector<parameter_t>& init,
     }
   } else {
     CHECK(init.size()==pdim);
+    CHECK(optindices.size() == Point::dim);
     for (unsigned int i=0; i<Point::dim; i++) {
       operator[](i)=init[optindices[i]];
       m_min[i] = min[optindices[i]];

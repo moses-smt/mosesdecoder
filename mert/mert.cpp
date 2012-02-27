@@ -362,13 +362,6 @@ int main(int argc, char **argv)
     vector<string> features;
     Tokenize(option.to_optimize_str.c_str(), ',', &features);
 
-    if (option.pdim != static_cast<int>(features.size())) {
-      cerr << "Error: pdim and the specified number of features are not equal: "
-           << "pdim = " << option.pdim
-           << ", the number of features = " << features.size() << endl;
-      exit(1);
-    }
-
     for (vector<string>::const_iterator it = features.begin();
          it != features.end(); ++it) {
       const int feature_index = data.getFeatureIndex(*it);
@@ -405,6 +398,7 @@ int main(int argc, char **argv)
 
   Point::setpdim(option.pdim);
   Point::setdim(to_optimize.size());
+  Point::set_optindices(to_optimize);
 
   //starting points consist of specified points and random restarts
   vector<Point> startingPoints;
