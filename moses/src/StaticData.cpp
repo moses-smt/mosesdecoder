@@ -982,26 +982,33 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
 
     // read optional punctuation and bias specifications
     if (spec.size() > 0) {
-    	factors = Tokenize(spec[0],"-");
-    	if (spec.size() >= 2)
-    		ignorePunctuation = Scan<int>(spec[1]);
-    	if (spec.size() >= 3)
-    		biasFeature = Scan<int>(spec[2]);
-    	if (spec.size() >= 4)
-    	  sourceContext = Scan<int>(spec[3]);
-    	if (spec.size() == 6) {
-    		filenameSource = spec[4];
-    		filenameTarget = spec[5];
-    		restricted = true;
-    	}
+      if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
+	UserMessage::Add("Format of glm feature is: --glm <factor-src> <factor-tgt> [use-bias] [ignore-punct] [use-source-context] [filename-src filename\
+-tgt]");
+	return false;
+      }
+      
+      factors = Tokenize(spec[0],"-");
+      if (spec.size() >= 2)
+	ignorePunctuation = Scan<int>(spec[1]);
+      if (spec.size() >= 3)
+	biasFeature = Scan<int>(spec[2]);
+      if (spec.size() >= 4)
+	sourceContext = Scan<int>(spec[3]);
+      if (spec.size() == 6) {
+	filenameSource = spec[4];
+	filenameTarget = spec[5];
+	restricted = true;
+      }
     }
     else
     	factors = Tokenize(modelSpec[i],"-");
 
     if ( factors.size() != 2 ) {
-    	std::cerr << "wrong factor definition for global lexical model unlimited: " << modelSpec[i] << endl;
+      UserMessage::Add("Wrong factor definition for global lexical model unlimited: " + modelSpec[i]);
     	return false;
     }
+
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
     GlobalLexicalModelUnlimited* glmu = new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, sourceContext);
@@ -1737,7 +1744,7 @@ bool StaticData::LoadWordTranslationFeature()
 
   vector<string> tokens = Tokenize(parameters[0]);
   if (tokens.size() != 2 && tokens.size() != 3 && tokens.size() != 5) {
-    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [filename-src filename-tgt]");
+    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [use-source-context] [filename-src filename-tgt]");
     return false;
   }
 
