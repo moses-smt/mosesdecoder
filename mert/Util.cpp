@@ -84,5 +84,5 @@ void PrintUserTime(const std::string &message)
 
 double GetUserTime()
 {
-  return g_timer.get_elapsed_time();
+  return g_timer.get_elapsed_cpu_time();
 }

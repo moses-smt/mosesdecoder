@@ -1,73 +1,106 @@
 #include "Timer.h"
 #include "Util.h"
+#include <cstdio>
 
-double Timer::elapsed_time()
-{
-  time_t now;
-  time(&now);
-  return difftime(now, start_time);
+#if !defined(_WIN32) && !defined(_WIN64)
+#include <sys/resource.h>
+#include <sys/time.h>
+#endif
+
+namespace {
+
+#if !defined(_WIN32) && !defined(_WIN64)
+uint64_t GetMicroSeconds(const struct timeval& tv) {
+  return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
 }
 
-double Timer::get_elapsed_time()
-{
-  return elapsed_time();
+uint64_t GetTimeOfDayMicroSeconds() {
+  struct timeval tv;
+  gettimeofday(&tv, NULL);
+  return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
+}
+#endif
+
+} // namespace
+
+Timer::CPUTime Timer::GetCPUTimeMicroSeconds() const {
+#if !defined(_WIN32) && !defined(_WIN64)
+  struct rusage usage;
+  if (getrusage(RUSAGE_SELF, &usage)) {
+    TRACE_ERR("Error occurred: getrusage().\n");
+    exit(1);
+  }
+  CPUTime t;
+  t.user_time = GetMicroSeconds(usage.ru_utime);
+  t.sys_time = GetMicroSeconds(usage.ru_stime);
+  return t;
+#else  // Windows
+  // Not implemented yet.
+  // TODO: implement the Windows version using native APIs.
+  CPUTime t;
+  return t;
+#endif
+}
+
+double Timer::get_elapsed_cpu_time() const {
+  return static_cast<double>(get_elapsed_cpu_time_microseconds()) * 1e-6;
+}
+
+uint64_t Timer::get_elapsed_cpu_time_microseconds() const {
+  const CPUTime e = GetCPUTimeMicroSeconds();
+  return (e.user_time - m_start_time.user_time) +
+      (e.sys_time - m_start_time.sys_time);
+}
+
+double Timer::get_elapsed_wall_time() const {
+  return static_cast<double>(get_elapsed_wall_time_microseconds()) * 1e-6;
+}
+
+uint64_t Timer::get_elapsed_wall_time_microseconds() const {
+  return GetTimeOfDayMicroSeconds() - m_wall;
 }
 
 void Timer::start(const char* msg)
 {
   // Print an optional message, something like "Starting timer t";
   if (msg) TRACE_ERR( msg << std::endl);
-
-  // Return immediately if the timer is already running
-  if (running) return;
-
-  // Change timer status to running
-  running = true;
-
-  // Set the start time;
-  time(&start_time);
+  if (m_is_running) return;
+  m_is_running = true;
+  m_wall = GetTimeOfDayMicroSeconds();
+  m_start_time = GetCPUTimeMicroSeconds();
 }
 
-/***
- * Turn the timer off and start it again from 0.  Print an optional message.
- */
-/*
-inline void Timer::restart(const char* msg)
+void Timer::restart(const char* msg)
 {
-  // Print an optional message, something like "Restarting timer t";
-  if (msg) TRACE_ERR( msg << std::endl;
-
-  // Set the timer status to running
-  running = true;
-
-  // Set the accumulated time to 0 and the start time to now
-  acc_time = 0;
-  start_clock = clock();
-  start_time = time(0);
+  if (msg) {
+    TRACE_ERR(msg << std::endl);
+  }
+  m_wall = GetTimeOfDayMicroSeconds();
+  m_start_time = GetCPUTimeMicroSeconds();
 }
-*/
-
-/***
- * Stop the timer and print an optional message.
- */
-/*
-inline void Timer::stop(const char* msg)
-{
-  // Print an optional message, something like "Stopping timer t";
-  check(msg);
-
-  // Recalculate and store the total accumulated time up until now
-  if (running) acc_time += elapsed_time();
-
-  running = false;
-}
-*/
 
 void Timer::check(const char* msg)
 {
   // Print an optional message, something like "Checking timer t";
   if (msg) TRACE_ERR( msg << " : ");
 
-//  TRACE_ERR( "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");
-  TRACE_ERR( "[" << (running ? elapsed_time() : 0) << "] seconds\n");
+  if (m_is_running) {
+    TRACE_ERR("[Wall " << get_elapsed_wall_time()
+              << " CPU " << get_elapsed_cpu_time() << "] seconds.\n");
+  } else {
+    TRACE_ERR("WARNING: the timer is not running.\n");
+  }
+}
+
+std::string Timer::ToString() const {
+  std::string res;
+  char tmp[64];
+  const double wall = get_elapsed_wall_time();
+  const CPUTime e = GetCPUTimeMicroSeconds();
+  const double utime = (e.user_time - m_start_time.user_time) * 1e-6;
+  const double stime = (e.sys_time - m_start_time.sys_time) * 1e-6;
+  std::snprintf(tmp, sizeof(tmp), "wall %f user %f sec. sys %f sec. total %f sec.",
+                wall, utime, stime, utime + stime);
+  res.append(tmp);
+  return res;
 }
