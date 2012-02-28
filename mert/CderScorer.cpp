@@ -31,6 +31,7 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
     m_ref_sentences.push_back(vector<sent_t>());
     string line;
     while (getline(refin,line)) {
+      line = this->applyFactors(line);
       sent_t encoded;
       TokenizeAndEncode(line, encoded);
       m_ref_sentences[rid].push_back(encoded);
@@ -40,8 +41,10 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
 void CderScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
+  string sentence = this->applyFactors(text);
+
   vector<int> stats;
-  prepareStatsVector(sid, text, stats);
+  prepareStatsVector(sid, sentence, stats);
   entry.set(stats);
 }
 
