@@ -159,3 +159,24 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
   string str = buff.str();
   entry.set(str);
 }
+
+void InterpolatedScorer::setFactors(const string& factors)
+{
+  if (factors.empty()) return;
+
+  vector<string> fsplit;
+  split(factors, ',', fsplit);
+
+  if (fsplit.size() != _scorers.size()) throw runtime_error("Number of factor specifications does not equal number of interpolated scorers.");
+  
+  for (size_t i = 0; i < _scorers.size(); ++i)
+  {
+    _scorers[i]->setFactors(fsplit[i]);
+  }
+}
+
+
+
+
+
+

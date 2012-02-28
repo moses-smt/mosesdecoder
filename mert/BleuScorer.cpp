@@ -139,6 +139,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
     string line;
     size_t sid = 0; //sentence counter
     while (getline(refin,line)) {
+      line = this->applyFactors(line);
       if (i == 0) {
         NgramCounts *counts = new NgramCounts; //these get leaked
         m_ref_counts.push_back(counts);
@@ -183,8 +184,9 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   }
   NgramCounts testcounts;
   // stats for this line
-  vector<ScoreStatsType> stats(kLENGTH * 2);;
-  const size_t length = countNgrams(text, testcounts, kLENGTH);
+  vector<ScoreStatsType> stats(kLENGTH * 2);
+  string sentence = this->applyFactors(text);
+  const size_t length = countNgrams(sentence, testcounts, kLENGTH);
 
   // Calculate effective reference length.
   switch (m_ref_length_type) {

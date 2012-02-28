@@ -97,6 +97,16 @@ class Scorer
     m_score_data = data;
   }
 
+  /**
+   * Set the factors, which should be used for this metric
+   */
+  virtual void setFactors(const string& factors);
+
+  /**
+   * Take the factored sentence and return the desired factors
+   */
+  virtual string applyFactors(const string& sentece);
+
  private:
   class Encoder {
    public:
@@ -114,6 +124,7 @@ class Scorer
   string m_name;
   Encoder* m_encoder;
   map<string, string> m_config;
+  vector<int> m_factors;
 
  protected:
   ScoreData* m_score_data;

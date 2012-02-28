@@ -131,6 +131,7 @@ void usage()
   cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
   cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
   cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
+  cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
   cerr << "[--reference|-R] comma separated list of reference files" << endl;
   cerr << "[--candidate|-C] comma separated list of candidate files" << endl;
   cerr << "[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)" << endl;
@@ -164,6 +165,7 @@ static struct option long_options[] = {
   {"candidate", required_argument, 0, 'C'},
   {"bootstrap", required_argument, 0, 'b'},
   {"rseed", required_argument, 0, 'r'},
+  {"factors", required_argument, 0, 'f'},
   {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
@@ -174,6 +176,7 @@ struct ProgramOption {
   vector<string> scorer_configs;
   string reference;
   string candidate;
+  vector<string> scorer_factors;
   int bootstrap;
   int seed;
   bool has_seed;
@@ -190,11 +193,12 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
   int last_scorer_index = -1;
-  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:f:h", long_options, &option_index)) != -1) {
     switch(c) {
       case 's':
         opt->scorer_types.push_back(string(optarg));
         opt->scorer_configs.push_back(string(""));
+        opt->scorer_factors.push_back(string(""));
         last_scorer_index++;
         break;
       case 'c':
@@ -213,6 +217,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
         opt->seed = strtol(optarg, NULL, 10);
         opt->has_seed = true;
         break;
+      case 'f':
+        opt->scorer_factors[last_scorer_index] = string(optarg);
+        break;
       default:
         usage();
     }
@@ -223,6 +230,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   {
     opt->scorer_types.push_back(string("BLEU"));
     opt->scorer_configs.push_back(string(""));
+    opt->scorer_factors.push_back(string(""));
   }
 }
 
@@ -268,6 +276,7 @@ int main(int argc, char** argv)
         for (size_t i = 0; i < option.scorer_types.size(); i++)
         {
             g_scorer = ScorerFactory::getScorer(option.scorer_types[i], option.scorer_configs[i]);
+            g_scorer->setFactors(option.scorer_factors[i]);
             g_scorer->setReferenceFiles(refFiles);
             EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
             delete g_scorer;

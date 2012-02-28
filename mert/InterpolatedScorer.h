@@ -42,6 +42,11 @@ public:
 
   virtual void setScoreData(ScoreData* data);
 
+  /**
+   * Set the factors, which should be used for this metric
+   */
+  virtual void setFactors(const string& factors);
+
 protected:
   ScopedVector<Scorer> _scorers;
 
