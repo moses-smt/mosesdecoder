@@ -1262,6 +1262,8 @@ def sort_file(filename,tempdir=None):
     cmd = ['sort', filename]
     env = {}
     env['LC_ALL'] = 'C'
+    if tempdir:
+        cmd.extend(['-T',tempdir])
     
     outfile = NamedTemporaryFile(delete=False,dir=tempdir)
     sys.stderr.write('LC_ALL=C ' + ' '.join(cmd) + ' > ' + outfile.name + '\n')
