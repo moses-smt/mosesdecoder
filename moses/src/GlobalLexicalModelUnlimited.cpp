@@ -8,122 +8,6 @@ using namespace std;
 
 namespace Moses
 {
-GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const vector< FactorType >& inFactors,
-                                                         const vector< FactorType >& outFactors,
-                                                         bool biasFeature,
-                                                         bool ignorePunctuation,
-                                                         bool sourceContext)
-: StatelessFeatureFunction("glm",ScoreProducer::unlimited),
-  m_sparseProducerWeight(1),
-  m_inputFactors(inFactors),
-  m_outputFactors(outFactors),
-  m_biasFeature(biasFeature),
-  m_ignorePunctuation(ignorePunctuation),
-  m_sourceContext(sourceContext),
-  m_unrestricted(true)
-{
-	std::cerr << "Creating global lexical model unlimited.. ";
-
-	// compile a list of punctuation characters
-	if (m_ignorePunctuation) {
-		cerr << "ignoring punctuation.. ";
-		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
-		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
-			m_punctuationHash[punctuation[i]] = 1;
-	}
-	cerr << "done." << endl;
-}
-
-GlobalLexicalModelUnlimited::~GlobalLexicalModelUnlimited(){}
-
-void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
-{
-//  m_input = &in;
-  m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
-}
-
-void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
-{
-	const Sentence& input = *(m_local->input);
-  for(size_t targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
-  	string targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
-
-  	if (m_ignorePunctuation) {
-	  // check if first char is punctuation
-	  char firstChar = targetString.at(0);
-	  CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-	  if(charIterator != m_punctuationHash.end())
-	    continue;	 
-  	}
-
-	if (m_biasFeature) {
-	  stringstream feature;
-	  feature << "glm_";
-	  feature << targetString;
-	  feature << "~";
-	  feature << "**BIAS**";
-	  accumulator->SparsePlusEquals(feature.str(), 1);
-	}
-
-//  	set< const Word*, WordComparer > alreadyScored; // do not score a word twice
-  	StringHash alreadyScored;
-  	for(size_t inputIndex = 0; inputIndex < input.GetSize(); inputIndex++ ) {
-  		string inputString = input.GetWord(inputIndex).GetString(0); // TODO: change for other factors
-
-  		if (m_ignorePunctuation) {
-  			// check if first char is punctuation
-  			char firstChar = inputString.at(0);
-  			CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-  			if(charIterator != m_punctuationHash.end()) 
-			  continue;			
-  		}
-
-  		//if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
-  		if ( alreadyScored.find(inputString) == alreadyScored.end()) {
-  			bool sourceExists, targetExists;
-  			if (!m_unrestricted) {
-  				sourceExists = m_vocabSource.find( inputString ) != m_vocabSource.end();
-  			  targetExists = m_vocabTarget.find( targetString) != m_vocabTarget.end();
-  			}
-
-  			// no feature if vocab is in use and both words are not in restricted vocabularies
-  			if (m_unrestricted || (sourceExists && targetExists)) {
-  				if (m_sourceContext) {
-  					// add source words right to current source word as context
-  					for(size_t contextIndex = inputIndex+1; contextIndex < input.GetSize(); contextIndex++ ) {
-  						string contextString = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
-  						bool contextExists;
-  						if (!m_unrestricted)
-  							contextExists = m_vocabSource.find( contextString ) != m_vocabSource.end();
-  						if (m_unrestricted || contextIndex == inputIndex+1 || contextExists) { // always add adjacent context words
-  	  					stringstream feature;
-  	  					feature << "glm_";
-  	  					feature << targetString;
-  	  					feature << "~";
-  	  					feature << inputString;
-  	  					feature << ",";
-  	  					feature << contextString;
-  	  					accumulator->SparsePlusEquals(feature.str(), 1);
-  	  					alreadyScored[inputString] = 1;
-  						}
-  					}
-  				}
-  				else {
-  					stringstream feature;
-  					feature << "glm_";
-  					feature << targetString;
-  					feature << "~";
-  					feature << inputString;
-  					accumulator->SparsePlusEquals(feature.str(), 1);
-  					//alreadyScored.insert( &inputWord );
-  					alreadyScored[inputString] = 1;
-  				}
-  			}
-  		}
-  	}
-  }
-}
 
 bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
 																			 const std::string &filePathTarget)
@@ -159,6 +43,244 @@ bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
 
   m_unrestricted = false;
   return true;
+}
+
+void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
+{
+  m_local.reset(new ThreadLocalStorage);
+  m_local->input = &in;
+}
+
+//void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
+FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
+      ScoreComponentCollection* accumulator) const
+{
+	const Sentence& input = *(m_local->input);
+	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+
+	for(int targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
+  	string targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
+
+  	if (m_ignorePunctuation) {
+  		// check if first char is punctuation
+  		char firstChar = targetString.at(0);
+  		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+  		if(charIterator != m_punctuationHash.end())
+  			continue;
+  	}
+
+  	if (m_biasFeature) {
+  		stringstream feature;
+  		feature << "glm_";
+  		feature << targetString;
+  		feature << "~";
+  		feature << "**BIAS**";
+  		accumulator->SparsePlusEquals(feature.str(), 1);
+  	}
+
+  	StringHash alreadyScored;
+  	for(int sourceIndex = 0; sourceIndex < input.GetSize(); sourceIndex++ ) {
+  		string sourceString = input.GetWord(sourceIndex).GetString(0); // TODO: change for other factors
+
+  		if (m_ignorePunctuation) {
+  			// check if first char is punctuation
+  			char firstChar = sourceString.at(0);
+  			CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+  			if(charIterator != m_punctuationHash.end()) 
+			  continue;			
+  		}
+
+  		if ( alreadyScored.find(sourceString) == alreadyScored.end()) {
+  			bool sourceExists, targetExists;
+  			if (!m_unrestricted) {
+  				sourceExists = m_vocabSource.find( sourceString ) != m_vocabSource.end();
+  			  targetExists = m_vocabTarget.find( targetString) != m_vocabTarget.end();
+  			}
+
+  			// no feature if vocab is in use and both words are not in restricted vocabularies
+  			if (m_unrestricted || (sourceExists && targetExists)) {
+  				if (m_sourceContext) {
+/*  					if (sourceIndex == 0) {
+  						// add <s> trigger feature for source
+	  					stringstream feature;
+	  					feature << "glm_";
+	  					feature << targetString;
+	  					feature << "~";
+	  					feature << "<s>,";
+	  					feature << sourceString;
+	  					accumulator->SparsePlusEquals(feature.str(), 1);
+	  					alreadyScored[sourceString] = 1;
+  					}*/
+
+  					// add source words right to current source word as context
+  					for(int contextIndex = sourceIndex+1; contextIndex < input.GetSize(); contextIndex++ ) {
+  						string contextString = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  						bool contextExists;
+  						if (!m_unrestricted)
+  							contextExists = m_vocabSource.find( contextString ) != m_vocabSource.end();
+  						if (contextIndex == sourceIndex+1)
+  							contextExists = true; // always add adjacent context words
+
+  						if (m_unrestricted || contextExists) {
+  	  					stringstream feature;
+  	  					feature << "glm_";
+  	  					feature << targetString;
+  	  					feature << "~";
+  	  					feature << sourceString;
+  	  					feature << ",";
+  	  					feature << contextString;
+  	  					accumulator->SparsePlusEquals(feature.str(), 1);
+  	  					alreadyScored[sourceString] = 1;
+  						}
+  					}
+  				}
+  				else if (m_biphrase) {
+  					// --> look backwards for constructing context
+  					int globalTargetIndex = cur_hypo.GetSize() - targetPhrase.GetSize() + targetIndex;
+
+  					// 1) source-target pair, trigger source word (can be discont.) and adjacent target word (bigram)
+						string targetContext;
+						if (globalTargetIndex > 0)
+							targetContext = cur_hypo.GetWord(globalTargetIndex-1).GetString(0); // TODO: change for other factors
+						else
+							targetContext = "<s>";
+
+  					if (sourceIndex == 0) {
+  						string sourceTrigger = "<s>";
+  						AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+  						  										targetContext, targetString);
+  					}
+  					else
+  						for(int contextIndex = sourceIndex-1; contextIndex >= 0; contextIndex-- ) {
+  							string sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  							bool sourceTriggerExists = false;
+  							if (!m_unrestricted)
+  								sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+  							if (contextIndex == sourceIndex-1)
+  								sourceTriggerExists = true; // always add adjacent context words
+
+  							if (m_unrestricted || sourceTriggerExists)
+  								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+  										targetContext, targetString);
+  						}
+
+  					// 2) source-target pair, adjacent source word (bigram) and trigger target word (can be discont.)
+  					string sourceContext;
+  					if (sourceIndex-1 >= 0)
+  						sourceContext = input.GetWord(sourceIndex-1).GetString(0); // TODO: change for other factors
+  					else
+  						sourceContext = "<s>";
+
+  					if (globalTargetIndex == 0) {
+	  					string targetTrigger = "<s>";
+	  					AddFeature(accumulator, alreadyScored, sourceContext, sourceString,
+	  					  										targetTrigger, targetString);
+  					}
+  					else
+  						for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
+  							string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+  							bool targetTriggerExists = false;
+  							if (!m_unrestricted)
+  								targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
+  							if (globalContextIndex == targetIndex-1)
+  								targetTriggerExists = true; // always add adjacent context words
+
+  							if (m_unrestricted || targetTriggerExists)
+  								AddFeature(accumulator, alreadyScored, sourceContext, sourceString,
+  										targetTrigger, targetString);
+  						}
+  				}
+  				else if (m_bitrigger) {
+  					// allow additional discont. triggers on both sides
+  					int globalTargetIndex = cur_hypo.GetSize() - targetPhrase.GetSize() + targetIndex;
+
+  					if (sourceIndex == 0) {
+  						string sourceTrigger = "<s>";
+  						bool sourceTriggerExists = true;
+
+  						if (globalTargetIndex == 0) {
+  							string targetTrigger = "<s>";
+  							bool targetTriggerExists = true;
+
+  							if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
+  								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+  										targetTrigger, targetString);
+  						}
+  						else {
+  							// iterate backwards over target
+  							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
+  								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+  								bool targetTriggerExists = false;
+  								if (!m_unrestricted)
+  									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
+  								if (globalContextIndex == globalTargetIndex-1)
+  									targetTriggerExists = true; // always add adjacent context words
+
+  								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
+  									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+  											targetTrigger, targetString);
+  							}
+  						}
+  					}
+  					// iterate over both source and target
+  					else {
+  						// iterate backwards over source
+  						for(int contextIndex = sourceIndex-1; contextIndex >= 0; contextIndex-- ) {
+  							string sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  							bool sourceTriggerExists = false;
+  							if (!m_unrestricted)
+  								sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+  							if (contextIndex == sourceIndex-1)
+  								sourceTriggerExists = true; // always add adjacent context words
+
+  							// iterate backwards over target
+  							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
+  								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+  								bool targetTriggerExists = false;
+  								if (!m_unrestricted)
+  									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
+  								if (globalContextIndex == globalTargetIndex-1)
+  									targetTriggerExists = true; // always add adjacent context words
+
+  								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
+  									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+  											targetTrigger, targetString);
+  							}
+  						}
+						}
+  				}
+  				else {
+  					stringstream feature;
+  					feature << "glm_";
+  					feature << targetString;
+  					feature << "~";
+  					feature << sourceString;
+  					accumulator->SparsePlusEquals(feature.str(), 1);
+  					//alreadyScored.insert( &inputWord );
+  					alreadyScored[sourceString] = 1;
+  				}
+  			}
+  		}
+  	}
+  }
+
+	return new DummyState();
+}
+
+void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulator,
+		StringHash alreadyScored, string sourceTrigger, string sourceWord, string targetTrigger,
+		string targetWord) const {
+	stringstream feature;
+	feature << "wt_";
+	feature << targetTrigger;
+	feature << ",";
+	feature << targetWord;
+	feature << "~";
+	feature << sourceTrigger;
+	feature << ",";
+	feature << sourceWord;
+	accumulator->SparsePlusEquals(feature.str(), 1);
+	alreadyScored[sourceWord] = 1;
 }
 
 }

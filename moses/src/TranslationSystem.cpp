@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "GlobalLexicalModel.h"
 #include "GlobalLexicalModelUnlimited.h"
+#include "WordTranslationFeature.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
@@ -117,9 +118,11 @@ namespace Moses {
       for(size_t i=0;i<m_globalLexicalModels.size();++i) {
         m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
       }
-      for(size_t i=0;i<m_statelessFFs.size();++i) {
-    	if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm")
-    	  ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+      for(size_t i=0;i<m_statefulFFs.size();++i) {
+      	if (m_statefulFFs[i]->GetScoreProducerWeightShortName() == "glm")
+      		((GlobalLexicalModelUnlimited*)m_statefulFFs[i])->InitializeForInput((Sentence const&)source);
+      	else if (m_statefulFFs[i]->GetScoreProducerWeightShortName() == "wt")
+      		((WordTranslationFeature*)m_statefulFFs[i])->InitializeForInput((Sentence const&)source);
       }
   
       LMList::const_iterator iterLM;

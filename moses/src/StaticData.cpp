@@ -975,7 +975,7 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     bool ignorePunctuation = false;
     bool biasFeature = false;
     bool restricted = false;
-    bool sourceContext = false;
+    size_t context = 0;
     string filenameSource, filenameTarget;
     vector< string > factors;
     vector< string > spec = Tokenize(modelSpec[i]," ");
@@ -983,22 +983,22 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     // read optional punctuation and bias specifications
     if (spec.size() > 0) {
       if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
-	UserMessage::Add("Format of glm feature is: --glm <factor-src> <factor-tgt> [ignore-punct] [use-bias] [use-source-context] [filename-src filename\
--tgt]");
-	return false;
+      	UserMessage::Add("Format of glm feature is: --glm <factor-src> <factor-tgt> [ignore-punct] [use-bias] "
+      			"[context-type] [filename-src filename-tgt]");
+				return false;
       }
       
       factors = Tokenize(spec[0],"-");
       if (spec.size() >= 2)
-	ignorePunctuation = Scan<int>(spec[1]);
+      	ignorePunctuation = Scan<size_t>(spec[1]);
       if (spec.size() >= 3)
-	biasFeature = Scan<int>(spec[2]);
+      	biasFeature = Scan<size_t>(spec[2]);
       if (spec.size() >= 4)
-	sourceContext = Scan<int>(spec[3]);
+      	context = Scan<size_t>(spec[3]);
       if (spec.size() == 6) {
-	filenameSource = spec[4];
-	filenameTarget = spec[5];
-	restricted = true;
+      	filenameSource = spec[4];
+      	filenameTarget = spec[5];
+      	restricted = true;
       }
     }
     else
@@ -1011,7 +1011,7 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
 
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    GlobalLexicalModelUnlimited* glmu = new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, sourceContext);
+    GlobalLexicalModelUnlimited* glmu = new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, context);
     m_globalLexicalModelsUnlimited.push_back(glmu);
     if (restricted) {
       cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
@@ -1744,7 +1744,7 @@ bool StaticData::LoadWordTranslationFeature()
 
   vector<string> tokens = Tokenize(parameters[0]);
   if (tokens.size() != 2 && tokens.size() != 3 && tokens.size() != 5) {
-    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [use-source-context] [filename-src filename-tgt]");
+    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [context-type] [filename-src filename-tgt]");
     return false;
   }
 
@@ -1756,11 +1756,11 @@ bool StaticData::LoadWordTranslationFeature()
   // set factor
   FactorType factorIdSource = Scan<size_t>(tokens[0]);
   FactorType factorIdTarget = Scan<size_t>(tokens[1]);
-  bool sourceContext = false;
+  size_t context = 0;
   if (tokens.size() >= 3)
-  	sourceContext = Scan<size_t>(tokens[2]);
+  	context = Scan<size_t>(tokens[2]);
 
-  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource,factorIdTarget, sourceContext);
+  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource,factorIdTarget, context);
 
   // load word list for restricted feature set
   if (tokens.size() == 5) {
