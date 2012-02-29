@@ -831,7 +831,7 @@ int main(int argc, char** argv) {
 			if (evaluateModulo(shardPosition, mixing_base, actualBatchSize)) {
 #ifdef MPI_ENABLE
 				ScoreComponentCollection mixedWeights;
-				cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
+				//				cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
 
 				// collect all weights in mixedWeights and divide by number of processes
 				mpi::reduce(world, mosesWeights, mixedWeights, SCCPlus(), 0);
@@ -842,10 +842,10 @@ int main(int argc, char** argv) {
 					// normalise weights after averaging
 					if (normaliseWeights) {
 						mixedWeights.L1Normalise();
-						cerr << "Mixed weights (normalised): " << mixedWeights << endl;
+						//						cerr << "Mixed weights (normalised): " << mixedWeights << endl;
 					}
 					else {
-						cerr << "Mixed weights: " << mixedWeights << endl;
+					  //						cerr << "Mixed weights: " << mixedWeights << endl;
 					}
 				}
 
@@ -855,7 +855,7 @@ int main(int argc, char** argv) {
 				mosesWeights = mixedWeights;
 #endif
 #ifndef MPI_ENABLE
-				cerr << "\nRank " << rank << ", no mixing, weights: " << mosesWeights << endl;
+				//				cerr << "\nRank " << rank << ", no mixing, weights: " << mosesWeights << endl;
 #endif
 			} // end mixing
 
@@ -905,9 +905,9 @@ int main(int argc, char** argv) {
 			      }
 			      
 			      if (accumulateWeights) {
-			      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+				//			      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
 			      } else {
-			      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+				//			      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
 			      }
 			      
 			      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
