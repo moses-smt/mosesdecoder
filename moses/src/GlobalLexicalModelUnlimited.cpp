@@ -100,7 +100,7 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   			// no feature if vocab is in use and both words are not in restricted vocabularies
   			if (m_unrestricted || (sourceExists && targetExists)) {
   				if (m_sourceContext) {
-/*  					if (sourceIndex == 0) {
+  					if (sourceIndex == 0) {
   						// add <s> trigger feature for source
 	  					stringstream feature;
 	  					feature << "glm_";
@@ -110,7 +110,7 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
 	  					feature << sourceString;
 	  					accumulator->SparsePlusEquals(feature.str(), 1);
 	  					alreadyScored[sourceString] = 1;
-  					}*/
+  					}
 
   					// add source words right to current source word as context
   					for(int contextIndex = sourceIndex+1; contextIndex < input.GetSize(); contextIndex++ ) {
@@ -233,19 +233,29 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   							if (contextIndex == sourceIndex-1)
   								sourceTriggerExists = true; // always add adjacent context words
 
-  							// iterate backwards over target
-  							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-  								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
-  								bool targetTriggerExists = false;
-  								if (!m_unrestricted)
-  									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
-  								if (globalContextIndex == globalTargetIndex-1)
-  									targetTriggerExists = true; // always add adjacent context words
+    						if (globalTargetIndex == 0) {
+    							string targetTrigger = "<s>";
+    							bool targetTriggerExists = true;
 
-  								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
-  									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
-  											targetTrigger, targetString);
-  							}
+    							if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
+    								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+    										targetTrigger, targetString);
+    						}
+    						else {
+    							// iterate backwards over target
+    							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
+    								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+    								bool targetTriggerExists = false;
+    								if (!m_unrestricted)
+    									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
+    								if (globalContextIndex == globalTargetIndex-1)
+    									targetTriggerExists = true; // always add adjacent context words
+
+    								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
+    									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
+    											targetTrigger, targetString);
+    							}
+    						}
   						}
 						}
   				}

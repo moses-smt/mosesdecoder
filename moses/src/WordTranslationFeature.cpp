@@ -70,19 +70,19 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     // no feature if both words are not in restricted vocabularies
     if (m_unrestricted || (sourceExists && targetExists)) {
     	if (m_sourceContext) {
-    		int globalSourceIndex = cur_hypo.GetSize() - sourcePhrase.GetSize() + sourceIndex;
+    		int globalSourceIndex = input.GetSize() - sourcePhrase.GetSize() + sourceIndex;
 
     		// TODO
     	}
     	else if (m_biphrase) {
 				// allow additional discont. triggers on one of the sides, bigram on the other side
 				int globalTargetIndex = cur_hypo.GetSize() - targetPhrase.GetSize() + targetIndex;
-				int globalSourceIndex = cur_hypo.GetSize() - sourcePhrase.GetSize() + sourceIndex;
+				int globalSourceIndex = input.GetSize() - sourcePhrase.GetSize() + sourceIndex;
 
 				// 1) source-target pair, trigger source word (can be discont.) and adjacent target word (bigram)
 				string targetContext;
 				if (globalTargetIndex > 0)
-					targetContext = cur_hypo.GetWord(globalTargetIndex-1).GetFactor(m_factorTypeSource)->GetString();
+					targetContext = cur_hypo.GetWord(globalTargetIndex-1).GetFactor(m_factorTypeTarget)->GetString();
 				else
 					targetContext = "<s>";
 
@@ -119,7 +119,7 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 				}
 				else
 					for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-						string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetFactor(m_factorTypeSource)->GetString();
+						string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetFactor(m_factorTypeTarget)->GetString();
 						bool targetTriggerExists = false;
 						if (!m_unrestricted)
 							targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
@@ -134,7 +134,7 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     	else if (m_bitrigger) {
 				// allow additional discont. triggers on both sides
 				int globalTargetIndex = cur_hypo.GetSize() - targetPhrase.GetSize() + targetIndex;
-				int globalSourceIndex = cur_hypo.GetSize() - sourcePhrase.GetSize() + sourceIndex;
+				int globalSourceIndex =input.GetSize() - sourcePhrase.GetSize() + sourceIndex;
 
 				if (globalSourceIndex == 0) {
 					string sourceTrigger = "<s>";
@@ -150,7 +150,7 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 					else {
 						// iterate backwards over target
 						for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-							string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+							string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetFactor(m_factorTypeTarget)->GetString();
 							bool targetTriggerExists = false;
 							if (!m_unrestricted)
 								targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
@@ -166,24 +166,33 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 				else {
 					// iterate backwards over source
 					for(int contextIndex = globalSourceIndex-1; contextIndex >= 0; contextIndex-- ) {
-						string sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+						string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
 						bool sourceTriggerExists = false;
 						if (!m_unrestricted)
 							sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
 						if (contextIndex == globalSourceIndex-1)
 							sourceTriggerExists = true; // always add adjacent context words
 
-						// iterate backwards over target
-						for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-							string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
-							bool targetTriggerExists = false;
-							if (!m_unrestricted)
-								targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
-							if (globalContextIndex == globalTargetIndex-1)
-								targetTriggerExists = true; // always add adjacent context words
+						if (globalTargetIndex == 0) {
+							string targetTrigger = "<s>";
+							bool targetTriggerExists = true;
 
 							if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
 								AddFeature(accumulator, sourceTrigger, sourceWord, targetTrigger, targetWord);
+						}
+						else {
+							// iterate backwards over target
+							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
+								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetFactor(m_factorTypeTarget)->GetString();
+								bool targetTriggerExists = false;
+								if (!m_unrestricted)
+									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
+								if (globalContextIndex == globalTargetIndex-1)
+									targetTriggerExists = true; // always add adjacent context words
+
+								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
+									AddFeature(accumulator, sourceTrigger, sourceWord, targetTrigger, targetWord);
+							}
 						}
 					}
 				}
