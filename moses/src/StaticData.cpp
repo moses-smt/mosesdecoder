@@ -1542,7 +1542,7 @@ bool StaticData::LoadReferences()
 bool StaticData::LoadDiscrimLMFeature()
 {
 	// only load if specified
-  const vector<string> &wordFile = m_parameter->GetParam("discrim-lmodel-file");
+  const vector<string> &wordFile = m_parameter->GetParam("dlm");
   if (wordFile.empty()) {
     return true;
   }
