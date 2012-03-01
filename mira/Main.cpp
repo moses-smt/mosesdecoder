@@ -1244,26 +1244,7 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, vector<string> &inputS
 	dummyBleuScores.push_back(newScores);
 	dummyModelScores.push_back(newScores);
 
-	vector<string> translations;
-	for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
-		string& input = inputSentences[sid];
-
-		float factor = decode_hope ? 1.0 : -1.0;
-		vector<const Word*> out = decoder->getNBest(input, sid, 1, factor, 1, dummyFeatureValues[0],
-				dummyBleuScores[0], dummyModelScores[0], true, true, 0, 0);
-		cerr << endl;
-		decoder->cleanup();
-
-		stringstream translation;
-		for (size_t i = 0; i < out.size(); ++i) {
-			Word* w = const_cast<Word*>(out[i]);
-			translation << w->GetString(0);
-			translation << " ";
-		}
-		translations.push_back(translation.str());
-	}
-
-	cerr << "Saving " << translations.size() << " decoded sentences" << endl;
+	// open file for writing
 	string filename = decode_hope ? "decode_hope_dev" : "decode_fear_dev";
   ofstream out(filename.c_str());
   if (!out) {
@@ -1271,9 +1252,27 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, vector<string> &inputS
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }
-  for (size_t i = 0; i < translations.size(); ++i)
-  	out << translations[i] << endl;
+
+  for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
+		string& input = inputSentences[sid];
+
+		float factor = decode_hope ? 1.0 : -1.0;
+		vector<const Word*> output = decoder->getNBest(input, sid, 1, factor, 1, dummyFeatureValues[0],
+				dummyBleuScores[0], dummyModelScores[0], true, true, 0, 0);
+		cerr << endl;
+		decoder->cleanup();
+
+		stringstream translation;
+		for (size_t i = 0; i < output.size(); ++i) {
+			Word* w = const_cast<Word*>(output[i]);
+			translation << w->GetString(0);
+			translation << " ";
+		}
+		out << translation.str() << endl;
+	}
+
   out.close();
+  cerr << "Closing file " << filename << "." << endl;
 
 	exit(0);
 }
