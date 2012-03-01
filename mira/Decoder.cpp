@@ -79,7 +79,7 @@ namespace Mira {
 	  delete m_sentence;
   }
 
-  vector<const Word*> MosesDecoder::getNBest(const std::string& source,
+  vector< vector<const Word*> > MosesDecoder::getNBest(const std::string& source,
                               size_t sentenceid,
                               size_t count,
                               float bleuObjectiveWeight, 
@@ -87,7 +87,7 @@ namespace Mira {
                               vector< ScoreComponentCollection>& featureValues,
                               vector< float>& bleuScores,
                               vector< float>& modelScores,
-                              bool oracle,
+                              size_t numReturnedTranslations,
                               bool distinct,
                               size_t rank,
                               size_t epoch)
@@ -146,22 +146,24 @@ namespace Mira {
     	setBleuScore(featureValues.back(), 0);
     }
 
-    // get the best
-    vector<const Word*> best;
-    if (oracle) {
-        assert(sentences.GetSize() > 0);
-        const TrellisPath &path = sentences.at(0);
-        Phrase bestPhrase = path.GetTargetPhrase();
+    // prepare translations to return
+    vector< vector<const Word*> > translations;
+    for (size_t i=0; i < numReturnedTranslations; ++i) {
+        assert(sentences.GetSize() >= numReturnedTranslations);
+        const TrellisPath &path = sentences.at(i);
+        Phrase phrase = path.GetTargetPhrase();
 
-        for (size_t pos = 0; pos < bestPhrase.GetSize(); ++pos) {
-        	const Word &word = bestPhrase.GetWord(pos);
+        vector<const Word*> translation;
+        for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+        	const Word &word = phrase.GetWord(pos);
         	Word *newWord = new Word(word);
-        	best.push_back(newWord);
-    	}
+        	translation.push_back(newWord);
+        }
+        translations.push_back(translation);
     }
 
 //    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
-    return best;
+    return translations;
   }
 
   size_t MosesDecoder::getCurrentInputLength() {

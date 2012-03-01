@@ -50,7 +50,7 @@ class MosesDecoder {
     MosesDecoder(const std::string& inifile, int debuglevel,  int argc, std::vector<std::string> decoder_params);
 	
     //returns the best sentence
-    std::vector<const Moses::Word*> getNBest(const std::string& source,
+    std::vector< std::vector<const Moses::Word*> > getNBest(const std::string& source,
                           size_t sentenceid,
                           size_t count,
                           float bleuObjectiveweight, //weight of bleu in objective
@@ -58,7 +58,7 @@ class MosesDecoder {
                           std::vector< Moses::ScoreComponentCollection>& featureValues,
                           std::vector< float>& bleuScores,
                           std::vector< float>& modelScores,
-                          bool oracle,
+                          size_t numReturnedTranslations,
                           bool distinct,
                           size_t rank,
                           size_t epoch);

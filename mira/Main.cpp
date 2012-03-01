@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
 	float minBleuRatio, maxBleuRatio;
 	bool boost;
 	bool decode_hope, decode_fear;
+	string decode_filename;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -142,6 +143,7 @@ int main(int argc, char** argv) {
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
 		("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
+		("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 		("delay-updates", po::value<bool>(&delayUpdates)->default_value(false), "Delay all updates until the end of an epoch")
@@ -292,7 +294,7 @@ int main(int argc, char** argv) {
 	}
 
 	if (decode_hope || decode_fear) {
-		decodeHopeOrFear(decode_hope, decode_fear, inputSentences, decoder);
+		decodeHopeOrFear(decode_hope, decode_fear, decode_filename, inputSentences, decoder, n);
 	}
 
 	// Optionally shuffle the sentences
@@ -530,9 +532,10 @@ int main(int argc, char** argv) {
 				if (hope_fear || hope_fear_rank || perceptron_update) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
-					vector<const Word*> oracle = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
+					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							true, distinctNbest, rank, epoch);
+							1, distinctNbest, rank, epoch);
+					vector<const Word*> oracle = outputHope[0];
 					size_t current_input_length = decoder->getCurrentInputLength();
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
@@ -553,9 +556,10 @@ int main(int argc, char** argv) {
 					if (historyOf1best && !skip) {
 						// MODEL (for updating the history only, using dummy vectors)
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
-						bestModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
+						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
-								true, distinctNbest, rank, epoch);
+								1, distinctNbest, rank, epoch);
+						bestModel = outputModel[0];
 						decoder->cleanup();
 						cerr << endl;
 						ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
@@ -567,9 +571,10 @@ int main(int argc, char** argv) {
 					int fearSize = 0;
 					if (!skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
-						vector<const Word*> fear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight_fear,
+						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight_fear,
 								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-								true,	distinctNbest, rank, epoch);
+								1,	distinctNbest, rank, epoch);
+						vector<const Word*> fear = outputFear[0];
 						decoder->cleanup();
 						ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 						avg_ref_length += ref_length;
@@ -625,9 +630,10 @@ int main(int argc, char** argv) {
 				if (rank_only || hope_fear_rank) {
 					// MODEL
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
-					vector<const Word*> bestModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuScoreWeight,
+					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							true,	distinctNbest, rank, epoch);
+							1,	distinctNbest, rank, epoch);
+					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
@@ -640,9 +646,10 @@ int main(int argc, char** argv) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
-					vector<const Word*> oracle = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight_hope,
+					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							true,	distinctNbest, rank, epoch);
+							1,	distinctNbest, rank, epoch);
+					vector<const Word*> oracle = outputHope[0];
 					// needed for history
 					inputLengths.push_back(decoder->getCurrentInputLength());
 					ref_ids.push_back(*sid);
@@ -658,9 +665,10 @@ int main(int argc, char** argv) {
 
 					// MODEL
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
-					vector<const Word*> bestModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
+					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							true,	distinctNbest, rank, epoch);
+							1,	distinctNbest, rank, epoch);
+					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
@@ -670,9 +678,10 @@ int main(int argc, char** argv) {
 					// FEAR
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
 					size_t fearPos = featureValues[batchPosition].size();
-					vector<const Word*> fear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight_fear,
+					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight_fear,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							true, distinctNbest, rank, epoch);
+							1, distinctNbest, rank, epoch);
+					vector<const Word*> fear = outputFear[0];
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 					float fear_length_ratio = (float)fear.size()/ref_length;
@@ -1228,7 +1237,7 @@ void deleteTranslations(vector<vector<const Word*> > &translations) {
 	}
 }
 
-void decodeHopeOrFear(bool decode_hope, bool decode_fear, vector<string> &inputSentences, MosesDecoder* decoder) {
+void decodeHopeOrFear(bool decode_hope, bool decode_fear, string filename, vector<string> &inputSentences, MosesDecoder* decoder, size_t n) {
 	if (decode_hope)
 		cerr << "Decoding dev input set according to hope objective.. " << endl;
 	else
@@ -1244,12 +1253,19 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, vector<string> &inputS
 	dummyBleuScores.push_back(newScores);
 	dummyModelScores.push_back(newScores);
 
-	// open file for writing
-	string filename = decode_hope ? "decode_hope_dev" : "decode_fear_dev";
-  ofstream out(filename.c_str());
+	// open files for writing
+	ostringstream filename_nbest;
+	filename_nbest << filename << "." << n << "best";
+	ofstream out(filename.c_str());
+  ofstream nbest_out((filename_nbest.str()).c_str());
   if (!out) {
     ostringstream msg;
     msg << "Unable to open " << filename;
+    throw runtime_error(msg.str());
+  }
+  if (!nbest_out) {
+    ostringstream msg;
+    msg << "Unable to open " << filename_nbest;
     throw runtime_error(msg.str());
   }
 
@@ -1257,22 +1273,31 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, vector<string> &inputS
 		string& input = inputSentences[sid];
 
 		float factor = decode_hope ? 1.0 : -1.0;
-		vector<const Word*> output = decoder->getNBest(input, sid, 1, factor, 1, dummyFeatureValues[0],
-				dummyBleuScores[0], dummyModelScores[0], true, true, 0, 0);
+		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, 1, dummyFeatureValues[0],
+				dummyBleuScores[0], dummyModelScores[0], n, true, 0, 0);
 		cerr << endl;
 		decoder->cleanup();
 
-		stringstream translation;
-		for (size_t i = 0; i < output.size(); ++i) {
-			Word* w = const_cast<Word*>(output[i]);
-			translation << w->GetString(0);
-			translation << " ";
+
+		for (size_t i = 0; i < nbestOutput.size(); ++i) {
+			vector<const Word*> output = nbestOutput[i];
+			stringstream translation;
+			for (size_t k = 0; k < output.size(); ++k) {
+				Word* w = const_cast<Word*>(output[k]);
+				translation << w->GetString(0);
+				translation << " ";
+			}
+
+			if (i == 0)
+				out << translation.str() << endl;
+			nbest_out << sid << " ||| " << translation.str() << " ||| " << "sBleu="
+					<< dummyBleuScores[0][i] << " ||| " << dummyModelScores[0][i] << endl;
 		}
-		out << translation.str() << endl;
 	}
 
   out.close();
-  cerr << "Closing file " << filename << "." << endl;
+  nbest_out.close();
+  cerr << "Closing files " << filename << " and " << filename_nbest.str() << endl;
 
 	exit(0);
 }
