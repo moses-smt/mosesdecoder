@@ -711,6 +711,9 @@ bool StaticData::LoadData(Parameter *parameter)
     // DLM: apply additional weight to sparse features if applicable
     for (size_t i = 0; i < m_targetNgramFeatures.size(); ++i) {
     	float dlmWeight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
+    	cerr << "Set sparse producer weight: " << dlmWeight << endl;
+    	cerr << "Size of loaded model: " <<
+    			extraWeights.GetNumberWeights(m_targetNgramFeatures[i]) << endl;
     	if (dlmWeight != 1)
     		extraWeights.MultiplyEquals(m_targetNgramFeatures[i], dlmWeight);
     }
@@ -719,7 +722,8 @@ bool StaticData::LoadData(Parameter *parameter)
     for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
     	float glmWeight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
     	cerr << "Set sparse producer weight: " << glmWeight << endl;
-    	cerr << "Size of loaded model: " << extraWeights.Size() << endl;
+    	cerr << "Size of loaded model: " <<
+    			extraWeights.GetNumberWeights(m_globalLexicalModelsUnlimited[i]) << endl;
     	if (glmWeight != 1)
     		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], glmWeight);
     }

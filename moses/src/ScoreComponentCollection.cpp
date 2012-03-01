@@ -73,6 +73,20 @@ void ScoreComponentCollection::MultiplyEquals(const ScoreProducer* sp, float sca
   }
 }
 
+// Count weights belonging to this sparse producer
+size_t ScoreComponentCollection::GetNumberWeights(const ScoreProducer* sp) {
+	assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+  std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
+  size_t weights = 0;
+  for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
+    std::stringstream name;
+    name << i->first;
+    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    	weights++;
+  }
+  return weights;
+}
+
 void ScoreComponentCollection::DivideEquals(float scalar)
 {
 	m_scores /= scalar;

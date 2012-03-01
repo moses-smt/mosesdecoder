@@ -123,6 +123,7 @@ int main(int argc, char** argv) {
 	float min_oracle_bleu;
 	float minBleuRatio, maxBleuRatio;
 	bool boost;
+	bool decode_hope, decode_fear;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -139,6 +140,8 @@ int main(int argc, char** argv) {
 		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+		("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
+		("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 		("delay-updates", po::value<bool>(&delayUpdates)->default_value(false), "Delay all updates until the end of an epoch")
@@ -286,6 +289,10 @@ int main(int argc, char** argv) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
 		decoder->setWeights(startWeights);
+	}
+
+	if (decode_hope || decode_fear) {
+		decodeHopeOrFear(decode_hope, decode_fear, inputSentences, decoder);
 	}
 
 	// Optionally shuffle the sentences
@@ -1218,4 +1225,54 @@ void deleteTranslations(vector<vector<const Word*> > &translations) {
 			delete translations[i][j];
 		}
 	}
+}
+
+void decodeHopeOrFear(bool decode_hope, bool decode_fear, vector<string> &inputSentences, MosesDecoder* decoder) {
+	if (decode_hope)
+		cerr << "Decoding dev input set according to hope objective.. " << endl;
+	else
+		cerr << "Decoding dev input set according to fear objective.. " << endl;
+
+	vector<vector<ScoreComponentCollection> > dummyFeatureValues;
+	vector<vector<float> > dummyBleuScores;
+	vector<vector<float> > dummyModelScores;
+
+	vector<ScoreComponentCollection> newFeatureValues;
+	vector<float> newScores;
+	dummyFeatureValues.push_back(newFeatureValues);
+	dummyBleuScores.push_back(newScores);
+	dummyModelScores.push_back(newScores);
+
+	vector<string> translations;
+	for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
+		string& input = inputSentences[sid];
+
+		float factor = decode_hope ? 1.0 : -1.0;
+		vector<const Word*> out = decoder->getNBest(input, sid, 1, factor, 1, dummyFeatureValues[0],
+				dummyBleuScores[0], dummyModelScores[0], true, true, 0, 0);
+		cerr << endl;
+		decoder->cleanup();
+
+		stringstream translation;
+		for (size_t i = 0; i < out.size(); ++i) {
+			Word* w = const_cast<Word*>(out[i]);
+			translation << w->GetString(0);
+			translation << " ";
+		}
+		translations.push_back(translation.str());
+	}
+
+	cerr << "Saving " << translations.size() << " decoded sentences" << endl;
+	string filename = decode_hope ? "decode_hope_dev" : "decode_fear_dev";
+  ofstream out(filename.c_str());
+  if (!out) {
+    ostringstream msg;
+    msg << "Unable to open " << filename;
+    throw runtime_error(msg.str());
+  }
+  for (size_t i = 0; i < translations.size(); ++i)
+  	out << translations[i] << endl;
+  out.close();
+
+	exit(0);
 }

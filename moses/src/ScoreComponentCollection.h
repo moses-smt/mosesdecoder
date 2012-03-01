@@ -132,6 +132,8 @@ public:
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
 	void MultiplyEquals(const ScoreProducer* sp, float scalar);
 
+	size_t GetNumberWeights(const ScoreProducer* sp);
+
   //! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
 	{

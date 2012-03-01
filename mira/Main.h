@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "Word.h"
 #include "ScoreProducer.h"
+#include "Decoder.h"
 
 typedef std::map<const Moses::ScoreProducer*, std::vector< float > > ProducerWeightMap;
 typedef std::pair<const Moses::ScoreProducer*, std::vector< float > > ProducerWeightPair;
@@ -49,5 +50,6 @@ void printFeatureValues(std::vector<std::vector<Moses::ScoreComponentCollection>
 void ignoreCoreFeatures(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, ProducerWeightMap &coreWeightMap);
 void takeLogs(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t base);
 void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translations);
+void decodeHopeOrFear(bool decode_hope, bool decode_fear, std::vector<std::string> &inputSentences, Mira::MosesDecoder* decoder);
 
 #endif /* MAIN_H_ */
