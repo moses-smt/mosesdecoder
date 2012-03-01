@@ -787,10 +787,11 @@ int main(int argc, char** argv) {
 					// apply weight update
 					if (delayUpdates) {
 						delayedWeightUpdates.PlusEquals(weightUpdate);
-						cerr << "\nRank " << rank << ", epoch " << epoch << ", keeping update: " << weightUpdate << endl;
+						//						cerr << "\nRank " << rank << ", epoch " << epoch << ", keeping update: " << weightUpdate << endl;
 						++numberOfUpdatesThisEpoch;
 					}
 					else {
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", applying update.." << endl;
 						mosesWeights.PlusEquals(weightUpdate);
 						if (normaliseWeights)
 							mosesWeights.L1Normalise();
