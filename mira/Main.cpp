@@ -123,7 +123,7 @@ int main(int argc, char** argv) {
 	float min_oracle_bleu;
 	float minBleuRatio, maxBleuRatio;
 	bool boost;
-	bool decode_hope, decode_fear;
+	bool decode_hope, decode_fear, decode_model;
 	string decode_filename;
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -143,6 +143,7 @@ int main(int argc, char** argv) {
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
 		("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
+		("decode-model", po::value<bool>(&decode_model)->default_value(false), "Decode dev input set according to normal objective")
 		("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
@@ -218,7 +219,7 @@ int main(int argc, char** argv) {
   // create threadpool, if using multi-threaded decoding
   // note: multi-threading is done on sentence-level,
   // each thread translates one sentence
-#ifdef WITH_THREADS
+/*#ifdef WITH_THREADS
   if (threadcount < 1) {
     cerr << "Error: Need to specify a positive number of threads" << endl;
     exit(1);
@@ -229,7 +230,7 @@ int main(int argc, char** argv) {
     cerr << "Error: Thread count of " << threadcount << " but moses not built with thread support" << endl;
     exit(1);
   }
-#endif
+#endif*/
 
   if (dummy != -1)
     slack = dummy;
@@ -293,8 +294,8 @@ int main(int argc, char** argv) {
 		decoder->setWeights(startWeights);
 	}
 
-	if (decode_hope || decode_fear) {
-		decodeHopeOrFear(decode_hope, decode_fear, decode_filename, inputSentences, decoder, n);
+	if (decode_hope || decode_fear || decode_model) {
+		decodeHopeOrFear(decode_hope, decode_fear, decode_model, decode_filename, inputSentences, decoder, n);
 	}
 
 	// Optionally shuffle the sentences
@@ -1237,11 +1238,13 @@ void deleteTranslations(vector<vector<const Word*> > &translations) {
 	}
 }
 
-void decodeHopeOrFear(bool decode_hope, bool decode_fear, string filename, vector<string> &inputSentences, MosesDecoder* decoder, size_t n) {
+void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, string filename, vector<string> &inputSentences, MosesDecoder* decoder, size_t n) {
 	if (decode_hope)
 		cerr << "Decoding dev input set according to hope objective.. " << endl;
-	else
+	else if (decode_fear)
 		cerr << "Decoding dev input set according to fear objective.. " << endl;
+	else
+		cerr << "Decoding dev input set according to normal objective.. " << endl;
 
 	vector<vector<ScoreComponentCollection> > dummyFeatureValues;
 	vector<vector<float> > dummyBleuScores;
@@ -1272,12 +1275,13 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, string filename, vecto
   for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
 		string& input = inputSentences[sid];
 
-		float factor = decode_hope ? 1.0 : -1.0;
+		float factor = 0.0;
+		if (decode_hope) factor = 1.0;
+		if (decode_fear) factor = -1.0;
 		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, 1, dummyFeatureValues[0],
 				dummyBleuScores[0], dummyModelScores[0], n, true, 0, 0);
 		cerr << endl;
 		decoder->cleanup();
-
 
 		for (size_t i = 0; i < nbestOutput.size(); ++i) {
 			vector<const Word*> output = nbestOutput[i];
