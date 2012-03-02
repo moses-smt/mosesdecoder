@@ -343,6 +343,8 @@ int main(int argc, char **argv)
     data.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
 
+  TheScorer->setScoreData(data.getScoreData().get());
+
   //ADDED_BY_TS
   data.remove_duplicates();
   //END_ADDED
