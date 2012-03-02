@@ -148,8 +148,7 @@ namespace Mira {
 
     // prepare translations to return
     vector< vector<const Word*> > translations;
-    for (size_t i=0; i < numReturnedTranslations; ++i) {
-        assert(sentences.GetSize() >= numReturnedTranslations);
+    for (size_t i=0; i < numReturnedTranslations && i < sentences.GetSize(); ++i) {
         const TrellisPath &path = sentences.at(i);
         Phrase phrase = path.GetTargetPhrase();
 
