@@ -22,6 +22,10 @@ class Timer
   uint64_t m_wall;                      // wall-clock time in microseconds
   CPUTime m_start_time;
 
+  // No copying allowed
+  Timer(const Timer&);
+  void operator=(const Timer&);
+
  public:
   /**
    * 'm_is_running' is initially false. A timer needs to be explicitly started
