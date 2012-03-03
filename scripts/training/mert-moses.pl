@@ -137,6 +137,7 @@ my $___INPUTTYPE = 0;
 my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert & extractor
 my $mertmertargs = undef; # args to pass through to mert only
+my $extractorargs = undef; # args to pass through to extractor only
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $filterfile = undef;
 my $qsubwrapper = undef;
@@ -178,6 +179,7 @@ GetOptions(
   "verbose" => \$verbose,
   "mertdir=s" => \$mertdir,
   "mertargs=s" => \$mertargs,
+  "extractorargs=s" => \$extractorargs,
   "mertmertargs=s" => \$mertmertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
@@ -241,8 +243,9 @@ Options:
                              model. useful for lattice decoding
   --rootdir=STRING       ... where do helpers reside (if not given explicitly)
   --mertdir=STRING       ... path to new mert implementation
-  --mertargs=STRING      ... extra args for mert, eg. to specify scorer
-  --mertmertargs=STRING  ... extra args for mert only, 
+  --mertargs=STRING      ... extra args for both extractor and mert
+  --extractorargs=STRING ... extra args for extractor only
+  --mertmertargs=STRING  ... extra args for mert only 
   --scorenbestcmd=STRING ... path to score-nbest.py
   --old-sge              ... passed to parallelizers, assume Grid Engine < 6.0
   --inputtype=[0|1|2]    ... Handle different input types: (0 for text,
@@ -364,6 +367,7 @@ $scconfig = "--scconfig $scconfig" if ($scconfig);
 
 my $mert_extract_args=$mertargs;
 $mert_extract_args .=" $scconfig";
+$mert_extract_args .=" $extractorargs";
 
 $mertmertargs = "" if !defined $mertmertargs;
 

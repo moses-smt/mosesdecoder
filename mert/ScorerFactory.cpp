@@ -7,6 +7,7 @@
 #include "TerScorer.h"
 #include "CderScorer.h"
 #include "MergeScorer.h"
+#include "InterpolatedScorer.h"
 
 using namespace std;
 
@@ -32,6 +33,11 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
   } else if (type == "MERGE") {
     return (MergeScorer*) new MergeScorer(config);
   } else {
-    throw runtime_error("Unknown scorer type: " + type);
+    if (type.find(',') != string::npos) {
+      return new InterpolatedScorer(type, config);
+    }
+    else {
+      throw runtime_error("Unknown scorer type: " + type);
+    }
   }
 }
