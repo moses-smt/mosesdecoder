@@ -60,6 +60,15 @@ public:
   static void setdim(size_t d) {
     dim = d;
   }
+
+  static void set_optindices(const vector<unsigned int>& indices) {
+    optindices = indices;
+  }
+
+  static const vector<unsigned int>& get_optindices() {
+    return optindices;
+  }
+
   static bool OptimizeAll() {
     return fixedweights.empty();
   }

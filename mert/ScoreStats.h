@@ -31,7 +31,7 @@ private:
 public:
   ScoreStats();
   explicit ScoreStats(const size_t size);
-  explicit ScoreStats(std::string &theString);
+
   ~ScoreStats();
 
   // We intentionally allow copying.
@@ -66,7 +66,15 @@ public:
     return array_;
   }
 
-  void set(std::string &theString);
+  void set(const std::string& str);
+
+  // Much more efficient than the above.
+  void set(const std::vector<ScoreStatsType>& stats) {
+    reset();
+    for (size_t i = 0; i < stats.size(); ++i) {
+      add(stats[i]);
+    }
+  }
 
   inline size_t bytes() const {
     return GetArraySizeWithBytes();
