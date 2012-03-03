@@ -16,7 +16,7 @@ class Timer
     CPUTime() : user_time(0), sys_time(0) { }
   };
 
-  CPUTime GetCPUTimeMicroSeconds() const;
+  void GetCPUTimeMicroSeconds(CPUTime* cpu_time) const;
 
   bool m_is_running;
   uint64_t m_wall;                      // wall-clock time in microseconds
