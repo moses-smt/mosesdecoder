@@ -135,6 +135,7 @@ public:
 	}
 
 	//! TODO - why is this needed and is it set correctly by every phrase dictionary class ? should be set in constructor
+	// NOTE: this is not set correctly for unbinarized phrase tables
 	void SetSourcePhrase(const Phrase&  p) 
 	{
 		m_sourcePhrase=p;

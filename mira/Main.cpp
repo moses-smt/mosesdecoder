@@ -1294,8 +1294,8 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, str
 
 			if (i == 0)
 				out << translation.str() << endl;
-			nbest_out << sid << " ||| " << translation.str() << " ||| " << "sBleu="
-					<< dummyBleuScores[0][i] << " ||| " << dummyModelScores[0][i] << endl;
+			nbest_out << sid << " ||| " << translation.str() << " ||| " << dummyFeatureValues[0][i] <<
+					" ||| " << dummyModelScores[0][i] << " ||| sBleu=" << dummyBleuScores[0][i] << endl;
 		}
 	}
 
