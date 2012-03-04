@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <getopt.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "Data.h"
 #include "Scorer.h"
@@ -185,7 +186,8 @@ int main(int argc, char** argv)
 
     TRACE_ERR("Scorer type: " << option.scorerType << endl);
 
-    Scorer* scorer = ScorerFactory::getScorer(option.scorerType, option.scorerConfig);
+    boost::scoped_ptr<Scorer> scorer(
+        ScorerFactory::getScorer(option.scorerType, option.scorerConfig));
 
     scorer->setFactors(option.scorerFactors);
 
@@ -217,8 +219,6 @@ int main(int argc, char** argv)
 
     data.save(option.featureDataFile, option.scoreDataFile, option.binmode);
     PrintUserTime("Stopping...");
-
-    delete scorer;
 
     return EXIT_SUCCESS;
   } catch (const exception& e) {

@@ -11,6 +11,7 @@
 #include <ctime>
 
 #include <getopt.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "Data.h"
 #include "Point.h"
@@ -333,17 +334,18 @@ int main(int argc, char **argv)
   }
 
   // it make sense to know what parameter set were used to generate the nbest
-  Scorer *TheScorer = ScorerFactory::getScorer(option.scorer_type, option.scorer_config);
+  boost::scoped_ptr<Scorer> scorer(
+      ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
 
   //load data
-  Data data(*TheScorer);
+  Data data(*scorer);
 
   for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
     data.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
 
-  TheScorer->setScoreData(data.getScoreData().get());
+  scorer->setScoreData(data.getScoreData().get());
 
   //ADDED_BY_TS
   data.remove_duplicates();
@@ -506,7 +508,6 @@ int main(int argc, char **argv)
     }
   }
 
-  delete TheScorer;
   PrintUserTime("Stopping...");
 
   return 0;
