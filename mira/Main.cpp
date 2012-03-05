@@ -1281,16 +1281,6 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, str
 	else
 		cerr << "Decoding dev input set according to normal objective.. " << endl;
 
-	vector<vector<ScoreComponentCollection> > dummyFeatureValues;
-	vector<vector<float> > dummyBleuScores;
-	vector<vector<float> > dummyModelScores;
-
-	vector<ScoreComponentCollection> newFeatureValues;
-	vector<float> newScores;
-	dummyFeatureValues.push_back(newFeatureValues);
-	dummyBleuScores.push_back(newScores);
-	dummyModelScores.push_back(newScores);
-
 	// open files for writing
 	ostringstream filename_nbest;
 	filename_nbest << filename << "." << n << "best";
@@ -1309,6 +1299,16 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, str
 
   for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
 		string& input = inputSentences[sid];
+
+		vector<vector<ScoreComponentCollection> > dummyFeatureValues;
+		vector<vector<float> > dummyBleuScores;
+		vector<vector<float> > dummyModelScores;
+
+		vector<ScoreComponentCollection> newFeatureValues;
+		vector<float> newScores;
+		dummyFeatureValues.push_back(newFeatureValues);
+		dummyBleuScores.push_back(newScores);
+		dummyModelScores.push_back(newScores);
 
 		float factor = 0.0;
 		if (decode_hope) factor = 1.0;
