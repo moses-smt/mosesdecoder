@@ -365,7 +365,8 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   // scenario 3: reward all-hope
   // scenario 4: reward strongly only-hope, reward mildly all-hope
   // scenario 5: reward strongly only-hope, reward mildly all-hope, penalize only-fear
-  // scenario 6: rewards only-hope
+  // scenario 6: reward only-hope
+  // scenario 7: penalize only-fear
 
   ScoreComponentCollection featureValueDiff;
   switch (m_update_scheme) {
@@ -401,6 +402,14 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   	featureValueDiff.MinusEquals(featureValuesFear);
   	// min: 0 (set all -1 to 0)
   	featureValueDiff.CapMin(0);
+  	break;
+  case 7:
+  	// values: -1: only-fear
+  	featureValueDiff = featureValuesHope;
+  	featureValueDiff.MinusEquals(featureValuesFear);
+  	// max: 0 (set all 1 to 0)
+  	featureValueDiff.CapMax(0);
+  	break;
   case 1:
   default:
 	  // values: 1: only-hope, -1: only-fear
