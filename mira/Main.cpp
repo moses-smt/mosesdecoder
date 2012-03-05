@@ -108,7 +108,7 @@ int main(int argc, char** argv) {
 	float margin_slack;
 	float margin_slack_incr;
 	bool perceptron_update;
-	bool hope_fear, hope_fear_rank;
+	bool hope_fear, hope_fear_rank, hope_model;
 	bool model_hope_fear, rank_only;
 	int hope_n, fear_n, rank_n;
 	int threadcount;
@@ -158,6 +158,7 @@ int main(int argc, char** argv) {
 		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.7), "Adjust the factor for history smoothing")
 		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
 		("hope-fear-rank", po::value<bool>(&hope_fear_rank)->default_value(false), "Use hope and fear translations for optimisation, use model for ranking")
+		("hope-model", po::value<bool>(&hope_model)->default_value(false), "Use only hope and model translations for optimisation (use --fear-n to set number of model translations)")
 		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
 		("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
 		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
@@ -335,6 +336,7 @@ int main(int argc, char** argv) {
 		rank_only = false; // mira only
 		hope_fear = false; // mira only
 		hope_fear_rank = false; // mira only
+		hope_model = false; // mira only
 		n = 1;
 		hope_n = 1;
 		fear_n = 1;
@@ -356,16 +358,15 @@ int main(int argc, char** argv) {
 	if (rank_n == -1)
 		rank_n = n;
 
-	if (model_hope_fear && hope_fear) {
+	if (model_hope_fear && hope_fear)
 		hope_fear = false; // is true by default
-	}
-	if (rank_only && hope_fear) {
+	if (rank_only && hope_fear)
 		hope_fear = false; // is true by default
-	}
-	if (hope_fear_rank && hope_fear) {
+	if (hope_fear_rank && hope_fear)
 		hope_fear = false; // is true by default
-	}
-	if (learner == "mira" && !(hope_fear || model_hope_fear || rank_only || hope_fear_rank)) {
+	if (hope_model && hope_fear)
+		hope_fear = false; // is true by default
+	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || hope_fear_rank)) {
 		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
@@ -516,7 +517,7 @@ int main(int argc, char** argv) {
 					bleuScores.push_back(newScores);
 					modelScores.push_back(newScores);
 				}
-				if (hope_fear || hope_fear_rank || perceptron_update) {
+				if (hope_fear || hope_model || hope_fear_rank || perceptron_update) {
 					featureValuesHope.push_back(newFeatureValues);
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newScores);
@@ -629,6 +630,38 @@ int main(int argc, char** argv) {
 
 						examples_in_batch++;
 					}
+				}
+				if (hope_model) {
+					// HOPE
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
+					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
+							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
+							1, distinctNbest, rank, epoch);
+					vector<const Word*> oracle = outputHope[0];
+					size_t current_input_length = decoder->getCurrentInputLength();
+					decoder->cleanup();
+					cerr << endl;
+
+					vector<const Word*> bestModel;
+					// MODEL (for updating the history only, using dummy vectors)
+					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best wrt model score" << endl;
+					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, fear_n, 0.0, bleuScoreWeight_fear,
+							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
+							1, distinctNbest, rank, epoch);
+					bestModel = outputModel[0];
+					decoder->cleanup();
+					cerr << endl;
+
+					// needed for history
+					inputLengths.push_back(current_input_length);
+					ref_ids.push_back(*sid);
+
+					if (!sentenceLevelBleu) {
+						oracles.push_back(oracle);
+						oneBests.push_back(bestModel);
+					}
+
+					examples_in_batch++;
 				}
 				if (rank_only || hope_fear_rank) {
 					// MODEL
@@ -763,7 +796,7 @@ int main(int argc, char** argv) {
 					update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
 							featureValuesHope, featureValuesFear, dummy1, dummy1, dummy1, dummy1, learning_rate, rank, epoch);
 				}
-				else if (hope_fear) {
+				else if (hope_fear || hope_model) {
 					if (bleuScoresHope[0][0] >= min_oracle_bleu)
 						if (hope_n == 1 && fear_n ==1)
 							update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights, weightUpdate,

@@ -44,7 +44,7 @@ size_t MiraOptimiser::updateWeights(
 
 			//			cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
 			if (featureValueDiff.GetL1Norm() == 0) {
-				// skip constraint
+				cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
 				continue;
 			}
 
@@ -204,7 +204,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 				featureValueDiff.MinusEquals(featureValuesFear[i][k]);
 				//				cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
 				if (featureValueDiff.GetL1Norm() == 0) {
-					// skip constraint
+					cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
 					continue;
 				}
 
@@ -409,7 +409,12 @@ size_t MiraOptimiser::updateWeightsAnalytically(
 	  break;
   }
 
-  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
+	if (featureValueDiff.GetL1Norm() == 0) {
+		cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
+		return 1;
+	}
+
+//  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
 //  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float modelScoreDiff = modelScoreHope - modelScoreFear;
   float loss = bleuScoreHope - bleuScoreFear;
@@ -429,39 +434,34 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     // from Crammer&Singer 2006: alpha = min {C , l_t/ ||x||^2}
     float squaredNorm = featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm();
 
-    if (squaredNorm > 0) {
-    	float alpha = diff / squaredNorm;
-    	cerr << "Rank " << rank << ", epoch " << epoch << ", unclipped alpha: " << alpha << endl;
-    	if (m_slack > 0 ) {
-    		if (alpha > m_slack) {
-    			alpha = m_slack;
-    		}
-    		else if (alpha < m_slack*(-1)) {
-    			alpha = m_slack*(-1);
-    		}
+    float alpha = diff / squaredNorm;
+    cerr << "Rank " << rank << ", epoch " << epoch << ", unclipped alpha: " << alpha << endl;
+    if (m_slack > 0 ) {
+    	if (alpha > m_slack) {
+    		alpha = m_slack;
     	}
-
-    	// apply learning rate
-    	if (learning_rate != 1)
-     		alpha = alpha * learning_rate;
-    	cerr << "Rank " << rank << ", epoch " << epoch << ", clipped alpha: " << alpha << endl;
-
-    	// apply boosting factor
-    	if (m_boost && modelScoreDiff <= 0) {
-    		// factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
-    		float factor = min(1.5, log2(bleuScoreHope));
-    		factor = min(3.0f, factor);
-    		alpha = alpha * factor;
-    		cerr << "Rank " << rank << ", epoch " << epoch << ", boosted alpha: " << alpha << endl;
+    	else if (alpha < m_slack*(-1)) {
+    		alpha = m_slack*(-1);
     	}
+    }
 
-    	featureValueDiff.MultiplyEquals(alpha);
-    	weightUpdate.PlusEquals(featureValueDiff);
-//    	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
+    // apply learning rate
+    if (learning_rate != 1)
+    	alpha = alpha * learning_rate;
+    cerr << "Rank " << rank << ", epoch " << epoch << ", clipped alpha: " << alpha << endl;
+
+    // apply boosting factor
+    if (m_boost && modelScoreDiff <= 0) {
+    	// factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
+    	float factor = min(1.5, log2(bleuScoreHope));
+    	factor = min(3.0f, factor);
+    	alpha = alpha * factor;
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", boosted alpha: " << alpha << endl;
     }
-    else {
-    	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", no update because squared norm is 0" << endl);
-    }
+
+    featureValueDiff.MultiplyEquals(alpha);
+    weightUpdate.PlusEquals(featureValueDiff);
+//  	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
   }
 
   if (!constraintViolatedBefore) {
@@ -529,7 +529,7 @@ size_t MiraOptimiser::updateWeightsRankModel(
 				featureValueDiff.MinusEquals(featureValues[i][k]);
 				//				cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
 				if (featureValueDiff.GetL1Norm() == 0)
-					// skip constraint
+					cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
 					continue;
 
 				float loss = bleuScores[i][j] - bleuScores[i][k];
@@ -671,7 +671,7 @@ size_t MiraOptimiser::updateWeightsHopeFearAndRankModel(
 				featureValueDiff.MinusEquals(featureValuesFear[i][k]);
 				//				cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
 				if (featureValueDiff.GetL1Norm() == 0) {
-					// skip constraint
+					cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
 					continue;
 				}
 
