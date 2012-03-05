@@ -281,7 +281,7 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
 		StringHash alreadyScored, string sourceTrigger, string sourceWord, string targetTrigger,
 		string targetWord) const {
 	stringstream feature;
-	feature << "wt_";
+	feature << "glm_";
 	feature << targetTrigger;
 	feature << ",";
 	feature << targetWord;
