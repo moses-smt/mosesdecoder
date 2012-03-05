@@ -185,6 +185,11 @@ namespace Moses {
     //scale so that abs. value is less than maxvalue
     void thresholdScale(float maxValue );
 
+    void capMax(FValue maxValue);
+    void capMin(FValue minValue);
+
+    void sparsePlusEquals(const FVector& rhs);
+
 #ifdef MPI_ENABLE
     friend class boost::serialization::access;
 #endif  

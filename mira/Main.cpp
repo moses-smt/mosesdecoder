@@ -125,6 +125,7 @@ int main(int argc, char** argv) {
 	bool boost;
 	bool decode_hope, decode_fear, decode_model;
 	string decode_filename;
+	size_t update_scheme;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -198,6 +199,7 @@ int main(int argc, char** argv) {
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
+		("update-scheme", po::value<size_t>(&update_scheme)->default_value(1), "Update scheme, default: 1")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
@@ -319,7 +321,7 @@ int main(int argc, char** argv) {
 			cerr << "Optimising using Mira" << endl;
 			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
 		}
-		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, margin_slack, boost);
+		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, margin_slack, boost, update_scheme);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {

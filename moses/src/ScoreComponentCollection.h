@@ -140,6 +140,12 @@ public:
 	  m_scores += rhs.m_scores;
 	}
 
+	// add only sparse features
+	void SparsePlusEquals(const ScoreComponentCollection& rhs)
+	{
+	  m_scores.sparsePlusEquals(rhs.m_scores);
+	}
+
 	void PlusEquals(const FVector& scores)
 	{
 		m_scores += scores;
@@ -301,6 +307,18 @@ public:
 		// 0.1 / 0.14 = 0.714285714
 		// 0.1 / 0.17 = 0.588235294
     m_scores.thresholdScale(maxValue);
+	}
+
+	void CapMax(float maxValue)
+	{
+		// cap all sparse features to maxValue
+		m_scores.capMax(maxValue);
+	}
+
+	void CapMin(float minValue)
+	{
+		// cap all sparse features to minValue
+		m_scores.capMin(minValue);
 	}
 
 	//! if a ScoreProducer produces a single score (for example, a language model score)

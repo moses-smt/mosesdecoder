@@ -65,14 +65,16 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin, size_t scale_update, float margin_slack, bool boost) :
+	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin,
+size_t scale_update, float margin_slack, bool boost, size_t update_scheme) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
 		  m_scale_update(scale_update),
 		  m_margin_slack(margin_slack),
-		  m_boost(boost) { }
+		  m_boost(boost),
+		  m_update_scheme(update_scheme) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
 	  								Moses::ScoreComponentCollection& weightUpdate,
@@ -158,6 +160,9 @@ namespace Mira {
 
       // boosting of updates on misranked candidates
       bool m_boost;
+
+      // select 1 of 5 different update schemes
+      size_t m_update_scheme;
   };
 }
 

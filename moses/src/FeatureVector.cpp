@@ -235,6 +235,18 @@ namespace Moses {
     operator*=(factor);
   }
 
+  void FVector::capMax(FValue maxValue) {
+    for (const_iterator i = cbegin(); i != cend(); ++i)
+      if (i->second > maxValue)
+         set(i->first, maxValue);
+  }
+
+  void FVector::capMin(FValue minValue) {
+    for (const_iterator i = cbegin(); i != cend(); ++i)
+      if (i->second < minValue)
+         set(i->first, minValue);
+  }
+
   void FVector::set(const FName& name, const FValue& value) {
     m_features[name] = value;
   }
@@ -268,6 +280,12 @@ namespace Moses {
     return *this;
   }
   
+  // add only sparse features
+  void FVector::sparsePlusEquals(const FVector& rhs) {
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
+	  set(i->first, get(i->first) + i->second);
+  }
+
   FVector& FVector::operator-= (const FVector& rhs) {
     if (rhs.m_coreFeatures.size() > m_coreFeatures.size())
       resize(rhs.m_coreFeatures.size());
@@ -423,5 +441,4 @@ namespace Moses {
       return lhs.inner_product(rhs);
     }
   }
-	
 }

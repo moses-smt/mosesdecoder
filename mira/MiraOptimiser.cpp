@@ -359,9 +359,50 @@ size_t MiraOptimiser::updateWeightsAnalytically(
 
  // cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << featureValuesHope << endl;
  // cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear << endl;
-  ScoreComponentCollection featureValueDiff = featureValuesHope;
-  featureValueDiff.MinusEquals(featureValuesFear);
-  //  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
+
+  // scenario 1: reward only-hope, penalize only-fear
+  // scenario 2: reward all-hope, penalize only-fear
+  // scenario 3: reward all-hope
+  // scenario 4: reward strongly only-hope, reward mildly all-hope
+  // scenario 5: reward strongly only-hope, reward mildly all-hope, penalize only-fear
+
+  ScoreComponentCollection featureValueDiff;
+  switch (m_update_scheme) {
+  case 2:
+	  // values: 1: all-hope, -1: only-fear
+	  featureValueDiff = featureValuesHope;
+	  featureValueDiff.MinusEquals(featureValuesFear);
+	  featureValueDiff.SparsePlusEquals(featureValuesHope);
+	  //max: 1 (set all 2 to 1)
+	  featureValueDiff.CapMax(1);
+	  break;
+  case 3:
+	  // values: 1: all-hope
+	  featureValueDiff = featureValuesHope;
+	  break;
+  case 4:
+	  // values: 2: only-hope, 1: both
+	  featureValueDiff = featureValuesHope;
+	  featureValueDiff.MinusEquals(featureValuesFear);
+	  featureValueDiff.SparsePlusEquals(featureValuesHope);
+	  // min: 0 (set all -1 to 0)
+	  featureValueDiff.CapMin(0);
+	  break;
+  case 5:
+	  // values: 2: only-hope, 1: both, -1: only-fear
+	  featureValueDiff = featureValuesHope;
+	  featureValueDiff.MinusEquals(featureValuesFear);
+	  featureValueDiff.SparsePlusEquals(featureValuesHope);
+	  break;
+  case 1:
+  default:
+	  // values: 1: only-hope, -1: only-fear
+	  featureValueDiff = featureValuesHope;
+	  featureValueDiff.MinusEquals(featureValuesFear);
+	  break;
+  }
+
+  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
 //  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float modelScoreDiff = modelScoreHope - modelScoreFear;
   float loss = bleuScoreHope - bleuScoreFear;
