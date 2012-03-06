@@ -131,26 +131,23 @@ void Data::remove_duplicates() {
 void Data::loadnbest(const std::string &file)
 {
   TRACE_ERR("loading nbest from " << file << std::endl);
-
-  ScoreStats scoreentry;
-
   inputfilestream inp(file); // matches a stream with a file. Opens the file
-
   if (!inp.good())
     throw runtime_error("Unable to open: " + file);
 
-  std::string subsubstring, stringBuf;
+  ScoreStats scoreentry;
+  std::string line;
   std::string sentence_index, sentence, feature_str;
   std::string::size_type loc;
 
-  while (getline(inp,stringBuf,'\n')) {
-    if (stringBuf.empty()) continue;
+  while (getline(inp, line, '\n')) {
+    if (line.empty()) continue;
     // adding statistics for error measures
     scoreentry.clear();
 
-    getNextPound(stringBuf, sentence_index, "|||"); // first field
-    getNextPound(stringBuf, sentence, "|||");       // second field
-    getNextPound(stringBuf, feature_str, "|||");    // third field
+    getNextPound(line, sentence_index, "|||"); // first field
+    getNextPound(line, sentence, "|||");       // second field
+    getNextPound(line, feature_str, "|||");    // third field
 
     theScorer->prepareStats(sentence_index, sentence, scoreentry);
     scoredata->add(scoreentry, sentence_index);
