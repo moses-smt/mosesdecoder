@@ -34,6 +34,11 @@ private:
   size_t number_of_scores;
   bool _sparse_flag;
 
+  // Helper functions for loadnbest();
+  void InitFeatureMap(const std::string& str);
+  void AddFeatures(const std::string& str,
+                   const std::string& sentence_index);
+
 protected:
   ScoreDataHandle scoredata;
   FeatureDataHandle featdata;
@@ -42,7 +47,7 @@ public:
   explicit Data(Scorer& sc);
   Data();
 
-  //Note that there is no copy constructor implemented, so only the 
+  //Note that there is no copy constructor implemented, so only the
   //compiler synthesised shallow copy is available
 
   inline void clear() {
@@ -79,7 +84,7 @@ public:
   void mergeSparseFeatures();
 
   void loadnbest(const std::string &file);
-  
+
   void load(const std::string &featfile,const std::string &scorefile) {
     featdata->load(featfile);
     scoredata->load(scorefile);
