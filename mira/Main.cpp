@@ -99,7 +99,7 @@ int main(int argc, char** argv) {
 	string decoder_settings;
 	float min_weight_change;
 	float decrease_learning_rate;
-	bool normaliseWeights;
+	bool normaliseWeights, normaliseMargin;
 	bool print_feature_values;
 	bool historyOf1best;
 	bool historyOfOracles;
@@ -179,6 +179,7 @@ int main(int argc, char** argv) {
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
 		("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
 		("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
+		("normalise-margin", po::value<bool>(&normaliseMargin)->default_value(false), "Normalise the margin: squash between 0 and 1")
 		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
@@ -322,7 +323,8 @@ int main(int argc, char** argv) {
 			cerr << "Optimising using Mira" << endl;
 			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
 		}
-		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update, margin_slack, boost, update_scheme);
+		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update,
+				margin_slack, boost, update_scheme, normaliseMargin);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {

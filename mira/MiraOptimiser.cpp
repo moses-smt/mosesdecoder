@@ -68,25 +68,31 @@ size_t MiraOptimiser::updateWeights(
 //		    float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 		    float modelScoreDiff = oracleModelScores[i] - modelScores[i][j];
 		    float diff = 0;
-			if (loss > (modelScoreDiff + m_margin_slack)) {
-				diff = loss - (modelScoreDiff + m_margin_slack);
-			}
-			cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " <<  m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+		    if (loss > (modelScoreDiff + m_margin_slack)) {
+		    	diff = loss - (modelScoreDiff + m_margin_slack);
+		    }
+		    cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " <<  m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
 
 		    if (diff > epsilon) {
 		    	violated = true;
 		    }
 		    else if (m_onlyViolatedConstraints) {
 		    	addConstraint = false;
-			}
+		    }
 
-		    float lossMinusModelScoreDiff = loss - modelScoreDiff;
+		    float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);
 		    if (addConstraint) {
+		    	if (m_normaliseMargin)
+		    		lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+
 		    	featureValueDiffs.push_back(featureValueDiff);
 		    	lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 		    	all_losses.push_back(loss);
 
 		    	if (violated) {
+		    		if (m_normaliseMargin)
+		    			diff = (2/(1 + exp(- diff))) - 1;
+
 		    		++violatedConstraintsBefore;
 		    		oldDistanceFromOptimum += diff;
 				}
@@ -242,12 +248,18 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 
 				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);
 				if (addConstraint) {
+					if (m_normaliseMargin)
+						lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 					modelScoreDiffs.push_back(modelScoreDiff);
 					all_losses.push_back(loss);
 
 					if (violated) {
+						if (m_normaliseMargin)
+							diff = (2/(1 + exp(- diff))) - 1;
+
 						++violatedConstraintsBefore;
 						oldDistanceFromOptimum += diff;
 					}
@@ -434,6 +446,12 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
 
   if (diff > epsilon) {
+  	// squash it between 0 and 1
+  	//diff = tanh(diff);
+  	//diff = (2/(1 + pow(2,- diff))) - 1;
+  	if (m_normaliseMargin)
+  		diff = (2/(1 + exp(- diff))) - 1;
+
     // constraint violated
     oldDistanceFromOptimum += diff;
     constraintViolatedBefore = true;
@@ -562,12 +580,18 @@ size_t MiraOptimiser::updateWeightsRankModel(
 
 				float lossMinusModelScoreDiff = loss - modelScoreDiff;
 				if (addConstraint) {
+					if (m_normaliseMargin)
+						lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 					modelScoreDiffs.push_back(modelScoreDiff);
 					all_losses.push_back(loss);
 
 					if (violated) {
+						if (m_normaliseMargin)
+							diff = (2/(1 + exp(- diff))) - 1;
+
 						++violatedConstraintsBefore;
 						oldDistanceFromOptimum += diff;
 					}
@@ -706,12 +730,18 @@ size_t MiraOptimiser::updateWeightsHopeFearAndRankModel(
 
 				float lossMinusModelScoreDiff = loss - modelScoreDiff;
 				if (addConstraint) {
+					if (m_normaliseMargin)
+						lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 					modelScoreDiffs.push_back(modelScoreDiff);
 					all_losses.push_back(loss);
 
 					if (violated) {
+						if (m_normaliseMargin)
+							diff = (2/(1 + exp(- diff))) - 1;
+
 						++violatedConstraintsBefore;
 						oldDistanceFromOptimum += diff;
 					}
@@ -756,12 +786,18 @@ size_t MiraOptimiser::updateWeightsHopeFearAndRankModel(
 
 				float lossMinusModelScoreDiff = loss - modelScoreDiff;
 				if (addConstraint) {
+					if (m_normaliseMargin)
+						lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
 					modelScoreDiffs.push_back(modelScoreDiff);
 					all_losses.push_back(loss);
 
 					if (violated) {
+						if (m_normaliseMargin)
+							diff = (2/(1 + exp(- diff))) - 1;
+
 						++violatedConstraintsBefore;
 						oldDistanceFromOptimum += diff;
 					}

@@ -66,7 +66,7 @@ namespace Mira {
 		  Optimiser() { }
 
 	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin,
-size_t scale_update, float margin_slack, bool boost, size_t update_scheme) :
+size_t scale_update, float margin_slack, bool boost, size_t update_scheme, bool normaliseMargin) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
@@ -74,7 +74,8 @@ size_t scale_update, float margin_slack, bool boost, size_t update_scheme) :
 		  m_scale_update(scale_update),
 		  m_margin_slack(margin_slack),
 		  m_boost(boost),
-		  m_update_scheme(update_scheme) { }
+		  m_update_scheme(update_scheme),
+		  m_normaliseMargin(normaliseMargin) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
 	  								Moses::ScoreComponentCollection& weightUpdate,
@@ -163,6 +164,9 @@ size_t scale_update, float margin_slack, bool boost, size_t update_scheme) :
 
       // select 1 of 5 different update schemes
       size_t m_update_scheme;
+
+      // squash margin between 0 and 1
+      bool m_normaliseMargin;
   };
 }
 
