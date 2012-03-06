@@ -71,20 +71,20 @@ void Data::remove_duplicates() {
 
 	size_t l=0;
 	for (l=0; l < cur_list.size(); l++) {
-	  
+
 	  size_t j=cur_list[l];
 
 	  if (cur_feats == feat_array.get(j)
 	      && score_array.get(k) == score_array.get(j)) {
 
 	    if (k < end_pos) {
-	      
+
 	      feat_array.swap(k,end_pos);
 	      score_array.swap(k,end_pos);
-	      
+
 	      k--;
 	    }
-	    
+
 	    end_pos--;
 	    nRemoved++;
 	    break;
@@ -132,93 +132,90 @@ void Data::loadnbest(const std::string &file)
 {
   TRACE_ERR("loading nbest from " << file << std::endl);
 
-  FeatureStats featentry;
   ScoreStats scoreentry;
-  std::string sentence_index;
 
   inputfilestream inp(file); // matches a stream with a file. Opens the file
 
   if (!inp.good())
     throw runtime_error("Unable to open: " + file);
 
-  std::string substring, subsubstring, stringBuf;
-  std::string theSentence;
+  std::string subsubstring, stringBuf;
+  std::string sentence_index, sentence, feature_str;
   std::string::size_type loc;
 
   while (getline(inp,stringBuf,'\n')) {
     if (stringBuf.empty()) continue;
-
-//              TRACE_ERR("stringBuf: " << stringBuf << std::endl);
-
-    getNextPound(stringBuf, substring, "|||"); //first field
-    sentence_index = substring;
-
-    getNextPound(stringBuf, substring, "|||"); //second field
-    theSentence = substring;
-
     // adding statistics for error measures
-    featentry.reset();
     scoreentry.clear();
 
-    theScorer->prepareStats(sentence_index, theSentence, scoreentry);
+    getNextPound(stringBuf, sentence_index, "|||"); // first field
+    getNextPound(stringBuf, sentence, "|||");       // second field
+    getNextPound(stringBuf, feature_str, "|||");    // third field
 
+    theScorer->prepareStats(sentence_index, sentence, scoreentry);
     scoredata->add(scoreentry, sentence_index);
-
-    getNextPound(stringBuf, substring, "|||"); //third field
 
     // examine first line for name of features
     if (!existsFeatureNames()) {
-      std::string stringsupport=substring;
-      std::string features="";
-      std::string tmpname="";
-
-      size_t tmpidx=0;
-      while (!stringsupport.empty()) {
-        //                      TRACE_ERR("Decompounding: " << substring << std::endl);
-        getNextPound(stringsupport, subsubstring);
-
-        // string ending with ":" are skipped, because they are the names of the features
-        if ((loc = subsubstring.find_last_of(":")) != subsubstring.length()-1) {
-          features+=tmpname+"_"+stringify(tmpidx)+" ";
-          tmpidx++;
-        }
-        // ignore sparse feature name
-        else if (subsubstring.find("_") != string::npos) {
-          // also ignore its value
-          getNextPound(stringsupport, subsubstring);
-        }
-        // update current feature name
-        else {
-          tmpidx=0;
-          tmpname=subsubstring.substr(0,subsubstring.size() - 1);
-        }
-      }
-
-      featdata->setFeatureMap(features);
+      InitFeatureMap(feature_str);
     }
-
-    // adding features
-    while (!substring.empty()) {
-//                      TRACE_ERR("Decompounding: " << substring << std::endl);
-      getNextPound(substring, subsubstring);
-
-      // no ':' -> feature value that needs to be stored
-      if ((loc = subsubstring.find_last_of(":")) != subsubstring.length()-1) {
-        featentry.add(ConvertStringToFeatureStatsType(subsubstring));
-      }
-      // sparse feature name? store as well
-      else if (subsubstring.find("_") != string::npos) {
-        std::string name = subsubstring;
-        getNextPound(substring, subsubstring);
-        featentry.addSparse( name, atof(subsubstring.c_str()) );
-        _sparse_flag = true;
-      }
-    }
-    //cerr << "number of sparse features: " << featentry.getSparse().size() << endl;
-    featdata->add(featentry,sentence_index);
+    AddFeatures(feature_str, sentence_index);
   }
-
   inp.close();
+}
+
+void Data::InitFeatureMap(const string& str) {
+  string buf = str;
+  string substr;
+  string features = "";
+  string tmp_name = "";
+  size_t tmp_index = 0;
+  string::size_type loc;
+  char tmp[64];                         // for snprintf();
+
+  while (!buf.empty()) {
+    getNextPound(buf, substr);
+
+    // string ending with ":" are skipped, because they are the names of the features
+    if ((loc = substr.find_last_of(":")) != substr.length()-1) {
+      snprintf(tmp, sizeof(tmp), "%s_%lu ", tmp_name.c_str(), tmp_index);
+      features.append(tmp);
+
+      tmp_index++;
+    } else if (substr.find("_") != string::npos) {
+      // ignore sparse feature name and its value
+      getNextPound(buf, substr);
+    } else {                              // update current feature name
+      tmp_index = 0;
+      tmp_name = substr.substr(0, substr.size() - 1);
+    }
+  }
+  featdata->setFeatureMap(features);
+}
+
+void Data::AddFeatures(const string& str,
+                       const string& sentence_index) {
+  string::size_type loc;
+  string buf = str;
+  string substr;
+  FeatureStats feature_entry;
+  feature_entry.reset();
+
+  while (!buf.empty()) {
+    getNextPound(buf, substr);
+
+    // no ':' -> feature value that needs to be stored
+    if ((loc = substr.find_last_of(":")) != substr.length()-1) {
+      feature_entry.add(ConvertStringToFeatureStatsType(substr));
+    } else if (substr.find("_") != string::npos) {
+      // sparse feature name? store as well
+      std::string name = substr;
+      getNextPound(buf, substr);
+      feature_entry.addSparse(name, atof(substr.c_str()));
+      _sparse_flag = true;
+    }
+  }
+  featdata->add(feature_entry, sentence_index);
 }
 
 // TODO
