@@ -137,14 +137,14 @@ void FeatureData::setFeatureMap(const std::string& feat)
   number_of_features = 0;
   features = feat;
 
-  std::string substring, stringBuf;
-  stringBuf = features;
-  while (!stringBuf.empty()) {
-    getNextPound(stringBuf, substring);
-
-    featname2idx_[substring] = idx2featname_.size();
-    idx2featname_[idx2featname_.size()] = substring;
-    number_of_features++;
+  vector<string> buf;
+  Tokenize(feat.c_str(), ' ', &buf);
+  for (vector<string>::const_iterator it = buf.begin();
+       it != buf.end(); ++it) {
+    const size_t size = idx2featname_.size();
+    featname2idx_[*it] = size;
+    idx2featname_[size] = *it;
+    ++number_of_features;
   }
 }
 
