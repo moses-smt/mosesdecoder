@@ -32,7 +32,7 @@ Data::Data(Scorer& ptr)
       scoredata(new ScoreData(*theScorer)),
       featdata(new FeatureData)
 {
-  TRACE_ERR("Data::score_type " << score_type << std::endl);
+  TRACE_ERR("Data::score_type " << score_type << endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
 }
 
@@ -50,7 +50,7 @@ void Data::remove_duplicates() {
     assert(feat_array.size() == score_array.size());
 
     //serves as a hash-map:
-    std::map<double, std::vector<size_t> > lookup;
+    map<double, vector<size_t> > lookup;
 
     size_t end_pos = feat_array.size() - 1;
 
@@ -65,9 +65,9 @@ void Data::remove_duplicates() {
 
       if (lookup.find(sum) != lookup.end()) {
 
-	//std::cerr << "hit" << std::endl;
+	//cerr << "hit" << endl;
 
-	std::vector<size_t>& cur_list = lookup[sum];
+	vector<size_t>& cur_list = lookup[sum];
 
 	size_t l=0;
 	for (l=0; l < cur_list.size(); l++) {
@@ -128,17 +128,15 @@ void Data::remove_duplicates() {
 //END_ADDED
 
 
-void Data::loadnbest(const std::string &file)
+void Data::loadnbest(const string &file)
 {
-  TRACE_ERR("loading nbest from " << file << std::endl);
+  TRACE_ERR("loading nbest from " << file << endl);
   inputfilestream inp(file); // matches a stream with a file. Opens the file
   if (!inp.good())
     throw runtime_error("Unable to open: " + file);
 
   ScoreStats scoreentry;
-  std::string line;
-  std::string sentence_index, sentence, feature_str;
-  std::string::size_type loc;
+  string line, sentence_index, sentence, feature_str;
 
   while (getline(inp, line, '\n')) {
     if (line.empty()) continue;
@@ -206,7 +204,7 @@ void Data::AddFeatures(const string& str,
       feature_entry.add(ConvertStringToFeatureStatsType(substr));
     } else if (substr.find("_") != string::npos) {
       // sparse feature name? store as well
-      std::string name = substr;
+      string name = substr;
       getNextPound(buf, substr);
       feature_entry.addSparse(name, atof(substr.c_str()));
       _sparse_flag = true;
@@ -217,12 +215,12 @@ void Data::AddFeatures(const string& str,
 
 // TODO
 void Data::mergeSparseFeatures() {
-  std::cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
+  cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
   exit(1);
 }
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
-                        std::vector<Data>& shards)
+                        vector<Data>& shards)
 {
   CHECK(shard_count);
   CHECK(shard_size >= 0);
@@ -232,13 +230,14 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
   CHECK(data_size == featdata->size());
 
   shard_size *= data_size;
+  const float coeff = static_cast<float>(data_size) / shard_count;
 
   for (size_t shard_id = 0; shard_id < shard_count; ++shard_id) {
     vector<size_t> shard_contents;
     if (shard_size == 0) {
       //split into roughly equal size shards
-      const size_t shard_start = floor(0.5 + shard_id * static_cast<float>(data_size) / shard_count);
-      const size_t shard_end = floor(0.5 + (shard_id + 1) * static_cast<float>(data_size) / shard_count);
+      const size_t shard_start = floor(0.5 + shard_id * coeff);
+      const size_t shard_end = floor(0.5 + (shard_id + 1) * coeff);
       for (size_t i = shard_start; i < shard_end; ++i) {
         shard_contents.push_back(i);
       }
