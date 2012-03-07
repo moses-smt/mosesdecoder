@@ -293,7 +293,10 @@ int main(int argc, char** argv) {
 	}
 
 	if (decode_hope || decode_fear || decode_model) {
-		decodeHopeOrFear(decode_hope, decode_fear, decode_model, decode_filename, inputSentences, decoder, n);
+		size_t decode = 1;
+		if (decode_fear) decode = 2;
+		if (decode_model) decode = 3;
+		decodeHopeOrFear(rank, size, decode, decode_filename, inputSentences, decoder, n);
 	}
 
 	// Optionally shuffle the sentences
@@ -437,7 +440,7 @@ int main(int argc, char** argv) {
 
 	time_t now;
 	time(&now);
-	cerr << "Rank " << rank << ", " << ctime(&now) << endl;
+	cerr << "Rank " << rank << ", " << ctime(&now);
 
 	ScoreComponentCollection mixedAverageWeights;
 	ScoreComponentCollection mixedAverageWeightsPrevious;
@@ -1269,31 +1272,53 @@ void deleteTranslations(vector<vector<const Word*> > &translations) {
 	}
 }
 
-void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, string filename, vector<string> &inputSentences, MosesDecoder* decoder, size_t n) {
-	if (decode_hope)
-		cerr << "Decoding dev input set according to hope objective.. " << endl;
-	else if (decode_fear)
-		cerr << "Decoding dev input set according to fear objective.. " << endl;
+void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, vector<string> &inputSentences, MosesDecoder* decoder, size_t n) {
+	if (decode == 1)
+		cerr << "Rank " << rank << ", decoding dev input set according to hope objective.. " << endl;
+	else if (decode == 2)
+		cerr << "Rank " << rank << ", decoding dev input set according to fear objective.. " << endl;
 	else
-		cerr << "Decoding dev input set according to normal objective.. " << endl;
+		cerr << "Rank " << rank << ", decoding dev input set according to normal objective.. " << endl;
+
+	// Create shards according to the number of processes used
+	vector<size_t> order;
+	for (size_t i = 0; i < inputSentences.size(); ++i)
+		order.push_back(i);
+
+	vector<size_t> shard;
+	float shardSize = (float) (order.size()) / size;
+	VERBOSE(1, "Rank " << rank << ", shard size: " << shardSize << endl);
+	size_t shardStart = (size_t) (shardSize * rank);
+	size_t shardEnd = (size_t) (shardSize * (rank + 1));
+	if (rank == size - 1)
+		shardEnd = inputSentences.size();
+	VERBOSE(1, "Rank " << rank << ", shard start: " << shardStart << " Shard end: " << shardEnd << endl);
+	shardSize = shardEnd - shardStart;
+	shard.resize(shardSize);
+	copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
+	VERBOSE(1, "Rank " << rank << ", actual shard size: " << shard.size() << endl);
 
 	// open files for writing
+	stringstream fname;
+	fname << filename << ".rank" << rank;
+	filename = fname.str();
 	ostringstream filename_nbest;
 	filename_nbest << filename << "." << n << "best";
 	ofstream out(filename.c_str());
-  ofstream nbest_out((filename_nbest.str()).c_str());
-  if (!out) {
-    ostringstream msg;
-    msg << "Unable to open " << filename;
-    throw runtime_error(msg.str());
-  }
-  if (!nbest_out) {
-    ostringstream msg;
-    msg << "Unable to open " << filename_nbest;
-    throw runtime_error(msg.str());
-  }
+	ofstream nbest_out((filename_nbest.str()).c_str());
+	if (!out) {
+		ostringstream msg;
+		msg << "Unable to open " << fname.str();
+		throw runtime_error(msg.str());
+	}
+	if (!nbest_out) {
+		ostringstream msg;
+		msg << "Unable to open " << filename_nbest;
+		throw runtime_error(msg.str());
+	}
 
-  for (size_t sid = 0; sid < inputSentences.size(); ++sid) {
+	for (size_t i = 0; i < shard.size(); ++i) {
+		size_t sid = shard[i];
 		string& input = inputSentences[sid];
 
 		vector<vector<ScoreComponentCollection> > dummyFeatureValues;
@@ -1307,10 +1332,11 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, str
 		dummyModelScores.push_back(newScores);
 
 		float factor = 0.0;
-		if (decode_hope) factor = 1.0;
-		if (decode_fear) factor = -1.0;
+		if (decode == 1) factor = 1.0;
+		if (decode == 2) factor = -1.0;
+		cerr << "Rank " << rank << ", translating sentence " << sid << endl;
 		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, 1, dummyFeatureValues[0],
-				dummyBleuScores[0], dummyModelScores[0], n, true, 0, 0);
+				dummyBleuScores[0], dummyModelScores[0], n, true, rank, 0);
 		cerr << endl;
 		decoder->cleanup();
 
@@ -1330,9 +1356,18 @@ void decodeHopeOrFear(bool decode_hope, bool decode_fear, bool decode_model, str
 		}
 	}
 
-  out.close();
-  nbest_out.close();
-  cerr << "Closing files " << filename << " and " << filename_nbest.str() << endl;
+	out.close();
+	nbest_out.close();
+	cerr << "Closing files " << filename << " and " << filename_nbest.str() << endl;
 
+#ifdef MPI_ENABLE
+	MPI_Finalize();
+#endif
+
+	time_t now;
+	time(&now);
+	cerr << "Rank " << rank << ", " << ctime(&now);
+
+	delete decoder;
 	exit(0);
 }

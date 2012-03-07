@@ -7,7 +7,7 @@
 namespace Moses {
 
 /**
-  * Phrase pair feature, as in Watanabe et al. Uses alignment info.
+  * Phrase pair feature: complete source/target phrase pair
   **/
 class PhrasePairFeature: public StatelessFeatureFunction {
   public:
