@@ -449,8 +449,10 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   	// squash it between 0 and 1
   	//diff = tanh(diff);
   	//diff = (2/(1 + pow(2,- diff))) - 1;
-  	if (m_normaliseMargin)
+  	if (m_normaliseMargin) {
   		diff = (2/(1 + exp(- diff))) - 1;
+  		cerr << "Rank " << rank << ", epoch " << epoch << ", new margin: " << diff << endl;
+  	}
 
     // constraint violated
     oldDistanceFromOptimum += diff;

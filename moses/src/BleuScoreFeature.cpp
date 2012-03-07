@@ -82,13 +82,11 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 }
 
 void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
-		float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
+		bool scaleByInverseLength, float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_ref_length = scaleByRefLength;
-	m_scale_by_target_length_linear = scaleByTargetLengthLinear;
-	m_scale_by_target_length_trend = scaleByTargetLengthTrend;
 	m_scale_by_avg_length = scaleByAvgLength;
+	m_scale_by_inverse_length = scaleByInverseLength;
 	m_scale_by_x = scaleByX;
 	m_historySmoothing = historySmoothing;
 	m_smoothing_scheme = (SmoothingScheme)scheme;
@@ -453,18 +451,11 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   else if (m_scale_by_ref_length) {
     precision *= m_ref_length_history + m_cur_ref_length;
   }
-  else if (m_scale_by_target_length_linear) {
-  	// length of current hypothesis + number of words still to translate from source (rest being translated 1-to-1)
-  	float scaled_target_length = state->m_target_length + (m_cur_source_length - state->m_source_length);
-  	precision *= m_target_length_history + scaled_target_length;
-  }
-  else if (m_scale_by_target_length_trend) {
-  	// length of full target if remaining words were translated with the same fertility as so far
-  	float scaled_target_length = ((float)m_cur_source_length/state->m_source_length) * state->m_target_length;
-  	precision *= m_target_length_history + scaled_target_length;
-  }
   else if (m_scale_by_avg_length) {
     precision *= (m_source_length_history + m_ref_length_history + m_cur_source_length +  + m_cur_ref_length) / 2;
+  }
+  else if (m_scale_by_inverse_length) {
+  	precision *= 100 / (m_source_length_history + m_cur_source_length);
   }
   return (precision*m_scale_by_x)/m_correction;
 }

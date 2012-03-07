@@ -82,8 +82,7 @@ public:
 //    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
     void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-    		bool scaleByTargetLengthLinear, bool scaleByTargetLengthTrend,
-  		  float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
+    		bool scaleByInverseLength, float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,
@@ -135,14 +134,11 @@ private:
     // scale BLEU score by (history of) reference length
     bool m_scale_by_ref_length;
 
-    // scale BLEU score by (history of) target length (linear future estimate)
-    bool m_scale_by_target_length_linear;
-
-    // scale BLEU score by (history of) target length (trend-based future estimate)
-        bool m_scale_by_target_length_trend;
-
     // scale BLEU score by (history of) the average of input and reference length
     bool m_scale_by_avg_length;
+
+    // scale by the inverse of the input length * 100
+    bool m_scale_by_inverse_length;
 
     float m_scale_by_x;
 
