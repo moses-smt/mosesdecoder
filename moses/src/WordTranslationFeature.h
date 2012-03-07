@@ -39,36 +39,26 @@ private:
   FactorType m_factorTypeSource;
   FactorType m_factorTypeTarget;
   bool m_unrestricted;
+  bool m_simple;
   bool m_sourceContext;
-  bool m_biphrase;
-  bool m_bitrigger;
+  bool m_targetContext;
 
 public:
-	WordTranslationFeature(FactorType factorTypeSource = 0, FactorType factorTypeTarget = 0, size_t context = 0):
+	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
+			bool simple, bool sourceContext, bool targetContext):
 //     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
 		 StatefulFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
+     m_simple(simple),
+     m_sourceContext(sourceContext),
+     m_targetContext(targetContext),
      m_unrestricted(true)
   {
 		std::cerr << "Creating word translation feature.. ";
-		m_sourceContext = false;
-		m_biphrase = false;
-		m_bitrigger = false;
-		switch(context) {
-			case 1:
-				m_sourceContext = true;
-				std::cerr << "using source context.. ";
-				break;
-			case 2:
-				m_biphrase = true;
-				std::cerr << "using biphrases.. ";
-				break;
-			case 3:
-				m_bitrigger = true;
-				std::cerr << "using bitriggers.. ";
-				break;
-		}
+		if (m_simple == 1) std::cerr << "using simple word translations.. ";
+		if (m_sourceContext == 1) std::cerr << "using source context.. ";
+		if (m_targetContext == 1) std::cerr << "using target context.. ";
 		std::cerr << "done." << std::endl;
   }
       

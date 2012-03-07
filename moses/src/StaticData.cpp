@@ -1747,8 +1747,9 @@ bool StaticData::LoadWordTranslationFeature()
   }
 
   vector<string> tokens = Tokenize(parameters[0]);
-  if (tokens.size() != 2 && tokens.size() != 3 && tokens.size() != 5) {
-    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src> <factor-tgt> [context-type] [filename-src filename-tgt]");
+  if (tokens.size() != 1 && tokens.size() != 4 && tokens.size() != 6) {
+    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src>-<factor-tgt> "
+    		"[simple source-trigger target-trigger] [filename-src filename-tgt]");
     return false;
   }
 
@@ -1758,18 +1759,25 @@ bool StaticData::LoadWordTranslationFeature()
   }
 
   // set factor
-  FactorType factorIdSource = Scan<size_t>(tokens[0]);
-  FactorType factorIdTarget = Scan<size_t>(tokens[1]);
-  size_t context = 0;
-  if (tokens.size() >= 3)
-  	context = Scan<size_t>(tokens[2]);
+  vector <string> factors = Tokenize(tokens[0],"-");
+  FactorType factorIdSource = Scan<size_t>(factors[0]);
+  FactorType factorIdTarget = Scan<size_t>(factors[1]);
+  bool simple = 1;
+  bool sourceTrigger = 0;
+  bool targetTrigger = 0;
+  if (tokens.size() >= 4) {
+	simple = Scan<size_t>(tokens[1]);
+  	sourceTrigger = Scan<size_t>(tokens[2]);
+  	targetTrigger = Scan<size_t>(tokens[3]);
+  }
 
-  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource,factorIdTarget, context);
+  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
+		  sourceTrigger, targetTrigger);
 
   // load word list for restricted feature set
-  if (tokens.size() == 5) {
-    string filenameSource = tokens[3];
-    string filenameTarget = tokens[4];
+  if (tokens.size() == 6) {
+    string filenameSource = tokens[5];
+    string filenameTarget = tokens[6];
     cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
     if (!m_wordTranslationFeature->Load(filenameSource, filenameTarget)) {
       UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);

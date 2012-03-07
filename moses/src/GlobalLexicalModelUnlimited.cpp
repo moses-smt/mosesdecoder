@@ -118,8 +118,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   						bool contextExists;
   						if (!m_unrestricted)
   							contextExists = m_vocabSource.find( contextString ) != m_vocabSource.end();
-  						if (contextIndex == sourceIndex+1)
-  							contextExists = true; // always add adjacent context words
 
   						if (m_unrestricted || contextExists) {
   	  					stringstream feature;
@@ -156,8 +154,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   							bool sourceTriggerExists = false;
   							if (!m_unrestricted)
   								sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
-  							if (contextIndex == sourceIndex-1)
-  								sourceTriggerExists = true; // always add adjacent context words
 
   							if (m_unrestricted || sourceTriggerExists)
   								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
@@ -182,8 +178,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   							bool targetTriggerExists = false;
   							if (!m_unrestricted)
   								targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
-  							if (globalContextIndex == targetIndex-1)
-  								targetTriggerExists = true; // always add adjacent context words
 
   							if (m_unrestricted || targetTriggerExists)
   								AddFeature(accumulator, alreadyScored, sourceContext, sourceString,
@@ -213,8 +207,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   								bool targetTriggerExists = false;
   								if (!m_unrestricted)
   									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
-  								if (globalContextIndex == globalTargetIndex-1)
-  									targetTriggerExists = true; // always add adjacent context words
 
   								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
   									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
@@ -230,8 +222,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   							bool sourceTriggerExists = false;
   							if (!m_unrestricted)
   								sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
-  							if (contextIndex == sourceIndex-1)
-  								sourceTriggerExists = true; // always add adjacent context words
 
     						if (globalTargetIndex == 0) {
     							string targetTrigger = "<s>";
@@ -248,8 +238,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
     								bool targetTriggerExists = false;
     								if (!m_unrestricted)
     									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
-    								if (globalContextIndex == globalTargetIndex-1)
-    									targetTriggerExists = true; // always add adjacent context words
 
     								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
     									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
