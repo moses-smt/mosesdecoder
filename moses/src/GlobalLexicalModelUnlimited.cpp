@@ -112,7 +112,7 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
 	  					alreadyScored[sourceString] = 1;
   					}
 
-  					// add source words right to current source word as context
+  					// add source words to the right of current source word as context
   					for(int contextIndex = sourceIndex+1; contextIndex < input.GetSize(); contextIndex++ ) {
   						string contextString = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
   						bool contextExists;

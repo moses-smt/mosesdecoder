@@ -51,22 +51,25 @@ public:
      m_factorTypeTarget(factorTypeTarget),
      m_unrestricted(true)
   {
+		std::cerr << "Creating word translation feature.. ";
 		m_sourceContext = false;
 		m_biphrase = false;
+		m_bitrigger = false;
 		switch(context) {
 			case 1:
 				m_sourceContext = true;
-				std::cerr << "Using source context for word translation feature.." << std::endl;
+				std::cerr << "using source context.. ";
 				break;
 			case 2:
 				m_biphrase = true;
-				std::cerr << "Using biphrases for word translation feature.." << std::endl;
+				std::cerr << "using biphrases.. ";
 				break;
 			case 3:
 				m_bitrigger = true;
-				std::cerr << "Using bitriggers for word translation feature.." << std::endl;
+				std::cerr << "using bitriggers.. ";
 				break;
 		}
+		std::cerr << "done." << std::endl;
   }
       
 	bool Load(const std::string &filePathSource, const std::string &filePathTarget);
