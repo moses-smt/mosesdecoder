@@ -119,9 +119,6 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     	}
     	if (m_targetContext) {
     		size_t globalTargetIndex = cur_hypo.GetCurrTargetWordsRange().GetStartPos() + targetIndex;
-    		cerr << "\n" <<  sourceWord << "-" << targetWord << endl;
-    		cerr << "hypo size " << cur_hypo.GetSize() << endl;
-    		cerr << "global target index: " << globalTargetIndex << endl;
     		if (globalTargetIndex == 0) {
     			// add <s> trigger feature for source
     			stringstream feature;
@@ -130,8 +127,7 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			feature << targetWord;
     			feature << "~";
     			feature << sourceWord;
-    			accumulator->SparsePlusEquals(feature.str(), 1);
-    			cerr << "feature: " << feature.str() << endl;
+    			accumulator->SparsePlusEquals(feature.str(), 1);    	   
 			}
 
     		// range over target words (up to current position) to get context
@@ -150,7 +146,6 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 	    			feature << "~";
 	    			feature << sourceWord;
 	    			accumulator->SparsePlusEquals(feature.str(), 1);
-	    			cerr << "feature: " << feature.str() << endl;
 				}
 			}
     	}
@@ -172,7 +167,6 @@ void WordTranslationFeature::AddFeature(ScoreComponentCollection* accumulator, s
 	feature << ",";
 	feature << sourceWord;
 	accumulator->SparsePlusEquals(feature.str(), 1);
-	cerr << "feature: " << feature.str() << endl;
 }
 
 }
