@@ -85,9 +85,6 @@ public:
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "wt"; }
 	size_t GetNumInputScores() const { return 0; }
-
-	void AddFeature(ScoreComponentCollection* accumulator, std::string sourceTrigger,
-			std::string sourceWord, std::string targetTrigger, std::string targetWord) const;
 };
 
 }

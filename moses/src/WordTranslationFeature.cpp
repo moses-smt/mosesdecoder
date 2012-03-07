@@ -65,17 +65,24 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
   	int targetIndex = alignmentPoint->second;
     const string &sourceWord = sourcePhrase.GetWord(sourceIndex).GetFactor(m_factorTypeSource)->GetString();
     const string &targetWord = targetPhrase.GetWord(targetIndex).GetFactor(m_factorTypeTarget)->GetString();
-    bool sourceExists = m_vocabSource.find( sourceWord ) != m_vocabSource.end();
-    bool targetExists = m_vocabTarget.find( targetWord ) != m_vocabTarget.end();
+    bool sourceExists = false;
+    bool targetExists = false;
+    if (!m_unrestricted) {
+    	sourceExists = m_vocabSource.find( sourceWord ) != m_vocabSource.end();
+    	targetExists = m_vocabTarget.find( targetWord ) != m_vocabTarget.end();
+    }
     // no feature if both words are not in restricted vocabularies
     if (m_unrestricted || (sourceExists && targetExists)) {
     	if (m_simple) {
     		// construct feature name
     		stringstream featureName;
-    		featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
+    		featureName << "wt_";
+    		//featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
+    		featureName << sourceWord;
     		featureName << "~";
-    		featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
-    		accumulator->PlusEquals(this,featureName.str(),1);
+    		//featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
+    		featureName << targetWord;
+    		accumulator->SparsePlusEquals(featureName.str(), 1);
     	}
     	if (m_sourceContext) {
     		size_t globalSourceIndex = cur_hypo.GetCurrSourceWordsRange().GetStartPos() + sourceIndex;
@@ -88,17 +95,17 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			feature << "<s>,";
     			feature << sourceWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);
-			}
+    		}
 
     		// range over source words to get context
-			for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
-				if (contextIndex == globalSourceIndex) continue;
-				string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
-				bool sourceTriggerExists = false;
-				if (!m_unrestricted)
-					sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+    		for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
+    			if (contextIndex == globalSourceIndex) continue;
+    			string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
+    			bool sourceTriggerExists = false;
+    			if (!m_unrestricted)
+    				sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
 
-				if (m_unrestricted || sourceTriggerExists) {
+    			if (m_unrestricted || sourceTriggerExists) {
 	    			stringstream feature;
 	    			feature << "wt_";
 	    			feature << targetWord;
@@ -114,8 +121,8 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 	    				feature << sourceTrigger;
 	    			}
 	    			accumulator->SparsePlusEquals(feature.str(), 1);
-				}
-			}
+    			}
+    		}
     	}
     	if (m_targetContext) {
     		size_t globalTargetIndex = cur_hypo.GetCurrTargetWordsRange().GetStartPos() + targetIndex;
@@ -128,45 +135,31 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			feature << "~";
     			feature << sourceWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);    	   
-			}
+    		}
 
     		// range over target words (up to current position) to get context
-			for(size_t contextIndex = 0; contextIndex < globalTargetIndex; contextIndex++ ) {
-				string targetTrigger = cur_hypo.GetWord(contextIndex).GetFactor(m_factorTypeTarget)->GetString();
-				bool targetTriggerExists = false;
-				if (!m_unrestricted)
-					targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
+    		for(size_t contextIndex = 0; contextIndex < globalTargetIndex; contextIndex++ ) {
+    			string targetTrigger = cur_hypo.GetWord(contextIndex).GetFactor(m_factorTypeTarget)->GetString();
+    			bool targetTriggerExists = false;
+    			if (!m_unrestricted)
+    				targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
 
-				if (m_unrestricted || targetTriggerExists) {
-	    			stringstream feature;
-	    			feature << "wt_";
+    			if (m_unrestricted || targetTriggerExists) {
+    				stringstream feature;
+    				feature << "wt_";
 	    			feature << targetTrigger;
 	    			feature << ",";
 	    			feature << targetWord;
 	    			feature << "~";
 	    			feature << sourceWord;
 	    			accumulator->SparsePlusEquals(feature.str(), 1);
-				}
-			}
+    			}
+    		}
     	}
     }
   }
 
   return new DummyState();
-}
-
-void WordTranslationFeature::AddFeature(ScoreComponentCollection* accumulator, string sourceTrigger,
-		string sourceWord, string targetTrigger, string targetWord) const {
-	stringstream feature;
-	feature << "wt_";
-	feature << targetTrigger;
-	feature << ",";
-	feature << targetWord;
-	feature << "~";
-	feature << sourceTrigger;
-	feature << ",";
-	feature << sourceWord;
-	accumulator->SparsePlusEquals(feature.str(), 1);
 }
 
 }
