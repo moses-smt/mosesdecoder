@@ -444,15 +444,23 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   	diff = loss - (modelScoreDiff + m_margin_slack);
   }
   cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+  if (m_normaliseMargin) {
+    modelScoreDiff = (2/(1 + exp(-modelScoreDiff))) - 1;
+    loss = (2/(1 + exp(-loss))) - 1;
+    if (loss > (modelScoreDiff + m_margin_slack)) {
+      diff = loss - (modelScoreDiff + m_margin_slack);
+    }
+    cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+  }
 
   if (diff > epsilon) {
   	// squash it between 0 and 1
   	//diff = tanh(diff);
-  	//diff = (2/(1 + pow(2,- diff))) - 1;
-  	if (m_normaliseMargin) {
-  		diff = (2/(1 + exp(- diff))) - 1;
+  	//diff = (2/(1 + pow(2,-diff))) - 1;
+    /*  	if (m_normaliseMargin) {
+  		diff = (2/(1 + exp(-diff))) - 1;
   		cerr << "Rank " << rank << ", epoch " << epoch << ", new margin: " << diff << endl;
-  	}
+		}*/
 
     // constraint violated
     oldDistanceFromOptimum += diff;
