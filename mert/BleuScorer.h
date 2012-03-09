@@ -12,6 +12,8 @@
 
 using namespace std;
 
+const int kBleuNgramOrder = 4;
+
 /**
  * Bleu scoring
  */
@@ -24,7 +26,7 @@ public:
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
   virtual float calculateScore(const vector<int>& comps) const;
-  virtual size_t NumberOfScores() const { return 2 * kLENGTH + 1; }
+  virtual size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
 
 private:
   enum ReferenceLengthType {
@@ -55,7 +57,6 @@ private:
   void CalcShortest(size_t sentence_id,
                     vector<ScoreStatsType>& stats) const;
 
-  const int kLENGTH;
   ReferenceLengthType m_ref_length_type;
 
   // data extracted from reference files

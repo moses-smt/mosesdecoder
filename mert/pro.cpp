@@ -34,9 +34,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <boost/program_options.hpp>
 
+#include "BleuScorer.h"
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
 
@@ -70,13 +72,12 @@ public:
 
 static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
 	float logbleu = 0.0;
-	const unsigned int bleu_order = 4;
-	for (unsigned int j=0; j<bleu_order; j++) {
+	for (unsigned int j=0; j<kBleuNgramOrder; j++) {
 		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
 		logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
 	}
-	logbleu /= bleu_order;
-	const float brevity = 1.0 - static_cast<float>(stats[(bleu_order*2)]) / stats[1];
+	logbleu /= kBleuNgramOrder;
+	const float brevity = 1.0 - static_cast<float>(stats[(kBleuNgramOrder * 2)]) / stats[1];
 	if (brevity < 0.0) {
 		logbleu += brevity;
 	}

@@ -85,7 +85,6 @@ class BleuScorer::NgramCounts {
 
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
-      kLENGTH(4),
       m_ref_length_type(CLOSEST) {
   const string reflen = getConfig(KEY_REFLEN, REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
@@ -150,7 +149,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
         throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
       }
       NgramCounts counts;
-      size_t length = countNgrams(line, counts, kLENGTH);
+      size_t length = countNgrams(line, counts, kBleuNgramOrder);
 
       //for any counts larger than those already there, merge them in
       for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
@@ -184,9 +183,9 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   }
   NgramCounts testcounts;
   // stats for this line
-  vector<ScoreStatsType> stats(kLENGTH * 2);
+  vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
   string sentence = this->applyFactors(text);
-  const size_t length = countNgrams(sentence, testcounts, kLENGTH);
+  const size_t length = countNgrams(sentence, testcounts, kBleuNgramOrder);
 
   // Calculate effective reference length.
   switch (m_ref_length_type) {
@@ -222,15 +221,16 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 float BleuScorer::calculateScore(const vector<int>& comps) const
 {
   float logbleu = 0.0;
-  for (int i = 0; i < kLENGTH; ++i) {
+  for (int i = 0; i < kBleuNgramOrder; ++i) {
     if (comps[2*i] == 0) {
       return 0.0;
     }
     logbleu += log(comps[2*i]) - log(comps[2*i+1]);
 
   }
-  logbleu /= kLENGTH;
-  const float brevity = 1.0 - static_cast<float>(comps[kLENGTH*2]) / comps[1];//reflength divided by test length
+  logbleu /= kBleuNgramOrder;
+  // reflength divided by test length
+  const float brevity = 1.0 - static_cast<float>(comps[kBleuNgramOrder * 2]) / comps[1];
   if (brevity < 0.0) {
     logbleu += brevity;
   }
