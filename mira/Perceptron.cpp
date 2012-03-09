@@ -35,7 +35,8 @@ size_t Perceptron::updateWeightsHopeFear(
 		const vector< vector<float> >& dummy4,
 		float perceptron_learning_rate,
 		size_t rank,
-		size_t epoch)
+		size_t epoch,
+		int updatePosition)
 {
 	cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << featureValuesHope[0][0] << endl;
 	cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear[0][0] << endl;

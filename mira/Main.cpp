@@ -115,13 +115,13 @@ int main(int argc, char** argv) {
 	float max_length_dev_hope_ref;
 	float max_length_dev_fear_ref;
 	float relax_BP;
-	bool delayUpdates;
 	float min_oracle_bleu;
 	float minBleuRatio, maxBleuRatio;
 	bool boost;
 	bool decode_hope, decode_fear, decode_model;
 	string decode_filename;
 	size_t update_scheme;
+	bool separateUpdates, batchEqualsShard;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -130,6 +130,7 @@ int main(int argc, char** argv) {
 		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for taking logs of feature values")
+		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
 		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
@@ -144,7 +145,6 @@ int main(int argc, char** argv) {
 		("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
-		("delay-updates", po::value<bool>(&delayUpdates)->default_value(false), "Delay all updates until the end of an epoch")
 		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
@@ -191,6 +191,7 @@ int main(int argc, char** argv) {
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
+		("separate-updates", po::value<bool>(&separateUpdates)->default_value(false), "Compute separate updates for each sentence in a batch")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
@@ -404,6 +405,8 @@ int main(int argc, char** argv) {
 	VERBOSE(1, "Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
 	shard.resize(shardSize);
 	copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
+	if (batchEqualsShard)
+		batchSize = shardSize;
 
 	// get reference to feature functions
 	const vector<const ScoreProducer*> featureFunctions =
@@ -446,9 +449,6 @@ int main(int argc, char** argv) {
 	ScoreComponentCollection mixedAverageWeightsPrevious;
 	ScoreComponentCollection mixedAverageWeightsBeforePrevious;
 
-	// for accumulating delayed updates
-	ScoreComponentCollection delayedWeightUpdates;
-
 	bool stop = false;
 //	int sumStillViolatedConstraints;
 	float *sendbuf, *recvbuf;
@@ -462,8 +462,6 @@ int main(int argc, char** argv) {
 		// Sum up weights over one epoch, final average uses weights from last epoch
 		if (!accumulateWeights)
 			cumulativeWeights.ZeroAll();
-
-		delayedWeightUpdates.ZeroAll();
 
 		// number of weight dumps this epoch
 		size_t weightEpochDump = 0;
@@ -788,7 +786,7 @@ int main(int argc, char** argv) {
 
 				// Run optimiser on batch:
 				VERBOSE(1, "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl);
-				size_t update_status;
+				size_t update_status = 1;
 				ScoreComponentCollection weightUpdate;
 				if (perceptron_update) {
 					vector<vector<float> > dummy1;
@@ -797,16 +795,33 @@ int main(int argc, char** argv) {
 				}
 				else if (hope_fear || hope_model) {
 					if (bleuScoresHope[0][0] >= min_oracle_bleu)
-						if (hope_n == 1 && fear_n ==1)
+						if (hope_n == 1 && fear_n ==1 && batchSize == 1)
 							update_status = ((MiraOptimiser*) optimiser)->updateWeightsAnalytically(mosesWeights, weightUpdate,
 									featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
 									modelScoresHope[0][0], modelScoresFear[0][0], learning_rate, rank, epoch);
-						else
-							update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
+						else {
+							if (batchSize > 1 && separateUpdates) {
+								// separate updates for all input sentences
+								for (size_t i = 0; i < batchSize; ++i) {
+									// use only the specified batch position to compute the update
+									int updatePosition = i;
+									ScoreComponentCollection partialWeightUpdate;
+									size_t partial_update_status = optimiser->updateWeightsHopeFear(mosesWeights, partialWeightUpdate,
+										featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
+										modelScoresHope, modelScoresFear, learning_rate, rank, epoch, updatePosition);
+									if (partial_update_status == 0) {
+										update_status = 0;
+										weightUpdate.PlusEquals(partialWeightUpdate);
+									}
+								}
+							}
+							else
+								update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
 									featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
 									modelScoresHope, modelScoresFear, learning_rate, rank, epoch);
+						}
 				  else
-				    update_status = -1;										     
+				    update_status = 1;
 				}
 				else if (rank_only) {
 					// learning ranking of model translations
@@ -829,35 +844,27 @@ int main(int argc, char** argv) {
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
-					if (delayUpdates) {
-						delayedWeightUpdates.PlusEquals(weightUpdate);
-						//						cerr << "\nRank " << rank << ", epoch " << epoch << ", keeping update: " << weightUpdate << endl;
-						++numberOfUpdatesThisEpoch;
-					}
-					else {
-					  cerr << "Rank " << rank << ", epoch " << epoch << ", applying update.." << endl;
-						mosesWeights.PlusEquals(weightUpdate);
-						if (normaliseWeights)
-							mosesWeights.L1Normalise();
+					cerr << "Rank " << rank << ", epoch " << epoch << ", applying update.." << endl;
+					mosesWeights.PlusEquals(weightUpdate);
+					if (normaliseWeights)
+						mosesWeights.L1Normalise();
 
-						cumulativeWeights.PlusEquals(mosesWeights);
-						++numberOfUpdates;
-						++numberOfUpdatesThisEpoch;
-						if (averageWeights) {
-							ScoreComponentCollection averageWeights(cumulativeWeights);
-							if (accumulateWeights) {
-								averageWeights.DivideEquals(numberOfUpdates);
-							} else {
-								averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
-							}
-
-							mosesWeights = averageWeights;
+					cumulativeWeights.PlusEquals(mosesWeights);
+					++numberOfUpdates;
+					++numberOfUpdatesThisEpoch;
+					if (averageWeights) {
+						ScoreComponentCollection averageWeights(cumulativeWeights);
+						if (accumulateWeights) {
+							averageWeights.DivideEquals(numberOfUpdates);
+						} else {
+							averageWeights.DivideEquals(numberOfUpdatesThisEpoch);
 						}
 
-						if (!delayUpdates)
-							// set new Moses weights
-							decoder->setWeights(mosesWeights);
+						mosesWeights = averageWeights;
 					}
+
+					// set new Moses weights
+					decoder->setWeights(mosesWeights);
 				}
 
 				// update history (for approximate document Bleu)
@@ -883,7 +890,6 @@ int main(int argc, char** argv) {
 			if (evaluateModulo(shardPosition, mixing_base, actualBatchSize)) {
 #ifdef MPI_ENABLE
 				ScoreComponentCollection mixedWeights;
-				//				cerr << "\nRank " << rank << ", before mixing: " << mosesWeights << endl;
 
 				// collect all weights in mixedWeights and divide by number of processes
 				mpi::reduce(world, mosesWeights, mixedWeights, SCCPlus(), 0);
@@ -894,10 +900,6 @@ int main(int argc, char** argv) {
 					// normalise weights after averaging
 					if (normaliseWeights) {
 						mixedWeights.L1Normalise();
-						//						cerr << "Mixed weights (normalised): " << mixedWeights << endl;
-					}
-					else {
-					  //						cerr << "Mixed weights: " << mixedWeights << endl;
 					}
 				}
 
@@ -912,7 +914,7 @@ int main(int argc, char** argv) {
 			} // end mixing
 
 			// Dump weights?
-			if (!delayUpdates && evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
+			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
 			  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
 			  bool proceed = false;
 			  if (accumulateWeights) {
@@ -970,70 +972,6 @@ int main(int argc, char** argv) {
 			}// end dumping
 
 		} // end of shard loop, end of this epoch
-
-		if (delayUpdates) {
-			// apply all updates from this epoch to the weight vector
-			ScoreComponentCollection mosesWeights = decoder->getWeights();
-			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, old moses weights: " << mosesWeights << endl;
-			mosesWeights.PlusEquals(delayedWeightUpdates);
-			cumulativeWeights.PlusEquals(mosesWeights);
-			decoder->setWeights(mosesWeights);
-			cerr << "Rank " << rank << ", epoch " << epoch << ", delayed update, new moses weights: " << mosesWeights << endl;
-
-		  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
-		  bool proceed = false;
-		  if (accumulateWeights) {
-		    if (numberOfUpdatesThisEpoch > 0) {
-		      tmpAverageWeights.DivideEquals(epoch+1);
-		      proceed = true;
-		    }
-		  }
-		  else {
-		    if (numberOfUpdatesThisEpoch > 0)
-		      proceed = true;
-		  }
-
-		  if (proceed) {
-#ifdef MPI_ENABLE
-		    // average across processes
-		    mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
-#endif
-#ifndef MPI_ENABLE
-		    mixedAverageWeights = tmpAverageWeights;
-#endif
-		    if (rank == 0 && !weightDumpStem.empty()) {
-		      // divide by number of processes
-		      mixedAverageWeights.DivideEquals(size);
-
-		      // normalise weights after averaging
-		      if (normaliseWeights) {
-		      	mixedAverageWeights.L1Normalise();
-		      }
-
-		      // dump final average weights
-		      ostringstream filename;
-		      if (epoch < 10) {
-		      	filename << weightDumpStem << "_0" << epoch;
-		      } else {
-		      	filename << weightDumpStem << "_" << epoch;
-		      }
-
-		      if (weightDumpFrequency > 1) {
-		      	filename << "_" << weightEpochDump;
-		      }
-
-		      if (accumulateWeights) {
-		      	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
-		      } else {
-		      	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
-		      }
-
-		      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
-		      mixedAverageWeights.Save(filename.str());
-		      ++weightEpochDump;
-		    }
-		  }
-		}
 
 		if (verbosity > 0) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;

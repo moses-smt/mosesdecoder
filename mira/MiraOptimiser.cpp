@@ -184,7 +184,8 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 		const std::vector<std::vector<float> >& modelScoresFear,
 		float learning_rate,
 		size_t rank,
-		size_t epoch) {
+		size_t epoch,
+		int updatePosition) {
 
 	// vector of feature values differences for all created constraints
 	vector<ScoreComponentCollection> featureValueDiffs;
@@ -203,6 +204,13 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 
 	// iterate over input sentences (1 (online) or more (batch))
 	for (size_t i = 0; i < featureValuesHope.size(); ++i) {
+		if (updatePosition != -1) {
+			if (i < updatePosition)
+				continue;
+			else if (i > updatePosition)
+				break;
+		}
+
 		// Pair all hope translations with all fear translations for one input sentence
 		for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
 			for (size_t k = 0; k < featureValuesFear[i].size(); ++k) {

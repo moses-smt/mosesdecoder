@@ -41,7 +41,8 @@ namespace Mira {
 				  const std::vector<std::vector<float> >& modelScoresFear,
 				  float learning_rate,
 				  size_t rank,
-				  size_t epoch) = 0;
+				  size_t epoch,
+				  int updatePosition = -1) = 0;
   };
  
   class Perceptron : public Optimiser {
@@ -57,7 +58,8 @@ namespace Mira {
 					const std::vector<std::vector<float> >& modelScoresFear,
 					float learning_rate,
 					size_t rank,
-					size_t epoch);
+					size_t epoch,
+					int updatePosition = -1);
   };
 
   class MiraOptimiser : public Optimiser {
@@ -99,7 +101,8 @@ size_t scale_update, float margin_slack, bool boost, size_t update_scheme, bool 
       						  const std::vector<std::vector<float> >& modelScoresFear,
       						  float learning_rate,
       						  size_t rank,
-      						  size_t epoch);
+      						  size_t epoch,
+      						  int updatePosition = -1);
      size_t updateWeightsAnalytically(Moses::ScoreComponentCollection& currWeights,
     		 Moses::ScoreComponentCollection& weightUpdate,
     		 Moses::ScoreComponentCollection& featureValuesHope,
