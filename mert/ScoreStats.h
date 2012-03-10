@@ -40,9 +40,7 @@ public:
 
   void Copy(const ScoreStats &stats);
 
-  bool isfull() const {
-    return (m_entries < m_available_size) ? 0 : 1;
-  }
+  bool isfull() const { return (m_entries < m_available_size) ? 0 : 1; }
 
   void expand();
   void add(ScoreStatsType v);
@@ -56,9 +54,9 @@ public:
     clear();
   }
 
-  inline ScoreStatsType get(size_t i) { return m_array[i]; }
-  inline ScoreStatsType get(size_t i) const { return m_array[i]; }
-  inline scorestats_t getArray() const { return m_array; }
+  ScoreStatsType get(size_t i) { return m_array[i]; }
+  ScoreStatsType get(size_t i) const { return m_array[i]; }
+  scorestats_t getArray() const { return m_array; }
 
   void set(const std::string& str);
 
@@ -70,15 +68,15 @@ public:
     }
   }
 
-  inline size_t bytes() const { return GetArraySizeWithBytes(); }
+  size_t bytes() const { return GetArraySizeWithBytes(); }
 
   size_t GetArraySizeWithBytes() const {
     return m_entries * sizeof(ScoreStatsType);
   }
 
-  inline size_t size() const { return m_entries; }
+  size_t size() const { return m_entries; }
 
-  inline size_t available() const { return m_available_size; }
+  size_t available() const { return m_available_size; }
 
   void savetxt(const std::string &file);
   void savetxt(ostream* os);

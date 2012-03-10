@@ -32,25 +32,16 @@ public:
   FeatureData();
   ~FeatureData() {}
 
-  inline void clear() {
-    m_array.clear();
-  }
+  void clear() { m_array.clear(); }
 
-  inline bool hasSparseFeatures() const {
-    return m_sparse_flag;
-  }
+  bool hasSparseFeatures() const { return m_sparse_flag; }
 
-  inline FeatureArray get(const std::string& idx) {
+  FeatureArray get(const std::string& idx) {
     return m_array.at(getIndex(idx));
   }
 
-  inline FeatureArray& get(size_t idx) {
-    return m_array.at(idx);
-  }
-
-  inline const FeatureArray& get(size_t idx) const {
-    return m_array.at(idx);
-  }
+  FeatureArray& get(size_t idx) { return m_array.at(idx); }
+  const FeatureArray& get(size_t idx) const { return m_array.at(idx); }
 
   inline bool exists(const std::string& sent_idx) const {
     return exists(getIndex(sent_idx));
@@ -64,44 +55,30 @@ public:
     return m_array.at(i).get(j);
   }
 
-  inline const FeatureStats&  get(size_t i, size_t j) const {
+  inline const FeatureStats& get(size_t i, size_t j) const {
     return m_array.at(i).get(j);
   }
 
   void add(FeatureArray& e);
   void add(FeatureStats& e, const std::string& sent_idx);
 
-  inline size_t size() const {
-    return m_array.size();
-  }
+  size_t size() const { return m_array.size(); }
 
-  inline size_t NumberOfFeatures() const {
-    return m_num_features;
-  }
+  size_t NumberOfFeatures() const { return m_num_features; }
+  void NumberOfFeatures(size_t v) { m_num_features = v; }
 
-  inline void NumberOfFeatures(size_t v) {
-    m_num_features = v;
-  }
-
-  inline std::string Features() const {
-    return m_features;
-  }
-
-  inline void Features(const std::string& f) {
-    m_features = f;
-  }
+  std::string Features() const { return m_features; }
+  void Features(const std::string& f) { m_features = f; }
 
   void save(const std::string &file, bool bin=false);
   void save(std::ostream* os, bool bin=false);
-
-  inline void save(bool bin=false) {
-    save(&cout, bin);
-  }
+  void save(bool bin=false);
 
   void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;
+
   void setIndex();
 
   inline int getIndex(const std::string& idx) const {
