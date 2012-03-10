@@ -8,6 +8,7 @@
 
 #include "FeatureStats.h"
 
+#include <fstream>
 #include <cmath>
 #include "Util.h"
 
@@ -89,7 +90,7 @@ FeatureStats::FeatureStats(const size_t size)
   memset(m_array, 0, GetArraySizeWithBytes());
 }
 
-FeatureStats::FeatureStats(std::string &theString)
+FeatureStats::FeatureStats(string &theString)
     : m_available_size(0), m_entries(0), m_array(NULL)
 {
   set(theString);
@@ -144,9 +145,9 @@ void FeatureStats::addSparse(const string& name, FeatureStatsType v)
   m_map.set(name,v);
 }
 
-void FeatureStats::set(std::string &theString)
+void FeatureStats::set(string &theString)
 {
-  std::string substring, stringBuf;
+  string substring, stringBuf;
   reset();
 
   while (!theString.empty()) {
@@ -163,48 +164,50 @@ void FeatureStats::set(std::string &theString)
   }
 }
 
-
-void FeatureStats::loadbin(std::ifstream& inFile)
+void FeatureStats::loadbin(istream* is)
 {
-  inFile.read((char*) m_array, GetArraySizeWithBytes());
+  is->read(reinterpret_cast<char*>(m_array),
+           static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
-void FeatureStats::loadtxt(std::ifstream& inFile)
+void FeatureStats::loadtxt(istream* is)
 {
-  std::string theString;
-  std::getline(inFile, theString);
-  set(theString);
+  string line;
+  getline(*is, line);
+  set(line);
 }
 
-void FeatureStats::loadtxt(const std::string &file)
+void FeatureStats::loadtxt(const string &file)
 {
-  //    TRACE_ERR("loading the stats from " << file << std::endl);
-
-  std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-  loadtxt(inFile);
+  ifstream ifs(file.c_str(), ios::in);
+  if (!ifs) {
+    cerr << "Failed to open " << file << endl;
+    exit(1);
+  }
+  istream* is = &ifs;
+  loadtxt(is);
 }
 
-
-void FeatureStats::savetxt(const std::string &file)
+void FeatureStats::savetxt(const string &file)
 {
-//      TRACE_ERR("saving the stats into " << file << std::endl);
-
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
-
-  savetxt(outFile);
+  ofstream ofs(file.c_str(), ios::out);
+  ostream* os = &ofs;
+  savetxt(os);
 }
 
-
-void FeatureStats::savetxt(std::ofstream& outFile)
+void FeatureStats::savetxt(ostream* os)
 {
-//      TRACE_ERR("saving the stats" << std::endl);
-  outFile << *this;
+  *os << *this;
 }
 
-void FeatureStats::savebin(std::ofstream& outFile)
+void FeatureStats::savetxt() {
+  savetxt(&cout);
+}
+
+void FeatureStats::savebin(ostream* os)
 {
-  outFile.write((char*) m_array, GetArraySizeWithBytes());
+  os->write(reinterpret_cast<char*>(m_array),
+            static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
 ostream& operator<<(ostream& o, const FeatureStats& e)

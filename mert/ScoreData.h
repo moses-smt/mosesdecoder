@@ -9,7 +9,7 @@
 #ifndef MERT_SCORE_DATA_H_
 #define MERT_SCORE_DATA_H_
 
-#include <fstream>
+#include <iostream>
 #include <vector>
 #include <stdexcept>
 #include <string>
@@ -86,12 +86,10 @@ public:
   }
 
   void save(const std::string &file, bool bin=false);
-  void save(ofstream& outFile, bool bin=false);
-  inline void save(bool bin=false) {
-    save("/dev/stdout", bin);
-  }
+  void save(std::ostream* os, bool bin=false);
+  void save(bool bin=false);
 
-  void load(ifstream& inFile);
+  void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;

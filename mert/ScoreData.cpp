@@ -7,6 +7,8 @@
  */
 
 #include "ScoreData.h"
+
+#include <fstream>
 #include "Scorer.h"
 #include "Util.h"
 #include "FileStream.h"
@@ -21,34 +23,40 @@ ScoreData::ScoreData(Scorer* scorer) :
   // TRACE_ERR("ScoreData: m_num_scores: " << m_num_scores << std::endl);
 }
 
-void ScoreData::save(std::ofstream& outFile, bool bin)
+void ScoreData::save(ostream* os, bool bin)
 {
-  for (scoredata_t::iterator i = m_array.begin(); i != m_array.end(); ++i) {
-    i->save(outFile, m_score_type, bin);
+  for (scoredata_t::iterator i = m_array.begin();
+       i != m_array.end(); ++i) {
+    i->save(os, m_score_type, bin);
   }
 }
 
-void ScoreData::save(const std::string &file, bool bin)
+void ScoreData::save(const string &file, bool bin)
 {
   if (file.empty()) return;
-  TRACE_ERR("saving the array into " << file << std::endl);
+  TRACE_ERR("saving the array into " << file << endl);
 
   // matches a stream with a file. Opens the file.
-  std::ofstream outFile(file.c_str(), std::ios::out);
-  save(outFile, bin);
-  outFile.close();
+  ofstream ofs(file.c_str(), ios::out);
+  ostream* os = &ofs;
+  save(os, bin);
+  ofs.close();
 }
 
-void ScoreData::load(ifstream& inFile)
+void ScoreData::save(bool bin) {
+  save(&cout, bin);
+}
+
+void ScoreData::load(istream* is)
 {
   ScoreArray entry;
 
-  while (!inFile.eof()) {
-    if (!inFile.good()) {
-      std::cerr << "ERROR ScoreData::load inFile.good()" << std::endl;
+  while (!is->eof()) {
+    if (!is->good()) {
+      cerr << "ERROR ScoreData::load inFile.good()" << endl;
     }
     entry.clear();
-    entry.load(inFile);
+    entry.load(is);
     if (entry.size() == 0) {
       break;
     }
@@ -56,15 +64,16 @@ void ScoreData::load(ifstream& inFile)
   }
 }
 
-void ScoreData::load(const std::string &file)
+void ScoreData::load(const string &file)
 {
-  TRACE_ERR("loading score data from " << file << std::endl);
-  inputfilestream inFile(file); // matches a stream with a file. Opens the file
-  if (!inFile) {
+  TRACE_ERR("loading score data from " << file << endl);
+  inputfilestream input_stream(file); // matches a stream with a file. Opens the file
+  if (!input_stream) {
     throw runtime_error("Unable to open score file: " + file);
   }
-  load((ifstream&) inFile);
-  inFile.close();
+  istream* is = &input_stream;
+  load(is);
+  input_stream.close();
 }
 
 void ScoreData::add(ScoreArray& e)
@@ -79,7 +88,7 @@ void ScoreData::add(ScoreArray& e)
   }
 }
 
-void ScoreData::add(const ScoreStats& e, const std::string& sent_idx)
+void ScoreData::add(const ScoreStats& e, const string& sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     // Enlarge array at position e.getIndex()

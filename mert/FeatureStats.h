@@ -10,7 +10,6 @@
 #define MERT_FEATURE_STATS_H_
 
 #include <cstring>
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -118,15 +117,13 @@ public:
   }
 
   void savetxt(const std::string &file);
-  void savetxt(ofstream& outFile);
-  void savebin(ofstream& outFile);
-  inline void savetxt() {
-    savetxt("/dev/stdout");
-  }
+  void savetxt(std::ostream* os);
+  void savebin(std::ostream* os);
+  void savetxt();
 
   void loadtxt(const std::string &file);
-  void loadtxt(ifstream& inFile);
-  void loadbin(ifstream& inFile);
+  void loadtxt(std::istream* is);
+  void loadbin(std::istream* is);
 
   /**
    * Write the whole object to a stream.

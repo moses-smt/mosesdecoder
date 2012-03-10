@@ -13,44 +13,41 @@
 #include "Util.h"
 #include <cstdio>
 
-static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
-static const float MAX_FLOAT=numeric_limits<float>::max();
+static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
+static const float MAX_FLOAT = numeric_limits<float>::max();
 
 FeatureData::FeatureData()
     : m_num_features(0),
       m_sparse_flag(false) {}
 
-void FeatureData::save(std::ofstream& outFile, bool bin)
+void FeatureData::save(ostream* os, bool bin)
 {
   for (featdata_t::iterator i = m_array.begin(); i != m_array.end(); i++)
-    i->save(outFile, bin);
+    i->save(os, bin);
 }
 
-void FeatureData::save(const std::string &file, bool bin)
+void FeatureData::save(const string &file, bool bin)
 {
   if (file.empty()) return;
-
-  TRACE_ERR("saving the array into " << file << std::endl);
-
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
-
-  save(outFile, bin);
-
-  outFile.close();
+  TRACE_ERR("saving the array into " << file << endl);
+  ofstream ofs(file.c_str(), ios::out); // matches a stream with a file. Opens the file
+  ostream* os = &ofs;
+  save(os, bin);
+  ofs.close();
 }
 
-void FeatureData::load(ifstream& inFile)
+void FeatureData::load(istream* is)
 {
   FeatureArray entry;
 
-  while (!inFile.eof()) {
+  while (!is->eof()) {
 
-    if (!inFile.good()) {
-      std::cerr << "ERROR FeatureData::load inFile.good()" << std::endl;
+    if (!is->good()) {
+      cerr << "ERROR FeatureData::load inFile.good()" << endl;
     }
 
     entry.clear();
-    entry.load(inFile);
+    entry.load(is);
 
     if (entry.size() == 0)
       break;
@@ -66,19 +63,16 @@ void FeatureData::load(ifstream& inFile)
 }
 
 
-void FeatureData::load(const std::string &file)
+void FeatureData::load(const string &file)
 {
-  TRACE_ERR("loading feature data from " << file << std::endl);
-
-  inputfilestream inFile(file); // matches a stream with a file. Opens the file
-
-  if (!inFile) {
+  TRACE_ERR("loading feature data from " << file << endl);
+  inputfilestream input_stream(file); // matches a stream with a file. Opens the file
+  if (!input_stream) {
     throw runtime_error("Unable to open feature file: " + file);
   }
-
-  load((ifstream&) inFile);
-
-  inFile.close();
+  istream* is = &input_stream;
+  load(is);
+  input_stream.close();
 }
 
 void FeatureData::add(FeatureArray& e)
@@ -93,7 +87,7 @@ void FeatureData::add(FeatureArray& e)
   }
 }
 
-void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
+void FeatureData::add(FeatureStats& e, const string& sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
@@ -132,7 +126,7 @@ void FeatureData::setIndex()
   }
 }
 
-void FeatureData::setFeatureMap(const std::string& feat)
+void FeatureData::setFeatureMap(const string& feat)
 {
   m_num_features = 0;
   m_features = feat;

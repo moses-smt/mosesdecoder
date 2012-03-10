@@ -67,7 +67,7 @@ void ScoreStats::add(ScoreStatsType v)
   m_array[m_entries++]=v;
 }
 
-void ScoreStats::set(const std::string& str)
+void ScoreStats::set(const string& str)
 {
   reset();
   vector<string> out;
@@ -78,46 +78,51 @@ void ScoreStats::set(const std::string& str)
   }
 }
 
-void ScoreStats::loadbin(std::ifstream& inFile)
+void ScoreStats::loadbin(istream* is)
 {
-  inFile.read((char*)m_array, GetArraySizeWithBytes());
+  is->read(reinterpret_cast<char*>(m_array),
+           static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
-void ScoreStats::loadtxt(std::ifstream& inFile)
+void ScoreStats::loadtxt(istream* is)
 {
-  std::string theString;
-  std::getline(inFile, theString);
-  set(theString);
+  string line;
+  getline(*is, line);
+  set(line);
 }
 
-void ScoreStats::loadtxt(const std::string &file)
+void ScoreStats::loadtxt(const string &file)
 {
-//      TRACE_ERR("loading the stats from " << file << std::endl);
-
-  std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-  loadtxt(inFile);
-}
-
-
-void ScoreStats::savetxt(const std::string &file)
-{
-//      TRACE_ERR("saving the stats into " << file << std::endl);
-
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
-
-  savetxt(outFile);
+  ifstream ifs(file.c_str(), ios::in); // matches a stream with a file. Opens the file
+  if (!ifs) {
+    cerr << "Failed to open " << file << endl;
+    exit(1);
+  }
+  istream* is = &ifs;
+  loadtxt(is);
 }
 
 
-void ScoreStats::savetxt(std::ofstream& outFile)
+void ScoreStats::savetxt(const string &file)
 {
-  outFile << *this;
+  ofstream ofs(file.c_str(), ios::out); // matches a stream with a file. Opens the file
+  ostream* os = &ofs;
+  savetxt(os);
 }
 
-void ScoreStats::savebin(std::ofstream& outFile)
+void ScoreStats::savetxt(ostream* os)
 {
-  outFile.write((char*)m_array, GetArraySizeWithBytes());
+  *os << *this;
+}
+
+void ScoreStats::savetxt() {
+  savetxt(&cout);
+}
+
+void ScoreStats::savebin(ostream* os)
+{
+  os->write(reinterpret_cast<char*>(m_array),
+            static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
 ostream& operator<<(ostream& o, const ScoreStats& e)

@@ -2,6 +2,7 @@
 #define MERT_FILE_STREAM_H_
 
 #include <fstream>
+#include <iostream>
 #include <streambuf>
 #include <string>
 
