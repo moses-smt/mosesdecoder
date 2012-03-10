@@ -24,12 +24,12 @@ Data::Data()
     m_score_data(),
     m_feature_data() {}
 
-Data::Data(Scorer& ptr)
-    : m_scorer(&ptr),
+Data::Data(Scorer* scorer)
+    : m_scorer(scorer),
       m_score_type(m_scorer->getName()),
       m_num_scores(0),
       m_sparse_flag(false),
-      m_score_data(new ScoreData(*m_scorer)),
+      m_score_data(new ScoreData(m_scorer)),
       m_feature_data(new FeatureData)
 {
   TRACE_ERR("Data::m_score_type " << m_score_type << endl);
@@ -250,7 +250,7 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
 
     Scorer* scorer = ScorerFactory::getScorer(m_score_type, scorerconfig);
 
-    shards.push_back(Data(*scorer));
+    shards.push_back(Data(scorer));
     shards.back().m_score_type = m_score_type;
     shards.back().m_num_scores = m_num_scores;
     shards.back().m_sparse_flag = m_sparse_flag;

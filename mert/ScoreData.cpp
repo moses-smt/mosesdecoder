@@ -11,8 +11,8 @@
 #include "Util.h"
 #include "FileStream.h"
 
-ScoreData::ScoreData(Scorer& ptr):
-  m_scorer(&ptr)
+ScoreData::ScoreData(Scorer* scorer) :
+  m_scorer(scorer)
 {
   m_score_type = m_scorer->getName();
   // This is not dangerous: we don't use the this pointer in SetScoreData.

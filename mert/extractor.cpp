@@ -197,7 +197,7 @@ int main(int argc, char** argv)
 
     PrintUserTime("References loaded");
 
-    Data data(*scorer);
+    Data data(scorer.get());
 
     // load old data
     for (size_t i = 0; i < prevScoreDataFiles.size(); i++) {
