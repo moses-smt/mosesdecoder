@@ -348,7 +348,7 @@ int main(int argc, char **argv)
   scorer->setScoreData(data.getScoreData().get());
 
   //ADDED_BY_TS
-  data.remove_duplicates();
+  data.removeDuplicates();
   //END_ADDED
 
   PrintUserTime("Data loaded");
