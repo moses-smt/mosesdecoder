@@ -17,12 +17,12 @@ static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
 static const float MAX_FLOAT=numeric_limits<float>::max();
 
 FeatureData::FeatureData()
-    : number_of_features(0),
-      _sparse_flag(false) {}
+    : m_num_features(0),
+      m_sparse_flag(false) {}
 
 void FeatureData::save(std::ofstream& outFile, bool bin)
 {
-  for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++)
+  for (featdata_t::iterator i = m_array.begin(); i != m_array.end(); i++)
     i->save(outFile, bin);
 }
 
@@ -59,7 +59,7 @@ void FeatureData::load(ifstream& inFile)
       setFeatureMap(entry.Features());
 
     if (entry.hasSparseFeatures())
-      _sparse_flag = true;
+      m_sparse_flag = true;
 
     add(entry);
   }
@@ -86,9 +86,9 @@ void FeatureData::add(FeatureArray& e)
   if (exists(e.getIndex())) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
     size_t pos = getIndex(e.getIndex());
-    array_.at(pos).merge(e);
+    m_array.at(pos).merge(e);
   } else {
-    array_.push_back(e);
+    m_array.push_back(e);
     setIndex();
   }
 }
@@ -99,12 +99,12 @@ void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
     //enlarge array at position e.getIndex()
     size_t pos = getIndex(sent_idx);
 //              TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
-    array_.at(pos).add(e);
+    m_array.at(pos).add(e);
   } else {
 //              TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
     FeatureArray a;
-    a.NumberOfFeatures(number_of_features);
-    a.Features(features);
+    a.NumberOfFeatures(m_num_features);
+    a.Features(m_features);
     a.setIndex(sent_idx);
     a.add(e);
     add(a);
@@ -113,10 +113,10 @@ void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
 
 bool FeatureData::check_consistency() const
 {
-  if (array_.size() == 0)
+  if (m_array.size() == 0)
     return true;
 
-  for (featdata_t::const_iterator i = array_.begin(); i != array_.end(); i++)
+  for (featdata_t::const_iterator i = m_array.begin(); i != m_array.end(); i++)
     if (!i->check_consistency()) return false;
 
   return true;
@@ -125,26 +125,26 @@ bool FeatureData::check_consistency() const
 void FeatureData::setIndex()
 {
   size_t j=0;
-  for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++) {
-    idx2arrayname_[j]=(*i).getIndex();
-    arrayname2idx_[(*i).getIndex()] = j;
+  for (featdata_t::iterator i = m_array.begin(); i !=m_array.end(); i++) {
+    m_index_to_array_name[j]=(*i).getIndex();
+    m_array_name_to_index[(*i).getIndex()] = j;
     j++;
   }
 }
 
 void FeatureData::setFeatureMap(const std::string& feat)
 {
-  number_of_features = 0;
-  features = feat;
+  m_num_features = 0;
+  m_features = feat;
 
   vector<string> buf;
   Tokenize(feat.c_str(), ' ', &buf);
   for (vector<string>::const_iterator it = buf.begin();
        it != buf.end(); ++it) {
-    const size_t size = idx2featname_.size();
-    featname2idx_[*it] = size;
-    idx2featname_[size] = *it;
-    ++number_of_features;
+    const size_t size = m_index_to_feature_name.size();
+    m_feature_name_to_index[*it] = size;
+    m_index_to_feature_name[size] = *it;
+    ++m_num_features;
   }
 }
 
@@ -152,26 +152,23 @@ string FeatureData::ToString() const {
   string res;
   char buf[100];
 
-  snprintf(buf, sizeof(buf), "number of features: %lu, ", number_of_features);
+  snprintf(buf, sizeof(buf), "number of features: %lu, ", m_num_features);
   res.append(buf);
 
-  snprintf(buf, sizeof(buf), "features: ");
-  res.append(buf);
-  res.append(features);
+  res.append("features: ");
+  res.append(m_features);
 
-  snprintf(buf, sizeof(buf), ", sparse flag: %s, ", (_sparse_flag) ? "yes" : "no");
+  snprintf(buf, sizeof(buf), ", sparse flag: %s, ", (m_sparse_flag) ? "yes" : "no");
   res.append(buf);
 
-  snprintf(buf, sizeof(buf), "feature_id_map = { ");
-  res.append(buf);
-  for (map<string, size_t>::const_iterator it = featname2idx_.begin();
-       it != featname2idx_.end(); ++it) {
+  res.append("feature_id_map = { ");
+  for (map<string, size_t>::const_iterator it = m_feature_name_to_index.begin();
+       it != m_feature_name_to_index.end(); ++it) {
     snprintf(buf, sizeof(buf), "%s => %lu, ",
                   it->first.c_str(), it->second);
     res.append(buf);
   }
-  snprintf(buf, sizeof(buf), "}");
-  res.append(buf);
+  res.append("}");
 
   return res;
 }

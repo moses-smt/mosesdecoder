@@ -12,15 +12,15 @@
 
 
 FeatureArray::FeatureArray()
-    : idx(""), number_of_features(0), _sparse_flag(false) {}
+    : m_index(""), m_num_features(0), m_sparse_flag(false) {}
 
 FeatureArray::~FeatureArray() {}
 
 void FeatureArray::savetxt(std::ofstream& outFile)
 {
-  outFile << FEATURES_TXT_BEGIN << " " << idx << " " << array_.size()
-          << " " << number_of_features << " " << features << std::endl;
-  for (featarray_t::iterator i = array_.begin(); i !=array_.end(); i++) {
+  outFile << FEATURES_TXT_BEGIN << " " << m_index << " " << m_array.size()
+          << " " << m_num_features << " " << m_features << std::endl;
+  for (featarray_t::iterator i = m_array.begin(); i != m_array.end(); ++i) {
     i->savetxt(outFile);
     outFile << std::endl;
   }
@@ -29,9 +29,9 @@ void FeatureArray::savetxt(std::ofstream& outFile)
 
 void FeatureArray::savebin(std::ofstream& outFile)
 {
-  outFile << FEATURES_BIN_BEGIN << " " << idx << " " << array_.size()
-          << " " << number_of_features << " " << features << std::endl;
-  for (featarray_t::iterator i = array_.begin(); i !=array_.end(); i++)
+  outFile << FEATURES_BIN_BEGIN << " " << m_index << " " << m_array.size()
+          << " " << m_num_features << " " << m_features << std::endl;
+  for (featarray_t::iterator i = m_array.begin(); i != m_array.end(); ++i)
     i->savebin(outFile);
 
   outFile << FEATURES_BIN_END << std::endl;
@@ -56,7 +56,7 @@ void FeatureArray::save(const std::string &file, bool bin)
 
 void FeatureArray::loadbin(ifstream& inFile, size_t n)
 {
-  FeatureStats entry(number_of_features);
+  FeatureStats entry(m_num_features);
 
   for (size_t i=0 ; i < n; i++) {
     entry.loadbin(inFile);
@@ -66,13 +66,13 @@ void FeatureArray::loadbin(ifstream& inFile, size_t n)
 
 void FeatureArray::loadtxt(ifstream& inFile, size_t n)
 {
-  FeatureStats entry(number_of_features);
+  FeatureStats entry(m_num_features);
 
   for (size_t i=0 ; i < n; i++) {
     entry.loadtxt(inFile);
     add(entry);
     if (entry.getSparse().size()>0)
-      _sparse_flag = true;
+      m_sparse_flag = true;
   }
 }
 
@@ -100,12 +100,12 @@ void FeatureArray::load(ifstream& inFile)
     }
     getNextPound(stringBuf, substring);
     getNextPound(stringBuf, substring);
-    idx = substring;
+    m_index = substring;
     getNextPound(stringBuf, substring);
     number_of_entries = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
-    number_of_features = atoi(substring.c_str());
-    features = stringBuf;
+    m_num_features = atoi(substring.c_str());
+    m_features = stringBuf;
   }
 
   (binmode)?loadbin(inFile, number_of_entries):loadtxt(inFile, number_of_entries);
@@ -144,10 +144,9 @@ bool FeatureArray::check_consistency() const
   if (sz == 0)
     return true;
 
-  for (featarray_t::const_iterator i = array_.begin(); i != array_.end(); i++) {
+  for (featarray_t::const_iterator i = m_array.begin(); i != m_array.end(); i++) {
     if (i->size() != sz)
       return false;
   }
   return true;
 }
-

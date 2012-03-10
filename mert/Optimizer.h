@@ -20,18 +20,19 @@ class Point;
 class Optimizer
 {
 protected:
-  Scorer *scorer;      // no accessor for them only child can use them
-  FeatureDataHandle FData;  // no accessor for them only child can use them
-  unsigned int number_of_random_directions;
+  Scorer *m_scorer;      // no accessor for them only child can use them
+  FeatureDataHandle m_feature_data;  // no accessor for them only child can use them
+  unsigned int m_num_random_directions;
 
 public:
   Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom);
-  void SetScorer(Scorer *_scorer);
-  void SetFData(FeatureDataHandle _FData);
+
+  void SetScorer(Scorer *scorer) { m_scorer = scorer; }
+  void SetFeatureData(FeatureDataHandle feature_data) { m_feature_data = feature_data; }
   virtual ~Optimizer();
 
   unsigned size() const {
-    return FData ? FData->size() : 0;
+    return m_feature_data ? m_feature_data->size() : 0;
   }
 
   /**
@@ -53,7 +54,7 @@ public:
    * Given a set of nbests, get the Statistical score.
    */
   statscore_t GetStatScore(const vector<unsigned>& nbests) const {
-    return scorer->score(nbests);
+    return m_scorer->score(nbests);
   }
 
   statscore_t GetStatScore(const Point& param) const;
@@ -129,7 +130,7 @@ private:
   // Setup optimization types.
   static void SetTypeNames();
 
-  static vector<string> typenames;
+  static vector<string> m_type_names;
 };
 
 #endif  // OPTIMIZER_H

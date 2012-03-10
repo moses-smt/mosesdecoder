@@ -29,19 +29,17 @@ typedef boost::shared_ptr<FeatureData> FeatureDataHandle;
 class Data
 {
 private:
-  Scorer* theScorer;
-  std::string score_type;
-  size_t number_of_scores;
-  bool _sparse_flag;
+  Scorer* m_scorer;
+  std::string m_score_type;
+  size_t m_num_scores;
+  bool m_sparse_flag;
+  ScoreDataHandle m_score_data;
+  FeatureDataHandle m_feature_data;
 
   // Helper functions for loadnbest();
   void InitFeatureMap(const std::string& str);
   void AddFeatures(const std::string& str,
                    const std::string& sentence_index);
-
-protected:
-  ScoreDataHandle scoredata;
-  FeatureDataHandle featdata;
 
 public:
   explicit Data(Scorer& sc);
@@ -51,45 +49,45 @@ public:
   //compiler synthesised shallow copy is available
 
   inline void clear() {
-    scoredata->clear();
-    featdata->clear();
+    m_score_data->clear();
+    m_feature_data->clear();
   }
 
   ScoreDataHandle getScoreData() {
-    return scoredata;
+    return m_score_data;
   }
 
   FeatureDataHandle getFeatureData() {
-    return featdata;
+    return m_feature_data;
   }
 
   Scorer* getScorer() {
-    return theScorer;
+    return m_scorer;
   }
 
   inline size_t NumberOfFeatures() const {
-    return featdata->NumberOfFeatures();
+    return m_feature_data->NumberOfFeatures();
   }
   inline void NumberOfFeatures(size_t v) {
-    featdata->NumberOfFeatures(v);
+    m_feature_data->NumberOfFeatures(v);
   }
   inline std::string Features() const {
-    return featdata->Features();
+    return m_feature_data->Features();
   }
   inline void Features(const std::string &f) {
-    featdata->Features(f);
+    m_feature_data->Features(f);
   }
 
-  inline bool hasSparseFeatures() const { return _sparse_flag; }
+  inline bool hasSparseFeatures() const { return m_sparse_flag; }
   void mergeSparseFeatures();
 
   void loadnbest(const std::string &file);
 
   void load(const std::string &featfile,const std::string &scorefile) {
-    featdata->load(featfile);
-    scoredata->load(scorefile);
-    if (featdata->hasSparseFeatures())
-      _sparse_flag = true;
+    m_feature_data->load(featfile);
+    m_score_data->load(scorefile);
+    if (m_feature_data->hasSparseFeatures())
+      m_sparse_flag = true;
   }
 
   //ADDED BY TS
@@ -101,20 +99,20 @@ public:
     if (bin) cerr << "Binary write mode is selected" << endl;
     else cerr << "Binary write mode is NOT selected" << endl;
 
-    featdata->save(featfile, bin);
-    scoredata->save(scorefile, bin);
+    m_feature_data->save(featfile, bin);
+    m_score_data->save(scorefile, bin);
   }
 
   inline bool existsFeatureNames() const {
-    return featdata->existsFeatureNames();
+    return m_feature_data->existsFeatureNames();
   }
 
   inline std::string getFeatureName(size_t idx) const {
-    return featdata->getFeatureName(idx);
+    return m_feature_data->getFeatureName(idx);
   }
 
   inline size_t getFeatureIndex(const std::string& name) const {
-    return featdata->getFeatureIndex(name);
+    return m_feature_data->getFeatureIndex(name);
   }
 
   /**

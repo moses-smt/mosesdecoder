@@ -14,30 +14,30 @@ const int kAvailableSize = 8;
 } // namespace
 
 ScoreStats::ScoreStats()
-    : available_(kAvailableSize), entries_(0),
-      array_(new ScoreStatsType[available_]) {}
+    : m_available_size(kAvailableSize), m_entries(0),
+      m_array(new ScoreStatsType[m_available_size]) {}
 
 ScoreStats::ScoreStats(const size_t size)
-    : available_(size), entries_(size),
-      array_(new ScoreStatsType[available_])
+    : m_available_size(size), m_entries(size),
+      m_array(new ScoreStatsType[m_available_size])
 {
-  memset(array_, 0, GetArraySizeWithBytes());
+  memset(m_array, 0, GetArraySizeWithBytes());
 }
 
 ScoreStats::~ScoreStats()
 {
-  if (array_) {
-    delete [] array_;
-    array_ = NULL;
+  if (m_array) {
+    delete [] m_array;
+    m_array = NULL;
   }
 }
 
 void ScoreStats::Copy(const ScoreStats &stats)
 {
-  available_ = stats.available();
-  entries_ = stats.size();
-  array_ = new ScoreStatsType[available_];
-  memcpy(array_, stats.getArray(), GetArraySizeWithBytes());
+  m_available_size = stats.available();
+  m_entries = stats.size();
+  m_array = new ScoreStatsType[m_available_size];
+  memcpy(m_array, stats.getArray(), GetArraySizeWithBytes());
 }
 
 ScoreStats::ScoreStats(const ScoreStats &stats)
@@ -47,24 +47,24 @@ ScoreStats::ScoreStats(const ScoreStats &stats)
 
 ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 {
-  delete [] array_;
+  delete [] m_array;
   Copy(stats);
   return *this;
 }
 
 void ScoreStats::expand()
 {
-  available_ *= 2;
-  scorestats_t buf = new ScoreStatsType[available_];
-  memcpy(buf, array_, GetArraySizeWithBytes());
-  delete [] array_;
-  array_ = buf;
+  m_available_size *= 2;
+  scorestats_t buf = new ScoreStatsType[m_available_size];
+  memcpy(buf, m_array, GetArraySizeWithBytes());
+  delete [] m_array;
+  m_array = buf;
 }
 
 void ScoreStats::add(ScoreStatsType v)
 {
   if (isfull()) expand();
-  array_[entries_++]=v;
+  m_array[m_entries++]=v;
 }
 
 void ScoreStats::set(const std::string& str)
@@ -80,7 +80,7 @@ void ScoreStats::set(const std::string& str)
 
 void ScoreStats::loadbin(std::ifstream& inFile)
 {
-  inFile.read((char*)array_, GetArraySizeWithBytes());
+  inFile.read((char*)m_array, GetArraySizeWithBytes());
 }
 
 void ScoreStats::loadtxt(std::ifstream& inFile)
@@ -117,7 +117,7 @@ void ScoreStats::savetxt(std::ofstream& outFile)
 
 void ScoreStats::savebin(std::ofstream& outFile)
 {
-  outFile.write((char*)array_, GetArraySizeWithBytes());
+  outFile.write((char*)m_array, GetArraySizeWithBytes());
 }
 
 ostream& operator<<(ostream& o, const ScoreStats& e)

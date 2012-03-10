@@ -1,14 +1,6 @@
-#ifndef __INTERPOLATED_SCORER_H__
-#define __INTERPOLATED_SCORER_H__
+#ifndef MERT_INTERPOLATED_SCORER_H_
+#define MERT_INTERPOLATED_SCORER_H_
 
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <iterator>
-#include <limits>
-#include <set>
-#include <sstream>
-#include <stdexcept>
 #include <string>
 #include <vector>
 #include "Types.h"
@@ -33,12 +25,13 @@ public:
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
 
   virtual size_t NumberOfScores() const {
-    size_t sz=0;
-    for (ScopedVector<Scorer>::const_iterator itsc = _scorers.begin(); itsc != _scorers.end(); itsc++) {
+    size_t sz = 0;
+    for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+         itsc != m_scorers.end(); ++itsc) {
       sz += (*itsc)->NumberOfScores();
     }
     return sz;
-  };
+  }
 
   virtual void setScoreData(ScoreData* data);
 
@@ -48,13 +41,13 @@ public:
   virtual void setFactors(const string& factors);
 
 protected:
-  ScopedVector<Scorer> _scorers;
+  ScopedVector<Scorer> m_scorers;
 
   // Take the ownership of the heap-allocated the objects
   // by Scorer objects.
   ScopedVector<ScoreData> m_scorers_score_data;
 
-  vector<float> _scorerWeights;
+  vector<float> m_scorer_weights;
 };
 
-#endif //__INTERPOLATED_SCORER_H
+#endif  // MERT_INTERPOLATED_SCORER_H_
