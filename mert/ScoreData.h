@@ -35,7 +35,7 @@ private:
   size_t m_num_scores;
 
 public:
-  ScoreData(Scorer& sc);
+  ScoreData(Scorer* scorer);
   ~ScoreData() {}
 
   inline void clear() {

@@ -42,7 +42,7 @@ private:
                    const std::string& sentence_index);
 
 public:
-  explicit Data(Scorer& sc);
+  explicit Data(Scorer* scorer);
   Data();
 
   //Note that there is no copy constructor implemented, so only the

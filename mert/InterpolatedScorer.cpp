@@ -69,7 +69,7 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
   for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();
        itsc != m_scorers.end(); ++itsc) {
     int numScoresScorer = (*itsc)->NumberOfScores();
-    ScoreData* newData =new ScoreData(**itsc);
+    ScoreData* newData =new ScoreData(*itsc);
     for (size_t i = 0; i < data->size(); i++) {
       ScoreArray scoreArray = data->get(i);
       ScoreArray newScoreArray;

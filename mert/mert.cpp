@@ -338,7 +338,7 @@ int main(int argc, char **argv)
       ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
 
   //load data
-  Data data(*scorer);
+  Data data(scorer.get());
 
   for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
