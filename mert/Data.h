@@ -11,11 +11,8 @@
 
 using namespace std;
 
-#include <limits>
 #include <vector>
-#include <iostream>
-
-#include<boost/shared_ptr.hpp>
+#include <boost/shared_ptr.hpp>
 
 #include "Util.h"
 #include "FeatureData.h"
@@ -26,6 +23,8 @@ class Scorer;
 typedef boost::shared_ptr<ScoreData> ScoreDataHandle;
 typedef boost::shared_ptr<FeatureData> FeatureDataHandle;
 
+// NOTE: there is no copy constructor implemented, so only the
+// compiler synthesised shallow copy is available.
 class Data
 {
 private:
@@ -45,63 +44,38 @@ public:
   explicit Data(Scorer* scorer);
   Data();
 
-  //Note that there is no copy constructor implemented, so only the
-  //compiler synthesised shallow copy is available
-
-  inline void clear() {
+  void clear() {
     m_score_data->clear();
     m_feature_data->clear();
   }
 
-  ScoreDataHandle getScoreData() {
-    return m_score_data;
-  }
+  ScoreDataHandle getScoreData() { return m_score_data; }
 
-  FeatureDataHandle getFeatureData() {
-    return m_feature_data;
-  }
+  FeatureDataHandle getFeatureData() { return m_feature_data; }
 
-  Scorer* getScorer() {
-    return m_scorer;
-  }
+  Scorer* getScorer() { return m_scorer; }
 
-  inline size_t NumberOfFeatures() const {
+  size_t NumberOfFeatures() const {
     return m_feature_data->NumberOfFeatures();
   }
-  inline void NumberOfFeatures(size_t v) {
-    m_feature_data->NumberOfFeatures(v);
-  }
-  inline std::string Features() const {
-    return m_feature_data->Features();
-  }
-  inline void Features(const std::string &f) {
-    m_feature_data->Features(f);
-  }
 
-  inline bool hasSparseFeatures() const { return m_sparse_flag; }
+  void NumberOfFeatures(size_t v) { m_feature_data->NumberOfFeatures(v); }
+
+  std::string Features() const { return m_feature_data->Features(); }
+  void Features(const std::string &f) { m_feature_data->Features(f); }
+
+  bool hasSparseFeatures() const { return m_sparse_flag; }
   void mergeSparseFeatures();
 
-  void loadnbest(const std::string &file);
+  void loadNBest(const std::string &file);
 
-  void load(const std::string &featfile,const std::string &scorefile) {
-    m_feature_data->load(featfile);
-    m_score_data->load(scorefile);
-    if (m_feature_data->hasSparseFeatures())
-      m_sparse_flag = true;
-  }
+  void load(const std::string &featfile, const std::string &scorefile);
+
+  void save(const std::string &featfile, const std::string &scorefile, bool bin=false);
 
   //ADDED BY TS
-  void remove_duplicates();
+  void removeDuplicates();
   //END_ADDED
-
-  void save(const std::string &featfile,const std::string &scorefile, bool bin=false) {
-
-    if (bin) cerr << "Binary write mode is selected" << endl;
-    else cerr << "Binary write mode is NOT selected" << endl;
-
-    m_feature_data->save(featfile, bin);
-    m_score_data->save(scorefile, bin);
-  }
 
   inline bool existsFeatureNames() const {
     return m_feature_data->existsFeatureNames();

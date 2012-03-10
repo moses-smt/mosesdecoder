@@ -7,7 +7,6 @@
  */
 
 #include <algorithm>
-#include "util/check.hh"
 #include <cmath>
 #include <fstream>
 
@@ -16,6 +15,7 @@
 #include "Scorer.h"
 #include "ScorerFactory.h"
 #include "Util.h"
+#include "util/check.hh"
 
 Data::Data()
   : m_scorer(NULL),
@@ -37,13 +37,13 @@ Data::Data(Scorer* scorer)
 }
 
 //ADDED BY TS
-void Data::remove_duplicates() {
-
+// TODO: This is too long; consider creating additional functions to
+// reduce the lines of this function.
+void Data::removeDuplicates() {
   size_t nSentences = m_feature_data->size();
   assert(m_score_data->size() == nSentences);
 
-  for (size_t s=0; s < nSentences; s++) {
-
+  for (size_t s = 0; s < nSentences; s++) {
     FeatureArray& feat_array =  m_feature_data->get(s);
     ScoreArray& score_array =  m_score_data->get(s);
 
@@ -55,48 +55,42 @@ void Data::remove_duplicates() {
     size_t end_pos = feat_array.size() - 1;
 
     size_t nRemoved = 0;
-    for (size_t k=0; k <= end_pos; k++) {
 
+    for (size_t k = 0; k <= end_pos; k++) {
       const FeatureStats& cur_feats = feat_array.get(k);
-
       double sum = 0.0;
-      for (size_t l=0; l < cur_feats.size(); l++)
-	sum += cur_feats.get(l);
+      for (size_t l = 0; l < cur_feats.size(); l++)
+        sum += cur_feats.get(l);
 
       if (lookup.find(sum) != lookup.end()) {
 
-	//cerr << "hit" << endl;
+        //cerr << "hit" << endl;
+        vector<size_t>& cur_list = lookup[sum];
 
-	vector<size_t>& cur_list = lookup[sum];
+        // TODO: Make sure this is correct because we have already used 'l'.
+        // If this does not impact on the removing duplicates, it is better
+        // to change
+        size_t l = 0;
+        for (l = 0; l < cur_list.size(); l++) {
+          size_t j = cur_list[l];
 
-	size_t l=0;
-	for (l=0; l < cur_list.size(); l++) {
-
-	  size_t j=cur_list[l];
-
-	  if (cur_feats == feat_array.get(j)
-	      && score_array.get(k) == score_array.get(j)) {
-
-	    if (k < end_pos) {
-
-	      feat_array.swap(k,end_pos);
-	      score_array.swap(k,end_pos);
-
-	      k--;
-	    }
-
-	    end_pos--;
-	    nRemoved++;
-	    break;
-	  }
-	}
-
-	if (l == lookup[sum].size())
-	  cur_list.push_back(k);
+          if (cur_feats == feat_array.get(j)
+              && score_array.get(k) == score_array.get(j)) {
+            if (k < end_pos) {
+              feat_array.swap(k,end_pos);
+              score_array.swap(k,end_pos);
+              k--;
+            }
+            end_pos--;
+            nRemoved++;
+            break;
+          }
+        }
+        if (l == lookup[sum].size())
+          cur_list.push_back(k);
+      } else {
+        lookup[sum].push_back(k);
       }
-      else
-	lookup[sum].push_back(k);
-
       // for (size_t j=0; j < k; j++) {
 
       // 	if (feat_array.get(k) == feat_array.get(j)
@@ -115,11 +109,9 @@ void Data::remove_duplicates() {
       //          break;
       // 	}
       // }
-    }
-
+    } // end for k
 
     if (nRemoved > 0) {
-
       feat_array.resize(end_pos+1);
       score_array.resize(end_pos+1);
     }
@@ -127,8 +119,14 @@ void Data::remove_duplicates() {
 }
 //END_ADDED
 
+void Data::load(const std::string &featfile, const std::string &scorefile) {
+  m_feature_data->load(featfile);
+  m_score_data->load(scorefile);
+  if (m_feature_data->hasSparseFeatures())
+    m_sparse_flag = true;
+}
 
-void Data::loadnbest(const string &file)
+void Data::loadNBest(const string &file)
 {
   TRACE_ERR("loading nbest from " << file << endl);
   inputfilestream inp(file); // matches a stream with a file. Opens the file
@@ -157,6 +155,16 @@ void Data::loadnbest(const string &file)
     AddFeatures(feature_str, sentence_index);
   }
   inp.close();
+}
+
+void Data::save(const std::string &featfile, const std::string &scorefile, bool bin) {
+  if (bin)
+    cerr << "Binary write mode is selected" << endl;
+  else
+    cerr << "Binary write mode is NOT selected" << endl;
+
+  m_feature_data->save(featfile, bin);
+  m_score_data->save(scorefile, bin);
 }
 
 void Data::InitFeatureMap(const string& str) {
