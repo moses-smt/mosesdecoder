@@ -11,7 +11,6 @@
 
 #include <vector>
 #include <iostream>
-#include <fstream>
 #include "FeatureStats.h"
 
 using namespace std;
@@ -89,17 +88,16 @@ public:
     m_features = f;
   }
 
-  void savetxt(ofstream& outFile);
-  void savebin(ofstream& outFile);
-  void save(ofstream& outFile, bool bin=false);
-  void save(const std::string &file, bool bin=false);
-  inline void save(bool bin=false) {
-    save("/dev/stdout",bin);
-  }
+  void savetxt(std::ostream* os);
+  void savebin(std::ostream* os);
+  void save(std::ostream* os, bool bin=false);
 
-  void loadtxt(ifstream& inFile, size_t n);
-  void loadbin(ifstream& inFile, size_t n);
-  void load(ifstream& inFile);
+  void save(const std::string &file, bool bin=false);
+  void save(bool bin=false);
+
+  void loadtxt(std::istream* is, size_t n);
+  void loadbin(std::istream* is, size_t n);
+  void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;

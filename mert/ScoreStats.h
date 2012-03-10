@@ -81,15 +81,13 @@ public:
   inline size_t available() const { return m_available_size; }
 
   void savetxt(const std::string &file);
-  void savetxt(ofstream& outFile);
-  void savebin(ofstream& outFile);
-  inline void savetxt() {
-    savetxt("/dev/stdout");
-  }
+  void savetxt(ostream* os);
+  void savebin(ostream* os);
+  void savetxt();
 
   void loadtxt(const std::string &file);
-  void loadtxt(ifstream& inFile);
-  void loadbin(ifstream& inFile);
+  void loadtxt(istream* is);
+  void loadbin(istream* is);
 
   /**
    * Write the whole object to a stream.

@@ -95,17 +95,15 @@ public:
     m_num_scores = v;
   }
 
-  void savetxt(ofstream& outFile, const std::string& sctype);
-  void savebin(ofstream& outFile, const std::string& sctype);
-  void save(ofstream& outFile, const std::string& sctype, bool bin=false);
-  void save(const std::string &file, const std::string& sctype, bool bin=false);
-  inline void save(const std::string& sctype, bool bin=false) {
-    save("/dev/stdout", sctype, bin);
-  }
+  void savetxt(std::ostream* os, const std::string& score_type);
+  void savebin(std::ostream* os, const std::string& score_type);
+  void save(std::ostream* os, const std::string& score_type, bool bin=false);
+  void save(const std::string &file, const std::string& score_type, bool bin=false);
+  void save(const std::string& score_type, bool bin=false);
 
-  void loadtxt(ifstream& inFile, size_t n);
-  void loadbin(ifstream& inFile, size_t n);
-  void load(ifstream& inFile);
+  void loadtxt(std::istream* is, size_t n);
+  void loadbin(std::istream* is, size_t n);
+  void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;

@@ -92,12 +92,13 @@ public:
   }
 
   void save(const std::string &file, bool bin=false);
-  void save(ofstream& outFile, bool bin=false);
+  void save(std::ostream* os, bool bin=false);
+
   inline void save(bool bin=false) {
-    save("/dev/stdout", bin);
+    save(&cout, bin);
   }
 
-  void load(ifstream& inFile);
+  void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;
