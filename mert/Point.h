@@ -1,7 +1,7 @@
 #ifndef MERT_POINT_H_
 #define MERT_POINT_H_
 
-#include <fstream>
+#include <ostream>
 #include <map>
 #include <vector>
 #include "Types.h"

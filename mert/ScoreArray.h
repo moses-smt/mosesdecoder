@@ -37,31 +37,17 @@ public:
   ScoreArray();
   ~ScoreArray() {}
 
-  inline void clear() {
-    m_array.clear();
-  }
+  void clear() { m_array.clear(); }
 
-  inline std::string getIndex() const {
-    return m_index;
-  }
+  std::string getIndex() const { return m_index; }
 
-  inline void setIndex(const std::string& value) {
-    m_index = value;
-  }
+  void setIndex(const std::string& value) { m_index = value; }
 
-//	inline ScoreStats get(size_t i){ return m_array.at(i); }
+  ScoreStats& get(size_t i) { return m_array.at(i); }
 
-  inline ScoreStats&  get(size_t i) {
-    return m_array.at(i);
-  }
+  const ScoreStats& get(size_t i) const { return m_array.at(i); }
 
-  inline const ScoreStats&  get(size_t i) const {
-    return m_array.at(i);
-  }
-
-  void add(const ScoreStats& e) {
-    m_array.push_back(e);
-  }
+  void add(const ScoreStats& e) { m_array.push_back(e); }
 
   //ADDED BY TS
   void swap(size_t i, size_t j) {
@@ -75,25 +61,15 @@ public:
 
   void merge(ScoreArray& e);
 
-  inline std::string name() const {
-    return m_score_type;
-  }
+  std::string name() const { return m_score_type; }
 
-  inline void name(std::string &score_type) {
-    m_score_type = score_type;
-  }
+  void name(std::string &score_type) { m_score_type = score_type; }
 
-  inline size_t size() const {
-    return m_array.size();
-  }
+  size_t size() const { return m_array.size(); }
 
-  inline size_t NumberOfScores() const {
-    return m_num_scores;
-  }
+  size_t NumberOfScores() const { return m_num_scores; }
 
-  inline void NumberOfScores(size_t v) {
-    m_num_scores = v;
-  }
+  void NumberOfScores(size_t v) { m_num_scores = v; }
 
   void savetxt(std::ostream* os, const std::string& score_type);
   void savebin(std::ostream* os, const std::string& score_type);

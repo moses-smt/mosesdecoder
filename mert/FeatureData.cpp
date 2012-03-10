@@ -36,6 +36,10 @@ void FeatureData::save(const string &file, bool bin)
   ofs.close();
 }
 
+void FeatureData::save(bool bin) {
+  save(&cout, bin);
+}
+
 void FeatureData::load(istream* is)
 {
   FeatureArray entry;

@@ -35,30 +35,17 @@ public:
   FeatureArray();
   ~FeatureArray();
 
-  inline void clear() {
-    m_array.clear();
-  }
+  void clear() { m_array.clear(); }
 
-  inline bool hasSparseFeatures() const {
-    return m_sparse_flag;
-  }
+  bool hasSparseFeatures() const { return m_sparse_flag; }
 
-  inline std::string getIndex() const {
-    return m_index;
-  }
-  inline void setIndex(const std::string& value) {
-    m_index = value;
-  }
+  std::string getIndex() const { return m_index; }
+  void setIndex(const std::string& value) { m_index = value; }
 
-  inline FeatureStats& get(size_t i) {
-    return m_array.at(i);
-  }
-  inline const FeatureStats& get(size_t i)const {
-    return m_array.at(i);
-  }
-  void add(FeatureStats& e) {
-    m_array.push_back(e);
-  }
+  FeatureStats& get(size_t i) { return m_array.at(i); }
+  const FeatureStats& get(size_t i) const { return m_array.at(i); }
+
+  void add(FeatureStats& e) { m_array.push_back(e); }
 
   //ADDED BY TS
   void swap(size_t i, size_t j) {
@@ -72,26 +59,17 @@ public:
 
   void merge(FeatureArray& e);
 
-  inline size_t size() const {
-    return m_array.size();
-  }
-  inline size_t NumberOfFeatures() const {
-    return m_num_features;
-  }
-  inline void NumberOfFeatures(size_t v) {
-    m_num_features = v;
-  }
-  inline std::string Features() const {
-    return m_features;
-  }
-  inline void Features(const std::string& f) {
-    m_features = f;
-  }
+  size_t size() const { return m_array.size(); }
+
+  size_t NumberOfFeatures() const { return m_num_features; }
+  void NumberOfFeatures(size_t v) { m_num_features = v; }
+
+  std::string Features() const { return m_features; }
+  void Features(const std::string& f) { m_features = f; }
 
   void savetxt(std::ostream* os);
   void savebin(std::ostream* os);
   void save(std::ostream* os, bool bin=false);
-
   void save(const std::string &file, bool bin=false);
   void save(bool bin=false);
 

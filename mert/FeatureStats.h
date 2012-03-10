@@ -29,9 +29,7 @@ public:
   FeatureStatsType get(size_t id) const;
   void set(const std::string& name, FeatureStatsType value);
   void clear();
-  size_t size() const {
-    return m_fvector.size();
-  }
+  size_t size() const { return m_fvector.size(); }
 
   void write(std::ostream& out, const std::string& sep = " ") const;
 
@@ -68,9 +66,7 @@ public:
 
   void Copy(const FeatureStats &stats);
 
-  bool isfull() const {
-    return (m_entries < m_available_size) ? 0 : 1;
-  }
+  bool isfull() const { return (m_entries < m_available_size) ? 0 : 1; }
   void expand();
   void add(FeatureStatsType v);
   void addSparse(const string& name, FeatureStatsType v);
@@ -85,36 +81,23 @@ public:
     clear();
   }
 
-  inline FeatureStatsType get(size_t i) {
-    return m_array[i];
-  }
-  inline FeatureStatsType get(size_t i)const {
-    return m_array[i];
-  }
-  inline featstats_t getArray() const {
-    return m_array;
-  }
-  inline const SparseVector& getSparse() const {
-    return m_map;
-  }
+  FeatureStatsType get(size_t i) { return m_array[i]; }
+  FeatureStatsType get(size_t i)const { return m_array[i]; }
+  featstats_t getArray() const { return m_array; }
+
+  const SparseVector& getSparse() const { return m_map; }
 
   void set(std::string &theString);
 
-  inline size_t bytes() const {
-    return GetArraySizeWithBytes();
-  }
+  inline size_t bytes() const { return GetArraySizeWithBytes(); }
 
   size_t GetArraySizeWithBytes() const {
     return m_entries * sizeof(FeatureStatsType);
   }
 
-  inline size_t size() const {
-    return m_entries;
-  }
+  size_t size() const { return m_entries; }
 
-  inline size_t available() const {
-    return m_available_size;
-  }
+  size_t available() const { return m_available_size; }
 
   void savetxt(const std::string &file);
   void savetxt(std::ostream* os);

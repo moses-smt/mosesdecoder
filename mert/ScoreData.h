@@ -38,16 +38,16 @@ public:
   ScoreData(Scorer* scorer);
   ~ScoreData() {}
 
-  inline void clear() {
-    m_array.clear();
-  }
+  void clear() { m_array.clear(); }
 
   inline ScoreArray get(const std::string& idx) {
     return m_array.at(getIndex(idx));
   }
+
   inline ScoreArray& get(size_t idx) {
     return m_array.at(idx);
   }
+
   inline const ScoreArray& get(size_t idx) const {
     return m_array.at(idx);
   }
@@ -63,27 +63,22 @@ public:
   inline ScoreStats& get(size_t i, size_t j) {
     return m_array.at(i).get(j);
   }
-  inline const ScoreStats&  get(size_t i, size_t j) const {
+
+  inline const ScoreStats& get(size_t i, size_t j) const {
     return m_array.at(i).get(j);
   }
 
-  inline std::string name() const {
-    return m_score_type;
-  }
+  std::string name() const { return m_score_type; }
 
-  inline std::string name(const std::string &sctype) {
-    return m_score_type = sctype;
+  std::string name(const std::string &score_type) {
+    return m_score_type = score_type;
   }
 
   void add(ScoreArray& e);
   void add(const ScoreStats& e, const std::string& sent_idx);
 
-  inline size_t NumberOfScores() const {
-    return m_num_scores;
-  }
-  inline size_t size() const {
-    return m_array.size();
-  }
+  size_t NumberOfScores() const { return m_num_scores; }
+  size_t size() const { return m_array.size(); }
 
   void save(const std::string &file, bool bin=false);
   void save(std::ostream* os, bool bin=false);
@@ -93,6 +88,7 @@ public:
   void load(const std::string &file);
 
   bool check_consistency() const;
+
   void setIndex();
 
   inline int getIndex(const std::string& idx) const {
@@ -102,6 +98,7 @@ public:
     else
       return -1;
   }
+
   inline std::string getIndex(size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
