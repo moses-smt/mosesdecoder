@@ -22,11 +22,11 @@ using namespace std;
 class ScoreStats
 {
 private:
-  size_t available_;
-  size_t entries_;
+  size_t m_available_size;
+  size_t m_entries;
 
   // TODO: Use smart pointer for exceptional-safety.
-  scorestats_t array_;
+  scorestats_t m_array;
 
 public:
   ScoreStats();
@@ -41,30 +41,24 @@ public:
   void Copy(const ScoreStats &stats);
 
   bool isfull() const {
-    return (entries_ < available_) ? 0 : 1;
+    return (m_entries < m_available_size) ? 0 : 1;
   }
 
   void expand();
   void add(ScoreStatsType v);
 
   void clear() {
-    memset((void*)array_, 0, GetArraySizeWithBytes());
+    memset((void*)m_array, 0, GetArraySizeWithBytes());
   }
 
   void reset() {
-    entries_ = 0;
+    m_entries = 0;
     clear();
   }
 
-  inline ScoreStatsType get(size_t i) {
-    return array_[i];
-  }
-  inline ScoreStatsType get(size_t i)const {
-    return array_[i];
-  }
-  inline scorestats_t getArray() const {
-    return array_;
-  }
+  inline ScoreStatsType get(size_t i) { return m_array[i]; }
+  inline ScoreStatsType get(size_t i) const { return m_array[i]; }
+  inline scorestats_t getArray() const { return m_array; }
 
   void set(const std::string& str);
 
@@ -76,20 +70,15 @@ public:
     }
   }
 
-  inline size_t bytes() const {
-    return GetArraySizeWithBytes();
-  }
+  inline size_t bytes() const { return GetArraySizeWithBytes(); }
 
   size_t GetArraySizeWithBytes() const {
-    return entries_ * sizeof(ScoreStatsType);
+    return m_entries * sizeof(ScoreStatsType);
   }
 
-  inline size_t size() const {
-    return entries_;
-  }
-  inline size_t available() const {
-    return available_;
-  }
+  inline size_t size() const { return m_entries; }
+
+  inline size_t available() const { return m_available_size; }
 
   void savetxt(const std::string &file);
   void savetxt(ofstream& outFile);

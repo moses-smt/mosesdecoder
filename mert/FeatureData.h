@@ -19,37 +19,37 @@ using namespace std;
 class FeatureData
 {
 private:
-  size_t number_of_features;
-  std::string features;
-  bool _sparse_flag;
-
-  map<std::string, size_t> featname2idx_; // map from name to index of features
-  map<size_t, std::string> idx2featname_; // map from index to name of features
-
-protected:
-  featdata_t array_;
-  idx2name idx2arrayname_; // map from index to name of array
-  name2idx arrayname2idx_; // map from name to index of array
+  size_t m_num_features;
+  std::string m_features;
+  bool m_sparse_flag;
+  map<std::string, size_t> m_feature_name_to_index; // map from name to index of features
+  map<size_t, std::string> m_index_to_feature_name; // map from index to name of features
+  featdata_t m_array;
+  idx2name m_index_to_array_name; // map from index to name of array
+  name2idx m_array_name_to_index; // map from name to index of array
 
 public:
   FeatureData();
   ~FeatureData() {}
 
   inline void clear() {
-    array_.clear();
+    m_array.clear();
   }
 
   inline bool hasSparseFeatures() const {
-    return _sparse_flag;
+    return m_sparse_flag;
   }
+
   inline FeatureArray get(const std::string& idx) {
-    return array_.at(getIndex(idx));
+    return m_array.at(getIndex(idx));
   }
+
   inline FeatureArray& get(size_t idx) {
-    return array_.at(idx);
+    return m_array.at(idx);
   }
+
   inline const FeatureArray& get(size_t idx) const {
-    return array_.at(idx);
+    return m_array.at(idx);
   }
 
   inline bool exists(const std::string& sent_idx) const {
@@ -57,33 +57,38 @@ public:
   }
 
   inline bool exists(int sent_idx) const {
-    return (sent_idx > -1 && sent_idx < static_cast<int>(array_.size())) ? true : false;
+    return (sent_idx > -1 && sent_idx < static_cast<int>(m_array.size())) ? true : false;
   }
 
   inline FeatureStats& get(size_t i, size_t j) {
-    return array_.at(i).get(j);
+    return m_array.at(i).get(j);
   }
+
   inline const FeatureStats&  get(size_t i, size_t j) const {
-    return array_.at(i).get(j);
+    return m_array.at(i).get(j);
   }
 
   void add(FeatureArray& e);
   void add(FeatureStats& e, const std::string& sent_idx);
 
   inline size_t size() const {
-    return array_.size();
+    return m_array.size();
   }
+
   inline size_t NumberOfFeatures() const {
-    return number_of_features;
+    return m_num_features;
   }
+
   inline void NumberOfFeatures(size_t v) {
-    number_of_features = v;
+    m_num_features = v;
   }
+
   inline std::string Features() const {
-    return features;
+    return m_features;
   }
+
   inline void Features(const std::string& f) {
-    features = f;
+    m_features = f;
   }
 
   void save(const std::string &file, bool bin=false);
@@ -99,29 +104,29 @@ public:
   void setIndex();
 
   inline int getIndex(const std::string& idx) const {
-    name2idx::const_iterator i = arrayname2idx_.find(idx);
-    if (i != arrayname2idx_.end())
+    name2idx::const_iterator i = m_array_name_to_index.find(idx);
+    if (i != m_array_name_to_index.end())
       return i->second;
     else
       return -1;
   }
 
   inline std::string getIndex(size_t idx) const {
-    idx2name::const_iterator i = idx2arrayname_.find(idx);
-    if (i != idx2arrayname_.end())
+    idx2name::const_iterator i = m_index_to_array_name.find(idx);
+    if (i != m_index_to_array_name.end())
       throw runtime_error("there is no entry at index " + idx);
     return i->second;
   }
 
   bool existsFeatureNames() const {
-    return (idx2featname_.size() > 0) ? true : false;
+    return (m_index_to_feature_name.size() > 0) ? true : false;
   }
 
   std::string getFeatureName(size_t idx) const {
-    if (idx >= idx2featname_.size())
+    if (idx >= m_index_to_feature_name.size())
       throw runtime_error("Error: you required an too big index");
-    map<size_t, std::string>::const_iterator it = idx2featname_.find(idx);
-    if (it == idx2featname_.end()) {
+    map<size_t, std::string>::const_iterator it = m_index_to_feature_name.find(idx);
+    if (it == m_index_to_feature_name.end()) {
       throw runtime_error("Error: specified id is unknown: " + idx);
     } else {
       return it->second;
@@ -129,8 +134,8 @@ public:
   }
 
   size_t getFeatureIndex(const std::string& name) const {
-    map<std::string, size_t>::const_iterator it = featname2idx_.find(name);
-    if (it == featname2idx_.end())
+    map<std::string, size_t>::const_iterator it = m_feature_name_to_index.find(name);
+    if (it == m_feature_name_to_index.end())
       throw runtime_error("Error: feature " + name + " is unknown");
     return it->second;
   }

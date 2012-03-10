@@ -24,72 +24,75 @@ const char SCORES_BIN_END[] = "SCORES_BIN_END_0";
 
 class ScoreArray
 {
-protected:
-  scorearray_t array_;
-  std::string score_type;
-  size_t number_of_scores;
+ private:
+  scorearray_t m_array;
+  std::string m_score_type;
+  size_t m_num_scores;
 
-private:
-  // idx to identify the utterance.
+  // indexx to identify the utterance.
   // It can differ from the index inside the vector.
-  std::string  idx;
+  std::string  m_index;
 
 public:
   ScoreArray();
   ~ScoreArray() {}
 
   inline void clear() {
-    array_.clear();
+    m_array.clear();
   }
 
   inline std::string getIndex() const {
-    return idx;
-  }
-  inline void setIndex(const std::string& value) {
-    idx=value;
+    return m_index;
   }
 
-//	inline ScoreStats get(size_t i){ return array_.at(i); }
+  inline void setIndex(const std::string& value) {
+    m_index = value;
+  }
+
+//	inline ScoreStats get(size_t i){ return m_array.at(i); }
 
   inline ScoreStats&  get(size_t i) {
-    return array_.at(i);
+    return m_array.at(i);
   }
-  inline const ScoreStats&  get(size_t i)const {
-    return array_.at(i);
+
+  inline const ScoreStats&  get(size_t i) const {
+    return m_array.at(i);
   }
 
   void add(const ScoreStats& e) {
-    array_.push_back(e);
+    m_array.push_back(e);
   }
 
   //ADDED BY TS
   void swap(size_t i, size_t j) {
-    std::swap(array_[i],array_[j]);
+    std::swap(m_array[i], m_array[j]);
   }
 
   void resize(size_t new_size) {
-    array_.resize(std::min(new_size,array_.size()));
+    m_array.resize(std::min(new_size, m_array.size()));
   }
   //END_ADDED
 
   void merge(ScoreArray& e);
 
   inline std::string name() const {
-    return score_type;
+    return m_score_type;
   }
 
-  inline void name(std::string &sctype) {
-    score_type = sctype;
+  inline void name(std::string &score_type) {
+    m_score_type = score_type;
   }
 
   inline size_t size() const {
-    return array_.size();
+    return m_array.size();
   }
+
   inline size_t NumberOfScores() const {
-    return number_of_scores;
+    return m_num_scores;
   }
+
   inline void NumberOfScores(size_t v) {
-    number_of_scores = v;
+    m_num_scores = v;
   }
 
   void savetxt(ofstream& outFile, const std::string& sctype);

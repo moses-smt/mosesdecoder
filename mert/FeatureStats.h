@@ -31,7 +31,7 @@ public:
   void set(const std::string& name, FeatureStatsType value);
   void clear();
   size_t size() const {
-    return fvector_.size();
+    return m_fvector.size();
   }
 
   void write(std::ostream& out, const std::string& sep = " ") const;
@@ -39,9 +39,9 @@ public:
   SparseVector& operator-=(const SparseVector& rhs);
 
 private:
-  static name2id_t name2id_;
-  static id2name_t id2name_;
-  fvector_t fvector_;
+  static name2id_t m_name_to_id;
+  static id2name_t m_id_to_name;
+  fvector_t m_fvector;
 };
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
@@ -49,12 +49,12 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
 class FeatureStats
 {
 private:
-  size_t available_;
-  size_t entries_;
+  size_t m_available_size;
+  size_t m_entries;
 
   // TODO: Use smart pointer for exceptional-safety.
-  featstats_t array_;
-  SparseVector map_;
+  featstats_t m_array;
+  SparseVector m_map;
 
 public:
   FeatureStats();
@@ -70,33 +70,33 @@ public:
   void Copy(const FeatureStats &stats);
 
   bool isfull() const {
-    return (entries_ < available_) ? 0 : 1;
+    return (m_entries < m_available_size) ? 0 : 1;
   }
   void expand();
   void add(FeatureStatsType v);
   void addSparse(const string& name, FeatureStatsType v);
 
   void clear() {
-    memset((void*)array_, 0, GetArraySizeWithBytes());
-    map_.clear();
+    memset((void*)m_array, 0, GetArraySizeWithBytes());
+    m_map.clear();
   }
 
   void reset() {
-    entries_ = 0;
+    m_entries = 0;
     clear();
   }
 
   inline FeatureStatsType get(size_t i) {
-    return array_[i];
+    return m_array[i];
   }
   inline FeatureStatsType get(size_t i)const {
-    return array_[i];
+    return m_array[i];
   }
   inline featstats_t getArray() const {
-    return array_;
+    return m_array;
   }
   inline const SparseVector& getSparse() const {
-    return map_;
+    return m_map;
   }
 
   void set(std::string &theString);
@@ -106,15 +106,15 @@ public:
   }
 
   size_t GetArraySizeWithBytes() const {
-    return entries_ * sizeof(FeatureStatsType);
+    return m_entries * sizeof(FeatureStatsType);
   }
 
   inline size_t size() const {
-    return entries_;
+    return m_entries;
   }
 
   inline size_t available() const {
-    return available_;
+    return m_available_size;
   }
 
   void savetxt(const std::string &file);

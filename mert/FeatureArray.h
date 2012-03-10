@@ -26,69 +26,67 @@ class FeatureArray
 private:
   // idx to identify the utterance. It can differ from
   // the index inside the vector.
-  std::string idx;
-
-protected:
-  featarray_t array_;
-  size_t number_of_features;
-  std::string features;
-  bool _sparse_flag;
+  std::string m_index;
+  featarray_t m_array;
+  size_t m_num_features;
+  std::string m_features;
+  bool m_sparse_flag;
 
 public:
   FeatureArray();
   ~FeatureArray();
 
   inline void clear() {
-    array_.clear();
+    m_array.clear();
   }
 
   inline bool hasSparseFeatures() const {
-    return _sparse_flag;
+    return m_sparse_flag;
   }
 
   inline std::string getIndex() const {
-    return idx;
+    return m_index;
   }
   inline void setIndex(const std::string& value) {
-    idx = value;
+    m_index = value;
   }
 
   inline FeatureStats& get(size_t i) {
-    return array_.at(i);
+    return m_array.at(i);
   }
   inline const FeatureStats& get(size_t i)const {
-    return array_.at(i);
+    return m_array.at(i);
   }
   void add(FeatureStats& e) {
-    array_.push_back(e);
+    m_array.push_back(e);
   }
 
   //ADDED BY TS
   void swap(size_t i, size_t j) {
-    std::swap(array_[i],array_[j]);
+    std::swap(m_array[i], m_array[j]);
   }
-  
+
   void resize(size_t new_size) {
-    array_.resize(std::min(new_size,array_.size()));
+    m_array.resize(std::min(new_size, m_array.size()));
   }
   //END_ADDED
 
   void merge(FeatureArray& e);
 
   inline size_t size() const {
-    return array_.size();
+    return m_array.size();
   }
   inline size_t NumberOfFeatures() const {
-    return number_of_features;
+    return m_num_features;
   }
   inline void NumberOfFeatures(size_t v) {
-    number_of_features = v;
+    m_num_features = v;
   }
   inline std::string Features() const {
-    return features;
+    return m_features;
   }
   inline void Features(const std::string& f) {
-    features = f;
+    m_features = f;
   }
 
   void savetxt(ofstream& outFile);

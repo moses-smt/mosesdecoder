@@ -1,35 +1,36 @@
-#include "ScorerFactory.h"
 #include "InterpolatedScorer.h"
+#include "ScorerFactory.h"
 #include "Util.h"
 
 using namespace std;
 
-
-InterpolatedScorer::InterpolatedScorer (const string& name, const string& config): Scorer(name,config)
+// TODO: This is too long. Consider creating a function for
+// initialization such as Init().
+InterpolatedScorer::InterpolatedScorer(const string& name, const string& config)
+    : Scorer(name,config)
 {
-
   // name would be: HAMMING,BLEU or similar
   string scorers = name;
   while (scorers.length() > 0) {
     string scorertype = "";
-    getNextPound(scorers,scorertype,",");
-    Scorer *theScorer=ScorerFactory::getScorer(scorertype,config);
-    _scorers.push_back(theScorer);
+    getNextPound(scorers, scorertype,",");
+    Scorer *scorer = ScorerFactory::getScorer(scorertype,config);
+    m_scorers.push_back(scorer);
   }
-  if (_scorers.size() == 0) {
+  if (m_scorers.size() == 0) {
     throw runtime_error("There are no scorers");
   }
-  cerr << "Number of scorers: " << _scorers.size() << endl;
+  cerr << "Number of scorers: " << m_scorers.size() << endl;
 
   //TODO debug this
   string wtype = getConfig("weights","");
   //Default weights set to uniform ie. if two weights 0.5 each
   //weights should add to 1
   if (wtype.length() == 0) {
-    float weight = 1.0/_scorers.size() ;
+    float weight = 1.0 / m_scorers.size() ;
     //cout << " Default weights:" << weight << endl;
-    for (size_t i = 0; i < _scorers.size(); i ++) {
-      _scorerWeights.push_back(weight);
+    for (size_t i = 0; i < m_scorers.size(); i ++) {
+      m_scorer_weights.push_back(weight);
     }
   } else {
     float tot=0;
@@ -38,24 +39,24 @@ InterpolatedScorer::InterpolatedScorer (const string& name, const string& config
       string scoreweight = "";
       getNextPound(wtype,scoreweight,"+");
       float weight = atof(scoreweight.c_str());
-      _scorerWeights.push_back(weight);
+      m_scorer_weights.push_back(weight);
       tot += weight;
       //cout << " :" << weight ;
     }
     //cout << endl;
-    if (tot != float(1)) {
-      for (vector<float>::iterator it = _scorerWeights.begin(); it != _scorerWeights.end(); ++it)
-      {
+    if (tot != float(1)) { // TODO: fix this checking in terms of readability.
+      for (vector<float>::iterator it = m_scorer_weights.begin();
+           it != m_scorer_weights.end(); ++it) {
         *it /= tot;
       }
     }
 
-    if (_scorers.size() != _scorerWeights.size()) {
+    if (m_scorers.size() != m_scorer_weights.size()) {
       throw runtime_error("The number of weights does not equal the number of scorers!");
     }
   }
   cerr << "The weights for the interpolated scorers are: " << endl;
-  for (vector<float>::iterator it = _scorerWeights.begin(); it < _scorerWeights.end(); it++) {
+  for (vector<float>::iterator it = m_scorer_weights.begin(); it < m_scorer_weights.end(); it++) {
     cerr << *it << " " ;
   }
   cerr <<endl;
@@ -65,7 +66,8 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
 {
   size_t last = 0;
   m_score_data = data;
-  for (ScopedVector<Scorer>::iterator itsc = _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
     int numScoresScorer = (*itsc)->NumberOfScores();
     ScoreData* newData =new ScoreData(**itsc);
     for (size_t i = 0; i < data->size(); i++) {
@@ -110,14 +112,16 @@ void InterpolatedScorer::score(const candidates_t& candidates, const diffs_t& di
 {
   //cout << "*******InterpolatedScorer::score" << endl;
   size_t scorerNum = 0;
-  for (ScopedVector<Scorer>::const_iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
     //int numScores = (*itsc)->NumberOfScores();
     statscores_t tscores;
     (*itsc)->score(candidates,diffs,tscores);
     size_t inc = 0;
-    for (statscores_t::iterator itstatsc =  tscores.begin(); itstatsc!=tscores.end(); itstatsc++) {
+    for (statscores_t::iterator itstatsc = tscores.begin();
+         itstatsc != tscores.end(); ++itstatsc) {
       //cout << "Scores " << (*itstatsc) << endl;
-      float weight = _scorerWeights[scorerNum];
+      float weight = m_scorer_weights[scorerNum];
       if (weight == 0) {
         stringstream msg;
         msg << "No weights for scorer" << scorerNum ;
@@ -139,7 +143,8 @@ void InterpolatedScorer::score(const candidates_t& candidates, const diffs_t& di
 
 void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
-  for (ScopedVector<Scorer>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
     (*itsc)->setReferenceFiles(referenceFiles);
   }
 }
@@ -147,8 +152,9 @@ void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   stringstream buff;
-  int i=0;
-  for (ScopedVector<Scorer>::iterator itsc =  _scorers.begin(); itsc!=_scorers.end(); itsc++) {
+  int i = 0;
+  for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
     ScoreStats tempEntry;
     (*itsc)->prepareStats(sid, text, tempEntry);
     if (i > 0) buff <<  " ";
@@ -167,16 +173,10 @@ void InterpolatedScorer::setFactors(const string& factors)
   vector<string> fsplit;
   split(factors, ',', fsplit);
 
-  if (fsplit.size() != _scorers.size()) throw runtime_error("Number of factor specifications does not equal number of interpolated scorers.");
-  
-  for (size_t i = 0; i < _scorers.size(); ++i)
-  {
-    _scorers[i]->setFactors(fsplit[i]);
+  if (fsplit.size() != m_scorers.size())
+    throw runtime_error("Number of factor specifications does not equal number of interpolated scorers.");
+
+  for (size_t i = 0; i < m_scorers.size(); ++i) {
+    m_scorers[i]->setFactors(fsplit[i]);
   }
 }
-
-
-
-
-
-
