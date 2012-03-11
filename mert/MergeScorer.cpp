@@ -14,7 +14,8 @@
 using namespace TERCpp;
 
 MergeScorer::MergeScorer(const string& config)
-    : StatisticsBasedScorer("MERGE",config), kLENGTH(4) {}
+    : StatisticsBasedScorer("MERGE", config) {}
+
 MergeScorer::~MergeScorer() {}
 
 void MergeScorer::setReferenceFiles(const vector<string>& referenceFiles)

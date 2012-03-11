@@ -32,36 +32,25 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 } // namespace
 
-
-void Optimizer::SetScorer(Scorer *_scorer)
-{
-  scorer = _scorer;
-}
-
-void Optimizer::SetFData(FeatureDataHandle _FData)
-{
-  FData = _FData;
-}
-
 Optimizer::Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
-    : scorer(NULL), FData(), number_of_random_directions(nrandom)
+    : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom)
 {
-  // Warning: the init vector is a full set of parameters, of dimension pdim!
-  Point::pdim = Pd;
+  // Warning: the init vector is a full set of parameters, of dimension m_pdim!
+  Point::m_pdim = Pd;
 
   CHECK(start.size() == Pd);
-  Point::dim = i2O.size();
-  Point::optindices = i2O;
-  if (Point::pdim > Point::dim) {
-    for (unsigned int i = 0; i < Point::pdim; i++) {
+  Point::m_dim = i2O.size();
+  Point::m_opt_indices = i2O;
+  if (Point::m_pdim > Point::m_dim) {
+    for (unsigned int i = 0; i < Point::m_pdim; i++) {
       unsigned int j = 0;
-      while (j < Point::dim && i != i2O[j])
+      while (j < Point::m_dim && i != i2O[j])
         j++;
 
-      // The index i wasnt found on optindices, it is a fixed index,
+      // The index i wasnt found on m_opt_indices, it is a fixed index,
       // we use the value of the start vector.
-      if (j == Point::dim)
-        Point::fixedweights[i] = start[i];
+      if (j == Point::m_dim)
+        Point::m_fixed_weights[i] = start[i];
     }
   }
 }
@@ -112,12 +101,12 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
     //cerr << "Sentence " << S << endl;
     multimap<float, unsigned> gradient;
     vector<float> f0;
-    f0.resize(FData->get(S).size());
-    for (unsigned j = 0; j < FData->get(S).size(); j++) {
+    f0.resize(m_feature_data->get(S).size());
+    for (unsigned j = 0; j < m_feature_data->get(S).size(); j++) {
       // gradient of the feature function for this particular target sentence
-      gradient.insert(pair<float, unsigned>(direction * (FData->get(S,j)), j));
+      gradient.insert(pair<float, unsigned>(direction * (m_feature_data->get(S,j)), j));
       // compute the feature function at the origin point
-      f0[j] = origin * FData->get(S, j);
+      f0[j] = origin * m_feature_data->get(S, j);
     }
     // Now let's compute the 1best for each value of x.
 
@@ -308,7 +297,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
 
 void Optimizer::Get1bests(const Point& P, vector<unsigned>& bests) const
 {
-  CHECK(FData);
+  CHECK(m_feature_data);
   bests.clear();
   bests.resize(size());
 
@@ -316,8 +305,8 @@ void Optimizer::Get1bests(const Point& P, vector<unsigned>& bests) const
     float bestfs = MIN_FLOAT;
     unsigned idx = 0;
     unsigned j;
-    for (j = 0; j < FData->get(i).size(); j++) {
-      float curfs = P * FData->get(i, j);
+    for (j = 0; j < m_feature_data->get(i).size(); j++) {
+      float curfs = P * m_feature_data->get(i, j);
       if (curfs > bestfs) {
         bestfs = curfs;
         idx = j;
@@ -330,15 +319,15 @@ void Optimizer::Get1bests(const Point& P, vector<unsigned>& bests) const
 
 statscore_t Optimizer::Run(Point& P) const
 {
-  if (!FData) {
+  if (!m_feature_data) {
     cerr << "error trying to optimize without Features loaded" << endl;
     exit(2);
   }
-  if (!scorer) {
+  if (!m_scorer) {
     cerr << "error trying to optimize without a Scorer loaded" << endl;
     exit(2);
   }
-  if (scorer->getReferenceSize() != FData->size()) {
+  if (m_scorer->getReferenceSize() != m_feature_data->size()) {
     cerr << "error length mismatch between feature file and score file" << endl;
     exit(2);
   }
@@ -361,11 +350,11 @@ statscore_t Optimizer::Run(Point& P) const
 
 vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst, vector<vector <pair<unsigned,unsigned> > > thediffs) const
 {
-  CHECK(scorer);
+  CHECK(m_scorer);
 
   vector<statscore_t> theres;
 
-  scorer->score(thefirst, thediffs, theres);
+  m_scorer->score(thefirst, thediffs, theres);
   return theres;
 }
 
@@ -392,7 +381,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P) const
 
     Point  linebest;
 
-    for (unsigned int d = 0; d < Point::getdim()+number_of_random_directions; d++) {
+    for (unsigned int d = 0; d < Point::getdim() + m_num_random_directions; d++) {
       if (verboselevel() > 4) {
         //	cerr<<"minimizing along direction "<<d<<endl;
         cerr << "starting point: " << P << " => " << prevscore << endl;
@@ -440,7 +429,7 @@ statscore_t RandomDirectionOptimizer::TrueRun(Point& P) const
   // do specified number of random direction optimizations
   unsigned int nrun = 0;
   unsigned int nrun_no_change = 0;
-  for (; nrun_no_change < number_of_random_directions; nrun++, nrun_no_change++)
+  for (; nrun_no_change < m_num_random_directions; nrun++, nrun_no_change++)
   {
     // choose a random direction in which to optimize
     Point direction;
@@ -476,32 +465,32 @@ statscore_t RandomOptimizer::TrueRun(Point& P) const
 
 //--------------------------------------
 
-vector<string> OptimizerFactory::typenames;
+vector<string> OptimizerFactory::m_type_names;
 
 void OptimizerFactory::SetTypeNames()
 {
-  if (typenames.empty()) {
-    typenames.resize(NOPTIMIZER);
-    typenames[POWELL]="powell";
-    typenames[RANDOM_DIRECTION]="random-direction";
-    typenames[RANDOM]="random";
+  if (m_type_names.empty()) {
+    m_type_names.resize(NOPTIMIZER);
+    m_type_names[POWELL]="powell";
+    m_type_names[RANDOM_DIRECTION]="random-direction";
+    m_type_names[RANDOM]="random";
     // Add new type there
   }
 }
 vector<string> OptimizerFactory::GetTypeNames()
 {
-  if (typenames.empty())
+  if (m_type_names.empty())
     SetTypeNames();
-  return typenames;
+  return m_type_names;
 }
 
 OptimizerFactory::OptType OptimizerFactory::GetOType(const string& type)
 {
   unsigned int thetype;
-  if (typenames.empty())
+  if (m_type_names.empty())
     SetTypeNames();
-  for (thetype = 0; thetype < typenames.size(); thetype++)
-    if (typenames[thetype] == type)
+  for (thetype = 0; thetype < m_type_names.size(); thetype++)
+    if (m_type_names[thetype] == type)
       break;
   return((OptType)thetype);
 }
@@ -513,8 +502,8 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim, vector<unsigned> i2o, 
     cerr << "Error: unknown Optimizer type " << type << endl;
     cerr << "Known Algorithm are:" << endl;
     unsigned int thetype;
-    for (thetype = 0; thetype < typenames.size(); thetype++)
-      cerr << typenames[thetype] << endl;
+    for (thetype = 0; thetype < m_type_names.size(); thetype++)
+      cerr << m_type_names[thetype] << endl;
     throw ("unknown Optimizer Type");
   }
 

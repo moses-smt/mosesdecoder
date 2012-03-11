@@ -13,11 +13,11 @@ bool IsGzipFile(const std::string &filename) {
 } // namespace
 
 inputfilestream::inputfilestream(const std::string &filePath)
-    : std::istream(0), m_streambuf(0), is_good(false)
+    : std::istream(0), m_streambuf(0), m_is_good(false)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
-  is_good = (fb->open(filePath.c_str(), std::ios::in) != NULL);
+  m_is_good = (fb->open(filePath.c_str(), std::ios::in) != NULL);
 
   if (IsGzipFile(filePath)) {
     fb->close();
@@ -40,11 +40,11 @@ void inputfilestream::close()
 }
 
 outputfilestream::outputfilestream(const std::string &filePath)
-    : std::ostream(0), m_streambuf(0), is_good(false)
+    : std::ostream(0), m_streambuf(0), m_is_good(false)
 {
   // check if file is readable
   std::filebuf* fb = new std::filebuf();
-  is_good = (fb->open(filePath.c_str(), std::ios::out) != NULL);
+  m_is_good = (fb->open(filePath.c_str(), std::ios::out) != NULL);
 
   if (IsGzipFile(filePath)) {
     throw runtime_error("Output to a zipped file not supported!");
