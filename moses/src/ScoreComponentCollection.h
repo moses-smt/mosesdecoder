@@ -297,6 +297,11 @@ public:
     return fv;
   }
 
+  float GetSparseWeight(const FName& featureName) const
+  {
+    return m_scores[featureName];
+  }
+
   void LogCoreFeatures(size_t baseOfLog) {
 		m_scores.logCoreFeatures(baseOfLog);
 	}

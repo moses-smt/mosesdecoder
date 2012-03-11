@@ -503,6 +503,10 @@ public:
     return m_allWeights.GetScoresForProducer(sp);
   }
 
+  float GetSparseWeight(const FName& featureName) const {
+    return m_allWeights.GetSparseWeight(featureName);
+  }
+  
   //Weights for feature with fixed number of values
   void SetWeights(const ScoreProducer* sp, const std::vector<float>& weights);
 

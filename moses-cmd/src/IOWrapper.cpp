@@ -516,8 +516,11 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
     // report each feature
     else {
       for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) 
-        if (i->second != 0) // do not report zero-valued features
-	  out << " " << i->first << "=" << i->second;
+        if (i->second != 0) { // do not report zero-valued features
+	  float weight = staticData.GetSparseWeight(i->first);
+          if (weight != 0)
+	    out << " " << i->first << "=" << weight;
+	}
     }
   }
 }
