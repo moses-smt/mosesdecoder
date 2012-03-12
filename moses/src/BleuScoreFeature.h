@@ -49,19 +49,20 @@ public:
 
 	BleuScoreFeature():
 	                                 StatefulFeatureFunction("BleuScore",1),
+	                                 m_sentence_bleu(true),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
-	                                 m_scale_by_ref_length(false),
-	                                 m_scale_by_avg_length(false),
+	                                 m_scale_by_avg_input_length(false),
+	                                 m_scale_by_inverse_length(false),
+	                                 m_scale_by_avg_inverse_length(false),
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.7),
 	                                 m_smoothing_scheme(PLUS_ONE),
-	                                 m_relax_BP(1),
-	                                 m_correction(1) {}
+	                                 m_relax_BP(1) {}
 
     std::string GetScoreProducerDescription() const
     {
@@ -81,8 +82,10 @@ public:
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
 //    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
     size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
-    void SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-    		bool scaleByInverseLength, float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
+    void SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+    		bool scaleByInverseLength, bool scaleByAvgInverseLength,
+    		float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
+    void SetAvgInputLength (float l) { m_avg_input_length = l; }
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,
@@ -107,14 +110,6 @@ public:
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
 
-    void SetCorrection(float correction) {
-    	m_correction = correction;
-    }
-
-    float GetCorrection() {
-    	return m_correction;
-    }
-
 private:
     // counts for pseudo-document
     std::vector< float > m_count_history;
@@ -128,17 +123,17 @@ private:
     NGrams m_cur_ref_ngrams;
     size_t m_cur_ref_length;
 
+    bool m_sentence_bleu;
+
     // scale BLEU score by history of input length
     bool m_scale_by_input_length;
-
-    // scale BLEU score by (history of) reference length
-    bool m_scale_by_ref_length;
-
-    // scale BLEU score by (history of) the average of input and reference length
-    bool m_scale_by_avg_length;
+    bool m_scale_by_avg_input_length;
 
     // scale by the inverse of the input length * 100
     bool m_scale_by_inverse_length;
+    bool m_scale_by_avg_inverse_length;
+
+    float m_avg_input_length;
 
     float m_scale_by_x;
 
@@ -150,9 +145,6 @@ private:
 
     // relax application of the BP by setting a value between 0 and 1
     float m_relax_BP;
-
-    // correct scaling issues
-    float m_correction;
 };
 
 } // Namespace.

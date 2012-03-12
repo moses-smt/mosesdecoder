@@ -111,7 +111,7 @@ namespace Mira {
     m_bleuScoreFeature->SetCurrentShortestReference(sentenceid);
 
     //run the decoder
-    m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system); 
+    m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
     m_manager->ProcessSentence();
     TrellisPathList sentences;
     m_manager->CalcNBest(count,sentences, distinct);
@@ -165,10 +165,6 @@ namespace Mira {
     return translations;
   }
 
-  size_t MosesDecoder::getCurrentInputLength() {
-	  return (*m_sentence).GetSize();
-  }
-
   float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
     return scores.GetScoreForProducer(m_bleuScoreFeature);
   }
@@ -209,10 +205,12 @@ namespace Mira {
   	return m_bleuScoreFeature->GetClosestReferenceLength(ref_id, hypoLength);
   }
 
-  void MosesDecoder::setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-  		bool scaleByInverseLinear, float scaleByX, float historySmoothing, size_t scheme, float relax_BP) {
-	  m_bleuScoreFeature->SetBleuParameters(scaleByInputLength, scaleByRefLength, scaleByAvgLength,
-	  		scaleByInverseLinear, scaleByX, historySmoothing, scheme, relax_BP);
+  void MosesDecoder::setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+		  bool scaleByInverseLength, bool scaleByAvgInverseLength,
+		  float scaleByX, float historySmoothing, size_t scheme, float relax_BP) {
+	  m_bleuScoreFeature->SetBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
+			  scaleByInverseLength, scaleByAvgInverseLength,
+			  scaleByX, historySmoothing, scheme, relax_BP);
   }
 } 
 

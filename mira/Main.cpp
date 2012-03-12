@@ -80,7 +80,8 @@ int main(int argc, char** argv) {
 	bool onlyViolatedConstraints;
 	bool accumulateWeights;
 	float historySmoothing;
-	bool scaleByInputLength, scaleByReferenceLength, scaleByAvgLength, scaleByInverseLength;
+	bool scaleByInputLength, scaleByAvgInputLength;
+	bool scaleByInverseLength, scaleByAvgInverseLength;
 	float scaleByX;
 	float slack, dummy;
 	float slack_step;
@@ -135,7 +136,7 @@ int main(int argc, char** argv) {
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
 		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
 		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-	  ("bleu-score-weight-fear", po::value<float>(&bleuScoreWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+	    ("bleu-score-weight-fear", po::value<float>(&bleuScoreWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
@@ -152,7 +153,7 @@ int main(int argc, char** argv) {
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
 		("history-of-1best", po::value<bool>(&historyOf1best)->default_value(false), "Use 1best translations to update the history")
 		("history-of-oracles", po::value<bool>(&historyOfOracles)->default_value(false), "Use oracle translations to update the history")
-		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.7), "Adjust the factor for history smoothing")
+		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
 		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
 		("hope-fear-rank", po::value<bool>(&hope_fear_rank)->default_value(false), "Use hope and fear translations for optimisation, use model for ranking")
 		("hope-model", po::value<bool>(&hope_model)->default_value(false), "Use only hope and model translations for optimisation (use --fear-n to set number of model translations)")
@@ -187,8 +188,8 @@ int main(int argc, char** argv) {
 		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
 		("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale the BLEU score by (a history of) the inverse input length")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
-		("scale-by-reference-length", po::value<bool>(&scaleByReferenceLength)->default_value(false), "Scale BLEU by (a history of) the reference length")
-		("scale-by-avg-length", po::value<bool>(&scaleByAvgLength)->default_value(false), "Scale BLEU by (a history of) the average of input and reference length")
+		("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by an average of the input length")
+		("scale-by-avg-inverse-length", po::value<bool>(&scaleByAvgInverseLength)->default_value(false), "Scale BLEU by an average of the inverse input length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
 		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
@@ -274,8 +275,16 @@ int main(int argc, char** argv) {
 		}
 	}
 
-	if (scaleByReferenceLength || scaleByAvgLength ||  scaleByInverseLength)
+	if (scaleByAvgInputLength ||  scaleByInverseLength || scaleByAvgInverseLength)
 		scaleByInputLength = false;
+
+	if (historyOf1best || historyOfOracles)
+		sentenceLevelBleu = false;
+	if (!sentenceLevelBleu) {
+		if (!historyOf1best && !historyOfOracles) {
+			historyOf1best = true;
+		}
+	}
 
 	// initialise Moses
 	// add initial Bleu weight and references to initialize Bleu feature
@@ -287,8 +296,9 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
-	decoder->setBleuParameters(scaleByInputLength, scaleByReferenceLength, scaleByAvgLength,
-			scaleByInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP);
+	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
+			scaleByInverseLength, scaleByAvgInverseLength,
+			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
@@ -372,13 +382,7 @@ int main(int argc, char** argv) {
 		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
-	if (historyOf1best || historyOfOracles)
-		sentenceLevelBleu = false;
-	if (!sentenceLevelBleu) {
-		if (!historyOf1best && !historyOfOracles) {
-			historyOf1best = true;
-		}
-	}
+
 	if (bleuScoreWeight_hope == -1) {
 		bleuScoreWeight_hope = bleuScoreWeight;
 	}
@@ -411,8 +415,10 @@ int main(int argc, char** argv) {
 		batchSize = shardSize;
 
 	// get reference to feature functions
+	const StaticData &staticData = StaticData::Instance();
 	const vector<const ScoreProducer*> featureFunctions =
-		    StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+			staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+	const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
 
 	// read core weight file
 	ProducerWeightMap coreWeightMap;
@@ -446,6 +452,10 @@ int main(int argc, char** argv) {
 	time_t now;
 	time(&now);
 	cerr << "Rank " << rank << ", " << ctime(&now);
+
+	float avgInputLength = 0;
+	float sumOfInputs = 0;
+	size_t numberOfInputs = 0;
 
 	ScoreComponentCollection mixedAverageWeights;
 	ScoreComponentCollection mixedAverageWeightsPrevious;
@@ -509,6 +519,19 @@ int main(int argc, char** argv) {
 //				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
 
+				Moses::Sentence *sentence = new Sentence(Input);
+			    stringstream in(input + "\n");
+			    sentence->Read(in,inputFactorOrder);
+			    size_t current_input_length = (*sentence).GetSize();
+
+				if (epoch == 0 && (scaleByAvgInputLength || scaleByAvgInverseLength)) {
+					sumOfInputs += current_input_length;
+					++numberOfInputs;
+					avgInputLength = sumOfInputs/numberOfInputs;
+					decoder->setAvgInputLength(avgInputLength);
+					cerr << "Rank " << rank << ", epoch 0, average input length: " << avgInputLength << endl;
+				}
+
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newScores;
 				if (model_hope_fear || rank_only || hope_fear_rank) {
@@ -539,7 +562,6 @@ int main(int argc, char** argv) {
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
 							1, distinctNbest, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
-					size_t current_input_length = decoder->getCurrentInputLength();
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
 					avg_ref_length = ref_length;
@@ -637,7 +659,6 @@ int main(int argc, char** argv) {
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
 							1, distinctNbest, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
-					size_t current_input_length = decoder->getCurrentInputLength();
 					decoder->cleanup();
 					cerr << endl;
 
@@ -686,7 +707,7 @@ int main(int argc, char** argv) {
 							1,	distinctNbest, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
 					// needed for history
-					inputLengths.push_back(decoder->getCurrentInputLength());
+					inputLengths.push_back(current_input_length);
 					ref_ids.push_back(*sid);
 					decoder->cleanup();
 					oracles.push_back(oracle);

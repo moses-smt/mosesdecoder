@@ -62,22 +62,19 @@ class MosesDecoder {
                           bool distinct,
                           size_t rank,
                           size_t epoch);
-    size_t getCurrentInputLength();
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
 //    void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
     void printBleuFeatureHistory(std::ostream& out);
 //    void printReferenceLength(const std::vector<size_t>& ref_ids);
     size_t getClosestReferenceLength(size_t ref_id, int hypoLength);
-    void setBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-    		bool scaleByInverse, float scaleByX, float historySmoothing, size_t scheme, float relax_BP);
+    void setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+    		bool scaleByInverseLength, bool scaleByAvgInverseLength,
+    		float scaleByX, float historySmoothing, size_t scheme, float relax_BP);
+    void setAvgInputLength (float l) { m_bleuScoreFeature->SetAvgInputLength(l); }
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
     void cleanup();
-
-    void setCorrection(float correction) {
-    	m_bleuScoreFeature->SetCorrection(correction);
-    }
 		
 	private:
     float getBleuScore(const Moses::ScoreComponentCollection& scores);

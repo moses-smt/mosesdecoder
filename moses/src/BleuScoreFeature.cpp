@@ -81,12 +81,14 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
   }
 }
 
-void BleuScoreFeature::SetBleuParameters(bool scaleByInputLength, bool scaleByRefLength, bool scaleByAvgLength,
-		bool scaleByInverseLength, float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
+void BleuScoreFeature::SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+		bool scaleByInverseLength, bool scaleByAvgInverseLength,
+		float scaleByX, float historySmoothing, size_t scheme, float relaxBP) {
+	m_sentence_bleu = sentenceBleu;
 	m_scale_by_input_length = scaleByInputLength;
-	m_scale_by_ref_length = scaleByRefLength;
-	m_scale_by_avg_length = scaleByAvgLength;
+	m_scale_by_avg_input_length = scaleByAvgInputLength;
 	m_scale_by_inverse_length = scaleByInverseLength;
+	m_scale_by_avg_inverse_length = scaleByAvgInverseLength;
 	m_scale_by_x = scaleByX;
 	m_historySmoothing = historySmoothing;
 	m_smoothing_scheme = (SmoothingScheme)scheme;
@@ -390,6 +392,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   float smooth = 1;
   float smoothed_count, smoothed_matches;
 
+  // revised: compute Bleu in the context of the pseudo-document
+  // B(b) = size_of_oracle_doc * (Bleu(B_hist + b) - Bleu(B_hist))
+
   // Calculate geometric mean of modified ngram precisions
   // BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
   // 		= BP * 4th root(PRODUCT_1_4 p_n)
@@ -442,22 +447,81 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
   }
 
-  // Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
-  // B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
-  // where c(e;) is a vector of reference length, ngram counts and ngram matches
-  if (m_scale_by_input_length) {
-    precision *= m_source_length_history + m_cur_source_length;
+  if (m_sentence_bleu) {
+	// Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
+	// B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
+	// where c(e;) is a vector of reference length, ngram counts and ngram matches
+	if (m_scale_by_input_length) {
+	  precision *= m_cur_source_length;
+	}
+	else if (m_scale_by_avg_input_length) {
+	  precision *= m_avg_input_length;
+	}
+	else if (m_scale_by_inverse_length) {
+	  precision *= 100 / m_cur_source_length;
+	}
+	else if (m_scale_by_avg_inverse_length) {
+	  precision *= 100 / m_avg_input_length;
+	}
+
+	return precision * m_scale_by_x;
   }
-  else if (m_scale_by_ref_length) {
-    precision *= m_ref_length_history + m_cur_ref_length;
+  else {
+    // **BLEU score of pseudo-document**
+    float precision_pd = 1.0;
+    if (m_target_length_history > 0) {
+	  smooth = 1;
+      for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
+        smoothed_matches = m_match_history[i];
+        smoothed_count = m_count_history[i];
+
+	    switch (m_smoothing_scheme) {
+	    	case PLUS_ONE:
+	    	default:
+	    		if (i > 0) {
+	    			// smoothing for all n > 1
+	    			smoothed_matches += 1;
+	    			smoothed_count += 1;
+	    		}
+	    		break;
+	    	case LIGHT:
+	    		if (i > 0) {
+	    			// smoothing for all n > 1
+	    			smoothed_matches += 0.1;
+	    			smoothed_count += 0.1;
+	    		}
+	    		break;
+	    	case PAPINENI:
+	    		if (state->m_ngram_matches[i] == 0) {
+	    			smooth *= 0.5;
+	    			smoothed_matches += smooth;
+	    			smoothed_count += smooth;
+	    		}
+	    		break;
+	    }
+
+		precision_pd *= smoothed_matches / smoothed_count;
+      }
+
+      // take geometric mean
+      precision_pd = pow(precision_pd, (float)1/4);
+
+      // Apply brevity penalty if applicable.
+      if (m_target_length_history < m_ref_length_history)
+    	  precision_pd *= exp(1 - (m_ref_length_history/m_target_length_history));
+    }
+    else
+      precision_pd = 0;
+    // **end BLEU of pseudo-document**
+
+    float sentence_impact;
+    if (m_target_length_history > 0)
+	  sentence_impact = m_target_length_history * (precision - precision_pd);
+    else
+	  sentence_impact = precision;
+
+    return sentence_impact;
   }
-  else if (m_scale_by_avg_length) {
-    precision *= (m_source_length_history + m_ref_length_history + m_cur_source_length +  + m_cur_ref_length) / 2;
-  }
-  else if (m_scale_by_inverse_length) {
-  	precision *= 100 / (m_source_length_history + m_cur_source_length);
-  }
-  return (precision*m_scale_by_x)/m_correction;
 }
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
