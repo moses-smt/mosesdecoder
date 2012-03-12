@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
 	size_t update_scheme;
 	bool separateUpdates, batchEqualsShard;
 	bool mixByAveraging;
+	bool dumpMixedWeights;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -148,6 +149,7 @@ int main(int argc, char** argv) {
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
+		("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -237,6 +239,11 @@ int main(int argc, char** argv) {
 
   if (dummy != -1)
     slack = dummy;
+
+  if (dumpMixedWeights && (mixingFrequency != weightDumpFrequency)) {
+	  cerr << "Set mixing frequency = weight dump frequency for dumping mixed weights!" << endl;
+	  exit(1);
+  }
 
 	if (mosesConfigFile.empty()) {
 		cerr << "Error: No moses ini file specified" << endl;
@@ -914,11 +921,11 @@ int main(int argc, char** argv) {
 
 			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
 			size_t dumping_base = weightDumpFrequency ==0 ? 0 : shard.size() / weightDumpFrequency;
+
 			// mix weights?
+			ScoreComponentCollection mixedWeights;
 			if (evaluateModulo(shardPosition, mixing_base, actualBatchSize)) {
 #ifdef MPI_ENABLE
-				ScoreComponentCollection mixedWeights;
-
 				// collect all weights in mixedWeights and divide by number of processes
 				mpi::reduce(world, mosesWeights, mixedWeights, SCCPlus(), 0);
 				if (rank == 0) {
@@ -945,10 +952,27 @@ int main(int argc, char** argv) {
 #endif
 #ifndef MPI_ENABLE
 				//				cerr << "\nRank " << rank << ", no mixing, weights: " << mosesWeights << endl;
+				mixedWeights = mosesWeights;
 #endif
 			} // end mixing
 
 			// Dump weights?
+			if (dumpMixedWeights) {
+			  // dump mixed weights instead of average weights
+			  ostringstream filename;
+			  if (epoch < 10)
+				filename << weightDumpStem << "_0" << epoch;
+			  else
+				filename << weightDumpStem << "_" << epoch;
+
+			  if (weightDumpFrequency > 1)
+				filename << "_" << weightEpochDump;
+
+			  cerr << "Dumping mixed weights during epoch " << epoch << " to " << filename.str() << endl << endl;
+			  mixedWeights.Save(filename.str());
+			  ++weightEpochDump;
+			}
+			else {
 			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
 			  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
 			  bool proceed = false;
@@ -1012,6 +1036,7 @@ int main(int argc, char** argv) {
 			    }
 			  }
 			}// end dumping
+			}
 
 		} // end of shard loop, end of this epoch
 
