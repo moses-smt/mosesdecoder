@@ -802,16 +802,18 @@ int main(int argc, char** argv) {
 						else {
 							if (batchSize > 1 && separateUpdates) {
 								// separate updates for all input sentences
+								ScoreComponentCollection tmpWeights(mosesWeights);
 								for (size_t i = 0; i < batchSize; ++i) {
 									// use only the specified batch position to compute the update
 									int updatePosition = i;
 									ScoreComponentCollection partialWeightUpdate;
-									size_t partial_update_status = optimiser->updateWeightsHopeFear(mosesWeights, partialWeightUpdate,
+									size_t partial_update_status = optimiser->updateWeightsHopeFear(tmpWeights, partialWeightUpdate,
 										featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
 										modelScoresHope, modelScoresFear, learning_rate, rank, epoch, updatePosition);
 									if (partial_update_status == 0) {
 										update_status = 0;
 										weightUpdate.PlusEquals(partialWeightUpdate);
+										tmpWeights.PlusEquals(partialWeightUpdate);
 									}
 								}
 							}
