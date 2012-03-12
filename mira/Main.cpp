@@ -436,11 +436,14 @@ int main(int argc, char** argv) {
 	if (coreWeightMap.size() > 0) {
 		ProducerWeightMap::iterator p;
 		for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-		{
 			initialWeights.Assign(p->first, p->second);
-		}
 	}
 	decoder->setWeights(initialWeights);
+
+	if (!mixByAveraging && coreWeightMap.size() == 0) {
+	  cerr << "Trying to mix without averaging, but cannot because of core features.." << endl;
+	  exit(1);
+	}
 
 	//Main loop:
 	// print initial weights
@@ -922,6 +925,12 @@ int main(int argc, char** argv) {
 					// divide by number of processes
 					if (mixByAveraging)
 						mixedWeights.DivideEquals(size);
+					else {
+						// can only skip this if we have fixed core features, reset them here
+						ProducerWeightMap::iterator p;
+						for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+							mixedWeights.Assign(p->first, p->second);
+					}
 
 					// normalise weights after averaging
 					if (normaliseWeights) {
@@ -967,6 +976,12 @@ int main(int argc, char** argv) {
 			      // divide by number of processes
 			      if (mixByAveraging)
 			        mixedAverageWeights.DivideEquals(size);
+			      else {
+			    	// can only skip this if we have fixed core features, reset them here
+			    	ProducerWeightMap::iterator p;
+			    	for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+			    	  mixedAverageWeights.Assign(p->first, p->second);
+			      }
 			      
 			      // normalise weights after averaging
 			      if (normaliseWeights) {
