@@ -271,12 +271,13 @@ namespace Moses {
     if (rhs.m_coreFeatures.size() > m_coreFeatures.size())
       resize(rhs.m_coreFeatures.size());
     for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
-    	set(i->first, get(i->first) + i->second);
-    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+        set(i->first, get(i->first) + i->second);
+/*    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       if (i < rhs.m_coreFeatures.size()) {
         m_coreFeatures[i] += rhs.m_coreFeatures[i];
-      }
-    }
+      }*/
+    for (size_t i = 0; i < rhs.m_coreFeatures.size(); ++i)
+      m_coreFeatures[i] += rhs.m_coreFeatures[i];
     return *this;
   }
   
@@ -284,6 +285,25 @@ namespace Moses {
   void FVector::sparsePlusEquals(const FVector& rhs) {
     for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
 	  set(i->first, get(i->first) + i->second);
+  }
+
+  // count non-zero occurrences for all sparse features
+  void FVector::setToBinaryOf(const FVector& rhs) {
+    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
+    	if (rhs.get(i->first) != 0)
+        	set(i->first, 1);
+    for (size_t i = 0; i < rhs.m_coreFeatures.size(); ++i)
+    	m_coreFeatures[i] = 1;
+  }
+
+  // lhs vector is a sum of vectors, rhs vector holds number of non-zero summands
+  FVector& FVector::divideEquals(const FVector& rhs) {
+	  assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+	    for (const_iterator i = rhs.cbegin(); i != rhs.cend(); ++i)
+	    	set(i->first, get(i->first)/rhs.get(i->first)); // divide by number of summands
+	    for (size_t i = 0; i < rhs.m_coreFeatures.size(); ++i)
+	    	m_coreFeatures[i] /= rhs.m_coreFeatures[i]; // divide by number of summands
+	  return *this;
   }
 
   FVector& FVector::operator-= (const FVector& rhs) {

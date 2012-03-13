@@ -117,7 +117,7 @@ namespace Moses {
      * Change the number of core features
     **/
     void resize(size_t newsize);
-    
+
     typedef boost::unordered_map<FName,FValue,FNameHash, FNameEquals> FNVmap;
     /** Iterators */
     typedef FNVmap::iterator iterator;
@@ -171,7 +171,7 @@ namespace Moses {
     FVector& operator/= (const FValue& rhs);
     
     FVector& max_equals(const FVector& rhs);
-    
+
     /** norms and sums */
     FValue l1norm() const;
     FValue l2norm() const;
@@ -181,6 +181,8 @@ namespace Moses {
     /** pretty printing */
     std::ostream& print(std::ostream& out) const;
 
+    /** additional */
+
     void logCoreFeatures(size_t baseOfLog);
     //scale so that abs. value is less than maxvalue
     void thresholdScale(float maxValue );
@@ -189,6 +191,12 @@ namespace Moses {
     void capMin(FValue minValue);
 
     void sparsePlusEquals(const FVector& rhs);
+
+    // vector which, for each element of the original vector, reflects whether an element is zero or non-zero
+    void setToBinaryOf(const FVector& rhs);
+
+    // divide each element by the number given in the rhs vector
+    FVector& divideEquals(const FVector& rhs);
 
 #ifdef MPI_ENABLE
     friend class boost::serialization::access;

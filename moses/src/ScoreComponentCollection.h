@@ -121,6 +121,11 @@ public:
     return FVector(s_denseVectorSize);
   }
 
+  void SetToBinaryOf(const ScoreComponentCollection& rhs)
+  {
+	  m_scores.setToBinaryOf(rhs.m_scores);
+  }
+
   //! Set all values to 0.0
 	void ZeroAll()
 	{
@@ -129,6 +134,7 @@ public:
 
 	void MultiplyEquals(float scalar);
 	void DivideEquals(float scalar);
+	void DivideEquals(const ScoreComponentCollection& rhs);
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
 	void MultiplyEquals(const ScoreProducer* sp, float scalar);
 
