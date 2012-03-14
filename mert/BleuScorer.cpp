@@ -90,14 +90,13 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
       //for any counts larger than those already there, merge them in
       for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-        NgramCounts::const_iterator oldcount_it = m_ref_counts[sid]->find(ci->first);
-        int oldcount = 0;
-        if (oldcount_it != m_ref_counts[sid]->end()) {
-          oldcount = oldcount_it->second;
-        }
-        int newcount = ci->second;
+        const NgramCounts::Key& ngram = ci->first;
+        const NgramCounts::Value newcount = ci->second;
+
+        NgramCounts::Value oldcount = 0;
+        m_ref_counts[sid]->lookup(ngram, &oldcount);
         if (newcount > oldcount) {
-          m_ref_counts[sid]->operator[](ci->first) = newcount;
+          m_ref_counts[sid]->operator[](ngram) = newcount;
         }
       }
       //add in the length
@@ -142,11 +141,12 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   //precision on each ngram type
   for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    NgramCounts::const_iterator refcounts_it = m_ref_counts[sid]->find(testcounts_it->first);
     int correct = 0;
     const int guess = testcounts_it->second;
-    if (refcounts_it != m_ref_counts[sid]->end()) {
-      correct = min(refcounts_it->second,guess);
+
+    NgramCounts::Value v = 0;
+    if (m_ref_counts[sid]->lookup(testcounts_it->first, &v)) {
+      correct = min(v, guess);
     }
     const size_t len = testcounts_it->first.size();
     stats[len*2-2] += correct;
