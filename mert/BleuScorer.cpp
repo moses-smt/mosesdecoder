@@ -141,16 +141,16 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   //precision on each ngram type
   for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    int correct = 0;
-    const int guess = testcounts_it->second;
+    const NgramCounts::Value guess = testcounts_it->second;
+    const size_t len = testcounts_it->first.size();
+    NgramCounts::Value correct = 0;
 
     NgramCounts::Value v = 0;
     if (m_ref_counts[sid]->lookup(testcounts_it->first, &v)) {
       correct = min(v, guess);
     }
-    const size_t len = testcounts_it->first.size();
-    stats[len*2-2] += correct;
-    stats[len*2-1] += guess;
+    stats[len * 2 - 2] += correct;
+    stats[len * 2 - 1] += guess;
   }
   entry.set(stats);
 }
