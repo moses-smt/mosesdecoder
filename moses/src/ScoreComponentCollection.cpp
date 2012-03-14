@@ -92,6 +92,11 @@ void ScoreComponentCollection::DivideEquals(float scalar)
 	m_scores /= scalar;
 }
 
+void ScoreComponentCollection::CoreDivideEquals(float scalar)
+{
+	m_scores.coreDivideEquals(scalar);
+}
+
 void ScoreComponentCollection::DivideEquals(const ScoreComponentCollection& rhs)
 {
 	m_scores.divideEquals(rhs.m_scores);

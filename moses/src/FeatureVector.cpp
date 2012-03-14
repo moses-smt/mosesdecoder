@@ -296,6 +296,13 @@ namespace Moses {
     	m_coreFeatures[i] = 1;
   }
 
+  // divide only core features by scalar
+  FVector& FVector::coreDivideEquals(float scalar) {
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i)
+    	m_coreFeatures[i] /= scalar;
+	  return *this;
+  }
+
   // lhs vector is a sum of vectors, rhs vector holds number of non-zero summands
   FVector& FVector::divideEquals(const FVector& rhs) {
 	  assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());

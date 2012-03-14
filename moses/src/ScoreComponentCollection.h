@@ -134,6 +134,7 @@ public:
 
 	void MultiplyEquals(float scalar);
 	void DivideEquals(float scalar);
+	void CoreDivideEquals(float scalar);
 	void DivideEquals(const ScoreComponentCollection& rhs);
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
 	void MultiplyEquals(const ScoreProducer* sp, float scalar);
