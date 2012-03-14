@@ -14,6 +14,8 @@ using namespace std;
 
 const int kBleuNgramOrder = 4;
 
+class NgramCounts;
+
 /**
  * Bleu scoring
  */
@@ -34,13 +36,6 @@ private:
     SHORTEST,
     CLOSEST
   };
-
-  /**
-   * A NgramCounts is a key-value store.
-   * Clients don't have to worry about the actual implementation
-   * since this type is used in internal only.
-   */
-  class NgramCounts;
 
   /**
    * Count the ngrams of each type, up to the given length in the input line.

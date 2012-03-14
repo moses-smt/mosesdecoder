@@ -6,6 +6,7 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+#include "Ngram.h"
 #include "Util.h"
 
 namespace {
@@ -18,70 +19,6 @@ const char REFLEN_CLOSEST[] = "closest";
 
 } // namespace
 
-// A simple STL-map based n-gram counts.
-// Basically, we provide typical accessors and mutaors, but
-// we intentionally does not allow erasing elements.
-class BleuScorer::NgramCounts {
- public:
-  // Used to construct the ngram map
-  struct NgramComparator {
-    bool operator()(const vector<int>& a, const vector<int>& b) const {
-      size_t i;
-      const size_t as = a.size();
-      const size_t bs = b.size();
-      for (i = 0; i < as && i < bs; ++i) {
-        if (a[i] < b[i]) {
-          return true;
-        }
-        if (a[i] > b[i]) {
-          return false;
-        }
-      }
-      // entries are equal, shortest wins
-      return as < bs;
-    }
-  };
-
-  typedef vector<int> Key;
-  typedef int Value;
-  typedef map<Key, Value, NgramComparator>::iterator iterator;
-  typedef map<Key, Value, NgramComparator>::const_iterator const_iterator;
-
-  NgramCounts() : kDefaultCount(1) { }
-  virtual ~NgramCounts() { }
-
-  // If the specified "ngram" is found, we add counts.
-  // If not, we insert the default count in the container.
-  void add(const Key& ngram) {
-    const_iterator it = find(ngram);
-    if (it != end()) {
-      m_counts[ngram] = it->second + 1;
-    } else {
-      m_counts[ngram] = kDefaultCount;
-    }
-  }
-
-  void clear() { m_counts.clear(); }
-
-  bool empty() const { return m_counts.empty(); }
-
-  size_t size() const { return m_counts.size(); }
-  size_t max_size() const { return m_counts.max_size(); }
-
-  iterator find(const Key& ngram) { return m_counts.find(ngram); }
-  const_iterator find(const Key& ngram) const { return m_counts.find(ngram); }
-
-  Value& operator[](const Key& ngram) { return m_counts[ngram]; }
-
-  iterator begin() { return m_counts.begin(); }
-  const_iterator begin() const { return m_counts.begin(); }
-  iterator end() { return m_counts.end(); }
-  const_iterator end() const { return m_counts.end(); }
-
- private:
-  const int kDefaultCount;
-  map<Key, Value, NgramComparator> m_counts;
-};
 
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
