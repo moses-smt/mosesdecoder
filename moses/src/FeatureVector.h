@@ -195,6 +195,9 @@ namespace Moses {
     // vector which, for each element of the original vector, reflects whether an element is zero or non-zero
     void setToBinaryOf(const FVector& rhs);
 
+    // divide only core features by scalar
+    FVector& coreDivideEquals(float scalar);
+
     // divide each element by the number given in the rhs vector
     FVector& divideEquals(const FVector& rhs);
 
