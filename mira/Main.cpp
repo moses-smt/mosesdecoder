@@ -124,6 +124,7 @@ int main(int argc, char** argv) {
 	size_t update_scheme;
 	bool separateUpdates, batchEqualsShard;
 	bool sparseAverage, dumpMixedWeights, mixWithoutAveraging;
+	bool useSourceLengthHistory;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -203,6 +204,7 @@ int main(int argc, char** argv) {
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
 		("update-scheme", po::value<size_t>(&update_scheme)->default_value(1), "Update scheme, default: 1")
+		("use-source-length-history", po::value<bool>(&useSourceLengthHistory)->default_value(false), "Use history of source length instead of target length for history Bleu")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
@@ -310,7 +312,7 @@ int main(int argc, char** argv) {
 	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
 	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
-			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP);
+			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
@@ -584,6 +586,19 @@ int main(int argc, char** argv) {
 					int oracleSize = (int)oracle.size();
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
+
+					float precision = bleuScoresHope[batchPosition][0];
+					if (historyOf1best) {
+						if (useSourceLengthHistory) precision /= decoder->getSourceLengthHistory();
+						else precision /= decoder->getTargetLengthHistory();
+					}
+					else {
+						if (scaleByAvgInputLength) precision /= decoder->getAverageInputLength();
+						else if (scaleByAvgInverseLength) precision /= (100/decoder->getAverageInputLength());
+						precision /= scaleByX;
+					}
+					if (historyOf1best || scaleByAvgInputLength || scaleByAvgInverseLength)
+						cerr << "Rank " << rank << ", epoch " << epoch << ", hope precision: " << precision << endl;
 
 					bool skip = false;
 

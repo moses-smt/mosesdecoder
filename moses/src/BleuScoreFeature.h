@@ -54,6 +54,7 @@ public:
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
+	                                 m_useSourceLengthHistory(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
 	                                 m_scale_by_avg_input_length(false),
@@ -84,7 +85,8 @@ public:
     size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
     void SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-    		float scaleByX, float historySmoothing, size_t scheme, float relaxBP);
+    		float scaleByX, float historySmoothing, size_t scheme, float relaxBP,
+    		bool useSourceLengthHistory);
     void SetAvgInputLength (float l) { m_avg_input_length = l; }
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
@@ -109,6 +111,10 @@ public:
                                     }
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
+
+    float GetSourceLengthHistory() { return m_source_length_history; }
+    float GetTargetLengthHistory() { return m_target_length_history; }
+    float GetAverageInputLength() { return m_avg_input_length; }
 
 private:
     // counts for pseudo-document
@@ -139,6 +145,7 @@ private:
 
     // smoothing factor for history counts
     float m_historySmoothing;
+    bool m_useSourceLengthHistory;
 
     enum SmoothingScheme { PLUS_ONE = 1, LIGHT = 2, PAPINENI = 3 };
     SmoothingScheme m_smoothing_scheme;

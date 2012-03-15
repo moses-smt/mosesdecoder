@@ -70,12 +70,17 @@ class MosesDecoder {
     size_t getClosestReferenceLength(size_t ref_id, int hypoLength);
     void setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-    		float scaleByX, float historySmoothing, size_t scheme, float relax_BP);
+    		float scaleByX, float historySmoothing, size_t scheme, float relax_BP,
+    		bool useSourceLengthHistory);
     void setAvgInputLength (float l) { m_bleuScoreFeature->SetAvgInputLength(l); }
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
     void cleanup();
 		
+    float getSourceLengthHistory() { return m_bleuScoreFeature->GetSourceLengthHistory(); }
+    float getTargetLengthHistory() { return m_bleuScoreFeature->GetTargetLengthHistory(); }
+    float getAverageInputLength() { return m_bleuScoreFeature->GetAverageInputLength(); }
+
 	private:
     float getBleuScore(const Moses::ScoreComponentCollection& scores);
     void setBleuScore(Moses::ScoreComponentCollection& scores, float bleu);
