@@ -98,6 +98,9 @@ Parameter::Parameter()
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-lex", "lex", "weight for global lexical model");
 	AddParam("weight-glm", "glm", "weight for global lexical model");
+	AddParam("weight-wt", "wt", "weight for global lexical model");
+	AddParam("weight-pp", "pp", "weight for global lexical model");
+	AddParam("weight-pb", "pb", "weight for global lexical model");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");

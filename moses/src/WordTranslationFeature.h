@@ -42,7 +42,8 @@ private:
   bool m_simple;
   bool m_sourceContext;
   bool m_targetContext;
-
+  float m_sparseProducerWeight;
+  
 public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
 			bool simple, bool sourceContext, bool targetContext):
@@ -85,6 +86,9 @@ public:
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "wt"; }
 	size_t GetNumInputScores() const { return 0; }
+	
+	void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
+	float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 };
 
 }
