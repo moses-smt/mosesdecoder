@@ -48,7 +48,7 @@ public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
 			bool simple, bool sourceContext, bool targetContext):
 //     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
-		 StatefulFeatureFunction("wt", ScoreProducer::unlimited),
+		 StatefulFeatureFunction("wt", ScoreProducer::unlimited), m_sparseProducerWeight(1),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
      m_simple(simple),
