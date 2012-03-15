@@ -710,25 +710,50 @@ bool StaticData::LoadData(Parameter *parameter)
 
     // DLM: apply additional weight to sparse features if applicable
     for (size_t i = 0; i < m_targetNgramFeatures.size(); ++i) {
-    	float dlmWeight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
-    	cerr << "Set sparse producer weight: " << dlmWeight << endl;
-    	cerr << "Size of loaded model: " <<
-    			extraWeights.GetNumberWeights(m_targetNgramFeatures[i]) << endl;
-    	if (dlmWeight != 1)
-    		extraWeights.MultiplyEquals(m_targetNgramFeatures[i], dlmWeight);
+    	float weight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
+    	if (weight != 1) {
+    		extraWeights.MultiplyEquals(m_targetNgramFeatures[i], weight);
+    		cerr << "Set dlm sparse producer weight: " << weight << endl;
+    	}
     }
 
     // GLM: apply additional weight to sparse features if applicable
     for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
-    	float glmWeight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
-    	cerr << "Set sparse producer weight: " << glmWeight << endl;
-    	cerr << "Size of loaded model: " <<
-    			extraWeights.GetNumberWeights(m_globalLexicalModelsUnlimited[i]) << endl;
-    	if (glmWeight != 1)
-    		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], glmWeight);
+    	float weight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
+    	if (weight != 1) {
+    		extraWeights.MultiplyEquals(m_globalLexicalModelsUnlimited[i], weight);
+    		cerr << "Set glm sparse producer weight: " << weight << endl;
+    	}
     }
 
-	  m_allWeights.PlusEquals(extraWeights);
+    // WT: apply additional weight to sparse features if applicable
+    if (m_wordTranslationFeature) {
+    	float weight = m_wordTranslationFeature->GetSparseProducerWeight();
+    	if (weight != 1) {
+    		extraWeights.MultiplyEquals(m_wordTranslationFeature, weight);
+    		cerr << "Set wt sparse producer weight: " << weight << endl;
+    	}
+    }
+    
+    // PP: apply additional weight to sparse features if applicable
+    if (m_phrasePairFeature) {
+    	float weight = m_phrasePairFeature->GetSparseProducerWeight();
+    	if (weight != 1) {
+    		extraWeights.MultiplyEquals(m_phrasePairFeature, weight);
+    		cerr << "Set pp sparse producer weight: " << weight << endl;
+    	}
+    }
+    
+    // PB: apply additional weight to sparse features if applicable
+    if (m_phraseBoundaryFeature) {
+    	float weight = m_phraseBoundaryFeature->GetSparseProducerWeight();
+    	if (weight != 1) {
+    		extraWeights.MultiplyEquals(m_phraseBoundaryFeature, weight);
+    		cerr << "Set pb sparse producer weight: " << weight << endl;
+    	}
+    }
+    
+	m_allWeights.PlusEquals(extraWeights);
   }
 
   return true;
@@ -969,13 +994,13 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-glm"));
   const vector<string> &modelSpec = m_parameter->GetParam("glm-model");
 
-  if (weight.size() != modelSpec.size()) {
+  if (weight.size() != 0 && weight.size() != modelSpec.size()) {
     std::cerr << "number of sparse producer weights and model specs for the global lexical model unlimited "
     		"does not match (" << weight.size() << " != " << modelSpec.size() << ")" << std::endl;
     return false;
   }
 
-  for (size_t i = 0; i < weight.size(); i++ ) {
+  for (size_t i = 0; i < modelSpec.size(); i++ ) {
     bool ignorePunctuation = false;
     bool biasFeature = false;
     bool restricted = false;
@@ -1600,6 +1625,12 @@ bool StaticData::LoadDiscrimLMFeature()
 
 bool StaticData::LoadPhraseBoundaryFeature()
 {
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pb"));
+  if (weight.size() > 1) {
+	std::cerr << "only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
+    return false;
+  }
+
   const vector<string> &phraseBoundarySourceFactors =
     m_parameter->GetParam("phrase-boundary-source-feature");
   const vector<string> &phraseBoundaryTargetFactors =
@@ -1626,11 +1657,19 @@ bool StaticData::LoadPhraseBoundaryFeature()
   //cerr << "source "; for (size_t i = 0; i < sourceFactors.size(); ++i) cerr << sourceFactors[i] << " "; cerr << endl;
   //cerr << "target "; for (size_t i = 0; i < targetFactors.size(); ++i) cerr << targetFactors[i] << " "; cerr << endl;
   m_phraseBoundaryFeature = new PhraseBoundaryFeature(sourceFactors,targetFactors);
+  if (weight.size() > 0)
+    m_phraseBoundaryFeature->SetSparseProducerWeight(weight[0]);
   return true;
 }
 
 bool StaticData::LoadPhrasePairFeature()
 {
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pp"));
+  if (weight.size() > 1) {
+	std::cerr << "only one sparse producer weight allowed for the phrase pair feature" << std::endl;
+	return false;
+  }
+
   const vector<string> &phrasePairFactors =
     m_parameter->GetParam("phrase-pair-feature");
   if (phrasePairFactors.size() == 0) return true;
@@ -1646,6 +1685,8 @@ bool StaticData::LoadPhrasePairFeature()
   size_t sourceFactorId = Scan<FactorType>(tokens[0]);
   size_t targetFactorId = Scan<FactorType>(tokens[1]);
   m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId);
+  if (weight.size() > 0)
+    m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
   return true;
 }
 
@@ -1737,6 +1778,12 @@ bool StaticData::LoadSourceWordDeletionFeature()
 
 bool StaticData::LoadWordTranslationFeature()
 {
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-wt"));
+  if (weight.size() > 1) {
+    std::cerr << "only one sparse producer weight allowed for the word translation feature" << std::endl;
+    return false;
+  }
+	
   const vector<string> &parameters = m_parameter->GetParam("word-translation-feature");
   if (parameters.empty())
     return true;
@@ -1773,6 +1820,8 @@ bool StaticData::LoadWordTranslationFeature()
 
   m_wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
 		  sourceTrigger, targetTrigger);
+  if (weight.size() > 0)
+    m_wordTranslationFeature->SetSparseProducerWeight(weight[0]);
 
   // load word list for restricted feature set
   if (tokens.size() == 6) {

@@ -49,15 +49,18 @@ public:
                                     /* Not implemented */
                                     assert(0);
                                   }
-
+  
+  void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
+  float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
+  
 private:
   void AddFeatures(
     const Word* leftWord, const Word* rightWord, const FactorList& factors, 
     const std::string& side, ScoreComponentCollection* scores) const ;
   FactorList m_sourceFactors;
   FactorList m_targetFactors;
+  float m_sparseProducerWeight;
 };
-
 
 }
 

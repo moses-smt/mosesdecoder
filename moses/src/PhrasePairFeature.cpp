@@ -12,7 +12,8 @@ PhrasePairFeature::PhrasePairFeature
   (FactorType sourceFactorId, FactorType targetFactorId) :
   StatelessFeatureFunction("pp", ScoreProducer::unlimited),
   m_sourceFactorId(sourceFactorId),
-  m_targetFactorId(targetFactorId) {
+  m_targetFactorId(targetFactorId),
+  m_sparseProducerWeight(1) {
   std::cerr << "Creating phrase pair feature.. " << endl;
 }
 

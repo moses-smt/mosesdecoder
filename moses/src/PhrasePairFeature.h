@@ -25,12 +25,13 @@ class PhrasePairFeature: public StatelessFeatureFunction {
     std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumInputScores() const;
 
+    void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
+    float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
   private:
     FactorType m_sourceFactorId;
     FactorType m_targetFactorId;
-
-
+    float m_sparseProducerWeight;
 };
 
 
