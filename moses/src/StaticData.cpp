@@ -1657,7 +1657,8 @@ bool StaticData::LoadPhraseBoundaryFeature()
   //cerr << "source "; for (size_t i = 0; i < sourceFactors.size(); ++i) cerr << sourceFactors[i] << " "; cerr << endl;
   //cerr << "target "; for (size_t i = 0; i < targetFactors.size(); ++i) cerr << targetFactors[i] << " "; cerr << endl;
   m_phraseBoundaryFeature = new PhraseBoundaryFeature(sourceFactors,targetFactors);
-  m_phraseBoundaryFeature->SetSparseProducerWeight(weight[0]);
+  if (weight.size() > 0)
+    m_phraseBoundaryFeature->SetSparseProducerWeight(weight[0]);
   return true;
 }
 
@@ -1684,7 +1685,8 @@ bool StaticData::LoadPhrasePairFeature()
   size_t sourceFactorId = Scan<FactorType>(tokens[0]);
   size_t targetFactorId = Scan<FactorType>(tokens[1]);
   m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId);
-  m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
+  if (weight.size() > 0)
+    m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
   return true;
 }
 
@@ -1818,7 +1820,8 @@ bool StaticData::LoadWordTranslationFeature()
 
   m_wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
 		  sourceTrigger, targetTrigger);
-  m_wordTranslationFeature->SetSparseProducerWeight(weight[0]);
+  if (weight.size() > 0)
+    m_wordTranslationFeature->SetSparseProducerWeight(weight[0]);
 
   // load word list for restricted feature set
   if (tokens.size() == 6) {
