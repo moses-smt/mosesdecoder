@@ -13,6 +13,8 @@ using namespace std;
 class PerScorer;
 class ScoreStats;
 
+const int kMergeScorerLength = 4;
+
 /**
  * Merge scoring.
  */
@@ -23,23 +25,13 @@ public:
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-
-  virtual size_t NumberOfScores() const
-  {
-    return 0;
-  }
-
-  void whoami() const {
-    cerr << "I AM MergeScorer" << endl;
-  }
+  virtual size_t NumberOfScores() const { return 0; }
 
 protected:
   friend class PerScorer;
   virtual float calculateScore(const vector<int>& comps) const;
 
  private:
-  const int kLENGTH;
-
   // no copying allowed
   MergeScorer(const MergeScorer&);
   MergeScorer& operator=(const MergeScorer&);

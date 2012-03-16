@@ -12,6 +12,10 @@
 
 using namespace std;
 
+const int kBleuNgramOrder = 4;
+
+class NgramCounts;
+
 /**
  * Bleu scoring
  */
@@ -24,7 +28,7 @@ public:
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
   virtual float calculateScore(const vector<int>& comps) const;
-  virtual size_t NumberOfScores() const { return 2 * kLENGTH + 1; }
+  virtual size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
 
 private:
   enum ReferenceLengthType {
@@ -32,13 +36,6 @@ private:
     SHORTEST,
     CLOSEST
   };
-
-  /**
-   * A NgramCounts is a key-value store.
-   * Clients don't have to worry about the actual implementation
-   * since this type is used in internal only.
-   */
-  class NgramCounts;
 
   /**
    * Count the ngrams of each type, up to the given length in the input line.
@@ -55,7 +52,6 @@ private:
   void CalcShortest(size_t sentence_id,
                     vector<ScoreStatsType>& stats) const;
 
-  const int kLENGTH;
   ReferenceLengthType m_ref_length_type;
 
   // data extracted from reference files

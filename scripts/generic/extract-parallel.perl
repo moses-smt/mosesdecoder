@@ -101,13 +101,14 @@ if ($numParallel > 1)
   print STDERR $extractCmd;
   print STDERR $extractInvCmd;
   print STDERR $extractOrderingCmd;
-  `$extractCmd`;
-  `$extractInvCmd`;
+
+  systemCheck($extractCmd);
+  systemCheck($extractInvCmd);
 
   my $numStr = NumStr(0);
   if (-e "$TMPDIR/extract.$numStr.o")
   {
-    `$extractOrderingCmd`;
+    systemCheck($extractOrderingCmd);
   }
 }
 else
@@ -130,6 +131,15 @@ print STDERR $cmd;
 
 print STDERR "Finished ".localtime() ."\n";
 
+sub systemCheck($)
+{
+  my $cmd = shift;
+  my $retVal = system($cmd);
+  if ($retVal != 0)
+  {
+    exit(1);
+  }
+}
 
 sub NumStr($)
 {
