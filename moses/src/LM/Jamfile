@@ -40,7 +40,7 @@ local with-randlm = [ option.get "with-randlm" ] ;
 if $(with-randlm) {
   lib randlm : : <search>$(with-randlm)/lib <search>$(with-randlm)/lib64 ;
   obj Rand.o : Rand.cpp randlm ..//headers : <include>$(with-randlm)/include <include>$(with-randlm)/include/randlm ;
-  alias rand : Rand.o : : : <define>LM_RAND ;
+  alias rand : Rand.o randlm : : : <define>LM_RAND ;
   dependencies += rand ;
 }
 

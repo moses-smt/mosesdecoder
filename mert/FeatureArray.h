@@ -11,7 +11,6 @@
 
 #include <vector>
 #include <iostream>
-#include <fstream>
 #include "FeatureStats.h"
 
 using namespace std;
@@ -26,82 +25,57 @@ class FeatureArray
 private:
   // idx to identify the utterance. It can differ from
   // the index inside the vector.
-  std::string idx;
-
-protected:
-  featarray_t array_;
-  size_t number_of_features;
-  std::string features;
-  bool _sparse_flag;
+  std::string m_index;
+  featarray_t m_array;
+  size_t m_num_features;
+  std::string m_features;
+  bool m_sparse_flag;
 
 public:
   FeatureArray();
   ~FeatureArray();
 
-  inline void clear() {
-    array_.clear();
-  }
+  void clear() { m_array.clear(); }
 
-  inline bool hasSparseFeatures() const {
-    return _sparse_flag;
-  }
+  bool hasSparseFeatures() const { return m_sparse_flag; }
 
-  inline std::string getIndex() const {
-    return idx;
-  }
-  inline void setIndex(const std::string& value) {
-    idx = value;
-  }
+  std::string getIndex() const { return m_index; }
+  void setIndex(const std::string& value) { m_index = value; }
 
-  inline FeatureStats& get(size_t i) {
-    return array_.at(i);
-  }
-  inline const FeatureStats& get(size_t i)const {
-    return array_.at(i);
-  }
-  void add(FeatureStats& e) {
-    array_.push_back(e);
-  }
+  FeatureStats& get(size_t i) { return m_array.at(i); }
+  const FeatureStats& get(size_t i) const { return m_array.at(i); }
+
+  void add(FeatureStats& e) { m_array.push_back(e); }
 
   //ADDED BY TS
   void swap(size_t i, size_t j) {
-    std::swap(array_[i],array_[j]);
+    std::swap(m_array[i], m_array[j]);
   }
-  
+
   void resize(size_t new_size) {
-    array_.resize(std::min(new_size,array_.size()));
+    m_array.resize(std::min(new_size, m_array.size()));
   }
   //END_ADDED
 
   void merge(FeatureArray& e);
 
-  inline size_t size() const {
-    return array_.size();
-  }
-  inline size_t NumberOfFeatures() const {
-    return number_of_features;
-  }
-  inline void NumberOfFeatures(size_t v) {
-    number_of_features = v;
-  }
-  inline std::string Features() const {
-    return features;
-  }
-  inline void Features(const std::string& f) {
-    features = f;
-  }
+  size_t size() const { return m_array.size(); }
 
-  void savetxt(ofstream& outFile);
-  void savebin(ofstream& outFile);
-  void save(ofstream& outFile, bool bin=false);
+  size_t NumberOfFeatures() const { return m_num_features; }
+  void NumberOfFeatures(size_t v) { m_num_features = v; }
+
+  std::string Features() const { return m_features; }
+  void Features(const std::string& f) { m_features = f; }
+
+  void savetxt(std::ostream* os);
+  void savebin(std::ostream* os);
+  void save(std::ostream* os, bool bin=false);
   void save(const std::string &file, bool bin=false);
-  inline void save(bool bin=false) {
-    save("/dev/stdout",bin);
-  }
+  void save(bool bin=false);
 
-  void loadtxt(ifstream& inFile, size_t n);
-  void loadbin(ifstream& inFile, size_t n);
-  void load(ifstream& inFile);
+  void loadtxt(std::istream* is, size_t n);
+  void loadbin(std::istream* is, size_t n);
+  void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;

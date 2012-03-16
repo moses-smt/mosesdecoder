@@ -23,22 +23,18 @@ uint64_t GetTimeOfDayMicroSeconds() {
 
 } // namespace
 
-Timer::CPUTime Timer::GetCPUTimeMicroSeconds() const {
+void Timer::GetCPUTimeMicroSeconds(Timer::CPUTime* cpu_time) const {
 #if !defined(_WIN32) && !defined(_WIN64)
   struct rusage usage;
   if (getrusage(RUSAGE_SELF, &usage)) {
     TRACE_ERR("Error occurred: getrusage().\n");
     exit(1);
   }
-  CPUTime t;
-  t.user_time = GetMicroSeconds(usage.ru_utime);
-  t.sys_time = GetMicroSeconds(usage.ru_stime);
-  return t;
+  cpu_time->user_time = GetMicroSeconds(usage.ru_utime);
+  cpu_time->sys_time = GetMicroSeconds(usage.ru_stime);
 #else  // Windows
   // Not implemented yet.
   // TODO: implement the Windows version using native APIs.
-  CPUTime t;
-  return t;
 #endif
 }
 
@@ -47,7 +43,8 @@ double Timer::get_elapsed_cpu_time() const {
 }
 
 uint64_t Timer::get_elapsed_cpu_time_microseconds() const {
-  const CPUTime e = GetCPUTimeMicroSeconds();
+  CPUTime e;
+  GetCPUTimeMicroSeconds(&e);
   return (e.user_time - m_start_time.user_time) +
       (e.sys_time - m_start_time.sys_time);
 }
@@ -67,7 +64,7 @@ void Timer::start(const char* msg)
   if (m_is_running) return;
   m_is_running = true;
   m_wall = GetTimeOfDayMicroSeconds();
-  m_start_time = GetCPUTimeMicroSeconds();
+  GetCPUTimeMicroSeconds(&m_start_time);
 }
 
 void Timer::restart(const char* msg)
@@ -76,7 +73,7 @@ void Timer::restart(const char* msg)
     TRACE_ERR(msg << std::endl);
   }
   m_wall = GetTimeOfDayMicroSeconds();
-  m_start_time = GetCPUTimeMicroSeconds();
+  GetCPUTimeMicroSeconds(&m_start_time);
 }
 
 void Timer::check(const char* msg)
@@ -96,7 +93,8 @@ std::string Timer::ToString() const {
   std::string res;
   char tmp[64];
   const double wall = get_elapsed_wall_time();
-  const CPUTime e = GetCPUTimeMicroSeconds();
+  CPUTime e;
+  GetCPUTimeMicroSeconds(&e);
   const double utime = (e.user_time - m_start_time.user_time) * 1e-6;
   const double stime = (e.sys_time - m_start_time.sys_time) * 1e-6;
   std::snprintf(tmp, sizeof(tmp), "wall %f user %f sec. sys %f sec. total %f sec.",

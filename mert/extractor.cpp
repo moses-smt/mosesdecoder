@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <getopt.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "Data.h"
 #include "Scorer.h"
@@ -185,7 +186,8 @@ int main(int argc, char** argv)
 
     TRACE_ERR("Scorer type: " << option.scorerType << endl);
 
-    Scorer* scorer = ScorerFactory::getScorer(option.scorerType, option.scorerConfig);
+    boost::scoped_ptr<Scorer> scorer(
+        ScorerFactory::getScorer(option.scorerType, option.scorerConfig));
 
     scorer->setFactors(option.scorerFactors);
 
@@ -195,7 +197,7 @@ int main(int argc, char** argv)
 
     PrintUserTime("References loaded");
 
-    Data data(*scorer);
+    Data data(scorer.get());
 
     // load old data
     for (size_t i = 0; i < prevScoreDataFiles.size(); i++) {
@@ -206,19 +208,17 @@ int main(int argc, char** argv)
 
     // computing score statistics of each nbest file
     for (size_t i = 0; i < nbestFiles.size(); i++) {
-      data.loadnbest(nbestFiles.at(i));
+      data.loadNBest(nbestFiles.at(i));
     }
 
     PrintUserTime("Nbest entries loaded and scored");
 
     //ADDED_BY_TS
-    data.remove_duplicates();
+    data.removeDuplicates();
     //END_ADDED
 
     data.save(option.featureDataFile, option.scoreDataFile, option.binmode);
     PrintUserTime("Stopping...");
-
-    delete scorer;
 
     return EXIT_SUCCESS;
   } catch (const exception& e) {

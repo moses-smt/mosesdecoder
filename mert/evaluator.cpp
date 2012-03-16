@@ -55,7 +55,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
     for (int i = 0; i < bootstrap; ++i)
     {
       // TODO: Use smart pointer for exceptional-safety.
-      ScoreData* scoredata = new ScoreData(*g_scorer);
+      ScoreData* scoredata = new ScoreData(g_scorer);
       for (int j = 0; j < n; ++j)
       {
         int randomIndex = random() % n;
@@ -89,7 +89,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
   else
   {
     // TODO: Use smart pointer for exceptional-safety.
-    ScoreData* scoredata = new ScoreData(*g_scorer);
+    ScoreData* scoredata = new ScoreData(g_scorer);
     for (int sid = 0; sid < n; ++sid)
     {
       string str_sid = int2string(sid);

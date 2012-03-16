@@ -1,9 +1,7 @@
 #ifndef MERT_PER_SCORER_H_
 #define MERT_PER_SCORER_H_
 
-#include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <vector>
 #include "Types.h"
@@ -27,17 +25,8 @@ public:
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-
-  virtual size_t NumberOfScores() const {
-    // cerr << "PerScorer: 3" << endl;
-    return 3;
-  }
-
+  virtual size_t NumberOfScores() const { return 3; }
   virtual float calculateScore(const vector<int>& comps) const;
-
-  void whoami() const {
-    cerr << "I AM PerScorer" << std::endl;
-  }
 
 private:
   // no copying allowed

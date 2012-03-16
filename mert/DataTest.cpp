@@ -10,7 +10,7 @@
 //very basic test of sharding
 BOOST_AUTO_TEST_CASE(shard_basic) {
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
-  Data data(*scorer);
+  Data data(scorer.get());
   FeatureArray fa1, fa2, fa3, fa4;
   ScoreArray sa1, sa2, sa3, sa4;
   fa1.setIndex("1");
