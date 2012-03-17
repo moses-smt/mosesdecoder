@@ -70,6 +70,7 @@ float CderScorer::calculateScore(const vector<int>& comps) const
   if (comps.size() != 2) {
     throw runtime_error("Size of stat vector for CDER is not 2");
   }
+  if (comps[1] == 0) return 1.0f;
   return 1.0f - (comps[0] / static_cast<float>(comps[1]));
 }
 
