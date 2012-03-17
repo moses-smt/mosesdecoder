@@ -7,6 +7,7 @@
 #include <iostream>
 #include <stdexcept>
 #include "Ngram.h"
+#include "Reference.h"
 #include "Util.h"
 
 namespace {
@@ -18,7 +19,6 @@ const char REFLEN_SHORTEST[] = "shortest";
 const char REFLEN_CLOSEST[] = "closest";
 
 } // namespace
-
 
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
@@ -60,9 +60,8 @@ size_t BleuScorer::countNgrams(const string& line, NgramCounts& counts,
 
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
-  //make sure reference data is clear
-  m_ref_counts.reset();
-  m_ref_lengths.clear();
+  // Make sure reference data is clear
+  m_references.reset();
   ClearEncoder();
 
   //load reference data
@@ -77,12 +76,10 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
     while (getline(refin,line)) {
       line = this->applyFactors(line);
       if (i == 0) {
-        NgramCounts *counts = new NgramCounts; //these get leaked
-        m_ref_counts.push_back(counts);
-        vector<size_t> lengths;
-        m_ref_lengths.push_back(lengths);
+        Reference* ref = new Reference;
+        m_references.push_back(ref);    // Take ownership of the Reference object.
       }
-      if (m_ref_counts.size() <= sid) {
+      if (m_references.size() <= sid) {
         throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
       }
       NgramCounts counts;
@@ -94,13 +91,13 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
         const NgramCounts::Value newcount = ci->second;
 
         NgramCounts::Value oldcount = 0;
-        m_ref_counts[sid]->lookup(ngram, &oldcount);
+        m_references[sid]->get_counts()->lookup(ngram, &oldcount);
         if (newcount > oldcount) {
-          m_ref_counts[sid]->operator[](ngram) = newcount;
+          m_references[sid]->get_counts()->operator[](ngram) = newcount;
         }
       }
       //add in the length
-      m_ref_lengths[sid].push_back(length);
+      m_references[sid]->push_back(length);
       if (sid > 0 && sid % 100 == 0) {
         TRACE_ERR(".");
       }
@@ -112,7 +109,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
 void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-  if (sid >= m_ref_counts.size()) {
+  if (sid >= m_references.size()) {
     stringstream msg;
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
@@ -123,20 +120,8 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   string sentence = this->applyFactors(text);
   const size_t length = countNgrams(sentence, testcounts, kBleuNgramOrder);
 
-  // Calculate effective reference length.
-  switch (m_ref_length_type) {
-    case SHORTEST:
-      CalcShortest(sid, stats);
-      break;
-    case AVERAGE:
-      CalcAverage(sid, stats);
-      break;
-    case CLOSEST:
-      CalcClosest(sid, length, stats);
-      break;
-    default:
-      throw runtime_error("Unsupported reflength strategy");
-  }
+  const int reference_len = CalcReferenceLength(sid, length);
+  stats.push_back(reference_len);
 
   //precision on each ngram type
   for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
@@ -146,7 +131,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     NgramCounts::Value correct = 0;
 
     NgramCounts::Value v = 0;
-    if (m_ref_counts[sid]->lookup(testcounts_it->first, &v)) {
+    if (m_references[sid]->get_counts()->lookup(testcounts_it->first, &v)) {
       correct = min(v, guess);
     }
     stats[len * 2 - 2] += correct;
@@ -174,6 +159,23 @@ float BleuScorer::calculateScore(const vector<int>& comps) const
   return exp(logbleu);
 }
 
+int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length) {
+  switch (m_ref_length_type) {
+    case AVERAGE:
+      return m_references[sentence_id]->CalcAverage();
+      break;
+    case CLOSEST:
+      return m_references[sentence_id]->CalcClosest(length);
+      break;
+    case SHORTEST:
+      return m_references[sentence_id]->CalcShortest();
+      break;
+    default:
+      cerr << "unknown reference types." << endl;
+      exit(1);
+  }
+}
+
 void BleuScorer::dump_counts(ostream* os,
                              const NgramCounts& counts) const {
   for (NgramCounts::const_iterator it = counts.begin();
@@ -191,44 +193,3 @@ void BleuScorer::dump_counts(ostream* os,
   *os << endl;
 }
 
-void BleuScorer::CalcAverage(size_t sentence_id,
-                             vector<ScoreStatsType>& stats) const {
-  int total = 0;
-  for (size_t i = 0;
-       i < m_ref_lengths[sentence_id].size(); ++i) {
-    total += m_ref_lengths[sentence_id][i];
-  }
-  const float mean = static_cast<float>(total) /
-                     m_ref_lengths[sentence_id].size();
-  stats.push_back(static_cast<ScoreStatsType>(mean));
-}
-
-void BleuScorer::CalcClosest(size_t sentence_id,
-                             size_t length,
-                             vector<ScoreStatsType>& stats) const {
-  int min_diff = INT_MAX;
-  int min_idx = 0;
-  for (size_t i = 0; i < m_ref_lengths[sentence_id].size(); ++i) {
-    const int reflength = m_ref_lengths[sentence_id][i];
-    const int length_diff = abs(reflength - static_cast<int>(length));
-
-    // Look for the closest reference
-    if (length_diff < abs(min_diff)) {
-      min_diff = reflength - length;
-      min_idx = i;
-    // if two references has the same closest length, take the shortest
-    } else if (length_diff == abs(min_diff)) {
-      if (reflength < static_cast<int>(m_ref_lengths[sentence_id][min_idx])) {
-        min_idx = i;
-      }
-    }
-  }
-  stats.push_back(m_ref_lengths[sentence_id][min_idx]);
-}
-
-void BleuScorer::CalcShortest(size_t sentence_id,
-                              vector<ScoreStatsType>& stats) const {
-  const int shortest = *min_element(m_ref_lengths[sentence_id].begin(),
-                                    m_ref_lengths[sentence_id].end());
-  stats.push_back(shortest);
-}

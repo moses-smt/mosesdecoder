@@ -15,6 +15,7 @@ using namespace std;
 const int kBleuNgramOrder = 4;
 
 class NgramCounts;
+class Reference;
 
 /**
  * Bleu scoring
@@ -30,6 +31,8 @@ public:
   virtual float calculateScore(const vector<int>& comps) const;
   virtual size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
 
+  int CalcReferenceLength(size_t sentence_id, size_t length);
+
 private:
   enum ReferenceLengthType {
     AVERAGE,
@@ -44,19 +47,10 @@ private:
 
   void dump_counts(std::ostream* os, const NgramCounts& counts) const;
 
-  // For calculating effective reference length.
-  void CalcAverage(size_t sentence_id,
-                   vector<ScoreStatsType>& stats) const;
-  void CalcClosest(size_t sentence_id, size_t length,
-                   vector<ScoreStatsType>& stats) const;
-  void CalcShortest(size_t sentence_id,
-                    vector<ScoreStatsType>& stats) const;
-
   ReferenceLengthType m_ref_length_type;
 
-  // data extracted from reference files
-  ScopedVector<NgramCounts> m_ref_counts;
-  vector<vector<size_t> > m_ref_lengths;
+  // reference translations.
+  ScopedVector<Reference> m_references;
 
   // no copying allowed
   BleuScorer(const BleuScorer&);
