@@ -104,31 +104,4 @@ public:
   virtual statscore_t TrueRun(Point&) const;
 };
 
-class OptimizerFactory
-{
-public:
-  static vector<string> GetTypeNames();
-  static Optimizer* BuildOptimizer(unsigned dim, const vector<unsigned>& to_optimize, const vector<parameter_t>& start, const string& type, unsigned int nrandom);
-
-private:
-  OptimizerFactory() {}
-  ~OptimizerFactory() {}
-
-  // Add new optimizer here BEFORE NOPTIMZER
-  enum OptType {
-    POWELL = 0,
-    RANDOM_DIRECTION = 1,
-    RANDOM,
-    NOPTIMIZER
-  };
-
-  // Get optimizer type.
-  static OptType GetOType(const string& type);
-
-  // Setup optimization types.
-  static void SetTypeNames();
-
-  static vector<string> m_type_names;
-};
-
 #endif  // OPTIMIZER_H
