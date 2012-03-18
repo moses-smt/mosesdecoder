@@ -67,13 +67,17 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(bool onlyViolatedConstraints, float slack, size_t scale_margin,
-size_t scale_update, float margin_slack, bool boost, size_t update_scheme, bool normaliseMargin) :
+	  MiraOptimiser(bool onlyViolatedConstraints, float slack, bool scale_margin, bool scale_margin_precision,
+			  bool scale_update, bool scale_update_precision, float margin_slack, bool boost, 
+			  size_t update_scheme, bool normaliseMargin) :
 		  Optimiser(),
 		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
+		  m_scale_margin_precision(scale_margin_precision),
 		  m_scale_update(scale_update),
+		  m_scale_update_precision(scale_update_precision),
+		  m_precision(1),
 		  m_margin_slack(margin_slack),
 		  m_boost(boost),
 		  m_update_scheme(update_scheme),
@@ -145,6 +149,10 @@ size_t scale_update, float margin_slack, bool boost, size_t update_scheme, bool 
      void setMarginSlack(float margin_slack) {
     	 m_margin_slack = margin_slack;
      }
+     
+     void setPrecision(float precision) {
+    	 m_precision = precision;
+     }
 
    private:
 
@@ -157,11 +165,14 @@ size_t scale_update, float margin_slack, bool boost, size_t update_scheme, bool 
       // slack when comparing losses to model scores
       float m_margin_slack;
 
-      size_t m_scale_margin;
+      // scale margin with BLEU score or precision
+      bool m_scale_margin, m_scale_margin_precision;
 
-      // scale update with log 10 of oracle BLEU score
-      size_t m_scale_update;
+      // scale update with oracle BLEU score or precision
+      bool m_scale_update, m_scale_update_precision;
 
+      float m_precision;
+      
       // boosting of updates on misranked candidates
       bool m_boost;
 

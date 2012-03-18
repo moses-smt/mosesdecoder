@@ -72,8 +72,8 @@ int main(int argc, char** argv) {
 	size_t weightDumpFrequency;
 	string weightDumpStem;
 	float min_learning_rate;
-	size_t scale_margin;
-	size_t scale_update;
+	bool scale_margin, scale_margin_precision;
+	bool scale_update, scale_update_precision;
 	size_t n;
 	size_t batchSize;
 	bool distinctNbest;
@@ -193,8 +193,10 @@ int main(int argc, char** argv) {
 		("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by an average of the input length")
 		("scale-by-avg-inverse-length", po::value<bool>(&scaleByAvgInverseLength)->default_value(false), "Scale BLEU by an average of the inverse input length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
-		("scale-margin", po::value<size_t>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
-		("scale-update", po::value<size_t>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
+		("scale-margin", po::value<bool>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
+		("scale-margin-precision", po::value<bool>(&scale_margin_precision)->default_value(0), "Scale the margin by the precision of the oracle translation")
+		("scale-update", po::value<bool>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
+		("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale the update by the precision of the oracle translation")	
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
 		("separate-updates", po::value<bool>(&separateUpdates)->default_value(false), "Compute separate updates for each sentence in a batch")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
@@ -347,8 +349,8 @@ int main(int argc, char** argv) {
 			cerr << "Optimising using Mira" << endl;
 			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
 		}
-		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_update,
-				margin_slack, boost, update_scheme, normaliseMargin);
+		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_margin_precision,
+				scale_update, scale_update_precision, margin_slack, boost, update_scheme, normaliseMargin);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {
@@ -597,9 +599,13 @@ int main(int argc, char** argv) {
 						else if (scaleByAvgInverseLength) precision /= (100/decoder->getAverageInputLength());
 						precision /= scaleByX;
 					}
-					if (historyOf1best || scaleByAvgInputLength || scaleByAvgInverseLength)
-						cerr << "Rank " << rank << ", epoch " << epoch << ", hope precision: " << precision << endl;
-
+					if (scale_margin_precision || scale_update_precision) {
+						if (historyOf1best || scaleByAvgInputLength || scaleByAvgInverseLength) {
+							cerr << "Rank " << rank << ", epoch " << epoch << ", set hope precision: " << precision << endl;
+							((MiraOptimiser*) optimiser)->setPrecision(precision);
+						}
+					}
+					
 					bool skip = false;
 
 					// Length-related example selection

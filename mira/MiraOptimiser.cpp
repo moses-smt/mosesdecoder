@@ -49,18 +49,6 @@ size_t MiraOptimiser::updateWeights(
 			}
 
 			float loss = losses[i][j];
-		    if (m_scale_margin == 1) {
-		    	loss *= oracleBleuScores[i];
-		    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << oracleBleuScores[i] << endl;
-		    }
-		    else if (m_scale_margin == 2) {
-		    	loss *= log2(oracleBleuScores[i]);
-		    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log2 oracle bleu score "  << log2(oracleBleuScores[i]) << endl;
-		    }
-		    else if (m_scale_margin == 10) {
-		    	loss *= log10(oracleBleuScores[i]);
-		    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log10 oracle bleu score "  << log10(oracleBleuScores[i]) << endl;
-		    }
 
 		  	// check if constraint is violated
 		    bool violated = false;
@@ -84,6 +72,11 @@ size_t MiraOptimiser::updateWeights(
 		    if (addConstraint) {
 		    	if (m_normaliseMargin)
 		    		lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+		    	
+			    if (m_scale_margin) {
+			    	lossMinusModelScoreDiff *= oracleBleuScores[i];
+			    	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << oracleBleuScores[i] << endl;
+			    }
 
 		    	featureValueDiffs.push_back(featureValueDiff);
 		    	lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
@@ -138,17 +131,9 @@ size_t MiraOptimiser::updateWeights(
 
 	// scale update by BLEU of oracle (for batch size 1 only)
 	if (oracleBleuScores.size() == 1) {
-		if (m_scale_update == 1) {
+		if (m_scale_update) {
 			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with oracle bleu score " << oracleBleuScores[0] << endl;
 			summedUpdate.MultiplyEquals(oracleBleuScores[0]);
-		}
-		else if (m_scale_update == 2) {
-			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log2 oracle bleu score " << log2(oracleBleuScores[0]) << endl;
-			summedUpdate.MultiplyEquals(log2(oracleBleuScores[0]));
-		}
-		else if (m_scale_update == 10) {
-			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log10 oracle bleu score " << log10(oracleBleuScores[0]) << endl;
-			summedUpdate.MultiplyEquals(log10(oracleBleuScores[0]));
 		}
 	}
 
@@ -223,18 +208,6 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 				}
 
 				float loss = bleuScoresHope[i][j] - bleuScoresFear[i][k];
-				if (m_scale_margin == 1) {
-					loss *= bleuScoresHope[i][j];
-					cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl;
-				}
-				else if (m_scale_margin == 2) {
-					loss *= log2(bleuScoresHope[i][j]);
-					cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log2 oracle bleu score "  << log2(bleuScoresHope[i][j]) << endl;
-				}
-				else if (m_scale_margin == 10) {
-					loss *= log10(bleuScoresHope[i][j]);
-					cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with log10 oracle bleu score "  << log10(bleuScoresHope[i][j]) << endl;
-				}
 
 				// check if constraint is violated
 				bool violated = false;
@@ -254,10 +227,15 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 					addConstraint = false;
 				}
 
-				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);
+				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);			
 				if (addConstraint) {
 					if (m_normaliseMargin)
 						lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
+					
+					if (m_scale_margin) {
+						lossMinusModelScoreDiff *= bleuScoresHope[i][j];
+						cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl;
+					}
 
 					featureValueDiffs.push_back(featureValueDiff);
 					lossMinusModelScoreDiffs.push_back(lossMinusModelScoreDiff);
@@ -325,17 +303,9 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 
 	// scale update by BLEU of oracle (for batch size 1 only)
 	if (featureValuesHope.size() == 1) {
-		if (m_scale_update == 1) {
+		if (m_scale_update) {
 			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with oracle bleu score " << bleuScoresHope[0][0] << endl;
 			summedUpdate.MultiplyEquals(bleuScoresHope[0][0]);
-		}
-		else if (m_scale_update == 2) {
-			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log2 oracle bleu score " << log2(bleuScoresHope[0][0]) << endl;
-			summedUpdate.MultiplyEquals(log2(bleuScoresHope[0][0]));
-		}
-		else if (m_scale_update == 10) {
-			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with log10 oracle bleu score " << log10(bleuScoresHope[0][0]) << endl;
-			summedUpdate.MultiplyEquals(log10(bleuScoresHope[0][0]));
 		}
 	}
 
@@ -460,6 +430,15 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     }
     cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
   }
+  
+  if (m_scale_margin) {
+	  diff *= bleuScoreHope;
+	  cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoreHope << endl;
+  }
+  if (m_scale_margin_precision) {
+	  diff *= (1+m_precision);
+	  cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with 1+precision: "  << (1+m_precision) << endl;
+  }
 
   if (diff > epsilon) {
   	// squash it between 0 and 1
@@ -493,7 +472,17 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     // apply learning rate
     if (learning_rate != 1)
     	alpha = alpha * learning_rate;
-    cerr << "Rank " << rank << ", epoch " << epoch << ", clipped alpha: " << alpha << endl;
+    
+    if (m_scale_update) {
+  	  cerr << "Rank " << rank << ", epoch " << epoch << ", scaling update with oracle bleu score " << bleuScoreHope << endl;
+  	  alpha *= bleuScoreHope;
+    }
+    if (m_scale_update_precision) {
+  	  cerr << "Rank " << rank << ", epoch " << epoch << ", scaling update with 1+precision: " << (1+m_precision) << endl;
+  	  alpha *= (1+m_precision);	
+    }
+    
+    cerr << "Rank " << rank << ", epoch " << epoch << ", clipped/scaled alpha: " << alpha << endl;
 
     // apply boosting factor
     if (m_boost && modelScoreDiff <= 0) {
@@ -508,7 +497,7 @@ size_t MiraOptimiser::updateWeightsAnalytically(
     weightUpdate.PlusEquals(featureValueDiff);
 //  	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
   }
-
+  
   if (!constraintViolatedBefore) {
     // constraint satisfied, nothing to do
   	cerr << "Rank " << rank << ", epoch " << epoch << ", constraint already satisfied" << endl;
