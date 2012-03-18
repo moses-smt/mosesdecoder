@@ -32,7 +32,7 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 } // namespace
 
-Optimizer::Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
     : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom)
 {
   // Warning: the init vector is a full set of parameters, of dimension m_pdim!
@@ -65,7 +65,7 @@ statscore_t Optimizer::GetStatScore(const Point& param) const
   return score;
 }
 
-map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap, float newt, pair<unsigned,unsigned> newdiff)
+map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap, float newt, const pair<unsigned,unsigned>& newdiff)
 {
   map<float,diff_t>::iterator it = thresholdmap.find(newt);
   if (it != thresholdmap.end()) {
@@ -348,7 +348,7 @@ statscore_t Optimizer::Run(Point& P) const
 }
 
 
-vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst, vector<vector <pair<unsigned,unsigned> > > thediffs) const
+vector<statscore_t> Optimizer::GetIncStatScore(const vector<unsigned>& thefirst, const vector<vector <pair<unsigned,unsigned> > >& thediffs) const
 {
   CHECK(m_scorer);
 
@@ -495,7 +495,7 @@ OptimizerFactory::OptType OptimizerFactory::GetOType(const string& type)
   return((OptType)thetype);
 }
 
-Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim, vector<unsigned> i2o, vector<parameter_t> start, const string& type, unsigned int nrandom)
+Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim, const vector<unsigned>& i2o, const vector<parameter_t>& start, const string& type, unsigned int nrandom)
 {
   OptType T = GetOType(type);
   if (T == NOPTIMIZER) {
