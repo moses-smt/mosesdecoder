@@ -90,10 +90,10 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			// add <s> trigger feature for source
     			stringstream feature;
     			feature << "wt_";
-    			feature << targetWord;
+			feature << "<s>,";
+                        feature << sourceWord;
     			feature << "~";
-    			feature << "<s>,";
-    			feature << sourceWord;
+			feature << targetWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);
     		}
 
@@ -108,8 +108,6 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			if (m_unrestricted || sourceTriggerExists) {
 	    			stringstream feature;
 	    			feature << "wt_";
-	    			feature << targetWord;
-	    			feature << "~";
 	    			if (contextIndex < globalSourceIndex) {
 	    				feature << sourceTrigger;
 	    				feature << ",";
@@ -120,6 +118,8 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 	    				feature << ",";
 	    				feature << sourceTrigger;
 	    			}
+				feature << "~";
+				feature << targetWord;
 	    			accumulator->SparsePlusEquals(feature.str(), 1);
     			}
     		}
@@ -130,10 +130,10 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			// add <s> trigger feature for source
     			stringstream feature;
     			feature << "wt_";
+			feature << sourceWord;
+			feature << "~";
     			feature << "<s>,";
     			feature << targetWord;
-    			feature << "~";
-    			feature << sourceWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);    	   
     		}
 
@@ -147,11 +147,11 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			if (m_unrestricted || targetTriggerExists) {
     				stringstream feature;
     				feature << "wt_";
+				feature << sourceWord;
+				feature << "~";
 	    			feature << targetTrigger;
 	    			feature << ",";
 	    			feature << targetWord;
-	    			feature << "~";
-	    			feature << sourceWord;
 	    			accumulator->SparsePlusEquals(feature.str(), 1);
     			}
     		}
