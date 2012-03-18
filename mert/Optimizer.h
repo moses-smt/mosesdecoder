@@ -10,8 +10,6 @@
 
 using namespace std;
 
-typedef float featurescore;
-
 class Point;
 
 /**
@@ -25,7 +23,7 @@ protected:
   unsigned int m_num_random_directions;
 
 public:
-  Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom);
+  Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom);
 
   void SetScorer(Scorer *scorer) { m_scorer = scorer; }
   void SetFeatureData(FeatureDataHandle feature_data) { m_feature_data = feature_data; }
@@ -59,7 +57,7 @@ public:
 
   statscore_t GetStatScore(const Point& param) const;
 
-  vector<statscore_t> GetIncStatScore(vector<unsigned> ref, vector<vector<pair<unsigned,unsigned> > >) const;
+  vector<statscore_t> GetIncStatScore(const vector<unsigned>& ref, const vector<vector<pair<unsigned,unsigned> > >& diffs) const;
 
   /**
    * Get the optimal Lambda and the best score in a particular direction from a given Point.
@@ -77,7 +75,7 @@ class SimpleOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  SimpleOptimizer(unsigned dim, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, start,nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
@@ -90,7 +88,7 @@ class RandomDirectionOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  RandomDirectionOptimizer(unsigned dim, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, start, nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
@@ -101,7 +99,7 @@ public:
 class RandomOptimizer : public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
 };
@@ -110,7 +108,7 @@ class OptimizerFactory
 {
 public:
   static vector<string> GetTypeNames();
-  static Optimizer* BuildOptimizer(unsigned dim, vector<unsigned> tooptimize, vector<parameter_t> start, const string& type, unsigned int nrandom);
+  static Optimizer* BuildOptimizer(unsigned dim, const vector<unsigned>& to_optimize, const vector<parameter_t>& start, const string& type, unsigned int nrandom);
 
 private:
   OptimizerFactory() {}
