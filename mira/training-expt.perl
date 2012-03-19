@@ -57,6 +57,7 @@ my $decoder_settings = &param("general.decoder-settings", "");
 #
 
 #job control
+my $jackknife = &param("general.jackknife", 0);
 my $working_dir = &param("general.working-dir");
 system("mkdir -p $working_dir") == 0 or  die "Error: unable to create directory \"$working_dir\"";
 my $train_script = "$name-train";
@@ -67,18 +68,40 @@ my $hours = &param("train.hours",48);
 my $core_weight_file = &param("core.weightfile");
 
 #required training parameters
-my $moses_ini_file = &param_required("train.moses-ini-file");
-&check_exists ("moses ini file", $moses_ini_file);
-my $input_file = &param_required("train.input-file");
-&check_exists ("train input file", $input_file);
-my $reference_files = &param_required("train.reference-files");
 my $singleRef = 1;
-if (&check_exists_noThrow ("ref files", $reference_files) != 0) {
-    for my $ref (glob $reference_files . "*") {
-	&check_exists ("ref files", $ref);
+my ($moses_ini_file, $input_file, $reference_files);
+my (@moses_ini_files_folds, @input_files_folds, @reference_files_folds);
+if ($jackknife) {
+    my $array_ref = &param_required("train.moses-ini-files-folds");
+    @moses_ini_files_folds= @$array_ref;
+    foreach my $ini (@moses_ini_files_folds) {
+	&check_exists ("moses ini file", $ini);
     }
-    $singleRef = 0;
+    $array_ref = &param_required("train.input-files-folds");
+    @input_files_folds = @$array_ref;
+    foreach my $in (@input_files_folds) {
+	&check_exists ("train input file", $in);
+    }
+    $array_ref = &param_required("train.reference-files-folds");
+    @reference_files_folds = @$array_ref;
+    foreach my $ref (@reference_files_folds) {
+        &check_exists ("train reference file", $ref);
+    }
 }
+else {
+    $moses_ini_file = &param_required("train.moses-ini-file");
+    &check_exists ("moses ini file", $moses_ini_file);
+    $input_file = &param_required("train.input-file");
+    &check_exists ("train input file", $input_file);
+    $reference_files = &param_required("train.reference-files");
+    if (&check_exists_noThrow ("ref files", $reference_files) != 0) {
+	for my $ref (glob $reference_files . "*") {
+	    &check_exists ("ref files", $ref);
+	}
+	$singleRef = 0;
+    }
+}
+
 my $trainer_exe = &param_required("train.trainer");
 &check_exists("Training executable", $trainer_exe);
 #my $weights_file = &param_required("train.weights-file");
@@ -127,51 +150,56 @@ my $skip_submit_test = &param("devtest.skip-submit",0);
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
-my $result = `wc -l $input_file`;
-my @result = split(/\s/, $result);
-my $inputSize = $result[0];
-my $shardSize = $inputSize / $jobs;
-if ($mixing_frequency != 0) {
-    if ($shardSize < $mixing_frequency) {
-	$mixing_frequency = int($shardSize);
-	if ($mixing_frequency == 0) {
-	    $mixing_frequency = 1;
-	}
-
-	print "Warning: mixing frequency must not be larger than shard size, setting mixing frequency to $mixing_frequency\n";
-    }
+if ($jackknife) {
+    # TODO..
 }
+else {
+    my $result = `wc -l $input_file`;
+    my @result = split(/\s/, $result);
+    my $inputSize = $result[0];
+    my $shardSize = $inputSize / $jobs;
+    if ($mixing_frequency != 0) {
+	if ($shardSize < $mixing_frequency) {
+	    $mixing_frequency = int($shardSize);
+	    if ($mixing_frequency == 0) {
+		$mixing_frequency = 1;
+	    }
 
-if ($weight_dump_frequency != 0) {
-    if ($shardSize < $weight_dump_frequency) {
-	$weight_dump_frequency = int($shardSize);
-	if ($weight_dump_frequency == 0) {
-	    $weight_dump_frequency = 1;
+	    print "Warning: mixing frequency must not be larger than shard size, setting mixing frequency to $mixing_frequency\n";
 	}
-	
-	print "Warning: weight dump frequency must not be larger than shard size, setting weight dump frequency to $weight_dump_frequency\n";
     }
-}
 
-if ($mixing_frequency != 0) {
-    if ($mixing_frequency > ($shardSize/$batch)) {
-	$mixing_frequency = int($shardSize/$batch);
-	if ($mixing_frequency == 0) {
-	    $mixing_frequency = 1;
+    if ($weight_dump_frequency != 0) {
+	if ($shardSize < $weight_dump_frequency) {
+	    $weight_dump_frequency = int($shardSize);
+	    if ($weight_dump_frequency == 0) {
+		$weight_dump_frequency = 1;
+	    }
+	    
+	    print "Warning: weight dump frequency must not be larger than shard size, setting weight dump frequency to $weight_dump_frequency\n";
 	}
-
-	print "Warning: mixing frequency must not be larger than (shard size/batch size), setting mixing frequency to $mixing_frequency\n";
     }
-}
 
-if ($weight_dump_frequency != 0) {
-    if ($weight_dump_frequency > ($shardSize/$batch)) {
-	$weight_dump_frequency = int($shardSize/$batch);
-	if ($weight_dump_frequency == 0) {
-	    $weight_dump_frequency = 1;
+    if ($mixing_frequency != 0) {
+	if ($mixing_frequency > ($shardSize/$batch)) {
+	    $mixing_frequency = int($shardSize/$batch);
+	    if ($mixing_frequency == 0) {
+		$mixing_frequency = 1;
+	    }
+	    
+	    print "Warning: mixing frequency must not be larger than (shard size/batch size), setting mixing frequency to $mixing_frequency\n";
 	}
+    }
 
-	print "Warning: weight dump frequency must not be larger than (shard size/batch size), setting weight dump frequency to $weight_dump_frequency\n";
+    if ($weight_dump_frequency != 0) {
+	if ($weight_dump_frequency > ($shardSize/$batch)) {
+	    $weight_dump_frequency = int($shardSize/$batch);
+	    if ($weight_dump_frequency == 0) {
+		$weight_dump_frequency = 1;
+	    }
+
+	    print "Warning: weight dump frequency must not be larger than (shard size/batch size), setting weight dump frequency to $weight_dump_frequency\n";
+	}
     }
 }
 
@@ -208,13 +236,28 @@ else {
     }
 }
 
-print TRAIN "-f $moses_ini_file \\\n";
-print TRAIN "-i $input_file \\\n";
-
-for my $ref (@refs) {
-    print TRAIN "-r $ref ";
+if ($jackknife) {
+    foreach my $ini (@moses_ini_files_folds) {
+	print TRAIN "--configs-folds $ini ";
+    }
+    print TRAIN "\\\n";
+    foreach my $in (@input_files_folds) {
+	print TRAIN "--input-files-folds $in ";
+    }
+    print TRAIN "\\\n";
+    for my $ref (@reference_files_folds) {
+        print TRAIN "--reference-files-folds $ref ";
+    }
+    print TRAIN "\\\n";
 }
-print TRAIN "\\\n";
+else {
+    print TRAIN "-f $moses_ini_file \\\n";
+    print TRAIN "-i $input_file \\\n";
+    for my $ref (@refs) {
+	print TRAIN "-r $ref ";
+    }
+    print TRAIN "\\\n";
+}
 
 if ($burn_in) {
     print TRAIN "--burn-in 1 \\\n";

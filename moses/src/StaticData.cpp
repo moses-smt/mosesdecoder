@@ -1677,13 +1677,17 @@ bool StaticData::LoadPhrasePairFeature()
     return false;
   }
   vector<string> tokens = Tokenize(phrasePairFactors[0]);
-  if (tokens.size() != 1 && tokens.size() != 3) {
+  if (tokens.size() != 1 && tokens.size() != 2 && tokens.size() != 3) {
     UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
     		"[simple source-trigger]");
     return false;
   }
   
-  vector <string> factors = Tokenize(tokens[0],"-");  
+  vector <string> factors;
+  if (tokens.size() == 2)
+    factors = Tokenize(tokens[0]," ");  
+  else 
+    factors = Tokenize(tokens[0],"-");
   size_t sourceFactorId = Scan<size_t>(factors[0]);
   size_t targetFactorId = Scan<size_t>(factors[1]);
   bool simple = true;
