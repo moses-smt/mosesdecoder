@@ -54,7 +54,7 @@ size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
       for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
         ngram.push_back(encoded_tokens[j]);
       }
-      counts.add(ngram);
+      counts.Add(ngram);
     }
   }
   return encoded_tokens.size();
@@ -93,7 +93,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
         const NgramCounts::Value newcount = ci->second;
 
         NgramCounts::Value oldcount = 0;
-        m_references[sid]->get_counts()->lookup(ngram, &oldcount);
+        m_references[sid]->get_counts()->Lookup(ngram, &oldcount);
         if (newcount > oldcount) {
           m_references[sid]->get_counts()->operator[](ngram) = newcount;
         }
@@ -133,7 +133,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     NgramCounts::Value correct = 0;
 
     NgramCounts::Value v = 0;
-    if (m_references[sid]->get_counts()->lookup(testcounts_it->first, &v)) {
+    if (m_references[sid]->get_counts()->Lookup(testcounts_it->first, &v)) {
       correct = min(v, guess);
     }
     stats[len * 2 - 2] += correct;
