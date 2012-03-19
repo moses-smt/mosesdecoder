@@ -20,6 +20,7 @@
 #include "ScoreData.h"
 #include "FeatureData.h"
 #include "Optimizer.h"
+#include "OptimizerFactory.h"
 #include "Types.h"
 #include "Timer.h"
 #include "Util.h"

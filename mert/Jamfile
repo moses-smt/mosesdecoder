@@ -6,9 +6,13 @@ lib mert_lib :
 Util.cpp
 FileStream.cpp
 Timer.cpp
-ScoreStats.cpp ScoreArray.cpp ScoreData.cpp
+ScoreStats.cpp
+ScoreArray.cpp
+ScoreData.cpp
 ScoreDataIterator.cpp
-FeatureStats.cpp FeatureArray.cpp FeatureData.cpp
+FeatureStats.cpp
+FeatureArray.cpp
+FeatureData.cpp
 FeatureDataIterator.cpp
 Data.cpp
 BleuScorer.cpp
@@ -18,6 +22,7 @@ PerScorer.cpp
 Scorer.cpp
 ScorerFactory.cpp
 Optimizer.cpp
+OptimizerFactory.cpp
 TER/alignmentStruct.cpp
 TER/hashMap.cpp
 TER/hashMapStringInfos.cpp
@@ -47,6 +52,8 @@ alias programs : mert extractor evaluator pro ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test reference_test : ReferenceTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
 
