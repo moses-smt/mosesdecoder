@@ -12,6 +12,7 @@
 using namespace std;
 
 class ScoreStats;
+class Encoder;
 
 /**
  * Superclass of all scorers and dummy implementation.
@@ -108,17 +109,6 @@ class Scorer
   virtual string applyFactors(const string& sentece) const;
 
  private:
-  class Encoder {
-   public:
-    Encoder();
-    virtual ~Encoder();
-    int Encode(const std::string& token);
-    void Clear() { m_vocab.clear(); }
-
-   private:
-    std::map<std::string, int> m_vocab;
-  };
-
   void InitConfig(const string& config);
 
   string m_name;
@@ -144,13 +134,12 @@ class Scorer
 
   /**
    * Tokenise line and encode.
-   * Note: We assume that all tokens are separated by single spaces.
+   * Note: We assume that all tokens are separated by whitespaces.
    */
   void TokenizeAndEncode(const string& line, vector<int>& encoded);
 
-  void ClearEncoder() { m_encoder->Clear(); }
+  void ClearEncoder();
 };
-
 
 /**
  * Abstract base class for Scorers that work by adding statistics across all

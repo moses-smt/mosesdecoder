@@ -1,6 +1,9 @@
 #include "Scorer.h"
+
 #include <limits>
+#include "Ngram.h"
 #include "Util.h"
+
 
 namespace {
 
@@ -65,23 +68,6 @@ void Scorer::InitConfig(const string& config) {
   }
 }
 
-Scorer::Encoder::Encoder() {}
-
-Scorer::Encoder::~Encoder() {}
-
-int Scorer::Encoder::Encode(const string& token) {
-  map<string, int>::iterator it = m_vocab.find(token);
-  int encoded_token;
-  if (it == m_vocab.end()) {
-    // Add an new entry to the vocaburary.
-    encoded_token = static_cast<int>(m_vocab.size());
-    m_vocab[token] = encoded_token;
-  } else {
-    encoded_token = it->second;
-  }
-  return encoded_token;
-}
-
 void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
   std::istringstream in(line);
   std::string token;
@@ -95,6 +81,8 @@ void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
     encoded.push_back(m_encoder->Encode(token));
   }
 }
+
+void Scorer::ClearEncoder() { m_encoder->clear(); }
 
 /**
  * Set the factors, which should be used for this metric
