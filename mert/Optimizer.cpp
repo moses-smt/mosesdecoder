@@ -32,7 +32,7 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 } // namespace
 
-Optimizer::Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
     : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom)
 {
   // Warning: the init vector is a full set of parameters, of dimension m_pdim!
@@ -65,7 +65,7 @@ statscore_t Optimizer::GetStatScore(const Point& param) const
   return score;
 }
 
-map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap, float newt, pair<unsigned,unsigned> newdiff)
+map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap, float newt, const pair<unsigned,unsigned>& newdiff)
 {
   map<float,diff_t>::iterator it = thresholdmap.find(newt);
   if (it != thresholdmap.end()) {
@@ -348,7 +348,7 @@ statscore_t Optimizer::Run(Point& P) const
 }
 
 
-vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst, vector<vector <pair<unsigned,unsigned> > > thediffs) const
+vector<statscore_t> Optimizer::GetIncStatScore(const vector<unsigned>& thefirst, const vector<vector <pair<unsigned,unsigned> > >& thediffs) const
 {
   CHECK(m_scorer);
 
@@ -461,64 +461,4 @@ statscore_t RandomOptimizer::TrueRun(Point& P) const
   statscore_t score = GetStatScore(P);
   P.SetScore(score);
   return score;
-}
-
-//--------------------------------------
-
-vector<string> OptimizerFactory::m_type_names;
-
-void OptimizerFactory::SetTypeNames()
-{
-  if (m_type_names.empty()) {
-    m_type_names.resize(NOPTIMIZER);
-    m_type_names[POWELL]="powell";
-    m_type_names[RANDOM_DIRECTION]="random-direction";
-    m_type_names[RANDOM]="random";
-    // Add new type there
-  }
-}
-vector<string> OptimizerFactory::GetTypeNames()
-{
-  if (m_type_names.empty())
-    SetTypeNames();
-  return m_type_names;
-}
-
-OptimizerFactory::OptType OptimizerFactory::GetOType(const string& type)
-{
-  unsigned int thetype;
-  if (m_type_names.empty())
-    SetTypeNames();
-  for (thetype = 0; thetype < m_type_names.size(); thetype++)
-    if (m_type_names[thetype] == type)
-      break;
-  return((OptType)thetype);
-}
-
-Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim, vector<unsigned> i2o, vector<parameter_t> start, const string& type, unsigned int nrandom)
-{
-  OptType T = GetOType(type);
-  if (T == NOPTIMIZER) {
-    cerr << "Error: unknown Optimizer type " << type << endl;
-    cerr << "Known Algorithm are:" << endl;
-    unsigned int thetype;
-    for (thetype = 0; thetype < m_type_names.size(); thetype++)
-      cerr << m_type_names[thetype] << endl;
-    throw ("unknown Optimizer Type");
-  }
-
-  switch ((OptType)T) {
-    case POWELL:
-      return new SimpleOptimizer(dim, i2o, start, nrandom);
-      break;
-    case RANDOM_DIRECTION:
-      return new RandomDirectionOptimizer(dim, i2o, start, nrandom);
-      break;
-    case RANDOM:
-      return new RandomOptimizer(dim, i2o, start, nrandom);
-      break;
-    default:
-      cerr << "Error: unknown optimizer" << type << endl;
-      return NULL;
-  }
 }
