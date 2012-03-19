@@ -1,9 +1,8 @@
 #include "Scorer.h"
 
 #include <limits>
-#include "Ngram.h"
+#include "Vocabulary.h"
 #include "Util.h"
-
 
 namespace {
 
@@ -37,14 +36,14 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
-      m_encoder(new Encoder),
+      m_vocab(new mert::Vocabulary),
       m_score_data(0),
       m_enable_preserve_case(true) {
   InitConfig(config);
 }
 
 Scorer::~Scorer() {
-  delete m_encoder;
+  delete m_vocab;
 }
 
 void Scorer::InitConfig(const string& config) {
@@ -78,11 +77,11 @@ void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
         *it = tolower(*it);
       }
     }
-    encoded.push_back(m_encoder->Encode(token));
+    encoded.push_back(m_vocab->Encode(token));
   }
 }
 
-void Scorer::ClearEncoder() { m_encoder->clear(); }
+void Scorer::ClearVocabulary() { m_vocab->clear(); }
 
 /**
  * Set the factors, which should be used for this metric
