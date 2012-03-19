@@ -1666,25 +1666,34 @@ bool StaticData::LoadPhrasePairFeature()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pp"));
   if (weight.size() > 1) {
-	std::cerr << "only one sparse producer weight allowed for the phrase pair feature" << std::endl;
+	std::cerr << "Only one sparse producer weight allowed for the phrase pair feature" << std::endl;
 	return false;
   }
 
-  const vector<string> &phrasePairFactors =
-    m_parameter->GetParam("phrase-pair-feature");
+  const vector<string> &phrasePairFactors = m_parameter->GetParam("phrase-pair-feature");
   if (phrasePairFactors.size() == 0) return true;
   if (phrasePairFactors.size() != 1) {
-    UserMessage::Add("Need to specify source and target factors for phrase pair feature");
+    UserMessage::Add("Can only have one phrase-pair-feature");
     return false;
   }
   vector<string> tokens = Tokenize(phrasePairFactors[0]);
-  if (tokens.size() != 2) {
-    UserMessage::Add("Need to specify source and target factors for phrase pair feature");
+  if (tokens.size() != 1 && tokens.size() != 3) {
+    UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
+    		"[simple source-trigger]");
     return false;
   }
-  size_t sourceFactorId = Scan<FactorType>(tokens[0]);
-  size_t targetFactorId = Scan<FactorType>(tokens[1]);
-  m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId);
+  
+  vector <string> factors = Tokenize(tokens[0],"-");  
+  size_t sourceFactorId = Scan<size_t>(factors[0]);
+  size_t targetFactorId = Scan<size_t>(factors[1]);
+  bool simple = true;
+  bool sourceContext = false;
+  if (tokens.size() == 3) {
+	simple = Scan<size_t>(tokens[1]);
+	sourceContext = Scan<size_t>(tokens[2]);
+  }
+  
+  m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext);
   if (weight.size() > 0)
     m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
   return true;
@@ -1780,7 +1789,7 @@ bool StaticData::LoadWordTranslationFeature()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-wt"));
   if (weight.size() > 1) {
-    std::cerr << "only one sparse producer weight allowed for the word translation feature" << std::endl;
+    std::cerr << "Only one sparse producer weight allowed for the word translation feature" << std::endl;
     return false;
   }
 	

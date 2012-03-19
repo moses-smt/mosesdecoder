@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModel.h"
 #include "GlobalLexicalModelUnlimited.h"
 #include "WordTranslationFeature.h"
+#include "PhrasePairFeature.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
@@ -124,7 +125,11 @@ namespace Moses {
       	else if (m_statefulFFs[i]->GetScoreProducerWeightShortName() == "wt")
       		((WordTranslationFeature*)m_statefulFFs[i])->InitializeForInput((Sentence const&)source);
       }
-  
+      for(size_t i=0;i<m_statelessFFs.size();++i) {
+    	if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "pp")
+    		((PhrasePairFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+      }
+      
       LMList::const_iterator iterLM;
       for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
       {

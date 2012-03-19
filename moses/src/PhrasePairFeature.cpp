@@ -2,20 +2,9 @@
 #include "PhrasePairFeature.h"
 #include "TargetPhrase.h"
 
-
 using namespace std;
 
 namespace Moses {
-
-
-PhrasePairFeature::PhrasePairFeature
-  (FactorType sourceFactorId, FactorType targetFactorId) :
-  StatelessFeatureFunction("pp", ScoreProducer::unlimited),
-  m_sourceFactorId(sourceFactorId),
-  m_targetFactorId(targetFactorId),
-  m_sparseProducerWeight(1) {
-  std::cerr << "Creating phrase pair feature.. " << endl;
-}
 
 string PhrasePairFeature::GetScoreProducerWeightShortName(unsigned) const
 {
@@ -25,6 +14,12 @@ string PhrasePairFeature::GetScoreProducerWeightShortName(unsigned) const
 size_t PhrasePairFeature::GetNumInputScores() const 
 {
   return 0;
+}
+
+void PhrasePairFeature::InitializeForInput( Sentence const& in )
+{
+  m_local.reset(new ThreadLocalStorage);
+  m_local->input = &in;
 }
 
 void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentCollection* accumulator) const {
@@ -39,26 +34,58 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
     namestr << targetFactor->GetString();
     accumulator->PlusEquals(this,namestr.str(),1);
   }*/
-   ostringstream namestr;
-   namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
-   for (size_t i = 1; i < source.GetSize(); ++i) {
-  	 const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
-  	 namestr << ",";
-  	 namestr << sourceFactor->GetString();
+   
+   if (m_simple) {
+	   ostringstream namestr;
+	   namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
+	   for (size_t i = 1; i < source.GetSize(); ++i) {
+		   const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
+		   namestr << ",";
+		   namestr << sourceFactor->GetString();
+	   }
+	   namestr << "~";
+	   namestr << target.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+	   for (size_t i = 1; i < target.GetSize(); ++i) {
+		   const Factor* targetFactor = target.GetWord(i).GetFactor(m_targetFactorId);
+		   namestr << ",";
+		   namestr << targetFactor->GetString();
+	   }
+	   accumulator->PlusEquals(this,namestr.str(),1);
    }
-   namestr << "~";
-   namestr << target.GetWord(0).GetFactor(m_targetFactorId)->GetString();
-   for (size_t i = 1; i < target.GetSize(); ++i) {
-  	 const Factor* targetFactor = target.GetWord(i).GetFactor(m_targetFactorId);
-  	 namestr << ",";
-  	 namestr << targetFactor->GetString();
-   }
-   accumulator->PlusEquals(this,namestr.str(),1);
+   if (m_sourceContext) {
+	   const Sentence& input = *(m_local->input);
+
+	   // range over source words to get context
+	   for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
+		   string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
+		   bool sourceTriggerExists = false;
+//		   if (!m_unrestricted)
+//			   sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+
+		   if (m_unrestricted || sourceTriggerExists) {
+			   ostringstream namestr;
+			   namestr << sourceTrigger;
+			   namestr << "~";
+			   namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
+			   for (size_t i = 1; i < source.GetSize(); ++i) {
+				   const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
+				   namestr << ",";
+				   namestr << sourceFactor->GetString();
+			   }
+			   namestr << "~";
+			   namestr << target.GetWord(0).GetFactor(m_targetFactorId)->GetString();
+			   for (size_t i = 1; i < target.GetSize(); ++i) {
+				   const Factor* targetFactor = target.GetWord(i).GetFactor(m_targetFactorId);
+				   namestr << ",";
+				   namestr << targetFactor->GetString();
+			   }
+			   accumulator->PlusEquals(this,namestr.str(),1);
+		   }
+	   }
+	}
 }
 
 bool PhrasePairFeature::ComputeValueInTranslationOption() const {
   return false;
 } 
-
-
 }

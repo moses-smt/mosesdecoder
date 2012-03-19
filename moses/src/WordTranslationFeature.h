@@ -48,13 +48,14 @@ public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
 			bool simple, bool sourceContext, bool targetContext):
 //     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
-		 StatefulFeatureFunction("wt", ScoreProducer::unlimited), m_sparseProducerWeight(1),
+		 StatefulFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
+     m_unrestricted(true),
      m_simple(simple),
      m_sourceContext(sourceContext),
      m_targetContext(targetContext),
-     m_unrestricted(true)
+     m_sparseProducerWeight(1)
   {
 		std::cerr << "Creating word translation feature.. ";
 		if (m_simple == 1) std::cerr << "using simple word translations.. ";
