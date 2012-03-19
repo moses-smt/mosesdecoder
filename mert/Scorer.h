@@ -12,7 +12,12 @@
 using namespace std;
 
 class ScoreStats;
-class Encoder;
+
+namespace mert {
+
+class Vocabulary;
+
+} // namespace mert
 
 /**
  * Superclass of all scorers and dummy implementation.
@@ -108,11 +113,13 @@ class Scorer
    */
   virtual string applyFactors(const string& sentece) const;
 
+  mert::Vocabulary* GetVocab() const { return m_vocab; }
+
  private:
   void InitConfig(const string& config);
 
   string m_name;
-  Encoder* m_encoder;
+  mert::Vocabulary* m_vocab;
   map<string, string> m_config;
   vector<int> m_factors;
 
@@ -138,7 +145,7 @@ class Scorer
    */
   void TokenizeAndEncode(const string& line, vector<int>& encoded);
 
-  void ClearEncoder();
+  void ClearVocabulary();
 };
 
 /**

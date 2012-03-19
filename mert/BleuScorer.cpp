@@ -64,7 +64,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   // Make sure reference data is clear
   m_references.reset();
-  ClearEncoder();
+  ClearVocabulary();
 
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
