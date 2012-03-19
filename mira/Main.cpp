@@ -64,6 +64,7 @@ int main(int argc, char** argv) {
 	string mosesConfigFile;
 	string inputFile;
 	vector<string> referenceFiles;
+	vector<string> mosesConfigFilesFolds, inputFilesFolds, referenceFilesFolds;
 	string coreWeightFile;
 	size_t epochs;
 	string learner;
@@ -123,7 +124,7 @@ int main(int argc, char** argv) {
 	string decode_filename;
 	size_t update_scheme;
 	bool separateUpdates, batchEqualsShard;
-	bool sparseAverage, dumpMixedWeights, mixWithoutAveraging;
+	bool sparseAverage, dumpMixedWeights, sparseNoAverage;
 	bool useSourceLengthHistory;
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -141,6 +142,7 @@ int main(int argc, char** argv) {
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
+		("configs-folds", po::value<vector<string> >(&mosesConfigFilesFolds), "Moses ini-files, one for each fold")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
 		("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
 		("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
@@ -161,6 +163,7 @@ int main(int argc, char** argv) {
 		("hope-model", po::value<bool>(&hope_model)->default_value(false), "Use only hope and model translations for optimisation (use --fear-n to set number of model translations)")
 		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
 		("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
+		("input-files-folds", po::value<vector<string> >(&inputFilesFolds), "Input files containing tokenised source, one for each fold")
 		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
 		("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
 		("margin-incr", po::value<float>(&margin_slack_incr)->default_value(0), "Increment margin slack after every epoch by this amount")
@@ -176,7 +179,6 @@ int main(int argc, char** argv) {
 		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
-		("mix-without-averaging", po::value<bool>(&mixWithoutAveraging)->default_value(false), "Mix without averaging sparse weights")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
 		("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
 		("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
@@ -187,6 +189,7 @@ int main(int argc, char** argv) {
 		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
 		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+		("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")		
 		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
 		("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale the BLEU score by (a history of) the inverse input length")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
@@ -203,6 +206,7 @@ int main(int argc, char** argv) {
 		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
 		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
 		("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
+		("sparse-no-average", po::value<bool>(&sparseNoAverage)->default_value(false), "Don't average sparse weights, just sum")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
 		("update-scheme", po::value<size_t>(&update_scheme)->default_value(1), "Update scheme, default: 1")
@@ -241,6 +245,10 @@ int main(int argc, char** argv) {
   }
 #endif*/
 
+  bool trainWithMultipleFolds = false; 
+  if (mosesConfigFilesFolds.size() > 0 || inputFilesFolds.size() > 0 || referenceFilesFolds.size() > 0)
+	  trainWithMultipleFolds = true;
+  
   if (dummy != -1)
     slack = dummy;
 
@@ -249,47 +257,89 @@ int main(int argc, char** argv) {
 	  exit(1);
   }
 
-  if (sparseAverage && averageWeights) {
-	  cerr << "Parameters --sparse-average 1 and --average-weights 1 are incompatible (not implemented)" << endl;
+  if ((sparseAverage || sparseNoAverage) && averageWeights) {
+	  cerr << "Parameters --sparse-average 1/--sparse-no-average 1 and --average-weights 1 are incompatible (not implemented)" << endl;
 	  exit(1);
   }
 
-	if (mosesConfigFile.empty()) {
-		cerr << "Error: No moses ini file specified" << endl;
-		return 1;
-	}
+  if (trainWithMultipleFolds) {
+	  if (!mosesConfigFilesFolds.size()) {
+		  cerr << "Error: No moses ini files specified for training with folds" << endl;
+		  exit(1);
+	  }
+	  
+	  if (!inputFilesFolds.size()) {
+		  cerr << "Error: No input files specified for training with folds" << endl;
+		  exit(1);
+	  }
 
-	if (inputFile.empty()) {
-		cerr << "Error: No input file specified" << endl;
-		return 1;
-	}
+	  if (!referenceFilesFolds.size()) {
+		  cerr << "Error: No reference files specified for training with folds" << endl;
+		  exit(1);
+	  }
+  }
+  else {
+	  if (mosesConfigFile.empty()) {
+		  cerr << "Error: No moses ini file specified" << endl;
+		  return 1;
+	  }
+	  
+	  if (inputFile.empty()) {
+		  cerr << "Error: No input file specified" << endl;
+		  return 1;
+	  }
 
-	if (!referenceFiles.size()) {
-		cerr << "Error: No reference files specified" << endl;
-		return 1;
-	}
+	  if (!referenceFiles.size()) {
+		  cerr << "Error: No reference files specified" << endl;
+		  return 1;
+	  }
+  }
 
 	// load input and references
-	vector<string> inputSentences;
-	if (!loadSentences(inputFile, inputSentences)) {
-		cerr << "Error: Failed to load input sentences from " << inputFile << endl;
-		return 1;
-	}
-
-	vector<vector<string> > referenceSentences(referenceFiles.size());
-	for (size_t i = 0; i < referenceFiles.size(); ++i) {
-		if (!loadSentences(referenceFiles[i], referenceSentences[i])) {
-			cerr << "Error: Failed to load reference sentences from "
-			    << referenceFiles[i] << endl;
-			return 1;
-		}
-		if (referenceSentences[i].size() != inputSentences.size()) {
-			cerr << "Error: Input file length (" << inputSentences.size() << ") != ("
-			    << referenceSentences[i].size() << ") length of reference file " << i
-			    << endl;
-			return 1;
-		}
-	}
+  	vector<string> inputSentences;
+  	size_t inputSize = trainWithMultipleFolds? inputFilesFolds.size(): 0;
+  	size_t refSize = trainWithMultipleFolds? referenceFilesFolds.size(): referenceFiles.size(); 
+  	vector<vector<string> > inputSentencesFolds(inputSize);
+  	vector<vector<string> > referenceSentences(refSize);
+  	if (trainWithMultipleFolds) {
+  		if (!loadSentences(inputFilesFolds[rank], inputSentencesFolds[rank])) {
+  			cerr << "Error: Failed to load input sentences from " << inputFilesFolds[rank] << endl;
+  			return 1;
+  		}
+  		cerr << "Rank " << rank << " reading inputs from " << inputFilesFolds[rank] << endl;
+  		
+  		if (!loadSentences(referenceFilesFolds[rank], referenceSentences[rank])) {
+  			cerr << "Error: Failed to load reference sentences from " << referenceFilesFolds[rank] << endl;
+  			return 1;
+  		}
+  		if (referenceSentences[rank].size() != inputSentencesFolds[rank].size()) {
+  			cerr << "Error: Input file length (" << inputSentencesFolds[rank].size() << ") != ("
+  				<< referenceSentences[rank].size() << ") reference file length (rank " << rank << ")" << endl;
+  			return 1;
+  		}
+  		cerr << "Rank " << rank << " reading references from " << referenceFilesFolds[rank] << endl;
+  		
+  	}
+  	else {
+  		if (!loadSentences(inputFile, inputSentences)) {
+  			cerr << "Error: Failed to load input sentences from " << inputFile << endl;
+  			return 1;
+  		}
+  		
+  		for (size_t i = 0; i < referenceFiles.size(); ++i) {
+  			if (!loadSentences(referenceFiles[i], referenceSentences[i])) {
+  				cerr << "Error: Failed to load reference sentences from "
+  						<< referenceFiles[i] << endl;
+  				return 1;
+  			}
+  			if (referenceSentences[i].size() != inputSentences.size()) {
+  				cerr << "Error: Input file length (" << inputSentences.size() << ") != ("
+  						<< referenceSentences[i].size() << ") length of reference file " << i
+  						<< endl;
+  				return 1;
+  			}
+  		}
+  	}
 
 	if (scaleByAvgInputLength ||  scaleByInverseLength || scaleByAvgInverseLength)
 		scaleByInputLength = false;
@@ -305,13 +355,23 @@ int main(int argc, char** argv) {
 	// initialise Moses
 	// add initial Bleu weight and references to initialize Bleu feature
 	decoder_settings += " -weight-bl 1 -references";
-	for (size_t i=0; i < referenceFiles.size(); ++i) {
+	if (trainWithMultipleFolds) {
 		decoder_settings += " ";
-		decoder_settings += referenceFiles[i];
+		decoder_settings += referenceFilesFolds[rank];
 	}
+	else {
+		for (size_t i=0; i < referenceFiles.size(); ++i) {
+			decoder_settings += " ";
+			decoder_settings += referenceFiles[i];
+		}
+	}
+	
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
-	MosesDecoder* decoder = new MosesDecoder(mosesConfigFile, verbosity, decoder_params.size(), decoder_params);
+	
+	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[rank] : mosesConfigFile;
+	cerr << "Rank " << rank << " reading config file from " << configFile << endl;
+	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
 	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
 			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
@@ -330,15 +390,28 @@ int main(int argc, char** argv) {
 
 	// Optionally shuffle the sentences
 	vector<size_t> order;
-	if (rank == 0) {
-		for (size_t i = 0; i < inputSentences.size(); ++i) {
+	if (trainWithMultipleFolds) {
+		for (size_t i = 0; i < inputSentencesFolds[rank].size(); ++i) {
 			order.push_back(i);
 		}
-
+		
 		if (shuffle) {
 			cerr << "Shuffling input sentences.." << endl;
 			RandomIndex rindex;
 			random_shuffle(order.begin(), order.end(), rindex);
+		}
+	}
+	else {
+		if (rank == 0) {
+			for (size_t i = 0; i < inputSentences.size(); ++i) {
+				order.push_back(i);
+			}
+			
+			if (shuffle) {
+				cerr << "Shuffling input sentences.." << endl;
+				RandomIndex rindex;
+				random_shuffle(order.begin(), order.end(), rindex);
+			}
 		}
 	}
 
@@ -418,19 +491,27 @@ int main(int argc, char** argv) {
 
 	// Create shards according to the number of processes used
 	vector<size_t> shard;
-	float shardSize = (float) (order.size()) / size;
-	size_t shardStart = (size_t) (shardSize * rank);
-	size_t shardEnd = (size_t) (shardSize * (rank + 1));
-	if (rank == size - 1) {
-		shardEnd = order.size();
-		shardSize = shardEnd - shardStart;
+	if (trainWithMultipleFolds) {
+		// for now let each processor work on the whole input set of one fold
+		shard = order;
+		batchSize = 1;
+		cerr << "Rank " << rank << ", shard size: " << shard.size() << endl;
 	}
-	VERBOSE(1, "Shard size: " << shardSize << endl);
-	VERBOSE(1, "Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
-	shard.resize(shardSize);
-	copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
-	if (batchEqualsShard)
-		batchSize = shardSize;
+	else {
+		float shardSize = (float) (order.size()) / size;
+		size_t shardStart = (size_t) (shardSize * rank);
+		size_t shardEnd = (size_t) (shardSize * (rank + 1));
+		if (rank == size - 1) {
+			shardEnd = order.size();
+			shardSize = shardEnd - shardStart;
+		}
+		VERBOSE(1, "Shard size: " << shardSize << endl);
+		VERBOSE(1, "Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
+		shard.resize(shardSize);
+		copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
+		if (batchEqualsShard)
+			batchSize = shardSize;
+	}
 
 	// get reference to feature functions
 	const StaticData &staticData = StaticData::Instance();
@@ -534,7 +615,11 @@ int main(int argc, char** argv) {
 			size_t examples_in_batch = 0;
 			for (size_t batchPosition = 0; batchPosition < batchSize && sid
 			    != shard.end(); ++batchPosition) {
-				string& input = inputSentences[*sid];
+				string input;
+				if (trainWithMultipleFolds) 
+					input = inputSentencesFolds[rank][*sid];
+				else
+					input = inputSentences[*sid];
 //				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
 
@@ -968,8 +1053,8 @@ int main(int argc, char** argv) {
 				}
 				if (rank == 0) {
 					// divide by number of processes
-					if (sparseAverage && mixWithoutAveraging)
-						mixedWeights.CoreDivideEquals(size); // average only core weights
+					if (sparseNoAverage)
+					  mixedWeights.CoreDivideEquals(size); // average only core weights
 					else if (sparseAverage)
 					  mixedWeights.DivideEquals(totalBinary);
 					else
@@ -1021,7 +1106,9 @@ int main(int argc, char** argv) {
 			    }
 			  } else {
 			    if (numberOfUpdatesThisEpoch > 0) {
-			    	if (sparseAverage)
+			    	if (sparseNoAverage) // average only core weights
+			    		tmpAverageWeights.CoreDivideEquals(numberOfUpdatesThisEpoch);
+			    	else if (sparseAverage)
 			    		tmpAverageWeights.DivideEquals(cumulativeWeightsBinary);
 			    	else
 			    		tmpAverageWeights.DivideEquals(numberOfUpdatesThisEpoch);
@@ -1045,9 +1132,9 @@ int main(int argc, char** argv) {
 #endif
 			    if (rank == 0 && !weightDumpStem.empty()) {
 			      // divide by number of processes
-						if (sparseAverage && mixWithoutAveraging)
-							mixedAverageWeights.CoreDivideEquals(size); // average only core weights
-						else if (sparseAverage)
+			      if (sparseNoAverage)
+			    	  mixedAverageWeights.CoreDivideEquals(size); // average only core weights
+				  else if (sparseAverage)
 			    	  mixedAverageWeights.DivideEquals(totalBinary);
 			      else
 			    	  mixedAverageWeights.DivideEquals(size);
