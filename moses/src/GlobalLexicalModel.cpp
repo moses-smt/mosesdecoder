@@ -152,7 +152,7 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
 float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const
 {
   LexiconCache& m_cache = m_local->cache;
-  map< const TargetPhrase*, float >::const_iterator query = m_cache.find( &targetPhrase );
+  const LexiconCache::const_iterator query = m_cache.find( &targetPhrase );
   if ( query != m_cache.end() ) {
     return query->second;
   }
