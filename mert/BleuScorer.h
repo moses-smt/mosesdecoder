@@ -23,6 +23,12 @@ class Reference;
 class BleuScorer: public StatisticsBasedScorer
 {
 public:
+  enum ReferenceLengthType {
+    AVERAGE,
+    CLOSEST,
+    SHORTEST
+  };
+
   explicit BleuScorer(const string& config = "");
   ~BleuScorer();
 
@@ -33,20 +39,19 @@ public:
 
   int CalcReferenceLength(size_t sentence_id, size_t length);
 
-private:
-  enum ReferenceLengthType {
-    AVERAGE,
-    SHORTEST,
-    CLOSEST
-  };
+  ReferenceLengthType GetReferenceLengthType() const { return m_ref_length_type; }
+  void SetReferenceLengthType(ReferenceLengthType type) { m_ref_length_type = type; }
+
+  const std::vector<Reference*>& GetReferences() const { return m_references.get(); }
 
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  size_t countNgrams(const string& line, NgramCounts& counts, unsigned int n);
+  size_t CountNgrams(const string& line, NgramCounts& counts, unsigned int n);
 
-  void dump_counts(std::ostream* os, const NgramCounts& counts) const;
+  void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
+private:
   ReferenceLengthType m_ref_length_type;
 
   // reference translations.

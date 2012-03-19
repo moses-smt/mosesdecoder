@@ -8,10 +8,10 @@
 namespace {
 
 inline void CheckBuildOptimizer(unsigned dim,
-                           const vector<unsigned>& to_optimize,
-                           const vector<parameter_t>& start,
-                           const string& type,
-                           unsigned int num_random) {
+                                const vector<unsigned>& to_optimize,
+                                const vector<parameter_t>& start,
+                                const string& type,
+                                unsigned int num_random) {
   boost::scoped_ptr<Optimizer> optimizer(
       OptimizerFactory::BuildOptimizer(dim, to_optimize, start, type, num_random));
   BOOST_CHECK(optimizer.get() != NULL);
