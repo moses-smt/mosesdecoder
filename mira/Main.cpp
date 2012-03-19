@@ -322,7 +322,7 @@ int main(int argc, char** argv) {
   			cerr << "Error: Failed to load input sentences from " << inputFilesFolds[myFold] << endl;
   			exit(1);
   		}
-  		cerr << "Rank " << rank << " reading inputs from " << inputFilesFolds[myFold] << endl;
+  		VERBOSE(1, "Rank " << rank << " reading inputs from " << inputFilesFolds[myFold] << endl);
   		
   		if (!loadSentences(referenceFilesFolds[myFold], referenceSentences[myFold])) {
   			cerr << "Error: Failed to load reference sentences from " << referenceFilesFolds[myFold] << endl;
@@ -333,7 +333,7 @@ int main(int argc, char** argv) {
   				<< referenceSentences[myFold].size() << ") reference file length (rank " << rank << ")" << endl;
   			exit(1);
   		}
-  		cerr << "Rank " << rank << " reading references from " << referenceFilesFolds[myFold] << endl;  		
+  		VERBOSE(1, "Rank " << rank << " reading references from " << referenceFilesFolds[myFold] << endl);  		
   	}
   	else {
   		if (!loadSentences(inputFile, inputSentences)) {
@@ -385,7 +385,7 @@ int main(int argc, char** argv) {
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	
 	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[myFold] : mosesConfigFile;
-	cerr << "Rank " << rank << " reading config file from " << configFile << endl;
+	VERBOSE(1, "Rank " << rank << " reading config file from " << configFile << endl);
 	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
 	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
@@ -514,8 +514,8 @@ int main(int argc, char** argv) {
 			shardEnd = order.size();
 			shardSize = shardEnd - shardStart;
 		}		
-		cerr << "Rank: " << rank << ", shard size: " << shardSize << endl;
-		cerr << "Rank: " << rank << ", shard start: " << shardStart << " shard end: " << shardEnd << endl;
+		VERBOSE(1, "Rank: " << rank << ", shard size: " << shardSize << endl);
+		VERBOSE(1, "Rank: " << rank << ", shard start: " << shardStart << " shard end: " << shardEnd << endl);
 		shard.resize(shardSize);
 		copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 		batchSize = 1;
