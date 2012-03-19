@@ -144,8 +144,6 @@ class Scorer
    * Note: We assume that all tokens are separated by whitespaces.
    */
   void TokenizeAndEncode(const string& line, vector<int>& encoded);
-
-  void ClearVocabulary();
 };
 
 /**

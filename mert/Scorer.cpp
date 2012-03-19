@@ -3,6 +3,7 @@
 #include <limits>
 #include "Vocabulary.h"
 #include "Util.h"
+#include "Singleton.h"
 
 namespace {
 
@@ -36,14 +37,14 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
-      m_vocab(new mert::Vocabulary),
+      m_vocab(mert::VocabularyFactory::GetVocabulary()),
       m_score_data(0),
       m_enable_preserve_case(true) {
   InitConfig(config);
 }
 
 Scorer::~Scorer() {
-  delete m_vocab;
+  Singleton<mert::Vocabulary>::Delete();
 }
 
 void Scorer::InitConfig(const string& config) {
@@ -80,8 +81,6 @@ void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
     encoded.push_back(m_vocab->Encode(token));
   }
 }
-
-void Scorer::ClearVocabulary() { m_vocab->clear(); }
 
 /**
  * Set the factors, which should be used for this metric

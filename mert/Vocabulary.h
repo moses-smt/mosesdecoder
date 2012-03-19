@@ -64,6 +64,16 @@ class Vocabulary {
   std::map<std::string, int> m_vocab;
 };
 
+class VocabularyFactory {
+ public:
+  static Vocabulary* GetVocabulary();
+  static void SetVocabulary(Vocabulary* vocab);
+
+ private:
+  VocabularyFactory() {}
+  virtual ~VocabularyFactory() {}
+};
+
 } // namespace mert
 
 #endif  // MERT_VOCABULARY_H_

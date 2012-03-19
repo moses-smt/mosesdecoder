@@ -37,6 +37,7 @@ TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 MergeScorer.cpp
+Vocabulary.cpp
 ../util//kenutil m ..//z ;
 
 exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
@@ -54,6 +55,7 @@ unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test reference_test : ReferenceTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test singleton_test : SingletonTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ;

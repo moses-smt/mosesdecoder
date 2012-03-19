@@ -10,6 +10,7 @@
 #include "Ngram.h"
 #include "Reference.h"
 #include "Util.h"
+#include "Vocabulary.h"
 
 namespace {
 
@@ -64,7 +65,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   // Make sure reference data is clear
   m_references.reset();
-  ClearVocabulary();
+  mert::VocabularyFactory::GetVocabulary()->clear();
 
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
