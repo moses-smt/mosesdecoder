@@ -301,24 +301,39 @@ int main(int argc, char** argv) {
   	size_t refSize = trainWithMultipleFolds? referenceFilesFolds.size(): referenceFiles.size(); 
   	vector<vector<string> > inputSentencesFolds(inputSize);
   	vector<vector<string> > referenceSentences(refSize);
+  	
+	// number of cores for each fold
+  	size_t coresPerFold = 0, myFold = 0;
   	if (trainWithMultipleFolds) {
-  		if (!loadSentences(inputFilesFolds[rank], inputSentencesFolds[rank])) {
-  			cerr << "Error: Failed to load input sentences from " << inputFilesFolds[rank] << endl;
-  			return 1;
+  		coresPerFold = size/mosesConfigFilesFolds.size();
+  		if (size % coresPerFold > 0) {
+  			cerr << "Number of cores has to be a multiple of the number of folds" << endl;
+  			exit(1);
+  		} 
+		
+  		if (rank == 0)
+  			cerr << "Number of cores per fold: " << coresPerFold << endl;		
+  		myFold = rank/coresPerFold;
+  		cerr << "Rank " << rank << ", my fold: " << myFold << endl;
+  	}
+  	
+  	if (trainWithMultipleFolds) {
+  		if (!loadSentences(inputFilesFolds[myFold], inputSentencesFolds[myFold])) {
+  			cerr << "Error: Failed to load input sentences from " << inputFilesFolds[myFold] << endl;
+  			exit(1);
   		}
-  		cerr << "Rank " << rank << " reading inputs from " << inputFilesFolds[rank] << endl;
+  		cerr << "Rank " << rank << " reading inputs from " << inputFilesFolds[myFold] << endl;
   		
-  		if (!loadSentences(referenceFilesFolds[rank], referenceSentences[rank])) {
-  			cerr << "Error: Failed to load reference sentences from " << referenceFilesFolds[rank] << endl;
-  			return 1;
+  		if (!loadSentences(referenceFilesFolds[myFold], referenceSentences[myFold])) {
+  			cerr << "Error: Failed to load reference sentences from " << referenceFilesFolds[myFold] << endl;
+  			exit(1);
   		}
-  		if (referenceSentences[rank].size() != inputSentencesFolds[rank].size()) {
-  			cerr << "Error: Input file length (" << inputSentencesFolds[rank].size() << ") != ("
-  				<< referenceSentences[rank].size() << ") reference file length (rank " << rank << ")" << endl;
-  			return 1;
+  		if (referenceSentences[myFold].size() != inputSentencesFolds[myFold].size()) {
+  			cerr << "Error: Input file length (" << inputSentencesFolds[myFold].size() << ") != ("
+  				<< referenceSentences[myFold].size() << ") reference file length (rank " << rank << ")" << endl;
+  			exit(1);
   		}
-  		cerr << "Rank " << rank << " reading references from " << referenceFilesFolds[rank] << endl;
-  		
+  		cerr << "Rank " << rank << " reading references from " << referenceFilesFolds[myFold] << endl;  		
   	}
   	else {
   		if (!loadSentences(inputFile, inputSentences)) {
@@ -357,7 +372,7 @@ int main(int argc, char** argv) {
 	decoder_settings += " -weight-bl 1 -references";
 	if (trainWithMultipleFolds) {
 		decoder_settings += " ";
-		decoder_settings += referenceFilesFolds[rank];
+		decoder_settings += referenceFilesFolds[myFold];
 	}
 	else {
 		for (size_t i=0; i < referenceFiles.size(); ++i) {
@@ -369,7 +384,7 @@ int main(int argc, char** argv) {
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	
-	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[rank] : mosesConfigFile;
+	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[myFold] : mosesConfigFile;
 	cerr << "Rank " << rank << " reading config file from " << configFile << endl;
 	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
 	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
@@ -390,8 +405,8 @@ int main(int argc, char** argv) {
 
 	// Optionally shuffle the sentences
 	vector<size_t> order;
-	if (trainWithMultipleFolds) {
-		for (size_t i = 0; i < inputSentencesFolds[rank].size(); ++i) {
+	if (trainWithMultipleFolds) {  	
+		for (size_t i = 0; i < inputSentencesFolds[myFold].size(); ++i) {
 			order.push_back(i);
 		}
 		
@@ -491,11 +506,19 @@ int main(int argc, char** argv) {
 
 	// Create shards according to the number of processes used
 	vector<size_t> shard;
-	if (trainWithMultipleFolds) {
-		// for now let each processor work on the whole input set of one fold
-		shard = order;
+	if (trainWithMultipleFolds) {			
+		float shardSize = (float) (order.size())/coresPerFold;
+		size_t shardStart = (size_t) (shardSize * (rank % coresPerFold));
+		size_t shardEnd = shardStart + shardSize;
+		if (rank % coresPerFold == coresPerFold - 1) { // last rank of each fold 
+			shardEnd = order.size();
+			shardSize = shardEnd - shardStart;
+		}		
+		cerr << "Rank: " << rank << ", shard size: " << shardSize << endl;
+		cerr << "Rank: " << rank << ", shard start: " << shardStart << " shard end: " << shardEnd << endl;
+		shard.resize(shardSize);
+		copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 		batchSize = 1;
-		cerr << "Rank " << rank << ", shard size: " << shard.size() << endl;
 	}
 	else {
 		float shardSize = (float) (order.size()) / size;
@@ -617,7 +640,7 @@ int main(int argc, char** argv) {
 			    != shard.end(); ++batchPosition) {
 				string input;
 				if (trainWithMultipleFolds) 
-					input = inputSentencesFolds[rank][*sid];
+					input = inputSentencesFolds[myFold][*sid];
 				else
 					input = inputSentences[*sid];
 //				const vector<string>& refs = referenceSentences[*sid];
