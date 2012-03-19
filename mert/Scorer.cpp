@@ -107,40 +107,40 @@ void Scorer::setFactors(const string& factors)
   for(vector<string>::iterator it = factors_vec.begin(); it != factors_vec.end(); ++it)
   {
     int factor = atoi(it->c_str());
-    m_factors.push_back(factor);        
+    m_factors.push_back(factor);
   }
 }
 
 /**
  * Take the factored sentence and return the desired factors
  */
-string Scorer::applyFactors(const string& sentence)
+string Scorer::applyFactors(const string& sentence) const
 {
   if (m_factors.size() == 0) return sentence;
-  
+
   vector<string> tokens;
   split(sentence, ' ', tokens);
- 
-  stringstream sstream; 
+
+  stringstream sstream;
   for (size_t i = 0; i < tokens.size(); ++i)
   {
-    if (tokens[i] == "") continue;   
+    if (tokens[i] == "") continue;
 
     vector<string> factors;
     split(tokens[i], '|', factors);
 
     int fsize = factors.size();
-    
-    if (i>0) sstream << " ";
-    
+
+    if (i > 0) sstream << " ";
+
     for (size_t j = 0; j < m_factors.size(); ++j)
     {
       int findex = m_factors[j];
       if (findex < 0 || findex >= fsize) throw runtime_error("Factor index is out of range.");
 
-      if (j>0) sstream << "|";
+      if (j > 0) sstream << "|";
       sstream << factors[findex];
-    }    
+    }
   }
   return sstream.str();
 }

@@ -3,12 +3,14 @@
 
 #include <algorithm>
 #include <climits>
-#include <iostream>
 #include <vector>
 
 #include "Ngram.h"
 
-// Refernece class is a reference translation for an output translation.
+/**
+ * Reference class represents reference translations for an output
+ * translation used in calculating BLEU score.
+ */
 class Reference {
  public:
   // for m_length

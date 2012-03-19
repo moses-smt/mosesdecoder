@@ -1,6 +1,7 @@
 #include "BleuScorer.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <climits>
 #include <fstream>
@@ -37,9 +38,10 @@ BleuScorer::BleuScorer(const string& config)
 
 BleuScorer::~BleuScorer() {}
 
-size_t BleuScorer::countNgrams(const string& line, NgramCounts& counts,
+size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
                                unsigned int n)
 {
+  assert(n > 0);
   vector<int> encoded_tokens;
   TokenizeAndEncode(line, encoded_tokens);
   for (size_t k = 1; k <= n; ++k) {
@@ -74,7 +76,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
     string line;
     size_t sid = 0; //sentence counter
     while (getline(refin,line)) {
-      line = this->applyFactors(line);
+      line = applyFactors(line);
       if (i == 0) {
         Reference* ref = new Reference;
         m_references.push_back(ref);    // Take ownership of the Reference object.
@@ -83,7 +85,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
         throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
       }
       NgramCounts counts;
-      size_t length = countNgrams(line, counts, kBleuNgramOrder);
+      size_t length = CountNgrams(line, counts, kBleuNgramOrder);
 
       //for any counts larger than those already there, merge them in
       for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
@@ -117,8 +119,8 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   NgramCounts testcounts;
   // stats for this line
   vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
-  string sentence = this->applyFactors(text);
-  const size_t length = countNgrams(sentence, testcounts, kBleuNgramOrder);
+  string sentence = applyFactors(text);
+  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder);
 
   const int reference_len = CalcReferenceLength(sid, length);
   stats.push_back(reference_len);
@@ -176,8 +178,8 @@ int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length) {
   }
 }
 
-void BleuScorer::dump_counts(ostream* os,
-                             const NgramCounts& counts) const {
+void BleuScorer::DumpCounts(ostream* os,
+                            const NgramCounts& counts) const {
   for (NgramCounts::const_iterator it = counts.begin();
        it != counts.end(); ++it) {
     *os << "(";

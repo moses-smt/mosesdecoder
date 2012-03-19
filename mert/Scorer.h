@@ -105,7 +105,7 @@ class Scorer
   /**
    * Take the factored sentence and return the desired factors
    */
-  virtual string applyFactors(const string& sentece);
+  virtual string applyFactors(const string& sentece) const;
 
  private:
   class Encoder {
