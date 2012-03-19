@@ -14,9 +14,9 @@ class NgramCounts {
   // Used to construct the ngram map
   struct NgramComparator {
     bool operator()(const std::vector<int>& a, const std::vector<int>& b) const {
-      size_t i;
-      const size_t as = a.size();
-      const size_t bs = b.size();
+      std::size_t i;
+      const std::size_t as = a.size();
+      const std::size_t bs = b.size();
       for (i = 0; i < as && i < bs; ++i) {
         if (a[i] < b[i]) {
           return true;
@@ -73,9 +73,9 @@ class NgramCounts {
   /**
    * Return the the number of elements in the container.
    */
-  size_t size() const { return m_counts.size(); }
+  std::size_t size() const { return m_counts.size(); }
 
-  size_t max_size() const { return m_counts.max_size(); }
+  std::size_t max_size() const { return m_counts.max_size(); }
 
   // Note: This is mainly used by unit tests.
   int get_default_count() const { return kDefaultCount; }
