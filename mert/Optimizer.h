@@ -10,8 +10,6 @@
 
 using namespace std;
 
-typedef float featurescore;
-
 class Point;
 
 /**
@@ -20,18 +18,19 @@ class Point;
 class Optimizer
 {
 protected:
-  Scorer *scorer;      // no accessor for them only child can use them
-  FeatureDataHandle FData;  // no accessor for them only child can use them
-  unsigned int number_of_random_directions;
+  Scorer *m_scorer;      // no accessor for them only child can use them
+  FeatureDataHandle m_feature_data;  // no accessor for them only child can use them
+  unsigned int m_num_random_directions;
 
 public:
-  Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom);
-  void SetScorer(Scorer *_scorer);
-  void SetFData(FeatureDataHandle _FData);
+  Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom);
+
+  void SetScorer(Scorer *scorer) { m_scorer = scorer; }
+  void SetFeatureData(FeatureDataHandle feature_data) { m_feature_data = feature_data; }
   virtual ~Optimizer();
 
   unsigned size() const {
-    return FData ? FData->size() : 0;
+    return m_feature_data ? m_feature_data->size() : 0;
   }
 
   /**
@@ -53,12 +52,12 @@ public:
    * Given a set of nbests, get the Statistical score.
    */
   statscore_t GetStatScore(const vector<unsigned>& nbests) const {
-    return scorer->score(nbests);
+    return m_scorer->score(nbests);
   }
 
   statscore_t GetStatScore(const Point& param) const;
 
-  vector<statscore_t> GetIncStatScore(vector<unsigned> ref, vector<vector<pair<unsigned,unsigned> > >) const;
+  vector<statscore_t> GetIncStatScore(const vector<unsigned>& ref, const vector<vector<pair<unsigned,unsigned> > >& diffs) const;
 
   /**
    * Get the optimal Lambda and the best score in a particular direction from a given Point.
@@ -76,7 +75,7 @@ class SimpleOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  SimpleOptimizer(unsigned dim, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, start,nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
@@ -89,7 +88,7 @@ class RandomDirectionOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  RandomDirectionOptimizer(unsigned dim, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, start, nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
@@ -100,36 +99,9 @@ public:
 class RandomOptimizer : public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim, vector<unsigned> i2O, vector<parameter_t> start, unsigned int nrandom)
+  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
-};
-
-class OptimizerFactory
-{
-public:
-  static vector<string> GetTypeNames();
-  static Optimizer* BuildOptimizer(unsigned dim, vector<unsigned> tooptimize, vector<parameter_t> start, const string& type, unsigned int nrandom);
-
-private:
-  OptimizerFactory() {}
-  ~OptimizerFactory() {}
-
-  // Add new optimizer here BEFORE NOPTIMZER
-  enum OptType {
-    POWELL = 0,
-    RANDOM_DIRECTION = 1,
-    RANDOM,
-    NOPTIMIZER
-  };
-
-  // Get optimizer type.
-  static OptType GetOType(const string& type);
-
-  // Setup optimization types.
-  static void SetTypeNames();
-
-  static vector<string> typenames;
 };
 
 #endif  // OPTIMIZER_H

@@ -18,8 +18,9 @@ while(<SRC>) {
     elsif (/^<\/srcset/) {
 	s/<\/srcset/<\/tstset/;
     }
-    elsif (/^<DOC/i) {
-	s/<DOC/<DOC sysid="$system"/i;
+    elsif (/^<doc/i) {
+  s/ *sysid="[^\"]+"//;
+	s/<doc/<doc sysid="$system"/i;
     }
     elsif (/<seg/) {
 	my $line = shift(@OUT);

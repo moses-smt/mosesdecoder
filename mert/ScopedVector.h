@@ -12,39 +12,39 @@ class ScopedVector {
   ScopedVector() {}
   virtual ~ScopedVector() { reset(); }
 
-  bool empty() const { return vec_.empty(); }
+  bool empty() const { return m_vec.empty(); }
 
-  void push_back(T *e) { vec_.push_back(e); }
+  void push_back(T *e) { m_vec.push_back(e); }
 
   void reset() {
-    for (iterator it = vec_.begin(); it != vec_.end(); ++it) {
+    for (iterator it = m_vec.begin(); it != m_vec.end(); ++it) {
       delete *it;
     }
-    vec_.clear();
+    m_vec.clear();
   }
 
-  void reserve(size_t capacity) { vec_.reserve(capacity); }
-  void resize(size_t size) { vec_.resize(size); }
+  void reserve(size_t capacity) { m_vec.reserve(capacity); }
+  void resize(size_t size) { m_vec.resize(size); }
 
-  size_t size() const {return vec_.size(); }
+  size_t size() const {return m_vec.size(); }
 
-  iterator begin() { return vec_.begin(); }
-  const_iterator begin() const { return vec_.begin(); }
+  iterator begin() { return m_vec.begin(); }
+  const_iterator begin() const { return m_vec.begin(); }
 
-  iterator end() { return vec_.end(); }
-  const_iterator end() const { return vec_.end(); }
+  iterator end() { return m_vec.end(); }
+  const_iterator end() const { return m_vec.end(); }
 
-  std::vector<T*>& get() { return vec_; }
-  const std::vector<T*>& get() const { return vec_; }
+  std::vector<T*>& get() { return m_vec; }
+  const std::vector<T*>& get() const { return m_vec; }
 
-  std::vector<T*>* operator->() { return &vec_; }
-  const std::vector<T*>* operator->() const { return &vec_; }
+  std::vector<T*>* operator->() { return &m_vec; }
+  const std::vector<T*>* operator->() const { return &m_vec; }
 
-  T*& operator[](size_t i) { return vec_[i]; }
-  const T* operator[](size_t i) const { return vec_[i]; }
+  T*& operator[](size_t i) { return m_vec[i]; }
+  const T* operator[](size_t i) const { return m_vec[i]; }
 
  private:
-  std::vector<T*> vec_;
+  std::vector<T*> m_vec;
 
   // no copying allowed.
   ScopedVector<T>(const ScopedVector<T>&);

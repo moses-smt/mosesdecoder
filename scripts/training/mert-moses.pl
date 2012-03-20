@@ -404,6 +404,9 @@ if (-e $ref_abs) {
 else {
   # if multiple file, get a full list of the files
     my $part = 0;
+    if (! -e $ref_abs."0" && -e $ref_abs.".ref0") {
+        $ref_abs .= ".ref";
+    }
     while (-e $ref_abs.$part) {
         push @references, $ref_abs.$part;
         $part++;
