@@ -1034,14 +1034,13 @@ sub execute_steps {
 	    }
 	    elsif (! -e &versionize(&step_file($i)).".DONE") {
 		my $step = &versionize(&step_file($i));
-		print "\texecuting $step via ";
 		&define_step($i);
 		&write_info($i);
 
 		# cluster job submission
 		if ($CLUSTER && ! &is_qsub_script($i)) {
 		    $DO{$i}++;
-		    print "qsub\n";
+		    print "\texecuting $step via qsub ($active active)\n";
 		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
 		    `qsub $qsub_args -e $step.STDERR -o $step.STDOUT $step`;
 		}
@@ -1050,15 +1049,12 @@ sub execute_steps {
 		elsif ($CLUSTER || $active < $MAX_ACTIVE) {
 		    $active++;
 		    $DO{$i}++;
-		    print "sh ($active active)\n";
+		    print "\texecuting $step via sh ($active active)\n";
 		    sleep(5);
 		    if (!fork) {
 		        `sh $step >$step.STDOUT 2> $step.STDERR`;
 		         exit;
 		    }
-		}
-		else {
-		    print " --- on hold\n";
 		}
 	    }
 	}
@@ -1853,6 +1849,9 @@ sub define_training_create_config {
 	    $cmd .= "-lm $factor:$order:$lm_file:$type ";
     }
 
+    my $additional_ini = &get("TRAINING:additional-ini");
+    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
+
     &create_step($step_id,$cmd);
 }
 
@@ -2185,6 +2184,7 @@ sub define_evaluation_decode {
     my $nbest = &backoff_and_get("EVALUATION:$set:nbest");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     
@@ -2192,6 +2192,9 @@ sub define_evaluation_decode {
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
       $settings .= " -use-alignment-info -alignment-output-file $system_output.wa";
       $report_segmentation = "yes";
+    }
+    if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
+      $settings .= " -unpruned-search-graph -osg $system_output.graph";
     }
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
       if ($hierarchical) {
@@ -2237,11 +2240,16 @@ sub define_evaluation_analysis {
 	$output,$reference,$input) = &get_output_and_input($step_id);
     my $script = &backoff_and_get("EVALUATION:$set:analysis");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
 
     my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis";
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
         my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
 	$cmd .= " -segmentation $segmentation_file";
+    }
+    if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
+      my $search_graph_file = &get_default_file("EVALUATION",$set,"decode");
+      $cmd .= " -search-graph $search_graph_file.graph";
     }
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$cmd .= " -hierarchical";
