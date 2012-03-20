@@ -4,6 +4,7 @@ lib m ;
 
 lib mert_lib :
 Util.cpp
+GzFileBuf.cpp
 FileStream.cpp
 Timer.cpp
 ScoreStats.cpp
