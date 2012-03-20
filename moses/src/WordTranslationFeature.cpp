@@ -65,6 +65,18 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
   	int targetIndex = alignmentPoint->second;
     const string &sourceWord = sourcePhrase.GetWord(sourceIndex).GetFactor(m_factorTypeSource)->GetString();
     const string &targetWord = targetPhrase.GetWord(targetIndex).GetFactor(m_factorTypeTarget)->GetString();
+    if (m_ignorePunctuation) {
+      // check if source or target are punctuation                                                                             
+      char firstChar = sourceWord.at(0);
+      CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+      if(charIterator != m_punctuationHash.end())
+	continue;
+      firstChar = targetWord.at(0);
+      charIterator = m_punctuationHash.find( firstChar );
+      if(charIterator != m_punctuationHash.end())
+        continue;
+    }
+
     bool sourceExists = false;
     bool targetExists = false;
     if (!m_unrestricted) {
