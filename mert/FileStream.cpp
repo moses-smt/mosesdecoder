@@ -1,7 +1,7 @@
 #include "FileStream.h"
 
 #include <stdexcept>
-#include "gzfilebuf.h"
+#include "GzFileBuf.h"
 
 using namespace std;
 
@@ -22,7 +22,7 @@ inputfilestream::inputfilestream(const std::string &filePath)
   if (IsGzipFile(filePath)) {
     fb->close();
     delete fb;
-    m_streambuf = new gzfilebuf(filePath.c_str());
+    m_streambuf = new GzFileBuf(filePath.c_str());
   } else {
     m_streambuf = fb;
   }
