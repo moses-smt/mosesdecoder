@@ -1001,9 +1001,7 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
   }
 
   for (size_t i = 0; i < modelSpec.size(); i++ ) {
-    bool ignorePunctuation = false;
-    bool biasFeature = false;
-    bool restricted = false;
+    bool ignorePunctuation = true, biasFeature = false, restricted = false;
     size_t context = 0;
     string filenameSource, filenameTarget;
     vector< string > factors;
@@ -1691,7 +1689,7 @@ bool StaticData::LoadPhrasePairFeature()
   
   size_t sourceFactorId = Scan<size_t>(factors[0]);
   size_t targetFactorId = Scan<size_t>(factors[1]);
-  bool simple = true, sourceContext = false, ignorePunctuation = false;
+  bool simple = true, sourceContext = false, ignorePunctuation = true;
   if (tokens.size() >= 3) {
 	simple = Scan<size_t>(tokens[1]);
 	sourceContext = Scan<size_t>(tokens[2]);
@@ -1826,7 +1824,7 @@ bool StaticData::LoadWordTranslationFeature()
   FactorType factorIdSource = Scan<size_t>(factors[0]);
   FactorType factorIdTarget = Scan<size_t>(factors[1]);
   
-  bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = false;
+  bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = true;
   if (tokens.size() >= 4) {
 	simple = Scan<size_t>(tokens[1]);
   	sourceTrigger = Scan<size_t>(tokens[2]);
