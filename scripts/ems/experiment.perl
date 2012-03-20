@@ -934,7 +934,12 @@ sub define_step {
 	    &define_training_create_config($i);
 	}
 	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:interpolate') {
-	    &define_training_interpolated_lm_interpolate($i);
+	    &define_interpolated_lm_interpolate($i);
+	}
+	elsif ($DO_STEP[$i] eq 'INTERPOLATED-LM:binarize' ||
+         $DO_STEP[$i] eq 'INTERPOLATED-LM:quantize' ||
+         $DO_STEP[$i] eq 'INTERPOLATED-LM:randomize') {
+	    &define_interpolated_lm_process($i);
 	}
 	elsif ($DO_STEP[$i] eq 'TUNING:factorize-input') {
             &define_tuningevaluation_factorize($i);
@@ -991,7 +996,10 @@ sub execute_steps {
     while(1) {
 
 	# find steps to be done
-	for(my $i=0;$i<=$#DO_STEP;$i++) {
+  my $repeat_if_passed = 1;
+  while($repeat_if_passed) {
+    $repeat_if_passed = 0;
+	  for(my $i=0;$i<=$#DO_STEP;$i++) {
 	    next if (defined($DONE{$i}));
 	    next if (defined($DO{$i}));
 	    next if (defined($CRASHED{$i}));
@@ -1000,10 +1008,19 @@ sub execute_steps {
 	    foreach my $prev_step (@{$DEPENDENCY[$i]}) {
 		$doable = 0 if !defined($DONE{$prev_step});
 	    }
-	    $DO{$i} = 1 if $doable;
+      next unless $doable;
+      $DO{$i} = 1;
+
+      # immediately label pass steps as done
+	    next unless defined($PASS{$i});
+      $DONE{$i} = 1;
+		  delete($DO{$i});
+      $repeat_if_passed = 1;
+    }
 	}
 
 	print "number of steps doable or running: ".(scalar keys %DO)."\n";
+  foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	
 	# execute new step
@@ -1017,31 +1034,27 @@ sub execute_steps {
 	    }
 	    elsif (! -e &versionize(&step_file($i)).".DONE") {
 		my $step = &versionize(&step_file($i));
-		print "\texecuting $step via ";
 		&define_step($i);
 		&write_info($i);
 
 		# cluster job submission
 		if ($CLUSTER && ! &is_qsub_script($i)) {
 		    $DO{$i}++;
-		    print "qsub\n";
+		    print "\texecuting $step via qsub ($active active)\n";
 		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
-		    `qsub $qsub_args -e $step.STDERR $step -o $step.STDOUT`;
+		    `qsub $qsub_args -e $step.STDERR -o $step.STDOUT $step`;
 		}
 
 		# execute in fork
 		elsif ($CLUSTER || $active < $MAX_ACTIVE) {
 		    $active++;
 		    $DO{$i}++;
-		    print "sh ($active)\n";
+		    print "\texecuting $step via sh ($active active)\n";
 		    sleep(5);
 		    if (!fork) {
 		        `sh $step >$step.STDOUT 2> $step.STDERR`;
 		         exit;
 		    }
-		}
-		else {
-		    print " --- on hold\n";
 		}
 	    }
 	}
@@ -1275,7 +1288,8 @@ sub check_if_crashed {
 	foreach my $pattern (@{$ERROR{&defined_step_id($i)}},
 			     'error','killed','core dumped','can\'t read',
 			     'no such file or directory','unknown option',
-			     'died at','exit code','permission denied') {
+			     'died at','exit code','permission denied',
+           "Can't locate") {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
@@ -1662,14 +1676,13 @@ sub define_training_extract_phrases {
 	  my $unknown_word_label = &versionize(&long_file_name("unknown-word-label","model",""));
 	  $cmd .= "-unknown-word-label $unknown_word_label ";
       }
-    }
 
+      if (&get("TRAINING:use-ghkm")) {
+        $cmd .= "-ghkm ";
+      }
+    }
 
     my $extract_settings = &get("TRAINING:extract-settings");
-    if (&get("TRAINING:sparse-phrase-scripts-dir")) {
-      $extract_settings = "" unless defined($extract_settings);
-      $extract_settings .= " --SentenceId ";
-    }
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
 
     &create_step($step_id,$cmd);
@@ -1733,10 +1746,8 @@ sub define_training_create_config {
     my ($step_id) = @_;
 
     my ($config,
-	$reordering_table,$phrase_translation_table,$generation_table,$sparse_phrase_translation_table,@LM)
+	$reordering_table,$phrase_translation_table,$generation_table,@LM)
 	= &get_output_and_input($step_id);
-
-    $phrase_translation_table = $sparse_phrase_translation_table if ($sparse_phrase_translation_table);
 
     my $cmd = &get_training_setting(9);
 
@@ -1772,11 +1783,11 @@ sub define_training_create_config {
 
     # find out which language model files have been built
     my @LM_SETS = &get_sets("LM");
+    my %INTERPOLATED_AWAY;
     my %OUTPUT_FACTORS;
     %OUTPUT_FACTORS = &get_factor_id("output") if &backoff_and_get("TRAINING:output-factors");
 
-    my $interpolated = &get("INTERPOLATED-LM:script"); # flag
-    if ($interpolated) {
+    if (&get("INTERPOLATED-LM:script")) {
 	my $type = 0;
 	# binarizing the lm?
 	$type = 1 if (&get("INTERPOLATED-LM:binlm") ||
@@ -1786,23 +1797,32 @@ sub define_training_create_config {
 		      &backoff_and_get("INTERPOLATED-LM:lm-randomizer"));
 
   # manually set type 
-  $type = &get("INTERPOLATED-LM:type") if (&get("INTERPOLATED-LM:type"));
+  $type = &get("INTERPOLATED-LM:type") if &get("INTERPOLATED-LM:type");
 
-	# order and factor inherited from individual LMs
-	my $set = shift @LM_SETS;
-	my $order = &check_backoff_and_get("LM:$set:order");
-	my $factor = 0;
-	if (&backoff_and_get("TRAINING:output-factors") &&
-	    &backoff_and_get("LM:$set:factors")) {
-	    $factor = $OUTPUT_FACTORS{&backoff_and_get("LM:$set:factors")};
-	}
-	$cmd .= "-lm $factor:$order:$LM[0]:$type ";
+  # go through each interpolated language model
+  my ($icount,$ILM_SETS) = &get_interpolated_lm_sets();
+  my $FACTOR = &backoff_and_get_array("TRAINING:output-factors");
+  foreach my $factor (keys %{$ILM_SETS}) {
+    foreach my $order (keys %{$$ILM_SETS{$factor}}) {
+      next unless scalar(@{$$ILM_SETS{$factor}{$order}}) > 1;
+      my $suffix = "";
+      $suffix = ".$$FACTOR[$factor]" if $icount > 1 && defined($FACTOR);
+      $suffix .= ".order$order" if $icount > 1;
+	    $cmd .= "-lm $factor:$order:$LM[0]$suffix:$type ";
+      foreach my $id_set (@{$$ILM_SETS{$factor}{$order}}) {
+        my ($id,$set) = split(/ /,$id_set,2);
+        $INTERPOLATED_AWAY{$set} = 1;
+      }
     }
-    else {
+  }
+  }
+  shift @LM; # remove interpolated lm
+
 	die("ERROR: number of defined LM sets (".(scalar @LM_SETS).":".join(",",@LM_SETS).") and LM files (".(scalar @LM).":".join(",",@LM).") does not match")
 	    unless scalar @LM == scalar @LM_SETS;
 	foreach my $lm (@LM) {
 	    my $set = shift @LM_SETS;
+      next if defined($INTERPOLATED_AWAY{$set});
 	    my $order = &check_backoff_and_get("LM:$set:order");
 	    my $lm_file = "$lm";
 	    my $type = 0; # default: SRILM
@@ -1827,56 +1847,144 @@ sub define_training_create_config {
 	    }
 
 	    $cmd .= "-lm $factor:$order:$lm_file:$type ";
-	}
     }
 
-    if (&get("TRAINING:sparse-phrase-scripts-dir")) {
-      $cmd .= "-sparse-phrase-features";
-    }
+    my $additional_ini = &get("TRAINING:additional-ini");
+    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
 
     &create_step($step_id,$cmd);
 }
 
-sub define_training_interpolated_lm_interpolate {
+sub define_interpolated_lm_interpolate {
     my ($step_id) = @_;
 
     my ($interpolated_lm,
-	$interpolation_script, $tuning, @LM) 
-	= &get_output_and_input($step_id);
+	$interpolation_script, $tuning, @LM) = &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
+    my $group = &get("INTERPOLATED-LM:group");
 
-    my $lm_list = "";
-    foreach (@LM) {
-	$lm_list .= $_.",";
+    my $cmd = "";
+
+    # go through language models by factor and order 
+    my ($icount,$ILM_SETS) = &get_interpolated_lm_sets();
+    foreach my $factor (keys %{$ILM_SETS}) {
+      foreach my $order (keys %{$$ILM_SETS{$factor}}) {
+        next unless scalar(@{$$ILM_SETS{$factor}{$order}}) > 1;
+
+        # get list of language model files
+        my $lm_list = "";
+        foreach my $id_set (@{$$ILM_SETS{$factor}{$order}}) {
+          my ($id,$set) = split(/ /,$id_set,2);
+          $lm_list .= $LM[$id].",";
+        }
+        chop($lm_list);
+
+        # if grouping, identify position in list
+        my $numbered_string = "";
+        if (defined($group)) {
+          my %POSITION;
+          foreach my $id_set (@{$$ILM_SETS{$factor}{$order}}) {
+            my ($id,$set) = split(/ /,$id_set,2);
+            $POSITION{$set} = scalar keys %POSITION;
+          }
+          my $group_string = $group;
+          $group_string =~ s/\s+/ /g;
+          $group_string =~ s/ *, */,/g;
+          $group_string =~ s/^ //;
+          $group_string =~ s/ $//;
+          $group_string .= " ";
+          while($group_string =~ /^([^ ,]+)([ ,]+)(.*)$/) {
+            die("ERROR: unknown set $1 in INTERPOLATED-LM:group definition")
+          if ! defined($POSITION{$1});
+            $numbered_string .= $POSITION{$1}.$2;
+            $group_string = $3;
+          }
+          chop($numbered_string);
+        }
+
+        my $FACTOR = &backoff_and_get_array("TRAINING:output-factors");
+        my $name = $interpolated_lm;
+        if ($icount > 1) {
+          $name .= ".$$FACTOR[$factor]" if defined($FACTOR);
+          $name .= ".order$order";
+        }
+        $cmd .= "$interpolation_script --tuning $tuning --name $name --srilm $srilm_dir --lm $lm_list";
+        $cmd .= " --group \"$numbered_string\"" if defined($group);
+        $cmd .= "\n";
+      }
     }
-    chop($lm_list);
 
-    # sanity checks on order and factors
-    my @LM_SETS = &get_sets("LM");
-    my %OUTPUT_FACTORS;
-    %OUTPUT_FACTORS = &get_factor_id("output") 
-	if &backoff_and_get("TRAINING:output-factors");
-    my ($factor,$order);
-    foreach my $set (@LM_SETS) {
-	my $set_order = &check_backoff_and_get("LM:$set:order");
-	if (defined($order) && $order != $set_order) {
-	    die("ERROR: language models have mismatching order - no interpolation possible!");
-	}
-	$order = $set_order;
-	
-	if (&backoff_and_get("TRAINING:output-factors") &&
-	    &backoff_and_get("LM:$set:factors")) {
-	    my $set_factor = $OUTPUT_FACTORS{&backoff_and_get("LM:$set:factors")};
-	    if (defined($factor) && $factor != $set_factor) {
-		die("ERROR: language models have mismatching factors - no interpolation possible!");
-	    }
-	    $factor = $set_factor;
-	}
-    }
-
-    my $cmd = "$interpolation_script --tuning $tuning --name $interpolated_lm --srilm $srilm_dir --lm $lm_list";
-
+    die("ERROR: Nothing to interpolate, remove interpolation step!") if $cmd eq "";
     &create_step($step_id,$cmd);
+}
+
+sub define_interpolated_lm_process {
+  my ($step_id) = @_;
+
+  my ($processed_lm, $interpolatd_lm) = &get_output_and_input($step_id);
+  my ($module,$set,$stepname) = &deconstruct_name($DO_STEP[$step_id]);
+  my $tool = &check_backoff_and_get("INTERPOLATED-LM:lm-${stepname}r");
+  my $FACTOR = &backoff_and_get_array("TRAINING:output-factors");
+
+  # go through language models by factor and order 
+  my ($icount,$ILM_SETS) = &get_interpolated_lm_sets();
+  my $cmd = "";
+  foreach my $factor (keys %{$ILM_SETS}) {
+    foreach my $order (keys %{$$ILM_SETS{$factor}}) {
+      next unless scalar(@{$$ILM_SETS{$factor}{$order}}) > 1;
+      my $suffix = "";
+      $suffix = ".$$FACTOR[$factor]" if $icount > 1 && defined($FACTOR);
+      $suffix .= ".order$order" if $icount > 1;
+      $cmd .= "$tool $interpolatd_lm$suffix $processed_lm$suffix\n"; 
+    }
+  }
+
+  &create_step($step_id,$cmd);
+}
+
+sub get_interpolated_lm_processed_names {
+  my ($processed_lm) = @_;
+  my @ILM_NAME;
+  my ($icount,$ILM_SETS) = &get_interpolated_lm_sets();
+  my $FACTOR = &backoff_and_get_array("TRAINING:output-factors");
+  foreach my $factor (keys %{$ILM_SETS}) {
+    foreach my $order (keys %{$$ILM_SETS{$factor}}) {
+      if (scalar(@{$$ILM_SETS{$factor}{$order}}) > 1) {
+        my $suffix = "";
+        $suffix = ".$$FACTOR[$factor]" if $icount > 1 && defined($FACTOR);
+        $suffix .= ".order$order" if $icount > 1;
+        push @ILM_NAME,"$processed_lm$suffix";
+      }
+      else {
+        push @ILM_NAME,"$processed_lm.".($FACTOR?"":".$$FACTOR[$factor]").".order$order";
+      }
+    }
+  }
+  return @ILM_NAME;
+}
+
+sub get_interpolated_lm_sets {
+  my %ILM_SETS;
+
+  my @LM_SETS = &get_sets("LM");
+  my %OUTPUT_FACTORS;
+  %OUTPUT_FACTORS = &get_factor_id("output") if &backoff_and_get("TRAINING:output-factors");
+
+  my $count=0;
+  my $icount=0;
+  foreach my $set (@LM_SETS) {
+    my $order = &check_backoff_and_get("LM:$set:order");
+	
+    my $factor = 0;
+	  if (&backoff_and_get("TRAINING:output-factors") &&
+	      &backoff_and_get("LM:$set:factors")) {
+      $factor = $OUTPUT_FACTORS{&backoff_and_get("LM:$set:factors")};
+    }
+
+    push @{$ILM_SETS{$factor}{$order}}, ($count++)." ".$set;
+    $icount++ if scalar(@{$ILM_SETS{$factor}{$order}}) == 2;
+  }
+  return ($icount,\%ILM_SETS);
 }
 
 sub get_training_setting {
@@ -1895,6 +2003,7 @@ sub get_training_setting {
     my $source_syntax = &get("GENERAL:input-parser");
     my $target_syntax = &get("GENERAL:output-parser");
     my $score_settings = &get("TRAINING:score-settings");
+    my $parallel = &get("TRAINING:parallel");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -1916,6 +2025,7 @@ sub get_training_setting {
     $cmd .= "-source-syntax " if $source_syntax;
     $cmd .= "-glue-grammar " if $hierarchical;
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
+    $cmd .= "-parallel " if $parallel;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2074,6 +2184,7 @@ sub define_evaluation_decode {
     my $nbest = &backoff_and_get("EVALUATION:$set:nbest");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     
@@ -2081,6 +2192,9 @@ sub define_evaluation_decode {
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
       $settings .= " -use-alignment-info -alignment-output-file $system_output.wa";
       $report_segmentation = "yes";
+    }
+    if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
+      $settings .= " -unpruned-search-graph -osg $system_output.graph";
     }
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
       if ($hierarchical) {
@@ -2126,11 +2240,16 @@ sub define_evaluation_analysis {
 	$output,$reference,$input) = &get_output_and_input($step_id);
     my $script = &backoff_and_get("EVALUATION:$set:analysis");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
 
     my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis";
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
         my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
 	$cmd .= " -segmentation $segmentation_file";
+    }
+    if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
+      my $search_graph_file = &get_default_file("EVALUATION",$set,"decode");
+      $cmd .= " -search-graph $search_graph_file.graph";
     }
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$cmd .= " -hierarchical";
@@ -2268,12 +2387,13 @@ sub define_reporting_report {
 ### subs for step definition
 
 sub get_output_and_input {
-    my ($step_id) = @_;
+  my ($step_id) = @_;
 
-    my $step = $DO_STEP[$step_id];
-    my $output = &get_default_file(&deconstruct_name($step));
+  my $step = $DO_STEP[$step_id];
+  my $output = &get_default_file(&deconstruct_name($step));
 
-    my @INPUT;
+  my @INPUT;
+  if (defined($USES_INPUT{$step_id})) { 
     for(my $i=0; $i<scalar @{$USES_INPUT{$step_id}}; $i++) {
 	# get name of input file needed
 	my $in_file = $USES_INPUT{$step_id}[$i];
@@ -2305,7 +2425,8 @@ sub get_output_and_input {
 	push @INPUT,&get_specified_or_default_file(&deconstruct_name($in_file),
 						   &deconstruct_name($prev_step));
     }
-    return ($output,@INPUT);
+  }
+  return ($output,@INPUT);
 }
 
 sub define_template {
@@ -2404,6 +2525,9 @@ sub define_template {
     }
     # input is defined as IN or IN0, IN1, IN2
     else {
+  if ($cmd =~ /([^ANS])IN/ && scalar(@INPUT) == 0) {
+    die("ERROR: Step $step requires input from prior steps, but none defined.");
+  }
 	$cmd =~ s/([^ANS])IN(\d+)/$1$INPUT[$2]/g;  # a bit trickier to
 	$cmd =~ s/([^ANS])IN/$1$INPUT[0]/g;        # avoid matching TRAINING, RECASING
 	$cmd =~ s/^IN(\d+)/$INPUT[$2]/g;
@@ -2459,7 +2583,7 @@ sub create_step {
     $subdir = "lm" if $subdir eq "interpolated-lm";
     open(STEP,">$file");
     print STEP "#!/bin/bash\n\n";
-    print STEP "PATH=".$ENV{"PATH"}."\n";
+    print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
     print STEP "cd $dir\n";
     print STEP "echo 'starting at '`date`' on '`hostname`\n";
     print STEP "mkdir -p $dir/$subdir\n\n";
@@ -2577,7 +2701,7 @@ sub get_default_file {
 
 sub long_file_name {
     my ($file,$module,$set) = @_;
-    return $file if $file =~ /^\//;
+    return $file if $file =~ /^\// || $file =~ / \//;
 
     if ($file !~ /\//) {
 	my $dir = $module;
