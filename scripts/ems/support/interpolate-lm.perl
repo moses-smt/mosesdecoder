@@ -110,7 +110,7 @@ print STDERR "\n=== BUILDING FINAL LM ===\n\n";
 sub interpolate {
   my ($name,@LM) = @_;
 
-  die("cannot interpolate more than 10 language models at once.")
+  die("cannot interpolate more than 10 language models at once: ",join(",",@LM))
     if scalar(@LM) > 10;
 
   my $tmp = tempdir(DIR=>$TEMPDIR);
