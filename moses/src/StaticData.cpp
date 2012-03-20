@@ -1677,9 +1677,9 @@ bool StaticData::LoadPhrasePairFeature()
     return false;
   }
   vector<string> tokens = Tokenize(phrasePairFactors[0]);
-  if (tokens.size() != 1 && tokens.size() != 2 && tokens.size() != 3) {
+  if (! (tokens.size() >= 1  && tokens.size() <= 4)) {
     UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
-    		"[simple source-trigger]");
+    		"[simple source-trigger] [ignore-punctuation]");
     return false;
   }
   
@@ -1688,16 +1688,19 @@ bool StaticData::LoadPhrasePairFeature()
     factors = Tokenize(tokens[0]," ");  
   else 
     factors = Tokenize(tokens[0],"-");
+  
   size_t sourceFactorId = Scan<size_t>(factors[0]);
   size_t targetFactorId = Scan<size_t>(factors[1]);
-  bool simple = true;
-  bool sourceContext = false;
-  if (tokens.size() == 3) {
+  bool simple = true, sourceContext = false, ignorePunctuation = false;
+  if (tokens.size() >= 3) {
 	simple = Scan<size_t>(tokens[1]);
 	sourceContext = Scan<size_t>(tokens[2]);
   }
+  if (tokens.size() == 4) 
+	ignorePunctuation = Scan<size_t>(tokens[3]);
   
-  m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext);
+  m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext, 
+		  ignorePunctuation);
   if (weight.size() > 0)
     m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
   return true;
@@ -1807,9 +1810,9 @@ bool StaticData::LoadWordTranslationFeature()
   }
 
   vector<string> tokens = Tokenize(parameters[0]);
-  if (tokens.size() != 1 && tokens.size() != 4 && tokens.size() != 6) {
+  if (tokens.size() != 1 && tokens.size() != 4 && tokens.size() != 5 && tokens.size() != 7) {
     UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src>-<factor-tgt> "
-    		"[simple source-trigger target-trigger] [filename-src filename-tgt]");
+    		"[simple source-trigger target-trigger] [ignore-punctuation] [filename-src filename-tgt]");
     return false;
   }
 
@@ -1822,22 +1825,24 @@ bool StaticData::LoadWordTranslationFeature()
   vector <string> factors = Tokenize(tokens[0],"-");
   FactorType factorIdSource = Scan<size_t>(factors[0]);
   FactorType factorIdTarget = Scan<size_t>(factors[1]);
-  bool simple = 1;
-  bool sourceTrigger = 0;
-  bool targetTrigger = 0;
+  
+  bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = false;
   if (tokens.size() >= 4) {
 	simple = Scan<size_t>(tokens[1]);
   	sourceTrigger = Scan<size_t>(tokens[2]);
   	targetTrigger = Scan<size_t>(tokens[3]);
   }
+  if (tokens.size() >= 5) {
+	  ignorePunctuation = Scan<size_t>(tokens[4]);
+  }
 
   m_wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
-		  sourceTrigger, targetTrigger);
+		  sourceTrigger, targetTrigger, ignorePunctuation);
   if (weight.size() > 0)
     m_wordTranslationFeature->SetSparseProducerWeight(weight[0]);
 
   // load word list for restricted feature set
-  if (tokens.size() == 6) {
+  if (tokens.size() == 7) {
     string filenameSource = tokens[5];
     string filenameTarget = tokens[6];
     cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;

@@ -58,6 +58,14 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
 	   // range over source words to get context
 	   for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
 		   string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
+		  	if (m_ignorePunctuation) {
+		  		// check if trigger is punctuation
+		  		char firstChar = sourceTrigger.at(0);
+		  		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+		  		if(charIterator != m_punctuationHash.end())
+		  			continue;
+		  	}
+		   
 		   bool sourceTriggerExists = false;
 //		   if (!m_unrestricted)
 //			   sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();

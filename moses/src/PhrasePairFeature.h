@@ -16,30 +16,52 @@ namespace Moses {
   **/
 class PhrasePairFeature: public StatelessFeatureFunction {
 	
+	typedef std::map< char, short > CharHash;
+	
 	struct ThreadLocalStorage
 	{
 		const Sentence *input;
 	};
 	
 	private:
-	#ifdef WITH_THREADS
+#ifdef WITH_THREADS
 	  boost::thread_specific_ptr<ThreadLocalStorage> m_local;
-	#else
+#else
 	  std::auto_ptr<ThreadLocalStorage> m_local;
-	#endif
+#endif
+
+	  FactorType m_sourceFactorId;
+	  FactorType m_targetFactorId;
+	  bool m_unrestricted;
+	  bool m_simple;
+	  bool m_sourceContext;
+	  float m_sparseProducerWeight;
+	  bool m_ignorePunctuation;
+	  CharHash m_punctuationHash;
 	
   public:
 	  PhrasePairFeature (FactorType sourceFactorId, FactorType targetFactorId, 
-			  bool simple, bool sourceContext) : StatelessFeatureFunction("pp", ScoreProducer::unlimited),
+			  bool simple, bool sourceContext, bool ignorePunctuation) : 
+				  StatelessFeatureFunction("pp", ScoreProducer::unlimited),
 	    m_sourceFactorId(sourceFactorId),
 	    m_targetFactorId(targetFactorId),
 	    m_unrestricted(true),
 	    m_simple(simple),
 	    m_sourceContext(sourceContext),	    
-	    m_sparseProducerWeight(1) {
+	    m_sparseProducerWeight(1),
+	    m_ignorePunctuation(ignorePunctuation) {
 		  std::cerr << "Creating phrase pair feature.. " << std::endl;
 		  if (m_simple == 1) std::cerr << "using simple phrase pairs.. ";
 		  if (m_sourceContext == 1) std::cerr << "using source context.. ";
+		  
+		  // compile a list of punctuation characters 
+		  if (m_ignorePunctuation) {
+			  std::cerr << "ignoring punctuation for triggers.. ";
+			  char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
+			  for (size_t i=0; i < sizeof(punctuation)-1; ++i)
+				  m_punctuationHash[punctuation[i]] = 1;
+		  }
+		  
 		  std::cerr << "done." << std::endl;
 	  }
 
@@ -58,14 +80,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
     
     void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
     float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
-
-  private:
-    FactorType m_sourceFactorId;
-    FactorType m_targetFactorId;
-    bool m_unrestricted;
-    bool m_simple;
-    bool m_sourceContext;
-    float m_sparseProducerWeight;
 };
 
 }

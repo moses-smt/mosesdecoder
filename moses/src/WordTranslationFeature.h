@@ -22,6 +22,8 @@ namespace Moses
 //class WordTranslationFeature : public StatelessFeatureFunction {
 class WordTranslationFeature : public StatefulFeatureFunction {
 
+  typedef std::map< char, short > CharHash;
+	
   struct ThreadLocalStorage
   {
     const Sentence *input;
@@ -43,10 +45,12 @@ private:
   bool m_sourceContext;
   bool m_targetContext;
   float m_sparseProducerWeight;
+  bool m_ignorePunctuation;
+  CharHash m_punctuationHash;
   
 public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
-			bool simple, bool sourceContext, bool targetContext):
+			bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation):
 //     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
 		 StatefulFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
@@ -55,12 +59,22 @@ public:
      m_simple(simple),
      m_sourceContext(sourceContext),
      m_targetContext(targetContext),
-     m_sparseProducerWeight(1)
+     m_sparseProducerWeight(1),
+     m_ignorePunctuation(ignorePunctuation)
   {
 		std::cerr << "Creating word translation feature.. ";
 		if (m_simple == 1) std::cerr << "using simple word translations.. ";
 		if (m_sourceContext == 1) std::cerr << "using source context.. ";
 		if (m_targetContext == 1) std::cerr << "using target context.. ";
+		
+		  // compile a list of punctuation characters
+		  if (m_ignorePunctuation) {
+			  std::cerr << "ignoring punctuation for triggers.. ";
+			  char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
+			  for (size_t i=0; i < sizeof(punctuation)-1; ++i)
+				  m_punctuationHash[punctuation[i]] = 1;
+		  }
+		
 		std::cerr << "done." << std::endl;
   }
       

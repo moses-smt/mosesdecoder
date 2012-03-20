@@ -51,7 +51,6 @@ private:
   std::auto_ptr<ThreadLocalStorage> m_local;
 #endif
 
-  const Sentence *m_input;
   CharHash m_punctuationHash;
 
   std::vector< FactorType > m_inputFactors;

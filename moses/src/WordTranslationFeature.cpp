@@ -90,10 +90,10 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			// add <s> trigger feature for source
     			stringstream feature;
     			feature << "wt_";
-			feature << "<s>,";
-                        feature << sourceWord;
+    			feature << "<s>,";
+    			feature << sourceWord;
     			feature << "~";
-			feature << targetWord;
+    			feature << targetWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);
     		}
 
@@ -101,6 +101,14 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     		for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
     			if (contextIndex == globalSourceIndex) continue;
     			string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
+    		  	if (m_ignorePunctuation) {
+    		  		// check if trigger is punctuation
+    		  		char firstChar = sourceTrigger.at(0);
+    		  		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+    		  		if(charIterator != m_punctuationHash.end())
+    		  			continue;
+    		  	}
+    			
     			bool sourceTriggerExists = false;
     			if (!m_unrestricted)
     				sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
@@ -118,8 +126,8 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
 	    				feature << ",";
 	    				feature << sourceTrigger;
 	    			}
-				feature << "~";
-				feature << targetWord;
+	    			feature << "~";
+	    			feature << targetWord;
 	    			accumulator->SparsePlusEquals(feature.str(), 1);
     			}
     		}
@@ -130,8 +138,8 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			// add <s> trigger feature for source
     			stringstream feature;
     			feature << "wt_";
-			feature << sourceWord;
-			feature << "~";
+    			feature << sourceWord;
+    			feature << "~";
     			feature << "<s>,";
     			feature << targetWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);    	   
@@ -140,6 +148,14 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     		// range over target words (up to current position) to get context
     		for(size_t contextIndex = 0; contextIndex < globalTargetIndex; contextIndex++ ) {
     			string targetTrigger = cur_hypo.GetWord(contextIndex).GetFactor(m_factorTypeTarget)->GetString();
+    		  	if (m_ignorePunctuation) {
+    		  		// check if trigger is punctuation
+    		  		char firstChar = targetTrigger.at(0);
+    		  		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+    		  		if(charIterator != m_punctuationHash.end())
+    		  			continue;
+    		  	}
+    			
     			bool targetTriggerExists = false;
     			if (!m_unrestricted)
     				targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
@@ -147,8 +163,8 @@ FFState* WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, const FFSt
     			if (m_unrestricted || targetTriggerExists) {
     				stringstream feature;
     				feature << "wt_";
-				feature << sourceWord;
-				feature << "~";
+    				feature << sourceWord;
+    				feature << "~";
 	    			feature << targetTrigger;
 	    			feature << ",";
 	    			feature << targetWord;
