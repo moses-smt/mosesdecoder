@@ -55,30 +55,30 @@ struct Fourgram {
   NgramCounts::Key instance;
 };
 
-void CheckUnigram(const std::string& str) {
+bool CheckUnigram(const std::string& str) {
   Unigram unigram(str);
   NgramCounts::Value v;
-  BOOST_CHECK(GetNgramCounts()->Lookup(unigram.instance, &v));
+  return GetNgramCounts()->Lookup(unigram.instance, &v);
 }
 
-void CheckBigram(const std::string& a, const std::string& b) {
+bool CheckBigram(const std::string& a, const std::string& b) {
   Bigram bigram(a, b);
   NgramCounts::Value v;
-  BOOST_CHECK(GetNgramCounts()->Lookup(bigram.instance, &v));
+  return GetNgramCounts()->Lookup(bigram.instance, &v);
 }
 
-void CheckTrigram(const std::string& a, const std::string& b,
+bool CheckTrigram(const std::string& a, const std::string& b,
                   const std::string& c) {
   Trigram trigram(a, b, c);
   NgramCounts::Value v;
-  BOOST_CHECK(GetNgramCounts()->Lookup(trigram.instance, &v));
+  return GetNgramCounts()->Lookup(trigram.instance, &v);
 }
 
-void CheckFourgram(const std::string& a, const std::string& b,
+bool CheckFourgram(const std::string& a, const std::string& b,
                    const std::string& c, const std::string& d) {
   Fourgram fourgram(a, b, c, d);
   NgramCounts::Value v;
-  BOOST_CHECK(GetNgramCounts()->Lookup(fourgram.instance, &v));
+  return GetNgramCounts()->Lookup(fourgram.instance, &v);
 }
 
 } // namespace
@@ -126,30 +126,30 @@ BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
 
   // unigram
   for (std::size_t i = 0; i < res.size(); ++i) {
-    CheckUnigram(res[i]);
+    BOOST_CHECK(CheckUnigram(res[i]));
   }
 
   // bigram
-  CheckBigram("I", "saw");
-  CheckBigram("saw", "a");
-  CheckBigram("a", "girl");
-  CheckBigram("girl", "with");
-  CheckBigram("with", "a");
-  CheckBigram("a", "telescope");
-  CheckBigram("telescope", ".");
+  BOOST_CHECK(CheckBigram("I", "saw"));
+  BOOST_CHECK(CheckBigram("saw", "a"));
+  BOOST_CHECK(CheckBigram("a", "girl"));
+  BOOST_CHECK(CheckBigram("girl", "with"));
+  BOOST_CHECK(CheckBigram("with", "a"));
+  BOOST_CHECK(CheckBigram("a", "telescope"));
+  BOOST_CHECK(CheckBigram("telescope", "."));
 
   // trigram
-  CheckTrigram("I", "saw", "a");
-  CheckTrigram("saw", "a", "girl");
-  CheckTrigram("a", "girl", "with");
-  CheckTrigram("girl", "with", "a");
-  CheckTrigram("with", "a", "telescope");
-  CheckTrigram("a", "telescope", ".");
+  BOOST_CHECK(CheckTrigram("I", "saw", "a"));
+  BOOST_CHECK(CheckTrigram("saw", "a", "girl"));
+  BOOST_CHECK(CheckTrigram("a", "girl", "with"));
+  BOOST_CHECK(CheckTrigram("girl", "with", "a"));
+  BOOST_CHECK(CheckTrigram("with", "a", "telescope"));
+  BOOST_CHECK(CheckTrigram("a", "telescope", "."));
 
   // 4-gram
-  CheckFourgram("I", "saw", "a", "girl");
-  CheckFourgram("saw", "a", "girl", "with");
-  CheckFourgram("a", "girl", "with", "a");
-  CheckFourgram("girl", "with", "a", "telescope");
-  CheckFourgram("with", "a", "telescope", ".");
+  BOOST_CHECK(CheckFourgram("I", "saw", "a", "girl"));
+  BOOST_CHECK(CheckFourgram("saw", "a", "girl", "with"));
+  BOOST_CHECK(CheckFourgram("a", "girl", "with", "a"));
+  BOOST_CHECK(CheckFourgram("girl", "with", "a", "telescope"));
+  BOOST_CHECK(CheckFourgram("with", "a", "telescope", "."));
 }
