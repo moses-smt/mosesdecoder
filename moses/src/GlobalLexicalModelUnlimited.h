@@ -103,7 +103,7 @@ public:
   	// compile a list of punctuation characters
   	if (m_ignorePunctuation) {
   		std::cerr << "ignoring punctuation.. ";
-  		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
+  		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑\-/\\0123456789~=";
   		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
   			m_punctuationHash[punctuation[i]] = 1;
   	}
