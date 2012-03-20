@@ -2,6 +2,7 @@
 
 #include <cstring>
 #include <cstdlib>
+#include <cstdio>
 #include <iostream>
 
 GzFileBuf::GzFileBuf(const char* filename) {
@@ -50,7 +51,7 @@ int GzFileBuf::underflow() {
                          kBufSize - sizeof(int));
   if (num <= 0) {
     // ERROR or EOF
-    return EOF;
+    return EOF;           // NOTE: the macro EOF defined in stdio.h
   }
 
   // reset m_buf pointers
