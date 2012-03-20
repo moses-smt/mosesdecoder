@@ -501,7 +501,8 @@ int main(int argc, char** argv) {
 	}
 
 #ifdef MPI_ENABLE
-	mpi::broadcast(world, order, 0);
+	if (!trainWithMultipleFolds)
+	  mpi::broadcast(world, order, 0);
 #endif
 
 	// Create shards according to the number of processes used
