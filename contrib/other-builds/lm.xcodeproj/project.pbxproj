@@ -66,8 +66,6 @@
 		1EBA458F14B97E92003CC0EA /* Jamfile in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA454814B97E92003CC0EA /* Jamfile */; };
 		1EBA459014B97E92003CC0EA /* joint_sort_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA454914B97E92003CC0EA /* joint_sort_test.cc */; };
 		1EBA459114B97E92003CC0EA /* joint_sort.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA454A14B97E92003CC0EA /* joint_sort.hh */; };
-		1EBA459214B97E92003CC0EA /* key_value_packing_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA454B14B97E92003CC0EA /* key_value_packing_test.cc */; };
-		1EBA459314B97E92003CC0EA /* key_value_packing.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA454C14B97E92003CC0EA /* key_value_packing.hh */; };
 		1EBA459414B97E92003CC0EA /* mmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA454E14B97E92003CC0EA /* mmap.cc */; };
 		1EBA459514B97E92003CC0EA /* mmap.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA454F14B97E92003CC0EA /* mmap.hh */; };
 		1EBA459614B97E92003CC0EA /* murmur_hash.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA455014B97E92003CC0EA /* murmur_hash.cc */; };
@@ -165,8 +163,6 @@
 		1EBA454814B97E92003CC0EA /* Jamfile */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.jam; name = Jamfile; path = ../../util/Jamfile; sourceTree = "<group>"; };
 		1EBA454914B97E92003CC0EA /* joint_sort_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = joint_sort_test.cc; path = ../../util/joint_sort_test.cc; sourceTree = "<group>"; };
 		1EBA454A14B97E92003CC0EA /* joint_sort.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = joint_sort.hh; path = ../../util/joint_sort.hh; sourceTree = "<group>"; };
-		1EBA454B14B97E92003CC0EA /* key_value_packing_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = key_value_packing_test.cc; path = ../../util/key_value_packing_test.cc; sourceTree = "<group>"; };
-		1EBA454C14B97E92003CC0EA /* key_value_packing.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = key_value_packing.hh; path = ../../util/key_value_packing.hh; sourceTree = "<group>"; };
 		1EBA454D14B97E92003CC0EA /* LICENSE */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = LICENSE; path = ../../util/LICENSE; sourceTree = "<group>"; };
 		1EBA454E14B97E92003CC0EA /* mmap.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mmap.cc; path = ../../util/mmap.cc; sourceTree = "<group>"; };
 		1EBA454F14B97E92003CC0EA /* mmap.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = mmap.hh; path = ../../util/mmap.hh; sourceTree = "<group>"; };
@@ -277,8 +273,6 @@
 				1EBA454814B97E92003CC0EA /* Jamfile */,
 				1EBA454914B97E92003CC0EA /* joint_sort_test.cc */,
 				1EBA454A14B97E92003CC0EA /* joint_sort.hh */,
-				1EBA454B14B97E92003CC0EA /* key_value_packing_test.cc */,
-				1EBA454C14B97E92003CC0EA /* key_value_packing.hh */,
 				1EBA454D14B97E92003CC0EA /* LICENSE */,
 				1EBA454E14B97E92003CC0EA /* mmap.cc */,
 				1EBA454F14B97E92003CC0EA /* mmap.hh */,
@@ -363,7 +357,6 @@
 				1EBA458D14B97E92003CC0EA /* getopt.hh in Headers */,
 				1EBA458E14B97E92003CC0EA /* have.hh in Headers */,
 				1EBA459114B97E92003CC0EA /* joint_sort.hh in Headers */,
-				1EBA459314B97E92003CC0EA /* key_value_packing.hh in Headers */,
 				1EBA459514B97E92003CC0EA /* mmap.hh in Headers */,
 				1EBA459714B97E92003CC0EA /* murmur_hash.hh in Headers */,
 				1EBA459914B97E92003CC0EA /* probing_hash_table.hh in Headers */,
@@ -466,7 +459,6 @@
 				1EBA458C14B97E92003CC0EA /* getopt.c in Sources */,
 				1EBA458F14B97E92003CC0EA /* Jamfile in Sources */,
 				1EBA459014B97E92003CC0EA /* joint_sort_test.cc in Sources */,
-				1EBA459214B97E92003CC0EA /* key_value_packing_test.cc in Sources */,
 				1EBA459414B97E92003CC0EA /* mmap.cc in Sources */,
 				1EBA459614B97E92003CC0EA /* murmur_hash.cc in Sources */,
 				1EBA459814B97E92003CC0EA /* probing_hash_table_test.cc in Sources */,

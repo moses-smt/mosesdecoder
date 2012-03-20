@@ -13,6 +13,12 @@ using namespace std;
 
 class ScoreStats;
 
+namespace mert {
+
+class Vocabulary;
+
+} // namespace mert
+
 /**
  * Superclass of all scorers and dummy implementation.
  *
@@ -105,24 +111,15 @@ class Scorer
   /**
    * Take the factored sentence and return the desired factors
    */
-  virtual string applyFactors(const string& sentece);
+  virtual string applyFactors(const string& sentece) const;
+
+  mert::Vocabulary* GetVocab() const { return m_vocab; }
 
  private:
-  class Encoder {
-   public:
-    Encoder();
-    virtual ~Encoder();
-    int Encode(const std::string& token);
-    void Clear() { m_vocab.clear(); }
-
-   private:
-    std::map<std::string, int> m_vocab;
-  };
-
   void InitConfig(const string& config);
 
   string m_name;
-  Encoder* m_encoder;
+  mert::Vocabulary* m_vocab;
   map<string, string> m_config;
   vector<int> m_factors;
 
@@ -144,13 +141,10 @@ class Scorer
 
   /**
    * Tokenise line and encode.
-   * Note: We assume that all tokens are separated by single spaces.
+   * Note: We assume that all tokens are separated by whitespaces.
    */
   void TokenizeAndEncode(const string& line, vector<int>& encoded);
-
-  void ClearEncoder() { m_encoder->Clear(); }
 };
-
 
 /**
  * Abstract base class for Scorers that work by adding statistics across all

@@ -20,6 +20,7 @@
 #include "ScoreData.h"
 #include "FeatureData.h"
 #include "Optimizer.h"
+#include "OptimizerFactory.h"
 #include "Types.h"
 #include "Timer.h"
 #include "Util.h"
@@ -338,7 +339,7 @@ int main(int argc, char **argv)
       ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
 
   //load data
-  Data data(*scorer);
+  Data data(scorer.get());
 
   for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
@@ -348,7 +349,7 @@ int main(int argc, char **argv)
   scorer->setScoreData(data.getScoreData().get());
 
   //ADDED_BY_TS
-  data.remove_duplicates();
+  data.removeDuplicates();
   //END_ADDED
 
   PrintUserTime("Data loaded");
@@ -434,7 +435,7 @@ int main(int argc, char **argv)
     vector<OptimizationTask*>& tasks = allTasks[i];
     Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, start_list[0], option.optimize_type, option.nrandom);
     optimizer->SetScorer(data_ref.getScorer());
-    optimizer->SetFData(data_ref.getFeatureData());
+    optimizer->SetFeatureData(data_ref.getFeatureData());
     // A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
       OptimizationTask* task = new OptimizationTask(optimizer, startingPoints[j]);
