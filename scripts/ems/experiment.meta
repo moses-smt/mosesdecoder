@@ -376,7 +376,7 @@ create-config
 	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
