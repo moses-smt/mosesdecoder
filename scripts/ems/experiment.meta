@@ -107,7 +107,7 @@ consolidate
 	default-name: truecaser/corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 train
-        in: tokenized-stem
+  in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	default-name: truecaser/truecase-model
@@ -207,6 +207,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
+  error: set kMaxOrder to at least this value
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -253,27 +254,27 @@ split-tuning
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 interpolate
 	in: script split-tuning LM:lm
-	rerun-on-change: srilm-dir
+	rerun-on-change: srilm-dir group
 	out: lm
 	default-name: lm/interpolated-lm
 randomize
 	in: lm
 	out: rlm
 	pass-unless: lm-randomizer
-	default-name: lm/rlm
+	default-name: lm/interpolated-rlm
 quantize
 	in: rlm
 	out: qlm
 	pass-unless: lm-quantizer
 	default-name: lm/interpolated-qlm
-	template: $lm-quantizer IN OUT
 binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
+	ignore-unless: script
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
-	template: $lm-binarizer IN OUT
+  error: set kMaxOrder to at least this value
 
 [TRAINING] single
 consolidate
@@ -293,12 +294,14 @@ run-giza
 	ignore-if: use-berkeley
 	rerun-on-change: giza-settings training-options script
 	default-name: giza
+	error: not found
 run-giza-inverse
 	in: prepared-data
 	out: giza-alignment-inverse
 	rerun-on-change: giza-settings training-options script
 	ignore-if: use-berkeley
 	default-name: giza-inverse
+	error: not found	
 run-berkeley
 	in: corpus
 	out: berkeley-alignment
@@ -356,24 +359,6 @@ build-ttable
 	out: phrase-translation-table
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
 	default-name: model/phrase-table
-build-pairs-to-sids
-  in: extracted-phrases
-  out: pairs-to-sids
-  ignore-unless: sparse-phrase-scripts-dir
-  default-name: model/pairs-to-sids
-  template: $sparse-phrase-scripts-dir/assign-pairs-to-sids.perl IN.sid | gzip -c >  OUT.gz
-get-corpus-sizes
-	in: CORPUS:clean-split-stem
-	out: corpus-sizes
-	default-name: corpus/corpus-sizes
-	template: $moses-script-dir/training/corpus-sizes.perl  $input-extension $output-extension IN > OUT
-build-sparse-ttable
-  in: corpus phrase-translation-table pairs-to-sids corpus-sizes
-  out: sparse-phrase-translation-table
-  default-name: model/phrase-table-sparse
-  ignore-unless: sparse-phrase-scripts-dir
-  template: $sparse-phrase-scripts-dir/extract-features.py -f $input-extension -e $output-extension -c IN -t IN1 -p IN2 -x $sparse-phrase-features -s IN3 | gzip -c > OUT.gz
-  rerun-on-change: TRAINING:sparse-phrase-features
 build-generation
 	in: corpus
 	out: generation-table
@@ -388,18 +373,10 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 create-config
-	in: reordering-table phrase-translation-table generation-table sparse-phrase-translation-table LM:binlm 
-	out: config
-	ignore-if: use-hiero INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
-	default-name: model/moses.ini
-	error: Unknown option
-create-config-interpolated-lm
-	in: reordering-table phrase-translation-table sparse-phrase-translation-table generation-table INTERPOLATED-LM:binlm
+	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
-	ignore-unless: INTERPOLATED-LM:script
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
@@ -563,6 +540,7 @@ apply-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.weight-reused.ini
 	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
+	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference
 	out: hiero-weight-config
@@ -643,6 +621,7 @@ filter
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
 	rerun-on-change: filter-settings report-precision-by-coverage
+	error: already exists. Please delete
 decode
 	in: filtered-config input
 	out: system-output
@@ -770,11 +749,12 @@ wer
 	rerun-on-change: wer
 	template: $wer IN IN1 > OUT
 meteor
-	in: wrapped-output reference-sgm
+	in: cleaned-output reference
 	out: meteor-score
-	default-name: evaluation/detokenized.sgm.METEOR
+	default-name: evaluation/meteor
 	ignore-unless: meteor
 	rerun-on-change: meteor
+	template: $meteor IN IN1 $meteor-params > OUT
 analysis
 	in: recased-output reference input
 	out: analysis
