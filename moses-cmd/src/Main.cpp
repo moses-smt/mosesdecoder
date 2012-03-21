@@ -435,6 +435,12 @@ int main(int argc, char** argv)
     }
     if (output1best) {
       outputCollector.reset(new OutputCollector());
+      if (params->isParamSpecified("async-output")) {
+        outputCollector.get()->setSortOutput(false);
+      }
+      if (params->isParamSpecified("print-id")) {
+        outputCollector.get()->setOutputId(true);
+      }
     }
   
     // initialize stream for word graph (aka: output lattice)

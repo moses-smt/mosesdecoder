@@ -146,6 +146,8 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
+  AddParam("async-output", "output translations as soon as possible. 0=sorted output (default), 1=unsorted output");
+  AddParam("print-id", "prefix translations with id. Default if false");
 }
 
 Parameter::~Parameter()

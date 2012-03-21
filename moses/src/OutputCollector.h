@@ -43,7 +43,7 @@ class OutputCollector
 {
 public:
   OutputCollector(std::ostream* outStream= &std::cout, std::ostream* debugStream=&std::cerr) :
-    m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
+    m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream),m_sortOutput(true),m_outputId(false)  {}
 
 
   /**
@@ -53,14 +53,16 @@ public:
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
-    if (sourceId == m_nextOutput) {
+    if (sourceId == m_nextOutput || !m_sortOutput) {
       //This is the one we were expecting
+      if (m_outputId) *m_outStream << sourceId << " ";
       *m_outStream << output << std::flush;
       *m_debugStream << debug << std::flush;
       ++m_nextOutput;
       //see if there's any more
       std::map<int,std::string>::iterator iter;
       while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
+        if (m_outputId) *m_outStream << iter->first << " ";
         *m_outStream << iter->second << std::flush;
         m_outputs.erase(iter);
         ++m_nextOutput;
@@ -76,12 +78,22 @@ public:
       m_debugs[sourceId] = debug;
     }
   }
+
+  void setSortOutput(const bool sortOutput) {
+    m_sortOutput = sortOutput;
+  }
+  void setOutputId(const bool outputId) {
+    m_outputId = outputId;
+  }
+
 private:
   std::map<int,std::string> m_outputs;
   std::map<int,std::string> m_debugs;
   int m_nextOutput;
   std::ostream* m_outStream;
   std::ostream* m_debugStream;
+  bool m_sortOutput;
+  bool m_outputId;
 #ifdef WITH_THREADS
   boost::mutex m_mutex;
 #endif
