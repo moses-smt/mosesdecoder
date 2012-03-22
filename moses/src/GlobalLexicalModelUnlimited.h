@@ -55,36 +55,37 @@ private:
 
   std::vector< FactorType > m_inputFactors;
   std::vector< FactorType > m_outputFactors;
-
-  bool m_ignorePunctuation;
-  bool m_biasFeature;
-
-  std::set<std::string> m_vocabSource;
-  std::set<std::string> m_vocabTarget;
   bool m_unrestricted;
 
   bool m_sourceContext;
   bool m_biphrase;
   bool m_bitrigger;
 
+  bool m_biasFeature;
   float m_sparseProducerWeight;
+  bool m_ignorePunctuation;
+
+  std::set<std::string> m_vocabSource;
+  std::set<std::string> m_vocabTarget;
 
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors, const std::vector< FactorType >& outFactors,
   		bool biasFeature, bool ignorePunctuation, size_t context):
 //    StatelessFeatureFunction("glm",ScoreProducer::unlimited),
   		StatefulFeatureFunction("glm",ScoreProducer::unlimited),
-    m_sparseProducerWeight(1),
-    m_inputFactors(inFactors),
+  	m_inputFactors(inFactors),
     m_outputFactors(outFactors),
+    m_unrestricted(true),
+    m_sourceContext(false),
+    m_biphrase(false),
+    m_bitrigger(false),
     m_biasFeature(biasFeature),
-    m_ignorePunctuation(ignorePunctuation),
-    m_unrestricted(true)
+    m_sparseProducerWeight(1),
+    m_ignorePunctuation(ignorePunctuation)
   {
   	std::cerr << "Creating global lexical model unlimited.. ";
-		m_sourceContext = false;
-		m_biphrase = false;
-		m_bitrigger = false;
+
+
 		switch(context) {
 			case 1:
 				m_sourceContext = true;
@@ -103,7 +104,7 @@ public:
   	// compile a list of punctuation characters
   	if (m_ignorePunctuation) {
   		std::cerr << "ignoring punctuation.. ";
-  		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑\-/\\0123456789~=";
+  		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
   		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
   			m_punctuationHash[punctuation[i]] = 1;
   	}

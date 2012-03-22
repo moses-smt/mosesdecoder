@@ -39,9 +39,11 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 	  bool m_ignorePunctuation;
 	  CharHash m_punctuationHash;
 	
+	  std::set<std::string> m_limitedFeatures;
+
   public:
 	  PhrasePairFeature (FactorType sourceFactorId, FactorType targetFactorId, 
-			  bool simple, bool sourceContext, bool ignorePunctuation) : 
+			  bool simple, bool sourceContext, bool ignorePunctuation, std::string filePath) :
 				  StatelessFeatureFunction("pp", ScoreProducer::unlimited),
 	    m_sourceFactorId(sourceFactorId),
 	    m_targetFactorId(targetFactorId),
@@ -57,12 +59,28 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 		  // compile a list of punctuation characters 
 		  if (m_ignorePunctuation) {
 			  std::cerr << "ignoring punctuation for triggers.. ";
-			  char punctuation[] = "\"'!?¿·()#_,.:;•&@‑\-/\\0123456789~=";
+			  char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
 			  for (size_t i=0; i < sizeof(punctuation)-1; ++i)
 				  m_punctuationHash[punctuation[i]] = 1;
 		  }
 		  
 		  std::cerr << "done." << std::endl;
+
+		  // only temporary: features for restricted training
+		  if (!filePath.empty()) {
+		  	std::ifstream inFile(filePath.c_str());
+		  	if (!inFile)
+		  	{
+		      	std::cerr << "could not open file " << filePath << std::endl;
+		  	}
+
+		  	std::string line;
+		  	while (getline(inFile, line)) {
+		  		m_limitedFeatures.insert(line);
+		  	}
+		  	inFile.close();
+		  	m_unrestricted = false;
+		  }
 	  }
 
     virtual void Evaluate(

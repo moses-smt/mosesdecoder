@@ -50,7 +50,15 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
 		   namestr << ",";
 		   namestr << targetFactor->GetString();
 	   }
-	   accumulator->PlusEquals(this,namestr.str(),1);
+
+	   // temporary:
+	   if (!m_unrestricted) {
+	  	 string feature = namestr.str();
+	  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )
+	  		 accumulator->PlusEquals(this,feature,1);
+	   }
+	   else
+	  	 accumulator->PlusEquals(this,namestr.str(),1);
    }
    if (m_sourceContext) {
 	   const Sentence& input = *(m_local->input);
@@ -87,7 +95,15 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
 				   namestr << ",";
 				   namestr << targetFactor->GetString();
 			   }
-			   accumulator->PlusEquals(this,namestr.str(),1);
+
+			   // temporary:
+			   if (!m_unrestricted) {
+			  	 string feature = namestr.str();
+			  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )
+			  		 accumulator->PlusEquals(this,feature,1);
+			   }
+			   else
+			  	 accumulator->PlusEquals(this,namestr.str(),1);
 		   }
 	   }
 	}

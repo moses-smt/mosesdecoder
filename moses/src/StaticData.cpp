@@ -1675,7 +1675,8 @@ bool StaticData::LoadPhrasePairFeature()
     return false;
   }
   vector<string> tokens = Tokenize(phrasePairFactors[0]);
-  if (! (tokens.size() >= 1  && tokens.size() <= 4)) {
+//  if (! (tokens.size() >= 1  && tokens.size() <= 4)) {
+  if (! (tokens.size() >= 1  && tokens.size() <= 5)) {
     UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
     		"[simple source-trigger] [ignore-punctuation]");
     return false;
@@ -1691,14 +1692,19 @@ bool StaticData::LoadPhrasePairFeature()
   size_t targetFactorId = Scan<size_t>(factors[1]);
   bool simple = true, sourceContext = false, ignorePunctuation = true;
   if (tokens.size() >= 3) {
-	simple = Scan<size_t>(tokens[1]);
-	sourceContext = Scan<size_t>(tokens[2]);
+  	simple = Scan<size_t>(tokens[1]);
+  	sourceContext = Scan<size_t>(tokens[2]);
   }
   if (tokens.size() == 4) 
-	ignorePunctuation = Scan<size_t>(tokens[3]);
+  	ignorePunctuation = Scan<size_t>(tokens[3]);
   
+  // temporary
+  string filePath = "";
+  if (tokens.size() == 5)
+  	filePath = Scan<string>(tokens[4]);
+
   m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext, 
-		  ignorePunctuation);
+		  ignorePunctuation, filePath);
   if (weight.size() > 0)
     m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
   return true;
