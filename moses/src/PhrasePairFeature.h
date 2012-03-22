@@ -68,19 +68,21 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 
 		  // only temporary: features for restricted training
 		  if (!filePath.empty()) {
+		    std::cerr << "Loading features for restricted training.. ";
 		  	std::ifstream inFile(filePath.c_str());
 		  	if (!inFile)
 		  	{
 		      	std::cerr << "could not open file " << filePath << std::endl;
+			exit(1);
 		  	}
 
 		  	std::string line;
-		  	while (getline(inFile, line)) {
-		  		m_limitedFeatures.insert(line);
-		  	}
-		  	inFile.close();
+		  	while (getline(inFile, line)) 
+			  m_limitedFeatures.insert(line);
+			inFile.close();
 		  	m_unrestricted = false;
-		  }
+			std::cerr << "done." << std::endl;
+		  }		  
 	  }
 
     virtual void Evaluate(
