@@ -520,12 +520,20 @@ split-reference
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: TRAINING:config input
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	out: filtered-dir
+	default-name: tuning/filtered
+	rerun-on-change: filter-settings
+	pass-if: TRAINING:binarize-all
+	ignore-if: use-hiero
+	error: already exists. Please delete
+apply-filter
+	in: TRAINING:config filtered-dir
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-  rerun-on-change: filter-settings
-  pass-if: TRAINING:binarize-all
+	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
+	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 tune
 	in: filtered-config input reference
 	out: weight-config
@@ -616,12 +624,20 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: TUNING:config-with-reused-weights input
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	out: filtered-dir
+	default-name: evaluation/filtered
+	rerun-on-change: filter-settings report-precision-by-coverage
+	pass-if: TRAINING:binarize-all
+	ignore-if: use-hiero
+	error: already exists. Please delete
+apply-filter
+	in: TUNING:config-with-reused-weights filtered-dir
 	out: filtered-config
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
-	rerun-on-change: filter-settings report-precision-by-coverage
-	error: already exists. Please delete
+	ignore-if: use-hiero
+	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 decode
 	in: filtered-config input
 	out: system-output

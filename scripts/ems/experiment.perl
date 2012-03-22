@@ -2133,8 +2133,8 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_config,
-	$config,$input) = &get_output_and_input($step_id);
+    my ($filter_dir,
+	$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2148,9 +2148,7 @@ sub define_tuningevaluation_filter {
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
     $input_filter = $input unless $input_filter;
 
-    my $filter_dir = "$dir/tuning/filtered.$VERSION";
-    $filter_dir = "$dir/evaluation/filtered.$set.$VERSION" unless $tuning_flag;
-
+    # additional settings
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
@@ -2160,12 +2158,22 @@ sub define_tuningevaluation_filter {
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
-    my $cmd = "$scripts/training/filter-model-given-input.pl";
-    $cmd .= " $filter_dir $config $input_filter $settings";
+    # create pseudo-config file
+    my $config = "$dir/tuning/moses.table.ini.$VERSION";
+    my $cmd = &get_training_setting(9);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
+	if $reordering_table;
+    $cmd .= "-lm 0:3:$dir "; # dummy
+    $cmd .= "-config $config\n";
+    
+    # filter command
+    $cmd .= "$scripts/training/filter-model-given-input.pl";
+    $cmd .= " $filter_dir $config $input_filter $settings\n";
 
-    # copy moses.ini into specified file location
-    $cmd .= "\ncp $filter_dir/moses.ini $filter_config\n";
- 
+    # clean-up
+    $cmd .= "rm $config";
+
     &create_step($step_id,$cmd);
 }
 
