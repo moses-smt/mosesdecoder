@@ -11,7 +11,7 @@ if (scalar @ARGV < 1 || ! -e $ARGV[0]) {
 my %CONFIG;
 my $status = 0;
 my $section;
-open(FILTERED,$ARGV[0]);
+open(FILTERED, $ARGV[0]) or die "Cannot open: $!";
 while(<FILTERED>) {
   if (/^\[(.+)\]\s*$/) {
     if ($1 eq "ttable-file" || $1 eq "distortion-file") {

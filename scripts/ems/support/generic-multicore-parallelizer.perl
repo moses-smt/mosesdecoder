@@ -33,8 +33,8 @@ chomp(@CORE);
 grep(s/.+in\-\d+\-([a-z]+)$/$1/e,@CORE);
 
 # create core scripts
-foreach my $core (@CORE){    
-    open(BASH,">$tmpdir/core-$parent-$core.bash");
+foreach my $core (@CORE){
+    open(BASH,">$tmpdir/core-$parent-$core.bash") or die "Cannot open: $!";
     print  BASH "#bash\n\n";
 #    print  BASH "export PATH=$ENV{PATH}\n\n";
     printf BASH $cmd."\n", "$tmpdir/in-$parent-$core", "$tmpdir/out-$parent-$core";

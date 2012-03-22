@@ -6,7 +6,7 @@ my ($language,$src,$system) = @ARGV;
 die("wrapping frame not found ($src)") unless -e $src;
 $system = "Edinburgh" unless $system;
 
-open(SRC,$src);
+open(SRC,$src) or die "Cannot open: $!";
 my @OUT = <STDIN>;
 chomp(@OUT);
 #my @OUT = `cat $decoder_output`;
