@@ -8,7 +8,7 @@
 #include <vector>
 
 // TODO: need comments about this number.
-const int kMaxNOC = 30;
+const int kMaxNOC = 50;
 
 typedef std::pair<std::string, std::string> str_item_t;
 typedef std::vector<str_item_t> str_sentence_t;
