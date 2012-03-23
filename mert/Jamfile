@@ -18,6 +18,7 @@ FeatureDataIterator.cpp
 Data.cpp
 BleuScorer.cpp
 SemposScorer.cpp
+SemposOverlapping.cpp
 InterpolatedScorer.cpp
 Point.cpp
 PerScorer.cpp
