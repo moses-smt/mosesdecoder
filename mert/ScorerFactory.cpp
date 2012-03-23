@@ -8,6 +8,7 @@
 #include "CderScorer.h"
 #include "MergeScorer.h"
 #include "InterpolatedScorer.h"
+#include "SemposScorer.h"
 
 using namespace std;
 
@@ -18,20 +19,23 @@ vector<string> ScorerFactory::getTypes() {
   types.push_back(string("TER"));
   types.push_back(string("CDER"));
   types.push_back(string("MERGE"));
+  types.push_back(string("SEMPOS"));
   return types;
 }
 
 Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
   if (type == "BLEU") {
-    return (BleuScorer*) new BleuScorer(config);
+    return new BleuScorer(config);
   } else if (type == "PER") {
-    return (PerScorer*) new PerScorer(config);
+    return new PerScorer(config);
   } else if (type == "TER") {
-    return (TerScorer*) new TerScorer(config);
+    return new TerScorer(config);
   } else if (type == "CDER") {
-    return (CderScorer*) new CderScorer(config);
+    return new CderScorer(config);
+  } else if (type == "SEMPOS") {
+    return new SemposScorer(config);
   } else if (type == "MERGE") {
-    return (MergeScorer*) new MergeScorer(config);
+    return new MergeScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
