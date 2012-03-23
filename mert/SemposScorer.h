@@ -7,8 +7,6 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 
-#include "Types.h"
-#include "ScoreData.h"
 #include "Scorer.h"
 
 // NOTE: This header should be included in .cpp file

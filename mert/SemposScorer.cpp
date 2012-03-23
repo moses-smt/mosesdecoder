@@ -75,19 +75,18 @@ void SemposScorer::prepareStats(size_t sid, const string& text, ScoreStats& entr
 
 void SemposScorer::splitSentence(const string& sentence, str_sentence_t& splitSentence)
 {
-    splitSentence.clear();
+  splitSentence.clear();
 
-    vector<string> tokens;
-    split(sentence, ' ', tokens);
-    for (vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it)
-    {
-        vector<string> factors;
-        split(*it, '|', factors);
-        if (factors.size() != 2) throw runtime_error("Sempos scorer accepts two factors (item|class)");
-        const string& item = factors[0];
-        const string& klass = factors[1];
-        splitSentence.push_back(make_pair(item, klass));
-    }
+  vector<string> tokens;
+  split(sentence, ' ', tokens);
+  for (vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
+    vector<string> factors;
+    split(*it, '|', factors);
+    if (factors.size() != 2) throw runtime_error("Sempos scorer accepts two factors (item|class)");
+    const string& item = factors[0];
+    const string& klass = factors[1];
+    splitSentence.push_back(make_pair(item, klass));
+  }
 }
 
 void SemposScorer::encodeSentence(const str_sentence_t& sentence, sentence_t& encodedSentence)
@@ -118,18 +117,14 @@ int SemposScorer::encodeSempos(const string& sempos)
 {
   if (sempos == "-") return -1;
   encoding_it it = m_semposMap.find(sempos);
-  if (it == m_semposMap.end())
-  {
-    if (m_semposMap.size() == kMaxNOC)
-    {
+  if (it == m_semposMap.end()) {
+    if (m_semposMap.size() == kMaxNOC) {
       throw std::runtime_error("Number of classes is greater than kMaxNOC");
     }
     const int classNumber = static_cast<int>(m_semposMap.size());
     m_semposMap[sempos] = classNumber;
     return classNumber;
-  }
-  else
-  {
+  } else {
     return it->second;
   }
 }

@@ -40,8 +40,7 @@ vector<int> CapMicroOverlapping::prepareStats(const sentence_t& cand, const sent
 
 float CapMicroOverlapping::calculateScore(const vector<int>& stats) const
 {
-  if (stats.size() != 2)
-  {
+  if (stats.size() != 2) {
     throw std::runtime_error("Size of stats vector has to be 2");
   }
   if (stats[1] == 0) return 1.0f;
@@ -82,7 +81,7 @@ float CapMacroOverlapping::calculateScore(const vector<int>& stats) const
     int clipped = stats[2 * i];
     int refsize = stats[2 * i + 1];
     if (refsize > 0) {
-      sum += clipped / (float) refsize;
+      sum += clipped / static_cast<float>(refsize);
       ++n;
     }
   }
