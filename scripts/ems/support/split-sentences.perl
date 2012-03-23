@@ -42,7 +42,7 @@ if (!(-e $prefixfile)) {
 }
 
 if (-e "$prefixfile") {
-	open(PREFIX, "<:utf8", "$prefixfile");
+	open(PREFIX, "<:utf8", "$prefixfile") or die "Cannot open: $!";
 	while (<PREFIX>) {
 		my $item = $_;
 		chomp($item);
