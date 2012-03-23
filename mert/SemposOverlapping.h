@@ -7,7 +7,7 @@
 #include <utility>
 #include <vector>
 
-// TODO: need to comments about this number.
+// TODO: need comments about this number.
 const int kMaxNOC = 30;
 
 typedef std::pair<std::string, std::string> str_item_t;
