@@ -19,7 +19,7 @@ close(ORDER);
 my %DOC;
 my $system_from_refset = 0;
 my ($doc,$system);
-open(REF,$ref);
+open(REF,$ref) or die "Cannot open: $!";
 while(<REF>) {
     if (/<refset/ && /refid="([^\"]+)"/i) {
       $system = $1;

@@ -33,8 +33,8 @@ chomp(@JOB);
 grep(s/.+in\-\d+\-([a-z]+)$/$1/e,@JOB);
 
 # create job scripts
-foreach my $job (@JOB){    
-    open(BASH,">$tmpdir/job-$$-$job.bash");
+foreach my $job (@JOB){
+    open(BASH,">$tmpdir/job-$$-$job.bash") or die "Cannot open: $!";
     print  BASH "#bash\n\n";
 #    print  BASH "export PATH=$ENV{PATH}\n\n";
     printf BASH $cmd."\n", "$tmpdir/in-$$-$job", "$tmpdir/out-$$-$job";

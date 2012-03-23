@@ -116,7 +116,7 @@ sub init_agenda_graph() {
     my $dir = &check_and_get("GENERAL:working-dir");    
 
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
-    open(PS,">".$graph_file.".ps");
+    open(PS,">".$graph_file.".ps") or die "Cannot open: $!";
     print PS "%!\n"
 		."/Helvetica findfont 36 scalefont setfont\n"
 		."72 72 moveto\n"
@@ -367,7 +367,7 @@ sub log_config {
     `mkdir -p $dir/steps`;
     my $config_file = &steps_file("config.$VERSION",$VERSION);
     `cp $CONFIG_FILE $config_file` unless $CONTINUE;
-    open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION));
+    open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION)) or die "Cannot open: $!";
     foreach my $parameter (sort keys %CONFIG) {
 	print PARAMETER "$parameter =";
 	foreach (@{$CONFIG{$parameter}}) {
@@ -751,7 +751,7 @@ sub find_re_use {
 
     # summarize and convert hashes into integers for to be re-used 
     print "\nSTEP SUMMARY:\n";
-    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION));
+    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION)) or die "Cannot open: $!";
     for(my $i=$#DO_STEP;$i>=0;$i--) {
         if ($PASS{$i}) {
 	    $RE_USE[$i] = 0;
@@ -797,7 +797,7 @@ sub find_dependencies {
 sub draw_agenda_graph {
     my %M;
     my $dir = &check_and_get("GENERAL:working-dir");
-    open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION));
+    open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION)) or die "Cannot open: $!";
     print DOT "digraph Experiment$VERSION {\n";
     print DOT "  ranksep=0;\n";
     for(my $i=0;$i<=$#DO_STEP;$i++) {
@@ -1122,7 +1122,8 @@ sub write_info {
     my $module_set = $step; $module_set =~ s/:[^:]+$//;
     
 
-    open(INFO,">".&versionize(&step_file($i)).".INFO");
+
+    open(INFO,">".&versionize(&step_file($i)).".INFO") or die "Cannot open: $!";
     my %VALUE = &get_parameters_relevant_for_re_use($i);
     foreach my $parameter (keys %VALUE) {
 	print INFO "$parameter = $VALUE{$parameter}\n";
@@ -1149,7 +1150,7 @@ sub check_info {
     my %VALUE = &get_parameters_relevant_for_re_use($i);
 
     my %INFO;
-    open(INFO,&versionize(&step_file($i),$version).".INFO");
+    open(INFO,&versionize(&step_file($i),$version).".INFO") or die "Cannot open: $!";
     while(<INFO>) {
 	chop;
 	if (/ = /) {
@@ -1273,7 +1274,7 @@ sub check_if_crashed {
     my $error = 0;
 
     if (-e $file.".digest") {
-	open(DIGEST,$file.".digest");
+	open(DIGEST,$file.".digest") or die "Cannot open: $!";
 	while(<DIGEST>) {
 	    $error++;
 	    print "\t$DO_STEP[$i]($version) crashed: $_" if $VERBOSE;
@@ -1283,7 +1284,7 @@ sub check_if_crashed {
     }
 
     my @DIGEST;
-    open(ERROR,$file);
+    open(ERROR,$file) or die "Cannot open: $!";
     while(<ERROR>) {
 	foreach my $pattern (@{$ERROR{&defined_step_id($i)}},
 			     'error','killed','core dumped','can\'t read',
@@ -1308,7 +1309,7 @@ sub check_if_crashed {
     }
     close(ERROR);
 
-    open(DIGEST,">$file.digest");
+    open(DIGEST,">$file.digest") or die "Cannot open: $!";
     foreach (@DIGEST) {
 	print DIGEST $_."\n";
     }
@@ -2599,7 +2600,7 @@ sub create_step {
     $subdir =~ tr/A-Z/a-z/; 
     $subdir = "evaluation" if $subdir eq "reporting";
     $subdir = "lm" if $subdir eq "interpolated-lm";
-    open(STEP,">$file");
+    open(STEP,">$file") or die "Cannot open: $!";
     print STEP "#!/bin/bash\n\n";
     print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
     print STEP "cd $dir\n";
