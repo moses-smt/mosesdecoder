@@ -2159,11 +2159,21 @@ sub define_tuningevaluation_filter {
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
     # create pseudo-config file
-    my $config = "$dir/tuning/moses.table.ini.$VERSION";
+    my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
+    # additional settings for hierarchical models
+    if (&get("TRAINING:hierarchical-rule-set")) {
+      my $extract_version = $VERSION;
+      $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
+        if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
+      my $glue_grammar_file = &get("TRAINING:glue-grammar");
+      $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
+        unless $glue_grammar_file;
+      $cmd .= "-glue-grammar-file $glue_grammar_file ";
+    }
     $cmd .= "-lm 0:3:$dir "; # dummy
     $cmd .= "-config $config\n";
     

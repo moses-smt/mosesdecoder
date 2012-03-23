@@ -70,6 +70,10 @@ sub tokenize {
 	chomp($text);
 	$text = " $text ";
 	
+  # remove ASCII junk
+  $text =~ s/\s+/ /g;
+  $text =~ s/[\000-\037]//g;
+
 	# seperate out all "other" special characters
 	$text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 	
@@ -149,6 +153,8 @@ sub tokenize {
   $text =~ s/\|/\&bar;/g;
   $text =~ s/\</\&lt;/g;
   $text =~ s/\>/\&gt;/g;
+  $text =~ s/\[/\&bra;/g;
+  $text =~ s/\]/\&ket;/g;
 
 	#ensure final line break
 	$text .= "\n" unless $text =~ /\n$/;
