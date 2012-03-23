@@ -1,101 +1,60 @@
-#ifndef __SEMPOSSCORER_H__
-#define __SEMPOSSCORER_H__
+#ifndef MERT_SEMPOSSCORER_H_
+#define MERT_SEMPOSSCORER_H_
 
-#include <algorithm>
-#include <cmath>
-#include <iostream>
-#include <iterator>
-#include <set>
-#include <sstream>
-#include <stdexcept>
+#include <map>
 #include <string>
+#include <utility>
 #include <vector>
-#include <limits.h>
+#include <boost/scoped_ptr.hpp>
+
 #include "Types.h"
 #include "ScoreData.h"
 #include "Scorer.h"
 
-using namespace std;
+// NOTE: This header should be included in .cpp file
+// because SemposScorer wants to know what actual SemposOverlapping type is
+// when we implement the scorer in .cpp file.
+// However, currently SemposScorer uses a bunch of typedefs, which are
+// used in SemposScorer as well as inherited SemposOverlapping classes.
+#include "SemposOverlapping.h"
 
-const int maxNOC = 30;
-
-typedef pair<string,string> str_item_t;
-typedef vector<str_item_t> str_sentence_t;
-typedef str_sentence_t::const_iterator str_sentence_it;
-
-typedef pair<int,int> item_t;
-typedef multiset<item_t> sentence_t;
-typedef sentence_t::const_iterator sentence_it;
-
-// Base class for classes representing overlapping formulas
-class SemposOverlapping
-{
-public:
-  virtual vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref) = 0;
-  virtual float calculateScore(const vector<int>& stats) = 0;
-  virtual size_t NumberOfScores() const = 0;
-};
-
-// Overlapping proposed by (Bojar and Machacek,2011);
-class CapMicroOverlapping : public SemposOverlapping
-{
-public:
-  virtual vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref);
-  virtual float calculateScore(const vector<int>& stats);
-  virtual size_t NumberOfScores() const {
-    return 2;
-  }
-};
-
-//Overlapping proposed by (Bojar and Kos,2009)
-class CapMacroOverlapping : public SemposOverlapping
-{
-public:
-  virtual vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref);
-  virtual float calculateScore(const vector<int>& stats);
-  virtual size_t NumberOfScores() const {
-    return maxNOC*2;
-  }
-};
-
-
-// This class represents sempos based metrics
+/**
+ * This class represents sempos based metrics.
+ */
 class SemposScorer: public StatisticsBasedScorer
 {
 public:
-  SemposScorer(const string& config);
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sindex, const string& text, ScoreStats& entry);
-
-  virtual size_t NumberOfScores() const {
-    return ovr->NumberOfScores();
-  };
-
-
+  explicit SemposScorer(const std::string& config);
   ~SemposScorer();
 
-  virtual float calculateScore(const vector<int>& comps) const;
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
+  virtual void prepareStats(std::size_t sindex, const std::string& text, ScoreStats& entry);
+  virtual std::size_t NumberOfScores() const { return m_ovr->NumberOfScores(); }
+  virtual float calculateScore(const std::vector<int>& comps) const {
+    return m_ovr->calculateScore(comps);
+  }
+
+  bool EnableDebug() const { return m_enable_debug; }
 
 private:
-  SemposOverlapping* ovr;
-  vector<vector<sentence_t> > ref_sentences;
+  boost::scoped_ptr<SemposOverlapping> m_ovr;
+  std::vector<std::vector<sentence_t> > m_ref_sentences;
 
-  typedef map<string, int> encoding_t;
-  typedef encoding_t::iterator   encoding_it;
+  typedef std::map<std::string, int> encoding_t;
+  typedef encoding_t::iterator encoding_it;
 
-  encoding_t semposMap;
-  encoding_t stringMap;
+  encoding_t m_semposMap;
+  encoding_t m_stringMap;
+  bool m_enable_debug;
 
-  void splitSentence(const string& sentence, str_sentence_t& splitSentence);
+  void splitSentence(const std::string& sentence, str_sentence_t& splitSentence);
   void encodeSentence(const str_sentence_t& sentence, sentence_t& encodedSentence);
-  int encodeString(const string& str);
-  int encodeSempos(const string& sempos);
+  int encodeString(const std::string& str);
+  int encodeSempos(const std::string& sempos);
 
-  //no copy
+  // no copying allowed.
   SemposScorer(const SemposScorer&);
   SemposScorer& operator=(const SemposScorer&);
-
-  bool debug;
 };
 
-#endif //__BLEUSCORER_H
+#endif  // MERT_SEMPOSSCORER_H_
