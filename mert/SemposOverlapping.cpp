@@ -1,4 +1,5 @@
 #include "SemposOverlapping.h"
+#include "SemposScorer.h"
 
 #include <algorithm>
 #include <stdexcept>
@@ -11,11 +12,11 @@ SemposOverlapping* g_overlapping = NULL;
 
 } // namespace
 
-SemposOverlapping* SemposOverlappingFactory::GetOverlapping(const string& str) {
+SemposOverlapping* SemposOverlappingFactory::GetOverlapping(const string& str, const SemposScorer* sempos) {
   if (str == "cap-micro") {
-    return new CapMicroOverlapping;
+    return new CapMicroOverlapping(sempos);
   } else if (str == "cap-macro") {
-    return new CapMacroOverlapping;
+    return new CapMacroOverlapping(sempos);
   } else {
     throw runtime_error("Unknown overlapping: " + str);
   }
@@ -33,8 +34,22 @@ vector<int> CapMicroOverlapping::prepareStats(const sentence_t& cand, const sent
   set_intersection(cand.begin(), cand.end(), ref.begin(), ref.end(),
                    inserter(intersection, intersection.begin()));
 
-  stats[0] = static_cast<int>(intersection.size());
-  stats[1] = static_cast<int>(ref.size());
+  int multCoeff = 1000;
+
+  float interSum = 0;
+  for (sentence_t::iterator it = intersection.begin(); it != intersection.end(); it++)
+  {
+    interSum += semposScorer->weight(it->first);
+  }
+
+  float refSum = 0;
+  for (sentence_t::iterator it = ref.begin(); it != ref.end(); it++)
+  {
+    refSum += semposScorer->weight(it->first);    
+  }
+
+  stats[0] = (int)(multCoeff * interSum);
+  stats[1] = (int)(multCoeff * refSum);
   return stats;
 }
 
@@ -55,14 +70,18 @@ vector<int> CapMacroOverlapping::prepareStats(const sentence_t& cand, const sent
   set_intersection(cand.begin(), cand.end(), ref.begin(), ref.end(),
                    inserter(intersection, intersection.begin()));
 
+  int multCoeff = 1000;
+
   for (int i = 0; i < 2 * kMaxNOC; ++i) stats[i] = 0;
   for (sentence_t::const_iterator it = intersection.begin(); it != intersection.end(); ++it) {
     const int sempos = it->second;
-    ++stats[2 * sempos];
+    float weight = semposScorer->weight(it->first);
+    stats[2 * sempos] += weight * multCoeff ;
   }
   for (sentence_t::const_iterator it = ref.begin(); it != ref.end(); ++it) {
     const int sempos = it->second;
-    ++stats[2 * sempos + 1];
+    float weight = semposScorer->weight(it->first);
+    stats[2 * sempos + 1] += weight * multCoeff;
   }
 
   return stats;
