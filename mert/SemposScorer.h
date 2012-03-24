@@ -34,6 +34,8 @@ public:
 
   bool EnableDebug() const { return m_enable_debug; }
 
+  float weight(int item) const;
+
 private:
   boost::scoped_ptr<SemposOverlapping> m_ovr;
   std::vector<std::vector<sentence_t> > m_ref_sentences;
@@ -49,6 +51,10 @@ private:
   void encodeSentence(const str_sentence_t& sentence, sentence_t& encodedSentence);
   int encodeString(const std::string& str);
   int encodeSempos(const std::string& sempos);
+
+  std::map<int, float> weightsMap;
+
+  void loadWeights(const string& weightsfile);
 
   // no copying allowed.
   SemposScorer(const SemposScorer&);

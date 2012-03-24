@@ -7,6 +7,8 @@
 #include <utility>
 #include <vector>
 
+class SemposScorer;
+
 // TODO: need comments about this number.
 const int kMaxNOC = 50;
 
@@ -32,7 +34,7 @@ public:
 
 class SemposOverlappingFactory {
  public:
-  static SemposOverlapping* GetOverlapping(const std::string& str);
+  static SemposOverlapping* GetOverlapping(const std::string& str, const SemposScorer* sempos);
 
   // dependency injection for unit testing.
   static void SetOverlapping(SemposOverlapping* ovr);
@@ -51,7 +53,7 @@ class SemposOverlappingFactory {
 class CapMicroOverlapping : public SemposOverlapping
 {
 public:
-  CapMicroOverlapping() {}
+  CapMicroOverlapping(const SemposScorer* sempos) : semposScorer(sempos) {}
   ~CapMicroOverlapping() {}
 
   virtual std::vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref);
@@ -62,6 +64,7 @@ public:
   // no copying allowed.
   CapMicroOverlapping(const CapMicroOverlapping&);
   CapMicroOverlapping& operator=(const CapMicroOverlapping&);
+  const SemposScorer* semposScorer;
 };
 
 /**
@@ -70,7 +73,7 @@ public:
 class CapMacroOverlapping : public SemposOverlapping
 {
 public:
-  CapMacroOverlapping() {}
+  CapMacroOverlapping(const SemposScorer* sempos) : semposScorer(sempos) {}
   ~CapMacroOverlapping() {}
 
   virtual std::vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref);
@@ -81,6 +84,7 @@ public:
   // no copying allowed.
   CapMacroOverlapping(const CapMacroOverlapping&);
   CapMacroOverlapping& operator=(const CapMacroOverlapping&);
+  const SemposScorer* semposScorer;
 };
 
 #endif  // MERT_SEMPOSOVERLAPPING_H_
