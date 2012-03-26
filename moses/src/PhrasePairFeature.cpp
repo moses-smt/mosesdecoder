@@ -37,6 +37,7 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
    
    if (m_simple) {
 	   ostringstream namestr;
+	   namestr << "pp_";
 	   namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
 	   for (size_t i = 1; i < source.GetSize(); ++i) {
 		   const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
@@ -55,10 +56,10 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
 	   if (!m_unrestricted) {
 	  	 string feature = namestr.str();
 	  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )
-	  		 accumulator->PlusEquals(this,feature,1);
+	  		 accumulator->SparsePlusEquals(feature,1);
 	   }
-	   else
-	  	 accumulator->PlusEquals(this,namestr.str(),1);
+	   else 
+	  	 accumulator->SparsePlusEquals(namestr.str(),1);	   
    }
    if (m_sourceContext) {
 	   const Sentence& input = *(m_local->input);
@@ -80,6 +81,7 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
 
 		   if (m_unrestricted || sourceTriggerExists) {
 			   ostringstream namestr;
+			   namestr << "pp_"; 
 			   namestr << sourceTrigger;
 			   namestr << "~";
 			   namestr << source.GetWord(0).GetFactor(m_sourceFactorId)->GetString();
@@ -95,15 +97,15 @@ void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentColle
 				   namestr << ",";
 				   namestr << targetFactor->GetString();
 			   }
-
+			   
 			   // temporary:
 			   if (!m_unrestricted) {
 			  	 string feature = namestr.str();
 			  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )
-			  		 accumulator->PlusEquals(this,feature,1);
+			  		 accumulator->SparsePlusEquals(feature,1);
 			   }
 			   else
-			  	 accumulator->PlusEquals(this,namestr.str(),1);
+			  	 accumulator->SparsePlusEquals(namestr.str(),1);
 		   }
 	   }
 	}

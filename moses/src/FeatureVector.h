@@ -56,9 +56,11 @@ namespace Moses {
     static const std::string SEP;
     
     typedef boost::unordered_map<std::string,size_t> Name2Id;
+    typedef boost::unordered_map<size_t,size_t> Id2Count;
     //typedef std::map<std::string, size_t> Name2Id;
     static Name2Id name2id;
     static std::vector<std::string> id2name;
+    static Id2Count id2count;
     
     //A feature name can either be initialised as a pair of strings,
     //which will be concatenated with a SEP between them, or as
@@ -76,6 +78,11 @@ namespace Moses {
     bool operator==(const FName& rhs) const ;
     bool operator!=(const FName& rhs) const ;
 		
+    static size_t getId(const std::string& name);
+    static size_t getIdCount(const std::string& name);
+    static void incrementId(const std::string& name);
+    static void eraseId(size_t id);
+        
   private:
     void init(const std::string& name);
     size_t m_id;
@@ -191,7 +198,12 @@ namespace Moses {
     void capMin(FValue minValue);
 
     void sparsePlusEquals(const FVector& rhs);
-
+    
+    void incrementSparseFeatures();
+    void printSparseFeatureCounts();
+    size_t pruneSparseFeatures(size_t threshold);
+    size_t pruneZeroWeightFeatures();
+    
     // vector which, for each element of the original vector, reflects whether an element is zero or non-zero
     void setToBinaryOf(const FVector& rhs);
 
@@ -210,7 +222,6 @@ namespace Moses {
     /** Internal get and set. */
     const FValue& get(const FName& name) const;
     void set(const FName& name, const FValue& value);
-    
 		
     FNVmap m_features;
     std::valarray<FValue> m_coreFeatures;

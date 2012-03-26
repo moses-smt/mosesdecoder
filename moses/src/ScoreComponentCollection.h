@@ -179,7 +179,6 @@ public:
     m_scores[fname] -= score;
   }
 
-
 	//! Add scores from a single ScoreProducer only
 	//! The length of scores must be equal to the number of score components
 	//! produced by sp
@@ -361,6 +360,11 @@ public:
   float GetLInfNorm() const;
   void Save(const std::string& filename) const;
   void Save(std::ostream&) const;
+  
+  void IncrementSparseFeatures() { m_scores.incrementSparseFeatures(); }
+  void PrintSparseFeatureCounts() { m_scores.printSparseFeatureCounts(); }
+  size_t PruneSparseFeatures(size_t threshold) { return m_scores.pruneSparseFeatures(threshold); }
+  size_t PruneZeroWeightFeatures() { return m_scores.pruneZeroWeightFeatures(); }
 
 #ifdef MPI_ENABLE
   public:

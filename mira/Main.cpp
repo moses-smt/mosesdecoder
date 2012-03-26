@@ -126,6 +126,8 @@ int main(int argc, char** argv) {
 	bool separateUpdates, batchEqualsShard;
 	bool sparseAverage, dumpMixedWeights, sparseNoAverage;
 	bool useSourceLengthHistory;
+	int featureCutoff;
+	bool pruneZeroWeights;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -153,6 +155,7 @@ int main(int argc, char** argv) {
 		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
 		("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
+		("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
 		("history-of-1best", po::value<bool>(&historyOf1best)->default_value(false), "Use 1best translations to update the history")
@@ -186,6 +189,7 @@ int main(int argc, char** argv) {
 		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+		("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")				
 		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
 		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
@@ -600,8 +604,9 @@ int main(int argc, char** argv) {
 		}
 
 		// number of weight dumps this epoch
+		size_t weightMixingThisEpoch = 0;
 		size_t weightEpochDump = 0;
-
+		
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
 		while (sid != shard.end()) {
@@ -698,6 +703,9 @@ int main(int argc, char** argv) {
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
 
+					// count sparse features occurring in hope translation
+					featureValuesHope[batchPosition][0].IncrementSparseFeatures();
+					
 					float precision = bleuScoresHope[batchPosition][0];
 					if (historyOf1best) {
 						if (useSourceLengthHistory) precision /= decoder->getSourceLengthHistory();
@@ -806,6 +814,9 @@ int main(int argc, char** argv) {
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup();
 					cerr << endl;
+					
+					// count sparse features occurring in hope translation
+					featureValuesHope[batchPosition][0].IncrementSparseFeatures();
 
 					vector<const Word*> bestModel;
 					// MODEL (for updating the history only, using dummy vectors)
@@ -840,6 +851,9 @@ int main(int argc, char** argv) {
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 					float model_length_ratio = (float)bestModel.size()/ref_length;
 					cerr << ", l-ratio model: " << model_length_ratio << endl;
+					
+					// count sparse features occurring in best model translation
+					featureValues[batchPosition][0].IncrementSparseFeatures();
 
 					examples_in_batch++;
 				}
@@ -859,6 +873,9 @@ int main(int argc, char** argv) {
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
 					float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
+					
+					// count sparse features occurring in hope translation
+					featureValues[batchPosition][0].IncrementSparseFeatures();
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
 					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
@@ -1088,6 +1105,28 @@ int main(int argc, char** argv) {
 					if (normaliseWeights) {
 						mixedWeights.L1Normalise();
 					}
+								
+					++weightMixingThisEpoch;
+					
+					if (pruneZeroWeights && weightMixingThisEpoch == mixingFrequency) {
+						size_t pruned = mixedWeights.PruneZeroWeightFeatures();
+						cerr << "Rank " << rank << ", epoch " << epoch << ", " 
+								<< pruned << " zero-weighted features pruned from mixedWeights." << endl;
+						
+						pruned = cumulativeWeights.PruneZeroWeightFeatures();
+						cerr << "Rank " << rank << ", epoch " << epoch << ", " 
+								<< pruned << " zero-weighted features pruned from cumulativeWeights." << endl;
+					}
+					
+					if (featureCutoff != -1 && weightMixingThisEpoch == mixingFrequency) {
+						size_t pruned = mixedWeights.PruneSparseFeatures(featureCutoff);
+						cerr << "Rank " << rank << ", epoch " << epoch << ", " 
+								<< pruned << " features pruned from mixedWeights." << endl;
+						
+						pruned = cumulativeWeights.PruneSparseFeatures(featureCutoff);
+						cerr << "Rank " << rank << ", epoch " << epoch << ", " 
+								<< pruned << " features pruned from cumulativeWeights." << endl;
+					}
 				}
 
 				// broadcast average weights from process 0
@@ -1195,7 +1234,7 @@ int main(int argc, char** argv) {
 			}
 
 		} // end of shard loop, end of this epoch
-
+		
 		if (verbosity > 0) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;
 			decoder->printBleuFeatureHistory(cerr);
