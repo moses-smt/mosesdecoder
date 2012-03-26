@@ -1108,7 +1108,7 @@ int main(int argc, char** argv) {
 								
 					++weightMixingThisEpoch;
 					
-					if (pruneZeroWeights && weightMixingThisEpoch == mixingFrequency) {
+					if (pruneZeroWeights) {
 						size_t pruned = mixedWeights.PruneZeroWeightFeatures();
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " 
 								<< pruned << " zero-weighted features pruned from mixedWeights." << endl;
