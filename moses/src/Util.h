@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_Util_h
 
 #include <iostream>
-#include <cassert>
+#include "util/check.hh"
 #include <fstream>
 #include <sstream>
 #include <string>
@@ -285,7 +285,7 @@ inline float FloorScore(float logScore)
 inline float CalcTranslationScore(const std::vector<float> &probVector,
                                   const std::vector<float> &weightT)
 {
-  assert(weightT.size()==probVector.size());
+  CHECK(weightT.size()==probVector.size());
   float rv=0.0;
   for(float const *sb=&probVector[0],*se=sb+probVector.size(),*wb=&weightT[0];
       sb!=se; ++sb, ++wb)
@@ -333,7 +333,7 @@ inline void ShrinkToFit(T& v)
 {
   if(v.capacity()>v.size())
     T(v).swap(v);
-  assert(v.capacity()==v.size());
+  CHECK(v.capacity()==v.size());
 }
 
 bool FileExists(const std::string& filePath);

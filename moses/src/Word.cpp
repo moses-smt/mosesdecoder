@@ -67,7 +67,7 @@ void Word::Merge(const Word &sourceWord)
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
   stringstream strme;
-  assert(factorType.size() <= MAX_NUM_FACTORS);
+  CHECK(factorType.size() <= MAX_NUM_FACTORS);
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   for (unsigned int i = 0 ; i < factorType.size() ; i++) {

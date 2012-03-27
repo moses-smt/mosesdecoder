@@ -20,7 +20,6 @@
  */
 
 #include <algorithm>
-#include <cassert>
 #include <cmath>
 #include <fstream>
 #include <sstream>
@@ -505,7 +504,7 @@ namespace Moses {
   }
     
   FValue FVector::inner_product(const FVector& rhs) const {
-    assert(m_coreFeatures.size() == rhs.m_coreFeatures.size());
+    CHECK(m_coreFeatures.size() == rhs.m_coreFeatures.size());
     FValue product = 0.0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
         product += ((i->second)*(rhs.get(i->first)));

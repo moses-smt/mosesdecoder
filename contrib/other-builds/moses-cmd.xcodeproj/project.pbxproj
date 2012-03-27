@@ -1,0 +1,494 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 42;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		03306D820C0B249A00CA1311 /* mbr.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 03306D800C0B249A00CA1311 /* mbr.cpp */; };
+		03306D830C0B249A00CA1311 /* mbr.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 03306D810C0B249A00CA1311 /* mbr.h */; };
+		1C8CFF4D0AD68D3600FA22E2 /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF450AD68D3600FA22E2 /* Main.cpp */; };
+		1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF460AD68D3600FA22E2 /* Main.h */; };
+		1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */; };
+		1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */ = {isa = PBXBuildFile; fileRef = 1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */; };
+		1CE646E411679F6900EC77CC /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1CE646E311679F5F00EC77CC /* libOnDiskPt.a */; };
+		1EE8C2DD1476A3F2002496F2 /* libutil.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EE8C2DC1476A34A002496F2 /* libutil.a */; };
+		1EE8C3C91476AB64002496F2 /* liblm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EE8C3C81476AB3C002496F2 /* liblm.a */; };
+		B219B8540E93812700EAB407 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 03306D670C0B240B00CA1311 /* libmoses.a */; };
+		B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B219B8560E9381AC00EAB407 /* IOWrapper.cpp */; };
+		B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */ = {isa = PBXBuildFile; fileRef = B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		03306D660C0B240B00CA1311 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = moses;
+		};
+		03306D770C0B244800CA1311 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1CE646E211679F5F00EC77CC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+		1CE6472D1167A11600EC77CC /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+		1EE8C2DB1476A34A002496F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EE8C2D41476A34A002496F2 /* util.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1EE8C2711476A262002496F2;
+			remoteInfo = util;
+		};
+		1EE8C3C71476AB3C002496F2 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1EE8C2E91476A48E002496F2;
+			remoteInfo = lm;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				1C8CFF4E0AD68D3600FA22E2 /* Main.h in CopyFiles */,
+				1C8CFF500AD68D3600FA22E2 /* TranslationAnalysis.h in CopyFiles */,
+				03306D830C0B249A00CA1311 /* mbr.h in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		03306D5F0C0B240B00CA1311 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		03306D800C0B249A00CA1311 /* mbr.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = mbr.cpp; path = src/mbr.cpp; sourceTree = "<group>"; };
+		03306D810C0B249A00CA1311 /* mbr.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = mbr.h; path = src/mbr.h; sourceTree = "<group>"; };
+		1C8CFF450AD68D3600FA22E2 /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = Main.cpp; path = src/Main.cpp; sourceTree = "<group>"; };
+		1C8CFF460AD68D3600FA22E2 /* Main.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = Main.h; path = src/Main.h; sourceTree = "<group>"; };
+		1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.cpp.cpp; name = TranslationAnalysis.cpp; path = src/TranslationAnalysis.cpp; sourceTree = "<group>"; };
+		1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */ = {isa = PBXFileReference; fileEncoding = 30; lastKnownFileType = sourcecode.c.h; name = TranslationAnalysis.h; path = src/TranslationAnalysis.h; sourceTree = "<group>"; };
+		1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1EE8C2D41476A34A002496F2 /* util.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = util.xcodeproj; path = ../util/util.xcodeproj; sourceTree = "<group>"; };
+		1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = lm.xcodeproj; path = ../lm/lm.xcodeproj; sourceTree = "<group>"; };
+		8DD76F6C0486A84900D96B5E /* moses-cmd */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "moses-cmd"; sourceTree = BUILT_PRODUCTS_DIR; };
+		B219B8560E9381AC00EAB407 /* IOWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = IOWrapper.cpp; path = src/IOWrapper.cpp; sourceTree = "<group>"; };
+		B219B8570E9381AC00EAB407 /* IOWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IOWrapper.h; path = src/IOWrapper.h; sourceTree = "<group>"; };
+		B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LatticeMBR.cpp; path = src/LatticeMBR.cpp; sourceTree = "<group>"; };
+		B28B1ED4110F52C600AAD188 /* LatticeMBR.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LatticeMBR.h; path = src/LatticeMBR.h; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EE8C3C91476AB64002496F2 /* liblm.a in Frameworks */,
+				1EE8C2DD1476A3F2002496F2 /* libutil.a in Frameworks */,
+				1CE646E411679F6900EC77CC /* libOnDiskPt.a in Frameworks */,
+				B219B8540E93812700EAB407 /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		03306D600C0B240B00CA1311 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				03306D670C0B240B00CA1311 /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		08FB7794FE84155DC02AAC07 /* moses-cmd */ = {
+			isa = PBXGroup;
+			children = (
+				1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */,
+				1EE8C2D41476A34A002496F2 /* util.xcodeproj */,
+				1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */,
+				03306D5F0C0B240B00CA1311 /* moses.xcodeproj */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = "moses-cmd";
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				B28B1ED4110F52C600AAD188 /* LatticeMBR.h */,
+				B28B1ED2110F52BB00AAD188 /* LatticeMBR.cpp */,
+				B219B8560E9381AC00EAB407 /* IOWrapper.cpp */,
+				B219B8570E9381AC00EAB407 /* IOWrapper.h */,
+				03306D800C0B249A00CA1311 /* mbr.cpp */,
+				03306D810C0B249A00CA1311 /* mbr.h */,
+				1C8CFF450AD68D3600FA22E2 /* Main.cpp */,
+				1C8CFF460AD68D3600FA22E2 /* Main.h */,
+				1C8CFF470AD68D3600FA22E2 /* TranslationAnalysis.cpp */,
+				1C8CFF480AD68D3600FA22E2 /* TranslationAnalysis.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DD76F6C0486A84900D96B5E /* moses-cmd */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1CE646DC11679F5F00EC77CC /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1CE646E311679F5F00EC77CC /* libOnDiskPt.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EE8C2D51476A34A002496F2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EE8C2DC1476A34A002496F2 /* libutil.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EE8C3C11476AB3C002496F2 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EE8C3C81476AB3C002496F2 /* liblm.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* moses-cmd */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 03306D3B0C0B23F200CA1311 /* Build configuration list for PBXNativeTarget "moses-cmd" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				03306D780C0B244800CA1311 /* PBXTargetDependency */,
+				1CE6472E1167A11600EC77CC /* PBXTargetDependency */,
+			);
+			name = "moses-cmd";
+			productInstallPath = "$(HOME)/bin";
+			productName = "moses-cmd";
+			productReference = 8DD76F6C0486A84900D96B5E /* moses-cmd */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-cmd" */;
+			compatibilityVersion = "Xcode 2.4";
+			developmentRegion = English;
+			hasScannedForEncodings = 1;
+			knownRegions = (
+				English,
+				Japanese,
+				French,
+				German,
+			);
+			mainGroup = 08FB7794FE84155DC02AAC07 /* moses-cmd */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1EE8C3C11476AB3C002496F2 /* Products */;
+					ProjectRef = 1EE8C3C01476AB3C002496F2 /* lm.xcodeproj */;
+				},
+				{
+					ProductGroup = 03306D600C0B240B00CA1311 /* Products */;
+					ProjectRef = 03306D5F0C0B240B00CA1311 /* moses.xcodeproj */;
+				},
+				{
+					ProductGroup = 1CE646DC11679F5F00EC77CC /* Products */;
+					ProjectRef = 1CE646DB11679F5F00EC77CC /* OnDiskPt.xcodeproj */;
+				},
+				{
+					ProductGroup = 1EE8C2D51476A34A002496F2 /* Products */;
+					ProjectRef = 1EE8C2D41476A34A002496F2 /* util.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* moses-cmd */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		03306D670C0B240B00CA1311 /* libmoses.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmoses.a;
+			remoteRef = 03306D660C0B240B00CA1311 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1CE646E311679F5F00EC77CC /* libOnDiskPt.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOnDiskPt.a;
+			remoteRef = 1CE646E211679F5F00EC77CC /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EE8C2DC1476A34A002496F2 /* libutil.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libutil.a;
+			remoteRef = 1EE8C2DB1476A34A002496F2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EE8C3C81476AB3C002496F2 /* liblm.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liblm.a;
+			remoteRef = 1EE8C3C71476AB3C002496F2 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1C8CFF4D0AD68D3600FA22E2 /* Main.cpp in Sources */,
+				1C8CFF4F0AD68D3600FA22E2 /* TranslationAnalysis.cpp in Sources */,
+				03306D820C0B249A00CA1311 /* mbr.cpp in Sources */,
+				B219B8580E9381AC00EAB407 /* IOWrapper.cpp in Sources */,
+				B28B1ED3110F52BB00AAD188 /* LatticeMBR.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		03306D780C0B244800CA1311 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 03306D770C0B244800CA1311 /* PBXContainerItemProxy */;
+		};
+		1CE6472E1167A11600EC77CC /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1CE6472D1167A11600EC77CC /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		03306D3C0C0B23F200CA1311 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_SRI,
+					LM_IRST,
+					TRACE_ENABLE,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../moses/src,
+					../kenlm,
+					/opt/local/include,
+				);
+				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib,
+					../srilm/lib/macosx,
+					../kenlm,
+				);
+				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "moses-cmd";
+				ZERO_LINK = NO;
+			};
+			name = Debug;
+		};
+		03306D3D0C0B23F200CA1311 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				COPY_PHASE_STRIP = YES;
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 3;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					LM_IRST,
+					LM_SRI,
+					TRACE_ENABLE,
+				);
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../moses/src,
+					../kenlm,
+					/opt/local/include,
+				);
+				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib,
+					../srilm/lib/macosx,
+					../kenlm,
+				);
+				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "moses-cmd";
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+		03306D3E0C0B23F200CA1311 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_GENERATE_DEBUGGING_SYMBOLS = NO;
+				GCC_MODEL_TUNING = G5;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					../,
+					../moses/src,
+					../kenlm,
+					/opt/local/include,
+				);
+				INSTALL_PATH = "$(HOME)/bin";
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib,
+					../srilm/lib/macosx,
+					../kenlm,
+				);
+				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = "moses-cmd";
+			};
+			name = Default;
+		};
+		03306D400C0B23F200CA1311 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
+				HEADER_SEARCH_PATHS = ../kenlm;
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
+			};
+			name = Debug;
+		};
+		03306D410C0B23F200CA1311 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
+				HEADER_SEARCH_PATHS = ../kenlm;
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
+			};
+			name = Release;
+		};
+		03306D420C0B23F200CA1311 /* Default */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ONLY_ACTIVE_ARCH_PRE_XCODE_3_1)";
+				HEADER_SEARCH_PATHS = ../kenlm;
+				ONLY_ACTIVE_ARCH_PRE_XCODE_3_1 = "$(NATIVE_ARCH_ACTUAL)";
+				SDKROOT = "$(DEVELOPER_SDK_DIR)/MacOSX10.6.sdk";
+				VALID_ARCHS = "i386 ppc ppc64 ppc7400 ppc970 x86_64";
+			};
+			name = Default;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		03306D3B0C0B23F200CA1311 /* Build configuration list for PBXNativeTarget "moses-cmd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03306D3C0C0B23F200CA1311 /* Debug */,
+				03306D3D0C0B23F200CA1311 /* Release */,
+				03306D3E0C0B23F200CA1311 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+		03306D3F0C0B23F200CA1311 /* Build configuration list for PBXProject "moses-cmd" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				03306D400C0B23F200CA1311 /* Debug */,
+				03306D410C0B23F200CA1311 /* Release */,
+				03306D420C0B23F200CA1311 /* Default */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Default;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

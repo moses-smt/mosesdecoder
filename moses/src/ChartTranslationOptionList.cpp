@@ -102,7 +102,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &targetPhraseC
 
 void ChartTranslationOptionList::Add(ChartTranslationOption *transOpt)
 {
-  assert(transOpt);
+  CHECK(transOpt);
   m_collection.push_back(transOpt);
 }
 

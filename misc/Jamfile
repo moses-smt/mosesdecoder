@@ -1,0 +1,9 @@
+exe processPhraseTable : GenerateTuples.cpp  processPhraseTable.cpp ../moses/src//moses ;
+
+exe processLexicalTable : processLexicalTable.cpp ../moses/src//moses ;
+
+exe queryPhraseTable : queryPhraseTable.cpp ../moses/src//moses ;
+
+exe queryLexicalTable : queryLexicalTable.cpp ../moses/src//moses ; 
+
+alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable ;

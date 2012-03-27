@@ -43,6 +43,7 @@ void usage(int ret)
   cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
   cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
   cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
+  cerr<<"[--sparse-weights|-p] required for merging sparse features"<<endl;
 #ifdef WITH_THREADS
   cerr<<"[--threads|-T] use multiple threads (default 1)"<<endl;
 #endif
@@ -59,13 +60,13 @@ static struct option long_options[] = {
   {"nrandom",1,0,'m'},
   {"rseed",required_argument,0,'r'},
   {"optimize",1,0,'o'},
-  {"pro",required_argument,0,'p'},
   {"type",1,0,'t'},
   {"sctype",1,0,'s'},
   {"scconfig",required_argument,0,'c'},
   {"scfile",1,0,'S'},
   {"ffile",1,0,'F'},
   {"ifile",1,0,'i'},
+  {"sparse-weights",required_argument,0,'p'},
 #ifdef WITH_THREADS
   {"threads", required_argument,0,'T'},
 #endif
@@ -129,7 +130,7 @@ int main (int argc, char **argv)
    timer.start("Starting...");
   */
 
-  int c,pdim,i;
+  int c,pdim;
   pdim=-1;
   int ntry=1;
   int nrandom=0;
@@ -146,6 +147,7 @@ int main (int argc, char **argv)
   string scorerfile("statscore.data");
   string featurefile("features.data");
   string initfile("init.opt");
+  string sparseweightsfile;
 
   string tooptimizestr("");
   vector<unsigned> tooptimize;
@@ -190,6 +192,9 @@ int main (int argc, char **argv)
       case 'i':
         initfile=string(optarg);
         break;
+      case 'p':
+        sparseweightsfile=string(optarg);
+        break;
       case 'v':
         setverboselevel(strtol(optarg,NULL,10));
         break;
@@ -232,6 +237,8 @@ int main (int argc, char **argv)
     cerr << "Seeding random numbers with system clock " << endl;
     srandom(time(NULL));
   }
+
+  if (sparseweightsfile.size()) ++pdim;
 
   // read in starting points
   std::string onefile;
@@ -291,7 +298,7 @@ int main (int argc, char **argv)
   Scorer *TheScorer = ScorerFactory::getScorer(scorertype,scorerconfig);
 
   //load data
-  Data D(*TheScorer);
+  Data D(*TheScorer,sparseweightsfile);
   for (size_t i=0; i < ScoreDataFiles.size(); i++) {
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i)  << " and " << FeatureDataFiles.at(i) << endl;
     D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
@@ -329,12 +336,6 @@ int main (int argc, char **argv)
       tooptimize[i]=1;
     }
   }
-
-  // treat sparse features just like regular features
-  if (D.hasSparseFeatures()) {
-    D.mergeSparseFeatures();
-  }
-
 
 #ifdef WITH_THREADS
   cerr << "Creating a pool of " << threads << " threads" << endl;

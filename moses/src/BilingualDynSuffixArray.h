@@ -22,7 +22,7 @@ public:
 	
 	void SetId(size_t pos, wordID_t id)
 	{
-    assert(pos < words.size());
+    CHECK(pos < words.size());
 		words[pos] = id;
 	}
 	bool operator<(const SAPhrase& phr2) const
@@ -109,7 +109,7 @@ private:
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
 	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
-		const FactorDirection& direction, std::vector<wordID_t>&, std::vector<wordID_t>&,
+		std::vector<wordID_t>&, std::vector<wordID_t>&,
     Vocab*);
 	int LoadAlignments(InputFileStream& aligs);
 	int LoadRawAlignments(InputFileStream& aligs);

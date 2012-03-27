@@ -45,10 +45,6 @@ class Phrase
   friend std::ostream& operator<<(std::ostream&, const Phrase&);
 private:
 
-  FactorDirection				m_direction;  /** Reusing Direction enum to really mean which language
-																					Input = Source, Output = Target.
-																					Not really used, but nice to know for debugging purposes
-																			*/
   std::vector<Word>			m_words;
 
 public:
@@ -56,16 +52,11 @@ public:
   static void InitializeMemPool();
   static void FinalizeMemPool();
 
-  /** copy constructor */
-  Phrase(const Phrase &copy);
-  Phrase& operator=(const Phrase&);
-
   /** create empty phrase
-  * \param direction = language (Input = Source, Output = Target)
   */
-  Phrase(FactorDirection direction, size_t reserveSize);
+  Phrase(size_t reserveSize);
   /** create phrase from vectors of words	*/
-  Phrase(FactorDirection direction, const std::vector< const Word* > &mergeWords);
+  Phrase(const std::vector< const Word* > &mergeWords);
 
   /** destructor */
   virtual ~Phrase();
@@ -98,11 +89,6 @@ public:
   bool IsCompatible(const Phrase &inputPhrase) const;
   bool IsCompatible(const Phrase &inputPhrase, FactorType factorType) const;
   bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
-
-  //! really means what language. Input = Source, Output = Target
-  inline FactorDirection GetDirection() const {
-    return m_direction;
-  }
 
   //! number of words
   inline size_t GetSize() const {
@@ -150,13 +136,13 @@ public:
 	
 	void RemoveWord(size_t pos)
 	{
-		assert(pos < m_words.size());
+		CHECK(pos < m_words.size());
 		m_words.erase(m_words.begin() + pos);
 	}
 	
 	//! create new phrase class that is a substring of this phrase
 	Phrase GetSubString(const WordsRange &wordsRange) const;
-	Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
+  Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
 	
 	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 

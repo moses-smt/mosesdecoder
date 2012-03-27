@@ -47,9 +47,13 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
+use strict;
 use FindBin qw($Bin);
 use File::Basename;
 use File::Path;
+use File::Spec;
+use Cwd;
+
 my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
@@ -82,7 +86,10 @@ my $minimum_required_change_in_weights = 0.00001;
 
 my $verbose = 0;
 my $usage = 0; # request for --help
-my $___WORKING_DIR = "mert-work";
+
+# We assume that if you don't specify working directory,
+# we set the default is set to `pwd`/mert-work
+my $___WORKING_DIR = File::Spec->catfile(Cwd::getcwd(), "mert-work");
 my $___DEV_F = undef; # required, input text to decode
 my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
@@ -144,10 +151,9 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
-                                  # and so on 
+                                  # and so on
 my $maximum_iterations = 25;
 
-use strict;
 use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
@@ -740,6 +746,7 @@ while(1) {
 
   $cmd .= $file_settings;
 
+  my %sparse_weights; # sparse features
   # pro optimization
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
     $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
@@ -751,13 +758,31 @@ while(1) {
     my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
     &submit_or_exec($pro_cmd,"run$run.pro.out","run$run.pro.err");
     # ... get results ...
-    my %dummy;
-    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%dummy);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);
+    # Get the pro outputs ready for mert. Add the weight ranges,
+    # and a weight and range for the single sparse feature
+    $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
+    open(MERT_START,$1);
     open(PRO_START,">run$run.init.pro");
-    print PRO_START $bestpoint."\n";
+    print PRO_START $bestpoint." 1\n";
+    my $mert_line = <MERT_START>;
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 0\n";
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 1\n";
     close(PRO_START);
+
+    # Write the sparse weights to file so mert can use them
+    open(SPARSE_WEIGHTS,">run$run.merge-weights");
+    foreach my $fname (keys %sparse_weights) {
+      print SPARSE_WEIGHTS "$fname $sparse_weights{$fname}\n";
+    }
+    close(SPARSE_WEIGHTS);
+    $cmd = $cmd." --sparse-weights run$run.merge-weights";
+
     # ... and run mert
-    $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
     &submit_or_exec($cmd.$mert_settings,$mert_outfile,$mert_logfile);
   }
   # just mert
@@ -778,8 +803,8 @@ while(1) {
 
   print "run $run end at ".`date`;
 
-  my %sparse_weights; # sparse features
   ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+  my $merge_weight = 0;
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -788,6 +813,10 @@ while(1) {
 
   # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
+
+  if ($___PRO_STARTING_POINT) {
+    $merge_weight = pop @newweights;
+  }
 
   # interpolate with prior's interation weight, if historic-interpolation is specified
   if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
@@ -827,7 +856,11 @@ while(1) {
     $sparse_weights_file = "run".($run+1).".sparse-weights";
     open(SPARSE,">".$sparse_weights_file);
     foreach my $feature (keys %sparse_weights) {
-      print SPARSE "$feature $sparse_weights{$feature}\n";
+      my $sparse_weight = $sparse_weights{$feature};
+      if ($___PRO_STARTING_POINT) {
+        $sparse_weight *= $merge_weight;
+      }
+      print SPARSE "$feature $sparse_weight\n";
     }
     close(SPARSE);
   }
@@ -1298,19 +1331,16 @@ sub submit_or_exec {
 sub create_extractor_script()
 {
   my ($cmd, $outdir) = @_;
+  my $script_path = File::Spec->catfile($outdir, "extractor.sh");
 
-  my $script_path = $outdir."/extractor.sh";
-
-  open(OUT,"> $script_path")
-    or die "Can't write $script_path";
-  print OUT "#!/bin/bash\n";
-  print OUT "cd $outdir\n";
-  print OUT $cmd."\n";
-  close(OUT);
+  open my $out, '>', $script_path
+      or die "Couldn't open $script_path for writing: $!\n";
+  print $out "#!/bin/bash\n";
+  print $out "cd $outdir\n";
+  print $out "$cmd\n";
+  close($out);
 
   `chmod +x $script_path`;
 
-  return $script_path;  
+  return $script_path;
 }
-
-

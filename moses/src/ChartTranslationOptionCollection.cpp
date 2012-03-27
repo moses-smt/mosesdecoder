@@ -19,7 +19,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "InputType.h"
@@ -77,12 +77,12 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
   ChartTranslationOptionList &chartRuleColl = GetTranslationOptionList(startPos, endPos);
   const WordsRange &wordsRange = chartRuleColl.GetSourceRange();
 
-  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
+  CHECK(m_decodeGraphList.size() == m_ruleLookupManagers.size());
   std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
   std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
   for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
     const DecodeGraph &decodeGraph = **iterDecodeGraph;
-    assert(decodeGraph.GetSize() == 1);
+    CHECK(decodeGraph.GetSize() == 1);
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t maxSpan = decodeGraph.GetMaxChartSpan();
     if (maxSpan == 0 || (endPos-startPos+1) <= maxSpan) {
@@ -125,7 +125,7 @@ void ChartTranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_
       ruleLookupManager.GetChartRuleCollection(wordsRange, false, fullList);
     }
   }
-  assert(iterRuleLookupManagers == m_ruleLookupManagers.end());
+  CHECK(iterRuleLookupManagers == m_ruleLookupManagers.end());
 
   bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
   // create unknown words for 1 word coverage where we don't have any trans options
@@ -137,13 +137,13 @@ void ChartTranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_
 ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {
   size_t sizeVec = m_collection[startPos].size();
-  assert(endPos-startPos < sizeVec);
+  CHECK(endPos-startPos < sizeVec);
   return m_collection[startPos][endPos - startPos];
 }
 const ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
 {
   size_t sizeVec = m_collection[startPos].size();
-  assert(endPos-startPos < sizeVec);
+  CHECK(endPos-startPos < sizeVec);
   return m_collection[startPos][endPos - startPos];
 }
 
@@ -197,7 +197,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
     // modify the starting bitmap
   }
 
-  Phrase* m_unksrc = new Phrase(Input, 1);
+  Phrase* m_unksrc = new Phrase(1);
   m_unksrc->AddWord() = sourceWord;
   m_unksrcs.push_back(m_unksrc);
 
@@ -221,7 +221,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       Word targetLHS(true);
 
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      assert(targetLHS.GetFactor(0) != NULL);
+      CHECK(targetLHS.GetFactor(0) != NULL);
 
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase(Output);
@@ -264,7 +264,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
       Word targetLHS(true);
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      assert(targetLHS.GetFactor(0) != NULL);
+      CHECK(targetLHS.GetFactor(0) != NULL);
 
       targetPhrase->SetSourcePhrase(*m_unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);

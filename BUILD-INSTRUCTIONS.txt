@@ -1,92 +1,109 @@
-0) Preliminaries
+PRELIMINARIES
 
-Before building you need to decide what language model toolkit (SRI's,
-IRST's, or Ken's) you want to use.
+Moses is primarily targeted at gcc on UNIX.  
 
-If you want to use SRI's, you will need to download its source 
-and build it.  The SRILM can be downloaded from 
+Moses requires gcc, Boost >= 1.36, and zlib including the headers that some
+distributions package separately (i.e. -dev or -devel packages).  Source is
+available at http://boost.org .
+
+There are several optional dependencies:
+
+GIZA++ from http://code.google.com/p/giza-pp/ is used to build phrase tables.
+
+Moses server requires xmlrpc-c with abyss-server.  Source is available from
+http://xmlrpc-c.sourceforge.net/.  
+
+The scripts support building ARPA format language models with SRILM or IRSTLM.
+To apply models inside the decoder, you can use SRILM, IRSTLM, or KenLM.  The
+ARPA format is exchangable so that e.g. you can build a model with SRILM and
+run the decoder with IRSTLM or KenLM.
+
+If you want to use SRILM, you will need to download its source and build it.  
+The SRILM can be downloaded from 
 http://www.speech.sri.com/projects/srilm/download.html .
+On x86_64, the default machine type is broken.  Edit sbin/machine-type, find
+this code
+    else if (`uname -m` == x86_64) then
+        set MACHINE_TYPE = i686
+and change it to
+    else if (`uname -m` == x86_64) then
+        set MACHINE_TYPE = i686-m64
+You may have to chmod +w sbin/machine-type first.  
 
-
-If you want to use IRST's, you will need to download its source and
-build it.  The IRSTLM can be downloaded from either the SourceForge
-website
+If you want to use IRSTLM, you will need to download its source and build it.  
+The IRSTLM can be downloaded from either the SourceForge website
 http://sourceforge.net/projects/irstlm
 or the official IRSTLM website
 http://hlt.fbk.eu/en/irstlm
 
-
-Ken's LM is included with the Moses distribution.  
-
-IMPORTANT: These instructions are for building the moses decoder ONLY,
-the training and tuning SCRIPTS contained in scripts/ must be built
-and installed separately.  Also, they may require modification to
-work in certain environments.
-
-Versions 1.9 (or higher) of aclocal and automake are required.
-
-For Mac OSX users:
-Standard distribution usually includes versions 1.6.
-Get correct versions, and set the environment variables ACLOCAL and 
-AUTOMAKE to the correct paths in ./regenerate-makefiles.sh.
+KenLM is included with Moses.  
 
 --------------------------------------------------------------------------
 
-1) Instructions for building with SRILM
+ADVICE ON INSTALLING EXTERNAL LIBRARIES
 
-Build SRILM according to their release instructions.  Make sure that
-you DO NOT override the MACHINE_TYPE variable on the command line when
-you do so, as this can lead to problems locating the library.
+Generally, for trouble installing external libraries, you should get support
+directly from the library maker:
 
- ./regenerate-makefiles.sh
- ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm]
+Boost: http://www.boost.org/doc/libs/1_48_0/more/getting_started/unix-variants.html
+IRSTLM: https://list.fbk.eu/sympa/subscribe/user-irstlm
+SRILM: http://www.speech.sri.com/projects/srilm/#srilm-user
 
-The resulting decoder binary will be moses-cmd/src/moses .
+However, here's some general advice on installing software (for bash users):
+
+#Determine where you want to install packages
+PREFIX=$HOME/usr
+#If your system has lib64 directories, lib64 should be used AND NOT lib  
+if [ -d /lib64 ]; then
+  LIBDIR=$PREFIX/lib64
+else
+  LIBDIR=$PREFIX/lib
+fi
+#If you're installing to a non-standard path, tell programs where to find things:
+export PATH=$PREFIX/bin${PATH:+:$PATH}
+export LD_LIBRARY_PATH=$LIBDIR${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}
+export LIBRARY_PATH=$LIBDIR${LIBRARY_PATH:+:$LIBRARY_PATH}
+export CPATH=$PREFIX/include${CPATH:+:$CPATH}
+
+Add all the above code to your .bashrc or .bash_login as appropriate.  Then
+you're ready to install packages in non-standard paths:
+
+#For autotools packages e.g. xmlrpc-c
+./configure --prefix=$PREFIX --libdir=$PREFIX/lib64 [other options here]
+
+#For Boost:
+./bootstrap.sh
+./b2 --prefix=$PREFIX --libdir=$PREFIX/lib64 link=static,shared threading=multi install
 
 --------------------------------------------------------------------------
 
-2) Instructions for building with IRSTLM
+BUILDING
 
-Build IRSTLM according to its release instructions.  Make sure that
-you DO NOT override the MACHINE_TYPE variable on the command line when
-you do so, as this can lead to problems locating the library.
+Building consists of running
+  ./bjam [options]
 
- ./regenerate-makefiles.sh
- ./configure [--with-srilm=/path/to/srilm] [--with-irstlm=/path/to/irstlm]
+Common options are:
+--with-srilm=/path/to/srilm to compile the decoder with SRILM support
+--with-irstlm=/path/to/irstlm to compile the decoder with IRSTLM support
+--with-giza=/path/to/giza to enable training scripts
+-jN where N is the number of CPUs
 
-The resulting decoder binary will be moses-cmd/src/moses .
+Binaries will appear in dist/bin.  
 
---------------------------------------------------------------------------
-
-3) Instructions for building with Ken's LM
-
- ./regenerate-makefiles.sh
- ./configure
-
-The resulting decoder binary will be moses-cmd/src/moses .
-Use language model 8 in your moses.ini:
-[lmodel-file]
-8 0 2 /path/to/lm.arpa
+For further documentation, run 
+  ./bjam --help
 
 --------------------------------------------------------------------------
-
-
 
 ALTERNATIVE WAYS TO BUILD ON UNIX AND OTHER PLATFORMS
 
 Microsoft Windows
 -----------------
-Tested on 32-bit Windows XP and Vista using Visual Studio 2005.
-Again, refer to the old manual
-	http://homepages.inf.ed.ac.uk/s0565741/papers/developers-manual.pdf
-The Windows build doesn't use the SRI or IRST language model libraries as they can't be compiled 
-under Windows using Visual Studio. Instead, an internal language model, which behave like SRILM is used,
-however, it can only handle up to trigrams.
+Moses is primarily targeted at gcc on UNIX.  Windows users should consult
+http://ssli.ee.washington.edu/people/amittai/Moses-on-Win7.pdf .  
 
 Binaries for all external libraries needed can be downloaded from 
 	http://www.statmt.org/moses/?n=Moses.LibrariesUsed
 
-Only the decoder is developed and tested under Windows. There are difficulties using the training scripts under Windows, even with Cygwin.
-
-
-
+Only the decoder is developed and tested under Windows. There are difficulties
+using the training scripts under Windows, even with Cygwin.

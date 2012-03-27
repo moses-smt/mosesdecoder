@@ -32,7 +32,7 @@ public:
     const ChartHypothesis&,
     int /* featureID */,
     ScoreComponentCollection*) const {
-		assert(0); // feature function not valid in chart decoder
+		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
 	}
 };

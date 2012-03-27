@@ -9,6 +9,7 @@
 #include "FeatureStats.h"
 
 #include <cmath>
+#include <stdexcept>
 #include "Util.h"
 
 namespace {
@@ -56,26 +57,53 @@ void SparseVector::clear() {
   fvector_.clear();
 }
 
-SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
-  //All the elements that have values in *this
-  for (fvector_t::iterator i = fvector_.begin(); i != fvector_.end(); ++i) {
-    fvector_[i->first] = i->second - rhs.get(i->first);
+void SparseVector::load(const string& file) {
+  ifstream in(file.c_str());
+  if (!in) {
+    throw runtime_error("Failed to open sparse weights file: " + file);
   }
+  string line;
+  while(getline(in,line)) {
+    if (line[0] == '#') continue;
+    istringstream linestream(line);
+    string name;
+    float value;
+    linestream >> name;
+    linestream >> value;
+    set(name,value);
+  }
+}
 
-  //Any elements in rhs, that have no value in *this
+SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
+
   for (fvector_t::const_iterator i = rhs.fvector_.begin();
       i != rhs.fvector_.end(); ++i) {
-    if (fvector_.find(i->first) == fvector_.end()) {
-      fvector_[i->first] = -(i->second);
-    }
+    fvector_[i->first] =  get(i->first) - (i->second);
   }
   return *this;
+}
+
+FeatureStatsType SparseVector::inner_product(const SparseVector& rhs) const {
+  FeatureStatsType product = 0.0;
+  for (fvector_t::const_iterator i = fvector_.begin();
+    i != fvector_.end(); ++i) {
+    product += ((i->second) * (rhs.get(i->first)));
+  }
+  return product;
 }
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
   SparseVector res(lhs);
   res -= rhs;
   return res;
+}
+
+FeatureStatsType inner_product(const SparseVector& lhs, const SparseVector& rhs) {
+    if (lhs.size() >= rhs.size()) {
+      return rhs.inner_product(lhs);
+    } else {
+      return lhs.inner_product(rhs);
+    }
 }
 
 FeatureStats::FeatureStats()
@@ -87,12 +115,6 @@ FeatureStats::FeatureStats(const size_t size)
       array_(new FeatureStatsType[available_])
 {
   memset(array_, 0, GetArraySizeWithBytes());
-}
-
-FeatureStats::FeatureStats(std::string &theString)
-    : available_(0), entries_(0), array_(NULL)
-{
-  set(theString);
 }
 
 FeatureStats::~FeatureStats()
@@ -144,7 +166,7 @@ void FeatureStats::addSparse(const string& name, FeatureStatsType v)
   map_.set(name,v);
 }
 
-void FeatureStats::set(std::string &theString)
+void FeatureStats::set(std::string &theString, const SparseVector& sparseWeights)
 {
   std::string substring, stringBuf;
   reset();
@@ -161,6 +183,26 @@ void FeatureStats::set(std::string &theString)
       addSparse(substring.substr(0,separator), atof(substring.substr(separator+1).c_str()) );
     }
   }
+
+  if (sparseWeights.size()) {
+    //Merge the sparse features
+    FeatureStatsType merged = inner_product(sparseWeights, map_);
+    add(merged);
+    /*
+    cerr << "Merged ";
+    sparseWeights.write(cerr,"=");
+    cerr << " and ";
+    map_.write(cerr,"=");
+    cerr << " to give " <<  merged << endl;
+    */
+    map_.clear();
+  }
+  /*
+  cerr << "FS: ";
+  for (size_t i = 0; i < entries_; ++i) {
+    cerr << array_[i] << " ";
+  }
+  cerr << endl;*/
 }
 
 
@@ -169,20 +211,11 @@ void FeatureStats::loadbin(std::ifstream& inFile)
   inFile.read((char*) array_, GetArraySizeWithBytes());
 }
 
-void FeatureStats::loadtxt(std::ifstream& inFile)
+void FeatureStats::loadtxt(std::ifstream& inFile, const SparseVector& sparseWeights)
 {
   std::string theString;
   std::getline(inFile, theString);
-  set(theString);
-}
-
-void FeatureStats::loadtxt(const std::string &file)
-{
-  //    TRACE_ERR("loading the stats from " << file << std::endl);
-
-  std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-  loadtxt(inFile);
+  set(theString, sparseWeights);
 }
 
 

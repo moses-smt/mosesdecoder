@@ -30,6 +30,7 @@ public:
   FeatureStatsType get(size_t id) const;
   void set(const std::string& name, FeatureStatsType value);
   void clear();
+  void load(const std::string& file);
   size_t size() const {
     return fvector_.size();
   }
@@ -37,6 +38,7 @@ public:
   void write(std::ostream& out, const std::string& sep = " ") const;
 
   SparseVector& operator-=(const SparseVector& rhs);
+  FeatureStatsType inner_product(const SparseVector& rhs) const;
 
 private:
   static name2id_t name2id_;
@@ -45,6 +47,7 @@ private:
 };
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
+FeatureStatsType inner_product(const SparseVector& lhs, const SparseVector& rhs);
 
 class FeatureStats
 {
@@ -59,7 +62,6 @@ private:
 public:
   FeatureStats();
   explicit FeatureStats(const size_t size);
-  explicit FeatureStats(std::string &theString);
 
   ~FeatureStats();
 
@@ -99,7 +101,7 @@ public:
     return map_;
   }
 
-  void set(std::string &theString);
+  void set(std::string &theString, const SparseVector& sparseWeights);
 
   inline size_t bytes() const {
     return GetArraySizeWithBytes();
@@ -124,8 +126,7 @@ public:
     savetxt("/dev/stdout");
   }
 
-  void loadtxt(const std::string &file);
-  void loadtxt(ifstream& inFile);
+  void loadtxt(ifstream& inFile, const SparseVector& sparseWeights);
   void loadbin(ifstream& inFile);
 
   /**

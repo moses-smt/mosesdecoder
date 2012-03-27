@@ -19,7 +19,7 @@ ScoreComponentCollection::ScoreComponentCollection() : m_scores(s_denseVectorSiz
 void ScoreComponentCollection::RegisterScoreProducer
   (const ScoreProducer* scoreProducer) 
 {
-  assert(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
+  CHECK(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
   VERBOSE(1, "ScoreProducer: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
@@ -30,9 +30,9 @@ void ScoreComponentCollection::RegisterScoreProducer
 void ScoreComponentCollection::UnregisterScoreProducer
   (const ScoreProducer* scoreProducer) 
 {
-  assert(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
+  CHECK(scoreProducer->GetNumScoreComponents() != ScoreProducer::unlimited);
   ScoreIndexMap::iterator iter = s_scoreIndexes.find(scoreProducer);
-  assert(iter != s_scoreIndexes.end());
+  CHECK(iter != s_scoreIndexes.end());
   s_scoreIndexes.erase(iter);
 
 }
@@ -160,7 +160,7 @@ void ScoreComponentCollection::Save(const string& filename) const {
 }
 
 void ScoreComponentCollection::Assign(const ScoreProducer* sp, const string line) {
-  assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+  CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
   istringstream istr(line);
   while(istr) {
     string namestring;

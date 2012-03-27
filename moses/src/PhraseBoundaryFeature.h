@@ -46,8 +46,7 @@ public:
                                   int /* featureID */,
                                   ScoreComponentCollection* ) const
                                   {
-                                    /* Not implemented */
-                                    assert(0);
+                                    abort();
                                   }
   
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }

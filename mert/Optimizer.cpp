@@ -1,7 +1,7 @@
 #include "Optimizer.h"
 
 #include <cmath>
-#include <cassert>
+#include "util/check.hh"
 #include <vector>
 #include <limits>
 #include <map>
@@ -49,7 +49,7 @@ Optimizer::Optimizer(unsigned Pd, vector<unsigned> i2O, vector<parameter_t> star
   // Warning: the init vector is a full set of parameters, of dimension pdim!
   Point::pdim = Pd;
 
-  assert(start.size() == Pd);
+  CHECK(start.size() == Pd);
   Point::dim = i2O.size();
   Point::optindices = i2O;
   if (Point::pdim > Point::dim) {
@@ -90,7 +90,7 @@ map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap, floa
   } else {
     // normal case
     pair<map<float,diff_t>::iterator, bool> ins = thresholdmap.insert(threshold(newt, diff_t(1, newdiff)));
-    assert(ins.second);                // we really inserted something
+    CHECK(ins.second);                // we really inserted something
     it = ins.first;
   }
   return it;
@@ -174,7 +174,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         // The rightmost bestindex is the one with the highest slope.
 
         // They should be equal but there might be.
-        assert(abs(leftmost->first-gradient.rbegin()->first) < 0.0001);
+        CHECK(abs(leftmost->first-gradient.rbegin()->first) < 0.0001);
         // A small difference due to rounding error
         break;
       }
@@ -195,7 +195,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         map<float,diff_t>::iterator tit = thresholdmap.find(leftmostx);
         if (tit == previnserted) {
           // The threshold is the same as before can happen if 2 candidates are the same for example.
-          assert(previnserted->second.back().first == newd.first);
+          CHECK(previnserted->second.back().first == newd.first);
           previnserted->second.back()=newd; // just replace the 1 best for sentence S
           // previnsert doesn't change
         } else {
@@ -209,14 +209,14 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
           } else {
             // We append the diffs in previnsert to tit before destroying previnsert.
             tit->second.insert(tit->second.end(),previnserted->second.begin(),previnserted->second.end());
-            assert(tit->second.back().first == newd.first);
+            CHECK(tit->second.back().first == newd.first);
             tit->second.back()=newd;    // change diff for sentence S
             thresholdmap.erase(previnserted); // erase old previnsert
             previnserted = tit;  // point previnsert to the new threshold
           }
         }
 
-        assert(previnserted != thresholdmap.end());
+        CHECK(previnserted != thresholdmap.end());
       } else { //normal insertion process
         previnserted = AddThreshold(thresholdmap, leftmostx, newd);
       }
@@ -252,7 +252,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
   float bestx = MIN_FLOAT;
 
   // We skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best.
-  assert(scores.size() == thresholdmap.size());
+  CHECK(scores.size() == thresholdmap.size());
   for (unsigned int sc = 0; sc != scores.size(); sc++) {
     //cerr << "x=" << thrit->first << " => " << scores[sc] << endl;
     if (scores[sc] > bestscore) {
@@ -309,7 +309,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
 
 void Optimizer::Get1bests(const Point& P, vector<unsigned>& bests) const
 {
-  assert(FData);
+  CHECK(FData);
   bests.clear();
   bests.resize(size());
 
@@ -362,7 +362,7 @@ statscore_t Optimizer::Run(Point& P) const
 
 vector<statscore_t> Optimizer::GetIncStatScore(vector<unsigned> thefirst, vector<vector <pair<unsigned,unsigned> > > thediffs) const
 {
-  assert(scorer);
+  CHECK(scorer);
 
   vector<statscore_t> theres;
 

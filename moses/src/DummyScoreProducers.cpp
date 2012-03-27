@@ -1,6 +1,6 @@
 // $Id$
 
-#include <cassert>
+#include "util/check.hh"
 #include "FFState.h"
 #include "StaticData.h"
 #include "DummyScoreProducers.h"

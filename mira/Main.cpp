@@ -606,7 +606,7 @@ int main(int argc, char** argv) {
 		// number of weight dumps this epoch
 		size_t weightMixingThisEpoch = 0;
 		size_t weightEpochDump = 0;
-		
+
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
 		while (sid != shard.end()) {

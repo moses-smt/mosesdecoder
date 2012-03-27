@@ -37,7 +37,7 @@ template <class MH, class MO>
   std::cerr << "Reading syntactic language model files...\n";
   // For each model file...
   for ( int a=0, n=filePaths.size(); a<n; a++ ) {                                           // read models
-    FILE* pf = fopen(filePaths[a].c_str(),"r"); //assert(pf);                                   // Read model file
+    FILE* pf = fopen(filePaths[a].c_str(),"r"); //CHECK(pf);                                   // Read model file
     if(!pf){
       std::cerr << "Error loading model file " << filePaths[a] << std::endl;
       return;

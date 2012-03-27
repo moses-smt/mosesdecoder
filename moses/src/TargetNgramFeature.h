@@ -124,8 +124,8 @@ private:
 
 public:
   TargetNgramChartState(const ChartHypothesis &hypo, int featureId, size_t order)
-      :m_contextPrefix(Output, order - 1),
-      m_contextSuffix(Output, order - 1)
+      :m_contextPrefix(order - 1),
+      m_contextSuffix(order - 1)
   {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
     const WordsRange range = hypo.GetCurrSourceRange();

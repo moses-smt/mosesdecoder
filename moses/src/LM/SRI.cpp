@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <fstream>
@@ -30,6 +30,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "StaticData.h"
+
+#include "Vocab.h"
+#include "Ngram.h"
 
 using namespace std;
 
@@ -149,7 +152,7 @@ LMResult LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, St
   }
   ngram[count] = Vocab_None;
 
-  assert((*contextFactor[count-1])[factorType] != NULL);
+  CHECK((*contextFactor[count-1])[factorType] != NULL);
   // call sri lm fn
   VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
   ret = GetValue(lmId, ngram+1);

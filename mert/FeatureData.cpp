@@ -16,8 +16,8 @@ static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
 static const float MAX_FLOAT=numeric_limits<float>::max();
 
 FeatureData::FeatureData()
-    : number_of_features(0),
-      _sparse_flag(false) {}
+    : number_of_features(0)
+      {}
 
 void FeatureData::save(std::ofstream& outFile, bool bin)
 {
@@ -38,7 +38,7 @@ void FeatureData::save(const std::string &file, bool bin)
   outFile.close();
 }
 
-void FeatureData::load(ifstream& inFile)
+void FeatureData::load(ifstream& inFile, const SparseVector& sparseWeights)
 {
   FeatureArray entry;
 
@@ -49,7 +49,7 @@ void FeatureData::load(ifstream& inFile)
     }
 
     entry.clear();
-    entry.load(inFile);
+    entry.load(inFile, sparseWeights);
 
     if (entry.size() == 0)
       break;
@@ -57,15 +57,12 @@ void FeatureData::load(ifstream& inFile)
     if (size() == 0)
       setFeatureMap(entry.Features());
 
-    if (entry.hasSparseFeatures())
-      _sparse_flag = true;
-
     add(entry);
   }
 }
 
 
-void FeatureData::load(const std::string &file)
+void FeatureData::load(const std::string &file, const SparseVector& sparseWeights)
 {
   TRACE_ERR("loading feature data from " << file << std::endl);
 
@@ -75,7 +72,7 @@ void FeatureData::load(const std::string &file)
     throw runtime_error("Unable to open feature file: " + file);
   }
 
-  load((ifstream&) inFile);
+  load((ifstream&) inFile, sparseWeights);
 
   inFile.close();
 }

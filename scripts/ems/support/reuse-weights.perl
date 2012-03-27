@@ -22,7 +22,7 @@ while(<WEIGHT>) {
     elsif (/^\[weight\-(\S+)\]/) {
 	$current_weight = $1;
     }
-    elsif ($current_weight && /^([\-\d\.e]+)\s*$/) {
+  elsif ($current_weight && /^([\-\d\.]+)([Ee][+-]?[\d]+)?$/) {
 	push @{$WEIGHT{$current_weight}},$1;
     }
     elsif ($weights_file_flag && !/^\[/ && !/^\s*$/) {
@@ -50,7 +50,7 @@ while(<STDIN>) {
 	    }
 	}
     }
-    elsif ($current_weight && /^([\-\d\.]+)\s*$/) {
+    elsif ($current_weight && /^([\-\d\.]+)([Ee][+-]?[\d]+)?$/) {
 	$IGNORE{$current_weight}++;
     }
     elsif (/^\[/) {

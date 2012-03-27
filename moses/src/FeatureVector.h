@@ -44,6 +44,8 @@
 #include <boost/thread/shared_mutex.hpp>
 #endif
 
+#include "util/check.hh"
+
 namespace Moses {
 	
 	typedef float FValue;
@@ -251,7 +253,7 @@ namespace Moses {
 			ar >> names;
 			ar >> values;
       ar >> m_coreFeatures;
-			assert (names.size() == values.size());
+			CHECK(names.size() == values.size());
 			for (size_t i = 0; i < names.size(); ++i) {
 				set(FName(names[i]), values[i]);
 			}

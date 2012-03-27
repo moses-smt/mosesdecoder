@@ -13,13 +13,14 @@
 #include <fcntl.h>
 #include <sys/types.h>
 #include <sys/stat.h>
+#include <stdlib.h>
+
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
+#include <io.h>
 #else
 #include <sys/mman.h>
 #endif
-#include <stdlib.h>
-#include <unistd.h>
 
 namespace util {
 
@@ -102,7 +103,7 @@ void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, int
   int protectM = for_write ? FILE_MAP_WRITE : FILE_MAP_READ;
   HANDLE hMapping = CreateFileMapping((HANDLE)_get_osfhandle(fd), NULL, protectC, 0, size + offset, NULL);
   UTIL_THROW_IF(!hMapping, ErrnoException, "CreateFileMapping failed");
-  ret = MapViewOfFile(hMapping, protectM, 0, offset, size);
+  LPVOID ret = MapViewOfFile(hMapping, protectM, 0, offset, size);
   CloseHandle(hMapping);
   UTIL_THROW_IF(!ret, ErrnoException, "MapViewOfFile failed");
 #else
@@ -159,8 +160,8 @@ void *MapAnonymous(std::size_t size) {
 }
 
 void *MapZeroedWrite(int fd, std::size_t size) {
-  UTIL_THROW_IF(-1 == ftruncate(fd, 0), ErrnoException, "ftruncate on fd " << fd << " to 0 failed");
-  UTIL_THROW_IF(-1 == ftruncate(fd, size), ErrnoException, "ftruncate on fd " << fd << " to " << size << " failed");
+  ResizeOrThrow(fd, 0);
+  ResizeOrThrow(fd, size);
   return MapOrThrow(size, true, kFileFlags, false, fd, 0);
 }
 

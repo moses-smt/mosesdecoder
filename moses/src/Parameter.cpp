@@ -627,7 +627,7 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
 	m_setting[paramName]; // defines the parameter, important for boolean switches
 	if (m_setting[paramName].size() > 1){
 		VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
-		assert(m_setting[paramName].size() == values.size());
+		CHECK(m_setting[paramName].size() == values.size());
 	}else{
 		VERBOSE(2," (the parameter does not have previous values)");
 		m_setting[paramName].resize(values.size());

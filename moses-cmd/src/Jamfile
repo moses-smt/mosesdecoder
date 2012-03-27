@@ -1,0 +1,8 @@
+alias deps : ../../moses/src//moses ;
+
+exe moses : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMBR.cpp deps ;
+exe lmbrgrid : LatticeMBRGrid.cpp LatticeMBR.cpp IOWrapper.cpp deps ;
+
+alias programs : moses lmbrgrid ;
+
+install legacy-install : programs : <location>. <install-type>EXE <install-dependencies>on <link>shared:<dll-path>$(TOP)/moses-cmd/src <link>shared:<install-type>LIB ;

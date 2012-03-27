@@ -81,7 +81,8 @@ public:
     void SetCurrentShortestReference(size_t);
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
-//    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
+    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
+    size_t GetReferenceLength(size_t ref_id);
     size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
     void SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
@@ -107,7 +108,7 @@ public:
                                     ScoreComponentCollection* ) const
                                     {
                                       /* Not implemented */
-                                      assert(0);
+                                      CHECK(0);
                                     }
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;

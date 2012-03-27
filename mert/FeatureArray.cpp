@@ -12,7 +12,7 @@
 
 
 FeatureArray::FeatureArray()
-    : idx(""), number_of_features(0), _sparse_flag(false) {}
+    : idx(""), number_of_features(0) {}
 
 FeatureArray::~FeatureArray() {}
 
@@ -64,19 +64,17 @@ void FeatureArray::loadbin(ifstream& inFile, size_t n)
   }
 }
 
-void FeatureArray::loadtxt(ifstream& inFile, size_t n)
+void FeatureArray::loadtxt(ifstream& inFile, const SparseVector& sparseWeights, size_t n)
 {
   FeatureStats entry(number_of_features);
 
   for (size_t i=0 ; i < n; i++) {
-    entry.loadtxt(inFile);
+    entry.loadtxt(inFile, sparseWeights);
     add(entry);
-    if (entry.getSparse().size()>0)
-      _sparse_flag = true;
   }
 }
 
-void FeatureArray::load(ifstream& inFile)
+void FeatureArray::load(ifstream& inFile, const SparseVector& sparseWeights)
 {
   size_t number_of_entries=0;
   bool binmode=false;
@@ -108,7 +106,7 @@ void FeatureArray::load(ifstream& inFile)
     features = stringBuf;
   }
 
-  (binmode)?loadbin(inFile, number_of_entries):loadtxt(inFile, number_of_entries);
+  (binmode)?loadbin(inFile, number_of_entries):loadtxt(inFile, sparseWeights, number_of_entries);
 
   std::getline(inFile, stringBuf);
   if (!stringBuf.empty()) {
@@ -117,18 +115,6 @@ void FeatureArray::load(ifstream& inFile)
       return;
     }
   }
-}
-
-void FeatureArray::load(const std::string &file)
-{
-  TRACE_ERR("loading data from " << file << std::endl);
-
-  inputfilestream inFile(file); // matches a stream with a file. Opens the file
-
-  load((ifstream&) inFile);
-
-  inFile.close();
-
 }
 
 void FeatureArray::merge(FeatureArray& e)

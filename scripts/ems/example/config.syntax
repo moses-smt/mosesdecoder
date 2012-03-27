@@ -30,13 +30,13 @@ wmt10-data = $working-dir/data
 ### basic tools
 #
 # moses decoder
-decoder = $moses-src-dir/moses-chart-cmd/src/moses_chart
+decoder = $moses-src-dir/dist/bin/moses_chart
 
 # conversion of phrase table into binary on-disk format
-#ttable-binarizer = $moses-src-dir/misc/processPhraseTable
+#ttable-binarizer = $moses-src-dir/dist/bin/processPhraseTable
 
 # conversion of rule table into binary on-disk format
-ttable-binarizer = "$moses-src-dir/CreateOnDisk/src/CreateOnDiskPt 1 1 5 100 2"
+ttable-binarizer = "$moses-src-dir/dist/bin/CreateOnDiskPt 1 1 5 100 2"
 
 # tokenizers - comment out if all your data is already tokenized
 input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
@@ -145,7 +145,7 @@ order = 5
 #lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
 
 # kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/kenlm/build_binary
+#lm-binarizer = $moses-src-dir/dist/bin/build_binary
 #type = 8
 
 ### script to create quantized language model format (irstlm)
@@ -220,7 +220,7 @@ tuning-sgm = $wmt10-data/dev/news-test2008-ref.$output-extension.sgm
 #lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
 
 # kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/kenlm/build_binary
+#lm-binarizer = $moses-src-dir/dist/bin/build_binary
 #type = 8
 
 ### script to create quantized language model format (irstlm)

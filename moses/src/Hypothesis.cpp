@@ -19,7 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <cassert>
+#include "util/check.hh"
 #include <iostream>
 #include <limits>
 #include <vector>
@@ -100,7 +100,7 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
 {
   // assert that we are not extending our hypothesis by retranslating something
   // that this hypothesis has already translated!
-  assert(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
+  CHECK(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
 
   //_hash_computed = false;
   m_sourceCompleted.SetValue(m_currSourceWordsRange.GetStartPos(), m_currSourceWordsRange.GetEndPos(), true);
@@ -321,7 +321,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore )
     t = clock();  // track time excluding LM
   }
 
-  assert(!"Need to add code to get the distortion scores");
+  CHECK(!"Need to add code to get the distortion scores");
   //CalcDistortionScore();
 
   // LANGUAGE MODEL ESTIMATE (includes word penalty cost)
@@ -345,7 +345,7 @@ void Hypothesis::CalcRemainingScore()
   clock_t t=0; // used to track time
 
   // LANGUAGE MODEL COST
-  assert(!"Need to add code to get the LM score(s)");
+  CHECK(!"Need to add code to get the LM score(s)");
   //CalcLMScore(staticData.GetAllLM());
 
   IFVERBOSE(2) {

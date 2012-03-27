@@ -258,7 +258,7 @@ Scores LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, co
   }
 
   if(m_FactorsC.empty()) {
-    assert(1 == cands.size());
+    CHECK(1 == cands.size());
     return cands[0].GetScore(0);
   } else {
     score = auxFindScoreForContext(cands, c);
@@ -273,7 +273,7 @@ Scores LexicalReorderingTableTree::GetScore(const Phrase& f, const Phrase& e, co
 Scores LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cands, const Phrase& context)
 {
   if(m_FactorsC.empty()) {
-    assert(cands.size() <= 1);
+    CHECK(cands.size() <= 1);
     return (1 == cands.size())?(cands[0].GetScore(0)):(Scores());
   } else {
     std::vector<std::string> cvec;
@@ -380,7 +380,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       }
     } else {
       //sanity check ALL lines must have same number of tokens
-      assert(numTokens == tokens.size());
+      CHECK(numTokens == tokens.size());
     }
     int phrase = 0;
     for(; phrase < numKeyTokens; ++phrase) {
@@ -424,7 +424,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     if(currKey.empty()) {
       currKey = key;
       //insert key into tree
-      assert(psa);
+      CHECK(psa);
       PSA::Data& d = psa->insert(key);
       if(d == InvalidOffT) {
         d = fTell(ot);
@@ -454,7 +454,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
         currFirstWord = key[0];
       }
       //c) insert key into tree
-      assert(psa);
+      CHECK(psa);
       PSA::Data& d = psa->insert(key);
       if(d == InvalidOffT) {
         d = fTell(ot);
@@ -571,8 +571,8 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f)
   if(m_FactorsE.empty()) {
     //f is all of key...
     Candidates cands;
-    m_Table->GetCandidates(MakeTableKey(f,Phrase(Output, ARRAY_SIZE_INCR)),&cands);
-    m_Cache[MakeCacheKey(f,Phrase(Output, ARRAY_SIZE_INCR))] = cands;
+    m_Table->GetCandidates(MakeTableKey(f,Phrase(ARRAY_SIZE_INCR)),&cands);
+    m_Cache[MakeCacheKey(f,Phrase(ARRAY_SIZE_INCR))] = cands;
   } else {
     ObjectPool<PPimp>     pool;
     PPimp* pPos  = m_Table->GetRoot();

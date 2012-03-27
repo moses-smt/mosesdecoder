@@ -1,0 +1,21 @@
+alias headers : ../../util//kenutil : : : <include>. ;
+
+alias ThreadPool : ThreadPool.cpp ;
+
+if [ option.get "with-synlm" : no : yes ] = yes
+{
+  lib m ;
+  obj SyntacticLanguageModel.o : SyntacticLanguageModel.cpp headers : <include>$(TOP)/synlm/hhmm/rvtl/include <include>$(TOP)/synlm/hhmm/wsjparse/include ;
+  alias synlm : SyntacticLanguageModel.o m : : : <define>HAVE_SYNLM ;
+} else {
+  alias synlm ;
+}
+
+lib moses :
+#All cpp files except those listed, and test files
+[ glob *.cpp DynSAInclude/*.cpp : ThreadPool.cpp SyntacticLanguageModel.cpp *Test.cpp Mock*.cpp ]
+synlm ThreadPool LM//LM headers ../..//z ../../OnDiskPt//OnDiskPt ;
+
+import testing ;
+
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp ]  moses ../..//boost_unit_test_framework ;

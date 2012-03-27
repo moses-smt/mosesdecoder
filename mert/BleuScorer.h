@@ -56,7 +56,7 @@ private:
 
   typedef map<vector<int>,int,CompareNgrams> counts_t;
   typedef map<vector<int>,int,CompareNgrams>::iterator counts_iterator;
-  typedef map<vector<int>,int,CompareNgrams>::iterator counts_const_iterator;
+  typedef map<vector<int>,int,CompareNgrams>::const_iterator counts_const_iterator;
   typedef ScopedVector<counts_t> refcounts_t;
 
   /**

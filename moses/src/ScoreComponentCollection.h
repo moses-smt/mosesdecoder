@@ -23,13 +23,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_ScoreComponentCollection_h
 
 #include <numeric>
-#include <cassert>
 #include <sstream>
 
 #ifdef MPI_ENABLE
 #include <boost/serialization/access.hpp>
 #include <boost/serialization/split_member.hpp>
 #endif
+
+#include "util/check.hh"
 
 #include "LMList.h"
 #include "ScoreProducer.h"
@@ -72,7 +73,7 @@ private:
   static IndexPair GetIndexes(const ScoreProducer* sp) 
   {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
-    assert(indexIter != s_scoreIndexes.end());
+    CHECK(indexIter != s_scoreIndexes.end());
     return indexIter->second;
   }
 
@@ -196,7 +197,7 @@ public:
   void PlusEquals(const ScoreProducer* sp, const std::vector<float>& scores)
   {
     IndexPair indexes = GetIndexes(sp);
-    assert(scores.size() == indexes.second - indexes.first);
+    CHECK(scores.size() == indexes.second - indexes.first);
     for (size_t i = 0; i < scores.size(); ++i) {
       m_scores[i + indexes.first] += scores[i];
     }
@@ -208,14 +209,14 @@ public:
 	void PlusEquals(const ScoreProducer* sp, float score)
 	{
     IndexPair indexes = GetIndexes(sp);
-    assert(1 == indexes.second - indexes.first);
+    CHECK(1 == indexes.second - indexes.first);
     m_scores[indexes.first] += score;
 	}
 
   //For features which have an unbounded number of components
   void PlusEquals(const ScoreProducer*sp, const std::string& name, float score)
   {
-    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] += score;
   }
@@ -230,7 +231,7 @@ public:
 	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
 	{
     IndexPair indexes = GetIndexes(sp);
-    assert(scores.size() == indexes.second - indexes.first);
+    CHECK(scores.size() == indexes.second - indexes.first);
     for (size_t i = 0; i < scores.size(); ++i) {
       m_scores[i + indexes.first] = scores[i];
     }
@@ -242,17 +243,19 @@ public:
 	void Assign(const ScoreProducer* sp, float score)
 	{
     IndexPair indexes = GetIndexes(sp);
-    assert(1 == indexes.second - indexes.first);
+    CHECK(1 == indexes.second - indexes.first);
     m_scores[indexes.first] = score;
 	}
 
+
   //For features which have an unbounded number of components
-  void Assign(const ScoreProducer*sp, const std::string name, float score) 
+  void Assign(const ScoreProducer*sp, const std::string name, float score)
   {
-    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] = score;
   }
+
 
   //Read sparse features from string
   void Assign(const ScoreProducer* sp, const std::string line);
@@ -272,7 +275,7 @@ public:
 	float PartialInnerProduct(const ScoreProducer* sp, const std::vector<float>& rhs) const
 	{
 		std::vector<float> lhs = GetScoresForProducer(sp);
-		assert(lhs.size() == rhs.size());
+		CHECK(lhs.size() == rhs.size());
 		return std::inner_product(lhs.begin(), lhs.end(), rhs.begin(), 0.0f);
 	}
 
@@ -337,7 +340,7 @@ public:
 	float GetScoreForProducer(const ScoreProducer* sp) const
 	{
     IndexPair indexes = GetIndexes(sp);
-    assert(indexes.second - indexes.first == 1);
+    CHECK(indexes.second - indexes.first == 1);
     return m_scores[indexes.first];
 	}
 
@@ -345,7 +348,7 @@ public:
   float GetScoreForProducer
     (const ScoreProducer* sp, const std::string& name) const
   {
-    assert(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
+    CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     return m_scores[fname];
   }
