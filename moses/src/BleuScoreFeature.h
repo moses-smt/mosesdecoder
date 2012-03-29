@@ -11,6 +11,7 @@
 
 #include "FFState.h"
 #include "Phrase.h"
+#include "ChartHypothesis.h"
 
 namespace Moses {
 
@@ -110,6 +111,11 @@ public:
                                       /* Not implemented */
                                       CHECK(0);
                                     }
+
+
+    FFState* EvaluateChart( const ChartHypothesis& cur_hypo,
+    												int featureID,
+    												ScoreComponentCollection) const;
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
 

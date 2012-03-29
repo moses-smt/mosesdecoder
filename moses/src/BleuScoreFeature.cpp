@@ -340,7 +340,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
     // Get context and append new words.
     num_new_words = cur_hypo.GetCurrTargetLength();
     if (num_new_words == 0) {
-	return new_state;
+    	return new_state;
     }
  
     Phrase new_words = ps.m_words;
@@ -382,6 +382,69 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
     return new_state;
 }
+
+/*FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis&  cur_hypo, int featureID,
+		ScoreComponentCollection accumulator ) const {
+  NGrams::const_iterator reference_ngrams_iter;
+
+  ChartHypothesis prev_hypo = cur_hypo.GetPrevHypo(0);
+  prev_hypo.GetFFState()
+
+  const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
+  BleuScoreState* new_state = new BleuScoreState(ps);
+  //cerr << "PS: " << ps << endl;
+
+  float old_bleu, new_bleu;
+  size_t num_new_words, ctx_start_idx, ctx_end_idx;
+
+  // Calculate old bleu;
+  old_bleu = CalculateBleu(new_state);
+
+  // Get context and append new words.
+  num_new_words = cur_hypo.GetCurrTargetLength();
+  if (num_new_words == 0) {
+  	return new_state;
+  }
+
+  Phrase new_words = ps.m_words;
+  new_words.Append(cur_hypo.GetCurrTargetPhrase());
+  //cerr << "NW: " << new_words << endl;
+
+  // get ngram matches for new words
+  GetNgramMatchCounts(new_words,
+                      m_cur_ref_ngrams,
+                      new_state->m_ngram_counts,
+                      new_state->m_ngram_matches,
+                      new_state->m_words.GetSize());
+
+  // Update state variables
+  ctx_end_idx = new_words.GetSize()-1;
+  size_t bleu_context_length = BleuScoreState::bleu_order -1;
+  if (ctx_end_idx > bleu_context_length) {
+    ctx_start_idx = ctx_end_idx - bleu_context_length;
+  } else {
+    ctx_start_idx = 0;
+  }
+
+  WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
+  new_state->m_source_length = coverageVector.GetNumWordsCovered();
+
+  new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
+                                                         ctx_end_idx));
+  new_state->m_target_length += cur_hypo.GetCurrTargetLength();
+
+  // we need a scaled reference length to compare the current target phrase to the corresponding reference phrase
+  new_state->m_scaled_ref_length = m_cur_ref_length *
+      ((float)coverageVector.GetNumWordsCovered() / coverageVector.GetSize());
+
+  // Calculate new bleu.
+  new_bleu = CalculateBleu(new_state);
+
+  // Set score to new Bleu score
+  accumulator->PlusEquals(this, new_bleu - old_bleu);
+
+  return new_state;
+}*/
 
 /*
  * Calculate Bleu score for a partial hypothesis given as state.

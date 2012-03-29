@@ -38,7 +38,6 @@ namespace mpi = boost::mpi;
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
 #include "ScoreComponentCollection.h"
-#include "Decoder.h"
 #include "Optimiser.h"
 #include "Hildreth.h"
 #include "ThreadPool.h"
@@ -102,7 +101,7 @@ int main(int argc, char** argv) {
 	bool historyOf1best;
 	bool historyOfOracles;
 	bool sentenceLevelBleu;
-	float bleuScoreWeight, bleuScoreWeight_hope, bleuScoreWeight_fear;
+	float bleuWeight, bleuWeight_hope, bleuWeight_fear;
 	float margin_slack;
 	float margin_slack_incr;
 	bool perceptron_update;
@@ -128,6 +127,8 @@ int main(int argc, char** argv) {
 	bool useSourceLengthHistory;
 	int featureCutoff;
 	bool pruneZeroWeights;
+	bool megam;
+	bool printFeatureInfo;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -138,9 +139,9 @@ int main(int argc, char** argv) {
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for taking logs of feature values")
 		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-		("bleu-score-weight", po::value<float>(&bleuScoreWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
-		("bleu-score-weight-hope", po::value<float>(&bleuScoreWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-	    ("bleu-score-weight-fear", po::value<float>(&bleuScoreWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+		("bleu-score-weight", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
+		("bleu-score-weight-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
+		("bleu-score-weight-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
@@ -177,6 +178,7 @@ int main(int argc, char** argv) {
 		("max-length-dev-fear-ref", po::value<float>(&max_length_dev_fear_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between fear and reference translations")
 		("min-bleu-ratio", po::value<float>(&minBleuRatio)->default_value(-1), "Set a minimum BLEU ratio between hope and fear")
 		("max-bleu-ratio", po::value<float>(&maxBleuRatio)->default_value(-1), "Set a maximum BLEU ratio between hope and fear")
+		("megam", po::value<bool>(&megam)->default_value(false), "Use megam for optimization step")
 		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
 		("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
 		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
@@ -189,6 +191,7 @@ int main(int argc, char** argv) {
 		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+		("print-feature-info", po::value<bool>(&printFeatureInfo)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
 		("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")				
 		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
 		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
@@ -478,24 +481,18 @@ int main(int argc, char** argv) {
 	if (rank_n == -1)
 		rank_n = n;
 
-	if (model_hope_fear && hope_fear)
+	if (model_hope_fear || hope_model || rank_only || hope_fear_rank || megam)
 		hope_fear = false; // is true by default
-	if (rank_only && hope_fear)
-		hope_fear = false; // is true by default
-	if (hope_fear_rank && hope_fear)
-		hope_fear = false; // is true by default
-	if (hope_model && hope_fear)
-		hope_fear = false; // is true by default
-	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || hope_fear_rank)) {
-		cerr << "Error: Need to select an one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
+	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || hope_fear_rank || megam)) {
+		cerr << "Error: Need to select one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
 
-	if (bleuScoreWeight_hope == -1) {
-		bleuScoreWeight_hope = bleuScoreWeight;
+	if (bleuWeight_hope == -1) {
+		bleuWeight_hope = bleuWeight;
 	}
-	if (bleuScoreWeight_fear == -1) {
-		bleuScoreWeight_fear = bleuScoreWeight;
+	if (bleuWeight_fear == -1) {
+		bleuWeight_fear = bleuWeight;
 	}
 
 	if (max_length_dev_all != -1) {
@@ -607,6 +604,16 @@ int main(int argc, char** argv) {
 		size_t weightMixingThisEpoch = 0;
 		size_t weightEpochDump = 0;
 
+		string f1 = "decode_hope_epoch0";
+		string f2 = "decode_fear_epoch0";
+    ofstream hopePlusFeatures(f1.c_str());
+    ofstream fearPlusFeatures(f2.c_str());
+    if (!hopePlusFeatures || !fearPlusFeatures) {
+    	ostringstream msg;
+    	msg << "Unable to open file";
+    	throw runtime_error(msg.str());
+    }
+
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
 		while (sid != shard.end()) {
@@ -640,6 +647,7 @@ int main(int argc, char** argv) {
 			vector<size_t> ref_ids;
 			size_t actualBatchSize = 0;
 
+			string nbestFileMegam, referenceFileMegam;
 			vector<size_t>::const_iterator current_sid_start = sid;
 			size_t examples_in_batch = 0;
 			for (size_t batchPosition = 0; batchPosition < batchSize && sid
@@ -652,7 +660,7 @@ int main(int argc, char** argv) {
 //				const vector<string>& refs = referenceSentences[*sid];
 				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
 
-				Moses::Sentence *sentence = new Sentence(Input);
+				Moses::Sentence *sentence = new Sentence();
 			    stringstream in(input + "\n");
 			    sentence->Read(in,inputFactorOrder);
 			    size_t current_input_length = (*sentence).GetSize();
@@ -688,10 +696,51 @@ int main(int argc, char** argv) {
 
 				size_t ref_length;
 				float avg_ref_length;
+
+				// preparation for MegaM
+				if (megam) {
+					ostringstream hope_nbest_filename, fear_nbest_filename, model_nbest_filename, ref_filename;
+					ofstream dummy;
+					cerr << "Generate nbest lists for megam.." << endl;
+					hope_nbest_filename << "decode_hope_sent" << *sid << "." << hope_n << "best";
+					fear_nbest_filename << "decode_fear_sent" << *sid << "." << fear_n << "best";
+					//model_nbest_filename << "decode_model_sent" << *sid << "." << n << "best";
+					cerr << "Writing file " << hope_nbest_filename.str() << endl;
+					decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
+							hope_nbest_filename.str(), dummy);
+					cerr << "Writing file " << fear_nbest_filename.str() << endl;
+					decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
+							fear_nbest_filename.str(), dummy);
+					//decoder->outputNBestList(input, *sid, n, 0, bleuWeight, distinctNbest,
+						//model_nbest_filename.str());
+
+					// save reference
+					ref_filename <<  "decode_ref_sent" << *sid;
+					referenceFileMegam = ref_filename.str();
+					ofstream ref_out(referenceFileMegam.c_str());
+					if (!ref_out) {
+						ostringstream msg;
+						msg << "Unable to open " << referenceFileMegam;
+						throw runtime_error(msg.str());
+					}
+					ref_out << referenceSentences[decoder->getShortestReferenceIndex(*sid)][*sid] << "\n";
+					ref_out.close();
+
+					// concatenate nbest files
+					stringstream nbestStreamMegam, catCmd, sortCmd;
+					nbestStreamMegam << "decode_hope-fear_sent" << *sid << "." << (hope_n+fear_n) << "best";
+					string tmp = nbestStreamMegam.str();
+					nbestFileMegam = tmp+".sorted";
+					catCmd << "cat " << hope_nbest_filename.str() << " " << fear_nbest_filename.str() << " > " << tmp;
+					sortCmd << "sort -k1,1n " << tmp << " > " << nbestFileMegam;
+					system(catCmd.str().c_str());
+					system(sortCmd.str().c_str());
+				}
+
 				if (hope_fear || hope_fear_rank || perceptron_update) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
-					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
+					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
 							1, distinctNbest, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
@@ -705,6 +754,12 @@ int main(int argc, char** argv) {
 
 					// count sparse features occurring in hope translation
 					featureValuesHope[batchPosition][0].IncrementSparseFeatures();
+
+					if (epoch == 0 && printFeatureInfo) {
+						decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest, "",
+								hopePlusFeatures);
+					}
+
 					
 					float precision = bleuScoresHope[batchPosition][0];
 					if (historyOf1best) {
@@ -723,6 +778,7 @@ int main(int argc, char** argv) {
 						}
 					}
 					
+//					exit(0);
 					bool skip = false;
 
 					// Length-related example selection
@@ -734,7 +790,7 @@ int main(int argc, char** argv) {
 					if (historyOf1best && !skip) {
 						// MODEL (for updating the history only, using dummy vectors)
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
-						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, 1, 0.0, bleuScoreWeight,
+						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, 1, 0.0, bleuWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
 								1, distinctNbest, rank, epoch);
 						bestModel = outputModel[0];
@@ -749,7 +805,7 @@ int main(int argc, char** argv) {
 					int fearSize = 0;
 					if (!skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
-						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuScoreWeight_fear,
+						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuWeight_fear,
 								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
 								1,	distinctNbest, rank, epoch);
 						vector<const Word*> fear = outputFear[0];
@@ -762,6 +818,11 @@ int main(int argc, char** argv) {
 						cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 						for (size_t i = 0; i < fear.size(); ++i)
 							delete fear[i];
+
+						if (epoch == 0 && printFeatureInfo) {
+							decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest, "",
+									fearPlusFeatures);
+						}
 
 						// Bleu-related example selection
 						bleuRatioHopeFear = bleuScoresHope[batchPosition][0] / bleuScoresFear[batchPosition][0];
@@ -808,7 +869,7 @@ int main(int argc, char** argv) {
 				if (hope_model) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
-					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuScoreWeight_hope,
+					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
 							1, distinctNbest, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
@@ -821,7 +882,7 @@ int main(int argc, char** argv) {
 					vector<const Word*> bestModel;
 					// MODEL (for updating the history only, using dummy vectors)
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best wrt model score" << endl;
-					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, fear_n, 0.0, bleuScoreWeight_fear,
+					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, fear_n, 0.0, bleuWeight_fear,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
 							1, distinctNbest, rank, epoch);
 					bestModel = outputModel[0];
@@ -842,7 +903,7 @@ int main(int argc, char** argv) {
 				if (rank_only || hope_fear_rank) {
 					// MODEL
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
-					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuScoreWeight,
+					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1,	distinctNbest, rank, epoch);
 					vector<const Word*> bestModel = outputModel[0];
@@ -861,7 +922,7 @@ int main(int argc, char** argv) {
 					// HOPE
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
-					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuScoreWeight_hope,
+					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1,	distinctNbest, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
@@ -883,7 +944,7 @@ int main(int argc, char** argv) {
 
 					// MODEL
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
-					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuScoreWeight,
+					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1,	distinctNbest, rank, epoch);
 					vector<const Word*> bestModel = outputModel[0];
@@ -895,8 +956,8 @@ int main(int argc, char** argv) {
 
 					// FEAR
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
-					size_t fearPos = featureValues[batchPosition].size();
-					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuScoreWeight_fear,
+//					size_t fearPos = featureValues[batchPosition].size();
+					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuWeight_fear,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1, distinctNbest, rank, epoch);
 					vector<const Word*> fear = outputFear[0];
@@ -917,8 +978,78 @@ int main(int argc, char** argv) {
 				++shardPosition;
 			} // end of batch loop
 
+			if (megam) {
+				// extract features and scores
+				string scoreDataFile = "decode_hope-fear.scores.dat";
+				string featureDataFile = "decode_hope-fear.features.dat";
+				stringstream extractorCmd;
+				extractorCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/extractor"
+						" --scconfig case:true --scfile " << scoreDataFile << " --ffile " << featureDataFile <<
+						" -r " << referenceFileMegam << " -n " << nbestFileMegam;
+				system(extractorCmd.str().c_str());
 
-			if (examples_in_batch == 0) {
+				// pro --> select training examples
+				stringstream proCmd;
+				string proDataFile = "decode_hope-fear.pro.data";
+				proCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/pro"
+						" --ffile " << featureDataFile << " --scfile " << scoreDataFile << " -o " << proDataFile;
+				system(proCmd.str().c_str());
+
+				// megam
+				stringstream megamCmd;
+				string megamOut = "decode_hope-fear.megam-weights";
+				string megamErr = "decode_hope-fear.megam-log";
+				megamCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/megam_i686.opt"
+						" -fvals -maxi 30 -nobias binary " << proDataFile << " 1> " << megamOut <<
+						" 2> " << megamErr;
+				system(megamCmd.str().c_str());
+
+				// read feature order
+				ifstream f_in(featureDataFile.c_str());
+				if (!f_in)
+					return false;
+				string line;
+				vector<string> coreFeats;
+				if (getline(f_in, line)) {
+					line = boost::algorithm::replace_all_copy(line, "  ", " ");
+					boost::split(coreFeats, line, boost::is_any_of(" "));
+				}
+				else {
+					cerr << "Error.." << endl;
+					exit(1);
+				}
+				for (size_t i=0; i < coreFeats.size(); ++i)
+					cerr << "from feature data file: " << coreFeats[i] << endl;
+
+				// read megam optimized weights
+				ifstream w_in(megamOut.c_str());
+				if (!w_in)
+					return false;
+
+				while (getline(w_in, line)) {
+					vector<string> keyValue;
+
+					boost::split(keyValue, line, boost::is_any_of("\t "));
+
+					// regular features
+					if (keyValue[0].substr(0, 1).compare("F") == 0) {
+						cerr << "core weight: " << keyValue[0] << " " << keyValue[1] << endl;
+						//$WEIGHT[$1] = $2;
+		        //$sum += abs($2);
+		      }
+		      // sparse features
+		      else {
+		        //$$sparse_weights{$1} = $2;
+		      	cerr << "sparse weight: " << keyValue[0] << " " << keyValue[1] << endl;
+		      }
+				}
+
+				// normalize weights
+				//foreach (@WEIGHT) { $_ /= $sum; }
+		    //foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
+
+			}
+			else if (examples_in_batch == 0) {
 				cerr << "Rank " << rank << ", epoch " << epoch << ", batch is empty." << endl;
 			}
 			else {
@@ -1075,7 +1206,7 @@ int main(int argc, char** argv) {
 				}
 				deleteTranslations(oracles);
 				deleteTranslations(oneBests);
-			} // END TRANSLATE AND UPDATE OF BATCH
+			} // END TRANSLATE AND UPDATE BATCH
 
 			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
 			size_t dumping_base = weightDumpFrequency ==0 ? 0 : shard.size() / weightDumpFrequency;
@@ -1228,13 +1359,24 @@ int main(int argc, char** argv) {
 			      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
 			      mixedAverageWeights.Save(filename.str());
 			      ++weightEpochDump;
+
+			      if (weightEpochDump == weightDumpFrequency && printFeatureInfo) {
+			      	// print out all features with counts
+			      	mixedAverageWeights.PrintSparseFeatureCounts();
+			      }
 			    }
 			  }
 			}// end dumping
 			}
 
 		} // end of shard loop, end of this epoch
-		
+
+		if (epoch == 0 && printFeatureInfo) {
+      cerr << "Writing out hope/fear nbest list with features: " << f1 << ", " << f2 << endl;
+			hopePlusFeatures.close();
+			fearPlusFeatures.close();
+		}
+
 		if (verbosity > 0) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;
 			decoder->printBleuFeatureHistory(cerr);

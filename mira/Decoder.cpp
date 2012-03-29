@@ -19,12 +19,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Decoder.h"
 #include "Manager.h"
+#include "ChartManager.h"
 #include "Sentence.h"
 #include "InputType.h"
 #include "TranslationSystem.h"
 #include "Phrase.h"
 #include "TrellisPathList.h"
-#include "DummyScoreProducers.h"
+#include "ChartTrellisPathList.h"
+#include "ChartTrellisPath.h"
+#include "IOWrapper.h"
 
 using namespace std;
 using namespace Moses;
@@ -81,7 +84,7 @@ namespace Mira {
 
   vector< vector<const Word*> > MosesDecoder::getNBest(const std::string& source,
                               size_t sentenceid,
-                              size_t count,
+                              size_t nBestSize,
                               float bleuObjectiveWeight, 
                               float bleuScoreWeight,
                               vector< ScoreComponentCollection>& featureValues,
@@ -99,26 +102,50 @@ namespace Mira {
     const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
     m_sentence->Read(in,inputFactorOrder);
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+    SearchAlgorithm search = staticData.GetSearchAlgorithm();
 
     // set weight of BleuScoreFeature
-    /*ostringstream bleuWeightStr;
-    bleuWeightStr << (bleuObjectiveWeight*bleuScoreWeight);
-    PARAM_VEC bleuWeight(1,bleuWeightStr.str());
-    staticData.GetParameter()->OverwriteParam("weight-bl", bleuWeight);*/
     staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
 
     m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
     m_bleuScoreFeature->SetCurrentShortestReference(sentenceid);
 
-    //run the decoder
-    m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
+    // run the decoder
+    if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+    	return runChartDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
+    			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
+    			system);
+    }
+    else {
+    	return runDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
+    			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
+    			search, system);
+    }
+  }
+
+  vector< vector<const Word*> > MosesDecoder::runDecoder(const std::string& source,
+  														size_t sentenceid,
+  														size_t nBestSize,
+  														float bleuObjectiveWeight,
+  														float bleuScoreWeight,
+  														vector< ScoreComponentCollection>& featureValues,
+  														vector< float>& bleuScores,
+  														vector< float>& modelScores,
+  														size_t numReturnedTranslations,
+  														bool distinct,
+  														size_t rank,
+  														size_t epoch,
+  														SearchAlgorithm& search,
+  														const TranslationSystem& system) {
+  	// run the decoder
+    m_manager = new Moses::Manager(*m_sentence, search, &system);
     m_manager->ProcessSentence();
-    TrellisPathList sentences;
-    m_manager->CalcNBest(count,sentences, distinct);
-						
+    TrellisPathList nBestList;
+    m_manager->CalcNBest(nBestSize, nBestList, distinct);
+
     // read off the feature values and bleu scores for each sentence in the nbest list
     Moses::TrellisPathList::const_iterator iter;
-    for (iter = sentences.begin() ; iter != sentences.end() ; ++iter) {
+    for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     	const Moses::TrellisPath &path = **iter;
     	featureValues.push_back(path.GetScoreBreakdown());
     	float bleuScore = getBleuScore(featureValues.back());
@@ -130,11 +157,11 @@ namespace Mira {
 
     	Phrase bestPhrase = path.GetTargetPhrase();
 
-    	if (iter != sentences.begin())
+    	if (iter != nBestList.begin())
     		cerr << endl;
-    	cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
-    	Phrase phrase = path.GetTargetPhrase();
-    	for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+    		cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
+    		Phrase phrase = path.GetTargetPhrase();
+    		for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
     		const Word &word = phrase.GetWord(pos);
     		Word *newWord = new Word(word);
     		cerr << *newWord;
@@ -148,8 +175,8 @@ namespace Mira {
 
     // prepare translations to return
     vector< vector<const Word*> > translations;
-    for (size_t i=0; i < numReturnedTranslations && i < sentences.GetSize(); ++i) {
-        const TrellisPath &path = sentences.at(i);
+    for (size_t i=0; i < numReturnedTranslations && i < nBestList.GetSize(); ++i) {
+        const TrellisPath &path = nBestList.at(i);
         Phrase phrase = path.GetTargetPhrase();
 
         vector<const Word*> translation;
@@ -163,6 +190,139 @@ namespace Mira {
 
 //    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
     return translations;
+  }
+
+  vector< vector<const Word*> > MosesDecoder::runChartDecoder(const std::string& source,
+                              size_t sentenceid,
+                              size_t nBestSize,
+                              float bleuObjectiveWeight,
+                              float bleuScoreWeight,
+                              vector< ScoreComponentCollection>& featureValues,
+                              vector< float>& bleuScores,
+                              vector< float>& modelScores,
+                              size_t numReturnedTranslations,
+                              bool distinct,
+                              size_t rank,
+                              size_t epoch,
+                              const TranslationSystem& system) {
+  	// run the decoder
+    ChartManager manager(*m_sentence, &system);
+    manager.ProcessSentence();
+    ChartTrellisPathList nBestList;
+    manager.CalcNBest(nBestSize, nBestList, distinct);
+
+    // read off the feature values and bleu scores for each sentence in the nbest list
+    ChartTrellisPathList::const_iterator iter;
+    for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
+    	const Moses::ChartTrellisPath &path = **iter;
+    	featureValues.push_back(path.GetScoreBreakdown());
+    	float bleuScore = getBleuScore(featureValues.back());
+    	bleuScores.push_back(bleuScore);
+
+    	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
+    	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
+    	modelScores.push_back(scoreWithoutBleu);
+
+    	Phrase bestPhrase = path.GetOutputPhrase();
+
+    	if (iter != nBestList.begin())
+    		cerr << endl;
+    		cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
+    		Phrase phrase = path.GetOutputPhrase();
+    		for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+    		const Word &word = phrase.GetWord(pos);
+    		Word *newWord = new Word(word);
+    		cerr << *newWord;
+    	}
+
+    	cerr << "\", score: " << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+
+    	// set bleu score to zero in the feature vector since we do not want to optimise its weight
+    	setBleuScore(featureValues.back(), 0);
+    }
+
+    // prepare translations to return
+    vector< vector<const Word*> > translations;
+    for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
+        const ChartTrellisPath &path = **iter;
+        Phrase phrase = path.GetOutputPhrase();
+
+        vector<const Word*> translation;
+        for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+        	const Word &word = phrase.GetWord(pos);
+        	Word *newWord = new Word(word);
+        	translation.push_back(newWord);
+        }
+        translations.push_back(translation);
+    }
+
+//    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
+    return translations;
+  }
+
+  void MosesDecoder::outputNBestList(const std::string& source, size_t sentenceid,
+  														size_t nBestSize, float bleuObjectiveWeight, float bleuScoreWeight,
+  														bool distinctNbest, string filename, ofstream& streamOut) {
+  	StaticData &staticData = StaticData::InstanceNonConst();
+
+  	m_sentence = new Sentence();
+    stringstream in(source + "\n");
+    const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+    m_sentence->Read(in,inputFactorOrder);
+    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+    SearchAlgorithm search = staticData.GetSearchAlgorithm();
+
+    // set weight of BleuScoreFeature
+    staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
+
+    m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
+    m_bleuScoreFeature->SetCurrentShortestReference(sentenceid);
+
+    if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+      ChartManager manager(*m_sentence, &system);
+      manager.ProcessSentence();
+      ChartTrellisPathList nBestList;
+      manager.CalcNBest(nBestSize, nBestList, distinctNbest);
+
+      cerr << "generate nbest list " << filename << endl;
+    	if (filename != "") {
+    		ofstream out(filename.c_str());
+    		if (!out) {
+    			ostringstream msg;
+    			msg << "Unable to open " << filename;
+    			throw runtime_error(msg.str());
+    		}
+    		// TODO: handle sentence id (for now always 0)
+//    		OutputNBestList(const ChartTrellisPathList &nBestList, const ChartHypothesis *bestHypo, const TranslationSystem* system, long translationId)
+//    		OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0);
+    		out.close();
+    	}
+    	else {
+//    		OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
+    	}
+    }
+    else {
+    	// run the decoder
+      m_manager = new Moses::Manager(*m_sentence, search, &system);
+      m_manager->ProcessSentence();
+      TrellisPathList nBestList;
+      m_manager->CalcNBest(nBestSize, nBestList, distinctNbest);
+
+      if (filename != "") {
+    		ofstream out(filename.c_str());
+    		if (!out) {
+    			ostringstream msg;
+    			msg << "Unable to open " << filename;
+    			throw runtime_error(msg.str());
+    		}
+    		// TODO: handle sentence id (for now always 0)
+    		OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0);
+    		out.close();
+      }
+      else {
+      	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
+      }
+    }
   }
 
   float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
@@ -189,20 +349,16 @@ namespace Mira {
 	  m_bleuScoreFeature->UpdateHistory(words, sourceLengths, ref_ids, rank, epoch);
   }
 
-/*  void MosesDecoder::loadReferenceSentences(const vector<vector<string> >& refs) {
-  	m_bleuScoreFeature->LoadReferences(refs);
-  }*/
-
   void MosesDecoder::printBleuFeatureHistory(std::ostream& out) {
   	m_bleuScoreFeature->PrintHistory(out);
   }
 
-/*  void MosesDecoder::printReferenceLength(const vector<size_t>& ref_ids) {
-  	m_bleuScoreFeature->PrintReferenceLength(ref_ids);
-  }*/
-
   size_t MosesDecoder::getClosestReferenceLength(size_t ref_id, int hypoLength) {
   	return m_bleuScoreFeature->GetClosestReferenceLength(ref_id, hypoLength);
+  }
+
+  size_t MosesDecoder::getShortestReferenceIndex(size_t ref_id) {
+  	return m_bleuScoreFeature->GetShortestReferenceIndex(ref_id);
   }
 
   void MosesDecoder::setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,

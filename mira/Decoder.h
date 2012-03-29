@@ -52,7 +52,7 @@ class MosesDecoder {
     //returns the best sentence
     std::vector< std::vector<const Moses::Word*> > getNBest(const std::string& source,
                           size_t sentenceid,
-                          size_t count,
+                          size_t nbestSize,
                           float bleuObjectiveweight, //weight of bleu in objective
                           float bleuScoreWeight, //weight of bleu in score
                           std::vector< Moses::ScoreComponentCollection>& featureValues,
@@ -62,14 +62,48 @@ class MosesDecoder {
                           bool distinct,
                           size_t rank,
                           size_t epoch);
+    std::vector< std::vector<const Moses::Word*> > runDecoder(const std::string& source,
+                          size_t sentenceid,
+                          size_t nbestSize,
+                          float bleuObjectiveweight, //weight of bleu in objective
+                          float bleuScoreWeight, //weight of bleu in score
+                          std::vector< Moses::ScoreComponentCollection>& featureValues,
+                          std::vector< float>& bleuScores,
+                          std::vector< float>& modelScores,
+                          size_t numReturnedTranslations,
+                          bool distinct,
+                          size_t rank,
+                          size_t epoch,
+                          Moses::SearchAlgorithm& seach,
+                          const Moses::TranslationSystem& system);
+    std::vector< std::vector<const Moses::Word*> > runChartDecoder(const std::string& source,
+                          size_t sentenceid,
+                          size_t nbestSize,
+                          float bleuObjectiveweight, //weight of bleu in objective
+                          float bleuScoreWeight, //weight of bleu in score
+                          std::vector< Moses::ScoreComponentCollection>& featureValues,
+                          std::vector< float>& bleuScores,
+                          std::vector< float>& modelScores,
+                          size_t numReturnedTranslations,
+                          bool distinct,
+                          size_t rank,
+                          size_t epoch,
+                          const Moses::TranslationSystem& system);
+    void outputNBestList(const std::string& source,
+    											size_t sentenceid,
+    											size_t nBestSize,
+    											float bleuObjectiveWeight,
+    											float bleuScoreWeight,
+    											bool distinctNbest,
+    											std::string filename,
+    											std::ofstream& streamOut);
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
-//    void loadReferenceSentences(const std::vector<std::vector<std::string> >& refs);
     void printBleuFeatureHistory(std::ostream& out);
     void printReferenceLength(const std::vector<size_t>& ref_ids);
     size_t getReferenceLength(size_t ref_id);
-//    void printReferenceLength(const std::vector<size_t>& ref_ids);
     size_t getClosestReferenceLength(size_t ref_id, int hypoLength);
+    size_t getShortestReferenceIndex(size_t ref_id);
     void setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
     		float scaleByX, float historySmoothing, size_t scheme, float relax_BP,
