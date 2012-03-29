@@ -202,7 +202,7 @@ namespace Moses {
     void sparsePlusEquals(const FVector& rhs);
     
     void incrementSparseFeatures();
-    void printSparseFeatureCounts();
+    void printSparseFeatureCounts(std::ofstream& out);
     size_t pruneSparseFeatures(size_t threshold);
     size_t pruneZeroWeightFeatures();
     

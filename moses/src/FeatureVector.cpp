@@ -323,9 +323,9 @@ namespace Moses {
       FName::incrementId((i->first).name());
   }
   
-  void FVector::printSparseFeatureCounts() {
+  void FVector::printSparseFeatureCounts(std::ofstream& out) {
     for (const_iterator i = cbegin(); i != cend(); ++i) 
-      std::cerr << (i->first).name() << ": " << FName::getIdCount((i->first).name()) << std::endl;
+      out << (i->first).name() << ": " << FName::getIdCount((i->first).name()) << std::endl;
   }
   
   size_t FVector::pruneSparseFeatures(size_t threshold) {

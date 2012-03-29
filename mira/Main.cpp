@@ -606,8 +606,10 @@ int main(int argc, char** argv) {
 
 		string f1 = "decode_hope_epoch0";
 		string f2 = "decode_fear_epoch0";
+		string s1 = "sparse_feature_hope_counts";
     ofstream hopePlusFeatures(f1.c_str());
     ofstream fearPlusFeatures(f2.c_str());
+    ofstream sparseFeatureCounts(s1.c_str());
     if (!hopePlusFeatures || !fearPlusFeatures) {
     	ostringstream msg;
     	msg << "Unable to open file";
@@ -1362,7 +1364,8 @@ int main(int argc, char** argv) {
 
 			      if (weightEpochDump == weightDumpFrequency && printFeatureInfo) {
 			      	// print out all features with counts
-			      	mixedAverageWeights.PrintSparseFeatureCounts();
+			      	mixedAverageWeights.PrintSparseFeatureCounts(sparseFeatureCounts);
+			      	sparseFeatureCounts.close();
 			      }
 			    }
 			  }

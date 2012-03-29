@@ -365,7 +365,7 @@ public:
   void Save(std::ostream&) const;
   
   void IncrementSparseFeatures() { m_scores.incrementSparseFeatures(); }
-  void PrintSparseFeatureCounts() { m_scores.printSparseFeatureCounts(); }
+  void PrintSparseFeatureCounts(std::ofstream& out) { m_scores.printSparseFeatureCounts(out); }
   size_t PruneSparseFeatures(size_t threshold) { return m_scores.pruneSparseFeatures(threshold); }
   size_t PruneZeroWeightFeatures() { return m_scores.pruneZeroWeightFeatures(); }
 
