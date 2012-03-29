@@ -477,7 +477,8 @@ void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system,
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ )
-    OutputFeatureScores( out, path, sff[i], lastName );
+  	if (sff[i]->GetScoreProducerWeightShortName() != "bl")
+  		OutputFeatureScores( out, path, sff[i], lastName );
 
   const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
