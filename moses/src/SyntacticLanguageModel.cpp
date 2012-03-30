@@ -17,9 +17,9 @@ namespace Moses
 						 size_t beamWidth) 
     // Initialize member variables  
   : m_NumScoreComponents(weights.size())
-  , m_beamWidth(beamWidth)
+  , m_files(new SyntacticLanguageModelFiles<YModel,XModel>(filePath))
   , m_factorType(factorType)
-  , m_files(new SyntacticLanguageModelFiles<YModel,XModel>(filePath)) {
+  , m_beamWidth(beamWidth) {
 
     // Inform Moses score manager of this feature and its weight(s)
     const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
