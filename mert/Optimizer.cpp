@@ -7,6 +7,7 @@
 #include <map>
 #include <cfloat>
 #include <iostream>
+#include <stdint.h>
 
 #include "Point.h"
 #include "Util.h"
@@ -247,7 +248,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
     //enforce positivity
     Point respoint = origin + direction * thrit->first;
     bool is_valid = true;
-    for (uint k=0; k < respoint.getdim(); k++) {
+    for (unsigned int k=0; k < respoint.getdim(); k++) {
       if (positive[k] && respoint[k] <= 0.0)
         is_valid = false;
     }
