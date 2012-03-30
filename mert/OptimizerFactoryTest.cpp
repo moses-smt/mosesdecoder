@@ -9,11 +9,11 @@ namespace {
 
 inline bool CheckBuildOptimizer(unsigned dim,
                                 const vector<unsigned>& to_optimize,
+				const vector<bool>& positive,
                                 const vector<parameter_t>& start,
                                 const string& type,
                                 unsigned int num_random) {
-  boost::scoped_ptr<Optimizer> optimizer(
-      OptimizerFactory::BuildOptimizer(dim, to_optimize, start, type, num_random));
+  boost::scoped_ptr<Optimizer> optimizer(OptimizerFactory::BuildOptimizer(dim, to_optimize, positive, start, type, num_random));
   return optimizer.get() != NULL;
 }
 
@@ -39,8 +39,11 @@ BOOST_AUTO_TEST_CASE(optimizer_build) {
   start.push_back(0.1);
   start.push_back(0.2);
   const unsigned int num_random = 1;
+  std::vector<bool> positive(dim);
+  for (int k=0; k < dim; k++)
+    positive[k] = false;
 
-  BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, start, "powell", num_random));
-  BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, start, "random", num_random));
-  BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, start, "random-direction", num_random));
+  BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, positive, start, "powell", num_random));
+  BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, positive, start, "random", num_random));
+  BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, positive, start, "random-direction", num_random));
 }

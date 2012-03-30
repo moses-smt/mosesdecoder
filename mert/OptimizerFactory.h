@@ -27,6 +27,7 @@ class OptimizerFactory
 
   static Optimizer* BuildOptimizer(unsigned dim,
                                    const std::vector<unsigned>& to_optimize,
+				   const std::vector<bool>& positive,
                                    const std::vector<parameter_t>& start,
                                    const std::string& type,
                                    unsigned int nrandom);
