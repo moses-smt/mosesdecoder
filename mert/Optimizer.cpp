@@ -32,8 +32,8 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 } // namespace
 
-Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
-    : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom)
+Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& pos, const vector<parameter_t>& start, unsigned int nrandom)
+  : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom), positive(pos)
 {
   // Warning: the init vector is a full set of parameters, of dimension m_pdim!
   Point::m_pdim = Pd;
@@ -243,7 +243,16 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
   CHECK(scores.size() == thresholdmap.size());
   for (unsigned int sc = 0; sc != scores.size(); sc++) {
     //cerr << "x=" << thrit->first << " => " << scores[sc] << endl;
-    if (scores[sc] > bestscore) {
+
+    //enforce positivity
+    Point respoint = origin + direction * thrit->first;
+    bool is_valid = true;
+    for (uint k=0; k < respoint.getdim(); k++) {
+      if (positive[k] && respoint[k] <= 0.0)
+        is_valid = false;
+    }
+
+    if (is_valid && scores[sc] > bestscore) {
       // This is the score for the interval [lit2->first, (lit2+1)->first]
       // unless we're at the last score, when it's the score
       // for the interval [lit2->first,+inf].

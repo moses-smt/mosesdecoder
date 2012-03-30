@@ -35,6 +35,7 @@ OptimizerFactory::OptimizerType OptimizerFactory::GetOptimizerType(const string&
 
 Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,
                                             const vector<unsigned>& i2o,
+					    const std::vector<bool>& positive,
                                             const vector<parameter_t>& start,
                                             const string& type,
                                             unsigned int nrandom)
@@ -51,13 +52,13 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,
 
   switch (opt_type) {
     case POWELL:
-      return new SimpleOptimizer(dim, i2o, start, nrandom);
+      return new SimpleOptimizer(dim, i2o, positive, start, nrandom);
       break;
     case RANDOM_DIRECTION:
-      return new RandomDirectionOptimizer(dim, i2o, start, nrandom);
+      return new RandomDirectionOptimizer(dim, i2o, positive, start, nrandom);
       break;
     case RANDOM:
-      return new RandomOptimizer(dim, i2o, start, nrandom);
+      return new RandomOptimizer(dim, i2o, positive, start, nrandom);
       break;
     default:
       cerr << "Error: unknown optimizer" << type << endl;
