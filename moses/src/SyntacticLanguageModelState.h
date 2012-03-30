@@ -26,7 +26,7 @@ template <class MY, class MX, class YS=typename MY::RandVarType, class B=NullBac
 
 
  ~SyntacticLanguageModelState() {
-   //cerr << "Deleting SyntacticLanguageModelState" << std::endl;
+   VERBOSE(3,"Destructing SyntacticLanguageModelState" << std::endl);
    //delete randomVariableStore;
  }
 
