@@ -40,7 +40,7 @@ BOOST_AUTO_TEST_CASE(optimizer_build) {
   start.push_back(0.2);
   const unsigned int num_random = 1;
   std::vector<bool> positive(dim);
-  for (int k=0; k < dim; k++)
+  for (unsigned int k = 0; k < dim; k++)
     positive[k] = false;
 
   BOOST_CHECK(CheckBuildOptimizer(dim, to_optimize, positive, start, "powell", num_random));
