@@ -22,7 +22,7 @@ protected:
   FeatureDataHandle m_feature_data;  // no accessor for them only child can use them
   unsigned int m_num_random_directions;
 
-  const vector<bool>& positive;
+  const vector<bool>& m_positive;
 
 public:
   Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& positive, const vector<parameter_t>& start, unsigned int nrandom);
