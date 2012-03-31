@@ -35,7 +35,7 @@ OptimizerFactory::OptimizerType OptimizerFactory::GetOptimizerType(const string&
 
 Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,
                                             const vector<unsigned>& i2o,
-					    const std::vector<bool>& positive,
+                                            const std::vector<bool>& positive,
                                             const vector<parameter_t>& start,
                                             const string& type,
                                             unsigned int nrandom)
