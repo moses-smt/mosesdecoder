@@ -175,7 +175,7 @@ struct ProgramOption {
         scorer_file(kDefaultScorerFile),
         feature_file(kDefaultFeatureFile),
         init_file(kDefaultInitFile),
-	positive_string(kDefaultPositiveString),
+        positive_string(kDefaultPositiveString),
         num_threads(1),
         shard_size(0),
         shard_count(0) { }
@@ -398,10 +398,9 @@ int main(int argc, char **argv)
   }
 
   positive.resize(option.pdim);
-  for (int i=0; i<option.pdim; i++)
+  for (int i = 0; i < option.pdim; i++)
     positive[i] = false;
   if (option.positive_string.length() > 0) {
-
     // Parse string to get weights that need to be positive
     std::string substring;
     int index;
@@ -412,11 +411,12 @@ int main(int argc, char **argv)
       if (index >= 0 && index < option.pdim) {
         positive[index] = true;
       } else {
-        cerr << "Index " << index << " is out of bounds in positivity list. Allowed indexes are [0," << (option.pdim-1) << "]." << endl;
+        cerr << "Index " << index
+             << " is out of bounds in positivity list. Allowed indexes are [0,"
+             << (option.pdim-1) << "]." << endl;
       }
     }
   }
-
 
   // treat sparse features just like regular features
   if (data.hasSparseFeatures()) {

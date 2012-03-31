@@ -77,8 +77,8 @@ class SimpleOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive, 
-		  const vector<parameter_t>& start, unsigned int nrandom)
+  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
+                  const vector<parameter_t>& start, unsigned int nrandom)
     : Optimizer(dim, i2O, positive, start,nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
@@ -91,9 +91,9 @@ class RandomDirectionOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive, 
-			   const vector<parameter_t>& start, unsigned int nrandom)
-    : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001) {}
+  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
+                           const vector<parameter_t>& start, unsigned int nrandom)
+      : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
@@ -103,9 +103,9 @@ public:
 class RandomOptimizer : public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive, 
-		  const vector<parameter_t>& start, unsigned int nrandom)
-    : Optimizer(dim, i2O, positive, start, nrandom) {}
+  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
+                  const vector<parameter_t>& start, unsigned int nrandom)
+      : Optimizer(dim, i2O, positive, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
