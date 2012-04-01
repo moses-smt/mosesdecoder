@@ -1525,6 +1525,7 @@ bool StaticData::LoadReferences()
 {
   vector<string> bleuWeightStr = m_parameter->GetParam("weight-bl");
   vector<string> referenceFiles = m_parameter->GetParam("references");
+  cerr << "Loading reference file " << referenceFiles[0] << endl;
   if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
     UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
     return false;
@@ -1551,6 +1552,11 @@ bool StaticData::LoadReferences()
     }
     string line;
     while (getline(in,line)) {
+    	if (GetSearchAlgorithm() == ChartDecoding) {
+    		stringstream tmp;
+    		tmp << "<s> " << line << " </s>";
+    		line = tmp.str();
+    	}
       references[i].push_back(line);
     }
     if (i > 0) {

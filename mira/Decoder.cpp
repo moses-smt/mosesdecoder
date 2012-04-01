@@ -46,7 +46,6 @@ namespace Mira {
 
   MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
 		: m_manager(NULL) {
-//	  static int BASE_ARGC = 5;
   	static int BASE_ARGC = 4;
 	  Parameter* params = new Parameter();
 	  char ** mosesargv = new char*[BASE_ARGC + argc];
@@ -56,7 +55,6 @@ namespace Mira {
 	  stringstream dbgin;
 	  dbgin << debuglevel;
 	  mosesargv[3] = strToChar(dbgin.str());
-//	  mosesargv[4] = strToChar("-mbr"); //so we can do nbest
 
 	  for (int i = 0; i < argc; ++i) {
 		  char *cstr = &(decoder_params[i])[0];
@@ -79,6 +77,7 @@ namespace Mira {
   
   void MosesDecoder::cleanup() {
 	  delete m_manager;
+	  delete m_chartManager;
 	  delete m_sentence;
   }
 
@@ -92,23 +91,13 @@ namespace Mira {
                               vector< float>& modelScores,
                               size_t numReturnedTranslations,
                               bool distinct,
+                              bool avgRefLength,
                               size_t rank,
                               size_t epoch)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
-
-  	m_sentence = new Sentence();
-    stringstream in(source + "\n");
-    const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-    m_sentence->Read(in,inputFactorOrder);
+  	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength);
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-    SearchAlgorithm search = staticData.GetSearchAlgorithm();
-
-    // set weight of BleuScoreFeature
-    staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
-
-    m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
-    m_bleuScoreFeature->SetCurrentShortestReference(sentenceid);
 
     // run the decoder
     if (staticData.GetSearchAlgorithm() == ChartDecoding) {
@@ -117,6 +106,7 @@ namespace Mira {
     			system);
     }
     else {
+    	SearchAlgorithm search = staticData.GetSearchAlgorithm();
     	return runDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
     			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
     			search, system);
@@ -206,10 +196,10 @@ namespace Mira {
                               size_t epoch,
                               const TranslationSystem& system) {
   	// run the decoder
-    ChartManager manager(*m_sentence, &system);
-    manager.ProcessSentence();
+    m_chartManager = new ChartManager(*m_sentence, &system);
+    m_chartManager->ProcessSentence();
     ChartTrellisPathList nBestList;
-    manager.CalcNBest(nBestSize, nBestList, distinct);
+    m_chartManager->CalcNBest(nBestSize, nBestList, distinct);
 
     // read off the feature values and bleu scores for each sentence in the nbest list
     ChartTrellisPathList::const_iterator iter;
@@ -262,29 +252,20 @@ namespace Mira {
 
   void MosesDecoder::outputNBestList(const std::string& source, size_t sentenceid,
   														size_t nBestSize, float bleuObjectiveWeight, float bleuScoreWeight,
-  														bool distinctNbest, string filename, ofstream& streamOut) {
+  														bool distinctNbest, bool avgRefLength, string filename, ofstream& streamOut) {
   	StaticData &staticData = StaticData::InstanceNonConst();
-
-  	m_sentence = new Sentence();
-    stringstream in(source + "\n");
-    const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
-    m_sentence->Read(in,inputFactorOrder);
+  	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength);
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-    SearchAlgorithm search = staticData.GetSearchAlgorithm();
-
-    // set weight of BleuScoreFeature
-    staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
-
-    m_bleuScoreFeature->SetCurrentSourceLength((*m_sentence).GetSize());
-    m_bleuScoreFeature->SetCurrentShortestReference(sentenceid);
 
     if (staticData.GetSearchAlgorithm() == ChartDecoding) {
-      ChartManager manager(*m_sentence, &system);
-      manager.ProcessSentence();
+      m_chartManager = new ChartManager(*m_sentence, &system);
+      m_chartManager->ProcessSentence();
       ChartTrellisPathList nBestList;
-      manager.CalcNBest(nBestSize, nBestList, distinctNbest);
+      m_chartManager->CalcNBest(nBestSize, nBestList, distinctNbest);
 
       cerr << "generate nbest list " << filename << endl;
+      cerr << "not implemented.." << endl;
+      exit(1);
     	if (filename != "") {
     		ofstream out(filename.c_str());
     		if (!out) {
@@ -303,7 +284,7 @@ namespace Mira {
     }
     else {
     	// run the decoder
-      m_manager = new Moses::Manager(*m_sentence, search, &system);
+      m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
       m_manager->ProcessSentence();
       TrellisPathList nBestList;
       m_manager->CalcNBest(nBestSize, nBestList, distinctNbest);
@@ -323,6 +304,24 @@ namespace Mira {
       	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
       }
     }
+  }
+
+  void MosesDecoder::initialize(StaticData& staticData, const std::string& source, size_t sentenceid,
+      													float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength) {
+  	m_sentence = new Sentence();
+    stringstream in(source + "\n");
+    const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+    m_sentence->Read(in,inputFactorOrder);
+
+    // set weight of BleuScoreFeature
+    staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
+
+    m_bleuScoreFeature->SetCurrSourceLength((*m_sentence).GetSize());
+    if (avgRefLength)
+    	m_bleuScoreFeature->SetCurrAvgRefLength(sentenceid);
+    else
+    	m_bleuScoreFeature->SetCurrShortestRefLength(sentenceid);
+    m_bleuScoreFeature->SetCurrReferenceNgrams(sentenceid);
   }
 
   float MosesDecoder::getBleuScore(const ScoreComponentCollection& scores) {
@@ -354,11 +353,11 @@ namespace Mira {
   }
 
   size_t MosesDecoder::getClosestReferenceLength(size_t ref_id, int hypoLength) {
-  	return m_bleuScoreFeature->GetClosestReferenceLength(ref_id, hypoLength);
+  	return m_bleuScoreFeature->GetClosestRefLength(ref_id, hypoLength);
   }
 
   size_t MosesDecoder::getShortestReferenceIndex(size_t ref_id) {
-  	return m_bleuScoreFeature->GetShortestReferenceIndex(ref_id);
+  	return m_bleuScoreFeature->GetShortestRefIndex(ref_id);
   }
 
   void MosesDecoder::setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,

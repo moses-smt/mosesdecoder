@@ -36,7 +36,10 @@ private:
 
     std::vector< size_t > m_ngram_counts;
     std::vector< size_t > m_ngram_matches;
+
+    void AddNgramCountAndMatches(std::vector< size_t >& counts, std::vector< size_t >& matches);
 };
+
 
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state);
 
@@ -55,14 +58,14 @@ public:
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
 	                                 m_target_length_history(0),
-	                                 m_useSourceLengthHistory(0),
 	                                 m_ref_length_history(0),
 	                                 m_scale_by_input_length(true),
 	                                 m_scale_by_avg_input_length(false),
 	                                 m_scale_by_inverse_length(false),
 	                                 m_scale_by_avg_inverse_length(false),
 	                                 m_scale_by_x(1),
-	                                 m_historySmoothing(0.7),
+	                                 m_historySmoothing(0.9),
+	                                 m_useSourceLengthHistory(0),
 	                                 m_smoothing_scheme(PLUS_ONE),
 	                                 m_relax_BP(1) {}
 
@@ -78,44 +81,50 @@ public:
 
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
-    void SetCurrentSourceLength(size_t);
-    void SetCurrentShortestReference(size_t);
+    void SetCurrSourceLength(size_t);
+    void SetCurrShortestRefLength(size_t);
+    void SetCurrAvgRefLength(size_t sent_id);
+    void SetAvgInputLength (float l) { m_avg_input_length = l; }
+    void SetCurrReferenceNgrams(size_t sent_id);
+    size_t GetShortestRefIndex(size_t ref_id);
+    size_t GetClosestRefLength(size_t ref_id, int hypoLength);
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
-    void PrintReferenceLength(const std::vector<size_t>& ref_ids);
-    size_t GetReferenceLength(size_t ref_id);
-    size_t GetClosestReferenceLength(size_t ref_id, int hypoLength);
+    void PrintRefLength(const std::vector<size_t>& ref_ids);
     void SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
     		float scaleByX, float historySmoothing, size_t scheme, float relaxBP,
     		bool useSourceLengthHistory);
-    void SetAvgInputLength (float l) { m_avg_input_length = l; }
+
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
                              std::vector< size_t >&,
                              std::vector< size_t >&,
                              size_t skip = 0) const;
+    void GetNgramMatchCounts_prefix(Phrase&,
+                             const NGrams&,
+                             std::vector< size_t >&,
+                             std::vector< size_t >&,
+                             size_t new_start_indices,
+                             size_t last_end_index) const;
+    void GetNgramMatchCounts_overlap(Phrase& phrase,
+    												 const NGrams& ref_ngram_counts,
+    												 std::vector< size_t >& ret_counts,
+    												 std::vector< size_t >& ret_matches,
+    												 size_t overlap_index) const;
     void GetClippedNgramMatchesAndCounts(Phrase&,
-                                 const NGrams&,
-                                 std::vector< size_t >&,
-                                 std::vector< size_t >&,
-                                 size_t skip = 0) const;
+    												 const NGrams&,
+    												 std::vector< size_t >&,
+    												 std::vector< size_t >&,
+    												 size_t skip = 0) const;
 
     FFState* Evaluate( const Hypothesis& cur_hypo, 
                        const FFState* prev_state, 
                        ScoreComponentCollection* accumulator) const;
-    virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
-                                    int /* featureID */,
-                                    ScoreComponentCollection* ) const
-                                    {
-                                      /* Not implemented */
-                                      CHECK(0);
-                                    }
+    FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
+    										int featureID,
+    										ScoreComponentCollection* accumulator) const;
 
-
-    FFState* EvaluateChart( const ChartHypothesis& cur_hypo,
-    												int featureID,
-    												ScoreComponentCollection) const;
     float CalculateBleu(BleuScoreState*) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
 
@@ -124,6 +133,8 @@ public:
     float GetAverageInputLength() { return m_avg_input_length; }
 
 private:
+    bool m_sentence_bleu;
+
     // counts for pseudo-document
     std::vector< float > m_count_history;
     std::vector< float > m_match_history;
@@ -134,9 +145,7 @@ private:
     size_t m_cur_source_length;
     RefCounts m_refs;
     NGrams m_cur_ref_ngrams;
-    size_t m_cur_ref_length;
-
-    bool m_sentence_bleu;
+    float m_cur_ref_length;
 
     // scale BLEU score by history of input length
     bool m_scale_by_input_length;

@@ -56,7 +56,6 @@ int main(int argc, char** argv) {
 	rank = world.rank();
 	size = world.size();
 #endif
-	cerr << "Rank: " << rank << " Size: " << size << endl;
 
 	bool help;
 	int verbosity;
@@ -129,6 +128,7 @@ int main(int argc, char** argv) {
 	bool pruneZeroWeights;
 	bool megam;
 	bool printFeatureInfo;
+	bool avgRefLength;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -136,6 +136,7 @@ int main(int argc, char** argv) {
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
 		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
+		("avg-ref-length", po::value<bool>(&avgRefLength)->default_value(false), "Use average reference length instead of shortest for BLEU score feature")
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for taking logs of feature values")
 		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
@@ -236,6 +237,8 @@ int main(int argc, char** argv) {
 		return 0;
 	}
 
+	const StaticData &staticData = StaticData::Instance();
+
   // create threadpool, if using multi-threaded decoding
   // note: multi-threading is done on sentence-level,
   // each thread translates one sentence
@@ -253,8 +256,11 @@ int main(int argc, char** argv) {
 #endif*/
 
   bool trainWithMultipleFolds = false; 
-  if (mosesConfigFilesFolds.size() > 0 || inputFilesFolds.size() > 0 || referenceFilesFolds.size() > 0)
-	  trainWithMultipleFolds = true;
+  if (mosesConfigFilesFolds.size() > 0 || inputFilesFolds.size() > 0 || referenceFilesFolds.size() > 0) {
+  	if (rank == 0)
+  		cerr << "Training with " << mosesConfigFilesFolds.size() << " folds" << endl;
+  	trainWithMultipleFolds = true;
+  }
   
   if (dummy != -1)
     slack = dummy;
@@ -312,6 +318,10 @@ int main(int argc, char** argv) {
 	// number of cores for each fold
   	size_t coresPerFold = 0, myFold = 0;
   	if (trainWithMultipleFolds) {
+  		if (mosesConfigFilesFolds.size() > size) {
+  			cerr << "Number of cores has to be a multiple of the number of folds" << endl;
+  			exit(1);
+  		}
   		coresPerFold = size/mosesConfigFilesFolds.size();
   		if (size % coresPerFold > 0) {
   			cerr << "Number of cores has to be a multiple of the number of folds" << endl;
@@ -324,6 +334,7 @@ int main(int argc, char** argv) {
   		cerr << "Rank " << rank << ", my fold: " << myFold << endl;
   	}
   	
+  	// NOTE: we do not actually need the references here, because we are reading them in from StaticData
   	if (trainWithMultipleFolds) {
   		if (!loadSentences(inputFilesFolds[myFold], inputSentencesFolds[myFold])) {
   			cerr << "Error: Failed to load input sentences from " << inputFilesFolds[myFold] << endl;
@@ -539,7 +550,6 @@ int main(int argc, char** argv) {
 	}
 
 	// get reference to feature functions
-	const StaticData &staticData = StaticData::Instance();
 	const vector<const ScoreProducer*> featureFunctions =
 			staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 	const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
@@ -709,10 +719,10 @@ int main(int argc, char** argv) {
 					//model_nbest_filename << "decode_model_sent" << *sid << "." << n << "best";
 					cerr << "Writing file " << hope_nbest_filename.str() << endl;
 					decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
-							hope_nbest_filename.str(), dummy);
+							avgRefLength, hope_nbest_filename.str(), dummy);
 					cerr << "Writing file " << fear_nbest_filename.str() << endl;
 					decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
-							fear_nbest_filename.str(), dummy);
+							avgRefLength, fear_nbest_filename.str(), dummy);
 					//decoder->outputNBestList(input, *sid, n, 0, bleuWeight, distinctNbest,
 						//model_nbest_filename.str());
 
@@ -744,7 +754,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							1, distinctNbest, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
@@ -758,8 +768,8 @@ int main(int argc, char** argv) {
 					featureValuesHope[batchPosition][0].IncrementSparseFeatures();
 
 					if (epoch == 0 && printFeatureInfo) {
-						decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest, "",
-								hopePlusFeatures);
+						decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
+								avgRefLength, "", hopePlusFeatures);
 					}
 
 					
@@ -794,7 +804,7 @@ int main(int argc, char** argv) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
 						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, 1, 0.0, bleuWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
-								1, distinctNbest, rank, epoch);
+								1, distinctNbest, avgRefLength, rank, epoch);
 						bestModel = outputModel[0];
 						decoder->cleanup();
 						cerr << endl;
@@ -809,7 +819,7 @@ int main(int argc, char** argv) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuWeight_fear,
 								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-								1,	distinctNbest, rank, epoch);
+								1,	distinctNbest, avgRefLength, rank, epoch);
 						vector<const Word*> fear = outputFear[0];
 						decoder->cleanup();
 						ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
@@ -822,8 +832,8 @@ int main(int argc, char** argv) {
 							delete fear[i];
 
 						if (epoch == 0 && printFeatureInfo) {
-							decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest, "",
-									fearPlusFeatures);
+							decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
+									avgRefLength, "", fearPlusFeatures);
 						}
 
 						// Bleu-related example selection
@@ -873,7 +883,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							1, distinctNbest, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup();
 					cerr << endl;
@@ -886,7 +896,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, fear_n, 0.0, bleuWeight_fear,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-							1, distinctNbest, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch);
 					bestModel = outputModel[0];
 					decoder->cleanup();
 					cerr << endl;
@@ -907,7 +917,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, rank, epoch);
+							1,	distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
@@ -926,7 +936,7 @@ int main(int argc, char** argv) {
 					size_t oraclePos = featureValues[batchPosition].size();
 					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, rank, epoch);
+							1,	distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
 					// needed for history
 					inputLengths.push_back(current_input_length);
@@ -948,7 +958,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, rank, epoch);
+							1,	distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup();
 					oneBests.push_back(bestModel);
@@ -961,7 +971,7 @@ int main(int argc, char** argv) {
 //					size_t fearPos = featureValues[batchPosition].size();
 					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuWeight_fear,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1, distinctNbest, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> fear = outputFear[0];
 					decoder->cleanup();
 					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
@@ -1330,7 +1340,7 @@ int main(int argc, char** argv) {
 			      // divide by number of processes
 			      if (sparseNoAverage)
 			    	  mixedAverageWeights.CoreDivideEquals(size); // average only core weights
-				  else if (sparseAverage)
+			      else if (sparseAverage)
 			    	  mixedAverageWeights.DivideEquals(totalBinary);
 			      else
 			    	  mixedAverageWeights.DivideEquals(size);
@@ -1374,7 +1384,7 @@ int main(int argc, char** argv) {
 
 		} // end of shard loop, end of this epoch
 
-		if (epoch == 0 && printFeatureInfo) {
+		if (printFeatureInfo && rank == 0 && epoch == 0) {
       cerr << "Writing out hope/fear nbest list with features: " << f1 << ", " << f2 << endl;
 			hopePlusFeatures.close();
 			fearPlusFeatures.close();
@@ -1510,9 +1520,8 @@ bool loadSentences(const string& filename, vector<string>& sentences) {
 	if (!in)
 		return false;
 	string line;
-	while (getline(in, line)) {
+	while (getline(in, line))
 		sentences.push_back(line);
-	}
 	return true;
 }
 
@@ -1690,7 +1699,7 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
 		if (decode == 2) factor = -1.0;
 		cerr << "Rank " << rank << ", translating sentence " << sid << endl;
 		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, 1, dummyFeatureValues[0],
-				dummyBleuScores[0], dummyModelScores[0], n, true, rank, 0);
+				dummyBleuScores[0], dummyModelScores[0], n, true, false, rank, 0);
 		cerr << endl;
 		decoder->cleanup();
 

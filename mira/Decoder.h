@@ -60,6 +60,7 @@ class MosesDecoder {
                           std::vector< float>& modelScores,
                           size_t numReturnedTranslations,
                           bool distinct,
+                          bool avgRefLength,
                           size_t rank,
                           size_t epoch);
     std::vector< std::vector<const Moses::Word*> > runDecoder(const std::string& source,
@@ -95,8 +96,11 @@ class MosesDecoder {
     											float bleuObjectiveWeight,
     											float bleuScoreWeight,
     											bool distinctNbest,
+    											bool avgRefLength,
     											std::string filename,
     											std::ofstream& streamOut);
+    void initialize(Moses::StaticData& staticData, const std::string& source, size_t sentenceid,
+    		 	 	 	 	 	  float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength);
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void printBleuFeatureHistory(std::ostream& out);
@@ -121,6 +125,7 @@ class MosesDecoder {
     float getBleuScore(const Moses::ScoreComponentCollection& scores);
     void setBleuScore(Moses::ScoreComponentCollection& scores, float bleu);
     Moses::Manager *m_manager;
+    Moses::ChartManager *m_chartManager;
     Moses::Sentence *m_sentence;
     Moses::BleuScoreFeature *m_bleuScoreFeature;
 	
