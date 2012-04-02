@@ -4,7 +4,7 @@
 #define moses_SyntacticLanguageModel_h
 
 #include "FeatureFunction.h"
-
+#include <stdexcept>
 
 class YModel; // hidden model
 class XModel; // observed model
@@ -34,6 +34,13 @@ namespace Moses
     FFState* Evaluate(const Hypothesis& cur_hypo,
 		      const FFState* prev_state,
 		      ScoreComponentCollection* accumulator) const;
+
+    FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
+                           int featureID,
+                           ScoreComponentCollection* accumulator) const {
+      throw std::runtime_error("Syntactic LM can only be used with phrase-based decoder.");
+    }
+
 
     //    double perplexity();
 
