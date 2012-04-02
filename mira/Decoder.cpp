@@ -75,10 +75,12 @@ namespace Mira {
       m_bleuScoreFeature = staticData.GetBleuScoreFeature();
   }
   
-  void MosesDecoder::cleanup() {
+  void MosesDecoder::cleanup(bool chartDecoding) {
 	  delete m_manager;
-	  delete m_chartManager;
-	  delete m_sentence;
+	  if (chartDecoding)
+	  	delete m_chartManager;
+	  else
+	  	delete m_sentence;
   }
 
   vector< vector<const Word*> > MosesDecoder::getNBest(const std::string& source,

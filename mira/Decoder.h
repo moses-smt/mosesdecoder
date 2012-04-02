@@ -115,7 +115,7 @@ class MosesDecoder {
     void setAvgInputLength (float l) { m_bleuScoreFeature->SetAvgInputLength(l); }
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);
-    void cleanup();
+    void cleanup(bool chartDecoding);
 		
     float getSourceLengthHistory() { return m_bleuScoreFeature->GetSourceLengthHistory(); }
     float getTargetLengthHistory() { return m_bleuScoreFeature->GetTargetLengthHistory(); }

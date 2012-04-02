@@ -408,6 +408,9 @@ int main(int argc, char** argv) {
 	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
 			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
+	SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
+	bool chartDecoding = (searchAlgorithm == ChartDecoding);
+
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
@@ -756,7 +759,7 @@ int main(int argc, char** argv) {
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
 							1, distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
 					avg_ref_length = ref_length;
 					float hope_length_ratio = (float)oracle.size()/ref_length;
@@ -806,7 +809,7 @@ int main(int argc, char** argv) {
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
 								1, distinctNbest, avgRefLength, rank, epoch);
 						bestModel = outputModel[0];
-						decoder->cleanup();
+						decoder->cleanup(chartDecoding);
 						cerr << endl;
 						ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 					}
@@ -821,7 +824,7 @@ int main(int argc, char** argv) {
 								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
 								1,	distinctNbest, avgRefLength, rank, epoch);
 						vector<const Word*> fear = outputFear[0];
-						decoder->cleanup();
+						decoder->cleanup(chartDecoding);
 						ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 						avg_ref_length += ref_length;
 						avg_ref_length /= 2;
@@ -885,7 +888,7 @@ int main(int argc, char** argv) {
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
 							1, distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> oracle = outputHope[0];
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					cerr << endl;
 					
 					// count sparse features occurring in hope translation
@@ -898,7 +901,7 @@ int main(int argc, char** argv) {
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
 							1, distinctNbest, avgRefLength, rank, epoch);
 					bestModel = outputModel[0];
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					cerr << endl;
 
 					// needed for history
@@ -919,7 +922,7 @@ int main(int argc, char** argv) {
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1,	distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> bestModel = outputModel[0];
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					oneBests.push_back(bestModel);
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 					float model_length_ratio = (float)bestModel.size()/ref_length;
@@ -941,7 +944,7 @@ int main(int argc, char** argv) {
 					// needed for history
 					inputLengths.push_back(current_input_length);
 					ref_ids.push_back(*sid);
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					oracles.push_back(oracle);
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
 					float hope_length_ratio = (float)oracle.size()/ref_length;
@@ -960,7 +963,7 @@ int main(int argc, char** argv) {
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1,	distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> bestModel = outputModel[0];
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					oneBests.push_back(bestModel);
 					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 					float model_length_ratio = (float)bestModel.size()/ref_length;
@@ -973,7 +976,7 @@ int main(int argc, char** argv) {
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 							1, distinctNbest, avgRefLength, rank, epoch);
 					vector<const Word*> fear = outputFear[0];
-					decoder->cleanup();
+					decoder->cleanup(chartDecoding);
 					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 					float fear_length_ratio = (float)fear.size()/ref_length;
 					cerr << ", l-ratio fear: " << fear_length_ratio << endl;
@@ -1701,7 +1704,7 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
 		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, 1, dummyFeatureValues[0],
 				dummyBleuScores[0], dummyModelScores[0], n, true, false, rank, 0);
 		cerr << endl;
-		decoder->cleanup();
+		decoder->cleanup(StaticData::Instance().GetSearchAlgorithm() == ChartDecoding);
 
 		for (size_t i = 0; i < nbestOutput.size(); ++i) {
 			vector<const Word*> output = nbestOutput[i];
