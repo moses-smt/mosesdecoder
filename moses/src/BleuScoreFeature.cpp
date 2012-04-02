@@ -731,8 +731,12 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
 //    cerr << "precision pd: " << precision_pd << endl;
 
     float sentence_impact;
-    if (m_target_length_history > 0)
-    	sentence_impact = m_target_length_history * (precision - precision_pd);
+    if (m_target_length_history > 0) {
+    	if (m_source_length_history)
+    		sentence_impact = m_source_length_history * (precision - precision_pd);
+    	else
+    		sentence_impact = m_target_length_history * (precision - precision_pd);
+    }
     else
     	sentence_impact = precision;
 
