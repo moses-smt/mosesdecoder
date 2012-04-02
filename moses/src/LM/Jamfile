@@ -55,6 +55,16 @@ if $(with-randlm) {
   dependencies += rand ;
 }
 
+# LDHTLM
+local with-ldhtlm = [ option.get "with-ldhtlm" ] ;
+if $(with-ldhtlm) {
+  lib LDHT : : <search>$(with-ldhtlm)/lib ;
+  lib ticpp : LDHT : <search>$(with-ldhtlm)/lib ;
+  obj LDHT.o : LDHT.cpp LDHT ..//headers : <include>$(with-ldhtlm)/include <include>$(with-ldhtlm)/include/LDHT <include>/home/wilson/include ;
+  alias ldht : LDHT.o LDHT ticpp : : : <define>LM_LDHT ;
+  dependencies += ldht ;
+}
+
 #ORLM is always compiled but needs special headers
 obj ORLM.o : ORLM.cpp ..//headers ../DynSAInclude//dynsa : : : <include>../DynSAInclude ;
 

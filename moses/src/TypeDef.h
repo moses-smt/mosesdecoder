@@ -120,7 +120,7 @@ enum LMImplementation {
   ,Ken			= 8
   ,LazyKen	= 9
   ,ORLM = 10
-  ,DMapLM = 11
+  ,LDHTLM = 11
 };
 
 enum PhraseTableImplementation {
