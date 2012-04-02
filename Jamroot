@@ -229,6 +229,12 @@ if ! [ path.exists $(BUILD-LOG) ] {
   SHELL "touch $(BUILD-LOG) && chmod +x $(BUILD-LOG)" ;
 }
 local script = [ modules.peek : ARGV ] ;
-script = $(script:J=" ") ;
+if $(script[1]) = "./jam-files/bjam" {
+  #The ./bjam shell script calls ./jam-files/bjam so that appears in argv but
+  #we want ./bjam to appear so the environment variables are set correctly.  
+  script = "./bjam "$(script[2-]:J=" ") ;
+} else {
+  script = $(script:J=" ") ;
+}
 script = "#!/bin/sh\n$(script)\n" ;
 local ignored = @($(BUILD-LOG):E=$(script)) ;
