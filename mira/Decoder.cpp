@@ -303,7 +303,8 @@ namespace Mira {
     		out.close();
       }
       else {
-      	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
+	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
+	streamOut.flush();
       }
     }
   }

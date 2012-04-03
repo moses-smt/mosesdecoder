@@ -620,9 +620,11 @@ int main(int argc, char** argv) {
 		string f1 = "decode_hope_epoch0";
 		string f2 = "decode_fear_epoch0";
 		string s1 = "sparse_feature_hope_counts";
+		string s2 = "sparse_feature_fear_counts";
     ofstream hopePlusFeatures(f1.c_str());
     ofstream fearPlusFeatures(f2.c_str());
-    ofstream sparseFeatureCounts(s1.c_str());
+    ofstream sparseFeatureCountsHope(s1.c_str());
+    ofstream sparseFeatureCountsFear(s2.c_str());
     if (!hopePlusFeatures || !fearPlusFeatures) {
     	ostringstream msg;
     	msg << "Unable to open file";
@@ -723,11 +725,14 @@ int main(int argc, char** argv) {
 					cerr << "Writing file " << hope_nbest_filename.str() << endl;
 					decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
 							avgRefLength, hope_nbest_filename.str(), dummy);
+					decoder->cleanup(chartDecoding);
 					cerr << "Writing file " << fear_nbest_filename.str() << endl;
 					decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
 							avgRefLength, fear_nbest_filename.str(), dummy);
+					decoder->cleanup(chartDecoding);
 					//decoder->outputNBestList(input, *sid, n, 0, bleuWeight, distinctNbest,
 						//model_nbest_filename.str());
+					//decoder->cleanup(chartDecoding);
 
 					// save reference
 					ref_filename <<  "decode_ref_sent" << *sid;
@@ -768,11 +773,12 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
 
 					// count sparse features occurring in hope translation
-					featureValuesHope[batchPosition][0].IncrementSparseFeatures();
+					featureValuesHope[batchPosition][0].IncrementSparseHopeFeatures();
 
 					if (epoch == 0 && printFeatureInfo) {
 						decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
 								avgRefLength, "", hopePlusFeatures);
+						decoder->cleanup(chartDecoding);
 					}
 
 					
@@ -834,9 +840,13 @@ int main(int argc, char** argv) {
 						for (size_t i = 0; i < fear.size(); ++i)
 							delete fear[i];
 
+						// count sparse features occurring in fear translation
+						featureValuesFear[batchPosition][0].IncrementSparseFearFeatures();
+						
 						if (epoch == 0 && printFeatureInfo) {
 							decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
 									avgRefLength, "", fearPlusFeatures);
+							decoder->cleanup(chartDecoding);
 						}
 
 						// Bleu-related example selection
@@ -892,7 +902,7 @@ int main(int argc, char** argv) {
 					cerr << endl;
 					
 					// count sparse features occurring in hope translation
-					featureValuesHope[batchPosition][0].IncrementSparseFeatures();
+					featureValuesHope[batchPosition][0].IncrementSparseHopeFeatures();
 
 					vector<const Word*> bestModel;
 					// MODEL (for updating the history only, using dummy vectors)
@@ -929,7 +939,7 @@ int main(int argc, char** argv) {
 					cerr << ", l-ratio model: " << model_length_ratio << endl;
 					
 					// count sparse features occurring in best model translation
-					featureValues[batchPosition][0].IncrementSparseFeatures();
+					featureValues[batchPosition][0].IncrementSparseHopeFeatures();
 
 					examples_in_batch++;
 				}
@@ -951,7 +961,7 @@ int main(int argc, char** argv) {
 					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
 					
 					// count sparse features occurring in hope translation
-					featureValues[batchPosition][0].IncrementSparseFeatures();
+					featureValues[batchPosition][0].IncrementSparseHopeFeatures();
 
 					oracleFeatureValues.push_back(featureValues[batchPosition][oraclePos]);
 					oracleBleuScores.push_back(bleuScores[batchPosition][oraclePos]);
@@ -1375,10 +1385,14 @@ int main(int argc, char** argv) {
 			      mixedAverageWeights.Save(filename.str());
 			      ++weightEpochDump;
 
-			      if (weightEpochDump == weightDumpFrequency && printFeatureInfo) {
+			      if (epoch == 0 && weightEpochDump == weightDumpFrequency && printFeatureInfo) {
 			      	// print out all features with counts
-			      	mixedAverageWeights.PrintSparseFeatureCounts(sparseFeatureCounts);
-			      	sparseFeatureCounts.close();
+				cerr << "Printing out hope feature counts" << endl;
+			      	mixedAverageWeights.PrintSparseHopeFeatureCounts(sparseFeatureCountsHope);
+				cerr << "Printing out fear feature counts" << endl;
+			      	mixedAverageWeights.PrintSparseFearFeatureCounts(sparseFeatureCountsFear);
+			      	sparseFeatureCountsHope.close();
+				sparseFeatureCountsFear.close();
 			      }
 			    }
 			  }

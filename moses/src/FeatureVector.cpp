@@ -35,7 +35,8 @@ namespace Moses {
   const string FName::SEP = "_";
   FName::Name2Id FName::name2id;
   vector<string> FName::id2name;
-  FName::Id2Count FName::id2count;
+  FName::Id2Count FName::id2hopeCount;
+  FName::Id2Count FName::id2fearCount;
 #ifdef WITH_THREADS
   boost::shared_mutex FName::m_idLock;
 #endif
@@ -73,16 +74,25 @@ namespace Moses {
 	  return i->second;
   }
   
-  size_t FName::getIdCount(const string& name) {
+  size_t FName::getHopeIdCount(const string& name) {
 	  Name2Id::iterator i = name2id.find(name);
 	  if (i != name2id.end()) {
 		  float id = i->second;
-		  return id2count[id];
+		  return id2hopeCount[id];
+	  }
+	  return 0;
+  }
+
+  size_t FName::getFearIdCount(const string& name) {
+	  Name2Id::iterator i = name2id.find(name);
+	  if (i != name2id.end()) {
+		  float id = i->second;
+		  return id2fearCount[id];
 	  }
 	  return 0;
   }
   
-  void FName::incrementId(const string& name) {
+  void FName::incrementHopeId(const string& name) {
 	  Name2Id::iterator i = name2id.find(name);
 	  assert(i != name2id.end());
 #ifdef WITH_THREADS
@@ -90,7 +100,18 @@ namespace Moses {
       boost::upgrade_lock<boost::shared_mutex> upgradeLock(m_idLock);
       boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(upgradeLock);
 #endif
-      id2count[i->second] += 1; 
+      id2hopeCount[i->second] += 1; 
+  }
+
+    void FName::incrementFearId(const string& name) {
+	  Name2Id::iterator i = name2id.find(name);
+	  assert(i != name2id.end());
+#ifdef WITH_THREADS
+      // get upgradable lock and upgrade to writer lock
+      boost::upgrade_lock<boost::shared_mutex> upgradeLock(m_idLock);
+      boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(upgradeLock);
+#endif
+      id2fearCount[i->second] += 1; 
   }
   
   void FName::eraseId(size_t id) {
@@ -99,9 +120,10 @@ namespace Moses {
       boost::upgrade_lock<boost::shared_mutex> upgradeLock(m_idLock);
       boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(upgradeLock);
 #endif
-      id2count.erase(id);
+      id2hopeCount.erase(id);
+      id2fearCount.erase(id);
   }
-      
+   
   std::ostream& operator<<( std::ostream& out, const FName& name) {
     out << name.name();
     return out;
@@ -318,14 +340,24 @@ namespace Moses {
 	  set(i->first, get(i->first) + i->second);
   }
   
-  void FVector::incrementSparseFeatures() {
+  void FVector::incrementSparseHopeFeatures() {
     for (const_iterator i = cbegin(); i != cend(); ++i) 
-      FName::incrementId((i->first).name());
+      FName::incrementHopeId((i->first).name());
+  }
+
+  void FVector::incrementSparseFearFeatures() {
+    for (const_iterator i = cbegin(); i != cend(); ++i) 
+      FName::incrementFearId((i->first).name());
   }
   
-  void FVector::printSparseFeatureCounts(std::ofstream& out) {
+  void FVector::printSparseHopeFeatureCounts(std::ofstream& out) {
     for (const_iterator i = cbegin(); i != cend(); ++i) 
-      out << (i->first).name() << ": " << FName::getIdCount((i->first).name()) << std::endl;
+      out << (i->first).name() << ": " << FName::getHopeIdCount((i->first).name()) << std::endl;
+  }
+
+  void FVector::printSparseFearFeatureCounts(std::ofstream& out) {
+    for (const_iterator i = cbegin(); i != cend(); ++i) 
+      out << (i->first).name() << ": " << FName::getFearIdCount((i->first).name()) << std::endl;
   }
   
   size_t FVector::pruneSparseFeatures(size_t threshold) {
@@ -333,7 +365,7 @@ namespace Moses {
 	vector<FName> toErase;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
       const std::string& fname = (i->first).name();
-      if (FName::getIdCount(fname) < threshold) {
+      if (FName::getHopeIdCount(fname) < threshold && FName::getFearIdCount(fname) < threshold) {
         toErase.push_back(i->first);
         //std::cerr << "pruning: " << fname << " (" << FName::getIdCount(fname) << ")" << std::endl;
         FName::eraseId(FName::getId(fname));

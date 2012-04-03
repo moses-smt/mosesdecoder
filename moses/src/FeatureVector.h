@@ -62,7 +62,8 @@ namespace Moses {
     //typedef std::map<std::string, size_t> Name2Id;
     static Name2Id name2id;
     static std::vector<std::string> id2name;
-    static Id2Count id2count;
+    static Id2Count id2hopeCount;
+    static Id2Count id2fearCount;
     
     //A feature name can either be initialised as a pair of strings,
     //which will be concatenated with a SEP between them, or as
@@ -81,8 +82,10 @@ namespace Moses {
     bool operator!=(const FName& rhs) const ;
 		
     static size_t getId(const std::string& name);
-    static size_t getIdCount(const std::string& name);
-    static void incrementId(const std::string& name);
+    static size_t getHopeIdCount(const std::string& name);
+    static size_t getFearIdCount(const std::string& name);
+    static void incrementHopeId(const std::string& name);
+    static void incrementFearId(const std::string& name);
     static void eraseId(size_t id);
         
   private:
@@ -201,8 +204,10 @@ namespace Moses {
 
     void sparsePlusEquals(const FVector& rhs);
     
-    void incrementSparseFeatures();
-    void printSparseFeatureCounts(std::ofstream& out);
+    void incrementSparseHopeFeatures();
+    void incrementSparseFearFeatures();
+    void printSparseHopeFeatureCounts(std::ofstream& out);
+    void printSparseFearFeatureCounts(std::ofstream& out);
     size_t pruneSparseFeatures(size_t threshold);
     size_t pruneZeroWeightFeatures();
     

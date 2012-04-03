@@ -1525,7 +1525,6 @@ bool StaticData::LoadReferences()
 {
   vector<string> bleuWeightStr = m_parameter->GetParam("weight-bl");
   vector<string> referenceFiles = m_parameter->GetParam("references");
-  cerr << "Loading reference file " << referenceFiles[0] << endl;
   if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
     UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
     return false;
@@ -1537,10 +1536,12 @@ bool StaticData::LoadReferences()
     UserMessage::Add("Can only specify one weight for the bleu feature");
     return false;
   }
+
   float bleuWeight = Scan<float>(bleuWeightStr[0]);
   m_bleuScoreFeature = new BleuScoreFeature();
   SetWeight(m_bleuScoreFeature, bleuWeight);
 
+  cerr << "Loading reference file " << referenceFiles[0] << endl;
   vector<vector<string> > references(referenceFiles.size());
   for (size_t i =0; i < referenceFiles.size(); ++i) {
     ifstream in(referenceFiles[i].c_str());
