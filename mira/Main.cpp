@@ -127,7 +127,7 @@ int main(int argc, char** argv) {
 	int featureCutoff;
 	bool pruneZeroWeights;
 	bool megam;
-	bool printFeatureInfo;
+	bool printFeatureCounts, printNbestWithFeatures;
 	bool avgRefLength;
 	po::options_description desc("Allowed options");
 	desc.add_options()
@@ -192,7 +192,8 @@ int main(int argc, char** argv) {
 		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
-		("print-feature-info", po::value<bool>(&printFeatureInfo)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
+		("print-feature-counts", po::value<bool>(&printFeatureCounts)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
+		("print-nbest-with-features", po::value<bool>(&printNbestWithFeatures)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
 		("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")				
 		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
 		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
@@ -775,7 +776,7 @@ int main(int argc, char** argv) {
 					// count sparse features occurring in hope translation
 					featureValuesHope[batchPosition][0].IncrementSparseHopeFeatures();
 
-					if (epoch == 0 && printFeatureInfo) {
+					if (epoch == 0 && printNbestWithFeatures) {
 						decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
 								avgRefLength, "", hopePlusFeatures);
 						decoder->cleanup(chartDecoding);
@@ -842,8 +843,8 @@ int main(int argc, char** argv) {
 
 						// count sparse features occurring in fear translation
 						featureValuesFear[batchPosition][0].IncrementSparseFearFeatures();
-						
-						if (epoch == 0 && printFeatureInfo) {
+
+						if (epoch == 0 && printNbestWithFeatures) {
 							decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
 									avgRefLength, "", fearPlusFeatures);
 							decoder->cleanup(chartDecoding);
@@ -1385,14 +1386,14 @@ int main(int argc, char** argv) {
 			      mixedAverageWeights.Save(filename.str());
 			      ++weightEpochDump;
 
-			      if (epoch == 0 && weightEpochDump == weightDumpFrequency && printFeatureInfo) {
+			      if (weightEpochDump == weightDumpFrequency && printFeatureCounts) {
 			      	// print out all features with counts
-				cerr << "Printing out hope feature counts" << endl;
+			      	cerr << "Printing out hope feature counts" << endl;
 			      	mixedAverageWeights.PrintSparseHopeFeatureCounts(sparseFeatureCountsHope);
-				cerr << "Printing out fear feature counts" << endl;
+			      	cerr << "Printing out fear feature counts" << endl;
 			      	mixedAverageWeights.PrintSparseFearFeatureCounts(sparseFeatureCountsFear);
 			      	sparseFeatureCountsHope.close();
-				sparseFeatureCountsFear.close();
+			      	sparseFeatureCountsFear.close();
 			      }
 			    }
 			  }
@@ -1401,7 +1402,7 @@ int main(int argc, char** argv) {
 
 		} // end of shard loop, end of this epoch
 
-		if (printFeatureInfo && rank == 0 && epoch == 0) {
+		if (printNbestWithFeatures && rank == 0 && epoch == 0) {
       cerr << "Writing out hope/fear nbest list with features: " << f1 << ", " << f2 << endl;
 			hopePlusFeatures.close();
 			fearPlusFeatures.close();
