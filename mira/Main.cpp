@@ -601,6 +601,21 @@ int main(int argc, char** argv) {
 	ScoreComponentCollection mixedAverageWeightsPrevious;
 	ScoreComponentCollection mixedAverageWeightsBeforePrevious;
 
+	// log feature counts and/or hope/fear translations with features
+	string f1 = "decode_hope_epoch0";
+	string f2 = "decode_fear_epoch0";
+	string s1 = "sparse_feature_hope_counts";
+	string s2 = "sparse_feature_fear_counts";
+  ofstream hopePlusFeatures(f1.c_str());
+  ofstream fearPlusFeatures(f2.c_str());
+  ofstream sparseFeatureCountsHope(s1.c_str());
+  ofstream sparseFeatureCountsFear(s2.c_str());
+  if (!hopePlusFeatures || !fearPlusFeatures || !sparseFeatureCountsHope || !sparseFeatureCountsFear) {
+  	ostringstream msg;
+  	msg << "Unable to open file";
+  	throw runtime_error(msg.str());
+  }
+
 	bool stop = false;
 //	int sumStillViolatedConstraints;
 	for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
@@ -617,20 +632,6 @@ int main(int argc, char** argv) {
 		// number of weight dumps this epoch
 		size_t weightMixingThisEpoch = 0;
 		size_t weightEpochDump = 0;
-
-		string f1 = "decode_hope_epoch0";
-		string f2 = "decode_fear_epoch0";
-		string s1 = "sparse_feature_hope_counts";
-		string s2 = "sparse_feature_fear_counts";
-    ofstream hopePlusFeatures(f1.c_str());
-    ofstream fearPlusFeatures(f2.c_str());
-    ofstream sparseFeatureCountsHope(s1.c_str());
-    ofstream sparseFeatureCountsFear(s2.c_str());
-    if (!hopePlusFeatures || !fearPlusFeatures) {
-    	ostringstream msg;
-    	msg << "Unable to open file";
-    	throw runtime_error(msg.str());
-    }
 
 		size_t shardPosition = 0;
 		vector<size_t>::const_iterator sid = shard.begin();
