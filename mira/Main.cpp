@@ -604,13 +604,9 @@ int main(int argc, char** argv) {
 	// log feature counts and/or hope/fear translations with features
 	string f1 = "decode_hope_epoch0";
 	string f2 = "decode_fear_epoch0";
-	string s1 = "sparse_feature_hope_counts";
-	string s2 = "sparse_feature_fear_counts";
   ofstream hopePlusFeatures(f1.c_str());
   ofstream fearPlusFeatures(f2.c_str());
-  ofstream sparseFeatureCountsHope(s1.c_str());
-  ofstream sparseFeatureCountsFear(s2.c_str());
-  if (!hopePlusFeatures || !fearPlusFeatures || !sparseFeatureCountsHope || !sparseFeatureCountsFear) {
+  if (!hopePlusFeatures || !fearPlusFeatures) {
   	ostringstream msg;
   	msg << "Unable to open file";
   	throw runtime_error(msg.str());
@@ -1389,6 +1385,12 @@ int main(int argc, char** argv) {
 
 			      if (weightEpochDump == weightDumpFrequency && printFeatureCounts) {
 			      	// print out all features with counts
+				stringstream s1, s2;
+				s1 << "sparse_feature_hope_counts" << "_" << epoch;
+				s2 << "sparse_feature_fear_counts" << "_" << epoch;
+				ofstream sparseFeatureCountsHope(s1.str().c_str());
+				ofstream sparseFeatureCountsFear(s2.str().c_str());
+
 			      	cerr << "Printing out hope feature counts" << endl;
 			      	mixedAverageWeights.PrintSparseHopeFeatureCounts(sparseFeatureCountsHope);
 			      	cerr << "Printing out fear feature counts" << endl;
