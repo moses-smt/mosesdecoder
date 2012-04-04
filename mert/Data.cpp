@@ -197,7 +197,6 @@ void Data::InitFeatureMap(const string& str) {
 
 void Data::AddFeatures(const string& str,
                        const string& sentence_index) {
-  string::size_type loc;
   string buf = str;
   string substr;
   FeatureStats feature_entry;
@@ -207,7 +206,7 @@ void Data::AddFeatures(const string& str,
     getNextPound(buf, substr);
 
     // no ':' -> feature value that needs to be stored
-    if ((loc = substr.find_last_of(":")) != substr.length()-1) {
+    if (!EndsWith(substr, ":")) {
       feature_entry.add(ConvertStringToFeatureStatsType(substr));
     } else if (substr.find("_") != string::npos) {
       // sparse feature name? store as well
