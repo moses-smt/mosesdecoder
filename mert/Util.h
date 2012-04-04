@@ -68,9 +68,9 @@ inline T Scan(const std::string &input)
 
 /**
  * Returns true iff "str" ends with "suffix".
- * e.g., Given str = "abc:", suffix = ":", this functions returns true.
+ * e.g., Given str = "abc:" and suffix = ":", this functions returns true.
  */
-bool EndsWith(const std::string& str, const char* suffix) {
+inline bool EndsWith(const std::string& str, const char* suffix) {
   return str.find_last_of(suffix) == str.size() - 1;
 }
 
