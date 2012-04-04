@@ -81,6 +81,35 @@ bool CheckFourgram(const std::string& a, const std::string& b,
   return GetNgramCounts()->Lookup(fourgram.instance, &v);
 }
 
+void SetUpReferences(BleuScorer& scorer) {
+  // The following exampels are taken from Koehn, "Statistical Machine Translation",
+  // Cambridge University Press, 2010.
+  {
+    std::stringstream ref1;
+    ref1 << "israeli officials are responsible for airport security" << std::endl;
+    BOOST_CHECK(scorer.OpenReferenceStream(&ref1, 0));
+  }
+
+  {
+    std::stringstream ref2;
+    ref2 << "israel is in charge of the security at this airport" << std::endl;
+    BOOST_CHECK(scorer.OpenReferenceStream(&ref2, 1));
+  }
+
+  {
+    std::stringstream ref3;
+    ref3 << "the security work for this airport is the responsibility of the israel government"
+         << std::endl;
+    BOOST_CHECK(scorer.OpenReferenceStream(&ref3, 2));
+  }
+
+  {
+    std::stringstream ref4;
+    ref4 << "israli side was in charge of the security of this airport" << std::endl;
+    BOOST_CHECK(scorer.OpenReferenceStream(&ref4, 3));
+  }
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_CASE(bleu_reference_type) {
@@ -152,4 +181,26 @@ BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
   BOOST_CHECK(CheckFourgram("a", "girl", "with", "a"));
   BOOST_CHECK(CheckFourgram("girl", "with", "a", "telescope"));
   BOOST_CHECK(CheckFourgram("with", "a", "telescope", "."));
+}
+
+BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
+  BleuScorer scorer;
+  SetUpReferences(scorer);
+  std::string line("israeli officials responsibility of airport safety");
+  ScoreStats entry;
+  scorer.prepareStats(0, line, entry);
+
+  BOOST_CHECK_EQUAL(entry.size(), 2 * kBleuNgramOrder + 1);
+
+  // Test hypothesis ngram counts
+  BOOST_CHECK_EQUAL(entry.get(0), 5);  // unigram
+  BOOST_CHECK_EQUAL(entry.get(2), 2);  // bigram
+  BOOST_CHECK_EQUAL(entry.get(4), 0);  // trigram
+  BOOST_CHECK_EQUAL(entry.get(6), 0);  // fourgram
+
+  // Test reference ngram counts.
+  BOOST_CHECK_EQUAL(entry.get(1), 6);  // unigram
+  BOOST_CHECK_EQUAL(entry.get(3), 5);  // bigram
+  BOOST_CHECK_EQUAL(entry.get(5), 4);  // trigram
+  BOOST_CHECK_EQUAL(entry.get(7), 3);  // fourgram
 }

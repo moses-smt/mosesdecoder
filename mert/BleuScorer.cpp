@@ -70,45 +70,60 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
     TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
-    ifstream refin(referenceFiles[i].c_str());
-    if (!refin) {
-      throw runtime_error("Unable to open: " + referenceFiles[i]);
-    }
-    string line;
-    size_t sid = 0; //sentence counter
-    while (getline(refin,line)) {
-      line = applyFactors(line);
-      if (i == 0) {
-        Reference* ref = new Reference;
-        m_references.push_back(ref);    // Take ownership of the Reference object.
-      }
-      if (m_references.size() <= sid) {
-        throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
-      }
-      NgramCounts counts;
-      size_t length = CountNgrams(line, counts, kBleuNgramOrder);
 
-      //for any counts larger than those already there, merge them in
-      for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-        const NgramCounts::Key& ngram = ci->first;
-        const NgramCounts::Value newcount = ci->second;
-
-        NgramCounts::Value oldcount = 0;
-        m_references[sid]->get_counts()->Lookup(ngram, &oldcount);
-        if (newcount > oldcount) {
-          m_references[sid]->get_counts()->operator[](ngram) = newcount;
-        }
-      }
-      //add in the length
-      m_references[sid]->push_back(length);
-      if (sid > 0 && sid % 100 == 0) {
-        TRACE_ERR(".");
-      }
-      ++sid;
+    if (!OpenReference(referenceFiles[i].c_str(), i)) {
+      throw runtime_error("Unable to open " + referenceFiles[i]);
     }
   }
 }
 
+bool BleuScorer::OpenReference(const char* filename, size_t file_id) {
+  ifstream ifs(filename);
+  if (!ifs) {
+    cerr << "Cannot open " << filename << endl;
+    return false;
+  }
+  return OpenReferenceStream(&ifs, file_id);
+}
+
+bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id) {
+  if (is == NULL) return false;
+
+  string line;
+  size_t sid = 0;
+  while (getline(*is, line)) {
+    line = applyFactors(line);
+    if (file_id == 0) {
+      Reference* ref = new Reference;
+      m_references.push_back(ref);    // Take ownership of the Reference object.
+    }
+    if (m_references.size() <= sid) {
+      cerr << "Reference " << file_id << "has too many sentences." << endl;
+      return false;
+    }
+    NgramCounts counts;
+    size_t length = CountNgrams(line, counts, kBleuNgramOrder);
+
+    //for any counts larger than those already there, merge them in
+    for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
+      const NgramCounts::Key& ngram = ci->first;
+      const NgramCounts::Value newcount = ci->second;
+
+      NgramCounts::Value oldcount = 0;
+      m_references[sid]->get_counts()->Lookup(ngram, &oldcount);
+      if (newcount > oldcount) {
+        m_references[sid]->get_counts()->operator[](ngram) = newcount;
+      }
+    }
+    //add in the length
+    m_references[sid]->push_back(length);
+    if (sid > 0 && sid % 100 == 0) {
+      TRACE_ERR(".");
+    }
+    ++sid;
+  }
+  return true;
+}
 
 void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
