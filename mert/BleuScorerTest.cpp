@@ -82,7 +82,7 @@ bool CheckFourgram(const std::string& a, const std::string& b,
 }
 
 void SetUpReferences(BleuScorer& scorer) {
-  // The following exampels are taken from Koehn, "Statistical Machine Translation",
+  // The following examples are taken from Koehn, "Statistical Machine Translation",
   // Cambridge University Press, 2010.
   {
     std::stringstream ref1;
