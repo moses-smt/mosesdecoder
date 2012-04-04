@@ -35,11 +35,6 @@ private:
   ScoreDataHandle m_score_data;
   FeatureDataHandle m_feature_data;
 
-  // Helper functions for loadnbest();
-  void InitFeatureMap(const std::string& str);
-  void AddFeatures(const std::string& str,
-                   const std::string& sentence_index);
-
 public:
   explicit Data(Scorer* scorer);
   Data();
@@ -97,6 +92,11 @@ public:
    */
   void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig,
                     std::vector<Data>& shards);
+
+  // Helper functions for loadnbest();
+  void InitFeatureMap(const std::string& str);
+  void AddFeatures(const std::string& str,
+                   const std::string& sentence_index);
 };
 
 #endif  // MERT_DATA_H_
