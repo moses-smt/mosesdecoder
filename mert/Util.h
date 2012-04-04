@@ -66,6 +66,14 @@ inline T Scan(const std::string &input)
   return ret;
 }
 
+/**
+ * Returns true iff "str" ends with "suffix".
+ * e.g., Given str = "abc:", suffix = ":", this functions returns true.
+ */
+bool EndsWith(const std::string& str, const char* suffix) {
+  return str.find_last_of(suffix) == str.size() - 1;
+}
+
 template<typename T>
 inline std::string stringify(T x)
 {
