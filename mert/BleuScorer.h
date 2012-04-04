@@ -51,6 +51,11 @@ public:
 
   void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
+  bool OpenReference(const char* filename, size_t file_id);
+
+  // NOTE: this function is used for unit testing.
+  bool OpenReferenceStream(std::istream* is, size_t file_id);
+
 private:
   ReferenceLengthType m_ref_length_type;
 
