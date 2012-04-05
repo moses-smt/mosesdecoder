@@ -73,7 +73,7 @@ public:
 
 static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
   float logbleu = 0.0;
-  for (unsigned int j=0; j<kBleuNgramOrder; j++) {
+  for (int j = 0; j < kBleuNgramOrder; j++) {
     //cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
     logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
   }
