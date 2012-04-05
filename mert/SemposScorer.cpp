@@ -126,10 +126,10 @@ int SemposScorer::encodeSempos(const string& sempos)
   if (sempos == "-") return -1;
   encoding_it it = m_semposMap.find(sempos);
   if (it == m_semposMap.end()) {
-    if (m_semposMap.size() == kMaxNOC) {
+    const int classNumber = static_cast<int>(m_semposMap.size());
+    if (classNumber == kMaxNOC) {
       throw std::runtime_error("Number of classes is greater than kMaxNOC");
     }
-    const int classNumber = static_cast<int>(m_semposMap.size());
     m_semposMap[sempos] = classNumber;
     return classNumber;
   } else {
@@ -174,6 +174,6 @@ void SemposScorer::loadWeights(const string& weightsfile)
     {
         cerr << "Unable to open file "<< weightsfile << endl;
         exit(1);
-    }    
+    }
 
 }
