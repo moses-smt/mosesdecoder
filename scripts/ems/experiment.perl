@@ -947,6 +947,9 @@ sub define_step {
  	elsif ($DO_STEP[$i] eq 'TUNING:filter') {
 	    &define_tuningevaluation_filter(undef,$i);
 	}
+	elsif ($DO_STEP[$i] eq 'TUNING:filter-devtest') {
+	    &define_tuningevaluation_filter(undef,$i,"devtest");
+	}
  	elsif ($DO_STEP[$i] eq 'TUNING:tune') {
 	    &define_tuning_tune($i);
 	}
@@ -1543,9 +1546,10 @@ sub factorize_one_language {
 sub define_tuning_tune {
     my ($step_id) = @_;
     my $dir = &check_and_get("GENERAL:working-dir");
+
+    # the last variable only apply for mira tuning (devtest input and reference are read out later)
+    my ($tuned_config,$config,$input,$reference,$config_devtest) = &get_output_and_input($step_id); 
     
-    my ($tuned_config,
-	$config,$input,$reference) = &get_output_and_input($step_id);
     my $tuning_script = &check_and_get("TUNING:tuning-script");
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
     my $nbest_size = &check_and_get("TUNING:nbest");
@@ -1562,21 +1566,186 @@ sub define_tuning_tune {
     my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
     $tuning_settings = "" unless $tuning_settings;
 
-    my $cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
-    $cmd .= " --lambdas \"$lambda\"" if $lambda;
-    $cmd .= " --continue" if $tune_continue;
-    $cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
+    my $use_mira = &check_and_get("TUNING:use-mira");
+    my $cmd = "";
+    if ($use_mira eq "true") {
+	my $experiment_dir = "$dir/tuning/tmp.$VERSION";
+	system("mkdir -p $experiment_dir");
 
-    my $qsub_args = &get_qsub_args("TUNING");
-    $cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
-    $cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
+	my $mira_config = "$experiment_dir/mira-config.$VERSION.";
+	my $mira_config_log = $mira_config."log";
+	$mira_config .= "cfg";
+	
+       	write_mira_config($mira_config, $experiment_dir, $config, $config_devtest);
+	$cmd = "$tuning_script -config $mira_config -exec >& $mira_config_log";
+
+	# write script to select the best set of weights after training for the specified number of epochs --> 
+	# cp to tuning/tmp.?/moses.ini
+	my $script_filename = "$experiment_dir/selectBestWeights.";
+	my $script_filename_log = $script_filename."log";
+	$script_filename .= "perl";
+	my $weight_output_file = "$experiment_dir/moses.ini";
+	write_selectBestMiraWeights($experiment_dir, $script_filename, $weight_output_file);
+	$cmd .= "\n$script_filename >& $script_filename_log";
+    }
+    else {
+	$cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
+	$cmd .= " --lambdas \"$lambda\"" if $lambda;
+	$cmd .= " --continue" if $tune_continue;
+	$cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
     
-    my $tuning_dir = $tuned_config;
-    $tuning_dir =~ s/\/[^\/]+$//;
-    $cmd .= "\nmkdir -p $tuning_dir";
+	my $qsub_args = &get_qsub_args("TUNING");
+	$cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
+	$cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
+	my $tuning_dir = $tuned_config;
+	$tuning_dir =~ s/\/[^\/]+$//;
+	$cmd .= "\nmkdir -p $tuning_dir";
+    }
+    
     $cmd .= "\ncp $dir/tuning/tmp.$VERSION/moses.ini $tuned_config";
 
     &create_step($step_id,$cmd);
+}
+
+sub write_mira_config {
+    my ($config_filename, $expt_dir, $tune_filtered_ini, $devtest_filtered_ini) = @_;
+    
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+    my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
+    my $core_weights = &check_and_get("TUNING:core-weight-config");
+    my $input = &check_and_get("TUNING:input");
+    my $reference = &check_and_get("TUNING:reference");
+    my $tuning_settings = &check_and_get("TUNING:tuning-settings");
+    my @settings = split(/ /, $tuning_settings);
+    my $mira_tuning_settings = &check_and_get("TUNING:mira-tuning-settings");
+    my $input_devtest = &check_and_get("TUNING:input-devtest");
+    my $reference_devtest = &check_and_get("TUNING:reference-devtest");
+
+    # convert core weights into format expected by mira
+    my $core_file = "$expt_dir/core_weights";
+    if ($core_weights) {
+	open(INI, $core_weights);
+	#print STDERR "Reading core weights from file $core_weights \n";
+	open(CORE, ">$core_file");
+	while(<INI>) {
+	    if (/weight-l/) {
+		my @lm_weights; 
+		while (<INI>) {
+		    last if $_ eq "\n";
+		    push(@lm_weights, $_);
+		}
+		
+		print CORE "LM ".$lm_weights[0];
+		for my $i (1 .. $#lm_weights) {
+		    print CORE "LM:".($i+1)." ".$lm_weights[$i];
+		}
+		
+	    } elsif (/weight-t/) {
+		my @pm_weights; 
+		while (<INI>) {
+		    last if $_ eq "\n";
+		    push(@pm_weights, $_);
+		}
+		for my $i (0 .. $#pm_weights) {
+		    print CORE "PhraseModel_".($i+1)." ".$pm_weights[$i];
+		}
+	    } elsif (/weight-d/) {
+		my @d_weights; 
+		while (<INI>) {
+		    last if $_ eq "\n";
+		    push(@d_weights, $_);
+		}
+		for my $i (0 .. $#d_weights) {
+		    if ($i == 0) {
+			print CORE "Distortion ".$d_weights[0];
+		    }
+		    else {
+			print CORE "LexicalReordering_wbe-msd-bidirectional-fe-allff_".($i+1)." ".$d_weights[$i];
+		    }
+		}
+		
+	    } elsif (/weight-w/) {
+		my $w = <INI>;
+		print CORE "WordPenalty ".$w;
+	    } 
+	}
+	close INI;
+	close CORE;
+    }
+    
+    # mira config file
+    open(CFG, ">$config_filename");
+    print CFG "[general] \n";
+    print CFG "name=expt \n";
+    print CFG "fold=0 \n";
+    print CFG "mpienv=openmpi_fillup_mark2 \n";
+    print CFG "moses-home=".$moses_src_dir."\n";
+    print CFG "working-dir=".$expt_dir."\n";
+    print CFG "decoder-settings=".$tuning_decoder_settings."\n\n";
+
+    if ($core_weights) {
+	print CFG "[core] \n"; 
+	print CFG "weightfile=".$core_file."\n\n";
+    }
+
+    print CFG "[train] \n";
+    print CFG "trainer=\${moses-home}/dist/bin/mira \n";
+    print CFG "input-file=".$input."\n";
+    print CFG "reference-files=".$reference."\n";
+    print CFG "moses-ini-file=".$tune_filtered_ini."\n";
+    print CFG "hours=48 \n"; 
+    foreach my $setting (@settings) {
+	print CFG $setting."\n";
+    }
+    print CFG "extra-args=".$mira_tuning_settings."\n\n";
+    
+    print CFG "[devtest] \n";
+    if (&get("TRAINING:hierarchical-rule-set")) {
+	print CFG "moses=\${moses-home}/moses-chart-cmd/src/moses_chart \n";
+    }
+    else {
+	print CFG "moses=\${moses-home}/moses-cmd/src/moses \n";
+    }
+    # use multi-bleu to select the best set of weights
+    print CFG "bleu=\${moses-home}/scripts/generic/multi-bleu.perl \n";
+    print CFG "input-file=".$input_devtest."\n";
+    print CFG "reference-file=".$reference_devtest."\n";
+    print CFG "moses-ini-file=".$devtest_filtered_ini."\n";
+    print CFG "hours=12 \nextra-args= \nskip-dev=1 \nskip-devtest=0 \nskip-submit=0 \n";
+    close(CFG);
+}
+
+sub write_selectBestMiraWeights {
+    my ($expt_dir, $script_filename, $weight_out_file) = @_;
+    open(SCR, ">$script_filename");
+
+    print SCR "#!/usr/bin/perl -w \nuse strict; \n\n";
+    print SCR "my \@devtest_bleu = glob(\"$expt_dir/*_devtest.bleu\"); \# expt_00_0_devtest.bleu \n";
+    print SCR "if (scalar(\@devtest_bleu) == 0) { \n";
+    print SCR "\tprint STDERR \"ERROR: no bleu files globbed, cannot find best weights.\\n\"; \n";
+    print SCR "\texit(1); \n";
+    print SCR "} \n\n";
+    print SCR "my (\$best_weights, \$best_id); \n";
+    print SCR "my \$best_bleu = -1; \n";
+    print SCR "my \$best_ratio = 0; \n";
+    print SCR "foreach my \$bleu_file (\@devtest_bleu) { \n";
+    print SCR "\t\$bleu_file =~ /_([\\d_]+)_devtest.bleu/; \n";
+    print SCR "\tmy \$id = \$1; \n";
+    print SCR "\topen(BLEU, \$bleu_file); \n";
+    print SCR "\tmy \$bleu = <BLEU>; \n";
+    print SCR "\t\$bleu =~ /BLEU = ([\\d\\.]+), .*ratio=([\\d\\.]+), /; \n";
+    print SCR "\tif (\$1 > \$best_bleu || (\$1 == \$best_bleu && (abs(1-\$2) < abs(1-\$best_ratio)))) { \n";
+    print SCR "\t\t\$best_bleu = \$1; \n";
+    print SCR "\t\t\$best_ratio = \$2; \n";
+    print SCR "\t\t# expt1-devtest.00_0.ini (incl. path to sparse weights) \n";
+    print SCR "\t\t(\$best_weights) = glob(\"$expt_dir/*devtest.\$id.ini\"); \n";
+    print SCR "\t} \n";
+    print SCR "} \n\n";
+    print SCR "print STDERR \"Best weights according to BLEU on devtest set: \$best_weights \\n\"; \n";
+    print SCR "system(\"cp \$best_weights $weight_out_file\"); \n\n";
+    
+    close(SCR);
+    system("chmod u+x $script_filename");
 }
 
 sub define_training_prepare_data {
@@ -2128,7 +2297,7 @@ sub encode_factor_list {
 }
 
 sub define_tuningevaluation_filter {
-    my ($set,$step_id) = @_;
+    my ($set,$step_id, $type) = @_;
     my $scripts = &check_and_get("GENERAL:moses-script-dir");
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
@@ -2148,7 +2317,14 @@ sub define_tuningevaluation_filter {
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
     $input_filter = $input unless $input_filter;
 
-    my $filter_dir = "$dir/tuning/filtered.$VERSION";
+    my $filter_dir;
+    if ($type) {
+	$filter_dir = "$dir/tuning/filtered.$type.$VERSION";
+    }
+    else {
+	$filter_dir = "$dir/tuning/filtered.$VERSION";
+    }
+ 
     $filter_dir = "$dir/evaluation/filtered.$set.$VERSION" unless $tuning_flag;
 
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;

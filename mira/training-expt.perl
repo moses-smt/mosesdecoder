@@ -393,26 +393,22 @@ sub createTestScriptAndSubmit {
     my $skip_submit = $_[8];
 
     #file names
-    my $job_name = $name."_".$testtype."_".$train_iteration.$suffix;
-
-    my $test_script = "$name-$testtype";
-    my $test_script_file = $working_dir."/".$test_script.".$train_iteration".$suffix.".sh"; 
-    my $test_out = $test_script . ".$train_iteration" . $suffix . ".out";
-    my $test_err = $test_script . ".$train_iteration" . $suffix . ".err";
-
     my $output_file;
     my $output_error_file;
     my $bleu_file;
+    my $file_id = "";
     if ($weight_dump_frequency == 1) {
 	if ($train_iteration < 10) {
 	    $output_file = $working_dir."/".$name."_0".$train_iteration.$suffix."_$testtype".".out";
 	    $output_error_file = $working_dir."/".$name."_0".$train_iteration.$suffix."_$testtype".".err";
 	    $bleu_file = $working_dir."/".$name."_0".$train_iteration.$suffix."_$testtype".".bleu";
+	    $file_id = "0".$train_iteration.$suffix;
 	}
 	else {
 	    $output_file = $working_dir."/".$name."_".$train_iteration.$suffix."_$testtype".".out";
 	    $output_error_file = $working_dir."/".$name."_".$train_iteration.$suffix."_$testtype".".err";
 	    $bleu_file = $working_dir."/".$name."_".$train_iteration.$suffix."_$testtype".".bleu";
+	    $file_id = $train_iteration.$suffix;
 	}        
     }
     else {
@@ -420,13 +416,22 @@ sub createTestScriptAndSubmit {
 	    $output_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix."_$testtype".".out";
 	    $output_error_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix."_$testtype".".err";
 	    $bleu_file = $working_dir."/".$name."_0".$epoch."_".$epoch_slice.$suffix."_$testtype".".bleu";
+	    $file_id = "0".$epoch."_".$epoch_slice.$suffix;
 	}
 	else {
 	    $output_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix."_$testtype".".out";
 	    $output_error_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix."_$testtype".".err";
 	    $bleu_file = $working_dir."/".$name."_".$epoch."_".$epoch_slice.$suffix."_$testtype".".bleu";
+	    $file_id = $epoch."_".$epoch_slice.$suffix;
 	}        
     }
+
+    my $job_name = $name."_".$testtype."_".$file_id;
+
+    my $test_script = "$name-$testtype";
+    my $test_script_file = "$working_dir/$test_script.$file_id.sh"; 
+    my $test_out = "$test_script.$file_id.out";
+    my $test_err = "$test_script.$file_id.err";
 
     if (! (open TEST, ">$test_script_file" )) {
         die "Unable to create test script $test_script_file\n";
@@ -445,6 +450,7 @@ sub createTestScriptAndSubmit {
     my $readCoreWeights = 0;
     my $readExtraWeights = 0;
     my %extra_weights;
+    my $abs_weights = 0;
     while(<WEIGHTS>) {
         chomp;
 	my ($name,$value) = split;
@@ -455,22 +461,28 @@ sub createTestScriptAndSubmit {
         } else {
             if ($name eq "WordPenalty") {
               $wordpenalty_weight = $value;
+	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
             } elsif ($name =~ /^PhraseModel/) {
               push @phrasemodel_weights,$value;
+	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
 	    } elsif ($name =~ /^LM\:2/) {
               $lm2_weight = $value;
+	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
             }  
 	    elsif ($name =~ /^LM/) {
               $lm_weight = $value;
+	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
             } elsif ($name eq "Distortion") {
               $distortion_weight = $value;
+	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
             } elsif ($name =~ /^LexicalReordering/) {
               push @lexicalreordering_weights,$value;
+	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
             } else {
               $extra_weights{$name} = $value;
@@ -480,60 +492,65 @@ sub createTestScriptAndSubmit {
     }
     close WEIGHTS;
     
-    if (!defined $core_weight_file) {
-	print "Number of core weights read: ".$readCoreWeights."\n";
-    }
+    print "Number of core weights read: ".$readCoreWeights."\n";
     print "Number of extra weights read: ".$readExtraWeights."\n";
     
     # If there is a core weight file, we have to load the core weights from that file (NOTE: this is not necessary if the core weights are also printed to the weights file)
-    if (defined $core_weight_file) {
-	@phrasemodel_weights = ();
-	@lexicalreordering_weights = ();
-	$readCoreWeights = 0;
-	if (! (open CORE_WEIGHTS, "$core_weight_file")) {
-	    die "Unable to open core weights file $core_weight_file\n";
-	}
-	print "Reading core weights from file..\n";
-	while(<CORE_WEIGHTS>) {
-	    chomp;
-	    my ($name,$value) = split;
-	    next if ($name =~ /^!Unknown/);
-	    next if ($name =~ /^BleuScore/);
-	    if ($name eq "DEFAULT_") {
-		$default_weight = $value;
-	    } 
-	    else {
-		if ($name eq "WordPenalty") {
-		    $wordpenalty_weight = $value;
-		    $readCoreWeights += 1;
-		} elsif ($name =~ /^PhraseModel/) {
-		    push @phrasemodel_weights,$value;
-		    $readCoreWeights += 1;
-		} elsif ($name =~ /^LM\:2/) {
-		    $lm2_weight = $value;
-		    $readCoreWeights += 1;
-		}  
-		elsif ($name =~ /^LM/) {
-		    $lm_weight = $value;
-		    $readCoreWeights += 1;
-		} elsif ($name eq "Distortion") {
-		    $distortion_weight = $value;
-		    $readCoreWeights += 1;
-		} elsif ($name =~ /^LexicalReordering/) {
-		    push @lexicalreordering_weights,$value;	      
-		    $readCoreWeights += 1;
-		} else {
-		    # there should be no extra weights in the core weights file
-		    print "weight not matched: $name:$value\n";
-		}
-	    }
-	}
-	close CORE_WEIGHTS;
-	print "Number of core weights read: ".$readCoreWeights."\n";
-    }
+#    if (defined $core_weight_file) {
+#	@phrasemodel_weights = ();
+#	@lexicalreordering_weights = ();
+#	$readCoreWeights = 0;
+#	if (! (open CORE_WEIGHTS, "$core_weight_file")) {
+#	    die "Unable to open core weights file $core_weight_file\n";
+#	}
+#	print "Reading core weights from file..\n";
+#	while(<CORE_WEIGHTS>) {
+#	    chomp;
+#	    my ($name,$value) = split;
+#	    next if ($name =~ /^!Unknown/);
+#	    next if ($name =~ /^BleuScore/);
+#	    if ($name eq "DEFAULT_") {
+#		$default_weight = $value;
+#	    } 
+#	    else {
+#		if ($name eq "WordPenalty") {
+#		    $wordpenalty_weight = $value;
+#		    $abs_weights += abs($value);
+#		    $readCoreWeights += 1;
+#		} elsif ($name =~ /^PhraseModel/) {
+#		    push @phrasemodel_weights,$value;
+#		    $abs_weights += abs($value);
+#		    $readCoreWeights += 1;
+#		} elsif ($name =~ /^LM\:2/) {
+#		    $lm2_weight = $value;
+#		    $abs_weights += abs($value);
+#		    $readCoreWeights += 1;
+#		}  
+#		elsif ($name =~ /^LM/) {
+#		    $lm_weight = $value;
+#		    $abs_weights += abs($value);
+#		    $readCoreWeights += 1;
+#		} elsif ($name eq "Distortion") {
+#		    $distortion_weight = $value;
+#		    $abs_weights += abs($value);
+#		    $readCoreWeights += 1;
+#		} elsif ($name =~ /^LexicalReordering/) {
+#		    push @lexicalreordering_weights,$value;	      
+#		    $abs_weights += abs($value);
+#		    $readCoreWeights += 1;
+#		} else {
+#		    # there should be no extra weights in the core weights file
+#		    print "weight not matched: $name:$value\n";
+#		}
+#	    }
+#	}
+#	close CORE_WEIGHTS;
+#	print "Number of core weights read: ".$readCoreWeights."\n";
+#    }
           
-    # Create new ini file
-    my $new_ini_file = $working_dir."/".$test_script.".".$train_iteration.$suffix.".ini";
+    # Create new ini file (changing format: expt1-devtest.00_2.ini instead of expt1-devtest.3.ini)
+    # my $new_ini_file = $working_dir."/".$test_script.".".$train_iteration.$suffix.".ini";
+    my $new_ini_file = "$working_dir/$test_script.$file_id.ini";
     if (! (open NEWINI, ">$new_ini_file" )) {
         die "Unable to create ini file $new_ini_file\n";
     }
@@ -541,15 +558,16 @@ sub createTestScriptAndSubmit {
         die "Unable to read ini file $old_ini_file\n";
     }
 
+    # write normalized weights to ini file
     while(<OLDINI>) {
         if (/weight-l/) {
             print NEWINI "[weight-l]\n";
-            print NEWINI $lm_weight;
+            print NEWINI ($lm_weight/$abs_weights);
             print NEWINI "\n";
 
 	    if (defined $lm2_weight) {
 		readline(OLDINI);
-		print NEWINI $lm2_weight;
+		print NEWINI ($lm2_weight/$abs_weights);
 		print NEWINI "\n";
 	    }
 
@@ -557,38 +575,37 @@ sub createTestScriptAndSubmit {
         } elsif (/weight-t/) {
             print NEWINI "[weight-t]\n";
             foreach my $phrasemodel_weight (@phrasemodel_weights) {
-                print NEWINI $phrasemodel_weight;
+                print NEWINI ($phrasemodel_weight/$abs_weights);
                 print NEWINI "\n";
                 readline(OLDINI);
             }
         } elsif (/weight-d/) {
             print NEWINI "[weight-d]\n";
-            print NEWINI $distortion_weight;
+            print NEWINI ($distortion_weight/$abs_weights);
             print NEWINI "\n";
             readline(OLDINI);
             foreach my $lexicalreordering_weight (@lexicalreordering_weights) {
-                print NEWINI $lexicalreordering_weight;
+                print NEWINI ($lexicalreordering_weight/$abs_weights);
                 print NEWINI "\n";
                 readline(OLDINI);
             }
         } elsif (/weight-w/) {
             print NEWINI "[weight-w]\n";
-            print NEWINI $wordpenalty_weight;
+            print NEWINI ($wordpenalty_weight/$abs_weights);
             print NEWINI "\n";
             readline(OLDINI);
         } else {
             print NEWINI;
         }
     }
-    close NEWINI;
     close OLDINI;
 
     my $writtenExtraWeights = 0;
 
-    # if there are any non-core weights, write them to a weights file
+    # if there are any non-core weights, write them to a weights file (normalized)
     my $extra_weight_file = undef;
     if (%extra_weights) {
-      $extra_weight_file = "$new_weight_file.scaled";
+      $extra_weight_file = "$new_weight_file.sparse.scaled";
       if (! (open EXTRAWEIGHT,">$extra_weight_file")) {
         print "Warning: unable to create extra weights file $extra_weight_file";
         next;
@@ -601,7 +618,7 @@ sub createTestScriptAndSubmit {
       foreach my $name (sort keys %extra_weights) {
         next if ($name eq "core");
         next if ($name eq "DEFAULT_");
-        my $value = $extra_weights{$name};
+        my $value = $extra_weights{$name}/$abs_weights;
 	
 	# write only non-zero feature weights to file
 	if ($value) {
@@ -611,6 +628,11 @@ sub createTestScriptAndSubmit {
 	} 
       }
     }
+
+    # add specification of sparse weight file to ini
+    print NEWINI "\n[weight-file] \n";
+    print NEWINI "$extra_weight_file \n";
+    close NEWINI;
     
     print TEST "#!/bin/sh\n";
     print TEST "#\$ -N $job_name\n";
@@ -626,9 +648,10 @@ sub createTestScriptAndSubmit {
 	print TEST "export LD_LIBRARY_PATH=/exports/informatics/inf_iccs_smt/shared/boost/lib:\$LD_LIBRARY_PATH\n";
     }
     print TEST "$test_exe $decoder_settings -i $input_file -f $new_ini_file ";
-    if ($extra_weight_file) {
-      print TEST "-weight-file $extra_weight_file ";
-    }
+# now written to ini file
+#    if ($extra_weight_file) {
+#      print TEST "-weight-file $extra_weight_file ";
+#    }
     print TEST $extra_args;
     print TEST " 1> $output_file 2> $output_error_file\n";
     print TEST "echo \"Decoding of ".$testtype." set finished.\"\n";
