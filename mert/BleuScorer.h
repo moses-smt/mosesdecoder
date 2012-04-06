@@ -67,4 +67,9 @@ private:
   BleuScorer& operator=(const BleuScorer&);
 };
 
+/** Computes sentence-level BLEU+1 score.
+ * This function is used in PRO.
+ */
+float sentenceLevelBleuPlusOne(const vector<float>& stats);
+
 #endif  // MERT_BLEU_SCORER_H_
