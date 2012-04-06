@@ -7,6 +7,8 @@
 #include <fstream>
 #include <iostream>
 #include <stdexcept>
+
+#include "util/check.hh"
 #include "Ngram.h"
 #include "Reference.h"
 #include "Util.h"
@@ -160,6 +162,8 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 
 float BleuScorer::calculateScore(const vector<int>& comps) const
 {
+  CHECK(comps.size() == kBleuNgramOrder * 2 + 1);
+
   float logbleu = 0.0;
   for (int i = 0; i < kBleuNgramOrder; ++i) {
     if (comps[2*i] == 0) {
@@ -211,3 +215,18 @@ void BleuScorer::DumpCounts(ostream* os,
   *os << endl;
 }
 
+float sentenceLevelBleuPlusOne(const vector<float>& stats) {
+  CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
+
+  float logbleu = 0.0;
+  for (int j = 0; j < kBleuNgramOrder; j++) {
+    logbleu += log(stats[2 * j] + 1.0) - log(stats[2 * j + 1] + 1.0);
+  }
+  logbleu /= kBleuNgramOrder;
+  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+  return exp(logbleu);
+}

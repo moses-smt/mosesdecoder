@@ -3,6 +3,7 @@
 #define BOOST_TEST_MODULE MertBleuScorer
 #include <boost/test/unit_test.hpp>
 
+#include <cmath>
 #include "Ngram.h"
 #include "Vocabulary.h"
 #include "Util.h"
@@ -110,6 +111,19 @@ void SetUpReferences(BleuScorer& scorer) {
   }
 }
 
+const float kEPS = 0.0001f;
+
+template <typename T>
+bool IsAlmostEqual(T expected, T actual) {
+  if (abs(expected - actual) < kEPS) {
+    return true;
+  } else {
+    cerr << "Fail: expected = " << expected
+         << " (actual = " << actual << ")" << endl;
+    return false;
+  }
+}
+
 } // namespace
 
 BOOST_AUTO_TEST_CASE(bleu_reference_type) {
@@ -203,4 +217,57 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
   BOOST_CHECK_EQUAL(entry.get(3), 5);  // bigram
   BOOST_CHECK_EQUAL(entry.get(5), 4);  // trigram
   BOOST_CHECK_EQUAL(entry.get(7), 3);  // fourgram
+}
+
+BOOST_AUTO_TEST_CASE(calculate_actual_score) {
+  BOOST_REQUIRE(4 == kBleuNgramOrder);
+  vector<int> stats(2 * kBleuNgramOrder + 1);
+  BleuScorer scorer;
+
+  // unigram
+  stats[0] = 6;
+  stats[1] = 6;
+
+  // bigram
+  stats[2] = 4;
+  stats[3] = 5;
+
+  // trigram
+  stats[4] = 2;
+  stats[5] = 4;
+
+  // fourgram
+  stats[6] = 1;
+  stats[7] = 3;
+
+  // reference-length
+  stats[8] = 7;
+
+  BOOST_CHECK(IsAlmostEqual(0.5115f, scorer.calculateScore(stats)));
+}
+
+BOOST_AUTO_TEST_CASE(sentence_level_bleu) {
+  BOOST_REQUIRE(4 == kBleuNgramOrder);
+  vector<float> stats(2 * kBleuNgramOrder + 1);
+
+  // unigram
+  stats[0] = 6.0;
+  stats[1] = 6.0;
+
+  // bigram
+  stats[2] = 4.0;
+  stats[3] = 5.0;
+
+  // trigram
+  stats[4] = 2.0;
+  stats[5] = 4.0;
+
+  // fourgram
+  stats[6] = 1.0;
+  stats[7] = 3.0;
+
+  // reference-length
+  stats[8] = 7.0;
+
+  BOOST_CHECK(IsAlmostEqual(0.5985f, sentenceLevelBleuPlusOne(stats)));
 }
