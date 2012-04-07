@@ -89,6 +89,7 @@ public:
 
     VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
 
+    if ((*m_source).GetSize() == 0) return;
     ChartManager manager(*m_source, &system);
     manager.ProcessSentence();
 
