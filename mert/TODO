@@ -15,7 +15,7 @@
   - In MERT, you might want to use the random restarting technique to avoid
     local optima.
   - PRO uses a sampling technique to choose candidate translation pairs
-    from N-best lists, whic means the choice of random generators seems to
+    from N-best lists, which means the choice of random generators seems to
     be important.
 
   Cons:
