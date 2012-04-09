@@ -51,9 +51,7 @@ void GlobalLexicalModelUnlimited::InitializeForInput( Sentence const& in )
   m_local->input = &in;
 }
 
-//void GlobalLexicalModelUnlimited::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
-FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
-      ScoreComponentCollection* accumulator) const
+void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const
 {
 	const Sentence& input = *(m_local->input);
 	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
@@ -261,8 +259,6 @@ FFState* GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, const
   		}
   	}
   }
-
-	return new DummyState();
 }
 
 void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulator,

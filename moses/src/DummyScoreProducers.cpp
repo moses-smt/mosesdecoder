@@ -96,8 +96,9 @@ std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
   return "w";
 }
 
-void WordPenaltyProducer::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
+void WordPenaltyProducer::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* out) const
 {
+	const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 

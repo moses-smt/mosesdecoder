@@ -33,6 +33,8 @@
 #include "ChartTranslationOption.h"
 #include "FFState.h"
 
+using namespace std;
+
 namespace Moses
 {
 
@@ -156,19 +158,16 @@ void ChartHypothesis::CalcScore()
 
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
-
-  //const vector<const StatelessFeatureFunction*>& sfs =
-  //  m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
-	// TODO!
-  //for (unsigned i = 0; i < sfs.size(); ++i) {
-  //  sfs[i]->ChartEvaluate(m_targetPhrase, &m_scoreBreakdown);
-  //}
+  const std::vector<const StatelessFeatureFunction*>& sfs =
+    m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
+  for (unsigned i = 0; i < sfs.size(); ++i)
+  	if (sfs[i]->ComputeValueInTranslationOption() == false)
+  		sfs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i) {
+  for (unsigned i = 0; i < ffs.size(); ++i)
 		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
-  }
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }

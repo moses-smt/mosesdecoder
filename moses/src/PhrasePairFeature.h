@@ -85,13 +85,19 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 		  }		  
 	  }
 
-    virtual void Evaluate(
-      const TargetPhrase& cur_hypo,
-      ScoreComponentCollection* accumulator) const;
+    void Evaluate(const Hypothesis& cur_hypo,
+    							ScoreComponentCollection* accumulator) const;
+
+    void EvaluateChart(
+      const ChartHypothesis&,
+      int /* featureID */,
+      ScoreComponentCollection*) const {
+  		CHECK(0); // feature function not valid in chart decoder
+  	}
 
     //NB: Should really precompute this feature, but don't have
     //good hooks to do this.
-    virtual bool ComputeValueInTranslationOption() const;
+    bool ComputeValueInTranslationOption() const;
     
     std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumInputScores() const;

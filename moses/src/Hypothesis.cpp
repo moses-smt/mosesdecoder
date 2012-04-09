@@ -276,9 +276,8 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // cached in the translation option-- there is no principled distinction
   const vector<const StatelessFeatureFunction*>& sfs =
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i) {
-    sfs[i]->Evaluate(m_targetPhrase, &m_currScoreBreakdown);
-  }
+  for (unsigned i = 0; i < sfs.size(); ++i)
+    sfs[i]->Evaluate(*this, &m_currScoreBreakdown);
 
   const vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();

@@ -26,8 +26,16 @@ public:
   {}
       
   bool Load(const std::string &filePath);
-  void Evaluate(const TargetPhrase& cur_phrase,
+  void Evaluate(const ChartHypothesis& cur_hypo,
                 ScoreComponentCollection* accumulator) const;
+
+  void EvaluateChart(
+    const ChartHypothesis& cur_hypo,
+    int featureID,
+    ScoreComponentCollection* accumulator) const;
+
+  void ComputeFeatures(const TargetPhrase& targetPhrase,
+  		 	 	 	 	 	 	 	 	 ScoreComponentCollection* accumulator) const;
 
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "twi"; }

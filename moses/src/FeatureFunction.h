@@ -33,14 +33,17 @@ public:
   StatelessFeatureFunction(const std::string& description, size_t numScoreComponents) :
     FeatureFunction(description, numScoreComponents) {}
   //! Evaluate for stateless feature functions. Implement this.
-  virtual void Evaluate(
-    const TargetPhrase& cur_hypo,
-    ScoreComponentCollection* accumulator) const;
+  virtual void Evaluate(const Hypothesis& cur_hypo,
+  											ScoreComponentCollection* accumulator) const;
+
+  virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
+  													 int featureID,
+                             ScoreComponentCollection* accumulator) const;
 
   // If true, this value is expected to be included in the
   // ScoreBreakdown in the TranslationOption once it has been
   // constructed.
-  // Default: true
+  // Default: false
   virtual bool ComputeValueInTranslationOption() const;
 
   bool IsStateless() const;

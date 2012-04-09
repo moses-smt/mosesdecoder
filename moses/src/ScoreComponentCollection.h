@@ -368,6 +368,8 @@ public:
   void IncrementSparseFearFeatures() { m_scores.incrementSparseFearFeatures(); }
   void PrintSparseHopeFeatureCounts(std::ofstream& out) { m_scores.printSparseHopeFeatureCounts(out); }
   void PrintSparseFearFeatureCounts(std::ofstream& out) { m_scores.printSparseFearFeatureCounts(out); }
+  void PrintSparseHopeFeatureCounts() { m_scores.printSparseHopeFeatureCounts(); }
+  void PrintSparseFearFeatureCounts() { m_scores.printSparseFearFeatureCounts(); }
   size_t PruneSparseFeatures(size_t threshold) { return m_scores.pruneSparseFeatures(threshold); }
   size_t PruneZeroWeightFeatures() { return m_scores.pruneZeroWeightFeatures(); }
 

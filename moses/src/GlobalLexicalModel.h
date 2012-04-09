@@ -77,6 +77,15 @@ public:
   void InitializeForInput( Sentence const& in );
 
   void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
+
+  void EvaluateChart(
+    const ChartHypothesis& cur_hypo,
+    int featureID,
+    ScoreComponentCollection* accumulator) const
+  {
+  	std::cerr << "EvaluateChart not implemented." << std::endl;
+  	exit(1);
+  }
 };
 
 }

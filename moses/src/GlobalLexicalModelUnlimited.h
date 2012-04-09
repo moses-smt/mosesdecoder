@@ -33,8 +33,7 @@ class InputType;
  * feature is that it uses context words for disambiguation
  */
 
-//class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
-class GlobalLexicalModelUnlimited : public StatefulFeatureFunction
+class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
 	typedef std::map< char, short > CharHash;
 	typedef std::map< std::string, short > StringHash;
@@ -71,8 +70,7 @@ private:
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors, const std::vector< FactorType >& outFactors,
   		bool biasFeature, bool ignorePunctuation, size_t context):
-//    StatelessFeatureFunction("glm",ScoreProducer::unlimited),
-  		StatefulFeatureFunction("glm",ScoreProducer::unlimited),
+    StatelessFeatureFunction("glm",ScoreProducer::unlimited),
   	m_inputFactors(inFactors),
     m_outputFactors(outFactors),
     m_unrestricted(true),
@@ -119,21 +117,20 @@ public:
 
   void InitializeForInput( Sentence const& in );
 
-  //void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
-
   const FFState* EmptyHypothesisState(const InputType &) const {
   	return new DummyState();
   }
 
-  FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
-                          ScoreComponentCollection* accumulator) const;
+  void Evaluate(const Hypothesis& cur_hypo,
+  							ScoreComponentCollection* accumulator) const;
 
-  FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */, int /* featureID */,
-                                  ScoreComponentCollection* ) const {
+  void EvaluateChart(const ChartHypothesis& /* cur_hypo */,
+  									 int /* featureID */,
+  									 ScoreComponentCollection* ) const {
   	/* Not implemented */
     assert(0);
-    return NULL;
   }
+
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }

@@ -208,6 +208,8 @@ namespace Moses {
     void incrementSparseFearFeatures();
     void printSparseHopeFeatureCounts(std::ofstream& out);
     void printSparseFearFeatureCounts(std::ofstream& out);
+    void printSparseHopeFeatureCounts();
+    void printSparseFearFeatureCounts();
     size_t pruneSparseFeatures(size_t threshold);
     size_t pruneZeroWeightFeatures();
     

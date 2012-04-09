@@ -1,6 +1,7 @@
 #include "AlignmentInfo.h"
 #include "PhrasePairFeature.h"
 #include "TargetPhrase.h"
+#include "Hypothesis.h"
 
 using namespace std;
 
@@ -22,8 +23,9 @@ void PhrasePairFeature::InitializeForInput( Sentence const& in )
   m_local->input = &in;
 }
 
-void PhrasePairFeature::Evaluate(const TargetPhrase& target, ScoreComponentCollection* accumulator) const {
-   const Phrase& source = target.GetSourcePhrase();
+void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const {
+	const TargetPhrase& target = cur_hypo.GetCurrTargetPhrase();
+	const Phrase& source = target.GetSourcePhrase();
 /*   const AlignmentInfo& align = cur_hypo.GetAlignmentInfo();
    for (AlignmentInfo::const_iterator i = align.begin(); i != align.end(); ++i) {
     const Factor* sourceFactor = source.GetWord(i->first).GetFactor(m_sourceFactorId);

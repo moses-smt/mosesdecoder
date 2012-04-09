@@ -19,8 +19,7 @@ namespace Moses
 
 /** Sets the features for word translation
  */
-//class WordTranslationFeature : public StatelessFeatureFunction {
-class WordTranslationFeature : public StatefulFeatureFunction {
+class WordTranslationFeature : public StatelessFeatureFunction {
 
   typedef std::map< char, short > CharHash;
 	
@@ -51,8 +50,7 @@ private:
 public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
 			bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation):
-//     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
-		 StatefulFeatureFunction("wt", ScoreProducer::unlimited),
+     StatelessFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
      m_unrestricted(true),
@@ -88,15 +86,12 @@ public:
   	return new DummyState();
   }
 
-  FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
-                          ScoreComponentCollection* accumulator) const;
+  void Evaluate(const Hypothesis& cur_hypo,
+  		          ScoreComponentCollection* accumulator) const;
 
-  FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */, int /* featureID */,
-                                  ScoreComponentCollection* ) const {
-  	/* Not implemented */
-    assert(0);
-    return NULL;
-  }
+  void EvaluateChart(const ChartHypothesis& cur_hypo,
+  								   int featureID,
+                     ScoreComponentCollection* accumulator) const;
 
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "wt"; }

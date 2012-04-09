@@ -342,6 +342,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               TargetPhrase targetPhrase(Output);
               targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],factorDelimiter);
               targetPhrase.SetScore(scoreValue);
+              // TODO: targetPhrase.SetSourcePhrase() ?
 
               XmlOption *option = new XmlOption(range,targetPhrase);
               CHECK(option);

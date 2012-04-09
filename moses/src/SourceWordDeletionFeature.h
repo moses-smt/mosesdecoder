@@ -23,11 +23,20 @@ public:
      StatelessFeatureFunction("swd", ScoreProducer::unlimited),
      m_factorType(factorType),
      m_unrestricted(true)
-  {}
+  {
+		std::cerr << "Initializing source word deletion feature.." << std::endl;
+  }
       
   bool Load(const std::string &filePath);
-  void Evaluate(const TargetPhrase& cur_phrase,
+  void Evaluate(const Hypothesis& cur_hypo,
                 ScoreComponentCollection* accumulator) const;
+
+  void EvaluateChart(const ChartHypothesis& cur_hypo,
+  		               int featureId,
+  		               ScoreComponentCollection* accumulator) const;
+
+  void ComputeFeatures(const TargetPhrase& targetPhrase,
+  		                 ScoreComponentCollection* accumulator) const;
 
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "swd"; }

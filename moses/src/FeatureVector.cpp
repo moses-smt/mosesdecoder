@@ -360,6 +360,16 @@ namespace Moses {
       out << (i->first).name() << ": " << FName::getFearIdCount((i->first).name()) << std::endl;
   }
   
+  void FVector::printSparseHopeFeatureCounts() {
+    for (const_iterator i = cbegin(); i != cend(); ++i)
+      std::cerr << (i->first).name() << ": " << FName::getHopeIdCount((i->first).name()) << std::endl;
+  }
+
+  void FVector::printSparseFearFeatureCounts() {
+    for (const_iterator i = cbegin(); i != cend(); ++i)
+      std::cerr << (i->first).name() << ": " << FName::getFearIdCount((i->first).name()) << std::endl;
+  }
+
   size_t FVector::pruneSparseFeatures(size_t threshold) {
 	size_t count = 0;
 	vector<FName> toErase;
