@@ -523,11 +523,18 @@ filter
 	in: TRAINING:config input
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-  rerun-on-change: filter-settings
-  pass-if: TRAINING:binarize-all
+ 	rerun-on-change: filter-settings
+	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
+filter-devtest
+	in: TRAINING:config input-devtest
+	out: filtered-config-devtest
+	default-name: tuning/moses.filtered.devtest.ini
+ 	rerun-on-change: filter-settings
+	pass-if: TRAINING:binarize-all
+	ignore-if: use-hiero	
 tune
-	in: filtered-config input reference
+	in: filtered-config input reference filtered-config-devtest input-devtest reference-devtest
 	out: weight-config
 	ignore-if: use-hiero
 	qsub-script: yes
