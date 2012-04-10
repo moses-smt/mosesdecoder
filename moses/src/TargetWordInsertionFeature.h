@@ -26,7 +26,7 @@ public:
   {}
       
   bool Load(const std::string &filePath);
-  void Evaluate(const ChartHypothesis& cur_hypo,
+  void Evaluate(const Hypothesis& cur_hypo,
                 ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(

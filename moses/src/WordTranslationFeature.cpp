@@ -53,8 +53,8 @@ void WordTranslationFeature::InitializeForInput( Sentence const& in )
 
 void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const
 {
-	const Sentence& input = *(m_local->input);
-	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+  const Sentence& input = *(m_local->input);
+  const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
 
   // process aligned words
@@ -192,19 +192,19 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
 void WordTranslationFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
     																			 ScoreComponentCollection* accumulator) const
 {
-	const Sentence& input = *(m_local->input);
-	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+  const Sentence& input = *(m_local->input);
+  const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
-  	const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
-  	int sourceIndex = alignmentPoint->first;
-  	int targetIndex = alignmentPoint->second;
-  	Word ws = sourcePhrase.GetWord(sourceIndex);
-  	if (m_factorTypeSource == 0 && ws.IsNonTerminal()) continue;
-  	Word wt = targetPhrase.GetWord(targetIndex);
-  	if (m_factorTypeSource == 0 && wt.IsNonTerminal()) continue;
+    const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
+    int sourceIndex = alignmentPoint->first;
+    int targetIndex = alignmentPoint->second;
+    Word ws = sourcePhrase.GetWord(sourceIndex);
+    if (m_factorTypeSource == 0 && ws.IsNonTerminal()) continue;
+    Word wt = targetPhrase.GetWord(targetIndex);
+    if (m_factorTypeSource == 0 && wt.IsNonTerminal()) continue;
     string sourceWord = ws.GetFactor(m_factorTypeSource)->GetString();
     string targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
     if (m_ignorePunctuation) {
@@ -225,7 +225,7 @@ void WordTranslationFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     	if (m_vocabTarget.find(targetWord) == m_vocabTarget.end())
     		targetWord = "OTHER";
     }
-
+    
     if (m_simple) {
     	// construct feature name
     	stringstream featureName;
