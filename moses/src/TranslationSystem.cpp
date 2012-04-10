@@ -119,15 +119,15 @@ namespace Moses {
       for(size_t i=0;i<m_globalLexicalModels.size();++i) {
         m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
       }
-      for(size_t i=0;i<m_statefulFFs.size();++i) {
-      	if (m_statefulFFs[i]->GetScoreProducerWeightShortName() == "glm")
-      		((GlobalLexicalModelUnlimited*)m_statefulFFs[i])->InitializeForInput((Sentence const&)source);
-      	else if (m_statefulFFs[i]->GetScoreProducerWeightShortName() == "wt")
-      		((WordTranslationFeature*)m_statefulFFs[i])->InitializeForInput((Sentence const&)source);
-      }
+      //for(size_t i=0;i<m_statefulFFs.size();++i) {
+      //}
       for(size_t i=0;i<m_statelessFFs.size();++i) {
     	if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "pp")
-    		((PhrasePairFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+	  ((PhrasePairFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+	else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm")
+	  ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+        else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "wt")
+	  ((WordTranslationFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
       }
       
       LMList::const_iterator iterLM;
