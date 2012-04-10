@@ -34,6 +34,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
+#include <boost/algorithm/string.hpp>
+
 
 using namespace std;
 
@@ -330,6 +332,35 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << ": pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
 
   return os;
+}
+
+void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, std::vector<float> &scoreVector) {
+	set<pair<size_t,size_t> > ruleCountInfo;
+	float p_f_given_e = 0, p_e_given_f = 0;
+	p_f_given_e = scoreVector[0];
+	if (scoreVector.size() >= 4) {
+		p_f_given_e = scoreVector[0];
+		p_e_given_f = scoreVector[2];
+	}
+	else {
+		if (scoreVector.size() >= 1 ) p_f_given_e = scoreVector[0];
+		std::cerr << "Warning: possibly wrong format of phrase translation scores" << endl;
+	}
+
+  std::vector<std::string> tokens;
+  boost::split(tokens, ruleCountString, boost::is_any_of("\t "));
+
+  float targetCount = 0, sourceCount = 0;
+  if (tokens.size() == 2) {
+   targetCount = Scan<float>(tokens[0]);
+   sourceCount = Scan<float>(tokens[1]);
+   float ruleCount = p_f_given_e * targetCount;
+   //float ruleCount2 = p_e_given_f * sourceCount; // could use this to double-check the counts
+   m_ruleCount = floor(ruleCount + 0.5);
+  }
+  else if (tokens.size() == 3) {
+  	m_ruleCount = Scan<float>(tokens[2]);
+  }
 }
 
 }

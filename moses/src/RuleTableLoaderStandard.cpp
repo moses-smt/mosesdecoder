@@ -185,7 +185,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     const string &sourcePhraseString = tokens[0]
                , &targetPhraseString = tokens[1]
                , &scoreString        = tokens[2]
-               , &alignString        = tokens[3];
+               , &alignString        = tokens[3]
+               , &ruleCountString    = tokens[4];
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -216,10 +217,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase(Output);
     targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
+    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
+    targetPhrase->SetRuleCount(ruleCountString, scoreVector);
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
 
     // component score, for n-best output

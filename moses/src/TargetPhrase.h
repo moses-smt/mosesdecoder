@@ -59,11 +59,12 @@ protected:
 	Phrase m_sourcePhrase; 
 	const AlignmentInfo* m_alignmentInfo;
 	Word m_lhsTarget;
+	size_t m_ruleCount;
 
 public:
   TargetPhrase();
   TargetPhrase(std::string out_string);
-  TargetPhrase(const Phrase &);
+  TargetPhrase(const Phrase &targetPhrase);
   ~TargetPhrase();
 
   //! used by the unknown word handler- these targets
@@ -159,6 +160,8 @@ public:
 	const AlignmentInfo &GetAlignmentInfo() const
 	{ return *m_alignmentInfo; }
 	
+	void SetRuleCount(const StringPiece &ruleCountString, std::vector<float> &scoreVector);
+	size_t GetRuleCount() const { return m_ruleCount; }
 
   TO_STRING();
 	

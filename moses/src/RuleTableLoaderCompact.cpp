@@ -226,6 +226,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->SetTargetLHS(targetLhs);
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weights,
                                 languageModels, wpProducer);
+    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
