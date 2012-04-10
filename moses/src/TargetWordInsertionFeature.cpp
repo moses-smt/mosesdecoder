@@ -30,7 +30,7 @@ bool TargetWordInsertionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void TargetWordInsertionFeature::Evaluate(const ChartHypothesis& cur_hypo,
+void TargetWordInsertionFeature::Evaluate(const Hypothesis& cur_hypo,
                                           ScoreComponentCollection* accumulator) const
 {
 	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
