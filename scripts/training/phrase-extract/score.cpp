@@ -497,10 +497,11 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   // alignment info for non-terminals
   if (! inverseFlag) {
     if (hierarchicalFlag) {
-      // always output alignment if hiero style, but only for non-terms
+      // always output alignment if hiero style, but only for non-terms 
+      // (eh: output all alignments, needed for some feature functions) 
       assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
       for(int j = 0; j < phraseT.size() - 1; j++) {
-        if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
+	//if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
           if (bestAlignment->alignedToT[ j ].size() != 1) {
             cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
             phraseTableFile.flush();
@@ -508,7 +509,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
           }
           int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
           phraseTableFile << sourcePos << "-" << j << " ";
-        }
+	//}
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model
