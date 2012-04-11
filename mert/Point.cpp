@@ -3,8 +3,8 @@
 #include <cmath>
 #include <cstdlib>
 #include "util/check.hh"
-#include <limits>
 #include "FeatureStats.h"
+#include "Optimizer.h"
 
 using namespace std;
 
@@ -84,7 +84,7 @@ Point Point::operator+(const Point& p2) const
     Res[i] += p2[i];
   }
 
-  Res.m_score = numeric_limits<statscore_t>::max();
+  Res.m_score = kMaxFloat;
   return Res;
 }
 
@@ -94,7 +94,7 @@ void Point::operator+=(const Point& p2)
   for (unsigned i = 0; i < size(); i++) {
     operator[](i) += p2[i];
   }
-  m_score = numeric_limits<statscore_t>::max();
+  m_score = kMaxFloat;
 }
 
 Point Point::operator*(float l) const
@@ -103,7 +103,7 @@ Point Point::operator*(float l) const
   for (unsigned i = 0; i < size(); i++) {
     Res[i] *= l;
   }
-  Res.m_score = numeric_limits<statscore_t>::max();
+  Res.m_score = kMaxFloat;
   return Res;
 }
 
