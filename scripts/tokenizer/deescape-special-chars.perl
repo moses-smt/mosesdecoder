@@ -2,9 +2,6 @@
 
 use strict;
 
-binmode(STDIN, ":utf8");
-binmode(STDOUT, ":utf8");
-
 while(<STDIN>) {
   s/\&bar;/\|/g;
   s/\&lt;/\</g;
