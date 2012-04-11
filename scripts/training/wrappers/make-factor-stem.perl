@@ -6,8 +6,8 @@ my ($size,$in,$out) = @ARGV;
 
 open(IN,$in);
 open(OUT,">$out");
-binmode(IN, ":UTF8");
-binmode(OUT, ":UTF8");
+binmode(IN, ":utf8");
+binmode(OUT, ":utf8");
 
 while(<IN>) {
     my $first = 1;

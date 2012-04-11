@@ -52,8 +52,9 @@ truecase
 	rerun-on-change: input-truecaser output-truecaser
 	default-name: corpus/truecased
 	pass-unless: input-truecaser output-truecaser
-        template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
-        template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
+	template-if: input-truecaser IN.$input-extension OUT.$input-extension -model IN1.$input-extension
+	template-if: output-truecaser IN.$output-extension OUT.$output-extension -model IN1.$output-extension
+	parallelizable: yes
 lowercase
 	in: truecased-stem
 	out: lowercased-stem
