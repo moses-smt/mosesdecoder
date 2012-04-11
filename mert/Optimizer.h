@@ -10,6 +10,8 @@
 
 using namespace std;
 
+static const float kMaxFloat = numeric_limits<float>::max();
+
 class Point;
 
 /**

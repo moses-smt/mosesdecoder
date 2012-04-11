@@ -58,6 +58,7 @@ unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_f
 unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test point_test : PointTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test reference_test : ReferenceTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test singleton_test : SingletonTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
