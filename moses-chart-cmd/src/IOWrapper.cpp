@@ -418,9 +418,11 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     lastName = "";
 
     const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
-    for( size_t i=0; i<slf.size(); i++ )
-    	if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
-    		OutputSparseFeatureScores( out, path, slf[i], lastName );
+    for( size_t i=0; i<slf.size(); i++ ) {
+      if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+	OutputSparseFeatureScores( out, path, slf[i], lastName );
+      }
+    }
 
     // total
     out << " ||| " << path.GetTotalScore();
