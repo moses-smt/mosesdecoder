@@ -5,7 +5,6 @@
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
-$SIG{CHLD} = "IGNORE"; # no zombies
 
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
@@ -125,9 +124,7 @@ sub init_agenda_graph() {
 		."showpage\n";
     close(PS);
 
-    $SIG{CHLD} = undef;
     `convert -alpha off $graph_file.ps $graph_file.png`;
-    $SIG{CHLD} = "IGNORE"; # no zombies
 
     if (!$NO_GRAPH && !fork) {
 	# use ghostview by default, it it is installed
