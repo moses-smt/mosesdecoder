@@ -949,7 +949,7 @@ sub define_step {
             &define_tuningevaluation_factorize($i);
         }	
  	elsif ($DO_STEP[$i] eq 'TUNING:filter') {
-	    &define_tuningevaluation_filter(undef,$i);
+	    &define_tuningevaluation_filter(undef,$i,"dev");
 	}
 	elsif ($DO_STEP[$i] eq 'TUNING:filter-devtest') {
 	    &define_tuningevaluation_filter(undef,$i,"devtest");
@@ -1686,7 +1686,8 @@ sub write_mira_config {
     print CFG "mpienv=openmpi_fillup_mark2 \n";
     print CFG "moses-home=".$moses_src_dir."\n";
     print CFG "working-dir=".$expt_dir."\n";
-    print CFG "decoder-settings=".$tuning_decoder_settings."\n\n";
+    print CFG "wait-for-bleu=1 \n";
+    print CFG "decoder-settings=".$tuning_decoder_settings."\n\n";   
 
     if ($core_weights) {
 	print CFG "[core] \n"; 
@@ -2343,6 +2344,14 @@ sub define_tuningevaluation_filter {
 
     my $cmd = "$scripts/training/filter-model-given-input.pl";
     $cmd .= " $filter_dir $config $input_filter $settings";
+
+    my $use_mira = &check_and_get("TUNING:use-mira");
+    if ($type && $type eq "dev" && $use_mira) {
+	# add line to config file to suppress caching
+	$cmd .= "\necho \"\" >> $filter_dir/moses.ini";
+	$cmd .= "\necho \"[use-persistent-cache]\" >> $filter_dir/moses.ini";
+	$cmd .= "\necho \"0\" >> $filter_dir/moses.ini";
+    }
 
     # copy moses.ini into specified file location
     $cmd .= "\ncp $filter_dir/moses.ini $filter_config\n";
