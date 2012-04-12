@@ -77,9 +77,9 @@ public:
 
   // Compute the feature function
   double operator*(const FeatureStats&) const;
-  Point operator+(const Point&) const;
+  const Point operator+(const Point&) const;
   void operator+=(const Point&);
-  Point operator*(float) const;
+  const Point operator*(float) const;
 
   /**
    * Write the Whole featureweight to a stream (ie m_pdim float).

@@ -111,19 +111,6 @@ void SetUpReferences(BleuScorer& scorer) {
   }
 }
 
-const float kEPS = 0.0001f;
-
-template <typename T>
-bool IsAlmostEqual(T expected, T actual) {
-  if (abs(expected - actual) < kEPS) {
-    return true;
-  } else {
-    cerr << "Fail: expected = " << expected
-         << " (actual = " << actual << ")" << endl;
-    return false;
-  }
-}
-
 } // namespace
 
 BOOST_AUTO_TEST_CASE(bleu_reference_type) {

@@ -76,7 +76,7 @@ double Point::operator*(const FeatureStats& F) const
   return prod;
 }
 
-Point Point::operator+(const Point& p2) const
+const Point Point::operator+(const Point& p2) const
 {
   CHECK(p2.size() == size());
   Point Res(*this);
@@ -97,7 +97,7 @@ void Point::operator+=(const Point& p2)
   m_score = kMaxFloat;
 }
 
-Point Point::operator*(float l) const
+const Point Point::operator*(float l) const
 {
   Point Res(*this);
   for (unsigned i = 0; i < size(); i++) {
