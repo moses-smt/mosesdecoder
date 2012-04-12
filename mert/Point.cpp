@@ -109,7 +109,8 @@ const Point Point::operator*(float l) const
 
 ostream& operator<<(ostream& o, const Point& P)
 {
-  vector<parameter_t> w = P.GetAllWeights();
+  vector<parameter_t> w;
+  P.GetAllWeights(w);
   for (unsigned int i = 0; i < Point::m_pdim; i++) {
     o << w[i] << " ";
   }
@@ -141,19 +142,17 @@ void Point::NormalizeL1()
 }
 
 
-vector<parameter_t> Point::GetAllWeights()const
+void Point::GetAllWeights(vector<parameter_t>& w) const
 {
-  vector<parameter_t> w;
   if (OptimizeAll()) {
     w = *this;
   } else {
     w.resize(m_pdim);
     for (unsigned int i = 0; i < size(); i++)
       w[m_opt_indices[i]] = operator[](i);
-    for (map<unsigned, float>::iterator it = m_fixed_weights.begin();
+    for (map<unsigned,float>::const_iterator it = m_fixed_weights.begin();
          it != m_fixed_weights.end(); ++it) {
       w[it->first]=it->second;
     }
   }
-  return w;
 }
