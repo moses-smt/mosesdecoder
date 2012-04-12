@@ -9,6 +9,7 @@
 #ifndef MERT_UTIL_H_
 #define MERT_UTIL_H_
 
+#include <cmath>
 #include <cstdlib>
 #include <stdexcept>
 #include <limits>
@@ -33,6 +34,20 @@ const char kDefaultDelimiterSymbol[] = " ";
 
 int verboselevel();
 int setverboselevel(int v);
+
+
+const float kEPS = 0.0001f;
+
+template <typename T>
+bool IsAlmostEqual(T expected, T actual, float round=kEPS) {
+  if (abs(expected - actual) < round) {
+    return true;
+  } else {
+    cerr << "Fail: expected = " << expected
+         << " (actual = " << actual << ")" << endl;
+    return false;
+  }
+}
 
 /**
  * Find the specified delimiter for the string 'str', and 'str' is assigned
