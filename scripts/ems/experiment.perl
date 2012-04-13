@@ -946,7 +946,7 @@ sub define_step {
             &define_tuningevaluation_factorize($i);
         }	
  	elsif ($DO_STEP[$i] eq 'TUNING:filter') {
-	    &define_tuningevaluation_filter(undef,$i);
+	    &define_tuningevaluation_filter(undef,$i,"dev");
 	}
 	elsif ($DO_STEP[$i] eq 'TUNING:filter-devtest') {
 	    &define_tuningevaluation_filter(undef,$i,"devtest");
