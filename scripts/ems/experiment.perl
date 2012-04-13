@@ -946,7 +946,7 @@ sub define_step {
             &define_tuningevaluation_factorize($i);
         }	
  	elsif ($DO_STEP[$i] eq 'TUNING:filter') {
-	    &define_tuningevaluation_filter(undef,$i,"dev");
+	    &define_tuningevaluation_filter(undef,$i);
 	}
 	elsif ($DO_STEP[$i] eq 'TUNING:filter-devtest') {
 	    &define_tuningevaluation_filter(undef,$i,"devtest");
@@ -1548,26 +1548,11 @@ sub factorize_one_language {
 sub define_tuning_tune {
     my ($step_id) = @_;
     my $dir = &check_and_get("GENERAL:working-dir");
-
-    # the last variable only apply for mira tuning (devtest input and reference are read out later)
-    my ($tuned_config,$config,$input,$reference,$config_devtest) = &get_output_and_input($step_id); 
-    
     my $tuning_script = &check_and_get("TUNING:tuning-script");
-    my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
-    my $nbest_size = &check_and_get("TUNING:nbest");
-    my $lambda = &backoff_and_get("TUNING:lambda");
-    my $tune_continue = &backoff_and_get("TUNING:continue");
-    my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
-    my $jobs = &backoff_and_get("TUNING:jobs");
-    my $decoder = &check_backoff_and_get("TUNING:decoder");
-
-    my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
-    $decoder_settings = "" unless $decoder_settings;
-    $decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
-
-    my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
-    $tuning_settings = "" unless $tuning_settings;
-
+    
+    # the last 3 variables are only used for mira tuning 
+    my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest) = &get_output_and_input($step_id); 
+    
     my $use_mira = &backoff_and_get("TUNING:use-mira");
     my $cmd = "";
     if ($use_mira && $use_mira eq "true") {
@@ -1578,7 +1563,7 @@ sub define_tuning_tune {
 	my $mira_config_log = $mira_config."log";
 	$mira_config .= "cfg";
 	
-       	write_mira_config($mira_config, $experiment_dir, $config, $config_devtest);
+       	write_mira_config($mira_config,$experiment_dir,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest);
 	$cmd = "$tuning_script -config $mira_config -exec >& $mira_config_log";
 
 	# write script to select the best set of weights after training for the specified number of epochs --> 
@@ -1591,6 +1576,22 @@ sub define_tuning_tune {
 	$cmd .= "\n$script_filename >& $script_filename_log";
     }
     else {
+	
+	my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
+	my $nbest_size = &check_and_get("TUNING:nbest");
+	my $lambda = &backoff_and_get("TUNING:lambda");
+	my $tune_continue = &backoff_and_get("TUNING:continue");
+	my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
+	my $jobs = &backoff_and_get("TUNING:jobs");
+	my $decoder = &check_backoff_and_get("TUNING:decoder");
+
+	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
+	$decoder_settings = "" unless $decoder_settings;
+	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
+	
+	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
+	$tuning_settings = "" unless $tuning_settings;
+
 	$cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
 	$cmd .= " --lambdas \"$lambda\"" if $lambda;
 	$cmd .= " --continue" if $tune_continue;
@@ -1610,18 +1611,14 @@ sub define_tuning_tune {
 }
 
 sub write_mira_config {
-    my ($config_filename, $expt_dir, $tune_filtered_ini, $devtest_filtered_ini) = @_;
+    my ($config_filename,$expt_dir,$tune_filtered_ini,$input,$reference,$devtest_filtered_ini,$input_devtest,$reference_devtest) = @_;
     
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
     my $core_weights = &backoff_and_get("TUNING:core-weight-config");
-    my $input = &check_and_get("TUNING:input");
-    my $reference = &check_and_get("TUNING:reference");
     my $tuning_settings = &check_and_get("TUNING:tuning-settings");
     my @settings = split(/ /, $tuning_settings);
     my $mira_tuning_settings = &check_and_get("TUNING:mira-tuning-settings");
-    my $input_devtest = &check_and_get("TUNING:input-devtest");
-    my $reference_devtest = &check_and_get("TUNING:reference-devtest");
 
     # convert core weights into format expected by mira
     my $core_file = "$expt_dir/core_weights";
@@ -2319,6 +2316,7 @@ sub define_tuningevaluation_filter {
     $input_filter = &get("EVALUATION:$set:input-filter") unless $tuning_flag;
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
     $input_filter = $input unless $input_filter;
+    print STDERR "$type: input-filter: $input_filter\n";
 
     my $filter_dir;
     if ($type) {

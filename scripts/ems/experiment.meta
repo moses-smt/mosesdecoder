@@ -444,10 +444,22 @@ tokenize-input
 	default-name: tuning/input.tok
 	pass-unless: input-tokenizer
 	template: $input-tokenizer < IN > OUT
+tokenize-input-devtest
+	in: raw-input-devtest
+	out: tokenized-input-devtest
+	default-name: tuning/input.devtest.tok
+	pass-unless: input-tokenizer
+	template: $input-tokenizer < IN > OUT
 parse-input
 	in: tokenized-input
 	out: parsed-input
 	default-name: tuning/input.parsed
+	pass-unless: input-parser
+	template: $input-parser < IN > OUT
+parse-input-devtest
+	in: tokenized-input-devtest
+	out: parsed-input-devtest
+	default-name: tuning/input.devtest.parsed
 	pass-unless: input-parser
 	template: $input-parser < IN > OUT
 parse-relax-input
@@ -456,10 +468,24 @@ parse-relax-input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
         template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+parse-relax-input-devtest
+	in: parsed-input-devtest
+	out: parse-relaxed-input-devtest
+	default-name: tuning/input.devtest.parse-relaxed
+	pass-unless: input-parse-relaxer
+        template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
 factorize-input
 	in: parse-relaxed-input
 	out: factorized-input
 	default-name: tuning/input.factorized
+	rerun-on-change: TRAINING:input-factors
+	pass-unless: TRAINING:input-factors
+	error: can't open
+	error: incompatible number of words in factor
+factorize-input-devtest
+	in: parse-relaxed-input-devtest
+	out: factorized-input-devtest
+	default-name: tuning/input.devtest.factorized
 	rerun-on-change: TRAINING:input-factors
 	pass-unless: TRAINING:input-factors
 	error: can't open
@@ -471,6 +497,13 @@ lowercase-input
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
+lowercase-input-devtest
+	in: factorized-input-devtest
+	out: cased-input-devtest
+	default-name: tuning/input.devtest.lc
+	pass-unless: input-lowercaser
+	ignore-if: input-truecaser
+	template: $input-lowercaser < IN > OUT
 truecase-input
 	in: factorized-input TRUECASER:truecase-model
 	out: cased-input
@@ -478,11 +511,25 @@ truecase-input
 	default-name: tuning/input.tc
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
+truecase-input-devtest
+	in: factorized-input-devtest TRUECASER:truecase-model
+	out: cased-input-devtest
+	rerun-on-change: input-truecaser
+	default-name: tuning/input.devtest.tc
+	ignore-unless: input-truecaser
+        template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
 	in: cased-input SPLITTER:splitter-model
 	out: input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
+	pass-unless: input-splitter
+	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+split-input-devtest
+	in: cased-input-devtest SPLITTER:splitter-model
+	out: input-devtest
+	rerun-on-change: input-splitter
+	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
 reference-from-sgm
@@ -497,10 +544,25 @@ tokenize-reference
 	pass-unless: output-tokenizer
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
+tokenize-reference-devtest
+	in: raw-reference-devtest
+	out: tokenized-reference-devtest
+	default-name: tuning/reference.devtest.tok
+	pass-unless: output-tokenizer
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-tokenizer < IN > OUT
 lowercase-reference
 	in: tokenized-reference
 	out: cased-reference
 	default-name: tuning/reference.lc
+	pass-unless: output-lowercaser
+	ignore-if: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-lowercaser < IN > OUT	
+lowercase-reference-devtest
+	in: tokenized-reference-devtest
+	out: cased-reference-devtest
+	default-name: tuning/reference.devtest.lc
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
@@ -513,10 +575,25 @@ truecase-reference
 	ignore-unless: output-truecaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
+truecase-reference-devtest
+	in: tokenized-reference-devtest TRUECASER:truecase-model
+	out: cased-reference-devtest
+	rerun-on-change: output-truecaser
+	default-name: tuning/reference.devtest.tc
+	ignore-unless: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+        template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
 	in: cased-reference SPLITTER:splitter-model
 	out: reference
 	default-name: tuning/reference.split
+	pass-unless: output-splitter
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-splitter -model IN1.$output-extension < IN > OUT
+split-reference-devtest
+	in: cased-reference-devtest SPLITTER:splitter-model
+	out: reference-devtest
+	default-name: tuning/reference.devtest.split
 	pass-unless: output-splitter
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
