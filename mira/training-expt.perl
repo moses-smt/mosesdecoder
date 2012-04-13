@@ -53,8 +53,9 @@ my $queue = &param("general.queue", "inf_iccs_smt");
 my $mpienv = &param("general.mpienv", "openmpi_smp8_mark2");
 my $vmem = &param("general.vmem", "6");
 my $decoder_settings = &param("general.decoder-settings", "");
-# Create the training script
-#
+
+#wait for bleu files to appear in experiment folder if running as part of experiment.perl
+my $wait_for_bleu = &param("general.wait-for-bleu", 0);
 
 #job control
 my $jackknife = &param("general.jackknife", 0);
@@ -353,7 +354,10 @@ while(1) {
 	}	
     }
     
+    my $expected_num_files = ($epoch+1)*$weight_dump_frequency;
     if (-e "$working_dir/stopping") {
+	wait_for_bleu($expected_num_files) if ($wait_for_bleu);
+	
 	print "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
         exit 0;
     }
@@ -365,6 +369,8 @@ while(1) {
 	    }
 	}
 	if (! -e $new_weight_file ) {
+	    wait_for_bleu($expected_num_files) if ($wait_for_bleu);
+	    
 	    print "Training finished at " . scalar(localtime()) . "\n";
 	    exit 0;
 	}
@@ -379,6 +385,15 @@ while(1) {
     if (!$skip_dev) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $reference_files, $skip_submit_test);
     }
+}
+
+sub wait_for_bleu() {
+    my $expected_num_files = $_;
+    my @bleu_files = glob("*.bleu");
+    while (scalar(@bleu_files) < $expected_num_files) {
+	sleep 10;
+    }
+    print "$expected_num_files BLEU files completed, continue.\n"; 
 }
 
 sub createTestScriptAndSubmit {

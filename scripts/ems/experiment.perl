@@ -5,7 +5,6 @@
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
-$SIG{CHLD} = "IGNORE"; # no zombies
 
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
@@ -125,9 +124,7 @@ sub init_agenda_graph() {
 		."showpage\n";
     close(PS);
 
-    $SIG{CHLD} = undef;
     `convert -alpha off $graph_file.ps $graph_file.png`;
-    $SIG{CHLD} = "IGNORE"; # no zombies
 
     if (!$NO_GRAPH && !fork) {
 	# use ghostview by default, it it is installed
@@ -1571,9 +1568,9 @@ sub define_tuning_tune {
     my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
     $tuning_settings = "" unless $tuning_settings;
 
-    my $use_mira = &check_and_get("TUNING:use-mira");
+    my $use_mira = &backoff_and_get("TUNING:use-mira");
     my $cmd = "";
-    if ($use_mira eq "true") {
+    if ($use_mira && $use_mira eq "true") {
 	my $experiment_dir = "$dir/tuning/tmp.$VERSION";
 	system("mkdir -p $experiment_dir");
 
@@ -1617,7 +1614,7 @@ sub write_mira_config {
     
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
-    my $core_weights = &check_and_get("TUNING:core-weight-config");
+    my $core_weights = &backoff_and_get("TUNING:core-weight-config");
     my $input = &check_and_get("TUNING:input");
     my $reference = &check_and_get("TUNING:reference");
     my $tuning_settings = &check_and_get("TUNING:tuning-settings");
@@ -2345,7 +2342,7 @@ sub define_tuningevaluation_filter {
     my $cmd = "$scripts/training/filter-model-given-input.pl";
     $cmd .= " $filter_dir $config $input_filter $settings";
 
-    my $use_mira = &check_and_get("TUNING:use-mira");
+    my $use_mira = &backoff_and_get("TUNING:use-mira");
     if ($type && $type eq "dev" && $use_mira) {
 	# add line to config file to suppress caching
 	$cmd .= "\necho \"\" >> $filter_dir/moses.ini";

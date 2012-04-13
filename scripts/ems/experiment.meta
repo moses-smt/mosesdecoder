@@ -526,14 +526,13 @@ filter
 	default-name: tuning/moses.filtered.ini
  	rerun-on-change: filter-settings
 	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero
 filter-devtest
 	in: TRAINING:config input-devtest
 	out: filtered-config-devtest
 	default-name: tuning/moses.filtered.devtest.ini
  	rerun-on-change: filter-settings
 	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero	
+	ignore-unless: use-mira	
 tune
 	in: filtered-config input reference filtered-config-devtest input-devtest reference-devtest
 	out: weight-config
