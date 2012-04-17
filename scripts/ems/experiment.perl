@@ -865,7 +865,7 @@ sub draw_agenda_graph {
     close(DOT);
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
     `dot -Tps $graph_file.dot >$graph_file.ps`;
-    `convert $graph_file.ps $graph_file.png`;
+    `convert -alpha off $graph_file.ps $graph_file.png`;
 }
 
 sub define_step {
