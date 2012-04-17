@@ -12,14 +12,20 @@ using namespace std;
 
 void ExtractedRule::OutputNTLengths(std::ostream &out) const
 {
+  ostringstream outString;
+  OutputNTLengths(outString);
+  out << outString;
+}
+
+void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
+{
   std::map<size_t, std::pair<size_t, size_t> >::const_iterator iter;
   for (iter = m_ntLengths.begin(); iter != m_ntLengths.end(); ++iter)
   {
     size_t sourcePos = iter->first;
     const std::pair<size_t, size_t> &spanLengths = iter->second;
-    out << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " "; 
+    outString << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " "; 
   }
-  
 }
 
 std::ostream& operator<<(std::ostream &out, const ExtractedRule &obj)

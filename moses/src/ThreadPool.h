@@ -81,6 +81,11 @@ class ThreadPool
    **/
   void Stop(bool processRemainingJobs = false);
 
+  /**
+   * Set maximum number of queued threads (otherwise Submit blocks)
+   **/
+  void SetQueueLimit( size_t limit ) { m_queueLimit = limit; }
+
 private:
   /**
    * The main loop executed by each thread.
@@ -94,6 +99,7 @@ private:
   boost::condition_variable m_threadAvailable;
   bool m_stopped;
   bool m_stopping;
+  size_t m_queueLimit;
 };
 
 class TestTask : public Task
