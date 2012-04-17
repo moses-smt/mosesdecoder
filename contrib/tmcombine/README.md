@@ -65,8 +65,6 @@ FURTHER NOTES
  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). 
    If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
 
- - The script assumes that all files are encoded in UTF-8. If this is not the case, fix it or change the `handle_file()` function.
-
  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files. The script will automatically search for the unzipped file first, and for the gzipped file if the former doesn't exist.
 
  - The cross-entropy estimation assumes that phrase tables contain true probability distributions (i.e. a probability mass of 1 for each conditional probability distribution). If this is not true, the results may be skewed.
