@@ -70,12 +70,11 @@ void ThreadPool::Submit( Task* task )
   if (m_stopping) {
     throw runtime_error("ThreadPool stopping - unable to accept new jobs");
   }
-  if (m_queueLimit > 0 && m_tasks.size() >= m_queueLimit) {
+  while (m_queueLimit > 0 && m_tasks.size() >= m_queueLimit) {
     m_threadAvailable.wait(lock);
   }
   m_tasks.push(task);
   m_threadNeeded.notify_all();
-
 }
 
 void ThreadPool::Stop(bool processRemainingJobs)
