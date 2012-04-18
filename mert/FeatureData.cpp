@@ -11,7 +11,6 @@
 #include <limits>
 #include "FileStream.h"
 #include "Util.h"
-#include <cstdio>
 
 static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
 static const float MAX_FLOAT = numeric_limits<float>::max();
@@ -148,23 +147,26 @@ void FeatureData::setFeatureMap(const string& feat)
 
 string FeatureData::ToString() const {
   string res;
-  char buf[100];
 
-  snprintf(buf, sizeof(buf), "number of features: %lu, ", m_num_features);
-  res.append(buf);
-
-  res.append("features: ");
-  res.append(m_features);
-
-  snprintf(buf, sizeof(buf), ", sparse flag: %s, ", (m_sparse_flag) ? "yes" : "no");
-  res.append(buf);
+  {
+    stringstream ss;
+    ss << "number of features: " << m_num_features
+       << ", features: " << m_features
+       << ", sparse flag: ";
+    if (m_sparse_flag) {
+      ss << "yes, ";
+    } else {
+      ss << "no, ";
+    }
+    res.append(ss.str());
+  }
 
   res.append("feature_id_map = { ");
   for (map<string, size_t>::const_iterator it = m_feature_name_to_index.begin();
        it != m_feature_name_to_index.end(); ++it) {
-    snprintf(buf, sizeof(buf), "%s => %lu, ",
-                  it->first.c_str(), it->second);
-    res.append(buf);
+    stringstream ss;
+    ss << it->first << " => " << it->second << ", ";
+    res.append(ss.str());
   }
   res.append("}");
 
