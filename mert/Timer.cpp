@@ -1,6 +1,5 @@
 #include "Timer.h"
 #include "Util.h"
-#include <cstdio>
 
 #if !defined(_WIN32) && !defined(_WIN64)
 #include <sys/resource.h>
@@ -91,14 +90,15 @@ void Timer::check(const char* msg)
 
 std::string Timer::ToString() const {
   std::string res;
-  char tmp[64];
   const double wall = get_elapsed_wall_time();
   CPUTime e;
   GetCPUTimeMicroSeconds(&e);
   const double utime = (e.user_time - m_start_time.user_time) * 1e-6;
   const double stime = (e.sys_time - m_start_time.sys_time) * 1e-6;
-  std::snprintf(tmp, sizeof(tmp), "wall %f user %f sec. sys %f sec. total %f sec.",
-                wall, utime, stime, utime + stime);
-  res.append(tmp);
+  std::stringstream ss;
+  ss << "wall "  << wall << " sec. user " << utime << " sec. sys " << stime
+     << " sec. total " << utime + stime << " sec.";
+  res.append(ss.str());
+
   return res;
 }
