@@ -318,11 +318,38 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
   SetAlignmentInfo(alignmentInfo);
 }
 
+void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase)
+{
+  std::vector<std::string> alignPoints;
+  boost::split(alignPoints, alignString, boost::is_any_of("\t "));
+  int indicator[alignPoints.size()];
+  int index = 0;
+	
+  set<pair<size_t,size_t> > alignmentInfo;
+  for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
+    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
+    MosesShouldUseExceptions(dash);
+    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(dash);
+    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(!dash);
+
+    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    indicator[index++] = sourcePhrase.GetWord(sourcePos).IsNonTerminal() ? 1: 0;
+  }
+
+  SetAlignmentInfo(alignmentInfo, indicator);
+}
+
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
 {
   m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
 }
 
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo, int* indicator)
+{
+  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo, indicator);
+}
 
 TO_STRING_BODY(TargetPhrase);
 
@@ -350,7 +377,7 @@ void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, std::vector<
     }
     else {
       if (scoreVector.size() >= 1 ) p_f_given_e = scoreVector[0];
-      std::cerr << "Warning: possibly wrong format of phrase translation scores, number of scores: " << scoreVector.size() << endl;
+//      std::cerr << "Warning: possibly wrong format of phrase translation scores, number of scores: " << scoreVector.size() << endl;
     }
     
     targetCount = Scan<float>(tokens[0]);

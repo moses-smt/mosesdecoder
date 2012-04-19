@@ -220,7 +220,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // rest of target phrase
-    targetPhrase->SetAlignmentInfo(alignString);
+    targetPhrase->SetAlignmentInfo(alignString, sourcePhrase);
     targetPhrase->SetTargetLHS(targetLHS);
     targetPhrase->SetRuleCount(ruleCountString, scoreVector);
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
@@ -242,7 +242,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
     else
     { // do nothing
     }
-
   }
 
   // sort and prune each target phrase collection

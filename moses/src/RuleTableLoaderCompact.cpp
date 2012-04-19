@@ -72,7 +72,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 
   // Load alignments.
   std::vector<const AlignmentInfo *> alignmentSets;
-  LoadAlignmentSection(reader, alignmentSets);
+  LoadAlignmentSection(reader, alignmentSets, sourcePhrases);
 
   // Load rules.
   if (!LoadRuleSection(reader, vocab, sourcePhrases, targetPhrases,
@@ -136,7 +136,7 @@ void RuleTableLoaderCompact::LoadPhraseSection(
 }
 
 void RuleTableLoaderCompact::LoadAlignmentSection(
-    LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets)
+    LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets, std::vector<Phrase> &sourcePhrases)
 {
   // Read alignment set count.
   reader.ReadLine();
@@ -153,13 +153,16 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
     reader.ReadLine();
     Tokenize(tokens, reader.m_line);
     std::vector<std::string>::const_iterator p;
+    int indicator[tokens.size()];
+    size_t index = 0;
     for (p = tokens.begin(); p != tokens.end(); ++p) {
       points.clear();
       Tokenize<size_t>(points, *p, "-");
       std::pair<size_t, size_t> alignmentPair(points[0], points[1]);
       alignmentInfo.insert(alignmentPair);
+      indicator[index++] = sourcePhrases[i].GetWord(points[0]).IsNonTerminal() ? 1: 0;
     }
-    alignmentSets[i] = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+    alignmentSets[i] = AlignmentInfoCollection::Instance().Add(alignmentInfo, indicator);
   }
 }
 

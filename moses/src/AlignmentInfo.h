@@ -19,26 +19,28 @@
 
 #pragma once
 
+#include <iostream>
 #include <ostream>
 #include <set>
 #include <vector>
+#include <cstdlib>
 
 namespace Moses
 {
 
 class AlignmentInfoCollection;
 
-// Collection of non-terminal alignment pairs, ordered by source index.
+// Collection of non-terminal/terminal alignment pairs, ordered by source index.
 class AlignmentInfo
 {
-  typedef std::set<std::pair<size_t,size_t> > CollType;
-
   friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
   friend class AlignmentInfoCollection;
 
  public:
+  typedef std::set<std::pair<size_t,size_t> > CollType;
   typedef std::vector<size_t> NonTermIndexMap;
+  typedef std::vector<size_t> TermIndexMap;
   typedef CollType::const_iterator const_iterator;
 
   const_iterator begin() const { return m_collection.begin(); }
@@ -50,7 +52,17 @@ class AlignmentInfo
   const NonTermIndexMap &GetNonTermIndexMap() const {
     return m_nonTermIndexMap;
   }
-
+  
+  // only used for hierarchical models, contains terminal alignments
+  const CollType &GetTerminalAlignments() const {
+    return m_terminalCollection;
+  }
+  
+  // for phrase-based models, this contains all alignments, for hierarchical models only the NT alignments
+  const CollType &GetAlignments() const {
+    return m_collection;
+  }
+  
   std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
   
  private:
@@ -60,10 +72,29 @@ class AlignmentInfo
   {
     BuildNonTermIndexMap();
   }
-
+  
+  // use this for hierarchical models
+  explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs, int* indicator)
+  { 
+	// split alignment set in terminals and non-terminals
+	std::set<std::pair<size_t,size_t> > terminalSet;
+	std::set<std::pair<size_t,size_t> > nonTerminalSet;
+	std::set<std::pair<size_t,size_t> >::iterator iter;
+	for (iter = pairs.begin(); iter != pairs.end(); ++iter) {
+		if (*indicator == 1) nonTerminalSet.insert(*iter);
+		else terminalSet.insert(*iter);
+		indicator++;
+	}
+	m_collection = nonTerminalSet;
+	m_terminalCollection = terminalSet;
+	
+	BuildNonTermIndexMap();
+  }
+  
   void BuildNonTermIndexMap();
 
   CollType m_collection;
+  CollType m_terminalCollection;
   NonTermIndexMap m_nonTermIndexMap;
 };
 
@@ -72,6 +103,8 @@ class AlignmentInfo
 struct AlignmentInfoOrderer
 {
   bool operator()(const AlignmentInfo &a, const AlignmentInfo &b) const {
+	if (a.m_collection == b.m_collection)
+	  return a.m_terminalCollection < b.m_terminalCollection;
     return a.m_collection < b.m_collection;
   }
 };

@@ -192,9 +192,10 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
 void WordTranslationFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
     																			 ScoreComponentCollection* accumulator) const
 {
-  const Sentence& input = *(m_local->input);
+  //const Sentence& input = *(m_local->input);
   const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
-  const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
+  const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+  const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {

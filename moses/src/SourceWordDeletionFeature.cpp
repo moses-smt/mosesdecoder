@@ -34,18 +34,23 @@ void SourceWordDeletionFeature::Evaluate(const Hypothesis& cur_hypo,
                                          ScoreComponentCollection* accumulator) const
 {
 	TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
-	ComputeFeatures(targetPhrase, accumulator);
+	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
+	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
 
 void SourceWordDeletionFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
 		                   	 	 	 	 	 	 	 	 	 	 	 	ScoreComponentCollection* accumulator) const
 {
 	TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
-	ComputeFeatures(targetPhrase, accumulator);
+	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
+	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
 
 void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
-		                   	 	 	 	 	 	 	 	 	 	 	 	  ScoreComponentCollection* accumulator) const
+		                   	 	 	 	 	 	ScoreComponentCollection* accumulator,
+		                   	 	 	 	 	 	const AlignmentInfo::CollType &alignment) const 
 {
   // handle special case: unknown words (they have no word alignment)
 	size_t targetLength = targetPhrase.GetSize();
@@ -58,24 +63,26 @@ void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase
 	}
 
   // flag aligned words
-  const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
   bool aligned[16];
   CHECK(sourceLength < 16);
   for(size_t i=0; i<sourceLength; i++)
     aligned[i] = false;
-  for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++)
+  for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) 
     aligned[ alignmentPoint->first ] = true;
-
+      
   // process unaligned source words
   for(size_t i=0; i<sourceLength; i++) {
     if (!aligned[i]) {
-    	const string &word = targetPhrase.GetSourcePhrase().GetWord(i).GetFactor(m_factorType)->GetString();
-    	if (word != "<s>" && word != "</s>") {
-    		if (!m_unrestricted && m_vocab.find( word ) == m_vocab.end()) {
-    			accumulator->PlusEquals(this,"OTHER",1);
-    		}
-    		else {
-    			accumulator->PlusEquals(this,word,1);
+    	Word w = targetPhrase.GetSourcePhrase().GetWord(i);
+    	if (!w.IsNonTerminal()) {
+    		const string &word = w.GetFactor(m_factorType)->GetString();
+    		if (word != "<s>" && word != "</s>") {
+    			if (!m_unrestricted && m_vocab.find( word ) == m_vocab.end()) {
+    				accumulator->PlusEquals(this,"OTHER",1);	
+    			}
+    			else {
+    				accumulator->PlusEquals(this,word,1);
+    			}
     		}
     	}
     }

@@ -26,7 +26,7 @@ namespace Moses
 {
 
 void AlignmentInfo::BuildNonTermIndexMap()
-{
+{ 
   if (m_collection.empty()) {
     return;
   }
@@ -40,9 +40,9 @@ void AlignmentInfo::BuildNonTermIndexMap()
   m_nonTermIndexMap.resize(maxIndex+1, NOT_FOUND);
   size_t i = 0;
   for (p = begin(); p != end(); ++p) {
-    m_nonTermIndexMap[p->second] = i++;
+	//std::cerr << "nt point: " << p->second << " -> " << i << std::endl;
+	m_nonTermIndexMap[p->second] = i++;
   }
-            
 }
 
 bool compare_target(const std::pair<size_t,size_t> *a, const std::pair<size_t,size_t> *b) {

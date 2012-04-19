@@ -152,7 +152,9 @@ public:
 	{ return m_lhsTarget; }
 	
   void SetAlignmentInfo(const StringPiece &alignString);
-	void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
+  void SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase);
+  void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
+  void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo, int* indicator);
   void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
     m_alignmentInfo = alignmentInfo;
   }

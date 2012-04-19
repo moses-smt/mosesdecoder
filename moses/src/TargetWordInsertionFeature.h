@@ -6,6 +6,7 @@
 
 #include "FeatureFunction.h"
 #include "FactorCollection.h"
+#include "AlignmentInfo.h"
 
 namespace Moses
 {
@@ -23,7 +24,9 @@ public:
      StatelessFeatureFunction("twi", ScoreProducer::unlimited),
      m_factorType(factorType),
      m_unrestricted(true)
-  {}
+  {
+		std::cerr << "Initializing target word insertion feature.." << std::endl;
+  }
       
   bool Load(const std::string &filePath);
   void Evaluate(const Hypothesis& cur_hypo,
@@ -35,7 +38,8 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   void ComputeFeatures(const TargetPhrase& targetPhrase,
-  		 	 	 	 	 	 	 	 	 ScoreComponentCollection* accumulator) const;
+		           	   ScoreComponentCollection* accumulator,
+		           	   const AlignmentInfo::CollType &alignment) const;
 
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "twi"; }

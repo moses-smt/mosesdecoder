@@ -6,6 +6,7 @@
 
 #include "FeatureFunction.h"
 #include "FactorCollection.h"
+#include "AlignmentInfo.h"
 
 namespace Moses
 {
@@ -35,8 +36,9 @@ public:
   		               int featureId,
   		               ScoreComponentCollection* accumulator) const;
 
-  void ComputeFeatures(const TargetPhrase& targetPhrase,
-  		                 ScoreComponentCollection* accumulator) const;
+  void ComputeFeatures(const TargetPhrase& targetPhrase, 
+		  	           ScoreComponentCollection* accumulator, 
+		  	           const AlignmentInfo::CollType &alignment) const;
 
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "swd"; }

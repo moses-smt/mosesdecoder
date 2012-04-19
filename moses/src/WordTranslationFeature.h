@@ -60,7 +60,7 @@ public:
      m_sparseProducerWeight(1),
      m_ignorePunctuation(ignorePunctuation)
   {
-		std::cerr << "Creating word translation feature.. ";
+		std::cerr << "Initializing word translation feature.. ";
 		if (m_simple == 1) std::cerr << "using simple word translations.. ";
 		if (m_sourceContext == 1) std::cerr << "using source context.. ";
 		if (m_targetContext == 1) std::cerr << "using target context.. ";
