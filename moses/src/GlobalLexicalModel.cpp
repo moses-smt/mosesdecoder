@@ -111,6 +111,9 @@ void GlobalLexicalModel::InitializeForInput( Sentence const& in )
 {
   m_local.reset(new ThreadLocalStorage);
   m_local->input = &in;
+  for(size_t inputIndex = 0; inputIndex < in.GetSize(); inputIndex++ ) {
+    m_local->inputSet.insert( &(in.GetWord(inputIndex)) );
+  }
 }
 
 float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
@@ -131,7 +134,7 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
 
       set< const Word*, WordComparer > alreadyScored; // do not score a word twice
       for(size_t inputIndex = 0; inputIndex < input.GetSize(); inputIndex++ ) {
-        const Word& inputWord = input.GetWord( inputIndex );
+        const Word inputWord = input.GetWord( inputIndex );
         if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
           SingleHash::const_iterator inputWordHash = targetWordHash->second.find( &inputWord );
           if( inputWordHash != targetWordHash->second.end() ) {

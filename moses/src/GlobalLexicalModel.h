@@ -42,6 +42,7 @@ class GlobalLexicalModel : public StatelessFeatureFunction
   {
     LexiconCache cache;
     const Sentence *input;
+    std::set< const Word*, WordComparer > inputSet;
   };
 
 private:
