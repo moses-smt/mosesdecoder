@@ -77,9 +77,9 @@ public:
 
   // Compute the feature function
   double operator*(const FeatureStats&) const;
-  Point operator+(const Point&) const;
+  const Point operator+(const Point&) const;
   void operator+=(const Point&);
-  Point operator*(float) const;
+  const Point operator*(float) const;
 
   /**
    * Write the Whole featureweight to a stream (ie m_pdim float).
@@ -94,7 +94,7 @@ public:
    * Return a vector of size m_pdim where all weights have been
    * put (including fixed ones).
    */
-  vector<parameter_t> GetAllWeights() const;
+  void GetAllWeights(vector<parameter_t>& w) const;
 
   statscore_t GetScore() const { return m_score; }
   void SetScore(statscore_t score) { m_score = score; }

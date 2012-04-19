@@ -3,6 +3,7 @@
 
 #include <vector>
 #include <map>
+#include <string>
 
 /** A simple STL-std::map based n-gram counts. Basically, we provide
  * typical accessors and mutaors, but we intentionally does not allow
@@ -40,13 +41,23 @@ class NgramCounts {
   /**
    * If the specified "ngram" is found, we add counts.
    * If not, we insert the default count in the container. */
-  void add(const Key& ngram) {
+  void Add(const Key& ngram) {
     const_iterator it = find(ngram);
     if (it != end()) {
       m_counts[ngram] = it->second + 1;
     } else {
       m_counts[ngram] = kDefaultCount;
     }
+  }
+
+  /**
+   * Return true iff the specified "ngram" is found in the container.
+   */
+  bool Lookup(const Key& ngram, Value* v) const {
+    const_iterator it = m_counts.find(ngram);
+    if (it == m_counts.end()) return false;
+    *v = it->second;
+    return true;
   }
 
   /**
@@ -68,16 +79,6 @@ class NgramCounts {
 
   // Note: This is mainly used by unit tests.
   int get_default_count() const { return kDefaultCount; }
-
-  /**
-   * Return true iff the specified "ngram" is found in the container.
-   */
-  bool lookup(const Key& ngram, Value* v) const {
-    const_iterator it = m_counts.find(ngram);
-    if (it == m_counts.end()) return false;
-    *v = it->second;
-    return true;
-  }
 
   iterator find(const Key& ngram) { return m_counts.find(ngram); }
   const_iterator find(const Key& ngram) const { return m_counts.find(ngram); }

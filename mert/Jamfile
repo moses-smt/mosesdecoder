@@ -4,6 +4,7 @@ lib m ;
 
 lib mert_lib :
 Util.cpp
+GzFileBuf.cpp
 FileStream.cpp
 Timer.cpp
 ScoreStats.cpp
@@ -16,6 +17,8 @@ FeatureData.cpp
 FeatureDataIterator.cpp
 Data.cpp
 BleuScorer.cpp
+SemposScorer.cpp
+SemposOverlapping.cpp
 InterpolatedScorer.cpp
 Point.cpp
 PerScorer.cpp
@@ -37,6 +40,7 @@ TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
 MergeScorer.cpp
+Vocabulary.cpp
 ../util//kenutil m ..//z ;
 
 exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
@@ -49,12 +53,16 @@ exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 alias programs : mert extractor evaluator pro ;
 
+unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test point_test : PointTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test reference_test : ReferenceTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test singleton_test : SingletonTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
+unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ;
 
 install legacy : programs : <location>. ;

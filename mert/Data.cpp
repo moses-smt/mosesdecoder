@@ -173,16 +173,15 @@ void Data::InitFeatureMap(const string& str) {
   string features = "";
   string tmp_name = "";
   size_t tmp_index = 0;
-  string::size_type loc;
-  char tmp[64];                         // for snprintf();
 
   while (!buf.empty()) {
     getNextPound(buf, substr);
 
     // string ending with ":" are skipped, because they are the names of the features
-    if ((loc = substr.find_last_of(":")) != substr.length()-1) {
-      snprintf(tmp, sizeof(tmp), "%s_%lu ", tmp_name.c_str(), tmp_index);
-      features.append(tmp);
+    if (!EndsWith(substr, ":")) {
+      stringstream ss;
+      ss << tmp_name << "_" << tmp_index << " ";
+      features.append(ss.str());
 
       tmp_index++;
     } else if (substr.find("_") != string::npos) {
@@ -198,7 +197,6 @@ void Data::InitFeatureMap(const string& str) {
 
 void Data::AddFeatures(const string& str,
                        const string& sentence_index) {
-  string::size_type loc;
   string buf = str;
   string substr;
   FeatureStats feature_entry;
@@ -208,7 +206,7 @@ void Data::AddFeatures(const string& str,
     getNextPound(buf, substr);
 
     // no ':' -> feature value that needs to be stored
-    if ((loc = substr.find_last_of(":")) != substr.length()-1) {
+    if (!EndsWith(substr, ":")) {
       feature_entry.add(ConvertStringToFeatureStatsType(substr));
     } else if (substr.find("_") != string::npos) {
       // sparse feature name? store as well

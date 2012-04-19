@@ -36,6 +36,7 @@ const char kDefaultScorer[] = "BLEU";
 const char kDefaultScorerFile[] = "statscore.data";
 const char kDefaultFeatureFile[] = "features.data";
 const char kDefaultInitFile[] = "init.opt";
+const char kDefaultPositiveString[] = "";
 
 // Used when saving optimized weights.
 const char kOutputFile[] = "weights.txt";
@@ -108,6 +109,7 @@ void usage(int ret)
   cerr << "[--scfile|-S] comma separated list of scorer data files (default " << kDefaultScorerFile << ")" << endl;
   cerr << "[--ffile|-F] comma separated list of feature data files (default " << kDefaultFeatureFile << ")" << endl;
   cerr << "[--ifile|-i] the starting point data file (default " << kDefaultInitFile << ")" << endl;
+  cerr << "[--positive|-P] indexes with positive weights (default none)"<<endl;
 #ifdef WITH_THREADS
   cerr << "[--threads|-T] use multiple threads (default 1)" << endl;
 #endif
@@ -125,6 +127,7 @@ static struct option long_options[] = {
   {"rseed", required_argument, 0, 'r'},
   {"optimize", 1, 0, 'o'},
   {"pro", required_argument, 0, 'p'},
+  {"positive",1,0,'P'},
   {"type", 1, 0, 't'},
   {"sctype", 1, 0, 's'},
   {"scconfig", required_argument, 0, 'c'},
@@ -154,6 +157,7 @@ struct ProgramOption {
   string scorer_file;
   string feature_file;
   string init_file;
+  string positive_string;
   size_t num_threads;
   float shard_size;
   size_t shard_count;
@@ -171,6 +175,7 @@ struct ProgramOption {
         scorer_file(kDefaultScorerFile),
         feature_file(kDefaultFeatureFile),
         init_file(kDefaultInitFile),
+        positive_string(kDefaultPositiveString),
         num_threads(1),
         shard_size(0),
         shard_count(0) { }
@@ -180,7 +185,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
 
-  while ((c = getopt_long(argc, argv, "o:r:d:n:m:t:s:S:F:v:p:", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "o:r:d:n:m:t:s:S:F:v:p:P:", long_options, &option_index)) != -1) {
     switch (c) {
       case 'o':
         opt->to_optimize_str = string(optarg);
@@ -234,6 +239,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
       case 'h':
         usage(0);
         break;
+      case 'P':
+        opt->positive_string = string(optarg);
+        break;
       default:
         usage(1);
     }
@@ -253,6 +261,7 @@ int main(int argc, char **argv)
   vector<vector<parameter_t> > start_list;
   vector<parameter_t> min;
   vector<parameter_t> max;
+  vector<bool> positive;
   // NOTE: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
 
   if (option.pdim < 0)
@@ -348,9 +357,7 @@ int main(int argc, char **argv)
 
   scorer->setScoreData(data.getScoreData().get());
 
-  //ADDED_BY_TS
   data.removeDuplicates();
-  //END_ADDED
 
   PrintUserTime("Data loaded");
 
@@ -387,6 +394,27 @@ int main(int argc, char **argv)
     to_optimize.resize(option.pdim);//We'll optimize on everything
     for (int i = 0; i < option.pdim; i++) {
       to_optimize[i] = 1;
+    }
+  }
+
+  positive.resize(option.pdim);
+  for (int i = 0; i < option.pdim; i++)
+    positive[i] = false;
+  if (option.positive_string.length() > 0) {
+    // Parse string to get weights that need to be positive
+    std::string substring;
+    int index;
+    while (!option.positive_string.empty()) {
+      getNextPound(option.positive_string, substring, ",");
+      index = data.getFeatureIndex(substring);
+      //index = strtol(substring.c_str(), NULL, 10);
+      if (index >= 0 && index < option.pdim) {
+        positive[index] = true;
+      } else {
+        cerr << "Index " << index
+             << " is out of bounds in positivity list. Allowed indexes are [0,"
+             << (option.pdim-1) << "]." << endl;
+      }
     }
   }
 
@@ -433,7 +461,7 @@ int main(int argc, char **argv)
       data_ref = shards[i]; //use the sharded data if it exists
 
     vector<OptimizationTask*>& tasks = allTasks[i];
-    Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, start_list[0], option.optimize_type, option.nrandom);
+    Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, positive, start_list[0], option.optimize_type, option.nrandom);
     optimizer->SetScorer(data_ref.getScorer());
     optimizer->SetFeatureData(data_ref.getFeatureData());
     // A task for each start point

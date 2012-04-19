@@ -113,8 +113,15 @@ public:
 
   size_t getFeatureIndex(const std::string& name) const {
     map<std::string, size_t>::const_iterator it = m_feature_name_to_index.find(name);
-    if (it == m_feature_name_to_index.end())
-      throw runtime_error("Error: feature " + name + " is unknown");
+    if (it == m_feature_name_to_index.end()) {
+      std::string msg = "Error: feature " + name + " is unknown. Known features: ";
+      for (std::map<std::string, size_t>::const_iterator it = m_feature_name_to_index.begin(); it != m_feature_name_to_index.end(); it++) {
+        msg += it->first;
+        msg += ", ";
+      }
+
+      throw runtime_error(msg);
+    }
     return it->second;
   }
 

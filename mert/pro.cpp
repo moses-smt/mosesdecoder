@@ -70,22 +70,6 @@ public:
   const pair<size_t,size_t>& getTranslation2() const { return m_translation2; }
 };
 
-
-static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
-  float logbleu = 0.0;
-  for (unsigned int j=0; j<kBleuNgramOrder; j++) {
-    //cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
-    logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
-  }
-  logbleu /= kBleuNgramOrder;
-  const float brevity = 1.0 - static_cast<float>(stats[(kBleuNgramOrder * 2)]) / stats[1];
-  if (brevity < 0.0) {
-    logbleu += brevity;
-  }
-  //cerr << brevity << " -> " << exp(logbleu) << endl;
-  return exp(logbleu);
-}
-
 static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2) {
   // difference in score in regular features
   for(unsigned int j=0; j<f1.dense.size(); j++)

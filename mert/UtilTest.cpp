@@ -63,3 +63,14 @@ BOOST_AUTO_TEST_CASE(util_tokenize_test) {
     BOOST_CHECK_EQUAL("ref.1", res[1]);
   }
 }
+
+BOOST_AUTO_TEST_CASE(util_ends_with_test) {
+  BOOST_CHECK(EndsWith("abc:", ":"));
+  BOOST_CHECK(EndsWith("a b c:", ":"));
+  BOOST_CHECK(!EndsWith("a", ":"));
+  BOOST_CHECK(!EndsWith("a:b", ":"));
+
+  BOOST_CHECK(EndsWith("ab ", " "));
+  BOOST_CHECK(!EndsWith("ab", " "));
+  BOOST_CHECK(!EndsWith("a b", " "));
+}

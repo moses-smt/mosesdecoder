@@ -3,8 +3,8 @@
 #include <cmath>
 #include <cstdlib>
 #include "util/check.hh"
-#include <limits>
 #include "FeatureStats.h"
+#include "Optimizer.h"
 
 using namespace std;
 
@@ -76,7 +76,7 @@ double Point::operator*(const FeatureStats& F) const
   return prod;
 }
 
-Point Point::operator+(const Point& p2) const
+const Point Point::operator+(const Point& p2) const
 {
   CHECK(p2.size() == size());
   Point Res(*this);
@@ -84,7 +84,7 @@ Point Point::operator+(const Point& p2) const
     Res[i] += p2[i];
   }
 
-  Res.m_score = numeric_limits<statscore_t>::max();
+  Res.m_score = kMaxFloat;
   return Res;
 }
 
@@ -94,22 +94,23 @@ void Point::operator+=(const Point& p2)
   for (unsigned i = 0; i < size(); i++) {
     operator[](i) += p2[i];
   }
-  m_score = numeric_limits<statscore_t>::max();
+  m_score = kMaxFloat;
 }
 
-Point Point::operator*(float l) const
+const Point Point::operator*(float l) const
 {
   Point Res(*this);
   for (unsigned i = 0; i < size(); i++) {
     Res[i] *= l;
   }
-  Res.m_score = numeric_limits<statscore_t>::max();
+  Res.m_score = kMaxFloat;
   return Res;
 }
 
 ostream& operator<<(ostream& o, const Point& P)
 {
-  vector<parameter_t> w = P.GetAllWeights();
+  vector<parameter_t> w;
+  P.GetAllWeights(w);
   for (unsigned int i = 0; i < Point::m_pdim; i++) {
     o << w[i] << " ";
   }
@@ -141,19 +142,17 @@ void Point::NormalizeL1()
 }
 
 
-vector<parameter_t> Point::GetAllWeights()const
+void Point::GetAllWeights(vector<parameter_t>& w) const
 {
-  vector<parameter_t> w;
   if (OptimizeAll()) {
     w = *this;
   } else {
     w.resize(m_pdim);
     for (unsigned int i = 0; i < size(); i++)
       w[m_opt_indices[i]] = operator[](i);
-    for (map<unsigned, float>::iterator it = m_fixed_weights.begin();
+    for (map<unsigned,float>::const_iterator it = m_fixed_weights.begin();
          it != m_fixed_weights.end(); ++it) {
       w[it->first]=it->second;
     }
   }
-  return w;
 }

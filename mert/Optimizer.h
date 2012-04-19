@@ -10,6 +10,8 @@
 
 using namespace std;
 
+static const float kMaxFloat = numeric_limits<float>::max();
+
 class Point;
 
 /**
@@ -22,8 +24,10 @@ protected:
   FeatureDataHandle m_feature_data;  // no accessor for them only child can use them
   unsigned int m_num_random_directions;
 
+  const vector<bool>& m_positive;
+
 public:
-  Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom);
+  Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& positive, const vector<parameter_t>& start, unsigned int nrandom);
 
   void SetScorer(Scorer *scorer) { m_scorer = scorer; }
   void SetFeatureData(FeatureDataHandle feature_data) { m_feature_data = feature_data; }
@@ -75,8 +79,9 @@ class SimpleOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
-      : Optimizer(dim, i2O, start,nrandom), kEPS(0.0001) {}
+  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
+                  const vector<parameter_t>& start, unsigned int nrandom)
+    : Optimizer(dim, i2O, positive, start,nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
@@ -88,8 +93,9 @@ class RandomDirectionOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
-      : Optimizer(dim, i2O, start, nrandom), kEPS(0.0001) {}
+  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
+                           const vector<parameter_t>& start, unsigned int nrandom)
+      : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
@@ -99,8 +105,9 @@ public:
 class RandomOptimizer : public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<parameter_t>& start, unsigned int nrandom)
-      : Optimizer(dim, i2O, start, nrandom) {}
+  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
+                  const vector<parameter_t>& start, unsigned int nrandom)
+      : Optimizer(dim, i2O, positive, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 

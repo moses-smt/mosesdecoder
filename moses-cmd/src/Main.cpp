@@ -493,6 +493,7 @@ int main(int argc, char** argv)
     pool.Submit(task);
 #else
       task->Run();
+      delete task;
 #endif
   
       source = NULL; //make sure it doesn't get deleted

@@ -116,14 +116,15 @@ sub init_agenda_graph() {
     my $dir = &check_and_get("GENERAL:working-dir");    
 
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
-    open(PS,">".$graph_file.".ps");
+    open(PS,">".$graph_file.".ps") or die "Cannot open: $!";
     print PS "%!\n"
 		."/Helvetica findfont 36 scalefont setfont\n"
 		."72 72 moveto\n"
 		."(its all gone blank...) show\n"
 		."showpage\n";
     close(PS);
-    `convert $graph_file.ps $graph_file.png`;
+
+    `convert -alpha off $graph_file.ps $graph_file.png`;
 
     if (!$NO_GRAPH && !fork) {
 	# use ghostview by default, it it is installed
@@ -367,7 +368,7 @@ sub log_config {
     `mkdir -p $dir/steps`;
     my $config_file = &steps_file("config.$VERSION",$VERSION);
     `cp $CONFIG_FILE $config_file` unless $CONTINUE;
-    open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION));
+    open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION)) or die "Cannot open: $!";
     foreach my $parameter (sort keys %CONFIG) {
 	print PARAMETER "$parameter =";
 	foreach (@{$CONFIG{$parameter}}) {
@@ -751,7 +752,7 @@ sub find_re_use {
 
     # summarize and convert hashes into integers for to be re-used 
     print "\nSTEP SUMMARY:\n";
-    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION));
+    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION)) or die "Cannot open: $!";
     for(my $i=$#DO_STEP;$i>=0;$i--) {
         if ($PASS{$i}) {
 	    $RE_USE[$i] = 0;
@@ -797,7 +798,7 @@ sub find_dependencies {
 sub draw_agenda_graph {
     my %M;
     my $dir = &check_and_get("GENERAL:working-dir");
-    open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION));
+    open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION)) or die "Cannot open: $!";
     print DOT "digraph Experiment$VERSION {\n";
     print DOT "  ranksep=0;\n";
     for(my $i=0;$i<=$#DO_STEP;$i++) {
@@ -864,7 +865,7 @@ sub draw_agenda_graph {
     close(DOT);
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
     `dot -Tps $graph_file.dot >$graph_file.ps`;
-    `convert $graph_file.ps $graph_file.png`;
+    `convert -alpha off $graph_file.ps $graph_file.png`;
 }
 
 sub define_step {
@@ -1034,14 +1035,13 @@ sub execute_steps {
 	    }
 	    elsif (! -e &versionize(&step_file($i)).".DONE") {
 		my $step = &versionize(&step_file($i));
-		print "\texecuting $step via ";
 		&define_step($i);
 		&write_info($i);
 
 		# cluster job submission
 		if ($CLUSTER && ! &is_qsub_script($i)) {
 		    $DO{$i}++;
-		    print "qsub\n";
+		    print "\texecuting $step via qsub ($active active)\n";
 		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
 		    `qsub $qsub_args -e $step.STDERR -o $step.STDOUT $step`;
 		}
@@ -1050,15 +1050,12 @@ sub execute_steps {
 		elsif ($CLUSTER || $active < $MAX_ACTIVE) {
 		    $active++;
 		    $DO{$i}++;
-		    print "sh ($active active)\n";
+		    print "\texecuting $step via sh ($active active)\n";
 		    sleep(5);
 		    if (!fork) {
 		        `sh $step >$step.STDOUT 2> $step.STDERR`;
 		         exit;
 		    }
-		}
-		else {
-		    print " --- on hold\n";
 		}
 	    }
 	}
@@ -1126,7 +1123,8 @@ sub write_info {
     my $module_set = $step; $module_set =~ s/:[^:]+$//;
     
 
-    open(INFO,">".&versionize(&step_file($i)).".INFO");
+
+    open(INFO,">".&versionize(&step_file($i)).".INFO") or die "Cannot open: $!";
     my %VALUE = &get_parameters_relevant_for_re_use($i);
     foreach my $parameter (keys %VALUE) {
 	print INFO "$parameter = $VALUE{$parameter}\n";
@@ -1153,7 +1151,7 @@ sub check_info {
     my %VALUE = &get_parameters_relevant_for_re_use($i);
 
     my %INFO;
-    open(INFO,&versionize(&step_file($i),$version).".INFO");
+    open(INFO,&versionize(&step_file($i),$version).".INFO") or die "Cannot open: $!";
     while(<INFO>) {
 	chop;
 	if (/ = /) {
@@ -1277,7 +1275,7 @@ sub check_if_crashed {
     my $error = 0;
 
     if (-e $file.".digest") {
-	open(DIGEST,$file.".digest");
+	open(DIGEST,$file.".digest") or die "Cannot open: $!";
 	while(<DIGEST>) {
 	    $error++;
 	    print "\t$DO_STEP[$i]($version) crashed: $_" if $VERBOSE;
@@ -1287,13 +1285,14 @@ sub check_if_crashed {
     }
 
     my @DIGEST;
-    open(ERROR,$file);
+    open(ERROR,$file) or die "Cannot open: $!";
     while(<ERROR>) {
 	foreach my $pattern (@{$ERROR{&defined_step_id($i)}},
 			     'error','killed','core dumped','can\'t read',
 			     'no such file or directory','unknown option',
 			     'died at','exit code','permission denied',
-           "Can't locate") {
+           'segmentation fault','abort',
+           'can\'t locate') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {
@@ -1312,7 +1311,7 @@ sub check_if_crashed {
     }
     close(ERROR);
 
-    open(DIGEST,">$file.digest");
+    open(DIGEST,">$file.digest") or die "Cannot open: $!";
     foreach (@DIGEST) {
 	print DIGEST $_."\n";
     }
@@ -1853,6 +1852,9 @@ sub define_training_create_config {
 	    $cmd .= "-lm $factor:$order:$lm_file:$type ";
     }
 
+    my $additional_ini = &get("TRAINING:additional-ini");
+    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
+
     &create_step($step_id,$cmd);
 }
 
@@ -2134,8 +2136,8 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_config,
-	$config,$input) = &get_output_and_input($step_id);
+    my ($filter_dir,
+	$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2149,9 +2151,7 @@ sub define_tuningevaluation_filter {
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
     $input_filter = $input unless $input_filter;
 
-    my $filter_dir = "$dir/tuning/filtered.$VERSION";
-    $filter_dir = "$dir/evaluation/filtered.$set.$VERSION" unless $tuning_flag;
-
+    # additional settings
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
@@ -2161,12 +2161,32 @@ sub define_tuningevaluation_filter {
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
-    my $cmd = "$scripts/training/filter-model-given-input.pl";
-    $cmd .= " $filter_dir $config $input_filter $settings";
+    # create pseudo-config file
+    my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
+    my $cmd = &get_training_setting(9);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
+	if $reordering_table;
+    # additional settings for hierarchical models
+    if (&get("TRAINING:hierarchical-rule-set")) {
+      my $extract_version = $VERSION;
+      $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
+        if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
+      my $glue_grammar_file = &get("TRAINING:glue-grammar");
+      $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
+        unless $glue_grammar_file;
+      $cmd .= "-glue-grammar-file $glue_grammar_file ";
+    }
+    $cmd .= "-lm 0:3:$dir "; # dummy
+    $cmd .= "-config $config\n";
+    
+    # filter command
+    $cmd .= "$scripts/training/filter-model-given-input.pl";
+    $cmd .= " $filter_dir $config $input_filter $settings\n";
 
-    # copy moses.ini into specified file location
-    $cmd .= "\ncp $filter_dir/moses.ini $filter_config\n";
- 
+    # clean-up
+    $cmd .= "rm $config";
+
     &create_step($step_id,$cmd);
 }
 
@@ -2185,6 +2205,7 @@ sub define_evaluation_decode {
     my $nbest = &backoff_and_get("EVALUATION:$set:nbest");
     my $moses_parallel = &backoff_and_get("EVALUATION:$set:moses-parallel");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     
@@ -2192,6 +2213,9 @@ sub define_evaluation_decode {
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
       $settings .= " -use-alignment-info -alignment-output-file $system_output.wa";
       $report_segmentation = "yes";
+    }
+    if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
+      $settings .= " -unpruned-search-graph -osg $system_output.graph";
     }
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
       if ($hierarchical) {
@@ -2237,11 +2261,16 @@ sub define_evaluation_analysis {
 	$output,$reference,$input) = &get_output_and_input($step_id);
     my $script = &backoff_and_get("EVALUATION:$set:analysis");
     my $report_segmentation = &backoff_and_get("EVALUATION:$set:report-segmentation");
+    my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
 
     my $cmd = "$script -system $output -reference $reference -input $input -dir $analysis";
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
         my $segmentation_file = &get_default_file("EVALUATION",$set,"decode");
 	$cmd .= " -segmentation $segmentation_file";
+    }
+    if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
+      my $search_graph_file = &get_default_file("EVALUATION",$set,"decode");
+      $cmd .= " -search-graph $search_graph_file.graph";
     }
     if (&get("TRAINING:hierarchical-rule-set")) {
 	$cmd .= " -hierarchical";
@@ -2453,12 +2482,7 @@ sub define_template {
 	    my $extra = join(" ",@EXTRA);
 
 	    if (&backoff_and_get(&extend_local_name($module,$set,$command))) {
-		if ($command eq "input-tokenizer") {
-		    $cmd .= "\$$command -r $VERSION -o $out < $in > $out $extra\n";
-		}
-		else {
 		    $cmd .= "\$$command < $in > $out $extra\n";
-		}
 	    }
 	    else {
 		$cmd .= "ln -s $in $out\n";
@@ -2528,7 +2552,7 @@ sub define_template {
     $cmd =~ s/OUT/$output/g;
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
-    while ($cmd =~ /^([\S\s]*)\$([^\s\/]+)([\S\s]*)$/) {
+    while ($cmd =~ /^([\S\s]*)\$([^\s\/\"\']+)([\S\s]*)$/) {
 	my ($pre,$variable,$post) = ($1,$2,$3);
 	$cmd = $pre
 	    . &check_backoff_and_get(&extend_local_name($module,$set,$variable))
@@ -2573,7 +2597,7 @@ sub create_step {
     $subdir =~ tr/A-Z/a-z/; 
     $subdir = "evaluation" if $subdir eq "reporting";
     $subdir = "lm" if $subdir eq "interpolated-lm";
-    open(STEP,">$file");
+    open(STEP,">$file") or die "Cannot open: $!";
     print STEP "#!/bin/bash\n\n";
     print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
     print STEP "cd $dir\n";

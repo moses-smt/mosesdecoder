@@ -20,7 +20,7 @@ namespace Moses
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
-bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels)
+bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
 {
   //parse XML markup in translation line
 
@@ -40,6 +40,10 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
+
+  // keep this handy for later
+  const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+  const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -145,14 +149,63 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
           return false;
         }
 
-        WordsRange range(startPos,endPos-1);
-        // specified translations -> vector of phrases
-        // multiple translations may be specified, separated by "||"
-        vector<string> altTexts = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"label"), "||");
-        CHECK(altTexts.size() == 1);
+	// may be either a input span label ("label"), or a specified output translation "translation"
+        string label = ParseXmlTagAttribute(tagContent,"label");
+        string translation = ParseXmlTagAttribute(tagContent,"translation");
 
-        XMLParseOutput item(altTexts[0], range);
-        sourceLabels.push_back(item);
+        // specified label
+        if (translation.length() == 0 && label.length() > 0) {
+          WordsRange range(startPos,endPos-1); // really?
+          XMLParseOutput item(label, range);
+          sourceLabels.push_back(item);
+        }
+
+        // specified translations -> vector of phrases, separated by "||"
+        if (translation.length() > 0 && StaticData::Instance().GetXmlInputType() != XmlIgnore) {
+          vector<string> altTexts = TokenizeMultiCharSeparator(translation, "||");
+          vector<string> altLabel = TokenizeMultiCharSeparator(label, "||");
+          vector<string> altProbs = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"prob"), "||");
+	  //TRACE_ERR("number of translations: " << altTexts.size() << endl);
+          for (size_t i=0; i<altTexts.size(); ++i) {
+            // set target phrase
+            TargetPhrase targetPhrase(Output);
+            targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],factorDelimiter);
+
+            // set constituent label
+	    string targetLHSstr;
+            if (altLabel.size() > i && altLabel[i].size() > 0) {
+              targetLHSstr = altLabel[i];
+            }
+            else {
+              const UnknownLHSList &lhsList = StaticData::Instance().GetUnknownLHS();
+              UnknownLHSList::const_iterator iterLHS = lhsList.begin();
+              targetLHSstr = iterLHS->first;
+            }
+            Word targetLHS(true);
+            targetLHS.CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
+            CHECK(targetLHS.GetFactor(0) != NULL);
+            targetPhrase.SetTargetLHS(targetLHS);
+
+            // get probability
+            float probValue = 1;
+            if (altProbs.size() > i && altProbs[i].size() > 0) {
+              probValue = Scan<float>(altProbs[i]);
+            }
+            // convert from prob to log-prob
+            float scoreValue = FloorScore(TransformScore(probValue));
+            targetPhrase.SetScore(scoreValue);
+
+            // set span and create XmlOption
+            WordsRange range(startPos+1,endPos);
+            XmlOption *option = new XmlOption(range,targetPhrase);
+            CHECK(option);
+            xmlOptions.push_back(option);
+
+            VERBOSE(2,"xml translation = [" << range << "] " << targetLHSstr << " -> " << altTexts[i] << " prob: " << probValue << endl);
+          }
+          altTexts.clear();
+          altProbs.clear();
+        }
       }
     }
   }
@@ -179,7 +232,8 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   //line = Trim(line);
 
   std::vector<XMLParseOutput> sourceLabels;
-  ProcessAndStripXMLTags(line, sourceLabels);
+  std::vector<XmlOption*> xmlOptionsList;
+  ProcessAndStripXMLTags(line, sourceLabels, xmlOptionsList);
 
   // do words 1st - hack
   stringstream strme;
@@ -209,6 +263,42 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
       AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
     }
+  }
+
+  // XML Options
+
+  //only fill the vector if we are parsing XML
+  if (staticData.GetXmlInputType() != XmlPassThrough ) {
+    //TODO: needed to handle exclusive
+    //for (size_t i=0; i<GetSize(); i++) {
+    //  m_xmlCoverageMap.push_back(false);
+    //}
+
+    //iterXMLOpts will be empty for XmlIgnore
+    //look at each column
+    for(std::vector<XmlOption*>::const_iterator iterXmlOpts = xmlOptionsList.begin();
+        iterXmlOpts != xmlOptionsList.end(); iterXmlOpts++) {
+
+      const XmlOption *xmlOption = *iterXmlOpts;
+      TargetPhrase *targetPhrase = new TargetPhrase(xmlOption->targetPhrase);
+      *targetPhrase = xmlOption->targetPhrase; // copy everything
+      WordsRange *range = new WordsRange(xmlOption->range);
+      const StackVec emptyStackVec; // hmmm... maybe dangerous, but it is never consulted
+
+      TargetPhraseCollection *tpc = new TargetPhraseCollection;
+      tpc->Add(targetPhrase);
+
+      ChartTranslationOption *transOpt = new ChartTranslationOption(*tpc, emptyStackVec, *range, 0.0f);
+      m_xmlChartOptionsList.push_back(transOpt);
+
+      //TODO: needed to handle exclusive
+      //for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {
+      //  m_xmlCoverageMap[j]=true;
+      //}
+
+      delete xmlOption;
+    }
+
   }
 
   return 1;
