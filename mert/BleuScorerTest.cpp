@@ -125,6 +125,18 @@ BOOST_AUTO_TEST_CASE(bleu_reference_type) {
   BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::SHORTEST);
 }
 
+BOOST_AUTO_TEST_CASE(bleu_reference_type_with_config) {
+  {
+    BleuScorer scorer("reflen:average");
+    BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::AVERAGE);
+  }
+
+  {
+    BleuScorer scorer("reflen:shortest");
+    BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::SHORTEST);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
   BleuScorer scorer;
 
