@@ -55,7 +55,7 @@ public:
     , maxSymbolsTarget(999)
     , maxSymbolsSource(5)
     , maxNonTerm(2)
-    , maxScope(3)
+    , maxScope(999)
     // int minHoleSize(1)
     // int minSubPhraseSize(1) // minimum size of a remaining lexical phrase
     , onlyDirectFlag(false)
