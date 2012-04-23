@@ -52,7 +52,7 @@ class ExtractGHKM
     const std::map<std::string, std::string> &,
     std::ostream &);
   void WriteGlueGrammar(const std::set<std::string> &,
-                        const std::set<std::string> &,
+                        const std::map<std::string, int> &,
                         std::ostream &);
   std::vector<std::string> ReadTokens(const std::string &);
   
