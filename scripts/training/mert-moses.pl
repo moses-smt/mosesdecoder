@@ -310,7 +310,7 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = "$SCRIPTS_ROOTDIR/../mert";
+  $mertdir = "$SCRIPTS_ROOTDIR/../dist/bin";
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
 
