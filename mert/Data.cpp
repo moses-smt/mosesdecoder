@@ -173,15 +173,15 @@ void Data::InitFeatureMap(const string& str) {
   string features = "";
   string tmp_name = "";
   size_t tmp_index = 0;
-  char tmp[64];                         // for snprintf();
 
   while (!buf.empty()) {
     getNextPound(buf, substr);
 
     // string ending with ":" are skipped, because they are the names of the features
     if (!EndsWith(substr, ":")) {
-      snprintf(tmp, sizeof(tmp), "%s_%lu ", tmp_name.c_str(), tmp_index);
-      features.append(tmp);
+      stringstream ss;
+      ss << tmp_name << "_" << tmp_index << " ";
+      features.append(ss.str());
 
       tmp_index++;
     } else if (substr.find("_") != string::npos) {

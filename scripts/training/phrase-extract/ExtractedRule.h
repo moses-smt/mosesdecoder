@@ -23,6 +23,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <map>
 
 // sentence-level collection of rules
@@ -65,6 +66,7 @@ public:
   }
   
   void OutputNTLengths(std::ostream &out) const;
+  void OutputNTLengths(std::ostringstream &out) const;
 };
 
 #endif

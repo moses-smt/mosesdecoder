@@ -3,17 +3,18 @@
 #define BOOST_TEST_MODULE FeatureData
 #include <boost/test/unit_test.hpp>
 
-#include <cstdio>
+#include <sstream>
 
 namespace {
 
 void CheckFeatureMap(const FeatureData* feature_data,
                      const char* str, int num_feature, int* cnt) {
-  char tmp[32];
   for (int i = 0; i < num_feature; ++i) {
-    std::snprintf(tmp, sizeof(tmp), "%s_%d", str, i);
-    BOOST_CHECK_EQUAL(feature_data->getFeatureIndex(tmp), *cnt);
-    BOOST_CHECK_EQUAL(feature_data->getFeatureName(*cnt).c_str(), tmp);
+    std::stringstream ss;
+    ss << str << "_" << i;
+    const string& s = ss.str();
+    BOOST_CHECK_EQUAL(feature_data->getFeatureIndex(s), *cnt);
+    BOOST_CHECK_EQUAL(feature_data->getFeatureName(*cnt).c_str(), s);
     ++(*cnt);
   }
 }

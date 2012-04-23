@@ -3,7 +3,7 @@ alias trees : SyntaxTree.cpp XmlTree.cpp : : : <include>. ;
 
 exe extract : tables-core.cpp SentenceAlignment.cpp extract.cpp InputFileStream ;
 
-exe extract-rules : tables-core.cpp SentenceAlignment.cpp SentenceAlignmentWithSyntax.cpp SyntaxTree.cpp XmlTree.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp InputFileStream ;
+exe extract-rules : tables-core.cpp SentenceAlignment.cpp SentenceAlignmentWithSyntax.cpp SyntaxTree.cpp XmlTree.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp InputFileStream ../../../moses/src//ThreadPool ;
 
 exe extract-lex : extract-lex.cpp InputFileStream ;
 
