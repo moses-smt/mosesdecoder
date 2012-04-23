@@ -20,6 +20,8 @@
 #include "XmlTreeParser.h"
 
 #include "ParseTree.h"
+#include "tables-core.h"
+#include "XmlException.h"
 #include "XmlTree.h"
 
 #include <cassert>
@@ -28,60 +30,58 @@
 namespace Moses {
 namespace GHKM {
 
-std::auto_ptr<ParseTree> ParseXmlTree(
-    std::vector<std::string>::const_iterator &p,
-    const std::vector<std::string>::const_iterator &end)
+XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
+                             std::map<std::string, int> &topLabelSet)
+    : m_labelSet(labelSet)
+    , m_topLabelSet(topLabelSet)
 {
-  std::auto_ptr<ParseTree> t;
-
-  if (p == end) {
-    return t;
-  }
-
-  std::string s(Trim(*p));
-
-  while (s.empty()) {
-    s = Trim(*++p);
-  }
-
-  if (!isXmlTag(s)) {
-    p++;
-    t.reset(new ParseTree(unescape(s)));
-    return t;
-  }
-
-  const std::string &tag = s;
-
-  if (tag[1] == '/') {
-    // Closing tag.  Don't advance p -- let caller handle it.
-    return t;
-  }
-
-  std::string label = ParseXmlTagAttribute(tag, "label");
-  t.reset(new ParseTree(label));
-
-  if (tag[tag.size()-2] == '/') {
-    // Unary tag.
-    p++;
-    return t;
-  }
-
-  p++;
-  while (ParseTree *c = ParseXmlTree(p, end).release()) {
-    t->AddChild(c);
-    c->SetParent(t.get());
-  }
-  p++;  // Skip over closing tag
-
-  return t;
 }
 
-std::auto_ptr<ParseTree> ParseXmlTree(const std::string &line)
+std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
 {
-  std::vector<std::string> xmlTokens(TokenizeXml(line));
-  std::vector<std::string>::const_iterator begin(xmlTokens.begin());
-  std::vector<std::string>::const_iterator end(xmlTokens.end());
-  return ParseXmlTree(begin, end);
+  m_line = line;
+  m_tree.Clear();
+  try {
+    if (!ProcessAndStripXMLTags(m_line, m_tree, m_labelSet, m_topLabelSet)) {
+      throw Exception("");
+    }
+  } catch (const XmlException &e) {
+    throw Exception(e.getMsg());
+  }
+  m_tree.ConnectNodes();
+  SyntaxNode *root = m_tree.GetTop();
+  assert(root);
+  m_words = tokenize(m_line.c_str());
+  return ConvertTree(*root, m_words);
+}
+
+// Converts a SyntaxNode tree to a Moses::GHKM::ParseTree.
+std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
+    const SyntaxNode &tree,
+    const std::vector<std::string> &words)
+{
+  std::auto_ptr<ParseTree> root(new ParseTree(tree.GetLabel()));
+  const std::vector<SyntaxNode*> &children = tree.GetChildren();
+  if (children.empty()) {
+    if (tree.GetStart() != tree.GetEnd()) {
+      std::ostringstream msg;
+      msg << "leaf node covers multiple words (" << tree.GetStart()
+          << "-" << tree.GetEnd() << "): this is currently unsupported";
+      throw Exception(msg.str());
+    }
+    std::auto_ptr<ParseTree> leaf(new ParseTree(words[tree.GetStart()]));
+    leaf->SetParent(root.get());
+    root->AddChild(leaf.release());
+  } else {
+    for (std::vector<SyntaxNode*>::const_iterator p = children.begin();
+         p != children.end(); ++p) {
+      assert(*p);
+      std::auto_ptr<ParseTree> child = ConvertTree(**p, words);
+      child->SetParent(root.get());
+      root->AddChild(child.release());
+    }
+  }
+  return root;
 }
 
 }  // namespace GHKM

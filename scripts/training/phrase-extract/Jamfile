@@ -1,5 +1,5 @@
 alias InputFileStream : InputFileStream.cpp ../../..//z ;
-alias trees : SyntaxTree.cpp XmlTree.cpp : : : <include>. ;
+alias trees : SyntaxTree.cpp tables-core.cpp XmlTree.cpp : : : <include>. ;
 
 exe extract : tables-core.cpp SentenceAlignment.cpp extract.cpp InputFileStream ;
 
