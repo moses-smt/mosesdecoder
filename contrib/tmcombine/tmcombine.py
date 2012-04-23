@@ -18,7 +18,6 @@
 #  - Different combination algorithms require different statistics. To be on the safe side, apply train_model.patch to train_model.perl and use the option -phrase-word-alignment for training all models.
 #  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). sort with LC_ALL=C.
 #  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
-#  - The script assumes that all files are encoded in UTF-8. If this is not the case, fix it or change the handle_file() function.
 #  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files.
 #  - The cross-entropy estimation assumes that phrase tables contain true probability distributions (i.e. a probability mass of 1 for each conditional probability distribution). If this is not true, the results are skewed.
 #  - Unknown phrase pairs are not considered for the cross-entropy estimation. A comparison of models with different vocabularies may be misleading.
@@ -1222,7 +1221,7 @@ def normalize_weights(weights,mode):
 
 
 def handle_file(filename,action,fileobj=None,mode='r'):
-    """handle some ugly encoding issues, different python versions, and writing either to file, stdout or gzipped file format"""
+    """support reading/writing either from/to file, stdout or gzipped file"""
 
     if action == 'open':
 
@@ -1619,6 +1618,7 @@ class Combine_TMs():
         best_weights,best_cross_entropy = optimize_cross_entropy(self.model_interface,self.reference_interface,self.weights,self.score,self.mode,self.flags)
         sys.stderr.write('Best weights: ' + str(best_weights) + '\n')
         sys.stderr.write('Cross entropies: ' + str(best_cross_entropy) + '\n')
+        sys.stderr.write('Executing action combine_given_weights with -w "{0}"\n'.format('; '.join([', '.join(str(w) for w in item) for item in best_weights])))
         
         self.loaded['pt-filtered'] = False # phrase table will be overwritten
         self.combine_given_weights(weights=best_weights)
@@ -1729,6 +1729,7 @@ class Combine_TMs():
 
         sys.stderr.write('Best weights: ' + str(best_weights) + '\n')
         sys.stderr.write('Cross entropies: ' + str(best_cross_entropy) + '\n')
+        sys.stderr.write('You can apply these weights with the action combine_given_weights and the option -w "{0}"\n'.format('; '.join([', '.join(str(w) for w in item) for item in best_weights])))
         return best_weights,best_cross_entropy
 
         
