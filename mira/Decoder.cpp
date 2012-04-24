@@ -46,7 +46,7 @@ namespace Mira {
 
   MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
 		: m_manager(NULL) {
-  	static int BASE_ARGC = 6;
+  	static int BASE_ARGC = 8;
 	  Parameter* params = new Parameter();
 	  char ** mosesargv = new char*[BASE_ARGC + argc];
 	  mosesargv[0] = strToChar("-f");
@@ -57,6 +57,8 @@ namespace Mira {
 	  mosesargv[3] = strToChar(dbgin.str());
 	  mosesargv[4] = strToChar("-use-persistent-cache"); 
 	  mosesargv[5] = strToChar("0"); 
+	  mosesargv[6] = strToChar("-persistent-cache-size");
+          mosesargv[7] = strToChar("0");
 
 	  for (int i = 0; i < argc; ++i) {
 		  char *cstr = &(decoder_params[i])[0];
