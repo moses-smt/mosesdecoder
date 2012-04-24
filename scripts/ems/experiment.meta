@@ -449,6 +449,7 @@ tokenize-input-devtest
 	out: tokenized-input-devtest
 	default-name: tuning/input.devtest.tok
 	pass-unless: input-tokenizer
+	ignore-unless: use-mira
 	template: $input-tokenizer < IN > OUT
 parse-input
 	in: tokenized-input
@@ -461,6 +462,7 @@ parse-input-devtest
 	out: parsed-input-devtest
 	default-name: tuning/input.devtest.parsed
 	pass-unless: input-parser
+	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
 parse-relax-input
 	in: parsed-input
@@ -473,6 +475,7 @@ parse-relax-input-devtest
 	out: parse-relaxed-input-devtest
 	default-name: tuning/input.devtest.parse-relaxed
 	pass-unless: input-parse-relaxer
+	ignore-unless: use-mira
         template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
 factorize-input
 	in: parse-relaxed-input
@@ -488,6 +491,7 @@ factorize-input-devtest
 	default-name: tuning/input.devtest.factorized
 	rerun-on-change: TRAINING:input-factors
 	pass-unless: TRAINING:input-factors
+	ignore-unless: use-mira
 	error: can't open
 	error: incompatible number of words in factor
 lowercase-input
@@ -502,6 +506,7 @@ lowercase-input-devtest
 	out: cased-input-devtest
 	default-name: tuning/input.devtest.lc
 	pass-unless: input-lowercaser
+	ignore-unless: use-mira
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
@@ -517,6 +522,7 @@ truecase-input-devtest
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.devtest.tc
 	ignore-unless: input-truecaser
+	ignore-unless: use-mira
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
 	in: cased-input SPLITTER:splitter-model
@@ -531,6 +537,7 @@ split-input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
+	ignore-unless: use-mira
 	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
@@ -549,6 +556,7 @@ tokenize-reference-devtest
 	out: tokenized-reference-devtest
 	default-name: tuning/reference.devtest.tok
 	pass-unless: output-tokenizer
+	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
 lowercase-reference
@@ -565,6 +573,7 @@ lowercase-reference-devtest
 	default-name: tuning/reference.devtest.lc
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
+	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 truecase-reference
@@ -581,6 +590,7 @@ truecase-reference-devtest
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.devtest.tc
 	ignore-unless: output-truecaser
+	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
@@ -595,6 +605,7 @@ split-reference-devtest
 	out: reference-devtest
 	default-name: tuning/reference.devtest.split
 	pass-unless: output-splitter
+	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter

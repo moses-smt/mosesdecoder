@@ -865,6 +865,19 @@ int main(int argc, char** argv) {
 						if (max_length_dev_fear_ref != -1 && length_diff_fear > max_length_dev_fear_ref)
 							skip = true;
 					}
+
+					// sanity check
+					if (historyOf1best) {
+					  if (dummyBleuScores[batchPosition][0] > bleuScoresHope[batchPosition][0]) {
+					    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: MODEL translation better than HOPE translation." << endl;
+					  }
+					  if (bleuScoresFear[batchPosition][0] > dummyBleuScores[batchPosition][0]) {
+					    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than MODEL translation." << endl;
+					  }
+					}  
+					if (bleuScoresFear[batchPosition][0] > bleuScoresHope[batchPosition][0]) {
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than HOPE translation." << endl;
+					}
 					
 					if (skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << bleuRatioHopeFear << ").. " << endl;
