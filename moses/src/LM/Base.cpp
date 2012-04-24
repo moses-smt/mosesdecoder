@@ -41,12 +41,14 @@ LanguageModel::LanguageModel() :
 LanguageModel::~LanguageModel() {}
 
 float LanguageModel::GetWeight() const {
-  return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[0];
+  //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[0];
+  return StaticData::Instance().GetWeights(this)[0];
 }
 
 float LanguageModel::GetOOVWeight() const {
   if (m_enableOOVFeature) {
-    return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[1];
+    //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[1];
+	return StaticData::Instance().GetWeights(this)[1];
   } else {
     return 0;
   }

@@ -83,9 +83,12 @@ class TranslationSystem {
       const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
       const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
       
+      const PhraseDictionaryFeature *GetTranslationScoreProducer() const { return GetPhraseDictionaries()[0]; }
+      
       float GetWeightWordPenalty() const;
       float GetWeightUnknownWordPenalty() const;
       float GetWeightDistortion() const;
+      std::vector<float> GetTranslationWeights() const;
       
       //sentence (and thread) specific initialisationn and cleanup
       void InitializeBeforeSentenceProcessing(const InputType& source) const;

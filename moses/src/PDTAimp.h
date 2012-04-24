@@ -443,11 +443,19 @@ public:
 
               CHECK(nscores.size()==m_weights.size());
 
+              const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+              
               //tally up
-              float score=std::inner_product(nscores.begin(), nscores.end(), m_weights.begin(), 0.0f);
+              std::vector<float> weightT = system.GetTranslationWeights();
+              std::cerr << "Read weightT from translation sytem.. " << std::endl;
+              //float score=std::inner_product(nscores.begin(), nscores.end(), m_weights.begin(), 0.0f);
+              float score=std::inner_product(nscores.begin(), nscores.end(), weightT.begin(), 0.0f);
 
               //count word penalty
-              score-=tcands[i].tokens.size() * m_weightWP;
+              float weightWP = system.GetWeightWordPenalty();
+              std::cerr << "Read weightWP from translation sytem: " << weightWP << std::endl;
+              //score-=tcands[i].tokens.size() * m_weightWP;
+              score-=tcands[i].tokens.size() * weightWP;
 
               std::pair<E2Costs::iterator,bool> p=e2costs.insert(std::make_pair(tcands[i].tokens,TScores()));
 

@@ -78,6 +78,9 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
 {
   const StaticData& staticData = StaticData::Instance();
+  std::vector<float> weightT = system->GetTranslationWeights();
+  cerr << "Read weightT from translation sytem.. " << std::endl;
+  
   if (m_implementation == Memory) {
     // memory phrase table
     VERBOSE(2,"using standard phrase tables" << std::endl);
@@ -93,7 +96,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(GetNumScoreComponents(),this);
     bool ret = pdm->Load(GetInput(), GetOutput()
                          , m_filePath
-                         , m_weight
+                         //, m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWeightWordPenalty());
@@ -104,7 +108,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdta->Load(                    GetInput()
                , GetOutput()
                , m_filePath
-               , m_weight
+               //, m_weight
+               , weightT
                , m_tableLimit
                , system->GetLanguageModels()
                , system->GetWeightWordPenalty());
@@ -122,7 +127,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         , m_weight
+                         // m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
@@ -140,7 +146,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         , m_weight
+                         //, m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
@@ -158,7 +165,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         , m_weight
+                         //, m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
@@ -170,7 +178,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdta->Load(GetInput()
                           , GetOutput()
                           , m_filePath
-                          , m_weight
+                          //, m_weight
+                          , weightT
                           , m_tableLimit
                           , system->GetLanguageModels()
                           , system->GetWordPenaltyProducer());
@@ -185,7 +194,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
            ,m_filePath
            ,m_targetFile
            , m_alignmentsFile
-           , m_weight, m_tableLimit
+           //, m_weight, m_tableLimit
+           , weightT, m_tableLimit
            , system->GetLanguageModels()
            , system->GetWeightWordPenalty()))) {
       std::cerr << "FAILED TO LOAD\n" << endl;

@@ -13,6 +13,7 @@
 #include "RuleTableLoader.h"
 #include "RuleTableLoaderFactory.h"
 #include "TypeDef.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -55,7 +56,10 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 
   std::auto_ptr<RuleTableLoader> loader =
   RuleTableLoaderFactory::Create(grammarFile);
-  bool ret = loader->Load(*m_input, *m_output, inFile, *m_weight, m_tableLimit,
+  std::vector<float> weightT = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights();
+  cerr << "Read weightT from translation sytem.. " << std::endl;
+  //bool ret = loader->Load(*m_input, *m_output, inFile, *m_weight, m_tableLimit,
+  bool ret = loader->Load(*m_input, *m_output, inFile, weightT, m_tableLimit,
                           *m_languageModels, m_wpProducer, *this);
   
   CHECK(ret);
