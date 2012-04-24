@@ -144,6 +144,13 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
       case 4:
         ++stage;
         break;
+	/*      case 5: {
+        // count info. Only store the 2nd one
+        float val = Moses::Scan<float>(tok);
+        misc[0] = val;
+        ++stage;
+        break;
+	}*/
       case 5: {
         // count info. Only store the 2nd one
         //float val = Moses::Scan<float>(tok);
@@ -157,7 +164,7 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
         misc[0] = val;
         ++stage;
         break;
-      }
+	}
       default:
         assert(false);
         break;
