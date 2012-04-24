@@ -715,7 +715,8 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     float precision_pd = 1.0;
     if (m_target_length_history > 0) {
     	for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
-        precision_pd *= m_match_history[i]/m_count_history[i];
+	  if (m_count_history[i] != 0)
+	    precision_pd *= m_match_history[i]/m_count_history[i];
 
       // take geometric mean
       precision_pd = pow(precision_pd, (float)1/4);
