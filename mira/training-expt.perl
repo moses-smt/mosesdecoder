@@ -354,7 +354,10 @@ while(1) {
 	}	
     }
     
-    my $expected_num_files = ($epoch+1)*$weight_dump_frequency;
+    my $expected_num_files = $epochs*$weight_dump_frequency;
+    if ($wait_for_bleu) {
+	print "Expected number of BLEU files: $expected_num_files \n";
+    }
     if (-e "$working_dir/stopping") {
 	wait_for_bleu($expected_num_files) if ($wait_for_bleu);
 	
@@ -388,10 +391,12 @@ while(1) {
 }
 
 sub wait_for_bleu() {
-    my $expected_num_files = $_;
+    my $expected_num_files = $_[0];
+    print "Waiting for $expected_num_files bleu files..\n";
     my @bleu_files = glob("*.bleu");
     while (scalar(@bleu_files) < $expected_num_files) {
 	sleep 10;
+	@bleu_files = glob("*.bleu");
     }
     print "$expected_num_files BLEU files completed, continue.\n"; 
 }
