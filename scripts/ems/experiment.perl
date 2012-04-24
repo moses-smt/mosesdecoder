@@ -1701,10 +1701,10 @@ sub write_mira_config {
     
     print CFG "[devtest] \n";
     if (&get("TRAINING:hierarchical-rule-set")) {
-	print CFG "moses=\${moses-home}/moses-chart-cmd/src/moses_chart \n";
+	print CFG "moses=\${moses-home}/dist/bin/moses_chart \n";
     }
     else {
-	print CFG "moses=\${moses-home}/moses-cmd/src/moses \n";
+	print CFG "moses=\${moses-home}/dist/bin/moses \n";
     }
     # use multi-bleu to select the best set of weights
     print CFG "bleu=\${moses-home}/scripts/generic/multi-bleu.perl \n";
@@ -2316,8 +2316,7 @@ sub define_tuningevaluation_filter {
     $input_filter = &get("EVALUATION:$set:input-filter") unless $tuning_flag;
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
     $input_filter = $input unless $input_filter;
-    print STDERR "$type: input-filter: $input_filter\n";
-
+    
     my $filter_dir;
     if ($type) {
 	$filter_dir = "$dir/tuning/filtered.$type.$VERSION";
