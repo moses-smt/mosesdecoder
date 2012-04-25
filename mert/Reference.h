@@ -43,6 +43,8 @@ class Reference {
   std::vector<size_t> m_length;
 };
 
+// TODO(tetsuok): fix this function and related stuff.
+// "average" reference length should not be calculated at sentence-level unlike "closest".
 inline int Reference::CalcAverage() const {
   int total = 0;
   for (size_t i = 0; i < m_length.size(); ++i) {
