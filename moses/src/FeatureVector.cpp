@@ -516,6 +516,14 @@ namespace Moses {
     }
     return norm;
   }
+
+  FValue FVector::l1norm_coreFeatures() const {
+    FValue norm = 0;
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      norm += abs(m_coreFeatures[i]);
+    }
+    return norm;
+  }
   
   FValue FVector::l2norm() const {
     return sqrt(inner_product(*this));

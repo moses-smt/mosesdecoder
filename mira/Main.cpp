@@ -129,6 +129,7 @@ int main(int argc, char** argv) {
 	bool megam;
 	bool printFeatureCounts, printNbestWithFeatures;
 	bool avgRefLength;
+	bool print_weights;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
@@ -187,13 +188,14 @@ int main(int argc, char** argv) {
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
 		("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
-		("normalise", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
+	  ("normalise-weights", po::value<bool>(&normaliseWeights)->default_value(true), "Whether to normalise the updated weights before passing them to the decoder")
 		("normalise-margin", po::value<bool>(&normaliseMargin)->default_value(false), "Normalise the margin: squash between 0 and 1")
 		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("print-feature-counts", po::value<bool>(&printFeatureCounts)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
 		("print-nbest-with-features", po::value<bool>(&printNbestWithFeatures)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
+	  ("print-weights", po::value<bool>(&print_weights)->default_value(false), "Print out new weights")
 		("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")				
 		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
 		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
@@ -413,6 +415,7 @@ int main(int argc, char** argv) {
 	SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
 	bool chartDecoding = (searchAlgorithm == ChartDecoding);
 
+	cerr << "Normalise weights? " << normaliseWeights << endl;
 	if (normaliseWeights) {
 		ScoreComponentCollection startWeights = decoder->getWeights();
 		startWeights.L1Normalise();
@@ -557,7 +560,7 @@ int main(int argc, char** argv) {
 	// get reference to feature functions
 	const vector<const ScoreProducer*> featureFunctions =
 			staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
-	const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
+	//const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
 
 	// read core weight file
 	ProducerWeightMap coreWeightMap;
@@ -678,6 +681,7 @@ int main(int argc, char** argv) {
 
 				Moses::Sentence *sentence = new Sentence();
 			    stringstream in(input + "\n");
+			    const vector<FactorType> inputFactorOrder = staticData.GetInputFactorOrder();
 			    sentence->Read(in,inputFactorOrder);
 			    size_t current_input_length = (*sentence).GetSize();
 
@@ -757,7 +761,15 @@ int main(int argc, char** argv) {
 				}
 
 				if (hope_fear || hope_fear_rank || perceptron_update) {
-					// HOPE
+					// HOPE		  
+				  /*delete decoder;
+				  StaticData::ClearDataStatic();
+				  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+				  decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
+				  decoder->setWeights(mosesWeights);*/
+
+				  //cerr << "Rank " << rank << ", epoch " << epoch << ", using weights: " << decoder->getWeights() << endl; 
+				  
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
@@ -768,8 +780,9 @@ int main(int argc, char** argv) {
 					avg_ref_length = ref_length;
 					float hope_length_ratio = (float)oracle.size()/ref_length;
 					int oracleSize = (int)oracle.size();
-					cerr << ", l-ratio hope: " << hope_length_ratio << endl;
-					cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
+					cerr << endl;
+					//cerr << ", l-ratio hope: " << hope_length_ratio << endl;
+					//cerr << "Rank " << rank << ", epoch " << epoch << ", current input length: " << current_input_length << endl;
 
 					// count sparse features occurring in hope translation
 					featureValuesHope[batchPosition][0].IncrementSparseHopeFeatures();
@@ -824,6 +837,12 @@ int main(int argc, char** argv) {
 					float bleuRatioHopeFear = 0;
 					int fearSize = 0;
 					if (!skip) {
+					  /*delete decoder;
+					  StaticData::ClearDataStatic();
+					  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+					  decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
+					  decoder->setWeights(mosesWeights);*/
+
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuWeight_fear,
 								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
@@ -835,7 +854,8 @@ int main(int argc, char** argv) {
 						avg_ref_length /= 2;
 						fear_length_ratio = (float)fear.size()/ref_length;
 						fearSize = (int)fear.size();
-						cerr << ", l-ratio fear: " << fear_length_ratio << endl;
+						cerr << endl;
+						//cerr << ", l-ratio fear: " << fear_length_ratio << endl;
 						for (size_t i = 0; i < fear.size(); ++i)
 							delete fear[i];
 
@@ -867,16 +887,30 @@ int main(int argc, char** argv) {
 					}
 
 					// sanity check
+					float epsilon = 0.0001;
 					if (historyOf1best) {
-					  if (dummyBleuScores[batchPosition][0] > bleuScoresHope[batchPosition][0]) {
-					    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: MODEL translation better than HOPE translation." << endl;
+					  if (dummyBleuScores[batchPosition][0] > bleuScoresHope[batchPosition][0] &&
+					      dummyModelScores[batchPosition][0] > modelScoresHope[batchPosition][0]) {
+					    if (abs(dummyBleuScores[batchPosition][0] - bleuScoresHope[batchPosition][0]) > epsilon &&
+						abs(dummyModelScores[batchPosition][0] - modelScoresHope[batchPosition][0]) > epsilon) {
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: MODEL translation better than HOPE translation." << endl;
+					      skip = true;
+					    }
 					  }
-					  if (bleuScoresFear[batchPosition][0] > dummyBleuScores[batchPosition][0]) {
-					    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than MODEL translation." << endl;
+					  if (bleuScoresFear[batchPosition][0] > dummyBleuScores[batchPosition][0] &&
+					      modelScoresFear[batchPosition][0] > dummyModelScores[batchPosition][0]) {
+					    if (abs(bleuScoresFear[batchPosition][0] - dummyBleuScores[batchPosition][0]) > epsilon && 
+						abs(modelScoresFear[batchPosition][0] - dummyModelScores[batchPosition][0]) > epsilon) {
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than MODEL translation." << endl;
+					      skip = true;
+					    }					  
 					  }
-					}  
+					}
 					if (bleuScoresFear[batchPosition][0] > bleuScoresHope[batchPosition][0]) {
-					  cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than HOPE translation." << endl;
+					  if (abs(bleuScoresFear[batchPosition][0] - bleuScoresHope[batchPosition][0]) > epsilon) {
+					    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than HOPE translation. (abs-diff: " << abs(bleuScoresFear[batchPosition][0] - bleuScoresHope[batchPosition][0]) << " > " << epsilon << ")" <<endl;
+					    skip = true;
+					  }
 					}
 					
 					if (skip) {
@@ -901,7 +935,7 @@ int main(int argc, char** argv) {
 						}
 
 						examples_in_batch++;
-					}
+					}					
 				}
 				if (hope_model) {
 					// HOPE
@@ -1101,13 +1135,15 @@ int main(int argc, char** argv) {
 				}
 
 				// set weight for bleu feature to 0 before optimizing
-				vector<const ScoreProducer*>::const_iterator iter = featureFunctions.begin();
-				for (; iter != featureFunctions.end(); ++iter)
+				vector<const ScoreProducer*>::const_iterator iter;
+				const vector<const ScoreProducer*> featureFunctions2 = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+				for (iter = featureFunctions2.begin(); iter != featureFunctions2.end(); ++iter) {
 				  if ((*iter)->GetScoreProducerWeightShortName() == "bl") {
 				    mosesWeights.Assign(*iter, 0);
 				    break;
 				  }
-
+				}
+				
 				// take logs of feature values
 				if (logFeatureValues) {
 					takeLogs(featureValuesHope, baseOfLog);
@@ -1199,7 +1235,8 @@ int main(int argc, char** argv) {
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
-					cerr << "Rank " << rank << ", epoch " << epoch << ", applying update.." << endl;
+				        cerr << "Rank " << rank << ", epoch " << epoch << ", applying update.." << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
 					mosesWeights.PlusEquals(weightUpdate);
 					if (normaliseWeights)
 						mosesWeights.L1Normalise();
@@ -1226,6 +1263,8 @@ int main(int argc, char** argv) {
 
 					// set new Moses weights
 					decoder->setWeights(mosesWeights);
+					if (print_weights)
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", new weights: " << mosesWeights << endl;
 				}
 
 				// update history (for approximate document Bleu)

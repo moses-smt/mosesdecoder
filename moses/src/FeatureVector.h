@@ -186,6 +186,7 @@ namespace Moses {
 
     /** norms and sums */
     FValue l1norm() const;
+    FValue l1norm_coreFeatures() const;
     FValue l2norm() const;
     FValue linfnorm() const;
     FValue sum() const;

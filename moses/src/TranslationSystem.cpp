@@ -175,10 +175,10 @@ namespace Moses {
 
     std::vector<float> TranslationSystem::GetTranslationWeights() const {
     	std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer());
-    	cerr << "Read weightT from translation sytem.. ";
+    	VERBOSE(1, cerr << "Read weightT from translation sytem.. ");
     	for (size_t i = 0; i < weights.size(); ++i)
-    		std::cerr << weights[i] << " ";
-    	std::cerr << std::endl;
+	  VERBOSE(1, std::cerr << weights[i] << " ");
+    	VERBOSE(1, std::cerr << std::endl);
     	return weights;
     }
 };

@@ -34,7 +34,6 @@ void ScoreComponentCollection::UnregisterScoreProducer
   ScoreIndexMap::iterator iter = s_scoreIndexes.find(scoreProducer);
   CHECK(iter != s_scoreIndexes.end());
   s_scoreIndexes.erase(iter);
-
 }
 
 float ScoreComponentCollection::GetWeightedScore() const
@@ -113,7 +112,7 @@ std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 	return os << ">>";
 }
 void ScoreComponentCollection::L1Normalise() {
-  m_scores /= m_scores.l1norm();
+  m_scores /= m_scores.l1norm_coreFeatures();
 }
 
 float ScoreComponentCollection::GetL1Norm() const {
