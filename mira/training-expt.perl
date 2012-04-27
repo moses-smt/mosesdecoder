@@ -52,7 +52,6 @@ my $name = &param_required("general.name");
 my $queue = &param("general.queue", "inf_iccs_smt");
 my $mpienv = &param("general.mpienv", "openmpi_smp8_mark2");
 my $vmem = &param("general.vmem", "6");
-my $decoder_settings = &param("general.decoder-settings", "");
 
 #wait for bleu files to appear in experiment folder if running as part of experiment.perl
 my $wait_for_bleu = &param("general.wait-for-bleu", 0);
@@ -148,6 +147,7 @@ my $extra_memory_devtest = &param("devtest.extra-memory",0);
 my $skip_devtest = &param("devtest.skip-devtest",0);
 my $skip_dev = &param("devtest.skip-dev",0);
 my $skip_submit_test = &param("devtest.skip-submit",0);
+my $devtest_decoder_settings = &param("devtest.decoder-settings", "");
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
@@ -289,8 +289,7 @@ if ($weight_dump_frequency != -1) {
 }
 print TRAIN "--epochs $epochs \\\n";
 print TRAIN "-b $batch \\\n";
-my $settings = $decoder_settings." ".$train_decoder_settings;
-print TRAIN "--decoder-settings \"$settings\" \\\n";
+print TRAIN "--decoder-settings \"$train_decoder_settings\" \\\n";
 print TRAIN $extra_args;
 print TRAIN "\n";
 if ($jobs == 1) {
@@ -667,7 +666,7 @@ sub createTestScriptAndSubmit {
 	print TEST "module load openmpi/ethernet/gcc/latest\n";
 	print TEST "export LD_LIBRARY_PATH=/exports/informatics/inf_iccs_smt/shared/boost/lib:\$LD_LIBRARY_PATH\n";
     }
-    print TEST "$test_exe $decoder_settings -i $input_file -f $new_ini_file ";
+    print TEST "$test_exe $devtest_decoder_settings -i $input_file -f $new_ini_file ";
 # now written to ini file
 #    if ($extra_weight_file) {
 #      print TEST "-weight-file $extra_weight_file ";
