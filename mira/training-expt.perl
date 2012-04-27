@@ -59,6 +59,7 @@ my $wait_for_bleu = &param("general.wait-for-bleu", 0);
 #job control
 my $jackknife = &param("general.jackknife", 0);
 my $working_dir = &param("general.working-dir");
+my $general_decoder_settings = &param("general.decoder-settings", "");
 system("mkdir -p $working_dir") == 0 or  die "Error: unable to create directory \"$working_dir\"";
 my $train_script = "$name-train";
 my $job_name = "$name-t";
@@ -123,6 +124,9 @@ my $burn_in_input_file = &param("train.burn-in-input-file");
 my $burn_in_reference_files = &param("train.burn-in-reference-files");
 my $skipTrain = &param("train.skip", 0);
 my $train_decoder_settings = &param("train.decoder-settings", "");
+if (!$train_decoder_settings) {
+    $train_decoder_settings = $general_decoder_settings;
+}
 
 #devtest configuration
 my ($devtest_input_file, $devtest_reference_files,$devtest_ini_file,$bleu_script,$use_moses);
@@ -148,6 +152,10 @@ my $skip_devtest = &param("devtest.skip-devtest",0);
 my $skip_dev = &param("devtest.skip-dev",0);
 my $skip_submit_test = &param("devtest.skip-submit",0);
 my $devtest_decoder_settings = &param("devtest.decoder-settings", "");
+if (!$devtest_decoder_settings) {
+    $devtest_decoder_settings = $general_decoder_settings;
+}
+
 
 # check that number of jobs, dump frequency and number of input sentences are compatible
 # shard size = number of input sentences / number of jobs, ensure shard size >= dump frequency
