@@ -42,6 +42,7 @@ namespace mpi = boost::mpi;
 #include "Hildreth.h"
 #include "ThreadPool.h"
 #include "DummyScoreProducers.h"
+#include "BleuScorer.h"
 
 using namespace Mira;
 using namespace std;
@@ -710,18 +711,22 @@ int main(int argc, char** argv) {
 					cerr << "Generate nbest lists for megam.." << endl;
 					hope_nbest_filename << "decode_hope_sent" << *sid << "." << hope_n << "best";
 					fear_nbest_filename << "decode_fear_sent" << *sid << "." << fear_n << "best";
-					//model_nbest_filename << "decode_model_sent" << *sid << "." << n << "best";
+					model_nbest_filename << "decode_model_sent" << *sid << "." << n << "best";
+					
 					cerr << "Writing file " << hope_nbest_filename.str() << endl;
 					decoder->outputNBestList(input, *sid, hope_n, 1, bleuWeight_hope, distinctNbest,
 							avgRefLength, hope_nbest_filename.str(), dummy);
 					decoder->cleanup(chartDecoding);
+					
 					cerr << "Writing file " << fear_nbest_filename.str() << endl;
 					decoder->outputNBestList(input, *sid, fear_n, -1, bleuWeight_fear, distinctNbest,
 							avgRefLength, fear_nbest_filename.str(), dummy);
 					decoder->cleanup(chartDecoding);
-					//decoder->outputNBestList(input, *sid, n, 0, bleuWeight, distinctNbest,
-						//model_nbest_filename.str());
-					//decoder->cleanup(chartDecoding);
+					
+					cerr << "Writing file " << model_nbest_filename.str() << endl;
+					decoder->outputNBestList(input, *sid, n, 0, bleuWeight, distinctNbest,
+							avgRefLength, model_nbest_filename.str(), dummy);
+					decoder->cleanup(chartDecoding);
 
 					// save reference
 					ref_filename <<  "decode_ref_sent" << *sid;
@@ -735,15 +740,17 @@ int main(int argc, char** argv) {
 					ref_out << referenceSentences[decoder->getShortestReferenceIndex(*sid)][*sid] << "\n";
 					ref_out.close();
 
-					// concatenate nbest files
+					// concatenate nbest files (use hope and fear lists to extract samples from)
 					stringstream nbestStreamMegam, catCmd, sortCmd;
-					nbestStreamMegam << "decode_hope-fear_sent" << *sid << "." << (hope_n+fear_n) << "best";
+					nbestStreamMegam << "decode_hope-model-fear_sent" << *sid << "." << (hope_n+n+fear_n) << "best";
 					string tmp = nbestStreamMegam.str();
-					nbestFileMegam = tmp+".sorted";
-					catCmd << "cat " << hope_nbest_filename.str() << " " << fear_nbest_filename.str() << " > " << tmp;
-					sortCmd << "sort -k1,1n " << tmp << " > " << nbestFileMegam;
+					//nbestFileMegam = tmp+".sorted";
+					nbestFileMegam = tmp;
+					catCmd << "cat " << hope_nbest_filename.str() << " " << model_nbest_filename.str() 
+							<< " " << fear_nbest_filename.str() << " > " << tmp;
+					//sortCmd << "sort -k 1 " << tmp << " > " << nbestFileMegam;
 					system(catCmd.str().c_str());
-					system(sortCmd.str().c_str());
+					//system(sortCmd.str().c_str());
 				}
 
 				if (hope_fear || hope_fear_rank || perceptron_update) {
@@ -772,12 +779,30 @@ int main(int argc, char** argv) {
 				    decoder->setWeights(mosesWeights);
 				}    
 
-				  //cerr << "Rank " << rank << ", epoch " << epoch << ", using weights: " << decoder->getWeights() << endl; 
-				  
+				  // ################
+				  ostringstream hope_nbest_filename, fear_nbest_filename, model_nbest_filename, ref_filename;
+				  hope_nbest_filename << "decode_hope_sent" << *sid << "." << hope_n << "best";
+				  fear_nbest_filename << "decode_fear_sent" << *sid << "." << fear_n << "best";
+				  model_nbest_filename << "decode_model_sent" << *sid << "." << n << "best";
+							  
+				  // save reference
+				  ref_filename <<  "decode_ref_sent" << *sid;
+				  referenceFileMegam = ref_filename.str();
+				  ofstream ref_out(referenceFileMegam.c_str());
+				  if (!ref_out) {
+					ostringstream msg;
+					msg << "Unable to open " << referenceFileMegam;
+					throw runtime_error(msg.str());
+				  }
+				  ref_out << referenceSentences[decoder->getShortestReferenceIndex(*sid)][*sid] << "\n";
+				  ref_out.close();
+				  // ################
+					
+					// HOPE		 				  
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch, hope_nbest_filename.str());
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup(chartDecoding);
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
@@ -835,7 +860,7 @@ int main(int argc, char** argv) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score " << endl;
 						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, 1, 0.0, bleuWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
-								1, distinctNbest, avgRefLength, rank, epoch);
+								1, distinctNbest, avgRefLength, rank, epoch, model_nbest_filename.str());
 						bestModel = outputModel[0];
 						decoder->cleanup(chartDecoding);
 						cerr << endl;
@@ -858,7 +883,7 @@ int main(int argc, char** argv) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuWeight_fear,
 								featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-								1,	distinctNbest, avgRefLength, rank, epoch);
+								1,	distinctNbest, avgRefLength, rank, epoch, fear_nbest_filename.str());
 						vector<const Word*> fear = outputFear[0];
 						decoder->cleanup(chartDecoding);
 						ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
@@ -931,6 +956,32 @@ int main(int argc, char** argv) {
 					  }
 					}
 					
+					// #####################
+					// concatenate nbest files (use hope and fear lists to extract samples from)
+					stringstream nbestStreamMegam, catCmd, sortCmd;
+					nbestStreamMegam << "decode_hope-model-fear_sent" << *sid << "." << (hope_n+n+fear_n) << "best";
+					nbestFileMegam = nbestStreamMegam.str();
+					catCmd << "cat " << hope_nbest_filename.str() << " " << model_nbest_filename.str() 
+							<< " " << fear_nbest_filename.str() << " > " << nbestFileMegam;
+					system(catCmd.str().c_str());
+					
+					// extract features and scores
+					string scoreDataFile = "decode_hope-model-fear.scores.dat";
+					string featureDataFile = "decode_hope-model-fear.features.dat";
+					stringstream extractorCmd;
+					extractorCmd << "/home/eva/mosesdecoder_github_saxnot/dist/bin/extractor"
+							" --scconfig case:true --scfile " << scoreDataFile << " --ffile " << featureDataFile <<
+							" -r " << referenceFileMegam << " -n " << nbestFileMegam;
+					system(extractorCmd.str().c_str());
+					
+					// NOTE: here we are just scoring the nbest lists created above. 
+					// We will use the (real, not dynamically computed) sentence bleu scores to select a pair of two
+					// translations with maximal Bleu difference
+					vector<float> bleuScores = BleuScorer::ScoreNbestList(scoreDataFile, featureDataFile);
+					for (size_t i=0; i < bleuScores.size(); ++i) 
+						cerr << "bleu: " << bleuScores[i] << endl;
+					// ######################
+					
 					if (skip) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", skip example (" << hope_length_ratio << ", " << bleuRatioHopeFear << ").. " << endl;
 						featureValuesHope[batchPosition].clear();
@@ -960,7 +1011,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup(chartDecoding);
 					cerr << endl;
@@ -973,7 +1024,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, fear_n, 0.0, bleuWeight_fear,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch, "");
 					bestModel = outputModel[0];
 					decoder->cleanup(chartDecoding);
 					cerr << endl;
@@ -994,7 +1045,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch);
+							1,	distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup(chartDecoding);
 					oneBests.push_back(bestModel);
@@ -1013,7 +1064,7 @@ int main(int argc, char** argv) {
 					size_t oraclePos = featureValues[batchPosition].size();
 					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch);
+							1,	distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> oracle = outputHope[0];
 					// needed for history
 					inputLengths.push_back(current_input_length);
@@ -1035,7 +1086,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch);
+							1,	distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup(chartDecoding);
 					oneBests.push_back(bestModel);
@@ -1048,7 +1099,7 @@ int main(int argc, char** argv) {
 //					size_t fearPos = featureValues[batchPosition].size();
 					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuWeight_fear,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch);
+							1, distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> fear = outputFear[0];
 					decoder->cleanup(chartDecoding);
 					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
@@ -1069,18 +1120,28 @@ int main(int argc, char** argv) {
 
 			if (megam) {
 				// extract features and scores
-				string scoreDataFile = "decode_hope-fear.scores.dat";
-				string featureDataFile = "decode_hope-fear.features.dat";
+				string scoreDataFile = "decode_hope-model-fear.scores.dat";
+				string featureDataFile = "decode_hope-model-fear.features.dat";
 				stringstream extractorCmd;
-				extractorCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/extractor"
+				//extractorCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/dist/bin/extractor"
+				extractorCmd << "/home/eva/mosesdecoder_github_saxnot/dist/bin/extractor"
 						" --scconfig case:true --scfile " << scoreDataFile << " --ffile " << featureDataFile <<
 						" -r " << referenceFileMegam << " -n " << nbestFileMegam;
 				system(extractorCmd.str().c_str());
-
+				
+				// NOTE: here we are just scoring the nbest lists created above. 
+				// We will use the (real, not dynamically computed) sentence bleu scores to select a pair of two
+				// translations with maximal Bleu difference
+				vector<float> bleuScores = BleuScorer::ScoreNbestList(scoreDataFile, featureDataFile);
+				for (size_t i=0; i < bleuScores.size(); ++i) 
+					cerr << "bleu: " << bleuScores[i] << endl;
+				
+				/*
 				// pro --> select training examples
 				stringstream proCmd;
 				string proDataFile = "decode_hope-fear.pro.data";
-				proCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/pro"
+				//proCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/dist/bin/pro"
+				proCmd << "/home/eva/mosesdecoder_github_saxnot/dist/bin/pro"
 						" --ffile " << featureDataFile << " --scfile " << scoreDataFile << " -o " << proDataFile;
 				system(proCmd.str().c_str());
 
@@ -1088,7 +1149,8 @@ int main(int argc, char** argv) {
 				stringstream megamCmd;
 				string megamOut = "decode_hope-fear.megam-weights";
 				string megamErr = "decode_hope-fear.megam-log";
-				megamCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/megam_i686.opt"
+				//megamCmd << "/afs/inf.ed.ac.uk/user/s07/s0787953/mosesdecoder_github_saxnot/mert/megam_i686.opt"
+				megamCmd << "/home/eva/mosesdecoder_github_saxnot/mert/megam_i686.opt"
 						" -fvals -maxi 30 -nobias binary " << proDataFile << " 1> " << megamOut <<
 						" 2> " << megamErr;
 				system(megamCmd.str().c_str());
@@ -1124,18 +1186,18 @@ int main(int argc, char** argv) {
 					if (keyValue[0].substr(0, 1).compare("F") == 0) {
 						cerr << "core weight: " << keyValue[0] << " " << keyValue[1] << endl;
 						//$WEIGHT[$1] = $2;
-		        //$sum += abs($2);
-		      }
-		      // sparse features
-		      else {
-		        //$$sparse_weights{$1} = $2;
-		      	cerr << "sparse weight: " << keyValue[0] << " " << keyValue[1] << endl;
-		      }
+						//$sum += abs($2);
+					}
+					// sparse features
+					else {
+						//$$sparse_weights{$1} = $2;
+						cerr << "sparse weight: " << keyValue[0] << " " << keyValue[1] << endl;
+					}
 				}
 
 				// normalize weights
 				//foreach (@WEIGHT) { $_ /= $sum; }
-		    //foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
+		    //foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; } */
 
 			}
 			else if (examples_in_batch == 0) {
@@ -1791,7 +1853,7 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
 		if (decode == 2) factor = -1.0;
 		cerr << "Rank " << rank << ", translating sentence " << sid << endl;
 		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, 1, dummyFeatureValues[0],
-				dummyBleuScores[0], dummyModelScores[0], n, true, false, rank, 0);
+				dummyBleuScores[0], dummyModelScores[0], n, true, false, rank, 0, "");
 		cerr << endl;
 		decoder->cleanup(StaticData::Instance().GetSearchAlgorithm() == ChartDecoding);
 
