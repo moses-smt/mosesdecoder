@@ -78,6 +78,10 @@ private:
   }
 
 public:
+  static void ResetCounter() {
+    s_denseVectorSize = 0;
+  }
+
   //! Create a new score collection with all values set to 0.0
   ScoreComponentCollection();
 
@@ -314,6 +318,10 @@ public:
   void LogCoreFeatures(size_t baseOfLog) {
 		m_scores.logCoreFeatures(baseOfLog);
 	}
+  
+  void PrintCoreFeatures() {
+    m_scores.printCoreFeatures();
+  }
 
 	void ThresholdScaling(float maxValue)
 	{

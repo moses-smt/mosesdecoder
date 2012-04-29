@@ -302,11 +302,19 @@ public:
 
   //! Load data into static instance. This function is required as LoadData() is not const
   static bool LoadDataStatic(Parameter *parameter) {
+    std::cerr << "Load static data.." << std::endl;
     return s_instance.LoadData(parameter);
+    std::cerr << "done.." << std::endl;
+  }
+  static void ClearDataStatic() {
+    std::cerr << "Clear static data.." << std::endl;
+    s_instance.ClearData();
+    std::cerr << "done.." << std::endl;
   }
 
   //! Main function to load everything. Also initialize the Parameter object
   bool LoadData(Parameter *parameter);
+  void ClearData();
 
   const PARAM_VEC &GetParam(const std::string &paramName) const {
     return m_parameter->GetParam(paramName);
@@ -476,6 +484,10 @@ public:
   }
   LMList GetLMList() const { 
     return m_languageModel; 
+  }
+  WordPenaltyProducer* GetWordPenaltyProducer() const {
+    assert(m_wordPenaltyProducers.size() >= 1);
+    return m_wordPenaltyProducers[0];
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;

@@ -67,20 +67,16 @@ namespace Mira {
 	  MiraOptimiser() :
 		  Optimiser() { }
 
-	  MiraOptimiser(bool onlyViolatedConstraints, float slack, bool scale_margin, bool scale_margin_precision,
-			  bool scale_update, bool scale_update_precision, float margin_slack, bool boost, 
-			  size_t update_scheme, bool normaliseMargin) :
+	  MiraOptimiser(float slack, bool scale_margin, bool scale_margin_precision,
+			bool scale_update, bool scale_update_precision, bool boost, bool normaliseMargin) :
 		  Optimiser(),
-		  m_onlyViolatedConstraints(onlyViolatedConstraints),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
 		  m_scale_margin_precision(scale_margin_precision),
 		  m_scale_update(scale_update),
 		  m_scale_update_precision(scale_update_precision),
 		  m_precision(1),
-		  m_margin_slack(margin_slack),
 		  m_boost(boost),
-		  m_update_scheme(update_scheme),
 		  m_normaliseMargin(normaliseMargin) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
@@ -145,10 +141,6 @@ namespace Mira {
      void setSlack(float slack) {
     	 m_slack = slack;
      }
-
-     void setMarginSlack(float margin_slack) {
-    	 m_margin_slack = margin_slack;
-     }
      
      void setPrecision(float precision) {
     	 m_precision = precision;
@@ -156,14 +148,8 @@ namespace Mira {
 
    private:
 
-      // add only violated constraints to the optimisation problem
-      bool m_onlyViolatedConstraints;
-
       // regularise Hildreth updates
       float m_slack;
-
-      // slack when comparing losses to model scores
-      float m_margin_slack;
 
       // scale margin with BLEU score or precision
       bool m_scale_margin, m_scale_margin_precision;
@@ -175,9 +161,6 @@ namespace Mira {
       
       // boosting of updates on misranked candidates
       bool m_boost;
-
-      // select 1 of 5 different update schemes
-      size_t m_update_scheme;
 
       // squash margin between 0 and 1
       bool m_normaliseMargin;

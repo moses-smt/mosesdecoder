@@ -242,7 +242,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
             const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
 
             std::vector<float> weightT = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights();
-            cerr << "Read weightT from translation sytem.. " << std::endl;
             targetPhraseCollection
             = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
                                                ,m_outputFactorsVec

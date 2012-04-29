@@ -41,6 +41,7 @@ namespace mpi = boost::mpi;
 #include "Optimiser.h"
 #include "Hildreth.h"
 #include "ThreadPool.h"
+#include "DummyScoreProducers.h"
 
 using namespace Mira;
 using namespace std;
@@ -70,21 +71,17 @@ int main(int argc, char** argv) {
 	size_t mixingFrequency;
 	size_t weightDumpFrequency;
 	string weightDumpStem;
-	float min_learning_rate;
 	bool scale_margin, scale_margin_precision;
 	bool scale_update, scale_update_precision;
 	size_t n;
 	size_t batchSize;
 	bool distinctNbest;
-	bool onlyViolatedConstraints;
 	bool accumulateWeights;
 	float historySmoothing;
 	bool scaleByInputLength, scaleByAvgInputLength;
 	bool scaleByInverseLength, scaleByAvgInverseLength;
 	float scaleByX;
-	float slack, dummy;
-	float slack_step;
-	float slack_min;
+	float slack;
 	bool averageWeights;
 	bool weightConvergence;
 	float learning_rate;
@@ -94,75 +91,67 @@ int main(int argc, char** argv) {
 	size_t baseOfLog;
 	string decoder_settings;
 	float min_weight_change;
-	float decrease_learning_rate;
 	bool normaliseWeights, normaliseMargin;
 	bool print_feature_values;
-	bool historyOf1best;
-	bool historyOfOracles;
+	bool historyBleu   ;
 	bool sentenceLevelBleu;
 	float bleuWeight, bleuWeight_hope, bleuWeight_fear;
-	float margin_slack;
-	float margin_slack_incr;
 	bool perceptron_update;
 	bool hope_fear, hope_fear_rank, hope_model;
 	bool model_hope_fear, rank_only;
 	int hope_n, fear_n, rank_n;
-	int threadcount;
-	size_t adapt_after_epoch;
 	size_t bleu_smoothing_scheme;
 	float max_length_dev_all;
 	float max_length_dev_hypos;
 	float max_length_dev_hope_ref;
 	float max_length_dev_fear_ref;
-	float relax_BP;
 	float min_oracle_bleu;
 	float minBleuRatio, maxBleuRatio;
 	bool boost;
 	bool decode_hope, decode_fear, decode_model;
 	string decode_filename;
-	size_t update_scheme;
-	bool separateUpdates, batchEqualsShard;
+	bool batchEqualsShard;
 	bool sparseAverage, dumpMixedWeights, sparseNoAverage;
-	bool useSourceLengthHistory;
 	int featureCutoff;
 	bool pruneZeroWeights;
 	bool megam;
 	bool printFeatureCounts, printNbestWithFeatures;
 	bool avgRefLength;
-	bool print_weights;
+	bool print_weights, print_core_weights, clear_static, debug_model, scale_lm, bleu_weight_lm, bleu_weight_lm_adjust, scale_wp;
+	float scale_lm_factor, bleu_weight_lm_factor, scale_wp_factor;
 	po::options_description desc("Allowed options");
 	desc.add_options()
-		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
-		("dummy", po::value<float>(&dummy)->default_value(-1), "Dummy variable for slack")
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
-		("adapt-after-epoch", po::value<size_t>(&adapt_after_epoch)->default_value(0), "Index of epoch after which adaptive parameters will be adapted")
 		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
 		("avg-ref-length", po::value<bool>(&avgRefLength)->default_value(false), "Use average reference length instead of shortest for BLEU score feature")
 		("base-of-log", po::value<size_t>(&baseOfLog)->default_value(10), "Base for taking logs of feature values")
 		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-		("bleu-score-weight", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
-		("bleu-score-weight-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-		("bleu-score-weight-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+		("bleu-weight", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
+		("bleu-weight-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
+		("bleu-weight-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+      	        ("bleu-weight-lm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
+      	        ("bleu-weight-factor-lm", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")     
+	        ("bleu-weight-adjust-lm", po::value<bool>(&bleu_weight_lm_adjust)->default_value(false), "Adjust bleu weight when lm weight changes")       
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
+  	        ("clear-static", po::value<bool>(&clear_static)->default_value(false), "Clear static data before every translation")
 		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 		("configs-folds", po::value<vector<string> >(&mosesConfigFilesFolds), "Moses ini-files, one for each fold")
 		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+ 	        ("debug-model", po::value<bool>(&debug_model)->default_value(false), "Get best model translation for debugging purposes")
 		("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
 		("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
 		("decode-model", po::value<bool>(&decode_model)->default_value(false), "Decode dev input set according to normal objective")
 		("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
 		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
-		("decr-learning-rate", po::value<float>(&decrease_learning_rate)->default_value(0),"Decrease learning rate by the given value after every epoch")
 		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
 		("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
 		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 		("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-		("history-of-1best", po::value<bool>(&historyOf1best)->default_value(false), "Use 1best translations to update the history")
-		("history-of-oracles", po::value<bool>(&historyOfOracles)->default_value(false), "Use oracle translations to update the history")
+		("history-of-1best", po::value<bool>(&historyBleu)->default_value(false), "Use 1best translations to update the history")
 		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
 		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
 		("hope-fear-rank", po::value<bool>(&hope_fear_rank)->default_value(false), "Use hope and fear translations for optimisation, use model for ranking")
@@ -172,56 +161,51 @@ int main(int argc, char** argv) {
 		("input-files-folds", po::value<vector<string> >(&inputFilesFolds), "Input files containing tokenised source, one for each fold")
 		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
 		("log-feature-values", po::value<bool>(&logFeatureValues)->default_value(false), "Take log of feature values according to the given base.")
-		("margin-incr", po::value<float>(&margin_slack_incr)->default_value(0), "Increment margin slack after every epoch by this amount")
-		("margin-slack", po::value<float>(&margin_slack)->default_value(0), "Slack when comparing left and right hand side of constraints")
 		("max-length-dev-all", po::value<float>(&max_length_dev_all)->default_value(-1), "Make use of all 3 following options")
 		("max-length-dev-hypos", po::value<float>(&max_length_dev_hypos)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and fear translations")
 		("max-length-dev-hope-ref", po::value<float>(&max_length_dev_hope_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between hope and reference translations")
 		("max-length-dev-fear-ref", po::value<float>(&max_length_dev_fear_ref)->default_value(-1), "Number between 0 and 1 specifying the percentage of admissible length deviation between fear and reference translations")
 		("min-bleu-ratio", po::value<float>(&minBleuRatio)->default_value(-1), "Set a minimum BLEU ratio between hope and fear")
 		("max-bleu-ratio", po::value<float>(&maxBleuRatio)->default_value(-1), "Set a maximum BLEU ratio between hope and fear")
-		("megam", po::value<bool>(&megam)->default_value(false), "Use megam for optimization step")
-		("min-learning-rate", po::value<float>(&min_learning_rate)->default_value(0), "Set a minimum learning rate")
+	        ("megam", po::value<bool>(&megam)->default_value(false), "Use megam for optimization step")
 		("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
 		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
 		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
 		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
 		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
 		("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
-	  ("normalise-weights", po::value<bool>(&normaliseWeights)->default_value(true), "Whether to normalise the updated weights before passing them to the decoder")
+	        ("normalise-weights", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
 		("normalise-margin", po::value<bool>(&normaliseMargin)->default_value(false), "Normalise the margin: squash between 0 and 1")
-		("only-violated-constraints", po::value<bool>(&onlyViolatedConstraints)->default_value(false), "Add only violated constraints to the optimisation problem")
 		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
 		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
 		("print-feature-counts", po::value<bool>(&printFeatureCounts)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
 		("print-nbest-with-features", po::value<bool>(&printNbestWithFeatures)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
-	  ("print-weights", po::value<bool>(&print_weights)->default_value(false), "Print out new weights")
+	  ("print-weights", po::value<bool>(&print_weights)->default_value(false), "Print out current weights")
+	  ("print-core-weights", po::value<bool>(&print_core_weights)->default_value(false), "Print out current core weights")
 		("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")				
 		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
 		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
 		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
-		("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")		
-		("relax-BP", po::value<float>(&relax_BP)->default_value(1), "Relax the BP by setting this value between 0 and 1")
+		("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")	       
 		("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale the BLEU score by (a history of) the inverse input length")
 		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
 		("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by an average of the input length")
 		("scale-by-avg-inverse-length", po::value<bool>(&scaleByAvgInverseLength)->default_value(false), "Scale BLEU by an average of the inverse input length")
 		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
-		("scale-margin", po::value<bool>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
+	        ("scale-lm", po::value<bool>(&scale_lm)->default_value(false), "Scale the language model feature") 
+    	        ("scale-factor-lm", po::value<float>(&scale_lm_factor)->default_value(2), "Scale the language model feature by this factor")
+       	        ("scale-wp", po::value<bool>(&scale_wp)->default_value(false), "Scale the word penalty feature") 
+     	        ("scale-factor-wp", po::value<float>(&scale_wp_factor)->default_value(2), "Scale the word penalty feature by this factor")
+	        ("scale-margin", po::value<bool>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
 		("scale-margin-precision", po::value<bool>(&scale_margin_precision)->default_value(0), "Scale the margin by the precision of the oracle translation")
 		("scale-update", po::value<bool>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
 		("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale the update by the precision of the oracle translation")	
 		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
-		("separate-updates", po::value<bool>(&separateUpdates)->default_value(false), "Compute separate updates for each sentence in a batch")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-		("slack-min", po::value<float>(&slack_min)->default_value(0.01), "Minimum slack used")
-		("slack-step", po::value<float>(&slack_step)->default_value(0), "Increase slack from epoch to epoch by the value provided")
+	  ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 		("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
 		("sparse-no-average", po::value<bool>(&sparseNoAverage)->default_value(false), "Don't average sparse weights, just sum")
 		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
-		("threads", po::value<int>(&threadcount)->default_value(1), "Number of threads used")
-		("update-scheme", po::value<size_t>(&update_scheme)->default_value(1), "Update scheme, default: 1")
-		("use-source-length-history", po::value<bool>(&useSourceLengthHistory)->default_value(false), "Use history of source length instead of target length for history Bleu")
 		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
 		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
@@ -264,9 +248,6 @@ int main(int argc, char** argv) {
   		cerr << "Training with " << mosesConfigFilesFolds.size() << " folds" << endl;
   	trainWithMultipleFolds = true;
   }
-  
-  if (dummy != -1)
-    slack = dummy;
 
   if (dumpMixedWeights && (mixingFrequency != weightDumpFrequency)) {
 	  cerr << "Set mixing frequency = weight dump frequency for dumping mixed weights!" << endl;
@@ -380,12 +361,10 @@ int main(int argc, char** argv) {
 	if (scaleByAvgInputLength ||  scaleByInverseLength || scaleByAvgInverseLength)
 		scaleByInputLength = false;
 
-	if (historyOf1best || historyOfOracles)
+	if (historyBleu)
 		sentenceLevelBleu = false;
 	if (!sentenceLevelBleu) {
-		if (!historyOf1best && !historyOfOracles) {
-			historyOf1best = true;
-		}
+	  historyBleu = true;
 	}
 
 	// initialise Moses
@@ -411,16 +390,9 @@ int main(int argc, char** argv) {
 	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
 	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
-			scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
+			scaleByX, historySmoothing, bleu_smoothing_scheme);
 	SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
 	bool chartDecoding = (searchAlgorithm == ChartDecoding);
-
-	cerr << "Normalise weights? " << normaliseWeights << endl;
-	if (normaliseWeights) {
-		ScoreComponentCollection startWeights = decoder->getWeights();
-		startWeights.L1Normalise();
-		decoder->setWeights(startWeights);
-	}
 
 	if (decode_hope || decode_fear || decode_model) {
 		size_t decode = 1;
@@ -463,8 +435,8 @@ int main(int argc, char** argv) {
 			cerr << "Optimising using Mira" << endl;
 			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
 		}
-		optimiser = new MiraOptimiser(onlyViolatedConstraints, slack, scale_margin, scale_margin_precision,
-				scale_update, scale_update_precision, margin_slack, boost, update_scheme, normaliseMargin);
+		optimiser = new MiraOptimiser(slack, scale_margin, scale_margin_precision,
+					      scale_update, scale_update_precision, boost, normaliseMargin);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {
@@ -505,13 +477,6 @@ int main(int argc, char** argv) {
 	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || hope_fear_rank || megam)) {
 		cerr << "Error: Need to select one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
-	}
-
-	if (bleuWeight_hope == -1) {
-		bleuWeight_hope = bleuWeight;
-	}
-	if (bleuWeight_fear == -1) {
-		bleuWeight_fear = bleuWeight;
 	}
 
 	if (max_length_dev_all != -1) {
@@ -575,16 +540,37 @@ int main(int argc, char** argv) {
 
 	// set core weights
 	ScoreComponentCollection initialWeights = decoder->getWeights();
+	cerr << "Rank " << rank << ", initial weights: " << initialWeights << endl;
 	if (coreWeightMap.size() > 0) {
 		ProducerWeightMap::iterator p;
 		for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
 			initialWeights.Assign(p->first, p->second);
 	}
+	cerr << "Normalise weights? " << normaliseWeights << endl;
+	if (normaliseWeights) 
+	  initialWeights.L1Normalise();
 	decoder->setWeights(initialWeights);
 
-	//Main loop:
-	// print initial weights
-	cerr << "Rank " << rank << ", initial weights: " << initialWeights << endl;
+	// set bleu weight to twice the size of the language model weight(s)
+	const LMList& lmList = staticData.GetLMList();
+	if (bleu_weight_lm) {
+	  float lmSum = 0;
+	  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) 
+	    lmSum += abs(initialWeights.GetScoreForProducer(*i));
+	  bleuWeight = lmSum * bleu_weight_lm_factor;
+	  
+	  if (bleuWeight_hope == -1) {
+	    bleuWeight_hope = bleuWeight;
+	  }
+	  if (bleuWeight_fear == -1) {
+	    bleuWeight_fear = bleuWeight;
+	  }
+	}
+
+	cerr << "Bleu weight: " << bleuWeight << endl;
+
+	//Main loop:	
+	cerr << "Rank " << rank << ", start weights: " << initialWeights << endl;
 	ScoreComponentCollection cumulativeWeights; // collect weights per epoch to produce an average
 	ScoreComponentCollection cumulativeWeightsBinary;
 	size_t numberOfUpdates = 0;
@@ -707,7 +693,7 @@ int main(int argc, char** argv) {
 					bleuScoresFear.push_back(newScores);
 					modelScoresHope.push_back(newScores);
 					modelScoresFear.push_back(newScores);
-					if (historyOf1best) {
+					if (historyBleu || debug_model) {
 						dummyFeatureValues.push_back(newFeatureValues);
 						dummyBleuScores.push_back(newScores);
 						dummyModelScores.push_back(newScores);
@@ -761,12 +747,30 @@ int main(int argc, char** argv) {
 				}
 
 				if (hope_fear || hope_fear_rank || perceptron_update) {
+				  if (print_weights)
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", current weights: " << mosesWeights << endl;
+				  if (print_core_weights) {
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", current weights: ";
+				    mosesWeights.PrintCoreFeatures(); 
+				    cerr << endl;
+				  }
+				  
+				  // check LM weight
+				  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) {
+				    float lmWeight = mosesWeights.GetScoreForProducer(*i);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight: " << lmWeight << endl;
+				    if (lmWeight <= 0)
+				      cerr << "ERROR: language model weight should never be <= 0." << endl;
+				  }
+				  
 					// HOPE		  
-				  /*delete decoder;
-				  StaticData::ClearDataStatic();
-				  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-				  decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
-				  decoder->setWeights(mosesWeights);*/
+				  if (clear_static) {
+				    delete decoder;
+				    StaticData::ClearDataStatic();
+				    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+				    decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+				    decoder->setWeights(mosesWeights);
+				}    
 
 				  //cerr << "Rank " << rank << ", epoch " << epoch << ", using weights: " << decoder->getWeights() << endl; 
 				  
@@ -795,9 +799,8 @@ int main(int argc, char** argv) {
 
 					
 					float precision = bleuScoresHope[batchPosition][0];
-					if (historyOf1best) {
-						if (useSourceLengthHistory) precision /= decoder->getSourceLengthHistory();
-						else precision /= decoder->getTargetLengthHistory();
+					if (historyBleu) {
+					  precision /= decoder->getTargetLengthHistory();
 					}
 					else {
 						if (scaleByAvgInputLength) precision /= decoder->getAverageInputLength();
@@ -805,13 +808,12 @@ int main(int argc, char** argv) {
 						precision /= scaleByX;
 					}
 					if (scale_margin_precision || scale_update_precision) {
-						if (historyOf1best || scaleByAvgInputLength || scaleByAvgInverseLength) {
+						if (historyBleu || scaleByAvgInputLength || scaleByAvgInverseLength) {
 							cerr << "Rank " << rank << ", epoch " << epoch << ", set hope precision: " << precision << endl;
 							((MiraOptimiser*) optimiser)->setPrecision(precision);
 						}
 					}
 					
-//					exit(0);
 					bool skip = false;
 
 					// Length-related example selection
@@ -820,9 +822,17 @@ int main(int argc, char** argv) {
 					  skip = true;
 
 					vector<const Word*> bestModel;
-					if (historyOf1best && !skip) {
+					if (debug_model || (historyBleu && !skip)) {
 						// MODEL (for updating the history only, using dummy vectors)
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (for history or length stabilisation)" << endl;
+					  if (clear_static) {
+                                            delete decoder;
+					    StaticData::ClearDataStatic();
+                                            decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+                                            decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+                                            decoder->setWeights(mosesWeights);
+                                          }
+
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score " << endl;
 						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, 1, 0.0, bleuWeight,
 								dummyFeatureValues[batchPosition], dummyBleuScores[batchPosition], dummyModelScores[batchPosition],
 								1, distinctNbest, avgRefLength, rank, epoch);
@@ -837,11 +847,13 @@ int main(int argc, char** argv) {
 					float bleuRatioHopeFear = 0;
 					int fearSize = 0;
 					if (!skip) {
-					  /*delete decoder;
-					  StaticData::ClearDataStatic();
-					  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-					  decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme, relax_BP, useSourceLengthHistory);
-					  decoder->setWeights(mosesWeights);*/
+					  if (clear_static) {
+					    delete decoder;
+					    StaticData::ClearDataStatic();
+					    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+					    decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					    decoder->setWeights(mosesWeights);
+					  }
 
 						cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 						vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuWeight_fear,
@@ -888,7 +900,7 @@ int main(int argc, char** argv) {
 
 					// sanity check
 					float epsilon = 0.0001;
-					if (historyOf1best) {
+					if (historyBleu) {
 					  if (dummyBleuScores[batchPosition][0] > bleuScoresHope[batchPosition][0] &&
 					      dummyModelScores[batchPosition][0] > modelScoresHope[batchPosition][0]) {
 					    if (abs(dummyBleuScores[batchPosition][0] - bleuScoresHope[batchPosition][0]) > epsilon &&
@@ -908,8 +920,14 @@ int main(int argc, char** argv) {
 					}
 					if (bleuScoresFear[batchPosition][0] > bleuScoresHope[batchPosition][0]) {
 					  if (abs(bleuScoresFear[batchPosition][0] - bleuScoresHope[batchPosition][0]) > epsilon) {
-					    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than HOPE translation. (abs-diff: " << abs(bleuScoresFear[batchPosition][0] - bleuScoresHope[batchPosition][0]) << " > " << epsilon << ")" <<endl;
+					    // check if it's an error or a warning
 					    skip = true;
+					    if (modelScoresFear[batchPosition][0] > modelScoresHope[batchPosition][0] && abs(modelScoresFear[batchPosition][0] - modelScoresHope[batchPosition][0]) > epsilon) {
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR translation better than HOPE translation. (abs-diff: " << abs(bleuScoresFear[batchPosition][0] - bleuScoresHope[batchPosition][0]) << ")" <<endl;			   
+					    }
+					    else {
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", WARNING: FEAR translation has better Bleu than HOPE translation. (abs-diff: " << abs(bleuScoresFear[batchPosition][0] - bleuScoresHope[batchPosition][0]) << ")" <<endl;
+					    }
 					  }
 					}
 					
@@ -919,7 +937,7 @@ int main(int argc, char** argv) {
 						featureValuesFear[batchPosition].clear();
 						bleuScoresHope[batchPosition].clear();
 						bleuScoresFear[batchPosition].clear();
-						if (historyOf1best) {
+						if (historyBleu) {
 							dummyFeatureValues[batchPosition].clear();
 							dummyBleuScores[batchPosition].clear();
 						}
@@ -1143,6 +1161,35 @@ int main(int argc, char** argv) {
 				    break;
 				  }
 				}
+
+				// scale LM feature (to avoid rapid changes)
+				if (scale_lm) {
+				  for (LMList::const_iterator iter = lmList.begin(); iter != lmList.end(); ++iter) {
+				    // scale up weight
+				    float lmWeight = mosesWeights.GetScoreForProducer(*iter);
+				    mosesWeights.Assign(*iter, lmWeight*scale_lm_factor);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight scaled from " << lmWeight << " to " << lmWeight*scale_lm_factor << endl;
+
+				    // scale down score
+				    scaleFeatureScore(*iter, scale_lm_factor, featureValuesHope, rank, epoch);
+				    scaleFeatureScore(*iter, scale_lm_factor, featureValuesFear, rank, epoch);
+				    scaleFeatureScore(*iter, scale_lm_factor, featureValues, rank, epoch);
+				  }
+				}
+
+				// scale WP
+				if (scale_wp) {
+				  // scale up weight  
+				  WordPenaltyProducer *wp = staticData.GetWordPenaltyProducer();
+				  float wpWeight = mosesWeights.GetScoreForProducer(wp);
+                                  mosesWeights.Assign(wp, wpWeight*scale_wp_factor);
+                                  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight scaled from " << wpWeight << " to " << wpWeight*scale_wp_factor << endl;
+
+				  // scale down score
+				  scaleFeatureScore(wp, scale_wp_factor, featureValuesHope, rank, epoch);
+				  scaleFeatureScore(wp, scale_wp_factor, featureValuesFear, rank, epoch);
+				  scaleFeatureScore(wp, scale_wp_factor, featureValues, rank, epoch);
+				}
 				
 				// take logs of feature values
 				if (logFeatureValues) {
@@ -1189,25 +1236,7 @@ int main(int argc, char** argv) {
 									featureValuesHope[0][0], featureValuesFear[0][0], bleuScoresHope[0][0], bleuScoresFear[0][0],
 									modelScoresHope[0][0], modelScoresFear[0][0], learning_rate, rank, epoch);
 						else {
-							if (batchSize > 1 && separateUpdates) {
-								// separate updates for all input sentences
-								ScoreComponentCollection tmpWeights(mosesWeights);
-								for (size_t i = 0; i < batchSize; ++i) {
-									// use only the specified batch position to compute the update
-									int updatePosition = i;
-									ScoreComponentCollection partialWeightUpdate;
-									size_t partial_update_status = optimiser->updateWeightsHopeFear(tmpWeights, partialWeightUpdate,
-										featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
-										modelScoresHope, modelScoresFear, learning_rate, rank, epoch, updatePosition);
-									if (partial_update_status == 0) {
-										update_status = 0;
-										weightUpdate.PlusEquals(partialWeightUpdate);
-										tmpWeights.PlusEquals(partialWeightUpdate);
-									}
-								}
-							}
-							else
-								update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
+						  update_status = optimiser->updateWeightsHopeFear(mosesWeights, weightUpdate,
 									featureValuesHope, featureValuesFear, bleuScoresHope, bleuScoresFear,
 									modelScoresHope, modelScoresFear, learning_rate, rank, epoch);
 						}
@@ -1232,6 +1261,25 @@ int main(int argc, char** argv) {
 				}
 
 //			sumStillViolatedConstraints += update_status;
+
+				// rescale LM feature                                              
+				if (scale_lm) {
+				  for (LMList::const_iterator iter = lmList.begin(); iter != lmList.end(); ++iter) {
+				    // scale weight back down                                                                
+				    float lmWeight = mosesWeights.GetScoreForProducer(*iter);
+				    mosesWeights.Assign(*iter, lmWeight/scale_lm_factor);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight rescaled from " << lmWeight << " to " << lmWeight/scale_lm_factor << endl;
+				  }
+				}
+
+				// rescale WP feature
+				if (scale_wp) {
+				  // scale weight back down
+				  WordPenaltyProducer *wp = staticData.GetWordPenaltyProducer();
+				  float wpWeight = mosesWeights.GetScoreForProducer(wp);
+				  mosesWeights.Assign(wp, wpWeight/scale_wp_factor);
+				  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight rescaled from " << wpWeight << " to " << wpWeight/scale_wp_factor << endl;                                  
+                                }
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
@@ -1263,22 +1311,30 @@ int main(int argc, char** argv) {
 
 					// set new Moses weights
 					decoder->setWeights(mosesWeights);
-					if (print_weights)
-					  cerr << "Rank " << rank << ", epoch " << epoch << ", new weights: " << mosesWeights << endl;
+
+					// adjust bleu weight
+					if (bleu_weight_lm_adjust) {
+					  float lmSum = 0;
+					  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i)
+					    lmSum += abs(mosesWeights.GetScoreForProducer(*i));
+					  bleuWeight = lmSum * bleu_weight_lm_factor;
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", adjusting Bleu weight to " << bleuWeight << " (factor " << bleu_weight_lm_factor << ")" << endl;
+					  
+					  if (bleuWeight_hope == -1) {
+					    bleuWeight_hope = bleuWeight;
+					  }
+					  if (bleuWeight_fear == -1) {
+					    bleuWeight_fear = bleuWeight;
+					  }
+					}
 				}
 
 				// update history (for approximate document Bleu)
-				if (historyOf1best) {
+				if (historyBleu) {
 					for (size_t i = 0; i < oneBests.size(); ++i) {
 						cerr << "Rank " << rank << ", epoch " << epoch << ", update history with 1best length: " << oneBests[i].size() << " ";
 						}
 					decoder->updateHistory(oneBests, inputLengths, ref_ids, rank, epoch);
-				}
-				else if (historyOfOracles) {
-					for (size_t i = 0; i < oracles.size(); ++i) {
-						cerr << "Rank " << rank << ", epoch " << epoch << ", update history with oracle length: " << oracles[i].size() << " ";
-					}
-					decoder->updateHistory(oracles, inputLengths, ref_ids, rank, epoch);
 				}
 				deleteTranslations(oracles);
 				deleteTranslations(oneBests);
@@ -1462,7 +1518,7 @@ int main(int argc, char** argv) {
 			fearPlusFeatures.close();
 		}
 
-		if (verbosity > 0) {
+		if (historyBleu) {
 			cerr << "Bleu feature history after epoch " <<  epoch << endl;
 			decoder->printBleuFeatureHistory(cerr);
 		}
@@ -1537,42 +1593,6 @@ int main(int argc, char** argv) {
 				mpi::broadcast(world, stop, 0);
 #endif
 			} //end if (weightConvergence)
-
-			// adjust flexible parameters
-			if (!stop && epoch >= adapt_after_epoch) {
-				// if using flexible slack, decrease slack parameter for next epoch
-				if (slack_step > 0) {
-					if (slack - slack_step >= slack_min) {
-						if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-							slack -= slack_step;
-							VERBOSE(1, "Change slack to: " << slack << endl);
-							((MiraOptimiser*) optimiser)->setSlack(slack);
-						}
-					}
-				}
-
-				// if using flexible margin slack, decrease margin slack parameter for next epoch
-				if (margin_slack_incr > 0.0001) {
-					if (typeid(*optimiser) == typeid(MiraOptimiser)) {
-						margin_slack += margin_slack_incr;
-						VERBOSE(1, "Change margin slack to: " << margin_slack << endl);
-						((MiraOptimiser*) optimiser)->setMarginSlack(margin_slack);
-					}
-				}
-
-				// change learning rate
-				if ((decrease_learning_rate > 0) && (learning_rate - decrease_learning_rate >= min_learning_rate)) {
-					learning_rate -= decrease_learning_rate;
-					if (learning_rate <= 0.0001) {
-						learning_rate = 0;
-						stop = true;
-#ifdef MPI_ENABLE
-						mpi::broadcast(world, stop, 0);
-#endif
-					}
-					VERBOSE(1, "Change learning rate to " << learning_rate << endl);
-				}
-			}
 		}
 	} // end of epoch loop
 
@@ -1805,4 +1825,18 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
 
 	delete decoder;
 	exit(0);
+}
+
+void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
+  string name = sp->GetScoreProducerWeightShortName();
+
+  // scale down score
+  float featureScore;
+  for (size_t i=0; i<featureValues.size(); ++i) { // each item in batch
+    for (size_t j=0; j<featureValues[i].size(); ++j) { // each item in nbest
+      featureScore = featureValues[i][j].GetScoreForProducer(sp);
+      featureValues[i][j].Assign(sp, featureScore/scaling_factor);
+      cerr << "Rank " << rank << ", epoch " << epoch << ", " << name << " score scaled from " << featureScore << " to " << featureScore/scaling_factor << endl;
+    }
+  }
 }

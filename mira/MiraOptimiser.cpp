@@ -28,7 +28,6 @@ size_t MiraOptimiser::updateWeights(
 
 	// most violated constraint in batch
 	ScoreComponentCollection max_batch_featureValueDiff;
-	float max_batch_lossMinusModelScoreDiff = -1;
 
 	// Make constraints for new hypothesis translations
 	float epsilon = 0.0001;
@@ -56,19 +55,16 @@ size_t MiraOptimiser::updateWeights(
 //		    float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 		    float modelScoreDiff = oracleModelScores[i] - modelScores[i][j];
 		    float diff = 0;
-		    if (loss > (modelScoreDiff + m_margin_slack)) {
-		    	diff = loss - (modelScoreDiff + m_margin_slack);
+		    if (loss > modelScoreDiff) {
+		    	diff = loss - modelScoreDiff;
 		    }
-		    cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " <<  m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+		    cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
 
 		    if (diff > epsilon) {
 		    	violated = true;
 		    }
-		    else if (m_onlyViolatedConstraints) {
-		    	addConstraint = false;
-		    }
 
-		    float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);
+		    float lossMinusModelScoreDiff = loss - modelScoreDiff;
 		    if (addConstraint) {
 		    	if (m_normaliseMargin)
 		    		lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
@@ -146,7 +142,7 @@ size_t MiraOptimiser::updateWeights(
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
 		float loss = all_losses[i];
-		float diff = loss - (modelScoreDiff + m_margin_slack);
+		float diff = loss - modelScoreDiff;
 		if (diff > epsilon) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;
@@ -180,7 +176,6 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 
 	// most violated constraint in batch
 	ScoreComponentCollection max_batch_featureValueDiff;
-	float max_batch_lossMinusModelScoreDiff = -1;
 
 	// Make constraints for new hypothesis translations
 	float epsilon = 0.0001;
@@ -215,19 +210,16 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 //				float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
 				float modelScoreDiff = modelScoresHope[i][j] - modelScoresFear[i][k];
 				float diff = 0;
-				if (loss > (modelScoreDiff + m_margin_slack)) {
-					diff = loss - (modelScoreDiff + m_margin_slack);
+				if (loss > modelScoreDiff) {
+					diff = loss - modelScoreDiff;
 				}
-				cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+				cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
 
 				if (diff > epsilon) {
 					violated = true;
 				}
-				else if (m_onlyViolatedConstraints) {
-					addConstraint = false;
-				}
 
-				float lossMinusModelScoreDiff = loss - (modelScoreDiff + m_margin_slack);			
+				float lossMinusModelScoreDiff = loss - modelScoreDiff;			
 				if (addConstraint) {
 					if (m_normaliseMargin)
 						lossMinusModelScoreDiff = (2/(1 + exp(- lossMinusModelScoreDiff))) - 1;
@@ -318,7 +310,7 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
 		float loss = all_losses[i];
-		float diff = loss - (modelScoreDiff + m_margin_slack);
+		float diff = loss - modelScoreDiff;
 		if (diff > epsilon) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;
@@ -349,86 +341,29 @@ size_t MiraOptimiser::updateWeightsAnalytically(
 
  // cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << featureValuesHope << endl;
  // cerr << "Rank " << rank << ", epoch " << epoch << ", fear: " << featureValuesFear << endl;
-
-  // scenario 1: reward only-hope, penalize only-fear
-  // scenario 2: reward all-hope, penalize only-fear
-  // scenario 3: reward all-hope
-  // scenario 4: reward strongly only-hope, reward mildly all-hope
-  // scenario 5: reward strongly only-hope, reward mildly all-hope, penalize only-fear
-  // scenario 6: reward only-hope
-  // scenario 7: penalize only-fear
-
-  ScoreComponentCollection featureValueDiff;
-  switch (m_update_scheme) {
-  case 2:
-	  // values: 1: all-hope, -1: only-fear
-	  featureValueDiff = featureValuesHope;
-	  featureValueDiff.MinusEquals(featureValuesFear);
-	  featureValueDiff.SparsePlusEquals(featureValuesHope);
-	  //max: 1 (set all 2 to 1)
-	  featureValueDiff.CapMax(1);
-	  break;
-  case 3:
-	  // values: 1: all-hope
-	  featureValueDiff = featureValuesHope;
-	  break;
-  case 4:
-	  // values: 2: only-hope, 1: both
-	  featureValueDiff = featureValuesHope;
-	  featureValueDiff.MinusEquals(featureValuesFear);
-	  featureValueDiff.SparsePlusEquals(featureValuesHope);
-	  // min: 0 (set all -1 to 0)
-	  featureValueDiff.CapMin(0);
-	  break;
-  case 5:
-	  // values: 2: only-hope, 1: both, -1: only-fear
-	  featureValueDiff = featureValuesHope;
-	  featureValueDiff.MinusEquals(featureValuesFear);
-	  featureValueDiff.SparsePlusEquals(featureValuesHope);
-	  break;
-  case 6:
-  	// values: 1: only-hope
-  	featureValueDiff = featureValuesHope;
-  	featureValueDiff.MinusEquals(featureValuesFear);
-  	// min: 0 (set all -1 to 0)
-  	featureValueDiff.CapMin(0);
-  	break;
-  case 7:
-  	// values: -1: only-fear
-  	featureValueDiff = featureValuesHope;
-  	featureValueDiff.MinusEquals(featureValuesFear);
-  	// max: 0 (set all 1 to 0)
-  	featureValueDiff.CapMax(0);
-  	break;
-  case 1:
-  default:
-	  // values: 1: only-hope, -1: only-fear
-	  featureValueDiff = featureValuesHope;
-	  featureValueDiff.MinusEquals(featureValuesFear);
-	  break;
+  ScoreComponentCollection featureValueDiff = featureValuesHope;
+  featureValueDiff.MinusEquals(featureValuesFear);
+  if (featureValueDiff.GetL1Norm() == 0) {
+    cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
+    return 1;
   }
-
-	if (featureValueDiff.GetL1Norm() == 0) {
-		cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
-		return 1;
-	}
 
 //  cerr << "Rank " << rank << ", epoch " << epoch << ", hope - fear: " << featureValueDiff << endl;
 //  float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
   float modelScoreDiff = modelScoreHope - modelScoreFear;
   float loss = bleuScoreHope - bleuScoreFear;
   float diff = 0;
-  if (loss > (modelScoreDiff + m_margin_slack)) {
-  	diff = loss - (modelScoreDiff + m_margin_slack);
+  if (loss > modelScoreDiff) {
+  	diff = loss - modelScoreDiff;
   }
-  cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+  cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
   if (m_normaliseMargin) {
     modelScoreDiff = (2/(1 + exp(-modelScoreDiff))) - 1;
     loss = (2/(1 + exp(-loss))) - 1;
-    if (loss > (modelScoreDiff + m_margin_slack)) {
-      diff = loss - (modelScoreDiff + m_margin_slack);
+    if (loss > modelScoreDiff) {
+      diff = loss - modelScoreDiff;
     }
-    cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " + " << m_margin_slack << " >= " << loss << " (current violation: " << diff << ")" << endl;
+    cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
   }
   
   if (m_scale_margin) {
@@ -512,7 +447,7 @@ size_t MiraOptimiser::updateWeightsAnalytically(
   featureValueDiff = featureValuesHope;
   featureValueDiff.MinusEquals(featureValuesFear);
   modelScoreDiff = featureValueDiff.InnerProduct(newWeights);
-  diff = loss - (modelScoreDiff + m_margin_slack);
+  diff = loss - modelScoreDiff;
   // approximate comparison between floats!
   if (diff > epsilon) {
     constraintViolatedAfter = true;
@@ -581,9 +516,6 @@ size_t MiraOptimiser::updateWeightsRankModel(
 				if (diff > epsilon) {
 					violated = true;
 				}
-				else if (m_onlyViolatedConstraints) {
-					addConstraint = false;
-				}
 
 				float lossMinusModelScoreDiff = loss - modelScoreDiff;
 				if (addConstraint) {
@@ -663,7 +595,7 @@ size_t MiraOptimiser::updateWeightsRankModel(
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
 		float loss = all_losses[i];
-		float diff = loss - (modelScoreDiff + m_margin_slack);
+		float diff = loss - modelScoreDiff;
 		if (diff > epsilon) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;
@@ -731,9 +663,6 @@ size_t MiraOptimiser::updateWeightsHopeFearAndRankModel(
 				if (diff > epsilon) {
 					violated = true;
 				}
-				else if (m_onlyViolatedConstraints) {
-					addConstraint = false;
-				}
 
 				float lossMinusModelScoreDiff = loss - modelScoreDiff;
 				if (addConstraint) {
@@ -786,9 +715,6 @@ size_t MiraOptimiser::updateWeightsHopeFearAndRankModel(
 
 				if (diff > epsilon) {
 					violated = true;
-				}
-				else if (m_onlyViolatedConstraints) {
-					addConstraint = false;
 				}
 
 				float lossMinusModelScoreDiff = loss - modelScoreDiff;
@@ -869,7 +795,7 @@ size_t MiraOptimiser::updateWeightsHopeFearAndRankModel(
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
 		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
 		float loss = all_losses[i];
-		float diff = loss - (modelScoreDiff + m_margin_slack);
+		float diff = loss - modelScoreDiff;
 		if (diff > epsilon) {
 			++violatedConstraintsAfter;
 			newDistanceFromOptimum += diff;

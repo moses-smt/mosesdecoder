@@ -66,7 +66,7 @@ public:
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.9),
 	                                 m_useSourceLengthHistory(0),
-	                                 m_smoothing_scheme(PLUS_ONE),
+	                                 m_smoothing_scheme(PLUS_POINT_ONE),
 	                                 m_relax_BP(1) {}
 
     std::string GetScoreProducerDescription() const
@@ -93,8 +93,7 @@ public:
     void PrintRefLength(const std::vector<size_t>& ref_ids);
     void SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-    		float scaleByX, float historySmoothing, size_t scheme, float relaxBP,
-    		bool useSourceLengthHistory);
+    		float scaleByX, float historySmoothing, size_t scheme);
 
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
@@ -163,7 +162,7 @@ private:
     float m_historySmoothing;
     bool m_useSourceLengthHistory;
 
-    enum SmoothingScheme { PLUS_ONE = 1, LIGHT = 2, PAPINENI = 3 };
+    enum SmoothingScheme { PLUS_ONE = 1, PLUS_POINT_ONE = 2, PAPINENI = 3 };
     SmoothingScheme m_smoothing_scheme;
 
     // relax application of the BP by setting a value between 0 and 1

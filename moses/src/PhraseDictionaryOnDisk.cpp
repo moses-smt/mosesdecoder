@@ -95,7 +95,6 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const ChartCellCollection &cellCollection)
 {
   std::vector<float> weightT = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights();
-  cerr << "Read weightT from translation sytem.. " << std::endl;	
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
                                           m_dbWrapper, m_languageModels,
                                           m_wpProducer, m_inputFactorsVec,

@@ -145,7 +145,6 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
   const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
   std::vector<float> weightsT = system.GetTranslationWeights();
   weightWP = system.GetWeightWordPenalty();
-  VERBOSE(1, cerr << "weightWP: " << weightWP << std::endl);
   
   //m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightsT.begin(), 0.0f);

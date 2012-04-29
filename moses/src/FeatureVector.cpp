@@ -323,6 +323,17 @@ namespace Moses {
 		  m_coreFeatures[i] = logOfValue;
 	  }
   }
+  
+  void FVector::printCoreFeatures() {
+    cerr << "core=(";
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      cerr << m_coreFeatures[i];
+      if (i + 1 < m_coreFeatures.size()) {
+	cerr << ",";
+      }
+    }
+    cerr << ") ";
+  }
 
   FVector& FVector::operator+= (const FVector& rhs) {
     if (rhs.m_coreFeatures.size() > m_coreFeatures.size())
@@ -519,9 +530,9 @@ namespace Moses {
 
   FValue FVector::l1norm_coreFeatures() const {
     FValue norm = 0;
-    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+    // ignore Bleu score feature (last feature)
+    for (size_t i = 0; i < m_coreFeatures.size()-1; ++i) 
       norm += abs(m_coreFeatures[i]);
-    }
     return norm;
   }
   

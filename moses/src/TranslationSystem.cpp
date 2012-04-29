@@ -161,7 +161,9 @@ namespace Moses {
      }
     
     float TranslationSystem::GetWeightWordPenalty() const {
-      return StaticData::Instance().GetWeight(m_wpProducer);
+      float weightWP = StaticData::Instance().GetWeight(m_wpProducer);
+      VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
+      return weightWP;
     }
     
     float TranslationSystem::GetWeightUnknownWordPenalty() const {
@@ -175,10 +177,10 @@ namespace Moses {
 
     std::vector<float> TranslationSystem::GetTranslationWeights() const {
     	std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer());
-    	VERBOSE(1, cerr << "Read weightT from translation sytem.. ");
+    	VERBOSE(1, "Read weightT from translation sytem.. ");
     	for (size_t i = 0; i < weights.size(); ++i)
-	  VERBOSE(1, std::cerr << weights[i] << " ");
-    	VERBOSE(1, std::cerr << std::endl);
+	  VERBOSE(1, weights[i] << " ");
+    	VERBOSE(1, std::endl);
     	return weights;
     }
 };

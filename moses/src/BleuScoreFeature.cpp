@@ -92,8 +92,7 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 
 void BleuScoreFeature::SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
 		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-		float scaleByX, float historySmoothing, size_t scheme, float relaxBP,
-		bool useSourceLengthHistory) {
+		float scaleByX, float historySmoothing, size_t scheme) {
 	m_sentence_bleu = sentenceBleu;
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_avg_input_length = scaleByAvgInputLength;
@@ -102,8 +101,6 @@ void BleuScoreFeature::SetBleuParameters(bool sentenceBleu, bool scaleByInputLen
 	m_scale_by_x = scaleByX;
 	m_historySmoothing = historySmoothing;
 	m_smoothing_scheme = (SmoothingScheme)scheme;
-	m_relax_BP = relaxBP;
-	m_useSourceLengthHistory = useSourceLengthHistory;
 }
 
 // Incoming references (refs) are stored as refs[file_id][[sent_id][reference]]
@@ -633,7 +630,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
       			smoothed_count += 1;
       		}
       		break;
-      	case LIGHT:
+      	case PLUS_POINT_ONE:
       		if (i > 0) {
       			// smoothing for all n > 1
       			smoothed_matches += 0.1;
@@ -662,9 +659,9 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // where
     // c: length of the candidate translation
     // r: effective reference length (sum of best match lengths for each candidate sentence)
-  	if (state->m_target_length < (state->m_scaled_ref_length * m_relax_BP)) {
+  	if (state->m_target_length < state->m_scaled_ref_length) {
   		float smoothed_target_length = m_target_length_history + state->m_target_length;
-  		float smoothed_ref_length = m_ref_length_history + (state->m_scaled_ref_length * m_relax_BP);
+  		float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
   		precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
   	}
 
@@ -696,8 +693,8 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // 		= BP * 4th root(PRODUCT_1_4 p_n)
     for (size_t i = 0; i < BleuScoreState::bleu_order; i++) {
       if (state->m_ngram_counts[i]) {
-      	smoothed_matches = m_match_history[i] + state->m_ngram_matches[i];
-      	smoothed_count = m_count_history[i] + state->m_ngram_counts[i];
+      	smoothed_matches = m_match_history[i] + state->m_ngram_matches[i] + 0.1;
+      	smoothed_count = m_count_history[i] + state->m_ngram_counts[i] + 0.1;
       	precision *= smoothed_matches / smoothed_count;
       }
     }
@@ -705,18 +702,18 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // take geometric mean
     precision = pow(precision, (float)1/4);
 
-  	// BP
+    // Apply brevity penalty if applicable.
     if (m_target_length_history + state->m_target_length < m_ref_length_history + state->m_scaled_ref_length)
   	  precision *= exp(1 - (m_ref_length_history + state->m_scaled_ref_length/m_target_length_history + state->m_target_length));
 
-//    cerr << "precision: " << precision << endl;
+    //cerr << "\nprecision: " << precision << endl;
 
     // **BLEU score of pseudo-document**
     float precision_pd = 1.0;
     if (m_target_length_history > 0) {
     	for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
 	  if (m_count_history[i] != 0)
-	    precision_pd *= m_match_history[i]/m_count_history[i];
+	    precision_pd *= (m_match_history[i] + 0.1)/(m_count_history[i] + 0.1);
 
       // take geometric mean
       precision_pd = pow(precision_pd, (float)1/4);
@@ -729,18 +726,16 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
       precision_pd = 0;
     // **end BLEU of pseudo-document**
 
-//    cerr << "precision pd: " << precision_pd << endl;
+    //cerr << "precision pd: " << precision_pd << endl;
 
     float sentence_impact;
-    if (m_target_length_history > 0) {
-    	if (m_source_length_history)
-    		sentence_impact = m_source_length_history * (precision - precision_pd);
-    	else
-    		sentence_impact = m_target_length_history * (precision - precision_pd);
-    }
+    if (m_target_length_history > 0) 
+      sentence_impact = m_target_length_history * (precision - precision_pd);    
     else
-    	sentence_impact = precision;
+      sentence_impact = precision;
 
+    sentence_impact *= 10;
+    //cerr << "sentence impact: " << sentence_impact << endl;
     return sentence_impact;
   }
 }

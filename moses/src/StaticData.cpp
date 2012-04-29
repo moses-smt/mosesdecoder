@@ -116,6 +116,49 @@ StaticData::StaticData()
   Phrase::InitializeMemPool();
 }
 
+void StaticData::ClearData() {
+  for (size_t i=0; i < m_decodeGraphs.size(); ++i)
+    delete m_decodeGraphs[i];
+  m_decodeGraphs.clear();
+  m_decodeGraphBackoff.clear();
+
+  m_translationSystems.clear();
+  for (size_t i=0; i < m_wordPenaltyProducers.size(); ++i) {
+    ScoreComponentCollection::UnregisterScoreProducer(m_wordPenaltyProducers[i]);
+    delete m_wordPenaltyProducers[i];
+  }
+  m_wordPenaltyProducers.clear();
+  for (size_t i=0; i < m_distortionScoreProducers.size(); ++i) {
+    ScoreComponentCollection::UnregisterScoreProducer(m_distortionScoreProducers[i]);
+    delete m_distortionScoreProducers[i];
+  }
+  m_distortionScoreProducers.clear();
+  for (size_t i=0; i < m_phraseDictionary.size(); ++i) {
+    ScoreComponentCollection::UnregisterScoreProducer(m_phraseDictionary[i]);
+    delete m_phraseDictionary[i];
+  }
+  m_phraseDictionary.clear();
+  for (size_t i=0; i < m_reorderModels.size(); ++i) {
+    ScoreComponentCollection::UnregisterScoreProducer(m_reorderModels[i]);
+    delete m_reorderModels[i];
+  }
+  m_reorderModels.clear();
+  for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k) {
+    ScoreComponentCollection::UnregisterScoreProducer(*k);
+    //    delete *k;
+  }
+  m_languageModel.CleanUp();
+
+  ScoreComponentCollection::UnregisterScoreProducer(m_bleuScoreFeature);
+  ScoreComponentCollection::UnregisterScoreProducer(m_unknownWordPenaltyProducer);
+
+  m_inputFactorOrder.clear();
+  m_outputFactorOrder.clear();
+
+  ScoreComponentCollection::ResetCounter();
+  ScoreProducer::ResetDescriptionCounts();
+}
+
 bool StaticData::LoadData(Parameter *parameter)
 {
   ResetUserTime();
@@ -282,6 +325,8 @@ bool StaticData::LoadData(Parameter *parameter)
     m_useTransOptCache = false;
   }
 
+  std::cerr << "transOptCache: " << m_useTransOptCache << std::endl;
+  std::cerr << "transOptCache max size: " << m_transOptCacheMaxSize << std::endl;
 
   //input factors
   const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
@@ -343,6 +388,7 @@ bool StaticData::LoadData(Parameter *parameter)
   // settings for pruning
   m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
                        ? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+  std::cerr << "max stack size: " << m_maxHypoStackSize << std::endl;
   m_minHypoStackDiversity = 0;
   if (m_parameter->GetParam("stack-diversity").size() > 0) {
     if (m_maxDistortion > 15) {
@@ -365,6 +411,10 @@ bool StaticData::LoadData(Parameter *parameter)
   m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
                                  TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
                                  : TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
+
+  std::cerr << "beamwidth: " << m_beamWidth << std::endl;
+  std::cerr << "early discarding threshold: " << m_earlyDiscardingThreshold << std::endl;
+  std::cerr << "translOptThreshold: " << m_translationOptionThreshold << std::endl;
 
   m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
                                ? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
@@ -1697,7 +1747,7 @@ bool StaticData::LoadPhrasePairFeature()
   
   size_t sourceFactorId = Scan<size_t>(factors[0]);
   size_t targetFactorId = Scan<size_t>(factors[1]);
-  bool simple = true, sourceContext = false, ignorePunctuation = true;
+  bool simple = true, sourceContext = false, ignorePunctuation = false;
   if (tokens.size() >= 3) {
   	simple = Scan<size_t>(tokens[1]);
   	sourceContext = Scan<size_t>(tokens[2]);
@@ -1837,7 +1887,7 @@ bool StaticData::LoadWordTranslationFeature()
   FactorType factorIdSource = Scan<size_t>(factors[0]);
   FactorType factorIdTarget = Scan<size_t>(factors[1]);
   
-  bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = true;
+  bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = false;
   if (tokens.size() >= 4) {
 	simple = Scan<size_t>(tokens[1]);
   	sourceTrigger = Scan<size_t>(tokens[2]);
