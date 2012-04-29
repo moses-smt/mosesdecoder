@@ -173,11 +173,14 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
     TargetPhrase *tp = new TargetPhrase(numScores);
 
     UINT64 sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
+    std::cerr << "other info done." << std::endl;
     tp->ReadFromFile(fileTP, numTargetFactors);
+    std::cerr << "done reading from file." << std::endl;
 
     currFilePos += sizeOtherInfo;
 
     m_coll.push_back(tp);
+    std::cerr << "tp done." << std::endl;
   }
 }
 

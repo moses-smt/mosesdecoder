@@ -63,6 +63,7 @@ public:
   void SetLHS(Word *lhs);
 
   void Create1AlignFromString(const std::string &align1Str);
+  void CreateAlignFromString(const std::string &align1Str);
   void SetScore(float score, size_t ind);
 
   const AlignType &GetAlign() const {

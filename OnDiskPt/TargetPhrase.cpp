@@ -27,6 +27,8 @@
 #include "TargetPhrase.h"
 #include "OnDiskWrapper.h"
 
+#include <boost/algorithm/string.hpp>
+
 using namespace std;
 
 namespace OnDiskPt
@@ -60,6 +62,18 @@ void TargetPhrase::Create1AlignFromString(const std::string &align1Str)
   CHECK(alignPoints.size() == 2);
   m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
 }
+
+void TargetPhrase::CreateAlignFromString(const std::string &alignStr)
+{
+	vector<std::string> alignPairs;
+	boost::split(alignPairs, alignStr, boost::is_any_of("\t "));
+	for (size_t i = 0; i < alignPairs.size(); ++i) {
+		vector<size_t> alignPoints;
+		Moses::Tokenize<size_t>(alignPoints, alignPairs[i], "-");
+		m_align.push_back(pair<size_t, size_t>(alignPoints[0], alignPoints[1]) );
+	}
+}
+
 
 void TargetPhrase::SetScore(float score, size_t ind)
 {
@@ -143,9 +157,10 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   // phrase id
   memcpy(mem, &m_filePos, sizeof(UINT64));
   memUsed += sizeof(UINT64);
-
+  
   // align
-  memUsed += WriteAlignToMemory(mem + memUsed);
+  size_t tmp = WriteAlignToMemory(mem + memUsed);
+  memUsed += tmp;
 
   // scores
   memUsed += WriteScoresToMemory(mem + memUsed);
@@ -176,6 +191,7 @@ size_t TargetPhrase::WriteAlignToMemory(char *mem) const
     memUsed += sizeof(alignPair.second);
   }
 
+  std::cerr << "align memory used: " << memUsed << std::endl;
   return memUsed;
 }
 
@@ -269,12 +285,14 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors)
 
 UINT64 TargetPhrase::ReadAlignFromFile(std::fstream &fileTPColl)
 {
+  std::cerr << "read alignment.." << std::endl;
   UINT64 bytesRead = 0;
 
   UINT64 numAlign;
   fileTPColl.read((char*) &numAlign, sizeof(UINT64));
   bytesRead += sizeof(UINT64);
 
+  std::cerr << "numAlign: " << numAlign << std::endl;
   for (size_t ind = 0; ind < numAlign; ++ind) {
     AlignPair alignPair;
     fileTPColl.read((char*) &alignPair.first, sizeof(UINT64));
@@ -284,6 +302,7 @@ UINT64 TargetPhrase::ReadAlignFromFile(std::fstream &fileTPColl)
     bytesRead += sizeof(UINT64) * 2;
   }
 
+  std::cerr << "Align bytes read: " << bytesRead << std::endl;
   return bytesRead;
 }
 

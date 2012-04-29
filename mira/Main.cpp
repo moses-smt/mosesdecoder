@@ -762,6 +762,25 @@ int main(int argc, char** argv) {
 				    cerr << endl;
 				  }
 				  
+				  // ################
+				  ostringstream hope_nbest_filename, fear_nbest_filename, model_nbest_filename, ref_filename;
+				  hope_nbest_filename << "decode_hope_sent" << *sid << "." << hope_n << "best";
+				  fear_nbest_filename << "decode_fear_sent" << *sid << "." << fear_n << "best";
+				  model_nbest_filename << "decode_model_sent" << *sid << "." << n << "best";
+				  
+				  // save reference
+				  ref_filename <<  "decode_ref_sent" << *sid;
+				  referenceFileMegam = ref_filename.str();
+				  ofstream ref_out(referenceFileMegam.c_str());
+				  if (!ref_out) {
+					ostringstream msg;
+					msg << "Unable to open " << referenceFileMegam;
+					throw runtime_error(msg.str());
+				  }
+				  ref_out << referenceSentences[decoder->getShortestReferenceIndex(*sid)][*sid] << "\n";
+				  ref_out.close();
+				  // ################
+								  
 				  // check LM weight
 				  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) {
 				    float lmWeight = mosesWeights.GetScoreForProducer(*i);
@@ -770,14 +789,13 @@ int main(int argc, char** argv) {
 				      cerr << "ERROR: language model weight should never be <= 0." << endl;
 				  }
 				  
-					// HOPE		  
 				  if (clear_static) {
 				    delete decoder;
 				    StaticData::ClearDataStatic();
 				    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
 				    decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 				    decoder->setWeights(mosesWeights);
-				}    
+				  }    
 
 				  // ################
 				  ostringstream hope_nbest_filename, fear_nbest_filename, model_nbest_filename, ref_filename;

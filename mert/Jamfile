@@ -9,7 +9,6 @@ ScoreDataIterator.cpp
 FeatureStats.cpp FeatureArray.cpp FeatureData.cpp
 FeatureDataIterator.cpp
 Data.cpp
-BleuScorer.cpp
 Point.cpp
 PerScorer.cpp
 Scorer.cpp
@@ -31,14 +30,16 @@ CderScorer.cpp
 MergeScorer.cpp
 ../util//kenutil m ..//z ;
 
-exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
+exe mert : mert.cpp mert_lib bleu_lib ../moses/src//ThreadPool ;
 
-exe extractor : extractor.cpp mert_lib ;
+exe extractor : extractor.cpp mert_lib bleu_lib ;
 
-exe evaluator : evaluator.cpp mert_lib ;
+exe evaluator : evaluator.cpp mert_lib bleu_lib ;
 
-exe pro : pro.cpp mert_lib ..//boost_program_options ;
+exe pro : pro.cpp mert_lib bleu_lib ..//boost_program_options ;
 
 alias programs : mert extractor evaluator pro ;
 
 install legacy : programs : <location>. ;
+
+lib bleu_lib : BleuScorer.cpp mert_lib : : : <include>. ;

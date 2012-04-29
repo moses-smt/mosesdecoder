@@ -54,7 +54,7 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
 		   namestr << targetFactor->GetString();
 	   }
 
-	   // temporary:
+	   // temporary: limit training to particular phrases
 	   if (!m_unrestricted) {
 	  	 string feature = namestr.str();
 	  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )

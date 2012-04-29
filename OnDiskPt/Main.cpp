@@ -55,7 +55,6 @@ int main (int argc, char * const argv[])
   const string filePath = argv[6]
                           ,destPath = argv[7];
 
-
   Moses::InputFileStream inStream(filePath);
 
   OnDiskWrapper onDiskWrapper;
@@ -138,7 +137,8 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
         break;
       }
       case 3: {
-        targetPhrase.Create1AlignFromString(tok);
+        //targetPhrase.Create1AlignFromString(tok);
+    	targetPhrase.CreateAlignFromString(tok);	
         break;
       }
       case 4:

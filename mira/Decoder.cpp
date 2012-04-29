@@ -99,7 +99,8 @@ namespace Mira {
                               bool distinct,
                               bool avgRefLength,
                               size_t rank,
-                              size_t epoch)
+                              size_t epoch,
+                              string filename)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
   	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength);
@@ -115,7 +116,7 @@ namespace Mira {
     	SearchAlgorithm search = staticData.GetSearchAlgorithm();
     	return runDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
     			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
-    			search, system);
+    			search, system, filename);
     }
   }
 
@@ -132,12 +133,26 @@ namespace Mira {
   														size_t rank,
   														size_t epoch,
   														SearchAlgorithm& search,
-  														const TranslationSystem& system) {
+  														const TranslationSystem& system,
+  														string filename) {
   	// run the decoder
     m_manager = new Moses::Manager(*m_sentence, search, &system);
     m_manager->ProcessSentence();
     TrellisPathList nBestList;
     m_manager->CalcNBest(nBestSize, nBestList, distinct);
+    
+    // optionally print nbest to file (to extract scores and features.. currently just for sentence bleu scoring)
+    if (filename != "") {
+    	ofstream out(filename.c_str());
+    	if (!out) {
+    		ostringstream msg;
+    		msg << "Unable to open " << filename;
+    		throw runtime_error(msg.str());
+    	}
+    	// TODO: handle sentence id (for now always 0)
+    	OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0);
+    	out.close();
+    }
 
     // read off the feature values and bleu scores for each sentence in the nbest list
     Moses::TrellisPathList::const_iterator iter;
@@ -184,7 +199,6 @@ namespace Mira {
         translations.push_back(translation);
     }
 
-//    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
     return translations;
   }
 
@@ -307,8 +321,8 @@ namespace Mira {
     		out.close();
       }
       else {
-	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
-	streamOut.flush();
+    	  OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid);
+    	  streamOut.flush();
       }
     }
   }

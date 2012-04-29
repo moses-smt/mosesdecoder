@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
+#include "BleuScorer.h"
 
 using namespace std;
 
@@ -66,23 +67,6 @@ public:
 	const pair<size_t,size_t>& getTranslation1() const { return translation1; }
 	const pair<size_t,size_t>& getTranslation2() const { return translation2; }
 };
-
-
-static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
-	float logbleu = 0.0;
-	const unsigned int bleu_order = 4;
-	for (unsigned int j=0; j<bleu_order; j++) {
-		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
-		logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
-	}
-	logbleu /= bleu_order;
-	float brevity = 1.0 - (float)stats[(bleu_order*2)]/stats[1];
-	if (brevity < 0.0) {
-		logbleu += brevity;
-	}
-	//cerr << brevity << " -> " << exp(logbleu) << endl;
-	return exp(logbleu);
-}
 
 static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2) {
   // difference in score in regular features
@@ -209,11 +193,11 @@ int main(int argc, char** argv)
     for(size_t  i=0; i<n_candidates; i++) {
       size_t rand1 = rand() % n_translations;
       pair<size_t,size_t> translation1 = hypotheses[rand1];
-      float bleu1 = sentenceLevelBleuPlusOne(scoreDataIters[translation1.first]->operator[](translation1.second));
+      float bleu1 = BleuScorer::sentenceLevelBleuPlusOne(scoreDataIters[translation1.first]->operator[](translation1.second));
 
       size_t rand2 = rand() % n_translations;
       pair<size_t,size_t> translation2 = hypotheses[rand2];
-      float bleu2 = sentenceLevelBleuPlusOne(scoreDataIters[translation2.first]->operator[](translation2.second));
+      float bleu2 = BleuScorer::sentenceLevelBleuPlusOne(scoreDataIters[translation2.first]->operator[](translation2.second));
       
       /*
       cerr << "t(" << translation1.first << "," << translation1.second << ") = " << bleu1 <<

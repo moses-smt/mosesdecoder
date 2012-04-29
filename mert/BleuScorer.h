@@ -23,6 +23,9 @@ class BleuScorer: public StatisticsBasedScorer
 public:
   explicit BleuScorer(const string& config = "");
   ~BleuScorer();
+  
+  static vector<float> ScoreNbestList(string scoreFile, string featureFile);
+  static float sentenceLevelBleuPlusOne(const vector<float>& stats);
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);

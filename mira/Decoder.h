@@ -62,7 +62,8 @@ class MosesDecoder {
                           bool distinct,
                           bool avgRefLength,
                           size_t rank,
-                          size_t epoch);
+                          size_t epoch,
+                          std::string filename);
     std::vector< std::vector<const Moses::Word*> > runDecoder(const std::string& source,
                           size_t sentenceid,
                           size_t nbestSize,
@@ -76,7 +77,8 @@ class MosesDecoder {
                           size_t rank,
                           size_t epoch,
                           Moses::SearchAlgorithm& seach,
-                          const Moses::TranslationSystem& system);
+                          const Moses::TranslationSystem& system,
+                          std::string filename);
     std::vector< std::vector<const Moses::Word*> > runChartDecoder(const std::string& source,
                           size_t sentenceid,
                           size_t nbestSize,
