@@ -1097,28 +1097,32 @@ int main(int argc, char** argv) {
 								bleuWorst = bleuScoresNbest[i];
 								indexWorst = i;
 							}
-						}
+						}		
 						
-						featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
-						featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
-						// updated sentence bleu
-						if (sentenceBleu) {
-							// use actual sentence bleu (not dynamically computed)
-							bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
-							bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
-							cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
-							cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
-													
+						if ((sentenceBleu && (bleuBest*current_input_length <= bleuWorst*current_input_length)) || 
+							(historyBleu && bleuScores[batchPosition][indexBest] <= bleuScores[batchPosition][indexWorst])) {
+							cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
 						}
 						else {
-							bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
-							bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
-							cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuScores[batchPosition][indexBest] << " (" << indexBest << ")" << endl;
-							cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuScores[batchPosition][indexWorst] << " (" << indexWorst << ")" << endl;
-													
-						}
-						modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
-						modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
+							if (sentenceBleu) {
+							  // use actual sentence bleu (not dynamically computed)
+							  bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
+							  bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
+							  cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
+							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
+							}
+							else {
+							  bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
+							  bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
+							  cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuScores[batchPosition][indexBest] << " (" << indexBest << ")" << endl;
+							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuScores[batchPosition][indexWorst] << " (" << indexWorst << ")" << endl;													
+							}
+							
+							featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
+							featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
+							modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
+							modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
+						}						
 					}
 				}
 
