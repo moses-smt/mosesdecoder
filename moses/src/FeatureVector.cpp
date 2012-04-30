@@ -307,22 +307,6 @@ namespace Moses {
   void FVector::set(const FName& name, const FValue& value) {
     m_features[name] = value;
   }
-   
-  void FVector::logCoreFeatures(size_t baseOfLog) {
-  	float logOfValue = 0;
-  	// log_a(value) = ln(value) / ln(a)
-	  for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
-		  FValue value = m_coreFeatures[i];
-		  if (value == 0) continue;
-		  else if (value < 0) {
-			  logOfValue = log(-1*value) / log(baseOfLog);
-			  logOfValue *= -1;
-		  }
-		  else
-		  	logOfValue = log(value) / log(baseOfLog);
-		  m_coreFeatures[i] = logOfValue;
-	  }
-  }
   
   void FVector::printCoreFeatures() {
     cerr << "core=(";

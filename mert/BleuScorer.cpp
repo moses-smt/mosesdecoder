@@ -76,7 +76,7 @@ void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
-    TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
+    //TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
     ifstream refin(referenceFiles[i].c_str());
     if (!refin) {
       throw runtime_error("Unable to open: " + referenceFiles[i]);

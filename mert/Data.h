@@ -78,8 +78,8 @@ public:
 
   void save(const std::string &featfile,const std::string &scorefile, bool bin=false) {
 
-    if (bin) cerr << "Binary write mode is selected" << endl;
-    else cerr << "Binary write mode is NOT selected" << endl;
+//    if (bin) cerr << "Binary write mode is selected" << endl;
+//    else cerr << "Binary write mode is NOT selected" << endl;
 
     featdata->save(featfile, bin);
     scoredata->save(scorefile, bin);

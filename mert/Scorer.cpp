@@ -17,7 +17,7 @@ Scorer::Scorer(const string& name, const string& config)
     }
     string name = nv.substr(0,split);
     string value = nv.substr(split+1,nv.size()-split-1);
-    cerr << "name: " << name << " value: " << value << endl;
+    //cerr << "name: " << name << " value: " << value << endl;
     _config[name] = value;
     start = end+1;
   }

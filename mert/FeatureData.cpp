@@ -29,7 +29,7 @@ void FeatureData::save(const std::string &file, bool bin)
 {
   if (file.empty()) return;
 
-  TRACE_ERR("saving the array into " << file << std::endl);
+//  TRACE_ERR("saving the array into " << file << std::endl);
 
   std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
 

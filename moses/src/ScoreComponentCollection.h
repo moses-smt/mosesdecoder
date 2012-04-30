@@ -314,10 +314,6 @@ public:
   {
     return m_scores[featureName];
   }
-
-  void LogCoreFeatures(size_t baseOfLog) {
-		m_scores.logCoreFeatures(baseOfLog);
-	}
   
   void PrintCoreFeatures() {
     m_scores.printCoreFeatures();

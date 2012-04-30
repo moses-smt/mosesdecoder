@@ -153,10 +153,10 @@ int main(int argc, char** argv)
     }
 
 
-    if (binmode) cerr << "Binary write mode is selected" << endl;
-    else cerr << "Binary write mode is NOT selected" << endl;
+//    if (binmode) cerr << "Binary write mode is selected" << endl;
+//    else cerr << "Binary write mode is NOT selected" << endl;
 
-    TRACE_ERR("Scorer type: " << scorerType << endl);
+//    TRACE_ERR("Scorer type: " << scorerType << endl);
     // ScorerFactory sfactory;
     Scorer* scorer = ScorerFactory::getScorer(scorerType,scorerConfig);
 
@@ -164,7 +164,7 @@ int main(int argc, char** argv)
     if (referenceFiles.size() > 0)
       scorer->setReferenceFiles(referenceFiles);
 
-    PrintUserTime("References loaded");
+//    PrintUserTime("References loaded");
 
     Data data(*scorer);
 
@@ -173,22 +173,22 @@ int main(int argc, char** argv)
       data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
     }
 
-    PrintUserTime("Previous data loaded");
+//    PrintUserTime("Previous data loaded");
 
     // computing score statistics of each nbest file
     for (size_t i=0; i < nbestFiles.size(); i++) {
       data.loadnbest(nbestFiles.at(i));
     }
 
-    PrintUserTime("Nbest entries loaded and scored");
+//    PrintUserTime("Nbest entries loaded and scored");
 
-    if (binmode)
-      cerr << "Binary write mode is selected" << endl;
-    else
-      cerr << "Binary write mode is NOT selected" << endl;
+//    if (binmode)
+//      cerr << "Binary write mode is selected" << endl;
+//    else
+//      cerr << "Binary write mode is NOT selected" << endl;
 
     data.save(featureDataFile, scoreDataFile, binmode);
-    PrintUserTime("Stopping...");
+//    PrintUserTime("Stopping...");
 
     // timer.stop("Stopping...");
 

@@ -24,8 +24,8 @@ Data::Data(Scorer& ptr, const std::string& sparseweightsfile)
       scoredata(new ScoreData(*theScorer)),
       featdata(new FeatureData)
 {
-  TRACE_ERR("Data::score_type " << score_type << std::endl);
-  TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
+//  TRACE_ERR("Data::score_type " << score_type << std::endl);
+//  TRACE_ERR("Data::Scorer type from Scorer: " << theScorer->getName() << endl);
   if (sparseweightsfile.size()) {
     sparse_weights.load(sparseweightsfile);
     ostringstream msg;
@@ -49,7 +49,7 @@ Data::~Data() {
 
 void Data::loadnbest(const std::string &file)
 {
-  TRACE_ERR("loading nbest from " << file << std::endl);
+  //TRACE_ERR("loading nbest from " << file << std::endl);
 
   FeatureStats featentry;
   ScoreStats scoreentry;
