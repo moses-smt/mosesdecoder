@@ -93,7 +93,7 @@ int main(int argc, char** argv) {
 	bool normaliseWeights, normaliseMargin;
 	bool print_feature_values;
 	bool historyBleu   ;
-	bool sentenceLevelBleu;
+	bool sentenceBleu;
 	float bleuWeight, bleuWeight_hope, bleuWeight_fear;
 	bool perceptron_update;
 	bool hope_fear, hope_fear_rank, hope_model;
@@ -147,7 +147,7 @@ int main(int argc, char** argv) {
 		("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
 		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
 		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-		("history-of-1best", po::value<bool>(&historyBleu)->default_value(false), "Use 1best translations to update the history")
+		("history-bleu", po::value<bool>(&historyBleu)->default_value(false), "Use 1best translations to update the history")
 		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
 		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
 		("hope-fear-rank", po::value<bool>(&hope_fear_rank)->default_value(false), "Use hope and fear translations for optimisation, use model for ranking")
@@ -193,7 +193,7 @@ int main(int argc, char** argv) {
 		("scale-margin-precision", po::value<bool>(&scale_margin_precision)->default_value(0), "Scale the margin by the precision of the oracle translation")
 		("scale-update", po::value<bool>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
 		("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale the update by the precision of the oracle translation")	
-		("sentence-level-bleu", po::value<bool>(&sentenceLevelBleu)->default_value(true), "Use a sentences level Bleu scoring function")
+		("sentence-level-bleu", po::value<bool>(&sentenceBleu)->default_value(true), "Use a sentences level Bleu scoring function")
 		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
 		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 		("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
@@ -354,10 +354,9 @@ int main(int argc, char** argv) {
 	if (scaleByAvgInputLength ||  scaleByInverseLength || scaleByAvgInverseLength)
 		scaleByInputLength = false;
 
-	if (historyBleu)
-		sentenceLevelBleu = false;
-	if (!sentenceLevelBleu) {
-	  historyBleu = true;
+	if (historyBleu) {
+	  sentenceBleu = false;
+	  cerr << "Using history Bleu. " << endl;
 	}
 
 	// initialise Moses
@@ -381,7 +380,7 @@ int main(int argc, char** argv) {
 	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[myFold] : mosesConfigFile;
 	VERBOSE(1, "Rank " << rank << " reading config file from " << configFile << endl);
 	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-	decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength,
+	decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
 			scaleByX, historySmoothing, bleu_smoothing_scheme);
 	SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
@@ -767,7 +766,7 @@ int main(int argc, char** argv) {
 				    delete decoder;
 				    StaticData::ClearDataStatic();
 				    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-				    decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+				    decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 				    decoder->setWeights(mosesWeights);
 				  }    
 					
@@ -817,11 +816,11 @@ int main(int argc, char** argv) {
                                             delete decoder;
 					    StaticData::ClearDataStatic();
                                             decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-                                            decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+                                            decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
                                             decoder->setWeights(mosesWeights);
                                           }
 
-						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score " << endl;
+						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (debug or history)" << endl;
 						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 								featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
 								1, distinctNbest, avgRefLength, rank, epoch, "");
@@ -839,7 +838,7 @@ int main(int argc, char** argv) {
 						delete decoder;
 					    StaticData::ClearDataStatic();
 					    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-					    decoder->setBleuParameters(sentenceLevelBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					    decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 					    decoder->setWeights(mosesWeights);
 					}
 
@@ -1099,16 +1098,25 @@ int main(int argc, char** argv) {
 								indexWorst = i;
 							}
 						}
-						cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
-						cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
 						
 						featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
 						featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
-						//bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
-						//bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
 						// updated sentence bleu
-						bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
-						bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
+						if (sentenceBleu) {
+							// use actual sentence bleu (not dynamically computed)
+							bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
+							bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
+							cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
+							cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
+													
+						}
+						else {
+							bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
+							bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
+							cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuScores[batchPosition][indexBest] << " (" << indexBest << ")" << endl;
+							cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuScores[batchPosition][indexWorst] << " (" << indexWorst << ")" << endl;
+													
+						}
 						modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
 						modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
 					}

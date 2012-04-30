@@ -65,7 +65,6 @@ public:
 	                                 m_scale_by_avg_inverse_length(false),
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.9),
-	                                 m_useSourceLengthHistory(0),
 	                                 m_smoothing_scheme(PLUS_POINT_ONE),
 	                                 m_relax_BP(1) {}
 
@@ -160,7 +159,6 @@ private:
 
     // smoothing factor for history counts
     float m_historySmoothing;
-    bool m_useSourceLengthHistory;
 
     enum SmoothingScheme { PLUS_ONE = 1, PLUS_POINT_ONE = 2, PAPINENI = 3 };
     SmoothingScheme m_smoothing_scheme;

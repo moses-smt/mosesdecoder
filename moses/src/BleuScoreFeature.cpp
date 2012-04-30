@@ -611,7 +611,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   float precision = 1.0;
   float smooth = 1;
   float smoothed_count, smoothed_matches;
-
+  
   if (m_sentence_bleu) {
     // Calculate geometric mean of modified ngram precisions
     // BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
@@ -665,7 +665,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   		precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
   	}
 
-//  	cerr << "precision: " << precision << endl;
+  	//cerr << "precision: " << precision << endl;
 
   	// Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
   	// B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
@@ -734,9 +734,8 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     else
       sentence_impact = precision;
 
-    sentence_impact *= 10;
     //cerr << "sentence impact: " << sentence_impact << endl;
-    return sentence_impact;
+    return sentence_impact * m_scale_by_x;
   }
 }
 
