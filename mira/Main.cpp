@@ -558,15 +558,14 @@ int main(int argc, char** argv) {
 	  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) 
 	    lmSum += abs(initialWeights.GetScoreForProducer(*i));
 	  bleuWeight = lmSum * bleu_weight_lm_factor;
-	  
-	  if (bleuWeight_hope == -1) {
-	    bleuWeight_hope = bleuWeight;
-	  }
-	  if (bleuWeight_fear == -1) {
-	    bleuWeight_fear = bleuWeight;
-	  }
 	}
 
+	if (bleuWeight_hope == -1) {
+	  bleuWeight_hope = bleuWeight;
+	}
+	if (bleuWeight_fear == -1) {
+	  bleuWeight_fear = bleuWeight;
+	}
 	cerr << "Bleu weight: " << bleuWeight << endl;
 
 	//Main loop:	
