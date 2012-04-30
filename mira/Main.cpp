@@ -116,6 +116,7 @@ int main(int argc, char** argv) {
 	float scale_lm_factor, bleu_weight_lm_factor, scale_wp_factor;
 	bool sample;
 	string moses_src;
+	bool external_score = false;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -123,12 +124,12 @@ int main(int argc, char** argv) {
 		("avg-ref-length", po::value<bool>(&avgRefLength)->default_value(false), "Use average reference length instead of shortest for BLEU score feature")
 		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-		("bleu-weight", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
-		("bleu-weight-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-		("bleu-weight-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
-		("bleu-weight-lm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
-		("bleu-weight-factor-lm", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")     
-		("bleu-weight-adjust-lm", po::value<bool>(&bleu_weight_lm_adjust)->default_value(false), "Adjust bleu weight when lm weight changes")       
+		("bw", po::value<float>(&bleuWeight)->default_value(2.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
+		("bw-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
+		("bw-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+		("blm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
+		("blm-factor", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")     
+		("blm-adjust", po::value<bool>(&bleu_weight_lm_adjust)->default_value(false), "Adjust bleu weight when lm weight changes")       
 		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
 		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
 		("clear-static", po::value<bool>(&clear_static)->default_value(false), "Clear static data before every translation")
@@ -980,7 +981,7 @@ int main(int argc, char** argv) {
 				}
 				if (model_hope_fear) {
 					ostringstream hope_nbest_filename, fear_nbest_filename, model_nbest_filename, ref_filename;
-					if (sample) {					  
+					if (sample && external_score) {					  
 					  hope_nbest_filename << "decode_hope_rank" << rank << "." << hope_n << "best";
 					  fear_nbest_filename << "decode_fear_rank" << rank << "." << fear_n << "best";
 					  model_nbest_filename << "decode_model_rank" << rank << "." << n << "best";
@@ -1048,120 +1049,133 @@ int main(int argc, char** argv) {
 					examples_in_batch++;
 					
 					if (sample) {
-						float bleuBest = -1000;
-						float bleuWorst = 1000;
-						size_t indexBest = -1;
-						size_t indexWorst = -1;	
-						if (sentenceBleu) {
-						  // concatenate nbest files (use hope, model, fear lists to extract samples from)
-					      stringstream nbestStreamMegam, catCmd, sortCmd, scoreDataFile, featureDataFile;
-					      nbestStreamMegam << "decode_hypos_rank" << rank << "." << (hope_n+n+fear_n) << "best";
-					      nbestFileMegam = nbestStreamMegam.str();
-					      catCmd << "cat " << hope_nbest_filename.str() << " " << model_nbest_filename.str() 
-										<< " " << fear_nbest_filename.str() << " > " << nbestFileMegam;
-					      system(catCmd.str().c_str());
-					
-					      // extract features and scores
-					      scoreDataFile << "decode_hypos_rank" << rank << ".scores.dat";
-					      featureDataFile << "decode_hypos_rank" << rank << ".features.dat";
-					      stringstream extractorCmd;
-					      extractorCmd << moses_src << "/dist/bin/extractor"
-					    		  " --scconfig case:true --scfile " << scoreDataFile.str() << " --ffile " << featureDataFile.str() <<
-					    		  " -r " << referenceFileMegam << " -n " << nbestFileMegam;
-					      system(extractorCmd.str().c_str());
-					
-					      // NOTE: here we are just scoring the nbest lists created above. 
-					      // We will use the (real, not dynamically computed) sentence bleu scores to select a pair of two
-					      // translations with maximal Bleu difference
-					      vector<float> bleuScoresNbest = BleuScorer::ScoreNbestList(scoreDataFile.str(), featureDataFile.str());
-					      for (size_t i=0; i < bleuScoresNbest.size(); ++i) {
-							//cerr << "bleu: " << bleuScoresNbest[i]*current_input_length << endl;
-							if (abs(bleuScoresNbest[i] - bleuBest) < epsilon) { // equal bleu scores
-								if (modelScores[batchPosition][i] > modelScores[batchPosition][indexBest]) {
-									if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexBest]) > epsilon) {
-									  bleuBest = bleuScoresNbest[i];
-									  indexBest = i;
-									}
-								}
-							}
-							else if (bleuScoresNbest[i] > bleuBest) { // greater than current best
-								bleuBest = bleuScoresNbest[i];
-								indexBest = i;
-							}
-							
-							if (abs(bleuScoresNbest[i] - bleuWorst) < epsilon) { // equal bleu scores
-								if (modelScores[batchPosition][i] > modelScores[batchPosition][indexWorst]) {
-									if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexWorst]) > epsilon) {
-									  bleuWorst = bleuScoresNbest[i];
-									  indexWorst = i;
-									}
-								}
-							}
-							else if (bleuScoresNbest[i] < bleuWorst) { // worse than current worst
-								bleuWorst = bleuScoresNbest[i];
-								indexWorst = i;
-							}
-					      }		
+					  float bleuBest = -1000;
+					  float bleuWorst = 1000;
+					  size_t indexBest = -1;
+					  size_t indexWorst = -1;
+					  
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", external score? " << external_score << endl;
+					  if (external_score) {
+					    // concatenate nbest files (use hope, model, fear lists to extract samples from)
+					    stringstream nbestStreamMegam, catCmd, sortCmd, scoreDataFile, featureDataFile;
+					    nbestStreamMegam << "decode_hypos_rank" << rank << "." << (hope_n+n+fear_n) << "best";
+					    nbestFileMegam = nbestStreamMegam.str();
+					    catCmd << "cat " << hope_nbest_filename.str() << " " << model_nbest_filename.str() 
+						   << " " << fear_nbest_filename.str() << " > " << nbestFileMegam;
+					    system(catCmd.str().c_str());
+					    
+					    // extract features and scores
+					    scoreDataFile << "decode_hypos_rank" << rank << ".scores.dat";
+					    featureDataFile << "decode_hypos_rank" << rank << ".features.dat";
+					    stringstream extractorCmd;
+					    extractorCmd << moses_src << "/dist/bin/extractor"
+					      " --scconfig case:true --scfile " << scoreDataFile.str() << " --ffile " << featureDataFile.str() << " -r " << referenceFileMegam << " -n " << nbestFileMegam;
+					    system(extractorCmd.str().c_str());
+					    
+					    // NOTE: here we are just scoring the nbest lists created above. 
+					    // We will use the (real, not dynamically computed) sentence bleu scores to select a pair of two
+					    // translations with maximal Bleu difference
+					    vector<float> bleuScoresNbest = BleuScorer::ScoreNbestList(scoreDataFile.str(), featureDataFile.str());
+					    for (size_t i=0; i < bleuScoresNbest.size(); ++i) {
+					      //cerr << "bleu: " << bleuScoresNbest[i]*current_input_length << endl;
+					      if (abs(bleuScoresNbest[i] - bleuBest) < epsilon) { // equal bleu scores
+						if (modelScores[batchPosition][i] > modelScores[batchPosition][indexBest]) {
+						  if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexBest]) > epsilon) {
+						    bleuBest = bleuScoresNbest[i];
+						    indexBest = i;
+						  }
 						}
-						else {
-							// for history bleu, use dynamically calculated scores to find best and worst 
-							for (size_t i=0; i<bleuScores[batchPosition].size(); ++i) {
-								//cerr << "bleu: " << bleuScores[batchPosition][i] << endl;
-								if (abs(bleuScores[batchPosition][i] - bleuBest) < epsilon) { // equal bleu scores
-									if (modelScores[batchPosition][i] > modelScores[batchPosition][indexBest]) {
-										if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexBest]) > epsilon) {
-										  bleuBest = bleuScores[batchPosition][i];
-										  indexBest = i;
-										}
-									}
-								}
-								else if (bleuScores[batchPosition][i] > bleuBest) { // greater than current best
-									bleuBest = bleuScores[batchPosition][i];
-									indexBest = i;
-								}
-								
-								if (abs(bleuScores[batchPosition][i] - bleuWorst) < epsilon) { // equal bleu scores
-									if (modelScores[batchPosition][i] > modelScores[batchPosition][indexWorst]) {
-										if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexWorst]) > epsilon) {
-										  bleuWorst = bleuScores[batchPosition][i];
-										  indexWorst = i;
-										}
-									}
-								}
-								else if (bleuScores[batchPosition][i] < bleuWorst) { // worse than current worst
-									bleuWorst = bleuScores[batchPosition][i];
-									indexWorst = i;
-								}						      	
-							}
+					      }
+					      else if (bleuScoresNbest[i] > bleuBest) { // greater than current best
+						bleuBest = bleuScoresNbest[i];
+						indexBest = i;
+					      }
+					      
+					      if (abs(bleuScoresNbest[i] - bleuWorst) < epsilon) { // equal bleu scores
+						if (modelScores[batchPosition][i] > modelScores[batchPosition][indexWorst]) {
+						  if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexWorst]) > epsilon) {
+						    bleuWorst = bleuScoresNbest[i];
+						    indexWorst = i;
+						  }
 						}
-						
-						if ((sentenceBleu && (bleuBest*current_input_length <= bleuWorst*current_input_length)) || 
-							(historyBleu && (bleuBest <= bleuWorst))) {
-							if (sentenceBleu)
-								cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
-							else 
-								cerr << "\nRank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
+					      }
+					      else if (bleuScoresNbest[i] < bleuWorst) { // worse than current worst
+						bleuWorst = bleuScoresNbest[i];
+						indexWorst = i;
+					      }
+					    }
+					  }
+					  else {
+					    cerr << "Rank " << rank << ", epoch " << epoch << ", use dynamic score." << endl;
+					    // use dynamically calculated scores to find best and worst 
+					    for (size_t i=0; i<bleuScores[batchPosition].size(); ++i) {
+					      //cerr << "bleu: " << bleuScores[batchPosition][i] << endl;
+					      if (abs(bleuScores[batchPosition][i] - bleuBest) < epsilon) { // equal bleu scores
+						if (modelScores[batchPosition][i] > modelScores[batchPosition][indexBest]) {
+						  if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexBest]) > epsilon) {
+						    bleuBest = bleuScores[batchPosition][i];
+						    indexBest = i;
+						  }
 						}
-						else {
-							if (sentenceBleu) {
-							  // use actual sentence bleu (not dynamically computed)
-							  bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
-							  bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
-							  cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
-							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
-							}
-							else {
-							  bleuScoresHopeSample[batchPosition].push_back(bleuBest);
-							  bleuScoresFearSample[batchPosition].push_back(bleuWorst);
-							  cerr << "\nRank " << rank << ", epoch " << epoch << ", Best: " << bleuBest << " (" << indexBest << ")" << endl;
-							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst << " (" << indexWorst << ")" << endl;													
-							}
-							
-							featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
-							featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
-							modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
-							modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
-						}						
+					      }
+					      else if (bleuScores[batchPosition][i] > bleuBest) { // greater than current best
+						bleuBest = bleuScores[batchPosition][i];
+						indexBest = i;
+					      }
+					      
+					      if (abs(bleuScores[batchPosition][i] - bleuWorst) < epsilon) { // equal bleu scores
+						if (modelScores[batchPosition][i] > modelScores[batchPosition][indexWorst]) {
+						  if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexWorst]) > epsilon) {
+						    bleuWorst = bleuScores[batchPosition][i];
+						    indexWorst = i;
+						  }
+						}
+					      }
+					      else if (bleuScores[batchPosition][i] < bleuWorst) { // worse than current worst
+						bleuWorst = bleuScores[batchPosition][i];
+						indexWorst = i;
+					      }						      	
+					    }
+					  }
+					  
+					  if ((external_score && (bleuBest*current_input_length <= bleuWorst*current_input_length)) || (bleuBest <= bleuWorst)) {
+					    if (external_score) {
+					      if (abs(bleuBest*current_input_length - bleuWorst*current_input_length) < epsilon) {
+						cerr << "Rank " << rank << ", epoch " << epoch << ", WARNING: HOPE and FEAR have equal Bleu." << endl;
+					      }
+					      else {
+						cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: FEAR has better Bleu than HOPE." << endl;
+					      }
+					    }
+					    else {
+					      if (abs(bleuBest - bleuWorst) < epsilon) {
+						cerr << "\nRank " << rank << ", epoch " << epoch << ", WARNING: HOPE and FEAR have equal Bleu." << endl;
+					      }
+					      else {
+						cerr << "\nRank " << rank << ", epoch " << epoch << ", ERROR: FEAR has better Bleu than HOPE." << endl;
+					      }
+					    }
+					  }
+					  else {
+					    if (external_score) {
+					      // use actual sentence bleu (not dynamically computed)
+					      bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
+					      bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
+					    }
+					    else {
+					      bleuScoresHopeSample[batchPosition].push_back(bleuBest);
+					      bleuScoresFearSample[batchPosition].push_back(bleuWorst);
+					      cerr << "\nRank " << rank << ", epoch " << epoch << ", Best: " << bleuBest << " (" << indexBest << ")" << endl;
+					      cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst << " (" << indexWorst << ")" << endl;													
+					    }
+					    
+					    featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
+					    featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
+					    modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
+					    modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
+					  }						
 					}
 				}
 
