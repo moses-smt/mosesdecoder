@@ -1101,16 +1101,20 @@ int main(int argc, char** argv) {
 						}
 						cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuBest*current_input_length << " (" << indexBest << ")" << endl;
 						cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
-						
-						featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
-						featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
-						//bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
-						//bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
-						// updated sentence bleu
-						bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
-						bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
-						modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
-						modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
+						if (bleuBest*current_input_length <= bleuWorst*current_input_length) {
+						  cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
+						}
+						else {
+						  featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
+						  featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexWorst]);
+						  //bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
+						  //bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
+						  // updated sentence bleu
+						  bleuScoresHopeSample[batchPosition].push_back(bleuBest*current_input_length);
+						  bleuScoresFearSample[batchPosition].push_back(bleuWorst*current_input_length);
+						  modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][indexBest]);
+						  modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][indexWorst]);
+						}
 					}
 				}
 
