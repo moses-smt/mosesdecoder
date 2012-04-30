@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <cstring>
 #include <set>
+#include <algorithm>
 
 #include "SafeGetline.h"
 #include "tables-core.h"
@@ -500,7 +501,8 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
       // always output alignment if hiero style, but only for non-terms 
       // (eh: output all alignments, needed for some feature functions) 
       assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
-      for(int j = 0; j < phraseT.size() - 1; j++) {
+      std::vector<std::string> alignment;
+      for(int j = 0; j < phraseT.size() - 1; j++) {      
 	if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
           if (bestAlignment->alignedToT[ j ].size() != 1) {
             cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
@@ -508,15 +510,26 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
             assert(bestAlignment->alignedToT[ j ].size() == 1);
           }
           int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
-          phraseTableFile << sourcePos << "-" << j << " ";
+          //phraseTableFile << sourcePos << "-" << j << " ";
+	  std::stringstream point;
+	  point << sourcePos << "-" << j;
+	  alignment.push_back(point.str());
 	}
 	else {
           set<size_t>::iterator setIter;
           for(setIter = (bestAlignment->alignedToT[j]).begin(); setIter != (bestAlignment->alignedToT[j]).end(); setIter++) {
             int sourcePos = *setIter;
-            phraseTableFile << sourcePos << "-" << j << " ";
+            //phraseTableFile << sourcePos << "-" << j << " ";
+	    std::stringstream point;
+	    point << sourcePos << "-" << j;
+	    alignment.push_back(point.str());
           }
         }
+      }
+      // now print all alignments, sorted by source index
+      sort(alignment.begin(), alignment.end());
+      for (size_t i = 0; i < alignment.size(); ++i) {
+	phraseTableFile << alignment[i] << " ";
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model

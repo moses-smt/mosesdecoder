@@ -548,7 +548,7 @@ int main(int argc, char** argv) {
 	    lmSum += abs(initialWeights.GetScoreForProducer(*i));
 	  bleuWeight = lmSum * bleu_weight_lm_factor;
 	}
-	
+
 	if (bleuWeight_hope == -1) {
 	  bleuWeight_hope = bleuWeight;
 	}
