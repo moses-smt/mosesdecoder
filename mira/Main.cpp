@@ -1228,9 +1228,15 @@ int main(int argc, char** argv) {
 				    cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight scaled from " << lmWeight << " to " << lmWeight*scale_lm_factor << endl;
 
 				    // scale down score
-				    scaleFeatureScore(*iter, scale_lm_factor, featureValuesHope, rank, epoch);
-				    scaleFeatureScore(*iter, scale_lm_factor, featureValuesFear, rank, epoch);
-				    scaleFeatureScore(*iter, scale_lm_factor, featureValues, rank, epoch);
+				    if (sample) {
+				    	scaleFeatureScore(*iter, scale_lm_factor, featureValuesHopeSample, rank, epoch);
+				    	scaleFeatureScore(*iter, scale_lm_factor, featureValuesFearSample, rank, epoch);
+				    }
+				    else {
+				    	scaleFeatureScore(*iter, scale_lm_factor, featureValuesHope, rank, epoch);
+				    	scaleFeatureScore(*iter, scale_lm_factor, featureValuesFear, rank, epoch);
+				    	scaleFeatureScore(*iter, scale_lm_factor, featureValues, rank, epoch);
+				    }
 				  }
 				}
 
@@ -1239,32 +1245,50 @@ int main(int argc, char** argv) {
 				  // scale up weight  
 				  WordPenaltyProducer *wp = staticData.GetWordPenaltyProducer();
 				  float wpWeight = mosesWeights.GetScoreForProducer(wp);
-                                  mosesWeights.Assign(wp, wpWeight*scale_wp_factor);
-                                  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight scaled from " << wpWeight << " to " << wpWeight*scale_wp_factor << endl;
+				  mosesWeights.Assign(wp, wpWeight*scale_wp_factor);
+				  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight scaled from " << wpWeight << " to " << wpWeight*scale_wp_factor << endl;
 
 				  // scale down score
-				  scaleFeatureScore(wp, scale_wp_factor, featureValuesHope, rank, epoch);
-				  scaleFeatureScore(wp, scale_wp_factor, featureValuesFear, rank, epoch);
-				  scaleFeatureScore(wp, scale_wp_factor, featureValues, rank, epoch);
+                  if (sample) {
+                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesHopeSample, rank, epoch);
+                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesFearSample, rank, epoch);
+                  }
+                  else {
+                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesHope, rank, epoch);
+                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesFear, rank, epoch);
+                	  scaleFeatureScore(wp, scale_wp_factor, featureValues, rank, epoch);
+                  }
+				}
+				
+				// set core features to 0 to avoid updating the feature weights
+				if (coreWeightMap.size() > 0) {
+					if (sample) {
+						ignoreCoreFeatures(featureValuesHopeSample, coreWeightMap);
+						ignoreCoreFeatures(featureValuesFearSample, coreWeightMap);
+					}
+					else {
+						ignoreCoreFeatures(featureValues, coreWeightMap);
+						ignoreCoreFeatures(featureValuesHope, coreWeightMap);
+						ignoreCoreFeatures(featureValuesFear, coreWeightMap);
+					}
 				}
 			
 				// print out the feature values
 				if (print_feature_values) {
 					cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
-					if (model_hope_fear || rank_only) printFeatureValues(featureValues);
+					if (sample) {
+						cerr << "hope: " << endl;
+						printFeatureValues(featureValuesHopeSample);
+						cerr << "fear: " << endl;
+						printFeatureValues(featureValuesFearSample);
+					}
+					else if (model_hope_fear || rank_only) printFeatureValues(featureValues);
 					else {
 						cerr << "hope: " << endl;
 						printFeatureValues(featureValuesHope);
 						cerr << "fear: " << endl;
 						printFeatureValues(featureValuesFear);
 					}
-				}
-
-				// set core features to 0 to avoid updating the feature weights
-				if (coreWeightMap.size() > 0) {
-					ignoreCoreFeatures(featureValues, coreWeightMap);
-					ignoreCoreFeatures(featureValuesHope, coreWeightMap);
-					ignoreCoreFeatures(featureValuesFear, coreWeightMap);
 				}
 
 				// Run optimiser on batch:
