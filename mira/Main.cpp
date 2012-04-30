@@ -1048,38 +1048,40 @@ int main(int argc, char** argv) {
 					examples_in_batch++;
 					
 					if (sample) {
-						// concatenate nbest files (use hope, model, fear lists to extract samples from)
-						stringstream nbestStreamMegam, catCmd, sortCmd, scoreDataFile, featureDataFile;
-						nbestStreamMegam << "decode_hypos_rank" << rank << "." << (hope_n+n+fear_n) << "best";
-						nbestFileMegam = nbestStreamMegam.str();
-						catCmd << "cat " << hope_nbest_filename.str() << " " << model_nbest_filename.str() 
-									<< " " << fear_nbest_filename.str() << " > " << nbestFileMegam;
-						system(catCmd.str().c_str());
-					
-						// extract features and scores
-						scoreDataFile << "decode_hypos_rank" << rank << ".scores.dat";
-						featureDataFile << "decode_hypos_rank" << rank << ".features.dat";
-						stringstream extractorCmd;
-						extractorCmd << moses_src << "/dist/bin/extractor"
-							" --scconfig case:true --scfile " << scoreDataFile.str() << " --ffile " << featureDataFile.str() <<
-							" -r " << referenceFileMegam << " -n " << nbestFileMegam;
-						system(extractorCmd.str().c_str());
-					
-						// NOTE: here we are just scoring the nbest lists created above. 
-						// We will use the (real, not dynamically computed) sentence bleu scores to select a pair of two
-						// translations with maximal Bleu difference
-						float bleuBest = -1;
+						float bleuBest = -1000;
 						float bleuWorst = 1000;
 						size_t indexBest = -1;
 						size_t indexWorst = -1;	
-						epsilon = 0.000001;
-						vector<float> bleuScoresNbest = BleuScorer::ScoreNbestList(scoreDataFile.str(), featureDataFile.str());
-						for (size_t i=0; i < bleuScoresNbest.size(); ++i) {
+						if (sentenceBleu) {
+						  // concatenate nbest files (use hope, model, fear lists to extract samples from)
+					      stringstream nbestStreamMegam, catCmd, sortCmd, scoreDataFile, featureDataFile;
+					      nbestStreamMegam << "decode_hypos_rank" << rank << "." << (hope_n+n+fear_n) << "best";
+					      nbestFileMegam = nbestStreamMegam.str();
+					      catCmd << "cat " << hope_nbest_filename.str() << " " << model_nbest_filename.str() 
+										<< " " << fear_nbest_filename.str() << " > " << nbestFileMegam;
+					      system(catCmd.str().c_str());
+					
+					      // extract features and scores
+					      scoreDataFile << "decode_hypos_rank" << rank << ".scores.dat";
+					      featureDataFile << "decode_hypos_rank" << rank << ".features.dat";
+					      stringstream extractorCmd;
+					      extractorCmd << moses_src << "/dist/bin/extractor"
+					    		  " --scconfig case:true --scfile " << scoreDataFile.str() << " --ffile " << featureDataFile.str() <<
+					    		  " -r " << referenceFileMegam << " -n " << nbestFileMegam;
+					      system(extractorCmd.str().c_str());
+					
+					      // NOTE: here we are just scoring the nbest lists created above. 
+					      // We will use the (real, not dynamically computed) sentence bleu scores to select a pair of two
+					      // translations with maximal Bleu difference
+					      vector<float> bleuScoresNbest = BleuScorer::ScoreNbestList(scoreDataFile.str(), featureDataFile.str());
+					      for (size_t i=0; i < bleuScoresNbest.size(); ++i) {
 							//cerr << "bleu: " << bleuScoresNbest[i]*current_input_length << endl;
 							if (abs(bleuScoresNbest[i] - bleuBest) < epsilon) { // equal bleu scores
 								if (modelScores[batchPosition][i] > modelScores[batchPosition][indexBest]) {
-									bleuBest = bleuScoresNbest[i];
-									indexBest = i;
+									if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexBest]) > epsilon) {
+									  bleuBest = bleuScoresNbest[i];
+									  indexBest = i;
+									}
 								}
 							}
 							else if (bleuScoresNbest[i] > bleuBest) { // greater than current best
@@ -1089,19 +1091,56 @@ int main(int argc, char** argv) {
 							
 							if (abs(bleuScoresNbest[i] - bleuWorst) < epsilon) { // equal bleu scores
 								if (modelScores[batchPosition][i] > modelScores[batchPosition][indexWorst]) {
-									bleuWorst = bleuScoresNbest[i];
-									indexWorst = i;
+									if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexWorst]) > epsilon) {
+									  bleuWorst = bleuScoresNbest[i];
+									  indexWorst = i;
+									}
 								}
 							}
 							else if (bleuScoresNbest[i] < bleuWorst) { // worse than current worst
 								bleuWorst = bleuScoresNbest[i];
 								indexWorst = i;
 							}
-						}		
+					      }		
+						}
+						else {
+							// for history bleu, use dynamically calculated scores to find best and worst 
+							for (size_t i=0; i<bleuScores[batchPosition].size(); ++i) {
+								//cerr << "bleu: " << bleuScores[batchPosition][i] << endl;
+								if (abs(bleuScores[batchPosition][i] - bleuBest) < epsilon) { // equal bleu scores
+									if (modelScores[batchPosition][i] > modelScores[batchPosition][indexBest]) {
+										if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexBest]) > epsilon) {
+										  bleuBest = bleuScores[batchPosition][i];
+										  indexBest = i;
+										}
+									}
+								}
+								else if (bleuScores[batchPosition][i] > bleuBest) { // greater than current best
+									bleuBest = bleuScores[batchPosition][i];
+									indexBest = i;
+								}
+								
+								if (abs(bleuScores[batchPosition][i] - bleuWorst) < epsilon) { // equal bleu scores
+									if (modelScores[batchPosition][i] > modelScores[batchPosition][indexWorst]) {
+										if (abs(modelScores[batchPosition][i] - modelScores[batchPosition][indexWorst]) > epsilon) {
+										  bleuWorst = bleuScores[batchPosition][i];
+										  indexWorst = i;
+										}
+									}
+								}
+								else if (bleuScores[batchPosition][i] < bleuWorst) { // worse than current worst
+									bleuWorst = bleuScores[batchPosition][i];
+									indexWorst = i;
+								}						      	
+							}
+						}
 						
 						if ((sentenceBleu && (bleuBest*current_input_length <= bleuWorst*current_input_length)) || 
-							(historyBleu && bleuScores[batchPosition][indexBest] <= bleuScores[batchPosition][indexWorst])) {
-							cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
+							(historyBleu && (bleuBest <= bleuWorst))) {
+							if (sentenceBleu)
+								cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
+							else 
+								cerr << "\nRank " << rank << ", epoch " << epoch << ", ERROR: HOPE ist not better than FEAR." << endl;
 						}
 						else {
 							if (sentenceBleu) {
@@ -1112,10 +1151,10 @@ int main(int argc, char** argv) {
 							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst*current_input_length << " (" << indexWorst << ")" << endl;
 							}
 							else {
-							  bleuScoresHopeSample[batchPosition].push_back(bleuScores[batchPosition][indexBest]);
-							  bleuScoresFearSample[batchPosition].push_back(bleuScores[batchPosition][indexWorst]);
-							  cerr << "Rank " << rank << ", epoch " << epoch << ", Best: " << bleuScores[batchPosition][indexBest] << " (" << indexBest << ")" << endl;
-							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuScores[batchPosition][indexWorst] << " (" << indexWorst << ")" << endl;													
+							  bleuScoresHopeSample[batchPosition].push_back(bleuBest);
+							  bleuScoresFearSample[batchPosition].push_back(bleuWorst);
+							  cerr << "\nRank " << rank << ", epoch " << epoch << ", Best: " << bleuBest << " (" << indexBest << ")" << endl;
+							  cerr << "Rank " << rank << ", epoch " << epoch << ", Worst: " << bleuWorst << " (" << indexWorst << ")" << endl;													
 							}
 							
 							featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexBest]);
