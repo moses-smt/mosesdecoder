@@ -124,7 +124,7 @@ int main(int argc, char** argv) {
 		("avg-ref-length", po::value<bool>(&avgRefLength)->default_value(false), "Use average reference length instead of shortest for BLEU score feature")
 		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
 		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-		("bw", po::value<float>(&bleuWeight)->default_value(2.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
+		("bw", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
 		("bw-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
 		("bw-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
 		("blm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
