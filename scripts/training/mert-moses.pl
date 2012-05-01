@@ -315,12 +315,12 @@ if (!defined $mertdir) {
 }
 
 my $mert_extract_cmd = "$mertdir/extractor";
-my $mert_mert_cmd = "$mertdir/mert";
-my $mert_pro_cmd = "$mertdir/pro";
+my $mert_mert_cmd    = "$mertdir/mert";
+my $mert_pro_cmd     = "$mertdir/pro";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
-die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
-die "Not executable: $mert_pro_cmd" if ! -x $mert_pro_cmd;
+die "Not executable: $mert_mert_cmd"    if ! -x $mert_mert_cmd;
+die "Not executable: $mert_pro_cmd"     if ! -x $mert_pro_cmd;
 
 my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
@@ -334,29 +334,29 @@ if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optim
 $mertargs = "" if !defined $mertargs;
 
 my $scconfig = undef;
-if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/){
+if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
   $scconfig=$1;
   $scconfig =~ s/\,/ /g;
   $mertargs =~ s/\-\-scconfig\s+(.+?)(\s|$)//;
 }
 
 # handling reference lengh strategy
-if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1){
+if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1) {
   die "You can specify just ONE reference length strategy (closest or shortest or average) not both\n";
 }
 
-if ($___SHORTEST){
+if ($___SHORTEST) {
   $scconfig .= " reflen:shortest";
-}elsif ($___AVERAGE){
+} elsif ($___AVERAGE) {
   $scconfig .= " reflen:average";
-}elsif ($___CLOSEST){
+} elsif ($___CLOSEST) {
   $scconfig .= " reflen:closest";
 }
 
 # handling case-insensitive flag
 if ($___NOCASE) {
   $scconfig .= " case:false";
-}else{
+} else {
   $scconfig .= " case:true";
 }
 $scconfig =~ s/^\s+//;
@@ -381,8 +381,8 @@ if ($___ACTIVATE_FEATURES){ $mert_mert_args .=" -o \"$___ACTIVATE_FEATURES\""; }
 my ($just_cmd_filtercmd,$x) = split(/ /,$filtercmd);
 die "Not executable: $just_cmd_filtercmd" if ! -x $just_cmd_filtercmd;
 die "Not executable: $moses_parallel_cmd" if defined $___JOBS && ! -x $moses_parallel_cmd;
-die "Not executable: $qsubwrapper" if defined $___JOBS && ! -x $qsubwrapper;
-die "Not executable: $___DECODER" if ! -x $___DECODER;
+die "Not executable: $qsubwrapper"        if defined $___JOBS && ! -x $qsubwrapper;
+die "Not executable: $___DECODER"         if ! -x $___DECODER;
 
 my $input_abs = ensure_full_path($___DEV_F);
 die "File not found: $___DEV_F (interpreted as $input_abs)."
@@ -402,8 +402,7 @@ my $ref_abs = ensure_full_path($___DEV_E);
 my @references;
 if (-e $ref_abs) {
   push @references, $ref_abs;
-}
-else {
+} else {
   # if multiple file, get a full list of the files
     my $part = 0;
     if (! -e $ref_abs."0" && -e $ref_abs.".ref0") {
@@ -417,18 +416,17 @@ else {
 }
 
 my $config_abs = ensure_full_path($___CONFIG);
-die "File not found: $___CONFIG (interpreted as $config_abs)."
-  if ! -e $config_abs;
+die "File not found: $___CONFIG (interpreted as $config_abs)." if ! -e $config_abs;
 $___CONFIG = $config_abs;
 
 # moses should use our config
 if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
-|| $___DECODER_FLAGS =~ /(^|\s)-(ttable-file|t) /
-|| $___DECODER_FLAGS =~ /(^|\s)-(distortion-file) /
-|| $___DECODER_FLAGS =~ /(^|\s)-(generation-file) /
-|| $___DECODER_FLAGS =~ /(^|\s)-(lmodel-file) /
-|| $___DECODER_FLAGS =~ /(^|\s)-(global-lexical-file) /
-) {
+    || $___DECODER_FLAGS =~ /(^|\s)-(ttable-file|t) /
+    || $___DECODER_FLAGS =~ /(^|\s)-(distortion-file) /
+    || $___DECODER_FLAGS =~ /(^|\s)-(generation-file) /
+    || $___DECODER_FLAGS =~ /(^|\s)-(lmodel-file) /
+    || $___DECODER_FLAGS =~ /(^|\s)-(global-lexical-file) /
+  ) {
   die "It is forbidden to supply any of -config, -ttable-file, -distortion-file, -generation-file or -lmodel-file in the --decoder-flags.\nPlease use only the --config option to give the config file that lists all the supplementary files.";
 }
 
@@ -443,8 +441,8 @@ chomp($cwd);
 
 mkpath($___WORKING_DIR);
 
-{
 # open local scope
+{
 
 #chdir to the working directory
 chdir($___WORKING_DIR) or die "Can't chdir to $___WORKING_DIR";
@@ -469,8 +467,7 @@ if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
     print STDERR "Assuming the tables are already filtered, reusing $outdir/moses.ini\n";
-  }
-  else {
+  } else {
     # filter the phrase tables with respect to input, use --decoder-flags
     print STDERR "filtering the phrase tables... ".`date`;
     my $___FILTER_F  = $___DEV_F;
@@ -483,8 +480,7 @@ if ($___FILTER_PHRASE_TABLE) {
   $___CONFIG_ORIG = $___CONFIG;
   # the decoder should now use the filtered model
   $___CONFIG = "$outdir/moses.ini";
-}
-else{
+} else{
   # do not filter phrase tables (useful if binary phrase tables are available)
   # use the original configuration file
   $___CONFIG_ORIG = $___CONFIG;
@@ -541,42 +537,39 @@ if ($continue) {
   my $firststep;
   if ($prev_aggregate_nbl_size==-1){
     $firststep=1;
-  }
-  else{
+  } else {
     $firststep=$step-$prev_aggregate_nbl_size+1;
     $firststep=($firststep>0)?$firststep:1;
   }
 
-#checking if all needed data are available
+  #checking if all needed data are available
   if ($firststep<=$step){
     print STDERR "First previous needed data index is $firststep\n";
     print STDERR "Checking whether all needed data (from step $firststep to step $step) are available\n";
 
-    for (my $prevstep=$firststep; $prevstep<=$step;$prevstep++){
-      print STDERR "Checking whether data of step $prevstep are available\n";
+    for (my $prevstep=$firststep; $prevstep<=$step;$prevstep++) {
+        print STDERR "Checking whether data of step $prevstep are available\n";
       if (! -e "run$prevstep.features.dat"){
-	die "Can't start from step $step, because run$prevstep.features.dat was not found!";
-      }else{
-	if (defined $prev_feature_file){
-	  $prev_feature_file = "${prev_feature_file},run$prevstep.features.dat";
-	}
-	else{
-	  $prev_feature_file = "run$prevstep.features.dat";
-	}
+          die "Can't start from step $step, because run$prevstep.features.dat was not found!";
+      } else {
+          if (defined $prev_feature_file){
+              $prev_feature_file = "${prev_feature_file},run$prevstep.features.dat";
+          } else {
+              $prev_feature_file = "run$prevstep.features.dat";
+          }
       }
       if (! -e "run$prevstep.scores.dat"){
-	die "Can't start from step $step, because run$prevstep.scores.dat was not found!";
-      }else{
-	if (defined $prev_score_file){
-	  $prev_score_file = "${prev_score_file},run$prevstep.scores.dat";
-	}
-	else{
-	  $prev_score_file = "run$prevstep.scores.dat";
-	}
+          die "Can't start from step $step, because run$prevstep.scores.dat was not found!";
+      } else {
+          if (defined $prev_score_file){
+              $prev_score_file = "${prev_score_file},run$prevstep.scores.dat";
+          } else {
+              $prev_score_file = "run$prevstep.scores.dat";
+          }
       }
       if (! -e "run$prevstep.${weights_in_file}"){
-	die "Can't start from step $step, because run$prevstep.${weights_in_file} was not found!";
-      }else{
+          die "Can't start from step $step, because run$prevstep.${weights_in_file} was not found!";
+      } else{
         if (defined $prev_init_file){
           $prev_init_file = "${prev_init_file},run$prevstep.${weights_in_file}";
         }
@@ -620,7 +613,7 @@ if ($continue) {
 
 ###### MERT MAIN LOOP
 
-my $run=$start_run-1;
+my $run = $start_run - 1;
 
 my $oldallsorted = undef;
 my $allsorted = undef;
@@ -629,7 +622,7 @@ my $nbest_file=undef;
 my $lsamp_file=undef; #Lattice samples
 my $orig_nbest_file=undef; # replaced if lattice sampling
 
-while(1) {
+while (1) {
   $run++;
   if ($maximum_iterations && $run > $maximum_iterations) {
       print "Maximum number of iterations exceeded - stopping\n";
@@ -642,7 +635,6 @@ while(1) {
 
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined$devbleu?$devbleu:"--not-estimated--"),$sparse_weights_file);
-
 
   # skip running the decoder if the user wanted
   if (!$skip_decoder) {
@@ -663,8 +655,7 @@ while(1) {
       }
       safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
       $nbest_file = $nbest_file.".gz";
-  }
-  else {
+  } else {
       $nbest_file="run$run.best$___N_BEST_LIST_SIZE.out.gz";
       print "skipped decoder run $run\n";
       $skip_decoder = 0;
@@ -729,16 +720,16 @@ while(1) {
 
   my $ffiles = "";
   my $scfiles = "";
+
   if (defined $prev_feature_file) {
     $ffiles = "$prev_feature_file,$feature_file";
-  }
-  else{
+  } else{
     $ffiles = "$feature_file";
   }
+
   if (defined $prev_score_file) {
     $scfiles = "$prev_score_file,$score_file";
-  }
-  else{
+  } else{
     $scfiles = "$score_file";
   }
 
@@ -946,8 +937,7 @@ sub get_weights_from_mert {
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ",@WEIGHT);
     close IN;
-  }
-  else {
+  } else {
     open(IN,$logfile) or die "Can't open $logfile";
     while (<IN>) {
       if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
@@ -1157,22 +1147,22 @@ sub create_config {
     my %P; # the hash of all parameters we wish to override
 
     # first convert the command line parameters to the hash
-    { # ensure local scope of vars
-	my $parameter=undef;
-	print "Parsing --decoder-flags: |$___DECODER_FLAGS|\n";
+    # ensure local scope of vars
+    {
+        my $parameter = undef;
+        print "Parsing --decoder-flags: |$___DECODER_FLAGS|\n";
         $___DECODER_FLAGS =~ s/^\s*|\s*$//;
         $___DECODER_FLAGS =~ s/\s+/ /;
-	foreach (split(/ /,$___DECODER_FLAGS)) {
-	    if (/^\-([^\d].*)$/) {
-		$parameter = $1;
-		$parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
-	    }
-	    else {
+        foreach (split(/ /,$___DECODER_FLAGS)) {
+            if (/^\-([^\d].*)$/) {
+                $parameter = $1;
+                $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
+            } else {
                 die "Found value with no -paramname before it: $_"
                   if !defined $parameter;
-		push @{$P{$parameter}},$_;
-	    }
-	}
+                push @{$P{$parameter}},$_;
+            }
+        }
     }
 
     # First delete all weights params from the input, we're overwriting them.
@@ -1207,50 +1197,51 @@ sub create_config {
     print OUT "# We were before running iteration $iteration\n";
     print OUT "# finished ".`date`;
     my $line = <INI>;
+
     while(1) {
-	last unless $line;
+        last unless $line;
 
-	# skip until hit [parameter]
-	if ($line !~ /^\[(.+)\]\s*$/) {
-	    $line = <INI>;
-	    print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
-	    next;
-	}
+        # skip until hit [parameter]
+        if ($line !~ /^\[(.+)\]\s*$/) {
+            $line = <INI>;
+            print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
+            next;
+        }
 
-	# parameter name
-	my $parameter = $1;
-	$parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
-	print OUT "[$parameter]\n";
+        # parameter name
+        my $parameter = $1;
+        $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
+        print OUT "[$parameter]\n";
 
-	# change parameter, if new values
-	if (defined($P{$parameter})) {
-	    # write new values
-	    foreach (@{$P{$parameter}}) {
-		print OUT $_."\n";
-	    }
-	    delete($P{$parameter});
-	    # skip until new parameter, only write comments
-	    while($line = <INI>) {
-		print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
-		last if $line =~ /^\[/;
-		last unless $line;
-	    }
-	    next;
-	}
+        # change parameter, if new values
+        if (defined($P{$parameter})) {
+            # write new values
+            foreach (@{$P{$parameter}}) {
+                print OUT $_."\n";
+            }
+            delete($P{$parameter});
+            # skip until new parameter, only write comments
+            while($line = <INI>) {
+                print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
+                last if $line =~ /^\[/;
+                last unless $line;
+            }
+            next;
+        }
 
-	# unchanged parameter, write old
-	while($line = <INI>) {
-	    last if $line =~ /^\[/;
-	    print OUT $line;
-	}
+        # unchanged parameter, write old
+        while ($line = <INI>) {
+            last if $line =~ /^\[/;
+            print OUT $line;
+        }
     }
 
     # write all additional parameters
     foreach my $parameter (keys %P) {
-	print OUT "\n[$parameter]\n";
-	foreach (@{$P{$parameter}}) {
-	    print OUT $_."\n";
-	}
+        print OUT "\n[$parameter]\n";
+        foreach (@{$P{$parameter}}) {
+            print OUT $_."\n";
+        }
     }
 
     close(INI);
@@ -1264,13 +1255,11 @@ sub safesystem {
   if ($? == -1) {
       print STDERR "Failed to execute: @_\n  $!\n";
       exit(1);
-  }
-  elsif ($? & 127) {
+  } elsif ($? & 127) {
       printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
           ($? & 127),  ($? & 128) ? 'with' : 'without';
       exit(1);
-  }
-  else {
+  } else {
     my $exitcode = $? >> 8;
     print STDERR "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
@@ -1278,7 +1267,7 @@ sub safesystem {
 }
 sub ensure_full_path {
     my $PATH = shift;
-$PATH =~ s/\/nfsmnt//;
+    $PATH =~ s/\/nfsmnt//;
     return $PATH if $PATH =~ /^\//;
     my $dir = `pawd 2>/dev/null`;
     if(!$dir){$dir = `pwd`;}
@@ -1294,7 +1283,7 @@ $PATH =~ s/\/nfsmnt//;
     }
     $PATH =~ s/\/[^\/]+\/\.\.$//;
     $PATH =~ s/\/+$//;
-$PATH =~ s/\/nfsmnt//;
+    $PATH =~ s/\/nfsmnt//;
     return $PATH;
 }
 
