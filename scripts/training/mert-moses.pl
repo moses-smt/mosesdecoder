@@ -450,6 +450,7 @@ my $mert_outfile = "mert.out";
 my $mert_logfile = "mert.log";
 my $weights_in_file = "init.opt";
 my $weights_out_file = "weights.txt";
+my $finished_step_file = "finished_step.txt";
 
 # set start run
 my $start_run = 1;
@@ -524,7 +525,7 @@ for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
 if ($continue) {
   # getting the last finished step
   print STDERR "Trying to continue an interrupted optimization.\n";
-  open my $fh, '<', "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
+  open my $fh, '<', $finished_step_file or die "$finished_step_file: $!";
   my $step = <$fh>;
   chomp $step;
   close $fh;
@@ -848,9 +849,7 @@ while (1) {
     }
   }
 
-  open my $fh, '>', "finished_step.txt" or die "Can't mark finished step: $!";
-  print $fh $run."\n";
-  close $fh;
+  &save_finished_step($finished_step_file, $run);
 
   if ($shouldstop) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
@@ -905,9 +904,7 @@ safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
 
 # just to be sure that we have the really last finished step marked
-open my $out, '>', "finished_step.txt" or die "Can't mark finished step: $!";
-print $out $run."\n";
-close $out;
+&save_finished_step($finished_step_file, $run);
 
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
@@ -1311,4 +1308,11 @@ sub create_extractor_script() {
   `chmod +x $script_path`;
 
   return $script_path;
+}
+
+sub save_finished_step {
+  my ($filename, $step) = @_;
+  open my $fh, '>', $filename or die "$filename: $!";
+  print $fh $step . "\n";
+  close $fh;
 }
