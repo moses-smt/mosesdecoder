@@ -1229,7 +1229,7 @@ sub create_config {
         }
 
         # unchanged parameter, write old
-        while ($line = <ini_fh>) {
+        while ($line = <$ini_fh>) {
             last if $line =~ /^\[/;
             print $out $line;
         }
