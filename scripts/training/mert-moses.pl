@@ -524,10 +524,10 @@ for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
 if ($continue) {
   # getting the last finished step
   print STDERR "Trying to continue an interrupted optimization.\n";
-  open IN, "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
-  my $step = <IN>;
+  open my $fh, '<', "finished_step.txt" or die "Failed to find the step number, failed to read finished_step.txt";
+  my $step = <$fh>;
   chomp $step;
-  close IN;
+  close $fh;
 
   print STDERR "Last finished step is $step\n";
 
@@ -680,12 +680,11 @@ while (1) {
   my @CURR = @{$featlist->{"values"}};
   my @NAME = @{$featlist->{"names"}};
 
-  open(OUT,"> $weights_in_file")
-    or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
-  print OUT join(" ", @CURR)."\n";
-  print OUT join(" ", @MIN)."\n";  # this is where we could pass MINS
-  print OUT join(" ", @MAX)."\n";  # this is where we could pass MAXS
-  close(OUT);
+  open my $out, '>', $weights_in_file or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
+  print $out join(" ", @CURR)."\n";
+  print $out join(" ", @MIN)."\n";  # this is where we could pass MINS
+  print $out join(" ", @MAX)."\n";  # this is where we could pass MAXS
+  close $out;
   # print join(" ", @NAME)."\n";
 
   # make a backup copy labelled with this run number
@@ -757,9 +756,10 @@ while (1) {
     # ... get results ...
     my %dummy;
     ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%dummy);
-    open(PRO_START,">run$run.init.pro");
-    print PRO_START $bestpoint."\n";
-    close(PRO_START);
+
+    open my $pro_fh, '>', "run$run.init.pro" or die "run$run.init.pro: $!";
+    print $pro_fh $bestpoint."\n";
+    close $pro_fh;
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
     &submit_or_exec($cmd.$mert_settings,$mert_outfile,$mert_logfile);
@@ -797,12 +797,13 @@ while (1) {
   if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
     my %historic_sparse_weights;
     if (-e "run$run.sparse-weights") {
-      open(SPARSE,"run$run.sparse-weights");
-      while(<SPARSE>) {
+      open my $sparse_fh, '<', "run$run.sparse-weights" or die "run$run.sparse-weights: $!";
+      while (<$sparse_fh>) {
         chop;
-        my ($feature,$weight) = split;
+        my ($feature, $weight) = split;
         $historic_sparse_weights{$feature} = $weight;
       }
+      close $sparse_fh;
     }
     my $prev = $run-1;
     my @historic_weights = split /\s+/, `cat run$prev.$weights_out_file`;
@@ -819,21 +820,21 @@ while (1) {
       #print STDERR "sparse_weights{$_} += (1-$___HISTORIC_INTERPOLATION) * $historic_sparse_weights{$_} -> $sparse_weights{$_}\n";
     }
   }
-  if ($___HISTORIC_INTERPOLATION>0) {
-    open(WEIGHTS,">run$run.$weights_out_file");
-    print WEIGHTS join(" ",@newweights);
-    close(WEIGHTS);
+  if ($___HISTORIC_INTERPOLATION > 0) {
+    open my $weights_fh, '>', "run$run.$weights_out_file" or die "run$run.$weights_out_file: $!";
+    print $weights_fh join(" ", @newweights);
+    close $weights_fh;
   }
 
   $featlist->{"values"} = \@newweights;
 
   if (scalar keys %sparse_weights) {
     $sparse_weights_file = "run".($run+1).".sparse-weights";
-    open(SPARSE,">".$sparse_weights_file);
+    open my $sparse_fh, '>', $sparse_weights_file or die "$sparse_weights_file: $!";
     foreach my $feature (keys %sparse_weights) {
-      print SPARSE "$feature $sparse_weights{$feature}\n";
+      print $sparse_fh "$feature $sparse_weights{$feature}\n";
     }
-    close(SPARSE);
+    close $sparse_fh;
   }
 
   ## additional stopping criterion: weights have not changed
@@ -847,9 +848,9 @@ while (1) {
     }
   }
 
-  open F, "> finished_step.txt" or die "Can't mark finished step";
-  print F $run."\n";
-  close F;
+  open my $fh, '>', "finished_step.txt" or die "Can't mark finished step: $!";
+  print $fh $run."\n";
+  close $fh;
 
   if ($shouldstop) {
     print STDERR "None of the weights changed more than $minimum_required_change_in_weights. Stopping.\n";
@@ -894,7 +895,9 @@ while (1) {
 }
 print "Training finished at ".`date`;
 
-if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
+if (defined $allsorted) {
+    safesystem ("\\rm -f $allsorted") or die;
+}
 
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
@@ -902,10 +905,9 @@ safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
 
 # just to be sure that we have the really last finished step marked
-open F, "> finished_step.txt" or die "Can't mark finished step";
-print F $run."\n";
-close F;
-
+open my $out, '>', "finished_step.txt" or die "Can't mark finished step: $!";
+print $out $run."\n";
+close $out;
 
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
@@ -913,40 +915,37 @@ chdir($cwd);
 } # end of local scope
 
 sub get_weights_from_mert {
-  my ($outfile,$logfile,$weight_count,$sparse_weights) = @_;
-  my ($bestpoint,$devbleu);
+  my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
+  my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)) {
-    open(IN,$outfile) or die "Can't open $outfile";
-    my (@WEIGHT,$sum);
-    for(my $i=0;$i<$weight_count;$i++) { push @WEIGHT, 0; }
-    while(<IN>) {
-      # regular features
-      if (/^F(\d+) ([\-\.\de]+)/) {
+    open my $fh, '<', $outfile or die "Can't open $outfile: $!";
+    my (@WEIGHT, $sum);
+    for(my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
+    while (<$fh>) {
+      if (/^F(\d+) ([\-\.\de]+)/) {     # regular features
         $WEIGHT[$1] = $2;
         $sum += abs($2);
-      }
-      # sparse features
-      elsif(/^(.+_.+) ([\-\.\de]+)/) {
+      } elsif (/^(.+_.+) ([\-\.\de]+)/) { # sparse features
         $$sparse_weights{$1} = $2;
       }
     }
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
-    $bestpoint = join(" ",@WEIGHT);
-    close IN;
+    $bestpoint = join(" ", @WEIGHT);
+    close $fh;
   } else {
-    open(IN,$logfile) or die "Can't open $logfile";
-    while (<IN>) {
+    open my $fh, '<', $logfile or die "Can't open $logfile: $!";
+    while (<$fh>) {
       if (/Best point:\s*([\s\d\.\-e]+?)\s*=> ([\-\d\.]+)/) {
         $bestpoint = $1;
         $devbleu = $2;
         last;
       }
     }
-    close IN;
+    close $fh;
   }
-  return ($bestpoint,$devbleu);
+  return ($bestpoint, $devbleu);
 }
 
 sub run_decoder {
@@ -1072,14 +1071,14 @@ sub get_featlist_from_moses {
   # read feature list
   my @names = ();
   my @startvalues = ();
-  open(INI,$featlistfn) or die "Can't read $featlistfn";
+  open my $fh, '<', $featlistfn or die "Can't read $featlistfn : $!";
   my $nr = 0;
   my @errs = ();
-  while (<INI>) {
+  while (<$fh>) {
     $nr++;
     chomp;
-    /^(.+) (\S+) (\S+)$/ || die("invalid feature: $_");
-    my ($longname, $feature, $value) = ($1,$2,$3);
+    /^(.+) (\S+) (\S+)$/ || die "invalid feature: $_";
+    my ($longname, $feature, $value) = ($1, $2, $3);
     next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
       if $value !~ /^[+-]?[0-9.e]+$/;
@@ -1088,7 +1087,8 @@ sub get_featlist_from_moses {
     push @names, $feature;
     push @startvalues, $value;
   }
-  close INI;
+  close $fh;
+
   if (scalar @errs) {
     print STDERR join("", @errs);
     exit 1;
@@ -1102,9 +1102,9 @@ sub get_order_of_scores_from_nbestlist {
   # return the score labels in order
   my $fname_or_source = shift;
   # print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
-  open IN, $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source'";
-  my $line = <IN>;
-  close IN;
+  open my $fh, '<', $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source': $!";
+  my $line = <$fh>;
+  close $fh;
   die "Line empty in nbestlist '$fname_or_source'" if !defined $line;
   my ($sent, $hypo, $scores, $total) = split /\|\|\|/, $line;
   $scores =~ s/^\s*|\s*$//g;
@@ -1185,42 +1185,43 @@ sub create_config {
     }
 
     # create new moses.ini decoder config file by cloning and overriding the original one
-    open(INI,$infn) or die "Can't read $infn";
+    open my $ini_fh, '<', $infn or die "Can't read $infn: $!";
     delete($P{"config"}); # never output
     print "Saving new config to: $outfn\n";
-    open(OUT,"> $outfn") or die "Can't write $outfn";
-    print OUT "# MERT optimized configuration\n";
-    print OUT "# decoder $___DECODER\n";
-    print OUT "# BLEU $bleu_achieved on dev $___DEV_F\n";
-    print OUT "# We were before running iteration $iteration\n";
-    print OUT "# finished ".`date`;
-    my $line = <INI>;
 
+    open my $out, '>', $outfn or die "Can't write $outfn: $!";
+    print $out "# MERT optimized configuration\n";
+    print $out "# decoder $___DECODER\n";
+    print $out "# BLEU $bleu_achieved on dev $___DEV_F\n";
+    print $out "# We were before running iteration $iteration\n";
+    print $out "# finished ".`date`;
+
+    my $line = <$ini_fh>;
     while(1) {
         last unless $line;
 
         # skip until hit [parameter]
         if ($line !~ /^\[(.+)\]\s*$/) {
-            $line = <INI>;
-            print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
+            $line = <$ini_fh>;
+            print $out $line if $line =~ /^\#/ || $line =~ /^\s+$/;
             next;
         }
 
         # parameter name
         my $parameter = $1;
         $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
-        print OUT "[$parameter]\n";
+        print $out "[$parameter]\n";
 
         # change parameter, if new values
         if (defined($P{$parameter})) {
             # write new values
             foreach (@{$P{$parameter}}) {
-                print OUT $_."\n";
+                print $out $_."\n";
             }
             delete($P{$parameter});
             # skip until new parameter, only write comments
-            while($line = <INI>) {
-                print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
+            while ($line = <$ini_fh>) {
+                print $out $line if $line =~ /^\#/ || $line =~ /^\s+$/;
                 last if $line =~ /^\[/;
                 last unless $line;
             }
@@ -1228,22 +1229,22 @@ sub create_config {
         }
 
         # unchanged parameter, write old
-        while ($line = <INI>) {
+        while ($line = <ini_fh>) {
             last if $line =~ /^\[/;
-            print OUT $line;
+            print $out $line;
         }
     }
 
     # write all additional parameters
     foreach my $parameter (keys %P) {
-        print OUT "\n[$parameter]\n";
+        print $out "\n[$parameter]\n";
         foreach (@{$P{$parameter}}) {
-            print OUT $_."\n";
+            print $out $_."\n";
         }
     }
 
-    close(INI);
-    close(OUT);
+    close $ini_fh;
+    close $out;
     print STDERR "Saved: $outfn\n";
 }
 
@@ -1263,6 +1264,7 @@ sub safesystem {
     return ! $exitcode;
   }
 }
+
 sub ensure_full_path {
     my $PATH = shift;
     $PATH =~ s/\/nfsmnt//;
@@ -1285,19 +1287,17 @@ sub ensure_full_path {
 }
 
 sub submit_or_exec {
-  my ($cmd,$stdout,$stderr) = @_;
+  my ($cmd, $stdout, $stderr) = @_;
   print STDERR "exec: $cmd\n";
   if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$stdout -stderr=$stderr" )
       or die "ERROR: Failed to submit '$cmd' (via $qsubwrapper)";
-  }
-  else {
+  } else {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
   }
 }
 
-sub create_extractor_script()
-{
+sub create_extractor_script() {
   my ($cmd, $outdir) = @_;
   my $script_path = File::Spec->catfile($outdir, "extractor.sh");
 
@@ -1306,7 +1306,7 @@ sub create_extractor_script()
   print $out "#!/bin/bash\n";
   print $out "cd $outdir\n";
   print $out "$cmd\n";
-  close($out);
+  close $out;
 
   `chmod +x $script_path`;
 
