@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -13,13 +13,13 @@
 # Sept 2011   multi-threaded mert (Barry Haddow)
 # 3 Aug 2011  Added random directions, historic best, pairwise ranked (PK)
 # Jul 2011    simplifications (Ondrej Bojar)
-#             -- rely on moses' -show-weights instead of parsing moses.ini 
+#             -- rely on moses' -show-weights instead of parsing moses.ini
 #                ... so moses is also run once *before* mert starts, checking
 #                    the model to some extent
 #             -- got rid of the 'triples' mess;
 #                use --range to supply bounds for random starting values:
 #                --range tm:-3..3 --range lm:-3..3
-# 5 Aug 2009  Handling with different reference length policies (shortest, average, closest) for BLEU 
+# 5 Aug 2009  Handling with different reference length policies (shortest, average, closest) for BLEU
 #             and case-sensistive/insensitive evaluation (Nicola Bertoldi)
 # 5 Jun 2008  Forked previous version to support new mert implementation.
 # 13 Feb 2007 Better handling of default values for lambda, now works with multiple
@@ -36,8 +36,8 @@
 # 29 Jul 2006 run-filter, score-nbest and mert run on the queue (Nicola; Ondrej had to type it in again)
 # 28 Jul 2006 attempt at foolproof usage, strong checking of input validity, merged the parallel and nonparallel version (Ondrej Bojar)
 # 27 Jul 2006 adding the safesystem() function to handle with process failure
-# 22 Jul 2006 fixed a bug about handling relative path of configuration file (Nicola Bertoldi) 
-# 21 Jul 2006 adapted for Moses-in-parallel (Nicola Bertoldi) 
+# 22 Jul 2006 fixed a bug about handling relative path of configuration file (Nicola Bertoldi)
+# 21 Jul 2006 adapted for Moses-in-parallel (Nicola Bertoldi)
 # 18 Jul 2006 adapted for Moses and cleaned up (PK)
 # 21 Jan 2005 unified various versions, thorough cleanup (DWC)
 #             now indexing accumulated n-best list solely by feature vectors
@@ -131,7 +131,7 @@ my $___NOCASE = 0;
 my $___NONORM = 0;
 
 # set 0 if input type is text, set 1 if input type is confusion network
-my $___INPUTTYPE = 0; 
+my $___INPUTTYPE = 0;
 
 
 my $mertdir = undef; # path to new mert directory
@@ -144,7 +144,7 @@ my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
 my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_ORIG = undef; # pathname to startup ini file before filtering
-my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
+my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
 my $___RANGES = undef;
@@ -223,7 +223,7 @@ Options:
   --mosesparallelcmd=STR ... use a different script instead of moses-parallel
   --queue-flags=STRING   ... anything you with to pass to qsub, eg.
                              '-l ws06osssmt=true'. The default is: '-hard'
-                             To reset the parameters, please use 
+                             To reset the parameters, please use
                              --queue-flags=' '
                              (i.e. a space between the quotes).
   --decoder-flags=STRING ... extra parameters for the decoder
@@ -245,7 +245,7 @@ Options:
   --mertdir=STRING       ... path to new mert implementation
   --mertargs=STRING      ... extra args for both extractor and mert
   --extractorargs=STRING ... extra args for extractor only
-  --mertmertargs=STRING  ... extra args for mert only 
+  --mertmertargs=STRING  ... extra args for mert only
   --scorenbestcmd=STRING ... path to score-nbest.py
   --old-sge              ... passed to parallelizers, assume Grid Engine < 6.0
   --inputtype=[0|1|2]    ... Handle different input types: (0 for text,
@@ -265,7 +265,7 @@ Options:
                              is identical to:
                                --range=tm:0..1,-1..1,0..2
                              but not to:
-                               --range=tm:0..2 --range=tm:0..1,-1..1 
+                               --range=tm:0..2 --range=tm:0..1,-1..1
   --activate-features=STRING  ... comma-separated list of features to optimize,
                                   others are fixed to the starting values
                                   default: optimize all features
@@ -435,7 +435,7 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 my $need_to_normalize = 1;
 
 #store current directory and create the working directory (if needed)
-my $cwd = `pawd 2>/dev/null`; 
+my $cwd = `pawd 2>/dev/null`;
 if(!$cwd){$cwd = `pwd`;}
 chomp($cwd);
 
@@ -467,7 +467,7 @@ if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
     print STDERR "Assuming the tables are already filtered, reusing $outdir/moses.ini\n";
-  } 
+  }
   else {
     # filter the phrase tables with respect to input, use --decoder-flags
     print STDERR "filtering the phrase tables... ".`date`;
@@ -549,7 +549,7 @@ if ($continue) {
   if ($firststep<=$step){
     print STDERR "First previous needed data index is $firststep\n";
     print STDERR "Checking whether all needed data (from step $firststep to step $step) are available\n";
-    
+
     for (my $prevstep=$firststep; $prevstep<=$step;$prevstep++){
       print STDERR "Checking whether data of step $prevstep are available\n";
       if (! -e "run$prevstep.features.dat"){
@@ -601,7 +601,7 @@ if ($continue) {
       if !defined $bestpoint || !defined $devbleu;
     print "($step) BEST at $step $bestpoint => $devbleu at ".`date`;
     my @newweights = split /\s+/, $bestpoint;
-    
+
     # Sanity check: order of lambdas must match
     sanity_check_order_of_lambdas($featlist,
       "gunzip -c < run$step.best$___N_BEST_LIST_SIZE.out.gz |");
@@ -651,7 +651,7 @@ while(1) {
         my $combined_file = "$nbest_file.comb";
         safesystem("sort -k1,1n $nbest_file $lsamp_file > $combined_file") or
           die("failed to merge nbest and lattice samples");
-        safesystem("gzip -f $nbest_file; gzip -f $lsamp_file") or 
+        safesystem("gzip -f $nbest_file; gzip -f $lsamp_file") or
           die "Failed to gzip nbests and lattice samples";
         $orig_nbest_file = "$nbest_file.gz";
         $orig_nbest_file = "$nbest_file.gz";
@@ -688,7 +688,7 @@ while(1) {
   my @MAX = @{$featlist->{"maxs"}};
   my @CURR = @{$featlist->{"values"}};
   my @NAME = @{$featlist->{"names"}};
-  
+
   open(OUT,"> $weights_in_file")
     or die "Can't write $weights_in_file (WD now $___WORKING_DIR)";
   print OUT join(" ", @CURR)."\n";
@@ -696,7 +696,7 @@ while(1) {
   print OUT join(" ", @MAX)."\n";  # this is where we could pass MAXS
   close(OUT);
   # print join(" ", @NAME)."\n";
-  
+
   # make a backup copy labelled with this run number
   safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 
@@ -704,7 +704,7 @@ while(1) {
 
   # run mert
   $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args";
-  
+
   my $mert_settings = " -n $___RANDOM_RESTARTS";
   my $seed_settings = "";
   if ($___PREDICTABLE_SEEDS) {
@@ -742,8 +742,8 @@ while(1) {
 
   my $file_settings = " --ffile $ffiles --scfile $scfiles";
   my $pro_file_settings = "--ffile " . join( " --ffile ", split(/,/, $ffiles)) .
-                          " --scfile " .  join( " --scfile ", split(/,/, $scfiles)); 
-  
+                          " --scfile " .  join( " --scfile ", split(/,/, $scfiles));
+
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   }
@@ -877,7 +877,7 @@ while(1) {
   $prev_feature_file = undef;
   $prev_score_file = undef;
   $prev_init_file = undef;
-  for (my $i=$firstrun;$i<=$run;$i++){ 
+  for (my $i=$firstrun;$i<=$run;$i++){
     if (defined $prev_feature_file){
       $prev_feature_file = "${prev_feature_file},run${i}.${base_feature_file}";
     }
@@ -968,7 +968,7 @@ sub run_decoder {
       my $lsamp_filename_template = "run%d.lsamp$___LATTICE_SAMPLES.out";
       $lsamp_filename = sprintf($lsamp_filename_template, $run);
     }
-    
+
     # user-supplied parameters
     print "params = $___DECODER_FLAGS\n";
 
@@ -1064,7 +1064,7 @@ sub sanity_check_order_of_lambdas {
   die "Mismatched lambdas. Decoder returned @got, we expected @expected_lambdas"
     if "@got" ne "@expected_lambdas";
 }
-    
+
 
 sub get_featlist_from_moses {
   # run moses with the given config file and return the list of features and
@@ -1196,7 +1196,7 @@ sub create_config {
 
     # create new moses.ini decoder config file by cloning and overriding the original one
     open(INI,$infn) or die "Can't read $infn";
-    delete($P{"config"}); # never output 
+    delete($P{"config"}); # never output
     print "Saving new config to: $outfn\n";
     open(OUT,"> $outfn") or die "Can't write $outfn";
     print OUT "# MERT optimized configuration\n";
@@ -1209,7 +1209,7 @@ sub create_config {
 	last unless $line;
 
 	# skip until hit [parameter]
-	if ($line !~ /^\[(.+)\]\s*$/) { 
+	if ($line !~ /^\[(.+)\]\s*$/) {
 	    $line = <INI>;
 	    print OUT $line if $line =~ /^\#/ || $line =~ /^\s+$/;
 	    next;
@@ -1235,7 +1235,7 @@ sub create_config {
 	    }
 	    next;
 	}
-	
+
 	# unchanged parameter, write old
 	while($line = <INI>) {
 	    last if $line =~ /^\[/;
@@ -1278,7 +1278,7 @@ sub ensure_full_path {
     my $PATH = shift;
 $PATH =~ s/\/nfsmnt//;
     return $PATH if $PATH =~ /^\//;
-    my $dir = `pawd 2>/dev/null`; 
+    my $dir = `pawd 2>/dev/null`;
     if(!$dir){$dir = `pwd`;}
     chomp($dir);
     $PATH = $dir."/".$PATH;
@@ -1302,7 +1302,7 @@ sub submit_or_exec {
   if (defined $___JOBS && $___JOBS > 0) {
     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=$stdout -stderr=$stderr" )
       or die "ERROR: Failed to submit '$cmd' (via $qsubwrapper)";
-  } 
+  }
   else {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
   }
