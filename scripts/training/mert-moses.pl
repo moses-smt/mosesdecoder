@@ -367,6 +367,8 @@ $scconfig = "--scconfig $scconfig" if ($scconfig);
 
 my $mert_extract_args=$mertargs;
 $mert_extract_args .=" $scconfig";
+
+$extractorargs = "" unless $extractorargs;
 $mert_extract_args .=" $extractorargs";
 
 $mertmertargs = "" if !defined $mertmertargs;
@@ -678,7 +680,7 @@ while(1) {
   my $score_file = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
-  $cmd = create_extractor_script($cmd, $___WORKING_DIR);
+  $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
 
   &submit_or_exec($cmd,"extract.out","extract.err");
 
