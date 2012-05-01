@@ -435,9 +435,7 @@ if ($___DECODER_FLAGS =~ /(^|\s)-(config|f) /
 my $need_to_normalize = 1;
 
 #store current directory and create the working directory (if needed)
-my $cwd = `pawd 2>/dev/null`;
-if(!$cwd){$cwd = `pwd`;}
-chomp($cwd);
+my $cwd = Cwd::getcwd();
 
 mkpath($___WORKING_DIR);
 
@@ -1269,9 +1267,8 @@ sub ensure_full_path {
     my $PATH = shift;
     $PATH =~ s/\/nfsmnt//;
     return $PATH if $PATH =~ /^\//;
-    my $dir = `pawd 2>/dev/null`;
-    if(!$dir){$dir = `pwd`;}
-    chomp($dir);
+
+    my $dir = Cwd::getcwd();
     $PATH = $dir."/".$PATH;
     $PATH =~ s/[\r\n]//g;
     $PATH =~ s/\/\.\//\//g;
