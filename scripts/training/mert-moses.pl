@@ -107,10 +107,16 @@ my $___PREDICTABLE_SEEDS = 0;
 my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iterations as starting points [Foster&Kuhn,2009]
 my $___RANDOM_DIRECTIONS = 0; # search in random directions only
 my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
-my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use Hopkins&May[2011]
-my $___PRO_STARTING_POINT = 0; # get a starting point from pairwise ranked optimizer
 my $___RANDOM_RESTARTS = 20;
+
+# Flags related to PRO (Hopkins & May, 2011)
+my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use
+my $___PRO_STARTING_POINT = 0; # get a starting point from pairwise ranked optimizer
 my $___HISTORIC_INTERPOLATION = 0; # interpolate optimize weights with previous iteration's weights [Hopkins&May,2011,5.4.3]
+# MegaM's options for PRO optimization.
+# TODO: Should we also add these values to options of this script?
+my $megam_default_options = "-fvals -maxi 30 -nobias binary";
+
 my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
@@ -734,14 +740,15 @@ while (1) {
   $cmd .= $file_settings;
 
   # pro optimization
+  my $pro_optimizer_cmd = "$pro_optimizer $megam_default_options run$run.pro.data";
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
-    $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
     &submit_or_exec($cmd,$mert_outfile,$mert_logfile);
   }
   # first pro, then mert
   elsif ($___PRO_STARTING_POINT) {
     # run pro...
-    my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd,"run$run.pro.out","run$run.pro.err");
     # ... get results ...
     my %dummy;
