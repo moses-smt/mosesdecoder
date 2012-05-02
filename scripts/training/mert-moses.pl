@@ -299,8 +299,8 @@ print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 $filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $filtercmd;
 
 if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
-  print STDERR "Filtering command not found: $filtercmd.\n";
-  print STDERR "Use --filtercmd=PATH to specify a valid one or --no-filter-phrase-table\n";
+  warn "Filtering command not found: $filtercmd.";
+  warn "Use --filtercmd=PATH to specify a valid one or --no-filter-phrase-table";
   exit 1;
 }
 
@@ -1074,7 +1074,7 @@ sub get_featlist_from_moses {
   close $fh;
 
   if (scalar @errs) {
-    print STDERR join("", @errs);
+    warn join("", @errs);
     exit 1;
   }
   return {"names"=>\@names, "values"=>\@startvalues};
@@ -1236,7 +1236,7 @@ sub safesystem {
   print STDERR "Executing: @_\n";
   system(@_);
   if ($? == -1) {
-      print STDERR "Failed to execute: @_\n  $!\n";
+      warn "Failed to execute: @_\n  $!";
       exit(1);
   } elsif ($? & 127) {
       printf STDERR "Execution of: @_\n  died with signal %d, %s coredump\n",
@@ -1244,7 +1244,7 @@ sub safesystem {
       exit(1);
   } else {
     my $exitcode = $? >> 8;
-    print STDERR "Exit code: $exitcode\n" if $exitcode;
+    warn "Exit code: $exitcode\n" if $exitcode;
     return ! $exitcode;
   }
 }
