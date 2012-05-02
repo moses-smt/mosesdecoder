@@ -296,7 +296,7 @@ Options:
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # path of script for filtering phrase tables and running the decoder
-$filtercmd="$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl" if !defined $filtercmd;
+$filtercmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "training", "filter-model-given-input.pl") if !defined $filtercmd;
 
 if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
   warn "Filtering command not found: $filtercmd.";
@@ -304,25 +304,27 @@ if ( ! -x $filtercmd && ! $___FILTER_PHRASE_TABLE) {
   exit 1;
 }
 
-$qsubwrapper="$SCRIPTS_ROOTDIR/generic/qsub-wrapper.pl" if !defined $qsubwrapper;
+$qsubwrapper = File::Spec->catfile($SCRIPTS_ROOTDIR, "generic", "qsub-wrapper.pl") if !defined $qsubwrapper;
 
-$moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
+$moses_parallel_cmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "generic", "moses-parallel.pl")
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = "$SCRIPTS_ROOTDIR/../dist/bin";
+  $mertdir = File::Spec->catfile(File::Basename::dirname($SCRIPTS_ROOTDIR), "dist", "bin");
+  die "mertdir does not exist: $mertdir" if ! -x $mertdir;
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
 
-my $mert_extract_cmd = "$mertdir/extractor";
-my $mert_mert_cmd    = "$mertdir/mert";
-my $mert_pro_cmd     = "$mertdir/pro";
+my $mert_extract_cmd = File::Spec->catfile($mertdir, "extractor");
+my $mert_mert_cmd    = File::Spec->catfile($mertdir, "mert");
+my $mert_pro_cmd     = File::Spec->catfile($mertdir, "pro");
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd"    if ! -x $mert_mert_cmd;
 die "Not executable: $mert_pro_cmd"     if ! -x $mert_pro_cmd;
 
-my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
+my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set to your installation
+
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
   print "did not find $pro_optimizer, installing it in $mertdir\n";
   `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
