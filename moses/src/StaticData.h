@@ -485,7 +485,7 @@ public:
   LMList GetLMList() const { 
     return m_languageModel; 
   }
-  WordPenaltyProducer* GetWordPenaltyProducer() const {
+  WordPenaltyProducer* GetFirstWordPenaltyProducer() const {
     assert(m_wordPenaltyProducers.size() >= 1);
     return m_wordPenaltyProducers[0];
   }

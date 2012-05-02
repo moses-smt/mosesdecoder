@@ -117,8 +117,8 @@ int main(int argc, char** argv) {
 	float scale_lm_factor, bleu_weight_lm_factor, scale_wp_factor;
 	bool sample;
 	string moses_src;
-	bool external_score = false, scale_all;
-	float dummy, sigmoidParam, scale_all_factor;
+	bool external_score = false, scale_all, dummy;
+	float sigmoidParam, scale_all_factor;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 	  ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -145,7 +145,7 @@ int main(int argc, char** argv) {
 	  ("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
 	  ("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
 	  ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
-	  ("dummy", po::value<float>(&dummy)->default_value(1.0), "****") 
+	  ("dummy", po::value<bool>(&dummy)->default_value(false), "****") 
 	  ("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
 	  ("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
 	  ("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
@@ -567,7 +567,13 @@ int main(int argc, char** argv) {
 	}
 	decoder->setWeights(initialWeights);
 
+	if (dummy == true) {
+	  scale_all = true;
+	  scale_all_factor = 2;
+	}
+
 	if (scale_all) {
+	  cerr << "Scale all core features by factor " << scale_all_factor << endl;
 	  scale_lm = true;
 	  scale_wp = true;
 	  scale_lm_factor = scale_all_factor;
@@ -582,9 +588,6 @@ int main(int argc, char** argv) {
 	    lmSum += abs(initialWeights.GetScoreForProducer(*i));
 	  bleuWeight = lmSum * bleu_weight_lm_factor;
 	}
-
-	if (dummy != 1.0)
-	  bleuWeight = dummy;
 
 	if (bleuWeight_hope == -1) {
 	  bleuWeight_hope = bleuWeight;
@@ -1373,7 +1376,7 @@ int main(int argc, char** argv) {
 				// scale WP
 				if (scale_wp) {
 				  // scale up weight  
-				  WordPenaltyProducer *wp = staticData.GetWordPenaltyProducer();
+				  WordPenaltyProducer *wp = staticData.GetFirstWordPenaltyProducer();
 				  float wpWeight = mosesWeights.GetScoreForProducer(wp);
 				  mosesWeights.Assign(wp, wpWeight*scale_wp_factor);
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight scaled from " << wpWeight << " to " << wpWeight*scale_wp_factor << endl;
@@ -1409,42 +1412,52 @@ int main(int argc, char** argv) {
                                   }
 
 				  // scale lexical reordering models
-				  vector<LexicalReordering*> lr = staticData.GetLexicalReorderModels();
-                                  for (size_t i=0; i<lr.size(); ++i) {
+				  vector<LexicalReordering*> lrVec = staticData.GetLexicalReorderModels();
+                                  for (size_t i=0; i<lrVec.size(); ++i) {
+				    LexicalReordering* lr = lrVec[i];
 				    // scale up weight                                                                                    
-				    dWeight = mosesWeights.GetScoreForProducer(lr[i]);
-                                    mosesWeights.Assign(lr[i], dWeight*scale_all_factor);
-                                    cerr << "Rank " << rank << ", epoch " << epoch << ", d weight scaled from " << dWeight << " to " << dWeight*scale_all_factor << endl;
-
-                                    // scale down score                                                                                  
-                                    if (sample) {
-				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesHopeSample, rank, epoch);
-				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesFearSample, rank, epoch);
-                                    }
-                                    else {
-				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesHope, rank, epoch);
-				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesFear, rank, epoch);
-				      scaleFeatureScore(lr[i], scale_all_factor, featureValues, rank, epoch);
-                                    }
+				    vector<float> dWeights = mosesWeights.GetScoresForProducer(lr);
+				    for (size_t j=0; j<dWeights.size(); ++j) {
+				      cerr << "Rank " << rank << ", epoch " << epoch << ", d weight scaled from " << dWeights[j];
+				      dWeights[j] *= scale_all_factor;
+				      cerr << " to " << dWeights[j] << endl;
+				    }
+				    mosesWeights.Assign(lr, dWeights);
+                           
+				    // scale down score                                                                                  
+				    if (sample) {
+				      scaleFeatureScores(lr, scale_all_factor, featureValuesHopeSample, rank, epoch);
+				      scaleFeatureScores(lr, scale_all_factor, featureValuesFearSample, rank, epoch);
+				    }
+				    else {
+				      scaleFeatureScores(lr, scale_all_factor, featureValuesHope, rank, epoch);
+				      scaleFeatureScores(lr, scale_all_factor, featureValuesFear, rank, epoch);
+				      scaleFeatureScores(lr, scale_all_factor, featureValues, rank, epoch);
+				    }
 				  }
-
+				  
 				  // scale phrase table models
-				  vector<PhraseDictionaryFeature*> pd = staticData.GetPhraseDictionaryModels();
-                                  for (size_t i=0; i<pd.size(); ++i) {
+				  vector<PhraseDictionaryFeature*> pdVec = staticData.GetPhraseDictionaryModels();
+                                  for (size_t i=0; i<pdVec.size(); ++i) {
+				    PhraseDictionaryFeature* pd = pdVec[i];
                                     // scale up weight                                                                                        
-                                    float tWeight = mosesWeights.GetScoreForProducer(pd[i]);
-                                    mosesWeights.Assign(pd[i], tWeight*scale_all_factor);
-                                    cerr << "Rank " << rank << ", epoch " << epoch << ", t weight scaled from " << tWeight << " to " << tWeight*scale_all_factor << endl;
+                                    vector<float> tWeights = mosesWeights.GetScoresForProducer(pd);
+				    for (size_t j=0; j<tWeights.size(); ++j) {
+                                      cerr << "Rank " << rank << ", epoch " << epoch << ", t weight scaled from " << tWeights[j];
+                                      tWeights[j] *= scale_all_factor;
+                                      cerr << " to " << tWeights[j] << endl;
+                                    }
+                                    mosesWeights.Assign(pd, tWeights);
 
-                                    // scale down score                                                                                        
+                                    // scale down score                                                                                     
                                     if (sample) {
-                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesHopeSample, rank, epoch);
-                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesFearSample, rank, epoch);
+                                      scaleFeatureScores(pd, scale_all_factor, featureValuesHopeSample, rank, epoch);
+                                      scaleFeatureScores(pd, scale_all_factor, featureValuesFearSample, rank, epoch);
                                     }
                                     else {
-                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesHope, rank, epoch);
-                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesFear, rank, epoch);
-                                      scaleFeatureScore(pd[i], scale_all_factor, featureValues, rank, epoch);
+                                      scaleFeatureScores(pd, scale_all_factor, featureValuesHope, rank, epoch);
+                                      scaleFeatureScores(pd, scale_all_factor, featureValuesFear, rank, epoch);
+                                      scaleFeatureScores(pd, scale_all_factor, featureValues, rank, epoch);
                                     }
                                   }
 				}
@@ -1539,7 +1552,7 @@ int main(int argc, char** argv) {
 				// rescale WP feature
 				if (scale_wp) {
 				  // scale weight back down
-				  WordPenaltyProducer *wp = staticData.GetWordPenaltyProducer();
+				  WordPenaltyProducer *wp = staticData.GetFirstWordPenaltyProducer();
 				  float wpWeight = mosesWeights.GetScoreForProducer(wp);
 				  mosesWeights.Assign(wp, wpWeight/scale_wp_factor);
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight rescaled from " << wpWeight << " to " << wpWeight/scale_wp_factor << endl;                                  
@@ -1555,17 +1568,25 @@ int main(int argc, char** argv) {
 				  // rescale lexical reordering
 				  vector<LexicalReordering*> lr = staticData.GetLexicalReorderModels();
                                   for (size_t i=0; i<lr.size(); ++i) {
-				    dWeight = mosesWeights.GetScoreForProducer(lr[i]);
-				    mosesWeights.Assign(lr[i], dWeight/scale_all_factor);
-				    cerr << "Rank " << rank << ", epoch " << epoch << ", d weight rescaled from " << dWeight << " to " << dWeight/scale_all_factor << endl;				    
+				    vector<float> dWeights = mosesWeights.GetScoresForProducer(lr[i]);
+				    for (size_t j=0; j<dWeights.size(); ++j) {
+				      cerr << "Rank " << rank << ", epoch " << epoch << ", d weight rescaled from " << dWeights[j];
+				      dWeights[j] /=scale_all_factor;
+				      cerr << " to " << dWeights[j] << endl;				    
+				    }
+				    mosesWeights.Assign(lr[i], dWeights);				    
 				  }
 
 				  // rescale phrase models
 				  vector<PhraseDictionaryFeature*> pd = staticData.GetPhraseDictionaryModels();
                                   for (size_t i=0; i<pd.size(); ++i) {
-				    float tWeight = mosesWeights.GetScoreForProducer(pd[i]);
-                                    mosesWeights.Assign(pd[i], tWeight/scale_all_factor);
-                                    cerr << "Rank " << rank << ", epoch " << epoch << ", t weight rescaled from " << tWeight << " to " << tWeight/scale_all_factor << endl;
+				    vector<float> tWeights = mosesWeights.GetScoresForProducer(pd[i]);
+				    for (size_t j=0; j<tWeights.size(); ++j) {
+                                      cerr << "Rank " << rank << ", epoch " << epoch << ", t weight rescaled from " << tWeights[j];
+                                      tWeights[j] /=scale_all_factor;
+                                      cerr << " to " << tWeights[j] << endl;
+                                    }
+                                    mosesWeights.Assign(pd[i], tWeights);
 				  }
 				}
 
@@ -2115,6 +2136,21 @@ void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<Sc
       featureScore = featureValues[i][j].GetScoreForProducer(sp);
       featureValues[i][j].Assign(sp, featureScore/scaling_factor);
       //cerr << "Rank " << rank << ", epoch " << epoch << ", " << name << " score scaled from " << featureScore << " to " << featureScore/scaling_factor << endl;
+    }
+  }
+}
+
+void scaleFeatureScores(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
+  string name = sp->GetScoreProducerWeightShortName();
+
+  // scale down score                                                                                                                         
+  for (size_t i=0; i<featureValues.size(); ++i) { // each item in batch                                                                       
+    for (size_t j=0; j<featureValues[i].size(); ++j) { // each item in nbest                                                               
+      vector<float> featureScores = featureValues[i][j].GetScoresForProducer(sp);
+      for (size_t k=0; k<featureScores.size(); ++k)
+	featureScores[k] /= scaling_factor;
+      featureValues[i][j].Assign(sp, featureScores);
+      //cerr << "Rank " << rank << ", epoch " << epoch << ", " << name << " score scaled from " << featureScore << " to " << featureScore/scaling_factor << endl;                                                                                                                            
     }
   }
 }
