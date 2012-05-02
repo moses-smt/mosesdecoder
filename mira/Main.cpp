@@ -42,6 +42,7 @@ namespace mpi = boost::mpi;
 #include "Hildreth.h"
 #include "ThreadPool.h"
 #include "DummyScoreProducers.h"
+#include "LexicalReordering.h"
 #include "BleuScorer.h"
 
 using namespace Mira;
@@ -65,7 +66,7 @@ int main(int argc, char** argv) {
 	string inputFile;
 	vector<string> referenceFiles;
 	vector<string> mosesConfigFilesFolds, inputFilesFolds, referenceFilesFolds;
-	string coreWeightFile;
+	string coreWeightFile, startWeightFile;
 	size_t epochs;
 	string learner;
 	bool shuffle;
@@ -116,8 +117,8 @@ int main(int argc, char** argv) {
 	float scale_lm_factor, bleu_weight_lm_factor, scale_wp_factor;
 	bool sample;
 	string moses_src;
-	bool external_score = false;
-	float dummy, sigmoidParam;
+	bool external_score = false, scale_all;
+	float dummy, sigmoidParam, scale_all_factor;
 	po::options_description desc("Allowed options");
 	desc.add_options()
 	  ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
@@ -136,7 +137,7 @@ int main(int argc, char** argv) {
 	  ("clear-static", po::value<bool>(&clear_static)->default_value(false), "Clear static data before every translation")
 	  ("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
 	  ("configs-folds", po::value<vector<string> >(&mosesConfigFilesFolds), "Moses ini-files, one for each fold")
-	  ("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+	  ("core-weights", po::value<string>(&coreWeightFile)->default_value(""), "Weight file containing the core weights (already tuned, have to be non-zero)")
 	  ("debug-model", po::value<bool>(&debug_model)->default_value(false), "Get best model translation for debugging purposes")
 	  ("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
 	  ("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
@@ -182,6 +183,8 @@ int main(int argc, char** argv) {
 	  ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
 	  ("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")	       
 	  ("sample", po::value<bool>(&sample)->default_value(false), "Sample a translation pair from hope/(model)/fear translations") 
+	  ("scale-all", po::value<bool>(&scale_all)->default_value(false), "Scale all core features")
+	  ("scale-all-factor", po::value<float>(&scale_all_factor)->default_value(2), "Scaling factor for all core features")
 	  ("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale the BLEU score by (a history of) the inverse input length")
 	  ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
 	  ("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by an average of the input length")
@@ -201,6 +204,7 @@ int main(int argc, char** argv) {
 	  ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
 	  ("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
 	  ("sparse-no-average", po::value<bool>(&sparseNoAverage)->default_value(false), "Don't average sparse weights, just sum")
+	  ("start-weights", po::value<string>(&startWeightFile)->default_value(""), "Weight file containing the start weights (already tuned, have to be non-zero)")
 	  ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
 	  ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
 	  ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
@@ -519,29 +523,56 @@ int main(int argc, char** argv) {
 			staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 	//const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
 
-	// read core weight file
-	ProducerWeightMap coreWeightMap;
-	if (!coreWeightFile.empty()) {
-		if (!loadCoreWeights(coreWeightFile, coreWeightMap, featureFunctions)) {
-				cerr << "Error: Failed to load core weights from " << coreWeightFile << endl;
-				return 1;
-		}
-		else
-			cerr << "Loaded core weights from " << coreWeightFile << "." << endl;
+	ProducerWeightMap coreWeightMap, startWeightMap;
+	ScoreComponentCollection initialWeights = decoder->getWeights();
+	// read start weight file                                                                                
+	if (!startWeightFile.empty()) {
+	  if (!loadCoreWeights(startWeightFile, startWeightMap, featureFunctions)) {
+	    cerr << "Error: Failed to load start weights from " << startWeightFile << endl;
+	    return 1;
+	  }
+	  else
+	    cerr << "Loaded start weights from " << startWeightFile << "." << endl;
+	       
+	  // set start weights                                                                                                          
+	  if (startWeightMap.size() > 0) {
+	    ProducerWeightMap::iterator p;
+	    for(p = startWeightMap.begin(); p!=startWeightMap.end(); ++p)
+              initialWeights.Assign(p->first, p->second);
+	  }
 	}
 
-	// set core weights
-	ScoreComponentCollection initialWeights = decoder->getWeights();
-	cerr << "Rank " << rank << ", initial weights: " << initialWeights << endl;
-	if (coreWeightMap.size() > 0) {
-		ProducerWeightMap::iterator p;
-		for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
-			initialWeights.Assign(p->first, p->second);
+	// read core weight file
+	if (!coreWeightFile.empty()) {
+	  if (!loadCoreWeights(coreWeightFile, coreWeightMap, featureFunctions)) {
+	    cerr << "Error: Failed to load core weights from " << coreWeightFile << endl;
+	    return 1;
+	  }
+	  else
+	    cerr << "Loaded core weights from " << coreWeightFile << "." << endl;
+		
+	  // set core weights
+	  if (coreWeightMap.size() > 0) {
+	    ProducerWeightMap::iterator p;
+	    for(p = coreWeightMap.begin(); p!=coreWeightMap.end(); ++p)
+	      initialWeights.Assign(p->first, p->second);
+	  }
 	}
-	cerr << "Normalise weights? " << normaliseWeights << endl;
-	if (normaliseWeights) 
+		
+        cerr << "Rank " << rank << ", initial weights: " << initialWeights << endl;
+	
+	if (normaliseWeights) {
 	  initialWeights.L1Normalise();
+	  cerr << "Rank " << rank << ", normalised initial weights: " << initialWeights << endl;
+	}
 	decoder->setWeights(initialWeights);
+
+	if (scale_all) {
+	  scale_lm = true;
+	  scale_wp = true;
+	  scale_lm_factor = scale_all_factor;
+	  scale_wp_factor = scale_all_factor;
+	}
 
 	// set bleu weight to twice the size of the language model weight(s)
 	const LMList& lmList = staticData.GetLMList();
@@ -564,7 +595,6 @@ int main(int argc, char** argv) {
 	cerr << "Bleu weight: " << bleuWeight << endl;
 
 	//Main loop:	
-	cerr << "Rank " << rank << ", start weights: " << initialWeights << endl;
 	ScoreComponentCollection cumulativeWeights; // collect weights per epoch to produce an average
 	ScoreComponentCollection cumulativeWeightsBinary;
 	size_t numberOfUpdates = 0;
@@ -1349,15 +1379,74 @@ int main(int argc, char** argv) {
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight scaled from " << wpWeight << " to " << wpWeight*scale_wp_factor << endl;
 
 				  // scale down score
-                  if (sample) {
-                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesHopeSample, rank, epoch);
-                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesFearSample, rank, epoch);
-                  }
-                  else {
-                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesHope, rank, epoch);
-                	  scaleFeatureScore(wp, scale_wp_factor, featureValuesFear, rank, epoch);
-                	  scaleFeatureScore(wp, scale_wp_factor, featureValues, rank, epoch);
-                  }
+				  if (sample) {
+				    scaleFeatureScore(wp, scale_wp_factor, featureValuesHopeSample, rank, epoch);
+				    scaleFeatureScore(wp, scale_wp_factor, featureValuesFearSample, rank, epoch);
+				  }
+				  else {
+				    scaleFeatureScore(wp, scale_wp_factor, featureValuesHope, rank, epoch);
+				    scaleFeatureScore(wp, scale_wp_factor, featureValuesFear, rank, epoch);
+				    scaleFeatureScore(wp, scale_wp_factor, featureValues, rank, epoch);
+				  }
+				}
+
+				if (scale_all) {
+				  // scale distortion
+				  DistortionScoreProducer *dp = staticData.GetDistortionScoreProducer();
+				  float dWeight = mosesWeights.GetScoreForProducer(dp);
+                                  mosesWeights.Assign(dp, dWeight*scale_all_factor);
+                                  cerr << "Rank " << rank << ", epoch " << epoch << ", distortion weight scaled from " << dWeight << " to " << dWeight*scale_all_factor << endl;
+
+                                  // scale down score                                                                                      
+                                  if (sample) {
+                                    scaleFeatureScore(dp, scale_all_factor, featureValuesHopeSample, rank, epoch);
+                                    scaleFeatureScore(dp, scale_all_factor, featureValuesFearSample, rank, epoch);
+                                  }
+                                  else {
+                                    scaleFeatureScore(dp, scale_all_factor, featureValuesHope, rank, epoch);
+                                    scaleFeatureScore(dp, scale_all_factor, featureValuesFear, rank, epoch);
+                                    scaleFeatureScore(dp, scale_all_factor, featureValues, rank, epoch);
+                                  }
+
+				  // scale lexical reordering models
+				  vector<LexicalReordering*> lr = staticData.GetLexicalReorderModels();
+                                  for (size_t i=0; i<lr.size(); ++i) {
+				    // scale up weight                                                                                    
+				    dWeight = mosesWeights.GetScoreForProducer(lr[i]);
+                                    mosesWeights.Assign(lr[i], dWeight*scale_all_factor);
+                                    cerr << "Rank " << rank << ", epoch " << epoch << ", d weight scaled from " << dWeight << " to " << dWeight*scale_all_factor << endl;
+
+                                    // scale down score                                                                                  
+                                    if (sample) {
+				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesHopeSample, rank, epoch);
+				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesFearSample, rank, epoch);
+                                    }
+                                    else {
+				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesHope, rank, epoch);
+				      scaleFeatureScore(lr[i], scale_all_factor, featureValuesFear, rank, epoch);
+				      scaleFeatureScore(lr[i], scale_all_factor, featureValues, rank, epoch);
+                                    }
+				  }
+
+				  // scale phrase table models
+				  vector<PhraseDictionaryFeature*> pd = staticData.GetPhraseDictionaryModels();
+                                  for (size_t i=0; i<pd.size(); ++i) {
+                                    // scale up weight                                                                                        
+                                    float tWeight = mosesWeights.GetScoreForProducer(pd[i]);
+                                    mosesWeights.Assign(pd[i], tWeight*scale_all_factor);
+                                    cerr << "Rank " << rank << ", epoch " << epoch << ", t weight scaled from " << tWeight << " to " << tWeight*scale_all_factor << endl;
+
+                                    // scale down score                                                                                        
+                                    if (sample) {
+                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesHopeSample, rank, epoch);
+                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesFearSample, rank, epoch);
+                                    }
+                                    else {
+                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesHope, rank, epoch);
+                                      scaleFeatureScore(pd[i], scale_all_factor, featureValuesFear, rank, epoch);
+                                      scaleFeatureScore(pd[i], scale_all_factor, featureValues, rank, epoch);
+                                    }
+                                  }
 				}
 				
 				// set core features to 0 to avoid updating the feature weights
@@ -1455,6 +1544,30 @@ int main(int argc, char** argv) {
 				  mosesWeights.Assign(wp, wpWeight/scale_wp_factor);
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", wp weight rescaled from " << wpWeight << " to " << wpWeight/scale_wp_factor << endl;                                  
                                 }
+
+				if (scale_all) {
+				  // rescale distortion
+				  DistortionScoreProducer *dp = staticData.GetDistortionScoreProducer();
+                                  float dWeight = mosesWeights.GetScoreForProducer(dp);
+                                  mosesWeights.Assign(dp, dWeight/scale_all_factor);
+                                  cerr << "Rank " << rank << ", epoch " << epoch << ", distortion weight rescaled from " << dWeight << " to " << dWeight/scale_all_factor << endl;
+
+				  // rescale lexical reordering
+				  vector<LexicalReordering*> lr = staticData.GetLexicalReorderModels();
+                                  for (size_t i=0; i<lr.size(); ++i) {
+				    dWeight = mosesWeights.GetScoreForProducer(lr[i]);
+				    mosesWeights.Assign(lr[i], dWeight/scale_all_factor);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", d weight rescaled from " << dWeight << " to " << dWeight/scale_all_factor << endl;				    
+				  }
+
+				  // rescale phrase models
+				  vector<PhraseDictionaryFeature*> pd = staticData.GetPhraseDictionaryModels();
+                                  for (size_t i=0; i<pd.size(); ++i) {
+				    float tWeight = mosesWeights.GetScoreForProducer(pd[i]);
+                                    mosesWeights.Assign(pd[i], tWeight/scale_all_factor);
+                                    cerr << "Rank " << rank << ", epoch " << epoch << ", t weight rescaled from " << tWeight << " to " << tWeight/scale_all_factor << endl;
+				  }
+				}
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
@@ -1797,7 +1910,6 @@ bool loadCoreWeights(const string& filename, ProducerWeightMap& coreWeightMap, c
 		return false;
 	string line;
 	vector< float > store_weights;
-	cerr << "Loading core weights:" << endl;
 	while (getline(in, line)) {
 		// split weight name from value
 		vector<string> split_line;
@@ -1818,17 +1930,17 @@ bool loadCoreWeights(const string& filename, ProducerWeightMap& coreWeightMap, c
 					vector< float > weights;
 					weights.push_back(weight);
 					coreWeightMap.insert(ProducerWeightPair(featureFunctions[i], weights));
-					cerr << "insert 1 weight for " << featureFunctions[i]->GetScoreProducerDescription();
-					cerr << " (" << weight << ")" << endl;
+					//cerr << "insert 1 weight for " << featureFunctions[i]->GetScoreProducerDescription();
+					//cerr << " (" << weight << ")" << endl;
 				}
 				else {
 					store_weights.push_back(weight);
 					if (store_weights.size() == featureFunctions[i]->GetNumScoreComponents()) {
 						coreWeightMap.insert(ProducerWeightPair(featureFunctions[i], store_weights));
-						cerr << "insert " << store_weights.size() << " weights for " << featureFunctions[i]->GetScoreProducerDescription() << " (";
+						/*cerr << "insert " << store_weights.size() << " weights for " << featureFunctions[i]->GetScoreProducerDescription() << " (";
 						for (size_t j=0; j < store_weights.size(); ++j)
 							cerr << store_weights[j] << " ";
-						cerr << ")" << endl;
+							cerr << ")" << endl;*/
 						store_weights.clear();
 					}
 				}

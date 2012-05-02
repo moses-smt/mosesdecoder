@@ -489,6 +489,16 @@ public:
     assert(m_wordPenaltyProducers.size() >= 1);
     return m_wordPenaltyProducers[0];
   }
+  DistortionScoreProducer* GetDistortionScoreProducer() const {
+    assert(m_distortionScoreProducers.size() >= 1);
+    return m_distortionScoreProducers[0];
+  }
+  std::vector<LexicalReordering*> GetLexicalReorderModels() const {
+    return m_reorderModels;
+  } 
+  std::vector<PhraseDictionaryFeature*> GetPhraseDictionaryModels() const {
+    return m_phraseDictionary;
+  }
   size_t GetNumInputScores() const {
     return m_numInputScores;
   }

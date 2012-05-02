@@ -68,6 +68,9 @@ my $hours = &param("train.hours",48);
 # Check if a weight file with core weights was given
 my $core_weight_file = &param("core.weightfile");
 
+# Check if a weight file with core weights was given                                                                                       
+my $start_weight_file = &param("start.weightfile");
+
 #required training parameters
 my $singleRef = 1;
 my ($moses_ini_file, $input_file, $reference_files);
@@ -286,8 +289,11 @@ if ($burn_in) {
 #if ($weights_file) {
 #    print TRAIN "-w $weights_file \\\n";
 #}
-if (defined $core_weight_file) {
-    print TRAIN "--core-weights $core_weight_file \\\n"; 
+if (defined $start_weight_file) {
+    print TRAIN "--start-weights $start_weight_file \\\n"; 
+}
+elsif (defined $core_weight_file) {
+    print TRAIN "--core-weights $core_weight_file \\\n";
 }
 print TRAIN "-l $learner \\\n";
 print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
