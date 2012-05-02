@@ -1317,7 +1317,7 @@ sub setup_reference_length_type {
   } elsif ($___CLOSEST) {
     return " reflen:closest";
   } else {
-    die "Invalid reference length type";
+    return "";
   }
 }
 
