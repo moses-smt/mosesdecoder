@@ -10,7 +10,7 @@ using namespace std;
 
 class CderScorer: public StatisticsBasedScorer {
  public:
-  explicit CderScorer(const string& config);
+  explicit CderScorer(const string& config, bool longJumps = true);
   ~CderScorer();
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
@@ -24,6 +24,9 @@ class CderScorer: public StatisticsBasedScorer {
   virtual float calculateScore(const vector<int>& comps) const;
 
  private:
+  
+  bool longJumpsAllowed;
+
   typedef vector<int> sent_t;
   vector<vector<sent_t> > m_ref_sentences;
 
