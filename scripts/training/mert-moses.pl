@@ -341,24 +341,11 @@ if ($mertargs =~ /\-\-scconfig\s+(.+?)(\s|$)/) {
 }
 
 # handling reference lengh strategy
-if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1) {
-  die "You can specify just ONE reference length strategy (closest or shortest or average) not both\n";
-}
-
-if ($___SHORTEST) {
-  $scconfig .= " reflen:shortest";
-} elsif ($___AVERAGE) {
-  $scconfig .= " reflen:average";
-} elsif ($___CLOSEST) {
-  $scconfig .= " reflen:closest";
-}
+$scconfig .= &setup_reference_length_type();
 
 # handling case-insensitive flag
-if ($___NOCASE) {
-  $scconfig .= " case:false";
-} else {
-  $scconfig .= " case:true";
-}
+$scconfig .= &setup_case_config();
+
 $scconfig =~ s/^\s+//;
 $scconfig =~ s/\s+$//;
 $scconfig =~ s/\s+/,/g;
@@ -1315,4 +1302,29 @@ sub save_finished_step {
   open my $fh, '>', $filename or die "$filename: $!";
   print $fh $step . "\n";
   close $fh;
+}
+
+# It returns a config for mert/extractor.
+sub setup_reference_length_type {
+  if (($___CLOSEST + $___AVERAGE + $___SHORTEST) > 1) {
+    die "You can specify just ONE reference length strategy (closest or shortest or average) not both\n";
+  }
+
+  if ($___SHORTEST) {
+    return " reflen:shortest";
+  } elsif ($___AVERAGE) {
+    return " reflen:average";
+  } elsif ($___CLOSEST) {
+    return " reflen:closest";
+  } else {
+    die "Invalid reference length type";
+  }
+}
+
+sub setup_case_config {
+  if ($___NOCASE) {
+    return " case:false";
+  } else {
+    return " case:true";
+  }
 }
