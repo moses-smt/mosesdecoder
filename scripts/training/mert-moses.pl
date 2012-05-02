@@ -1071,7 +1071,7 @@ sub get_featlist_from_moses {
   # their initial values
   my $configfn = shift;
   my $featlistfn = "./features.list";
-  if (-e $featlistfn) {
+  if (-e $featlistfn && ! -z $featlistfn) {   # exists & not empty
     print STDERR "Using cached features list: $featlistfn\n";
   } else {
     print STDERR "Asking moses for feature names and values from $___CONFIG\n";
