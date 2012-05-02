@@ -96,7 +96,7 @@ int main(int argc, char** argv) {
 	bool sentenceBleu;
 	float bleuWeight, bleuWeight_hope, bleuWeight_fear;
 	bool perceptron_update;
-	bool hope_fear, hope_fear_rank, hope_model;
+	bool hope_fear, hope_model;
 	bool model_hope_fear, rank_only;
 	int hope_n, fear_n, rank_n;
 	size_t bleu_smoothing_scheme;
@@ -117,92 +117,94 @@ int main(int argc, char** argv) {
 	bool sample;
 	string moses_src;
 	bool external_score = false;
+	float dummy, sigmoidParam;
 	po::options_description desc("Allowed options");
 	desc.add_options()
-		("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
-		("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
-		("avg-ref-length", po::value<bool>(&avgRefLength)->default_value(false), "Use average reference length instead of shortest for BLEU score feature")
-		("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
-		("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
-		("bw", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
-		("bw-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
-		("bw-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
-		("blm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
-		("blm-factor", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")     
-		("blm-adjust", po::value<bool>(&bleu_weight_lm_adjust)->default_value(false), "Adjust bleu weight when lm weight changes")       
-		("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
-		("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
-		("clear-static", po::value<bool>(&clear_static)->default_value(false), "Clear static data before every translation")
-		("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
-		("configs-folds", po::value<vector<string> >(&mosesConfigFilesFolds), "Moses ini-files, one for each fold")
-		("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
-		("debug-model", po::value<bool>(&debug_model)->default_value(false), "Get best model translation for debugging purposes")
-		("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
-		("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
-		("decode-model", po::value<bool>(&decode_model)->default_value(false), "Decode dev input set according to normal objective")
-		("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
-		("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
-		("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
-		("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
-		("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
-		("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
-		("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
-		("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-		("history-bleu", po::value<bool>(&historyBleu)->default_value(false), "Use 1best translations to update the history")
-		("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
-		("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
-		("hope-fear-rank", po::value<bool>(&hope_fear_rank)->default_value(false), "Use hope and fear translations for optimisation, use model for ranking")
-		("hope-model", po::value<bool>(&hope_model)->default_value(false), "Use only hope and model translations for optimisation (use --fear-n to set number of model translations)")
-		("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
-		("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
-		("input-files-folds", po::value<vector<string> >(&inputFilesFolds), "Input files containing tokenised source, one for each fold")
-		("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
-		("min-bleu-ratio", po::value<float>(&minBleuRatio)->default_value(-1), "Set a minimum BLEU ratio between hope and fear")
-		("max-bleu-ratio", po::value<float>(&maxBleuRatio)->default_value(-1), "Set a maximum BLEU ratio between hope and fear")
-		("megam", po::value<bool>(&megam)->default_value(false), "Use megam for optimization step")
-		("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
-		("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
-		("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
-		("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
-		("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
-		("moses-src", po::value<string>(&moses_src)->default_value(""), "Moses source directory")
-		("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
-		("normalise-weights", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
-		("normalise-margin", po::value<bool>(&normaliseMargin)->default_value(false), "Normalise the margin: squash between 0 and 1")
-		("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
-		("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
-		("print-feature-counts", po::value<bool>(&printFeatureCounts)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
-		("print-nbest-with-features", po::value<bool>(&printNbestWithFeatures)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
-	    ("print-weights", po::value<bool>(&print_weights)->default_value(false), "Print out current weights")
-	    ("print-core-weights", po::value<bool>(&print_core_weights)->default_value(false), "Print out current core weights")
-		("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")				
-		("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
-		("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
-		("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
-		("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")	       
-		("sample", po::value<bool>(&sample)->default_value(false), "Sample a translation pair from hope/(model)/fear translations") 
-		("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale the BLEU score by (a history of) the inverse input length")
-		("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
-		("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by an average of the input length")
-		("scale-by-avg-inverse-length", po::value<bool>(&scaleByAvgInverseLength)->default_value(false), "Scale BLEU by an average of the inverse input length")
-		("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
-		("scale-lm", po::value<bool>(&scale_lm)->default_value(false), "Scale the language model feature") 
-		("scale-factor-lm", po::value<float>(&scale_lm_factor)->default_value(2), "Scale the language model feature by this factor")
-		("scale-wp", po::value<bool>(&scale_wp)->default_value(false), "Scale the word penalty feature") 
-		("scale-factor-wp", po::value<float>(&scale_wp_factor)->default_value(2), "Scale the word penalty feature by this factor")
-		("scale-margin", po::value<bool>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
-		("scale-margin-precision", po::value<bool>(&scale_margin_precision)->default_value(0), "Scale the margin by the precision of the oracle translation")
-		("scale-update", po::value<bool>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation")       
-		("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale the update by the precision of the oracle translation")	
-		("sentence-level-bleu", po::value<bool>(&sentenceBleu)->default_value(true), "Use a sentences level Bleu scoring function")
-		("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-		("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
-		("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
-		("sparse-no-average", po::value<bool>(&sparseNoAverage)->default_value(false), "Don't average sparse weights, just sum")
-		("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
-		("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
-		("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
-		("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
+	  ("accumulate-weights", po::value<bool>(&accumulateWeights)->default_value(false), "Accumulate and average weights over all epochs")
+	  ("average-weights", po::value<bool>(&averageWeights)->default_value(false), "Set decoder weights to average weights after each update")
+	  ("avg-ref-length", po::value<bool>(&avgRefLength)->default_value(false), "Use average reference length instead of shortest for BLEU score feature")
+	  ("batch-equals-shard", po::value<bool>(&batchEqualsShard)->default_value(false), "Batch size is equal to shard size (purely batch)")
+	  ("batch-size,b", po::value<size_t>(&batchSize)->default_value(1), "Size of batch that is send to optimiser for weight adjustments")
+	  ("bw", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu score weight used in the decoder objective function (on top of the Bleu objective weight)")
+	  ("bw-hope", po::value<float>(&bleuWeight_hope)->default_value(-1), "Bleu score weight used in the decoder objective function for hope translations")
+	  ("bw-fear", po::value<float>(&bleuWeight_fear)->default_value(-1), "Bleu score weight used in the decoder objective function for fear translations")
+	  ("blm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
+	  ("blm-factor", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")
+	  ("blm-adjust", po::value<bool>(&bleu_weight_lm_adjust)->default_value(false), "Adjust bleu weight when lm weight changes")       
+	  ("bleu-smoothing-scheme", po::value<size_t>(&bleu_smoothing_scheme)->default_value(1), "Set a smoothing scheme for sentence-Bleu: +1 (1), +0.1 (2), papineni (3) (default:1)")
+	  ("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
+	  ("clear-static", po::value<bool>(&clear_static)->default_value(false), "Clear static data before every translation")
+	  ("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
+	  ("configs-folds", po::value<vector<string> >(&mosesConfigFilesFolds), "Moses ini-files, one for each fold")
+	  ("core-weights", po::value<string>(&coreWeightFile), "Weight file containing the core weights (already tuned, have to be non-zero)")
+	  ("debug-model", po::value<bool>(&debug_model)->default_value(false), "Get best model translation for debugging purposes")
+	  ("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
+	  ("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
+	  ("decode-model", po::value<bool>(&decode_model)->default_value(false), "Decode dev input set according to normal objective")
+	  ("decode-filename", po::value<string>(&decode_filename), "Filename for Bleu objective translations")
+	  ("decoder-settings", po::value<string>(&decoder_settings)->default_value(""), "Decoder settings for tuning runs")
+	  ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
+	  ("dummy", po::value<float>(&dummy)->default_value(1.0), "****") 
+	  ("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
+	  ("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
+	  ("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
+	  ("fear-n", po::value<int>(&fear_n)->default_value(-1), "Number of fear translations used")
+	  ("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+	  ("history-bleu", po::value<bool>(&historyBleu)->default_value(false), "Use 1best translations to update the history")
+	  ("history-smoothing", po::value<float>(&historySmoothing)->default_value(0.9), "Adjust the factor for history smoothing")
+	  ("hope-fear", po::value<bool>(&hope_fear)->default_value(true), "Use only hope and fear translations for optimisation (not model)")
+	  ("hope-model", po::value<bool>(&hope_model)->default_value(false), "Use only hope and model translations for optimisation (use --fear-n to set number of model translations)")
+	  ("hope-n", po::value<int>(&hope_n)->default_value(-1), "Number of hope translations used")
+	  ("input-file,i", po::value<string>(&inputFile), "Input file containing tokenised source")
+	  ("input-files-folds", po::value<vector<string> >(&inputFilesFolds), "Input files containing tokenised source, one for each fold")
+	  ("learner,l", po::value<string>(&learner)->default_value("mira"), "Learning algorithm")
+	  ("min-bleu-ratio", po::value<float>(&minBleuRatio)->default_value(-1), "Set a minimum BLEU ratio between hope and fear")
+	  ("max-bleu-ratio", po::value<float>(&maxBleuRatio)->default_value(-1), "Set a maximum BLEU ratio between hope and fear")
+	  ("megam", po::value<bool>(&megam)->default_value(false), "Use megam for optimization step")
+	  ("min-oracle-bleu", po::value<float>(&min_oracle_bleu)->default_value(0), "Set a minimum oracle BLEU score")
+	  ("min-weight-change", po::value<float>(&min_weight_change)->default_value(0.01), "Set minimum weight change for stopping criterion")
+	  ("mira-learning-rate", po::value<float>(&mira_learning_rate)->default_value(1), "Learning rate for MIRA (fixed or flexible)")
+	  ("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
+	  ("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
+	  ("moses-src", po::value<string>(&moses_src)->default_value(""), "Moses source directory")
+	  ("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
+	  ("normalise-weights", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
+	  ("normalise-margin", po::value<bool>(&normaliseMargin)->default_value(false), "Normalise the margin: squash between 0 and 1")
+	  ("perceptron-learning-rate", po::value<float>(&perceptron_learning_rate)->default_value(0.01), "Perceptron learning rate")
+	  ("print-feature-values", po::value<bool>(&print_feature_values)->default_value(false), "Print out feature values")
+	  ("print-feature-counts", po::value<bool>(&printFeatureCounts)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
+	  ("print-nbest-with-features", po::value<bool>(&printNbestWithFeatures)->default_value(false), "Print out feature values, print feature list with hope counts after 1st epoch")
+	  ("print-weights", po::value<bool>(&print_weights)->default_value(false), "Print out current weights")
+	  ("print-core-weights", po::value<bool>(&print_core_weights)->default_value(false), "Print out current core weights")
+	  ("prune-zero-weights", po::value<bool>(&pruneZeroWeights)->default_value(false), "Prune zero-valued sparse feature weights")	    
+	  ("rank-n", po::value<int>(&rank_n)->default_value(-1), "Number of translations used for ranking")
+	  ("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
+	  ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
+	  ("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")	       
+	  ("sample", po::value<bool>(&sample)->default_value(false), "Sample a translation pair from hope/(model)/fear translations") 
+	  ("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale the BLEU score by (a history of) the inverse input length")
+	  ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale the BLEU score by (a history of) the input length")
+	  ("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by an average of the input length")
+	  ("scale-by-avg-inverse-length", po::value<bool>(&scaleByAvgInverseLength)->default_value(false), "Scale BLEU by an average of the inverse input length")
+	  ("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
+	  ("scale-lm", po::value<bool>(&scale_lm)->default_value(false), "Scale the language model feature") 
+	  ("scale-factor-lm", po::value<float>(&scale_lm_factor)->default_value(2), "Scale the language model feature by this factor")
+	  ("scale-wp", po::value<bool>(&scale_wp)->default_value(false), "Scale the word penalty feature") 
+	  ("scale-factor-wp", po::value<float>(&scale_wp_factor)->default_value(2), "Scale the word penalty feature by this factor")
+	  ("scale-margin", po::value<bool>(&scale_margin)->default_value(0), "Scale the margin by the Bleu score of the oracle translation")
+	  ("scale-margin-precision", po::value<bool>(&scale_margin_precision)->default_value(0), "Scale the margin by the precision of the oracle translation")
+	  ("scale-update", po::value<bool>(&scale_update)->default_value(0), "Scale the update by the Bleu score of the oracle translation") 
+	  ("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale the update by the precision of the oracle translation")	
+	  ("sentence-level-bleu", po::value<bool>(&sentenceBleu)->default_value(true), "Use a sentences level Bleu scoring function")
+	  ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
+	  ("sigmoid-param", po::value<float>(&sigmoidParam)->default_value(1), "y=sigmoidParam is the axis that this sigmoid approaches")
+	  ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
+	  ("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
+	  ("sparse-no-average", po::value<bool>(&sparseNoAverage)->default_value(false), "Don't average sparse weights, just sum")
+	  ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
+	  ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
+	  ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights, when using mpi")
+	  ("weight-dump-stem", po::value<string>(&weightDumpStem)->default_value("weights"), "Stem of filename to use for dumping weights");
 
 	po::options_description cmdline_options;
 	cmdline_options.add(desc);
@@ -427,9 +429,11 @@ int main(int argc, char** argv) {
 		if (rank == 0) {
 			cerr << "Optimising using Mira" << endl;
 			cerr << "slack: " << slack << ", learning rate: " << mira_learning_rate << endl;
+			if (normaliseMargin) 
+			  cerr << "sigmoid parameter: " << sigmoidParam << endl;
 		}
 		optimiser = new MiraOptimiser(slack, scale_margin, scale_margin_precision,
-					      scale_update, scale_update_precision, boost, normaliseMargin);
+					      scale_update, scale_update_precision, boost, normaliseMargin, sigmoidParam);
 		learning_rate = mira_learning_rate;
 		perceptron_update = false;
 	} else if (learner == "perceptron") {
@@ -442,7 +446,6 @@ int main(int argc, char** argv) {
 		model_hope_fear = false; // mira only
 		rank_only = false; // mira only
 		hope_fear = false; // mira only
-		hope_fear_rank = false; // mira only
 		hope_model = false; // mira only
 		n = 1;
 		hope_n = 1;
@@ -467,9 +470,9 @@ int main(int argc, char** argv) {
 
 	if (sample)
 		model_hope_fear = true;
-	if (model_hope_fear || hope_model || rank_only || hope_fear_rank || megam)
+	if (model_hope_fear || hope_model || rank_only || megam)
 		hope_fear = false; // is true by default
-	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || hope_fear_rank || megam)) {
+	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || megam)) {
 		cerr << "Error: Need to select one of parameters --hope-fear/--model-hope-fear for mira update." << endl;
 		return 1;
 	}
@@ -548,6 +551,9 @@ int main(int argc, char** argv) {
 	    lmSum += abs(initialWeights.GetScoreForProducer(*i));
 	  bleuWeight = lmSum * bleu_weight_lm_factor;
 	}
+
+	if (dummy != 1.0)
+	  bleuWeight = dummy;
 
 	if (bleuWeight_hope == -1) {
 	  bleuWeight_hope = bleuWeight;
@@ -666,12 +672,12 @@ int main(int argc, char** argv) {
 
 				vector<ScoreComponentCollection> newFeatureValues;
 				vector<float> newScores;
-				if (model_hope_fear || rank_only || hope_fear_rank) {
+				if (model_hope_fear || rank_only) {
 					featureValues.push_back(newFeatureValues);
 					bleuScores.push_back(newScores);
 					modelScores.push_back(newScores);
 				}
-				if (hope_fear || hope_model || hope_fear_rank || perceptron_update) {
+				if (hope_fear || hope_model || perceptron_update) {
 					featureValuesHope.push_back(newFeatureValues);
 					featureValuesFear.push_back(newFeatureValues);
 					bleuScoresHope.push_back(newScores);
@@ -754,15 +760,19 @@ int main(int argc, char** argv) {
 				}
 				 								  
 				// check LM weight
-				for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i) {
+				const LMList& lmList_new = staticData.GetLMList();
+				for (LMList::const_iterator i = lmList_new.begin(); i != lmList_new.end(); ++i) {
 				  float lmWeight = mosesWeights.GetScoreForProducer(*i);
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", lm weight: " << lmWeight << endl;
-				  if (lmWeight <= 0)
-				    cerr << "ERROR: language model weight should never be <= 0." << endl;
+				  if (lmWeight <= 0) {
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", ERROR: language model weight should never be <= 0." << endl;
+				    mosesWeights.Assign(*i, 0.1);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", assign lm weights of 0.1" << endl;
+				  }
 				}
 				
 				// select inference scheme
-				if (hope_fear || hope_fear_rank || perceptron_update) {				  
+				if (hope_fear || perceptron_update) {				  
 				  if (clear_static) {
 				    delete decoder;
 				    StaticData::ClearDataStatic();
@@ -961,7 +971,7 @@ int main(int argc, char** argv) {
 					
 					examples_in_batch++;
 				}
-				if (rank_only || hope_fear_rank) {
+				if (rank_only) {
 					// MODEL
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuWeight,
@@ -1000,6 +1010,14 @@ int main(int argc, char** argv) {
 					}					
 					
 					// HOPE
+					if (clear_static) {
+					  delete decoder;
+					  StaticData::ClearDataStatic();
+					  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+					  decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					  decoder->setWeights(mosesWeights);
+					}
+
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
 					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuWeight_hope,
@@ -1022,6 +1040,14 @@ int main(int argc, char** argv) {
 					oracleModelScores.push_back(modelScores[batchPosition][oraclePos]);
 
 					// MODEL
+					if (clear_static) {
+					  delete decoder;
+					  StaticData::ClearDataStatic();
+					  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+					  decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					  decoder->setWeights(mosesWeights);
+					}
+
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
@@ -1034,6 +1060,14 @@ int main(int argc, char** argv) {
 					cerr << endl;
 
 					// FEAR
+					if (clear_static) {
+                                          delete decoder;
+					  StaticData::ClearDataStatic();
+                                          decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
+                                          decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+                                          decoder->setWeights(mosesWeights);
+					}
+					
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
 					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuWeight_fear,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
@@ -1286,7 +1320,8 @@ int main(int argc, char** argv) {
 
 				// scale LM feature (to avoid rapid changes)
 				if (scale_lm) {
-				  for (LMList::const_iterator iter = lmList.begin(); iter != lmList.end(); ++iter) {
+				  const LMList& lmList_new = staticData.GetLMList();
+				  for (LMList::const_iterator iter = lmList_new.begin(); iter != lmList_new.end(); ++iter) {
 				    // scale up weight
 				    float lmWeight = mosesWeights.GetScoreForProducer(*iter);
 				    mosesWeights.Assign(*iter, lmWeight*scale_lm_factor);
@@ -1386,12 +1421,6 @@ int main(int argc, char** argv) {
 					update_status = ((MiraOptimiser*) optimiser)->updateWeightsRankModel(mosesWeights, weightUpdate,
 							featureValues, bleuScores, modelScores, learning_rate, rank, epoch);
 				}
-				else if (hope_fear_rank) {
-					// hope-fear + learning ranking of model translations
-					update_status = ((MiraOptimiser*) optimiser)->updateWeightsHopeFearAndRankModel(mosesWeights, weightUpdate,
-							featureValuesHope, featureValuesFear, featureValues, bleuScoresHope, bleuScoresFear, bleuScores,
-							modelScoresHope, modelScoresFear, modelScores, learning_rate, rank, epoch);
-				}
 				else {
 					// model_hope_fear
 					if (sample) {
@@ -1409,7 +1438,8 @@ int main(int argc, char** argv) {
 
 				// rescale LM feature                                              
 				if (scale_lm) {
-				  for (LMList::const_iterator iter = lmList.begin(); iter != lmList.end(); ++iter) {
+				  const LMList& lmList_new = staticData.GetLMList();
+				  for (LMList::const_iterator iter = lmList_new.begin(); iter != lmList_new.end(); ++iter) {
 				    // scale weight back down                                                                
 				    float lmWeight = mosesWeights.GetScoreForProducer(*iter);
 				    mosesWeights.Assign(*iter, lmWeight/scale_lm_factor);
@@ -1460,7 +1490,8 @@ int main(int argc, char** argv) {
 					// adjust bleu weight
 					if (bleu_weight_lm_adjust) {
 					  float lmSum = 0;
-					  for (LMList::const_iterator i = lmList.begin(); i != lmList.end(); ++i)
+					  const LMList& lmList_new = staticData.GetLMList();
+					  for (LMList::const_iterator i = lmList_new.begin(); i != lmList_new.end(); ++i)
 					    lmSum += abs(mosesWeights.GetScoreForProducer(*i));
 					  bleuWeight = lmSum * bleu_weight_lm_factor;
 					  cerr << "Rank " << rank << ", epoch " << epoch << ", adjusting Bleu weight to " << bleuWeight << " (factor " << bleu_weight_lm_factor << ")" << endl;
@@ -1971,7 +2002,7 @@ void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<Sc
     for (size_t j=0; j<featureValues[i].size(); ++j) { // each item in nbest
       featureScore = featureValues[i][j].GetScoreForProducer(sp);
       featureValues[i][j].Assign(sp, featureScore/scaling_factor);
-      cerr << "Rank " << rank << ", epoch " << epoch << ", " << name << " score scaled from " << featureScore << " to " << featureScore/scaling_factor << endl;
+      //cerr << "Rank " << rank << ", epoch " << epoch << ", " << name << " score scaled from " << featureScore << " to " << featureScore/scaling_factor << endl;
     }
   }
 }

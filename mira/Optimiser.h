@@ -68,7 +68,7 @@ namespace Mira {
 		  Optimiser() { }
 
 	  MiraOptimiser(float slack, bool scale_margin, bool scale_margin_precision,
-			bool scale_update, bool scale_update_precision, bool boost, bool normaliseMargin) :
+			bool scale_update, bool scale_update_precision, bool boost, bool normaliseMargin, float sigmoidParam) :
 		  Optimiser(),
 		  m_slack(slack),
 		  m_scale_margin(scale_margin),
@@ -77,7 +77,8 @@ namespace Mira {
 		  m_scale_update_precision(scale_update_precision),
 		  m_precision(1),
 		  m_boost(boost),
-		  m_normaliseMargin(normaliseMargin) { }
+		  m_normaliseMargin(normaliseMargin),
+		  m_sigmoidParam(sigmoidParam) { }
    
 	  size_t updateWeights(Moses::ScoreComponentCollection& currWeights,
 	  								Moses::ScoreComponentCollection& weightUpdate,
@@ -122,22 +123,7 @@ namespace Mira {
     		 float learning_rate,
     		 size_t rank,
     		 size_t epoch);
-     size_t updateWeightsHopeFearAndRankModel(
-     		Moses::ScoreComponentCollection& currWeights,
-     		Moses::ScoreComponentCollection& weightUpdate,
-     		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-     		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-     		const std::vector< std::vector<Moses::ScoreComponentCollection> >& featureValues,
-     		const std::vector<std::vector<float> >& bleuScoresHope,
-     		const std::vector<std::vector<float> >& bleuScoresFear,
-     		const std::vector<std::vector<float> >& bleuScores,
-     		const std::vector<std::vector<float> >& modelScoresHope,
-     		const std::vector<std::vector<float> >& modelScoresFear,
-     		const std::vector<std::vector<float> >& modelScores,
-     		float learning_rate,
-     		size_t rank,
-     		size_t epoch);
-
+   
      void setSlack(float slack) {
     	 m_slack = slack;
      }
@@ -162,8 +148,11 @@ namespace Mira {
       // boosting of updates on misranked candidates
       bool m_boost;
 
-      // squash margin between 0 and 1
+      // squash margin between 0 and 1 (or depending on m_sigmoidParam)
       bool m_normaliseMargin;
+      
+      // y=sigmoidParam is the axis that this sigmoid approaches
+      float m_sigmoidParam ;
   };
 }
 
