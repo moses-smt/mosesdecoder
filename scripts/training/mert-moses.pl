@@ -110,7 +110,7 @@ my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with
 my $___RANDOM_RESTARTS = 20;
 
 # Flags related to PRO (Hopkins & May, 2011)
-my $___PAIRWISE_RANKED_OPTIMIZER = 0; # use
+my $___PAIRWISE_RANKED_OPTIMIZER = 0; # flag to enable PRO.
 my $___PRO_STARTING_POINT = 0; # get a starting point from pairwise ranked optimizer
 my $___HISTORIC_INTERPOLATION = 0; # interpolate optimize weights with previous iteration's weights [Hopkins&May,2011,5.4.3]
 # MegaM's options for PRO optimization.
