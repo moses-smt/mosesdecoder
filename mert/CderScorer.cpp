@@ -12,9 +12,9 @@ inline int CalcDistance(int word1, int word2) {
 
 } // namespace
 
-CderScorer::CderScorer(const string& config, bool longJumps)
-    : StatisticsBasedScorer("CDER",config),
-      longJumpsAllowed(longJumps) {}
+CderScorer::CderScorer(const string& config, bool allowed_long_jumps)
+    : StatisticsBasedScorer("CDER", config),
+      m_allowed_long_jumps(allowed_long_jumps) {}
 
 CderScorer::~CderScorer() {}
 
@@ -103,13 +103,13 @@ void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
       (*nextRow)[i] = *min_element(possibleCosts.begin(), possibleCosts.end());
     }
 
-    if (longJumpsAllowed) {
-        // Cost of LongJumps is the same for all in the row
-        int LJ = 1 + *min_element(nextRow->begin(), nextRow->end());
-    
-        for (int i = 0; i < I; ++i) {
-          (*nextRow)[i] = min((*nextRow)[i], LJ); // LongJumps
-        }
+    if (m_allowed_long_jumps) {
+      // Cost of LongJumps is the same for all in the row
+      int LJ = 1 + *min_element(nextRow->begin(), nextRow->end());
+
+      for (int i = 0; i < I; ++i) {
+        (*nextRow)[i] = min((*nextRow)[i], LJ); // LongJumps
+      }
     }
 
     delete row;
