@@ -8,9 +8,12 @@
 
 using namespace std;
 
+/**
+ * CderScorer class can compute both CDER and WER metric.
+ */
 class CderScorer: public StatisticsBasedScorer {
  public:
-  explicit CderScorer(const string& config);
+  explicit CderScorer(const string& config, bool allowed_long_jumps = true);
   ~CderScorer();
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
@@ -24,6 +27,8 @@ class CderScorer: public StatisticsBasedScorer {
   virtual float calculateScore(const vector<int>& comps) const;
 
  private:
+  bool m_allowed_long_jumps;
+
   typedef vector<int> sent_t;
   vector<vector<sent_t> > m_ref_sentences;
 
