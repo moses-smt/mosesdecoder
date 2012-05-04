@@ -1169,8 +1169,7 @@ sub create_config {
   }
 
   if (defined($sparse_weights_file)) {
-    # TODO: use File::Spec->catfile()
-    push @{$P{"weights-file"}}, $___WORKING_DIR . "/" . $sparse_weights_file;
+    push @{$P{"weights-file"}}, File::Spec->catfile($___WORKING_DIR, $sparse_weights_file);
   }
 
   # create new moses.ini decoder config file by cloning and overriding the original one
@@ -1260,8 +1259,7 @@ sub ensure_full_path {
   return $PATH if $PATH =~ /^\//;
 
   my $dir = Cwd::getcwd();
-  # TODO: Use File::Spec->catfile().
-  $PATH = $dir . "/" . $PATH;
+  $PATH = File::Spec->catfile($dir, $PATH);
   $PATH =~ s/[\r\n]//g;
   $PATH =~ s/\/\.\//\//g;
   $PATH =~ s/\/+/\//g;
