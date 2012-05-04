@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class FactorFriend;
+struct FactorFriend;
 class FactorCollection;
 
 /** Represents a factor (word, POS, etc).  
@@ -43,7 +43,7 @@ class Factor
 
   // only these classes are allowed to instantiate this class
   friend class FactorCollection;
-  friend class FactorFriend;
+  friend struct FactorFriend;
 
   // FactorCollection writes here.  
   std::string m_string;
