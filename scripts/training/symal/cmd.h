@@ -16,7 +16,7 @@
 #define	CMDBOOLTYPE	9
 
 typedef struct {
-  char	*Name;
+  const char	*Name;
   int	Idx;
 } Enum_T;
 
