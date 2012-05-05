@@ -26,9 +26,9 @@
 namespace Moses {
 namespace GHKM {
 
-class Options;
+struct Options;
 class ScfgRule;
-class Symbol;
+struct Symbol;
 
 class ScfgRuleWriter
 {
