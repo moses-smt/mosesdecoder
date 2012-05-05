@@ -27,8 +27,8 @@
 namespace Moses
 {
 
-class ApplicableRuleTrie;
-class VarSpanNode;
+struct ApplicableRuleTrie;
+struct VarSpanNode;
 
 class VarSpanTrieBuilder
 {
