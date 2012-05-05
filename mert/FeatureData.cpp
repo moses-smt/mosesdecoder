@@ -12,6 +12,8 @@
 #include "FileStream.h"
 #include "Util.h"
 
+using namespace std;
+
 static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
 static const float MAX_FLOAT = numeric_limits<float>::max();
 
