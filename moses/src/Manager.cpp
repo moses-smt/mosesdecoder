@@ -691,12 +691,11 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
   // Modified so that -osgx is a superset of -osg (GST Oct 2011)
   ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
   scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
-	outputSearchGraphStream << " scores = [ " << StaticData::Instance().GetAllWeights();
-  outputSearchGraphStream << " ]";
-                            
+  //outputSearchGraphStream << " scores = [ " << StaticData::Instance().GetAllWeights();
+  outputSearchGraphStream << " scores=\"" << scoreBreakdown << "\"";                            
 
-  outputSearchGraphStream << " out=" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
-		  searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+  outputSearchGraphStream << " out=\"" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
+    searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\"" << endl;
 //  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }
 

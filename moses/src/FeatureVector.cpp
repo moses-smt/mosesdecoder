@@ -251,7 +251,6 @@ namespace Moses {
   }
 
   ostream& FVector::print(ostream& out) const {
-	out << "{";
     out << "core=(";
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       out << m_coreFeatures[i];
@@ -261,9 +260,10 @@ namespace Moses {
     }
     out << ") ";
     for (const_iterator i = cbegin(); i != cend(); ++i) {
-       out << i->first << "=" << i->second << ", ";
+      if (i != cbegin())
+	out << " ";
+      out << i->first << "=" << i->second;
     }
-    out << "}";
     return out;
   }
   

@@ -108,8 +108,8 @@ void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rh
 
 std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
-	os << "<<" << rhs.m_scores;
-	return os << ">>";
+	os << rhs.m_scores;
+	return os;
 }
 void ScoreComponentCollection::L1Normalise() {
   m_scores /= m_scores.l1norm_coreFeatures();
