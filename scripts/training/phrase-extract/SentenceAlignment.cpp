@@ -25,6 +25,8 @@
 
 #include "tables-core.h"
 
+SentenceAlignment::~SentenceAlignment() {}
+
 bool SentenceAlignment::processTargetSentence(const char * targetString, int)
 {
   target = tokenize(targetString);
