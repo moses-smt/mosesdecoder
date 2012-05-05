@@ -39,7 +39,7 @@ public:
   virtual float GetWorstScoreForBitmap( WordsBitmapID ) {
     return -std::numeric_limits<float>::infinity();
   };
-  virtual float GetWorstScoreForBitmap( WordsBitmap ) {
+  virtual float GetWorstScoreForBitmap( const WordsBitmap& ) {
     return -std::numeric_limits<float>::infinity();
   };
 

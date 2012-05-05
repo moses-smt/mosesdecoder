@@ -10,6 +10,8 @@
 #include "Util.h"
 #include "FileStream.h"
 
+using namespace std;
+
 ScoreArray::ScoreArray()
     : m_num_scores(0), m_index("") {}
 

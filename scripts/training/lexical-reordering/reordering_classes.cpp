@@ -22,6 +22,8 @@ ModelScore::ModelScore()
   }
 }
 
+ModelScore::~ModelScore() {}
+
 ModelScore* ModelScore::createModelScore(const string& modeltype)
 {
   if (modeltype.compare("mslr") == 0) {
