@@ -9,8 +9,6 @@
 #ifndef MERT_FEATURE_DATA_H_
 #define MERT_FEATURE_DATA_H_
 
-using namespace std;
-
 #include <vector>
 #include <iostream>
 #include <stdexcept>
@@ -19,11 +17,11 @@ using namespace std;
 class FeatureData
 {
 private:
-  size_t m_num_features;
+  std::size_t m_num_features;
   std::string m_features;
   bool m_sparse_flag;
-  map<std::string, size_t> m_feature_name_to_index; // map from name to index of features
-  map<size_t, std::string> m_index_to_feature_name; // map from index to name of features
+  std::map<std::string, std::size_t> m_feature_name_to_index; // map from name to index of features
+  std::map<std::size_t, std::string> m_index_to_feature_name; // map from index to name of features
   featdata_t m_array;
   idx2name m_index_to_array_name; // map from index to name of array
   name2idx m_array_name_to_index; // map from name to index of array
@@ -40,8 +38,8 @@ public:
     return m_array.at(getIndex(idx));
   }
 
-  FeatureArray& get(size_t idx) { return m_array.at(idx); }
-  const FeatureArray& get(size_t idx) const { return m_array.at(idx); }
+  FeatureArray& get(std::size_t idx) { return m_array.at(idx); }
+  const FeatureArray& get(std::size_t idx) const { return m_array.at(idx); }
 
   inline bool exists(const std::string& sent_idx) const {
     return exists(getIndex(sent_idx));
@@ -51,21 +49,21 @@ public:
     return (sent_idx > -1 && sent_idx < static_cast<int>(m_array.size())) ? true : false;
   }
 
-  inline FeatureStats& get(size_t i, size_t j) {
+  inline FeatureStats& get(std::size_t i, std::size_t j) {
     return m_array.at(i).get(j);
   }
 
-  inline const FeatureStats& get(size_t i, size_t j) const {
+  inline const FeatureStats& get(std::size_t i, std::size_t j) const {
     return m_array.at(i).get(j);
   }
 
   void add(FeatureArray& e);
   void add(FeatureStats& e, const std::string& sent_idx);
 
-  size_t size() const { return m_array.size(); }
+  std::size_t size() const { return m_array.size(); }
 
-  size_t NumberOfFeatures() const { return m_num_features; }
-  void NumberOfFeatures(size_t v) { m_num_features = v; }
+  std::size_t NumberOfFeatures() const { return m_num_features; }
+  void NumberOfFeatures(std::size_t v) { m_num_features = v; }
 
   std::string Features() const { return m_features; }
   void Features(const std::string& f) { m_features = f; }
@@ -89,10 +87,10 @@ public:
       return -1;
   }
 
-  inline std::string getIndex(size_t idx) const {
+  inline std::string getIndex(std::size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
-      throw runtime_error("there is no entry at index " + idx);
+      throw std::runtime_error("there is no entry at index " + idx);
     return i->second;
   }
 
@@ -100,10 +98,10 @@ public:
     return (m_index_to_feature_name.size() > 0) ? true : false;
   }
 
-  std::string getFeatureName(size_t idx) const {
+  std::string getFeatureName(std::size_t idx) const {
     if (idx >= m_index_to_feature_name.size())
       throw runtime_error("Error: you required an too big index");
-    map<size_t, std::string>::const_iterator it = m_index_to_feature_name.find(idx);
+    std::map<std::size_t, std::string>::const_iterator it = m_index_to_feature_name.find(idx);
     if (it == m_index_to_feature_name.end()) {
       throw runtime_error("Error: specified id is unknown: " + idx);
     } else {
@@ -111,16 +109,16 @@ public:
     }
   }
 
-  size_t getFeatureIndex(const std::string& name) const {
-    map<std::string, size_t>::const_iterator it = m_feature_name_to_index.find(name);
+  std::size_t getFeatureIndex(const std::string& name) const {
+    std::map<std::string, std::size_t>::const_iterator it = m_feature_name_to_index.find(name);
     if (it == m_feature_name_to_index.end()) {
       std::string msg = "Error: feature " + name + " is unknown. Known features: ";
-      for (std::map<std::string, size_t>::const_iterator it = m_feature_name_to_index.begin(); it != m_feature_name_to_index.end(); it++) {
+      for (std::map<std::string, std::size_t>::const_iterator it = m_feature_name_to_index.begin(); it != m_feature_name_to_index.end(); it++) {
         msg += it->first;
         msg += ", ";
       }
 
-      throw runtime_error(msg);
+      throw std::runtime_error(msg);
     }
     return it->second;
   }
