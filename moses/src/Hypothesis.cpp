@@ -247,7 +247,11 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
     }
     if (comp != 0) return comp;
   }
-
+  
+  cerr << "Recombining hypotheses.. " << endl; 
+  cerr << "1: " << *this << endl;
+  cerr << "2: " << compare << endl << endl;
+  
   return 0;
 }
 

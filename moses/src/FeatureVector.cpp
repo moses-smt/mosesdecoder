@@ -176,6 +176,7 @@ namespace Moses {
 			linestream >> namestring;
 			linestream >> value;
 			FName fname(namestring);
+			cerr << "Setting sparse weight " << fname << " to value " << value << "." << endl;
 			set(fname,value);
 		}
     return true;
