@@ -38,10 +38,10 @@ size_t PhraseNode::GetNodeSize(size_t numChildren, size_t wordSize, size_t count
 }
 
 PhraseNode::PhraseNode()
-  :m_currChild(NULL)
+  : m_value(0) 
+  ,m_currChild(NULL)
   ,m_saved(false)
   ,m_memLoad(NULL)
-  ,m_value(0)
 {
 }
 

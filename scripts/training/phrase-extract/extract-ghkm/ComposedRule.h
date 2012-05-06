@@ -30,7 +30,7 @@ namespace Moses {
 namespace GHKM {
 
 class Node;
-class Options;
+struct Options;
 
 class ComposedRule
 {
@@ -60,8 +60,8 @@ class ComposedRule
   std::vector<const Subgraph *> m_attachedRules;
   std::queue<const Node *> m_openAttachmentPoints;
   int m_depth;
-  int m_nodeCount;
   int m_size;
+  int m_nodeCount;
 };
 
 }  // namespace GHKM

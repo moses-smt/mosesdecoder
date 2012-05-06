@@ -30,7 +30,7 @@
 namespace Moses {
 namespace GHKM {
 
-class Options;
+struct Options;
 class ParseTree;
 
 class ExtractGHKM
