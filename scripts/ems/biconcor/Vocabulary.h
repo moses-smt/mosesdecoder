@@ -10,10 +10,9 @@
 #include <queue>
 #include <map>
 #include <cmath>
+#include <vector>
 
 using namespace std;
-
-#define MAX_LENGTH 10000
 
 #define SAFE_GETLINE(_IS, _LINE, _SIZE, _DELIM) { \
                 _IS.getline(_LINE, _SIZE, _DELIM); \
