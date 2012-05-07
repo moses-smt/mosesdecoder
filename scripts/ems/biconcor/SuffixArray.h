@@ -19,6 +19,10 @@ private:
   INDEX m_size;
   INDEX m_sentenceCount;
 
+  // No copying allowed.
+  SuffixArray(const SuffixArray&);
+  void operator=(const SuffixArray&);
+
 public:
   SuffixArray();
   ~SuffixArray();

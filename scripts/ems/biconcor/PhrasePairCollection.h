@@ -25,6 +25,10 @@ private:
   int m_max_pp_target;
   int m_max_pp;
 
+  // No copying allowed.
+  PhrasePairCollection(const PhrasePairCollection&);
+  void operator=(const PhrasePairCollection&);
+
 public:
   PhrasePairCollection ( SuffixArray *, TargetCorpus *, Alignment * );
   ~PhrasePairCollection ();

@@ -26,6 +26,10 @@ private:
   bool m_target_unaligned[ 256 ];
   bool m_unaligned;
 
+  // No copying allowed.
+  Mismatch(const Mismatch&);
+  void operator=(const Mismatch&);
+
 public:
   Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, char source_length, char target_length, char source_start, char source_end );
   ~Mismatch();

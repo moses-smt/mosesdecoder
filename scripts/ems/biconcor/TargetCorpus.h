@@ -14,7 +14,12 @@ private:
   INDEX m_size;
   INDEX m_sentenceCount;
 
+  // No copying allowed.
+  TargetCorpus(const TargetCorpus&);
+  void operator=(const TargetCorpus&);
+
 public:
+  TargetCorpus();
   ~TargetCorpus();
 
   void Create(const std::string& fileName );
