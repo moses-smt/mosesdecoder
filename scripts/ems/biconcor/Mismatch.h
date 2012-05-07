@@ -36,9 +36,9 @@ public:
     ,m_targetCorpus(tc)
     ,m_alignment(a)
     ,m_sentence_id(sentence_id)
-    ,m_source_position(position)
-		,m_source_length(source_length)
+    ,m_source_length(source_length)
     ,m_target_length(target_length)
+    ,m_source_position(position)
     ,m_source_start(source_start)
     ,m_source_end(source_end)
   {
