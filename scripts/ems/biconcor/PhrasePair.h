@@ -42,8 +42,8 @@ public:
   {}
   ~PhrasePair () {}
 
-  void PrintTarget( std::ostream* out );
-  void Print( std::ostream* out, int width );
-  void PrintHTML( std::ostream* out );
-  void PrintClippedHTML( std::ostream* out, int width );
+  void PrintTarget( std::ostream* out ) const;
+  void Print( std::ostream* out, int width ) const;
+  void PrintHTML( std::ostream* out ) const;
+  void PrintClippedHTML( std::ostream* out, int width ) const;
 };

@@ -8,9 +8,9 @@
 
 using namespace std;
 
-void PhrasePair::Print( ostream* out, int width )
+void PhrasePair::Print( ostream* out, int width ) const
 {
-  vector< WORD_ID >::iterator t;
+  vector< WORD_ID >::const_iterator t;
 
   // source
   int sentence_start = m_source_position - m_source_start;
@@ -76,7 +76,7 @@ void PhrasePair::Print( ostream* out, int width )
        << target_post.substr( 0, target_post_width ) << endl;
 }
 
-void PhrasePair::PrintTarget( ostream* out )
+void PhrasePair::PrintTarget( ostream* out ) const
 {
   for( char i=m_target_start; i<=m_target_end; i++ ) {
     if (i>m_target_start) *out << " ";
@@ -84,7 +84,7 @@ void PhrasePair::PrintTarget( ostream* out )
   }
 }
 
-void PhrasePair::PrintHTML( ostream* out )
+void PhrasePair::PrintHTML( ostream* out ) const
 {
   // source
   int sentence_start = m_source_position - m_source_start;
@@ -125,9 +125,9 @@ void PhrasePair::PrintHTML( ostream* out )
   *out << "</td></tr>\n";
 }
 
-void PhrasePair::PrintClippedHTML( ostream* out, int width )
+void PhrasePair::PrintClippedHTML( ostream* out, int width ) const
 {
-  vector< WORD_ID >::iterator t;
+  vector< WORD_ID >::const_iterator t;
 
   // source
   int sentence_start = m_source_position - m_source_start;

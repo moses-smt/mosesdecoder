@@ -19,7 +19,12 @@ private:
   INDEX m_size;
   INDEX m_sentenceCount;
 
+  // No copying allowed.
+  SuffixArray(const SuffixArray&);
+  void operator=(const SuffixArray&);
+
 public:
+  SuffixArray();
   ~SuffixArray();
 
   void Create(const std::string& fileName );
@@ -35,24 +40,24 @@ public:
   INDEX FindLast( const std::vector< WORD > &phrase, INDEX start, INDEX end, int direction );
   int Match( const std::vector< WORD > &phrase, INDEX index );
   void List( INDEX start, INDEX end );
-  inline INDEX GetPosition( INDEX index ) {
+  inline INDEX GetPosition( INDEX index ) const {
     return m_index[ index ];
   }
-  inline INDEX GetSentence( INDEX position ) {
+  inline INDEX GetSentence( INDEX position ) const {
     return m_sentence[position];
   }
-  inline char GetWordInSentence( INDEX position ) {
+  inline char GetWordInSentence( INDEX position ) const {
     return m_wordInSentence[position];
   }
-  inline char GetSentenceLength( INDEX sentenceId ) {
+  inline char GetSentenceLength( INDEX sentenceId ) const {
     return m_sentenceLength[sentenceId];
   }
-  inline INDEX GetSize() {
+  inline INDEX GetSize() const {
     return m_size;
   }
-  inline WORD GetWord( INDEX position ) {
+  inline WORD GetWord( INDEX position ) const {
     return m_vcb.GetWord( m_array[position] );
   }
-  void Save(const std::string& fileName );
+  void Save(const std::string& fileName ) const;
   void Load(const std::string& fileName );
 };

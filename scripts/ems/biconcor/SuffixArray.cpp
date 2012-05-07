@@ -13,6 +13,26 @@ const int LINE_MAX_LENGTH = 10000;
 
 using namespace std;
 
+SuffixArray::SuffixArray()
+    : m_array(NULL),
+      m_index(NULL),
+      m_buffer(NULL),
+      m_wordInSentence(NULL),
+      m_sentence(NULL),
+      m_sentenceLength(NULL),
+      m_vcb(),
+      m_size(0),
+      m_sentenceCount(0) { }
+
+SuffixArray::~SuffixArray()
+{
+  free(m_array);
+  free(m_index);
+  free(m_wordInSentence);
+  free(m_sentence);
+  free(m_sentenceLength);
+}
+
 void SuffixArray::Create(const string& fileName )
 {
   m_vcb.StoreIfNew( "<uNk>" );
@@ -122,12 +142,6 @@ void SuffixArray::Sort(INDEX start, INDEX end)
 
   memcpy( ((char*)m_index) + sizeof( INDEX ) * start,
           ((char*)m_buffer), sizeof( INDEX ) * (end-start+1) );
-}
-
-SuffixArray::~SuffixArray()
-{
-  free(m_index);
-  free(m_array);
 }
 
 int SuffixArray::CompareIndex( INDEX a, INDEX b ) const
@@ -257,7 +271,7 @@ void SuffixArray::List(INDEX start, INDEX end)
   }
 }
 
-void SuffixArray::Save(const string& fileName )
+void SuffixArray::Save(const string& fileName ) const
 {
   FILE *pFile = fopen ( fileName.c_str() , "w" );
   if (pFile == NULL) {
@@ -323,6 +337,12 @@ void SuffixArray::Load(const string& fileName )
   fread( &m_sentenceCount, sizeof(INDEX), 1, pFile );
   cerr << "sentences in corpus: " << m_sentenceCount << endl;
   m_sentenceLength = (char*) calloc( sizeof( char ), m_sentenceCount );
+
+  if (m_sentenceLength == NULL) {
+    cerr << "Error: cannot allocate memory to m_sentenceLength" << endl;
+    exit(1);
+  }
+
   fread( m_sentenceLength, sizeof(char), m_sentenceCount, pFile); // sentence length
   fclose( pFile );
 

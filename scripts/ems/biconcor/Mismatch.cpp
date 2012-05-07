@@ -13,12 +13,14 @@
 
 using namespace std;
 
-#define UNANNOTATED 0
-#define PRE_ALIGNED 1
-#define POST_ALIGNED 2
-#define UNALIGNED 3
-#define MISALIGNED 4
-#define ALIGNED 5
+enum {
+  UNANNOTATED = 0,
+  PRE_ALIGNED = 1,
+  POST_ALIGNED = 2,
+  UNALIGNED = 3,
+  MISALIGNED = 4,
+  ALIGNED = 5
+};
 
 Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, char source_length, char target_length, char source_start, char source_end )
     :m_suffixArray(sa)
