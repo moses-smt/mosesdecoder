@@ -63,114 +63,18 @@
 import option ;
 import modules ;
 import path ;
+include jam-files/sanity.jam ;
 
-path-constant TOP : . ;
-
-# Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
-rule trim-nl ( str extras * ) {
-  return [ MATCH "([^
-]*)" : $(str) ] $(extras) ;
-}
-rule _shell ( cmd : extras * ) {
-  return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
-}
-
-local cleaning = [ option.get "clean" : : yes ] ;
-cleaning ?= [ option.get "clean-all" : no : yes ] ;
-if "clean" in [ modules.peek : ARGV ] {
-  cleaning = yes ;
-}
-constant CLEANING : $(cleaning) ;
-
-#Run g++ with empty main and these arguments to see if it passes.  
-rule test_flags ( flags ) {
-  if [ SHELL $(TOP)"/jam-files/test.sh "$(flags) ] = 0 {
-    return true ;
-  } else {
-    return ;
-  }
-}
-
-#Determine if a library can be compiled statically.  
-rule auto_shared ( name : additional ? ) {
-  additional ?= "" ;
-  if [ test_flags $(additional)" -static -l"$(name) ] {
-    return ;
-  } else {
-    return "<link>shared" ;
-  }
-}
-
-with-boost = [ option.get "with-boost" ] ;
-if $(with-boost) {
-  L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
-  boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
-  I-boost-include = -I$(with-boost)/include ;
-  boost-include = <include>$(with-boost)/include ;
-} else {
-  L-boost-search = "" ;
-  boost-search = ;
-  I-boost-include = "" ;
-  boost-include = ;
-}
-
-boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '" : exit-status ] ;
-if $(boost-shell[2]) != 0 && $(CLEANING) = no {
-  exit Boost does not seem to be installed or g++ is confused. : 1 ;
-}
-boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
-if $(boost-version) < 103600 && $(cleaning) = no {
-  exit You have Boost $(boost-version).  Moses requires at least 103600 (and preferably newer). : 1 ;
-}
-#Are we linking static binaries against shared boost?
-boost-auto-shared = [ auto_shared "boost_program_options" : $(L-boost-search) ] ;
-#Convenience rule for boost libraries.  Defines library boost_$(name).  
-rule boost_lib ( name macro ) {
-  #Link multi-threaded programs against the -mt version if available.  Old 
-  #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
-  #boost.jam does not handle this correctly.  
-  if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
-  } else {
-    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) ;
-  }
-
-  alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) $(boost-include) ;
-}
-#See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
-boost_lib thread THREAD_DYN_DLL ;
-boost_lib program_options PROGRAM_OPTIONS_DYN_LINK ;
-boost_lib unit_test_framework TEST_DYN_LINK ;
-
-#Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
-rule external_lib ( name ) {
-  lib $(name) : : [ auto_shared $(name) ] ;
-}
-
-external_lib z ;
-
-requirements = ;
-
-#libSegFault prints a stack trace on segfault.  Link against it if available.  
-if [ test_flags "-lSegfault" ] {
-  external_lib SegFault ;
-  requirements += <library>SegFault ;
-}
+boost 103600 ;
+external-lib z ;
 
 if [ option.get "with-tcmalloc" : : "yes" ] {
-  external_lib tcmalloc ;
+  external-lib tcmalloc ;
   requirements += <library>tcmalloc ;
 }
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
-
-import os ;
-
-cxxflags = [ os.environ "CXXFLAGS" ] ;
-cflags = [ os.environ "CFLAGS" ] ;
-ldflags = [ os.environ "LDFLAGS" ] ;
 
 project : default-build
   <threading>multi
@@ -185,10 +89,6 @@ project : requirements
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
-  <os>LINUX,<link>static,<toolset>clang:<linkflags>-static #apparently bjam doesn't pass -static properly.  
-  <cxxflags>$(cxxflags)
-  <cflags>$(cflags)
-  <linkflags>$(ldflags)
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
@@ -203,39 +103,14 @@ build-project scripts ;
 #Regression tests (only does anything if --with-regtest is passed)
 build-project regression-testing ;
 
-if [ option.get "git" : : "yes" ] {
-  local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
-  constant GITTAG : "/"$(revision) ;
-} else {
-  constant GITTAG : "" ;
-}
-
 alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
 
-prefix = [ option.get "prefix" : $(TOP)/dist$(GITTAG) ] ;
-bindir = [ option.get "bindir" : $(prefix)/bin ] ;
-libdir = [ option.get "libdir" : $(prefix)/lib ] ;
-install prefix-bin : programs : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
-install prefix-lib : programs : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
+install-bin-libs programs ;
+install-headers headers-base : [ glob-tree *.h *.hh : jam-files dist kenlm moses ] : . ;
+install-headers headers-moses : moses/src//headers-to-install : moses/src ;
 
-includedir = [ option.get "includedir" : : $(prefix)/include ] ;
-if $(includedir) {
-  install prefix-header : [ glob-tree *.h *.hh : jam-files dist kenlm moses ] : <location>$(includedir) <install-source-root>. ;
-  install prefix-moses-header : moses/src//headers-to-install : <location>$(includedir) <install-source-root>moses/src ;
-}
+alias install : prefix-bin prefix-lib headers-base headers-moses ;
 
-#Write the current command line to previous.sh.  This does not do shell escaping.  
-path-constant BUILD-LOG : previous.sh ;
-if ! [ path.exists $(BUILD-LOG) ] {
-  SHELL "touch $(BUILD-LOG) && chmod +x $(BUILD-LOG)" ;
+if ! [ option.get "includedir" : : $(prefix)/include ] {
+  explicit install headers-base headers-moses ;
 }
-local script = [ modules.peek : ARGV ] ;
-if $(script[1]) = "./jam-files/bjam" {
-  #The ./bjam shell script calls ./jam-files/bjam so that appears in argv but
-  #we want ./bjam to appear so the environment variables are set correctly.  
-  script = "./bjam "$(script[2-]:J=" ") ;
-} else {
-  script = $(script:J=" ") ;
-}
-script = "#!/bin/sh\n$(script)\n" ;
-local ignored = @($(BUILD-LOG):E=$(script)) ;
