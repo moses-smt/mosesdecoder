@@ -20,6 +20,7 @@ private:
   INDEX m_sentenceCount;
 
 public:
+  SuffixArray();
   ~SuffixArray();
 
   void Create(const std::string& fileName );
