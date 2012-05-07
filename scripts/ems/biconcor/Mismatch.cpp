@@ -1,4 +1,14 @@
 #include "Mismatch.h"
+
+#include <fstream>
+#include <iostream>
+#include <cstring>
+#include <string>
+#include <stdlib.h>
+
+#include "SuffixArray.h"
+#include "TargetCorpus.h"
+#include "Alignment.h"
 #include "Vocabulary.h"
 
 using namespace std;
@@ -10,6 +20,39 @@ using namespace std;
 #define MISALIGNED 4
 #define ALIGNED 5
 
+Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, char source_length, char target_length, char source_start, char source_end )
+    :m_suffixArray(sa)
+    ,m_targetCorpus(tc)
+    ,m_alignment(a)
+    ,m_sentence_id(sentence_id)
+    ,m_source_length(source_length)
+    ,m_target_length(target_length)
+    ,m_source_position(position)
+    ,m_source_start(source_start)
+    ,m_source_end(source_end)
+    ,m_unaligned(true)
+{
+  // initialize unaligned indexes
+  for (int i = 0; i < m_source_length; i++) {
+    m_source_unaligned[i] = true;
+  }
+  for (int i = 0; i < m_target_length; i++) {
+    m_target_unaligned[i] = true;
+  }
+  m_num_alignment_points =
+      m_alignment->GetNumberOfAlignmentPoints( sentence_id );
+  for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
+    m_source_unaligned[ m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
+    m_target_unaligned[ m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
+  }
+  for(int i = source_start; i <= source_end; i++) {
+    if (!m_source_unaligned[ i ]) {
+      m_unaligned = false;
+    }
+  }
+}
+
+Mismatch::~Mismatch () {}
 
 void Mismatch::PrintClippedHTML( ostream* out, int width )
 {
