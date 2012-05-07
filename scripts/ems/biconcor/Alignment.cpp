@@ -3,6 +3,12 @@
 #include <stdlib.h>
 #include <cstring>
 
+namespace {
+
+const int LINE_MAX_LENGTH = 10000;
+
+} // namespace
+
 using namespace std;
 
 void Alignment::Create( string fileName )

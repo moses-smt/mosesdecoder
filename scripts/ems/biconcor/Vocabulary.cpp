@@ -1,6 +1,14 @@
 // $Id: Vocabulary.cpp 1565 2008-02-22 14:42:01Z bojar $
 #include "Vocabulary.h"
 
+namespace {
+
+const int MAX_LENGTH = 10000;
+
+} // namespace
+
+using namespace std;
+
 // as in beamdecoder/tables.cpp
 vector<WORD_ID> Vocabulary::Tokenize( const char input[] )
 {
