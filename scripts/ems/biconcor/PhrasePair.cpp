@@ -1,5 +1,10 @@
 #include "PhrasePair.h"
+
+#include <iostream>
+#include "TargetCorpus.h"
+#include "Alignment.h"
 #include "Vocabulary.h"
+#include "SuffixArray.h"
 
 using namespace std;
 

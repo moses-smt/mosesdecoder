@@ -1,16 +1,10 @@
 #pragma once
 
-#include <string>
-#include <stdlib.h>
-#include <cstring>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include "SuffixArray.h"
-#include "TargetCorpus.h"
-#include "Alignment.h"
+#include <iosfwd>
 
-using namespace std;
+class Alignment;
+class SuffixArray;
+class TargetCorpus;
 
 class PhrasePair
 {
@@ -23,7 +17,7 @@ private:
   Alignment *m_alignment;
   INDEX m_sentence_id;
   char m_target_length;
-  SuffixArray::INDEX m_source_position;
+  INDEX m_source_position;
   char m_source_start, m_source_end;
   char m_target_start, m_target_end;
   char m_start_null, m_end_null;
@@ -48,8 +42,8 @@ public:
   {}
   ~PhrasePair () {}
 
-  void PrintTarget( ostream* out );
-  void Print( ostream* out, int width );
-  void PrintHTML( ostream* out );
-  void PrintClippedHTML( ostream* out, int width );
+  void PrintTarget( std::ostream* out );
+  void Print( std::ostream* out, int width );
+  void PrintHTML( std::ostream* out );
+  void PrintClippedHTML( std::ostream* out, int width );
 };
