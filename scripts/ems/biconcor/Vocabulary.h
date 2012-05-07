@@ -28,12 +28,12 @@ public:
   std::map<WORD, WORD_ID> lookup;
   std::vector< WORD > vocab;
   WORD_ID StoreIfNew( const WORD& );
-  WORD_ID GetWordID( const WORD& );
+  WORD_ID GetWordID( const WORD& ) const;
   std::vector<WORD_ID> Tokenize( const char[] );
   inline WORD &GetWord( WORD_ID id ) const {
     WORD &i = (WORD&) vocab[ id ];
     return i;
   }
-  void Save(const std::string& fileName );
+  void Save(const std::string& fileName ) const;
   void Load(const std::string& fileName );
 };
