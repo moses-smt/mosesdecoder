@@ -15,16 +15,17 @@ private:
   char m_unaligned[ 256 ]; // here for speed (local to PhraseAlignment)
 
 public:
+  Alignment();
   ~Alignment();
 
-  void Create( string fileName );
+  void Create(const std::string& fileName );
   bool PhraseAlignment( INDEX sentence, char target_length,
                         char source_start, char source_end,
                         char &target_start, char &target_end,
                         char &pre_null, char &post_null );
-  void Load( string fileName );
-  void Save( string fileName );
-  vector<string> Tokenize( const char input[] );
+  void Load(const std::string& fileName );
+  void Save(const std::string& fileName );
+  std::vector<std::string> Tokenize( const char input[] );
 
 	INDEX GetSentenceStart( INDEX sentence ) {
 		if (sentence == 0) return 0;

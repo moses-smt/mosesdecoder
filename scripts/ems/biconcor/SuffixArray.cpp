@@ -11,7 +11,7 @@ const int LINE_MAX_LENGTH = 10000;
 
 using namespace std;
 
-void SuffixArray::Create( string fileName )
+void SuffixArray::Create(const string& fileName )
 {
   m_vcb.StoreIfNew( "<uNk>" );
   m_endOfSentence = m_vcb.StoreIfNew( "<s>" );
@@ -21,6 +21,12 @@ void SuffixArray::Create( string fileName )
 
   // count the number of words first;
   textFile.open(fileName.c_str());
+
+  if (!textFile) {
+    cerr << "no such file or directory " << fileName << endl;
+    exit(1);
+  }
+
   istream *fileP = &textFile;
   m_size = 0;
   m_sentenceCount = 0;
@@ -45,6 +51,12 @@ void SuffixArray::Create( string fileName )
   int wordIndex = 0;
   int sentenceId = 0;
   textFile.open(fileName.c_str());
+
+  if (!textFile) {
+    cerr << "no such file or directory " << fileName << endl;
+    exit(1);
+  }
+
   fileP = &textFile;
   while(!fileP->eof()) {
     SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
@@ -68,6 +80,12 @@ void SuffixArray::Create( string fileName )
 
   // sort
   m_buffer = (INDEX*) calloc( sizeof( INDEX ), m_size );
+
+  if (m_buffer == NULL) {
+    cerr << "cannot allocate memory to m_buffer" << endl;
+    exit(1);
+  }
+
   Sort( 0, m_size-1 );
   free( m_buffer );
   cerr << "done sorting" << endl;
@@ -237,9 +255,13 @@ void SuffixArray::List(INDEX start, INDEX end)
   }
 }
 
-void SuffixArray::Save( string fileName )
+void SuffixArray::Save(const string& fileName )
 {
   FILE *pFile = fopen ( fileName.c_str() , "w" );
+  if (pFile == NULL) {
+    cerr << "Cannot open " << fileName << endl;
+    exit(1);
+  }
 
   fwrite( &m_size, sizeof(INDEX), 1, pFile );
   fwrite( m_array, sizeof(WORD_ID), m_size, pFile ); // corpus
@@ -254,9 +276,14 @@ void SuffixArray::Save( string fileName )
   m_vcb.Save( fileName + ".src-vcb" );
 }
 
-void SuffixArray::Load( string fileName )
+void SuffixArray::Load(const string& fileName )
 {
   FILE *pFile = fopen ( fileName.c_str() , "r" );
+  if (pFile == NULL) {
+    cerr << "no such file or directory " << fileName << endl;
+    exit(1);
+  }
+
   cerr << "loading from " << fileName << endl;
 
   fread( &m_size, sizeof(INDEX), 1, pFile );
@@ -265,6 +292,26 @@ void SuffixArray::Load( string fileName )
   m_index = (INDEX*) calloc( sizeof( INDEX ), m_size );
   m_wordInSentence = (char*) calloc( sizeof( char ), m_size );
   m_sentence = (INDEX*) calloc( sizeof( INDEX ), m_size );
+
+  if (m_array == NULL) {
+    cerr << "Error: cannot allocate memory to m_array" << endl;
+    exit(1);
+  }
+
+  if (m_index == NULL) {
+    cerr << "Error: cannot allocate memory to m_index" << endl;
+    exit(1);
+  }
+
+  if (m_wordInSentence == NULL) {
+    cerr << "Error: cannot allocate memory to m_wordInSentence" << endl;
+    exit(1);
+  }
+
+  if (m_sentence == NULL) {
+    cerr << "Error: cannot allocate memory to m_sentence" << endl;
+    exit(1);
+  }
 
   fread( m_array, sizeof(WORD_ID), m_size, pFile ); // corpus
   fread( m_index, sizeof(INDEX), m_size, pFile );   // suffix array
@@ -279,5 +326,3 @@ void SuffixArray::Load( string fileName )
 
   m_vcb.Load( fileName + ".src-vcb" );
 }
-
-
