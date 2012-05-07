@@ -54,10 +54,16 @@ WORD_ID Vocabulary::GetWordID( const WORD &word )
   return w;
 }
 
-void Vocabulary::Save( string fileName )
+void Vocabulary::Save(const string& fileName )
 {
   ofstream vcbFile;
   vcbFile.open( fileName.c_str(), ios::out | ios::ate | ios::trunc);
+
+  if (!vcbFile) {
+    cerr << "Failed to open " << vcbFile << endl;
+    exit(1);
+  }
+
   vector< WORD >::iterator i;
   for(i = vocab.begin(); i != vocab.end(); i++) {
     const string &word = *i;
@@ -66,11 +72,17 @@ void Vocabulary::Save( string fileName )
   vcbFile.close();
 }
 
-void Vocabulary::Load( string fileName )
+void Vocabulary::Load(const string& fileName )
 {
   ifstream vcbFile;
   char line[MAX_LENGTH];
   vcbFile.open(fileName.c_str());
+
+  if (!vcbFile) {
+    cerr << "no such file or directory: " << vcbFile << endl;
+    exit(1);
+  }
+
   cerr << "loading from " << fileName << endl;
   istream *fileP = &vcbFile;
   int count = 0;

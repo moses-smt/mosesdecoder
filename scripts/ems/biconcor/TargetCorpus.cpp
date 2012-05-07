@@ -12,13 +12,19 @@ const int LINE_MAX_LENGTH = 10000;
 
 using namespace std;
 
-void TargetCorpus::Create( string fileName )
+void TargetCorpus::Create(const string& fileName )
 {
   ifstream textFile;
   char line[LINE_MAX_LENGTH];
 
   // count the number of words first;
   textFile.open(fileName.c_str());
+
+  if (!textFile) {
+    cerr << "no such file or directory " << fileName << endl;
+    exit(1);
+  }
+
   istream *fileP = &textFile;
   m_size = 0;
   m_sentenceCount = 0;
@@ -40,6 +46,12 @@ void TargetCorpus::Create( string fileName )
   int wordIndex = 0;
   int sentenceId = 0;
   textFile.open(fileName.c_str());
+
+  if (!textFile) {
+    cerr << "no such file or directory " << fileName << endl;
+    exit(1);
+  }
+
   fileP = &textFile;
   while(!fileP->eof()) {
     SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
@@ -88,9 +100,13 @@ char TargetCorpus::GetSentenceLength( INDEX sentence )
   return (char) ( m_sentenceEnd[ sentence ] - m_sentenceEnd[ sentence-1 ] );
 }
 
-void TargetCorpus::Save( string fileName )
+void TargetCorpus::Save(const string& fileName )
 {
   FILE *pFile = fopen ( (fileName + ".tgt").c_str() , "w" );
+  if (pFile == NULL) {
+    cerr << "Cannot open " << fileName << endl;
+    exit(1);
+  }
 
   fwrite( &m_size, sizeof(INDEX), 1, pFile );
   fwrite( m_array, sizeof(WORD_ID), m_size, pFile ); // corpus
@@ -102,9 +118,14 @@ void TargetCorpus::Save( string fileName )
   m_vcb.Save( fileName + ".tgt-vcb" );
 }
 
-void TargetCorpus::Load( string fileName )
+void TargetCorpus::Load(const string& fileName )
 {
   FILE *pFile = fopen ( (fileName + ".tgt").c_str() , "r" );
+  if (pFile == NULL) {
+    cerr << "Cannot open " << fileName << endl;
+    exit(1);
+  }
+
   cerr << "loading from " << fileName << ".tgt" << endl;
 
   fread( &m_size, sizeof(INDEX), 1, pFile );
@@ -119,4 +140,3 @@ void TargetCorpus::Load( string fileName )
   fclose( pFile );
   m_vcb.Load( fileName + ".tgt-vcb" );
 }
-

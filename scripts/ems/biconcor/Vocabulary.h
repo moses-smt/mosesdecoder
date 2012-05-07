@@ -40,6 +40,6 @@ public:
     WORD &i = (WORD&) vocab[ id ];
     return i;
   }
-  void Save( string fileName );
-  void Load( string fileName );
+  void Save(const string& fileName );
+  void Load(const string& fileName );
 };
