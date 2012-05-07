@@ -247,10 +247,14 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
     }
     if (comp != 0) return comp;
   }
-  
-  cerr << "Recombining hypotheses.. " << endl; 
-  cerr << "1: " << *this << endl;
-  cerr << "2: " << compare << endl << endl;
+
+  string hypo1 = GetOutputString();
+  string hypo2 = compare.GetOutputString();
+  if (hypo1.compare(hypo2) != 0) {
+    cerr << "Recombining hypotheses.. " << endl; 
+    cerr << "1: " << hypo1 << endl;
+    cerr << "2: " << hypo2 << endl;
+  }
   
   return 0;
 }

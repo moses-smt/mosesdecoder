@@ -213,6 +213,19 @@ public:
     out << (Phrase) GetCurrTargetPhrase();
   }
 
+  void ToStringStream(std::stringstream& out) const {
+    if (m_prevHypo != NULL) {
+      m_prevHypo->ToStream(out);
+    }
+    out << (Phrase) GetCurrTargetPhrase();
+  }
+
+  std::string GetOutputString() const {
+    std::stringstream out;
+    ToStringStream(out);
+    return out.str();
+  }
+
   TO_STRING();
 
   inline void SetWinningHypo(const Hypothesis *hypo) {

@@ -180,7 +180,7 @@ public:
     }
 
     const TranslationSystem& system = getTranslationSystem(params);
-
+    
     Sentence sentence;
     const vector<FactorType> &inputFactorOrder =
       staticData.GetInputFactorOrder();
@@ -307,13 +307,13 @@ public:
   }
 };
 
-/*const char* ffNames[] = { "Distortion", "WordPenalty", "!UnknownWordPenalty 1", "LexicalReordering_wbe-msd-bidirectional-fe-allff_1",
+const char* ffNames[] = { "Distortion", "WordPenalty", "!UnknownWordPenalty 1", "LexicalReordering_wbe-msd-bidirectional-fe-allff_1",
 		"LexicalReordering_wbe-msd-bidirectional-fe-allff_2", "LexicalReordering_wbe-msd-bidirectional-fe-allff_3", 
 		"LexicalReordering_wbe-msd-bidirectional-fe-allff_4", "LexicalReordering_wbe-msd-bidirectional-fe-allff_5", 
 		"LexicalReordering_wbe-msd-bidirectional-fe-allff_6", "LM", "PhraseModel_1", "PhraseModel_2", "PhraseModel_3",
-		"PhraseModel_4", "PhraseModel_5" };*/
+		"PhraseModel_4", "PhraseModel_5" };
 
-const char* ffNames[] = { "Distortion", "WordPenalty", "!UnknownWordPenalty 1", "LM", "PhraseModel_1", "PhraseModel_2" };
+//const char* ffNames[] = { "Distortion", "WordPenalty", "!UnknownWordPenalty 1", "LM", "PhraseModel_1", "PhraseModel_2" };
 
 class WeightUpdater: public xmlrpc_c::method
 {	
@@ -468,7 +468,16 @@ int main(int argc, char** argv)
   ++mosesargc;
   mosesargv[mosesargc] = strToChar("0");
   ++mosesargc;
+  mosesargv[mosesargc] = strToChar("-b");
+  ++mosesargc;
+  mosesargv[mosesargc] = strToChar("0");
+  ++mosesargc;
   
+  cerr << "mosesargs: " << endl;
+  for (int i = 0 ; i < mosesargc ; i++) {
+    cerr << mosesargv[i] << endl;
+  }
+
   Parameter* params = new Parameter();
   if (!params->LoadParam(mosesargc,mosesargv)) {
     params->Explain();

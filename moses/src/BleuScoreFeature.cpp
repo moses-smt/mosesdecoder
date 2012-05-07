@@ -24,6 +24,11 @@ int BleuScoreState::Compare(const FFState& o) const
 
     const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
 
+    if (m_target_length < other.m_target_length)
+      return -1;
+    if (m_target_length > other.m_target_length)
+      return 1;
+
     int c = m_words.Compare(other.m_words);
 
     if (c != 0)

@@ -65,8 +65,7 @@ public:
 	                                 m_scale_by_avg_inverse_length(false),
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.9),
-	                                 m_smoothing_scheme(PLUS_POINT_ONE),
-	                                 m_relax_BP(1) {}
+					 m_smoothing_scheme(PLUS_POINT_ONE) {}
 
     std::string GetScoreProducerDescription() const
     {
@@ -162,9 +161,6 @@ private:
 
     enum SmoothingScheme { PLUS_ONE = 1, PLUS_POINT_ONE = 2, PAPINENI = 3 };
     SmoothingScheme m_smoothing_scheme;
-
-    // relax application of the BP by setting a value between 0 and 1
-    float m_relax_BP;
 };
 
 } // Namespace.
