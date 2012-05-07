@@ -1,11 +1,11 @@
+#pragma once
+
 #include "Vocabulary.h"
 #include "SuffixArray.h"
 #include "TargetCorpus.h"
 #include "Alignment.h"
 #include "PhrasePair.h"
 #include "Mismatch.h"
-
-#pragma once
 
 class PhrasePairCollection
 {

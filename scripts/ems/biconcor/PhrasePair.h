@@ -1,3 +1,5 @@
+#pragma once
+
 #include <string>
 #include <stdlib.h>
 #include <cstring>
@@ -7,7 +9,6 @@
 #include "SuffixArray.h"
 #include "TargetCorpus.h"
 #include "Alignment.h"
-#pragma once
 
 using namespace std;
 

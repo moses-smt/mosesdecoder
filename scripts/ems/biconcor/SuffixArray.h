@@ -1,9 +1,8 @@
-#include "Vocabulary.h"
-
 #pragma once
 
 #define LINE_MAX_LENGTH 10000
 
+#include "Vocabulary.h"
 
 class SuffixArray
 {
