@@ -13,6 +13,19 @@ const int LINE_MAX_LENGTH = 10000;
 
 using namespace std;
 
+TargetCorpus::TargetCorpus()
+    : m_array(NULL),
+      m_sentenceEnd(NULL),
+      m_vcb(),
+      m_size(0),
+      m_sentenceCount(0) {}
+
+TargetCorpus::~TargetCorpus()
+{
+  free(m_array);
+  free(m_sentenceEnd);
+}
+
 void TargetCorpus::Create(const string& fileName )
 {
   ifstream textFile;
@@ -43,6 +56,16 @@ void TargetCorpus::Create(const string& fileName )
   m_array = (WORD_ID*) calloc( sizeof( WORD_ID ), m_size );
   m_sentenceEnd = (INDEX*) calloc( sizeof( INDEX ), m_sentenceCount );
 
+  if (m_array == NULL) {
+    cerr << "cannot allocate memory to m_array" << endl;
+    exit(1);
+  }
+
+  if (m_sentenceEnd == NULL) {
+    cerr << "cannot allocate memory to m_sentenceEnd" << endl;
+    exit(1);
+  }
+
   // fill the array
   int wordIndex = 0;
   int sentenceId = 0;
@@ -67,12 +90,6 @@ void TargetCorpus::Create(const string& fileName )
   }
   textFile.close();
   cerr << "done reading " << wordIndex << " words, " << sentenceId << " sentences." << endl;
-}
-
-TargetCorpus::~TargetCorpus()
-{
-  free(m_array);
-  free(m_sentenceEnd);
 }
 
 WORD TargetCorpus::GetWordFromId( const WORD_ID id ) const
@@ -132,11 +149,23 @@ void TargetCorpus::Load(const string& fileName )
   fread( &m_size, sizeof(INDEX), 1, pFile );
   cerr << "words in corpus: " << m_size << endl;
   m_array = (WORD_ID*) calloc( sizeof(WORD_ID), m_size );
+
+  if (m_array == NULL) {
+    cerr << "cannot allocate memory to m_array" << endl;
+    exit(1);
+  }
+
   fread( m_array, sizeof(WORD_ID), m_size, pFile ); // corpus
 
   fread( &m_sentenceCount, sizeof(INDEX), 1, pFile );
   cerr << "sentences in corpus: " << m_sentenceCount << endl;
   m_sentenceEnd = (INDEX*) calloc( sizeof(INDEX), m_sentenceCount );
+
+  if (m_sentenceEnd == NULL) {
+    cerr << "cannot allocate memory to m_sentenceEnd" << endl;
+    exit(1);
+  }
+
   fread( m_sentenceEnd, sizeof(INDEX), m_sentenceCount, pFile); // sentence index
   fclose( pFile );
   m_vcb.Load( fileName + ".tgt-vcb" );

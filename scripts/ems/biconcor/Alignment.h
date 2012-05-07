@@ -14,6 +14,10 @@ private:
   INDEX m_sentenceCount;
   char m_unaligned[ 256 ]; // here for speed (local to PhraseAlignment)
 
+  // No copying allowed.
+  Alignment(const Alignment&);
+  void operator=(const Alignment&);
+
 public:
   Alignment();
   ~Alignment();
