@@ -183,7 +183,7 @@ bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
   return true;
 }
 
-void Alignment::Save(const string& fileName )
+void Alignment::Save(const string& fileName ) const
 {
   FILE *pFile = fopen ( (fileName + ".align").c_str() , "w" );
   if (pFile == NULL) {

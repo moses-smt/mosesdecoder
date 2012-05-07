@@ -30,7 +30,7 @@ public:
   Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, char source_length, char target_length, char source_start, char source_end );
   ~Mismatch();
 
-  bool Unaligned() { return m_unaligned; }
+  bool Unaligned() const { return m_unaligned; }
   void PrintClippedHTML(std::ostream* out, int width );
   void LabelSourceMatches( char *source_annotation, char *target_annotation, char source_id, char label );
 };

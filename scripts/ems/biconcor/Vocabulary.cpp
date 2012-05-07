@@ -46,16 +46,16 @@ WORD_ID Vocabulary::StoreIfNew( const WORD& word )
   return id;
 }
 
-WORD_ID Vocabulary::GetWordID( const WORD &word )
+WORD_ID Vocabulary::GetWordID( const WORD &word ) const
 {
-  map<WORD, WORD_ID>::iterator i = lookup.find( word );
+  map<WORD, WORD_ID>::const_iterator i = lookup.find( word );
   if( i == lookup.end() )
     return 0;
   WORD_ID w= (WORD_ID) i->second;
   return w;
 }
 
-void Vocabulary::Save(const string& fileName )
+void Vocabulary::Save(const string& fileName ) const
 {
   ofstream vcbFile;
   vcbFile.open( fileName.c_str(), ios::out | ios::ate | ios::trunc);
@@ -65,7 +65,7 @@ void Vocabulary::Save(const string& fileName )
     exit(1);
   }
 
-  vector< WORD >::iterator i;
+  vector< WORD >::const_iterator i;
   for(i = vocab.begin(); i != vocab.end(); i++) {
     const string &word = *i;
     vcbFile << word << endl;

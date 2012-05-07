@@ -80,12 +80,12 @@ WORD TargetCorpus::GetWordFromId( const WORD_ID id ) const
   return m_vcb.GetWord( id );
 }
 
-WORD TargetCorpus::GetWord( INDEX sentence, char word )
+WORD TargetCorpus::GetWord( INDEX sentence, char word ) const
 {
   return m_vcb.GetWord( GetWordId( sentence, word ) );
 }
 
-WORD_ID TargetCorpus::GetWordId( INDEX sentence, char word )
+WORD_ID TargetCorpus::GetWordId( INDEX sentence, char word ) const
 {
   if (sentence == 0) {
     return m_array[ word ];
@@ -93,7 +93,7 @@ WORD_ID TargetCorpus::GetWordId( INDEX sentence, char word )
   return m_array[ m_sentenceEnd[ sentence-1 ] + 1 + word ] ;
 }
 
-char TargetCorpus::GetSentenceLength( INDEX sentence )
+char TargetCorpus::GetSentenceLength( INDEX sentence ) const
 {
   if (sentence == 0) {
     return (char) m_sentenceEnd[ 0 ]+1;
@@ -101,7 +101,7 @@ char TargetCorpus::GetSentenceLength( INDEX sentence )
   return (char) ( m_sentenceEnd[ sentence ] - m_sentenceEnd[ sentence-1 ] );
 }
 
-void TargetCorpus::Save(const string& fileName )
+void TargetCorpus::Save(const string& fileName ) const
 {
   FILE *pFile = fopen ( (fileName + ".tgt").c_str() , "w" );
   if (pFile == NULL) {

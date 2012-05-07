@@ -29,14 +29,14 @@ public:
   PhrasePairCollection ( SuffixArray *, TargetCorpus *, Alignment * );
   ~PhrasePairCollection ();
 
-  bool GetCollection( const std::vector<std::string > sourceString );
-  void Print();
-  void PrintHTML();
+  bool GetCollection( const std::vector<std::string >& sourceString );
+  void Print() const;
+  void PrintHTML() const;
 };
 
 // sorting helper
 struct CompareBySize {
-  bool operator()(const std::vector<PhrasePair*> a, const std::vector<PhrasePair*> b ) const {
+  bool operator()(const std::vector<PhrasePair*>& a, const std::vector<PhrasePair*>& b ) const {
     return a.size() > b.size();
   }
 };
