@@ -24,8 +24,8 @@ public:
 
   void Create(const std::string& fileName );
   WORD GetWordFromId( const WORD_ID id ) const;
-  WORD GetWord( INDEX sentence, char word ) const;
-  WORD_ID GetWordId( INDEX sentence, char word ) const;
+  WORD GetWord( INDEX sentence, int word ) const;
+  WORD_ID GetWordId( INDEX sentence, int word ) const;
   char GetSentenceLength( INDEX sentence ) const;
   void Load(const std::string& fileName );
   void Save(const std::string& fileName ) const;
