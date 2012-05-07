@@ -257,7 +257,7 @@ void SuffixArray::List(INDEX start, INDEX end)
   }
 }
 
-void SuffixArray::Save(const string& fileName )
+void SuffixArray::Save(const string& fileName ) const
 {
   FILE *pFile = fopen ( fileName.c_str() , "w" );
   if (pFile == NULL) {
