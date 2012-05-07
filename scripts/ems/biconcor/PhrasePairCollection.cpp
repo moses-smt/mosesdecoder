@@ -1,8 +1,15 @@
 #include "PhrasePairCollection.h"
-#include <string>
+
 #include <stdlib.h>
 #include <cstring>
 #include <algorithm>
+
+#include "Vocabulary.h"
+#include "SuffixArray.h"
+#include "TargetCorpus.h"
+#include "Alignment.h"
+#include "PhrasePair.h"
+#include "Mismatch.h"
 
 using namespace std;
 

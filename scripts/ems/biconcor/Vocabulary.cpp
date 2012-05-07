@@ -1,5 +1,6 @@
 // $Id: Vocabulary.cpp 1565 2008-02-22 14:42:01Z bojar $
 #include "Vocabulary.h"
+#include <fstream>
 
 namespace {
 

@@ -1,4 +1,6 @@
 #include "Alignment.h"
+
+#include <fstream>
 #include <string>
 #include <stdlib.h>
 #include <cstring>
