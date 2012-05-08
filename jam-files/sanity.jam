@@ -133,9 +133,9 @@ requirements = ;
 
 if [ option.get "git" : : "yes" ] {
   local revision = [ _shell "git rev-parse --verify HEAD |head -c 7" ] ;
-  GITTAG = "/"$(revision) ;
+  constant GITTAG : "/"$(revision) ;
 } else {
-  GITTAG = "" ;
+  constant GITTAG : "" ;
 }
 
 prefix = [ option.get "prefix" : $(TOP)/dist$(GITTAG) ] ;
