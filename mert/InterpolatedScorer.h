@@ -40,6 +40,8 @@ public:
    */
   virtual void setFactors(const string& factors);
 
+  virtual void setFilter(const string& filterCommand);
+
 protected:
   ScopedVector<Scorer> m_scorers;
 

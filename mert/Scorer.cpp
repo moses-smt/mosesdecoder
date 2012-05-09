@@ -39,12 +39,14 @@ Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
       m_vocab(mert::VocabularyFactory::GetVocabulary()),
       m_score_data(0),
-      m_enable_preserve_case(true) {
+      m_enable_preserve_case(true),
+      m_filter(NULL) {
   InitConfig(config);
 }
 
 Scorer::~Scorer() {
   Singleton<mert::Vocabulary>::Delete();
+  delete m_filter;
 }
 
 void Scorer::InitConfig(const string& config) {
@@ -98,6 +100,15 @@ void Scorer::setFactors(const string& factors)
 }
 
 /**
+ * Set unix filter, which will be used to preprocess the sentences
+ */
+void Scorer::setFilter(const string& filterCommand)
+{
+    if (filterCommand.empty()) return;
+    m_filter = new PreProcessFilter(filterCommand);
+}
+
+/**
  * Take the factored sentence and return the desired factors
  */
 string Scorer::applyFactors(const string& sentence) const
@@ -130,6 +141,22 @@ string Scorer::applyFactors(const string& sentence) const
   }
   return sstream.str();
 }
+
+/**
+ * Preprocess the sentence with the filter (if given)
+ */
+string Scorer::applyFilter(const string& sentence) const
+{
+  if (m_filter)
+  {
+    return m_filter->ProcessSentence(sentence);
+  }
+  else
+  {
+    return sentence;
+  }
+}
+
 
 StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& config)
     : Scorer(name,config) {
