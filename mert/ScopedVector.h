@@ -23,10 +23,10 @@ class ScopedVector {
     m_vec.clear();
   }
 
-  void reserve(size_t capacity) { m_vec.reserve(capacity); }
-  void resize(size_t size) { m_vec.resize(size); }
+  void reserve(std::size_t capacity) { m_vec.reserve(capacity); }
+  void resize(std::size_t size) { m_vec.resize(size); }
 
-  size_t size() const {return m_vec.size(); }
+  std::size_t size() const {return m_vec.size(); }
 
   iterator begin() { return m_vec.begin(); }
   const_iterator begin() const { return m_vec.begin(); }
@@ -40,8 +40,8 @@ class ScopedVector {
   std::vector<T*>* operator->() { return &m_vec; }
   const std::vector<T*>* operator->() const { return &m_vec; }
 
-  T*& operator[](size_t i) { return m_vec[i]; }
-  const T* operator[](size_t i) const { return m_vec[i]; }
+  T*& operator[](std::size_t i) { return m_vec[i]; }
+  const T* operator[](std::size_t i) const { return m_vec[i]; }
 
  private:
   std::vector<T*> m_vec;
