@@ -4,6 +4,7 @@
 #include "Vocabulary.h"
 #include "Util.h"
 #include "Singleton.h"
+#include "PreProcessFilter.h"
 
 namespace {
 
