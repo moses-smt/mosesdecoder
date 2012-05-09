@@ -8,10 +8,10 @@
 #include <vector>
 #include "Types.h"
 #include "ScoreData.h"
-#include "PreProcessFilter.h"
 
 using namespace std;
 
+class PreProcessFilter;
 class ScoreStats;
 
 namespace mert {
