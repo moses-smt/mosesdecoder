@@ -38,6 +38,10 @@
 		1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */; };
+		1EB29A3B1511C253005BC4BA /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1EB29A3C1511C253005BC4BA /* InputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A210129C024C00041956 /* InputFileStream.h */; };
+		1EB29A3E1511C2D9005BC4BA /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
+		1EB29A3F1511C2D9005BC4BA /* InputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A210129C024C00041956 /* InputFileStream.h */; };
 		1EB8A212129C024C00041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1EB8A261129C04C700041956 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1EB8A297129C06A300041956 /* gzfilebuf.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A20C129C022000041956 /* gzfilebuf.h */; };
@@ -354,6 +358,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EB29A3B1511C253005BC4BA /* InputFileStream.cpp in Sources */,
+				1EB29A3C1511C253005BC4BA /* InputFileStream.h in Sources */,
 				1C05BA281174CF10003585B2 /* extract-rules.cpp in Sources */,
 				1C05BA251174CF03003585B2 /* Hole.h in Sources */,
 				1C05BA261174CF03003585B2 /* HoleCollection.cpp in Sources */,
@@ -376,6 +382,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1EB29A3E1511C2D9005BC4BA /* InputFileStream.cpp in Sources */,
+				1EB29A3F1511C2D9005BC4BA /* InputFileStream.h in Sources */,
 				1C05BA381174CFAD003585B2 /* tables-core.cpp in Sources */,
 				1C05BA391174CFAD003585B2 /* tables-core.h in Sources */,
 				1C05BA351174CF98003585B2 /* AlignmentPhrase.cpp in Sources */,
@@ -444,6 +452,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
 				SDKROOT = macosx10.6;
@@ -461,6 +470,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
 				SDKROOT = macosx10.6;
@@ -479,6 +489,7 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = statistics;
 				SDKROOT = macosx10.6;
@@ -496,6 +507,7 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
 				PREBINDING = NO;
 				PRODUCT_NAME = statistics;
 				SDKROOT = macosx10.6;

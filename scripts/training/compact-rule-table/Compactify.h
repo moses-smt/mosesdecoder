@@ -10,7 +10,7 @@
 
 namespace moses {
 
-class Options;
+struct Options;
 
 // Tool for converting a rule table into a more compact format.
 class Compactify : public Tool {

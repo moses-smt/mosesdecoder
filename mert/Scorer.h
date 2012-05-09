@@ -1,5 +1,5 @@
-#ifndef __SCORER_H__
-#define __SCORER_H__
+#ifndef MERT_SCORER_H_
+#define MERT_SCORER_H_
 
 #include <iostream>
 #include <sstream>
@@ -8,10 +8,17 @@
 #include <vector>
 #include "Types.h"
 #include "ScoreData.h"
+#include "PreProcessFilter.h"
 
 using namespace std;
 
 class ScoreStats;
+
+namespace mert {
+
+class Vocabulary;
+
+} // namespace mert
 
 /**
  * Superclass of all scorers and dummy implementation.
@@ -28,10 +35,7 @@ class Scorer
   /**
    * Return the number of statistics needed for the computation of the score.
    */
-  virtual size_t NumberOfScores() const {
-    cerr << "Scorer: 0" << endl;
-    return 0;
-  }
+  virtual size_t NumberOfScores() const = 0;
 
   /**
    * Set the reference files. This must be called before prepareStats().
@@ -57,7 +61,9 @@ class Scorer
    * applying each in turn, and calculating a new score each time.
    */
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores) const {
+                     statscores_t& scores) const = 0;
+  /*
+  {
     //dummy impl
     if (!m_score_data) {
       throw runtime_error("score data not loaded");
@@ -67,6 +73,7 @@ class Scorer
       scores.push_back(0);
     }
   }
+  */
 
   /**
    * Calculate the score of the sentences corresponding to the list of candidate
@@ -93,27 +100,40 @@ class Scorer
   /**
    * Set the score data, prior to scoring.
    */
-  void setScoreData(ScoreData* data) {
+  virtual void setScoreData(ScoreData* data) {
     m_score_data = data;
   }
 
+  /**
+   * Set the factors, which should be used for this metric
+   */
+  virtual void setFactors(const string& factors);
+
+  mert::Vocabulary* GetVocab() const { return m_vocab; }
+
+  /**
+   * Set unix filter, which will be used to preprocess the sentences
+   */
+  virtual void setFilter(const string& filterCommand);
+  
  private:
-  class Encoder {
-   public:
-    Encoder();
-    virtual ~Encoder();
-    int Encode(const std::string& token);
-    void Clear() { m_vocab.clear(); }
-
-   private:
-    std::map<std::string, int> m_vocab;
-  };
-
   void InitConfig(const string& config);
 
+  /**
+   * Take the factored sentence and return the desired factors
+   */
+  string applyFactors(const string& sentece) const;
+
+  /**
+   * Preprocess the sentence with the filter (if given)
+   */
+  string applyFilter(const string& sentence) const;
+
   string m_name;
-  Encoder* m_encoder;
+  mert::Vocabulary* m_vocab;
   map<string, string> m_config;
+  vector<int> m_factors;
+  PreProcessFilter* m_filter;    
 
  protected:
   ScoreData* m_score_data;
@@ -133,13 +153,19 @@ class Scorer
 
   /**
    * Tokenise line and encode.
-   * Note: We assume that all tokens are separated by single spaces.
+   * Note: We assume that all tokens are separated by whitespaces.
    */
   void TokenizeAndEncode(const string& line, vector<int>& encoded);
 
-  void ClearEncoder() { m_encoder->Clear(); }
-};
+  /**
+   * Every inherited scorer should call this function for each sentence
+   */
+  string preprocessSentence(const string& sentence) const
+  {
+    return applyFactors(applyFilter(sentence));
+  }
 
+};
 
 /**
  * Abstract base class for Scorers that work by adding statistics across all
@@ -171,4 +197,4 @@ class StatisticsBasedScorer : public Scorer
   size_t  m_regularization_window;
 };
 
-#endif // __SCORER_H__
+#endif // MERT_SCORER_H_

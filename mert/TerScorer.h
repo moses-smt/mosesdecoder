@@ -1,5 +1,5 @@
-#ifndef __TERSCORER_H__
-#define __TERSCORER_H__
+#ifndef MERT_TER_SCORER_H_
+#define MERT_TER_SCORER_H_
 
 #include <iostream>
 #include <set>
@@ -54,4 +54,4 @@ private:
   TerScorer& operator=(const TerScorer&);
 };
 
-#endif // __TERSCORER_H__
+#endif // MERT_TER_SCORER_H_

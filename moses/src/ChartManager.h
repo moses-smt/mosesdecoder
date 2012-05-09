@@ -65,6 +65,7 @@ public:
   ChartManager(InputType const& source, const TranslationSystem* system);
   ~ChartManager();
   void ProcessSentence();
+  void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
   void CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct=0) const;
 

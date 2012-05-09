@@ -29,6 +29,7 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
   string line;
   int sid = 0;
   while (getline(in,line)) {
+    line = this->preprocessSentence(line);
     vector<int> tokens;
     TokenizeAndEncode(line, tokens);
     m_ref_tokens.push_back(multiset<int>());
@@ -52,10 +53,13 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
   }
+
+  string sentence = this->preprocessSentence(text);
+
   // Calculate correct, output_length and ref_length for
   // the line and store it in entry
   vector<int> testtokens;
-  TokenizeAndEncode(text, testtokens);
+  TokenizeAndEncode(sentence, testtokens);
   multiset<int> testtokens_all(testtokens.begin(),testtokens.end());
   set<int> testtokens_unique(testtokens.begin(),testtokens.end());
   int correct = 0;

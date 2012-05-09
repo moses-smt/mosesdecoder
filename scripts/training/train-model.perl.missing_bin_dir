@@ -40,7 +40,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/azouzi/SMT-Engine/Tools/Giza";
+my $BINDIR="/Users/hieuhoang/workspace/bin/";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -209,10 +209,28 @@ if(!defined $_MGIZA ){
 my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
+
+# parallel extract
+my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+if($SPLIT_EXEC) {
+  $SPLIT_EXEC = 'gsplit';
+}
+else {
+  $SPLIT_EXEC = 'split';
+}
+
+my $SORT_EXEC = `gsort --help 2>/dev/null`; 
+if($SORT_EXEC) {
+  $SORT_EXEC = 'gsort';
+}
+else {
+  $SORT_EXEC = 'sort';
+}
+
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
 if ($___NOFORK == 0)
 {
-  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 split sort $PHRASE_EXTRACT";
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $PHRASE_EXTRACT";
 }
 
 my $RULE_EXTRACT;
@@ -224,7 +242,7 @@ else {
 }
 if ($___NOFORK == 0)
 {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 split sort $RULE_EXTRACT";
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $RULE_EXTRACT";
 }
 
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
@@ -1472,10 +1490,10 @@ sub score_phrase_phrase_extract {
 	          # sorting
 	          print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
 	          if (-e "$extract_filename.gz") {
-		      safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+		      safesystem("gunzip < $extract_filename.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
 	          }
 	          else {
-		      safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+		      safesystem("LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
 	          }
               }
 
@@ -1497,7 +1515,7 @@ sub score_phrase_phrase_extract {
         # sorting inverse phrase-table-half to sync up with regular one
         if ($direction eq "e2f" && ! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
           print STDERR "(6." . ($substep++) . ") sorting inverse e2f table@ ".`date`;
-          safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
+          safesystem("LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
           if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
         }
 
@@ -1552,7 +1570,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1608,10 +1626,10 @@ sub get_reordering_factored {
 sub get_reordering {
     my ($extract_file,$reo_model_path) = @_;
     if (-e "$extract_file.o.gz") {
-	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
+	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
     }
     else {
-        safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
+        safesystem("LC_ALL=C $SORT_EXEC -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
     }
 
     my $smooth = $___REORDERING_SMOOTH;

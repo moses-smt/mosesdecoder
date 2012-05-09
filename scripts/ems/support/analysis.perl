@@ -34,7 +34,7 @@ if (!&GetOptions('system=s' => \$system, # raw output from decoder
 
 # factor names
 if (defined($input_factor_names) && defined($output_factor_names)) {
-  open(FACTOR,">$dir/factor-names");
+  open(FACTOR,">$dir/factor-names") or die "Cannot open: $!";
   print FACTOR $input_factor_names."\n";
   print FACTOR $output_factor_names."\n";
   close(FACTOR);
@@ -74,7 +74,7 @@ if (defined($system) || defined($reference)) {
 	       \%RECALL_CORRECT,\%RECALL_TOTAL);
   }
 
-  open(SUMMARY,">$dir/summary");
+  open(SUMMARY,">$dir/summary") or die "Cannot open: $!";
   &best_matches(\%PRECISION_CORRECT,\%PRECISION_TOTAL,"$dir/n-gram-precision");
   &best_matches(\%RECALL_CORRECT,\%RECALL_TOTAL,"$dir/n-gram-recall");
   &bleu_annotation();
@@ -137,7 +137,7 @@ sub best_matches {
     my $type = ($out =~ /precision/) ? "precision" : "recall";
     for(my $length=1;$length<=$MAX_LENGTH;$length++) {
 	my ($total,$correct) = (0,0);
-	open(OUT,">$out.$length");
+	open(OUT,">$out.$length") or die "Cannot open: $!";
 	foreach my $ngram (keys %{$$TOTAL{$length}}) {
 	    printf OUT "%d\t%d\t%s\n",
 	    $$TOTAL{$length}{$ngram},
@@ -212,7 +212,7 @@ sub factor_ext {
 }
 
 sub bleu_annotation {
-    open(OUT,"| sort -r >$dir/bleu-annotation");
+    open(OUT,"| sort -r >$dir/bleu-annotation") or die "Cannot open: $!";
     for(my $i=0;$i<scalar @SYSTEM;$i++) {
 	my $system = $SYSTEM[$i];
 	$system =~ s/\s+/ /g;
@@ -307,17 +307,17 @@ sub ttable_coverage {
 
   # open file
   if (! -e $ttable && -e $ttable.".gz") {
-    open(TTABLE,"gzip -cd $ttable.gz|");
+    open(TTABLE,"gzip -cd $ttable.gz|") or die "Cannot open: $!";
   }
   elsif ($ttable =~ /.gz$/) {
-    open(TTABLE,"gzip -cd $ttable|");
+    open(TTABLE,"gzip -cd $ttable|") or die "Cannot open: $!";
   }
   else {
-    open(TTABLE,$ttable) or die "Can't read ttable $ttable";
+    open(TTABLE,$ttable) or die "Can't read ttable $ttable: $!";
   }
 
   # create report file
-  open(REPORT,">$dir/ttable-coverage-by-phrase".&factor_ext($factor));
+  open(REPORT,">$dir/ttable-coverage-by-phrase".&factor_ext($factor)) or die "Cannot open: $!";
   my ($last_in,$last_size,$size) = ("",0);
 
   my $p_e_given_f_score = 2;
@@ -358,7 +358,7 @@ sub ttable_coverage {
     push @DISTRIBUTION, $SCORE[$p_e_given_f_score]; # forward probability
   }
   my $entropy = &compute_entropy(@DISTRIBUTION);
-  print REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
+  printf REPORT "%s\t%d\t%.5f\n",$last_in,$TTABLE_COVERED{$last_size}{$last_in},$entropy;
   $TTABLE_ENTROPY{$last_size}{$last_in} = $entropy;
   close(REPORT);
   close(TTABLE);
@@ -402,7 +402,7 @@ sub corpus_coverage {
   close(CORPUS);
 
   # report occurrence counts for all known input phrases
-  open(REPORT,">$dir/corpus-coverage-by-phrase".&factor_ext($factor));
+  open(REPORT,">$dir/corpus-coverage-by-phrase".&factor_ext($factor)) or die "Cannot open: $!";
   foreach my $size (sort {$a <=> $b} keys %INPUT_PHRASE) {
     foreach my $phrase (keys %{$INPUT_PHRASE{$size}}) {
       next unless defined $CORPUS_COVERED{$size}{$phrase};
@@ -418,7 +418,7 @@ sub additional_coverage_reports {
   my ($factor,$name,$COVERED) = @_;
 
   # unknown word report ---- TODO: extend to rare words?
-  open(REPORT,">$dir/$name-unknown".&factor_ext($factor));
+  open(REPORT,">$dir/$name-unknown".&factor_ext($factor)) or die "Cannot open: $!";
   foreach my $phrase (keys %{$INPUT_PHRASE{1}}) {
     next if defined($$COVERED{1}{$phrase});
     printf REPORT "%s\t%d\n",$phrase,$INPUT_PHRASE{1}{$phrase};
@@ -426,7 +426,7 @@ sub additional_coverage_reports {
   close(REPORT);
 
   # summary report
-  open(REPORT,">$dir/$name-coverage-summary".&factor_ext($factor) );
+  open(REPORT,">$dir/$name-coverage-summary".&factor_ext($factor)) or die "Cannot open: $!";
   foreach my $size (sort {$a <=> $b} keys %INPUT_PHRASE) {
     my (%COUNT_TYPE,%COUNT_TOKEN);
     foreach my $phrase (keys %{$INPUT_PHRASE{$size}}) {
@@ -443,12 +443,12 @@ sub additional_coverage_reports {
 }
 
 sub input_annotation {
-  open(OUT,">$dir/input-annotation");
+  open(OUT,">$dir/input-annotation") or die "Cannot open: $!";;
   open(INPUT,$input) or die "Can't read input $input";
   while(<INPUT>) {
     chop;
     s/\|\S+//g; # remove additional factors
-    s/<[^>]+>//g; # remove xml markup
+    s/<\S[^>]*>//g; # remove xml markup
     s/\s+/ /g; s/^ //; s/ $//; # remove redundant spaces
     print OUT $_."\t";
     my @WORD = split;
@@ -551,7 +551,7 @@ sub precision_by_coverage {
   print STDERR "".(defined($coverage_dir)?$coverage_dir:$dir)
       ."/$coverage_type-coverage-by-phrase";
   open(COVERAGE,(defined($coverage_dir)?$coverage_dir:$dir)
-                ."/$coverage_type-coverage-by-phrase");
+                ."/$coverage_type-coverage-by-phrase") or die "Cannot open: $!";
   while(<COVERAGE>) {
     chop;
     my ($phrase,$count) = split(/\t/);
@@ -663,14 +663,14 @@ sub precision_by_coverage {
     }
   }
   close(FILE);
-      
-  open(REPORT,">$dir/precision-by-$coverage_type-coverage");
+
+  open(REPORT,">$dir/precision-by-$coverage_type-coverage") or die "Cannot open: $!";
   foreach my $coverage (sort {$a <=> $b} keys %TOTAL_BY_COVERAGE) {
     printf REPORT "%d\t%.3f\t%d\t%d\t%d\n", $coverage, $PREC_BY_COVERAGE{$coverage}, $DELETED_BY_COVERAGE{$coverage}, $LENGTH_BY_COVERAGE{$coverage}, $TOTAL_BY_COVERAGE{$coverage};
   }
   close(REPORT);
 
-  open(REPORT,">$dir/precision-by-input-word");
+  open(REPORT,">$dir/precision-by-input-word") or die "Cannot open: $!";
   foreach my $word (keys %TOTAL_BY_WORD) {
     my ($w,$f) = split(/\t/,$word);
     my $coverage = 0;
@@ -680,7 +680,7 @@ sub precision_by_coverage {
   close(REPORT);
 
   if ($precision_by_coverage_factor) {
-    open(REPORT,">$dir/precision-by-$coverage_type-coverage.$precision_by_coverage_factor");
+    open(REPORT,">$dir/precision-by-$coverage_type-coverage.$precision_by_coverage_factor") or die "Cannot open: $!";
     foreach my $factor (sort keys %TOTAL_BY_FACTOR_COVERAGE) {
       foreach my $coverage (sort {$a <=> $b} keys %{$TOTAL_BY_FACTOR_COVERAGE{$factor}}) {
         printf REPORT "%s\t%d\t%.3f\t%d\t%d\t%d\n", $factor, $coverage, $PREC_BY_FACTOR_COVERAGE{$factor}{$coverage}, $DELETED_BY_FACTOR_COVERAGE{$factor}{$coverage}, $LENGTH_BY_FACTOR_COVERAGE{$factor}{$coverage}, $TOTAL_BY_FACTOR_COVERAGE{$factor}{$coverage};
@@ -694,7 +694,7 @@ sub segmentation {
   my %SEGMENTATION;
 
   open(FILE,$segmentation) || die("ERROR: could not open segmentation file $segmentation");
-  open(OUT,">$dir/segmentation-annotation");
+  open(OUT,">$dir/segmentation-annotation") or die "Cannot open: $!";
   while(<FILE>) {
     chop;
     my $count=0;
@@ -717,7 +717,7 @@ sub segmentation {
   close(OUT);
   close(FILE);
 
-  open(SUMMARY,">$dir/segmentation");
+  open(SUMMARY,">$dir/segmentation") or die "Cannot open: $!";
   foreach my $in (sort { $a <=> $b } keys %SEGMENTATION) {
     foreach my $out (sort { $a <=> $b } keys %{$SEGMENTATION{$in}}) {
       printf SUMMARY "%d\t%d\t%d\n", $in, $out, $SEGMENTATION{$in}{$out};
@@ -734,10 +734,10 @@ sub hierarchical_segmentation {
     my $last_sentence = -1;
     my @DERIVATION;
     my %STATS;
-    open(TRACE,$segmentation.".trace");
-    open(INPUT_TREE,">$dir/input-tree");
-    open(OUTPUT_TREE,">$dir/output-tree");
-    open(NODE,">$dir/node");
+    open(TRACE,$segmentation.".trace") or die "Cannot open: $!";
+    open(INPUT_TREE,">$dir/input-tree") or die "Cannot open: $!";
+    open(OUTPUT_TREE,">$dir/output-tree") or die "Cannot open: $!";
+    open(NODE,">$dir/node") or die "Cannot open: $!";
     while(<TRACE>) {
 	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ || die("cannot scan line $_");
 	my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
@@ -776,7 +776,7 @@ sub hierarchical_segmentation {
     close(INPUT_TREE);
     close(OUTPUT_TREE);
 
-    open(SUMMARY,">$dir/rule");
+    open(SUMMARY,">$dir/rule") or die "Cannot open: $!";
     print SUMMARY "sentence-count\t".(++$last_sentence)."\n";
     print SUMMARY "glue-rule\t".$STATS{'glue-rule'}."\n";
     print SUMMARY "depth\t".$STATS{'depth'}."\n";

@@ -22,6 +22,8 @@ ModelScore::ModelScore()
   }
 }
 
+ModelScore::~ModelScore() {}
+
 ModelScore* ModelScore::createModelScore(const string& modeltype)
 {
   if (modeltype.compare("mslr") == 0) {
@@ -376,7 +378,7 @@ void Model::zipFile()
 {
   fclose(file);
   file = fopen(filename.c_str(), "rb");
-  FILE* gzfile = (FILE*) gzopen((filename+".gz").c_str(),"wb");
+  gzFile gzfile = gzopen((filename+".gz").c_str(),"wb");
   char inbuffer[128];
   int num_read;
   while ((num_read = fread(inbuffer, 1, sizeof(inbuffer), file)) > 0) {

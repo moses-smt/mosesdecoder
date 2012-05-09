@@ -18,6 +18,7 @@ my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
 my $AGGRESSIVE = 0;
+my $SKIP_XML = 0;
 
 #my $start = [ Time::HiRes::gettimeofday( ) ];
 
@@ -27,6 +28,7 @@ while (@ARGV) {
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
+	/^-x$/ && ($SKIP_XML = 1, next);
 	/^-a$/ && ($AGGRESSIVE = 1, next);
 }
 
@@ -50,7 +52,7 @@ if (scalar(%NONBREAKING_PREFIX) eq 0){
 }
 
 while(<STDIN>) {
-	if (/^<.+>$/ || /^\s*$/) {
+	if (($SKIP_XML && /^<.+>$/) || /^\s*$/) {
 		#don't try to tokenize XML/HTML tag lines
 		print $_;
 	}
@@ -68,6 +70,10 @@ sub tokenize {
 	chomp($text);
 	$text = " $text ";
 	
+  # remove ASCII junk
+  $text =~ s/\s+/ /g;
+  $text =~ s/[\000-\037]//g;
+
 	# seperate out all "other" special characters
 	$text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 	
@@ -141,7 +147,15 @@ sub tokenize {
 		$text =~ s/DOTDOTMULTI/DOTMULTI./g;
 	}
 	$text =~ s/DOTMULTI/./g;
-	
+
+  #escape special chars
+  $text =~ s/\&/\&amp;/g;
+  $text =~ s/\|/\&bar;/g;
+  $text =~ s/\</\&lt;/g;
+  $text =~ s/\>/\&gt;/g;
+  $text =~ s/\[/\&bra;/g;
+  $text =~ s/\]/\&ket;/g;
+
 	#ensure final line break
 	$text .= "\n" unless $text =~ /\n$/;
 

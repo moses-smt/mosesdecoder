@@ -1,6 +1,6 @@
 /*
  *  Util.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
@@ -11,29 +11,28 @@
 
 using namespace std;
 
-// global variables
-Timer g_timer;
-
-int verbose = 0;
-
 namespace {
+
+Timer g_timer;
+int g_verbose = 0;
 
 bool FindDelimiter(const std::string &str, const std::string &delim, size_t *pos)
 {
   *pos = str.find(delim);
   return *pos != std::string::npos ? true : false;
 }
+
 } // namespace
 
 int verboselevel()
 {
-  return verbose;
+  return g_verbose;
 }
 
 int setverboselevel(int v)
 {
-  verbose = v;
-  return verbose;
+  g_verbose = v;
+  return g_verbose;
 }
 
 size_t getNextPound(std::string &str, std::string &substr,
@@ -67,25 +66,10 @@ void Tokenize(const char *str, const char delim,
   while (1) {
     const char *begin = str;
     while (*str != delim && *str) str++;
-    res->push_back(std::string(begin, str));
+    if (begin != str)            // Don't create empty string objects.
+      res->push_back(std::string(begin, str));
     if (*str++ == 0) break;
   }
-}
-
-int swapbytes(char *p, int sz, int n)
-{
-  char c, *l, *h;
-
-  if((n < 1) || (sz < 2)) return 0;
-  for (; n--; p += sz) {
-    for (h = (l = p) + sz; --h > l; l++) {
-      c = *h;
-      *h = *l;
-      *l = c;
-    }
-  }
-  return 0;
-
 }
 
 void ResetUserTime()
@@ -100,5 +84,5 @@ void PrintUserTime(const std::string &message)
 
 double GetUserTime()
 {
-  return g_timer.get_elapsed_time();
+  return g_timer.get_elapsed_cpu_time();
 }

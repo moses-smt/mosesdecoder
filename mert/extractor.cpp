@@ -9,6 +9,7 @@
 #include <vector>
 
 #include <getopt.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "Data.h"
 #include "Scorer.h"
@@ -33,6 +34,8 @@ void usage()
   cerr << "[--ffile|-F] the feature data output file" << endl;
   cerr << "[--prev-ffile|-E] comma separated list of previous feature data" << endl;
   cerr << "[--prev-scfile|-R] comma separated list of previous scorer data" << endl;
+  cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
+  cerr << "[--filter|-l] filter command used to preprocess the sentences" << endl;
   cerr << "[-v] verbose level" << endl;
   cerr << "[--help|-h] print this message and exit" << endl;
   exit(1);
@@ -41,6 +44,8 @@ void usage()
 static struct option long_options[] = {
   {"sctype", required_argument, 0, 's'},
   {"scconfig", required_argument,0, 'c'},
+  {"factors", required_argument,0, 'f'},
+  {"filter", required_argument,0, 'l'},
   {"reference", required_argument, 0, 'r'},
   {"binary", no_argument, 0, 'b'},
   {"nbest", required_argument, 0, 'n'},
@@ -57,6 +62,8 @@ static struct option long_options[] = {
 struct ProgramOption {
   string scorerType;
   string scorerConfig;
+  string scorerFactors;
+  string scorerFilter;
   string referenceFile;
   string nbestFile;
   string scoreDataFile;
@@ -69,6 +76,8 @@ struct ProgramOption {
   ProgramOption()
       : scorerType("BLEU"),
         scorerConfig(""),
+        scorerFactors(""),
+        scorerFilter(""),
         referenceFile(""),
         nbestFile(""),
         scoreDataFile("statscore.data"),
@@ -83,13 +92,19 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
 
-  while ((c = getopt_long(argc, argv, "s:r:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:r:f:l:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
     switch (c) {
       case 's':
         opt->scorerType = string(optarg);
         break;
       case 'c':
         opt->scorerConfig = string(optarg);
+        break;
+      case 'f':
+        opt->scorerFactors = string(optarg);
+        break;
+      case 'l':
+        opt->scorerFilter = string(optarg);
         break;
       case 'r':
         opt->referenceFile = string(optarg);
@@ -178,7 +193,12 @@ int main(int argc, char** argv)
 
     TRACE_ERR("Scorer type: " << option.scorerType << endl);
 
-    Scorer* scorer = ScorerFactory::getScorer(option.scorerType, option.scorerConfig);
+    boost::scoped_ptr<Scorer> scorer(
+        ScorerFactory::getScorer(option.scorerType, option.scorerConfig));
+
+    // set Factors and Filter used to preprocess the sentences
+    scorer->setFactors(option.scorerFactors);
+    scorer->setFilter(option.scorerFilter);
 
     // load references
     if (referenceFiles.size() > 0)
@@ -186,7 +206,7 @@ int main(int argc, char** argv)
 
     PrintUserTime("References loaded");
 
-    Data data(*scorer);
+    Data data(scorer.get());
 
     // load old data
     for (size_t i = 0; i < prevScoreDataFiles.size(); i++) {
@@ -197,26 +217,17 @@ int main(int argc, char** argv)
 
     // computing score statistics of each nbest file
     for (size_t i = 0; i < nbestFiles.size(); i++) {
-      data.loadnbest(nbestFiles.at(i));
+      data.loadNBest(nbestFiles.at(i));
     }
 
     PrintUserTime("Nbest entries loaded and scored");
 
     //ADDED_BY_TS
-    data.remove_duplicates();
+    data.removeDuplicates();
     //END_ADDED
-
-    if (option.binmode)
-      cerr << "Binary write mode is selected" << endl;
-    else
-      cerr << "Binary write mode is NOT selected" << endl;
 
     data.save(option.featureDataFile, option.scoreDataFile, option.binmode);
     PrintUserTime("Stopping...");
-
-    // timer.stop("Stopping...");
-
-    delete scorer;
 
     return EXIT_SUCCESS;
   } catch (const exception& e) {

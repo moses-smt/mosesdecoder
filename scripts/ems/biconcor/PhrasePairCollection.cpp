@@ -1,8 +1,15 @@
 #include "PhrasePairCollection.h"
-#include <string>
+
 #include <stdlib.h>
 #include <cstring>
 #include <algorithm>
+
+#include "Vocabulary.h"
+#include "SuffixArray.h"
+#include "TargetCorpus.h"
+#include "Alignment.h"
+#include "PhrasePair.h"
+#include "Mismatch.h"
 
 using namespace std;
 
@@ -19,7 +26,7 @@ PhrasePairCollection::PhrasePairCollection( SuffixArray *sa, TargetCorpus *tc, A
 PhrasePairCollection::~PhrasePairCollection()
 {}
 
-bool PhrasePairCollection::GetCollection( const vector< string > sourceString )
+bool PhrasePairCollection::GetCollection( const vector< string >& sourceString )
 {
   INDEX first_match, last_match;
   if (! m_suffixArray->FindMatches( sourceString, first_match, last_match )) {
@@ -90,33 +97,33 @@ bool PhrasePairCollection::GetCollection( const vector< string > sourceString )
   return true;
 }
 
-void PhrasePairCollection::Print()
+void PhrasePairCollection::Print() const
 {
-  vector< vector<PhrasePair*> >::iterator ppWithSameTarget;
+  vector< vector<PhrasePair*> >::const_iterator ppWithSameTarget;
   for( ppWithSameTarget = m_collection.begin(); ppWithSameTarget != m_collection.end(); ppWithSameTarget++ ) {
     (*(ppWithSameTarget->begin()))->PrintTarget( &cout );
     int count = ppWithSameTarget->size();
     cout << "(" << count << ")" << endl;
-    vector< PhrasePair* >::iterator p;
+    vector< PhrasePair* >::const_iterator p;
     for(p = ppWithSameTarget->begin(); p != ppWithSameTarget->end(); p++ ) {
       (*p)->Print( &cout, 100 );
     }
   }
 }
 
-void PhrasePairCollection::PrintHTML()
+void PhrasePairCollection::PrintHTML() const
 {
   int pp_target = 0;
 	bool singleton = false;
 	// loop over all translations
-  vector< vector<PhrasePair*> >::iterator ppWithSameTarget;
+  vector< vector<PhrasePair*> >::const_iterator ppWithSameTarget;
   for( ppWithSameTarget = m_collection.begin(); ppWithSameTarget != m_collection.end() && pp_target<m_max_pp_target; ppWithSameTarget++, pp_target++ ) {
 
 		int count = ppWithSameTarget->size();
 		if (!singleton) {
 			if (count == 1) {
 				singleton = true;
-				cout << "<p class=\"pp_singleton_header\">singleton" 
+				cout << "<p class=\"pp_singleton_header\">singleton"
 						 << (m_collection.end() - ppWithSameTarget==1?"":"s") << " ("
 						 << (m_collection.end() - ppWithSameTarget)
 						 << "/" << m_size << ")</p>";
@@ -129,8 +136,8 @@ void PhrasePairCollection::PrintHTML()
 			}
 			cout << "<table align=\"center\">";
 		}
-		
-    vector< PhrasePair* >::iterator p;
+
+    vector< PhrasePair* >::const_iterator p;
 		// loop over all sentences where translation occurs
     int pp=0;
 		int i=0;

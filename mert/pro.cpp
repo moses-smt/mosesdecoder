@@ -21,8 +21,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 
-/** 
-  * This is part of the PRO implementation. It converts the features and scores 
+/**
+  * This is part of the PRO implementation. It converts the features and scores
   * files into a form suitable for input into the megam maxent trainer.
   *
   *   For details of PRO, refer to Hopkins & May (EMNLP 2011)
@@ -34,9 +34,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <string>
 #include <vector>
+#include <utility>
 
 #include <boost/program_options.hpp>
 
+#include "BleuScorer.h"
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
 
@@ -46,49 +48,33 @@ namespace po = boost::program_options;
 
 class SampledPair {
 private:
-	pair<size_t,size_t> translation1;
-	pair<size_t,size_t> translation2;
-	float scoreDiff;
+  pair<size_t,size_t> m_translation1;
+  pair<size_t,size_t> m_translation2;
+  float m_score_diff;
+
 public:
-	SampledPair(const pair<size_t,size_t>& t1, const pair<size_t,size_t>& t2, float diff ) {
-		if (diff > 0) {
-			translation1 = t1;
-			translation2 = t2;
-			scoreDiff = diff;
-		}
-		else {
-			translation1 = t2;
-			translation2 = t1;
-			scoreDiff = -diff;
-		}			
-	}
-	float getDiff() const { return scoreDiff; }
-	const pair<size_t,size_t>& getTranslation1() const { return translation1; }
-	const pair<size_t,size_t>& getTranslation2() const { return translation2; }
+  SampledPair(const pair<size_t,size_t>& t1, const pair<size_t,size_t>& t2, float diff ) {
+    if (diff > 0) {
+      m_translation1 = t1;
+      m_translation2 = t2;
+      m_score_diff = diff;
+    } else {
+      m_translation1 = t2;
+      m_translation2 = t1;
+      m_score_diff = -diff;
+    }
+  }
+
+  float getDiff() const { return m_score_diff; }
+  const pair<size_t,size_t>& getTranslation1() const { return m_translation1; }
+  const pair<size_t,size_t>& getTranslation2() const { return m_translation2; }
 };
-
-
-static float sentenceLevelBleuPlusOne(const vector<float>& stats) {
-	float logbleu = 0.0;
-	const unsigned int bleu_order = 4;
-	for (unsigned int j=0; j<bleu_order; j++) {
-		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
-		logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
-	}
-	logbleu /= bleu_order;
-	const float brevity = 1.0 - static_cast<float>(stats[(bleu_order*2)]) / stats[1];
-	if (brevity < 0.0) {
-		logbleu += brevity;
-	}
-	//cerr << brevity << " -> " << exp(logbleu) << endl;
-	return exp(logbleu);
-}
 
 static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2) {
   // difference in score in regular features
-	for(unsigned int j=0; j<f1.dense.size(); j++)
-		if (abs(f1.dense[j]-f2.dense[j]) > 0.00001)
-			out << " F" << j << " " << (f1.dense[j]-f2.dense[j]);
+  for(unsigned int j=0; j<f1.dense.size(); j++)
+    if (abs(f1.dense[j]-f2.dense[j]) > 0.00001)
+      out << " F" << j << " " << (f1.dense[j]-f2.dense[j]);
 
   if (f1.sparse.size() || f2.sparse.size()) {
     out << " ";
@@ -101,27 +87,27 @@ static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureD
   }
 }
 
-	
-int main(int argc, char** argv) 
+
+int main(int argc, char** argv)
 {
   bool help;
   vector<string> scoreFiles;
   vector<string> featureFiles;
   int seed;
   string outputFile;
-  //TODO: options
-	const unsigned int n_candidates = 5000; // Gamma, in Hopkins & May
-	const unsigned int n_samples = 50; // Xi, in Hopkins & May
-	const float min_diff = 0.05;
+  // TODO: Add these constants to options
+  const unsigned int n_candidates = 5000; // Gamma, in Hopkins & May
+  const unsigned int n_samples = 50; // Xi, in Hopkins & May
+  const float min_diff = 0.05;
 
   po::options_description desc("Allowed options");
   desc.add_options()
-    ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-    ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
-    ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
-    ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
-    ("output-file,o", po::value<string>(&outputFile), "Output file")
-    ;
+      ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+      ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
+      ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
+      ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
+      ("output-file,o", po::value<string>(&outputFile), "Output file")
+      ;
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -134,7 +120,7 @@ int main(int argc, char** argv)
       cout << desc << endl;
       exit(0);
   }
-  
+
   if (vm.count("random-seed")) {
     cerr << "Initialising random seed to " << seed << endl;
     srand(seed);
@@ -167,7 +153,7 @@ int main(int argc, char** argv)
     out = &cout;
   }
 
-  
+
   vector<FeatureDataIterator> featureDataIters;
   vector<ScoreDataIterator> scoreDataIters;
   for (size_t i = 0; i < featureFiles.size(); ++i) {
@@ -179,7 +165,7 @@ int main(int argc, char** argv)
   size_t sentenceId = 0;
   while(1) {
     vector<pair<size_t,size_t> > hypotheses;
-    //TODO: de-deuping. Collect hashes of score,feature pairs and 
+    //TODO: de-deuping. Collect hashes of score,feature pairs and
     //only add index if it's unique.
     if (featureDataIters[0] == FeatureDataIterator::end()) {
       break;
@@ -214,7 +200,7 @@ int main(int argc, char** argv)
       size_t rand2 = rand() % n_translations;
       pair<size_t,size_t> translation2 = hypotheses[rand2];
       float bleu2 = sentenceLevelBleuPlusOne(scoreDataIters[translation2.first]->operator[](translation2.second));
-      
+
       /*
       cerr << "t(" << translation1.first << "," << translation1.second << ") = " << bleu1 <<
         " t(" << translation2.first << "," << translation2.second << ") = " <<
@@ -222,7 +208,7 @@ int main(int argc, char** argv)
       */
       if (abs(bleu1-bleu2) < min_diff)
         continue;
-      
+
       samples.push_back(SampledPair(translation1, translation2, bleu1-bleu2));
       scores.push_back(1.0-abs(bleu1-bleu2));
     }
@@ -261,4 +247,3 @@ int main(int argc, char** argv)
   outFile.close();
 
 }
-

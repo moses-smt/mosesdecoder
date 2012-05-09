@@ -8,13 +8,14 @@
 #include "PerScorer.h"
 #include "CderScorer.h"
 
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
+#include "TER/tercalc.h"
+#include "TER/terAlignment.h"
 
 using namespace TERCpp;
 
 MergeScorer::MergeScorer(const string& config)
-    : StatisticsBasedScorer("MERGE",config), kLENGTH(4) {}
+    : StatisticsBasedScorer("MERGE", config) {}
+
 MergeScorer::~MergeScorer() {}
 
 void MergeScorer::setReferenceFiles(const vector<string>& referenceFiles)

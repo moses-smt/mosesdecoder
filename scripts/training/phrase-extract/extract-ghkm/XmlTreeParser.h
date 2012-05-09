@@ -21,15 +21,37 @@
 #ifndef EXTRACT_GHKM_XML_TREE_PARSER_H_
 #define EXTRACT_GHKM_XML_TREE_PARSER_H_
 
+#include "Exception.h"
+
+#include "SyntaxTree.h"
+
+#include <map>
 #include <memory>
+#include <set>
 #include <string>
+#include <vector>
 
 namespace Moses {
 namespace GHKM {
 
 class ParseTree;
 
-std::auto_ptr<ParseTree> ParseXmlTree(const std::string &);
+// Parses a string in Moses' XML parse tree format and returns a ParseTree
+// object.
+class XmlTreeParser {
+ public:
+  XmlTreeParser(std::set<std::string> &, std::map<std::string, int> &);
+  std::auto_ptr<ParseTree> Parse(const std::string &);
+ private:
+  std::auto_ptr<ParseTree> ConvertTree(const SyntaxNode &,
+                                       const std::vector<std::string> &);
+
+  std::set<std::string> &m_labelSet;
+  std::map<std::string, int> &m_topLabelSet;
+  std::string m_line;
+  SyntaxTree m_tree;
+  std::vector<std::string> m_words;
+};
 
 }  // namespace GHKM
 }  // namespace Moses
