@@ -43,7 +43,7 @@ void SemposScorer::setReferenceFiles(const vector<string>& referenceFiles)
     m_ref_sentences.push_back(vector<sentence_t>());
     string line;
     while (getline(refin,line)) {
-      line = applyFactors(line);
+      line = preprocessSentence(line);
 
       str_sentence_t sentence;
       splitSentence(line, sentence);
@@ -60,7 +60,7 @@ void SemposScorer::prepareStats(size_t sid, const string& text, ScoreStats& entr
 {
   vector<ScoreStatsType> stats;
 
-  const string& sentence = applyFactors(text);
+  const string& sentence = preprocessSentence(text);
   str_sentence_t splitCandSentence;
   splitSentence(sentence, splitCandSentence);
 

@@ -180,3 +180,10 @@ void InterpolatedScorer::setFactors(const string& factors)
     m_scorers[i]->setFactors(fsplit[i]);
   }
 }
+
+void InterpolatedScorer::setFilter(const string& filterCommand)
+{
+    for (size_t i = 0; i < m_scorers.size(); ++i) {
+      m_scorers[i]->setFilter(filterCommand);
+    }
+}

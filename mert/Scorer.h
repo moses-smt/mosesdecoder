@@ -8,6 +8,7 @@
 #include <vector>
 #include "Types.h"
 #include "ScoreData.h"
+#include "PreProcessFilter.h"
 
 using namespace std;
 
@@ -108,20 +109,31 @@ class Scorer
    */
   virtual void setFactors(const string& factors);
 
+  mert::Vocabulary* GetVocab() const { return m_vocab; }
+
+  /**
+   * Set unix filter, which will be used to preprocess the sentences
+   */
+  virtual void setFilter(const string& filterCommand);
+  
+ private:
+  void InitConfig(const string& config);
+
   /**
    * Take the factored sentence and return the desired factors
    */
-  virtual string applyFactors(const string& sentece) const;
+  string applyFactors(const string& sentece) const;
 
-  mert::Vocabulary* GetVocab() const { return m_vocab; }
-
- private:
-  void InitConfig(const string& config);
+  /**
+   * Preprocess the sentence with the filter (if given)
+   */
+  string applyFilter(const string& sentence) const;
 
   string m_name;
   mert::Vocabulary* m_vocab;
   map<string, string> m_config;
   vector<int> m_factors;
+  PreProcessFilter* m_filter;    
 
  protected:
   ScoreData* m_score_data;
@@ -144,6 +156,15 @@ class Scorer
    * Note: We assume that all tokens are separated by whitespaces.
    */
   void TokenizeAndEncode(const string& line, vector<int>& encoded);
+
+  /**
+   * Every inherited scorer should call this function for each sentence
+   */
+  string preprocessSentence(const string& sentence) const
+  {
+    return applyFactors(applyFilter(sentence));
+  }
+
 };
 
 /**
