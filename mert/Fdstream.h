@@ -11,7 +11,7 @@
 #if defined(__GLIBCXX__) || defined(__GLIBCPP__)
 #include <ext/stdio_filebuf.h>
 
-#define BUFFER_SIZE (1024)
+#define BUFFER_SIZE (32768)
 
 class _fdstream
 {
