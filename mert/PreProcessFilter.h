@@ -3,7 +3,8 @@
 
 #include <string>
 
-#include "Fdstream.h"
+class ofdstream;
+class ifdstream;
 
 /*
  * This class runs the filter command in a child process and
@@ -12,13 +13,13 @@
 class PreProcessFilter
 {
 public:
-    PreProcessFilter(const string& filterCommand);
-    string ProcessSentence(const string& sentence);
-    ~PreProcessFilter();
+  explicit PreProcessFilter(const std::string& filterCommand);
+  std::string ProcessSentence(const std::string& sentence);
+  ~PreProcessFilter();
 
 private:
     ofdstream* m_toFilter;
-    ifdstream* m_fromFilter;    
+    ifdstream* m_fromFilter;
 };
 
 #endif  // MERT_PREPROCESSFILTER_H_
