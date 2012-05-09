@@ -26,8 +26,8 @@ template <class MY, class MX, class YS=typename MY::RandVarType, class B=NullBac
 
 
  ~SyntacticLanguageModelState() {
-   //cerr << "Deleting SyntacticLanguageModelState" << std::endl;
-   //delete randomVariableStore;
+   VERBOSE(3,"Destructing SyntacticLanguageModelState" << std::endl);
+   delete randomVariableStore;
  }
 
  virtual int Compare(const FFState& other) const;

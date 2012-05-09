@@ -1,16 +1,15 @@
 /*
  *  FeatureStats.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef FEATURE_STATS_H
-#define FEATURE_STATS_H
+#ifndef MERT_FEATURE_STATS_H_
+#define MERT_FEATURE_STATS_H_
 
 #include <cstring>
-#include <fstream>
 #include <iostream>
 #include <map>
 #include <string>
@@ -30,18 +29,16 @@ public:
   FeatureStatsType get(size_t id) const;
   void set(const std::string& name, FeatureStatsType value);
   void clear();
-  size_t size() const {
-    return fvector_.size();
-  }
+  size_t size() const { return m_fvector.size(); }
 
   void write(std::ostream& out, const std::string& sep = " ") const;
 
   SparseVector& operator-=(const SparseVector& rhs);
 
 private:
-  static name2id_t name2id_;
-  static id2name_t id2name_;
-  fvector_t fvector_;
+  static name2id_t m_name_to_id;
+  static id2name_t m_id_to_name;
+  fvector_t m_fvector;
 };
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
@@ -49,12 +46,12 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
 class FeatureStats
 {
 private:
-  size_t available_;
-  size_t entries_;
+  size_t m_available_size;
+  size_t m_entries;
 
   // TODO: Use smart pointer for exceptional-safety.
-  featstats_t array_;
-  SparseVector map_;
+  featstats_t m_array;
+  SparseVector m_map;
 
 public:
   FeatureStats();
@@ -69,64 +66,47 @@ public:
 
   void Copy(const FeatureStats &stats);
 
-  bool isfull() const {
-    return (entries_ < available_) ? 0 : 1;
-  }
+  bool isfull() const { return (m_entries < m_available_size) ? 0 : 1; }
   void expand();
   void add(FeatureStatsType v);
   void addSparse(const string& name, FeatureStatsType v);
 
   void clear() {
-    memset((void*)array_, 0, GetArraySizeWithBytes());
-    map_.clear();
+    memset((void*)m_array, 0, GetArraySizeWithBytes());
+    m_map.clear();
   }
 
   void reset() {
-    entries_ = 0;
+    m_entries = 0;
     clear();
   }
 
-  inline FeatureStatsType get(size_t i) {
-    return array_[i];
-  }
-  inline FeatureStatsType get(size_t i)const {
-    return array_[i];
-  }
-  inline featstats_t getArray() const {
-    return array_;
-  }
-  inline const SparseVector& getSparse() const {
-    return map_;
-  }
+  FeatureStatsType get(size_t i) { return m_array[i]; }
+  FeatureStatsType get(size_t i)const { return m_array[i]; }
+  featstats_t getArray() const { return m_array; }
+
+  const SparseVector& getSparse() const { return m_map; }
 
   void set(std::string &theString);
 
-  inline size_t bytes() const {
-    return GetArraySizeWithBytes();
-  }
+  inline size_t bytes() const { return GetArraySizeWithBytes(); }
 
   size_t GetArraySizeWithBytes() const {
-    return entries_ * sizeof(FeatureStatsType);
+    return m_entries * sizeof(FeatureStatsType);
   }
 
-  inline size_t size() const {
-    return entries_;
-  }
+  size_t size() const { return m_entries; }
 
-  inline size_t available() const {
-    return available_;
-  }
+  size_t available() const { return m_available_size; }
 
   void savetxt(const std::string &file);
-  void savetxt(ofstream& outFile);
-  void savebin(ofstream& outFile);
-  inline void savetxt() {
-    savetxt("/dev/stdout");
-  }
+  void savetxt(std::ostream* os);
+  void savebin(std::ostream* os);
+  void savetxt();
 
   void loadtxt(const std::string &file);
-  void loadtxt(ifstream& inFile);
-  void loadbin(ifstream& inFile);
+  void loadtxt(std::istream* is);
+  void loadbin(std::istream* is);
 
   /**
    * Write the whole object to a stream.
@@ -138,4 +118,4 @@ public:
 bool operator==(const FeatureStats& f1, const FeatureStats& f2);
 //END_ADDED
 
-#endif  // FEATURE_STATS_H
+#endif  // MERT_FEATURE_STATS_H_

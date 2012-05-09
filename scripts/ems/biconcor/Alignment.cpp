@@ -1,17 +1,31 @@
 #include "Alignment.h"
+
+#include <fstream>
 #include <string>
 #include <stdlib.h>
 #include <cstring>
 
+namespace {
+
+const int LINE_MAX_LENGTH = 10000;
+
+} // namespace
+
 using namespace std;
 
-void Alignment::Create( string fileName )
+void Alignment::Create(const string& fileName)
 {
   ifstream textFile;
   char line[LINE_MAX_LENGTH];
 
   // count the number of words first;
   textFile.open(fileName.c_str());
+
+  if (!textFile) {
+    cerr << "No such file or directory: " << fileName << endl;
+    exit(1);
+  }
+
   istream *fileP = &textFile;
   m_size = 0;
   m_sentenceCount = 0;
@@ -29,10 +43,26 @@ void Alignment::Create( string fileName )
   m_array = (char*) calloc( sizeof( char ), m_size*2 );
   m_sentenceEnd = (INDEX*) calloc( sizeof( INDEX ), m_sentenceCount );
 
+  if (m_array == NULL) {
+    cerr << "Error: cannot allocate memory to m_array" << endl;
+    exit(1);
+  }
+
+  if (m_sentenceEnd == NULL) {
+    cerr << "Error: cannot allocate memory to m_sentenceEnd" << endl;
+    exit(1);
+  }
+
   // fill the array
   int alignmentPointIndex = 0;
   int sentenceId = 0;
+
   textFile.open(fileName.c_str());
+  if (!textFile) {
+    cerr << "Failed to open " << fileName << endl;
+    exit(1);
+  }
+
   fileP = &textFile;
   while(!fileP->eof()) {
     SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
@@ -53,10 +83,20 @@ void Alignment::Create( string fileName )
   cerr << "done reading " << (alignmentPointIndex/2) << " alignment points, " << sentenceId << " sentences." << endl;
 }
 
+Alignment::Alignment()
+    : m_array(NULL),
+      m_sentenceEnd(NULL),
+      m_size(0),
+      m_sentenceCount(0) {}
+
 Alignment::~Alignment()
 {
-  free(m_array);
-  free(m_sentenceEnd);
+  if (m_array != NULL) {
+    free(m_array);
+  }
+  if (m_sentenceEnd != NULL) {
+    free(m_sentenceEnd);
+  }
 }
 
 vector<string> Alignment::Tokenize( const char input[] )
@@ -143,9 +183,13 @@ bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
   return true;
 }
 
-void Alignment::Save( string fileName )
+void Alignment::Save(const string& fileName ) const
 {
   FILE *pFile = fopen ( (fileName + ".align").c_str() , "w" );
+  if (pFile == NULL) {
+    cerr << "Cannot open " << fileName << ".align" << endl;
+    exit(1);
+  }
 
   fwrite( &m_size, sizeof(INDEX), 1, pFile );
   fwrite( m_array, sizeof(char), m_size*2, pFile ); // corpus
@@ -155,9 +199,14 @@ void Alignment::Save( string fileName )
   fclose( pFile );
 }
 
-void Alignment::Load( string fileName )
+void Alignment::Load(const string& fileName )
 {
   FILE *pFile = fopen ( (fileName + ".align").c_str() , "r" );
+  if (pFile == NULL) {
+    cerr << "no such file or directory: " << fileName << ".align" << endl;
+    exit(1);
+  }
+
   cerr << "loading from " << fileName << ".align" << endl;
 
   fread( &m_size, sizeof(INDEX), 1, pFile );

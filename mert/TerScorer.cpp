@@ -5,8 +5,8 @@
 #include <stdexcept>
 
 #include "ScoreStats.h"
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
+#include "TER/tercalc.h"
+#include "TER/terAlignment.h"
 #include "Util.h"
 
 using namespace TERCpp;
@@ -33,6 +33,7 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
     string line;
     int sid = 0;
     while ( getline ( in, line ) ) {
+      line = this->preprocessSentence(line);
       vector<int> tokens;
       TokenizeAndEncode(line, tokens);
       m_references.push_back ( tokens );
@@ -48,6 +49,7 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
 
 void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry )
 {
+  string sentence = this->preprocessSentence(text);
 
   terAlignment result;
   result.numEdits = 0.0 ;
@@ -74,7 +76,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
       averageLength+=(double)m_multi_references.at ( incRefsBis ).at ( sid ).size();
     }
     averageLength=averageLength/( double ) m_multi_references.size();
-    TokenizeAndEncode(text, testtokens);
+    TokenizeAndEncode(sentence, testtokens);
     terCalc * evaluation=new terCalc();
     evaluation->setDebugMode ( false );
     terAlignment tmp_result = evaluation->TER ( reftokens, testtokens );

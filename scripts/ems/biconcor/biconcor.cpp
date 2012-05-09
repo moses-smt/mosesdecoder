@@ -118,4 +118,6 @@ int main(int argc, char* argv[])
     ppCollection.GetCollection( queryString );
     ppCollection.PrintHTML();
   }
+
+  return 0;
 }

@@ -6,11 +6,13 @@
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
 
+#include "ChartManager.h"
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "StaticData.h"
 #include "PhraseDictionaryDynSuffixArray.h"
 #include "TranslationSystem.h"
+#include "TreeInput.h"
 #include "LMList.h"
 #include "LM/ORLM.h"
 
@@ -170,36 +172,48 @@ public:
     }
 
     const TranslationSystem& system = getTranslationSystem(params);
-
-    Sentence sentence;
-    const vector<FactorType> &inputFactorOrder =
-      staticData.GetInputFactorOrder();
-    stringstream in(source + "\n");
-    sentence.Read(in,inputFactorOrder);
-    Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
-    manager.ProcessSentence();
-    const Hypothesis* hypo = manager.GetBestHypothesis();
-
-    vector<xmlrpc_c::value> alignInfo;
     stringstream out, graphInfo, transCollOpts;
-    outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
-
     map<string, xmlrpc_c::value> retData;
+
+    SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
+    if (searchAlgorithm == ChartDecoding) {
+       TreeInput tinput; 
+        const vector<FactorType> &inputFactorOrder =
+          staticData.GetInputFactorOrder();
+        stringstream in(source + "\n");
+        tinput.Read(in,inputFactorOrder);
+        ChartManager manager(tinput, &system);
+        manager.ProcessSentence();
+        const ChartHypothesis *hypo = manager.GetBestHypothesis();
+        outputChartHypo(out,hypo);
+    } else {
+        Sentence sentence;
+        const vector<FactorType> &inputFactorOrder =
+          staticData.GetInputFactorOrder();
+        stringstream in(source + "\n");
+        sentence.Read(in,inputFactorOrder);
+        Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
+        manager.ProcessSentence();
+        const Hypothesis* hypo = manager.GetBestHypothesis();
+
+        vector<xmlrpc_c::value> alignInfo;
+        outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
+        if (addAlignInfo) {
+          retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+        }
+
+        if(addGraphInfo) {
+          insertGraphInfo(manager,retData);
+            (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
+        }
+        if (addTopts) {
+          insertTranslationOptions(manager,retData);
+        }
+    }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
-    cerr << "Output: " << out.str() << endl;
-    if (addAlignInfo) {
-      retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
-    }
     retData.insert(text);
-
-    if(addGraphInfo) {
-      insertGraphInfo(manager,retData);
-      (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
-    }
-    if (addTopts) {
-      insertTranslationOptions(manager,retData);
-    }
+    cerr << "Output: " << out.str() << endl;
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
@@ -228,6 +242,21 @@ public:
         alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
       }
     }
+  }
+
+  void outputChartHypo(ostream& out, const ChartHypothesis* hypo) {
+    Phrase outPhrase(20);
+    hypo->CreateOutputPhrase(outPhrase);
+
+    // delete 1st & last
+    assert(outPhrase.GetSize() >= 2);
+    outPhrase.RemoveWord(0);
+    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+    for (size_t pos = 0 ; pos < outPhrase.GetSize() ; pos++) {
+      const Factor *factor = outPhrase.GetFactor(pos, 0);
+      out << *factor << " ";
+    }
+
   }
 
   void insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData) {

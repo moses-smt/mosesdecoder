@@ -1,7 +1,7 @@
-#ifndef __BLEUSCORER_H__
-#define __BLEUSCORER_H__
+#ifndef MERT_BLEU_SCORER_H_
+#define MERT_BLEU_SCORER_H_
 
-#include <iostream>
+#include <ostream>
 #include <string>
 #include <vector>
 
@@ -12,72 +12,64 @@
 
 using namespace std;
 
+const int kBleuNgramOrder = 4;
+
+class NgramCounts;
+class Reference;
+
 /**
  * Bleu scoring
  */
 class BleuScorer: public StatisticsBasedScorer
 {
 public:
+  enum ReferenceLengthType {
+    AVERAGE,
+    CLOSEST,
+    SHORTEST
+  };
+
   explicit BleuScorer(const string& config = "");
   ~BleuScorer();
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
   virtual float calculateScore(const vector<int>& comps) const;
+  virtual size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
 
-  virtual size_t NumberOfScores() const {
-    return 2 * kLENGTH + 1;
-  }
+  int CalcReferenceLength(size_t sentence_id, size_t length);
 
-private:
-  enum ReferenceLengthType {
-    AVERAGE,
-    SHORTEST,
-    CLOSEST,
-  };
+  ReferenceLengthType GetReferenceLengthType() const { return m_ref_length_type; }
+  void SetReferenceLengthType(ReferenceLengthType type) { m_ref_length_type = type; }
 
-  //Used to construct the ngram map
-  struct CompareNgrams {
-    bool operator()(const vector<int>& a, const vector<int>& b) const {
-      size_t i;
-      const size_t as = a.size();
-      const size_t bs = b.size();
-      for (i = 0; i < as && i < bs; ++i) {
-        if (a[i] < b[i]) {
-          //cerr << "true" << endl;
-          return true;
-        }
-        if (a[i] > b[i]) {
-          //cerr << "false" << endl;
-          return false;
-        }
-      }
-      //entries are equal, shortest wins
-      return as < bs;;
-    }
-  };
-
-  typedef map<vector<int>,int,CompareNgrams> counts_t;
-  typedef map<vector<int>,int,CompareNgrams>::iterator counts_iterator;
-  typedef map<vector<int>,int,CompareNgrams>::const_iterator counts_const_iterator;
+  const std::vector<Reference*>& GetReferences() const { return m_references.get(); }
 
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  size_t countNgrams(const string& line, counts_t& counts, unsigned int n);
+  size_t CountNgrams(const string& line, NgramCounts& counts, unsigned int n);
 
-  void dump_counts(counts_t& counts) const;
+  void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
-  const int kLENGTH;
+  bool OpenReference(const char* filename, size_t file_id);
+
+  // NOTE: this function is used for unit testing.
+  bool OpenReferenceStream(std::istream* is, size_t file_id);
+
+private:
   ReferenceLengthType m_ref_length_type;
 
-  // data extracted from reference files
-  ScopedVector<counts_t> m_ref_counts;
-  vector<vector<size_t> > m_ref_lengths;
+  // reference translations.
+  ScopedVector<Reference> m_references;
 
   // no copying allowed
   BleuScorer(const BleuScorer&);
   BleuScorer& operator=(const BleuScorer&);
 };
 
-#endif  // __BLEUSCORER_H__
+/** Computes sentence-level BLEU+1 score.
+ * This function is used in PRO.
+ */
+float sentenceLevelBleuPlusOne(const vector<float>& stats);
+
+#endif  // MERT_BLEU_SCORER_H_

@@ -1,6 +1,6 @@
 /*
  *  FeatureData.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
@@ -12,44 +12,47 @@
 #include "FileStream.h"
 #include "Util.h"
 
-static const float MIN_FLOAT=-1.0*numeric_limits<float>::max();
-static const float MAX_FLOAT=numeric_limits<float>::max();
+using namespace std;
+
+static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
+static const float MAX_FLOAT = numeric_limits<float>::max();
 
 FeatureData::FeatureData()
-    : number_of_features(0),
-      _sparse_flag(false) {}
+    : m_num_features(0),
+      m_sparse_flag(false) {}
 
-void FeatureData::save(std::ofstream& outFile, bool bin)
+void FeatureData::save(ostream* os, bool bin)
 {
-  for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++)
-    i->save(outFile, bin);
+  for (featdata_t::iterator i = m_array.begin(); i != m_array.end(); i++)
+    i->save(os, bin);
 }
 
-void FeatureData::save(const std::string &file, bool bin)
+void FeatureData::save(const string &file, bool bin)
 {
   if (file.empty()) return;
-
-  TRACE_ERR("saving the array into " << file << std::endl);
-
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
-
-  save(outFile, bin);
-
-  outFile.close();
+  TRACE_ERR("saving the array into " << file << endl);
+  ofstream ofs(file.c_str(), ios::out); // matches a stream with a file. Opens the file
+  ostream* os = &ofs;
+  save(os, bin);
+  ofs.close();
 }
 
-void FeatureData::load(ifstream& inFile)
+void FeatureData::save(bool bin) {
+  save(&cout, bin);
+}
+
+void FeatureData::load(istream* is)
 {
   FeatureArray entry;
 
-  while (!inFile.eof()) {
+  while (!is->eof()) {
 
-    if (!inFile.good()) {
-      std::cerr << "ERROR FeatureData::load inFile.good()" << std::endl;
+    if (!is->good()) {
+      cerr << "ERROR FeatureData::load inFile.good()" << endl;
     }
 
     entry.clear();
-    entry.load(inFile);
+    entry.load(is);
 
     if (entry.size() == 0)
       break;
@@ -58,26 +61,23 @@ void FeatureData::load(ifstream& inFile)
       setFeatureMap(entry.Features());
 
     if (entry.hasSparseFeatures())
-      _sparse_flag = true;
+      m_sparse_flag = true;
 
     add(entry);
   }
 }
 
 
-void FeatureData::load(const std::string &file)
+void FeatureData::load(const string &file)
 {
-  TRACE_ERR("loading feature data from " << file << std::endl);
-
-  inputfilestream inFile(file); // matches a stream with a file. Opens the file
-
-  if (!inFile) {
+  TRACE_ERR("loading feature data from " << file << endl);
+  inputfilestream input_stream(file); // matches a stream with a file. Opens the file
+  if (!input_stream) {
     throw runtime_error("Unable to open feature file: " + file);
   }
-
-  load((ifstream&) inFile);
-
-  inFile.close();
+  istream* is = &input_stream;
+  load(is);
+  input_stream.close();
 }
 
 void FeatureData::add(FeatureArray& e)
@@ -85,25 +85,25 @@ void FeatureData::add(FeatureArray& e)
   if (exists(e.getIndex())) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
     size_t pos = getIndex(e.getIndex());
-    array_.at(pos).merge(e);
+    m_array.at(pos).merge(e);
   } else {
-    array_.push_back(e);
+    m_array.push_back(e);
     setIndex();
   }
 }
 
-void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
+void FeatureData::add(FeatureStats& e, const string& sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
     size_t pos = getIndex(sent_idx);
 //              TRACE_ERR("Inserting " << e << " in array " << sent_idx << std::endl);
-    array_.at(pos).add(e);
+    m_array.at(pos).add(e);
   } else {
 //              TRACE_ERR("Creating a new entry in the array and inserting " << e << std::endl);
     FeatureArray a;
-    a.NumberOfFeatures(number_of_features);
-    a.Features(features);
+    a.NumberOfFeatures(m_num_features);
+    a.Features(m_features);
     a.setIndex(sent_idx);
     a.add(e);
     add(a);
@@ -112,10 +112,10 @@ void FeatureData::add(FeatureStats& e, const std::string& sent_idx)
 
 bool FeatureData::check_consistency() const
 {
-  if (array_.size() == 0)
+  if (m_array.size() == 0)
     return true;
 
-  for (featdata_t::const_iterator i = array_.begin(); i != array_.end(); i++)
+  for (featdata_t::const_iterator i = m_array.begin(); i != m_array.end(); i++)
     if (!i->check_consistency()) return false;
 
   return true;
@@ -124,25 +124,53 @@ bool FeatureData::check_consistency() const
 void FeatureData::setIndex()
 {
   size_t j=0;
-  for (featdata_t::iterator i = array_.begin(); i !=array_.end(); i++) {
-    idx2arrayname_[j]=(*i).getIndex();
-    arrayname2idx_[(*i).getIndex()] = j;
+  for (featdata_t::iterator i = m_array.begin(); i !=m_array.end(); i++) {
+    m_index_to_array_name[j]=(*i).getIndex();
+    m_array_name_to_index[(*i).getIndex()] = j;
     j++;
   }
 }
 
-void FeatureData::setFeatureMap(const std::string& feat)
+void FeatureData::setFeatureMap(const string& feat)
 {
-  number_of_features = 0;
-  features = feat;
+  m_num_features = 0;
+  m_features = feat;
 
-  std::string substring, stringBuf;
-  stringBuf = features;
-  while (!stringBuf.empty()) {
-    getNextPound(stringBuf, substring);
-
-    featname2idx_[substring] = idx2featname_.size();
-    idx2featname_[idx2featname_.size()] = substring;
-    number_of_features++;
+  vector<string> buf;
+  Tokenize(feat.c_str(), ' ', &buf);
+  for (vector<string>::const_iterator it = buf.begin();
+       it != buf.end(); ++it) {
+    const size_t size = m_index_to_feature_name.size();
+    m_feature_name_to_index[*it] = size;
+    m_index_to_feature_name[size] = *it;
+    ++m_num_features;
   }
+}
+
+string FeatureData::ToString() const {
+  string res;
+
+  {
+    stringstream ss;
+    ss << "number of features: " << m_num_features
+       << ", features: " << m_features
+       << ", sparse flag: ";
+    if (m_sparse_flag) {
+      ss << "yes, ";
+    } else {
+      ss << "no, ";
+    }
+    res.append(ss.str());
+  }
+
+  res.append("feature_id_map = { ");
+  for (map<string, size_t>::const_iterator it = m_feature_name_to_index.begin();
+       it != m_feature_name_to_index.end(); ++it) {
+    stringstream ss;
+    ss << it->first << " => " << it->second << ", ";
+    res.append(ss.str());
+  }
+  res.append("}");
+
+  return res;
 }

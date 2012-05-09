@@ -63,8 +63,15 @@ sub detokenize {
 	my($text) = @_;
 	chomp($text);
 	$text = " $text ";
-        $text =~ s/ \@\-\@ /-/g;
-	
+  $text =~ s/ \@\-\@ /-/g;
+  # de-escape special chars
+  $text =~ s/\&bar;/\|/g;
+  $text =~ s/\&lt;/\</g;
+  $text =~ s/\&gt;/\>/g;
+  $text =~ s/\&bra;/\[/g;
+  $text =~ s/\&ket;/\]/g;
+  $text =~ s/\&amp;/\&/g;
+
 	my $word;
 	my $i;
 	my @words = split(/ /,$text);

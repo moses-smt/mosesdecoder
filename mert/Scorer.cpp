@@ -1,5 +1,9 @@
 #include "Scorer.h"
+
 #include <limits>
+#include "Vocabulary.h"
+#include "Util.h"
+#include "Singleton.h"
 
 namespace {
 
@@ -33,14 +37,16 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
-      m_encoder(new Encoder),
+      m_vocab(mert::VocabularyFactory::GetVocabulary()),
       m_score_data(0),
-      m_enable_preserve_case(true) {
+      m_enable_preserve_case(true),
+      m_filter(NULL) {
   InitConfig(config);
 }
 
 Scorer::~Scorer() {
-  delete m_encoder;
+  Singleton<mert::Vocabulary>::Delete();
+  delete m_filter;
 }
 
 void Scorer::InitConfig(const string& config) {
@@ -64,23 +70,6 @@ void Scorer::InitConfig(const string& config) {
   }
 }
 
-Scorer::Encoder::Encoder() {}
-
-Scorer::Encoder::~Encoder() {}
-
-int Scorer::Encoder::Encode(const string& token) {
-  map<string, int>::iterator it = m_vocab.find(token);
-  int encoded_token;
-  if (it == m_vocab.end()) {
-    // Add an new entry to the vocaburary.
-    encoded_token = static_cast<int>(m_vocab.size());
-    m_vocab[token] = encoded_token;
-  } else {
-    encoded_token = it->second;
-  }
-  return encoded_token;
-}
-
 void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
   std::istringstream in(line);
   std::string token;
@@ -91,9 +80,83 @@ void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
         *it = tolower(*it);
       }
     }
-    encoded.push_back(m_encoder->Encode(token));
+    encoded.push_back(m_vocab->Encode(token));
   }
 }
+
+/**
+ * Set the factors, which should be used for this metric
+ */
+void Scorer::setFactors(const string& factors)
+{
+  if (factors.empty()) return;
+  vector<string> factors_vec;
+  split(factors, '|', factors_vec);
+  for(vector<string>::iterator it = factors_vec.begin(); it != factors_vec.end(); ++it)
+  {
+    int factor = atoi(it->c_str());
+    m_factors.push_back(factor);
+  }
+}
+
+/**
+ * Set unix filter, which will be used to preprocess the sentences
+ */
+void Scorer::setFilter(const string& filterCommand)
+{
+    if (filterCommand.empty()) return;
+    m_filter = new PreProcessFilter(filterCommand);
+}
+
+/**
+ * Take the factored sentence and return the desired factors
+ */
+string Scorer::applyFactors(const string& sentence) const
+{
+  if (m_factors.size() == 0) return sentence;
+
+  vector<string> tokens;
+  split(sentence, ' ', tokens);
+
+  stringstream sstream;
+  for (size_t i = 0; i < tokens.size(); ++i)
+  {
+    if (tokens[i] == "") continue;
+
+    vector<string> factors;
+    split(tokens[i], '|', factors);
+
+    int fsize = factors.size();
+
+    if (i > 0) sstream << " ";
+
+    for (size_t j = 0; j < m_factors.size(); ++j)
+    {
+      int findex = m_factors[j];
+      if (findex < 0 || findex >= fsize) throw runtime_error("Factor index is out of range.");
+
+      if (j > 0) sstream << "|";
+      sstream << factors[findex];
+    }
+  }
+  return sstream.str();
+}
+
+/**
+ * Preprocess the sentence with the filter (if given)
+ */
+string Scorer::applyFilter(const string& sentence) const
+{
+  if (m_filter)
+  {
+    return m_filter->ProcessSentence(sentence);
+  }
+  else
+  {
+    return sentence;
+  }
+}
+
 
 StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& config)
     : Scorer(name,config) {

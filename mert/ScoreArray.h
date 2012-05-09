@@ -1,15 +1,13 @@
 /*
  *  ScoreArray.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef SCORE_ARRAY_H
-#define SCORE_ARRAY_H
-
-using namespace std;
+#ifndef MERT_SCORE_ARRAY_H_
+#define MERT_SCORE_ARRAY_H_
 
 #include <vector>
 #include <iostream>
@@ -24,88 +22,65 @@ const char SCORES_BIN_END[] = "SCORES_BIN_END_0";
 
 class ScoreArray
 {
-protected:
-  scorearray_t array_;
-  std::string score_type;
-  size_t number_of_scores;
+ private:
+  scorearray_t m_array;
+  std::string m_score_type;
+  std::size_t m_num_scores;
 
-private:
-  // idx to identify the utterance.
+  // indexx to identify the utterance.
   // It can differ from the index inside the vector.
-  std::string  idx;
+  std::string  m_index;
 
 public:
   ScoreArray();
   ~ScoreArray() {}
 
-  inline void clear() {
-    array_.clear();
-  }
+  void clear() { m_array.clear(); }
 
-  inline std::string getIndex() const {
-    return idx;
-  }
-  inline void setIndex(const std::string& value) {
-    idx=value;
-  }
+  std::string getIndex() const { return m_index; }
 
-//	inline ScoreStats get(size_t i){ return array_.at(i); }
+  void setIndex(const std::string& value) { m_index = value; }
 
-  inline ScoreStats&  get(size_t i) {
-    return array_.at(i);
-  }
-  inline const ScoreStats&  get(size_t i)const {
-    return array_.at(i);
-  }
+  ScoreStats& get(std::size_t i) { return m_array.at(i); }
 
-  void add(const ScoreStats& e) {
-    array_.push_back(e);
-  }
+  const ScoreStats& get(std::size_t i) const { return m_array.at(i); }
+
+  void add(const ScoreStats& e) { m_array.push_back(e); }
 
   //ADDED BY TS
-  void swap(size_t i, size_t j) {
-    std::swap(array_[i],array_[j]);
+  void swap(std::size_t i, std::size_t j) {
+    std::swap(m_array[i], m_array[j]);
   }
 
-  void resize(size_t new_size) {
-    array_.resize(std::min(new_size,array_.size()));
+  void resize(std::size_t new_size) {
+    m_array.resize(std::min(new_size, m_array.size()));
   }
   //END_ADDED
 
   void merge(ScoreArray& e);
 
-  inline std::string name() const {
-    return score_type;
-  }
+  std::string name() const { return m_score_type; }
 
-  inline void name(std::string &sctype) {
-    score_type = sctype;
-  }
+  void name(std::string &score_type) { m_score_type = score_type; }
 
-  inline size_t size() const {
-    return array_.size();
-  }
-  inline size_t NumberOfScores() const {
-    return number_of_scores;
-  }
-  inline void NumberOfScores(size_t v) {
-    number_of_scores = v;
-  }
+  std::size_t size() const { return m_array.size(); }
 
-  void savetxt(ofstream& outFile, const std::string& sctype);
-  void savebin(ofstream& outFile, const std::string& sctype);
-  void save(ofstream& outFile, const std::string& sctype, bool bin=false);
-  void save(const std::string &file, const std::string& sctype, bool bin=false);
-  inline void save(const std::string& sctype, bool bin=false) {
-    save("/dev/stdout", sctype, bin);
-  }
+  std::size_t NumberOfScores() const { return m_num_scores; }
 
-  void loadtxt(ifstream& inFile, size_t n);
-  void loadbin(ifstream& inFile, size_t n);
-  void load(ifstream& inFile);
+  void NumberOfScores(std::size_t v) { m_num_scores = v; }
+
+  void savetxt(std::ostream* os, const std::string& score_type);
+  void savebin(std::ostream* os, const std::string& score_type);
+  void save(std::ostream* os, const std::string& score_type, bool bin=false);
+  void save(const std::string &file, const std::string& score_type, bool bin=false);
+  void save(const std::string& score_type, bool bin=false);
+
+  void loadtxt(std::istream* is, std::size_t n);
+  void loadbin(std::istream* is, std::size_t n);
+  void load(std::istream* is);
   void load(const std::string &file);
 
   bool check_consistency() const;
 };
 
-#endif  // SCORE_ARRAY_H
+#endif  // MERT_SCORE_ARRAY_H_

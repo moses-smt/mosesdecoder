@@ -46,8 +46,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "LM/Ken.h"
 
-#ifdef LM_DMAP
-#   include "LM/DMapLM.h"
+#ifdef LM_LDHT
+#   include "LM/LDHT.h"
 #endif
 
 #include "LM/Base.h"
@@ -107,9 +107,11 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     lm = NewParallelBackoff();
 #endif
     break;
-  case DMapLM:
-#ifdef LM_DMAP
-    lm = new LanguageModelDMapLM();
+  case LDHTLM:
+#ifdef LM_LDHT
+    return ConstructLDHTLM(languageModelFile,
+                           scoreIndexManager,
+                           factorTypes[0]);
 #endif
     break;
   default:

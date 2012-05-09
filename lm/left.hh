@@ -78,7 +78,7 @@ struct Left {
 };
 
 inline size_t hash_value(const Left &left) {
-  return util::MurmurHashNative(&left.length, 1, left.pointers[left.length - 1]);
+  return util::MurmurHashNative(&left.length, 1, left.length ? left.pointers[left.length - 1] : 0);
 }
 
 struct ChartState {
@@ -112,7 +112,7 @@ inline size_t hash_value(const ChartState &state) {
   size_t hashes[2];
   hashes[0] = hash_value(state.left);
   hashes[1] = hash_value(state.right);
-  return util::MurmurHashNative(hashes, sizeof(size_t), state.full);
+  return util::MurmurHashNative(hashes, sizeof(size_t) * 2, state.full);
 }
 
 template <class M> class RuleScore {

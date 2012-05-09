@@ -55,7 +55,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
     for (int i = 0; i < bootstrap; ++i)
     {
       // TODO: Use smart pointer for exceptional-safety.
-      ScoreData* scoredata = new ScoreData(*g_scorer);
+      ScoreData* scoredata = new ScoreData(g_scorer);
       for (int j = 0; j < n; ++j)
       {
         int randomIndex = random() % n;
@@ -89,7 +89,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
   else
   {
     // TODO: Use smart pointer for exceptional-safety.
-    ScoreData* scoredata = new ScoreData(*g_scorer);
+    ScoreData* scoredata = new ScoreData(g_scorer);
     for (int sid = 0; sid < n; ++sid)
     {
       string str_sid = int2string(sid);
@@ -133,15 +133,26 @@ void usage()
   cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
   cerr << "[--reference|-R] comma separated list of reference files" << endl;
   cerr << "[--candidate|-C] comma separated list of candidate files" << endl;
+  cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
+  cerr << "[--filter|-l] filter command which will be used to preprocess the sentences" << endl;
   cerr << "[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)" << endl;
   cerr << "[--rseed|-r] the random seed for bootstraping (defaults to system clock)" << endl;
   cerr << "[--help|-h] print this message and exit" << endl;
   cerr << endl;
   cerr << "Evaluator is able to compute more metrics at once. To do this," << endl;
-  cerr << "separate scorers with semicolon (note that comma is used to separate" << endl;
-  cerr << "scorers in the interpolated scorer)." << endl;
+  cerr << "specify more --sctype arguments. You can also specify more --scconfig strings." << endl;
   cerr << endl;
-  cerr << "If you specify only one metric and one candidate file, only the final score" << endl;
+  cerr << "The example below prints BLEU score, PER score and interpolated" << endl;
+  cerr << "score of CDER and PER with the given weights." << endl;
+  cerr << endl;
+  cerr << "./evaluator \\" << endl;
+  cerr << "\t--sctype BLEU --scconfig reflen:closest \\" << endl;
+  cerr << "\t--sctype PER \\" << endl;
+  cerr << "\t--sctype CDER,PER --scconfig weights:0.25+0.75 \\" << endl;
+  cerr << "\t--candidate CANDIDATE \\" << endl;
+  cerr << "\t--reference REFERENCE" << endl;
+  cerr << endl;
+  cerr << "If you specify only one scorer and one candidate file, only the final score" << endl;
   cerr << "will be printed to stdout. Otherwise each line will contain metric name" << endl;
   cerr << "and/or filename and the final score. Since most of the metrics prints some" << endl;
   cerr << "debuging info, consider redirecting stderr to /dev/null." << endl;
@@ -155,24 +166,26 @@ static struct option long_options[] = {
   {"candidate", required_argument, 0, 'C'},
   {"bootstrap", required_argument, 0, 'b'},
   {"rseed", required_argument, 0, 'r'},
+  {"factors", required_argument, 0, 'f'},
+  {"filter", required_argument, 0, 'l'},
   {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
 
 // Options used in evaluator.
 struct ProgramOption {
-  string scorer_type;
-  string scorer_config;
+  vector<string> scorer_types;
+  vector<string> scorer_configs;
   string reference;
   string candidate;
+  vector<string> scorer_factors;
+  vector<string> scorer_filter;
   int bootstrap;
   int seed;
   bool has_seed;
 
   ProgramOption()
-      : scorer_type("BLEU"),
-        scorer_config(""),
-        reference(""),
+      : reference(""),
         candidate(""),
         bootstrap(0),
         seed(0),
@@ -182,13 +195,18 @@ struct ProgramOption {
 void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
-  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:h", long_options, &option_index)) != -1) {
+  int last_scorer_index = -1;
+  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:f:l:h", long_options, &option_index)) != -1) {
     switch(c) {
       case 's':
-        opt->scorer_type = string(optarg);
+        opt->scorer_types.push_back(string(optarg));
+        opt->scorer_configs.push_back(string(""));
+        opt->scorer_factors.push_back(string(""));
+        opt->scorer_filter.push_back(string(""));
+        last_scorer_index++;
         break;
       case 'c':
-        opt->scorer_config = string(optarg);
+        opt->scorer_configs[last_scorer_index] = string(optarg);
         break;
       case 'R':
         opt->reference = string(optarg);
@@ -203,9 +221,24 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
         opt->seed = strtol(optarg, NULL, 10);
         opt->has_seed = true;
         break;
+      case 'f':
+        opt->scorer_factors[last_scorer_index] = string(optarg);
+        break;
+      case 'l':
+        opt->scorer_filter[last_scorer_index] = string(optarg);
+        break;
       default:
         usage();
     }
+  }
+
+  // Add default scorer if no scorer provided
+  if (opt->scorer_types.size() == 0)
+  {
+    opt->scorer_types.push_back(string("BLEU"));
+    opt->scorer_configs.push_back(string(""));
+    opt->scorer_factors.push_back(string(""));
+    opt->scorer_filter.push_back(string(""));
   }
 }
 
@@ -236,7 +269,6 @@ int main(int argc, char** argv)
   try {
     vector<string> refFiles;
     vector<string> candFiles;
-    vector<string> scorerTypes;
 
     if (option.reference.length() == 0) throw runtime_error("You have to specify at least one reference file.");
     split(option.reference, ',', refFiles);
@@ -244,17 +276,16 @@ int main(int argc, char** argv)
     if (option.candidate.length() == 0) throw runtime_error("You have to specify at least one candidate file.");
     split(option.candidate, ',', candFiles);
 
-    if (option.scorer_type.length() == 0) throw runtime_error("You have to specify at least one scorer.");
-    split(option.scorer_type, ';', scorerTypes);
-
     if (candFiles.size() > 1) g_has_more_files = true;
-    if (scorerTypes.size() > 1) g_has_more_scorers = true;
+    if (option.scorer_types.size() > 1) g_has_more_scorers = true;
 
     for (vector<string>::const_iterator fileIt = candFiles.begin(); fileIt != candFiles.end(); ++fileIt)
     {
-        for (vector<string>::const_iterator scorerIt = scorerTypes.begin(); scorerIt != scorerTypes.end(); ++scorerIt)
+        for (size_t i = 0; i < option.scorer_types.size(); i++)
         {
-            g_scorer = ScorerFactory::getScorer(*scorerIt, option.scorer_config);
+            g_scorer = ScorerFactory::getScorer(option.scorer_types[i], option.scorer_configs[i]);
+            g_scorer->setFactors(option.scorer_factors[i]);
+            g_scorer->setFilter(option.scorer_filter[i]);
             g_scorer->setReferenceFiles(refFiles);
             EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
             delete g_scorer;

@@ -1,5 +1,5 @@
-#ifndef __SCORER_FACTORY_H
-#define __SCORER_FACTORY_H
+#ifndef MERT_SCORER_FACTORY_H_
+#define MERT_SCORER_FACTORY_H_
 
 #include <vector>
 #include <string>
@@ -18,4 +18,4 @@ private:
   ~ScorerFactory() {}
 };
 
-#endif  // __SCORER_FACTORY_H
+#endif  // MERT_SCORER_FACTORY_H_

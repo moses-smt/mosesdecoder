@@ -18,7 +18,6 @@
 #  - Different combination algorithms require different statistics. To be on the safe side, apply train_model.patch to train_model.perl and use the option -phrase-word-alignment for training all models.
 #  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). sort with LC_ALL=C.
 #  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
-#  - The script assumes that all files are encoded in UTF-8. If this is not the case, fix it or change the handle_file() function.
 #  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files.
 #  - The cross-entropy estimation assumes that phrase tables contain true probability distributions (i.e. a probability mass of 1 for each conditional probability distribution). If this is not true, the results are skewed.
 #  - Unknown phrase pairs are not considered for the cross-entropy estimation. A comparison of models with different vocabularies may be misleading.
@@ -196,7 +195,7 @@ class Moses():
 
 
 
-    def traverse_incrementally(self,table,models,load_lines,store_flag,inverted=False):
+    def traverse_incrementally(self,table,models,load_lines,store_flag,inverted=False,lowmem=False):
         """hack-ish way to find common phrase pairs in multiple models in one traversal without storing it all in memory
             relies on alphabetical sorting of phrase table.
         """
@@ -209,7 +208,9 @@ class Moses():
             self.phrase_pairs = defaultdict(lambda: defaultdict(lambda: [[[0]*len(self.models) for i in range(self.number_of_features)],[]]))
             self.reordering_pairs = defaultdict(lambda: defaultdict(lambda: [[0]*len(self.models) for i in range(self.number_of_features)]))
             self.phrase_source = defaultdict(lambda: [0]*len(self.models))
-            self.phrase_target = defaultdict(lambda: [0]*len(self.models))
+            
+            if lowmem:
+                self.phrase_target = defaultdict(lambda: [0]*len(self.models))
     
             for model,priority,i in models:
                 
@@ -451,10 +452,10 @@ class Moses():
         return line
 
 
-    def create_inverse(self,fobj):
+    def create_inverse(self,fobj,tempdir=None):
         """swap source and target phrase in the phrase table, and then sort (by target phrase)"""
         
-        inverse = NamedTemporaryFile(prefix='inv_unsorted',delete=False)        
+        inverse = NamedTemporaryFile(prefix='inv_unsorted',delete=False,dir=tempdir)        
         swap = re.compile(b'(.+?) \|\|\| (.+?) \|\|\|')
         
         # just swap source and target phrase, and leave order of scores etc. intact. 
@@ -463,7 +464,7 @@ class Moses():
             inverse.write(swap.sub(b'\\2 ||| \\1 |||',line,1))
         inverse.close()
         
-        inverse_sorted = sort_file(inverse.name)
+        inverse_sorted = sort_file(inverse.name,tempdir=tempdir)
         os.remove(inverse.name)
         
         return inverse_sorted
@@ -1220,7 +1221,7 @@ def normalize_weights(weights,mode):
 
 
 def handle_file(filename,action,fileobj=None,mode='r'):
-    """handle some ugly encoding issues, different python versions, and writing either to file, stdout or gzipped file format"""
+    """support reading/writing either from/to file, stdout or gzipped file"""
 
     if action == 'open':
 
@@ -1254,14 +1255,16 @@ def handle_file(filename,action,fileobj=None,mode='r'):
         fileobj.close()   
 
 
-def sort_file(filename):
+def sort_file(filename,tempdir=None):
     """Sort a file and return temporary file"""
 
     cmd = ['sort', filename]
     env = {}
     env['LC_ALL'] = 'C'
+    if tempdir:
+        cmd.extend(['-T',tempdir])
     
-    outfile = NamedTemporaryFile(delete=False)
+    outfile = NamedTemporaryFile(delete=False,dir=tempdir)
     sys.stderr.write('LC_ALL=C ' + ' '.join(cmd) + ' > ' + outfile.name + '\n')
     p = Popen(cmd,env=env,stdout=outfile.file)
     p.wait()
@@ -1343,6 +1346,8 @@ class Combine_TMs():
                                 This indicates which model(s) a phrase pair comes from and can be used during MERT to additionally reward/penalize translation models
 
            lowmem: low memory mode: instead of loading target phrase counts / probability (when required), process the original table and its inversion (source and target swapped) incrementally, then merge the two halves.
+
+           tempdir: temporary directory (for low memory mode).
 
            there are a number of further configuration options that you can define, which modify the algorithm for linear interpolation. They have no effect in mode 'counts'
 
@@ -1507,25 +1512,25 @@ class Combine_TMs():
             self.loaded['pt-target'] = 1
 
 
-    def _inverse_wrapper(self,weights):
+    def _inverse_wrapper(self,weights,tempdir=None):
         """if we want to invert the phrase table to better calcualte p(s|t) and lex(s|t), manage creation, sorting and merging of inverted phrase tables"""
 
         sys.stderr.write('Processing first table half\n')
         models = [(self.model_interface.open_table(model,'phrase-table'),priority,i) for (model,priority,i) in priority_sort_models(self.model_interface.models)]
-        pt_half1 = NamedTemporaryFile(prefix='half1',delete=False)
+        pt_half1 = NamedTemporaryFile(prefix='half1',delete=False,dir=tempdir)
         self._write_phrasetable(models,pt_half1,weights)
         pt_half1.seek(0)
 
         sys.stderr.write('Inverting tables\n')
-        models = [(self.model_interface.create_inverse(self.model_interface.open_table(model,'phrase-table')),priority,i) for (model,priority,i) in priority_sort_models(self.model_interface.models)]
+        models = [(self.model_interface.create_inverse(self.model_interface.open_table(model,'phrase-table'),tempdir=tempdir),priority,i) for (model,priority,i) in priority_sort_models(self.model_interface.models)]
         sys.stderr.write('Processing second table half\n')
-        pt_half2_inverted = NamedTemporaryFile(prefix='half2',delete=False)
+        pt_half2_inverted = NamedTemporaryFile(prefix='half2',delete=False,dir=tempdir)
         self._write_phrasetable(models,pt_half2_inverted,weights,inverted=True)
         pt_half2_inverted.close()
         for model,priority,i in models:
             model.close()
             os.remove(model.name)
-        pt_half2 = sort_file(pt_half2_inverted.name)
+        pt_half2 = sort_file(pt_half2_inverted.name,tempdir=tempdir)
         os.remove(pt_half2_inverted.name)
 
         sys.stderr.write('Merging tables: first half: {0} ; second half: {1} ; final table: {2}\n'.format(pt_half1.name,pt_half2.name,self.output_file))
@@ -1549,7 +1554,7 @@ class Combine_TMs():
 
         i = 0
         sys.stderr.write('Incrementally loading and processing phrase tables...')
-        for block in self.model_interface.traverse_incrementally('phrase-table',models,self.load_lines,store_flag,inverted=inverted):
+        for block in self.model_interface.traverse_incrementally('phrase-table',models,self.load_lines,store_flag,inverted=inverted,lowmem=self.flags['lowmem']):
             
             for src in sorted(self.model_interface.phrase_pairs, key = lambda x: x + b' |'):
                 for target in sorted(self.model_interface.phrase_pairs[src], key = lambda x: x + b' |'):
@@ -1586,7 +1591,7 @@ class Combine_TMs():
         self._ensure_loaded(data)
 
         if self.flags['lowmem'] and (self.mode == 'counts' or self.flags['normalized'] and self.flags['normalize_s_given_t'] == 't'):
-            self._inverse_wrapper(weights)
+            self._inverse_wrapper(weights,tempdir=self.flags['tempdir'])
         else:
             models = [(self.model_interface.open_table(model,'phrase-table'),priority,i) for (model,priority,i) in priority_sort_models(self.model_interface.models)]
             output_object = handle_file(self.output_file,'open',mode='w')
@@ -1613,6 +1618,7 @@ class Combine_TMs():
         best_weights,best_cross_entropy = optimize_cross_entropy(self.model_interface,self.reference_interface,self.weights,self.score,self.mode,self.flags)
         sys.stderr.write('Best weights: ' + str(best_weights) + '\n')
         sys.stderr.write('Cross entropies: ' + str(best_cross_entropy) + '\n')
+        sys.stderr.write('Executing action combine_given_weights with -w "{0}"\n'.format('; '.join([', '.join(str(w) for w in item) for item in best_weights])))
         
         self.loaded['pt-filtered'] = False # phrase table will be overwritten
         self.combine_given_weights(weights=best_weights)
@@ -1631,12 +1637,12 @@ class Combine_TMs():
             sys.stderr.write('Error: only linear interpolation is supported for reordering model combination')
             
         output_object = handle_file(self.output_file,'open',mode='w')
-        models = [(self.open_table(model,table),priority,i) for (model,priority,i) in priority_sort_models(self.models)]
+        models = [(self.model_interface.open_table(model,'reordering-table'),priority,i) for (model,priority,i) in priority_sort_models(self.models)]
 
         i = 0
         
         sys.stderr.write('Incrementally loading and processing phrase tables...')
-        for block in self.model_interface.traverse_incrementally('reordering-table',models,self.model_interface.load_reordering_probabilities,'pairs'):
+        for block in self.model_interface.traverse_incrementally('reordering-table',models,self.model_interface.load_reordering_probabilities,'pairs',lowmem=self.flags['lowmem']):
             
             for src in sorted(self.model_interface.reordering_pairs):
                 for target in sorted(self.model_interface.reordering_pairs[src]):
@@ -1723,6 +1729,7 @@ class Combine_TMs():
 
         sys.stderr.write('Best weights: ' + str(best_weights) + '\n')
         sys.stderr.write('Cross entropies: ' + str(best_cross_entropy) + '\n')
+        sys.stderr.write('You can apply these weights with the action combine_given_weights and the option -w "{0}"\n'.format('; '.join([', '.join(str(w) for w in item) for item in best_weights])))
         return best_weights,best_cross_entropy
 
         
@@ -1829,6 +1836,11 @@ def parse_command_line():
     parser.add_argument('--recompute_lexweights', action="store_true",
                     help=('don\'t directly interpolate lexical weights, but interpolate word translation probabilities instead and recompute the lexical weights. Only relevant in mode "interpolate".'))
 
+    parser.add_argument('--tempdir', type=str,
+                    default=None,
+                    help=('Temporary directory in --lowmem mode.'))
+
+
     return parser.parse_args()
 
 if __name__ == "__main__":
@@ -1842,7 +1854,7 @@ if __name__ == "__main__":
     else:
         args = parse_command_line()
         #initialize
-        combiner = Combine_TMs([(m,'primary') for m in args.model],weights=args.weights,mode=args.mode,output_file=args.output,reference_file=args.reference,output_lexical=args.output_lexical,lowmem=args.lowmem,normalized=args.normalized,recompute_lexweights=args.recompute_lexweights)
+        combiner = Combine_TMs([(m,'primary') for m in args.model],weights=args.weights,mode=args.mode,output_file=args.output,reference_file=args.reference,output_lexical=args.output_lexical,lowmem=args.lowmem,normalized=args.normalized,recompute_lexweights=args.recompute_lexweights,tempdir=args.tempdir)
         # execute right method
         f_string = "combiner."+args.action+'()'
         exec(f_string)

@@ -35,12 +35,15 @@ my $linesPerSplit = int($totalLines / $numParallel) + 1;
 print "total=$totalLines line-per-split=$linesPerSplit \n";
 
 my $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
+print STDERR "Executing: $cmd \n";
 `$cmd`;
 
 # run extract
@@ -55,7 +58,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
     $isParent = 0;
     my $numStr = NumStr($i);
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs \n";
-    print $cmd;
+    print STDERR $cmd;
     `$cmd`;
 
     exit();
@@ -95,15 +98,17 @@ if ($numParallel > 1)
   $extractCmd .= "> $extract \n";
   $extractInvCmd .= "> $extract.inv \n";
   $extractOrderingCmd .= "> $extract.o \n";
-  print $extractCmd;
-  print $extractInvCmd;
-  print $extractOrderingCmd;
-  `$extractCmd`;
-  `$extractInvCmd`;
+  print STDERR $extractCmd;
+  print STDERR $extractInvCmd;
+  print STDERR $extractOrderingCmd;
 
-  if (-e "$TMPDIR/extract.0.o")
+  systemCheck($extractCmd);
+  systemCheck($extractInvCmd);
+
+  my $numStr = NumStr(0);
+  if (-e "$TMPDIR/extract.$numStr.o")
   {
-    `$extractOrderingCmd`;
+    systemCheck($extractOrderingCmd);
   }
 }
 else
@@ -111,7 +116,9 @@ else
   rename "$TMPDIR/extract.0", "$extract";
   rename "$TMPDIR/extract.0.inv", "$extract.inv";
 
-  if (-e "$TMPDIR/extract.0.o")
+
+  my $numStr = NumStr(0);
+  if (-e "$TMPDIR/extract.$numStr.o")
   {
     rename "$TMPDIR/extract.0.o", "$extract.o";
   }
@@ -119,11 +126,20 @@ else
 
 
 $cmd = "rm -rf $TMPDIR \n";
-print $cmd;
+print STDERR $cmd;
 `$cmd`;
 
-print "Finished ".localtime() ."\n";
+print STDERR "Finished ".localtime() ."\n";
 
+sub systemCheck($)
+{
+  my $cmd = shift;
+  my $retVal = system($cmd);
+  if ($retVal != 0)
+  {
+    exit(1);
+  }
+}
 
 sub NumStr($)
 {

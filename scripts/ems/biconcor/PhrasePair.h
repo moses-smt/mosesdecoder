@@ -1,15 +1,10 @@
-#include <string>
-#include <stdlib.h>
-#include <cstring>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include "SuffixArray.h"
-#include "TargetCorpus.h"
-#include "Alignment.h"
 #pragma once
 
-using namespace std;
+#include <iosfwd>
+
+class Alignment;
+class SuffixArray;
+class TargetCorpus;
 
 class PhrasePair
 {
@@ -22,7 +17,7 @@ private:
   Alignment *m_alignment;
   INDEX m_sentence_id;
   char m_target_length;
-  SuffixArray::INDEX m_source_position;
+  INDEX m_source_position;
   char m_source_start, m_source_end;
   char m_target_start, m_target_end;
   char m_start_null, m_end_null;
@@ -34,8 +29,8 @@ public:
     ,m_targetCorpus(tc)
     ,m_alignment(a)
     ,m_sentence_id(sentence_id)
-    ,m_source_position(position)
     ,m_target_length(target_length)
+    ,m_source_position(position)
     ,m_source_start(source_start)
     ,m_source_end(source_end)
     ,m_target_start(target_start)
@@ -47,8 +42,8 @@ public:
   {}
   ~PhrasePair () {}
 
-  void PrintTarget( ostream* out );
-  void Print( ostream* out, int width );
-  void PrintHTML( ostream* out );
-  void PrintClippedHTML( ostream* out, int width );
+  void PrintTarget( std::ostream* out ) const;
+  void Print( std::ostream* out, int width ) const;
+  void PrintHTML( std::ostream* out ) const;
+  void PrintClippedHTML( std::ostream* out, int width ) const;
 };

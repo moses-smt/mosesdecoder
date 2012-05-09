@@ -1,6 +1,6 @@
 /*
  *  FeatureStats.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
@@ -8,6 +8,7 @@
 
 #include "FeatureStats.h"
 
+#include <fstream>
 #include <cmath>
 #include "Util.h"
 
@@ -15,58 +16,58 @@ namespace {
 const int kAvailableSize = 8;
 } // namespace
 
-SparseVector::name2id_t SparseVector::name2id_;
-SparseVector::id2name_t SparseVector::id2name_;
+SparseVector::name2id_t SparseVector::m_name_to_id;
+SparseVector::id2name_t SparseVector::m_id_to_name;
 
 FeatureStatsType SparseVector::get(const string& name) const {
-  name2id_t::const_iterator name2id_iter = name2id_.find(name);
-  if (name2id_iter == name2id_.end()) return 0;
+  name2id_t::const_iterator name2id_iter = m_name_to_id.find(name);
+  if (name2id_iter == m_name_to_id.end()) return 0;
   size_t id = name2id_iter->second;
   return get(id);
 }
 
 FeatureStatsType SparseVector::get(size_t id) const {
-  fvector_t::const_iterator fvector_iter = fvector_.find(id);
-  if (fvector_iter == fvector_.end()) return 0;
+  fvector_t::const_iterator fvector_iter = m_fvector.find(id);
+  if (fvector_iter == m_fvector.end()) return 0;
   return fvector_iter->second;
 }
 
 void SparseVector::set(const string& name, FeatureStatsType value) {
-  name2id_t::const_iterator name2id_iter = name2id_.find(name);
+  name2id_t::const_iterator name2id_iter = m_name_to_id.find(name);
   size_t id = 0;
-  if (name2id_iter == name2id_.end()) {
-    id = id2name_.size();
-    id2name_.push_back(name);
-    name2id_[name] = id;
+  if (name2id_iter == m_name_to_id.end()) {
+    id = m_id_to_name.size();
+    m_id_to_name.push_back(name);
+    m_name_to_id[name] = id;
   } else {
     id = name2id_iter->second;
   }
-  fvector_[id] = value;
+  m_fvector[id] = value;
 }
 
 void SparseVector::write(ostream& out, const string& sep) const {
-  for (fvector_t::const_iterator i = fvector_.begin(); i != fvector_.end(); ++i) {
+  for (fvector_t::const_iterator i = m_fvector.begin(); i != m_fvector.end(); ++i) {
     if (abs(i->second) < 0.00001) continue;
-    string name = id2name_[i->first];
+    string name = m_id_to_name[i->first];
     out << name << sep << i->second << " ";
   }
 }
 
 void SparseVector::clear() {
-  fvector_.clear();
+  m_fvector.clear();
 }
 
 SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
   //All the elements that have values in *this
-  for (fvector_t::iterator i = fvector_.begin(); i != fvector_.end(); ++i) {
-    fvector_[i->first] = i->second - rhs.get(i->first);
+  for (fvector_t::iterator i = m_fvector.begin(); i != m_fvector.end(); ++i) {
+    m_fvector[i->first] = i->second - rhs.get(i->first);
   }
 
   //Any elements in rhs, that have no value in *this
-  for (fvector_t::const_iterator i = rhs.fvector_.begin();
-      i != rhs.fvector_.end(); ++i) {
-    if (fvector_.find(i->first) == fvector_.end()) {
-      fvector_[i->first] = -(i->second);
+  for (fvector_t::const_iterator i = rhs.m_fvector.begin();
+      i != rhs.m_fvector.end(); ++i) {
+    if (m_fvector.find(i->first) == m_fvector.end()) {
+      m_fvector[i->first] = -(i->second);
     }
   }
   return *this;
@@ -79,37 +80,37 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
 }
 
 FeatureStats::FeatureStats()
-    : available_(kAvailableSize), entries_(0),
-      array_(new FeatureStatsType[available_]) {}
+    : m_available_size(kAvailableSize), m_entries(0),
+      m_array(new FeatureStatsType[m_available_size]) {}
 
 FeatureStats::FeatureStats(const size_t size)
-    : available_(size), entries_(size),
-      array_(new FeatureStatsType[available_])
+    : m_available_size(size), m_entries(size),
+      m_array(new FeatureStatsType[m_available_size])
 {
-  memset(array_, 0, GetArraySizeWithBytes());
+  memset(m_array, 0, GetArraySizeWithBytes());
 }
 
-FeatureStats::FeatureStats(std::string &theString)
-    : available_(0), entries_(0), array_(NULL)
+FeatureStats::FeatureStats(string &theString)
+    : m_available_size(0), m_entries(0), m_array(NULL)
 {
   set(theString);
 }
 
 FeatureStats::~FeatureStats()
 {
-  if (array_) {
-    delete [] array_;
-    array_ = NULL;
+  if (m_array) {
+    delete [] m_array;
+    m_array = NULL;
   }
 }
 
 void FeatureStats::Copy(const FeatureStats &stats)
 {
-  available_ = stats.available();
-  entries_ = stats.size();
-  array_ = new FeatureStatsType[available_];
-  memcpy(array_, stats.getArray(), GetArraySizeWithBytes());
-  map_ = stats.getSparse();
+  m_available_size = stats.available();
+  m_entries = stats.size();
+  m_array = new FeatureStatsType[m_available_size];
+  memcpy(m_array, stats.getArray(), GetArraySizeWithBytes());
+  m_map = stats.getSparse();
 }
 
 FeatureStats::FeatureStats(const FeatureStats &stats)
@@ -119,34 +120,34 @@ FeatureStats::FeatureStats(const FeatureStats &stats)
 
 FeatureStats& FeatureStats::operator=(const FeatureStats &stats)
 {
-  delete [] array_;
+  delete [] m_array;
   Copy(stats);
   return *this;
 }
 
 void FeatureStats::expand()
 {
-  available_ *= 2;
-  featstats_t t_ = new FeatureStatsType[available_];
-  memcpy(t_, array_, GetArraySizeWithBytes());
-  delete [] array_;
-  array_ = t_;
+  m_available_size *= 2;
+  featstats_t t_ = new FeatureStatsType[m_available_size];
+  memcpy(t_, m_array, GetArraySizeWithBytes());
+  delete [] m_array;
+  m_array = t_;
 }
 
 void FeatureStats::add(FeatureStatsType v)
 {
   if (isfull()) expand();
-  array_[entries_++]=v;
+  m_array[m_entries++]=v;
 }
 
 void FeatureStats::addSparse(const string& name, FeatureStatsType v)
 {
-  map_.set(name,v);
+  m_map.set(name,v);
 }
 
-void FeatureStats::set(std::string &theString)
+void FeatureStats::set(string &theString)
 {
-  std::string substring, stringBuf;
+  string substring, stringBuf;
   reset();
 
   while (!theString.empty()) {
@@ -163,48 +164,50 @@ void FeatureStats::set(std::string &theString)
   }
 }
 
-
-void FeatureStats::loadbin(std::ifstream& inFile)
+void FeatureStats::loadbin(istream* is)
 {
-  inFile.read((char*) array_, GetArraySizeWithBytes());
+  is->read(reinterpret_cast<char*>(m_array),
+           static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
-void FeatureStats::loadtxt(std::ifstream& inFile)
+void FeatureStats::loadtxt(istream* is)
 {
-  std::string theString;
-  std::getline(inFile, theString);
-  set(theString);
+  string line;
+  getline(*is, line);
+  set(line);
 }
 
-void FeatureStats::loadtxt(const std::string &file)
+void FeatureStats::loadtxt(const string &file)
 {
-  //    TRACE_ERR("loading the stats from " << file << std::endl);
-
-  std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-  loadtxt(inFile);
+  ifstream ifs(file.c_str(), ios::in);
+  if (!ifs) {
+    cerr << "Failed to open " << file << endl;
+    exit(1);
+  }
+  istream* is = &ifs;
+  loadtxt(is);
 }
 
-
-void FeatureStats::savetxt(const std::string &file)
+void FeatureStats::savetxt(const string &file)
 {
-//      TRACE_ERR("saving the stats into " << file << std::endl);
-
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
-
-  savetxt(outFile);
+  ofstream ofs(file.c_str(), ios::out);
+  ostream* os = &ofs;
+  savetxt(os);
 }
 
-
-void FeatureStats::savetxt(std::ofstream& outFile)
+void FeatureStats::savetxt(ostream* os)
 {
-//      TRACE_ERR("saving the stats" << std::endl);
-  outFile << *this;
+  *os << *this;
 }
 
-void FeatureStats::savebin(std::ofstream& outFile)
+void FeatureStats::savetxt() {
+  savetxt(&cout);
+}
+
+void FeatureStats::savebin(ostream* os)
 {
-  outFile.write((char*) array_, GetArraySizeWithBytes());
+  os->write(reinterpret_cast<char*>(m_array),
+            static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
 ostream& operator<<(ostream& o, const FeatureStats& e)
@@ -230,7 +233,7 @@ bool operator==(const FeatureStats& f1, const FeatureStats& f2) {
     if (f1.get(k) != f2.get(k))
       return false;
   }
-  
+
   return true;
 }
 //END_ADDED

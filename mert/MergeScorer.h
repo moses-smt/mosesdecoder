@@ -1,5 +1,5 @@
-#ifndef __MERGESCORER_H__
-#define __MERGESCORER_H__
+#ifndef MERT_MERGE_SCORER_H_
+#define MERT_MERGE_SCORER_H_
 
 #include <iostream>
 #include <set>
@@ -13,6 +13,8 @@ using namespace std;
 class PerScorer;
 class ScoreStats;
 
+const int kMergeScorerLength = 4;
+
 /**
  * Merge scoring.
  */
@@ -23,21 +25,16 @@ public:
 
   virtual void setReferenceFiles(const vector<string>& referenceFiles);
   virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-
-  void whoami() const {
-    cerr << "I AM MergeScorer" << endl;
-  }
+  virtual size_t NumberOfScores() const { return 0; }
 
 protected:
   friend class PerScorer;
   virtual float calculateScore(const vector<int>& comps) const;
 
  private:
-  const int kLENGTH;
-
   // no copying allowed
   MergeScorer(const MergeScorer&);
   MergeScorer& operator=(const MergeScorer&);
 };
 
-#endif  //__TERSCORER_H
+#endif  // MERT_MERGE_SCORER_H_
