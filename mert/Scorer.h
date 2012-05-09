@@ -115,7 +115,7 @@ class Scorer
    * Set unix filter, which will be used to preprocess the sentences
    */
   virtual void setFilter(const string& filterCommand);
-  
+
  private:
   void InitConfig(const string& config);
 
@@ -133,7 +133,7 @@ class Scorer
   mert::Vocabulary* m_vocab;
   map<string, string> m_config;
   vector<int> m_factors;
-  PreProcessFilter* m_filter;    
+  PreProcessFilter* m_filter;
 
  protected:
   ScoreData* m_score_data;
@@ -184,7 +184,7 @@ class StatisticsBasedScorer : public Scorer
   enum RegularisationType {
     NONE,
     AVERAGE,
-    MINIMUM,
+    MINIMUM
   };
 
   /**
