@@ -54,7 +54,7 @@ private:
 
   std::map<int, float> weightsMap;
 
-  void loadWeights(const string& weightsfile);
+  void loadWeights(const std::string& weightsfile);
 
   // no copying allowed.
   SemposScorer(const SemposScorer&);

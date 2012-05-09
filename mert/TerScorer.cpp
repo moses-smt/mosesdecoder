@@ -9,6 +9,7 @@
 #include "TER/terAlignment.h"
 #include "Util.h"
 
+using namespace std;
 using namespace TERCpp;
 
 TerScorer::TerScorer(const string& config)

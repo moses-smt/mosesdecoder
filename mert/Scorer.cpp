@@ -6,6 +6,8 @@
 #include "Singleton.h"
 #include "PreProcessFilter.h"
 
+using namespace std;
+
 namespace {
 
 //regularisation strategies
