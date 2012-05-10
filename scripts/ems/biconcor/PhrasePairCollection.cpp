@@ -89,7 +89,7 @@ bool PhrasePairCollection::GetCollection( const vector< string >& sourceString )
 		}
     cerr << endl;
 
-    if (found > m_max_lookup) {
+    if (found > (INDEX)m_max_lookup) {
       i += found/m_max_lookup-1;
     }
   }
@@ -172,7 +172,7 @@ void PhrasePairCollection::PrintHTML() const
 	if (singleton) cout << "</table></div>\n";
 	else if (pp_target > 9)	cout << "</div>";
 
-	int max_mismatch = m_max_pp/3;
+	size_t max_mismatch = m_max_pp/3;
 	// unaligned phrases
 	if (m_unaligned.size() > 0) {
 		cout << "<p class=\"pp_singleton_header\">unaligned" 
@@ -181,7 +181,7 @@ void PhrasePairCollection::PrintHTML() const
 		int step_size = 1;
 		if (m_unaligned.size() > max_mismatch)
 			step_size = (m_unaligned.size()+max_mismatch-1) / max_mismatch;
-		for(int i=0;i<m_unaligned.size();i+=step_size)
+		for(size_t i=0;i<m_unaligned.size();i+=step_size)
 			m_unaligned[i]->PrintClippedHTML( &cout, 160 );
 		cout << "</table>";
 	}
@@ -194,7 +194,7 @@ void PhrasePairCollection::PrintHTML() const
 		int step_size = 1;
 		if (m_mismatch.size() > max_mismatch)
 			step_size = (m_mismatch.size()+max_mismatch-1) / max_mismatch;
-		for(int i=0;i<m_mismatch.size();i+=step_size)
+		for(size_t i=0;i<m_mismatch.size();i+=step_size)
 			m_mismatch[i]->PrintClippedHTML( &cout, 160 );
 		cout << "</table>";
 	}	

@@ -68,7 +68,7 @@ void Alignment::Create(const string& fileName)
     SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
     if (fileP->eof()) break;
     vector<string> alignmentSequence = Tokenize( line );
-    for(int i=0; i<alignmentSequence.size(); i++) {
+    for(size_t i=0; i<alignmentSequence.size(); i++) {
       int s,t;
       // cout << "scaning " << alignmentSequence[i].c_str() << endl;
       if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {
@@ -166,18 +166,18 @@ bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
   }
   for(INDEX ap = sentenceStart; ap <= m_sentenceEnd[ sentence ]; ap += 2 ) {
     char target =  m_array[ ap+1 ];
-    m_unaligned[ target ] = false;
+    m_unaligned[ (int)target ] = false;
   }
 
   // prior unaligned words
   pre_null = 0;
-  for(char target = target_start-1; target >= 0 && m_unaligned[ target ]; target--) {
+  for(char target = target_start-1; target >= 0 && m_unaligned[ (int)target ]; target--) {
     pre_null++;
   }
 
   // post unaligned words;
   post_null = 0;
-  for(char target = target_end+1; target < target_length && m_unaligned[ target ]; target++) {
+  for(char target = target_end+1; target < target_length && m_unaligned[ (int)target ]; target++) {
     post_null++;
   }
   return true;

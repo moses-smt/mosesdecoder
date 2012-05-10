@@ -44,8 +44,8 @@ Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sente
   m_num_alignment_points =
       m_alignment->GetNumberOfAlignmentPoints( sentence_id );
   for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
-    m_source_unaligned[ m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
-    m_target_unaligned[ m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
+    m_source_unaligned[ (int)m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
+    m_target_unaligned[ (int)m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
   }
   for(int i = source_start; i <= source_end; i++) {
     if (!m_source_unaligned[ i ]) {
