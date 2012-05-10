@@ -190,12 +190,9 @@ int main(int argc, char* argv[])
 	}
 	else {
 		Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
-		//ofstream *outputFile = new ofstream();
-		//outputFile->open(fileNamePhraseTable);
-		
-		//if (outputFile->fail()) {
-    
-    {
+    bool success = outputFile->Open(fileNamePhraseTable);
+    		
+    if (!success) {
 			cerr << "ERROR: could not open file phrase table file "
 					 << fileNamePhraseTable << endl;
 			exit(1);
@@ -250,7 +247,7 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
-		(dynamic_cast<ofstream*>(phraseTableFile))->close();
+		//(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 

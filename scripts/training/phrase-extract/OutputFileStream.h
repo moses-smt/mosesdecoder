@@ -35,6 +35,7 @@ namespace Moses
 class OutputFileStream : public boost::iostreams::filtering_ostream
 {
 protected:
+  bool m_isGZ;
   std::ofstream *m_outFile;
 public:
   OutputFileStream();
