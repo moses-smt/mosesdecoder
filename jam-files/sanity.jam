@@ -47,17 +47,30 @@ rule auto-shared ( name : additional * ) {
   }
 }
 
-with-boost = [ option.get "with-boost" ] ;
-if $(with-boost) {
-  L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
-  boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
-  I-boost-include = -I$(with-boost)/include ;
-  boost-include = <include>$(with-boost)/include ;
-} else {
-  L-boost-search = "" ;
-  boost-search = ;
-  I-boost-include = "" ;
-  boost-include = ;
+# MacPorts' default location is /opt/local -- use this if no path is given.
+with-macports = [ option.get "with-macports" : : "/opt/local" ] ;
+if $(with-macports) {
+  using darwin ;
+  ECHO "Using --with-macports=$(with-macports), implying use of darwin GCC" ;
+
+  L-boost-search = -L$(with-macports)/lib ;
+  boost-search = <search>$(with-macports)/lib ;
+  I-boost-include = -I$(with-macports)/include ;
+  boost-include = <include>$(with-macports)/include ;
+}
+else {
+  with-boost = [ option.get "with-boost" ] ;
+  if $(with-boost) {
+    L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
+    boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
+    I-boost-include = -I$(with-boost)/include ;
+    boost-include = <include>$(with-boost)/include ;
+  } else {
+    L-boost-search = "" ;
+    boost-search = ;
+    I-boost-include = "" ;
+    boost-include = ;
+  }
 }
  
 #Are we linking static binaries against shared boost?
