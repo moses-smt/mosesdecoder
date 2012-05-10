@@ -17,7 +17,7 @@ class OptimizerFactory
     NOPTIMIZER
   };
 
-  static std::vector<string> GetTypeNames();
+  static std::vector<std::string> GetTypeNames();
 
   // Setup optimization types.
   static void SetTypeNames();
@@ -27,7 +27,7 @@ class OptimizerFactory
 
   static Optimizer* BuildOptimizer(unsigned dim,
                                    const std::vector<unsigned>& to_optimize,
-				   const std::vector<bool>& positive,
+                                   const std::vector<bool>& positive,
                                    const std::vector<parameter_t>& start,
                                    const std::string& type,
                                    unsigned int nrandom);
@@ -36,7 +36,7 @@ class OptimizerFactory
   OptimizerFactory() {}
   ~OptimizerFactory() {}
 
-  static vector<string> m_type_names;
+  static std::vector<std::string> m_type_names;
 };
 
 #endif  // MERT_OPTIMIZER_FACTORY_H_

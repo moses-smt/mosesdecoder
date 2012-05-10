@@ -22,8 +22,6 @@
 
 #include "Types.h"
 
-using namespace std;
-
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
 #else
@@ -40,11 +38,11 @@ const float kEPS = 0.0001f;
 
 template <typename T>
 bool IsAlmostEqual(T expected, T actual, float round=kEPS) {
-  if (abs(expected - actual) < round) {
+  if (std::abs(expected - actual) < round) {
     return true;
   } else {
-    cerr << "Fail: expected = " << expected
-         << " (actual = " << actual << ")" << endl;
+    std::cerr << "Fail: expected = " << expected
+              << " (actual = " << actual << ")" << std::endl;
     return false;
   }
 }

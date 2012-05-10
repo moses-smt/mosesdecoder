@@ -4,6 +4,8 @@
 #include <fstream>
 #include <stdexcept>
 
+using namespace std;
+
 namespace {
 
 inline int CalcDistance(int word1, int word2) {
