@@ -88,7 +88,16 @@ Common options are:
 --with-giza=/path/to/giza to enable training scripts
 -jN where N is the number of CPUs
 
+--with-macports=/path/to/macports use MacPorts on Mac OS X.
+
+If you leave out /path/to/macports bjam will use the /opt/local as default.
+You don't have to use --with-boost with-macports as it is implicitly set.
+Also note that using --with-macports automatically triggers "using darwin".
+
 Binaries will appear in dist/bin.  
+
+You can clean up data from previous builds using
+  ./bjam --clean
 
 For further documentation, run 
   ./bjam --help
