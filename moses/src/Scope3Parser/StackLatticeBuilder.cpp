@@ -51,7 +51,7 @@ void StackLatticeBuilder::Build(
 
   const UTrieNode::LabelTable &labelTable = ruleNode.GetLabelTable();
 
-  for (int index = 0; index < ranges.size(); ++index) {
+  for (size_t index = 0; index < ranges.size(); ++index) {
     const VarSpanNode::NonTermRange &range = ranges[index];
     const std::vector<Word> &labelVec = labelTable[index];
     checkTable[index].clear();

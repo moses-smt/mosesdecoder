@@ -68,7 +68,7 @@ void Alignment::Create(const string& fileName)
     SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
     if (fileP->eof()) break;
     vector<string> alignmentSequence = Tokenize( line );
-    for(int i=0; i<alignmentSequence.size(); i++) {
+    for(size_t i=0; i<alignmentSequence.size(); i++) {
       int s,t;
       // cout << "scaning " << alignmentSequence[i].c_str() << endl;
       if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {

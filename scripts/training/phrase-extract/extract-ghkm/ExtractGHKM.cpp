@@ -380,7 +380,7 @@ void ExtractGHKM::WriteGlueGrammar(
 {
   // chose a top label that is not already a label
   std::string topLabel = "QQQQQQ";
-  for(int i = 1; i <= topLabel.length(); i++) {
+  for(size_t i = 1; i <= topLabel.length(); i++) {
     if (labelSet.find(topLabel.substr(0,i)) == labelSet.end() ) {
       topLabel = topLabel.substr(0,i);
       break;

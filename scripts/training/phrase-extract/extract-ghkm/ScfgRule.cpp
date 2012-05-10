@@ -119,7 +119,7 @@ int ScfgRule::Scope() const
     ++scope;
     predIsNonTerm = true;
   }
-  for (int i = 1; i < m_sourceRHS.size(); ++i) {
+  for (size_t i = 1; i < m_sourceRHS.size(); ++i) {
     bool isNonTerm = m_sourceRHS[i].GetType() == NonTerminal;
     if (isNonTerm && predIsNonTerm) {
       ++scope;

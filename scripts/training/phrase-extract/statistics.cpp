@@ -112,7 +112,7 @@ int main(int argc, char* argv[])
     bool isPhrasePair = phrasePair.create( line, i );
     if (lastForeign >= 0 && lastForeign != phrasePair.foreign) {
       processPhrasePairs( phrasePairsWithSameF );
-      for(int j=0; j<phrasePairsWithSameF.size(); j++)
+      for(size_t j=0; j<phrasePairsWithSameF.size(); j++)
         phrasePairsWithSameF[j].clear();
       phrasePairsWithSameF.clear();
       phraseTableE.clear();
@@ -141,7 +141,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
   int maxSameCount = 0;
   int maxSame = -1;
   int old = -1;
-  for(int i=0; i<phrasePair.size(); i++) {
+  for(size_t i=0; i<phrasePair.size(); i++) {
     if (i>0) {
       if (phrasePair[old].english == phrasePair[i].english) {
         if (! phrasePair[i].equals( phrasePair[old] )) {
@@ -194,7 +194,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
 
     // foreign phrase (unless inverse)
     if (! inverseFlag) {
-      for(int j=0; j<phraseF.size(); j++) {
+      for(size_t j=0; j<phraseF.size(); j++) {
         phraseTableFile << vcbF.getWord( phraseF[j] );
         phraseTableFile << " ";
       }
@@ -203,7 +203,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
 
     // english phrase
     PHRASE phraseE = phraseTableE.getPhrase( i->first );
-    for(int j=0; j<phraseE.size(); j++) {
+    for(size_t j=0; j<phraseE.size(); j++) {
       phraseTableFile << vcbE.getWord( phraseE[j] );
       phraseTableFile << " ";
     }
@@ -211,7 +211,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair )
 
     // foreign phrase (if inverse)
     if (inverseFlag) {
-      for(int j=0; j<phraseF.size(); j++) {
+      for(size_t j=0; j<phraseF.size(); j++) {
         phraseTableFile << vcbF.getWord( phraseF[j] );
         phraseTableFile << " ";
       }
@@ -241,7 +241,7 @@ bool PhraseAlignment::create( char line[], int lineID )
   vector< string > token = tokenize( line );
   int item = 1;
   PHRASE phraseF, phraseE;
-  for (int j=0; j<token.size(); j++) {
+  for (size_t j=0; j<token.size(); j++) {
     if (token[j] == "|||") item++;
     else {
       if (item == 1)
@@ -251,14 +251,14 @@ bool PhraseAlignment::create( char line[], int lineID )
       else if (item == 3) {
         int e,f;
         sscanf(token[j].c_str(), "%d-%d", &f, &e);
-        if (e >= phraseE.size() || f >= phraseF.size()) {
+        if ((size_t)e >= phraseE.size() || (size_t)f >= phraseF.size()) {
           cerr << "WARNING: sentence " << lineID << " has alignment point (" << f << ", " << e << ") out of bounds (" << phraseF.size() << ", " << phraseE.size() << ")\n";
         } else {
           if (alignedToE.size() == 0) {
             vector< size_t > dummy;
-            for(int i=0; i<phraseE.size(); i++)
+            for(size_t i=0; i<phraseE.size(); i++)
               alignedToE.push_back( dummy );
-            for(int i=0; i<phraseF.size(); i++)
+            for(size_t i=0; i<phraseF.size(); i++)
               alignedToF.push_back( dummy );
             foreign = phraseTableF.storeIfNew( phraseF );
             english = phraseTableE.storeIfNew( phraseE );
@@ -274,9 +274,9 @@ bool PhraseAlignment::create( char line[], int lineID )
 
 void PhraseAlignment::clear()
 {
-  for(int i=0; i<alignedToE.size(); i++)
+  for(size_t i=0; i<alignedToE.size(); i++)
     alignedToE[i].clear();
-  for(int i=0; i<alignedToF.size(); i++)
+  for(size_t i=0; i<alignedToF.size(); i++)
     alignedToF[i].clear();
   alignedToE.clear();
   alignedToF.clear();
@@ -289,15 +289,15 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
   if (other.foreign != foreign) return false;
   PHRASE phraseE = phraseTableE.getPhrase( english );
   PHRASE phraseF = phraseTableF.getPhrase( foreign );
-  for(int i=0; i<phraseE.size(); i++) {
+  for(size_t i=0; i<phraseE.size(); i++) {
     if (alignedToE[i].size() != other.alignedToE[i].size()) return false;
-    for(int j=0; j<alignedToE[i].size(); j++) {
+    for(size_t j=0; j<alignedToE[i].size(); j++) {
       if (alignedToE[i][j] != other.alignedToE[i][j]) return false;
     }
   }
-  for(int i=0; i<phraseF.size(); i++) {
+  for(size_t i=0; i<phraseF.size(); i++) {
     if (alignedToF[i].size() != other.alignedToF[i].size()) return false;
-    for(int j=0; j<alignedToF[i].size(); j++) {
+    for(size_t j=0; j<alignedToF[i].size(); j++) {
       if (alignedToF[i][j] != other.alignedToF[i][j]) return false;
     }
   }

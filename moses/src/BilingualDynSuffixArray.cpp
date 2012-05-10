@@ -447,7 +447,7 @@ int BilingualDynSuffixArray::SampleSelection(std::vector<unsigned>& sample,
   int sampleSize) const 
 {
   // only use top 'sampleSize' number of samples
-   if(sample.size() > sampleSize)
+   if(sample.size() > (size_t)sampleSize)
      sample.erase(sample.begin()+sampleSize, sample.end());
    return sample.size(); 
 }
