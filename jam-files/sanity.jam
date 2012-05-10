@@ -20,7 +20,12 @@ rule _shell ( cmd : extras * ) {
 
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
-  local ret = [ SHELL "g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null" : exit-status ] ;
+  local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
+  local ret = [ SHELL $(cmd) : exit-status ] ;
+  if --debug-configuration in [ modules.peek : ARGV ] {
+    echo $(cmd) ;
+    echo $(ret) ;
+  }
   if $(ret[2]) = 0 {
     return true ;
   } else {
@@ -92,8 +97,10 @@ rule boost-lib ( name macro ) {
 
 #Argument is e.g. 103600
 rule boost ( min-version ) {
-  local boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '" : exit-status ] ;
+  local cmd = "bash -c \"g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '\"" ;
+  local boost-shell = [ SHELL "$(cmd)" : exit-status ] ;
   if $(boost-shell[2]) != 0 && $(CLEANING) = no {
+    echo Failed to run "$(cmd)" ;
     exit Boost does not seem to be installed or g++ is confused. : 1 ;
   }
   boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
@@ -138,7 +145,7 @@ requirements = ;
   requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<link>static,<toolset>clang:<linkflags>-static ;
 
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
-  if [ test_flags "-lSegfault" ] {
+  if [ test_flags "-lSegFault" ] {
     external-lib SegFault ;
     requirements += <library>SegFault ;
   }
