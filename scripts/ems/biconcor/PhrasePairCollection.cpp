@@ -50,16 +50,16 @@ bool PhrasePairCollection::GetCollection( const vector< string >& sourceString )
          << ", starting at word " << source_start
          << " of " << sentence_length
          << ". target sentence has " << target_length << " words.";
-    char target_start, target_end, pre_null, post_null;
+    int target_start, target_end, pre_null, post_null;
     if (m_alignment->PhraseAlignment( sentence_id, target_length, source_start, source_end, target_start, target_end, pre_null, post_null)) {
       cerr << " aligned to [" << (int)target_start << "," << (int)target_end << "]";
       cerr << " +(" << (int)pre_null << "," << (int)post_null << ")";
 			bool null_boundary_words = false;
-      for( char pre = 0; pre <= pre_null && (pre==0||null_boundary_words); pre++ ) {
-        for( char post = 0; post <= post_null && (post==0||null_boundary_words); post++ ) {
+      for (int pre = 0; pre <= pre_null && (pre == 0 || null_boundary_words); pre++ ) {
+        for (int post = 0; post <= post_null && (post == 0 || null_boundary_words); post++ ) {
           vector< WORD_ID > targetString;
           cerr << "; ";
-          for( char target = target_start-pre; target <= target_end+post; target++ ) {
+          for (int target = target_start - pre; target <= target_end + post; target++) {
             targetString.push_back( m_targetCorpus->GetWordId( sentence_id, target) );
             cerr << m_targetCorpus->GetWord( sentence_id, target) << " ";
           }
