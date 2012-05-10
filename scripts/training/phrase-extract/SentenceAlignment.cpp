@@ -60,17 +60,17 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
   }
 
   // prepare data structures for alignments
-  for(int i=0; i<source.size(); i++) {
+  for(size_t i=0; i<source.size(); i++) {
     alignedCountS.push_back( 0 );
   }
-  for(int i=0; i<target.size(); i++) {
+  for(size_t i=0; i<target.size(); i++) {
     vector< int > dummy;
     alignedToT.push_back( dummy );
   }
 
   // reading in alignments
   vector<string> alignmentSequence = tokenize( alignmentString );
-  for(int i=0; i<alignmentSequence.size(); i++) {
+  for(size_t i=0; i<alignmentSequence.size(); i++) {
     int s,t;
     // cout << "scaning " << alignmentSequence[i].c_str() << endl;
     if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {
@@ -79,7 +79,7 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
       return false;
     }
     // cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << s << ", " << t << endl;
-    if (t >= target.size() || s >= source.size()) {
+    if ((size_t)t >= target.size() || (size_t)s >= source.size()) {
       cerr << "WARNING: sentence " << sentenceID << " has alignment point (" << s << ", " << t << ") out of bounds (" << source.size() << ", " << target.size() << ")\n";
       cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
       return false;
