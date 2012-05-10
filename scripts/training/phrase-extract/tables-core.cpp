@@ -1,6 +1,5 @@
 // $Id$
 //#include "beammain.h"
-#include "SafeGetline.h"
 #include "tables-core.h"
 
 #define TABLE_LINE_MAX_LENGTH 1000
@@ -90,16 +89,19 @@ void DTable::load( const string& fileName )
 {
   ifstream inFile;
   inFile.open(fileName.c_str());
-  istream *inFileP = &inFile;
 
-  char line[TABLE_LINE_MAX_LENGTH];
+  std::string line;
   int i=0;
   while(true) {
     i++;
-    SAFE_GETLINE((*inFileP), line, TABLE_LINE_MAX_LENGTH, '\n', __FILE__);
-    if (inFileP->eof()) break;
-
-    vector<string> token = tokenize( line );
+    getline(inFile, line);
+    if (inFile.eof()) break;
+    if (!inFile) {
+      std::cerr << "Error reading from " << fileName << std::endl;
+      abort();
+    }
+    
+    vector<string> token = tokenize(line.c_str());
     if (token.size() < 2) {
       cerr << "line " << i << " in " << fileName << " too short, skipping\n";
       continue;
