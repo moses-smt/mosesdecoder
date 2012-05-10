@@ -1,4 +1,5 @@
-alias InputFileStream : InputFileStream.cpp ../../..//z ;
+obj InputFileStream.o : InputFileStream.cpp : <include>. ;
+alias InputFileStream : InputFileStream.o ../../..//z ;
 
 obj tables-core.o : tables-core.cpp : <include>. ;
 obj AlignmentPhrase.o : AlignmentPhrase.cpp : <include>. ;
