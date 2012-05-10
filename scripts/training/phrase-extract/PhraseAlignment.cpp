@@ -82,7 +82,7 @@ void PhraseAlignment::create( char line[], int lineID )
   //cerr << "processing " << line;
   vector< string > token = tokenize( line );
   int item = 1;
-  for (int j=0; j<token.size(); j++) {
+  for (size_t j=0; j<token.size(); j++) {
     if (token[j] == "|||") item++;
     else if (item == 1) { // source phrase
       phraseS.push_back( vcbS.storeIfNew( token[j] ) );
@@ -94,7 +94,7 @@ void PhraseAlignment::create( char line[], int lineID )
     else if (item == 3) { // alignment
       int s,t;
       sscanf(token[j].c_str(), "%d-%d", &s, &t);
-      if (t >= phraseT.size() || s >= phraseS.size()) {
+      if ((size_t)t >= phraseT.size() || (size_t)s >= phraseS.size()) {
         cerr << "WARNING: phrase pair " << lineID
              << " has alignment point (" << s << ", " << t
              << ") out of bounds (" << phraseS.size() << ", " << phraseT.size() << ")\n";
@@ -187,7 +187,7 @@ bool PhraseAlignment::match( const PhraseAlignment& other )
   assert(alignedToT.size() == other.alignedToT.size());
 
   // loop over all words (note: 0 = left hand side of rule)
-  for(int i=0; i<phraseT.size()-1; i++) {
+  for(size_t i=0; i<phraseT.size()-1; i++) {
     if (isNonTerminal( vcbT.getWord( phraseT[i] ) )) {
       if (alignedToT[i].size() != 1 ||
           other.alignedToT[i].size() != 1 ||
@@ -213,7 +213,7 @@ int PhraseAlignment::Compare(const PhraseAlignment &other) const
     return 0;
 
   // loop over all words (note: 0 = left hand side of rule)
-  for(int i=0; i<phraseT.size()-1; i++) {
+  for(size_t i=0; i<phraseT.size()-1; i++) {
     if (isNonTerminal( vcbT.getWord( phraseT[i] ) )) {
       size_t thisAlign = *(alignedToT[i].begin());
       size_t otherAlign = *(other.alignedToT[i].begin());
