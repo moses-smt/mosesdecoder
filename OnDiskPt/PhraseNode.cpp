@@ -55,7 +55,7 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
 
   std::fstream &file = onDiskWrapper.GetFileSource();
   file.seekg(filePos);
-  CHECK(filePos == file.tellg());
+  CHECK(filePos == (UINT64)file.tellg());
 
   file.read((char*) &m_numChildrenLoad, sizeof(UINT64));
 
@@ -64,11 +64,11 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
 
   // go to start of node again
   file.seekg(filePos);
-  CHECK(filePos == file.tellg());
+  CHECK(filePos == (UINT64)file.tellg());
 
   // read everything into memory
   file.read(m_memLoad, memAlloc);
-  CHECK(filePos + memAlloc == file.tellg());
+  CHECK(filePos + memAlloc == (UINT64)file.tellg());
 
   // get value
   m_value = ((UINT64*)m_memLoad)[1];
