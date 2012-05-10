@@ -282,7 +282,7 @@ void extract(SentenceAlignment &sentence)
       int maxF = -1;
       vector< int > usedF = sentence.alignedCountS;
       for(int ei=startE; ei<=endE; ei++) {
-        for(int i=0; i<sentence.alignedToT[ei].size(); i++) {
+        for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
           int fi = sentence.alignedToT[ei][i];
           if (fi<minF) {
             minF = fi;
@@ -354,7 +354,7 @@ void extract(SentenceAlignment &sentence)
     string orientationInfo = "";
     REO_POS wordPrevOrient, wordNextOrient, phrasePrevOrient, phraseNextOrient, hierPrevOrient, hierNextOrient;
 
-    for(int i = 0; i < inboundPhrases.size(); i++) {
+    for(size_t i = 0; i < inboundPhrases.size(); i++) {
       int startF = inboundPhrases[i].first.first;
       int startE = inboundPhrases[i].first.second;
       int endF = inboundPhrases[i].second.first;
@@ -523,11 +523,11 @@ bool isAligned ( SentenceAlignment &sentence, int fi, int ei )
     return true;
   if (ei <= -1 || fi <= -1)
     return false;
-  if (ei == sentence.target.size() && fi == sentence.source.size())
+  if ((size_t)ei == sentence.target.size() && (size_t)fi == sentence.source.size())
     return true;
-  if (ei >= sentence.target.size() || fi >= sentence.source.size())
+  if ((size_t)ei >= sentence.target.size() || (size_t)fi >= sentence.source.size())
     return false;
-  for(int i=0; i<sentence.alignedToT[ei].size(); i++)
+  for(size_t i=0; i<sentence.alignedToT[ei].size(); i++)
     if (sentence.alignedToT[ei][i] == fi)
       return true;
   return false;
@@ -645,7 +645,7 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   // alignment
   if (translationFlag) {
     for(int ei=startE; ei<=endE; ei++) {
-      for(int i=0; i<sentence.alignedToT[ei].size(); i++) {
+      for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
         int fi = sentence.alignedToT[ei][i];
         extractFile << " " << fi-startF << "-" << ei-startE;
         extractFileInv << " " << ei-startE << "-" << fi-startF;
