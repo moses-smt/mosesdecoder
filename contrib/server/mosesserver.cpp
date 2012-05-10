@@ -16,6 +16,7 @@
 #  include "LanguageModelORLM.h"
 #endif
 #include <boost/algorithm/string.hpp>
+#include "BleuScoreFeature.h"
 
 using namespace Moses;
 using namespace std;
@@ -148,7 +149,12 @@ public:
     // system.methodHelp RPC.
     this->_signature = "S:S";
     this->_help = "Does translation";
+
+    const StaticData &staticData = StaticData::Instance();
+    m_bleuScoreFeature = staticData.GetBleuScoreFeature();
   }
+
+  BleuScoreFeature *m_bleuScoreFeature;
 
   void execute(xmlrpc_c::paramList const& paramList,
           xmlrpc_c::value * const  retvalP) {
@@ -162,6 +168,28 @@ public:
     }
     const string source(
       (xmlrpc_c::value_string(si->second)));
+
+    si = params.find("id");
+    if (si == params.end()) {
+      throw xmlrpc_c::fault("Missing sentence id",
+			    xmlrpc_c::fault::CODE_PARSE);
+    }
+    int sentenceid = xmlrpc_c::value_int(si->second);
+    if (sentenceid < -1) {
+      throw xmlrpc_c::fault("Sentence id has to be >= 0",
+                            xmlrpc_c::fault::CODE_PARSE);
+    }
+
+    cerr << "Loading reference info for sentence " << sentenceid << endl;
+    vector<string> sourceTokens;
+    boost::split(sourceTokens, source, boost::is_any_of("\t "));
+    m_bleuScoreFeature->SetCurrSourceLength(sourceTokens.size());
+    bool avgRefLength = false;
+    if (avgRefLength)
+      m_bleuScoreFeature->SetCurrAvgRefLength(sentenceid);
+    else
+      m_bleuScoreFeature->SetCurrShortestRefLength(sentenceid);
+    m_bleuScoreFeature->SetCurrReferenceNgrams(sentenceid);
 
     cerr << "Input: " << source;
     si = params.find("align");
@@ -197,7 +225,7 @@ public:
     map<string, xmlrpc_c::value> retData;
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
-    cerr << "Output: " << out.str() << endl << endl;
+    cerr << "\nOutput: " << out.str() << endl << endl;
     if (addAlignInfo) {
       retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
     }
@@ -261,11 +289,12 @@ public:
         }
         searchGraphXmlNode["cover-start"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetStartPos());
         searchGraphXmlNode["cover-end"] = xmlrpc_c::value_int(hypo->GetCurrSourceWordsRange().GetEndPos());
+	searchGraphXmlNode["src-phrase"] = xmlrpc_c::value_string(hypo->GetSourcePhraseStringRep());
+	searchGraphXmlNode["tgt-phrase"] = xmlrpc_c::value_string(hypo->GetTargetPhraseStringRep());
+	ScoreComponentCollection scoreBreakdown = hypo->GetScoreBreakdown();
+	scoreBreakdown.MinusEquals(prevHypo->GetScoreBreakdown());
         stringstream tmp;
-        tmp << hypo->GetSourcePhraseStringRep() << "|" << hypo->GetCurrTargetPhrase().GetStringRep(StaticData::Instance().GetOutputFactorOrder());
-        searchGraphXmlNode["out"] = xmlrpc_c::value_string(tmp.str());
-        tmp.str("");
-        tmp << hypo->GetScoreBreakdown();
+	tmp << scoreBreakdown;
         searchGraphXmlNode["scores"] = xmlrpc_c::value_string(tmp.str());
       }
       searchGraphXml.push_back(xmlrpc_c::value_struct(searchGraphXmlNode));
@@ -311,19 +340,52 @@ const char* ffNames[] = { "Distortion", "WordPenalty", "!UnknownWordPenalty 1", 
 		"LexicalReordering_wbe-msd-bidirectional-fe-allff_2", "LexicalReordering_wbe-msd-bidirectional-fe-allff_3", 
 		"LexicalReordering_wbe-msd-bidirectional-fe-allff_4", "LexicalReordering_wbe-msd-bidirectional-fe-allff_5", 
 		"LexicalReordering_wbe-msd-bidirectional-fe-allff_6", "LM", "PhraseModel_1", "PhraseModel_2", "PhraseModel_3",
-		"PhraseModel_4", "PhraseModel_5" };
+		"PhraseModel_4", "PhraseModel_5", "BleuScoreFeature" };
 
 //const char* ffNames[] = { "Distortion", "WordPenalty", "!UnknownWordPenalty 1", "LM", "PhraseModel_1", "PhraseModel_2" };
 
-class WeightUpdater: public xmlrpc_c::method
+bool setCoreWeights(ScoreComponentCollection &weights, vector<string> &coreWeightVector, const vector<const ScoreProducer*> &featureFunctions) {
+  vector< float > store_weights;
+  for (size_t i=0; i<coreWeightVector.size(); ++i) {
+    string name(ffNames[i]);
+    float weight = Scan<float>(coreWeightVector[i]);  
+    
+    VERBOSE(1, "loading core weight " << name << endl);
+    for (size_t i=0; i < featureFunctions.size(); ++i) {
+      std::string prefix = featureFunctions[i]->GetScoreProducerDescription();
+      if (name.substr( 0, prefix.length() ).compare( prefix ) == 0) {
+	size_t numberScoreComponents = featureFunctions[i]->GetNumScoreComponents();
+	if (numberScoreComponents == 1) {
+	  VERBOSE(1, "assign 1 weight for " << featureFunctions[i]->GetScoreProducerDescription());
+	  VERBOSE(1, " (" << weight << ")" << endl << endl);
+	  weights.Assign(featureFunctions[i], weight);
+  	      }
+	else {
+	  store_weights.push_back(weight);
+	  if (store_weights.size() == numberScoreComponents) {
+	    VERBOSE(1, "assign " << store_weights.size() << " weights for " << featureFunctions[i]->GetScoreProducerDescription() << " (");
+	    for (size_t j=0; j < store_weights.size(); ++j)
+	      VERBOSE(1, store_weights[j] << " ");
+	    VERBOSE(1, ")" << endl << endl);
+	    weights.Assign(featureFunctions[i], store_weights);
+	    store_weights.clear();
+	  }			
+	}
+      }
+    }
+  }
+  return true;
+}
+
+class WeightSetter: public xmlrpc_c::method
 {	
 public:
-  WeightUpdater() {
+  WeightSetter() {
     // signature and help strings are documentation -- the client
     // can query this information with a system.methodSignature and
     // system.methodHelp RPC.
     this->_signature = "S:S";
-    this->_help = "Updates Moses weights";
+    this->_help = "Sets Moses weights";
   }
   
   void execute(xmlrpc_c::paramList const& paramList,
@@ -331,7 +393,7 @@ public:
     const params_t params = paramList.getStruct(0);
     paramList.verifyEnd(1);
     
-    ScoreComponentCollection updatedWeights;
+    ScoreComponentCollection weightUpdate;
     
     params_t::const_iterator si = params.find("core-weights");
     string coreWeights;
@@ -344,10 +406,10 @@ public:
     VERBOSE(1, "core weights: " << coreWeights << endl);
 
     StaticData &staticData = StaticData::InstanceNonConst();
-	const vector<const ScoreProducer*> featureFunctions = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
-	vector<string> coreWeightVector;
-	boost::split(coreWeightVector, coreWeights, boost::is_any_of(","));
-	loadCoreWeight(updatedWeights, coreWeightVector, featureFunctions);
+    const vector<const ScoreProducer*> featureFunctions = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+    vector<string> coreWeightVector;
+    boost::split(coreWeightVector, coreWeights, boost::is_any_of(","));
+    setCoreWeights(weightUpdate, coreWeightVector, featureFunctions);
 	    
     si = params.find("sparse-weights");
     string sparseWeights;
@@ -355,61 +417,100 @@ public:
       sparseWeights = xmlrpc_c::value_string(si->second);
       VERBOSE(1, "sparse weights: " << sparseWeights << endl);
       
-      vector<string> sparseWeightVector;
-      boost::split(sparseWeightVector, sparseWeights, boost::is_any_of("\t "));
-      for(size_t i=0; i<sparseWeightVector.size(); ++i) {
-    	vector<string> name_value; 
-    	boost::split(name_value, sparseWeightVector[i], boost::is_any_of("="));
-    	if (name_value.size() > 2) {
-    		string tmp1 = name_value[name_value.size()-1];
-    		name_value.erase(name_value.end());
-    		string tmp2 = boost::algorithm::join(name_value, "=");
-    		name_value[0] = tmp2;
-    		name_value[1] = tmp1;
-    	}
-    	const string name(name_value[0]);
-    	float value = Scan<float>(name_value[1]);
-    	VERBOSE(1, "Setting sparse weight " << name << " to value " << value << "." << endl);
-		updatedWeights.Assign(name, value);
+      if (sparseWeights != "") {
+	vector<string> sparseWeightVector;
+	boost::split(sparseWeightVector, sparseWeights, boost::is_any_of("\t "));
+	for(size_t i=0; i<sparseWeightVector.size(); ++i) {
+	  vector<string> name_value; 
+	  boost::split(name_value, sparseWeightVector[i], boost::is_any_of("="));
+	  if (name_value.size() > 2) {
+	    string tmp1 = name_value[name_value.size()-1];
+	    name_value.erase(name_value.end());
+	    string tmp2 = boost::algorithm::join(name_value, "=");
+	    name_value[0] = tmp2;
+	    name_value[1] = tmp1;
+	  }
+	  const string name(name_value[0]);
+	  float value = Scan<float>(name_value[1]);
+	  VERBOSE(1, "Setting sparse weight " << name << " to value " << value << "." << endl);
+	  weightUpdate.Assign(name, value);
+	}
       }
     }
 
-    staticData.SetAllWeights(updatedWeights);
-    cerr << "\nUpdated weights: " << staticData.GetAllWeights() << endl;
-    *retvalP = xmlrpc_c::value_string("Weights updated!");
+    // Set moses weights to new weights
+    staticData.SetAllWeights(weightUpdate);
+    cerr << "\nSet weights: " << staticData.GetAllWeights() << endl;
+    *retvalP = xmlrpc_c::value_string("Weights set!");
+  }
+};
+
+class WeightAdder: public xmlrpc_c::method
+{	
+public:
+  WeightAdder() {
+    // signature and help strings are documentation -- the client
+    // can query this information with a system.methodSignature and
+    // system.methodHelp RPC.
+    this->_signature = "S:S";
+    this->_help = "Adds an update to Moses weights";
   }
   
-  bool loadCoreWeight(ScoreComponentCollection &weights, vector<string> &coreWeightVector, const vector<const ScoreProducer*> &featureFunctions) {
-	vector< float > store_weights;
-	for (size_t i=0; i<coreWeightVector.size(); ++i) {
-	  string name(ffNames[i]);
-	  float weight = Scan<float>(coreWeightVector[i]);  
-		
-	  VERBOSE(1, "loading core weight " << name << endl);
-	  for (size_t i=0; i < featureFunctions.size(); ++i) {
-		std::string prefix = featureFunctions[i]->GetScoreProducerDescription();
-		if (name.substr( 0, prefix.length() ).compare( prefix ) == 0) {
-		  size_t numberScoreComponents = featureFunctions[i]->GetNumScoreComponents();
-  	      if (numberScoreComponents == 1) {
-  	    	VERBOSE(1, "assign 1 weight for " << featureFunctions[i]->GetScoreProducerDescription());
-  	    	VERBOSE(1, " (" << weight << ")" << endl << endl);
-  		    weights.Assign(featureFunctions[i], weight);
-  	      }
-  	      else {
-  	    	store_weights.push_back(weight);
-  		    if (store_weights.size() == numberScoreComponents) {
-  		      VERBOSE(1, "assign " << store_weights.size() << " weights for " << featureFunctions[i]->GetScoreProducerDescription() << " (");
-  		      for (size_t j=0; j < store_weights.size(); ++j)
-  		    	VERBOSE(1, store_weights[j] << " ");
-  		      VERBOSE(1, ")" << endl << endl);
-  		      weights.Assign(featureFunctions[i], store_weights);
-  		      store_weights.clear();
-  		    }			
-  	      }
-		}
+  void execute(xmlrpc_c::paramList const& paramList,
+          xmlrpc_c::value * const  retvalP) {
+    const params_t params = paramList.getStruct(0);
+    paramList.verifyEnd(1);
+    
+    ScoreComponentCollection weightUpdate;
+    
+    params_t::const_iterator si = params.find("core-weights");
+    string coreWeights;
+    if (si == params.end()) {
+      throw xmlrpc_c::fault(
+        "Missing core weights",
+        xmlrpc_c::fault::CODE_PARSE);
+    }
+    coreWeights = xmlrpc_c::value_string(si->second);
+    VERBOSE(1, "core weights: " << coreWeights << endl);
+
+    StaticData &staticData = StaticData::InstanceNonConst();
+    const vector<const ScoreProducer*> featureFunctions = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+    vector<string> coreWeightVector;
+    boost::split(coreWeightVector, coreWeights, boost::is_any_of(","));
+    setCoreWeights(weightUpdate, coreWeightVector, featureFunctions);
+	    
+    si = params.find("sparse-weights");
+    string sparseWeights;
+    if (si != params.end()) {
+      sparseWeights = xmlrpc_c::value_string(si->second);
+      VERBOSE(1, "sparse weights: " << sparseWeights << endl);
+      
+      if (sparseWeights != "") {
+	vector<string> sparseWeightVector;
+	boost::split(sparseWeightVector, sparseWeights, boost::is_any_of("\t "));
+	for(size_t i=0; i<sparseWeightVector.size(); ++i) {
+	  vector<string> name_value; 
+	  boost::split(name_value, sparseWeightVector[i], boost::is_any_of("="));
+	  if (name_value.size() > 2) {
+	    string tmp1 = name_value[name_value.size()-1];
+	    name_value.erase(name_value.end());
+	    string tmp2 = boost::algorithm::join(name_value, "=");
+	    name_value[0] = tmp2;
+	    name_value[1] = tmp1;
 	  }
+	  const string name(name_value[0]);
+	  float value = Scan<float>(name_value[1]);
+	  VERBOSE(1, "Setting sparse weight " << name << " to value " << value << "." << endl);
+	  weightUpdate.Assign(name, value);
 	}
-    return true;
+      }
+    }
+
+    // add new weights to Moses weights and write back to staticData
+    weightUpdate.PlusEquals(staticData.GetAllWeights());
+    staticData.SetAllWeights(weightUpdate);
+    cerr << "\nUpdated weights: " << staticData.GetAllWeights() << endl;
+    *retvalP = xmlrpc_c::value_string("Weights updated!");
   }
 };
 
@@ -428,7 +529,7 @@ int main(int argc, char** argv)
   //Extract port and log, send other args to moses
   char** mosesargv = new char*[argc+2];
   int mosesargc = 0;
-  int port = 8080;
+  int port = 50005;
   const char* logfile = "/dev/null";
   bool isSerial = false;
 
@@ -486,18 +587,22 @@ int main(int argc, char** argv)
   if (!StaticData::LoadDataStatic(params)) {
     exit(1);
   }
-  
+
   cerr << "start weights: " << StaticData::Instance().GetAllWeights() << endl;
 
   xmlrpc_c::registry myRegistry;
 
   xmlrpc_c::methodPtr const translator(new Translator);
   xmlrpc_c::methodPtr const updater(new Updater);
-  xmlrpc_c::methodPtr const weightUpdater(new WeightUpdater);
+  xmlrpc_c::methodPtr const weightSetter(new WeightSetter);
+  xmlrpc_c::methodPtr const weightAdder(new WeightAdder);
 
   myRegistry.addMethod("translate", translator);
   myRegistry.addMethod("updater", updater);
-  myRegistry.addMethod("updateWeights", weightUpdater);
+  myRegistry.addMethod("setWeights", weightSetter);
+  myRegistry.addMethod("addWeights", weightAdder);
+  // backwards compatibility
+  myRegistry.addMethod("updateWeights", weightSetter);
 
   xmlrpc_c::serverAbyss myAbyssServer(
     myRegistry,

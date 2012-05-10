@@ -1616,16 +1616,20 @@ sub write_mira_config {
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
     my $core_weights = &backoff_and_get("TUNING:core-weight-config");
+    my $start_weights = &backoff_and_get("TUNING:start-weight-config");
     my $tuning_settings = &check_and_get("TUNING:tuning-settings");
     my @settings = split(/ /, $tuning_settings);
     my $mira_tuning_settings = &check_and_get("TUNING:mira-tuning-settings");
 
     # convert core weights into format expected by mira
     my $core_file = "$expt_dir/core_weights";
-    if ($core_weights) {
-	open(INI, $core_weights);
+    my $start_file = "$expt_dir/start_weights";
+    if ($core_weights or $start_weights) {
+	open INI, $core_weights if $core_weights;
+	open INI, $start_weights if $start_weights;
 	#print STDERR "Reading core weights from file $core_weights \n";
-	open(CORE, ">$core_file");
+	open CORE_OR_START, ">$core_file" if $core_weights;
+	open CORE_OR_START, ">$start_file" if $start_weights;
 	while(<INI>) {
 	    if (/weight-l/) {
 		my @lm_weights; 
@@ -1634,9 +1638,9 @@ sub write_mira_config {
 		    push(@lm_weights, $_);
 		}
 		
-		print CORE "LM ".$lm_weights[0];
+		print CORE_OR_START "LM ".$lm_weights[0];
 		for my $i (1 .. $#lm_weights) {
-		    print CORE "LM:".($i+1)." ".$lm_weights[$i];
+		    print CORE_OR_START "LM:".($i+1)." ".$lm_weights[$i];
 		}
 		
 	    } elsif (/weight-t/) {
@@ -1646,7 +1650,7 @@ sub write_mira_config {
 		    push(@pm_weights, $_);
 		}
 		for my $i (0 .. $#pm_weights) {
-		    print CORE "PhraseModel_".($i+1)." ".$pm_weights[$i];
+		    print CORE_OR_START "PhraseModel_".($i+1)." ".$pm_weights[$i];
 		}
 	    } elsif (/weight-d/) {
 		my @d_weights; 
@@ -1656,20 +1660,20 @@ sub write_mira_config {
 		}
 		for my $i (0 .. $#d_weights) {
 		    if ($i == 0) {
-			print CORE "Distortion ".$d_weights[0];
+			print CORE_OR_START "Distortion ".$d_weights[0];
 		    }
 		    else {
-			print CORE "LexicalReordering_wbe-msd-bidirectional-fe-allff_".($i+1)." ".$d_weights[$i];
+			print CORE_OR_START "LexicalReordering_wbe-msd-bidirectional-fe-allff_".($i+1)." ".$d_weights[$i];
 		    }
 		}
 		
 	    } elsif (/weight-w/) {
 		my $w = <INI>;
-		print CORE "WordPenalty ".$w;
+		print CORE_OR_START "WordPenalty ".$w;
 	    } 
 	}
 	close INI;
-	close CORE;
+	close CORE_OR_START;
     }
     
     # mira config file
@@ -1686,6 +1690,10 @@ sub write_mira_config {
     if ($core_weights) {
 	print CFG "[core] \n"; 
 	print CFG "weightfile=".$core_file."\n\n";
+    }
+    if ($start_weights) {
+        print CFG "[start] \n";
+        print CFG "weightfile=".$start_file."\n\n";
     }
 
     print CFG "[train] \n";

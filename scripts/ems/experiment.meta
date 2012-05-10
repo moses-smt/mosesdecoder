@@ -438,6 +438,12 @@ input-from-sgm
 	out: raw-input
 	default-name: tuning/input.txt
 	template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
+input-devtest-from-sgm
+        in: input-devtest-sgm
+        out: raw-input-devtest
+        default-name: tuning/input.devtest.txt
+	ignore-unless: use-mira
+        template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
 tokenize-input
 	in: raw-input
 	out: tokenized-input
@@ -496,14 +502,14 @@ factorize-input-devtest
 	error: incompatible number of words in factor
 lowercase-input
 	in: factorized-input
-	out: cased-input
+	out: truecased-input
 	default-name: tuning/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 lowercase-input-devtest
 	in: factorized-input-devtest
-	out: cased-input-devtest
+	out: truecased-input-devtest
 	default-name: tuning/input.devtest.lc
 	pass-unless: input-lowercaser
 	ignore-unless: use-mira
@@ -511,28 +517,27 @@ lowercase-input-devtest
 	template: $input-lowercaser < IN > OUT
 truecase-input
 	in: factorized-input TRUECASER:truecase-model
-	out: cased-input
+	out: truecased-input
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.tc
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 truecase-input-devtest
 	in: factorized-input-devtest TRUECASER:truecase-model
-	out: cased-input-devtest
+	out: truecased-input-devtest
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.devtest.tc
-	ignore-unless: input-truecaser
-	ignore-unless: use-mira
+	ignore-unless: AND input-truecaser use-mira
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
-	in: cased-input SPLITTER:splitter-model
+	in: truecased-input SPLITTER:splitter-model
 	out: input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
 split-input-devtest
-	in: cased-input-devtest SPLITTER:splitter-model
+	in: truecased-input-devtest SPLITTER:splitter-model
 	out: input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
@@ -544,6 +549,12 @@ reference-from-sgm
 	out: raw-reference
 	default-name: tuning/reference.txt
 	template: $moses-script-dir/ems/support/reference-from-sgm.perl IN IN1 OUT
+reference-devtest-from-sgm
+        in: reference-devtest-sgm input-devtest-sgm
+        out: raw-reference-devtest
+        default-name: tuning/reference.devtest.txt
+	ignore-unless: use-mira
+        template: $moses-script-dir/ems/support/reference-from-sgm.perl IN IN1 OUT
 tokenize-reference
 	in: raw-reference
 	out: tokenized-reference
@@ -561,7 +572,7 @@ tokenize-reference-devtest
 	template: $output-tokenizer < IN > OUT
 lowercase-reference
 	in: tokenized-reference
-	out: cased-reference
+	out: truecased-reference
 	default-name: tuning/reference.lc
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
@@ -569,7 +580,7 @@ lowercase-reference
 	template: $output-lowercaser < IN > OUT	
 lowercase-reference-devtest
 	in: tokenized-reference-devtest
-	out: cased-reference-devtest
+	out: truecased-reference-devtest
 	default-name: tuning/reference.devtest.lc
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
@@ -578,7 +589,7 @@ lowercase-reference-devtest
 	template: $output-lowercaser < IN > OUT	
 truecase-reference
 	in: tokenized-reference TRUECASER:truecase-model
-	out: cased-reference
+	out: truecased-reference
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.tc
 	ignore-unless: output-truecaser
@@ -586,22 +597,21 @@ truecase-reference
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 truecase-reference-devtest
 	in: tokenized-reference-devtest TRUECASER:truecase-model
-	out: cased-reference-devtest
+	out: truecased-reference-devtest
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.devtest.tc
-	ignore-unless: output-truecaser
-	ignore-unless: use-mira
+	ignore-unless: AND output-truecaser use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
-	in: cased-reference SPLITTER:splitter-model
+	in: truecased-reference SPLITTER:splitter-model
 	out: reference
 	default-name: tuning/reference.split
 	pass-unless: output-splitter
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 split-reference-devtest
-	in: cased-reference-devtest SPLITTER:splitter-model
+	in: truecased-reference-devtest SPLITTER:splitter-model
 	out: reference-devtest
 	default-name: tuning/reference.devtest.split
 	pass-unless: output-splitter
@@ -692,20 +702,20 @@ factorize-input
 	error: incompatible number of words in factor
 lowercase-input
 	in: factorized-input
-	out: cased-input
+	out: truecased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
 	in: factorized-input TRUECASER:truecase-model
-	out: cased-input
+	out: truecased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
-	in: cased-input SPLITTER:splitter-model
+	in: truecased-input SPLITTER:splitter-model
 	out: input
 	default-name: evaluation/input.split
 	pass-unless: input-splitter

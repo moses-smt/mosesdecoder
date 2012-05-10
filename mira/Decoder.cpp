@@ -76,7 +76,7 @@ namespace Mira {
 	  delete[] mosesargv;
 
 	  const StaticData &staticData = StaticData::Instance();
-      m_bleuScoreFeature = staticData.GetBleuScoreFeature();
+	  m_bleuScoreFeature = staticData.GetBleuScoreFeature();
   }
   
   void MosesDecoder::cleanup(bool chartDecoding) {
@@ -335,6 +335,7 @@ namespace Mira {
     m_sentence->Read(in,inputFactorOrder);
 
     // set weight of BleuScoreFeature
+    //cerr << "Reload Bleu feature weight: " << bleuObjectiveWeight*bleuScoreWeight << " (" << bleuObjectiveWeight << "*" << bleuScoreWeight << ")" << endl;
     staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
 
     m_bleuScoreFeature->SetCurrSourceLength((*m_sentence).GetSize());

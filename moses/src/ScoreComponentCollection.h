@@ -365,6 +365,8 @@ public:
   float GetL1Norm() const;
   float GetL2Norm() const;
   float GetLInfNorm() const;
+  void L1Regularize(float lambda);
+  void L2Regularize(float lambda);
   void Save(const std::string& filename) const;
   void Save(std::ostream&) const;
   

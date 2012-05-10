@@ -127,6 +127,14 @@ float ScoreComponentCollection::GetLInfNorm() const {
   return m_scores.linfnorm();
 }
 
+void ScoreComponentCollection::L1Regularize(float lambda) {
+  m_scores.l1regularize(lambda);
+}
+
+void ScoreComponentCollection::L2Regularize(float lambda) {
+  m_scores.l2regularize(lambda);
+}
+
 void ScoreComponentCollection::Save(ostream& out) const {
   ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
   for (; iter != s_scoreIndexes.end(); ++iter ) {

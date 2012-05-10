@@ -189,6 +189,8 @@ namespace Moses {
     FValue l1norm_coreFeatures() const;
     FValue l2norm() const;
     FValue linfnorm() const;
+    void l1regularize(float lambda);
+    void l2regularize(float lambda);
     FValue sum() const;
     
     /** pretty printing */

@@ -540,6 +540,24 @@ namespace Moses {
     return norm;
   }
 
+  void FVector::l1regularize(float lambda) {
+    for (iterator i = begin(); i != end(); ++i) {
+      float value = i->second;
+      if (value > 0) {
+        i->second = max(0.0f, value - lambda);
+      }
+      else {
+        i->second = min(0.0f, value + lambda);
+      }
+    }
+  }
+
+  void FVector::l2regularize(float lambda)  {
+    for (iterator i = begin(); i != end(); ++i) {
+      i->second *= (1 - lambda);            
+    }
+  }
+
   FValue FVector::sum() const {
     FValue sum = 0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {

@@ -24,10 +24,10 @@ int BleuScoreState::Compare(const FFState& o) const
 
     const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
 
-    if (m_target_length < other.m_target_length)
+    /*if (m_target_length < other.m_target_length)
       return -1;
     if (m_target_length > other.m_target_length)
-      return 1;
+    return 1;*/
 
     int c = m_words.Compare(other.m_words);
 
@@ -35,14 +35,14 @@ int BleuScoreState::Compare(const FFState& o) const
         return c;
 
     for(size_t i = 0; i < m_ngram_counts.size(); i++) {
-        if (m_ngram_counts[i] < other.m_ngram_counts[i])
-            return -1;
-        if (m_ngram_counts[i] > other.m_ngram_counts[i])
-            return 1;
-        if (m_ngram_matches[i] < other.m_ngram_matches[i])
-            return -1;
-        if (m_ngram_matches[i] > other.m_ngram_matches[i])
-            return 1;
+      if (m_ngram_counts[i] < other.m_ngram_counts[i])
+	return -1;
+      if (m_ngram_counts[i] > other.m_ngram_counts[i])
+	return 1;
+      if (m_ngram_matches[i] < other.m_ngram_matches[i])
+	return -1;
+      if (m_ngram_matches[i] > other.m_ngram_matches[i])
+	return 1;
     }
     return 0;
 }

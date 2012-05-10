@@ -142,7 +142,8 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   // set reordering walls, if "-monotone-at-punction" is set
   if (staticData.UseReorderingConstraint()) {
-    m_reorderingConstraint.SetMonotoneAtPunctuation( GetSubString( WordsRange(0,GetSize()-1 ) ) );
+    if (GetSize() > 0)
+      m_reorderingConstraint.SetMonotoneAtPunctuation( GetSubString( WordsRange(0,GetSize()-1 ) ) );
   }
 
   // set walls obtained from xml
