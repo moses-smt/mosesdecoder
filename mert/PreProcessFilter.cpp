@@ -5,6 +5,8 @@
 #include <unistd.h>
 #include <csignal>
 
+#include "Fdstream.h"
+
 using namespace std;
 
 #define CHILD_STDIN_READ pipefds_input[0]

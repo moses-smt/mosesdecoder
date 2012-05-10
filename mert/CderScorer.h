@@ -6,34 +6,32 @@
 #include "Types.h"
 #include "Scorer.h"
 
-using namespace std;
-
 /**
  * CderScorer class can compute both CDER and WER metric.
  */
 class CderScorer: public StatisticsBasedScorer {
  public:
-  explicit CderScorer(const string& config, bool allowed_long_jumps = true);
+  explicit CderScorer(const std::string& config, bool allowed_long_jumps = true);
   ~CderScorer();
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
 
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
-  virtual void prepareStatsVector(size_t sid, const string& text, vector<int>& stats);
+  virtual void prepareStatsVector(std::size_t sid, const std::string& text, std::vector<int>& stats);
 
-  virtual size_t NumberOfScores() const { return 2; }
+  virtual std::size_t NumberOfScores() const { return 2; }
 
-  virtual float calculateScore(const vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<int>& comps) const;
 
  private:
   bool m_allowed_long_jumps;
 
-  typedef vector<int> sent_t;
-  vector<vector<sent_t> > m_ref_sentences;
+  typedef std::vector<int> sent_t;
+  std::vector<std::vector<sent_t> > m_ref_sentences;
 
   void computeCD(const sent_t& cand, const sent_t& ref,
-                 vector<int>& stats) const;
+                 std::vector<int>& stats) const;
 
   // no copying allowed
   CderScorer(const CderScorer&);

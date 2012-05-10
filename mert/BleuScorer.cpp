@@ -14,6 +14,8 @@
 #include "Util.h"
 #include "Vocabulary.h"
 
+using namespace std;
+
 namespace {
 
 // configure regularisation

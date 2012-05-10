@@ -4,6 +4,9 @@
 #include "Vocabulary.h"
 #include "Util.h"
 #include "Singleton.h"
+#include "PreProcessFilter.h"
+
+using namespace std;
 
 namespace {
 
@@ -38,9 +41,9 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
       m_vocab(mert::VocabularyFactory::GetVocabulary()),
-      m_score_data(0),
-      m_enable_preserve_case(true),
-      m_filter(NULL) {
+      m_filter(NULL),
+      m_score_data(NULL),
+      m_enable_preserve_case(true) {
   InitConfig(config);
 }
 
