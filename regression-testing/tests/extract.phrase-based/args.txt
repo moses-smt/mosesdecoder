@@ -1,0 +1,1 @@
+$data_dir/models/extract.phrase-based/en $data_dir/models/extract.phrase-based/fr $data_dir/models/extract.phrase-based/align.fr-en $outPath/extract 7 orientation --model wbe-msd

@@ -11,7 +11,6 @@ use Getopt::Long;
 ############################################################
 my @tests = qw (
 	extract.phrase-based
-	extract.hierarchical
   score.phrase-based
   score.phrase-based-inv
   score.phrase-based-with-alignment
