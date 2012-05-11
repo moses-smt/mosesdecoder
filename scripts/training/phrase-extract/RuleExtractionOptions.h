@@ -46,7 +46,8 @@ public:
   bool duplicateRules;
   bool fractionalCounting;
   bool outputNTLengths;
-
+  bool gzOutput;
+  
   RuleExtractionOptions()
     : maxSpan(10)
     , minHoleSource(2)
@@ -74,6 +75,7 @@ public:
     , duplicateRules(true)
     , fractionalCounting(true)
     , outputNTLengths(false)
+    , gzOutput(false)
   {}
 };
 
