@@ -27,7 +27,7 @@ ParseNumberException::ParseNumberException(StringPiece value) throw() {
 #ifdef HAVE_ZLIB
 GZException::GZException(gzFile file) {
   int num;
-  *this << gzerror((gzFile)file, &num) << " from zlib";
+  *this << gzerror(file, &num) << " from zlib";
 }
 #endif // HAVE_ZLIB
 
@@ -52,7 +52,7 @@ FilePiece::~FilePiece() {
     // zlib took ownership
     file_.release();
     int ret;
-    if (Z_OK != (ret = gzclose((gzFile)gz_file_))) {
+    if (Z_OK != (ret = gzclose(gz_file_))) {
       std::cerr << "could not close file " << file_name_ << " using zlib" << std::endl;
       abort();
     }
@@ -291,7 +291,7 @@ void FilePiece::ReadShift() {
 
   ssize_t read_return;
 #ifdef HAVE_ZLIB
-  read_return = gzread((gzFile)gz_file_, static_cast<char*>(data_.get()) + already_read, default_map_size_ - already_read);
+  read_return = gzread(gz_file_, static_cast<char*>(data_.get()) + already_read, default_map_size_ - already_read);
   if (read_return == -1) throw GZException(gz_file_);
   if (total_size_ != kBadSize) {
     // Just get the position, don't actually seek.  Apparently this is how you do it. . . 
