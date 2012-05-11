@@ -17,9 +17,9 @@ exe extract-lex : extract-lex.cpp InputFileStream ;
 
 exe score : tables-core.o AlignmentPhrase.o score.cpp PhraseAlignment.cpp OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
 
-exe consolidate : consolidate.cpp tables-core.o InputFileStream ;
+exe consolidate : consolidate.cpp tables-core.o OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
 
-exe consolidate-direct : consolidate-direct.cpp InputFileStream ;
+exe consolidate-direct : consolidate-direct.cpp OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
 
 exe consolidate-reverse :  consolidate-reverse.cpp tables-core.o InputFileStream ;
 
