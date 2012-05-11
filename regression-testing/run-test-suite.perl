@@ -10,6 +10,8 @@ use Getopt::Long;
 
 ############################################################
 my @tests = qw (
+	extract.phrase-based
+	extract.hierarchical
   score.phrase-based
   score.phrase-based-inv
   score.phrase-based-with-alignment
@@ -61,6 +63,7 @@ use POSIX qw ( strftime );
 my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
 my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
 my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
+my $extractorExe = "$Bin/../scripts/training/phrase-extract/extract";
 my $kenlmBinarizer = "$Bin/../kenlm/build_binary";
 my $test_dir;
 my $BIN_TEST = $script_dir;
@@ -108,6 +111,10 @@ foreach my $test (@tests)
   elsif ($model_type eq 'score.')
   {
     $cmd .= "$BIN_TEST/run-test-scorer.perl $test_run --scorer=$scoreExe";
+  }
+  elsif ($model_type eq 'extrac')
+  {
+    $cmd .= "$BIN_TEST/run-test-extract.perl $test_run --extractor=$extractorExe";
   }
   elsif ($test =~ /^mert/)
   {
