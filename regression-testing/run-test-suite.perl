@@ -79,7 +79,7 @@ GetOptions(	"decoder-phrase=s" => \$decoderPhrase,
 $data_dir = MosesRegressionTesting::find_data_directory($BIN_TEST, $data_dir);
 
 my $test_run = "$BIN_TEST/run-single-test.pl --data-dir=$data_dir";
-$test_dir = $script_dir . "/tests";
+$test_dir = "$data_dir/tests";
 $test_run .= " --test-dir=$test_dir" if $test_dir;
 
 print "Data directory: $data_dir\n";
