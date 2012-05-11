@@ -382,10 +382,10 @@ void Model::zipFile()
   char inbuffer[128];
   int num_read;
   while ((num_read = fread(inbuffer, 1, sizeof(inbuffer), file)) > 0) {
-    gzwrite((gzFile)gzfile, inbuffer, num_read);
+    gzwrite(gzfile, inbuffer, num_read);
   }
   fclose(file);
-  gzclose((gzFile)gzfile);
+  gzclose(gzfile);
 
   //Remove the unzipped file
   remove(filename.c_str());
