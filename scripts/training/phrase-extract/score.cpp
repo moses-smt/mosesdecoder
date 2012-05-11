@@ -247,7 +247,6 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
-		//(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 
@@ -260,9 +259,9 @@ int main(int argc, char* argv[])
 void writeCountOfCounts( const char* fileNameCountOfCounts )
 {
   // open file
-	ofstream countOfCountsFile;
-	countOfCountsFile.open(fileNameCountOfCounts);
-	if (countOfCountsFile.fail()) {
+	Moses::OutputFileStream countOfCountsFile;
+	bool success = countOfCountsFile.Open(fileNameCountOfCounts);
+	if (!success) {
 		cerr << "ERROR: could not open count-of-counts file "
 				 << fileNameCountOfCounts << endl;
     return;
@@ -275,7 +274,7 @@ void writeCountOfCounts( const char* fileNameCountOfCounts )
   for(int i=1; i<=COC_MAX; i++) {
     countOfCountsFile << countOfCounts[ i ] << endl;
   }
-	countOfCountsFile.close();
+	countOfCountsFile.Close();
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
