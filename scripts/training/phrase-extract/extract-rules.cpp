@@ -213,6 +213,9 @@ int main(int argc, char* argv[])
         exit(1);
       }
     }
+    else if (strcmp(argv[i], "--GZOutput") == 0) {
+      options.gzOutput = true;  
+    } 
     // allow consecutive non-terminals (X Y | X Y)
     else if (strcmp(argv[i],"--TargetSyntax") == 0) {
       options.targetSyntax = true;
@@ -280,10 +283,10 @@ int main(int argc, char* argv[])
   istream *aFileP = &aFile;
 
   // open output files
-  string fileNameExtractInv = fileNameExtract + ".inv";
+  string fileNameExtractInv = fileNameExtract + ".inv" + (options.gzOutput?".gz":"");
   Moses::OutputFileStream extractFile;
   Moses::OutputFileStream extractFileInv;
-  extractFile.Open(fileNameExtract.c_str());
+  extractFile.Open((fileNameExtract  + (options.gzOutput?".gz":"")).c_str());
   if (!options.onlyDirectFlag)
     extractFileInv.Open(fileNameExtractInv.c_str());
 

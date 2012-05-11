@@ -92,6 +92,7 @@ bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
+bool gzOutput = false;
 
 int main(int argc, char* argv[])
 {
@@ -117,6 +118,8 @@ int main(int argc, char* argv[])
       translationFlag = false;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
+    } else if (strcmp(argv[i], "--GZOutput") == 0) {
+      gzOutput = true;  
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -194,17 +197,17 @@ int main(int argc, char* argv[])
 
   // open output files
   if (translationFlag) {
-    string fileNameExtractInv = fileNameExtract + ".inv";
-    extractFile.Open(fileNameExtract.c_str());
+    string fileNameExtractInv = fileNameExtract + ".inv" + (gzOutput?".gz":"");
+    extractFile.Open( (fileNameExtract + (gzOutput?".gz":"")).c_str());
     extractFileInv.Open(fileNameExtractInv.c_str());
   }
   if (orientationFlag) {
-    string fileNameExtractOrientation = fileNameExtract + ".o";
+    string fileNameExtractOrientation = fileNameExtract + ".o" + (gzOutput?".gz":"");
     extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
 
   if (sentenceIdFlag) {
-    string fileNameExtractSentenceId = fileNameExtract + ".sid";
+    string fileNameExtractSentenceId = fileNameExtract + ".sid" + (gzOutput?".gz":"");
     extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
