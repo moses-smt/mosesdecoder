@@ -39,6 +39,8 @@
 		1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
 		1E66AB3D155D8068009ABD7C /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E66AB3E155D8068009ABD7C /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
+		1E66AB40155D8233009ABD7C /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
+		1E66AB41155D8233009ABD7C /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
 		1E671A80155C22C500119DD9 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E671A82155C234500119DD9 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E671A83155C234500119DD9 /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
@@ -424,6 +426,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E66AB40155D8233009ABD7C /* OutputFileStream.cpp in Sources */,
+				1E66AB41155D8233009ABD7C /* OutputFileStream.h in Sources */,
 				1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */,
 				1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */,
 				1CFE962711762A2A006FF13B /* consolidate.cpp in Sources */,
@@ -590,7 +594,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
 				SDKROOT = macosx10.6;
@@ -608,7 +615,10 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = consolidate;
 				SDKROOT = macosx10.6;
