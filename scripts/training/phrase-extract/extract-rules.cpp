@@ -45,6 +45,7 @@
 #include "tables-core.h"
 #include "XmlTree.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 #include "../../../moses/src/ThreadPool.h"
 #include "../../../moses/src/OutputCollector.h"
 
@@ -280,11 +281,11 @@ int main(int argc, char* argv[])
 
   // open output files
   string fileNameExtractInv = fileNameExtract + ".inv";
-  ofstream extractFile;
-  ofstream extractFileInv;
-  extractFile.open(fileNameExtract.c_str());
+  Moses::OutputFileStream extractFile;
+  Moses::OutputFileStream extractFileInv;
+  extractFile.Open(fileNameExtract.c_str());
   if (!options.onlyDirectFlag)
-    extractFileInv.open(fileNameExtractInv.c_str());
+    extractFileInv.Open(fileNameExtractInv.c_str());
 
   // output into file
   Moses::OutputCollector* extractCollector = new Moses::OutputCollector(&extractFile);
@@ -357,8 +358,8 @@ int main(int argc, char* argv[])
   aFile.Close();
   // only close if we actually opened it
   if (!options.onlyOutputSpanInfo) {
-    extractFile.close();
-    if (!options.onlyDirectFlag) extractFileInv.close();
+    extractFile.Close();
+    if (!options.onlyDirectFlag) extractFileInv.Close();
   }
 
   if (options.glueGrammarFlag)
