@@ -30,13 +30,11 @@ namespace Moses
 OutputFileStream::OutputFileStream()
   :boost::iostreams::filtering_ostream()
   ,m_outFile(NULL)
-  ,m_isGZ(false)
 {
 }
 
 OutputFileStream::OutputFileStream(const std::string &filePath)
   : m_outFile(NULL)
-  , m_isGZ(false)
 {
   Open(filePath);
 }
@@ -55,7 +53,6 @@ bool OutputFileStream::Open(const std::string &filePath)
   
   if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
     this->push(boost::iostreams::gzip_compressor());
-    m_isGZ = true;
   }
   this->push(*m_outFile);
 
