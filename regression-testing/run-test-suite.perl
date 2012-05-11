@@ -10,8 +10,8 @@ use Getopt::Long;
 
 ############################################################
 my @tests = qw (
-	extract-rules.hierarchical
 	extract.phrase-based
+	extract-rules.hierarchical
   score.phrase-based
   score.phrase-based-inv
   score.phrase-based-with-alignment
