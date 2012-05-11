@@ -53,7 +53,7 @@ my $truthPath = "$test_dir/$test_name/truth/";
 
 if (-e $outPath)
 {
-  my $cmd = "diff $outPath/test.txt $truthPath | wc -l";
+  my $cmd = "diff $outPath/* $truthPath/* | wc -l";
 
   my $numDiff = `$cmd`;
 
