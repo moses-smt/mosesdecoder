@@ -1,9 +1,0 @@
-WEIGHT_1 = Distortion d 0.141807
-WEIGHT_2 = LM_3gram lm 0.142659
-WEIGHT_3 = WordPenalty w -0.273416
-WEIGHT_4 = PhraseModel tm 0.004024
-WEIGHT_5 = PhraseModel tm 0.068565
-WEIGHT_6 = PhraseModel tm 0.294089
-WEIGHT_7 = PhraseModel tm 0.032832
-WEIGHT_8 = PhraseModel tm -0.042608
-TOTAL_WALLTIME ~ 28
