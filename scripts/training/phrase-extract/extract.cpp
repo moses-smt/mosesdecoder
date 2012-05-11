@@ -22,6 +22,7 @@
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -82,10 +83,10 @@ bool hierModel = false;
 REO_MODEL_TYPE hierType = REO_MSD;
 
 
-ofstream extractFile;
-ofstream extractFileInv;
-ofstream extractFileOrientation;
-ofstream extractFileSentenceId;
+Moses::OutputFileStream extractFile;
+Moses::OutputFileStream extractFileInv;
+Moses::OutputFileStream extractFileOrientation;
+Moses::OutputFileStream extractFileSentenceId;
 int maxPhraseLength;
 bool orientationFlag = false;
 bool translationFlag = true;
@@ -194,17 +195,17 @@ int main(int argc, char* argv[])
   // open output files
   if (translationFlag) {
     string fileNameExtractInv = fileNameExtract + ".inv";
-    extractFile.open(fileNameExtract.c_str());
-    extractFileInv.open(fileNameExtractInv.c_str());
+    extractFile.Open(fileNameExtract.c_str());
+    extractFileInv.Open(fileNameExtractInv.c_str());
   }
   if (orientationFlag) {
     string fileNameExtractOrientation = fileNameExtract + ".o";
-    extractFileOrientation.open(fileNameExtractOrientation.c_str());
+    extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
 
   if (sentenceIdFlag) {
     string fileNameExtractSentenceId = fileNameExtract + ".sid";
-    extractFileSentenceId.open(fileNameExtractSentenceId.c_str());
+    extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
   int i=0;
@@ -239,12 +240,12 @@ int main(int argc, char* argv[])
   //az: only close if we actually opened it
   if (!onlyOutputSpanInfo) {
     if (translationFlag) {
-      extractFile.close();
-      extractFileInv.close();
+      extractFile.Close();
+      extractFileInv.Close();
     }
-    if (orientationFlag) extractFileOrientation.close();
+    if (orientationFlag) extractFileOrientation.Close();
     if (sentenceIdFlag) {
-      extractFileSentenceId.close();
+      extractFileSentenceId.Close();
     }
   }
 }

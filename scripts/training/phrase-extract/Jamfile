@@ -3,12 +3,13 @@ alias InputFileStream : InputFileStream.o ../../..//z ;
 
 obj tables-core.o : tables-core.cpp : <include>. ;
 obj AlignmentPhrase.o : AlignmentPhrase.cpp : <include>. ;
+obj SentenceAlignment.o : SentenceAlignment.cpp : <include>. ;
 
 alias trees : SyntaxTree.cpp tables-core.o XmlTree.cpp : : : <include>. ;
 
-exe extract : tables-core.o SentenceAlignment.cpp extract.cpp InputFileStream ;
+exe extract : tables-core.o SentenceAlignment.o extract.cpp OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
 
-exe extract-rules : tables-core.o SentenceAlignment.cpp SentenceAlignmentWithSyntax.cpp SyntaxTree.cpp XmlTree.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp InputFileStream ../../../moses/src//ThreadPool ;
+exe extract-rules : tables-core.o SentenceAlignment.o SentenceAlignmentWithSyntax.cpp SyntaxTree.cpp XmlTree.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp InputFileStream ../../../moses/src//ThreadPool ;
 
 exe extract-lex : extract-lex.cpp InputFileStream ;
 
