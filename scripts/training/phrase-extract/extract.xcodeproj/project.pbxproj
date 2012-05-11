@@ -37,6 +37,8 @@
 		1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CFE962311762A20006FF13B /* consolidate-direct.cpp */; };
 		1E2C902D141FDED400EA06A6 /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1E2C902E141FDF6D00EA06A6 /* tables-core.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1CE8CE4B0FC6EAA200924FEA /* tables-core.cpp */; };
+		1E66AB3D155D8068009ABD7C /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
+		1E66AB3E155D8068009ABD7C /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
 		1E671A80155C22C500119DD9 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E671A82155C234500119DD9 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E671A83155C234500119DD9 /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
@@ -365,6 +367,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E66AB3D155D8068009ABD7C /* OutputFileStream.cpp in Sources */,
+				1E66AB3E155D8068009ABD7C /* OutputFileStream.h in Sources */,
 				1EB29A3B1511C253005BC4BA /* InputFileStream.cpp in Sources */,
 				1EB29A3C1511C253005BC4BA /* InputFileStream.h in Sources */,
 				1C05BA281174CF10003585B2 /* extract-rules.cpp in Sources */,
