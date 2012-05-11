@@ -63,6 +63,7 @@ my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
 my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
 my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
 my $extractorExe = "$Bin/../scripts/training/phrase-extract/extract";
+my $extractorSyntaxExe = "$Bin/../scripts/training/phrase-extract/extract-rules";
 my $kenlmBinarizer = "$Bin/../kenlm/build_binary";
 my $test_dir;
 my $BIN_TEST = $script_dir;
@@ -97,29 +98,30 @@ my @failed;
 foreach my $test (@tests) 
 {
   my $cmd;
-  my $model_type = substr($test, $[, 6);
+  my @tokens = split('\.', $test);
+  my $model_type = $tokens[0];
 
   if ($model_type eq 'phrase')
   {
   	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderPhrase";
   }
-  elsif ($model_type eq 'chart.')
+  elsif ($model_type eq 'chart')
   {
   	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderChart";
   }
-  elsif ($model_type eq 'score.')
+  elsif ($model_type eq 'score')
   {
     $cmd .= "$BIN_TEST/run-test-scorer.perl $test_run --scorer=$scoreExe";
   }
-  elsif ($model_type eq 'extrac')
+  elsif ($model_type eq 'extract')
   {
     $cmd .= "$BIN_TEST/run-test-extract.perl $test_run --extractor=$extractorExe";
   }
-  elsif ($test =~ /^mert/)
+  elsif ($model_type eq "mert")
   {
     $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
   }
-  elsif ($test =~ /^kenlmbin/)
+  elsif ($model_type eq "kenlmbin")
   {
   	$cmd .= "$BIN_TEST/run-kenlm-binarizer.perl --binarizer=$kenlmBinarizer";
   }
