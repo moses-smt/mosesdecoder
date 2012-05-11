@@ -41,7 +41,7 @@ public:
   OutputFileStream();
 
   OutputFileStream(const std::string &filePath);
-  ~OutputFileStream();
+  virtual ~OutputFileStream();
 
   bool Open(const std::string &filePath);
   void Close();

@@ -49,9 +49,11 @@ OutputFileStream::~OutputFileStream()
 bool OutputFileStream::Open(const std::string &filePath)
 {
   m_outFile = new ofstream(filePath.c_str(), ios_base::out | ios_base::binary);    
+  if (m_outFile->fail()) {
+    return false;
+  }
   
-  if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz")
-  {
+  if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
     this->push(boost::iostreams::gzip_compressor());
     m_isGZ = true;
   }
@@ -67,14 +69,12 @@ void OutputFileStream::Close()
     return;
   }
   
-  if (m_isGZ) {
-    this->pop();
-  }
+  this->pop(); // file
   
-  //this->close();
   m_outFile->close();
   delete m_outFile;
   m_outFile = NULL;
+  return;
 }
 
 
