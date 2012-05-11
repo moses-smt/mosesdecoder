@@ -462,7 +462,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
 				SDKROOT = macosx10.6;
@@ -480,7 +483,10 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "extract-rules";
 				SDKROOT = macosx10.6;
@@ -658,7 +664,10 @@
 					"_GLIBCXX_DEBUG_PEDANTIC=1",
 				);
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PRODUCT_NAME = extract;
 				SDKROOT = macosx10.6;
 			};
@@ -673,7 +682,10 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PRODUCT_NAME = extract;
 				SDKROOT = macosx10.6;
 			};
