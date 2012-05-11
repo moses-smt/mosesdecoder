@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 use strict;
 
@@ -38,7 +38,7 @@ unless (defined $results_dir)
 
 `mkdir -p $results_dir`;
 
-my $outPath = "$results_dir/pt.half";
+my $outPath = "$results_dir";
 
 my $extractorArgs = `cat $test_dir/$test_name/args.txt`;
 $_ = $extractorArgs;
@@ -48,12 +48,12 @@ $extractorArgs = $_;
 my $cmdMain = "$extractorExe $extractorArgs \n";
 `$cmdMain`;
 
-my $truthPath = "$test_dir/$test_name/truth/results.txt";
+my $truthPath = "$test_dir/$test_name/truth/";
 
 
 if (-e $outPath)
 {
-  my $cmd = "diff $outPath $truthPath | wc -l";
+  my $cmd = "diff $outPath/test.txt $truthPath | wc -l";
 
   my $numDiff = `$cmd`;
 
