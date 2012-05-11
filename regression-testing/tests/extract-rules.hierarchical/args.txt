@@ -1,0 +1,1 @@
+$data_dir/models/extract-rules.hierarchical/en $data_dir/models/extract-rules.hierarchical/fr $data_dir/models/extract-rules.hierarchical/align.fr-en $outPath/extract --GlueGrammar $outPath/glue-grammar.3 --MaxSpan 10  
