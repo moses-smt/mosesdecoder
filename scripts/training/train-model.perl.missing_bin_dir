@@ -221,14 +221,19 @@ else {
 
 my $SORT_EXEC = `gsort --help 2>/dev/null`; 
 if($SORT_EXEC) {
-  $SORT_EXEC = 'gsort';
+  $SORT_EXEC = '"gsort --compress-program=gzip"';
+#  $SORT_EXEC = 'gsort';
 }
 else {
   $SORT_EXEC = 'sort';
 }
 
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
-if ($___NOFORK == 0)
+if ($___NOFORK != 0)
+{
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 1 $SPLIT_EXEC $SORT_EXEC $PHRASE_EXTRACT";
+}
+else
 {
   $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $PHRASE_EXTRACT";
 }
@@ -1382,13 +1387,17 @@ sub extract_phrase {
 
       $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
 		}
-      if ($reordering_flag) {
+		
+     if ($reordering_flag) {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
         $cmd .= " --NoTTable" if !$ttable_flag;
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
     }
+
+		$cmd .= " --GZOutput ";
+
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
@@ -1486,20 +1495,20 @@ sub score_phrase_phrase_extract {
               }
 	      my $extract = "$extract_filename.sorted";
 
-	      if (!($___CONTINUE && -e "$extract_filename.sorted")) {
-	          # sorting
-	          print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
-	          if (-e "$extract_filename.gz") {
-		      safesystem("gunzip < $extract_filename.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
-	          }
-	          else {
-		      safesystem("LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
-	          }
-              }
+	      #if (!($___CONTINUE && -e "$extract_filename.sorted")) {
+	      #  # sorting
+	      #  print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
+	      #  if (-e "$extract_filename.gz") {
+		    #    safesystem("gunzip < $extract_filename.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+	      #  }
+	      #  else {
+		    #    safesystem("LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+	      #  }
+        #}
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+        my $cmd = "$PHRASE_SCORE $extract.gz $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
