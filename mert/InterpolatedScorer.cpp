@@ -183,7 +183,15 @@ void InterpolatedScorer::setFactors(const string& factors)
 
 void InterpolatedScorer::setFilter(const string& filterCommand)
 {
+    if (filterCommand.empty()) return;
+
+    vector<string> csplit;
+    split(filterCommand, ',', csplit);
+
+    if (csplit.size() != m_scorers.size())
+      throw runtime_error("Number of command specifications does not equal number of interpolated scorers.");
+
     for (size_t i = 0; i < m_scorers.size(); ++i) {
-      m_scorers[i]->setFilter(filterCommand);
+      m_scorers[i]->setFilter(csplit[i]);
     }
 }
