@@ -222,33 +222,10 @@ else {
 
 my $SORT_EXEC = `gsort --help 2>/dev/null`; 
 if($SORT_EXEC) {
-#  $SORT_EXEC = '"gsort --compress-program=gzip"';
   $SORT_EXEC = 'gsort';
 }
 else {
   $SORT_EXEC = 'sort';
-}
-
-my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
-if ($___NOFORK != 0)
-{
-  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 1 $SPLIT_EXEC $SORT_EXEC $PHRASE_EXTRACT";
-}
-else
-{
-  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $PHRASE_EXTRACT";
-}
-
-my $RULE_EXTRACT;
-if (defined($_GHKM)) {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-ghkm/tools/extract-ghkm";
-}
-else {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
-}
-if ($___NOFORK == 0)
-{
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC $SORT_EXEC $RULE_EXTRACT";
 }
 
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
@@ -364,6 +341,33 @@ my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
+
+my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+if ($___NOFORK != 0)
+{
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 1 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $PHRASE_EXTRACT";
+}
+else
+{
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $PHRASE_EXTRACT";
+}
+
+my $RULE_EXTRACT;
+if (defined($_GHKM)) {
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-ghkm/tools/extract-ghkm";
+}
+else {
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
+}
+
+if ($___NOFORK != 0)
+{
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 1 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $RULE_EXTRACT";
+}
+else
+{
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $RULE_EXTRACT";
+}
 
 my $___PHRASE_SCORER = "phrase-extract";
 $___PHRASE_SCORER = "memscore" if defined $_MEMSCORE;
