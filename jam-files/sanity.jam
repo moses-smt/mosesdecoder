@@ -138,8 +138,8 @@ requirements = ;
   local cflags = [ os.environ "CFLAGS" ] ;
   local ldflags = [ os.environ "LDFLAGS" ] ;
 
-  #Boost jam's static clang is buggy.  
-  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <toolset>clang:<link>shared ;
+  #Boost jam's static clang for Linux is buggy.
+  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
   if [ test_flags "-lSegFault" ] {
