@@ -61,11 +61,11 @@ bool OutputFileStream::Open(const std::string &filePath)
 
 void OutputFileStream::Close()
 {
-  this->flush();
   if (m_outFile == NULL) {
     return;
   }
   
+  this->flush();
   this->pop(); // file
   
   m_outFile->close();
