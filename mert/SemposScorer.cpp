@@ -89,6 +89,7 @@ void SemposScorer::splitSentence(const string& sentence, str_sentence_t& splitSe
   split(sentence, ' ', tokens);
   for (vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
     vector<string> factors;
+    if (it->empty()) continue;
     split(*it, '|', factors);
     if (factors.size() != 2) throw runtime_error("Sempos scorer accepts two factors (item|class)");
     const string& item = factors[0];
