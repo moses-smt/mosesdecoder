@@ -102,31 +102,31 @@ else
 }
 
 # merge
-my $extractCmd = "zcat ";
-my $extractInvCmd = "zcat ";
-my $extractOrderingCmd = "zcat ";
+my $catCmd = "zcat ";
+my $catInvCmd = "zcat ";
+my $catOCmd = "zcat ";
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
-		$extractCmd .= "$TMPDIR/extract.$numStr.gz ";
-		$extractInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
-		$extractOrderingCmd .= "$TMPDIR/extract.$numStr.o.gz ";
+		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
+		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
+		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
 }
 
-$extractCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
-$extractInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
-$extractOrderingCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
-print STDERR $extractCmd;
-print STDERR $extractInvCmd;
-print STDERR $extractOrderingCmd;
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
+print STDERR $catCmd;
+print STDERR $catInvCmd;
+print STDERR $catOCmd;
 
-systemCheck($extractCmd);
-systemCheck($extractInvCmd);
+systemCheck($catCmd);
+systemCheck($catInvCmd);
 
 my $numStr = NumStr(0);
-if (-e "$TMPDIR/extract.$numStr.o")
+if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
-	systemCheck($extractOrderingCmd);
+	systemCheck($catOCmd);
 }
 
 

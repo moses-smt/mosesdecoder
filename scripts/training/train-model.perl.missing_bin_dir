@@ -221,8 +221,8 @@ else {
 
 my $SORT_EXEC = `gsort --help 2>/dev/null`; 
 if($SORT_EXEC) {
-  $SORT_EXEC = '"gsort --compress-program=gzip"';
-#  $SORT_EXEC = 'gsort';
+#  $SORT_EXEC = '"gsort --compress-program=gzip"';
+  $SORT_EXEC = 'gsort';
 }
 else {
   $SORT_EXEC = 'sort';
@@ -1404,14 +1404,6 @@ sub extract_phrase {
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    if (! $___DONT_ZIP) { 
-      safesystem("gzip $extract_file.o") if -e "$extract_file.o";
-      safesystem("gzip $extract_file.sid") if -e "$extract_file.sid";
-      if ($ttable_flag) {
-        safesystem("gzip $extract_file.inv") or die("ERROR");
-        safesystem("gzip $extract_file") or die("ERROR");
-      }
-    }
 }
 
 ### (6) PHRASE SCORING
@@ -1634,11 +1626,11 @@ sub get_reordering_factored {
 
 sub get_reordering {
     my ($extract_file,$reo_model_path) = @_;
-    if (-e "$extract_file.o.gz") {
-	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
+    if (-e "$extract_file.o.sorted.gz") {
+      # do nothing
     }
     else {
-        safesystem("LC_ALL=C $SORT_EXEC -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
+        die("ERROR: $extract_file.o.sorted.gz does not exist");
     }
 
     my $smooth = $___REORDERING_SMOOTH;
@@ -1646,22 +1638,20 @@ sub get_reordering {
     print STDERR "(7.2) building tables @ ".`date`;
 
     #create cmd string for lexical reordering scoring
-    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted $smooth $reo_model_path";
+    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
     $cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
     for my $mtype (keys %REORDERING_MODEL_TYPES) {
-	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
-	foreach my $model (@REORDERING_MODELS) {
-	    if ($model->{"type"} eq $mtype) {
-		$cmd .= " ".$model->{"filename"};
-	    }
-	}
-	$cmd .= "\"";
-    }
+			$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
+			foreach my $model (@REORDERING_MODELS) {
+	    	if ($model->{"type"} eq $mtype) {
+					$cmd .= " ".$model->{"filename"};
+	    	}
+		}
+		$cmd .= "\"";
+  }
     
-    #Call the lexical reordering scorer
-    safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
-
-    if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
+  #Call the lexical reordering scorer
+  safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
 }
 
 
