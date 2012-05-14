@@ -1,18 +1,18 @@
-INPUT_FILE=/Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/training/10
-OUTPUT_PATH=/Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/sa/filtered
+#!/bin/bash
 
-SA_EXEC_DIR=/Users/hieuhoang/workspace/github/cdec/sa-extract
-WORKING_DIR=/Users/hieuhoang/workspace/data/europarl/exp/fr-en/
-EXP_NUM=2
+# execute: ~/workspace/bin/moses-smt/scripts/training/wrappers/suffix-array-extract.sh $SA_EXEC_DIR $MODEL_DIR $INPUT_FILE $OUTPUT_DIR
 
-SA_DIR=$WORKING_DIR/model/suffix-array.$EXP_NUM
+SA_EXEC_DIR=$1
+MODEL_DIR=$2
+INPUT_FILE=$3
+OUTPUT_DIR=$4
 
-mkdir $OUTPUT_PATH
+mkdir $OUTPUT_DIR
 
 pushd .
-cd $OUTPUT_PATH
+cd $OUTPUT_DIR
 
-$SA_EXEC_DIR/extractor.py -c  $SA_DIR/extract.ini < $INPUT_FILE
+$SA_EXEC_DIR/extractor.py -c  $MODEL_DIR/extract.ini < $INPUT_FILE
 
 popd
 
