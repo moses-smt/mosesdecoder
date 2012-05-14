@@ -15,7 +15,7 @@ inline int CalcDistance(int word1, int word2) {
 } // namespace
 
 CderScorer::CderScorer(const string& config, bool allowed_long_jumps)
-    : StatisticsBasedScorer("CDER", config),
+    : StatisticsBasedScorer(allowed_long_jumps ? "CDER" : "WER", config),
       m_allowed_long_jumps(allowed_long_jumps) {}
 
 CderScorer::~CderScorer() {}
