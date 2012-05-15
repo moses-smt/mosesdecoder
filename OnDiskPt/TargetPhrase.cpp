@@ -305,6 +305,23 @@ UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
   return bytesRead;
 }
 
+void TargetPhrase::DebugPrint(ostream &out, const Vocab &vocab) const
+{
+  Phrase::DebugPrint(out, vocab);
+  
+  for (size_t ind = 0; ind < m_align.size(); ++ind) {
+    const AlignPair &alignPair = m_align[ind];
+    out << alignPair.first << "-" << alignPair.second << " ";
+  }
+  out << ", ";
+
+  for (size_t ind = 0; ind < m_scores.size(); ++ind) {
+    out << m_scores[ind] << " ";
+  }
+
+  return;
+}
+
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &phrase)
 {
   out << (const Phrase&) phrase << ", " ;
