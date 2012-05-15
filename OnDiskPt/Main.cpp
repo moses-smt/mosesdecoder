@@ -46,15 +46,15 @@ int main (int argc, char * const argv[])
 
   assert(argc == 8);
 
-  int numSourceFactors		= Moses::Scan<int>(argv[1])
-                            , numTargetFactors	= Moses::Scan<int>(argv[2])
-                                , numScores					= Moses::Scan<int>(argv[3])
-                                    , tableLimit				= Moses::Scan<int>(argv[4]);
+  int numSourceFactors	= Moses::Scan<int>(argv[1])
+     , numTargetFactors	= Moses::Scan<int>(argv[2])
+     , numScores				= Moses::Scan<int>(argv[3])
+     , tableLimit				= Moses::Scan<int>(argv[4]);
   TargetPhraseCollection::s_sortScoreInd			= Moses::Scan<int>(argv[5]);
   assert(TargetPhraseCollection::s_sortScoreInd < numScores);
   
-  const string filePath = argv[6]
-                          ,destPath = argv[7];
+  const string filePath 	= argv[6]
+               ,destPath	= argv[7];
 
 
   Moses::InputFileStream inStream(filePath);
