@@ -152,8 +152,15 @@ void Word::DebugPrint(ostream &out, const Vocab &vocab) const
 
   std::vector<UINT64>::const_iterator iter;
   for (size_t ind = 0; ind < m_factors.size() - 1; ++ind) {
-    out << *iter << "|";
+  	UINT64 vocabId = *iter;
+  	const string &str = vocab.GetString(vocabId);
+    out << str << "|";
   }
+
+  // last
+	UINT64 vocabId = m_factors.back();
+	const string &str = vocab.GetString(vocabId);
+	out << str;
 
 	if (m_isNonTerminal)
 	  out << "]";

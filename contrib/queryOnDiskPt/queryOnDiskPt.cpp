@@ -121,7 +121,6 @@ int main(int argc, char **argv)
 			  Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
 			}
 		}
-		cerr << "size=" << sourcePhrase.GetSize() << endl;
 		
     const PhraseNode *node = &onDiskWrapper.GetRootSourceNode();
 		cerr << "node=" << node << endl;
@@ -149,7 +148,9 @@ int main(int argc, char **argv)
       for (size_t ind = 0; ind < coll->GetSize(); ++ind)
       {
         const TargetPhrase &targetPhrase = coll->GetTargetPhrase(ind);
-        cerr << "  ** " << targetPhrase << endl;
+        cerr << " ** ";
+        targetPhrase.DebugPrint(cerr, onDiskWrapper.GetVocab());
+        cerr << endl;
         
 
       }

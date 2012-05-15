@@ -49,7 +49,7 @@ public:
     return m_words.size();
   }
 
-  void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
   int Compare(const Phrase &compare) const;
   bool operator<(const Phrase &compare) const;
