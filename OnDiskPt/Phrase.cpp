@@ -102,7 +102,8 @@ void Phrase::DebugPrint(ostream &out, const Vocab &vocab) const
 {
   for (size_t pos = 0; pos < GetSize(); ++pos) {
     const Word &word = GetWord(pos);
-    out << word << " ";
+    word.DebugPrint(out, vocab);
+    out << " ";
   }
 }
 
