@@ -119,14 +119,18 @@ int main(int argc, char **argv)
 			  Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
 			}
 		}
-
+		cerr << "size=" << sourcePhrase.GetSize() << endl;
+		
     const PhraseNode *node = &onDiskWrapper.GetRootSourceNode();
+		cerr << "node=" << node << endl;
     assert(node);
     
     for (size_t pos = 0; pos < sourcePhrase.GetSize(); ++pos)
 		{
 		  const Word &word = sourcePhrase.GetWord(pos);
+		  cerr << word << " ";
 		  node = node->GetChild(word, onDiskWrapper);
+  		cerr << "node=" << node << endl;
 		  
 		  if (node == NULL)
 		  {
