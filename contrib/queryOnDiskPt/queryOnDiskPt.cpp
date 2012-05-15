@@ -17,6 +17,8 @@ void usage();
 
 typedef unsigned int uint;
 
+#define TABLE_LIMIT 20
+
 void Tokenize(OnDiskPt::Phrase &phrase
               , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
               , OnDiskPt::OnDiskWrapper &onDiskWrapper)
@@ -94,6 +96,8 @@ int main(int argc, char **argv)
   bool retDb = onDiskWrapper.BeginLoad(ttable);
 	CHECK(retDb);
 	
+	cerr << "Ready..." << endl;
+	
   std::string line;
   while(getline(std::cin, line)) {
     std::vector<std::string> tokens;
@@ -116,10 +120,37 @@ int main(int argc, char **argv)
 			}
 		}
 
+    const PhraseNode *node = &onDiskWrapper.GetRootSourceNode();
+    assert(node);
+    
+    for (size_t pos = 0; pos < sourcePhrase.GetSize(); ++pos)
+		{
+		  const Word &word = sourcePhrase.GetWord(pos);
+		  node = node->GetChild(word, onDiskWrapper);
+		  
+		  if (node == NULL)
+		  {
+		    break;
+		  }
+		}
+    
+    if (node)
+    { // source phrase points to something
+      const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(TABLE_LIMIT, onDiskWrapper);
+      string str = coll->GetDebugStr();
+      cout << "Found" << str << endl;
+    }
+    else
+    {
+      cout << "Not found" << endl;
+    }
     
     std::cout << '\n';
     std::cout.flush();
   }
+  
+  cerr << "Finished." << endl;
+	
 }
 
 void usage()
