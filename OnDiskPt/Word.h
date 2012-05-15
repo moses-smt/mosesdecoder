@@ -71,7 +71,7 @@ public:
                               , const std::vector<Moses::FactorType> &outputFactorsVec
                               , const Vocab &vocab) const;
 
-	void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
   int Compare(const Word &compare) const;
   bool operator<(const Word &compare) const;

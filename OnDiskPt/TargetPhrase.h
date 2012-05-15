@@ -93,7 +93,7 @@ public:
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
   UINT64 ReadFromFile(std::fstream &fileTP, size_t numFactors);
 
-	void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
 };
 
