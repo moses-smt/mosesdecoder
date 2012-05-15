@@ -147,9 +147,6 @@ bool Word::operator==(const Word &compare) const
 
 void Word::DebugPrint(ostream &out, const Vocab &vocab) const
 {
-  if (m_isNonTerminal)
-	  out << "[";
-
   std::vector<UINT64>::const_iterator iter;
   for (size_t ind = 0; ind < m_factors.size() - 1; ++ind) {
   	UINT64 vocabId = *iter;
@@ -161,9 +158,6 @@ void Word::DebugPrint(ostream &out, const Vocab &vocab) const
 	UINT64 vocabId = m_factors.back();
 	const string &str = vocab.GetString(vocabId);
 	out << str;
-
-	if (m_isNonTerminal)
-	  out << "]";
 }
 
 std::ostream& operator<<(std::ostream &out, const Word &word)
