@@ -41,9 +41,7 @@ void Tokenize(OnDiskPt::Phrase &phrase
     if (splitPos == string::npos) {
       // lhs - only 1 word
       Word *word = new Word();
-			cerr << "WORD " << *word << " ";
       word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
-      cerr << *word << endl;
       phrase.AddWord(word);
     } else {
       // source & target non-terms
@@ -103,8 +101,10 @@ int main(int argc, char **argv)
   std::string line;
   while(getline(std::cin, line)) {
     std::vector<std::string> tokens;
-    tokens = Moses::Tokenize(line);
+    tokens = Moses::Tokenize(line, " ");
 
+		cerr << "line: " << line << endl;
+		
 		// create source phrase
     SourcePhrase sourcePhrase;
 
@@ -144,7 +144,13 @@ int main(int argc, char **argv)
     { // source phrase points to something
       const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(TABLE_LIMIT, onDiskWrapper);
       string str = coll->GetDebugStr();
-      cout << "Found" << str << endl;
+      cout << "Found" << coll->GetSize() << endl;
+      
+      for (size_t ind = 0; ind < coll->GetSize(); ++ind)
+      {
+        const TargetPhrase &targetPhrase = coll->GetTargetPhrase(ind);
+        cerr << "  ** " << targetPhrase << endl; 
+      }
     }
     else
     {
