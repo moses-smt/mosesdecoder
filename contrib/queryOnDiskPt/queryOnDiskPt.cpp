@@ -41,7 +41,9 @@ void Tokenize(OnDiskPt::Phrase &phrase
     if (splitPos == string::npos) {
       // lhs - only 1 word
       Word *word = new Word();
+			cerr << "WORD " << *word << " ";
       word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+      cerr << *word << endl;
       phrase.AddWord(word);
     } else {
       // source & target non-terms
