@@ -7,6 +7,7 @@ obj SentenceAlignment.o : SentenceAlignment.cpp : <include>. ;
 obj SyntaxTree.o : SyntaxTree.cpp : <include>. ;
 obj XmlTree.o : XmlTree.cpp : <include>. ;
 
+alias filestreams : InputFileStream.cpp OutputFileStream.cpp : : : <include>. ;
 alias trees : SyntaxTree.cpp tables-core.o XmlTree.o : : : <include>. ;
 
 exe extract : tables-core.o SentenceAlignment.o extract.cpp OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
