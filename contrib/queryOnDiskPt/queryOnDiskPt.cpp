@@ -141,7 +141,7 @@ int main(int argc, char **argv)
 		}
     
     if (node)
-    { // source phrase points to something
+    { // source phrase points to a bunch of rules
       const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(TABLE_LIMIT, onDiskWrapper);
       string str = coll->GetDebugStr();
       cout << "Found" << coll->GetSize() << endl;
@@ -149,7 +149,9 @@ int main(int argc, char **argv)
       for (size_t ind = 0; ind < coll->GetSize(); ++ind)
       {
         const TargetPhrase &targetPhrase = coll->GetTargetPhrase(ind);
-        cerr << "  ** " << targetPhrase << endl; 
+        cerr << "  ** " << targetPhrase << endl;
+        
+
       }
     }
     else
