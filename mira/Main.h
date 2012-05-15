@@ -50,7 +50,7 @@ void printFeatureValues(std::vector<std::vector<Moses::ScoreComponentCollection>
 void ignoreCoreFeatures(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, ProducerWeightMap &coreWeightMap);
 void takeLogs(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t base);
 void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translations);
-void decodeHopeOrFear(size_t rank, size_t size, size_t decode, std::string decode_filename, std::vector<std::string> &inputSentences, Mira::MosesDecoder* decoder, size_t n);
+void decodeHopeOrFear(size_t rank, size_t size, size_t decode, std::string decode_filename, std::vector<std::string> &inputSentences, Mira::MosesDecoder* decoder, size_t n, float bleuWeight);
 void scaleFeatureScore(Moses::ScoreProducer *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
 void scaleFeatureScores(Moses::ScoreProducer *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
 

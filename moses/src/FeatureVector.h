@@ -182,6 +182,8 @@ namespace Moses {
     FVector& operator*= (const FValue& rhs);
     FVector& operator/= (const FValue& rhs);
     
+    FVector& multiplyEqualsSafe(const FVector& rhs);
+
     FVector& max_equals(const FVector& rhs);
 
     /** norms and sums */
@@ -214,6 +216,8 @@ namespace Moses {
     void printSparseFearFeatureCounts();
     size_t pruneSparseFeatures(size_t threshold);
     size_t pruneZeroWeightFeatures();
+    void updateConfidenceCounts(const FVector& weightUpdate, bool signedCounts);
+    void updateLearningRates(float decay, const FVector& confidence_counts);
     
     // vector which, for each element of the original vector, reflects whether an element is zero or non-zero
     void setToBinaryOf(const FVector& rhs);
@@ -232,8 +236,9 @@ namespace Moses {
     
     /** Internal get and set. */
     const FValue& get(const FName& name) const;
+    const FValue& getSafe(const FName& name) const;
     void set(const FName& name, const FValue& value);
-		
+	       
     FNVmap m_features;
     std::valarray<FValue> m_coreFeatures;
 		

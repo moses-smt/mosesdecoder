@@ -165,150 +165,148 @@ size_t MiraOptimiser::updateWeightsHopeFear(
 		size_t epoch,
 		int updatePosition) {
 
-	// vector of feature values differences for all created constraints
-	vector<ScoreComponentCollection> featureValueDiffs;
-	vector<float> lossMinusModelScoreDiffs;
-	vector<float> modelScoreDiffs;
-	vector<float> all_losses;
-
-	// most violated constraint in batch
-	ScoreComponentCollection max_batch_featureValueDiff;
-
-	// Make constraints for new hypothesis translations
-	float epsilon = 0.0001;
-	int violatedConstraintsBefore = 0;
-	float oldDistanceFromOptimum = 0;
-
-	// iterate over input sentences (1 (online) or more (batch))
-	for (size_t i = 0; i < featureValuesHope.size(); ++i) {
-		if (updatePosition != -1) {
-		  if (i < updatePosition)
-		    continue;
-		  else if (i > updatePosition)
-		    break;
-		}
-
-		// Pair all hope translations with all fear translations for one input sentence
-		for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
-			for (size_t k = 0; k < featureValuesFear[i].size(); ++k) {
-				ScoreComponentCollection featureValueDiff = featureValuesHope[i][j];
-				featureValueDiff.MinusEquals(featureValuesFear[i][k]);
-				//				cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
-				if (featureValueDiff.GetL1Norm() == 0) {
-					cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
-					continue;
-				}
-
-				float loss = bleuScoresHope[i][j] - bleuScoresFear[i][k];
-
-				// check if constraint is violated
-				bool violated = false;
-				//float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
-				float modelScoreDiff = modelScoresHope[i][j] - modelScoresFear[i][k];
-				float diff = 0;
-				if (loss > modelScoreDiff) 
-				  diff = loss - modelScoreDiff;
-				cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;	
-				
-				if (diff > epsilon) 
-				  violated = true;
-		
-				if (m_normaliseMargin) {
-				  modelScoreDiff = (2*m_sigmoidParam/(1 + exp(-modelScoreDiff))) - m_sigmoidParam;
-				  loss = (2*m_sigmoidParam/(1 + exp(-loss))) - m_sigmoidParam;
-				  diff = 0;
-				  if (loss > modelScoreDiff) {
-				    diff = loss - modelScoreDiff;
-				  }
-				  cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
-				}
-
-				if (m_scale_margin) {
-				  diff *= bleuScoresHope[i][j];
-				  cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl;
-				}
-
-				featureValueDiffs.push_back(featureValueDiff);
-				lossMinusModelScoreDiffs.push_back(diff);
-				modelScoreDiffs.push_back(modelScoreDiff);
-				all_losses.push_back(loss);
-				if (violated) {
-				  ++violatedConstraintsBefore;
-				  oldDistanceFromOptimum += diff;
-				}				
-			}
-		}
+  // vector of feature values differences for all created constraints
+  vector<ScoreComponentCollection> featureValueDiffs;
+  vector<float> lossMinusModelScoreDiffs;
+  vector<float> modelScoreDiffs;
+  vector<float> all_losses;
+  
+  // most violated constraint in batch
+  ScoreComponentCollection max_batch_featureValueDiff;
+  
+  // Make constraints for new hypothesis translations
+  float epsilon = 0.0001;
+  int violatedConstraintsBefore = 0;
+  float oldDistanceFromOptimum = 0;
+  
+  // iterate over input sentences (1 (online) or more (batch))
+  for (size_t i = 0; i < featureValuesHope.size(); ++i) {
+    if (updatePosition != -1) {
+      if (i < updatePosition)
+	continue;
+      else if (i > updatePosition)
+	break;
+    }
+    
+    // Pick all pairs[j,j] of hope and fear translations for one input sentence
+    for (size_t j = 0; j < featureValuesHope[i].size(); ++j) {
+      ScoreComponentCollection featureValueDiff = featureValuesHope[i][j];
+      featureValueDiff.MinusEquals(featureValuesFear[i][j]);
+      //cerr << "Rank " << rank << ", epoch " << epoch << ", feature value diff: " << featureValueDiff << endl;
+      if (featureValueDiff.GetL1Norm() == 0) {
+	cerr << "Rank " << rank << ", epoch " << epoch << ", features equal --> skip" << endl;
+	continue;
+      }
+      
+      float loss = bleuScoresHope[i][j] - bleuScoresFear[i][j];
+      
+      // check if constraint is violated
+      bool violated = false;
+      //float modelScoreDiff = featureValueDiff.InnerProduct(currWeights);
+      float modelScoreDiff = modelScoresHope[i][j] - modelScoresFear[i][j];
+      float diff = 0;
+      if (loss > modelScoreDiff) 
+	diff = loss - modelScoreDiff;
+      cerr << "Rank " << rank << ", epoch " << epoch << ", constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;	
+      
+      if (diff > epsilon) 
+	violated = true;
+	    
+      if (m_normaliseMargin) {
+	modelScoreDiff = (2*m_sigmoidParam/(1 + exp(-modelScoreDiff))) - m_sigmoidParam;
+	loss = (2*m_sigmoidParam/(1 + exp(-loss))) - m_sigmoidParam;
+	diff = 0;
+	if (loss > modelScoreDiff) {
+	  diff = loss - modelScoreDiff;
 	}
+	cerr << "Rank " << rank << ", epoch " << epoch << ", normalised constraint: " << modelScoreDiff << " >= " << loss << " (current violation: " << diff << ")" << endl;
+      }
+      
+      if (m_scale_margin) {
+	diff *= bleuScoresHope[i][j];
+	cerr << "Rank " << rank << ", epoch " << epoch << ", scaling margin with oracle bleu score "  << bleuScoresHope[i][j] << endl;
+      }
+      
+      featureValueDiffs.push_back(featureValueDiff);
+      lossMinusModelScoreDiffs.push_back(diff);
+      modelScoreDiffs.push_back(modelScoreDiff);
+      all_losses.push_back(loss);
+      if (violated) {
+	++violatedConstraintsBefore;
+	oldDistanceFromOptimum += diff;
+      }				
+    }
+  }
 
-	// run optimisation: compute alphas for all given constraints
-	vector<float> alphas;
-	ScoreComponentCollection summedUpdate;
-	if (violatedConstraintsBefore > 0) {
-	  cerr << "Rank " << rank << ", epoch " << epoch << ", number of constraints passed to optimizer: " <<
-			  featureValueDiffs.size() << " (of which violated: " << violatedConstraintsBefore << ")" << endl;
-	  if (m_slack != 0) {
-	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
-	  } else {
-	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
-	  }
-
-	  // Update the weight vector according to the alphas and the feature value differences
-	  // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
-	  for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
-	  	float alpha = alphas[k];
-	  	cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
-	  	if (alpha != 0) {
-	  		// apply boosting factor
-	  		if (m_boost && modelScoreDiffs[k] <= 0) {
-	  			// factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
-	  			float factor = min(1.5, log2(bleuScoresHope[0][0])); // TODO: make independent of number of oracles!!
-	  			factor = min(3.0f, factor);
-	  			alpha = alpha * factor;
-	  			cerr << "Rank " << rank << ", epoch " << epoch << ", apply boosting factor " << factor << " to update." << endl;
-	  		}
-
-	  		ScoreComponentCollection update(featureValueDiffs[k]);
-	  		update.MultiplyEquals(alpha);
-
-	  		// sum updates
-	  		summedUpdate.PlusEquals(update);
-	  	}
-	  }
+  // run optimisation: compute alphas for all given constraints
+  vector<float> alphas;
+  ScoreComponentCollection summedUpdate;
+  if (violatedConstraintsBefore > 0) {
+    cerr << "Rank " << rank << ", epoch " << epoch << ", number of constraints passed to optimizer: " <<
+      featureValueDiffs.size() << " (of which violated: " << violatedConstraintsBefore << ")" << endl;
+    if (m_slack != 0) {
+      alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
+    } else {
+      alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
+    }
+    
+    // Update the weight vector according to the alphas and the feature value differences
+    // * w' = w' + SUM alpha_i * (h_i(oracle) - h_i(hypothesis))
+    for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
+      float alpha = alphas[k];
+      cerr << "Rank " << rank << ", epoch " << epoch << ", alpha: " << alpha << endl;
+      if (alpha != 0) {
+	// apply boosting factor
+	if (m_boost && modelScoreDiffs[k] <= 0) {
+	  // factor between 1.5 and 3 (for Bleu scores between 5 and 20, the factor is within the boundaries)
+	  float factor = min(1.5, log2(bleuScoresHope[0][0])); // TODO: make independent of number of oracles!!
+	  factor = min(3.0f, factor);
+	  alpha = alpha * factor;
+	  cerr << "Rank " << rank << ", epoch " << epoch << ", apply boosting factor " << factor << " to update." << endl;
 	}
-	else {
-		cerr << "Rank " << rank << ", epoch " << epoch << ", no constraint violated for this batch" << endl;
-//	  return 0;
-		return 1;
-	}
-
-	// apply learning rate
-	if (learning_rate != 1) {
-		cerr << "Rank " << rank << ", epoch " << epoch << ", apply learning rate " << learning_rate << " to update." << endl;
-		summedUpdate.MultiplyEquals(learning_rate);
-	}
-
-	// scale update by BLEU of oracle (for batch size 1 only)
-	if (featureValuesHope.size() == 1) {
-		if (m_scale_update) {
-			cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with oracle bleu score " << bleuScoresHope[0][0] << endl;
-			summedUpdate.MultiplyEquals(bleuScoresHope[0][0]);
-		}
-	}
-
-	//	cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
-	weightUpdate.PlusEquals(summedUpdate);
-
-	// Sanity check: are there still violated constraints after optimisation?
+	
+	ScoreComponentCollection update(featureValueDiffs[k]);
+	update.MultiplyEquals(alpha);
+	
+	// sum updates
+	summedUpdate.PlusEquals(update);
+      }
+    }
+  }
+  else {
+    cerr << "Rank " << rank << ", epoch " << epoch << ", no constraint violated for this batch" << endl;
+    //	  return 0;
+    return 1;
+  }
+  
+  // apply learning rate
+  if (learning_rate != 1) {
+    cerr << "Rank " << rank << ", epoch " << epoch << ", apply learning rate " << learning_rate << " to update." << endl;
+    summedUpdate.MultiplyEquals(learning_rate);
+  }
+  
+  // scale update by BLEU of oracle (for batch size 1 only)
+  if (featureValuesHope.size() == 1) {
+    if (m_scale_update) {
+      cerr << "Rank " << rank << ", epoch " << epoch << ", scaling summed update with oracle bleu score " << bleuScoresHope[0][0] << endl;
+      summedUpdate.MultiplyEquals(bleuScoresHope[0][0]);
+    }
+  }
+  
+  //cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << summedUpdate << endl;
+  weightUpdate.PlusEquals(summedUpdate);
+  
+  // Sanity check: are there still violated constraints after optimisation?
 /*	int violatedConstraintsAfter = 0;
 	float newDistanceFromOptimum = 0;
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
-		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
-		float loss = all_losses[i];
-		float diff = loss - modelScoreDiff;
-		if (diff > epsilon) {
-			++violatedConstraintsAfter;
-			newDistanceFromOptimum += diff;
-		}
+	float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
+	float loss = all_losses[i];
+	float diff = loss - modelScoreDiff;
+	if (diff > epsilon) {
+	++violatedConstraintsAfter;
+	newDistanceFromOptimum += diff;
+	}
 	}
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);*/

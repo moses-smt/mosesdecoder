@@ -106,6 +106,11 @@ void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rh
 	m_scores *= rhs.m_scores;
 }
 
+void ScoreComponentCollection::MultiplyEqualsSafe(const ScoreComponentCollection& rhs)
+{
+  m_scores.multiplyEqualsSafe(rhs.m_scores);
+}
+
 std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)
 {
 	os << rhs.m_scores;

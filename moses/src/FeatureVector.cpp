@@ -282,6 +282,16 @@ namespace Moses {
     }
   }
 
+  const FValue& FVector::getSafe(const FName& name) const {
+    static const FValue DEFAULT = 100000;
+    const_iterator fi = m_features.find(name);
+    if (fi == m_features.end()) {
+      return DEFAULT;
+    } else {
+      return fi->second;
+    }
+  }
+
   void FVector::thresholdScale(FValue maxValue ) {
     FValue factor = 1.0;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
@@ -367,21 +377,21 @@ namespace Moses {
   }
 
   size_t FVector::pruneSparseFeatures(size_t threshold) {
-	size_t count = 0;
-	vector<FName> toErase;
+    size_t count = 0;
+    vector<FName> toErase;
     for (const_iterator i = cbegin(); i != cend(); ++i) {
       const std::string& fname = (i->first).name();
       if (FName::getHopeIdCount(fname) < threshold && FName::getFearIdCount(fname) < threshold) {
         toErase.push_back(i->first);
-        //std::cerr << "pruning: " << fname << " (" << FName::getIdCount(fname) << ")" << std::endl;
+        std::cerr << "pruning: " << fname << " (" << FName::getHopeIdCount(fname) << ", " << FName::getFearIdCount(fname) << ")" << std::endl;
         FName::eraseId(FName::getId(fname));
     	++count;
       }
     }
     
-    for (size_t i = 0; i < toErase.size(); ++i)
-    	m_features.erase(toErase[i]);
-    
+    for (size_t i = 0; i < toErase.size(); ++i) 
+    	m_features.erase(toErase[i]);	
+        
     return count;
   }
   
@@ -402,6 +412,43 @@ namespace Moses {
     	m_features.erase(toErase[i]);
     
     return count;
+  }
+
+  void FVector::updateConfidenceCounts(const FVector& weightUpdate, bool signedCounts) {
+    for (size_t i = 0; i < weightUpdate.m_coreFeatures.size(); ++i) {
+      if (signedCounts) {
+	int sign = weightUpdate.m_coreFeatures[i] >= 0 ? 1 : -1;
+	m_coreFeatures[i] += (weightUpdate.m_coreFeatures[i] * weightUpdate.m_coreFeatures[i]) * sign;
+      }
+      else
+	m_coreFeatures[i] += (weightUpdate.m_coreFeatures[i] * weightUpdate.m_coreFeatures[i]);
+    }
+    
+    for (const_iterator i = weightUpdate.cbegin(); i != weightUpdate.cend(); ++i) {
+      if (weightUpdate[i->first] == 0)
+	continue;
+      float value = get(i->first);
+      if (signedCounts) {
+	int sign = weightUpdate[i->first] >= 0 ? 1 : -1;
+	value += (weightUpdate[i->first] * weightUpdate[i->first]) * sign;
+      }
+      else 
+	value += (weightUpdate[i->first] * weightUpdate[i->first]);
+      set(i->first, value);
+    }
+  }
+
+  void FVector::updateLearningRates(float decay, const FVector &confidenceCounts) {
+    float r0 = 1.0;
+    for (size_t i = 0; i < confidenceCounts.m_coreFeatures.size(); ++i) {
+      m_coreFeatures[i] = 1.0/(1.0/r0 + decay * abs(confidenceCounts.m_coreFeatures[i]));     
+    }
+
+    for (const_iterator i = confidenceCounts.cbegin(); i != confidenceCounts.cend(); ++i) {
+      float value = 1.0/(1.0/r0 + decay * abs(i->second));
+      set(i->first, value);
+      cerr << "set learning rate: " << i->first << ": " << value << endl; 
+    }
   }
 
   // count non-zero occurrences for all sparse features
@@ -501,6 +548,26 @@ namespace Moses {
     m_coreFeatures /= rhs;
     return *this;
   }
+
+  FVector& FVector::multiplyEqualsSafe(const FVector& rhs) {
+    if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
+      resize(rhs.m_coreFeatures.size());
+    }
+    for (iterator i = begin(); i != end(); ++i) {
+      FValue lhsValue = i->second;
+      FValue rhsValue = rhs.getSafe(i->first);
+      if (rhsValue != 100000) // indicates that feature  is uninitialized
+	set(i->first,lhsValue*rhsValue);
+    }
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      if (i < rhs.m_coreFeatures.size()) {
+        m_coreFeatures[i] *= rhs.m_coreFeatures[i];
+      } else {
+        m_coreFeatures[i] = 0;
+      }
+    }
+    return *this;
+  }
   
   FValue FVector::l1norm() const {
     FValue norm = 0;
@@ -533,7 +600,7 @@ namespace Moses {
 	norm = absValue;
     }
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
-      float absValue = m_coreFeatures[i];
+      float absValue = abs(m_coreFeatures[i]);
       if (absValue > norm)
 	norm = absValue;
     }
@@ -541,6 +608,16 @@ namespace Moses {
   }
 
   void FVector::l1regularize(float lambda) {
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      float value = m_coreFeatures[i];
+      if (value > 0) {
+        m_coreFeatures[i] = max(0.0f, value - lambda);
+      }
+      else {
+        m_coreFeatures[i] = min(0.0f, value + lambda);
+      }
+    }
+
     for (iterator i = begin(); i != end(); ++i) {
       float value = i->second;
       if (value > 0) {
@@ -553,6 +630,10 @@ namespace Moses {
   }
 
   void FVector::l2regularize(float lambda)  {
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      m_coreFeatures[i] *= (1 - lambda);
+    }
+
     for (iterator i = begin(); i != end(); ++i) {
       i->second *= (1 - lambda);            
     }

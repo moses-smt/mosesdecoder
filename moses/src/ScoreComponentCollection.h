@@ -142,6 +142,7 @@ public:
 	void CoreDivideEquals(float scalar);
 	void DivideEquals(const ScoreComponentCollection& rhs);
 	void MultiplyEquals(const ScoreComponentCollection& rhs);	
+	void MultiplyEqualsSafe(const ScoreComponentCollection& rhs);
 	void MultiplyEquals(const ScoreProducer* sp, float scalar);
 
 	size_t GetNumberWeights(const ScoreProducer* sp);
@@ -378,6 +379,8 @@ public:
   void PrintSparseFearFeatureCounts() { m_scores.printSparseFearFeatureCounts(); }
   size_t PruneSparseFeatures(size_t threshold) { return m_scores.pruneSparseFeatures(threshold); }
   size_t PruneZeroWeightFeatures() { return m_scores.pruneZeroWeightFeatures(); }
+  void UpdateConfidenceCounts(ScoreComponentCollection &weightUpdate, bool signedCounts) { m_scores.updateConfidenceCounts(weightUpdate.m_scores, signedCounts); }
+  void UpdateLearningRates(float decay, ScoreComponentCollection &confidenceCounts) { m_scores.updateLearningRates(decay, confidenceCounts.m_scores); }
 
 #ifdef MPI_ENABLE
   public:
