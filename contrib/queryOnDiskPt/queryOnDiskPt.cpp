@@ -17,8 +17,6 @@ void usage();
 
 typedef unsigned int uint;
 
-#define TABLE_LIMIT 20
-
 void Tokenize(OnDiskPt::Phrase &phrase
               , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
               , OnDiskPt::OnDiskWrapper &onDiskWrapper)
@@ -70,21 +68,20 @@ void Tokenize(OnDiskPt::Phrase &phrase
 
 int main(int argc, char **argv)
 {
-  int nscores = 5;
+  int tableLimit = 20;
   std::string ttable = "";
   bool useAlignments = false;
 
   for(int i = 1; i < argc; i++) {
-    if(!strcmp(argv[i], "-n")) {
+    if(!strcmp(argv[i], "-tlimit")) {
       if(i + 1 == argc)
         usage();
-      nscores = atoi(argv[++i]);
+      tableLimit = atoi(argv[++i]);
     } else if(!strcmp(argv[i], "-t")) {
       if(i + 1 == argc)
         usage();
       ttable = argv[++i];
-    } else if(!strcmp(argv[i], "-a"))
-      useAlignments = true;
+    }
     else
       usage();
   }
@@ -141,14 +138,14 @@ int main(int argc, char **argv)
     
     if (node)
     { // source phrase points to a bunch of rules
-      const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(TABLE_LIMIT, onDiskWrapper);
+      const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(tableLimit, onDiskWrapper);
       string str = coll->GetDebugStr();
-      cout << "Found" << coll->GetSize() << endl;
+      cout << "Found " << coll->GetSize() << endl;
       
       for (size_t ind = 0; ind < coll->GetSize(); ++ind)
       {
         const TargetPhrase &targetPhrase = coll->GetTargetPhrase(ind);
-        cerr << " ** ";
+        cerr << "  ";
         targetPhrase.DebugPrint(cerr, onDiskWrapper.GetVocab());
         cerr << endl;
         
@@ -170,9 +167,8 @@ int main(int argc, char **argv)
 
 void usage()
 {
-  std::cerr << 	"Usage: queryPhraseTable [-n <nscores>] [-a] -t <ttable>\n"
-            "-n <nscores>      number of scores in phrase table (default: 5)\n"
-            "-a                binary phrase table contains alignments\n"
+  std::cerr << 	"Usage: queryOnDiskPt [-n <nscores>] [-a] -t <ttable>\n"
+            "-tlimit <table limit>      max number of rules per source phrase (default: 20)\n"
             "-t <ttable>       phrase table\n";
   exit(1);
 }
