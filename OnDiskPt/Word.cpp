@@ -145,6 +145,20 @@ bool Word::operator==(const Word &compare) const
   return ret == 0;
 }
 
+void Word::DebugPrint(ostream &out, const Vocab &vocab) const
+{
+  if (m_isNonTerminal)
+	  out << "[";
+
+  std::vector<UINT64>::const_iterator iter;
+  for (size_t ind = 0; ind < m_factors.size() - 1; ++ind) {
+    out << *iter << "|";
+  }
+
+	if (m_isNonTerminal)
+	  out << "]";
+}
+
 std::ostream& operator<<(std::ostream &out, const Word &word)
 {
   out << "(";
