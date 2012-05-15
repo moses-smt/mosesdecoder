@@ -147,7 +147,7 @@ bool Word::operator==(const Word &compare) const
 
 std::ostream& operator<<(std::ostream &out, const Word &word)
 {
-  out << "[";
+  out << "(";
 
   std::vector<UINT64>::const_iterator iter;
   for (iter = word.m_factors.begin(); iter != word.m_factors.end(); ++iter) {
@@ -155,7 +155,7 @@ std::ostream& operator<<(std::ostream &out, const Word &word)
   }
 
   out << (word.m_isNonTerminal ? "n" : "t");
-  out << "]";
+  out << ")";
 
   return out;
 }
