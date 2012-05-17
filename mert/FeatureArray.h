@@ -10,10 +10,8 @@
 #define MERT_FEATURE_ARRAY_H_
 
 #include <vector>
-#include <iostream>
+#include <iosfwd>
 #include "FeatureStats.h"
-
-using namespace std;
 
 const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";
 const char FEATURES_TXT_END[] = "FEATURES_TXT_END_0";
@@ -27,7 +25,7 @@ private:
   // the index inside the vector.
   std::string m_index;
   featarray_t m_array;
-  size_t m_num_features;
+  std::size_t m_num_features;
   std::string m_features;
   bool m_sparse_flag;
 
@@ -42,27 +40,27 @@ public:
   std::string getIndex() const { return m_index; }
   void setIndex(const std::string& value) { m_index = value; }
 
-  FeatureStats& get(size_t i) { return m_array.at(i); }
-  const FeatureStats& get(size_t i) const { return m_array.at(i); }
+  FeatureStats& get(std::size_t i) { return m_array.at(i); }
+  const FeatureStats& get(std::size_t i) const { return m_array.at(i); }
 
   void add(FeatureStats& e) { m_array.push_back(e); }
 
   //ADDED BY TS
-  void swap(size_t i, size_t j) {
+  void swap(std::size_t i, std::size_t j) {
     std::swap(m_array[i], m_array[j]);
   }
 
-  void resize(size_t new_size) {
+  void resize(std::size_t new_size) {
     m_array.resize(std::min(new_size, m_array.size()));
   }
   //END_ADDED
 
   void merge(FeatureArray& e);
 
-  size_t size() const { return m_array.size(); }
+  std::size_t size() const { return m_array.size(); }
 
-  size_t NumberOfFeatures() const { return m_num_features; }
-  void NumberOfFeatures(size_t v) { m_num_features = v; }
+  std::size_t NumberOfFeatures() const { return m_num_features; }
+  void NumberOfFeatures(std::size_t v) { m_num_features = v; }
 
   std::string Features() const { return m_features; }
   void Features(const std::string& f) { m_features = f; }
@@ -73,8 +71,8 @@ public:
   void save(const std::string &file, bool bin=false);
   void save(bool bin=false);
 
-  void loadtxt(std::istream* is, size_t n);
-  void loadbin(std::istream* is, size_t n);
+  void loadtxt(std::istream* is, std::size_t n);
+  void loadbin(std::istream* is, std::size_t n);
   void load(std::istream* is);
   void load(const std::string &file);
 

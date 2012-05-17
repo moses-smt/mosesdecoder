@@ -186,9 +186,11 @@ InputType*IOWrapper::GetInput(InputType* inputType)
 /***
  * print surface factor only for the given phrase
  */
-void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<FactorType> &outputFactorOrder, bool reportAllFactors)
+void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
+		   bool reportSegmentation, bool reportAllFactors)
 {
   CHECK(outputFactorOrder.size() > 0);
+  const Phrase& phrase = edge.GetCurrTargetPhrase();
   if (reportAllFactors == true) {
     out << phrase;
   } else {
@@ -203,6 +205,22 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
       }
       out << " ";
     }
+  }
+
+  // trace option "-t"
+  if (reportSegmentation == true && phrase.GetSize() > 0) {
+    out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
+	<< "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
+  }
+}
+
+void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
+                   bool reportSegmentation, bool reportAllFactors)
+{
+  if (hypo != NULL) {
+    // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
+    OutputBestSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
+    OutputSurface(out, *hypo, outputFactorOrder, reportSegmentation, reportAllFactors);
   }
 }
 
@@ -264,35 +282,13 @@ void OutputAlignment(OutputCollector* collector, size_t lineNo , const TrellisPa
   }
 }
 
-void OutputSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder
-                   ,bool reportSegmentation, bool reportAllFactors)
-{
-  if ( hypo != NULL) {
-    OutputSurface(out, hypo->GetPrevHypo(), outputFactorOrder, reportSegmentation, reportAllFactors);
-    OutputSurface(out, hypo->GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
-
-    // trace option "-t"
-    if (reportSegmentation == true
-        && hypo->GetCurrTargetPhrase().GetSize() > 0) {
-      out << "|" << hypo->GetCurrSourceWordsRange().GetStartPos()
-          << "-" << hypo->GetCurrSourceWordsRange().GetEndPos() << "| ";
-    }
-  }
-}
-
-void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out)
+void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/, bool reportSegmentation, bool reportAllFactors, std::ostream &out)
 {
   const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
   for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
     const Hypothesis &edge = *edges[currEdge];
-
-    OutputSurface(out, edge.GetCurrTargetPhrase(), StaticData::Instance().GetOutputFactorOrder(), reportAllFactors);
-    if (reportSegmentation == true
-        && edge.GetCurrTargetPhrase().GetSize() > 0) {
-      out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
-          << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
-    }
+    OutputSurface(out, edge, StaticData::Instance().GetOutputFactorOrder(), reportSegmentation, reportAllFactors);
   }
   out << endl;
 }
@@ -347,7 +343,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
         OutputInput(cout, hypo);
         cout << "||| ";
       }
-      OutputSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
+      OutputBestSurface(cout, hypo, m_outputFactorOrder, reportSegmentation, reportAllFactors);
       cout << endl;
     }
   } else {
@@ -358,10 +354,7 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
   }
 }
 
-
-
-
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder, const TranslationSystem* system, long translationId)
+void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder, const TranslationSystem* system, long translationId, bool reportSegmentation)
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
@@ -378,7 +371,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     out << translationId << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
-      OutputSurface(out, edge.GetCurrTargetPhrase(), outputFactorOrder, reportAllFactors);
+      OutputSurface(out, edge, outputFactorOrder, reportSegmentation, reportAllFactors);
     }
     out << " |||";
 

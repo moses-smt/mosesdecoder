@@ -382,7 +382,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       //sanity check ALL lines must have same number of tokens
       CHECK(numTokens == tokens.size());
     }
-    int phrase = 0;
+    size_t phrase = 0;
     for(; phrase < numKeyTokens; ++phrase) {
       //conditioned on more than just f... need |||
       if(phrase >=1) {
@@ -396,7 +396,7 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
     //collect all non key phrases, i.e. c
     std::vector<IPhrase> tgt_phrases;
     tgt_phrases.resize(numTokens - numKeyTokens - 1);
-    for(int j = 0; j < tgt_phrases.size(); ++j, ++phrase) {
+    for(size_t j = 0; j < tgt_phrases.size(); ++j, ++phrase) {
       std::istringstream is(tokens[numKeyTokens + j]);
       while(is >> w) {
         tgt_phrases[j].push_back(voc[phrase]->add(w));
@@ -531,7 +531,7 @@ IPhrase LexicalReorderingTableTree::MakeTableKey(const Phrase& f,
   IPhrase key;
   std::vector<std::string> keyPart;
   if(!m_FactorsF.empty()) {
-    for(int i = 0; i < f.GetSize(); ++i) {
+    for(size_t i = 0; i < f.GetSize(); ++i) {
       /* old code
         std::string s = f.GetWord(i).ToString(m_FactorsF);
         keyPart.push_back(s.substr(0,s.size()-1));
@@ -545,7 +545,7 @@ IPhrase LexicalReorderingTableTree::MakeTableKey(const Phrase& f,
     if(!key.empty()) {
       key.push_back(PrefixTreeMap::MagicWord);
     }
-    for(int i = 0; i < e.GetSize(); ++i) {
+    for(size_t i = 0; i < e.GetSize(); ++i) {
       /* old code
         std::string s = e.GetWord(i).ToString(m_FactorsE);
         keyPart.push_back(s.substr(0,s.size()-1));
@@ -577,7 +577,7 @@ void LexicalReorderingTableTree::auxCacheForSrcPhrase(const Phrase& f)
     ObjectPool<PPimp>     pool;
     PPimp* pPos  = m_Table->GetRoot();
     //1) goto subtree for f
-    for(int i = 0; i < f.GetSize() && 0 != pPos && pPos->isValid(); ++i) {
+    for(size_t i = 0; i < f.GetSize() && 0 != pPos && pPos->isValid(); ++i) {
       /* old code
       pPos = m_Table.Extend(pPos, auxClearString(f.GetWord(i).ToString(m_FactorsF)), SourceVocId);
       */

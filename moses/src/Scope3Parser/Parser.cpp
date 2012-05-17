@@ -70,7 +70,7 @@ void Scope3Parser::GetChartRuleCollection(
         const TargetPhraseCollection &tpc = p->second;
         assert(labels.size() == varSpanNode.m_rank);
         bool failCheck = false;
-        for (int i = 0; i < varSpanNode.m_rank; ++i) {
+        for (size_t i = 0; i < varSpanNode.m_rank; ++i) {
           if (!m_quickCheckTable[i][labels[i]]) {
             failCheck = true;
             break;

@@ -31,6 +31,7 @@ protected:
 
 public:
   ModelScore();
+  virtual ~ModelScore();
   void add_example(const std::string& previous, std::string& next);
   void reset_fe();
   void reset_f();
@@ -70,7 +71,7 @@ protected:
 class Scorer
 {
 public:
-  ~Scorer() {}
+  virtual ~Scorer() {}
   virtual void score(const std::vector<double>&, std::vector<double>&) const = 0;
   virtual void createSmoothing(const std::vector<double>&, double, std::vector<double>&) const = 0;
   virtual void createConstSmoothing(double, std::vector<double>&) const = 0;

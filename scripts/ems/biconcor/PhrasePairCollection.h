@@ -1,11 +1,13 @@
-#include "Vocabulary.h"
-#include "SuffixArray.h"
-#include "TargetCorpus.h"
-#include "Alignment.h"
-#include "PhrasePair.h"
-#include "Mismatch.h"
-
 #pragma once
+
+#include <vector>
+#include <string>
+
+class Alignment;
+class PhrasePair;
+class SuffixArray;
+class TargetCorpus;
+class Mismatch;
 
 class PhrasePairCollection
 {
@@ -16,25 +18,29 @@ private:
   SuffixArray *m_suffixArray;
   TargetCorpus *m_targetCorpus;
   Alignment *m_alignment;
-  vector< vector<PhrasePair*> > m_collection;
-	vector< Mismatch* > m_mismatch, m_unaligned;
+  std::vector<std::vector<PhrasePair*> > m_collection;
+  std::vector< Mismatch* > m_mismatch, m_unaligned;
   int m_size;
   int m_max_lookup;
   int m_max_pp_target;
   int m_max_pp;
 
+  // No copying allowed.
+  PhrasePairCollection(const PhrasePairCollection&);
+  void operator=(const PhrasePairCollection&);
+
 public:
   PhrasePairCollection ( SuffixArray *, TargetCorpus *, Alignment * );
   ~PhrasePairCollection ();
 
-  bool GetCollection( const vector< string > sourceString );
-  void Print();
-  void PrintHTML();
+  bool GetCollection( const std::vector<std::string >& sourceString );
+  void Print() const;
+  void PrintHTML() const;
 };
 
 // sorting helper
 struct CompareBySize {
-  bool operator()(const vector<PhrasePair*> a, const vector<PhrasePair*> b ) const {
+  bool operator()(const std::vector<PhrasePair*>& a, const std::vector<PhrasePair*>& b ) const {
     return a.size() > b.size();
   }
 };

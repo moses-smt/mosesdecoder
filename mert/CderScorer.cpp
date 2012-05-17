@@ -4,6 +4,8 @@
 #include <fstream>
 #include <stdexcept>
 
+using namespace std;
+
 namespace {
 
 inline int CalcDistance(int word1, int word2) {
@@ -12,8 +14,9 @@ inline int CalcDistance(int word1, int word2) {
 
 } // namespace
 
-CderScorer::CderScorer(const string& config)
-    : StatisticsBasedScorer("CDER",config) {}
+CderScorer::CderScorer(const string& config, bool allowed_long_jumps)
+    : StatisticsBasedScorer(allowed_long_jumps ? "CDER" : "WER", config),
+      m_allowed_long_jumps(allowed_long_jumps) {}
 
 CderScorer::~CderScorer() {}
 
@@ -31,7 +34,7 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
     m_ref_sentences.push_back(vector<sent_t>());
     string line;
     while (getline(refin,line)) {
-      line = this->applyFactors(line);
+      line = this->preprocessSentence(line);
       sent_t encoded;
       TokenizeAndEncode(line, encoded);
       m_ref_sentences[rid].push_back(encoded);
@@ -41,7 +44,7 @@ void CderScorer::setReferenceFiles(const vector<string>& referenceFiles)
 
 void CderScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-  string sentence = this->applyFactors(text);
+  string sentence = this->preprocessSentence(text);
 
   vector<int> stats;
   prepareStatsVector(sid, sentence, stats);
@@ -102,11 +105,13 @@ void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
       (*nextRow)[i] = *min_element(possibleCosts.begin(), possibleCosts.end());
     }
 
-    // Cost of LongJumps is the same for all in the row
-    int LJ = 1 + *min_element(nextRow->begin(), nextRow->end());
+    if (m_allowed_long_jumps) {
+      // Cost of LongJumps is the same for all in the row
+      int LJ = 1 + *min_element(nextRow->begin(), nextRow->end());
 
-    for (int i = 0; i < I; ++i) {
-      (*nextRow)[i] = min((*nextRow)[i], LJ); // LongJumps
+      for (int i = 0; i < I; ++i) {
+        (*nextRow)[i] = min((*nextRow)[i], LJ); // LongJumps
+      }
     }
 
     delete row;

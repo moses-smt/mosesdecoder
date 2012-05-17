@@ -97,7 +97,7 @@ PerfectHash<T>::~PerfectHash() {
 template<typename T>  
 uint64_t PerfectHash<T>::insert(const wordID_t* IDs, const int len, 
                             const count_t value) {
-  count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len));
+  count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len, 0));
   if(idxTracker_[bucket] < (int)bucketRange_) {  // if empty rows 
     // restriction on fprint value is non-zero
     T fp = nonZeroSignature(IDs, len, (bucket % MAX_HASH_FUNCS));
@@ -140,7 +140,7 @@ bool PerfectHash<T>::update(const wordID_t* IDs, const int len,
   }
   // else hash ngram
   //count_t bucket = bucketHash_->hash(IDs, len);
-  count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len));
+  count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len, 0));
   // restriction on fprint value is non-zero
   T fp = nonZeroSignature(IDs, len, (bucket % MAX_HASH_FUNCS));
   uint64_t index = bucket * bucketRange_,  // starting bucket row
@@ -169,7 +169,7 @@ int PerfectHash<T>::query(const wordID_t* IDs, const int len,
   else {  // check if key is in filter
     // get bucket 
     //count_t bucket = bucketHash_->hash(IDs, len);
-    count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len));
+    count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len, 0));
     // restriction on fprint value is non-zero
     T fp = nonZeroSignature(IDs, len, (bucket % MAX_HASH_FUNCS));
     // return value if ngram is in filter
@@ -196,7 +196,7 @@ void PerfectHash<T>::remove(const wordID_t* IDs, const int len) {
   else {  // check if key is in filter
     // get small representation for ngrams 
     //count_t bucket = bucketHash_->hash(IDs, len);
-    count_t bucket = (bucketHash_->size() > 1? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len));
+    count_t bucket = (bucketHash_->size() > 1? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len, 0));
     // retrieve non zero fingerprint for ngram
     T fp = nonZeroSignature(IDs, len, (bucket % MAX_HASH_FUNCS)); 
     // return value if ngram is in filter
@@ -385,7 +385,7 @@ bool PerfectHash<T>::update2(const wordID_t* IDs, const int len,
   }
   // else hash ngram
   //count_t bucket = bucketHash_->hash(IDs, len);
-  count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len));
+  count_t bucket = (bucketHash_->size() > 1 ? bucketHash_->hash(IDs, len, len) : bucketHash_->hash(IDs, len, 0));
   // restriction on fprint value is non-zero
   T fp = nonZeroSignature(IDs, len, (bucket % MAX_HASH_FUNCS));
   uint64_t index = bucket * bucketRange_,  // starting bucket row

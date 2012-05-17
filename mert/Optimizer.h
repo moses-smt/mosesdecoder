@@ -8,9 +8,7 @@
 #include "Scorer.h"
 #include "Types.h"
 
-using namespace std;
-
-static const float kMaxFloat = numeric_limits<float>::max();
+static const float kMaxFloat = std::numeric_limits<float>::max();
 
 class Point;
 
@@ -24,10 +22,10 @@ protected:
   FeatureDataHandle m_feature_data;  // no accessor for them only child can use them
   unsigned int m_num_random_directions;
 
-  const vector<bool>& m_positive;
+  const std::vector<bool>& m_positive;
 
 public:
-  Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& positive, const vector<parameter_t>& start, unsigned int nrandom);
+  Optimizer(unsigned Pd, const std::vector<unsigned>& i2O, const std::vector<bool>& positive, const std::vector<parameter_t>& start, unsigned int nrandom);
 
   void SetScorer(Scorer *scorer) { m_scorer = scorer; }
   void SetFeatureData(FeatureDataHandle feature_data) { m_feature_data = feature_data; }
@@ -50,18 +48,18 @@ public:
   /**
    * Given a set of lambdas, get the nbest for each sentence.
    */
-  void Get1bests(const Point& param,vector<unsigned>& bests) const;
+  void Get1bests(const Point& param,std::vector<unsigned>& bests) const;
 
   /**
    * Given a set of nbests, get the Statistical score.
    */
-  statscore_t GetStatScore(const vector<unsigned>& nbests) const {
+  statscore_t GetStatScore(const std::vector<unsigned>& nbests) const {
     return m_scorer->score(nbests);
   }
 
   statscore_t GetStatScore(const Point& param) const;
 
-  vector<statscore_t> GetIncStatScore(const vector<unsigned>& ref, const vector<vector<pair<unsigned,unsigned> > >& diffs) const;
+  std::vector<statscore_t> GetIncStatScore(const std::vector<unsigned>& ref, const std::vector<std::vector<std::pair<unsigned,unsigned> > >& diffs) const;
 
   /**
    * Get the optimal Lambda and the best score in a particular direction from a given Point.
@@ -79,9 +77,9 @@ class SimpleOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  SimpleOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
-                  const vector<parameter_t>& start, unsigned int nrandom)
-    : Optimizer(dim, i2O, positive, start,nrandom), kEPS(0.0001) {}
+  SimpleOptimizer(unsigned dim, const std::vector<unsigned>& i2O, const std::vector<bool>& positive,
+                  const std::vector<parameter_t>& start, unsigned int nrandom)
+    : Optimizer(dim, i2O, positive, start,nrandom), kEPS(0.0001f) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
@@ -93,9 +91,9 @@ class RandomDirectionOptimizer : public Optimizer
 private:
   const float kEPS;
 public:
-  RandomDirectionOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
-                           const vector<parameter_t>& start, unsigned int nrandom)
-      : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001) {}
+  RandomDirectionOptimizer(unsigned dim, const std::vector<unsigned>& i2O, const std::vector<bool>& positive,
+                           const std::vector<parameter_t>& start, unsigned int nrandom)
+      : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001f) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
@@ -105,8 +103,8 @@ public:
 class RandomOptimizer : public Optimizer
 {
 public:
-  RandomOptimizer(unsigned dim, const vector<unsigned>& i2O, const vector<bool>& positive,
-                  const vector<parameter_t>& start, unsigned int nrandom)
+  RandomOptimizer(unsigned dim, const std::vector<unsigned>& i2O, const std::vector<bool>& positive,
+                  const std::vector<parameter_t>& start, unsigned int nrandom)
       : Optimizer(dim, i2O, positive, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
 };
