@@ -30,7 +30,7 @@ BOOST_AUTO_TEST_CASE(shard_basic) {
   data.getScoreData()->add(sa3);
   data.getScoreData()->add(sa4);
 
-  vector<Data> shards;
+  std::vector<Data> shards;
   data.createShards(2,0,"",shards);
 
   BOOST_CHECK_EQUAL(shards.size(),2);

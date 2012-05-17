@@ -35,7 +35,7 @@ void SyntaxTree::Clear()
 {
   m_top = 0;
   // loop through all m_nodes, delete them
-  for(int i=0; i<m_nodes.size(); i++) {
+  for(size_t i=0; i<m_nodes.size(); i++) {
     delete m_nodes[i];
   }
   m_nodes.clear();
@@ -158,7 +158,7 @@ void SyntaxTree::ConnectNodes()
 
 std::ostream& operator<<(std::ostream& os, const SyntaxTree& t)
 {
-  int size = t.m_index.size();
+  size_t size = t.m_index.size();
   for(size_t length=1; length<=size; length++) {
     for(size_t space=0; space<length; space++) {
       os << "    ";

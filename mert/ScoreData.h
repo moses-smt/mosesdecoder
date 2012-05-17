@@ -9,14 +9,12 @@
 #ifndef MERT_SCORE_DATA_H_
 #define MERT_SCORE_DATA_H_
 
-#include <iostream>
+#include <iosfwd>
 #include <vector>
 #include <stdexcept>
 #include <string>
 #include "ScoreArray.h"
 #include "ScoreStats.h"
-
-using namespace std;
 
 class Scorer;
 
@@ -32,7 +30,7 @@ private:
 
   Scorer* m_scorer;
   std::string m_score_type;
-  size_t m_num_scores;
+  std::size_t m_num_scores;
 
 public:
   ScoreData(Scorer* scorer);
@@ -44,11 +42,11 @@ public:
     return m_array.at(getIndex(idx));
   }
 
-  inline ScoreArray& get(size_t idx) {
+  inline ScoreArray& get(std::size_t idx) {
     return m_array.at(idx);
   }
 
-  inline const ScoreArray& get(size_t idx) const {
+  inline const ScoreArray& get(std::size_t idx) const {
     return m_array.at(idx);
   }
 
@@ -60,11 +58,11 @@ public:
     return (sent_idx > -1 && sent_idx < static_cast<int>(m_array.size())) ? true : false;
   }
 
-  inline ScoreStats& get(size_t i, size_t j) {
+  inline ScoreStats& get(std::size_t i, std::size_t j) {
     return m_array.at(i).get(j);
   }
 
-  inline const ScoreStats& get(size_t i, size_t j) const {
+  inline const ScoreStats& get(std::size_t i, std::size_t j) const {
     return m_array.at(i).get(j);
   }
 
@@ -77,8 +75,8 @@ public:
   void add(ScoreArray& e);
   void add(const ScoreStats& e, const std::string& sent_idx);
 
-  size_t NumberOfScores() const { return m_num_scores; }
-  size_t size() const { return m_array.size(); }
+  std::size_t NumberOfScores() const { return m_num_scores; }
+  std::size_t size() const { return m_array.size(); }
 
   void save(const std::string &file, bool bin=false);
   void save(std::ostream* os, bool bin=false);
@@ -99,10 +97,10 @@ public:
       return -1;
   }
 
-  inline std::string getIndex(size_t idx) const {
+  inline std::string getIndex(std::size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
-      throw runtime_error("there is no entry at index " + idx);
+      throw std::runtime_error("there is no entry at index " + idx);
     return i->second;
   }
 };

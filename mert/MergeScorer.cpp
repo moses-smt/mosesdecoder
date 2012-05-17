@@ -11,6 +11,7 @@
 #include "TER/tercalc.h"
 #include "TER/terAlignment.h"
 
+using namespace std;
 using namespace TERCpp;
 
 MergeScorer::MergeScorer(const string& config)

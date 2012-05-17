@@ -10,6 +10,8 @@ use Getopt::Long;
 
 ############################################################
 my @tests = qw (
+	extract.phrase-based
+	extract-rules.hierarchical
   score.phrase-based
   score.phrase-based-inv
   score.phrase-based-with-alignment
@@ -61,6 +63,8 @@ use POSIX qw ( strftime );
 my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
 my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
 my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
+my $extractorExe = "$Bin/../scripts/training/phrase-extract/extract";
+my $extractorRulesExe = "$Bin/../scripts/training/phrase-extract/extract-rules";
 my $kenlmBinarizer = "$Bin/../kenlm/build_binary";
 my $test_dir;
 my $BIN_TEST = $script_dir;
@@ -75,7 +79,7 @@ GetOptions(	"decoder-phrase=s" => \$decoderPhrase,
 $data_dir = MosesRegressionTesting::find_data_directory($BIN_TEST, $data_dir);
 
 my $test_run = "$BIN_TEST/run-single-test.pl --data-dir=$data_dir";
-$test_dir = $script_dir . "/tests";
+$test_dir = "$data_dir/tests";
 $test_run .= " --test-dir=$test_dir" if $test_dir;
 
 print "Data directory: $data_dir\n";
@@ -95,25 +99,34 @@ my @failed;
 foreach my $test (@tests) 
 {
   my $cmd;
-  my $model_type = substr($test, $[, 6);
+  my @tokens = split('\.', $test);
+  my $model_type = $tokens[0];
 
   if ($model_type eq 'phrase')
   {
   	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderPhrase";
   }
-  elsif ($model_type eq 'chart.')
+  elsif ($model_type eq 'chart')
   {
   	$cmd .= "$BIN_TEST/run-single-test.perl $test_run --decoder=$decoderChart";
   }
-  elsif ($model_type eq 'score.')
+  elsif ($model_type eq 'score')
   {
     $cmd .= "$BIN_TEST/run-test-scorer.perl $test_run --scorer=$scoreExe";
   }
-  elsif ($test =~ /^mert/)
+  elsif ($model_type eq 'extract')
+  {
+    $cmd .= "$BIN_TEST/run-test-extract.perl $test_run --extractor=$extractorExe";
+  }
+  elsif ($model_type eq 'extract-rules')
+  {
+    $cmd .= "$BIN_TEST/run-test-extract.perl $test_run --extractor=$extractorRulesExe";
+  }
+  elsif ($model_type eq "mert")
   {
     $cmd .= "$BIN_TEST/run-test-mert.perl $test_run";
   }
-  elsif ($test =~ /^kenlmbin/)
+  elsif ($model_type eq "kenlmbin")
   {
   	$cmd .= "$BIN_TEST/run-kenlm-binarizer.perl --binarizer=$kenlmBinarizer";
   }

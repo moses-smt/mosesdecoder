@@ -232,7 +232,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
 
 UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl)
 {
-  CHECK(filePos == fileTPColl.tellg());
+  CHECK(filePos == (UINT64)fileTPColl.tellg());
 
   UINT64 memUsed = 0;
   fileTPColl.read((char*) &m_filePos, sizeof(UINT64));
@@ -240,10 +240,10 @@ UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPC
   CHECK(m_filePos != 0);
 
   memUsed += ReadAlignFromFile(fileTPColl);
-  CHECK((memUsed + filePos) == fileTPColl.tellg());
+  CHECK((memUsed + filePos) == (UINT64)fileTPColl.tellg());
 
   memUsed += ReadScoresFromFile(fileTPColl);
-  CHECK((memUsed + filePos) == fileTPColl.tellg());
+  CHECK((memUsed + filePos) == (UINT64)fileTPColl.tellg());
 
   return memUsed;
 }
@@ -303,6 +303,23 @@ UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
   std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::FloorScore);
 
   return bytesRead;
+}
+
+void TargetPhrase::DebugPrint(ostream &out, const Vocab &vocab) const
+{
+  Phrase::DebugPrint(out, vocab);
+  
+  for (size_t ind = 0; ind < m_align.size(); ++ind) {
+    const AlignPair &alignPair = m_align[ind];
+    out << alignPair.first << "-" << alignPair.second << " ";
+  }
+  out << ", ";
+
+  for (size_t ind = 0; ind < m_scores.size(); ++ind) {
+    out << m_scores[ind] << " ";
+  }
+
+  return;
 }
 
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &phrase)
