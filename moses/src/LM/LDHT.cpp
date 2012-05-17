@@ -131,8 +131,8 @@ LDHT::Client* LanguageModelLDHT::initTSSClient() {
             LDHT::FactoryCollection::createDefaultFactoryCollection();
 
     LDHT::Client* client;
-    //client = new LDHT::ClientLocal();
-    client = new LDHT::Client();
+    client = new LDHT::ClientLocal();
+    //client = new LDHT::Client();
     client->fromXmlFiles(*factory_collection,
                            ldht_config_path,
                            ldhtlm_config_path);

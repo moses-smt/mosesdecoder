@@ -8,6 +8,10 @@
 
 #include "Util.h"
 #include "ScoreStats.h"
+#include <fstream>
+#include <iostream>
+
+using namespace std;
 
 namespace {
 const int kAvailableSize = 8;

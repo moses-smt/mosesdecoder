@@ -24,6 +24,7 @@
 #include <iostream>
 #include <cstdlib>
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 #include "SafeGetline.h"
 
@@ -93,9 +94,9 @@ int main(int argc, char* argv[])
 		fileConsolidated = &cout;
 	}
 	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNameConsolidated);
-		if (outputFile->fail()) {
+    Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
+		bool success = outputFile->Open(fileNameConsolidated);
+		if (!success) {
 			cerr << "ERROR: could not open file phrase table file "
 			<< fileNameConsolidated << endl;
 			exit(1);
@@ -129,7 +130,6 @@ int main(int argc, char* argv[])
 
 	fileConsolidated->flush();
 	if (fileConsolidated != &cout) {
-		(dynamic_cast<ofstream*>(fileConsolidated))->close();
 		delete fileConsolidated;
 	}
 	

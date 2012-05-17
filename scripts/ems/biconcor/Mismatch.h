@@ -1,15 +1,10 @@
-#include <string>
-#include <stdlib.h>
-#include <cstring>
-#include <fstream>
-#include <sstream>
-#include <iostream>
-#include "SuffixArray.h"
-#include "TargetCorpus.h"
-#include "Alignment.h"
 #pragma once
 
-using namespace std;
+#include <iosfwd>
+
+class Alignment;
+class SuffixArray;
+class TargetCorpus;
 
 class Mismatch
 {
@@ -21,50 +16,25 @@ private:
   TargetCorpus *m_targetCorpus;
   Alignment *m_alignment;
   INDEX m_sentence_id;
-	INDEX m_num_alignment_points;
-	char m_source_length;
-  char m_target_length;
-  SuffixArray::INDEX m_source_position;
-  char m_source_start, m_source_end;
-	char m_source_unaligned[ 256 ];
-	char m_target_unaligned[ 256 ];
-	char m_unaligned;
+  INDEX m_num_alignment_points;
+  int m_source_length;
+  int m_target_length;
+  INDEX m_source_position;
+  int m_source_start;
+  int m_source_end;
+  bool m_source_unaligned[ 256 ];
+  bool m_target_unaligned[ 256 ];
+  bool m_unaligned;
+
+  // No copying allowed.
+  Mismatch(const Mismatch&);
+  void operator=(const Mismatch&);
 
 public:
-  Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, char source_length, char target_length, char source_start, char source_end )
-    :m_suffixArray(sa)
-    ,m_targetCorpus(tc)
-    ,m_alignment(a)
-    ,m_sentence_id(sentence_id)
-    ,m_source_position(position)
-		,m_source_length(source_length)
-    ,m_target_length(target_length)
-    ,m_source_start(source_start)
-    ,m_source_end(source_end)
-  {
-		// initialize unaligned indexes
-		for(char i=0; i<m_source_length; i++) {
-			m_source_unaligned[i] = true;
-		}
-		for(char i=0; i<m_target_length; i++) {
-			m_target_unaligned[i] = true;
-		}
-		m_num_alignment_points = 
-			m_alignment->GetNumberOfAlignmentPoints( sentence_id );
-		for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
-			m_source_unaligned[ m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
-			m_target_unaligned[ m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
-		}
-		m_unaligned = true;
-		for(char i=source_start; i<=source_end; i++) {
-			if (!m_source_unaligned[ i ]) {
-				m_unaligned = false;
-			}
-		}
-	}
-  ~Mismatch () {}
+  Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, int source_length, int target_length, int source_start, int source_end );
+  ~Mismatch();
 
-	bool Unaligned() { return m_unaligned; }
-  void PrintClippedHTML( ostream* out, int width );
-	void LabelSourceMatches( char *source_annotation, char *target_annotation, char source_id, char label );
+  bool Unaligned() const { return m_unaligned; }
+  void PrintClippedHTML(std::ostream* out, int width );
+  void LabelSourceMatches(int *source_annotation, int *target_annotation, int source_id, int label );
 };

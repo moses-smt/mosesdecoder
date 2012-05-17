@@ -98,6 +98,15 @@ bool Phrase::operator==(const Phrase &compare) const
   return ret == 0;
 }
 
+void Phrase::DebugPrint(ostream &out, const Vocab &vocab) const
+{
+  for (size_t pos = 0; pos < GetSize(); ++pos) {
+    const Word &word = GetWord(pos);
+    word.DebugPrint(out, vocab);
+    out << " ";
+  }
+}
+
 std::ostream& operator<<(std::ostream &out, const Phrase &phrase)
 {
   for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {

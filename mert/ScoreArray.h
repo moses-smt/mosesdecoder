@@ -9,8 +9,6 @@
 #ifndef MERT_SCORE_ARRAY_H_
 #define MERT_SCORE_ARRAY_H_
 
-using namespace std;
-
 #include <vector>
 #include <iostream>
 #include <string>
@@ -27,7 +25,7 @@ class ScoreArray
  private:
   scorearray_t m_array;
   std::string m_score_type;
-  size_t m_num_scores;
+  std::size_t m_num_scores;
 
   // indexx to identify the utterance.
   // It can differ from the index inside the vector.
@@ -43,18 +41,18 @@ public:
 
   void setIndex(const std::string& value) { m_index = value; }
 
-  ScoreStats& get(size_t i) { return m_array.at(i); }
+  ScoreStats& get(std::size_t i) { return m_array.at(i); }
 
-  const ScoreStats& get(size_t i) const { return m_array.at(i); }
+  const ScoreStats& get(std::size_t i) const { return m_array.at(i); }
 
   void add(const ScoreStats& e) { m_array.push_back(e); }
 
   //ADDED BY TS
-  void swap(size_t i, size_t j) {
+  void swap(std::size_t i, std::size_t j) {
     std::swap(m_array[i], m_array[j]);
   }
 
-  void resize(size_t new_size) {
+  void resize(std::size_t new_size) {
     m_array.resize(std::min(new_size, m_array.size()));
   }
   //END_ADDED
@@ -65,11 +63,11 @@ public:
 
   void name(std::string &score_type) { m_score_type = score_type; }
 
-  size_t size() const { return m_array.size(); }
+  std::size_t size() const { return m_array.size(); }
 
-  size_t NumberOfScores() const { return m_num_scores; }
+  std::size_t NumberOfScores() const { return m_num_scores; }
 
-  void NumberOfScores(size_t v) { m_num_scores = v; }
+  void NumberOfScores(std::size_t v) { m_num_scores = v; }
 
   void savetxt(std::ostream* os, const std::string& score_type);
   void savebin(std::ostream* os, const std::string& score_type);
@@ -77,8 +75,8 @@ public:
   void save(const std::string &file, const std::string& score_type, bool bin=false);
   void save(const std::string& score_type, bool bin=false);
 
-  void loadtxt(std::istream* is, size_t n);
-  void loadbin(std::istream* is, size_t n);
+  void loadtxt(std::istream* is, std::size_t n);
+  void loadbin(std::istream* is, std::size_t n);
   void load(std::istream* is);
   void load(const std::string &file);
 

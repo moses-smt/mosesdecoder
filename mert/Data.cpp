@@ -17,6 +17,8 @@
 #include "Util.h"
 #include "util/check.hh"
 
+using namespace std;
+
 Data::Data()
   : m_scorer(NULL),
     m_num_scores(0),

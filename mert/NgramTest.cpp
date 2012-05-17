@@ -17,7 +17,7 @@ BOOST_AUTO_TEST_CASE(ngram_basic) {
   NgramCounts::const_iterator it = counts.find(key);
   BOOST_CHECK(it != counts.end());
   BOOST_CHECK_EQUAL(it->first.size(), key.size());
-  for (size_t i = 0; i < key.size(); ++i) {
+  for (std::size_t i = 0; i < key.size(); ++i) {
     BOOST_CHECK_EQUAL(it->first[i], key[i]);
   }
   BOOST_CHECK_EQUAL(it->second, 1);

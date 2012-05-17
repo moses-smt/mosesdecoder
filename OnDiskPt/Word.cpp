@@ -145,9 +145,24 @@ bool Word::operator==(const Word &compare) const
   return ret == 0;
 }
 
+void Word::DebugPrint(ostream &out, const Vocab &vocab) const
+{
+  std::vector<UINT64>::const_iterator iter;
+  for (size_t ind = 0; ind < m_factors.size() - 1; ++ind) {
+  	UINT64 vocabId = *iter;
+  	const string &str = vocab.GetString(vocabId);
+    out << str << "|";
+  }
+
+  // last
+	UINT64 vocabId = m_factors.back();
+	const string &str = vocab.GetString(vocabId);
+	out << str;
+}
+
 std::ostream& operator<<(std::ostream &out, const Word &word)
 {
-  out << "[";
+  out << "(";
 
   std::vector<UINT64>::const_iterator iter;
   for (iter = word.m_factors.begin(); iter != word.m_factors.end(); ++iter) {
@@ -155,7 +170,7 @@ std::ostream& operator<<(std::ostream &out, const Word &word)
   }
 
   out << (word.m_isNonTerminal ? "n" : "t");
-  out << "]";
+  out << ")";
 
   return out;
 }
