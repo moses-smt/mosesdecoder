@@ -22,7 +22,9 @@
 #include "Alignment.h"
 #include "AlignmentGraph.h"
 #include "Exception.h"
+#include "InputFileStream.h"
 #include "Node.h"
+#include "OutputFileStream.h"
 #include "Options.h"
 #include "ParseTree.h"
 #include "ScfgRule.h"
@@ -51,21 +53,23 @@ int ExtractGHKM::Main(int argc, char *argv[])
   ProcessOptions(argc, argv, options);
 
   // Open input files.
-  std::ifstream targetStream;
-  std::ifstream sourceStream;
-  std::ifstream alignmentStream;
-  OpenInputFileOrDie(options.targetFile, targetStream);
-  OpenInputFileOrDie(options.sourceFile, sourceStream);
-  OpenInputFileOrDie(options.alignmentFile, alignmentStream);
+  InputFileStream targetStream(options.targetFile);
+  InputFileStream sourceStream(options.sourceFile);
+  InputFileStream alignmentStream(options.alignmentFile);
 
   // Open output files.
-  std::ofstream extractStream;
-  std::ofstream invExtractStream;
+  OutputFileStream fwdExtractStream;
+  OutputFileStream invExtractStream;
   std::ofstream glueGrammarStream;
   std::ofstream unknownWordStream;
-  std::string invExtractFileName = options.extractFile + std::string(".inv");
-  OpenOutputFileOrDie(options.extractFile, extractStream);
-  OpenOutputFileOrDie(invExtractFileName, invExtractStream);
+  std::string fwdFileName = options.extractFile;
+  std::string invFileName = options.extractFile + std::string(".inv");
+  if (options.gzOutput) {
+    fwdFileName += ".gz";
+    invFileName += ".gz";
+  }
+  OpenOutputFileOrDie(fwdFileName, fwdExtractStream);
+  OpenOutputFileOrDie(invFileName, invExtractStream);
   if (!options.glueGrammarFile.empty()) {
     OpenOutputFileOrDie(options.glueGrammarFile, glueGrammarStream);
   }
@@ -85,7 +89,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string sourceLine;
   std::string alignmentLine;
   XmlTreeParser xmlTreeParser(labelSet, topLabelSet);
-  ScfgRuleWriter writer(extractStream, invExtractStream, options);
+  ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
   size_t lineNum = 0;
   while (true) {
     std::getline(targetStream, targetLine);
@@ -196,6 +200,17 @@ void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
   }
 }
 
+void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
+                                      OutputFileStream &stream)
+{
+  bool ret = stream.Open(filename);
+  if (!ret) {
+    std::ostringstream msg;
+    msg << "failed to open output file: " << filename;
+    Error(msg.str());
+  }
+}
+
 void ExtractGHKM::ProcessOptions(int argc, char *argv[],
                                  Options &options) const
 {
@@ -246,6 +261,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     ("GlueGrammar",
         po::value(&options.glueGrammarFile),
         "write glue grammar to named file")
+    ("GZOutput",
+        "write gzipped extract files")
     ("MaxNodes",
         po::value(&options.maxNodes)->default_value(options.maxNodes),
         "set maximum number of tree nodes for composed rules")
@@ -330,6 +347,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("AllowUnary")) {
     options.allowUnary = true;
   }
+  if (vm.count("GZOutput")) {
+    options.gzOutput = true;
+  }
   if (vm.count("Minimal")) {
     options.minimal = true;
   }
@@ -380,7 +400,7 @@ void ExtractGHKM::WriteGlueGrammar(
 {
   // chose a top label that is not already a label
   std::string topLabel = "QQQQQQ";
-  for(int i = 1; i <= topLabel.length(); i++) {
+  for(size_t i = 1; i <= topLabel.length(); i++) {
     if (labelSet.find(topLabel.substr(0,i)) == labelSet.end() ) {
       topLabel = topLabel.substr(0,i);
       break;

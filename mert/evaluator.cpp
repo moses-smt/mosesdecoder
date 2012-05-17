@@ -131,9 +131,10 @@ void usage()
   cerr << "[--sctype|-s] the scorer type (default BLEU)" << endl;
   cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
   cerr << "\tThis is of the form NAME1:VAL1,NAME2:VAL2 etc " << endl;
-  cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
   cerr << "[--reference|-R] comma separated list of reference files" << endl;
   cerr << "[--candidate|-C] comma separated list of candidate files" << endl;
+  cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
+  cerr << "[--filter|-l] filter command which will be used to preprocess the sentences" << endl;
   cerr << "[--bootstrap|-b] number of booststraped samples (default 0 - no bootstraping)" << endl;
   cerr << "[--rseed|-r] the random seed for bootstraping (defaults to system clock)" << endl;
   cerr << "[--help|-h] print this message and exit" << endl;
@@ -166,6 +167,7 @@ static struct option long_options[] = {
   {"bootstrap", required_argument, 0, 'b'},
   {"rseed", required_argument, 0, 'r'},
   {"factors", required_argument, 0, 'f'},
+  {"filter", required_argument, 0, 'l'},
   {"help", no_argument, 0, 'h'},
   {0, 0, 0, 0}
 };
@@ -177,6 +179,7 @@ struct ProgramOption {
   string reference;
   string candidate;
   vector<string> scorer_factors;
+  vector<string> scorer_filter;
   int bootstrap;
   int seed;
   bool has_seed;
@@ -193,12 +196,13 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
   int last_scorer_index = -1;
-  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:f:h", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:c:R:C:b:r:f:l:h", long_options, &option_index)) != -1) {
     switch(c) {
       case 's':
         opt->scorer_types.push_back(string(optarg));
         opt->scorer_configs.push_back(string(""));
         opt->scorer_factors.push_back(string(""));
+        opt->scorer_filter.push_back(string(""));
         last_scorer_index++;
         break;
       case 'c':
@@ -220,6 +224,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
       case 'f':
         opt->scorer_factors[last_scorer_index] = string(optarg);
         break;
+      case 'l':
+        opt->scorer_filter[last_scorer_index] = string(optarg);
+        break;
       default:
         usage();
     }
@@ -231,6 +238,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
     opt->scorer_types.push_back(string("BLEU"));
     opt->scorer_configs.push_back(string(""));
     opt->scorer_factors.push_back(string(""));
+    opt->scorer_filter.push_back(string(""));
   }
 }
 
@@ -277,6 +285,7 @@ int main(int argc, char** argv)
         {
             g_scorer = ScorerFactory::getScorer(option.scorer_types[i], option.scorer_configs[i]);
             g_scorer->setFactors(option.scorer_factors[i]);
+            g_scorer->setFilter(option.scorer_filter[i]);
             g_scorer->setReferenceFiles(refFiles);
             EvaluatorUtil::evaluate(*fileIt, option.bootstrap);
             delete g_scorer;

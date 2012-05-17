@@ -9,8 +9,6 @@
 #ifndef MERT_DATA_H_
 #define MERT_DATA_H_
 
-using namespace std;
-
 #include <vector>
 #include <boost/shared_ptr.hpp>
 
@@ -30,7 +28,7 @@ class Data
 private:
   Scorer* m_scorer;
   std::string m_score_type;
-  size_t m_num_scores;
+  std::size_t m_num_scores;
   bool m_sparse_flag;
   ScoreDataHandle m_score_data;
   FeatureDataHandle m_feature_data;
@@ -50,11 +48,11 @@ public:
 
   Scorer* getScorer() { return m_scorer; }
 
-  size_t NumberOfFeatures() const {
+  std::size_t NumberOfFeatures() const {
     return m_feature_data->NumberOfFeatures();
   }
 
-  void NumberOfFeatures(size_t v) { m_feature_data->NumberOfFeatures(v); }
+  void NumberOfFeatures(std::size_t v) { m_feature_data->NumberOfFeatures(v); }
 
   std::string Features() const { return m_feature_data->Features(); }
   void Features(const std::string &f) { m_feature_data->Features(f); }
@@ -76,11 +74,11 @@ public:
     return m_feature_data->existsFeatureNames();
   }
 
-  inline std::string getFeatureName(size_t idx) const {
+  inline std::string getFeatureName(std::size_t idx) const {
     return m_feature_data->getFeatureName(idx);
   }
 
-  inline size_t getFeatureIndex(const std::string& name) const {
+  inline std::size_t getFeatureIndex(const std::string& name) const {
     return m_feature_data->getFeatureIndex(name);
   }
 
@@ -90,7 +88,7 @@ public:
    * the data (with replacement) and shard_size is interpreted as the proportion
    * of the total size.
    */
-  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig,
+  void createShards(std::size_t shard_count, float shard_size, const std::string& scorerconfig,
                     std::vector<Data>& shards);
 
   // Helper functions for loadnbest();

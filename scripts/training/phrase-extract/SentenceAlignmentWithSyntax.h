@@ -53,6 +53,8 @@ public:
     , m_options(options)
   {}
 
+  virtual ~SentenceAlignmentWithSyntax() {}
+
   bool
   processTargetSentence(const char *, int);
 

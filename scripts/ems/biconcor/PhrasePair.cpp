@@ -1,19 +1,24 @@
 #include "PhrasePair.h"
+
+#include <iostream>
+#include "TargetCorpus.h"
+#include "Alignment.h"
 #include "Vocabulary.h"
+#include "SuffixArray.h"
 
 using namespace std;
 
-void PhrasePair::Print( ostream* out, int width )
+void PhrasePair::Print( ostream* out, int width ) const
 {
-  vector< WORD_ID >::iterator t;
+  vector< WORD_ID >::const_iterator t;
 
   // source
   int sentence_start = m_source_position - m_source_start;
-  int source_width = (width-3)/2;
+  size_t source_width = (width-3)/2;
   string source_pre = "";
   string source = "";
   string source_post = "";
-  for( int space=0; space<source_width/2; space++ ) source_pre += " ";
+  for( size_t space=0; space<source_width/2; space++ ) source_pre += " ";
   for( char i=0; i<m_source_start; i++ ) {
     source_pre += " " + m_suffixArray->GetWord( sentence_start + i );
   }
@@ -26,12 +31,12 @@ void PhrasePair::Print( ostream* out, int width )
     if (i>m_source_end+1) source_post += " ";
     source_post += m_suffixArray->GetWord( sentence_start + i );
   }
-  for( int space=0; space<source_width/2; space++ ) source_post += " ";
+  for( size_t space=0; space<source_width/2; space++ ) source_post += " ";
 
-  int source_pre_width = (source_width-source.size()-2)/2;
-  int source_post_width = (source_width-source.size()-2+1)/2;
+  size_t source_pre_width = (source_width-source.size()-2)/2;
+  size_t source_post_width = (source_width-source.size()-2+1)/2;
 
-  if (source.size() > width) {
+  if (source.size() > (size_t)width) {
     source_pre_width = 0;
     source_post_width = 0;
   }
@@ -41,11 +46,11 @@ void PhrasePair::Print( ostream* out, int width )
        << source_post.substr( 0, source_post_width ) << " | ";
 
   // target
-  int target_width = (width-3)/2;
+  size_t target_width = (width-3)/2;
   string target_pre = "";
   string target = "";
   string target_post = "";
-  for( int space=0; space<target_width/2; space++ ) target_pre += " ";
+  for( size_t space=0; space<target_width/2; space++ ) target_pre += " ";
   for( char i=0; i<m_target_start; i++ ) {
     target_pre += " " + m_targetCorpus->GetWord( m_sentence_id, i);
   }
@@ -58,10 +63,10 @@ void PhrasePair::Print( ostream* out, int width )
     target_post += m_targetCorpus->GetWord( m_sentence_id, i);
   }
 
-  int target_pre_width = (target_width-target.size()-2)/2;
-  int target_post_width = (target_width-target.size()-2+1)/2;
+  size_t target_pre_width = (target_width-target.size()-2)/2;
+  size_t target_post_width = (target_width-target.size()-2+1)/2;
 
-  if (target.size() > width) {
+  if (target.size() > (size_t)width) {
     target_pre_width = 0;
     target_post_width = 0;
   }
@@ -71,7 +76,7 @@ void PhrasePair::Print( ostream* out, int width )
        << target_post.substr( 0, target_post_width ) << endl;
 }
 
-void PhrasePair::PrintTarget( ostream* out )
+void PhrasePair::PrintTarget( ostream* out ) const
 {
   for( char i=m_target_start; i<=m_target_end; i++ ) {
     if (i>m_target_start) *out << " ";
@@ -79,7 +84,7 @@ void PhrasePair::PrintTarget( ostream* out )
   }
 }
 
-void PhrasePair::PrintHTML( ostream* out )
+void PhrasePair::PrintHTML( ostream* out ) const
 {
   // source
   int sentence_start = m_source_position - m_source_start;
@@ -120,13 +125,13 @@ void PhrasePair::PrintHTML( ostream* out )
   *out << "</td></tr>\n";
 }
 
-void PhrasePair::PrintClippedHTML( ostream* out, int width )
+void PhrasePair::PrintClippedHTML( ostream* out, int width ) const
 {
-  vector< WORD_ID >::iterator t;
+  vector< WORD_ID >::const_iterator t;
 
   // source
   int sentence_start = m_source_position - m_source_start;
-  int source_width = (width+1)/2;
+  size_t source_width = (width+1)/2;
   string source_pre = "";
   string source = "";
   string source_post = "";
@@ -142,16 +147,16 @@ void PhrasePair::PrintClippedHTML( ostream* out, int width )
     if (i>m_source_end+1) source_post += " ";
     source_post += m_suffixArray->GetWord( sentence_start + i );
   }
-  int source_pre_width = (source_width-source.size())/2;
-  int source_post_width = (source_width-source.size()+1)/2;
+  size_t source_pre_width = (source_width-source.size())/2;
+  size_t source_post_width = (source_width-source.size()+1)/2;
 
 	// if phrase is too long, don't show any context
-  if (source.size() > width) {
+  if (source.size() > (size_t)width) {
     source_pre_width = 0;
     source_post_width = 0;
   }
 	// too long -> truncate and add "..."
-  if (source_pre.size()>source_pre_width) {
+  if (source_pre.size() > source_pre_width) {
 		// first skip up to a space
 		while(source_pre_width>0 &&
 					source_pre.substr(source_pre.size()-source_pre_width,1) != " ") {
@@ -176,12 +181,12 @@ void PhrasePair::PrintClippedHTML( ostream* out, int width )
        << "</td>";
 
   // target
-  int target_width = width/2;
+  size_t target_width = width/2;
   string target_pre = "";
   string target = "";
   string target_post = "";
-	int target_pre_null_width = 0;
-	int target_post_null_width = 0;
+	size_t target_pre_null_width = 0;
+	size_t target_post_null_width = 0;
   for( char i=0; i<m_target_start; i++ ) {
 		WORD word = m_targetCorpus->GetWord( m_sentence_id, i);
     target_pre += " " + word;
@@ -201,10 +206,10 @@ void PhrasePair::PrintClippedHTML( ostream* out, int width )
 		}
   }
 
-  int target_pre_width = (target_width-target.size())/2;
-  int target_post_width = (target_width-target.size()+1)/2;
+  size_t target_pre_width = (target_width-target.size())/2;
+  size_t target_post_width = (target_width-target.size()+1)/2;
 
-  if (target.size() > width) {
+  if (target.size() > (size_t)width) {
     target_pre_width = 0;
     target_post_width = 0;
   }
@@ -241,7 +246,7 @@ void PhrasePair::PrintClippedHTML( ostream* out, int width )
 	}
 	if (m_post_null) {
 		//cerr << endl << "target_post_width=" << target_post_width << ", target_post_null_width=" << target_post_null_width << ", target_post.size()=" << target_post.size() << endl;
-		if (target_post_null_width>target_post.size()) {
+		if (target_post_null_width > target_post.size()) {
 			target_post_null_width = target_post.size();
 		}
 		target_post = "<span class=\"null_aligned\">"

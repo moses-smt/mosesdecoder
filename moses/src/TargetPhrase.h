@@ -51,10 +51,11 @@ protected:
   float m_transScore;
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
-  const AlignmentInfo *m_alignmentInfo;
 
   // in case of confusion net, ptr to source phrase
   Phrase const* m_sourcePhrase;
+
+  const AlignmentInfo *m_alignmentInfo;
   Word m_lhsTarget;
 
 public:

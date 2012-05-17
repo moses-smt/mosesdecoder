@@ -12,6 +12,8 @@
 #include <cmath>
 #include "Util.h"
 
+using namespace std;
+
 namespace {
 const int kAvailableSize = 8;
 } // namespace
