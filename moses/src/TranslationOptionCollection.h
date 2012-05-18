@@ -116,7 +116,8 @@ public:
   virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
       , size_t startPosition
       , size_t endPosition
-      , bool adhereTableLimit);
+      , bool adhereTableLimit
+      , size_t graphInd);
 
   //!Check if this range has XML options
   virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;

@@ -198,9 +198,12 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
     for (size_t pos = 0 ; pos < size ; pos++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
       out << *factor;
+      CHECK(factor);
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+        CHECK(factor);
+
         out << "|" << *factor;
       }
       out << " ";
@@ -307,6 +310,7 @@ void OutputBestHypo(const std::vector<Word>&  mbrBestHypo, long /*translationId*
 
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i].GetFactor(StaticData::Instance().GetOutputFactorOrder()[0]);
+    CHECK(factor);
     if (i>0) out << " " << *factor;
     else     out << *factor;
   }
