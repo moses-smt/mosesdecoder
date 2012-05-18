@@ -38,7 +38,8 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
-
+class ChartTranslationOption;
+  
 //! base class for sentences and confusion networks
 class InputType
 {
@@ -129,6 +130,8 @@ public:
   };
 
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const = 0;
+
+  virtual std::vector <ChartTranslationOption*> GetXmlChartTranslationOptions() const;
 
   TO_STRING();
 
