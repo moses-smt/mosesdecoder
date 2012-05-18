@@ -126,8 +126,7 @@ void ChartManager::ProcessSentence()
 }
 
 void ChartManager::AddXmlChartOptions() {
-  TreeInput const &source = dynamic_cast<TreeInput const&>(m_source);
-  const std::vector <ChartTranslationOption*> xmlChartOptionsList = source.GetXmlChartTranslationOptions();
+  const std::vector <ChartTranslationOption*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
   if (xmlChartOptionsList.size() == 0) return;
 
