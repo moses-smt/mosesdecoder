@@ -282,11 +282,10 @@ namespace Moses {
     }
   }
 
-  const FValue& FVector::getSafe(const FName& name) const {
-    static const FValue DEFAULT = 100000;
+  const FValue& FVector::getBackoff(const FName& name, float backoff) const {
     const_iterator fi = m_features.find(name);
     if (fi == m_features.end()) {
-      return DEFAULT;
+      return backoff;
     } else {
       return fi->second;
     }
@@ -438,16 +437,14 @@ namespace Moses {
     }
   }
 
-  void FVector::updateLearningRates(float decay, const FVector &confidenceCounts) {
-    float r0 = 1.0;
+  void FVector::updateLearningRates(float decay, const FVector &confidenceCounts, float core_r0, float sparse_r0) {
     for (size_t i = 0; i < confidenceCounts.m_coreFeatures.size(); ++i) {
-      m_coreFeatures[i] = 1.0/(1.0/r0 + decay * abs(confidenceCounts.m_coreFeatures[i]));     
+      m_coreFeatures[i] = 1.0/(1.0/core_r0 + decay * abs(confidenceCounts.m_coreFeatures[i]));     
     }
 
     for (const_iterator i = confidenceCounts.cbegin(); i != confidenceCounts.cend(); ++i) {
-      float value = 1.0/(1.0/r0 + decay * abs(i->second));
+      float value = 1.0/(1.0/sparse_r0 + decay * abs(i->second));
       set(i->first, value);
-      cerr << "set learning rate: " << i->first << ": " << value << endl; 
     }
   }
 
@@ -549,15 +546,14 @@ namespace Moses {
     return *this;
   }
 
-  FVector& FVector::multiplyEqualsSafe(const FVector& rhs) {
+  FVector& FVector::multiplyEqualsBackoff(const FVector& rhs, float backoff) {
     if (rhs.m_coreFeatures.size() > m_coreFeatures.size()) {
       resize(rhs.m_coreFeatures.size());
     }
     for (iterator i = begin(); i != end(); ++i) {
       FValue lhsValue = i->second;
-      FValue rhsValue = rhs.getSafe(i->first);
-      if (rhsValue != 100000) // indicates that feature  is uninitialized
-	set(i->first,lhsValue*rhsValue);
+      FValue rhsValue = rhs.getBackoff(i->first, backoff);
+      set(i->first,lhsValue*rhsValue);
     }
     for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       if (i < rhs.m_coreFeatures.size()) {
@@ -566,6 +562,15 @@ namespace Moses {
         m_coreFeatures[i] = 0;
       }
     }
+    return *this;
+  }
+  
+  FVector& FVector::multiplyEquals(float core_r0, float sparse_r0) {
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      m_coreFeatures[i] *= core_r0;
+    }
+    for (iterator i = begin(); i != end(); ++i) 
+      set(i->first,(i->second)*sparse_r0);   
     return *this;
   }
   

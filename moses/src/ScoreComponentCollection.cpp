@@ -106,9 +106,14 @@ void ScoreComponentCollection::MultiplyEquals(const ScoreComponentCollection& rh
 	m_scores *= rhs.m_scores;
 }
 
-void ScoreComponentCollection::MultiplyEqualsSafe(const ScoreComponentCollection& rhs)
+void ScoreComponentCollection::MultiplyEqualsBackoff(const ScoreComponentCollection& rhs, float backoff)
 {
-  m_scores.multiplyEqualsSafe(rhs.m_scores);
+  m_scores.multiplyEqualsBackoff(rhs.m_scores, backoff);
+}
+
+void ScoreComponentCollection::MultiplyEquals(float core_r0, float sparse_r0)
+{
+  m_scores.multiplyEquals(core_r0, sparse_r0);
 }
 
 std::ostream& operator<<(std::ostream& os, const ScoreComponentCollection& rhs)

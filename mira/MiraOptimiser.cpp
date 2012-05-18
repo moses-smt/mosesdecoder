@@ -581,10 +581,10 @@ size_t MiraOptimiser::updateWeightsRankModel(
 	weightUpdate.PlusEquals(summedUpdate);
 
 	// Sanity check: are there still violated constraints after optimisation?
-	int violatedConstraintsAfter = 0;
+	/*int violatedConstraintsAfter = 0;
 	float newDistanceFromOptimum = 0;
 	for (size_t i = 0; i < featureValueDiffs.size(); ++i) {
-		float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
+	        float modelScoreDiff = featureValueDiffs[i].InnerProduct(currWeights);
 		float loss = all_losses[i];
 		float diff = loss - modelScoreDiff;
 		if (diff > epsilon) {
@@ -593,7 +593,7 @@ size_t MiraOptimiser::updateWeightsRankModel(
 		}
 	}
 	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", violated constraint before: " << violatedConstraintsBefore << ", after: " << violatedConstraintsAfter  << ", change: " << violatedConstraintsBefore - violatedConstraintsAfter << endl);
-	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);
+	VERBOSE(1, "Rank " << rank << ", epoch " << epoch << ", error before: " << oldDistanceFromOptimum << ", after: " << newDistanceFromOptimum << ", change: " << oldDistanceFromOptimum - newDistanceFromOptimum << endl);*/
 //	return violatedConstraintsAfter;
 	return 0;
 }

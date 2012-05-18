@@ -51,6 +51,8 @@ void ignoreCoreFeatures(std::vector<std::vector<Moses::ScoreComponentCollection>
 void takeLogs(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t base);
 void deleteTranslations(std::vector<std::vector<const Moses::Word*> > &translations);
 void decodeHopeOrFear(size_t rank, size_t size, size_t decode, std::string decode_filename, std::vector<std::string> &inputSentences, Mira::MosesDecoder* decoder, size_t n, float bleuWeight);
+void applyLearningRates(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, float core_r0, float sparse_r0); 
+void applyPerFeatureLearningRates(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, Moses::ScoreComponentCollection featureLearningRates, float sparse_r0);
 void scaleFeatureScore(Moses::ScoreProducer *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
 void scaleFeatureScores(Moses::ScoreProducer *sp, float scaling_factor,  std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch);
 

@@ -126,14 +126,18 @@ int main(int argc, char** argv) {
   bool l1_regularize, l2_regularize;
   float l1_lambda, l2_lambda;
   bool most_violated, all_violated, max_bleu_diff, one_against_all;
-  bool feature_confidence, signed_counts;
-  float decay;
+  bool feature_confidence, signed_counts, averageConfidenceCounts;
+  float decay, core_r0, sparse_r0;
   po::options_description desc("Allowed options");
   desc.add_options()
     ("bleu-weight", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu weight used in decoder objective")
     ("bw-hope", po::value<float>(&bleuWeight_hope)->default_value(-1.0), "Bleu weight used in decoder objective for hope")
     ("bw-fear", po::value<float>(&bleuWeight_fear)->default_value(-1.0), "Bleu weight used in decoder objective for fear")
     
+    ("core-r0", po::value<float>(&core_r0)->default_value(1.0), "Start learning rate for core features")
+    ("sparse-r0", po::value<float>(&sparse_r0)->default_value(1.0), "Start learning rate for sparse features")
+    ("avg-conf-counts", po::value<bool>(&averageConfidenceCounts)->default_value(true), "Divide confidence counts by number of processors")
+
     ("tie-bw-to-lm", po::value<bool>(&bleu_weight_lm)->default_value(false), "Make bleu weight depend on lm weight")   
     ("adjust-bw", po::value<bool>(&bleu_weight_lm_adjust)->default_value(false), "Adjust bleu weight when lm weight changes")       
     ("bw-lm-factor", po::value<float>(&bleu_weight_lm_factor)->default_value(2.0), "Make bleu weight depend on lm weight by this factor")
@@ -221,7 +225,7 @@ int main(int argc, char** argv) {
     ("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale update by precision of oracle")	
     ("sentence-level-bleu", po::value<bool>(&sentenceBleu)->default_value(true), "Use a sentences level Bleu scoring function")
     ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-    ("signed-counts", po::value<bool>(&signed_counts)->default_value(true), "use signed counts for feature learning rates")
+    ("signed-counts", po::value<bool>(&signed_counts)->default_value(false), "Use signed counts for feature learning rates")
     ("sigmoid-param", po::value<float>(&sigmoidParam)->default_value(1), "y=sigmoidParam is the axis that this sigmoid approaches")
     ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
     ("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
@@ -636,7 +640,8 @@ int main(int argc, char** argv) {
 
 	// variables for feature confidence
 	ScoreComponentCollection confidenceCounts, mixedConfidenceCounts, featureLearningRates;
-	featureLearningRates.UpdateLearningRates(decay, confidenceCounts); //initialise core learning rates
+       	featureLearningRates.UpdateLearningRates(decay, confidenceCounts, core_r0, sparse_r0); //initialise core learning rates
+	cerr << "Initial learning rates, core: " << core_r0 << ", sparse: " << sparse_r0 << endl;
 
 	for (size_t epoch = 0; epoch < epochs && !stop; ++epoch) {
 	  if (shuffle) {
@@ -1644,6 +1649,41 @@ int main(int argc, char** argv) {
 					}
 				}
 
+				// apply learning rates to feature vectors before optimization
+				if (feature_confidence) {
+				  cerr << "Rank " << rank << ", epoch " << epoch << ", apply feature learning rates with decay " << decay << ": " << featureLearningRates << endl;
+				  //weightUpdate.MultiplyEqualsBackoff(featureLearningRates, sparse_r0);
+				  //cerr << "Rank " << rank << ", epoch " << epoch << ", scaled update: " << weightUpdate << endl;
+				  if (sample) {
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", feature values before: " << featureValuesHopeSample[0][0] << endl;
+				    applyPerFeatureLearningRates(featureValuesHopeSample, featureLearningRates, sparse_r0);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
+				    applyPerFeatureLearningRates(featureValuesFearSample, featureLearningRates, sparse_r0);
+				  }
+				  else {
+				    applyPerFeatureLearningRates(featureValuesHope, featureLearningRates, sparse_r0);
+				    applyPerFeatureLearningRates(featureValuesFear, featureLearningRates, sparse_r0);
+				    applyPerFeatureLearningRates(featureValues, featureLearningRates, sparse_r0);
+				  }			  
+				}
+				else {
+				  // apply fixed learning rates
+				  cerr << "Rank " << rank << ", epoch " << epoch << ", apply fixed learning rates, core: " << core_r0 << ", sparse: " << sparse_r0 << endl;
+				  if (core_r0 != 1.0 || sparse_r0 != 1.0) {
+				    if (sample) {
+				      cerr << "Rank " << rank << ", epoch " << epoch << ", feature values before: " << featureValuesHopeSample[0][0] << endl;
+				      applyLearningRates(featureValuesHopeSample, core_r0, sparse_r0);
+				      cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
+				      applyLearningRates(featureValuesFearSample, core_r0, sparse_r0);
+                                    }
+                                    else {
+                                      applyLearningRates(featureValuesHope, core_r0, sparse_r0);
+				      applyLearningRates(featureValuesFear, core_r0, sparse_r0);
+                                      applyLearningRates(featureValues, core_r0, sparse_r0);
+                                    }
+				  }
+				}
+
 				// Run optimiser on batch:
 				VERBOSE(1, "\nRank " << rank << ", epoch " << epoch << ", run optimiser:" << endl);
 				size_t update_status = 1;
@@ -1753,17 +1793,13 @@ int main(int argc, char** argv) {
 					}
 
 					if (feature_confidence) {
-					  cerr << "Rank " << rank << ", epoch " << epoch << ", apply feature learning rates with decay " << decay << ": " << featureLearningRates << endl;
-					  weightUpdate.MultiplyEqualsSafe(featureLearningRates);
-					  if (rank == 0)
-					    cerr << "Rank " << rank << ", epoch " << epoch << ", scaled update: " << weightUpdate << endl;
-					  
-					  // update confidence counts
+					  // update confidence counts based on weight update
 					  confidenceCounts.UpdateConfidenceCounts(weightUpdate, signed_counts);
-					  
+					  				  
 					  // update feature learning rates
-					  featureLearningRates.UpdateLearningRates(decay, confidenceCounts);
+					  featureLearningRates.UpdateLearningRates(decay, confidenceCounts, core_r0, sparse_r0); 
 					}
+
 					mosesWeights.PlusEquals(weightUpdate);
 
 					if (normaliseWeights)
@@ -1846,8 +1882,11 @@ int main(int argc, char** argv) {
 					else
 					  mixedWeights.DivideEquals(size);
 					
-					// divide confidence counts 
-					mixedConfidenceCounts.DivideEquals(size);
+					// divide confidence counts
+					if (averageConfidenceCounts) {
+					  mixedConfidenceCounts.DivideEquals(size);
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", average confidence counts." << endl;
+					}
 
 					// normalise weights after averaging
 					if (normaliseWeights) {
@@ -1893,16 +1932,13 @@ int main(int argc, char** argv) {
 				decoder->setWeights(mixedWeights);
 				mosesWeights = mixedWeights;
 
-				// broadcast confidence counts
-				if (rank == 0)
-				  cerr << "Rank " << rank << ", epoch " << epoch << ", confidence counts before: " << confidenceCounts << endl;
+				// broadcast summed confidence counts
 				mpi::broadcast(world, mixedConfidenceCounts, 0);
 				confidenceCounts = mixedConfidenceCounts;
-				if (rank == 0)
-                                  cerr << "Rank " << rank << ", epoch " << epoch << ", confidence counts after: " << confidenceCounts << endl;
+				
 #endif
 #ifndef MPI_ENABLE
-				//				cerr << "\nRank " << rank << ", no mixing, weights: " << mosesWeights << endl;
+				//cerr << "\nRank " << rank << ", no mixing, weights: " << mosesWeights << endl;
 				mixedWeights = mosesWeights;
 #endif
 			} // end mixing
@@ -2320,6 +2356,18 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
 
 	delete decoder;
 	exit(0);
+}
+
+void applyLearningRates(vector<vector<ScoreComponentCollection> > &featureValues, float core_r0, float sparse_r0) {
+  for (size_t i=0; i<featureValues.size(); ++i) // each item in batch                                                           
+    for (size_t j=0; j<featureValues[i].size(); ++j) // each item in nbest                                                        
+      featureValues[i][j].MultiplyEquals(core_r0, sparse_r0);
+}
+
+void applyPerFeatureLearningRates(vector<vector<ScoreComponentCollection> > &featureValues, ScoreComponentCollection featureLearningRates, float sparse_r0) {
+  for (size_t i=0; i<featureValues.size(); ++i) // each item in batch       
+    for (size_t j=0; j<featureValues[i].size(); ++j) // each item in nbest                                                         
+      featureValues[i][j].MultiplyEqualsBackoff(featureLearningRates, sparse_r0);
 }
 
 void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
