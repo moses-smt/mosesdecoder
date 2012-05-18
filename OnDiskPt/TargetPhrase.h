@@ -24,6 +24,7 @@
 #include <vector>
 #include "Word.h"
 #include "Phrase.h"
+#include "SourcePhrase.h"
 
 namespace Moses
 {
@@ -45,6 +46,7 @@ class TargetPhrase: public Phrase
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
   AlignType m_align;
+  Phrase* m_sourcePhrase; 
 
   std::vector<float>	m_scores;
   UINT64 m_filePos;
@@ -60,6 +62,14 @@ public:
   TargetPhrase(const 	TargetPhrase &copy);
   virtual ~TargetPhrase();
 
+  void SetSourcePhrase(Phrase *p) {
+	Phrase *copy = new Phrase(*p);
+    m_sourcePhrase = copy;
+  }
+  const Phrase* GetSourcePhrase() const {
+	return m_sourcePhrase;
+  }
+  
   void SetLHS(Word *lhs);
 
   void Create1AlignFromString(const std::string &align1Str);
@@ -90,7 +100,7 @@ public:
                                       , const Moses::WordPenaltyProducer* wpProducer
                                       , const Moses::LMList &lmList) const;
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
-  UINT64 ReadFromFile(std::fstream &fileTP, size_t numFactors);
+  UINT64 ReadFromFile(std::fstream &fileTP, size_t numFactors, size_t numSourceFactors);
 
 };
 

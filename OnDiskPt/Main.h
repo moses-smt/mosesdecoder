@@ -25,10 +25,10 @@
 typedef std::pair<size_t, size_t>  AlignPair;
 typedef std::vector<AlignPair> AlignType;
 
-void Tokenize(OnDiskPt::Phrase &phrase
+OnDiskPt::Word *Tokenize(OnDiskPt::Phrase &phrase
               , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
               , OnDiskPt::OnDiskWrapper &onDiskWrapper);
-void Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targetPhrase
+OnDiskPt::Phrase *Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targetPhrase
               , char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
               , int numScores
               , std::vector<float> &misc);
