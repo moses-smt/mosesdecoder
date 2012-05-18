@@ -1042,7 +1042,7 @@ bool StaticData::LoadGlobalLexicalModel()
 bool StaticData::LoadGlobalLexicalModelUnlimited()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-glm"));
-  const vector<string> &modelSpec = m_parameter->GetParam("glm-model");
+  const vector<string> &modelSpec = m_parameter->GetParam("glm-feature");
 
   if (weight.size() != 0 && weight.size() != modelSpec.size()) {
     std::cerr << "number of sparse producer weights and model specs for the global lexical model unlimited "
@@ -1060,7 +1060,7 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     // read optional punctuation and bias specifications
     if (spec.size() > 0) {
       if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
-      	UserMessage::Add("Format of glm feature is <factor-src> <factor-tgt> [ignore-punct] [use-bias] "
+      	UserMessage::Add("Format of glm feature is <factor-src>-<factor-tgt> [ignore-punct] [use-bias] "
       			"[context-type] [filename-src filename-tgt]");
 				return false;
       }
@@ -1097,7 +1097,8 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
         return false;
       }
     }
-    m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
+    if (weight.size() > i)
+      m_globalLexicalModelsUnlimited[i]->SetSparseProducerWeight(weight[i]);
   }
   return true;
 }

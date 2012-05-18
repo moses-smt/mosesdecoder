@@ -51,7 +51,7 @@ Parameter::Parameter()
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
-  AddParam("glm-model", "Factor types for global lexicon models, format Factor-Factor.");
+  AddParam("glm-feature", "discriminatively trained global lexical translation feature, sparse producer");
   AddParam("input-factors", "list of factors in the input");
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
@@ -97,10 +97,10 @@ Parameter::Parameter()
 	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
 	AddParam("weight-l", "lm", "weight(s) for language models");
 	AddParam("weight-lex", "lex", "weight for global lexical model");
-	AddParam("weight-glm", "glm", "weight for global lexical model");
-	AddParam("weight-wt", "wt", "weight for global lexical model");
-	AddParam("weight-pp", "pp", "weight for global lexical model");
-	AddParam("weight-pb", "pb", "weight for global lexical model");
+	AddParam("weight-glm", "glm", "weight for global lexical feature, sparse producer");
+	AddParam("weight-wt", "wt", "weight for word translation feature");
+	AddParam("weight-pp", "pp", "weight for phrase pair feature");
+	AddParam("weight-pb", "pb", "weight for phrase boundary feature");
 	AddParam("weight-t", "tm", "weights for translation model components");
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
