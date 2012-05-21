@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -45,7 +44,6 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
   :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
-  ,m_transOpt(transOpt)
   ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
   ,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)

@@ -1,20 +1,65 @@
 #include "Mismatch.h"
+
+#include <fstream>
+#include <iostream>
+#include <cstring>
+#include <string>
+#include <stdlib.h>
+
+#include "SuffixArray.h"
+#include "TargetCorpus.h"
+#include "Alignment.h"
 #include "Vocabulary.h"
 
 using namespace std;
 
-#define UNANNOTATED 0
-#define PRE_ALIGNED 1
-#define POST_ALIGNED 2
-#define UNALIGNED 3
-#define MISALIGNED 4
-#define ALIGNED 5
+enum {
+  UNANNOTATED = 0,
+  PRE_ALIGNED = 1,
+  POST_ALIGNED = 2,
+  UNALIGNED = 3,
+  MISALIGNED = 4,
+  ALIGNED = 5
+};
 
+Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, int source_length, int target_length, int source_start, int source_end )
+    :m_suffixArray(sa)
+    ,m_targetCorpus(tc)
+    ,m_alignment(a)
+    ,m_sentence_id(sentence_id)
+    ,m_source_length(source_length)
+    ,m_target_length(target_length)
+    ,m_source_position(position)
+    ,m_source_start(source_start)
+    ,m_source_end(source_end)
+    ,m_unaligned(true)
+{
+  // initialize unaligned indexes
+  for (int i = 0; i < m_source_length; i++) {
+    m_source_unaligned[i] = true;
+  }
+  for (int i = 0; i < m_target_length; i++) {
+    m_target_unaligned[i] = true;
+  }
+  m_num_alignment_points =
+      m_alignment->GetNumberOfAlignmentPoints( sentence_id );
+  for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
+    m_source_unaligned[ (int)m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
+    m_target_unaligned[ (int)m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
+  }
+  for(int i = source_start; i <= source_end; i++) {
+    if (!m_source_unaligned[ i ]) {
+      m_unaligned = false;
+    }
+  }
+}
+
+Mismatch::~Mismatch () {}
 
 void Mismatch::PrintClippedHTML( ostream* out, int width )
 {
-	char source_annotation[256], target_annotation[256];
-	vector< string > label_class;
+    int source_annotation[256], target_annotation[256];
+    vector< string > label_class;
 	label_class.push_back( "" );
 	label_class.push_back( "mismatch_pre_aligned" );
 	label_class.push_back( "mismatch_post_aligned" );
@@ -236,7 +281,7 @@ void Mismatch::PrintClippedHTML( ostream* out, int width )
 	*out << "</td></tr>";
 }
 
-void Mismatch::LabelSourceMatches( char *source_annotation, char *target_annotation, char source_id, char label ) {
+void Mismatch::LabelSourceMatches(int *source_annotation, int *target_annotation, int source_id, int label ) {
 	for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
 		if (m_alignment->GetSourceWord( m_sentence_id, ap ) == source_id) {
 			source_annotation[ source_id ] = label;

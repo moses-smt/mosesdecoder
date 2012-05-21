@@ -1,17 +1,12 @@
-#ifndef __TERSCORER_H__
-#define __TERSCORER_H__
+#ifndef MERT_TER_SCORER_H_
+#define MERT_TER_SCORER_H_
 
-#include <iostream>
 #include <set>
 #include <string>
 #include <vector>
 
 #include "Types.h"
 #include "Scorer.h"
-
-using namespace std;
-
-// enum TerReferenceLengthStrategy { TER_AVERAGE, TER_SHORTEST, TER_CLOSEST };
 
 class ScoreStats;
 
@@ -21,39 +16,35 @@ class ScoreStats;
 class TerScorer: public StatisticsBasedScorer
 {
 public:
-  explicit TerScorer(const string& config = "");
+  explicit TerScorer(const std::string& config = "");
   ~TerScorer();
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
-  virtual void whoami() const {
-    cerr << "I AM TerScorer" << std::endl;
-  }
-
-  virtual size_t NumberOfScores() const {
+  virtual std::size_t NumberOfScores() const {
     // cerr << "TerScorer: " << (LENGTH + 1) << endl;
     return kLENGTH + 1;
   }
 
-  virtual float calculateScore(const vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<int>& comps) const;
 
 private:
   const int kLENGTH;
 
-  string javaEnv;
-  string tercomEnv;
+  std::string m_java_env;
+  std::string m_ter_com_env;
 
   // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
-  vector<vector<int> > m_references;
-  vector<vector<vector<int> > > m_multi_references;
-  string m_pid;
+  std::vector<std::size_t> m_ref_lengths;
+  std::vector<std::multiset<int> > m_ref_tokens;
+  std::vector<std::vector<int> > m_references;
+  std::vector<std::vector<std::vector<int> > > m_multi_references;
+  std::string m_pid;
 
   // no copying allowed
   TerScorer(const TerScorer&);
   TerScorer& operator=(const TerScorer&);
 };
 
-#endif // __TERSCORER_H__
+#endif // MERT_TER_SCORER_H_

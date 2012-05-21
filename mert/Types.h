@@ -1,11 +1,10 @@
-#ifndef TYPE_H
-#define TYPE_H
+#ifndef MERT_TYPE_H_
+#define MERT_TYPE_H_
 
 #include <vector>
 #include <map>
 #include <string>
-
-using namespace std;
+#include <utility>
 
 class FeatureStats;
 class FeatureArray;
@@ -15,29 +14,29 @@ class ScoreArray;
 class ScoreData;
 
 typedef float parameter_t;
-//typedef vector<parameter_t> parameters_t;confusing; use vector<parameter_t>
-typedef vector<pair<unsigned int, unsigned int> > diff_t;
-typedef pair<float,diff_t > threshold;
-typedef vector<diff_t> diffs_t;
-typedef vector<unsigned int> candidates_t;
+//typedef std::vector<parameter_t> parameters_t;confusing; use std::vector<parameter_t>
+typedef std::vector<std::pair<unsigned int, unsigned int> > diff_t;
+typedef std::pair<float,diff_t > threshold;
+typedef std::vector<diff_t> diffs_t;
+typedef std::vector<unsigned int> candidates_t;
 
 typedef float statscore_t;
-typedef vector<statscore_t> statscores_t;
+typedef std::vector<statscore_t> statscores_t;
 
 
 typedef float FeatureStatsType;
 typedef FeatureStatsType* featstats_t;
-//typedef vector<FeatureStatsType> featstats_t;
-typedef vector<FeatureStats> featarray_t;
-typedef vector<FeatureArray> featdata_t;
+//typedef std::vector<FeatureStatsType> featstats_t;
+typedef std::vector<FeatureStats> featarray_t;
+typedef std::vector<FeatureArray> featdata_t;
 
 typedef int ScoreStatsType;
 typedef ScoreStatsType* scorestats_t;
-//typedef vector<ScoreStatsType> scorestats_t;
-typedef vector<ScoreStats> scorearray_t;
-typedef vector<ScoreArray> scoredata_t;
+//typedef std::vector<ScoreStatsType> scorestats_t;
+typedef std::vector<ScoreStats> scorearray_t;
+typedef std::vector<ScoreArray> scoredata_t;
 
-typedef map<size_t, std::string> idx2name;
-typedef map<std::string, size_t> name2idx;
+typedef std::map<std::size_t, std::string> idx2name;
+typedef std::map<std::string, std::size_t> name2idx;
 
-#endif  // TYPE_H
+#endif  // MERT_TYPE_H_

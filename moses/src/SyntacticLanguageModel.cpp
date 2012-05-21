@@ -17,9 +17,9 @@ namespace Moses
 						 size_t beamWidth) 
     // Initialize member variables  
   : m_NumScoreComponents(weights.size())
-  , m_beamWidth(beamWidth)
+  , m_files(new SyntacticLanguageModelFiles<YModel,XModel>(filePath))
   , m_factorType(factorType)
-  , m_files(new SyntacticLanguageModelFiles<YModel,XModel>(filePath)) {
+  , m_beamWidth(beamWidth) {
 
     // Inform Moses score manager of this feature and its weight(s)
     const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
@@ -29,7 +29,7 @@ namespace Moses
 
   SyntacticLanguageModel::~SyntacticLanguageModel() {
     VERBOSE(3,"Destructing SyntacticLanguageModel" << std::endl);
-    //    delete m_files;
+    delete m_files;
   }
 
   size_t SyntacticLanguageModel::GetNumScoreComponents() const {
@@ -86,10 +86,7 @@ namespace Moses
 
     VERBOSE(3,"Evaluating SyntacticLanguageModel for a hypothesis" << endl);
 
-    const SyntacticLanguageModelState<YModel,XModel,S,R>& prev =
-      static_cast<const SyntacticLanguageModelState<YModel,XModel,S,R>&>(*prev_state);
-
-    const SyntacticLanguageModelState<YModel,XModel,S,R>* currentState = &prev;
+    SyntacticLanguageModelState<YModel,XModel,S,R>*  tmpState = NULL;
     SyntacticLanguageModelState<YModel,XModel,S,R>* nextState = NULL;
   
 
@@ -103,10 +100,11 @@ namespace Moses
       const std::string& string = factor->GetString();
       
       if (i==0) {
-	nextState = new SyntacticLanguageModelState<YModel,XModel,S,R>(&prev, string);
+	nextState = new SyntacticLanguageModelState<YModel,XModel,S,R>((const SyntacticLanguageModelState<YModel,XModel,S,R>*)prev_state, string);
       } else {
-	currentState = nextState;
-	nextState = new SyntacticLanguageModelState<YModel,XModel,S,R>(currentState, string);
+	tmpState = nextState;
+	nextState = new SyntacticLanguageModelState<YModel,XModel,S,R>(tmpState, string);
+	delete tmpState;
       }
       
       double score = nextState->getScore();

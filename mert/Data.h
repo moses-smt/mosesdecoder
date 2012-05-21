@@ -1,19 +1,16 @@
 /*
  *  Data.h
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
  */
 
-#ifndef DATA_H
-#define DATA_H
+#ifndef MERT_DATA_H_
+#define MERT_DATA_H_
 
-using namespace std;
-
-#include <limits>
 #include <vector>
-#include <iostream>
+#include <boost/shared_ptr.hpp>
 
 #include "Util.h"
 #include "FeatureData.h"
@@ -21,89 +18,68 @@ using namespace std;
 
 class Scorer;
 
+typedef boost::shared_ptr<ScoreData> ScoreDataHandle;
+typedef boost::shared_ptr<FeatureData> FeatureDataHandle;
+
+// NOTE: there is no copy constructor implemented, so only the
+// compiler synthesised shallow copy is available.
 class Data
 {
 private:
-  Scorer* theScorer;
-  std::string score_type;
-  size_t number_of_scores;
-  bool _sparse_flag;
-
-protected:
-  // TODO: Use smart pointers for exceptional-safety.
-  ScoreData* scoredata;
-  FeatureData* featdata;
+  Scorer* m_scorer;
+  std::string m_score_type;
+  std::size_t m_num_scores;
+  bool m_sparse_flag;
+  ScoreDataHandle m_score_data;
+  FeatureDataHandle m_feature_data;
 
 public:
-  explicit Data(Scorer& sc);
+  explicit Data(Scorer* scorer);
   Data();
-  ~Data();
 
-  inline void clear() {
-    scoredata->clear();
-    featdata->clear();
-  }
-
-  ScoreData* getScoreData() {
-    return scoredata;
+  void clear() {
+    m_score_data->clear();
+    m_feature_data->clear();
   }
 
-  FeatureData* getFeatureData() {
-    return featdata;
+  ScoreDataHandle getScoreData() { return m_score_data; }
+
+  FeatureDataHandle getFeatureData() { return m_feature_data; }
+
+  Scorer* getScorer() { return m_scorer; }
+
+  std::size_t NumberOfFeatures() const {
+    return m_feature_data->NumberOfFeatures();
   }
 
-  Scorer* getScorer() {
-    return theScorer;
-  }
+  void NumberOfFeatures(std::size_t v) { m_feature_data->NumberOfFeatures(v); }
 
-  inline size_t NumberOfFeatures() const {
-    return featdata->NumberOfFeatures();
-  }
-  inline void NumberOfFeatures(size_t v) {
-    featdata->NumberOfFeatures(v);
-  }
-  inline std::string Features() const {
-    return featdata->Features();
-  }
-  inline void Features(const std::string &f) {
-    featdata->Features(f);
-  }
+  std::string Features() const { return m_feature_data->Features(); }
+  void Features(const std::string &f) { m_feature_data->Features(f); }
 
-  inline bool hasSparseFeatures() const { return _sparse_flag; }
+  bool hasSparseFeatures() const { return m_sparse_flag; }
   void mergeSparseFeatures();
 
-  void loadnbest(const std::string &file);
-  
-  void load(const std::string &featfile,const std::string &scorefile) {
-    featdata->load(featfile);
-    scoredata->load(scorefile);
-    if (featdata->hasSparseFeatures())
-      _sparse_flag = true;
-  }
+  void loadNBest(const std::string &file);
+
+  void load(const std::string &featfile, const std::string &scorefile);
+
+  void save(const std::string &featfile, const std::string &scorefile, bool bin=false);
 
   //ADDED BY TS
-  void remove_duplicates();
+  void removeDuplicates();
   //END_ADDED
 
-  void save(const std::string &featfile,const std::string &scorefile, bool bin=false) {
-
-    if (bin) cerr << "Binary write mode is selected" << endl;
-    else cerr << "Binary write mode is NOT selected" << endl;
-
-    featdata->save(featfile, bin);
-    scoredata->save(scorefile, bin);
-  }
-
   inline bool existsFeatureNames() const {
-    return featdata->existsFeatureNames();
+    return m_feature_data->existsFeatureNames();
   }
 
-  inline std::string getFeatureName(size_t idx) const {
-    return featdata->getFeatureName(idx);
+  inline std::string getFeatureName(std::size_t idx) const {
+    return m_feature_data->getFeatureName(idx);
   }
 
-  inline size_t getFeatureIndex(const std::string& name) const {
-    return featdata->getFeatureIndex(name);
+  inline std::size_t getFeatureIndex(const std::string& name) const {
+    return m_feature_data->getFeatureIndex(name);
   }
 
   /**
@@ -112,8 +88,13 @@ public:
    * the data (with replacement) and shard_size is interpreted as the proportion
    * of the total size.
    */
-  void createShards(size_t shard_count, float shard_size, const std::string& scorerconfig,
+  void createShards(std::size_t shard_count, float shard_size, const std::string& scorerconfig,
                     std::vector<Data>& shards);
+
+  // Helper functions for loadnbest();
+  void InitFeatureMap(const std::string& str);
+  void AddFeatures(const std::string& str,
+                   const std::string& sentence_index);
 };
 
-#endif  // DATA_H
+#endif  // MERT_DATA_H_

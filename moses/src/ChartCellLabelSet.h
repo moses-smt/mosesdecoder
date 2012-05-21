@@ -19,13 +19,12 @@
 
 #pragma once
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
-
 #include "ChartCellLabel.h"
+#include "NonTerminal.h"
 
-#include <set>
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/version.hpp>
 
 namespace Moses
 {
@@ -35,41 +34,46 @@ class ChartHypothesisCollection;
 class ChartCellLabelSet
 {
  private:
-  typedef std::set<ChartCellLabel> SetType;
+#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
+  typedef boost::unordered_map<Word, ChartCellLabel,
+                               NonTerminalHasher, NonTerminalEqualityPred
+                              > MapType;
+#else
+  typedef std::map<Word, ChartCellLabel> MapType;
+#endif
 
  public:
-  typedef SetType::const_iterator const_iterator;
+  typedef MapType::const_iterator const_iterator;
 
   ChartCellLabelSet(const WordsRange &coverage) : m_coverage(coverage) {}
 
-  const_iterator begin() const { return m_set.begin(); }
-  const_iterator end() const { return m_set.end(); }
+  const_iterator begin() const { return m_map.begin(); }
+  const_iterator end() const { return m_map.end(); }
 
   void AddWord(const Word &w)
   {
-    ChartCellLabel cellLabel(m_coverage, w);
-    m_set.insert(cellLabel);
+    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w)));
   }
 
-  void AddConstituent(const Word &w, const ChartHypothesisCollection &stack)
+  void AddConstituent(const Word &w, const ChartHypothesisCollection &coll)
   {
-    ChartCellLabel cellLabel(m_coverage, w, &stack);
-    m_set.insert(cellLabel);
+    const HypoList *stack = &(coll.GetSortedHypotheses());
+    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, stack)));
   }
 
-  bool Empty() const { return m_set.empty(); }
+  bool Empty() const { return m_map.empty(); }
 
-  size_t GetSize() const { return m_set.size(); }
+  size_t GetSize() const { return m_map.size(); }
 
   const ChartCellLabel *Find(const Word &w) const
   {
-    SetType::const_iterator p = m_set.find(ChartCellLabel(m_coverage, w));
-    return p == m_set.end() ? 0 : &(*p);
+    MapType::const_iterator p = m_map.find(w);
+    return p == m_map.end() ? 0 : &(p->second);
   }
 
  private:
   const WordsRange &m_coverage;
-  SetType m_set;
+  MapType m_map;
 };
 
 }

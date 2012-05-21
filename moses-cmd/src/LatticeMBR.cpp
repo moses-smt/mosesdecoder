@@ -148,13 +148,13 @@ void pruneLatticeFB(Lattice & connectedHyp, map < const Hypothesis*, set <const 
   //sort hyps based on estimated scores - do so by copying to multimap
   multimap<float, const Hypothesis*> sortHypsByVal;
   for (size_t i =0; i < estimatedScores.size(); ++i) {
-    sortHypsByVal.insert(make_pair<float, const Hypothesis*>(estimatedScores[i], connectedHyp[i]));
+    sortHypsByVal.insert(make_pair(estimatedScores[i], connectedHyp[i]));
   }
 
   multimap<float, const Hypothesis*>::const_iterator it = --sortHypsByVal.end();
   float bestScore = it->first;
   //store best score as score of hyp 0
-  sortHypsByVal.insert(make_pair<float, const Hypothesis*>(bestScore, emptyHyp));
+  sortHypsByVal.insert(make_pair(bestScore, emptyHyp));
 
 
   IFVERBOSE(3) {

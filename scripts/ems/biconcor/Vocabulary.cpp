@@ -1,5 +1,14 @@
 // $Id: Vocabulary.cpp 1565 2008-02-22 14:42:01Z bojar $
 #include "Vocabulary.h"
+#include <fstream>
+
+namespace {
+
+const int MAX_LENGTH = 10000;
+
+} // namespace
+
+using namespace std;
 
 // as in beamdecoder/tables.cpp
 vector<WORD_ID> Vocabulary::Tokenize( const char input[] )
@@ -37,20 +46,26 @@ WORD_ID Vocabulary::StoreIfNew( const WORD& word )
   return id;
 }
 
-WORD_ID Vocabulary::GetWordID( const WORD &word )
+WORD_ID Vocabulary::GetWordID( const WORD &word ) const
 {
-  map<WORD, WORD_ID>::iterator i = lookup.find( word );
+  map<WORD, WORD_ID>::const_iterator i = lookup.find( word );
   if( i == lookup.end() )
     return 0;
   WORD_ID w= (WORD_ID) i->second;
   return w;
 }
 
-void Vocabulary::Save( string fileName )
+void Vocabulary::Save(const string& fileName ) const
 {
   ofstream vcbFile;
   vcbFile.open( fileName.c_str(), ios::out | ios::ate | ios::trunc);
-  vector< WORD >::iterator i;
+
+  if (!vcbFile) {
+    cerr << "Failed to open " << vcbFile << endl;
+    exit(1);
+  }
+
+  vector< WORD >::const_iterator i;
   for(i = vocab.begin(); i != vocab.end(); i++) {
     const string &word = *i;
     vcbFile << word << endl;
@@ -58,11 +73,17 @@ void Vocabulary::Save( string fileName )
   vcbFile.close();
 }
 
-void Vocabulary::Load( string fileName )
+void Vocabulary::Load(const string& fileName )
 {
   ifstream vcbFile;
   char line[MAX_LENGTH];
   vcbFile.open(fileName.c_str());
+
+  if (!vcbFile) {
+    cerr << "no such file or directory: " << vcbFile << endl;
+    exit(1);
+  }
+
   cerr << "loading from " << fileName << endl;
   istream *fileP = &vcbFile;
   int count = 0;

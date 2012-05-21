@@ -1,5 +1,3 @@
-// $Id$
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -68,13 +66,6 @@ const float DEFAULT_EARLY_DISCARDING_THRESHOLD		= 0.0f;
 const float DEFAULT_TRANSLATION_OPTION_THRESHOLD	= 0.0f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
 
-/////////////////////////////////////////////////
-// for those using autoconf/automake
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
-/////////////////////////////////////////////////
-
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
 
@@ -129,7 +120,7 @@ enum LMImplementation {
   ,Ken			= 8
   ,LazyKen	= 9
   ,ORLM = 10
-  ,DMapLM = 11
+  ,LDHTLM = 11
 };
 
 enum PhraseTableImplementation {
@@ -165,6 +156,11 @@ enum XmlInputType {
 enum DictionaryFind {
   Best		= 0
   ,All		= 1
+};
+
+enum ParsingAlgorithm {
+  ParseCYKPlus = 0,
+  ParseScope3 = 1
 };
 
 enum SearchAlgorithm {

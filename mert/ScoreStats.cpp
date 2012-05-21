@@ -1,6 +1,6 @@
 /*
  *  FeatureStats.cpp
- *  met - Minimum Error Training
+ *  mert - Minimum Error Rate Training
  *
  *  Created by Nicola Bertoldi on 13/05/08.
  *
@@ -8,42 +8,40 @@
 
 #include "Util.h"
 #include "ScoreStats.h"
+#include <fstream>
+#include <iostream>
+
+using namespace std;
 
 namespace {
 const int kAvailableSize = 8;
 } // namespace
 
 ScoreStats::ScoreStats()
-    : available_(kAvailableSize), entries_(0),
-      array_(new ScoreStatsType[available_]) {}
+    : m_available_size(kAvailableSize), m_entries(0),
+      m_array(new ScoreStatsType[m_available_size]) {}
 
 ScoreStats::ScoreStats(const size_t size)
-    : available_(size), entries_(size),
-      array_(new ScoreStatsType[available_])
+    : m_available_size(size), m_entries(size),
+      m_array(new ScoreStatsType[m_available_size])
 {
-  memset(array_, 0, GetArraySizeWithBytes());
-}
-
-ScoreStats::ScoreStats(std::string &theString)
-    : available_(0), entries_(0), array_(NULL)
-{
-  set(theString);
+  memset(m_array, 0, GetArraySizeWithBytes());
 }
 
 ScoreStats::~ScoreStats()
 {
-  if (array_) {
-    delete [] array_;
-    array_ = NULL;
+  if (m_array) {
+    delete [] m_array;
+    m_array = NULL;
   }
 }
 
 void ScoreStats::Copy(const ScoreStats &stats)
 {
-  available_ = stats.available();
-  entries_ = stats.size();
-  array_ = new ScoreStatsType[available_];
-  memcpy(array_, stats.getArray(), GetArraySizeWithBytes());
+  m_available_size = stats.available();
+  m_entries = stats.size();
+  m_array = new ScoreStatsType[m_available_size];
+  memcpy(m_array, stats.getArray(), GetArraySizeWithBytes());
 }
 
 ScoreStats::ScoreStats(const ScoreStats &stats)
@@ -53,77 +51,82 @@ ScoreStats::ScoreStats(const ScoreStats &stats)
 
 ScoreStats& ScoreStats::operator=(const ScoreStats &stats)
 {
-  delete [] array_;
+  delete [] m_array;
   Copy(stats);
   return *this;
 }
 
 void ScoreStats::expand()
 {
-  available_ *= 2;
-  scorestats_t buf = new ScoreStatsType[available_];
-  memcpy(buf, array_, GetArraySizeWithBytes());
-  delete [] array_;
-  array_ = buf;
+  m_available_size *= 2;
+  scorestats_t buf = new ScoreStatsType[m_available_size];
+  memcpy(buf, m_array, GetArraySizeWithBytes());
+  delete [] m_array;
+  m_array = buf;
 }
 
 void ScoreStats::add(ScoreStatsType v)
 {
   if (isfull()) expand();
-  array_[entries_++]=v;
+  m_array[m_entries++]=v;
 }
 
-void ScoreStats::set(std::string &theString)
+void ScoreStats::set(const string& str)
 {
-  std::string substring, stringBuf;
   reset();
-
-  while (!theString.empty()) {
-    getNextPound(theString, substring);
-    add(ConvertStringToScoreStatsType(substring));
+  vector<string> out;
+  Tokenize(str.c_str(), ' ', &out);
+  for (vector<string>::const_iterator it = out.begin();
+       it != out.end(); ++it) {
+    add(ConvertStringToScoreStatsType(*it));
   }
 }
 
-void ScoreStats::loadbin(std::ifstream& inFile)
+void ScoreStats::loadbin(istream* is)
 {
-  inFile.read((char*)array_, GetArraySizeWithBytes());
+  is->read(reinterpret_cast<char*>(m_array),
+           static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
-void ScoreStats::loadtxt(std::ifstream& inFile)
+void ScoreStats::loadtxt(istream* is)
 {
-  std::string theString;
-  std::getline(inFile, theString);
-  set(theString);
+  string line;
+  getline(*is, line);
+  set(line);
 }
 
-void ScoreStats::loadtxt(const std::string &file)
+void ScoreStats::loadtxt(const string &file)
 {
-//      TRACE_ERR("loading the stats from " << file << std::endl);
-
-  std::ifstream inFile(file.c_str(), std::ios::in); // matches a stream with a file. Opens the file
-
-  loadtxt(inFile);
-}
-
-
-void ScoreStats::savetxt(const std::string &file)
-{
-//      TRACE_ERR("saving the stats into " << file << std::endl);
-
-  std::ofstream outFile(file.c_str(), std::ios::out); // matches a stream with a file. Opens the file
-
-  savetxt(outFile);
+  ifstream ifs(file.c_str(), ios::in); // matches a stream with a file. Opens the file
+  if (!ifs) {
+    cerr << "Failed to open " << file << endl;
+    exit(1);
+  }
+  istream* is = &ifs;
+  loadtxt(is);
 }
 
 
-void ScoreStats::savetxt(std::ofstream& outFile)
+void ScoreStats::savetxt(const string &file)
 {
-  outFile << *this;
+  ofstream ofs(file.c_str(), ios::out); // matches a stream with a file. Opens the file
+  ostream* os = &ofs;
+  savetxt(os);
 }
 
-void ScoreStats::savebin(std::ofstream& outFile)
+void ScoreStats::savetxt(ostream* os)
 {
-  outFile.write((char*)array_, GetArraySizeWithBytes());
+  *os << *this;
+}
+
+void ScoreStats::savetxt() {
+  savetxt(&cout);
+}
+
+void ScoreStats::savebin(ostream* os)
+{
+  os->write(reinterpret_cast<char*>(m_array),
+            static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
 ostream& operator<<(ostream& o, const ScoreStats& e)
@@ -144,7 +147,7 @@ bool operator==(const ScoreStats& s1, const ScoreStats& s2) {
     if (s1.get(k) != s2.get(k))
       return false;
   }
-  
+
   return true;
 }
 //END_ADDED

@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -26,7 +25,6 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
-#include "DotChart.h"
 #include "Util.h"
 
 using namespace std;
@@ -43,144 +41,54 @@ ChartTranslationOptionCollection::ChartTranslationOptionCollection(InputType con
   ,m_decodeGraphList(system->GetDecodeGraphs())
   ,m_hypoStackColl(hypoStackColl)
   ,m_ruleLookupManagers(ruleLookupManagers)
-  ,m_collection(source.GetSize())
+  ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
 {
-  // create 2-d vector
-  size_t size = source.GetSize();
-  for (size_t startPos = 0 ; startPos < size ; ++startPos) {
-    m_collection[startPos].reserve(size-startPos);
-    for (size_t endPos = startPos ; endPos < size ; ++endPos) {
-      m_collection[startPos].push_back( ChartTranslationOptionList(WordsRange(startPos, endPos)) );
-    }
-  }
 }
 
 ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
 {
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhraseCollection);
-
-  std::list<std::vector<DottedRule*>* >::iterator iterOuter;
-  for (iterOuter = m_dottedRuleCache.begin(); iterOuter != m_dottedRuleCache.end(); ++iterOuter) {
-    std::vector<DottedRule*> &inner = **iterOuter;
-    RemoveAllInColl(inner);
-  }
-
-  RemoveAllInColl(m_dottedRuleCache);
-
 }
 
 void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
-  size_t startPos
-  , size_t endPos)
+  const WordsRange &wordsRange)
 {
-  ChartTranslationOptionList &chartRuleColl = GetTranslationOptionList(startPos, endPos);
-  const WordsRange &wordsRange = chartRuleColl.GetSourceRange();
+  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
 
-  CHECK(m_decodeGraphList.size() == m_ruleLookupManagers.size());
+  m_translationOptionList.Clear();
+
   std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
   std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
   for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
     const DecodeGraph &decodeGraph = **iterDecodeGraph;
-    CHECK(decodeGraph.GetSize() == 1);
+    assert(decodeGraph.GetSize() == 1);
     ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
     size_t maxSpan = decodeGraph.GetMaxChartSpan();
-    if (maxSpan == 0 || (endPos-startPos+1) <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, true, chartRuleColl);
+    if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
+      ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
     }
   }
 
-  ProcessUnknownWord(startPos, endPos);
-
-  Prune(startPos, endPos);
-
-  Sort(startPos, endPos);
-
-}
-
-//! Force a creation of a translation option where there are none for a particular source position.
-void ChartTranslationOptionCollection::ProcessUnknownWord(size_t startPos, size_t endPos)
-{
-  if (startPos != endPos) {
-    // only for 1 word phrases
-    return;
-  }
-
-  if (startPos == 0 || startPos == m_source.GetSize() - 1)
-  { // don't create unknown words for <S> or </S> tags. Otherwise they can be moved. Should only be translated by glue rules
-    return;
-  }
-
-  ChartTranslationOptionList &fullList = GetTranslationOptionList(startPos, startPos);
-  const WordsRange &wordsRange = fullList.GetSourceRange();
-
-  // try to translation for coverage with no trans by expanding table limit
-  std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
-  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
-  for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
-    //const DecodeGraph &decodeGraph = **iterDecodeGraph;
-    ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
-    size_t numTransOpt = fullList.GetSize();
-    if (numTransOpt == 0) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, false, fullList);
-    }
-  }
-  CHECK(iterRuleLookupManagers == m_ruleLookupManagers.end());
-
-  bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-  // create unknown words for 1 word coverage where we don't have any trans options
-  if (fullList.GetSize() == 0 || alwaysCreateDirectTranslationOption)
-    ProcessUnknownWord(startPos);
-}
-
-
-ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
-{
-  size_t sizeVec = m_collection[startPos].size();
-  CHECK(endPos-startPos < sizeVec);
-  return m_collection[startPos][endPos - startPos];
-}
-const ChartTranslationOptionList &ChartTranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos) const
-{
-  size_t sizeVec = m_collection[startPos].size();
-  CHECK(endPos-startPos < sizeVec);
-  return m_collection[startPos][endPos - startPos];
-}
-
-std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionCollection &coll)
-{
-  std::vector< std::vector< ChartTranslationOptionList > >::const_iterator iterOuter;
-  for (iterOuter = coll.m_collection.begin(); iterOuter != coll.m_collection.end(); ++iterOuter) {
-    const std::vector< ChartTranslationOptionList > &vecInner = *iterOuter;
-    std::vector< ChartTranslationOptionList >::const_iterator iterInner;
-
-    for (iterInner = vecInner.begin(); iterInner != vecInner.end(); ++iterInner) {
-      const ChartTranslationOptionList &list = *iterInner;
-      out << list.GetSourceRange() << " = " << list.GetSize() << std::endl;
+  if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
+    bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+    if (m_translationOptionList.GetSize() == 0 || alwaysCreateDirectTranslationOption) {
+      // create unknown words for 1 word coverage where we don't have any trans options
+      const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
+      ProcessOneUnknownWord(sourceWord, wordsRange);
     }
   }
 
-
-  return out;
-}
-
-// taken from ChartTranslationOptionCollectionText.
-void ChartTranslationOptionCollection::ProcessUnknownWord(size_t sourcePos)
-{
-  const Word &sourceWord = m_source.GetWord(sourcePos);
-  ProcessOneUnknownWord(sourceWord,sourcePos);
+  m_translationOptionList.ApplyThreshold();
 }
 
 //! special handling of ONE unknown words.
-void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t /* length */)
+void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord, const WordsRange &range)
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
   vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
-
-  ChartTranslationOptionList &transOptColl = GetTranslationOptionList(sourcePos, sourcePos);
-  const WordsRange &range = transOptColl.GetSourceRange();
 
   const ChartCell &chartCell = m_hypoStackColl.Get(range);
   const ChartCellLabel &sourceWordLabel = chartCell.GetSourceWordLabel();
@@ -203,12 +111,6 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
   //TranslationOption *transOpt;
   if (! staticData.GetDropUnknown() || isDigit) {
-    // create dotted rules
-    std::vector<DottedRule*> *dottedRuleList = new std::vector<DottedRule*>();
-    m_dottedRuleCache.push_back(dottedRuleList);
-    dottedRuleList->push_back(new DottedRule());
-    dottedRuleList->push_back(new DottedRule(sourceWordLabel, *(dottedRuleList->back())));
-
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;
@@ -242,11 +144,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       targetPhrase->SetTargetLHS(targetLHS);
 
       // chart rule
-      ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
-          , *dottedRuleList->back()
-          , range
-          , m_hypoStackColl);
-      transOptColl.Add(chartRule);
+      m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
     } // for (iterLHS
   } else {
     // drop source word. create blank trans opt
@@ -271,39 +169,10 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
 
-      // words consumed
-      std::vector<DottedRule*> *dottedRuleList = new std::vector<DottedRule*>();
-      m_dottedRuleCache.push_back(dottedRuleList);
-      dottedRuleList->push_back(new DottedRule());
-      dottedRuleList->push_back(new DottedRule(sourceWordLabel, *(dottedRuleList->back())));
-
       // chart rule
-      ChartTranslationOption *chartRule = new ChartTranslationOption(*tpc
-          , *dottedRuleList->back()
-          , range
-          , m_hypoStackColl);
-      transOptColl.Add(chartRule);
+      m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
     }
   }
-}
-
-void ChartTranslationOptionCollection::Add(ChartTranslationOption *transOpt, size_t pos)
-{
-  ChartTranslationOptionList &transOptList = GetTranslationOptionList(pos, pos);
-  transOptList.Add(transOpt);
-}
-
-//! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
-void ChartTranslationOptionCollection::Prune(size_t /* startPos */, size_t /* endPos */)
-{
-
-}
-
-//! sort all trans opt in each list for cube pruning */
-void ChartTranslationOptionCollection::Sort(size_t startPos, size_t endPos)
-{
-  ChartTranslationOptionList &list = GetTranslationOptionList(startPos, endPos);
-  list.Sort();
 }
 
 }  // namespace

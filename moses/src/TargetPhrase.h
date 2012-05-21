@@ -30,9 +30,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/string_piece.hh"
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
 #endif
@@ -54,10 +51,11 @@ protected:
   float m_transScore;
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
-  const AlignmentInfo *m_alignmentInfo;
 
   // in case of confusion net, ptr to source phrase
   Phrase const* m_sourcePhrase;
+
+  const AlignmentInfo *m_alignmentInfo;
   Word m_lhsTarget;
 
 public:

@@ -19,7 +19,7 @@ if ($SCRIPTS_ROOTDIR eq '') {
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_CORPUS,
+my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE, $_SORT_COMPRESS, $_CORPUS,
    $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
    $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
    $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
@@ -40,7 +40,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/azouzi/SMT-Engine/Tools/Giza";
+my $BINDIR="/Users/hieuhoang/workspace/bin/";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -57,6 +57,8 @@ $_HELP = 1
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
            'sort-buffer-size=s' => \$_SORT_BUFFER_SIZE,
+           'sort-batch-size=s' => \$_SORT_BATCH_SIZE,
+           'sort-compress=s' => \$_SORT_COMPRESS,
 		       'extract-file=s' => \$_EXTRACT_FILE,
 		       'alignment=s' => \$_ALIGNMENT,
 		       'alignment-file=s' => \$_ALIGNMENT_FILE,
@@ -174,6 +176,8 @@ foreach my $step (@step_conf) {
   }
 }
 
+# don't fork
+my $___NOFORK = !defined $_PARALLEL;
 
 
 # supporting binaries from other packages
@@ -206,14 +210,24 @@ if(!defined $_MGIZA ){
 my $MKCLS = "$BINDIR/mkcls";
 
 # supporting scripts/binaries from this package
-my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
-my $RULE_EXTRACT;
-if (defined($_GHKM)) {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-ghkm/tools/extract-ghkm";
+
+# parallel extract
+my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+if($SPLIT_EXEC) {
+  $SPLIT_EXEC = 'gsplit';
 }
 else {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
+  $SPLIT_EXEC = 'split';
 }
+
+my $SORT_EXEC = `gsort --help 2>/dev/null`; 
+if($SORT_EXEC) {
+  $SORT_EXEC = 'gsort';
+}
+else {
+  $SORT_EXEC = 'sort';
+}
+
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $EPPEX = "$SCRIPTS_ROOTDIR/training/eppex/eppex";
@@ -310,6 +324,12 @@ $___TEMP_DIR = $_TEMP_DIR if $_TEMP_DIR;
 my $__SORT_BUFFER_SIZE = "";
 $__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
 
+my $__SORT_BATCH_SIZE = "";
+$__SORT_BATCH_SIZE = "--batch-size $_SORT_BATCH_SIZE" if $_SORT_BATCH_SIZE;
+
+my $__SORT_COMPRESS = "";
+$__SORT_COMPRESS = "--compress-program=$_SORT_COMPRESS" if $_SORT_COMPRESS;
+
 my $___CONTINUE = 0; 
 $___CONTINUE = $_CONTINUE if $_CONTINUE;
 
@@ -321,6 +341,33 @@ my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
+
+my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+if ($___NOFORK != 0)
+{
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 1 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $PHRASE_EXTRACT";
+}
+else
+{
+  $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $PHRASE_EXTRACT";
+}
+
+my $RULE_EXTRACT;
+if (defined($_GHKM)) {
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-ghkm/tools/extract-ghkm";
+}
+else {
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
+}
+
+if ($___NOFORK != 0)
+{
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 1 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $RULE_EXTRACT";
+}
+else
+{
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl 3 $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS\" $RULE_EXTRACT";
+}
 
 my $___PHRASE_SCORER = "phrase-extract";
 $___PHRASE_SCORER = "memscore" if defined $_MEMSCORE;
@@ -351,9 +398,6 @@ $___PARTS = $_PARTS if $_PARTS;
 
 my $___DIRECTION = 0;
 $___DIRECTION = $_DIRECTION if $_DIRECTION;
-
-# don't fork
-my $___NOFORK = !defined $_PARALLEL;
 
 my $___ONLY_PRINT_GIZA = 0;
 $___ONLY_PRINT_GIZA = 1 if $_ONLY_PRINT_GIZA;
@@ -641,6 +685,7 @@ sub reduce_factors {
         # available factors
         my $inh = open_or_zcat($full);
         my $firstline = <$inh>;
+        die "Corpus file $full is empty" unless $firstline;
         close $inh;
         # pick first word
         $firstline =~ s/^\s*//;
@@ -1333,8 +1378,8 @@ sub extract_phrase {
         if (!defined($_GHKM)) {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
+          $cmd .= " --MaxSpan $max_length";
         }
-        $cmd .= " --MaxSpan $max_length";
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     else
@@ -1350,26 +1395,22 @@ sub extract_phrase {
 
       $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
 		}
-      if ($reordering_flag) {
+		
+     if ($reordering_flag) {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
         $cmd .= " --NoTTable" if !$ttable_flag;
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
     }
+
+		$cmd .= " --GZOutput ";
+
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
     foreach my $f (@tempfiles) {
       unlink $f;
-    }
-    if (! $___DONT_ZIP) { 
-      safesystem("gzip $extract_file.o") if -e "$extract_file.o";
-      safesystem("gzip $extract_file.sid") if -e "$extract_file.sid";
-      if ($ttable_flag) {
-        safesystem("gzip $extract_file.inv") or die("ERROR");
-        safesystem("gzip $extract_file") or die("ERROR");
-      }
     }
 }
 
@@ -1432,31 +1473,42 @@ sub score_phrase_phrase_extract {
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
 
     my $substep = 1;
+    my $isParent = 1;
+    my @children;
+
     for my $direction ("f2e","e2f") {
-	next if $___CONTINUE && -e "$ttable_file.half.$direction";
-	next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.sorted";
-	my $inverse = "";
-        my $extract_filename = $extract_file;
-	if ($direction eq "e2f") {
-	    $inverse = " --Inverse";
-            $extract_filename = $extract_file.".inv";
-        }
-	my $extract = "$extract_filename.sorted";
+      if ($___NOFORK and @children > 0) {
+        waitpid((shift @children), 0);
+		  $substep+=2;
+      }
+      my $pid = fork();
+    
+      if ($pid == 0)
+      {
+	      next if $___CONTINUE && -e "$ttable_file.half.$direction";
+	      next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.sorted";
+	      my $inverse = "";
+              my $extract_filename = $extract_file;
+	      if ($direction eq "e2f") {
+	          $inverse = " --Inverse";
+                  $extract_filename = $extract_file.".inv";
+              }
+	      my $extract = "$extract_filename.sorted";
 
-	if (!($___CONTINUE && -e "$extract_filename.sorted")) {
-	    # sorting
-	    print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
-	    if (-e "$extract_filename.gz") {
-		safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
-	    }
-	    else {
-		safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
-	    }
-        }
+	      #if (!($___CONTINUE && -e "$extract_filename.sorted")) {
+	      #  # sorting
+	      #  print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
+	      #  if (-e "$extract_filename.gz") {
+		    #    safesystem("gunzip < $extract_filename.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+	      #  }
+	      #  else {
+		    #    safesystem("LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+	      #  }
+        #}
 
-	print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
+	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+        my $cmd = "$PHRASE_SCORE $extract.gz $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
@@ -1468,19 +1520,41 @@ sub score_phrase_phrase_extract {
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
         if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
+  
+        # sorting inverse phrase-table-half to sync up with regular one
+        if ($direction eq "e2f" && ! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
+          print STDERR "(6." . ($substep++) . ") sorting inverse e2f table@ ".`date`;
+          $cmd = "zcat $ttable_file.half.e2f.gz | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS  -T $___TEMP_DIR | gzip -c > $ttable_file.half.e2f.sorted.gz";
+          print "Executing: $cmd \n";  
+          safesystem($cmd) or die("ERROR");
+          if (! $debug) { safesystem("rm -f $ttable_file.half.e2f.gz") or die("ERROR"); }
+        }
+
+        exit();
+      }
+      else
+      { # parent
+    	  push(@children, $pid);
+      }
+
     }
 
-    # sorting inverse phrase-table-half to sync up with regular one
-    print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
-    if (! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
-	safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
-	if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
+    # wait for everything is finished
+    if ($isParent)
+    {
+        foreach (@children) {
+	        waitpid($_, 0);
+        }
+    }
+    else
+    {
+        die "shouldn't be here";
     }
 
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e.gz $ttable_file.half.e2f.sorted.gz $ttable_file.gz";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
@@ -1491,9 +1565,6 @@ sub score_phrase_phrase_extract {
     $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
-    if (! $___DONT_ZIP) {
-        safesystem("gzip $ttable_file") || die("ERROR: could not gzip $ttable_file");
-    }
 }
 
 sub score_phrase_memscore {
@@ -1507,7 +1578,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C $SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS -T $___TEMP_DIR | gzip >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1562,11 +1633,11 @@ sub get_reordering_factored {
 
 sub get_reordering {
     my ($extract_file,$reo_model_path) = @_;
-    if (-e "$extract_file.o.gz") {
-	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
+    if (-e "$extract_file.o.sorted.gz") {
+      # do nothing
     }
     else {
-        safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
+        die("ERROR: $extract_file.o.sorted.gz does not exist");
     }
 
     my $smooth = $___REORDERING_SMOOTH;
@@ -1574,22 +1645,20 @@ sub get_reordering {
     print STDERR "(7.2) building tables @ ".`date`;
 
     #create cmd string for lexical reordering scoring
-    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted $smooth $reo_model_path";
+    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
     $cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
     for my $mtype (keys %REORDERING_MODEL_TYPES) {
-	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
-	foreach my $model (@REORDERING_MODELS) {
-	    if ($model->{"type"} eq $mtype) {
-		$cmd .= " ".$model->{"filename"};
-	    }
-	}
-	$cmd .= "\"";
-    }
+			$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
+			foreach my $model (@REORDERING_MODELS) {
+	    	if ($model->{"type"} eq $mtype) {
+					$cmd .= " ".$model->{"filename"};
+	    	}
+		}
+		$cmd .= "\"";
+  }
     
-    #Call the lexical reordering scorer
-    safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
-
-    if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
+  #Call the lexical reordering scorer
+  safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
 }
 
 

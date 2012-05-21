@@ -139,7 +139,7 @@ void LeftBinarize( SyntaxTree &tree, ParentNodes &parents )
       = tree.GetNodes( point[0], point[point.size()-1]-1);
       string topLabel = topNodes[0]->GetLabel();
 
-      for(int i=2; i<point.size()-1; i++) {
+      for(size_t i=2; i<point.size()-1; i++) {
         // cerr << "LeftBin  " << point[0] << "-" << (point[point.size()-1]-1) << ": " << point[0] << "-" << point[i]-1 << " ^" << topLabel << endl;
         tree.AddNode( point[0], point[i]-1, "^" + topLabel );
       }
@@ -157,7 +157,7 @@ void RightBinarize( SyntaxTree &tree, ParentNodes &parents )
       = tree.GetNodes( point[0], endPoint);
       string topLabel = topNodes[0]->GetLabel();
 
-      for(int i=1; i<point.size()-2; i++) {
+      for(size_t i=1; i<point.size()-2; i++) {
         // cerr << "RightBin " << point[0] << "-" << (point[point.size()-1]-1) << ": " << point[i] << "-" << endPoint << " ^" << topLabel << endl;
         tree.AddNode( point[i], endPoint, "^" + topLabel );
       }
@@ -181,7 +181,7 @@ void SAMT( SyntaxTree &tree, ParentNodes &parents )
       // for(int i=0;i<point.size();i++) cerr << point[i] << " ";
       // cerr << endl;
 
-      for(int i = 0; i+2 < point.size(); i++) {
+      for(size_t i = 0; i+2 < point.size(); i++) {
         // cerr << "\tadding " << point[i] << ";" << point[i+1] << ";" << (point[i+2]-1) << ": " << tree.GetNodes(point[i  ],point[i+1]-1)[0]->GetLabel() << "+" << tree.GetNodes(point[i+1],point[i+2]-1)[0]->GetLabel() << endl;
 
         newTree.AddNode( point[i],point[i+2]-1,
@@ -271,7 +271,7 @@ void SAMT( SyntaxTree &tree, ParentNodes &parents )
 
   // adding all new nodes
   vector< SyntaxNode* > nodes = newTree.GetAllNodes();
-  for( int i=0; i<nodes.size(); i++ ) {
+  for( size_t i=0; i<nodes.size(); i++ ) {
     tree.AddNode( nodes[i]->GetStart(), nodes[i]->GetEnd(), nodes[i]->GetLabel());
   }
 }

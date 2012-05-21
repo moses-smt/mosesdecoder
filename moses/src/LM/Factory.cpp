@@ -26,35 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "FactorCollection.h"
 
-/////////////////////////////////////////////////
-// for those using autoconf/automake
-#if HAVE_CONFIG_H
-#include "config.h"
-
-#define LM_REMOTE 1
-#  ifdef HAVE_SRILM
-#    define LM_SRI 1
-#  else
-#    undef LM_SRI
-#  endif
-
-#  ifdef HAVE_IRSTLM
-#    define LM_IRST 1
-#  endif
-
-#  ifdef HAVE_RANDLM
-#    define LM_RAND 1
-#  endif
-
-#  ifdef HAVE_ORLM
-#    define LM_ORLM 1
-#  endif
-
-#  ifdef HAVE_DMAPLM
-#    define LM_DMAP
-#  endif
-#endif
-
 // include appropriate header
 #ifdef LM_SRI
 #  include "LM/SRI.h"
@@ -66,15 +37,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_RAND
 #  include "LM/Rand.h"
 #endif
-#ifdef LM_ORLM
-#  include "LM/ORLM.h"
-#endif
+
+#include "LM/ORLM.h"
+
 #ifdef LM_REMOTE
 #	include "LM/Remote.h"
 #endif
+
 #include "LM/Ken.h"
-#ifdef LM_DMAP
-#   include "LM/DMapLM.h"
+
+#ifdef LM_LDHT
+#   include "LM/LDHT.h"
 #endif
 
 #include "LM/Base.h"
@@ -106,9 +79,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
 #endif
     break;
   case ORLM:
-#ifdef LM_ORLM
     lm = new LanguageModelORLM();
-#endif
     break;
   case Remote:
 #ifdef LM_REMOTE
@@ -136,9 +107,11 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     lm = NewParallelBackoff();
 #endif
     break;
-  case DMapLM:
-#ifdef LM_DMAP
-    lm = new LanguageModelDMapLM();
+  case LDHTLM:
+#ifdef LM_LDHT
+    return ConstructLDHTLM(languageModelFile,
+                           scoreIndexManager,
+                           factorTypes[0]);
 #endif
     break;
   default:

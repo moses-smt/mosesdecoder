@@ -35,7 +35,7 @@ while (defined $_) {
   print STDERR "." if $nr % 10000 == 0;
   print STDERR "($nr)" if $nr % 100000 == 0;
   chomp;
-  s/ +/ /g; s/^ //; s/ $//;
+  s/\s+/ /g; s/^ //; s/ $//;
   my @intokens = split / /;
   # load lines of corresponding streams and ensure equal number of words
   my @lines_of_extratoks;
@@ -44,7 +44,7 @@ while (defined $_) {
     die "Additional factor file $addfactors[$factor] contains too few sentences!"
       if !defined $line;
     chomp($line);
-    $line =~ s/ +/ /g; $line =~ s/^ //; $line =~ s/ $//;
+    $line =~ s/\s+/ /g; $line =~ s/^ //; $line =~ s/ $//;
     my @toks = split / /, $line;
     die "Incompatible number of words in factor $factor on line $nr. ($#toks != $#intokens)"
       if $#toks != $#intokens;

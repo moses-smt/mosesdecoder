@@ -37,8 +37,10 @@ my $ZCAT = "gzip -cd";
 my $opt_hierarchical = 0;
 my $binarizer = undef;
 my $opt_min_non_initial_rule_count = undef;
+my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 
 GetOptions(
+    "gzip!" => \$opt_gzip,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
@@ -118,6 +120,7 @@ while(<INI>) {
         elsif ($binarizer && $phrase_table_impl == 0) {
     	  print INI_OUT "1 $source_factor $t $w $new_name\n";
         } else {
+          $new_name .= ".gz" if $opt_gzip;
     	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name\n";
         }
     	push @TABLE_NEW_NAME,$new_name;
@@ -178,7 +181,7 @@ if ($opt_hierarchical)
 my %PHRASE_USED;
 if (!$opt_hierarchical) {
     # get the phrase pairs appearing in the input text, up to the $MAX_LENGTH
-    open(INPUT,$input) or die "Can't read $input";
+    open(INPUT,mk_open_string($input)) or die "Can't read $input";
     while(my $line = <INPUT>) {
         chomp($line);
         my @WORD = split(/ +/,$line);
@@ -204,6 +207,22 @@ if (!$opt_hierarchical) {
     close(INPUT);
 }
 
+sub mk_open_string {
+  my $file = shift;
+  my $openstring;
+  if ($file !~ /\.gz$/ && -e "$file.gz") {
+    $openstring = "$ZCAT $file.gz |";
+  } elsif ($file =~ /\.gz$/) {
+    $openstring = "$ZCAT $file |";
+  } elsif ($opt_hierarchical) {
+    $openstring = "cat $file |";
+  } else {
+    $openstring = "< $file";
+  }
+  return $openstring;
+}
+
+
 # filter files
 for(my $i=0;$i<=$#TABLE;$i++) {
     my ($used,$total) = (0,0);
@@ -212,18 +231,16 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     my $new_file = $TABLE_NEW_NAME[$i];
     print STDERR "filtering $file -> $new_file...\n";
 
-    my $openstring;
-    if ($file !~ /\.gz$/ && -e "$file.gz") {
-      $openstring = "$ZCAT $file.gz |";
-    } elsif ($file =~ /\.gz$/) {
-      $openstring = "$ZCAT $file |";
-    } elsif ($opt_hierarchical) {
-      $openstring = "cat $file |";
+    my $openstring = mk_open_string($file);
+
+    my $new_openstring;
+    if ($new_file =~ /\.gz$/) {
+      $new_openstring = "| gzip -c > $new_file";
     } else {
-      $openstring = "< $file";
+      $new_openstring = ">$new_file";
     }
 
-    open(FILE_OUT,">$new_file") or die "Can't write $new_file";
+    open(FILE_OUT,$new_openstring) or die "Can't write to $new_openstring";
 
     if ($opt_hierarchical) {
         my $tmp_input = $TMP_INPUT_FILENAME{$factors};
@@ -293,7 +310,7 @@ close(INFO);
 
 
 print "To run the decoder, please call:
-  moses -f $dir/moses.ini < $input\n";
+  moses -f $dir/moses.ini -i $input\n";
 
 sub safesystem {
   print STDERR "Executing: @_\n";

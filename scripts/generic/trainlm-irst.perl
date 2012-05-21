@@ -7,29 +7,33 @@
 #    settings = ""
 # Also, make sure that $irst-dir is defined (in the [LM] or [GENERAL] section. 
 # It should point to the root of the LM toolkit, eg
-#    irst-dir = /Users/hieu/workspace/irstlm/trunk
+#    irst-dir = /Users/hieu/workspace/irstlm/trunk/bin
 # And make sure that $cores is defined, eg $cores = 8
+# And make sure the $settings variable is empty. This script doesn't understand some of the sri args like -unk and will complain.
 
 use strict;
 use FindBin qw($Bin);
 use Getopt::Long;
 
-my $order;
+my $order = 3;
 my $corpusPath;
 my $lmPath;
 my $cores = 2;
 my $irstPath;
 my $tempPath = "tmp";
+my $temp;
 
 GetOptions("order=s"  => \$order,
            "text=s"   => \$corpusPath,
            "lm=s"     => \$lmPath,
            "cores=s"  => \$cores,
            "irst-dir=s"  => \$irstPath,
-           "temp-dir=s"  => \$tempPath
+           "temp-dir=s"  => \$tempPath,
+	   "interpolate!" => \$temp,  #ignore
+	   "kndiscount!" => \$temp    #ignore
 	   ) or exit 1;
 
-die("ERROR: please set order") unless defined($order);
+#die("ERROR: please set order") unless defined($order);
 die("ERROR: please set text") unless defined($corpusPath);
 die("ERROR: please set lm") unless defined($lmPath);
 die("ERROR: please set irst-dir") unless defined($irstPath);

@@ -24,6 +24,7 @@
 
 namespace OnDiskPt
 {
+class Vocab;
 
 class Phrase
 {
@@ -47,6 +48,8 @@ public:
   size_t GetSize() const {
     return m_words.size();
   }
+
+  virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
   int Compare(const Phrase &compare) const;
   bool operator<(const Phrase &compare) const;

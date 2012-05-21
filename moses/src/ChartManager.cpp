@@ -29,6 +29,7 @@
 #include "ChartTrellisPathList.h"
 #include "StaticData.h"
 #include "DecodeStep.h"
+#include "TreeInput.h"
 
 using namespace std;
 using namespace Moses;
@@ -79,31 +80,27 @@ void ChartManager::ProcessSentence()
   VERBOSE(2,"Decoding: " << endl);
   //ChartHypothesis::ResetHypoCount();
 
+  AddXmlChartOptions();
+
   // MAIN LOOP
   size_t size = m_source.GetSize();
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
-      //TRACE_ERR(" " << range << "=");
 
       // create trans opt
-      m_transOptColl.CreateTranslationOptionsForRange(startPos, endPos);
-      //if (g_debug)
-      //	cerr << m_transOptColl.GetTranslationOptionList(WordsRange(startPos, endPos));
+      m_transOptColl.CreateTranslationOptionsForRange(range);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
-      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList(range)
+      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
                            ,m_hypoStackColl);
+      m_transOptColl.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
       cell.SortHypotheses();
-
-      //cerr << cell.GetSize();
-      //cerr << cell << endl;
-      //cell.OutputSizes(cerr);
     }
   }
 
@@ -125,6 +122,28 @@ void ChartManager::ProcessSentence()
       }
       cerr << endl;
     }
+  }
+}
+
+void ChartManager::AddXmlChartOptions() {
+  TreeInput const &source = dynamic_cast<TreeInput const&>(m_source);
+  const std::vector <ChartTranslationOption*> xmlChartOptionsList = source.GetXmlChartTranslationOptions();
+  IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
+  if (xmlChartOptionsList.size() == 0) return;
+
+  for(std::vector<ChartTranslationOption*>::const_iterator i = xmlChartOptionsList.begin();
+      i != xmlChartOptionsList.end(); ++i) {
+    ChartTranslationOption* opt = *i;
+
+    Moses::Scores wordPenaltyScore(1, -0.434294482); // TODO what is this number?
+    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((ScoreProducer*)m_system->GetWordPenaltyProducer(), wordPenaltyScore);
+
+    const WordsRange &range = opt->GetSourceWordsRange();
+    RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
+    ChartHypothesis* hypo = new ChartHypothesis(*opt, *item, *this);
+    hypo->CalcScore();
+    ChartCell &cell = m_hypoStackColl.Get(range);
+    cell.AddHypothesis(hypo);
   }
 }
 

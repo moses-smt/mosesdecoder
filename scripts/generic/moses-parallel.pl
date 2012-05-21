@@ -590,7 +590,7 @@ sub preparing_script(){
       $tmpwordgraphlist="-output-word-graph $tmpdir/$wordgraphfile.$splitpfx$idx $wordgraphlist[1]";
     }
 
-	my $tmpStartTranslationId = "-start-translation-id $currStartTranslationId";
+	my $tmpStartTranslationId = ""; # "-start-translation-id $currStartTranslationId";
 
     print OUT "$mosescmd $mosesparameters $tmpStartTranslationId $tmpalioutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
@@ -914,6 +914,7 @@ sub check_translation_old_sge(){
       print STDERR "outputfile=${inputfile}.$splitpfx$idx.trans inputfile=${inputfile}.$splitpfx$idx\n";
       return 1;
     }
+		
   }
   return 0; 
 }

@@ -19,9 +19,7 @@
 
 #pragma once
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
+#include "StackVec.h"
 
 #include <vector>
 
@@ -32,7 +30,6 @@ class ChartCellCollection;
 class ChartHypothesis;
 class ChartManager;
 class ChartTranslationOption;
-class DottedRule;
 class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
@@ -134,8 +131,7 @@ class RuleCubeItem
   RuleCubeItem(const RuleCubeItem &);  // Not implemented
   RuleCubeItem &operator=(const RuleCubeItem &);  // Not implemented
 
-  void CreateHypothesisDimensions(const DottedRule &,
-                                  const ChartCellCollection &);
+  void CreateHypothesisDimensions(const StackVec &);
 
   TranslationDimension m_translationDimension;
   std::vector<HypothesisDimension> m_hypothesisDimensions;

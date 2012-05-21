@@ -37,6 +37,7 @@ POSSIBILITY OF SUCH DAMAGE.
 //#include <vld.h>
 #endif
 
+#include <exception>
 #include <fstream>
 #include "Main.h"
 #include "FactorCollection.h"
@@ -56,13 +57,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartHypothesis.h"
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
-
-#if HAVE_CONFIG_H
-#include "config.h"
-#else
-// those not using autoconf have to build MySQL support for now
-#  define USE_MYSQL 1
-#endif
 
 using namespace std;
 using namespace Moses;
@@ -104,7 +98,8 @@ public:
     }
 
     if (staticData.IsDetailedTranslationReportingEnabled()) {
-      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, lineNumber);
+      const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
+      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
     }
 
     // n-best
@@ -202,81 +197,87 @@ static void ShowWeights()
 
 int main(int argc, char* argv[])
 {
-  IFVERBOSE(1) {
-    TRACE_ERR("command: ");
-    for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
-    TRACE_ERR(endl);
-  }
-
-  IOWrapper::FixPrecision(cout);
-  IOWrapper::FixPrecision(cerr);
-
-  // load data structures
-  Parameter parameter;
-  if (!parameter.LoadParam(argc, argv)) {
-    return EXIT_FAILURE;
-  }
-
-  const StaticData &staticData = StaticData::Instance();
-  if (!StaticData::LoadDataStatic(&parameter))
-    return EXIT_FAILURE;
-
-  if (parameter.isParamSpecified("show-weights")) {
-    ShowWeights();
-    exit(0);
-  }
-
-  CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
-
-  // set up read/writing class
-  IOWrapper *ioWrapper = GetIODevice(staticData);
-
-  // check on weights
-  vector<float> weights = staticData.GetAllWeights();
-  IFVERBOSE(2) {
-    TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-    TRACE_ERR("The global weight vector looks like this:");
-    for (size_t j=0; j<weights.size(); j++) {
-      TRACE_ERR(" " << weights[j]);
+  try {
+    IFVERBOSE(1) {
+      TRACE_ERR("command: ");
+      for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
+      TRACE_ERR(endl);
     }
-    TRACE_ERR("\n");
-  }
-  // every score must have a weight!  check that here:
-  if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-    TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-    return EXIT_FAILURE;
-  }
-
-  if (ioWrapper == NULL)
-    return EXIT_FAILURE;
-
+  
+    IOWrapper::FixPrecision(cout);
+    IOWrapper::FixPrecision(cerr);
+  
+    // load data structures
+    Parameter parameter;
+    if (!parameter.LoadParam(argc, argv)) {
+      return EXIT_FAILURE;
+    }
+  
+    const StaticData &staticData = StaticData::Instance();
+    if (!StaticData::LoadDataStatic(&parameter))
+      return EXIT_FAILURE;
+  
+    if (parameter.isParamSpecified("show-weights")) {
+      ShowWeights();
+      exit(0);
+    }
+  
+    CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
+  
+    // set up read/writing class
+    IOWrapper *ioWrapper = GetIODevice(staticData);
+  
+    // check on weights
+    vector<float> weights = staticData.GetAllWeights();
+    IFVERBOSE(2) {
+      TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
+      TRACE_ERR("The global weight vector looks like this:");
+      for (size_t j=0; j<weights.size(); j++) {
+        TRACE_ERR(" " << weights[j]);
+      }
+      TRACE_ERR("\n");
+    }
+    // every score must have a weight!  check that here:
+    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
+      TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
+      return EXIT_FAILURE;
+    }
+  
+    if (ioWrapper == NULL)
+      return EXIT_FAILURE;
+  
 #ifdef WITH_THREADS
-  ThreadPool pool(staticData.ThreadCount());
+    ThreadPool pool(staticData.ThreadCount());
 #endif
-
-  // read each sentence & decode
-  InputType *source=0;
-  while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
-    IFVERBOSE(1)
-    ResetUserTime();
-    TranslationTask *task = new TranslationTask(source, *ioWrapper);
-    source = NULL;  // task will delete source
+  
+    // read each sentence & decode
+    InputType *source=0;
+    while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
+      IFVERBOSE(1)
+      ResetUserTime();
+      TranslationTask *task = new TranslationTask(source, *ioWrapper);
+      source = NULL;  // task will delete source
 #ifdef WITH_THREADS
-    pool.Submit(task);  // pool will delete task
+      pool.Submit(task);  // pool will delete task
 #else
-    task->Run();
-    delete task;
+      task->Run();
+      delete task;
 #endif
-  }
-
+    }
+  
 #ifdef WITH_THREADS
-  pool.Stop(true);  // flush remaining jobs
+    pool.Stop(true);  // flush remaining jobs
 #endif
-
-  delete ioWrapper;
-
-  IFVERBOSE(1)
-  PrintUserTime("End.");
+  
+    delete ioWrapper;
+  
+    IFVERBOSE(1)
+    PrintUserTime("End.");
+  
+  } catch (const std::exception &e) {
+    std::cerr << "Exception: " << e.what() << std::endl;
+    return EXIT_FAILURE;
+  }
 
 #ifdef HACK_EXIT
   //This avoids that detructors are called (it can take a long time)

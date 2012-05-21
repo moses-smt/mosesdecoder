@@ -32,6 +32,7 @@
 #include "PhraseAlignment.h"
 #include "score.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -58,8 +59,8 @@ vector<string> tokenize( const char [] );
 
 void writeCountOfCounts( const char* fileNameCountOfCounts );
 void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
-PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > & );
-void outputPhrasePair( vector< PhraseAlignment * > &, float, int, ostream &phraseTableFile );
+PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
 double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
 set<string> functionWordList;
@@ -188,9 +189,10 @@ int main(int argc, char* argv[])
 		phraseTableFile = &cout;
 	}
 	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNamePhraseTable);
-		if (outputFile->fail()) {
+		Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
+    bool success = outputFile->Open(fileNamePhraseTable);
+    		
+    if (!success) {
 			cerr << "ERROR: could not open file phrase table file "
 					 << fileNamePhraseTable << endl;
 			exit(1);
@@ -245,7 +247,6 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
-		(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 
@@ -258,22 +259,22 @@ int main(int argc, char* argv[])
 void writeCountOfCounts( const char* fileNameCountOfCounts )
 {
   // open file
-	ofstream countOfCountsFile;
-	countOfCountsFile.open(fileNameCountOfCounts);
-	if (countOfCountsFile.fail()) {
+	Moses::OutputFileStream countOfCountsFile;
+	bool success = countOfCountsFile.Open(fileNameCountOfCounts);
+	if (!success) {
 		cerr << "ERROR: could not open count-of-counts file "
 				 << fileNameCountOfCounts << endl;
     return;
 	}
 
   // Kneser-Ney needs the total number of phrase pairs
-  countOfCountsFile << totalDistinct;
+  countOfCountsFile << totalDistinct << endl;
 
   // write out counts
   for(int i=1; i<=COC_MAX; i++) {
     countOfCountsFile << countOfCounts[ i ] << endl;
   }
-	countOfCountsFile.close();
+	countOfCountsFile.Close();
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
@@ -282,53 +283,62 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
 
   // group phrase pairs based on alignments that matter
   // (i.e. that re-arrange non-terminals)
-  vector< vector< PhraseAlignment * > > phrasePairGroup;
+  PhrasePairGroup phrasePairGroup;
+  
   float totalSource = 0;
 
+  //cerr << "phrasePair.size() = " << phrasePair.size() << endl;
+  
   // loop through phrase pairs
   for(size_t i=0; i<phrasePair.size(); i++) {
     // add to total count
+    PhraseAlignment &currPhrasePair = phrasePair[i];
+    
     totalSource += phrasePair[i].count;
-
+    
     // check for matches
-    bool matched = false;
-    for(size_t g=0; g<phrasePairGroup.size(); g++) {
-      vector< PhraseAlignment* > &group = phrasePairGroup[g];
-      // matched? place into same group
-      if ( group[0]->match( phrasePair[i] )) {
-        group.push_back( &phrasePair[i] );
-        matched = true;
-      }
+    //cerr << "phrasePairGroup.size() = " << phrasePairGroup.size() << endl;
+    
+    PhraseAlignmentCollection phraseAlignColl;
+    phraseAlignColl.push_back(&currPhrasePair);
+    pair<PhrasePairGroup::iterator, bool> retInsert;
+    retInsert = phrasePairGroup.insert(phraseAlignColl);
+    if (!retInsert.second)
+    { // already exist. Add to that collection instead
+      PhraseAlignmentCollection &existingColl = const_cast<PhraseAlignmentCollection&>(*retInsert.first);
+      existingColl.push_back(&currPhrasePair);
     }
-    // not matched? create new group
-    if (! matched) {
-      vector< PhraseAlignment* > newGroup;
-      newGroup.push_back( &phrasePair[i] );
-      phrasePairGroup.push_back( newGroup );
-    }
+    
   }
 
   // output the distinct phrase pairs, one at a time
-  for(size_t g=0; g<phrasePairGroup.size(); g++) {
-    vector< PhraseAlignment* > &group = phrasePairGroup[g];
-    outputPhrasePair( group, totalSource, phrasePairGroup.size(), phraseTableFile );
+  const PhrasePairGroup::SortedColl &sortedColl = phrasePairGroup.GetSortedColl();
+  PhrasePairGroup::SortedColl::const_iterator iter;
+
+  for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
+  {
+    const PhraseAlignmentCollection &group = **iter;
+    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile );
+
   }
+  
 }
 
-PhraseAlignment* findBestAlignment( vector< PhraseAlignment* > &phrasePair )
+PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair )
 {
   float bestAlignmentCount = -1;
   PhraseAlignment* bestAlignment;
-
-  for(int i=0; i<phrasePair.size(); i++) {
+  
+  for(size_t i=0; i<phrasePair.size(); i++) {
     if (phrasePair[i]->count > bestAlignmentCount) {
       bestAlignmentCount = phrasePair[i]->count;
       bestAlignment = phrasePair[i];
     }
   }
-
+  
   return bestAlignment;
 }
+
 
 void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
                       , size_t total
@@ -417,7 +427,7 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
 
 }
 
-void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile )
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile )
 {
   if (phrasePair.size() == 0) return;
 
@@ -443,7 +453,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
 
   // do not output if hierarchical and count below threshold
   if (hierarchicalFlag && count < minCountHierarchical) {
-    for(int j=0; j<phraseS.size()-1; j++) {
+    for(size_t j=0; j<phraseS.size()-1; j++) {
       if (isNonTerminal(vcbS.getWord( phraseS[j] )))
         return;
     }
@@ -451,7 +461,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
 
   // source phrase (unless inverse)
   if (! inverseFlag) {
-    for(int j=0; j<phraseS.size(); j++) {
+    for(size_t j=0; j<phraseS.size(); j++) {
       phraseTableFile << vcbS.getWord( phraseS[j] );
       phraseTableFile << " ";
     }
@@ -459,7 +469,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
   }
 
   // target phrase
-  for(int j=0; j<phraseT.size(); j++) {
+  for(size_t j=0; j<phraseT.size(); j++) {
     phraseTableFile << vcbT.getWord( phraseT[j] );
     phraseTableFile << " ";
   }
@@ -467,7 +477,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
 
   // source phrase (if inverse)
   if (inverseFlag) {
-    for(int j=0; j<phraseS.size(); j++) {
+    for(size_t j=0; j<phraseS.size(); j++) {
       phraseTableFile << vcbS.getWord( phraseS[j] );
       phraseTableFile << " ";
     }
@@ -499,7 +509,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
     if (hierarchicalFlag) {
       // always output alignment if hiero style, but only for non-terms
       assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
-      for(int j = 0; j < phraseT.size() - 1; j++) {
+      for(size_t j = 0; j < phraseT.size() - 1; j++) {
         if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
           if (bestAlignment->alignedToT[ j ].size() != 1) {
             cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
@@ -512,7 +522,7 @@ void outputPhrasePair( vector< PhraseAlignment* > &phrasePair, float totalCount,
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model
-      for(int j=0; j<bestAlignment->alignedToT.size(); j++) {
+      for(size_t j=0; j<bestAlignment->alignedToT.size(); j++) {
         const set< size_t > &aligned = bestAlignment->alignedToT[j];
         for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p) {
           phraseTableFile << *p << "-" << j << " ";
@@ -552,7 +562,7 @@ double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, Ph
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(int ti=0; ti<alignment->alignedToT.size(); ti++) {
+  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
     const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
     if (srcIndices.empty()) {
       unaligned *= 2.718;
@@ -566,7 +576,7 @@ double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, 
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(int ti=0; ti<alignment->alignedToT.size(); ti++) {
+  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
     const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
     if (srcIndices.empty() && functionWordList.find( vcbT.getWord( phraseT[ ti ] ) ) != functionWordList.end()) {
       unaligned *= 2.718;
@@ -606,7 +616,7 @@ double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, 
   double lexScore = 1.0;
   int null = vcbS.getWordID("NULL");
   // all target words have to be explained
-  for(int ti=0; ti<alignment->alignedToT.size(); ti++) {
+  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
     const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
     if (srcIndices.empty()) {
       // explain unaligned word by NULL
@@ -658,3 +668,18 @@ void LexicalTable::load( char *fileName )
   }
   cerr << endl;
 }
+
+std::pair<PhrasePairGroup::Coll::iterator,bool> PhrasePairGroup::insert ( const PhraseAlignmentCollection& obj )
+{
+  std::pair<iterator,bool> ret = m_coll.insert(obj);
+  
+  if (ret.second)
+  { // obj inserted. Also add to sorted vector
+    const PhraseAlignmentCollection &insertedObj = *ret.first;
+    m_sortedColl.push_back(&insertedObj);
+  }
+  
+  return ret;
+}
+
+

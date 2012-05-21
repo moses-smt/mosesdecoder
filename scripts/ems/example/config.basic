@@ -258,6 +258,9 @@ type = 8
 script = $moses-script-dir/training/train-model.perl
 
 ### general options
+# these are options that are passed on to train-model.perl, for instance
+# * "-mgiza -mgiza-cpus 8" to use mgiza instead of giza
+# * "-sort-buffer-size 8G" to reduce on-disk sorting
 #
 #training-options = ""
 
@@ -504,9 +507,13 @@ nist-bleu-c = "$moses-script-dir/generic/mteval-v13a.pl -c"
 # ter = 
 
 ### METEOR: gives credit to stem / worknet synonym matches
-# not yet integrated
-#
-# meteor = 
+## recently integrated - use with care
+## only for supported languages, needs to be installed separately
+##
+## uncomment following 3 lines, modify first one adding the location of meteor installation on your disk
+# meteor-script = "/project/software/meteor-1.3/meteor-1.3.jar"     
+# meteor = "java -Xmx2G -jar $meteor-script"                        
+# meteor-params = " -l $output-extension -norm"
 
 ### Analysis: carry out various forms of analysis on the output
 #

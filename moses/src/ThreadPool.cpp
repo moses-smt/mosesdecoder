@@ -31,7 +31,7 @@ namespace Moses
 {
 
 ThreadPool::ThreadPool( size_t numThreads )
-  : m_stopped(false), m_stopping(false)
+  : m_stopped(false), m_stopping(false), m_queueLimit(0)
 {
   for (size_t i = 0; i < numThreads; ++i) {
     m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
@@ -70,9 +70,11 @@ void ThreadPool::Submit( Task* task )
   if (m_stopping) {
     throw runtime_error("ThreadPool stopping - unable to accept new jobs");
   }
+  while (m_queueLimit > 0 && m_tasks.size() >= m_queueLimit) {
+    m_threadAvailable.wait(lock);
+  }
   m_tasks.push(task);
   m_threadNeeded.notify_all();
-
 }
 
 void ThreadPool::Stop(bool processRemainingJobs)
@@ -96,7 +98,6 @@ void ThreadPool::Stop(bool processRemainingJobs)
     m_stopped = true;
   }
   m_threadNeeded.notify_all();
-
 
   m_threads.join_all();
 }

@@ -168,6 +168,8 @@ class LMRefCount : public LanguageModel {
       return m_impl->GetScoreProducerDescription(param);
     }
 
+    LanguageModelImplementation *MosesServerCppShouldNotHaveLMCode() { return m_impl.get(); }
+
   private:
     LMRefCount(ScoreIndexManager &scoreIndexManager, const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {
       Init(scoreIndexManager);

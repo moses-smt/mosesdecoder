@@ -24,7 +24,7 @@ void printHelp()
 
 std::ostream& operator<<(std::ostream& o, Scores s)
 {
-  for(int i = 0; i < s.size(); ++i) {
+  for(size_t i = 0; i < s.size(); ++i) {
     o << s[i] << "  ";
   }
   //o << std::endln;

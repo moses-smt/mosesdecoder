@@ -138,7 +138,7 @@ void Hash_shiftAddXOR<T>::initSeeds() {
     v_[i] = Utils::rand<T>() + 1; 
 }
 template <typename T>
-T Hash_shiftAddXOR<T>::hash(const char* s, count_t h=0) {
+T Hash_shiftAddXOR<T>::hash(const char* s, count_t h) {
   T value = v_[h];
   int pos(0);
   unsigned char c;
@@ -171,7 +171,7 @@ void UnivHash_tableXOR<T>::freeSeeds() {
   table_ = NULL;
 }
 template <typename T>
-T UnivHash_tableXOR<T>::hash(const char* s, count_t h = 0) {  
+T UnivHash_tableXOR<T>::hash(const char* s, count_t h) {  
   T value = 0;
   count_t pos = 0, idx = 0;
   unsigned char c;
@@ -191,14 +191,14 @@ void UnivHash_noPrimes<T>::initSeeds() {
   }
 }
 template <typename T>
-T UnivHash_noPrimes<T>::hash(const P x, count_t h=0) {
+T UnivHash_noPrimes<T>::hash(const P x, count_t h) {
   // h_a(x) = (ax mod 2^l) div 2^(l-k)
   T value = ((a_[h] * x) % p_) >> d_;
   return value % this->m_;
 }
 template <typename T>
 T UnivHash_noPrimes<T>::hash(const wordID_t* id, const int len, 
-  count_t h=0) {
+  count_t h) {
   T value = 0;
   int pos(0);
   while(pos < len) {
@@ -208,7 +208,7 @@ T UnivHash_noPrimes<T>::hash(const wordID_t* id, const int len,
   return value % this->m_;
 }
 template <typename T>
-T UnivHash_noPrimes<T>::hash(const char* s, count_t h=0) {
+T UnivHash_noPrimes<T>::hash(const char* s, count_t h) {
   T value = 0;
   int pos(0);
   unsigned char c;
@@ -264,7 +264,7 @@ void UnivHash_linear<T>::freeSeeds() {
 }
 template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t* id, const int len, 
-                           count_t h=0) {
+                           count_t h) {
   CHECK(h < this->H_);
   T value = 0;
   int pos(0);
@@ -276,7 +276,7 @@ inline T UnivHash_linear<T>::hash(const wordID_t* id, const int len,
 }
 template <typename T>
 inline T UnivHash_linear<T>::hash(const wordID_t id, const count_t pos,
-                           const T prevValue, count_t h=0) {
+                           const T prevValue, count_t h) {
   CHECK(h < this->H_);
   T value = prevValue + ((a_[h][pos] * id) + b_[h][pos]); // % pr_;
   return value % this->m_;
