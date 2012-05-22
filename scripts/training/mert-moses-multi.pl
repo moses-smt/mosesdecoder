@@ -302,7 +302,7 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = "/lium/buster1/servan/Tools/bin";
+  $mertdir = "/usr/bin";
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
 
