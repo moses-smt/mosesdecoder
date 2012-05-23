@@ -32,6 +32,7 @@
 #include "PhraseAlignment.h"
 #include "score.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -188,9 +189,9 @@ int main(int argc, char* argv[])
 		phraseTableFile = &cout;
 	}
 	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNamePhraseTable);
-		if (outputFile->fail()) {
+		Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
+		bool success = outputFile->Open(fileNamePhraseTable);
+		if (!success) {
 			cerr << "ERROR: could not open file phrase table file "
 					 << fileNamePhraseTable << endl;
 			exit(1);
@@ -245,7 +246,6 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
-		(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 

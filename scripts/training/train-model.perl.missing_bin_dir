@@ -1468,7 +1468,7 @@ sub score_phrase_phrase_extract {
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
@@ -1484,7 +1484,7 @@ sub score_phrase_phrase_extract {
         # sorting inverse phrase-table-half to sync up with regular one
         if ($direction eq "e2f" && ! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
           print STDERR "(6." . ($substep++) . ") sorting inverse e2f table@ ".`date`;
-          safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $ttable_file.half.e2f | gzip -c > $ttable_file.half.e2f.sorted.gz") or die("ERROR");
+          safesystem("zcat $ttable_file.half.e2f.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip -c > $ttable_file.half.e2f.sorted.gz") or die("ERROR");
           if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
         }
 
@@ -1512,7 +1512,7 @@ sub score_phrase_phrase_extract {
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted.gz $ttable_file.gz";
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e.gz $ttable_file.half.e2f.sorted.gz $ttable_file.gz";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;

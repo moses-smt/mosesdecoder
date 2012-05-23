@@ -16,7 +16,7 @@ exe extract-rules : tables-core.o SentenceAlignment.o SyntaxTree.o XmlTree.o Sen
 
 exe extract-lex : extract-lex.cpp InputFileStream ;
 
-exe score : tables-core.o AlignmentPhrase.o score.cpp PhraseAlignment.cpp InputFileStream ../../..//boost_iostreams ;
+exe score : tables-core.o AlignmentPhrase.o score.cpp PhraseAlignment.cpp OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
 
 exe consolidate : consolidate.cpp tables-core.o OutputFileStream.cpp InputFileStream ../../..//boost_iostreams ;
 
