@@ -103,6 +103,10 @@ int ExtractGHKM::Main(int argc, char *argv[])
     ++lineNum;
 
     // Parse target tree.
+    if (targetLine.size() == 0) { 
+      std::cerr << "skipping line " << lineNum << " with empty target tree\n";
+      continue;
+    }
     std::auto_ptr<ParseTree> t;
     try {
       t = xmlTreeParser.Parse(targetLine);
@@ -128,6 +132,10 @@ int ExtractGHKM::Main(int argc, char *argv[])
       s << "Failed to read alignment at line " << lineNum << ": ";
       s << e.GetMsg();
       Error(s.str());
+    }
+    if (alignment.size() == 0) {
+      std::cerr << "skipping line " << lineNum << " without alignment points\n";
+      continue;
     }
 
     // Record word counts.
