@@ -57,7 +57,7 @@ public:
 
 vector<string> tokenize( const char [] );
 
-void writeCountOfCounts( const char* fileNameCountOfCounts );
+void writeCountOfCounts( const string &fileNameCountOfCounts );
 void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
 PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
 void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
@@ -92,13 +92,13 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring coc-file] [--KneserNey coc-file] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] \n";
     exit(1);
   }
   char* fileNameExtract = argv[1];
   char* fileNameLex = argv[2];
   char* fileNamePhraseTable = argv[3];
-  char* fileNameCountOfCounts;
+  string fileNameCountOfCounts;
   char* fileNameFunctionWords;
 
   for(int i=4; i<argc; i++) {
@@ -116,19 +116,11 @@ int main(int argc, char* argv[])
       cerr << "not computing lexical translation score\n";
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
-      if (i+1==argc) { 
-        cerr << "ERROR: specify count of count files for Good Turing discounting!\n";
-        exit(1);
-      }
-      fileNameCountOfCounts = argv[++i];
+			fileNameCountOfCounts = string(fileNamePhraseTable) + ".coc";
       cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
     } else if (strcmp(argv[i],"--KneserNey") == 0) {
       kneserNeyFlag = true;
-      if (i+1==argc) { 
-        cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
-        exit(1);
-      }
-      fileNameCountOfCounts = argv[++i];
+			fileNameCountOfCounts = string(fileNamePhraseTable) + ".coc";
       cerr << "adjusting phrase translation probabilities with Kneser Ney discounting\n";
     } else if (strcmp(argv[i],"--UnalignedPenalty") == 0) {
       unalignedFlag = true;
@@ -255,12 +247,12 @@ int main(int argc, char* argv[])
   }
 }
 
-void writeCountOfCounts( const char* fileNameCountOfCounts )
+void writeCountOfCounts( const string &fileNameCountOfCounts )
 {
   // open file
-	ofstream countOfCountsFile;
-	countOfCountsFile.open(fileNameCountOfCounts);
-	if (countOfCountsFile.fail()) {
+	Moses::OutputFileStream countOfCountsFile;
+	bool success = countOfCountsFile.Open(fileNameCountOfCounts.c_str());
+	if (!success) {
 		cerr << "ERROR: could not open count-of-counts file "
 				 << fileNameCountOfCounts << endl;
     return;
