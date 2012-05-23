@@ -22,6 +22,7 @@
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -82,15 +83,16 @@ bool hierModel = false;
 REO_MODEL_TYPE hierType = REO_MSD;
 
 
-ofstream extractFile;
-ofstream extractFileInv;
-ofstream extractFileOrientation;
-ofstream extractFileSentenceId;
+Moses::OutputFileStream extractFile;
+Moses::OutputFileStream extractFileInv;
+Moses::OutputFileStream extractFileOrientation;
+Moses::OutputFileStream extractFileSentenceId;
 int maxPhraseLength;
 bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
+bool gzOutput = false;
 
 int main(int argc, char* argv[])
 {
@@ -116,6 +118,8 @@ int main(int argc, char* argv[])
       translationFlag = false;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
+    } else if (strcmp(argv[i], "--GZOutput") == 0) {
+      gzOutput = true;  
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -193,18 +197,18 @@ int main(int argc, char* argv[])
 
   // open output files
   if (translationFlag) {
-    string fileNameExtractInv = fileNameExtract + ".inv";
-    extractFile.open(fileNameExtract.c_str());
-    extractFileInv.open(fileNameExtractInv.c_str());
+    string fileNameExtractInv = fileNameExtract + ".inv" + (gzOutput?".gz":"");
+    extractFile.Open( (fileNameExtract + (gzOutput?".gz":"")).c_str());
+    extractFileInv.Open(fileNameExtractInv.c_str());
   }
   if (orientationFlag) {
-    string fileNameExtractOrientation = fileNameExtract + ".o";
-    extractFileOrientation.open(fileNameExtractOrientation.c_str());
+    string fileNameExtractOrientation = fileNameExtract + ".o" + (gzOutput?".gz":"");
+    extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
 
   if (sentenceIdFlag) {
-    string fileNameExtractSentenceId = fileNameExtract + ".sid";
-    extractFileSentenceId.open(fileNameExtractSentenceId.c_str());
+    string fileNameExtractSentenceId = fileNameExtract + ".sid" + (gzOutput?".gz":"");
+    extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
   int i=0;
@@ -239,12 +243,12 @@ int main(int argc, char* argv[])
   //az: only close if we actually opened it
   if (!onlyOutputSpanInfo) {
     if (translationFlag) {
-      extractFile.close();
-      extractFileInv.close();
+      extractFile.Close();
+      extractFileInv.Close();
     }
-    if (orientationFlag) extractFileOrientation.close();
+    if (orientationFlag) extractFileOrientation.Close();
     if (sentenceIdFlag) {
-      extractFileSentenceId.close();
+      extractFileSentenceId.Close();
     }
   }
 }

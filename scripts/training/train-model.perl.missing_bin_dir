@@ -1362,20 +1362,16 @@ sub extract_phrase {
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
     }
+    
+    $cmd .= " --GZOutput ";
+    
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    if (! $___DONT_ZIP) { 
-      safesystem("gzip $extract_file.o") if -e "$extract_file.o";
-      safesystem("gzip $extract_file.sid") if -e "$extract_file.sid";
-      if ($ttable_flag) {
-        safesystem("gzip $extract_file.inv") or die("ERROR");
-        safesystem("gzip $extract_file") or die("ERROR");
-      }
-    }
+    
 }
 
 ### (6) PHRASE SCORING
