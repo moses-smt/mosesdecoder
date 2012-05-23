@@ -1453,16 +1453,16 @@ sub score_phrase_phrase_extract {
 	          $inverse = " --Inverse";
                   $extract_filename = $extract_file.".inv";
               }
-	      my $extract = "$extract_filename.sorted";
+	      my $extract = "$extract_filename.sorted.gz";
 
-	      if (!($___CONTINUE && -e "$extract_filename.sorted")) {
+	      if (!($___CONTINUE && -e "$extract_filename.sorted.gz")) {
 	          # sorting
 	          print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
 	          if (-e "$extract_filename.gz") {
-		      safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
+		      safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip -c > $extract_filename.sorted.gz") or die("ERROR");
 	          }
 	          else {
-		      safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
+		      safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename | gzip -c > $extract_filename.sorted.gz") or die("ERROR");
 	          }
               }
 
@@ -1592,10 +1592,10 @@ sub get_reordering_factored {
 sub get_reordering {
     my ($extract_file,$reo_model_path) = @_;
     if (-e "$extract_file.o.gz") {
-	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
+	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip -c > $extract_file.o.sorted.gz") or die("ERROR");
     }
     else {
-        safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
+        safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o | gzip -c > $extract_file.o.sorted.gz") or die("ERROR");
     }
 
     my $smooth = $___REORDERING_SMOOTH;
@@ -1603,7 +1603,7 @@ sub get_reordering {
     print STDERR "(7.2) building tables @ ".`date`;
 
     #create cmd string for lexical reordering scoring
-    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted $smooth $reo_model_path";
+    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
     $cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
     for my $mtype (keys %REORDERING_MODEL_TYPES) {
 	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
@@ -1618,7 +1618,7 @@ sub get_reordering {
     #Call the lexical reordering scorer
     safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
 
-    if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
+    if (! $debug) { safesystem("rm $extract_file.o.sorted.gz") or die("ERROR");}
 }
 
 
