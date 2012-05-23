@@ -32,7 +32,6 @@
 #include "PhraseAlignment.h"
 #include "score.h"
 #include "InputFileStream.h"
-#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -189,10 +188,9 @@ int main(int argc, char* argv[])
 		phraseTableFile = &cout;
 	}
 	else {
-		Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
-    bool success = outputFile->Open(fileNamePhraseTable);
-    		
-    if (!success) {
+		ofstream *outputFile = new ofstream();
+		outputFile->open(fileNamePhraseTable);
+		if (outputFile->fail()) {
 			cerr << "ERROR: could not open file phrase table file "
 					 << fileNamePhraseTable << endl;
 			exit(1);
@@ -247,6 +245,7 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
+		(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 
@@ -259,9 +258,9 @@ int main(int argc, char* argv[])
 void writeCountOfCounts( const char* fileNameCountOfCounts )
 {
   // open file
-	Moses::OutputFileStream countOfCountsFile;
-	bool success = countOfCountsFile.Open(fileNameCountOfCounts);
-	if (!success) {
+	ofstream countOfCountsFile;
+	countOfCountsFile.open(fileNameCountOfCounts);
+	if (countOfCountsFile.fail()) {
 		cerr << "ERROR: could not open count-of-counts file "
 				 << fileNameCountOfCounts << endl;
     return;
@@ -274,7 +273,7 @@ void writeCountOfCounts( const char* fileNameCountOfCounts )
   for(int i=1; i<=COC_MAX; i++) {
     countOfCountsFile << countOfCounts[ i ] << endl;
   }
-	countOfCountsFile.Close();
+	countOfCountsFile.close();
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
