@@ -1626,7 +1626,6 @@ sub get_reordering {
 	#Call the lexical reordering scorer
 	safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
 	
-	if (! $debug) { safesystem("rm $extract_file.o.sorted.gz") or die("ERROR");}
 }
 
 

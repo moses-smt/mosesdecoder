@@ -141,10 +141,10 @@ foreach (@children) {
 	waitpid($_, 0);
 }
 
-
-#$cmd = "rm -rf $TMPDIR \n";
-#print STDERR $cmd;
-#`$cmd`;
+# delete temporary files
+$cmd = "rm -rf $TMPDIR \n";
+print STDERR $cmd;
+`$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
 
