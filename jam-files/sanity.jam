@@ -4,11 +4,6 @@ import os ;
 import path ;
 import project ;
 
-local prj = [ project.current ] ; 
-mod = [ $(prj).project-module ] ;
-
-path-constant TOP : . ;
-
 #Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
 rule trim-nl ( str extras * ) {
 return [ MATCH "([^
@@ -20,7 +15,12 @@ rule _shell ( cmd : extras * ) {
 
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
-  local ret = [ SHELL "g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null" : exit-status ] ;
+  local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
+  local ret = [ SHELL $(cmd) : exit-status ] ;
+  if --debug-configuration in [ modules.peek : ARGV ] {
+    echo $(cmd) ;
+    echo $(ret) ;
+  }
   if $(ret[2]) = 0 {
     return true ;
   } else {
@@ -47,17 +47,30 @@ rule auto-shared ( name : additional * ) {
   }
 }
 
-with-boost = [ option.get "with-boost" ] ;
-if $(with-boost) {
-  L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
-  boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
-  I-boost-include = -I$(with-boost)/include ;
-  boost-include = <include>$(with-boost)/include ;
-} else {
-  L-boost-search = "" ;
-  boost-search = ;
-  I-boost-include = "" ;
-  boost-include = ;
+# MacPorts' default location is /opt/local -- use this if no path is given.
+with-macports = [ option.get "with-macports" : : "/opt/local" ] ;
+if $(with-macports) {
+  using darwin ;
+  ECHO "Using --with-macports=$(with-macports), implying use of darwin GCC" ;
+
+  L-boost-search = -L$(with-macports)/lib ;
+  boost-search = <search>$(with-macports)/lib ;
+  I-boost-include = -I$(with-macports)/include ;
+  boost-include = <include>$(with-macports)/include ;
+}
+else {
+  with-boost = [ option.get "with-boost" ] ;
+  if $(with-boost) {
+    L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
+    boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
+    I-boost-include = -I$(with-boost)/include ;
+    boost-include = <include>$(with-boost)/include ;
+  } else {
+    L-boost-search = "" ;
+    boost-search = ;
+    I-boost-include = "" ;
+    boost-include = ;
+  }
 }
  
 #Are we linking static binaries against shared boost?
@@ -79,8 +92,10 @@ rule boost-lib ( name macro ) {
 
 #Argument is e.g. 103600
 rule boost ( min-version ) {
-  local boost-shell = [ SHELL "g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '" : exit-status ] ;
+  local cmd = "bash -c \"g++ "$(I-boost-include)" -dM -x c++ -E /dev/null -include boost/version.hpp 2>/dev/null |grep '#define BOOST_VERSION '\"" ;
+  local boost-shell = [ SHELL "$(cmd)" : exit-status ] ;
   if $(boost-shell[2]) != 0 && $(CLEANING) = no {
+    echo Failed to run "$(cmd)" ;
     exit Boost does not seem to be installed or g++ is confused. : 1 ;
   }
   boost-version = [ MATCH "#define BOOST_VERSION ([0-9]*)" : $(boost-shell[1]) ] ;
@@ -91,6 +106,7 @@ rule boost ( min-version ) {
   boost-lib thread THREAD_DYN_DLL ;
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
   boost-lib unit_test_framework TEST_DYN_LINK ;
+  boost-lib iostreams IOSTREAMS_DYN_LINK ;
 }
  
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
@@ -122,10 +138,11 @@ requirements = ;
   local cflags = [ os.environ "CFLAGS" ] ;
   local ldflags = [ os.environ "LDFLAGS" ] ;
 
-  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<link>static,<toolset>clang:<linkflags>-static ;
+  #Boost jam's static clang for Linux is buggy.
+  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
-  if [ test_flags "-lSegfault" ] {
+  if [ test_flags "-lSegFault" ] {
     external-lib SegFault ;
     requirements += <library>SegFault ;
   }

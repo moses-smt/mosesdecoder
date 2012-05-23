@@ -122,10 +122,10 @@ void SuffixArray::Sort(INDEX start, INDEX end)
   Sort( mid, end );
 
   // merge
-  int i = start;
-  int j = mid;
-  int k = 0;
-  int length = end-start+1;
+  INDEX i = start;
+  INDEX j = mid;
+  INDEX k = 0;
+  INDEX length = end-start+1;
   while( k<length ) {
     if (i == mid ) {
       m_buffer[ k++ ] = m_index[ j++ ];
@@ -174,7 +174,7 @@ int SuffixArray::Count( const vector< WORD > &phrase )
 bool SuffixArray::MinCount( const vector< WORD > &phrase, INDEX min )
 {
   INDEX dummy;
-  return LimitedCount( phrase, min, dummy, dummy, 0, m_size-1 ) >= min;
+  return (INDEX)LimitedCount( phrase, min, dummy, dummy, 0, m_size-1 ) >= min;
 }
 
 bool SuffixArray::Exists( const vector< WORD > &phrase )
@@ -192,7 +192,7 @@ int SuffixArray::LimitedCount( const vector< WORD > &phrase, INDEX min, INDEX &f
 {
   // cerr << "FindFirst\n";
   INDEX start = search_start;
-  INDEX end = (search_end == -1) ? (m_size-1) : search_end;
+  INDEX end = (search_end == (INDEX)-1) ? (m_size-1) : search_end;
   INDEX mid = FindFirst( phrase, start, end );
   // cerr << "done\n";
   if (mid == m_size) return 0; // no matches

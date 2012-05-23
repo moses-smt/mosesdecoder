@@ -32,6 +32,7 @@
 #include "PhraseAlignment.h"
 #include "score.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -188,9 +189,10 @@ int main(int argc, char* argv[])
 		phraseTableFile = &cout;
 	}
 	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNamePhraseTable);
-		if (outputFile->fail()) {
+		Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
+    bool success = outputFile->Open(fileNamePhraseTable);
+    		
+    if (!success) {
 			cerr << "ERROR: could not open file phrase table file "
 					 << fileNamePhraseTable << endl;
 			exit(1);
@@ -245,7 +247,6 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
-		(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 
@@ -258,9 +259,9 @@ int main(int argc, char* argv[])
 void writeCountOfCounts( const char* fileNameCountOfCounts )
 {
   // open file
-	ofstream countOfCountsFile;
-	countOfCountsFile.open(fileNameCountOfCounts);
-	if (countOfCountsFile.fail()) {
+	Moses::OutputFileStream countOfCountsFile;
+	bool success = countOfCountsFile.Open(fileNameCountOfCounts);
+	if (!success) {
 		cerr << "ERROR: could not open count-of-counts file "
 				 << fileNameCountOfCounts << endl;
     return;
@@ -273,7 +274,7 @@ void writeCountOfCounts( const char* fileNameCountOfCounts )
   for(int i=1; i<=COC_MAX; i++) {
     countOfCountsFile << countOfCounts[ i ] << endl;
   }
-	countOfCountsFile.close();
+	countOfCountsFile.Close();
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
@@ -328,7 +329,7 @@ PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair )
   float bestAlignmentCount = -1;
   PhraseAlignment* bestAlignment;
   
-  for(int i=0; i<phrasePair.size(); i++) {
+  for(size_t i=0; i<phrasePair.size(); i++) {
     if (phrasePair[i]->count > bestAlignmentCount) {
       bestAlignmentCount = phrasePair[i]->count;
       bestAlignment = phrasePair[i];
@@ -452,7 +453,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   // do not output if hierarchical and count below threshold
   if (hierarchicalFlag && count < minCountHierarchical) {
-    for(int j=0; j<phraseS.size()-1; j++) {
+    for(size_t j=0; j<phraseS.size()-1; j++) {
       if (isNonTerminal(vcbS.getWord( phraseS[j] )))
         return;
     }
@@ -460,7 +461,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   // source phrase (unless inverse)
   if (! inverseFlag) {
-    for(int j=0; j<phraseS.size(); j++) {
+    for(size_t j=0; j<phraseS.size(); j++) {
       phraseTableFile << vcbS.getWord( phraseS[j] );
       phraseTableFile << " ";
     }
@@ -468,7 +469,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   }
 
   // target phrase
-  for(int j=0; j<phraseT.size(); j++) {
+  for(size_t j=0; j<phraseT.size(); j++) {
     phraseTableFile << vcbT.getWord( phraseT[j] );
     phraseTableFile << " ";
   }
@@ -476,7 +477,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   // source phrase (if inverse)
   if (inverseFlag) {
-    for(int j=0; j<phraseS.size(); j++) {
+    for(size_t j=0; j<phraseS.size(); j++) {
       phraseTableFile << vcbS.getWord( phraseS[j] );
       phraseTableFile << " ";
     }
@@ -508,7 +509,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     if (hierarchicalFlag) {
       // always output alignment if hiero style, but only for non-terms
       assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
-      for(int j = 0; j < phraseT.size() - 1; j++) {
+      for(size_t j = 0; j < phraseT.size() - 1; j++) {
         if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
           if (bestAlignment->alignedToT[ j ].size() != 1) {
             cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
@@ -521,7 +522,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model
-      for(int j=0; j<bestAlignment->alignedToT.size(); j++) {
+      for(size_t j=0; j<bestAlignment->alignedToT.size(); j++) {
         const set< size_t > &aligned = bestAlignment->alignedToT[j];
         for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p) {
           phraseTableFile << *p << "-" << j << " ";
@@ -561,7 +562,7 @@ double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, Ph
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(int ti=0; ti<alignment->alignedToT.size(); ti++) {
+  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
     const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
     if (srcIndices.empty()) {
       unaligned *= 2.718;
@@ -575,7 +576,7 @@ double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, 
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(int ti=0; ti<alignment->alignedToT.size(); ti++) {
+  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
     const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
     if (srcIndices.empty() && functionWordList.find( vcbT.getWord( phraseT[ ti ] ) ) != functionWordList.end()) {
       unaligned *= 2.718;
@@ -615,7 +616,7 @@ double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, 
   double lexScore = 1.0;
   int null = vcbS.getWordID("NULL");
   // all target words have to be explained
-  for(int ti=0; ti<alignment->alignedToT.size(); ti++) {
+  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
     const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
     if (srcIndices.empty()) {
       // explain unaligned word by NULL

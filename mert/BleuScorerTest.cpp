@@ -220,7 +220,7 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
 
 BOOST_AUTO_TEST_CASE(calculate_actual_score) {
   BOOST_REQUIRE(4 == kBleuNgramOrder);
-  vector<int> stats(2 * kBleuNgramOrder + 1);
+  std::vector<int> stats(2 * kBleuNgramOrder + 1);
   BleuScorer scorer;
 
   // unigram
@@ -247,7 +247,7 @@ BOOST_AUTO_TEST_CASE(calculate_actual_score) {
 
 BOOST_AUTO_TEST_CASE(sentence_level_bleu) {
   BOOST_REQUIRE(4 == kBleuNgramOrder);
-  vector<float> stats(2 * kBleuNgramOrder + 1);
+  std::vector<float> stats(2 * kBleuNgramOrder + 1);
 
   // unigram
   stats[0] = 6.0;

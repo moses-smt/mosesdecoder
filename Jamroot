@@ -63,7 +63,8 @@
 import option ;
 import modules ;
 import path ;
-include jam-files/sanity.jam ;
+path-constant TOP : . ;
+include $(TOP)/jam-files/sanity.jam ;
 
 boost 103600 ;
 external-lib z ;
