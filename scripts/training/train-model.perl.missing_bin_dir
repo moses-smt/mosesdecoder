@@ -1516,7 +1516,7 @@ sub score_phrase_phrase_extract {
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file.gz";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
@@ -1527,9 +1527,6 @@ sub score_phrase_phrase_extract {
     $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
-    if (! $___DONT_ZIP) {
-        safesystem("gzip $ttable_file") || die("ERROR: could not gzip $ttable_file");
-    }
 }
 
 sub score_phrase_memscore {
