@@ -6,10 +6,13 @@
  *
  */
 
+#include <iostream>
 #include <fstream>
 #include "FeatureArray.h"
 #include "FileStream.h"
 #include "Util.h"
+
+using namespace std;
 
 FeatureArray::FeatureArray()
     : m_index(""), m_num_features(0), m_sparse_flag(false) {}

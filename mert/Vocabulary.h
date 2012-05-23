@@ -48,7 +48,7 @@ class Vocabulary {
 
   bool empty() const { return m_vocab.empty(); }
 
-  size_t size() const { return m_vocab.size(); }
+  std::size_t size() const { return m_vocab.size(); }
 
   iterator find(const std::string& str) { return m_vocab.find(str); }
   const_iterator find(const std::string& str) const { return m_vocab.find(str); }

@@ -14,6 +14,8 @@
 #include "Util.h"
 #include "Vocabulary.h"
 
+using namespace std;
+
 namespace {
 
 // configure regularisation
@@ -94,7 +96,7 @@ bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id) {
   string line;
   size_t sid = 0;
   while (getline(*is, line)) {
-    line = applyFactors(line);
+    line = preprocessSentence(line);
     if (file_id == 0) {
       Reference* ref = new Reference;
       m_references.push_back(ref);    // Take ownership of the Reference object.
@@ -137,7 +139,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   NgramCounts testcounts;
   // stats for this line
   vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
-  string sentence = applyFactors(text);
+  string sentence = preprocessSentence(text);
   const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder);
 
   const int reference_len = CalcReferenceLength(sid, length);

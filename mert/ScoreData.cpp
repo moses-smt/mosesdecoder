@@ -8,10 +8,13 @@
 
 #include "ScoreData.h"
 
+#include <iostream>
 #include <fstream>
 #include "Scorer.h"
 #include "Util.h"
 #include "FileStream.h"
+
+using namespace std;
 
 ScoreData::ScoreData(Scorer* scorer) :
   m_scorer(scorer)

@@ -8,7 +8,7 @@ public:
   typedef unsigned int INDEX;
 
 private:
-  char *m_array;
+  int *m_array;
   INDEX *m_sentenceEnd;
   INDEX m_size;
   INDEX m_sentenceCount;
@@ -23,10 +23,10 @@ public:
   ~Alignment();
 
   void Create(const std::string& fileName );
-  bool PhraseAlignment( INDEX sentence, char target_length,
-                        char source_start, char source_end,
-                        char &target_start, char &target_end,
-                        char &pre_null, char &post_null );
+  bool PhraseAlignment( INDEX sentence, int target_length,
+                        int source_start, int source_end,
+                        int &target_start, int &target_end,
+                        int &pre_null, int &post_null );
   void Load(const std::string& fileName );
   void Save(const std::string& fileName ) const;
   std::vector<std::string> Tokenize( const char input[] );
@@ -38,10 +38,10 @@ public:
   INDEX GetNumberOfAlignmentPoints( INDEX sentence ) const {
     return ( m_sentenceEnd[ sentence ] - GetSentenceStart( sentence ) ) / 2;
   }
-  char GetSourceWord( INDEX sentence, INDEX alignment_point ) const {
+  int GetSourceWord( INDEX sentence, INDEX alignment_point ) const {
     return m_array[ GetSentenceStart( sentence ) + alignment_point*2 ];
   }
-  char GetTargetWord( INDEX sentence, INDEX alignment_point ) const {
+  int GetTargetWord( INDEX sentence, INDEX alignment_point ) const {
     return m_array[ GetSentenceStart( sentence ) + alignment_point*2 + 1 ];
   }
 };

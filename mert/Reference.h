@@ -14,8 +14,8 @@
 class Reference {
  public:
   // for m_length
-  typedef std::vector<size_t>::iterator iterator;
-  typedef std::vector<size_t>::const_iterator const_iterator;
+  typedef std::vector<std::size_t>::iterator iterator;
+  typedef std::vector<std::size_t>::const_iterator const_iterator;
 
   Reference() : m_counts(new NgramCounts) { }
   ~Reference() { delete m_counts; }
@@ -28,36 +28,36 @@ class Reference {
   iterator end() { return m_length.end(); }
   const_iterator end() const { return m_length.end(); }
 
-  void push_back(size_t len) { m_length.push_back(len); }
+  void push_back(std::size_t len) { m_length.push_back(len); }
 
-  size_t num_references() const { return m_length.size(); }
+  std::size_t num_references() const { return m_length.size(); }
 
   int CalcAverage() const;
-  int CalcClosest(size_t length) const;
+  int CalcClosest(std::size_t length) const;
   int CalcShortest() const;
 
  private:
   NgramCounts* m_counts;
 
   // multiple reference lengths
-  std::vector<size_t> m_length;
+  std::vector<std::size_t> m_length;
 };
 
 // TODO(tetsuok): fix this function and related stuff.
 // "average" reference length should not be calculated at sentence-level unlike "closest".
 inline int Reference::CalcAverage() const {
   int total = 0;
-  for (size_t i = 0; i < m_length.size(); ++i) {
+  for (std::size_t i = 0; i < m_length.size(); ++i) {
     total += m_length[i];
   }
   return static_cast<int>(
       static_cast<float>(total) / m_length.size());
 }
 
-inline int Reference::CalcClosest(size_t length) const {
+inline int Reference::CalcClosest(std::size_t length) const {
   int min_diff = INT_MAX;
   int closest_ref_id = 0; // an index of the closest reference translation
-  for (size_t i = 0; i < m_length.size(); ++i) {
+  for (std::size_t i = 0; i < m_length.size(); ++i) {
     const int ref_length = m_length[i];
     const int length_diff = abs(ref_length - static_cast<int>(length));
     const int abs_min_diff = abs(min_diff);

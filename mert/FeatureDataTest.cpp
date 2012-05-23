@@ -12,7 +12,7 @@ void CheckFeatureMap(const FeatureData* feature_data,
   for (int i = 0; i < num_feature; ++i) {
     std::stringstream ss;
     ss << str << "_" << i;
-    const string& s = ss.str();
+    const std::string& s = ss.str();
     BOOST_CHECK_EQUAL(feature_data->getFeatureIndex(s), *cnt);
     BOOST_CHECK_EQUAL(feature_data->getFeatureName(*cnt).c_str(), s);
     ++(*cnt);

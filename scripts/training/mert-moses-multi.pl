@@ -10,7 +10,6 @@
 
 # Excerpts from revision history
 
-# Dec 2011    update the script for the mert-moses.pl compatibility
 # Sept 2011   multi-threaded mert (Barry Haddow)
 # 3 Aug 2011  Added random directions, historic best, pairwise ranked (PK)
 # Jul 2011    simplifications (Ondrej Bojar)
@@ -48,13 +47,9 @@
 # 13 Oct 2004 Use alternative decoders (DWC)
 # Original version by Philipp Koehn
 
-use strict;
 use FindBin qw($Bin);
 use File::Basename;
 use File::Path;
-use File::Spec;
-use Cwd;
-
 my $SCRIPTS_ROOTDIR = $Bin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
@@ -87,16 +82,12 @@ my $minimum_required_change_in_weights = 0.00001;
 
 my $verbose = 0;
 my $usage = 0; # request for --help
-
-# We assume that if you don't specify working directory,
-# we set the default is set to `pwd`/mert-work
-my $___WORKING_DIR = File::Spec->catfile(Cwd::getcwd(), "mert-work");
+my $___WORKING_DIR = "mert-work";
 my $___DEV_F = undef; # required, input text to decode
 my $___DEV_E = undef; # required, basename of files with references
 my $___DECODER = undef; # required, pathname to the decoder executable
 my $___CONFIG = undef; # required, pathname to startup ini file
 my $___N_BEST_LIST_SIZE = 100;
-my $___LATTICE_SAMPLES = 0;
 my $queue_flags = "-hard";  # extra parameters for parallelizer
       # the -l ws0ssmt was relevant only to JHU 2006 workshop
 my $___JOBS = undef; # if parallel, number of jobs to use (undef or 0 -> serial)
@@ -142,6 +133,7 @@ my $filtercmd = undef; # path to filter-model-given-input.pl
 my $filterfile = undef;
 my $qsubwrapper = undef;
 my $moses_parallel_cmd = undef;
+my $scorer_config = "BLEU:1";
 my $old_sge = 0; # assume sge<6.0
 my $___CONFIG_ORIG = undef; # pathname to startup ini file before filtering
 my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of features to work on 
@@ -152,10 +144,10 @@ my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loa
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
                                   # 1 means 1 previous data , i.e. from the actual iteration and from the previous one
-                                  # and so on
+                                  # and so on 
 my $maximum_iterations = 25;
-my $scorer_config = undef ;
 
+use strict;
 use Getopt::Long;
 GetOptions(
   "working-dir=s" => \$___WORKING_DIR,
@@ -165,7 +157,6 @@ GetOptions(
   "decoder=s" => \$___DECODER,
   "config=s" => \$___CONFIG,
   "nbest=i" => \$___N_BEST_LIST_SIZE,
-  "lattice-samples=i" => \$___LATTICE_SAMPLES,
   "queue-flags=s" => \$queue_flags,
   "jobs=i" => \$___JOBS,
   "decoder-flags=s" => \$___DECODER_FLAGS,
@@ -200,8 +191,8 @@ GetOptions(
   "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
   "pro-starting-point" => \$___PRO_STARTING_POINT,
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
-  "sc-config=s" => \$scorer_config,
-  "threads=i" => \$__THREADS
+  "threads=i" => \$__THREADS,
+  "sc-config=s" => \$scorer_config
 ) or exit(1);
 
 # the 4 required parameters can be supplied on the command line directly
@@ -219,7 +210,6 @@ if ($usage || !defined $___DEV_F || !defined $___DEV_E || !defined $___DECODER |
 Options:
   --working-dir=mert-dir ... where all the files are created
   --nbest=100            ... how big nbestlist to generate
-  --lattice-samples      ... how many lattice samples (Chatterjee & Cancedda, emnlp 2010)
   --jobs=N               ... set this to anything to run moses in parallel
   --mosesparallelcmd=STR ... use a different script instead of moses-parallel
   --queue-flags=STRING   ... anything you with to pass to qsub, eg.
@@ -286,7 +276,7 @@ Options:
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
-  --sc-config=\"METRIC1:WEIGHT1,METRIC2:WEIGHT2\"  ... extra option to specify tuning with multiple metrics.
+  --sc-config=STRING     ... extra option to specify multiscoring.
 ";
   exit 1;
 }
@@ -294,6 +284,7 @@ Options:
 
 # Check validity of input parameters and set defaults if needed
 
+print STDERR "Using WORKING_DIR: $___WORKING_DIR\n";
 print STDERR "Using SCRIPTS_ROOTDIR: $SCRIPTS_ROOTDIR\n";
 
 # path of script for filtering phrase tables and running the decoder
@@ -311,17 +302,15 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = "$SCRIPTS_ROOTDIR/../mert";
+  $mertdir = "/usr/bin";
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
 
 my $mert_extract_cmd = "$mertdir/extractor";
 my $mert_mert_cmd = "$mertdir/mert";
-my $mert_pro_cmd = "$mertdir/pro";
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd" if ! -x $mert_mert_cmd;
-die "Not executable: $mert_pro_cmd" if ! -x $mert_pro_cmd;
 
 my $pro_optimizer = "$mertdir/megam_i686.opt"; # or set to your installation
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
@@ -621,8 +610,6 @@ my $oldallsorted = undef;
 my $allsorted = undef;
 
 my $nbest_file=undef;
-my $lsamp_file=undef; #Lattice samples
-my $orig_nbest_file=undef; # replaced if lattice sampling
 
 while(1) {
   $run++;
@@ -642,20 +629,8 @@ while(1) {
   # skip running the decoder if the user wanted
   if (!$skip_decoder) {
       print "($run) run decoder to produce n-best lists\n";
-      ($nbest_file,$lsamp_file) = run_decoder($featlist, $run, $need_to_normalize);
+      $nbest_file = run_decoder($featlist, $run, $need_to_normalize);
       $need_to_normalize = 0;
-      if ($___LATTICE_SAMPLES) {
-        my $combined_file = "$nbest_file.comb";
-        safesystem("sort -k1,1n $nbest_file $lsamp_file > $combined_file") or
-          die("failed to merge nbest and lattice samples");
-        safesystem("gzip -f $nbest_file; gzip -f $lsamp_file") or 
-          die "Failed to gzip nbests and lattice samples";
-        $orig_nbest_file = "$nbest_file.gz";
-        $orig_nbest_file = "$nbest_file.gz";
-        $lsamp_file = "$lsamp_file.gz";
-        $lsamp_file = "$lsamp_file.gz";
-        $nbest_file = "$combined_file";
-      }
       safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out";
       $nbest_file = $nbest_file.".gz";
   }
@@ -673,12 +648,9 @@ while(1) {
   my $base_score_file = "scores.dat";
   my $feature_file = "run$run.${base_feature_file}";
   my $score_file = "run$run.${base_score_file}";
-  my $cmd = "";
 
-if (defined($scorer_config))
-{
-#process the mulitple metric way
-    print STDERR "-- process the mulitple metric way --\n";
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+  my $cmd = "";
   my $scorer_name;
   my $scorer_weight;
   $scorer_config=~s/ //g;
@@ -687,153 +659,249 @@ if (defined($scorer_config))
   my $scorer_config_spec;
   foreach $scorer_config_spec(@lists_scorer_config)
   {
+#     print STDERR $scorer_config_spec."\n";
     my @lists_scorer_config_spec=split(":",$scorer_config_spec);
     $scorer_name=$lists_scorer_config_spec[0];
     $scorer_weight=$lists_scorer_config_spec[1];
+#     print STDERR $scorer_name."\n";
+#     print STDERR $scorer_weight."\n";
     $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file.$scorer_name --ffile $feature_file.$scorer_name --sctype $scorer_name -r ".join(",", @references)." -n $nbest_file";
+#     print STDERR "LANCEMENT $scorer_name ********************************************\n";
     &submit_or_exec($cmd,"extract.out.$scorer_name","extract.err.$scorer_name");
+#     print STDERR "FIN $scorer_name ************************************************** \n";
+#   print STDERR "executing $cmd\n";
+
+#   print STDERR "\n";
+#   safesystem("date"); 
+#   print STDERR "\n";
+
+#   if (defined $___JOBS) {
+#     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=extract.out.$scorer_name -stderr=extract.err.$scorer_name" )
+#       or die "$scorer_name Failed to submit extraction to queue (via $qsubwrapper)";
+#   } else {
+#     safesystem("$cmd > extract.out.$scorer_name 2> extract.err.$scorer_name") or die "$scorer_name Failed to do extraction of statistics.";
+#   }
+
+#   print FILE "$scorer_name $scorer_weight $score_file.$scorer_name $feature_file.$scorer_name\n";
   }
+#  print STDERR "CREATION INI\n";
   my @scorer_content;
+  my @feature_content;
   my $fileIncrement=0;
+  my $minSizeIncrement=-1;
   open(FILE,">merge.init") || die ("File creation ERROR : merge.init");
-  my $minFileName="";
-  my $minFileSize;
-  my %scoreFileContent;
-  my %featureFileContent;
-  my $firstContent;
   foreach $scorer_config_spec(@lists_scorer_config)
   {
     my @lists_scorer_config_spec=split(":",$scorer_config_spec);
     $scorer_name=$lists_scorer_config_spec[0];
     $scorer_weight=$lists_scorer_config_spec[1];
     print FILE "$scorer_name $scorer_weight $score_file.$scorer_name $feature_file.$scorer_name\n";
-    my @tmp_scoreContent=`/bin/cat $score_file.$scorer_name`;
-    my @tmp_featContent=`/bin/cat $feature_file.$scorer_name`;
-    my $localIncrementFileContent=0;
-    my $fileContentInfo=0;
-    my $localIncrementInfo=0;
-    for ($localIncrementFileContent=0; $localIncrementFileContent<scalar(@tmp_scoreContent); $localIncrementFileContent++)
+    my @tmp_load_content=`/bin/cat $score_file.$scorer_name`;
+    my @tmp_load_feat_content=`/bin/cat $feature_file.$scorer_name`;
+    my @tmp_content;
+    my @tmp_feat_content;
+    my $contentIncrement=0;
+    my @tmp_part_content;
+    my $increment_part=0;
+    while ($contentIncrement<scalar(@tmp_load_feat_content))
     {
-	if (rindex($tmp_scoreContent[$localIncrementFileContent],"BEGIN")>-1)
+	my $line=$tmp_load_feat_content[$contentIncrement];
+	chomp($line);
+        $line=~s/^[ ]+//g;
+        $line=~s/[ ]+$//g;
+        $line=~s/[ ]+/ /g;
+	push @tmp_part_content,$line;
+	if (rindex($line,"FEATURES_TXT_END")>-1)
 	{
-	    my @split_local=split(" ",$tmp_scoreContent[$localIncrementFileContent]);
-	    $fileContentInfo=$split_local[1];
-	    
-	    $localIncrementInfo=0;
+	   $tmp_feat_content[$increment_part] = [ @tmp_part_content ];
+	   $increment_part++;
+	   @tmp_part_content=();
 	}
-	chomp($tmp_scoreContent[$localIncrementFileContent]);
-	chomp($tmp_featContent[$localIncrementFileContent]);
-	$scoreFileContent{$fileIncrement}{$fileContentInfo}{$localIncrementInfo}=$tmp_scoreContent[$localIncrementFileContent];
-	$featureFileContent{$fileIncrement}{$fileContentInfo}{$localIncrementInfo}=$tmp_featContent[$localIncrementFileContent];
-	$localIncrementInfo++;
+	$contentIncrement++;
     }
-    if ($fileIncrement==0)
+    $contentIncrement=0;
+    $increment_part=0;
+    @tmp_part_content=();
+    while ($contentIncrement<scalar(@tmp_load_content))
     {
-	$minFileSize=$localIncrementFileContent;
-	$minFileName=$scorer_name;
-    }
-    else
-    {
-	if ($minFileSize>$localIncrementFileContent)
+	my $line=$tmp_load_content[$contentIncrement];
+	chomp($line);
+        $line=~s/^[ ]+//g;
+        $line=~s/[ ]+$//g;
+        $line=~s/[ ]+/ /g;
+	push @tmp_part_content,$line;
+	if (rindex($line,"SCORES_TXT_END")>-1)
 	{
-	    $minFileSize=$localIncrementFileContent;
-	    $minFileName=$scorer_name;
+	   $tmp_content[$increment_part] = [ @tmp_part_content ];
+	   $increment_part++;
+	   @tmp_part_content=();
 	}
+	$contentIncrement++;
     }
+    if ($minSizeIncrement<0 || $minSizeIncrement>$increment_part)
+    {
+	$minSizeIncrement=$increment_part;
+    }
+    $scorer_content[$fileIncrement] = [ @tmp_content ];
+    $feature_content[$fileIncrement] = [ @tmp_feat_content ];
+#     if ($fileIncrement==0)
+#     {
+# 	`/bin/cp $feature_file.$scorer_name $feature_file`;
+#     }
     $fileIncrement++;
   }
   close(FILE);
+#   print STDERR "\n";
+#   safesystem("date");
+#   print STDERR "\n";
   
+#   print STDERR "ON  VA RASSEMBLER dans $score_file\n";
   open(SCOREFILE,">$score_file") || die ("File creation ERROR : $score_file");
-  open(FEATUREFILE,">$feature_file") || die ("File creation ERROR : $feature_file");
+  open(FEATFILE,">$feature_file") || die ("File creation ERROR : $feature_file");
   my $newFileIncrement=0;
   my $contentIncrement=0;
-  my @nbestSize;
-  my $contentSize;
-  my $lineScore="";
-  my $lineFeature="";
-  my $minSize;
-  my $localContentIncrement=0;
-  my @localContentSizeSize;
-  my $scoreFileName;
-  my $notFinished=1;
-  my $scoreName=$minFileName;
-  my $minInfoSize=-1;
-  $fileIncrement=0;
-  while (defined($scoreFileContent{$fileIncrement}{$contentIncrement}))
+  my $maxContent=100;
+  my $increment_part=0;
+  my $contentSize=scalar(@{$scorer_content[0]});
+#   print STDERR "TAILLE : ".$contentSize."|".$fileIncrement."|".$minSizeIncrement."\n";
+  while ($increment_part<$minSizeIncrement)
   {
-      if ($localContentIncrement==0)
+    $contentIncrement=0;
+#	print STDERR "increment_part : $increment_part\n";
+    while ($contentIncrement< $maxContent)
+    {
+#      print STDERR "contentIncrement : $contentIncrement\n";
+      my $line="";
+      my $featureLine="";
+      my $createLines=1;
+      $newFileIncrement=0;
+      while($newFileIncrement< $fileIncrement)
       {
-	foreach $fileIncrement(sort keys %scoreFileContent)
-	{
-# 	    process the score file
-	    my @tmp_split=split(" ",$scoreFileContent{$fileIncrement}{$contentIncrement}{$localContentIncrement});
-	    if ($minInfoSize==-1)
-	    {
-		$minInfoSize=$tmp_split[2];
-	    }
-	    elsif ($minInfoSize>$tmp_split[2])
-	    {
-		$minInfoSize=$tmp_split[2];
-	    }
-	    my @split_line=split(" ",$lineScore);
-	    if (scalar(@split_line)>0)
-	    {
-		$tmp_split[3]=$split_line[3]+$tmp_split[3];
-	    }
-	    $lineScore=$tmp_split[0]." ".$contentIncrement." ".$minInfoSize." ".$tmp_split[3]." MERGE";	 
-# 	    process the feature file
-	    @tmp_split=split(" ",$featureFileContent{$fileIncrement}{$contentIncrement}{$localContentIncrement});
-	    $lineFeature=$tmp_split[0]." ".$contentIncrement." ".$minInfoSize." ".$tmp_split[3]." MERGE";	 
-
+#	print STDERR "newFileIncrement : $newFileIncrement\n";
+	 if (rindex($scorer_content[$newFileIncrement][$increment_part][$contentIncrement],"BEGIN")<0)
+	 {
+	         if (rindex($line,"SCORES_TXT_END")>-1)
+        	{
+#	            $line=$line;
+#	            chomp($line);
+	         }
+		elsif (rindex($scorer_content[$newFileIncrement][$increment_part][$contentIncrement],"SCORES_TXT_END")>-1)
+     		{
+			$line=$scorer_content[$newFileIncrement][$increment_part][$contentIncrement];
+			$featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+		}
+	    else
+		{
+			$line=$line." ".$scorer_content[$newFileIncrement][$increment_part][$contentIncrement];
+			chomp($line);
+			if (length($featureLine)>0 && rindex($featureLine,$feature_content[$newFileIncrement][$increment_part][$contentIncrement])==0)
+			{
+			    
+			    $featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+			    chomp($featureLine);
+			}
+			elsif (length($featureLine)>0)
+			{
+	    # 		$createLines=0;
+			    my @split_line=split(/[\s]+/,$featureLine);
+			    my @split_line_input=split(/[\s]+/,$feature_content[$newFileIncrement][$increment_part][$contentIncrement]);
+			    my $i=0;
+			    $featureLine="";
+			    for ($i=0;$i<scalar(@split_line_input);$i++)
+			    {
+				$split_line_input[$i]=($split_line_input[$i]+$split_line[$i])/2;
+				$featureLine=$featureLine.$split_line_input[$i]." ";
+			    }
+			}
+			elsif (length($featureLine)==0)
+			{
+			    $featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+			    chomp($featureLine);
+			}
+	        }
 	 }
-	 $localContentIncrement++;
-      }
-      else
-      {
-	LOOP_CONTENT: foreach $scoreName(sort keys %scoreFileContent)
+	else
+	 {
+	    my @split_line_input=split(" ",$scorer_content[$newFileIncrement][$increment_part][$contentIncrement]);
+	    my @split_line_feat_input=split(/[\s]+/,$feature_content[$newFileIncrement][$increment_part][$contentIncrement]);
+	    my @split_line=split(" ",$line);
+	    if (scalar(@split_line)>4)
+	    {
+		$split_line_input[3]=$split_line[3]+$split_line_input[3];
+	    }
+	    if (scalar(@split_line_input)>4)
+	    {
+		if (scalar(@split_line)>4)
+		{
+			if ($split_line[2]<$split_line_input[2])
+			{
+				$split_line_input[2]=$split_line[2];
+			}
+		}
+		else
+		{
+			## Nothing to do
+		}
+		$maxContent=$split_line_input[2]+2;
+#                print STDERR "maxContent : $maxContent : ".$scorer_content[$newFileIncrement][$increment_part][$contentIncrement]."\n"; 
+	    }
+	    else
 	{
-	  if ((rindex($scoreFileContent{$fileIncrement}{$contentIncrement}{$localContentIncrement},"END")>-1) || ($minInfoSize < $localContentIncrement))
-	  {
-	      $lineScore="SCORES_TXT_END_0";
-	      $lineFeature="FEATURES_TXT_END_0";
-	      $localContentIncrement=0;
-	      $contentIncrement++;
-	      $minInfoSize=-1;
-	      last LOOP_CONTENT;
-	  }
-	  else
-	  {
-	      $lineScore=$lineScore." ".$scoreFileContent{$fileIncrement}{$contentIncrement}{$localContentIncrement};
-	      $lineFeature=$featureFileContent{$fileIncrement}{$contentIncrement}{$localContentIncrement};
-	  }
+		die "scoreFile bad format : ".$scorer_content[$newFileIncrement][$increment_part][$contentIncrement]."\n";
 	}
-	if ($localContentIncrement!=0) 
-	{
-	    $localContentIncrement++;
-	}
+	    $line=$split_line_input[0]." ".$split_line_input[1]." ".$split_line_input[2]." ".$split_line_input[3]." MERGE";
+	    my $i=0;
+	    $featureLine="";
+	    for ($i=0;$i<scalar(@split_line_feat_input);$i++)
+	    {
+# 		$split_line_feat_input[$i]=($split_line_input[$i]+$split_line[$i])/2;
+		if ($i==2)
+		{
+		    $featureLine=$featureLine.$split_line_input[2]." ";
+		}
+		else
+		{
+		    $featureLine=$featureLine.$split_line_feat_input[$i]." ";
+		}
+	    }
+	    
+# 	    $featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+	  }
+	 $newFileIncrement++;
       }
-      $lineScore=~s/^[ ]+//g;
-      $lineScore=~s/[ ]+$//g;
-      $lineScore=~s/[ ]+/ /g;
-      $lineFeature=~s/^[ ]+//g;
-      $lineFeature=~s/[ ]+$//g;
-      $lineFeature=~s/[ ]+/ /g;
-      print SCOREFILE $lineScore."\n";      
-      print FEATUREFILE $lineFeature."\n";      
-      $lineScore="";
-      $lineFeature="";
+      $line=~s/^[ ]+//g;
+      $line=~s/[ ]+$//g;
+      $line=~s/[ ]+/ /g;
+#      $line=~s/( SCORES_TXT_END[^!]*)//g;
+#       print STDERR $line."\n";
+#       if ($createLines>0)
+#       {
+	  print SCOREFILE $line."\n";
+	  print FEATFILE $featureLine."\n";
+#       }
+      $contentIncrement++;
     }
-    close(SCOREFILE);
-    close(FEATUREFILE);
+  $increment_part++;
   }
-  else
-  {
-  # continue with the classical way  
-    $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
-    $cmd = create_extractor_script($cmd, $___WORKING_DIR);
-    &submit_or_exec($cmd,"extract.out","extract.err");
-  }
+  close(SCOREFILE);
+  close(FEATFILE);
+#   `/bin/cp `
+  
+#   $cmd="$mertdir/mergeWeights -c merge.init -s $score_file -f $feature_file";
+#   print STDERR "executing : $cmd\n";
+
+#   if (defined $___JOBS) {
+#     safesystem("$qsubwrapper $pass_old_sge -command='$cmd' -queue-parameter=\"$queue_flags\" -stdout=mergeWeight.out.MERGE -stderr=mergeWeight.err.MERGE" )
+#       or die "MERGE Failed to submit extraction to queue (via $qsubwrapper)";
+#   } else {
+#     safesystem("$cmd > mergeWeight.out.MERGE 2> mergeWeight.err.MERGE") or die "MERGE Failed to do extraction of statistics.";
+#   }
+
+# # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # # 
+
+#   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r ".join(",", @references)." -n $nbest_file";
+#   &submit_or_exec($cmd,"extract.out","extract.err");
+
   # Create the initial weights file for mert: init.opt
 
   my @MIN = @{$featlist->{"mins"}};
@@ -858,12 +926,10 @@ if (defined($scorer_config))
   $cmd = "$mert_mert_cmd -d $DIM $mert_mert_args";
   
   my $mert_settings = " -n $___RANDOM_RESTARTS";
-  my $seed_settings = "";
   if ($___PREDICTABLE_SEEDS) {
       my $seed = $run * 1000;
-      $seed_settings .= " -r $seed";
+      $mert_settings .= " -r $seed";
   }
-  $mert_settings .= $seed_settings;
   if ($___RANDOM_DIRECTIONS) {
     if ($___NUM_RANDOM_DIRECTIONS == 0) {
       $mert_settings .= " -m 50";
@@ -877,25 +943,19 @@ if (defined($scorer_config))
     $mert_settings .= " --threads $__THREADS";
   }
 
-  my $ffiles = "";
-  my $scfiles = "";
+  my $file_settings = "";
   if (defined $prev_feature_file) {
-    $ffiles = "$prev_feature_file,$feature_file";
+    $file_settings .= " --ffile $prev_feature_file,$feature_file";
   }
   else{
-    $ffiles = "$feature_file";
+    $file_settings .= " --ffile $feature_file";
   }
   if (defined $prev_score_file) {
-    $scfiles = "$prev_score_file,$score_file";
+    $file_settings .= " --scfile $prev_score_file,$score_file";
   }
   else{
-    $scfiles = "$score_file";
+    $file_settings .= " --scfile $score_file";
   }
-
-  my $file_settings = " --ffile $ffiles --scfile $scfiles";
-  my $pro_file_settings = "--ffile " . join( " --ffile ", split(/,/, $ffiles)) .
-                          " --scfile " .  join( " --scfile ", split(/,/, $scfiles)); 
-  
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   }
@@ -907,13 +967,13 @@ if (defined($scorer_config))
 
   # pro optimization
   if ($___PAIRWISE_RANKED_OPTIMIZER) {
-    $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    $cmd .= " --pro run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
     &submit_or_exec($cmd,$mert_outfile,$mert_logfile);
   }
   # first pro, then mert
   elsif ($___PRO_STARTING_POINT) {
     # run pro...
-    my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
+    my $pro_cmd = $cmd." --pro run$run.pro.data ; $pro_optimizer -fvals -maxi 30 -nobias binary run$run.pro.data";
     &submit_or_exec($pro_cmd,"run$run.pro.out","run$run.pro.err");
     # ... get results ...
     my %dummy;
@@ -939,8 +999,9 @@ if (defined($scorer_config))
     chomp $extractFiles;
     safesystem ("\\cp -f $extractFiles run$run.$extractFiles") or die;
   }
-#   safesystem ("\\cp -f extract.err run$run.extract.err") or die;
-#   safesystem ("\\cp -f extract.out run$run.extract.out") or die;
+
+#  safesystem ("\\cp -f extract.err run$run.extract.err") or die;
+#  safesystem ("\\cp -f extract.out run$run.extract.out") or die;
   safesystem ("\\cp -f $mert_outfile run$run.$mert_outfile") or die;
   safesystem ("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem ("touch $mert_logfile run$run.$mert_logfile") or die;
@@ -1065,7 +1126,7 @@ if (defined $allsorted){ safesystem ("\\rm -f $allsorted") or die; };
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
+create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu);
 
 # just to be sure that we have the really last finished step marked
 open F, "> finished_step.txt" or die "Can't mark finished step";
@@ -1120,11 +1181,6 @@ sub run_decoder {
     my ($featlist, $run, $need_to_normalize) = @_;
     my $filename_template = "run%d.best$___N_BEST_LIST_SIZE.out";
     my $filename = sprintf($filename_template, $run);
-    my $lsamp_filename = undef;
-    if ($___LATTICE_SAMPLES) {
-      my $lsamp_filename_template = "run%d.lsamp$___LATTICE_SAMPLES.out";
-      $lsamp_filename = sprintf($lsamp_filename_template, $run);
-    }
     
     # user-supplied parameters
     print "params = $___DECODER_FLAGS\n";
@@ -1145,28 +1201,23 @@ sub run_decoder {
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
     my $decoder_config = join(" ", values %model_weights);
-    $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
 
-
     # run the decoder
+    my $nBest_cmd = "-n-best-size $___N_BEST_LIST_SIZE";
     my $decoder_cmd;
-    my $lsamp_cmd = "";
-    if ($___LATTICE_SAMPLES) {
-      $lsamp_cmd = " -lattice-samples $lsamp_filename $___LATTICE_SAMPLES ";
-    }
 
     if (defined $___JOBS && $___JOBS > 0) {
-      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" $lsamp_cmd -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
+      $decoder_cmd = "$moses_parallel_cmd $pass_old_sge -config $___CONFIG -inputtype $___INPUTTYPE -qsub-prefix mert$run -queue-parameters \"$queue_flags\" -decoder-parameters \"$___DECODER_FLAGS $decoder_config\" -n-best-list \"$filename $___N_BEST_LIST_SIZE\" -input-file $___DEV_F -jobs $___JOBS -decoder $___DECODER > run$run.out";
     } else {
-      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config $lsamp_cmd -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
+      $decoder_cmd = "$___DECODER $___DECODER_FLAGS  -config $___CONFIG -inputtype $___INPUTTYPE $decoder_config -n-best-list $filename $___N_BEST_LIST_SIZE -input-file $___DEV_F > run$run.out";
     }
 
     safesystem($decoder_cmd) or die "The decoder died. CONFIG WAS $decoder_config \n";
 
     sanity_check_order_of_lambdas($featlist, $filename);
-    return ($filename, $lsamp_filename);
+    return $filename;
 }
 
 
@@ -1463,21 +1514,4 @@ sub submit_or_exec {
   else {
     safesystem("$cmd > $stdout 2> $stderr") or die "ERROR: Failed to run '$cmd'.";
   }
-}
-
-sub create_extractor_script
-{
-  my ($cmd, $outdir) = @_;
-  my $script_path = File::Spec->catfile($outdir, "extractor.sh");
-
-  open my $out, '>', $script_path
-      or die "Couldn't open $script_path for writing: $!\n";
-  print $out "#!/bin/bash\n";
-  print $out "cd $outdir\n";
-  print $out "$cmd\n";
-  close($out);
-
-  `chmod +x $script_path`;
-
-  return $script_path;
 }
