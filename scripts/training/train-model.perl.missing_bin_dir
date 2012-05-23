@@ -1482,17 +1482,6 @@ sub score_phrase_phrase_extract {
               }
 	      my $extract = "$extract_filename.sorted.gz";
 
-	      if (!($___CONTINUE && -e "$extract_filename.sorted.gz")) {
-	          # sorting
-	          print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
-	          if (-e "$extract_filename.gz") {
-		      safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip -c > $extract_filename.sorted.gz") or die("ERROR");
-	          }
-	          else {
-		      safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR $extract_filename | gzip -c > $extract_filename.sorted.gz") or die("ERROR");
-	          }
-              }
-
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
         my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
@@ -1506,7 +1495,6 @@ sub score_phrase_phrase_extract {
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
-        if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
   
         # sorting inverse phrase-table-half to sync up with regular one
         if ($direction eq "e2f" && ! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
