@@ -37,7 +37,7 @@ void ApplicableRuleTrie::Extend(const UTrieNode &root, int minPos,
     for (std::vector<size_t>::const_iterator r = q->second.begin();
          r != q->second.end(); ++r) {
       size_t index = *r;
-      if (index == minPos || (followsGap && index > minPos) || minPos == -1) {
+      if (index == (size_t)minPos || (followsGap && index > (size_t)minPos) || minPos == -1) {
         ApplicableRuleTrie *subTrie = new ApplicableRuleTrie(index, index,
                                                              child);
         subTrie->Extend(child, index+1, sentMap, false);

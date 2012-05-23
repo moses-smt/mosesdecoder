@@ -100,10 +100,10 @@ public:
 
   std::string getFeatureName(std::size_t idx) const {
     if (idx >= m_index_to_feature_name.size())
-      throw runtime_error("Error: you required an too big index");
+      throw std::runtime_error("Error: you required an too big index");
     std::map<std::size_t, std::string>::const_iterator it = m_index_to_feature_name.find(idx);
     if (it == m_index_to_feature_name.end()) {
-      throw runtime_error("Error: specified id is unknown: " + idx);
+      throw std::runtime_error("Error: specified id is unknown: " + idx);
     } else {
       return it->second;
     }
@@ -113,8 +113,9 @@ public:
     std::map<std::string, std::size_t>::const_iterator it = m_feature_name_to_index.find(name);
     if (it == m_feature_name_to_index.end()) {
       std::string msg = "Error: feature " + name + " is unknown. Known features: ";
-      for (std::map<std::string, std::size_t>::const_iterator it = m_feature_name_to_index.begin(); it != m_feature_name_to_index.end(); it++) {
-        msg += it->first;
+      for (std::map<std::string, std::size_t>::const_iterator cit = m_feature_name_to_index.begin();
+           cit != m_feature_name_to_index.end(); cit++) {
+        msg += cit->first;
         msg += ", ";
       }
 

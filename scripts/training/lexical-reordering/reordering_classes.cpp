@@ -279,11 +279,11 @@ void Model::score_fe(const string& f, const string& e)
     vector<double> scores;
     scorer->score(modelscore->get_scores_fe_prev(), scores);
     double sum = 0;
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_prev[i];
       sum += scores[i];
     }
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       fprintf(file,"%f ",scores[i]/sum);
     }
     //fprintf(file, "||| ");
@@ -293,11 +293,11 @@ void Model::score_fe(const string& f, const string& e)
     vector<double> scores;
     scorer->score(modelscore->get_scores_fe_next(), scores);
     double sum = 0;
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_next[i];
       sum += scores[i];
     }
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       fprintf(file, "%f ", scores[i]/sum);
     }
   }
@@ -314,11 +314,11 @@ void Model::score_f(const string& f)
     vector<double> scores;
     scorer->score(modelscore->get_scores_f_prev(), scores);
     double sum = 0;
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_prev[i];
       sum += scores[i];
     }
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       fprintf(file, "%f ", scores[i]/sum);
     }
     //fprintf(file, "||| ");
@@ -328,11 +328,11 @@ void Model::score_f(const string& f)
     vector<double> scores;
     scorer->score(modelscore->get_scores_f_next(), scores);
     double sum = 0;
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       scores[i] += smoothing_next[i];
       sum += scores[i];
     }
-    for(int i=0; i<scores.size(); ++i) {
+    for(size_t i=0; i<scores.size(); ++i) {
       fprintf(file, "%f ", scores[i]/sum);
     }
   }

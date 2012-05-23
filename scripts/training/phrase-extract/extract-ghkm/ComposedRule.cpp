@@ -108,7 +108,7 @@ Subgraph ComposedRule::CreateSubgraph()
 {
   std::set<const Node *> leaves;
   const std::set<const Node *> &baseLeaves = m_baseRule.GetLeaves();
-  int i = 0;
+  size_t i = 0;
   for (std::set<const Node *>::const_iterator p = baseLeaves.begin();
        p != baseLeaves.end(); ++p) {
     const Node *baseLeaf = *p;
