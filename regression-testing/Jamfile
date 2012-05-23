@@ -2,7 +2,7 @@ import option ;
 
 with-regtest = [ option.get "with-regtest" ] ;
 if $(with-regtest) {
-  path-constant TESTS : tests ;
+  path-constant TESTS : $(with-regtest)/tests ;
   
   rule reg_test ( name : tests * : program : action ) {
     alias $(name) : $(tests:D=).passed ;
