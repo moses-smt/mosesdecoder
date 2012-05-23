@@ -40,7 +40,7 @@ void Alignment::Create(const string& fileName)
   cerr << m_size << " alignment points" << endl;
 
   // allocate memory
-  m_array = (char*) calloc( sizeof( char ), m_size*2 );
+  m_array = (int*) calloc( sizeof(int), m_size*2 );
   m_sentenceEnd = (INDEX*) calloc( sizeof( INDEX ), m_sentenceCount );
 
   if (m_array == NULL) {
@@ -68,7 +68,7 @@ void Alignment::Create(const string& fileName)
     SAFE_GETLINE((*fileP), line, LINE_MAX_LENGTH, '\n');
     if (fileP->eof()) break;
     vector<string> alignmentSequence = Tokenize( line );
-    for(int i=0; i<alignmentSequence.size(); i++) {
+    for(size_t i=0; i<alignmentSequence.size(); i++) {
       int s,t;
       // cout << "scaning " << alignmentSequence[i].c_str() << endl;
       if (! sscanf(alignmentSequence[i].c_str(), "%d-%d", &s, &t)) {
@@ -121,13 +121,11 @@ vector<string> Alignment::Tokenize( const char input[] )
   return token;
 }
 
-bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
-                                 char source_start, char source_end,
-                                 char &target_start, char &target_end,
-                                 char &pre_null, char &post_null )
+bool Alignment::PhraseAlignment( INDEX sentence, int target_length,
+                                 int source_start, int source_end,
+                                 int &target_start, int &target_end,
+                                 int &pre_null, int &post_null )
 {
-  vector< char > alignedTargetWords;
-
   // get index for first alignment point
   INDEX sentenceStart = 0;
   if (sentence > 0) {
@@ -138,9 +136,9 @@ bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
   target_start = target_length;
   target_end = 0;
   for(INDEX ap = sentenceStart; ap <= m_sentenceEnd[ sentence ]; ap += 2 ) {
-    char source = m_array[ ap ];
+    int source = m_array[ ap ];
     if (source >= source_start && source <= source_end ) {
-      char target =  m_array[ ap+1 ];
+      int target =  m_array[ ap+1 ];
       if (target < target_start) target_start = target;
       if (target > target_end )  target_end   = target;
     }
@@ -151,9 +149,9 @@ bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
 
   // check consistency
   for(INDEX ap = sentenceStart; ap <= m_sentenceEnd[ sentence ]; ap += 2 ) {
-    char target =  m_array[ ap+1 ];
+    int target =  m_array[ ap+1 ];
     if (target >= target_start && target <= target_end ) {
-      char source = m_array[ ap ];
+      int source = m_array[ ap ];
       if (source < source_start || source > source_end) {
         return false; // alignment point out of range
       }
@@ -165,19 +163,19 @@ bool Alignment::PhraseAlignment( INDEX sentence, char target_length,
     m_unaligned[i] = true;
   }
   for(INDEX ap = sentenceStart; ap <= m_sentenceEnd[ sentence ]; ap += 2 ) {
-    char target =  m_array[ ap+1 ];
+    int target =  m_array[ ap+1 ];
     m_unaligned[ target ] = false;
   }
 
   // prior unaligned words
   pre_null = 0;
-  for(char target = target_start-1; target >= 0 && m_unaligned[ target ]; target--) {
+  for(int target = target_start-1; target >= 0 && m_unaligned[ target ]; target--) {
     pre_null++;
   }
 
   // post unaligned words;
   post_null = 0;
-  for(char target = target_end+1; target < target_length && m_unaligned[ target ]; target++) {
+  for(int target = target_end+1; target < target_length && m_unaligned[ target ]; target++) {
     post_null++;
   }
   return true;
@@ -192,7 +190,7 @@ void Alignment::Save(const string& fileName ) const
   }
 
   fwrite( &m_size, sizeof(INDEX), 1, pFile );
-  fwrite( m_array, sizeof(char), m_size*2, pFile ); // corpus
+  fwrite( m_array, sizeof(int), m_size*2, pFile ); // corpus
 
   fwrite( &m_sentenceCount, sizeof(INDEX), 1, pFile );
   fwrite( m_sentenceEnd, sizeof(INDEX), m_sentenceCount, pFile); // sentence index
@@ -211,8 +209,8 @@ void Alignment::Load(const string& fileName )
 
   fread( &m_size, sizeof(INDEX), 1, pFile );
   cerr << "alignment points in corpus: " << m_size << endl;
-  m_array = (char*) calloc( sizeof(char), m_size*2 );
-  fread( m_array, sizeof(char), m_size*2, pFile ); // corpus
+  m_array = (int*) calloc( sizeof(int), m_size*2 );
+  fread( m_array, sizeof(int), m_size*2, pFile ); // corpus
 
   fread( &m_sentenceCount, sizeof(INDEX), 1, pFile );
   cerr << "sentences in corpus: " << m_sentenceCount << endl;

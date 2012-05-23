@@ -50,16 +50,16 @@ bool PhrasePairCollection::GetCollection( const vector< string >& sourceString )
          << ", starting at word " << source_start
          << " of " << sentence_length
          << ". target sentence has " << target_length << " words.";
-    char target_start, target_end, pre_null, post_null;
+    int target_start, target_end, pre_null, post_null;
     if (m_alignment->PhraseAlignment( sentence_id, target_length, source_start, source_end, target_start, target_end, pre_null, post_null)) {
       cerr << " aligned to [" << (int)target_start << "," << (int)target_end << "]";
       cerr << " +(" << (int)pre_null << "," << (int)post_null << ")";
 			bool null_boundary_words = false;
-      for( char pre = 0; pre <= pre_null && (pre==0||null_boundary_words); pre++ ) {
-        for( char post = 0; post <= post_null && (post==0||null_boundary_words); post++ ) {
+      for (int pre = 0; pre <= pre_null && (pre == 0 || null_boundary_words); pre++ ) {
+        for (int post = 0; post <= post_null && (post == 0 || null_boundary_words); post++ ) {
           vector< WORD_ID > targetString;
           cerr << "; ";
-          for( char target = target_start-pre; target <= target_end+post; target++ ) {
+          for (int target = target_start - pre; target <= target_end + post; target++) {
             targetString.push_back( m_targetCorpus->GetWordId( sentence_id, target) );
             cerr << m_targetCorpus->GetWord( sentence_id, target) << " ";
           }
@@ -89,7 +89,7 @@ bool PhrasePairCollection::GetCollection( const vector< string >& sourceString )
 		}
     cerr << endl;
 
-    if (found > m_max_lookup) {
+    if (found > (INDEX)m_max_lookup) {
       i += found/m_max_lookup-1;
     }
   }
@@ -172,7 +172,7 @@ void PhrasePairCollection::PrintHTML() const
 	if (singleton) cout << "</table></div>\n";
 	else if (pp_target > 9)	cout << "</div>";
 
-	int max_mismatch = m_max_pp/3;
+	size_t max_mismatch = m_max_pp/3;
 	// unaligned phrases
 	if (m_unaligned.size() > 0) {
 		cout << "<p class=\"pp_singleton_header\">unaligned" 
@@ -181,7 +181,7 @@ void PhrasePairCollection::PrintHTML() const
 		int step_size = 1;
 		if (m_unaligned.size() > max_mismatch)
 			step_size = (m_unaligned.size()+max_mismatch-1) / max_mismatch;
-		for(int i=0;i<m_unaligned.size();i+=step_size)
+		for(size_t i=0;i<m_unaligned.size();i+=step_size)
 			m_unaligned[i]->PrintClippedHTML( &cout, 160 );
 		cout << "</table>";
 	}
@@ -194,7 +194,7 @@ void PhrasePairCollection::PrintHTML() const
 		int step_size = 1;
 		if (m_mismatch.size() > max_mismatch)
 			step_size = (m_mismatch.size()+max_mismatch-1) / max_mismatch;
-		for(int i=0;i<m_mismatch.size();i+=step_size)
+		for(size_t i=0;i<m_mismatch.size();i+=step_size)
 			m_mismatch[i]->PrintClippedHTML( &cout, 160 );
 		cout << "</table>";
 	}	

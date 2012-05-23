@@ -22,7 +22,7 @@ enum {
   ALIGNED = 5
 };
 
-Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, char source_length, char target_length, char source_start, char source_end )
+Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, int source_length, int target_length, int source_start, int source_end )
     :m_suffixArray(sa)
     ,m_targetCorpus(tc)
     ,m_alignment(a)
@@ -44,8 +44,8 @@ Mismatch::Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sente
   m_num_alignment_points =
       m_alignment->GetNumberOfAlignmentPoints( sentence_id );
   for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
-    m_source_unaligned[ m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
-    m_target_unaligned[ m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
+    m_source_unaligned[ (int)m_alignment->GetSourceWord( sentence_id, ap ) ] = false;
+    m_target_unaligned[ (int)m_alignment->GetTargetWord( sentence_id, ap ) ] = false;
   }
   for(int i = source_start; i <= source_end; i++) {
     if (!m_source_unaligned[ i ]) {
@@ -58,8 +58,8 @@ Mismatch::~Mismatch () {}
 
 void Mismatch::PrintClippedHTML( ostream* out, int width )
 {
-	char source_annotation[256], target_annotation[256];
-	vector< string > label_class;
+    int source_annotation[256], target_annotation[256];
+    vector< string > label_class;
 	label_class.push_back( "" );
 	label_class.push_back( "mismatch_pre_aligned" );
 	label_class.push_back( "mismatch_post_aligned" );
@@ -281,7 +281,7 @@ void Mismatch::PrintClippedHTML( ostream* out, int width )
 	*out << "</td></tr>";
 }
 
-void Mismatch::LabelSourceMatches( char *source_annotation, char *target_annotation, char source_id, char label ) {
+void Mismatch::LabelSourceMatches(int *source_annotation, int *target_annotation, int source_id, int label ) {
 	for(INDEX ap=0; ap<m_num_alignment_points; ap++) {
 		if (m_alignment->GetSourceWord( m_sentence_id, ap ) == source_id) {
 			source_annotation[ source_id ] = label;

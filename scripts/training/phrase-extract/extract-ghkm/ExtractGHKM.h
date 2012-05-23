@@ -28,6 +28,9 @@
 #include <vector>
 
 namespace Moses {
+
+class OutputFileStream;
+
 namespace GHKM {
 
 struct Options;
@@ -43,6 +46,7 @@ class ExtractGHKM
   void Error(const std::string &) const;
   void OpenInputFileOrDie(const std::string &, std::ifstream &);
   void OpenOutputFileOrDie(const std::string &, std::ofstream &);
+  void OpenOutputFileOrDie(const std::string &, OutputFileStream &);
   void RecordTreeLabels(const ParseTree &, std::set<std::string> &);
   void CollectWordLabelCounts(ParseTree &,
                               std::map<std::string, int> &,

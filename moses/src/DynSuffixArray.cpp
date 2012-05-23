@@ -82,7 +82,7 @@ int DynSuffixArray::F_firstIdx(unsigned word)
   //      if ordering of vocab is not consecutive (ie..after deletions) 
   int low = std::lower_bound(m_F->begin(), m_F->end(), word) - m_F->begin();
   //cerr << "in F_firstIdx with word = " << word << " and low = " << low <<  " and F->size() =" << m_F->size() << endl;
-  if(low >= m_F->size())
+  if((size_t)low >= m_F->size())
     return -1;
   else
     return low;
@@ -150,7 +150,7 @@ void DynSuffixArray::Reorder(unsigned j, unsigned jprime)
     // checking.  
     bool seenit = seen.insert(std::make_pair(j, jprime)).second;
     if(seenit) {
-      for(int i=1; i < m_SA->size(); ++i) {
+      for(size_t i=1; i < m_SA->size(); ++i) {
         if(m_corpus->at(m_SA->at(i)) < m_corpus->at(m_SA->at(i-1))) {
           cerr << "PROBLEM WITH SUFFIX ARRAY REORDERING. EXITING...\n";
           exit(1);

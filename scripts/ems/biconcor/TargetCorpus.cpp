@@ -97,12 +97,12 @@ WORD TargetCorpus::GetWordFromId( const WORD_ID id ) const
   return m_vcb.GetWord( id );
 }
 
-WORD TargetCorpus::GetWord( INDEX sentence, char word ) const
+WORD TargetCorpus::GetWord( INDEX sentence, int word ) const
 {
   return m_vcb.GetWord( GetWordId( sentence, word ) );
 }
 
-WORD_ID TargetCorpus::GetWordId( INDEX sentence, char word ) const
+WORD_ID TargetCorpus::GetWordId( INDEX sentence, int word ) const
 {
   if (sentence == 0) {
     return m_array[ word ];

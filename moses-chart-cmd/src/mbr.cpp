@@ -130,9 +130,9 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList)
   int minMBRLossIdx = -1;
 
   /* Main MBR computation done here */
-  for (int i = 0; i < nBestList.GetSize(); i++) {
+  for (size_t i = 0; i < nBestList.GetSize(); i++) {
     weightedLossCumul = 0;
-    for (int j = 0; j < nBestList.GetSize(); j++) {
+    for (size_t j = 0; j < nBestList.GetSize(); j++) {
       if ( i != j) {
         bleu = calculate_score(translations, j, i,ngram_stats );
         weightedLoss = ( 1 - bleu) * ( joint_prob_vec[j]/marginal);

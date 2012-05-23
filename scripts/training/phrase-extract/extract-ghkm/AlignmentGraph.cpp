@@ -315,7 +315,7 @@ void AlignmentGraph::AttachUnalignedSourceWords()
 {
   // Find the unaligned source words (if any).
   std::set<int> unaligned;
-  for (int i = 0; i < m_sourceNodes.size(); ++i) {
+  for (size_t i = 0; i < m_sourceNodes.size(); ++i) {
     const Node &sourceNode = (*m_sourceNodes[i]);
     if (sourceNode.GetParents().empty()) {
       unaligned.insert(i);
@@ -347,7 +347,7 @@ Node *AlignmentGraph::DetermineAttachmentPoint(int index)
     return m_root;
   }
   // Find the nearest aligned neighbour to the right, if any.
-  int j = index;
+  size_t j = index;
   while (++j < m_sourceNodes.size()) {
     if (!m_sourceNodes[j]->GetParents().empty()) {
       break;

@@ -1,4 +1,4 @@
-#! /usr/bin/perl
+#! /usr/bin/perl -w 
 
 # example
 #  ./extract-parallel.perl 8 ./coreutils-8.9/src/split "./coreutils-8.9/src/sort --batch-size=253" ./extract ./corpus.5.en ./corpus.5.ar ./align.ar-en.grow-diag-final-and ./extracted 7 --NoFileLimit orientation 
@@ -8,22 +8,22 @@ use File::Basename;
 
 sub NumStr($);
 
-	   print "Started ".localtime() ."\n";
+print "Started ".localtime() ."\n";
 
-	   my $numParallel= $ARGV[0];
-	   my $splitCmd= $ARGV[1];
-	   my $sortCmd= $ARGV[2];
-	   my $extractCmd= $ARGV[3];
+my $numParallel= $ARGV[0];
+my $splitCmd= $ARGV[1];
+my $sortCmd= $ARGV[2];
+my $extractCmd= $ARGV[3];
 
-	   my $target = $ARGV[4]; # 1st arg of extract argument
-	   my $source = $ARGV[5]; # 2nd arg of extract argument
-	   my $align = $ARGV[6]; # 3rd arg of extract argument
-	   my $extract = $ARGV[7]; # 4th arg of extract argument
+my $target = $ARGV[4]; # 1st arg of extract argument
+my $source = $ARGV[5]; # 2nd arg of extract argument
+my $align = $ARGV[6]; # 3rd arg of extract argument
+my $extract = $ARGV[7]; # 4th arg of extract argument
 
-	   my $otherExtractArgs= "";
-	   for (my $i = 8; $i < $#ARGV + 1; ++$i)
+my $otherExtractArgs= "";
+for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
-    $otherExtractArgs .= $ARGV[$i] ." ";
+  $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
@@ -34,17 +34,37 @@ my $linesPerSplit = int($totalLines / $numParallel) + 1;
 
 print "total=$totalLines line-per-split=$linesPerSplit \n";
 
-my $cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
-print STDERR "Executing: $cmd \n";
-`$cmd`;
+my $cmd;
+if ($numParallel > 1)
+{
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
+	print STDERR "Executing: $cmd \n";
+	`$cmd`;
+	
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
+	print STDERR "Executing: $cmd \n";
+	`$cmd`;
 
-$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
-print STDERR "Executing: $cmd \n";
-`$cmd`;
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
+	print STDERR "Executing: $cmd \n";
+	`$cmd`;
+}
+else
+{
+  my $numStr = NumStr(0);
 
-$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
-print STDERR "Executing: $cmd \n";
-`$cmd`;
+  $cmd = "ln -s $target $TMPDIR/target.$numStr";
+	print STDERR "Executing: $cmd \n";
+	`$cmd`;
+
+  $cmd = "ln -s $source $TMPDIR/source.$numStr";
+	print STDERR "Executing: $cmd \n";
+	`$cmd`;
+
+  $cmd = "ln -s $align $TMPDIR/align.$numStr";
+	print STDERR "Executing: $cmd \n";
+	`$cmd`;
+}
 
 # run extract
 my $isParent = 1;
@@ -82,46 +102,31 @@ else
 }
 
 # merge
-if ($numParallel > 1)
+my $catCmd = "zcat ";
+my $catInvCmd = "zcat ";
+my $catOCmd = "zcat ";
+for (my $i = 0; $i < $numParallel; ++$i)
 {
-  my $extractCmd = "cat ";
-  my $extractInvCmd = "cat ";
-  my $extractOrderingCmd = "cat ";
-  for (my $i = 0; $i < $numParallel; ++$i)
-  {
-      my $numStr = NumStr($i);
-      $extractCmd .= "$TMPDIR/extract.$numStr ";
-      $extractInvCmd .= "$TMPDIR/extract.$numStr.inv ";
-      $extractOrderingCmd .= "$TMPDIR/extract.$numStr.o ";
-  }
-
-  $extractCmd .= "> $extract \n";
-  $extractInvCmd .= "> $extract.inv \n";
-  $extractOrderingCmd .= "> $extract.o \n";
-  print STDERR $extractCmd;
-  print STDERR $extractInvCmd;
-  print STDERR $extractOrderingCmd;
-
-  systemCheck($extractCmd);
-  systemCheck($extractInvCmd);
-
-  my $numStr = NumStr(0);
-  if (-e "$TMPDIR/extract.$numStr.o")
-  {
-    systemCheck($extractOrderingCmd);
-  }
+		my $numStr = NumStr($i);
+		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
+		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
+		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
 }
-else
+
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
+print STDERR $catCmd;
+print STDERR $catInvCmd;
+print STDERR $catOCmd;
+
+systemCheck($catCmd);
+systemCheck($catInvCmd);
+
+my $numStr = NumStr(0);
+if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
-  rename "$TMPDIR/extract.0", "$extract";
-  rename "$TMPDIR/extract.0.inv", "$extract.inv";
-
-
-  my $numStr = NumStr(0);
-  if (-e "$TMPDIR/extract.$numStr.o")
-  {
-    rename "$TMPDIR/extract.0.o", "$extract.o";
-  }
+	systemCheck($catOCmd);
 }
 
 
@@ -130,6 +135,9 @@ print STDERR $cmd;
 `$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
+
+# -----------------------------------------
+# -----------------------------------------
 
 sub systemCheck($)
 {
