@@ -123,9 +123,9 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 
     RuleTableTrie *dict;
     if (staticData.GetParsingAlgorithm() == ParseScope3) {
-      dict = new RuleTableUTrie(m_numScoreComponent, this);
+      dict = new RuleTableUTrie(GetNumScoreComponents(), this);
     } else {
-      dict = new PhraseDictionarySCFG(m_numScoreComponent, this);
+      dict = new PhraseDictionarySCFG(GetNumScoreComponents(), this);
     }
     bool ret = dict->Load(GetInput()
                          , GetOutput()
@@ -134,7 +134,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
-    assert(ret);
+    CHECK(ret);
     return dict;
   } else if (m_implementation == ALSuffixArray) {
     // memory phrase table
