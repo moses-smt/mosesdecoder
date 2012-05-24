@@ -42,6 +42,8 @@ if $(location) {
   install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
 
   install phrase-extract : training/phrase-extract//programs : <location>$(location)/training/phrase-extract ;
+  install pcfg-extract : training/phrase-extract/pcfg-extract//pcfg-extract : <location>$(location)/training/phrase-extract/pcfg-extract ;
+  install pcfg-score : training/phrase-extract/pcfg-score//pcfg-score : <location>$(location)/training/phrase-extract/pcfg-score ;
   install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
   install symal : training/symal//symal : <location>$(location)/training/symal ;
 

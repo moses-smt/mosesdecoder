@@ -41,8 +41,7 @@ class Node
   Node(const std::string &label, NodeType type)
       : m_label(label)
       , m_type(type)
-      , m_children()
-      , m_parents() {}
+      , m_pcfgScore(0.0f) {}
 
   ~Node();
 
@@ -50,12 +49,14 @@ class Node
   NodeType GetType() const { return m_type; }
   const std::vector<Node*> &GetChildren() const { return m_children; }
   const std::vector<Node*> &GetParents() const { return m_parents; }
+  float GetPcfgScore() const { return m_pcfgScore; }
   const Span &GetSpan() const { return m_span; }
   const Span &GetComplementSpan() const { return m_complementSpan; }
   const std::vector<const Subgraph*> &GetRules() const { return m_rules; }
 
   void SetChildren(const std::vector<Node*> &c) { m_children = c; }
   void SetParents(const std::vector<Node*> &p) { m_parents = p; }
+  void SetPcfgScore(float s) { m_pcfgScore = s; }
   void SetSpan(const Span &s) { m_span = s; }
   void SetComplementSpan(const Span &cs) { m_complementSpan = cs; }
 
@@ -92,6 +93,7 @@ class Node
   NodeType m_type;
   std::vector<Node*> m_children;
   std::vector<Node*> m_parents;
+  float m_pcfgScore;
   Span m_span;
   Span m_complementSpan;
   std::vector<const Subgraph*> m_rules;

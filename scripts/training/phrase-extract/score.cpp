@@ -71,6 +71,7 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
 LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
+bool pcfgFlag = false;
 bool wordAlignmentFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
@@ -107,6 +108,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--Hierarchical") == 0) {
       hierarchicalFlag = true;
       cerr << "processing hierarchical rules\n";
+    } else if (strcmp(argv[i],"--PCFG") == 0) {
+      pcfgFlag = true;
+      cerr << "including PCFG scores\n";
     } else if (strcmp(argv[i],"--WordAlignment") == 0) {
       wordAlignmentFlag = true;
       cerr << "outputing word alignment" << endl;
@@ -200,6 +204,7 @@ int main(int argc, char* argv[])
 	
   // loop through all extracted phrase translations
   float lastCount = 0.0f;
+  float lastPcfgSum = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
   char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
@@ -214,6 +219,7 @@ int main(int argc, char* argv[])
     // identical to last line? just add count
     if (strcmp(line,lastLine) == 0) {
       lastPhrasePair->count += lastCount;
+      lastPhrasePair->pcfgSum += lastPcfgSum;
       continue;
     }
     strcpy( lastLine, line );
@@ -222,10 +228,12 @@ int main(int argc, char* argv[])
     PhraseAlignment phrasePair;
     phrasePair.create( line, i );
     lastCount = phrasePair.count;
+    lastPcfgSum = phrasePair.pcfgSum;
 
     // only differs in count? just add count
     if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair )) {
       lastPhrasePair->count += phrasePair.count;
+      lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
       continue;
     }
 
@@ -446,6 +454,16 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       countOfCounts[ countInt ]++;
   }
 
+  // compute PCFG score
+  float pcfgScore;
+  if (pcfgFlag && !inverseFlag) {
+    float pcfgSum = 0;
+    for(size_t i=0; i<phrasePair.size(); ++i) {
+        pcfgSum += phrasePair[i]->pcfgSum;
+    }
+    pcfgScore = pcfgSum / count;
+  }
+
   // output phrases
   const PHRASE &phraseS = phrasePair[0]->GetSource();
   const PHRASE &phraseT = phrasePair[0]->GetTarget();
@@ -499,6 +517,11 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (unalignedFWFlag) {
     double penalty = computeUnalignedFWPenalty( phraseS, phraseT, bestAlignment);
     phraseTableFile << " " << ( logProbFlag ? negLogProb*log(penalty) : penalty );
+  }
+
+  // target-side PCFG score
+  if (pcfgFlag && !inverseFlag) {
+    phraseTableFile << " " << pcfgScore;
   }
 
   phraseTableFile << " ||| ";

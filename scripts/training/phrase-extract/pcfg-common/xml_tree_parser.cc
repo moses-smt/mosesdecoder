@@ -1,6 +1,6 @@
 /***********************************************************************
  Moses - statistical machine translation system
- Copyright (C) 2006-2011 University of Edinburgh
+ Copyright (C) 2006-2012 University of Edinburgh
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,9 +17,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "XmlTreeParser.h"
+#include "xml_tree_parser.h"
 
-#include "ParseTree.h"
+#include "exception.h"
 #include "tables-core.h"
 #include "XmlException.h"
 #include "XmlTree.h"
@@ -28,16 +28,13 @@
 #include <vector>
 
 namespace Moses {
-namespace GHKM {
+namespace PCFG {
 
-XmlTreeParser::XmlTreeParser(std::set<std::string> &labelSet,
-                             std::map<std::string, int> &topLabelSet)
-    : m_labelSet(labelSet)
-    , m_topLabelSet(topLabelSet)
+XmlTreeParser::XmlTreeParser()
 {
 }
 
-std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
+std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line)
 {
   m_line = line;
   m_tree.Clear();
@@ -55,13 +52,12 @@ std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
   return ConvertTree(*root, m_words);
 }
 
-// Converts a SyntaxNode tree to a Moses::GHKM::ParseTree.
-std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
+// Converts a SyntaxNode tree to a Moses::PCFG::PcfgTree.
+std::auto_ptr<PcfgTree> XmlTreeParser::ConvertTree(
     const SyntaxNode &tree,
     const std::vector<std::string> &words)
 {
-  std::auto_ptr<ParseTree> root(new ParseTree(tree.GetLabel()));
-  root->SetPcfgScore(tree.GetPcfgScore());
+  std::auto_ptr<PcfgTree> root(new PcfgTree(tree.GetLabel()));
   const std::vector<SyntaxNode*> &children = tree.GetChildren();
   if (children.empty()) {
     if (tree.GetStart() != tree.GetEnd()) {
@@ -70,20 +66,20 @@ std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
           << "-" << tree.GetEnd() << "): this is currently unsupported";
       throw Exception(msg.str());
     }
-    std::auto_ptr<ParseTree> leaf(new ParseTree(words[tree.GetStart()]));
-    leaf->SetParent(root.get());
+    std::auto_ptr<PcfgTree> leaf(new PcfgTree(words[tree.GetStart()]));
+    leaf->set_parent(root.get());
     root->AddChild(leaf.release());
   } else {
     for (std::vector<SyntaxNode*>::const_iterator p = children.begin();
          p != children.end(); ++p) {
       assert(*p);
-      std::auto_ptr<ParseTree> child = ConvertTree(**p, words);
-      child->SetParent(root.get());
+      std::auto_ptr<PcfgTree> child = ConvertTree(**p, words);
+      child->set_parent(root.get());
       root->AddChild(child.release());
     }
   }
   return root;
 }
 
-}  // namespace GHKM
+}  // namespace PCFG
 }  // namespace Moses

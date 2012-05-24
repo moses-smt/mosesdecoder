@@ -30,7 +30,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
@@ -101,6 +101,7 @@ $_HELP = 1
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'ghkm' => \$_GHKM,
+		       'pcfg' => \$_PCFG,
 		       'extract-options=s' => \$_EXTRACT_OPTIONS,
 		       'score-options=s' => \$_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
@@ -1335,6 +1336,7 @@ sub extract_phrase {
         $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
+        $cmd .= " --PCFG" if $_PCFG;
         if (!defined($_GHKM)) {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
@@ -1480,6 +1482,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --UnalignedPenalty" if $UNALIGNED_COUNT;
         $cmd .= " --UnalignedFunctionWordPenalty ".($inverse ? $UNALIGNED_FW_F : $UNALIGNED_FW_E) if $UNALIGNED_FW_COUNT;
         $cmd .= " --MinCountHierarchical $MIN_COUNT_HIERARCHICAL" if $MIN_COUNT_HIERARCHICAL;
+        $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
         print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
@@ -1788,6 +1791,7 @@ sub create_ini {
    $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
    $basic_weight_count++ unless defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
    $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
+   $basic_weight_count++ if $_PCFG;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      $num_of_ttables++;
      my $ff = $f;

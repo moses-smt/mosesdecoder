@@ -42,11 +42,12 @@ void SyntaxTree::Clear()
   m_index.clear();
 }
 
-void SyntaxTree::AddNode( int startPos, int endPos, std::string label )
+SyntaxNode *SyntaxTree::AddNode( int startPos, int endPos, std::string label )
 {
   SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
   m_nodes.push_back( newNode );
   m_index[ startPos ][ endPos ].push_back( newNode );
+  return newNode;
 }
 
 ParentNodes SyntaxTree::Parse()

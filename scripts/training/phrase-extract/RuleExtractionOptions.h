@@ -45,6 +45,7 @@ public:
   bool targetSyntax;
   bool duplicateRules;
   bool fractionalCounting;
+  bool pcfgScore;
   bool outputNTLengths;
   bool gzOutput;
   
@@ -74,6 +75,7 @@ public:
     , targetSyntax(false)
     , duplicateRules(true)
     , fractionalCounting(true)
+    , pcfgScore(false)
     , outputNTLengths(false)
     , gzOutput(false)
   {}
