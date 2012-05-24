@@ -1,8 +1,0 @@
-TRANSLATION_1=i ask you , therefore , mr president , are the different labour costs not therefore also a reduction of the free competition in the european union ? 
-TRANSLATION_2=if we look at the fälligkeitspläne the implementation of the budget for the categories 2 , 3 , 4 and 7 to , we see that only an average of 8 % of all commitments by payments are met . 
-TRANSLATION_3=three years ago , we have with our employment initiative started by small and medium-sized enterprises halfen , chancenkapital to obtain . 
-TRANSLATION_4=parliament wants the in two ways to do . 
-TRANSLATION_5=only then will the european institutions also its mandate fair . 
-LMLOAD_TIME ~ 8.00
-PTLOAD_TIME ~ 9.00
-TOTAL_WALLTIME ~ 200

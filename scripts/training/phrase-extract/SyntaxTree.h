@@ -39,6 +39,7 @@ public:
     :m_start(startPos)
     ,m_end(endPos)
     ,m_label(label)
+    ,m_parent(0)
   {}
   int GetStart() const {
     return m_start;
@@ -48,6 +49,18 @@ public:
   }
   std::string GetLabel() const {
     return m_label;
+  }
+  SyntaxNode *GetParent() {
+    return m_parent;
+  }
+  void SetParent(SyntaxNode *parent) {
+    m_parent = parent;
+  }
+  void AddChild(SyntaxNode* child) {
+    m_children.push_back(child);
+  }
+  const std::vector< SyntaxNode* > &GetChildren() const {
+    return m_children;
   }
 };
 
@@ -72,9 +85,13 @@ protected:
 
 public:
   SyntaxTree() {
-    m_emptyNode.clear();
+    m_top = 0;  // m_top doesn't get set unless ConnectNodes is called.
   }
   ~SyntaxTree();
+
+  SyntaxNode *GetTop() {
+    return m_top;
+  }
 
   void AddNode( int startPos, int endPos, std::string label );
   ParentNodes Parse();
@@ -86,6 +103,8 @@ public:
   size_t GetNumWords() const {
     return m_index.size();
   }
+  void ConnectNodes();
+  void Clear();
   std::string ToString() const;
 };
 

@@ -3,9 +3,15 @@
 # $Id$
 use strict;
 
+my $lowercase = 0;
+if ($ARGV[0] eq "-lc") {
+  $lowercase = 1;
+  shift;
+}
+
 my $stem = $ARGV[0];
 if (!defined $stem) {
-  print STDERR "usage: multi-bleu.pl reference < hypothesis\n";
+  print STDERR "usage: multi-bleu.pl [-lc] reference < hypothesis\n";
   print STDERR "Reads the references from reference or reference0, reference1, ...\n";
   exit(1);
 }
@@ -35,12 +41,14 @@ my(@CORRECT,@TOTAL,$length_translation,$length_reference);
 my $s=0;
 while(<STDIN>) {
     chop;
+    $_ = lc if $lowercase;
     my @WORD = split;
     my %REF_NGRAM = ();
     my $length_translation_this_sentence = scalar(@WORD);
     my ($closest_diff,$closest_length) = (9999,9999);
     foreach my $reference (@{$REF[$s]}) {
 #      print "$s $_ <=> $reference\n";
+  $reference = lc($reference) if $lowercase;
 	my @WORD = split(/ /,$reference);
 	my $length = scalar(@WORD);
         my $diff = abs($length_translation_this_sentence-$length);

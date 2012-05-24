@@ -1,15 +1,11 @@
-#ifndef __PERSCORER_H__
-#define __PERSCORER_H__
+#ifndef MERT_PER_SCORER_H_
+#define MERT_PER_SCORER_H_
 
-#include <iostream>
 #include <set>
-#include <sstream>
 #include <string>
 #include <vector>
 #include "Types.h"
 #include "Scorer.h"
-
-using namespace std;
 
 class ScoreStats;
 
@@ -22,22 +18,13 @@ class ScoreStats;
 class PerScorer: public StatisticsBasedScorer
 {
 public:
-  explicit PerScorer(const string& config = "");
+  explicit PerScorer(const std::string& config = "");
   ~PerScorer();
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-
-  virtual void whoami() const {
-    cerr << "I AM PerScorer" << std::endl;
-  }
-
-  virtual size_t NumberOfScores() const {
-    // cerr << "PerScorer: 3" << endl;
-    return 3;
-  }
-
-  virtual float calculateScore(const vector<int>& comps) const;
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
+  virtual std::size_t NumberOfScores() const { return 3; }
+  virtual float calculateScore(const std::vector<int>& comps) const;
 
 private:
   // no copying allowed
@@ -45,8 +32,8 @@ private:
   PerScorer& operator=(const PerScorer&);
 
   // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
+  std::vector<std::size_t> m_ref_lengths;
+  std::vector<std::multiset<int> > m_ref_tokens;
 };
 
-#endif  // __PERSCORER_H__
+#endif  // MERT_PER_SCORER_H_

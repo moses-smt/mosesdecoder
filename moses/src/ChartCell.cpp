@@ -57,15 +57,6 @@ ChartCell::~ChartCell()
   delete m_sourceWordLabel;
 }
 
-/** Get all hypotheses in the cell that have the specified constituent label */
-const HypoList &ChartCell::GetSortedHypotheses(const Word &constituentLabel) const
-{
-  std::map<Word, ChartHypothesisCollection>::const_iterator
-  iter = m_hypoColl.find(constituentLabel);
-  CHECK(iter != m_hypoColl.end());
-  return iter->second.GetSortedHypotheses();
-}
-
 /** Add the given hypothesis to the cell */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {
@@ -76,7 +67,7 @@ bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 /** Pruning */
 void ChartCell::PruneToSize()
 {
-  std::map<Word, ChartHypothesisCollection>::iterator iter;
+  MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
     coll.PruneToSize(m_manager);
@@ -97,10 +88,8 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   RuleCubeQueue queue(m_manager);
 
   // add all trans opt into queue. using only 1st child node.
-  ChartTranslationOptionList::const_iterator iterList;
-  for (iterList = transOptList.begin(); iterList != transOptList.end(); ++iterList) 
-  {
-    const ChartTranslationOption &transOpt = **iterList;
+  for (size_t i = 0; i < transOptList.GetSize(); ++i) {
+    const ChartTranslationOption &transOpt = transOptList.Get(i);
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);
   }
@@ -118,7 +107,7 @@ void ChartCell::SortHypotheses()
 {
   // sort each mini cells & fill up target lhs list
   CHECK(m_targetLabelSet.Empty());
-  std::map<Word, ChartHypothesisCollection>::iterator iter;
+  MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
     m_targetLabelSet.AddConstituent(iter->first, coll);
@@ -132,7 +121,7 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   const ChartHypothesis *ret = NULL;
   float bestScore = -std::numeric_limits<float>::infinity();
 
-  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
+  MapType::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
     CHECK(sortedList.size() > 0);
@@ -152,7 +141,7 @@ void ChartCell::CleanupArcList()
   // only necessary if n-best calculations are enabled
   if (!m_nBestIsEnabled) return;
 
-  std::map<Word, ChartHypothesisCollection>::iterator iter;
+  MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
     coll.CleanupArcList();
@@ -161,7 +150,7 @@ void ChartCell::CleanupArcList()
 
 void ChartCell::OutputSizes(std::ostream &out) const
 {
-  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
+  MapType::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const Word &targetLHS = iter->first;
     const ChartHypothesisCollection &coll = iter->second;
@@ -173,7 +162,7 @@ void ChartCell::OutputSizes(std::ostream &out) const
 size_t ChartCell::GetSize() const
 {
   size_t ret = 0;
-  std::map<Word, ChartHypothesisCollection>::const_iterator iter;
+  MapType::const_iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     const ChartHypothesisCollection &coll = iter->second;
 
@@ -185,7 +174,7 @@ size_t ChartCell::GetSize() const
 
 void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
 {
-  std::map<Word, ChartHypothesisCollection>::const_iterator iterOutside;
+  MapType::const_iterator iterOutside;
   for (iterOutside = m_hypoColl.begin(); iterOutside != m_hypoColl.end(); ++iterOutside) {
     const ChartHypothesisCollection &coll = iterOutside->second;
     coll.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
@@ -194,7 +183,7 @@ void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGra
 
 std::ostream& operator<<(std::ostream &out, const ChartCell &cell)
 {
-  std::map<Word, ChartHypothesisCollection>::const_iterator iterOutside;
+  ChartCell::MapType::const_iterator iterOutside;
   for (iterOutside = cell.m_hypoColl.begin(); iterOutside != cell.m_hypoColl.end(); ++iterOutside) {
     const Word &targetLHS = iterOutside->first;
     cerr << targetLHS << ":" << endl;

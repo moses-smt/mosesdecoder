@@ -11,10 +11,14 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-lib moses :
-#All cpp files except those listed, and test files
-[ glob *.cpp DynSAInclude/*.cpp : ThreadPool.cpp SyntacticLanguageModel.cpp *Test.cpp Mock*.cpp ]
-synlm ThreadPool LM//LM headers ../..//z ../../OnDiskPt//OnDiskPt ;
+lib moses_internal :
+#All cpp files except those listed
+[ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp *Test.cpp Mock*.cpp ]
+synlm ThreadPool headers ;
+
+alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
+
+alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 

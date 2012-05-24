@@ -29,10 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "UserMessage.h"
-#include "StaticData.h"
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 using namespace std;
 
@@ -157,6 +153,21 @@ Parameter::Parameter()
   AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
   AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
   AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
+  AddParam("parsing-algorithm", "Which parsing algorithm to use. 0=CYK+, 1=scope-3. (default = 0)");
+  AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
+  AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
+  AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
+  AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
+  AddParam("description", "Source language, target language, description");
+
+  AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
+  AddParam("non-terminals", "list of non-term symbols, space separated");
+  AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+  AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+  AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+  AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
   AddParam("show-weights", "print feature weights and exit");
   AddParam("alignment-output-file", "print output word alignments into given file");

@@ -33,6 +33,10 @@
 #include "RuleCube.h"
 #include "ChartCellLabelSet.h"
 
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_map.hpp>
+#include <boost/version.hpp>
+
 namespace Moses
 {
 class ChartTranslationOptionList;
@@ -44,9 +48,18 @@ class ChartCell
 {
   friend std::ostream& operator<<(std::ostream&, const ChartCell&);
 public:
+#if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
+  typedef boost::unordered_map<Word,
+                               ChartHypothesisCollection,
+                               NonTerminalHasher,
+                               NonTerminalEqualityPred
+                              > MapType;
+#else
+  typedef std::map<Word, ChartHypothesisCollection> MapType;
+#endif
 
 protected:
-  std::map<Word, ChartHypothesisCollection> m_hypoColl;
+  MapType m_hypoColl;
 
   WordsRange m_coverage;
 
@@ -63,7 +76,13 @@ public:
   void ProcessSentence(const ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
 
-  const HypoList &GetSortedHypotheses(const Word &constituentLabel) const;
+  /** Get all hypotheses in the cell that have the specified constituent label */
+  const HypoList *GetSortedHypotheses(const Word &constituentLabel) const
+  {
+    MapType::const_iterator p = m_hypoColl.find(constituentLabel);
+    return (p == m_hypoColl.end()) ? NULL : &(p->second.GetSortedHypotheses());
+  }
+
   bool AddHypothesis(ChartHypothesis *hypo);
 
   void SortHypotheses();

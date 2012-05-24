@@ -1,7 +1,7 @@
 
 # where to find include files and libraries from Moses
-MOSES_INC=../../moses/src
-LIB_DIR=../../moses/src/
+MOSES_INC=../../../moses/src ../../..
+LIB_DIR=../../../moses/src/
 
 LIBS=-lmoses -lz
 OBJS=Main.o NBest.o Hypo.o Tools.o ParameterNBest.o

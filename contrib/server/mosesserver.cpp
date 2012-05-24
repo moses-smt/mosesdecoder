@@ -6,15 +6,15 @@
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
 
+#include "ChartManager.h"
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "StaticData.h"
 #include "PhraseDictionaryDynSuffixArray.h"
 #include "TranslationSystem.h"
+#include "TreeInput.h"
 #include "LMList.h"
-#ifdef LM_ORLM
-#  include "LanguageModelORLM.h"
-#endif
+#include "LM/ORLM.h"
 
 using namespace Moses;
 using namespace std;
@@ -67,20 +67,12 @@ public:
   string source_, target_, alignment_;
   bool bounded_, add2ORLM_;
   void updateORLM() {
-#ifdef LM_ORLM
+    // TODO(level101): this belongs in the language model, not in moseserver.cpp
     vector<string> vl;
     map<vector<string>, int> ngSet;
     LMList lms = StaticData::Instance().GetLMList(); // get LM
     LMList::const_iterator lmIter = lms.begin();
-    const LanguageModel* lm = *lmIter; 
-    /* currently assumes a single LM that is a ORLM */
-#ifdef WITH_THREADS
-    boost::shared_ptr<LanguageModelORLM> orlm; 
-    orlm = boost::dynamic_pointer_cast<LanguageModelORLM>(lm->GetLMImplementation()); 
-#else 
-    LanguageModelORLM* orlm; 
-    orlm = (LanguageModelORLM*)lm->GetLMImplementation(); 
-#endif
+    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(static_cast<LMRefCount*>(*lmIter)->MosesServerCppShouldNotHaveLMCode());
     if(orlm == 0) {
       cerr << "WARNING: Unable to add target sentence to ORLM\n";
       return;
@@ -113,7 +105,6 @@ public:
           orlm->UpdateORLM(it->first, it->second);
       }
     }
-#endif
   }
   void breakOutParams(const params_t& params) {
     params_t::const_iterator si = params.find("source");
@@ -181,36 +172,48 @@ public:
     }
 
     const TranslationSystem& system = getTranslationSystem(params);
-
-    Sentence sentence;
-    const vector<FactorType> &inputFactorOrder =
-      staticData.GetInputFactorOrder();
-    stringstream in(source + "\n");
-    sentence.Read(in,inputFactorOrder);
-    Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
-    manager.ProcessSentence();
-    const Hypothesis* hypo = manager.GetBestHypothesis();
-
-    vector<xmlrpc_c::value> alignInfo;
     stringstream out, graphInfo, transCollOpts;
-    outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
-
     map<string, xmlrpc_c::value> retData;
+
+    SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
+    if (searchAlgorithm == ChartDecoding) {
+       TreeInput tinput; 
+        const vector<FactorType> &inputFactorOrder =
+          staticData.GetInputFactorOrder();
+        stringstream in(source + "\n");
+        tinput.Read(in,inputFactorOrder);
+        ChartManager manager(tinput, &system);
+        manager.ProcessSentence();
+        const ChartHypothesis *hypo = manager.GetBestHypothesis();
+        outputChartHypo(out,hypo);
+    } else {
+        Sentence sentence;
+        const vector<FactorType> &inputFactorOrder =
+          staticData.GetInputFactorOrder();
+        stringstream in(source + "\n");
+        sentence.Read(in,inputFactorOrder);
+        Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
+        manager.ProcessSentence();
+        const Hypothesis* hypo = manager.GetBestHypothesis();
+
+        vector<xmlrpc_c::value> alignInfo;
+        outputHypo(out,hypo,addAlignInfo,alignInfo,reportAllFactors);
+        if (addAlignInfo) {
+          retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
+        }
+
+        if(addGraphInfo) {
+          insertGraphInfo(manager,retData);
+            (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
+        }
+        if (addTopts) {
+          insertTranslationOptions(manager,retData);
+        }
+    }
     pair<string, xmlrpc_c::value>
     text("text", xmlrpc_c::value_string(out.str()));
-    cerr << "Output: " << out.str() << endl;
-    if (addAlignInfo) {
-      retData.insert(pair<string, xmlrpc_c::value>("align", xmlrpc_c::value_array(alignInfo)));
-    }
     retData.insert(text);
-
-    if(addGraphInfo) {
-      insertGraphInfo(manager,retData);
-      (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(false);
-    }
-    if (addTopts) {
-      insertTranslationOptions(manager,retData);
-    }
+    cerr << "Output: " << out.str() << endl;
     *retvalP = xmlrpc_c::value_struct(retData);
   }
 
@@ -239,6 +242,21 @@ public:
         alignInfo.push_back(xmlrpc_c::value_struct(phraseAlignInfo));
       }
     }
+  }
+
+  void outputChartHypo(ostream& out, const ChartHypothesis* hypo) {
+    Phrase outPhrase(20);
+    hypo->CreateOutputPhrase(outPhrase);
+
+    // delete 1st & last
+    assert(outPhrase.GetSize() >= 2);
+    outPhrase.RemoveWord(0);
+    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+    for (size_t pos = 0 ; pos < outPhrase.GetSize() ; pos++) {
+      const Factor *factor = outPhrase.GetFactor(pos, 0);
+      out << *factor << " ";
+    }
+
   }
 
   void insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData) {

@@ -169,52 +169,6 @@ raw-corpus = $toy-data/nc-5k.$output-extension
 #
 #lm = 
 
-#################################################################
-# INTERPOLATING LANGUAGE MODELS
-
-[INTERPOLATED-LM]
-
-# if multiple language models are used, these may be combined
-# by optimizing perplexity on a tuning set
-# see, for instance [Koehn and Schwenk, IJCNLP 2008]
-
-### script to interpolate language models
-# if commented out, no interpolation is performed
-#
-# script = $moses-script-dir/ems/support/interpolate-lm.perl
-
-### tuning set
-# you may use the same set that is used for mert tuning (reference set)
-#
-#tuning-sgm =
-#raw-tuning =
-#tokenized-tuning = 
-#factored-tuning = 
-#lowercased-tuning = 
-#split-tuning = 
-
-### script to use for binary table format for irstlm or kenlm
-# (default: no binarization)
-
-# irstlm
-#lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
-
-# kenlm, also set type to 8
-#lm-binarizer = $moses-src-dir/kenlm/build_binary
-#type = 8
-
-### script to create quantized language model format (irstlm)
-# (default: no quantization)
-# 
-#lm-quantizer = $moses-src-dir/irstlm/bin/quantize-lm
-
-### script to use for converting into randomized table format
-# (default: no randomization)
-#
-#lm-randomizer = "$moses-src-dir/randlm/bin/buildlm -falsepos 8 -values 8"
-
-#################################################################
-# TRANSLATION MODEL TRAINING
 
 [TRAINING]
 

@@ -22,7 +22,9 @@
 #include "Alignment.h"
 #include "AlignmentGraph.h"
 #include "Exception.h"
+#include "InputFileStream.h"
 #include "Node.h"
+#include "OutputFileStream.h"
 #include "Options.h"
 #include "ParseTree.h"
 #include "ScfgRule.h"
@@ -51,21 +53,23 @@ int ExtractGHKM::Main(int argc, char *argv[])
   ProcessOptions(argc, argv, options);
 
   // Open input files.
-  std::ifstream targetStream;
-  std::ifstream sourceStream;
-  std::ifstream alignmentStream;
-  OpenInputFileOrDie(options.targetFile, targetStream);
-  OpenInputFileOrDie(options.sourceFile, sourceStream);
-  OpenInputFileOrDie(options.alignmentFile, alignmentStream);
+  InputFileStream targetStream(options.targetFile);
+  InputFileStream sourceStream(options.sourceFile);
+  InputFileStream alignmentStream(options.alignmentFile);
 
   // Open output files.
-  std::ofstream extractStream;
-  std::ofstream invExtractStream;
+  OutputFileStream fwdExtractStream;
+  OutputFileStream invExtractStream;
   std::ofstream glueGrammarStream;
   std::ofstream unknownWordStream;
-  std::string invExtractFileName = options.extractFile + std::string(".inv");
-  OpenOutputFileOrDie(options.extractFile, extractStream);
-  OpenOutputFileOrDie(invExtractFileName, invExtractStream);
+  std::string fwdFileName = options.extractFile;
+  std::string invFileName = options.extractFile + std::string(".inv");
+  if (options.gzOutput) {
+    fwdFileName += ".gz";
+    invFileName += ".gz";
+  }
+  OpenOutputFileOrDie(fwdFileName, fwdExtractStream);
+  OpenOutputFileOrDie(invFileName, invExtractStream);
   if (!options.glueGrammarFile.empty()) {
     OpenOutputFileOrDie(options.glueGrammarFile, glueGrammarStream);
   }
@@ -75,7 +79,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
   // Target label sets for producing glue grammar.
   std::set<std::string> labelSet;
-  std::set<std::string> topLabelSet;
+  std::map<std::string, int> topLabelSet;
 
   // Word count statistics for producing unknown word labels.
   std::map<std::string, int> wordCount;
@@ -84,7 +88,8 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string targetLine;
   std::string sourceLine;
   std::string alignmentLine;
-  ScfgRuleWriter writer(extractStream, invExtractStream, options);
+  XmlTreeParser xmlTreeParser(labelSet, topLabelSet);
+  ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
   size_t lineNum = 0;
   while (true) {
     std::getline(targetStream, targetLine);
@@ -102,10 +107,16 @@ int ExtractGHKM::Main(int argc, char *argv[])
     ++lineNum;
 
     // Parse target tree.
-    std::auto_ptr<ParseTree> t(ParseXmlTree(targetLine));
-    if (!t.get()) {
+    std::auto_ptr<ParseTree> t;
+    try {
+      t = xmlTreeParser.Parse(targetLine);
+      assert(t.get());
+    } catch (const Exception &e) {
       std::ostringstream s;
       s << "Failed to parse XML tree at line " << lineNum;
+      if (!e.GetMsg().empty()) {
+        s << ": " << e.GetMsg();
+      }
       Error(s.str());
     }
 
@@ -121,22 +132,6 @@ int ExtractGHKM::Main(int argc, char *argv[])
       s << "Failed to read alignment at line " << lineNum << ": ";
       s << e.GetMsg();
       Error(s.str());
-    }
-
-    // Record tree labels for use in glue grammar.
-    if (!options.glueGrammarFile.empty()) {
-      // Record labels that cover the full sentence to topLabelSet.
-      ParseTree *p = t.get();
-      topLabelSet.insert(p->GetLabel());
-      while (p->GetChildren().size() == 1) {
-        p = p->GetChildren()[0];
-        if (p->IsLeaf()) {
-          break;
-        }
-        topLabelSet.insert(p->GetLabel());
-      }
-      // Record all labels to labelSet.
-      RecordTreeLabels(*t, labelSet);
     }
 
     // Record word counts.
@@ -205,6 +200,17 @@ void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
   }
 }
 
+void ExtractGHKM::OpenOutputFileOrDie(const std::string &filename,
+                                      OutputFileStream &stream)
+{
+  bool ret = stream.Open(filename);
+  if (!ret) {
+    std::ostringstream msg;
+    msg << "failed to open output file: " << filename;
+    Error(msg.str());
+  }
+}
+
 void ExtractGHKM::ProcessOptions(int argc, char *argv[],
                                  Options &options) const
 {
@@ -255,6 +261,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     ("GlueGrammar",
         po::value(&options.glueGrammarFile),
         "write glue grammar to named file")
+    ("GZOutput",
+        "write gzipped extract files")
     ("MaxNodes",
         po::value(&options.maxNodes)->default_value(options.maxNodes),
         "set maximum number of tree nodes for composed rules")
@@ -339,6 +347,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("AllowUnary")) {
     options.allowUnary = true;
   }
+  if (vm.count("GZOutput")) {
+    options.gzOutput = true;
+  }
   if (vm.count("Minimal")) {
     options.minimal = true;
   }
@@ -382,13 +393,14 @@ std::vector<std::string> ExtractGHKM::ReadTokens(const std::string &s)
   return tokens;
 }
 
-void ExtractGHKM::WriteGlueGrammar(const std::set<std::string> &labelSet,
-                                   const std::set<std::string> &topLabelSet,
-                                   std::ostream &out)
+void ExtractGHKM::WriteGlueGrammar(
+    const std::set<std::string> &labelSet,
+    const std::map<std::string, int> &topLabelSet,
+    std::ostream &out)
 {
   // chose a top label that is not already a label
   std::string topLabel = "QQQQQQ";
-  for(int i = 1; i <= topLabel.length(); i++) {
+  for(size_t i = 1; i <= topLabel.length(); i++) {
     if (labelSet.find(topLabel.substr(0,i)) == labelSet.end() ) {
       topLabel = topLabel.substr(0,i);
       break;
@@ -400,9 +412,9 @@ void ExtractGHKM::WriteGlueGrammar(const std::set<std::string> &labelSet,
   out << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 " << std::endl;
 
   // top rules
-  for (std::set<std::string>::const_iterator i = topLabelSet.begin();
+  for (std::map<std::string, int>::const_iterator i = topLabelSet.begin();
        i != topLabelSet.end(); ++i) {
-    out << "<s> [X][" << *i << "] </s> [X] ||| <s> [X][" << *i << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << std::endl;
+    out << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << std::endl;
   }
 
   // glue rules
@@ -412,20 +424,6 @@ void ExtractGHKM::WriteGlueGrammar(const std::set<std::string> &labelSet,
   }
   // glue rule for unknown word...
   out << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << std::endl;
-}
-
-void ExtractGHKM::RecordTreeLabels(const ParseTree &t,
-                                   std::set<std::string> &labelSet)
-{
-  labelSet.insert(t.GetLabel());
-  const std::vector<ParseTree *> &children = t.GetChildren();
-  for (std::vector<ParseTree *>::const_iterator p = children.begin();
-       p != children.end(); ++p) {
-    const ParseTree &child = **p;
-    if (!child.IsLeaf()) {
-      RecordTreeLabels(child, labelSet);
-    }
-  }
 }
 
 void ExtractGHKM::CollectWordLabelCounts(

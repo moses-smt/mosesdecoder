@@ -1,4 +1,3 @@
-// $Id$
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -20,6 +19,7 @@
 
 #pragma once
 
+#include "StackVec.h"
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
 #include "WordsRange.h"
@@ -30,36 +30,33 @@
 namespace Moses
 {
 
-class DottedRule;
-class ChartCellCollection;
-
 // Similar to a DottedRule, but contains a direct reference to a list
 // of translations and provdes an estimate of the best score.
 class ChartTranslationOption
 {
  public:
   ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
-                         const DottedRule &dottedRule,
+                         const StackVec &stackVec,
                          const WordsRange &wordsRange,
-                         const ChartCellCollection &allChartCells)
-    : m_dottedRule(dottedRule)
-    , m_targetPhraseCollection(targetPhraseColl)
-    , m_wordsRange(wordsRange)
-    , m_estimateOfBestScore(0)
-  {
-    CalcEstimateOfBestScore(allChartCells);
-  }
+                         float score)
+      : m_stackVec(stackVec)
+      , m_targetPhraseCollection(&targetPhraseColl)
+      , m_wordsRange(&wordsRange)
+      , m_estimateOfBestScore(score) {}
 
   ~ChartTranslationOption() {}
 
-  const DottedRule &GetDottedRule() const { return m_dottedRule; }
+  static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
+                                       const StackVec &);
+
+  const StackVec &GetStackVec() const { return m_stackVec; }
 
   const TargetPhraseCollection &GetTargetPhraseCollection() const { 
-    return m_targetPhraseCollection;
+    return *m_targetPhraseCollection;
   }
 
   const WordsRange &GetSourceWordsRange() const {
-    return m_wordsRange;
+    return *m_wordsRange;
   }
 
   // return an estimate of the best score possible with this translation option.
@@ -68,14 +65,10 @@ class ChartTranslationOption
   inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
 
  private:
-  // not implemented
-  ChartTranslationOption &operator=(const ChartTranslationOption &);
 
-  void CalcEstimateOfBestScore(const ChartCellCollection &);
-
-  const DottedRule &m_dottedRule;
-  const TargetPhraseCollection &m_targetPhraseCollection;
-  const WordsRange &m_wordsRange;
+  StackVec m_stackVec;
+  const TargetPhraseCollection *m_targetPhraseCollection;
+  const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;
 };
 

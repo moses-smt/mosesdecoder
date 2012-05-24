@@ -21,7 +21,6 @@
 #include "ChartCellCollection.h"
 #include "ChartTranslationOption.h"
 #include "ChartTranslationOptionCollection.h"
-#include "DotChart.h"
 #include "RuleCubeItem.h"
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"
@@ -39,12 +38,12 @@ std::size_t hash_value(const HypothesisDimension &dimension)
 }
 
 RuleCubeItem::RuleCubeItem(const ChartTranslationOption &transOpt,
-                           const ChartCellCollection &allChartCells)
+                           const ChartCellCollection &/*allChartCells*/)
   : m_translationDimension(0,
                            transOpt.GetTargetPhraseCollection().GetCollection())
   , m_hypothesis(0)
 {
-  CreateHypothesisDimensions(transOpt.GetDottedRule(), allChartCells);
+  CreateHypothesisDimensions(transOpt.GetStackVec());
 }
 
 // create the RuleCube from an existing one, differing only in one dimension
@@ -94,31 +93,19 @@ ChartHypothesis *RuleCubeItem::ReleaseHypothesis()
 
 // for each non-terminal, create a ordered list of matching hypothesis from the
 // chart
-void RuleCubeItem::CreateHypothesisDimensions(
-  const DottedRule &dottedRule,
-  const ChartCellCollection &allChartCells)
+void RuleCubeItem::CreateHypothesisDimensions(const StackVec &stackVec)
 {
-  CHECK(!dottedRule.IsRoot());
-
-  const DottedRule *prev = dottedRule.GetPrev();
-  if (!prev->IsRoot()) {
-    CreateHypothesisDimensions(*prev, allChartCells);
-  }
-
-  // only deal with non-terminals
-  if (dottedRule.IsNonTerminal()) {
-    // get a sorted list of the underlying hypotheses
-    const ChartCellLabel &cellLabel = dottedRule.GetChartCellLabel();
-    const ChartHypothesisCollection *hypoColl = cellLabel.GetStack();
-    CHECK(hypoColl);
-    const HypoList &hypoList = hypoColl->GetSortedHypotheses();
+  for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
+       ++p) {
+    const HypoList *stack = *p;
+    assert(stack);
 
     // there have to be hypothesis with the desired non-terminal
     // (otherwise the rule would not be considered)
-    CHECK(!hypoList.empty());
+    assert(!stack->empty());
 
     // create a list of hypotheses that match the non-terminal
-    HypothesisDimension dimension(0, hypoList);
+    HypothesisDimension dimension(0, *stack);
     // add them to the vector for such lists
     m_hypothesisDimensions.push_back(dimension);
   }

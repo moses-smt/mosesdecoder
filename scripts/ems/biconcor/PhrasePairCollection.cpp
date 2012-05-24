@@ -1,8 +1,15 @@
 #include "PhrasePairCollection.h"
-#include <string>
+
 #include <stdlib.h>
 #include <cstring>
 #include <algorithm>
+
+#include "Vocabulary.h"
+#include "SuffixArray.h"
+#include "TargetCorpus.h"
+#include "Alignment.h"
+#include "PhrasePair.h"
+#include "Mismatch.h"
 
 using namespace std;
 
@@ -19,7 +26,7 @@ PhrasePairCollection::PhrasePairCollection( SuffixArray *sa, TargetCorpus *tc, A
 PhrasePairCollection::~PhrasePairCollection()
 {}
 
-bool PhrasePairCollection::GetCollection( const vector< string > sourceString )
+bool PhrasePairCollection::GetCollection( const vector< string >& sourceString )
 {
   INDEX first_match, last_match;
   if (! m_suffixArray->FindMatches( sourceString, first_match, last_match )) {
@@ -43,16 +50,16 @@ bool PhrasePairCollection::GetCollection( const vector< string > sourceString )
          << ", starting at word " << source_start
          << " of " << sentence_length
          << ". target sentence has " << target_length << " words.";
-    char target_start, target_end, pre_null, post_null;
+    int target_start, target_end, pre_null, post_null;
     if (m_alignment->PhraseAlignment( sentence_id, target_length, source_start, source_end, target_start, target_end, pre_null, post_null)) {
       cerr << " aligned to [" << (int)target_start << "," << (int)target_end << "]";
       cerr << " +(" << (int)pre_null << "," << (int)post_null << ")";
 			bool null_boundary_words = false;
-      for( char pre = 0; pre <= pre_null && (pre==0||null_boundary_words); pre++ ) {
-        for( char post = 0; post <= post_null && (post==0||null_boundary_words); post++ ) {
+      for (int pre = 0; pre <= pre_null && (pre == 0 || null_boundary_words); pre++ ) {
+        for (int post = 0; post <= post_null && (post == 0 || null_boundary_words); post++ ) {
           vector< WORD_ID > targetString;
           cerr << "; ";
-          for( char target = target_start-pre; target <= target_end+post; target++ ) {
+          for (int target = target_start - pre; target <= target_end + post; target++) {
             targetString.push_back( m_targetCorpus->GetWordId( sentence_id, target) );
             cerr << m_targetCorpus->GetWord( sentence_id, target) << " ";
           }
@@ -82,40 +89,41 @@ bool PhrasePairCollection::GetCollection( const vector< string > sourceString )
 		}
     cerr << endl;
 
-    if (found > m_max_lookup) {
+    if (found > (INDEX)m_max_lookup) {
       i += found/m_max_lookup-1;
     }
   }
   sort(m_collection.begin(), m_collection.end(), CompareBySize());
+  return true;
 }
 
-void PhrasePairCollection::Print()
+void PhrasePairCollection::Print() const
 {
-  vector< vector<PhrasePair*> >::iterator ppWithSameTarget;
+  vector< vector<PhrasePair*> >::const_iterator ppWithSameTarget;
   for( ppWithSameTarget = m_collection.begin(); ppWithSameTarget != m_collection.end(); ppWithSameTarget++ ) {
     (*(ppWithSameTarget->begin()))->PrintTarget( &cout );
     int count = ppWithSameTarget->size();
     cout << "(" << count << ")" << endl;
-    vector< PhrasePair* >::iterator p;
+    vector< PhrasePair* >::const_iterator p;
     for(p = ppWithSameTarget->begin(); p != ppWithSameTarget->end(); p++ ) {
       (*p)->Print( &cout, 100 );
     }
   }
 }
 
-void PhrasePairCollection::PrintHTML()
+void PhrasePairCollection::PrintHTML() const
 {
   int pp_target = 0;
 	bool singleton = false;
 	// loop over all translations
-  vector< vector<PhrasePair*> >::iterator ppWithSameTarget;
+  vector< vector<PhrasePair*> >::const_iterator ppWithSameTarget;
   for( ppWithSameTarget = m_collection.begin(); ppWithSameTarget != m_collection.end() && pp_target<m_max_pp_target; ppWithSameTarget++, pp_target++ ) {
 
 		int count = ppWithSameTarget->size();
 		if (!singleton) {
 			if (count == 1) {
 				singleton = true;
-				cout << "<p class=\"pp_singleton_header\">singleton" 
+				cout << "<p class=\"pp_singleton_header\">singleton"
 						 << (m_collection.end() - ppWithSameTarget==1?"":"s") << " ("
 						 << (m_collection.end() - ppWithSameTarget)
 						 << "/" << m_size << ")</p>";
@@ -128,8 +136,8 @@ void PhrasePairCollection::PrintHTML()
 			}
 			cout << "<table align=\"center\">";
 		}
-		
-    vector< PhrasePair* >::iterator p;
+
+    vector< PhrasePair* >::const_iterator p;
 		// loop over all sentences where translation occurs
     int pp=0;
 		int i=0;
@@ -164,7 +172,7 @@ void PhrasePairCollection::PrintHTML()
 	if (singleton) cout << "</table></div>\n";
 	else if (pp_target > 9)	cout << "</div>";
 
-	int max_mismatch = m_max_pp/3;
+	size_t max_mismatch = m_max_pp/3;
 	// unaligned phrases
 	if (m_unaligned.size() > 0) {
 		cout << "<p class=\"pp_singleton_header\">unaligned" 
@@ -173,7 +181,7 @@ void PhrasePairCollection::PrintHTML()
 		int step_size = 1;
 		if (m_unaligned.size() > max_mismatch)
 			step_size = (m_unaligned.size()+max_mismatch-1) / max_mismatch;
-		for(int i=0;i<m_unaligned.size();i+=step_size)
+		for(size_t i=0;i<m_unaligned.size();i+=step_size)
 			m_unaligned[i]->PrintClippedHTML( &cout, 160 );
 		cout << "</table>";
 	}
@@ -186,7 +194,7 @@ void PhrasePairCollection::PrintHTML()
 		int step_size = 1;
 		if (m_mismatch.size() > max_mismatch)
 			step_size = (m_mismatch.size()+max_mismatch-1) / max_mismatch;
-		for(int i=0;i<m_mismatch.size();i+=step_size)
+		for(size_t i=0;i<m_mismatch.size();i+=step_size)
 			m_mismatch[i]->PrintClippedHTML( &cout, 160 );
 		cout << "</table>";
 	}	

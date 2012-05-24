@@ -1,5 +1,5 @@
 #See ../Jamroot for options.  
-import option ;
+import option path ;
 
 build-project ems/biconcor ;
 build-project training ;
@@ -34,6 +34,7 @@ if $(with-giza) {
 
 location = [ option.get "install-scripts" ] ;
 if $(location) {
+  location = [ path.root $(location) [ path.pwd ] ] ;
   location = $(location)$(GITTAG) ;
 
   #These two used to live in a tools directory.  

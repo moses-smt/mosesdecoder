@@ -1,7 +1,11 @@
+*.pyc
+*.lo
+*.o
 *.so
 *.a
 *.swp
 *~
+*.gch
 dist*
 jam-files/bjam
 jam-files/engine/bootstrap
@@ -48,3 +52,4 @@ scripts/training/symal/symal
 scripts/training/train-model.perl
 dist
 bin
+previous.sh
