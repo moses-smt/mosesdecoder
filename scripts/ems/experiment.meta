@@ -738,6 +738,20 @@ ibm-bleu-c
         ignore-unless: ibm-bleu-c
         rerun-on-change: ibm-bleu-c
         template: $ibm-bleu-c -s $input-sgm -r IN1 -t IN > OUT
+bolt-bleu
+	in: detokenized-output
+	out: bolt-bleu-score
+	default-name: evaluation/bolt-bleu
+	ignore-unless: bolt-bleu
+	rerun-on-change: bolt-bleu
+	template: $bolt-bleu IN > OUT
+bolt-bleu-c
+	in: detokenized-output
+	out: bolt-bleu-c-score
+	default-name: evaluation/bolt-bleu-c
+	ignore-unless: bolt-bleu-c
+	rerun-on-change: bolt-bleu-c
+	template: $bolt-bleu-c IN > OUT
 multi-bleu
 	in: cleaned-output reference
 	out: multi-bleu-score
@@ -793,6 +807,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model
 	out: report
 	default-name: evaluation/report
