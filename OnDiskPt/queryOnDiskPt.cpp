@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "util.h"
+#include "Util.h"
 #include "OnDiskWrapper.h"
 #include "SourcePhrase.h"
 

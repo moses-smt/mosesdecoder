@@ -1,6 +1,6 @@
 /***********************************************************************
  Moses - statistical machine translation system
- Copyright (C) 2006-2011 University of Edinburgh
+ Copyright (C) 2006-2012 University of Edinburgh
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -18,43 +18,20 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_RULE_WRITER_H_
-#define EXTRACT_GHKM_RULE_WRITER_H_
+#ifndef PCFG_TYPEDEF_H_
+#define PCFG_TYPEDEF_H_
 
-#include <ostream>
+#include "numbered_set.h"
+#include "syntax_tree.h"
+
+#include <string>
 
 namespace Moses {
-namespace GHKM {
+namespace PCFG {
 
-struct Options;
-class ScfgRule;
-struct Symbol;
+typedef NumberedSet<std::string> Vocabulary;
 
-class ScfgRuleWriter
-{
- public:
-  ScfgRuleWriter(std::ostream &fwd, std::ostream &inv, const Options &options)
-      : m_fwd(fwd)
-      , m_inv(inv)
-      , m_options(options) {}
-
-  void Write(const ScfgRule &);
-
- private:
-  // Disallow copying
-  ScfgRuleWriter(const ScfgRuleWriter &);
-  ScfgRuleWriter &operator=(const ScfgRuleWriter &);
-
-  void WriteStandardFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteUnpairedFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteSymbol(const Symbol &, std::ostream &);
-
-  std::ostream &m_fwd;
-  std::ostream &m_inv;
-  const Options &m_options;
-};
-
-}  // namespace GHKM
+}  // namespace PCFG
 }  // namespace Moses
 
 #endif

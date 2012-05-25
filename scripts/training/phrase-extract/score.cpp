@@ -32,6 +32,7 @@
 #include "PhraseAlignment.h"
 #include "score.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -56,7 +57,7 @@ public:
 
 vector<string> tokenize( const char [] );
 
-void writeCountOfCounts( const char* fileNameCountOfCounts );
+void writeCountOfCounts( const string &fileNameCountOfCounts );
 void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
 PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
 void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
@@ -71,6 +72,7 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
 LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
+bool pcfgFlag = false;
 bool wordAlignmentFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
@@ -91,13 +93,13 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring coc-file] [--KneserNey coc-file] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] \n";
     exit(1);
   }
   char* fileNameExtract = argv[1];
   char* fileNameLex = argv[2];
   char* fileNamePhraseTable = argv[3];
-  char* fileNameCountOfCounts;
+  string fileNameCountOfCounts;
   char* fileNameFunctionWords;
 
   for(int i=4; i<argc; i++) {
@@ -107,6 +109,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--Hierarchical") == 0) {
       hierarchicalFlag = true;
       cerr << "processing hierarchical rules\n";
+    } else if (strcmp(argv[i],"--PCFG") == 0) {
+      pcfgFlag = true;
+      cerr << "including PCFG scores\n";
     } else if (strcmp(argv[i],"--WordAlignment") == 0) {
       wordAlignmentFlag = true;
       cerr << "outputing word alignment" << endl;
@@ -115,19 +120,11 @@ int main(int argc, char* argv[])
       cerr << "not computing lexical translation score\n";
     } else if (strcmp(argv[i],"--GoodTuring") == 0) {
       goodTuringFlag = true;
-      if (i+1==argc) { 
-        cerr << "ERROR: specify count of count files for Good Turing discounting!\n";
-        exit(1);
-      }
-      fileNameCountOfCounts = argv[++i];
+			fileNameCountOfCounts = string(fileNamePhraseTable) + ".coc";
       cerr << "adjusting phrase translation probabilities with Good Turing discounting\n";
     } else if (strcmp(argv[i],"--KneserNey") == 0) {
       kneserNeyFlag = true;
-      if (i+1==argc) { 
-        cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
-        exit(1);
-      }
-      fileNameCountOfCounts = argv[++i];
+			fileNameCountOfCounts = string(fileNamePhraseTable) + ".coc";
       cerr << "adjusting phrase translation probabilities with Kneser Ney discounting\n";
     } else if (strcmp(argv[i],"--UnalignedPenalty") == 0) {
       unalignedFlag = true;
@@ -188,9 +185,9 @@ int main(int argc, char* argv[])
 		phraseTableFile = &cout;
 	}
 	else {
-		ofstream *outputFile = new ofstream();
-		outputFile->open(fileNamePhraseTable);
-		if (outputFile->fail()) {
+		Moses::OutputFileStream *outputFile = new Moses::OutputFileStream();
+		bool success = outputFile->Open(fileNamePhraseTable);
+		if (!success) {
 			cerr << "ERROR: could not open file phrase table file "
 					 << fileNamePhraseTable << endl;
 			exit(1);
@@ -200,6 +197,7 @@ int main(int argc, char* argv[])
 	
   // loop through all extracted phrase translations
   float lastCount = 0.0f;
+  float lastPcfgSum = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
   int i=0;
   char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
@@ -214,6 +212,7 @@ int main(int argc, char* argv[])
     // identical to last line? just add count
     if (strcmp(line,lastLine) == 0) {
       lastPhrasePair->count += lastCount;
+      lastPhrasePair->pcfgSum += lastPcfgSum;
       continue;
     }
     strcpy( lastLine, line );
@@ -222,10 +221,12 @@ int main(int argc, char* argv[])
     PhraseAlignment phrasePair;
     phrasePair.create( line, i );
     lastCount = phrasePair.count;
+    lastPcfgSum = phrasePair.pcfgSum;
 
     // only differs in count? just add count
     if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair )) {
       lastPhrasePair->count += phrasePair.count;
+      lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
       continue;
     }
 
@@ -245,7 +246,6 @@ int main(int argc, char* argv[])
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
-		(dynamic_cast<ofstream*>(phraseTableFile))->close();
 		delete phraseTableFile;
 	}
 
@@ -255,12 +255,12 @@ int main(int argc, char* argv[])
   }
 }
 
-void writeCountOfCounts( const char* fileNameCountOfCounts )
+void writeCountOfCounts( const string &fileNameCountOfCounts )
 {
   // open file
-	ofstream countOfCountsFile;
-	countOfCountsFile.open(fileNameCountOfCounts);
-	if (countOfCountsFile.fail()) {
+	Moses::OutputFileStream countOfCountsFile;
+	bool success = countOfCountsFile.Open(fileNameCountOfCounts.c_str());
+	if (!success) {
 		cerr << "ERROR: could not open count-of-counts file "
 				 << fileNameCountOfCounts << endl;
     return;
@@ -273,7 +273,7 @@ void writeCountOfCounts( const char* fileNameCountOfCounts )
   for(int i=1; i<=COC_MAX; i++) {
     countOfCountsFile << countOfCounts[ i ] << endl;
   }
-	countOfCountsFile.close();
+	countOfCountsFile.Close();
 }
 
 void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
@@ -446,6 +446,16 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       countOfCounts[ countInt ]++;
   }
 
+  // compute PCFG score
+  float pcfgScore;
+  if (pcfgFlag && !inverseFlag) {
+    float pcfgSum = 0;
+    for(size_t i=0; i<phrasePair.size(); ++i) {
+        pcfgSum += phrasePair[i]->pcfgSum;
+    }
+    pcfgScore = pcfgSum / count;
+  }
+
   // output phrases
   const PHRASE &phraseS = phrasePair[0]->GetSource();
   const PHRASE &phraseT = phrasePair[0]->GetTarget();
@@ -499,6 +509,11 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (unalignedFWFlag) {
     double penalty = computeUnalignedFWPenalty( phraseS, phraseT, bestAlignment);
     phraseTableFile << " " << ( logProbFlag ? negLogProb*log(penalty) : penalty );
+  }
+
+  // target-side PCFG score
+  if (pcfgFlag && !inverseFlag) {
+    phraseTableFile << " " << pcfgScore;
   }
 
   phraseTableFile << " ||| ";

@@ -1,6 +1,6 @@
 /***********************************************************************
  Moses - statistical machine translation system
- Copyright (C) 2006-2011 University of Edinburgh
+ Copyright (C) 2006-2012 University of Edinburgh
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -18,43 +18,39 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_RULE_WRITER_H_
-#define EXTRACT_GHKM_RULE_WRITER_H_
+#ifndef PCFG_XML_TREE_PARSER_H_
+#define PCFG_XML_TREE_PARSER_H_
 
-#include <ostream>
+#include "pcfg_tree.h"
+#include "SyntaxTree.h"
+
+#include <map>
+#include <memory>
+#include <set>
+#include <string>
+#include <vector>
 
 namespace Moses {
-namespace GHKM {
+namespace PCFG {
 
-struct Options;
-class ScfgRule;
-struct Symbol;
-
-class ScfgRuleWriter
-{
+// Parses a string in Moses' XML parse tree format and returns a PcfgTree
+// object.
+class XmlTreeParser {
  public:
-  ScfgRuleWriter(std::ostream &fwd, std::ostream &inv, const Options &options)
-      : m_fwd(fwd)
-      , m_inv(inv)
-      , m_options(options) {}
-
-  void Write(const ScfgRule &);
-
+  XmlTreeParser();
+  std::auto_ptr<PcfgTree> Parse(const std::string &);
  private:
-  // Disallow copying
-  ScfgRuleWriter(const ScfgRuleWriter &);
-  ScfgRuleWriter &operator=(const ScfgRuleWriter &);
+  std::auto_ptr<PcfgTree> ConvertTree(const SyntaxNode &,
+                                      const std::vector<std::string> &);
 
-  void WriteStandardFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteUnpairedFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteSymbol(const Symbol &, std::ostream &);
-
-  std::ostream &m_fwd;
-  std::ostream &m_inv;
-  const Options &m_options;
+  std::set<std::string> m_labelSet;
+  std::map<std::string, int> m_topLabelSet;
+  std::string m_line;
+  ::SyntaxTree m_tree;
+  std::vector<std::string> m_words;
 };
 
-}  // namespace GHKM
+}  // namespace PCFG
 }  // namespace Moses
 
 #endif

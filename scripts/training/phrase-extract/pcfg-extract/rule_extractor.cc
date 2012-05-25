@@ -1,6 +1,6 @@
 /***********************************************************************
  Moses - statistical machine translation system
- Copyright (C) 2006-2011 University of Edinburgh
+ Copyright (C) 2006-2012 University of Edinburgh
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,44 +17,35 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
-#ifndef EXTRACT_GHKM_RULE_WRITER_H_
-#define EXTRACT_GHKM_RULE_WRITER_H_
+#include "rule_extractor.h"
 
-#include <ostream>
+#include "pcfg-common/pcfg_tree.h"
 
 namespace Moses {
-namespace GHKM {
+namespace PCFG {
 
-struct Options;
-class ScfgRule;
-struct Symbol;
+RuleExtractor::RuleExtractor(Vocabulary &non_term_vocab)
+    : non_term_vocab_(non_term_vocab) {
+}
 
-class ScfgRuleWriter
-{
- public:
-  ScfgRuleWriter(std::ostream &fwd, std::ostream &inv, const Options &options)
-      : m_fwd(fwd)
-      , m_inv(inv)
-      , m_options(options) {}
+void RuleExtractor::Extract(const PcfgTree &tree, RuleCollection &rc) const {
+  if (tree.IsPreterminal() || tree.IsLeaf()) {
+    return;
+  }
 
-  void Write(const ScfgRule &);
+  size_t lhs = non_term_vocab_.Insert(tree.label());
+  std::vector<size_t> rhs;
 
- private:
-  // Disallow copying
-  ScfgRuleWriter(const ScfgRuleWriter &);
-  ScfgRuleWriter &operator=(const ScfgRuleWriter &);
+  const std::vector<PcfgTree *> &children = tree.children();
+  rhs.reserve(children.size());
+  for (std::vector<PcfgTree *>::const_iterator p(children.begin());
+       p != children.end(); ++p) {
+    const PcfgTree &child = **p;
+    rhs.push_back(non_term_vocab_.Insert(child.label()));
+    Extract(child, rc);
+  }
+  rc.Add(lhs, rhs);
+}
 
-  void WriteStandardFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteUnpairedFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteSymbol(const Symbol &, std::ostream &);
-
-  std::ostream &m_fwd;
-  std::ostream &m_inv;
-  const Options &m_options;
-};
-
-}  // namespace GHKM
+}  // namespace PCFG
 }  // namespace Moses
-
-#endif

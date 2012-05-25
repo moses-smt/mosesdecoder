@@ -1,6 +1,6 @@
 /***********************************************************************
  Moses - statistical machine translation system
- Copyright (C) 2006-2011 University of Edinburgh
+ Copyright (C) 2006-2012 University of Edinburgh
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -18,43 +18,28 @@
 ***********************************************************************/
 
 #pragma once
-#ifndef EXTRACT_GHKM_RULE_WRITER_H_
-#define EXTRACT_GHKM_RULE_WRITER_H_
+#ifndef PCFG_EXTRACT_RULE_EXTRACTOR_H_
+#define PCFG_EXTRACT_RULE_EXTRACTOR_H_
 
-#include <ostream>
+#include "rule_collection.h"
+
+#include "pcfg-common/typedef.h"
 
 namespace Moses {
-namespace GHKM {
+namespace PCFG {
 
-struct Options;
-class ScfgRule;
-struct Symbol;
+class PcfgTree;
 
-class ScfgRuleWriter
-{
+// Extracts PCFG rules from syntax trees and adds them to a RuleCollection.
+class RuleExtractor {
  public:
-  ScfgRuleWriter(std::ostream &fwd, std::ostream &inv, const Options &options)
-      : m_fwd(fwd)
-      , m_inv(inv)
-      , m_options(options) {}
-
-  void Write(const ScfgRule &);
-
+  RuleExtractor(Vocabulary &);
+  void Extract(const PcfgTree &, RuleCollection &) const;
  private:
-  // Disallow copying
-  ScfgRuleWriter(const ScfgRuleWriter &);
-  ScfgRuleWriter &operator=(const ScfgRuleWriter &);
-
-  void WriteStandardFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteUnpairedFormat(const ScfgRule &, std::ostream &, std::ostream &);
-  void WriteSymbol(const Symbol &, std::ostream &);
-
-  std::ostream &m_fwd;
-  std::ostream &m_inv;
-  const Options &m_options;
+  Vocabulary &non_term_vocab_;
 };
 
-}  // namespace GHKM
+}  // namespace PCFG
 }  // namespace Moses
 
 #endif
