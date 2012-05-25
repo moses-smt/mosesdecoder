@@ -29,7 +29,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
@@ -75,6 +75,7 @@ $_HELP = 1
 		       'help' => \$_HELP,
 		       'mgiza' => \$_MGIZA, # multi-thread 
 		       'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
+		       'snt2cooc=s' => \$_SNT2COOC, # override snt2cooc exe. For when you want to run reduced memory snt2cooc.perl from mgiza
 		       'hmm-align' => \$_HMM_ALIGN,
 		       'final-alignment-model=s' => \$_FINAL_ALIGNMENT_MODEL, # use word alignment model 1/2/hmm/3/4/5 as final (default is 4); value 'hmm' equivalent to the --hmm-align switch
 		       'debug' => \$debug,
@@ -189,24 +190,27 @@ my $SNT2COOC;
 if(!defined $_MGIZA ){
 	$GIZA = "$BINDIR/GIZA++";
 	if (-x "$BINDIR/snt2cooc.out") {
-   		$SNT2COOC = "$BINDIR/snt2cooc.out";
+  	$SNT2COOC = "$BINDIR/snt2cooc.out";
 	} elsif (-x "$BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same   
 		$SNT2COOC = "$BINDIR/snt2cooc";
 	}
 	print STDERR "Using single-thread GIZA\n";
 } else {
-    	$GIZA = "$BINDIR/mgiza";
+  $GIZA = "$BINDIR/mgiza";
 	if (-x "$BINDIR/snt2cooc") {
-                $SNT2COOC = "$BINDIR/snt2cooc";
-        } elsif (-x "$BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $BINDIR 
-                $SNT2COOC = "$BINDIR/snt2cooc.out";
-        }
+  	$SNT2COOC = "$BINDIR/snt2cooc";
+  } elsif (-x "$BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $BINDIR 
+    $SNT2COOC = "$BINDIR/snt2cooc.out";
+  }
 	print STDERR "Using multi-thread GIZA\n";	
-    	if (!defined($_MGIZA_CPUS)) {
-        	$_MGIZA_CPUS=4;
-    	}
-    die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
+  if (!defined($_MGIZA_CPUS)) {
+  	$_MGIZA_CPUS=4;
+  }
+  die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
 }
+
+# override
+$SNT2COOC = "$BINDIR/$_SNT2COOC" if defined($_SNT2COOC);
 
 my $MKCLS = "$BINDIR/mkcls";
 
