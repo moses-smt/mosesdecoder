@@ -104,7 +104,7 @@ build-project scripts ;
 #Regression tests (only does anything if --with-regtest is passed)
 build-project regression-testing ;
 
-alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk mert//programs contrib/server//mosesserver misc//programs ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs ;
 
 install-bin-libs programs ;
 install-headers headers-base : [ glob-tree *.h *.hh : jam-files dist kenlm moses ] : . ;
