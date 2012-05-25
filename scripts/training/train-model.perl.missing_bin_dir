@@ -41,7 +41,7 @@ my $_CORES = 1;
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/Users/hieuhoang/workspace/bin/training-tools";
+my $BINDIR="/home/hieu/workspace/bin/training-tools/";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -1546,7 +1546,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --GoodTuring $ttable_file.half.f2e.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.coc" if $KNESER_NEY;
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
-    #if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
+    if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
 }
 
 sub score_phrase_memscore {
