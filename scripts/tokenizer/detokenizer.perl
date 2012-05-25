@@ -33,8 +33,9 @@ if ($HELP) {
 	exit;
 }
 
-die "No built-in rules for language $language, claim en for default behaviour."
-	if $language !~ /^(cs|en|fr|it)$/;
+if ($language !~ /^(cs|en|fr|it)$/) {
+  print STDERR "Warning: No built-in rules for language $language.\n"
+}
 
 if (!$QUIET) {
 	print STDERR "Detokenizer Version ".'$Revision: 4134 $'."\n";
@@ -70,6 +71,8 @@ sub detokenize {
   $text =~ s/\&gt;/\>/g;
   $text =~ s/\&bra;/\[/g;
   $text =~ s/\&ket;/\]/g;
+  $text =~ s/\&#91;/\[/g;
+  $text =~ s/\&#93;/\]/g;
   $text =~ s/\&amp;/\&/g;
 
 	my $word;

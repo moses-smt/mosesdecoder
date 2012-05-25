@@ -1020,7 +1020,7 @@ sub execute_steps {
     }
 	}
 
-	print "number of steps doable or running: ".(scalar keys %DO)."\n";
+	print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
   foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	

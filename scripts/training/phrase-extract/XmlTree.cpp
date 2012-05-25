@@ -128,6 +128,16 @@ string unescape(const string& str)
       s += string("<");
     } else if (name == "gt") {
       s += string(">");
+    } else if (name == "#91") {
+      s += string("[");
+    } else if (name == "#93") {
+      s += string("]");
+    } else if (name == "bra") {
+      s += string("[");
+    } else if (name == "ket") {
+      s += string("]");
+    } else if (name == "bar") {
+      s += string("|");
     } else if (name == "amp") {
       s += string("&");
     } else if (name == "apos") {

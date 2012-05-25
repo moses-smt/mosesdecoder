@@ -153,8 +153,8 @@ sub tokenize {
   $text =~ s/\|/\&bar;/g;
   $text =~ s/\</\&lt;/g;
   $text =~ s/\>/\&gt;/g;
-  $text =~ s/\[/\&bra;/g;
-  $text =~ s/\]/\&ket;/g;
+  $text =~ s/\[/\&#91;/g;
+  $text =~ s/\]/\&#93;/g;
 
 	#ensure final line break
 	$text .= "\n" unless $text =~ /\n$/;
