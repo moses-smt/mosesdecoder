@@ -33,3 +33,5 @@ alias programs : extract extract-rules extract-lex score consolidate consolidate
 install legacy : programs : <location>. <install-type>EXE ;
 
 build-project extract-ghkm ;
+build-project pcfg-extract ;
+build-project pcfg-score ;

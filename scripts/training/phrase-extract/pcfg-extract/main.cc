@@ -1,6 +1,6 @@
 /***********************************************************************
  Moses - statistical machine translation system
- Copyright (C) 2006-2011 University of Edinburgh
+ Copyright (C) 2006-2012 University of Edinburgh
  
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
@@ -17,49 +17,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#pragma once
-#ifndef EXTRACT_GHKM_OPTIONS_H_
-#define EXTRACT_GHKM_OPTIONS_H_
+#include "pcfg_extract.h"
 
-#include <string>
-
-namespace Moses {
-namespace GHKM {
-
-struct Options {
- public:
-  Options()
-      : allowUnary(false)
-      , gzOutput(false)
-      , maxNodes(15)
-      , maxRuleDepth(3)
-      , maxRuleSize(3)
-      , maxScope(3)
-      , minimal(false)
-      , pcfg(false)
-      , unpairedExtractFormat(false) {}
-
-  // Positional options
-  std::string targetFile;
-  std::string sourceFile;
-  std::string alignmentFile;
-  std::string extractFile;
-
-  // All other options
-  bool allowUnary;
-  std::string glueGrammarFile;
-  bool gzOutput;
-  int maxNodes;
-  int maxRuleDepth;
-  int maxRuleSize;
-  int maxScope;
-  bool minimal;
-  bool pcfg;
-  bool unpairedExtractFormat;
-  std::string unknownWordFile;
-};
-
-}  // namespace GHKM
-}  // namespace Moses
-
-#endif
+int main(int argc, char *argv[]) {
+  Moses::PCFG::PcfgExtract tool;
+  return tool.Main(argc, argv);
+}

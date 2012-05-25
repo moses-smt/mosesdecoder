@@ -34,12 +34,14 @@ protected:
   std::string m_label;
   std::vector< SyntaxNode* > m_children;
   SyntaxNode* m_parent;
+  float m_pcfgScore;
 public:
   SyntaxNode( int startPos, int endPos, std::string label )
     :m_start(startPos)
     ,m_end(endPos)
     ,m_label(label)
     ,m_parent(0)
+    ,m_pcfgScore(0.0f)
   {}
   int GetStart() const {
     return m_start;
@@ -49,6 +51,12 @@ public:
   }
   std::string GetLabel() const {
     return m_label;
+  }
+  float GetPcfgScore() const {
+    return m_pcfgScore;
+  }
+  void SetPcfgScore(float score) {
+    m_pcfgScore = score;
   }
   SyntaxNode *GetParent() {
     return m_parent;
@@ -89,11 +97,12 @@ public:
   }
   ~SyntaxTree();
 
+  SyntaxNode *AddNode( int startPos, int endPos, std::string label );
+
   SyntaxNode *GetTop() {
     return m_top;
   }
 
-  void AddNode( int startPos, int endPos, std::string label );
   ParentNodes Parse();
   bool HasNode( int startPos, int endPos ) const;
   const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;

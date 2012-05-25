@@ -43,6 +43,7 @@ public:
   int startS;
   int endS;
   float count;
+  double pcfgScore;
 
   std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
   
@@ -58,6 +59,7 @@ public:
     , startS(sS)
     , endS(eS)
     , count(0)
+    , pcfgScore(0.0)
   {}
   
   void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength)

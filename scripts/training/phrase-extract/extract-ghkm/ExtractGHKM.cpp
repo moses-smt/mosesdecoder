@@ -285,6 +285,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
         "set maximum allowed scope")
     ("Minimal",
         "extract minimal rules only")
+    ("PCFG",
+        "include score based on PCFG scores in target corpus")
     ("UnknownWordLabel",
         po::value(&options.unknownWordFile),
         "write unknown word labels to named file")
@@ -360,6 +362,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   }
   if (vm.count("Minimal")) {
     options.minimal = true;
+  }
+  if (vm.count("PCFG")) {
+    options.pcfg = true;
   }
   if (vm.count("UnpairedExtractFormat")) {
     options.unpairedExtractFormat = true;

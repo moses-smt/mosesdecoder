@@ -57,6 +57,7 @@ class ScfgRule
   const std::vector<Symbol> &GetSourceRHS() const { return m_sourceRHS; }
   const std::vector<Symbol> &GetTargetRHS() const { return m_targetRHS; }
   const Alignment &GetAlignment() const { return m_alignment; }
+  float GetPcfgScore() const { return m_pcfgScore; }
 
   int Scope() const;
 
@@ -68,6 +69,7 @@ class ScfgRule
   std::vector<Symbol> m_sourceRHS;
   std::vector<Symbol> m_targetRHS;
   Alignment m_alignment;
+  float m_pcfgScore;
 };
 
 }  // namespace GHKM

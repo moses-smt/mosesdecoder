@@ -38,7 +38,8 @@ class Subgraph
       : m_root(root)
       , m_depth(0)
       , m_size(root->GetType() == TREE ? 1 : 0)
-      , m_nodeCount(1) {}
+      , m_nodeCount(1)
+      , m_pcfgScore(0.0f) {}
 
   Subgraph(const Node *root, const std::set<const Node *> &leaves)
       : m_root(root)
@@ -46,10 +47,12 @@ class Subgraph
       , m_depth(-1)
       , m_size(-1)
       , m_nodeCount(-1)
+      , m_pcfgScore(0.0f)
   {
     m_depth = CalcDepth(m_root);
     m_size = CalcSize(m_root);
     m_nodeCount = CountNodes(m_root);
+    m_pcfgScore = CalcPcfgScore();
   }
 
   const Node *GetRoot() const { return m_root; }
@@ -57,6 +60,7 @@ class Subgraph
   int GetDepth() const { return m_depth; }
   int GetSize() const { return m_size; }
   int GetNodeCount() const { return m_nodeCount; }
+  float GetPcfgScore() const { return m_pcfgScore; }
 
   bool IsTrivial() const { return m_leaves.empty(); }
 
@@ -66,6 +70,7 @@ class Subgraph
   void GetTargetLeaves(const Node *, std::vector<const Node *> &) const;
   int CalcDepth(const Node *) const;
   int CalcSize(const Node *) const;
+  float CalcPcfgScore() const;
   int CountNodes(const Node *) const;
 
   const Node *m_root;
@@ -73,6 +78,7 @@ class Subgraph
   int m_depth;
   int m_size;
   int m_nodeCount;
+  float m_pcfgScore;
 };
 
 }  // namespace GHKM
