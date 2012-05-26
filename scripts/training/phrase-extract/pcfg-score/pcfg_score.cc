@@ -78,14 +78,14 @@ int PcfgScore::Main(int argc, char *argv[]) {
       std::ostringstream msg;
       msg << "no tree at line " << line_num;
       Warn(msg.str());
-      std::cout << std::endl;
+      std::cout << line << std::endl;
       continue;
     }
     if (!scorer.Score(*tree)) {
       std::ostringstream msg;
       msg << "failed to score tree at line " << line_num;
       Warn(msg.str());
-      std::cout << std::endl;
+      std::cout << line << std::endl;
       continue;
     }
     writer.Write(*tree, std::cout);
