@@ -38,7 +38,7 @@ bool TreeScorer::Score(PcfgTree &root) const {
 
   double log_prob = 0.0;
 
-  std::vector<size_t> key;
+  std::vector<std::size_t> key;
   key.reserve(children.size()+1);
   key.push_back(non_term_vocab_.Lookup(root.label()));
 

@@ -80,7 +80,7 @@ class SyntaxTree : public SyntaxTreeBase<T, SyntaxTree<T> > {
 
 template<typename T, typename DerivedType>
 SyntaxTreeBase<T, DerivedType>::~SyntaxTreeBase() {
-  for (size_t i = 0; i < children_.size(); ++i) {
+  for (std::size_t i = 0; i < children_.size(); ++i) {
     delete children_[i];
   }
 }

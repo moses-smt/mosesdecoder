@@ -63,7 +63,7 @@ int PcfgScore::Main(int argc, char *argv[]) {
   XmlTreeParser parser;
   XmlTreeWriter<PcfgTree> writer;
   std::string line;
-  size_t line_num = 0;
+  std::size_t line_num = 0;
   std::auto_ptr<PcfgTree> tree;
   while (std::getline(std::cin, line)) {
     ++line_num;

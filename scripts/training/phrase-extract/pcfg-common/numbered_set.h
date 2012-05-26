@@ -35,7 +35,7 @@ namespace PCFG {
 // Stores a set of elements of type T, each of which is allocated an integral
 // ID of type I.  IDs are contiguous starting at 0.  Individual elements cannot
 // be removed once inserted (but the whole set can be cleared).
-template<typename T, typename I=size_t>
+template<typename T, typename I=std::size_t>
 class NumberedSet {
  private:
   typedef boost::unordered_map<T, I> ElementToIdMap;
@@ -54,7 +54,7 @@ class NumberedSet {
   static I NullId() { return std::numeric_limits<I>::max(); }
 
   bool Empty() const { return id_to_element_.empty(); }
-  size_t Size() const { return id_to_element_.size(); }
+  std::size_t Size() const { return id_to_element_.size(); }
 
   // Insert the given object and return its ID.
   I Insert(const T &);
