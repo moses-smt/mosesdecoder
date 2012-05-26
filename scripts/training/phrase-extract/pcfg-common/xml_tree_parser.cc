@@ -47,7 +47,10 @@ std::auto_ptr<PcfgTree> XmlTreeParser::Parse(const std::string &line)
   }
   m_tree.ConnectNodes();
   SyntaxNode *root = m_tree.GetTop();
-  assert(root);
+  if (!root) {
+    // There is no XML tree.
+    return std::auto_ptr<PcfgTree>();
+  }
   m_words = tokenize(m_line.c_str());
   return ConvertTree(*root, m_words);
 }
