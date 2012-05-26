@@ -8,6 +8,8 @@ while(<STDIN>) {
   s/\&gt;/\>/g;
   s/\&bra;/\[/g;
   s/\&ket;/\]/g;
+  s/\&#91;/\[/g;
+  s/\&#93;/\]/g;
   s/\&amp;/\&/g;
   print $_;
 }

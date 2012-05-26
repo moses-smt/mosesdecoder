@@ -1089,7 +1089,7 @@ sub get_order_of_scores_from_nbestlist {
   # return the score labels in order
   my $fname_or_source = shift;
   # print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
-  open my $fh, '<', $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source': $!";
+  open my $fh, $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source': $!";
   my $line = <$fh>;
   close $fh;
   die "Line empty in nbestlist '$fname_or_source'" if !defined $line;
@@ -1169,7 +1169,7 @@ sub create_config {
   }
 
   if (defined($sparse_weights_file)) {
-    push @{$P{"weights-file"}}, File::Spec->catfile($___WORKING_DIR, $sparse_weights_file);
+    push @{$P{"weight-file"}}, File::Spec->catfile($___WORKING_DIR, $sparse_weights_file);
   }
 
   # create new moses.ini decoder config file by cloning and overriding the original one
