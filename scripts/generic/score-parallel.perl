@@ -152,7 +152,7 @@ $cmd = "\n\nOH SHIT. This should have been filled in \n\n";
 if ($fileCount == 1 && !$doSort)
 {
   my $numStr = NumStr(0);
-  $cmd = "mv $TMPDIR/phrase-table.half.$numStr.gz $ptHalf.gz \n";
+  $cmd = "mv $TMPDIR/phrase-table.half.$numStr.gz $ptHalf";
 }
 else
 {
@@ -162,14 +162,7 @@ else
     $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
   }
 
-  $cmd .= " | gzip -c >";
-
-  if ($doSort) {
-    $cmd .= " $ptHalf.sorted.gz \n";
-  }
-  else {
-    $cmd .= " $ptHalf.gz \n";
-  }
+  $cmd .= " | gzip -c > $ptHalf";
 }
 print STDERR $cmd;
 systemCheck($cmd);

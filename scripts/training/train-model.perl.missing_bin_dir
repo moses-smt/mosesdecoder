@@ -1486,7 +1486,7 @@ sub score_phrase_phrase_extract {
       if ($pid == 0)
       {
 	      next if $___CONTINUE && -e "$ttable_file.half.$direction";
-	      next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.sorted";
+	      next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.gz";
 	      my $inverse = "";
               my $extract_filename = $extract_file;
 	      if ($direction eq "e2f") {
@@ -1497,7 +1497,7 @@ sub score_phrase_phrase_extract {
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " --KneserNey" if $KNESER_NEY;
@@ -1543,15 +1543,18 @@ sub score_phrase_phrase_extract {
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e.gz $ttable_file.half.e2f.sorted.gz $ttable_file.gz";
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e.gz $ttable_file.half.e2f.gz /dev/stdout";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
     $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
-    $cmd .= " --GoodTuring $ttable_file.half.f2e.coc" if $GOOD_TURING;
-    $cmd .= " --KneserNey $ttable_file.half.f2e.coc" if $KNESER_NEY;
+    $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
+    $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
+    
+    $cmd .= " | gzip -c > $ttable_file.gz";
+    
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
 }
