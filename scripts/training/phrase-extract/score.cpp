@@ -69,10 +69,15 @@ double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignmen
 void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
                       , map<size_t, map<size_t, float> > &targetProb);
+void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
+void printTargetPhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
+
 LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
 bool pcfgFlag = false;
+bool unpairedExtractFormatFlag = false;
+bool conditionOnTargetLhsFlag = false;
 bool wordAlignmentFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
@@ -93,7 +98,7 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS]\n";
     exit(1);
   }
   char* fileNameExtract = argv[1];
@@ -112,6 +117,12 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--PCFG") == 0) {
       pcfgFlag = true;
       cerr << "including PCFG scores\n";
+    } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
+      unpairedExtractFormatFlag = true;
+      cerr << "processing unpaired extract format\n";
+    } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
+      conditionOnTargetLhsFlag = true;
+      cerr << "processing unpaired extract format\n";
     } else if (strcmp(argv[i],"--WordAlignment") == 0) {
       wordAlignmentFlag = true;
       cerr << "outputing word alignment" << endl;
@@ -470,27 +481,18 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   // source phrase (unless inverse)
   if (! inverseFlag) {
-    for(size_t j=0; j<phraseS.size(); j++) {
-      phraseTableFile << vcbS.getWord( phraseS[j] );
-      phraseTableFile << " ";
-    }
-    phraseTableFile << "||| ";
+    printSourcePhrase(phraseS, phraseT, *bestAlignment, phraseTableFile);
+    phraseTableFile << " ||| ";
   }
 
   // target phrase
-  for(size_t j=0; j<phraseT.size(); j++) {
-    phraseTableFile << vcbT.getWord( phraseT[j] );
-    phraseTableFile << " ";
-  }
-  phraseTableFile << "||| ";
+  printTargetPhrase(phraseS, phraseT, *bestAlignment, phraseTableFile);
+  phraseTableFile << " ||| ";
 
   // source phrase (if inverse)
   if (inverseFlag) {
-    for(size_t j=0; j<phraseS.size(); j++) {
-      phraseTableFile << vcbS.getWord( phraseS[j] );
-      phraseTableFile << " ";
-    }
-    phraseTableFile << "||| ";
+    printSourcePhrase(phraseS, phraseT, *bestAlignment, phraseTableFile);
+    phraseTableFile << " ||| ";
   }
 
   // lexical translation probability
@@ -681,6 +683,66 @@ void LexicalTable::load( char *fileName )
     ltable[ wordS ][ wordT ] = prob;
   }
   cerr << endl;
+}
+
+void printSourcePhrase(const PHRASE &phraseS, const PHRASE &phraseT,
+                       const PhraseAlignment &bestAlignment, ostream &out)
+{
+  // output source symbols, except root, in rule table format
+  for (std::size_t i = 0; i < phraseS.size()-1; ++i) {
+    const std::string &word = vcbS.getWord(phraseS[i]);
+    if (!unpairedExtractFormatFlag || !isNonTerminal(word)) {
+      out << word << " ";
+      continue;
+    }
+    // get corresponding target non-terminal and output pair
+    std::set<std::size_t> alignmentPoints = bestAlignment.alignedToS[i];
+    assert(alignmentPoints.size() == 1);
+    int j = *(alignmentPoints.begin());
+    if (inverseFlag) {
+      out << vcbT.getWord(phraseT[j]) << word << " ";
+    } else {
+      out << word << vcbT.getWord(phraseT[j]) << " ";
+    }
+  }
+  // output source root symbol
+  if (conditionOnTargetLhsFlag && !inverseFlag) {
+    out << "[X]";
+  } else {
+    out << vcbS.getWord(phraseS.back());
+  }
+}
+
+void printTargetPhrase(const PHRASE &phraseS, const PHRASE &phraseT,
+                       const PhraseAlignment &bestAlignment, ostream &out)
+{
+  // output target symbols, except root, in rule table format
+  for (std::size_t i = 0; i < phraseT.size()-1; ++i) {
+    const std::string &word = vcbT.getWord(phraseT[i]);
+    if (!unpairedExtractFormatFlag || !isNonTerminal(word)) {
+      out << word << " ";
+      continue;
+    }
+    // get corresponding source non-terminal and output pair
+    std::set<std::size_t> alignmentPoints = bestAlignment.alignedToT[i];
+    assert(alignmentPoints.size() == 1);
+    int j = *(alignmentPoints.begin());
+    if (inverseFlag) {
+      out << word << vcbS.getWord(phraseS[j]) << " ";
+    } else {
+      out << vcbS.getWord(phraseS[j]) << word << " ";
+    }
+  }
+  // output target root symbol
+  if (conditionOnTargetLhsFlag) {
+    if (inverseFlag) {
+      out << "[X]";
+    } else {
+      out << vcbS.getWord(phraseS.back());
+    }
+  } else {
+    out << vcbT.getWord(phraseT.back());
+  }
 }
 
 std::pair<PhrasePairGroup::Coll::iterator,bool> PhrasePairGroup::insert ( const PhraseAlignmentCollection& obj )

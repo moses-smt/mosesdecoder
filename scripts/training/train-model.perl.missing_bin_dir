@@ -31,6 +31,7 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+   $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
@@ -106,6 +107,8 @@ $_HELP = 1
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'ghkm' => \$_GHKM,
 		       'pcfg' => \$_PCFG,
+		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
+		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
 		       'extract-options=s' => \$_EXTRACT_OPTIONS,
 		       'score-options=s' => \$_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
@@ -1375,6 +1378,8 @@ sub extract_phrase {
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
         $cmd .= " --PCFG" if $_PCFG;
+        $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
+        $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
         if (!defined($_GHKM)) {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
@@ -1506,10 +1511,12 @@ sub score_phrase_phrase_extract {
         $cmd .= " --UnalignedFunctionWordPenalty ".($inverse ? $UNALIGNED_FW_F : $UNALIGNED_FW_E) if $UNALIGNED_FW_COUNT;
         $cmd .= " --MinCountHierarchical $MIN_COUNT_HIERARCHICAL" if $MIN_COUNT_HIERARCHICAL;
         $cmd .= " --PCFG" if $_PCFG;
+        $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
+        $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
 
 				# sorting
-				if ($direction eq "e2f") {
+				if ($direction eq "e2f" || $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2) {
 					$cmd .= " 1 ";
 				}
 				else {
