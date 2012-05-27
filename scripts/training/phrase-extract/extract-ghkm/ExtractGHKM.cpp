@@ -266,6 +266,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     //("help", "print this help message and exit")
     ("AllowUnary",
         "allow fully non-lexical unary rules")
+    ("ConditionOnTargetLHS",
+        "write target LHS instead of \"X\" as source LHS")
     ("GlueGrammar",
         po::value(&options.glueGrammarFile),
         "write glue grammar to named file")
