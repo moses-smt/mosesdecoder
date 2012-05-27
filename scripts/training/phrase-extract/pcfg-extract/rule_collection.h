@@ -33,8 +33,8 @@ namespace PCFG {
 // Contains PCFG rules and their counts.
 class RuleCollection {
  public:
-  typedef boost::unordered_map<std::vector<size_t>, size_t> RhsCountMap;
-  typedef boost::unordered_map<size_t, RhsCountMap> Map;
+  typedef boost::unordered_map<std::vector<std::size_t>, std::size_t> RhsCountMap;
+  typedef boost::unordered_map<std::size_t, RhsCountMap> Map;
   typedef Map::iterator iterator;
   typedef Map::const_iterator const_iterator;
 
@@ -46,7 +46,7 @@ class RuleCollection {
   iterator end() { return collection_.end(); }
   const_iterator end() const { return collection_.end(); }
 
-  void Add(size_t, const std::vector<size_t> &);
+  void Add(std::size_t, const std::vector<std::size_t> &);
   void CreatePcfg(Pcfg &);
 
  private:

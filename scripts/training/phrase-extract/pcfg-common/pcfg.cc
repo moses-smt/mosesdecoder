@@ -50,7 +50,7 @@ void Pcfg::Read(std::istream &input, Vocabulary &vocab) {
   Key key;
   while (std::getline(input, line)) {
     // Read LHS.
-    size_t pos = line.find("|||");
+    std::size_t pos = line.find("|||");
     if (pos == std::string::npos) {
       throw Exception("missing first delimiter");
     }
@@ -58,7 +58,7 @@ void Pcfg::Read(std::istream &input, Vocabulary &vocab) {
     boost::trim(lhs_string);
 
     // Read RHS.
-    size_t begin = pos+3;
+    std::size_t begin = pos+3;
     pos = line.find("|||", begin);
     if (pos == std::string::npos) {
       throw Exception("missing second delimiter");
@@ -92,8 +92,8 @@ void Pcfg::Write(const Vocabulary &vocab, std::ostream &output) const {
   for (const_iterator p = begin(); p != end(); ++p) {
     const Key &key = p->first;
     double score = p->second;
-    std::vector<size_t>::const_iterator q = key.begin();
-    std::vector<size_t>::const_iterator end = key.end();
+    std::vector<std::size_t>::const_iterator q = key.begin();
+    std::vector<std::size_t>::const_iterator end = key.end();
     output << vocab.Lookup(*q++) << " |||";
     while (q != end) {
       output << " " << vocab.Lookup(*q++);

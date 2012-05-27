@@ -26,24 +26,24 @@
 namespace Moses {
 namespace PCFG {
 
-void RuleCollection::Add(size_t lhs, const std::vector<size_t> &rhs) {
+void RuleCollection::Add(std::size_t lhs, const std::vector<std::size_t> &rhs) {
   ++collection_[lhs][rhs];
 }
 
 void RuleCollection::CreatePcfg(Pcfg &pcfg) {
-  std::vector<size_t> key;
+  std::vector<std::size_t> key;
   for (const_iterator p = begin(); p != end(); ++p) {
-    size_t lhs = p->first;
+    std::size_t lhs = p->first;
     const RhsCountMap &rhs_counts = p->second;
-    size_t total = 0;
+    std::size_t total = 0;
     for (RhsCountMap::const_iterator q = rhs_counts.begin();
          q != rhs_counts.end(); ++q) {
       total += q->second;
     }
     for (RhsCountMap::const_iterator q = rhs_counts.begin();
          q != rhs_counts.end(); ++q) {
-      const std::vector<size_t> &rhs = q->first;
-      size_t count = q->second;
+      const std::vector<std::size_t> &rhs = q->first;
+      std::size_t count = q->second;
       double score = std::log(static_cast<double>(count) /
                               static_cast<double>(total));
       key.clear();

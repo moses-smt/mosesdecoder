@@ -101,9 +101,9 @@ void XmlTreeWriter<InputTree>::Write(const InputTree &tree,
 template<typename InputTree>
 std::string XmlTreeWriter<InputTree>::Escape(const std::string &s) const {
   std::string t;
-  size_t len = s.size();
+  std::size_t len = s.size();
   t.reserve(len);
-  for (size_t i = 0; i < len; ++i) {
+  for (std::size_t i = 0; i < len; ++i) {
     if (s[i] == '<') {
       t += "&lt;";
     } else if (s[i] == '>') {

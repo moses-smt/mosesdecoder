@@ -33,7 +33,7 @@ namespace PCFG {
 
 class Pcfg {
  public:
-  typedef std::vector<size_t> Key;
+  typedef std::vector<std::size_t> Key;
   typedef std::map<Key, double> Map;
   typedef Map::iterator iterator;
   typedef Map::const_iterator const_iterator;

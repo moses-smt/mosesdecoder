@@ -33,8 +33,8 @@ void RuleExtractor::Extract(const PcfgTree &tree, RuleCollection &rc) const {
     return;
   }
 
-  size_t lhs = non_term_vocab_.Insert(tree.label());
-  std::vector<size_t> rhs;
+  std::size_t lhs = non_term_vocab_.Insert(tree.label());
+  std::vector<std::size_t> rhs;
 
   const std::vector<PcfgTree *> &children = tree.children();
   rhs.reserve(children.size());
