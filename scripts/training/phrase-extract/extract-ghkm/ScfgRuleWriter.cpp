@@ -101,7 +101,11 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
     }
     sourceSS << " ";
   }
-  WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  if (m_options.conditionOnTargetLhs) {
+    WriteSymbol(rule.GetTargetLHS(), sourceSS);
+  } else {
+    WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  }
 
   // Write the target side of the rule to targetSS.
   i = 0;
@@ -131,7 +135,11 @@ void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule,
     WriteSymbol(*p, sourceSS);
     sourceSS << " ";
   }
-  WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  if (m_options.conditionOnTargetLhs) {
+    WriteSymbol(rule.GetTargetLHS(), sourceSS);
+  } else {
+    WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  }
 
   // Write the target side of the rule to targetSS.
   i = 0;

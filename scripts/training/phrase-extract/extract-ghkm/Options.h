@@ -30,6 +30,7 @@ struct Options {
  public:
   Options()
       : allowUnary(false)
+      , conditionOnTargetLhs(false)
       , gzOutput(false)
       , maxNodes(15)
       , maxRuleDepth(3)
@@ -47,6 +48,7 @@ struct Options {
 
   // All other options
   bool allowUnary;
+  bool conditionOnTargetLhs;
   std::string glueGrammarFile;
   bool gzOutput;
   int maxNodes;

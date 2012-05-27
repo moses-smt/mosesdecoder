@@ -357,6 +357,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("AllowUnary")) {
     options.allowUnary = true;
   }
+  if (vm.count("ConditionOnTargetLHS")) {
+    options.conditionOnTargetLhs = true;
+  }
   if (vm.count("GZOutput")) {
     options.gzOutput = true;
   }

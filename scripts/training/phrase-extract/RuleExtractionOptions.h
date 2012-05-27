@@ -48,6 +48,8 @@ public:
   bool pcfgScore;
   bool outputNTLengths;
   bool gzOutput;
+  bool unpairedExtractFormat;
+  bool conditionOnTargetLhs;
   
   RuleExtractionOptions()
     : maxSpan(10)
@@ -78,6 +80,8 @@ public:
     , pcfgScore(false)
     , outputNTLengths(false)
     , gzOutput(false)
+    , unpairedExtractFormat(false)
+    , conditionOnTargetLhs(false)
   {}
 };
 

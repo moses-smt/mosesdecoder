@@ -140,7 +140,9 @@ int main(int argc, char* argv[])
          << " | --MaxNonTerm[" << options.maxNonTerm << "]"
          << " | --MaxScope[" << options.maxScope << "]"
          << " | --SourceSyntax | --TargetSyntax"
-         << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting ]\n";
+         << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting"
+         << " | --UnpairedExtractFormat"
+         << " | --ConditionOnTargetLHS ]\n";
     exit(1);
   }
   char* &fileNameT = argv[1];
@@ -261,6 +263,10 @@ int main(int argc, char* argv[])
       options.pcfgScore = true;
     } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
       options.outputNTLengths = true;
+    } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
+      options.unpairedExtractFormat = true;
+    } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
+      options.conditionOnTargetLhs = true;
 #ifdef WITH_THREADS
     } else if (strcmp(argv[i],"-threads") == 0 || 
                strcmp(argv[i],"--threads") == 0 ||
@@ -545,7 +551,11 @@ string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, in
                            m_sentence->targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
       hole.SetLabel(targetLabel, 1);
 
-      out += "[" + sourceLabel + "][" + targetLabel + "] ";
+      if (m_options.unpairedExtractFormat) {
+        out += "[" + targetLabel + "] ";
+      } else {
+        out += "[" + sourceLabel + "][" + targetLabel + "] ";
+      }
 
       if (m_options.pcfgScore) {
         double score = m_sentence->targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->GetPcfgScore();
@@ -591,7 +601,11 @@ string ExtractTask::printSourceHieroPhrase( int startT, int endT, int startS, in
       assert(targetLabel != "");
 
       const string &sourceLabel =  hole.GetLabel(0);
-      out += "[" + sourceLabel + "][" + targetLabel + "] ";
+      if (m_options.unpairedExtractFormat) {
+        out += "[" + sourceLabel + "] ";
+      } else {
+        out += "[" + sourceLabel + "][" + targetLabel + "] ";
+      }
 
       currPos = hole.GetEnd(0);
       hole.SetPos(outPos, 0);
@@ -659,7 +673,6 @@ void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
                        m_sentence->targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
   string sourceLabel = m_options.sourceSyntax ?
                        m_sentence->sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
-  //string sourceLabel = "X";
 
   // create non-terms on the source side
   preprocessSourceHieroPhrase(startT, endT, startS, endS, indexS, holeColl, labelIndex);
@@ -677,9 +690,12 @@ void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
   }
 
   // source
-  // holeColl.SortSourceHoles();
-  rule.source = printSourceHieroPhrase(startT, endT, startS, endS, holeColl, labelIndex)
-                + " [" + sourceLabel + "]";
+  rule.source = printSourceHieroPhrase(startT, endT, startS, endS, holeColl, labelIndex);
+  if (m_options.conditionOnTargetLhs) {
+    rule.source += " [" + targetLabel + "]";
+  } else {
+    rule.source += " [" + sourceLabel + "]";
+  }
 
   // alignment
   printHieroAlignment(startT, endT, startS, endS, indexS, indexT, holeColl, rule);
@@ -875,10 +891,15 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, RuleExist
 
   // phrase labels
   string targetLabel,sourceLabel;
-  sourceLabel = m_options.sourceSyntax ?
-                m_sentence->sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
-  targetLabel = m_options.targetSyntax ?
-                m_sentence->targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
+  if (m_options.targetSyntax && m_options.conditionOnTargetLhs) {
+    sourceLabel = targetLabel = m_sentence->targetTree.GetNodes(startT,endT)[0]->GetLabel();
+  }
+  else {
+    sourceLabel = m_options.sourceSyntax ?
+                  m_sentence->sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
+    targetLabel = m_options.targetSyntax ?
+                  m_sentence->targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
+  }
 
   // source
   rule.source = "";
