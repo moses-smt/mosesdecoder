@@ -48,6 +48,7 @@ Parameter::Parameter()
   AddParam("dlm-model", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
+  AddParam("distinct-nbest", "only distinct translations in nbest list");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
@@ -116,6 +117,7 @@ Parameter::Parameter()
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
  	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
+  AddParam("mira", "do mira training");
   AddParam("consensus-decoding", "con", "use consensus decoding (De Nero et. al. 2009)");
   AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
   AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");

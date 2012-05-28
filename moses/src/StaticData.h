@@ -184,6 +184,7 @@ protected:
 
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
+  bool m_mira; // do mira training
   bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
   size_t m_mbrSize; //! number of translation candidates considered
   float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
@@ -454,7 +455,7 @@ public:
     return m_nBestFilePath;
   }
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
+    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
 #ifdef HAVE_PROTOBUF
            || m_outputSearchGraphPB
 #endif

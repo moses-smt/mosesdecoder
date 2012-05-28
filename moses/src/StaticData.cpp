@@ -246,6 +246,9 @@ bool StaticData::LoadData(Parameter *parameter)
   } else {
     m_nBestFactor = 20;
   }
+  
+  // explicit setting of distinct nbest
+  SetBooleanParameter( &m_onlyDistinctNBest, "distinct-nbest", false);
 
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
@@ -451,6 +454,9 @@ bool StaticData::LoadData(Parameter *parameter)
     cerr << "Errror: Cannot use both n-best mbr and lattice mbr together" << endl;
     exit(1);
   }
+  
+  //mira training
+  SetBooleanParameter( &m_mira, "mira", false );
 
   if (m_useLatticeMBR) m_mbr = true;
 
@@ -1793,7 +1799,7 @@ bool StaticData::LoadTargetWordInsertionFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo) {
+  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
     UserMessage::Add("Target word insertion feature needs word alignments in phrase table.");
     return false;
   }
@@ -1832,7 +1838,7 @@ bool StaticData::LoadSourceWordDeletionFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo) {
+  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
     UserMessage::Add("Source word deletion feature needs word alignments in phrase table.");
     return false;
   }
@@ -1878,7 +1884,7 @@ bool StaticData::LoadWordTranslationFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo) {
+  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
     UserMessage::Add("Word translation feature needs word alignments in phrase table.");
     return false;
   }

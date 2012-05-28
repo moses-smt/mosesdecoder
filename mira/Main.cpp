@@ -391,7 +391,7 @@ int main(int argc, char** argv) {
 	// initialise Moses
 	// add initial Bleu weight and references to initialize Bleu feature
 	boost::trim(decoder_settings);
-	decoder_settings += " -weight-bl 1 -references";
+	decoder_settings += " -mira -distinct-nbest -weight-bl 1 -references";
 	if (trainWithMultipleFolds) {
 		decoder_settings += " ";
 		decoder_settings += referenceFilesFolds[myFold];

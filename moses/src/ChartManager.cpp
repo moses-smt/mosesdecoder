@@ -141,7 +141,7 @@ const ChartHypothesis *ChartManager::GetBestHypothesis() const
   }
 }
 
-void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct) const
+void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyDistinct) const
 {
   size_t size = m_source.GetSize();
   if (count == 0 || size == 0)
@@ -158,21 +158,16 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(*hypo));
 
   // Add it to the n-best list.
-  ret.Add(basePath);
   if (count == 1) {
+	ret.Add(basePath);
     return;
-  }
-
-  // Record the output phrase if distinct translations are required.
-  set<Phrase> distinctHyps;
-  if (onlyDistinct) {
-    distinctHyps.insert(basePath->GetOutputPhrase());
   }
 
   // Set a limit on the number of detours to pop.  If the n-best list is
   // restricted to distinct translations then this limit should be bigger
   // than n.  The n-best factor determines how much bigger the limit should be.
-  const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+  const StaticData &staticData = StaticData::Instance();
+  const size_t nBestFactor = staticData.GetNBestFactor();
   size_t popLimit;
   if (!onlyDistinct) {
     popLimit = count-1;
@@ -188,36 +183,47 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   // contain no more than popLimit items.
   ChartTrellisDetourQueue contenders(popLimit);
 
-  // Create a ChartTrellisDetour for each single-point deviation from basePath
-  // and add them to the queue.
-  CreateDeviantPaths(basePath, contenders);
-
+  // Get all complete translations
+  Word *w = new Word();
+  w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "TOP", true);
+  const HypoList topHypos = lastCell.GetSortedHypotheses(*w);
+  
+  // Create a ChartTrellisDetour for each complete translation and add it to the queue
+  for (size_t i=0; i<topHypos.size(); ++i) {
+	  const ChartHypothesis &hypo = *(topHypos[i]);
+	  boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(hypo));
+	  ChartTrellisDetour *detour = new ChartTrellisDetour(basePath, basePath->GetFinalNode(), hypo);
+	  contenders.Push(detour);
+  }
+ 	
+  // Record the output phrase if distinct translations are required.
+  set<Phrase> distinctHyps;
+  
   // MAIN loop
-  for (size_t i = 0;
-       ret.GetSize() < count && !contenders.Empty() && i < popLimit;
-       ++i) {
+  for (size_t i = 0; ret.GetSize() < count && !contenders.Empty() && i < popLimit; ++i) {
     // Get the best detour from the queue.
     std::auto_ptr<const ChartTrellisDetour> detour(contenders.Pop());
     CHECK(detour.get());
 
     // Create a full base path from the chosen detour.
-    basePath.reset(new ChartTrellisPath(*detour));
-
+    //basePath.reset(new ChartTrellisPath(*detour));
+    boost::shared_ptr<ChartTrellisPath> path(new ChartTrellisPath(*detour));
+    
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
-    CHECK(basePath->GetDeviationPoint());
-    CreateDeviantPaths(basePath, *(basePath->GetDeviationPoint()), contenders);
+    CHECK(path->GetDeviationPoint());
+    CreateDeviantPaths(path, *(path->GetDeviationPoint()), contenders);
 
     // If the n-best list is allowed to contain duplicate translations (at the
     // surface level) then add the new path unconditionally, otherwise check
     // whether the translation has seen before.
     if (!onlyDistinct) {
-      ret.Add(basePath);
+      ret.Add(path);
     } else {
-      Phrase tgtPhrase = basePath->GetOutputPhrase();
+      Phrase tgtPhrase = path->GetOutputPhrase();
       if (distinctHyps.insert(tgtPhrase).second) {
-        ret.Add(basePath);
+        ret.Add(path);
       }
     }
   }
