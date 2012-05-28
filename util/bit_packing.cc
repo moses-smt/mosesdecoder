@@ -10,7 +10,7 @@ template <bool> struct StaticCheck {};
 template <> struct StaticCheck<true> { typedef bool StaticAssertionPassed; };
 
 // If your float isn't 4 bytes, we're hosed.  
-typedef StaticCheck<sizeof(float) == 4>::StaticAssertionPassed FloatSize;
+//typedef StaticCheck<sizeof(float) == 4>::StaticAssertionPassed FloatSize;
 
 } // namespace
 
