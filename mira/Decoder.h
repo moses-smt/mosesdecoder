@@ -102,7 +102,7 @@ class MosesDecoder {
     											std::string filename,
     											std::ofstream& streamOut);
     void initialize(Moses::StaticData& staticData, const std::string& source, size_t sentenceid,
-    		 	 	 	 	 	  float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength);
+    		 	 	float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength, bool chartDecoding);
     void updateHistory(const std::vector<const Moses::Word*>& words);
     void updateHistory(const std::vector< std::vector< const Moses::Word*> >& words, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void printBleuFeatureHistory(std::ostream& out);

@@ -103,11 +103,12 @@ namespace Mira {
                               string filename)
   {
   	StaticData &staticData = StaticData::InstanceNonConst();
-  	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength);
+  	bool chartDecoding = (staticData.GetSearchAlgorithm() == ChartDecoding);
+  	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
     // run the decoder
-    if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+    if (chartDecoding) {
     	return runChartDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
     			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
     			system);
@@ -274,10 +275,11 @@ namespace Mira {
   														size_t nBestSize, float bleuObjectiveWeight, float bleuScoreWeight,
   														bool distinctNbest, bool avgRefLength, string filename, ofstream& streamOut) {
   	StaticData &staticData = StaticData::InstanceNonConst();
-  	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength);
+  	bool chartDecoding = (staticData.GetSearchAlgorithm() == ChartDecoding);
+  	initialize(staticData, source, sentenceid, bleuObjectiveWeight, bleuScoreWeight, avgRefLength, chartDecoding);
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
 
-    if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+    if (chartDecoding) {
       m_chartManager = new ChartManager(*m_sentence, &system);
       m_chartManager->ProcessSentence();
       ChartTrellisPathList nBestList;
@@ -328,7 +330,7 @@ namespace Mira {
   }
 
   void MosesDecoder::initialize(StaticData& staticData, const std::string& source, size_t sentenceid,
-      													float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength) {
+      							float bleuObjectiveWeight, float bleuScoreWeight, bool avgRefLength, bool chartDecoding) {
   	m_sentence = new Sentence();
     stringstream in(source + "\n");
     const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
@@ -339,6 +341,11 @@ namespace Mira {
     staticData.ReLoadBleuScoreFeatureParameter(bleuObjectiveWeight*bleuScoreWeight);
 
     m_bleuScoreFeature->SetCurrSourceLength((*m_sentence).GetSize());
+    if (chartDecoding)
+      m_bleuScoreFeature->SetCurrNormSourceLength((*m_sentence).GetSize()-2);
+    else
+      m_bleuScoreFeature->SetCurrNormSourceLength((*m_sentence).GetSize());
+    	
     if (avgRefLength)
     	m_bleuScoreFeature->SetCurrAvgRefLength(sentenceid);
     else

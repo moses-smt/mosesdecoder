@@ -114,6 +114,9 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
 void BleuScoreFeature::SetCurrSourceLength(size_t source_length) {
     m_cur_source_length = source_length;
 }
+void BleuScoreFeature::SetCurrNormSourceLength(size_t source_length) {
+    m_cur_norm_source_length = source_length;
+}
 
 // m_refs[sent_id][[vector<length>][ngrams]]
 void BleuScoreFeature::SetCurrShortestRefLength(size_t sent_id) {
@@ -454,7 +457,7 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
 		ScoreComponentCollection* accumulator ) const {
   NGrams::const_iterator reference_ngrams_iter;
-
+  
   const Phrase& curr_target_phrase = static_cast<const Phrase&>(cur_hypo.GetCurrTargetPhrase());
 //  cerr << "\nCur target phrase: " << cur_hypo.GetTargetLHS() << " --> " << curr_target_phrase << endl;
 
@@ -488,6 +491,14 @@ FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int fe
   			// add ngram matches from other previous states
   			new_state->AddNgramCountAndMatches(ps_nonConst->m_ngram_counts, ps_nonConst->m_ngram_matches);
   	}
+  }
+  
+  // check if we are already done (don't add <s> and </s>)
+  size_t numWordsCovered = cur_hypo.GetCurrSourceRange().GetNumWordsCovered();
+  if (numWordsCovered == m_cur_source_length) {
+	  // Bleu score stays the same, do not need to add anything
+	  //accumulator->PlusEquals(this, 0);
+	  return new_state;
   }
 
   // set new context
@@ -565,7 +576,7 @@ FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int fe
   // reference phrase
   size_t cur_source_length = m_cur_source_length;
   new_state->m_scaled_ref_length = m_cur_ref_length * (float(new_state->m_source_length)/cur_source_length);
-
+  
   // Calculate new bleu.
   new_bleu = CalculateBleu(new_state);
 
@@ -644,13 +655,13 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   	// B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
   	// where c(e;) is a vector of reference length, ngram counts and ngram matches
   	if (m_scale_by_input_length) {
-  		precision *= m_cur_source_length;
+  		precision *= m_cur_norm_source_length;
   	}
   	else if (m_scale_by_avg_input_length) {
   		precision *= m_avg_input_length;
   	}
   	else if (m_scale_by_inverse_length) {
-  		precision *= (100/m_cur_source_length);
+  		precision *= (100/m_cur_norm_source_length);
   	}
   	else if (m_scale_by_avg_inverse_length) {
   		precision *= (100/m_avg_input_length);

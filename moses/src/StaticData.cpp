@@ -1610,11 +1610,11 @@ bool StaticData::LoadReferences()
     }
     string line;
     while (getline(in,line)) {
-    	if (GetSearchAlgorithm() == ChartDecoding) {
-    		stringstream tmp;
-    		tmp << "<s> " << line << " </s>";
-    		line = tmp.str();
-    	}
+/*      if (GetSearchAlgorithm() == ChartDecoding) {
+    	stringstream tmp;
+    	tmp << "<s> " << line << " </s>";
+    	line = tmp.str();
+      }*/
       references[i].push_back(line);
     }
     if (i > 0) {

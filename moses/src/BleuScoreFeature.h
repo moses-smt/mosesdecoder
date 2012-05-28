@@ -80,6 +80,7 @@ public:
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrSourceLength(size_t);
+    void SetCurrNormSourceLength(size_t);
     void SetCurrShortestRefLength(size_t);
     void SetCurrAvgRefLength(size_t sent_id);
     void SetAvgInputLength (float l) { m_avg_input_length = l; }
@@ -140,6 +141,7 @@ private:
     float m_ref_length_history;
 
     size_t m_cur_source_length;
+    size_t m_cur_norm_source_length; // length without <s>, </s>
     RefCounts m_refs;
     NGrams m_cur_ref_ngrams;
     float m_cur_ref_length;
