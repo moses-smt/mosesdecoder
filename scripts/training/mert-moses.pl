@@ -117,6 +117,9 @@ my $___HISTORIC_INTERPOLATION = 0; # interpolate optimize weights with previous 
 # TODO: Should we also add these values to options of this script?
 my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 
+# Flags related to Batch MIRA (Cherry & Foster, 2012)
+my $___BATCH_MIRA = 0; # flg to enable batch MIRA
+
 my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
@@ -206,6 +209,7 @@ GetOptions(
   "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
   "pro-starting-point" => \$___PRO_STARTING_POINT,
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
+  "batch-mira" => \$___BATCH_MIRA,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -324,10 +328,12 @@ if (!defined $mertdir) {
 my $mert_extract_cmd = File::Spec->catfile($mertdir, "extractor");
 my $mert_mert_cmd    = File::Spec->catfile($mertdir, "mert");
 my $mert_pro_cmd     = File::Spec->catfile($mertdir, "pro");
+my $mert_mira_cmd    = File::Spec->catfile($mertdir, "kbmira");
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd"    if ! -x $mert_mert_cmd;
 die "Not executable: $mert_pro_cmd"     if ! -x $mert_pro_cmd;
+die "Not executable: $mert_mira_cmd"    if ! -x $mert_mira_cmd;
 
 my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set to your installation
 
@@ -727,6 +733,11 @@ while (1) {
     $scfiles = "$score_file";
   }
 
+  my $mira_settings = "";
+  $mira_settings .= " --dense-init run$run.$weights_in_file";
+  if (-e "run$run.sparse-weights") {
+    $mira_settings .= " --sparse-init run$run.sparse-weights";
+  }
   my $file_settings = " --ffile $ffiles --scfile $scfiles";
   my $pro_file_settings = "--ffile " . join(" --ffile ", split(/,/, $ffiles)) .
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
@@ -759,6 +770,10 @@ while (1) {
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
+  } elsif ($___BATCH_MIRA) { # batch MIRA optimization
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
+    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
   }
@@ -906,7 +921,7 @@ chdir($cwd);
 sub get_weights_from_mert {
   my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
   my ($bestpoint, $devbleu);
-  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)) {
+  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/) || $___BATCH_MIRA) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my (@WEIGHT, $sum);
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
@@ -923,6 +938,14 @@ sub get_weights_from_mert {
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ", @WEIGHT);
     close $fh;
+    if($___BATCH_MIRA) {
+      open my $fh2, '<', $logfile or die "Can't open $logfile: $!";
+      while(<$fh2>) {
+        if(/Best BLEU = ([\-\d\.]+)/) {
+          $devbleu = $1;
+        }
+      }
+    }
   } else {
     open my $fh, '<', $logfile or die "Can't open $logfile: $!";
     while (<$fh>) {
