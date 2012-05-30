@@ -63,9 +63,10 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
   }
 }
 
-void BleuScoreFeature::SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+void BleuScoreFeature::SetBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
 		bool scaleByInverseLength, bool scaleByAvgInverseLength,
 		float scaleByX, float historySmoothing, size_t scheme) {
+	m_enabled = !disable;
 	m_sentence_bleu = sentenceBleu;
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_avg_input_length = scaleByAvgInputLength;
@@ -398,11 +399,12 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
                                     const FFState* prev_state, 
                                     ScoreComponentCollection* accumulator) const
 {
-    NGrams::const_iterator reference_ngrams_iter;
+	if (!m_enabled) return new BleuScoreState();
+	
+	NGrams::const_iterator reference_ngrams_iter;
     const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
     BleuScoreState* new_state = new BleuScoreState(ps);
-    //cerr << "PS: " << ps << endl;
-
+    
     float old_bleu, new_bleu;
     size_t num_new_words, ctx_start_idx, ctx_end_idx;
 
@@ -456,6 +458,8 @@ FFState* BleuScoreFeature::Evaluate(const Hypothesis& cur_hypo,
 
 FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
 		ScoreComponentCollection* accumulator ) const {
+  if (!m_enabled) return new BleuScoreState();
+	
   NGrams::const_iterator reference_ngrams_iter;
   
   const Phrase& curr_target_phrase = static_cast<const Phrase&>(cur_hypo.GetCurrTargetPhrase());
@@ -583,6 +587,39 @@ FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int fe
   // Set score to new Bleu score
   accumulator->PlusEquals(this, new_bleu - old_bleu);
   return new_state;
+}
+
+/**
+ * Calculate real sentence Bleu score of complete translation
+ */
+float BleuScoreFeature::CalculateBleu(Phrase translation) const
+{
+	if (translation.GetSize() == 0)
+	  return 0.0;
+	
+	Phrase normTranslation = translation;
+    // remove start and end symbol for chart decoding
+    if (m_cur_source_length != m_cur_norm_source_length) {
+      WordsRange* range = new WordsRange(1, translation.GetSize()-2);
+      normTranslation = translation.GetSubString(*range);
+    }
+    
+    // get ngram matches for translation
+    BleuScoreState* state = new BleuScoreState();
+    GetClippedNgramMatchesAndCounts(normTranslation,
+                        m_cur_ref_ngrams,
+                        state->m_ngram_counts,
+                        state->m_ngram_matches,
+                        0); // number of words in previous states
+
+    // set state variables
+    state->m_words = normTranslation;
+    state->m_source_length = m_cur_norm_source_length;
+    state->m_target_length = normTranslation.GetSize();
+    state->m_scaled_ref_length = m_cur_ref_length;
+
+    // Calculate bleu.
+    return CalculateBleu(state);
 }
 
 /*

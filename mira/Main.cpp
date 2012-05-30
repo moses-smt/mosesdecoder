@@ -128,8 +128,11 @@ int main(int argc, char** argv) {
   bool most_violated, all_violated, max_bleu_diff, one_against_all;
   bool feature_confidence, signed_counts, averageConfidenceCounts;
   float decay, core_r0, sparse_r0;
+  bool realBleu, disableBleuFeature;
   po::options_description desc("Allowed options");
   desc.add_options()
+    ("disable-bleu-feature", po::value<bool>(&disableBleuFeature)->default_value(false), "Disable the Bleu feature")
+	("real-bleu", po::value<bool>(&realBleu)->default_value(false), "Compute real sentence Bleu on complete translations") 
     ("bleu-weight", po::value<float>(&bleuWeight)->default_value(1.0), "Bleu weight used in decoder objective")
     ("bw-hope", po::value<float>(&bleuWeight_hope)->default_value(-1.0), "Bleu weight used in decoder objective for hope")
     ("bw-fear", po::value<float>(&bleuWeight_fear)->default_value(-1.0), "Bleu weight used in decoder objective for fear")
@@ -250,19 +253,6 @@ int main(int argc, char** argv) {
   }
   
   const StaticData &staticData = StaticData::Instance();
-
-  cerr << "scale-all: " << scale_all << endl;
-  cerr << "scale-all-factor: " << scale_all_factor << endl;
-  cerr << "bleu weight: " << bleuWeight << endl;
-  cerr << "bleu weight hope: " << bleuWeight_hope << endl;
-  cerr << "bleu weight fear: " << bleuWeight_fear << endl;;
-  cerr << "bleu weight depends on lm: " << bleu_weight_lm << endl;
-  cerr << "by this factor: " << bleu_weight_lm_factor << endl;
-  cerr << "adjust dynamically: " << bleu_weight_lm_adjust << endl;
-  cerr << "l1-reg: " << l1_regularize << endl;
-  cerr << "l1-lambda: " << l1_lambda << endl;
-  cerr << "l2-reg: " << l2_regularize << endl;
-  cerr << "l2-lambda: " << l2_lambda << endl;
 
   bool trainWithMultipleFolds = false; 
   if (mosesConfigFilesFolds.size() > 0 || inputFilesFolds.size() > 0 || referenceFilesFolds.size() > 0) {
@@ -409,7 +399,7 @@ int main(int argc, char** argv) {
 	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[myFold] : mosesConfigFile;
 	VERBOSE(1, "Rank " << rank << " reading config file from " << configFile << endl);
 	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-	decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
+	decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
 			scaleByX, historySmoothing, bleu_smoothing_scheme);
 	SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
@@ -866,7 +856,7 @@ int main(int argc, char** argv) {
 				    delete decoder;
 				    StaticData::ClearDataStatic();
 				    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-				    decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+				    decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 				    decoder->setWeights(mosesWeights);
 				  }    
 					
@@ -874,7 +864,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch, "");
+							1, realBleu, distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup(chartDecoding);
 					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
@@ -882,8 +872,6 @@ int main(int argc, char** argv) {
 					float hope_length_ratio = (float)oracle.size()/ref_length;
 					int oracleSize = (int)oracle.size();
 					cerr << endl;
-
-					//exit(0);
 
 					// count sparse features occurring in hope translation
 					featureValuesHope[batchPosition][0].IncrementSparseHopeFeatures();
@@ -918,14 +906,14 @@ int main(int argc, char** argv) {
                                             delete decoder;
 					    StaticData::ClearDataStatic();
                                             decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-                                            decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+                                            decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
                                             decoder->setWeights(mosesWeights);
                                           }
 
 						cerr << "Rank " << rank << ", epoch " << epoch << ", 1best wrt model score (debug or history)" << endl;
 						vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 								featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-								1, distinctNbest, avgRefLength, rank, epoch, "");
+								1, realBleu, distinctNbest, avgRefLength, rank, epoch, "");
 						bestModel = outputModel[0];
 						decoder->cleanup(chartDecoding);
 						cerr << endl;
@@ -940,14 +928,14 @@ int main(int argc, char** argv) {
 						delete decoder;
 					    StaticData::ClearDataStatic();
 					    decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-					    decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					    decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 					    decoder->setWeights(mosesWeights);
 					}
 
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best fear translations" << endl;
 					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, fear_n, -1.0, bleuWeight_fear,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch, "");
+							1, realBleu, distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> fear = outputFear[0];
 					decoder->cleanup(chartDecoding);
 					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
@@ -1035,7 +1023,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << hope_n << "best hope translations" << endl;
 					vector< vector<const Word*> > outputHope = decoder->getNBest(input, *sid, hope_n, 1.0, bleuWeight_hope,
 							featureValuesHope[batchPosition], bleuScoresHope[batchPosition], modelScoresHope[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch, "");
+							1, realBleu, distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> oracle = outputHope[0];
 					decoder->cleanup(chartDecoding);
 					cerr << endl;
@@ -1048,7 +1036,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << fear_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, fear_n, 0.0, bleuWeight_fear,
 							featureValuesFear[batchPosition], bleuScoresFear[batchPosition], modelScoresFear[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch, "");
+							realBleu, 1, distinctNbest, avgRefLength, rank, epoch, "");
 					bestModel = outputModel[0];
 					decoder->cleanup(chartDecoding);
 					cerr << endl;
@@ -1067,7 +1055,7 @@ int main(int argc, char** argv) {
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << rank_n << "best wrt model score" << endl;
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, rank_n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch, "");
+							1, realBleu, distinctNbest, avgRefLength, rank, epoch, "");
 					vector<const Word*> bestModel = outputModel[0];
 					decoder->cleanup(chartDecoding);
 					oneBests.push_back(bestModel);
@@ -1105,21 +1093,20 @@ int main(int argc, char** argv) {
 					  delete decoder;
 					  StaticData::ClearDataStatic();
 					  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-					  decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					  decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 					  decoder->setWeights(mosesWeights);
 					}
 
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best hope translations" << endl;
 					size_t oraclePos = featureValues[batchPosition].size();
-					vector <vector<const Word*> > outputHope = decoder->getNBest(input, *sid, n, 1.0, bleuWeight_hope,
+					decoder->getNBest(input, *sid, n, 1.0, bleuWeight_hope,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch, hope_nbest_filename.str());
-					vector<const Word*> oracle = outputHope[0];
+							0, realBleu, distinctNbest, avgRefLength, rank, epoch, hope_nbest_filename.str());
 					// needed for history
 					inputLengths.push_back(current_input_length);
 					ref_ids.push_back(*sid);
 					decoder->cleanup(chartDecoding);
-					ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
+					//ref_length = decoder->getClosestReferenceLength(*sid, oracle.size());
 					//float hope_length_ratio = (float)oracle.size()/ref_length;
 					cerr << endl;
 					
@@ -1132,18 +1119,25 @@ int main(int argc, char** argv) {
 					  delete decoder;
 					  StaticData::ClearDataStatic();
 					  decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-					  decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+					  decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
 					  decoder->setWeights(mosesWeights);
 					}
 
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best wrt model score" << endl;
+					if (historyBleu) {
 					vector< vector<const Word*> > outputModel = decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1,	distinctNbest, avgRefLength, rank, epoch, model_nbest_filename.str());
-					vector<const Word*> bestModel = outputModel[0];
+							1, realBleu, distinctNbest, avgRefLength, rank, epoch, model_nbest_filename.str());
+						vector<const Word*> bestModel = outputModel[0];
+						oneBests.push_back(bestModel);
+					}
+					else {
+						decoder->getNBest(input, *sid, n, 0.0, bleuWeight,
+							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
+							0, realBleu, distinctNbest, avgRefLength, rank, epoch, model_nbest_filename.str());
+					}
 					decoder->cleanup(chartDecoding);
-					oneBests.push_back(bestModel);
-					ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
+					//ref_length = decoder->getClosestReferenceLength(*sid, bestModel.size());
 					//float model_length_ratio = (float)bestModel.size()/ref_length;
 					cerr << endl;
 
@@ -1152,21 +1146,17 @@ int main(int argc, char** argv) {
                                           delete decoder;
 					  StaticData::ClearDataStatic();
                                           decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-                                          decoder->setBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
+                                          decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength, scaleByInverseLength, scaleByAvgInverseLength, scaleByX, historySmoothing, bleu_smoothing_scheme);
                                           decoder->setWeights(mosesWeights);
 					}
 					
 					cerr << "Rank " << rank << ", epoch " << epoch << ", " << n << "best fear translations" << endl;
-					vector< vector<const Word*> > outputFear = decoder->getNBest(input, *sid, n, -1.0, bleuWeight_fear,
+					decoder->getNBest(input, *sid, n, -1.0, bleuWeight_fear,
 							featureValues[batchPosition], bleuScores[batchPosition], modelScores[batchPosition],
-							1, distinctNbest, avgRefLength, rank, epoch, fear_nbest_filename.str());
-					vector<const Word*> fear = outputFear[0];
+							0, realBleu, distinctNbest, avgRefLength, rank, epoch, fear_nbest_filename.str());
 					decoder->cleanup(chartDecoding);
-					ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
+					//ref_length = decoder->getClosestReferenceLength(*sid, fear.size());
 					//float fear_length_ratio = (float)fear.size()/ref_length;
-					for (size_t i = 0; i < fear.size(); ++i) {
-						delete fear[i];
-					}
 
 					examples_in_batch++;
 					
@@ -1851,8 +1841,8 @@ int main(int argc, char** argv) {
 					for (size_t i = 0; i < oneBests.size(); ++i) 
 						cerr << "Rank " << rank << ", epoch " << epoch << ", update history with 1best length: " << oneBests[i].size() << " ";
 					decoder->updateHistory(oneBests, inputLengths, ref_ids, rank, epoch);
-				}
-				deleteTranslations(oneBests);
+					deleteTranslations(oneBests);
+				}				
 			} // END TRANSLATE AND UPDATE BATCH
 
 			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
@@ -2321,8 +2311,9 @@ void decodeHopeOrFear(size_t rank, size_t size, size_t decode, string filename, 
 		if (decode == 1) factor = 1.0;
 		if (decode == 2) factor = -1.0;
 		cerr << "Rank " << rank << ", translating sentence " << sid << endl;
+		bool realBleu = false;
 		vector< vector<const Word*> > nbestOutput = decoder->getNBest(input, sid, n, factor, bleuWeight, dummyFeatureValues[0],
-				dummyBleuScores[0], dummyModelScores[0], n, true, false, rank, 0, "");
+				dummyBleuScores[0], dummyModelScores[0], n, realBleu, true, false, rank, 0, "");
 		cerr << endl;
 		decoder->cleanup(StaticData::Instance().GetSearchAlgorithm() == ChartDecoding);
 

@@ -45,7 +45,7 @@ namespace Mira {
   }
 
   MosesDecoder::MosesDecoder(const string& inifile, int debuglevel, int argc, vector<string> decoder_params)
-		: m_manager(NULL) {
+	: m_manager(NULL) {
   	static int BASE_ARGC = 8;
 	  Parameter* params = new Parameter();
 	  char ** mosesargv = new char*[BASE_ARGC + argc];
@@ -96,6 +96,7 @@ namespace Mira {
                               vector< float>& bleuScores,
                               vector< float>& modelScores,
                               size_t numReturnedTranslations,
+                              bool realBleu,
                               bool distinct,
                               bool avgRefLength,
                               size_t rank,
@@ -110,13 +111,13 @@ namespace Mira {
     // run the decoder
     if (chartDecoding) {
     	return runChartDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
-    			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
+    			featureValues, bleuScores, modelScores, numReturnedTranslations, realBleu, distinct, rank, epoch,
     			system);
     }
     else {
     	SearchAlgorithm search = staticData.GetSearchAlgorithm();
     	return runDecoder(source, sentenceid, nBestSize, bleuObjectiveWeight, bleuScoreWeight,
-    			featureValues, bleuScores, modelScores, numReturnedTranslations, distinct, rank, epoch,
+    			featureValues, bleuScores, modelScores, numReturnedTranslations, realBleu, distinct, rank, epoch,
     			search, system, filename);
     }
   }
@@ -130,6 +131,7 @@ namespace Mira {
   														vector< float>& bleuScores,
   														vector< float>& modelScores,
   														size_t numReturnedTranslations,
+  														bool realBleu,
   														bool distinct,
   														size_t rank,
   														size_t epoch,
@@ -160,26 +162,21 @@ namespace Mira {
     for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     	const Moses::TrellisPath &path = **iter;
     	featureValues.push_back(path.GetScoreBreakdown());
-    	float bleuScore = getBleuScore(featureValues.back());
-    	bleuScores.push_back(bleuScore);
+    	float bleuScore, dynBleuScore, realBleuScore;
+    	dynBleuScore = getBleuScore(featureValues.back());  
+    	realBleuScore = m_bleuScoreFeature->CalculateBleu(path.GetTargetPhrase());
+    	bleuScore = realBleu ? realBleuScore : dynBleuScore; 
+    	bleuScores.push_back(bleuScore);	
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
     	modelScores.push_back(scoreWithoutBleu);
-
-    	Phrase bestPhrase = path.GetTargetPhrase();
-
+    	
     	if (iter != nBestList.begin())
-    		cerr << endl;
-    		cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
-    		Phrase phrase = path.GetTargetPhrase();
-    		for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
-    		const Word &word = phrase.GetWord(pos);
-    		Word *newWord = new Word(word);
-    		cerr << *newWord;
-    	}
-
-    	cerr << "\", score: " << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+    		cerr << endl;  	
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << path.GetTargetPhrase() << "\", score: " 
+    		 << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+    	cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
@@ -212,6 +209,7 @@ namespace Mira {
                               vector< float>& bleuScores,
                               vector< float>& modelScores,
                               size_t numReturnedTranslations,
+                              bool realBleu,
                               bool distinct,
                               size_t rank,
                               size_t epoch,
@@ -227,26 +225,21 @@ namespace Mira {
     for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     	const Moses::ChartTrellisPath &path = **iter;
     	featureValues.push_back(path.GetScoreBreakdown());
-    	float bleuScore = getBleuScore(featureValues.back());
+    	float bleuScore, dynBleuScore, realBleuScore;
+    	dynBleuScore = getBleuScore(featureValues.back());  
+    	realBleuScore = m_bleuScoreFeature->CalculateBleu(path.GetOutputPhrase());
+    	bleuScore = realBleu ? realBleuScore : dynBleuScore; 
     	bleuScores.push_back(bleuScore);
 
     	//std::cout << "Score breakdown: " << path.GetScoreBreakdown() << endl;
     	float scoreWithoutBleu = path.GetTotalScore() - (bleuObjectiveWeight * bleuScoreWeight * bleuScore);
     	modelScores.push_back(scoreWithoutBleu);
 
-    	Phrase bestPhrase = path.GetOutputPhrase();
-
     	if (iter != nBestList.begin())
-    		cerr << endl;
-    		cerr << "Rank " << rank << ", epoch " << epoch << ", \"";
-    		Phrase phrase = path.GetOutputPhrase();
-    		for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
-    		const Word &word = phrase.GetWord(pos);
-    		Word *newWord = new Word(word);
-    		cerr << *newWord;
-    	}
-
-    	cerr << "\", score: " << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+    	  cerr << endl;
+    	cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << path.GetOutputPhrase() << "\", score: " 
+    		 << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
+    	cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
@@ -267,7 +260,6 @@ namespace Mira {
         translations.push_back(translation);
     }
 
-//    cerr << "Rank " << rank << ", use cache: " << staticData.GetUseTransOptCache() << ", weights: " << staticData.GetAllWeights() << endl;
     return translations;
   }
 
@@ -389,10 +381,10 @@ namespace Mira {
   	return m_bleuScoreFeature->GetShortestRefIndex(ref_id);
   }
 
-  void MosesDecoder::setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+  void MosesDecoder::setBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
 		  bool scaleByInverseLength, bool scaleByAvgInverseLength,
 		  float scaleByX, float historySmoothing, size_t scheme) {
-	  m_bleuScoreFeature->SetBleuParameters(sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
+	  m_bleuScoreFeature->SetBleuParameters(disable, sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
 			  scaleByInverseLength, scaleByAvgInverseLength,
 			  scaleByX, historySmoothing, scheme);
   }

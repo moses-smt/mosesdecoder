@@ -53,6 +53,7 @@ public:
 
 	BleuScoreFeature():
 	                                 StatefulFeatureFunction("BleuScore",1),
+	                                 m_enabled(true),
 	                                 m_sentence_bleu(true),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
@@ -90,7 +91,7 @@ public:
     void UpdateHistory(const std::vector< const Word* >&);
     void UpdateHistory(const std::vector< std::vector< const Word* > >& hypos, std::vector<size_t>& sourceLengths, std::vector<size_t>& ref_ids, size_t rank, size_t epoch);
     void PrintRefLength(const std::vector<size_t>& ref_ids);
-    void SetBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+    void SetBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
     		float scaleByX, float historySmoothing, size_t scheme);
 
@@ -124,6 +125,7 @@ public:
     										ScoreComponentCollection* accumulator) const;
 
     float CalculateBleu(BleuScoreState*) const;
+    float CalculateBleu(Phrase translation) const;
     const FFState* EmptyHypothesisState(const InputType&) const;
 
     float GetSourceLengthHistory() { return m_source_length_history; }
@@ -131,6 +133,7 @@ public:
     float GetAverageInputLength() { return m_avg_input_length; }
 
 private:
+    bool m_enabled;
     bool m_sentence_bleu;
 
     // counts for pseudo-document

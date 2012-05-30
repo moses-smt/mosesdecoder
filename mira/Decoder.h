@@ -59,6 +59,7 @@ class MosesDecoder {
                           std::vector< float>& bleuScores,
                           std::vector< float>& modelScores,
                           size_t numReturnedTranslations,
+                          bool realBleu,
                           bool distinct,
                           bool avgRefLength,
                           size_t rank,
@@ -73,6 +74,7 @@ class MosesDecoder {
                           std::vector< float>& bleuScores,
                           std::vector< float>& modelScores,
                           size_t numReturnedTranslations,
+                          bool realBleu,
                           bool distinct,
                           size_t rank,
                           size_t epoch,
@@ -88,6 +90,7 @@ class MosesDecoder {
                           std::vector< float>& bleuScores,
                           std::vector< float>& modelScores,
                           size_t numReturnedTranslations,
+                          bool realBleu,
                           bool distinct,
                           size_t rank,
                           size_t epoch,
@@ -110,7 +113,7 @@ class MosesDecoder {
     size_t getReferenceLength(size_t ref_id);
     size_t getClosestReferenceLength(size_t ref_id, int hypoLength);
     size_t getShortestReferenceIndex(size_t ref_id);
-    void setBleuParameters(bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
+    void setBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
     		float scaleByX, float historySmoothing, size_t scheme);
     void setAvgInputLength (float l) { m_bleuScoreFeature->SetAvgInputLength(l); }
@@ -129,8 +132,6 @@ class MosesDecoder {
     Moses::ChartManager *m_chartManager;
     Moses::Sentence *m_sentence;
     Moses::BleuScoreFeature *m_bleuScoreFeature;
-	
-
 };
 
 
