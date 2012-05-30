@@ -12,11 +12,10 @@
 #include <string>
 #include <vector>
 #include <utility>
+#include <stddef.h>
 
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
-
-using namespace std;
 
 // Start with these abstract classes
 
@@ -36,8 +35,8 @@ public:
 // Low-memory, low-speed, sequential access
 class StreamingHypPackEnumerator : public HypPackEnumerator {
 public:
-  StreamingHypPackEnumerator(vector<string> const& featureFiles,
-                             vector<string> const& scoreFiles
+  StreamingHypPackEnumerator(std::vector<std::string> const& featureFiles,
+                             std::vector<std::string> const& scoreFiles
                              );
 
   virtual size_t num_dense() const;
@@ -54,14 +53,14 @@ private:
   void prime();
   size_t m_num_lists;
   size_t m_sentenceId;
-  vector<string> m_featureFiles;
-  vector<string> m_scoreFiles;
+  std::vector<std::string> m_featureFiles;
+  std::vector<std::string> m_scoreFiles;
 
   bool m_primed;
   int m_iNumDense;
-  vector<FeatureDataIterator>  m_featureDataIters;
-  vector<ScoreDataIterator>    m_scoreDataIters;
-  vector<pair<size_t,size_t> > m_current_indexes;
+  std::vector<FeatureDataIterator>  m_featureDataIters;
+  std::vector<ScoreDataIterator>    m_scoreDataIters;
+  std::vector<std::pair<size_t,size_t> > m_current_indexes;
 };
 
 // Instantiation that reads into memory
@@ -69,8 +68,8 @@ private:
 // (Actually randomizes with each call to reset)
 class RandomAccessHypPackEnumerator : public HypPackEnumerator {
 public:
-  RandomAccessHypPackEnumerator(vector<string> const& featureFiles,
-                                vector<string> const& scoreFiles,
+  RandomAccessHypPackEnumerator(std::vector<std::string> const& featureFiles,
+                                std::vector<std::string> const& scoreFiles,
                                 bool no_shuffle);
 
   virtual size_t num_dense() const;
@@ -87,9 +86,9 @@ private:
   bool m_no_shuffle;
   size_t m_cur_index;
   size_t m_num_dense;
-  vector<size_t> m_indexes;
-  vector<vector<FeatureDataItem> > m_features;
-  vector<vector<ScoreDataItem> > m_scores;
+  std::vector<size_t> m_indexes;
+  std::vector<std::vector<FeatureDataItem> > m_features;
+  std::vector<std::vector<ScoreDataItem> > m_scores;
 };
 
 #endif // MERT_HYP_PACK_COLLECTION_H

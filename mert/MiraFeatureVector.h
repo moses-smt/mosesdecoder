@@ -24,9 +24,9 @@ class MiraFeatureVector {
 public:
   MiraFeatureVector(const FeatureDataItem& vec);
   MiraFeatureVector(const MiraFeatureVector& other);
-  MiraFeatureVector(const vector<ValType>& dense,
-                    const vector<size_t>& sparseFeats,
-                    const vector<ValType>& sparseVals);
+  MiraFeatureVector(const std::vector<ValType>& dense,
+                    const std::vector<size_t>& sparseFeats,
+                    const std::vector<ValType>& sparseVals);
   
   ValType val(size_t index) const;
   size_t feat(size_t index) const;
@@ -37,9 +37,9 @@ public:
                                      const MiraFeatureVector& b);
   
 private:
-  vector<ValType> m_dense;
-  vector<size_t>  m_sparseFeats;
-  vector<ValType> m_sparseVals;
+  std::vector<ValType> m_dense;
+  std::vector<size_t>  m_sparseFeats;
+  std::vector<ValType> m_sparseVals;
 };
 
 #endif // MERT_FEATURE_VECTOR_H
