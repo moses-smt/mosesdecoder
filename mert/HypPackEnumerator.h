@@ -21,6 +21,8 @@
 
 class HypPackEnumerator {
 public:
+  virtual ~HypPackEnumerator() {}
+
   virtual void reset() = 0;
   virtual bool finished() = 0;
   virtual void next() = 0;
