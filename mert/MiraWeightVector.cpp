@@ -1,5 +1,7 @@
 #include "MiraWeightVector.h"
 
+using namespace std;
+
 /**
  * Constructor, initializes to the zero vector
  */

@@ -2,6 +2,8 @@
 
 #include "MiraFeatureVector.h"
 
+using namespace std;
+
 MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   : m_dense(vec.dense)
 {
@@ -97,7 +99,7 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
   vector<ValType> sparseVals;
   vector<size_t> sparseFeats;
   while(i < a.m_sparseFeats.size() && j < b.m_sparseFeats.size()) {
-    
+
     if(a.m_sparseFeats[i] < b.m_sparseFeats[j]) {
       sparseFeats.push_back(a.m_sparseFeats[i]);
       sparseVals.push_back(a.m_sparseVals[i]);
@@ -136,7 +138,7 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
   // Create and return vector
   return MiraFeatureVector(dense,sparseFeats,sparseVals);
 }
-  
+
 // --Emacs trickery--
 // Local Variables:
 // mode:c++

@@ -16,8 +16,6 @@
 
 #include "FeatureDataIterator.h"
 
-using namespace std;
-
 typedef FeatureStatsType ValType;
 
 class MiraFeatureVector {
@@ -25,20 +23,20 @@ public:
   MiraFeatureVector(const FeatureDataItem& vec);
   MiraFeatureVector(const MiraFeatureVector& other);
   MiraFeatureVector(const std::vector<ValType>& dense,
-                    const std::vector<size_t>& sparseFeats,
+                    const std::vector<std::size_t>& sparseFeats,
                     const std::vector<ValType>& sparseVals);
-  
-  ValType val(size_t index) const;
-  size_t feat(size_t index) const;
-  size_t size() const;
+
+  ValType val(std::size_t index) const;
+  std::size_t feat(std::size_t index) const;
+  std::size_t size() const;
   ValType sqrNorm() const;
-  
+
   friend MiraFeatureVector operator-(const MiraFeatureVector& a,
                                      const MiraFeatureVector& b);
-  
+
 private:
   std::vector<ValType> m_dense;
-  std::vector<size_t>  m_sparseFeats;
+  std::vector<std::size_t> m_sparseFeats;
   std::vector<ValType> m_sparseVals;
 };
 

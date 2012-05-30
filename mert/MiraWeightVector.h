@@ -4,7 +4,7 @@
  *
  * A self-averaging weight-vector. Good for
  * perceptron learning as well.
- * 
+ *
  */
 
 #ifndef MERT_MIRA_WEIGHT_VECTOR_H
@@ -13,8 +13,6 @@
 #include <vector>
 
 #include "MiraFeatureVector.h"
-
-using namespace std;
 
 class AvgWeightVector;
 
@@ -29,7 +27,7 @@ public:
    * Constructor with provided initial vector
    * \param init Initial feature values
    */
-  MiraWeightVector(const vector<ValType>& init); 
+  MiraWeightVector(const std::vector<ValType>& init);
 
   /**
    * Update a the model
@@ -60,12 +58,12 @@ public:
   AvgWeightVector avg();
 
   friend class AvgWeightVector;
-  
+
 private:
   /**
    * Updates a weight and lazily updates its total
    */
-  void update(size_t index, ValType delta);
+  void update(std::size_t index, ValType delta);
 
   /**
    * Make sure everyone's total is up-to-date
@@ -75,12 +73,12 @@ private:
   /**
    * Helper to handle out-of-range weights
    */
-  ValType weight(size_t index) const;
-  
-  vector<ValType> m_weights;
-  vector<ValType> m_totals;
-  vector<size_t>  m_lastUpdated;
-  size_t          m_numUpdates;
+  ValType weight(std::size_t index) const;
+
+  std::vector<ValType> m_weights;
+  std::vector<ValType> m_totals;
+  std::vector<std::size_t> m_lastUpdated;
+  std::size_t m_numUpdates;
 };
 
 /**
@@ -90,8 +88,8 @@ class AvgWeightVector {
 public:
   AvgWeightVector(const MiraWeightVector& wv);
   ValType score(const MiraFeatureVector& fv) const;
-  ValType weight(size_t index) const;
-  size_t size() const;
+  ValType weight(std::size_t index) const;
+  std::size_t size() const;
 private:
   const MiraWeightVector& m_wv;
 };

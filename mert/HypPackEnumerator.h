@@ -27,10 +27,10 @@ public:
   virtual bool finished() = 0;
   virtual void next() = 0;
 
-  virtual size_t cur_size() = 0;
-  virtual size_t num_dense() const = 0;
-  virtual const FeatureDataItem& featuresAt(size_t i) = 0;
-  virtual const ScoreDataItem& scoresAt(size_t i) = 0;
+  virtual std::size_t cur_size() = 0;
+  virtual std::size_t num_dense() const = 0;
+  virtual const FeatureDataItem& featuresAt(std::size_t i) = 0;
+  virtual const ScoreDataItem& scoresAt(std::size_t i) = 0;
 };
 
 // Instantiation that streams from disk
@@ -38,23 +38,22 @@ public:
 class StreamingHypPackEnumerator : public HypPackEnumerator {
 public:
   StreamingHypPackEnumerator(std::vector<std::string> const& featureFiles,
-                             std::vector<std::string> const& scoreFiles
-                             );
+                             std::vector<std::string> const& scoreFiles);
 
-  virtual size_t num_dense() const;
-  
+  virtual std::size_t num_dense() const;
+
   virtual void reset();
   virtual bool finished();
   virtual void next();
 
-  virtual size_t cur_size();
-  virtual const FeatureDataItem& featuresAt(size_t i);
-  virtual const ScoreDataItem& scoresAt(size_t i);
-  
+  virtual std::size_t cur_size();
+  virtual const FeatureDataItem& featuresAt(std::size_t i);
+  virtual const ScoreDataItem& scoresAt(std::size_t i);
+
 private:
   void prime();
-  size_t m_num_lists;
-  size_t m_sentenceId;
+  std::size_t m_num_lists;
+  std::size_t m_sentenceId;
   std::vector<std::string> m_featureFiles;
   std::vector<std::string> m_scoreFiles;
 
@@ -62,7 +61,7 @@ private:
   int m_iNumDense;
   std::vector<FeatureDataIterator>  m_featureDataIters;
   std::vector<ScoreDataIterator>    m_scoreDataIters;
-  std::vector<std::pair<size_t,size_t> > m_current_indexes;
+  std::vector<std::pair<std::size_t,std::size_t> > m_current_indexes;
 };
 
 // Instantiation that reads into memory
@@ -74,21 +73,21 @@ public:
                                 std::vector<std::string> const& scoreFiles,
                                 bool no_shuffle);
 
-  virtual size_t num_dense() const;
-  
+  virtual std::size_t num_dense() const;
+
   virtual void reset();
   virtual bool finished();
   virtual void next();
 
-  virtual size_t cur_size();
-  virtual const FeatureDataItem& featuresAt(size_t i);
-  virtual const ScoreDataItem& scoresAt(size_t i);
+  virtual std::size_t cur_size();
+  virtual const FeatureDataItem& featuresAt(std::size_t i);
+  virtual const ScoreDataItem& scoresAt(std::size_t i);
 
 private:
   bool m_no_shuffle;
-  size_t m_cur_index;
-  size_t m_num_dense;
-  std::vector<size_t> m_indexes;
+  std::size_t m_cur_index;
+  std::size_t m_num_dense;
+  std::vector<std::size_t> m_indexes;
   std::vector<std::vector<FeatureDataItem> > m_features;
   std::vector<std::vector<ScoreDataItem> > m_scores;
 };
