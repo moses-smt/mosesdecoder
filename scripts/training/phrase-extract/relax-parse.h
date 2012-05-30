@@ -31,8 +31,6 @@
 #include "SyntaxTree.h"
 #include "XmlTree.h"
 
-using namespace std;
-
 #define LINE_MAX_LENGTH 1000000
 
 bool leftBinarizeFlag = false;
@@ -41,7 +39,7 @@ char SAMTLevel = 0;
 
 // functions
 void init(int argc, char* argv[]);
-void store( SyntaxTree &tree, vector<string> &words );
+void store( SyntaxTree &tree, std::vector<std::string> &words );
 void LeftBinarize( SyntaxTree &tree, ParentNodes &parents );
 void RightBinarize( SyntaxTree &tree, ParentNodes &parents );
 void SAMT( SyntaxTree &tree, ParentNodes &parents );

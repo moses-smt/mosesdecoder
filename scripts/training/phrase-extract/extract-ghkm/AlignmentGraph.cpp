@@ -212,6 +212,10 @@ Node *AlignmentGraph::CopyParseTree(const ParseTree *root)
 
   std::auto_ptr<Node> n(new Node(root->GetLabel(), nodeType));
 
+  if (nodeType == TREE) {
+    n->SetPcfgScore(root->GetPcfgScore());
+  }
+
   const std::vector<ParseTree *> &children = root->GetChildren();
   std::vector<Node *> childNodes;
   childNodes.reserve(children.size());

@@ -61,6 +61,7 @@ std::auto_ptr<ParseTree> XmlTreeParser::ConvertTree(
     const std::vector<std::string> &words)
 {
   std::auto_ptr<ParseTree> root(new ParseTree(tree.GetLabel()));
+  root->SetPcfgScore(tree.GetPcfgScore());
   const std::vector<SyntaxNode*> &children = tree.GetChildren();
   if (children.empty()) {
     if (tree.GetStart() != tree.GetEnd()) {

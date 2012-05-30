@@ -32,17 +32,19 @@ class ParseTree
  public:
   ParseTree(const std::string &label)
       : m_label(label)
-      , m_children()
-      , m_parent() {}
+      , m_parent(0)
+      , m_pcfgScore(0.0) {}
 
   ~ParseTree();
 
   const std::string &GetLabel() const { return m_label; }
   const std::vector<ParseTree*> &GetChildren() const { return m_children; }
   const ParseTree *GetParent() const { return m_parent; }
+  float GetPcfgScore() const { return m_pcfgScore; }
 
   void SetParent(ParseTree *);
   void SetChildren(const std::vector<ParseTree*> &);
+  void SetPcfgScore(float score) { m_pcfgScore = score; }
 
   void AddChild(ParseTree *);
 
@@ -59,6 +61,7 @@ class ParseTree
   std::string m_label;
   std::vector<ParseTree*> m_children;
   ParseTree *m_parent;
+  float m_pcfgScore;  // log probability
 };
 
 template<typename OutputIterator>

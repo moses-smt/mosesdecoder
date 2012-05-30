@@ -13,6 +13,7 @@
 #include <set>
 
 using namespace std;
+using namespace Moses;
 
 size_t bleu_order = 4;
 float UNKNGRAMLOGPROB = -20;

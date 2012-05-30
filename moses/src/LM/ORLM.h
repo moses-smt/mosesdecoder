@@ -5,7 +5,7 @@
 #include "Factor.h"
 #include "Util.h"
 #include "LM/SingleFactor.h"
-#include "onlineRLM.h"
+#include "DynSAInclude/onlineRLM.h"
 //#include "multiOnlineRLM.h"
 #include "DynSAInclude/file.h"
 #include "DynSAInclude/vocab.h"

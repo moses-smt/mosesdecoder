@@ -29,11 +29,19 @@ public:
   void clear();
   void load(const std::string& file);
   std::size_t size() const { return m_fvector.size(); }
-
+   
   void write(std::ostream& out, const std::string& sep = " ") const;
 
   SparseVector& operator-=(const SparseVector& rhs);
   FeatureStatsType inner_product(const SparseVector& rhs) const;
+
+  // Added by cherryc
+  std::vector<std::size_t> feats() const;
+  friend bool operator==(SparseVector const& item1, SparseVector const& item2);
+  friend std::size_t hash_value(SparseVector const& item);
+  static std::size_t encode(const std::string& feat);
+  static std::string decode(std::size_t feat);
+  // End added by cherryc
 
 private:
   static name2id_t m_name_to_id;

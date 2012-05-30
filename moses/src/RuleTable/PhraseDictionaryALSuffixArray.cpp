@@ -13,6 +13,8 @@
 #include "RuleTable/Loader.h"
 #include "RuleTable/LoaderFactory.h"
 #include "TypeDef.h"
+#include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -27,6 +29,13 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
                                  , const LMList &languageModels
                                  , const WordPenaltyProducer* wpProducer)
 {
+  const StaticData &staticData = StaticData::Instance();
+  if (staticData.ThreadCount() > 1)
+  {
+    UserMessage::Add("Suffix array implementation is not threadsafe");
+    return false;
+  }
+  
   // file path is the directory of the rules for eacg, NOT the file of all the rules
   SetFilePath(filePath);
   m_tableLimit = tableLimit;

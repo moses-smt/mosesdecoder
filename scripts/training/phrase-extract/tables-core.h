@@ -12,18 +12,16 @@
 #include <map>
 #include <cmath>
 
-using namespace std;
+extern std::vector<std::string> tokenize( const char*);
 
-extern vector<string> tokenize( const char*);
-
-typedef string WORD;
+typedef std::string WORD;
 typedef unsigned int WORD_ID;
 
 class Vocabulary
 {
 public:
-  map<WORD, WORD_ID>  lookup;
-  vector< WORD > vocab;
+  std::map<WORD, WORD_ID>  lookup;
+  std::vector< WORD > vocab;
   WORD_ID storeIfNew( const WORD& );
   WORD_ID getWordID( const WORD& );
   inline WORD &getWord( WORD_ID id ) {
@@ -31,14 +29,14 @@ public:
   }
 };
 
-typedef vector< WORD_ID > PHRASE;
+typedef std::vector< WORD_ID > PHRASE;
 typedef unsigned int PHRASE_ID;
 
 class PhraseTable
 {
 public:
-  map< PHRASE, PHRASE_ID > lookup;
-  vector< PHRASE > phraseTable;
+  std::map< PHRASE, PHRASE_ID > lookup;
+  std::vector< PHRASE > phraseTable;
   PHRASE_ID storeIfNew( const PHRASE& );
   PHRASE_ID getPhraseID( const PHRASE& );
   void clear();
@@ -47,21 +45,21 @@ public:
   }
 };
 
-typedef vector< pair< PHRASE_ID, double > > PHRASEPROBVEC;
+typedef std::vector< std::pair< PHRASE_ID, double > > PHRASEPROBVEC;
 
 class TTable
 {
 public:
-  map< PHRASE_ID, vector< pair< PHRASE_ID, double > > > ttable;
-  map< PHRASE_ID, vector< pair< PHRASE_ID, vector< double > > > > ttableMulti;
+  std::map< PHRASE_ID, std::vector< std::pair< PHRASE_ID, double > > > ttable;
+  std::map< PHRASE_ID, std::vector< std::pair< PHRASE_ID, std::vector< double > > > > ttableMulti;
 };
 
 class DTable
 {
 public:
-  map< int, double > dtable;
+  std::map< int, double > dtable;
   void init();
-  void load( const string& );
+  void load( const std::string& );
   double get( int );
 };
 

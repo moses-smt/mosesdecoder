@@ -266,6 +266,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     //("help", "print this help message and exit")
     ("AllowUnary",
         "allow fully non-lexical unary rules")
+    ("ConditionOnTargetLHS",
+        "write target LHS instead of \"X\" as source LHS")
     ("GlueGrammar",
         po::value(&options.glueGrammarFile),
         "write glue grammar to named file")
@@ -285,6 +287,8 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
         "set maximum allowed scope")
     ("Minimal",
         "extract minimal rules only")
+    ("PCFG",
+        "include score based on PCFG scores in target corpus")
     ("UnknownWordLabel",
         po::value(&options.unknownWordFile),
         "write unknown word labels to named file")
@@ -355,11 +359,17 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("AllowUnary")) {
     options.allowUnary = true;
   }
+  if (vm.count("ConditionOnTargetLHS")) {
+    options.conditionOnTargetLhs = true;
+  }
   if (vm.count("GZOutput")) {
     options.gzOutput = true;
   }
   if (vm.count("Minimal")) {
     options.minimal = true;
+  }
+  if (vm.count("PCFG")) {
+    options.pcfg = true;
   }
   if (vm.count("UnpairedExtractFormat")) {
     options.unpairedExtractFormat = true;

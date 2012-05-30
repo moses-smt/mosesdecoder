@@ -24,6 +24,7 @@
 #include "ScfgRule.h"
 
 #include <cassert>
+#include <cmath>
 #include <ostream>
 #include <map>
 #include <sstream>
@@ -34,14 +35,43 @@ namespace GHKM {
 
 void ScfgRuleWriter::Write(const ScfgRule &rule)
 {
+  std::ostringstream sourceSS;
+  std::ostringstream targetSS;
+
   if (m_options.unpairedExtractFormat) {
-    WriteUnpairedFormat(rule);
+    WriteUnpairedFormat(rule, sourceSS, targetSS);
   } else {
-    WriteStandardFormat(rule);
+    WriteStandardFormat(rule, sourceSS, targetSS);
   }
+
+  // Write the rule to the forward and inverse extract files.
+  m_fwd << sourceSS.str() << " ||| " << targetSS.str() << " |||";
+  m_inv << targetSS.str() << " ||| " << sourceSS.str() << " |||";
+
+  const Alignment &alignment = rule.GetAlignment();
+  for (Alignment::const_iterator p = alignment.begin();
+       p != alignment.end(); ++p) {
+    m_fwd << " " << p->first << "-" << p->second;
+    m_inv << " " << p->second << "-" << p->first;
+  }
+
+  // Write a count of 1 and an empty NT length column to the forward extract
+  // file.
+  // TODO Add option to write NT length?
+  m_fwd << " ||| 1 ||| |||";
+  if (m_options.pcfg) {
+    // Write the PCFG score.
+    m_fwd << " " << std::exp(rule.GetPcfgScore());
+  }
+  m_fwd << std::endl;
+
+  // Write a count of 1 to the inverse extract file.
+  m_inv << " ||| 1" << std::endl;
 }
 
-void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule)
+void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule,
+                                         std::ostream &sourceSS,
+                                         std::ostream &targetSS)
 {
   const std::vector<Symbol> &sourceRHS = rule.GetSourceRHS();
   const std::vector<Symbol> &targetRHS = rule.GetTargetRHS();
@@ -60,9 +90,6 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule)
     }
   }
 
-  std::ostringstream sourceSS;
-  std::ostringstream targetSS;
-
   // Write the source side of the rule to sourceSS.
   int i = 0;
   for (std::vector<Symbol>::const_iterator p(sourceRHS.begin());
@@ -74,7 +101,11 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule)
     }
     sourceSS << " ";
   }
-  WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  if (m_options.conditionOnTargetLhs) {
+    WriteSymbol(rule.GetTargetLHS(), sourceSS);
+  } else {
+    WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  }
 
   // Write the target side of the rule to targetSS.
   i = 0;
@@ -88,27 +119,14 @@ void ScfgRuleWriter::WriteStandardFormat(const ScfgRule &rule)
     targetSS << " ";
   }
   WriteSymbol(rule.GetTargetLHS(), targetSS);
-
-  // Write the rule to the forward and inverse extract files.
-  m_fwd << sourceSS.str() << " ||| " << targetSS.str() << " |||";
-  m_inv << targetSS.str() << " ||| " << sourceSS.str() << " |||";
-  for (Alignment::const_iterator p(alignment.begin());
-       p != alignment.end(); ++p) {
-    m_fwd << " " << p->first << "-" << p->second;
-    m_inv << " " << p->second << "-" << p->first;
-  }
-  m_fwd << " ||| 1" << std::endl;
-  m_inv << " ||| 1" << std::endl;
 }
 
-void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule)
+void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule,
+                                         std::ostream &sourceSS,
+                                         std::ostream &targetSS)
 {
   const std::vector<Symbol> &sourceRHS = rule.GetSourceRHS();
   const std::vector<Symbol> &targetRHS = rule.GetTargetRHS();
-  const Alignment &alignment = rule.GetAlignment();
-
-  std::ostringstream sourceSS;
-  std::ostringstream targetSS;
 
   // Write the source side of the rule to sourceSS.
   int i = 0;
@@ -117,7 +135,11 @@ void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule)
     WriteSymbol(*p, sourceSS);
     sourceSS << " ";
   }
-  WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  if (m_options.conditionOnTargetLhs) {
+    WriteSymbol(rule.GetTargetLHS(), sourceSS);
+  } else {
+    WriteSymbol(rule.GetSourceLHS(), sourceSS);
+  }
 
   // Write the target side of the rule to targetSS.
   i = 0;
@@ -127,17 +149,6 @@ void ScfgRuleWriter::WriteUnpairedFormat(const ScfgRule &rule)
     targetSS << " ";
   }
   WriteSymbol(rule.GetTargetLHS(), targetSS);
-
-  // Write the rule to the forward and inverse extract files.
-  m_fwd << sourceSS.str() << " ||| " << targetSS.str() << " |||";
-  m_inv << targetSS.str() << " ||| " << sourceSS.str() << " |||";
-  for (Alignment::const_iterator p(alignment.begin());
-       p != alignment.end(); ++p) {
-    m_fwd << " " << p->first << "-" << p->second;
-    m_inv << " " << p->second << "-" << p->first;
-  }
-  m_fwd << " ||| 1" << std::endl;
-  m_inv << " ||| 1" << std::endl;
 }
 
 void ScfgRuleWriter::WriteSymbol(const Symbol &symbol, std::ostream &out)
