@@ -62,6 +62,7 @@ class UnknownWordPenaltyProducer;
 class SyntacticLanguageModel;
 #endif
 class TranslationSystem;
+class LeftContextScoreProducer;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -138,6 +139,7 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  LeftContextScoreProducer * m_leftContextScoreProducer;
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;

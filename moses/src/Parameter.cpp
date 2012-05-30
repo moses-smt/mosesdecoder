@@ -146,6 +146,8 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
+  AddParam("weight-left-context", "wlc", "weight for context-aware phrase scorer");
+  AddParam("left-context-ttable", "lctt", "phrase table for context-aware phrase scorer"); 
 }
 
 Parameter::~Parameter()

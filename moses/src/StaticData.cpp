@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+#include "LeftContextScoreProducer.h"
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -167,6 +168,12 @@ bool StaticData::LoadData(Parameter *parameter)
 
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+  }
+
+  if (m_parameter->GetParam("left-context-ttable").size() > 0) {
+    float leftContextWeight = Scan<float>(m_parameter->GetParam("weight-left-context")[0]);
+    m_leftContextScoreProducer = new LeftContextScoreProducer(m_scoreIndexManager, leftContextWeight);
+    m_leftContextScoreProducer->LoadScores(m_parameter->GetParam("left-context-ttable")[0]);
   }
 
   // n-best
@@ -644,6 +651,7 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
+  delete m_leftContextScoreProducer;
 
   //delete m_parameter;
 

@@ -91,6 +91,7 @@ bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
+bool oneWordToTheLeftFlag = false; // output one word to the left for each phrase
 
 int main(int argc, char* argv[])
 {
@@ -114,6 +115,8 @@ int main(int argc, char* argv[])
       orientationFlag = true;
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
+    } else if (strcmp(argv[i], "--OneWordToTheLeft") == 0) {
+      oneWordToTheLeftFlag = true;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
     } else if(strcmp(argv[i],"--model") == 0) {
@@ -614,6 +617,10 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     return;
   }
 
+  if (translationFlag && oneWordToTheLeftFlag) {
+    extractFile << "{" << sentence.source[max(0, startF - 1)] << "} ";
+  }
+
   for(int fi=startF; fi<=endF; fi++) {
     if (translationFlag) extractFile << sentence.source[fi] << " ";
     if (orientationFlag) extractFileOrientation << sentence.source[fi] << " ";
@@ -634,6 +641,10 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (translationFlag) extractFileInv << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
   if (sentenceIdFlag) extractFileSentenceId << "||| ";
+
+  if (translationFlag && oneWordToTheLeftFlag) {
+    extractFileInv << "{" << sentence.source[max(0, startF - 1)] << "} ";
+  }
 
   // source (for inverse)
   if (translationFlag) {
