@@ -4,6 +4,8 @@
 #include <algorithm>
 #include <boost/unordered_set.hpp>
 
+using namespace std;
+
 StreamingHypPackEnumerator::StreamingHypPackEnumerator
 (
  vector<std::string> const& featureFiles,
