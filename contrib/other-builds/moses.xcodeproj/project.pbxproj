@@ -1357,6 +1357,7 @@
 					LM_IRST,
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
+					WITH_THREADS,
 				);
 				HEADER_SEARCH_PATHS = (
 					../..,
@@ -1399,6 +1400,7 @@
 					LM_IRST,
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
+					WITH_THREADS,
 				);
 				HEADER_SEARCH_PATHS = (
 					../..,
