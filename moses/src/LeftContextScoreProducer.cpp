@@ -42,7 +42,7 @@ void LeftContextScoreProducer::LoadScores(const string &ttableFile)
 
     // get the third score: p(e|f)
     vector<string> scores;
-    Tokenize(scores, segments[3], " ");
+    Tokenize(scores, segments[2], " ");
     float p_e_f = Scan<float>(scores[2]);
 
     pair<string, string> phrasePair = make_pair(segments[0], segments[1]);
