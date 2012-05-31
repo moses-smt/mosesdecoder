@@ -56,7 +56,7 @@ FFState* LeftContextScoreProducer::Evaluate(
   const FFState* prev_state,
   ScoreComponentCollection* out) const
 {
-  
+
   TTable::const_iterator it;
   float score = 0;
 
@@ -77,7 +77,7 @@ FFState* LeftContextScoreProducer::Evaluate(
 
   if ((it = modelScores.find(make_pair(srcPhrase, tgtPhrase))) != modelScores.end()) {
     score = it->second;
-  }
+  } 
 
   out->PlusEquals(this, score); // XXX score or log(score)?
   
