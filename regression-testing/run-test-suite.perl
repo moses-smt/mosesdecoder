@@ -60,19 +60,17 @@ use MosesRegressionTesting;
 use File::Temp qw ( tempfile );
 use POSIX qw ( strftime );
 
-my $decoderPhrase = "$Bin/../moses-cmd/src/moses";
-my $decoderChart = "$Bin/../moses-chart-cmd/src/moses_chart";
-my $scoreExe = "$Bin/../scripts/training/phrase-extract/score";
-my $extractorExe = "$Bin/../scripts/training/phrase-extract/extract";
-my $extractorRulesExe = "$Bin/../scripts/training/phrase-extract/extract-rules";
-my $kenlmBinarizer = "$Bin/../kenlm/build_binary";
+my $decoderPhrase = "$Bin/../bin/moses";
+my $decoderChart = "$Bin/../bin/moses_chart";
+my $scoreExe = "$Bin/../bin/score";
+my $extractorExe = "$Bin/../bin/extract";
+my $extractorRulesExe = "$Bin/../bin/extract-rules";
+my $kenlmBinarizer = "$Bin/../bin/build_binary";
 my $test_dir;
 my $BIN_TEST = $script_dir;
 my $data_dir;
 
-GetOptions(	"decoder-phrase=s" => \$decoderPhrase,
-			"decoder-chart=s" => \$decoderChart,
-           	"data-dir=s" => \$data_dir,
+GetOptions("data-dir=s" => \$data_dir,
           ) or exit 1;
 
 
@@ -83,10 +81,6 @@ $test_dir = "$data_dir/tests";
 $test_run .= " --test-dir=$test_dir" if $test_dir;
 
 print "Data directory: $data_dir\n";
-
-die "Please specify the phrase-based decoder & the chart decoder to test with --decoder-phrase=[path] --decoder-chart=[path] \n" unless ($decoderPhrase and $decoderChart);
-
-die "Cannot locate executable called $decoderPhrase\n" unless (-x $decoderPhrase);
 
 print "Running tests: @tests\n\n";
 
