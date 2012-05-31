@@ -19,7 +19,7 @@ pair-extension = fr-en
 moses-src-dir = /home/pkoehn/moses
 #
 # moses binaries
-moses-bin-dir = $moses-src-dir/dist/bin
+moses-bin-dir = $moses-src-dir/bin
 #
 # moses scripts
 moses-script-dir = $moses-src-dir/scripts
