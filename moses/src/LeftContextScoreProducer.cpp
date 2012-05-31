@@ -76,10 +76,10 @@ FFState* LeftContextScoreProducer::Evaluate(
   srcPhrase = wordToTheLeft + srcPhrase;
 
   if ((it = modelScores.find(make_pair(srcPhrase, tgtPhrase))) != modelScores.end()) {
-    score = it->second;
+    score = log(it->second);
   } 
 
-  out->PlusEquals(this, score); // XXX score or log(score)?
+  out->PlusEquals(this, score); 
   
   return NULL;
 }

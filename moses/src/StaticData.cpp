@@ -597,7 +597,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
 
     //Add any other features here.
-     m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
+    if (m_leftContextScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
+    }
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
