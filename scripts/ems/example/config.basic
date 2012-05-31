@@ -24,6 +24,9 @@ moses-bin-dir = $moses-src-dir/bin
 # moses scripts
 moses-script-dir = $moses-src-dir/scripts
 #
+# directory where GIZA++/MGIZA programs resides
+external-bin-dir = /Users/hieuhoang/workspace/bin/training-tools
+#
 # srilm
 srilm-dir = $moses-src-dir/srilm/bin/i686
 #
