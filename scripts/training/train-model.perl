@@ -266,7 +266,7 @@ my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/../bin/lexical-reordering-score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/../bin/memscore";
 my $EPPEX = "$SCRIPTS_ROOTDIR/../bin/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/../bin/symal";
-my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
+my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/giza2bal.pl";
 
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
