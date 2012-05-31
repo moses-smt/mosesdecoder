@@ -30,8 +30,3 @@ exe statistics : tables-core.o AlignmentPhrase.o statistics.cpp InputFileStream 
 
 alias programs : extract extract-rules extract-lex score consolidate consolidate-direct consolidate-reverse relax-parse statistics ;
 
-install legacy : programs : <location>. <install-type>EXE ;
-
-build-project extract-ghkm ;
-build-project pcfg-extract ;
-build-project pcfg-score ;

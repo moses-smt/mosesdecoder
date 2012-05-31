@@ -27,7 +27,7 @@
 #
 #
 #INSTALLATION
-#--prefix=/path/to/prefix sets the install prefix [dist].
+#--prefix=/path/to/prefix sets the install prefix [default is source root].
 #--bindir=/path/to/prefix/bin sets the bin directory [PREFIX/bin]
 #--libdir=/path/to/prefix/lib sets the lib directory [PREFIX/lib]
 #--includedir=/path/to/prefix/include installs headers.  
@@ -104,10 +104,10 @@ build-project scripts ;
 #Regression tests (only does anything if --with-regtest is passed)
 build-project regression-testing ;
 
-alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDisk OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs scripts//training//symal scripts//training//lexical-reordering scripts//training//phrase-extract scripts//training//phrase-extract//extract-ghkm scripts//training//phrase-extract//pcfg-extract scripts//training//phrase-extract//pcfg-score ;
 
 install-bin-libs programs ;
-install-headers headers-base : [ glob-tree *.h *.hh : jam-files dist kenlm moses ] : . ;
+install-headers headers-base : [ glob-tree *.h *.hh : jam-files dist bin lib include kenlm moses ] : . ;
 install-headers headers-moses : moses/src//headers-to-install : moses/src ;
 
 alias install : prefix-bin prefix-lib headers-base headers-moses ;

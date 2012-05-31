@@ -159,7 +159,7 @@ prefix = [ option.get "prefix" ] ;
 if $(prefix) {
   prefix = [ path.root $(prefix) [ path.pwd ] ] ;
 } else {
-  prefix = $(TOP)/dist$(GITTAG) ;
+  prefix = $(TOP)$(GITTAG) ;
 }
 rule install-bin-libs ( deps * ) {
   local bindir = [ option.get "bindir" : $(prefix)/bin ] ;
