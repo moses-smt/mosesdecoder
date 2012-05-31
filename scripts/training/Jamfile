@@ -1,8 +1,3 @@
-build-project compact-rule-table ;
-build-project phrase-extract ;
-build-project lexical-reordering ;
-build-project symal ;
-
 if $(WITH-GIZA) != no || $(CLEANING) != no {
   make train-model.perl : train-model.perl.missing_bin_dir : @missing_bin_dir ;
   actions missing_bin_dir {
