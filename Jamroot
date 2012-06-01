@@ -115,3 +115,9 @@ alias install : prefix-bin prefix-lib headers-base headers-moses ;
 if ! [ option.get "includedir" : : $(prefix)/include ] {
   explicit install headers-base headers-moses ;
 }
+
+if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
+  echo "You have a $(TOP)/dist directory, but the build system now places files directly in the root i.e. $(TOP)/bin ." ;
+  echo "To disable this message, delete $(TOP)/dist ." ;
+  echo ;
+}
