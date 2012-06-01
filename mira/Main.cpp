@@ -133,12 +133,11 @@ int main(int argc, char** argv) {
   bool hildreth;
   float add2lm;
   bool realBleu, disableBleuFeature;
-  bool rescaleSlack, rewardHope;
+  bool rescaleSlack;
   bool makePairs;
   po::options_description desc("Allowed options");
   desc.add_options()
     ("make-pairs", po::value<bool>(&makePairs)->default_value(true), "Make pairs of hypotheses for 1slack")
-    ("reward-hope", po::value<bool>(&rewardHope)->default_value(false), "Reward hope features over fear features")
     ("rescale-slack", po::value<bool>(&rescaleSlack)->default_value(false), "Rescale slack in 1-slack formulation")
     ("disable-bleu-feature", po::value<bool>(&disableBleuFeature)->default_value(false), "Disable the Bleu feature")
     ("real-bleu", po::value<bool>(&realBleu)->default_value(false), "Compute real sentence Bleu on complete translations") 
@@ -1616,7 +1615,7 @@ int main(int argc, char** argv) {
 					    update_status = ((MiraOptimiser*)optimiser)->updateWeightsHopeFearSummed(weightUpdate,
 							     featureValuesHopeSample, featureValuesFearSample,
 							     bleuScoresHopeSample, bleuScoresFearSample, modelScoresHopeSample,
-							     modelScoresFearSample, learning_rate, rank, epoch, rescaleSlack, rewardHope, makePairs);
+							     modelScoresFearSample, learning_rate, rank, epoch, rescaleSlack, makePairs);
 					  else {
 					    if (batchSize == 1 && featureValuesHopeSample[0].size() == 1 && !hildreth) {
 					      cerr << "Rank " << rank << ", epoch " << epoch << ", model score hope: " << modelScoresHopeSample[0][0] << endl;

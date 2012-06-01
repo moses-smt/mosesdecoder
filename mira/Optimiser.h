@@ -122,7 +122,6 @@ namespace Mira {
 					  size_t rank,
 					  size_t epoch,
 					  bool rescaleSlack,
-					  bool rewardHope,
 					  bool makePairs);
      size_t updateWeightsAnalytically(Moses::ScoreComponentCollection& weightUpdate,
     		 Moses::ScoreComponentCollection& featureValuesHope,

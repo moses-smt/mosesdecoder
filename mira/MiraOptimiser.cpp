@@ -780,7 +780,6 @@ size_t MiraOptimiser::updateWeightsHopeFearSummed(
 		size_t rank,
 		size_t epoch,
 		bool rescaleSlack,
-		bool rewardHope,
 		bool makePairs) {
 
   // vector of feature values differences for all created constraints
@@ -888,11 +887,6 @@ size_t MiraOptimiser::updateWeightsHopeFearSummed(
   cerr << "Rank " << rank << ", epoch " << epoch << ", averaged violations: " << averagedViolations << endl;
 
   if (violatedConstraintsBefore > 0) {
-    if (rewardHope) {
-      averagedFeatureDiffs.RedistributeMass(0.1);
-      cerr << "Rank " << rank << ", epoch " << epoch << ", redistributed feature diffs: " << averagedFeatureDiffs << endl;
-    }
-
     // compute alpha for given constraint: (loss diff - model score diff) / || feature value diff ||^2                                
     // featureValueDiff.GetL2Norm() * featureValueDiff.GetL2Norm() == featureValueDiff.InnerProduct(featureValueDiff)                     
     // from Crammer&Singer 2006: alpha = min {C , l_t/ ||x||^2}                                                         
