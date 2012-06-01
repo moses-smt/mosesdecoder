@@ -916,6 +916,10 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-biconcor') {
             &define_training_build_biconcor($i);
 	}
+	elsif ($DO_STEP[$i] eq 'TRAINING:build-suffix-array') {
+            &define_training_build_suffix_array($i);
+	}
+
         elsif ($DO_STEP[$i] eq 'TRAINING:build-lex-trans') {
             &define_training_build_lex_trans($i);
         }
@@ -1630,6 +1634,22 @@ sub define_training_symmetrize_giza {
     $cmd .= "-alignment $method ";
 
     &create_step($step_id,$cmd);
+}
+
+sub define_training_build_suffix_array {
+		my ($step_id) = @_;
+	
+		my $scripts = &check_and_get("GENERAL:moses-script-dir");
+	
+		my ($model, $aligned,$corpus) = &get_output_and_input($step_id);
+		my $sa_exec_dir = &check_and_get("TRAINING:suffix-array");
+		my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+		my $method = &check_and_get("TRAINING:alignment-symmetrization-method");
+	
+		my $cmd = "$scripts/training/wrappers/adam-suffix-array/suffix-array-create.sh $sa_exec_dir $corpus.$input_extension $corpus.$output_extension $aligned.$method $model";
+
+		&create_step($step_id,$cmd);
 }
 
 sub define_training_build_biconcor {
