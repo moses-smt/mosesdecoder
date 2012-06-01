@@ -149,12 +149,14 @@ sub tokenize {
 	$text =~ s/DOTMULTI/./g;
 
   #escape special chars
-  $text =~ s/\&/\&amp;/g;
-  $text =~ s/\|/\&bar;/g;
-  $text =~ s/\</\&lt;/g;
-  $text =~ s/\>/\&gt;/g;
-  $text =~ s/\[/\&bra;/g;
-  $text =~ s/\]/\&ket;/g;
+  $text =~ s/\&/\&amp;/g;   # escape escape
+  $text =~ s/\|/\&bar;/g;   # factor separator
+  $text =~ s/\</\&lt;/g;    # xml
+  $text =~ s/\>/\&gt;/g;    # xml
+  $text =~ s/\'/\&apos;/g;  # xml
+  $text =~ s/\"/\&quot;/g;  # xml
+  $text =~ s/\[/\&#91;/g;   # syntax non-terminal
+  $text =~ s/\]/\&#93;/g;   # syntax non-terminal
 
 	#ensure final line break
 	$text .= "\n" unless $text =~ /\n$/;

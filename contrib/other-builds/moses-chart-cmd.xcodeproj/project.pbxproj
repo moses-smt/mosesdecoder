@@ -307,6 +307,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
+					/opt/local/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -316,6 +317,7 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";
@@ -338,6 +340,7 @@
 				LIBRARY_SEARCH_PATHS = (
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
+					/opt/local/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -347,6 +350,7 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";
@@ -359,7 +363,10 @@
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
 				GCC_OPTIMIZATION_LEVEL = 0;
-				GCC_PREPROCESSOR_DEFINITIONS = TRACE_ENABLE;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					WITH_THREADS,
+				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (
@@ -378,7 +385,10 @@
 			buildSettings = {
 				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
 				GCC_C_LANGUAGE_STANDARD = gnu99;
-				GCC_PREPROCESSOR_DEFINITIONS = TRACE_ENABLE;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					TRACE_ENABLE,
+					WITH_THREADS,
+				);
 				GCC_WARN_ABOUT_RETURN_TYPE = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
 				HEADER_SEARCH_PATHS = (

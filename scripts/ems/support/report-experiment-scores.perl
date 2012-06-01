@@ -14,6 +14,10 @@ $TYPE{"multi-bleu-c"}= "BLEU-c";
 $TYPE{"ibm-bleu"}    = "IBM";
 $TYPE{"ibm-bleu-c"}  = "IBM-c";
 $TYPE{"meteor"} = "METEOR";
+$TYPE{"bolt-bleu"}     = "BLEU";
+$TYPE{"bolt-bleu-c"}   = "BLEU-c";
+$TYPE{"bolt-ter"}      = "TER";
+$TYPE{"bolt-ter-c"}    = "TER-c";
 
 my %SCORE;
 my %AVERAGE;
@@ -59,6 +63,9 @@ sub process {
     }
     elsif ($type eq 'meteor') {
 	$SCORE{$set} .= &extract_meteor($file,$type)." ";
+    }
+    elsif ($type =~ /^bolt-(.+)$/) {
+      $SCORE{$set} .= &extract_bolt($file,$1)." ";
     }
 }
 
@@ -115,6 +122,19 @@ sub extract_multi_bleu {
     return $output.$TYPE{$type};
 }
 
+sub extract_bolt {
+  my ($file,$type) = @_;
+  my $score;
+  foreach (`cat $file`) {
+    $score = $1 if $type eq 'bleu' && /Lowercase BLEU\s+([\d\.]+)/;
+    $score = $1 if $type eq 'bleu-c' && /Cased BLEU\s+([\d\.]+)/;
+    $score = $1 if $type eq 'ter' && /Lowercase TER\s+([\d\.]+)/;
+    $score = $1 if $type eq 'ter-c' && /Cased TER\s+([\d\.]+)/;
+  }
+  my $output = sprintf("%.02f ",$score*100);
+  $AVERAGE{"bolt-".$type} += $score*100;
+  return $output.$TYPE{"bolt-".$type};
+}
 sub extract_meteor {
     my ($file,$type) = @_;
     my ($meteor, $precision);

@@ -35,6 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef moses_cmd_IOWrapper_h
 #define moses_cmd_IOWrapper_h
 
+#include <cassert>
 #include <fstream>
 #include <ostream>
 #include <vector>
@@ -121,13 +122,13 @@ IOWrapper *GetIODevice(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, bool reportSegmentation, bool reportAllFactors);
 void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&,
-                 const TranslationSystem* system, long translationId, bool reportSegmentation);
+                 const Moses::TranslationSystem* system, long translationId, bool reportSegmentation);
 void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId);
 void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
                     bool reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out);
-void OutputInput(std::ostream& os, const Hypothesis* hypo);
-void OutputAlignment(OutputCollector* collector, size_t lineNo, const Hypothesis *hypo);
-void OutputAlignment(OutputCollector* collector, size_t lineNo,  const TrellisPath &path);
+void OutputInput(std::ostream& os, const Moses::Hypothesis* hypo);
+void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo, const Moses::Hypothesis *hypo);
+void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
 
 #endif

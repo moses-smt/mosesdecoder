@@ -70,4 +70,14 @@ private:
  */
 float sentenceLevelBleuPlusOne(const std::vector<float>& stats);
 
+/** Computes sentence-level BLEU score given a background corpus.
+ * This function is used in batch MIRA.
+ */
+float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg);
+
+/**
+ * Computes plain old BLEU from a vector of stats
+ */
+float unsmoothedBleu(const std::vector<float>& stats);
+
 #endif  // MERT_BLEU_SCORER_H_

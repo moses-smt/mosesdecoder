@@ -33,8 +33,9 @@ if ($HELP) {
 	exit;
 }
 
-die "No built-in rules for language $language, claim en for default behaviour."
-	if $language !~ /^(cs|en|fr|it)$/;
+if ($language !~ /^(cs|en|fr|it)$/) {
+  print STDERR "Warning: No built-in rules for language $language.\n"
+}
 
 if (!$QUIET) {
 	print STDERR "Detokenizer Version ".'$Revision: 4134 $'."\n";
@@ -65,12 +66,16 @@ sub detokenize {
 	$text = " $text ";
   $text =~ s/ \@\-\@ /-/g;
   # de-escape special chars
-  $text =~ s/\&bar;/\|/g;
-  $text =~ s/\&lt;/\</g;
-  $text =~ s/\&gt;/\>/g;
-  $text =~ s/\&bra;/\[/g;
-  $text =~ s/\&ket;/\]/g;
-  $text =~ s/\&amp;/\&/g;
+  $text =~ s/\&bar;/\|/g;   # factor separator
+  $text =~ s/\&lt;/\</g;    # xml
+  $text =~ s/\&gt;/\>/g;    # xml
+  $text =~ s/\&bra;/\[/g;   # syntax non-terminal (legacy)
+  $text =~ s/\&ket;/\]/g;   # syntax non-terminal (legacy)
+  $text =~ s/\&quot;/\"/g;  # xml
+  $text =~ s/\&apos;/\'/g;  # xml
+  $text =~ s/\&#91;/\[/g;   # syntax non-terminal
+  $text =~ s/\&#93;/\]/g;   # syntax non-terminal
+  $text =~ s/\&amp;/\&/g;   # escape escape
 
 	my $word;
 	my $i;

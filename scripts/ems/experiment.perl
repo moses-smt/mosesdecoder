@@ -1020,7 +1020,7 @@ sub execute_steps {
     }
 	}
 
-	print "number of steps doable or running: ".(scalar keys %DO)."\n";
+	print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
   foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	
@@ -1994,6 +1994,7 @@ sub get_training_setting {
     my ($step) = @_;
     my $dir = &check_and_get("GENERAL:working-dir");
     my $training_script = &check_and_get("TRAINING:script");
+    my $external_bin_dir = &check_backoff_and_get("TRAINING:external-bin-dir");
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
     my $reordering = &get("TRAINING:lexicalized-reordering");
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
@@ -2007,6 +2008,7 @@ sub get_training_setting {
     my $target_syntax = &get("GENERAL:output-parser");
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
+    my $pcfg = &get("TRAINING:use-pcfg-feature");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2015,7 +2017,7 @@ sub get_training_setting {
     $cmd .= "-dont-zip ";
     $cmd .= "-first-step $step " if $step>1;
     $cmd .= "-last-step $step "  if $step<9;
-    $cmd .= "-scripts-root-dir $scripts ";
+    $cmd .= "-external-bin-dir $external_bin_dir " if defined($external_bin_dir);
     $cmd .= "-f $input_extension -e $output_extension ";
     $cmd .= "-alignment $alignment ";
     $cmd .= "-max-phrase-length $phrase_length " if $phrase_length;
@@ -2029,6 +2031,7 @@ sub get_training_setting {
     $cmd .= "-glue-grammar " if $hierarchical;
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
+    $cmd .= "-pcfg " if $pcfg;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {

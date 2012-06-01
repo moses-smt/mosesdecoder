@@ -152,10 +152,10 @@ BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
   //          "girl with a telescope", "with a telescope ."
   NgramCounts counts;
   BOOST_REQUIRE(scorer.CountNgrams(line, counts, kBleuNgramOrder) == 8);
-  BOOST_CHECK_EQUAL(25, counts.size());
+  BOOST_CHECK_EQUAL((std::size_t)25, counts.size());
 
   mert::Vocabulary* vocab = scorer.GetVocab();
-  BOOST_CHECK_EQUAL(7, vocab->size());
+  BOOST_CHECK_EQUAL((std::size_t)7, vocab->size());
 
   std::vector<std::string> res;
   Tokenize(line.c_str(), ' ', &res);
@@ -203,7 +203,7 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
   ScoreStats entry;
   scorer.prepareStats(0, line, entry);
 
-  BOOST_CHECK_EQUAL(entry.size(), 2 * kBleuNgramOrder + 1);
+  BOOST_CHECK_EQUAL(entry.size(), (std::size_t)(2 * kBleuNgramOrder + 1));
 
   // Test hypothesis ngram counts
   BOOST_CHECK_EQUAL(entry.get(0), 5);  // unigram

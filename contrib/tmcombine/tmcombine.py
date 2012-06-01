@@ -36,7 +36,10 @@ from collections import defaultdict
 from operator import mul
 from tempfile import NamedTemporaryFile
 from subprocess import Popen
-from itertools import izip
+try:
+    from itertools import izip
+except:
+    izip = zip
 
 try:
     from lxml import etree as ET
@@ -85,76 +88,9 @@ class Moses():
         filename = os.path.join(model,'model',table)
         fileobj = handle_file(filename,'open',mode)
         return fileobj
-
-
-    def load_phrase_counts(self,line,priority,i,store='all',filter_by=None,filter_by_src=None,filter_by_target=None,inverted=False):
-        """take single phrase table line and store counts in internal data structure"""
-        
-        src = line[0]
-        target = line[1]
-        
-        if inverted:
-            src,target = target,src
-        
-        target_count = 0
-        src_count = 0
-            
-        if (store == 'all' or store == 'pairs') and not (filter_by and not (src in filter_by and target in filter_by[src])):
-            
-            if priority < 10 or (src in self.phrase_pairs and target in self.phrase_pairs[src]):
-
-                try:
-                    target_count,src_count = map(float,line[-1].split())
-                except:
-                    sys.stderr.write(str(line)+'\n')
-                    sys.stderr.write('Counts are missing. Maybe you have an older Moses version without counts?\n')
-                    return
-
-                scores = line[2].split()
-                pst = float(scores[0])
-                pts = float(scores[2])
-                
-                if priority == 2: #MAP
-                    self.phrase_pairs[src][target][0][0][i] = pst
-                    self.phrase_pairs[src][target][0][1][i] = pts
-                else:
-                    self.phrase_pairs[src][target][0][0][i] = pst*target_count
-                    self.phrase_pairs[src][target][0][1][i] = pts*src_count
-
-                self.store_info(src,target,line)
-        
-        if (store == 'all' or store == 'source') and not (filter_by_src and not filter_by_src.get(src)):
-
-            if not src_count:
-                try:
-                    if priority == 2: #MAP
-                        src_count = 1
-                    else:
-                        src_count = float(line[-1].split()[1])
-                except:
-                    sys.stderr.write(str(line)+'\n')
-                    sys.stderr.write('Counts are missing. Maybe you have an older Moses version without counts?\n')
-                    return
-                    
-            self.phrase_source[src][i] = src_count
-            
-        if (store == 'all' or store == 'target') and not (filter_by_target and not filter_by_target.get(target)):
-            
-            if not target_count:
-                try:
-                    if priority == 2: #MAP
-                        target_count = 1
-                    else:
-                        target_count = float(line[-1].split()[0])
-                except:
-                    sys.stderr.write(str(line)+'\n')
-                    sys.stderr.write('Counts are missing. Maybe you have an older Moses version without counts?\n')
-                    return
-                    
-            self.phrase_target[target][i] = target_count
         
         
-    def load_phrase_probabilities(self,line,priority,i,store='pairs',filter_by=None,filter_by_src=None,filter_by_target=None,inverted=False):
+    def load_phrase_features(self,line,priority,i,mode='interpolate',store='pairs',filter_by=None,filter_by_src=None,filter_by_target=None,inverted=False,flags=None):
         """take single phrase table line and store probablities in internal data structure"""
         
         src = line[0]
@@ -167,8 +103,27 @@ class Moses():
             
                 self.store_info(src,target,line)
                 
-                model_probabilities = map(float,line[2].split()[:-1])
+                scores = line[2].split()
+                if len(scores) <self.number_of_features:
+                    sys.stderr.write('Error: model only has {0} features. Expected {1}.\n'.format(len(scores),self.number_of_features))
+                    exit()
+                    
+                scores = scores[:self.number_of_features]
+                model_probabilities = map(float,scores)
                 phrase_probabilities = self.phrase_pairs[src][target][0]
+                
+                if mode == 'counts' and not priority == 2: #priority 2 is MAP
+                    try:
+                        target_count,src_count = map(float,line[-1].split())
+                    except:
+                        sys.stderr.write(str(line)+'\n')
+                        sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
+                        return
+                        
+                    i_e2f = flags['i_e2f']
+                    i_f2e = flags['i_f2e']
+                    model_probabilities[i_e2f] *= target_count
+                    model_probabilities[i_f2e] *= src_count
                 
                 for j,p in enumerate(model_probabilities):
                     phrase_probabilities[j][i] = p
@@ -176,9 +131,26 @@ class Moses():
         # mark that the src/target phrase has been seen.
         # needed for re-normalization during linear interpolation
         if (store == 'all' or store == 'source') and not (filter_by_src and not src in filter_by_src):
-            self.phrase_source[src][i] = 1
+            if mode == 'counts' and not priority == 2: #priority 2 is MAP
+                try:
+                    self.phrase_source[src][i] = float(line[-1].split()[1])
+                except:
+                    sys.stderr.write(str(line)+'\n')
+                    sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
+                    return
+            else:
+                self.phrase_source[src][i] = 1
+                
         if (store == 'all' or store == 'target') and not (filter_by_target and not target in filter_by_target):
-            self.phrase_target[target][i] = 1
+            if mode == 'counts' and not priority == 2: #priority 2 is MAP
+                try:
+                    self.phrase_target[target][i] = float(line[-1].split()[0])
+                except:
+                    sys.stderr.write(str(line)+'\n')
+                    sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
+                    return
+            else:
+                self.phrase_target[target][i] = 1
 
 
     def load_reordering_probabilities(self,line,priority,i,store='pairs'):
@@ -194,8 +166,7 @@ class Moses():
             reordering_probabilities[j][i] = p
 
 
-
-    def traverse_incrementally(self,table,models,load_lines,store_flag,inverted=False,lowmem=False):
+    def traverse_incrementally(self,table,models,load_lines,store_flag,mode='interpolate',inverted=False,lowmem=False,flags=None):
         """hack-ish way to find common phrase pairs in multiple models in one traversal without storing it all in memory
             relies on alphabetical sorting of phrase table.
         """
@@ -218,7 +189,7 @@ class Moses():
                     if increment != stack[i][0]:
                         continue
                     else:
-                        load_lines(stack[i],priority,i,store=store_flag,inverted=inverted)
+                        load_lines(stack[i],priority,i,mode=mode,store=store_flag,inverted=inverted,flags=flags)
                         stack[i] = ''
                     
                 for line in model:
@@ -229,7 +200,7 @@ class Moses():
                         stack[i] = line
                         break
                         
-                    load_lines(line,priority,i,store=store_flag,inverted=inverted)
+                    load_lines(line,priority,i,mode=mode,store=store_flag,inverted=inverted,flags=flags)
                 
             yield 1
 
@@ -255,7 +226,7 @@ class Moses():
             self.word_pairs_f2e[a][b][i] = float(prob)
     
 
-    def load_word_counts(self,line,side,i,priority,e2f_filter=None,f2e_filter=None):
+    def load_word_counts(self,line,side,i,priority,e2f_filter=None,f2e_filter=None,flags=None):
         """process single line of lexical table"""
         
         a, b, ab_count, b_count = line.split(b' ')
@@ -389,8 +360,10 @@ class Moses():
         # information specific to Moses model: alignment info and comment section with target and source counts
         alignment,comments = self.phrase_pairs[src][target][1]
         if mode == 'counts':
-            srccount =  dot_product(self.phrase_source[src],weights[2])
-            targetcount = dot_product(self.phrase_target[target],weights[0])
+            i_e2f = flags['i_e2f']
+            i_f2e = flags['i_f2e']
+            srccount =  dot_product(self.phrase_source[src],weights[i_f2e])
+            targetcount = dot_product(self.phrase_target[target],weights[i_e2f])
             comments = b"%s %s" %(targetcount,srccount)
             
         features = b' '.join([b'%.6g' %(f) for f in features])
@@ -471,7 +444,8 @@ class Moses():
 
 
     def merge(self,pt_normal, pt_inverse, pt_out, mode='interpolate'):
-        """merge two phrasetables (the latter having been inverted to calculate p(s|t) and lex(s|t) in sorted order)"""
+        """merge two phrasetables (the latter having been inverted to calculate p(s|t) and lex(s|t) in sorted order)
+           Assumes that p(s|t) and lex(s|t) are in first table half, p(t|s) and lex(t|s) in second"""
         
         for line,line2 in izip(pt_normal,pt_inverse):
             
@@ -479,9 +453,10 @@ class Moses():
             line2 = line2.split(b' ||| ')
             
             #scores
+            mid = int(self.number_of_features/2)
             scores1 = line[2].split()
             scores2 = line2[2].split()
-            line[2] = b' '.join(scores2[:2]+scores1[2:])
+            line[2] = b' '.join(scores2[:mid]+scores1[mid:])
             
             # marginal counts
             if mode == 'counts':
@@ -722,17 +697,14 @@ def cross_entropy(model_interface,reference_interface,weights,score,mode,flags):
        don't call this directly, but use one of the Combine_TMs methods.
     """
 
-    weights = normalize_weights(weights,mode)
+    weights = normalize_weights(weights,mode,flags)
     
     if 'compare_cross-entropies' in flags and flags['compare_cross-entropies']:
         num_results = len(model_interface.models)
     else:
         num_results = 1
     
-    cross_entropy_ts = [0]*num_results
-    cross_entropy_st = [0]*num_results
-    cross_entropy_lex_ts = [0]*num_results
-    cross_entropy_lex_st = [0]*num_results
+    cross_entropies = [[0]*num_results for i in range(model_interface.number_of_features)]
     oov = [0]*num_results
     oov2 = 0
     other_translations = [0]*num_results
@@ -780,11 +752,8 @@ def cross_entropy(model_interface,reference_interface,weights,score,mode,flags):
                         continue
                         
                     n[i] += c
-                    cross_entropy_ts[i] += -log(features[2],2)*c
-                    cross_entropy_st[i] += -log(features[0],2)*c
-                    
-                    cross_entropy_lex_ts[i] += -log(features[3],2)*c
-                    cross_entropy_lex_st[i] += -log(features[1],2)*c
+                    for j in range(model_interface.number_of_features):
+                        cross_entropies[j][i] -= log(features[j],2)*c
 
                 elif src in model_interface.phrase_source and not ('compare_cross-entropies' in flags and flags['compare_cross-entropies']):
                     other_translations[i] += c
@@ -799,22 +768,18 @@ def cross_entropy(model_interface,reference_interface,weights,score,mode,flags):
     
     for i in range(num_results):
         try:
-            cross_entropy_ts[i] /= n[i]
-            cross_entropy_st[i] /= n[i]
-            cross_entropy_lex_ts[i] /= n[i]
-            cross_entropy_lex_st[i] /= n[i]
+            for j in range(model_interface.number_of_features):
+                cross_entropies[j][i] /= n[i]
         except ZeroDivisionError:
             sys.stderr.write('Warning: no matching phrase pairs between reference set and model\n')
-            cross_entropy_ts[i] = 0
-            cross_entropy_st[i] = 0
-            cross_entropy_lex_ts[i] = 0
-            cross_entropy_lex_st[i] = 0
+            for j in range(model_interface.number_of_features):
+                cross_entropies[j][i] = 0
 
 
     if 'compare_cross-entropies' in flags and flags['compare_cross-entropies']:
-        return [(cross_entropy_st[i],cross_entropy_lex_st[i],cross_entropy_ts[i],cross_entropy_lex_ts[i],other_translations[i],oov[i],ignored[i],n[i],total_pairs) for i in range(num_results)], (n[0],total_pairs,oov2)
+        return [tuple([ce[i] for ce in cross_entropies]) + (other_translations[i],oov[i],ignored[i],n[i],total_pairs) for i in range(num_results)], (n[0],total_pairs,oov2)
     else:
-        return cross_entropy_st[0],cross_entropy_lex_st[0],cross_entropy_ts[0],cross_entropy_lex_ts[0],other_translations[0],oov2,total_pairs
+        return tuple([ce[0] for ce in cross_entropies]) + (other_translations[0],oov2,total_pairs)
 
 
 def cross_entropy_light(model_interface,reference_interface,weights,score,mode,flags,cache):
@@ -823,22 +788,16 @@ def cross_entropy_light(model_interface,reference_interface,weights,score,mode,f
        Same as cross_entropy, but optimized for speed: it doesn't generate all of the statistics,
        doesn't normalize, and uses caching.
     """
-    weights = normalize_weights(weights,mode)
-    cross_entropy_ts = 0
-    cross_entropy_st = 0
-    cross_entropy_lex_ts = 0
-    cross_entropy_lex_st = 0
+    weights = normalize_weights(weights,mode,flags)
+    cross_entropies = [0]*model_interface.number_of_features
 
     for (src,target,c) in cache:
         features = score(weights,src,target,model_interface,flags,cache=True)
 
-        cross_entropy_ts -= log(features[2],2)*c
-        cross_entropy_st -= log(features[0],2)*c
-        
-        cross_entropy_lex_ts -= log(features[3],2)*c
-        cross_entropy_lex_st -= log(features[1],2)*c
+        for i in range(model_interface.number_of_features):
+            cross_entropies[i] -= log(features[i],2)*c
                 
-    return cross_entropy_st,cross_entropy_lex_st,cross_entropy_ts,cross_entropy_lex_ts
+    return cross_entropies
 
 
 def _get_reference_cache(reference_interface,model_interface):
@@ -881,16 +840,16 @@ def _get_lexical_filter(reference_interface,model_interface):
     return e2f_filter,f2e_filter
 
 
-def _hillclimb_move(weights,stepsize,mode):
+def _hillclimb_move(weights,stepsize,mode,flags):
     """Move function for hillclimb algorithm. Updates each weight by stepsize."""
 
     for i,w in enumerate(weights):
-        yield normalize_weights(weights[:i]+[w+stepsize]+weights[i+1:],mode)
+        yield normalize_weights(weights[:i]+[w+stepsize]+weights[i+1:],mode,flags)
 
     for i,w in enumerate(weights):
         new = w-stepsize
         if new >= 1e-10:
-            yield normalize_weights(weights[:i]+[new]+weights[i+1:],mode)
+            yield normalize_weights(weights[:i]+[new]+weights[i+1:],mode,flags)
 
 def _hillclimb(scores,best_weights,objective,model_interface,reference_interface,score_function,mode,flags,precision,cache,n):
     """first (deprecated) implementation of iterative weight optimization."""
@@ -912,7 +871,7 @@ def _hillclimb(scores,best_weights,objective,model_interface,reference_interface
             
         move = 0
         
-        for w in _hillclimb_move(list(best_weights),stepsize,mode):
+        for w in _hillclimb_move(list(best_weights),stepsize,mode,flags):
             weights_tuple = tuple(w)
             
             if weights_tuple in scores:
@@ -948,22 +907,18 @@ def optimize_cross_entropy_hillclimb(model_interface,reference_interface,initial
     cache,n = _get_reference_cache(reference_interface,model_interface)
     
     # each objective is a triple: which score to minimize from cross_entropy(), which weights to update accordingly, and a comment that is printed
-    objectives = [(lambda x: scores[x][0]/n,[0],'minimize cross-entropy for p(s|t)'), #optimize cross-entropy for p(s|t)
-                    (lambda x: scores[x][1]/n,[1],'minimize cross-entropy for lex(s|t)'),
-                    (lambda x: scores[x][2]/n,[2],'minimize cross-entropy for p(t|s)'), #optimize for p(t|s)
-                    (lambda x: scores[x][3]/n,[3],'minimize cross-entropy for lex(t|s)')] 
-
+    objectives = [(lambda x: scores[x][i]/n,[i],'minimize cross-entropy for feature {0}'.format(i)) for i in range(model_interface.number_of_features)]
     
     scores[best_weights] = cross_entropy_light(model_interface,reference_interface,initial_weights,score_function,mode,flags,cache)
     final_weights = initial_weights[:]
     final_cross_entropy = [0]*model_interface.number_of_features
     
-    for objective, features, comment in objectives:
+    for i,(objective, features, comment) in enumerate(objectives):
         best_weights = min(scores,key=objective)
         sys.stderr.write('Optimizing objective "' + comment +'"\n')
-        best_weights = _hillclimb(scores,best_weights,objective,model_interface,reference_interface,score_function,mode,flags,precision,cache,n)
+        best_weights = _hillclimb(scores,best_weights,objective,model_interface,reference_interface,score_function,feature_specific_mode(mode,i,flags),flags,precision,cache,n)
         
-        sys.stderr.write('\nCross-entropy:' + str(objective(best_weights)) + '- weights: ' + str(best_weights)+'\n\n')
+        sys.stderr.write('\nCross-entropy:' + str(objective(best_weights)) + ' - weights: ' + str(best_weights)+'\n\n')
         
         for j in features:
             final_weights[j] = list(best_weights)
@@ -984,11 +939,8 @@ def optimize_cross_entropy(model_interface,reference_interface,initial_weights,s
     cache,n = _get_reference_cache(reference_interface,model_interface)
     
     # each objective is a triple: which score to minimize from cross_entropy(), which weights to update accordingly, and a comment that is printed
-    objectives = [(lambda w: cross_entropy_light(model_interface,reference_interface,[[1]+list(w) for m in range(model_interface.number_of_features)],score_function,mode,flags,cache)[0],[0],'minimize cross-entropy for p(s|t)'), #optimize cross-entropy for p(s|t)
-                    (lambda w: cross_entropy_light(model_interface,reference_interface,[[1]+list(w) for m in range(model_interface.number_of_features)],score_function,mode,flags,cache)[1],[1],'minimize cross-entropy for lex(s|t)'),
-                    (lambda w: cross_entropy_light(model_interface,reference_interface,[[1]+list(w) for m in range(model_interface.number_of_features)],score_function,mode,flags,cache)[2],[2],'minimize cross-entropy for p(t|s)'), #optimize for p(t|s)
-                    (lambda w: cross_entropy_light(model_interface,reference_interface,[[1]+list(w) for m in range(model_interface.number_of_features)],score_function,mode,flags,cache)[3],[3],'minimize cross-entropy for lex(t|s)')] 
-    
+    objectives = [(lambda w: cross_entropy_light(model_interface,reference_interface,[[1]+list(w) for m in range(model_interface.number_of_features)],score_function,feature_specific_mode(mode,i,flags),flags,cache)[i],[i],'minimize cross-entropy for feature {0}'.format(i)) for i in range(model_interface.number_of_features)] #optimize cross-entropy for p(s|t)
+
     final_weights = initial_weights[:]
     final_cross_entropy = [0]*model_interface.number_of_features
     
@@ -996,7 +948,7 @@ def optimize_cross_entropy(model_interface,reference_interface,initial_weights,s
         sys.stderr.write('Optimizing objective "' + comment +'"\n')
         initial_values = [1]*(len(model_interface.models)-1) # we leave value of first model at 1 and optimize all others (normalized of course)
         best_weights, best_point, data = fmin_l_bfgs_b(objective,initial_values,approx_grad=True,bounds=[(0.000000001,None)]*len(initial_values))
-        best_weights = normalize_weights([1]+list(best_weights),mode)
+        best_weights = normalize_weights([1]+list(best_weights),feature_specific_mode(mode,i,flags),flags)
         sys.stderr.write('Cross-entropy after L-BFGS optimization: ' + str(best_point/n) + ' - weights: ' + str(best_weights)+'\n')
     
         for j in features:
@@ -1006,41 +958,59 @@ def optimize_cross_entropy(model_interface,reference_interface,initial_weights,s
     return final_weights,final_cross_entropy
 
 
+def feature_specific_mode(mode,i,flags):
+    """in mode 'counts', only the default Moses features can be recomputed from raw frequencies;
+       all other features are interpolated by default. 
+       This fucntion mostly serves optical purposes (i.e. normalizing a single weight vector for logging),
+       since normalize_weights also handles a mix of interpolated and recomputed features.
+    """
+    
+    if mode == 'counts' and i not in [flags['i_e2f'],flags['i_e2f_lex'],flags['i_f2e'],flags['i_f2e_lex']]:
+        return 'interpolate'
+    else:
+        return mode
+
+
 def redistribute_probability_mass(weights,src,target,interface,flags,mode='interpolate'):
     """the conditional probability p(x|y) is undefined for cases where p(y) = 0
        this function redistributes the probability mass to only consider models for which p(y) > 0
     """
+
+    i_e2f = flags['i_e2f']
+    i_e2f_lex = flags['i_e2f_lex']
+    i_f2e = flags['i_f2e']
+    i_f2e_lex = flags['i_f2e_lex']
 
     new_weights = weights[:]
     
     if flags['normalize_s_given_t'] == 's':
     
         # set weight to 0 for all models where target phrase is unseen (p(s|t)   
-        new_weights[0] = map(mul,interface.phrase_source[src],weights[0])
+        new_weights[i_e2f] = map(mul,interface.phrase_source[src],weights[i_e2f])
         if flags['normalize-lexical_weights']:
-            new_weights[1] = map(mul,interface.phrase_source[src],weights[1])
+            new_weights[i_e2f_lex] = map(mul,interface.phrase_source[src],weights[i_e2f_lex])
         
     elif flags['normalize_s_given_t'] == 't':
         
         # set weight to 0 for all models where target phrase is unseen (p(s|t)   
-        new_weights[0] = map(mul,interface.phrase_target[target],weights[0])
+        new_weights[i_e2f] = map(mul,interface.phrase_target[target],weights[i_e2f])
         if flags['normalize-lexical_weights']:
-            new_weights[1] = map(mul,interface.phrase_target[target],weights[1])
+            new_weights[i_e2f_lex] = map(mul,interface.phrase_target[target],weights[i_e2f_lex])
 
     # set weight to 0 for all models where source phrase is unseen (p(t|s)
-    new_weights[2] = map(mul,interface.phrase_source[src],weights[2])
+    new_weights[i_f2e] = map(mul,interface.phrase_source[src],weights[i_f2e])
     if flags['normalize-lexical_weights']:
-        new_weights[3] = map(mul,interface.phrase_source[src],weights[3])
+        new_weights[i_f2e_lex] = map(mul,interface.phrase_source[src],weights[i_f2e_lex])
         
     
-    return normalize_weights(new_weights,mode)
+    return normalize_weights(new_weights,mode,flags)
 
 
 def score_interpolate(weights,src,target,interface,flags,cache=False):
     """linear interpolation of probabilites (and other feature values)
        if normalized is True, the probability mass for p(x|y) is redistributed to models with p(y) > 0
     """
-    
+
     model_values = interface.phrase_pairs[src][target][0]
     
     scores = [0]*len(model_values)
@@ -1059,12 +1029,12 @@ def score_interpolate(weights,src,target,interface,flags,cache=False):
             lts = 0
             
         else:
-            scores[1] = compute_lexicalweight(normalized_weights[1],e2f_alignment,interface.word_pairs_e2f,None,mode='interpolate')
-            scores[3] = compute_lexicalweight(normalized_weights[3],f2e_alignment,interface.word_pairs_f2e,None,mode='interpolate')
+            scores[flags['i_e2f_lex']] = compute_lexicalweight(normalized_weights[flags['i_e2f_lex']],e2f_alignment,interface.word_pairs_e2f,None,mode='interpolate')
+            scores[flags['i_f2e_lex']] = compute_lexicalweight(normalized_weights[flags['i_f2e_lex']],f2e_alignment,interface.word_pairs_f2e,None,mode='interpolate')
 
     
     for idx,prob in enumerate(model_values):
-        if not ('recompute_lexweights' in flags and flags['recompute_lexweights'] and (idx == 1 or idx == 3)):
+        if not ('recompute_lexweights' in flags and flags['recompute_lexweights'] and (idx == flags['i_e2f_lex'] or idx == flags['i_f2e_lex'])):
             scores[idx] = dot_product(prob,normalized_weights[idx])
     
     return scores
@@ -1093,32 +1063,43 @@ def score_counts(weights,src,target,interface,flags,cache=False):
        each count is multiplied by its weight; trivial case is weight 1 for each model, which corresponds to a concatentation
     """
     
+    i_e2f = flags['i_e2f']
+    i_e2f_lex = flags['i_e2f_lex']
+    i_f2e = flags['i_f2e']
+    i_f2e_lex = flags['i_f2e_lex']
+    
+    # if we have non-default number of weights, assume that we might have to do a mix of count-based and interpolated scores.
+    if len(weights) == 4:
+        scores = [0]*len(weights)
+    else:
+        scores = score_interpolate(weights,src,target,interface,flags,cache=cache)
+    
     try:
-        joined_count = dot_product(interface.phrase_pairs[src][target][0][0],weights[0])
-        target_count = dot_product(interface.phrase_target[target],weights[0])
-        pst = joined_count / target_count
+        joined_count = dot_product(interface.phrase_pairs[src][target][0][i_e2f],weights[i_e2f])
+        target_count = dot_product(interface.phrase_target[target],weights[i_e2f])
+        scores[i_e2f] = joined_count / target_count
     except ZeroDivisionError:
-        pst = 0
+        scores[i_e2f] = 0
 
     try:
-        joined_count = dot_product(interface.phrase_pairs[src][target][0][1],weights[2])
-        source_count = dot_product(interface.phrase_source[src],weights[2])
-        pts = joined_count / source_count
+        joined_count = dot_product(interface.phrase_pairs[src][target][0][i_f2e],weights[i_f2e])
+        source_count = dot_product(interface.phrase_source[src],weights[i_f2e])
+        scores[i_f2e] = joined_count / source_count
     except ZeroDivisionError:
-        pts = 0
+        scores[i_f2e] = 0
     
     e2f_alignment,f2e_alignment = interface.get_word_alignments(src,target,cache=cache)
     
     if not e2f_alignment or not f2e_alignment:
         sys.stderr.write('Error: no word alignments found, but necessary for lexical weight computation.\n')
-        lst = 0
-        lts = 0
+        scores[i_e2f_lex] = 0
+        scores[i_f2e_lex] = 0
     
     else:
-        lst = compute_lexicalweight(weights[1],e2f_alignment,interface.word_pairs_e2f,interface.word_target,mode='counts',cache=cache)
-        lts = compute_lexicalweight(weights[3],f2e_alignment,interface.word_pairs_f2e,interface.word_source,mode='counts',cache=cache)
+        scores[i_e2f_lex] = compute_lexicalweight(weights[i_e2f_lex],e2f_alignment,interface.word_pairs_e2f,interface.word_target,mode='counts',cache=cache)
+        scores[i_f2e_lex] = compute_lexicalweight(weights[i_f2e_lex],f2e_alignment,interface.word_pairs_f2e,interface.word_source,mode='counts',cache=cache)
     
-    return [pst,lst,pts,lts]
+    return scores
 
 
 def score_interpolate_reordering(weights,src,target,interface):
@@ -1174,7 +1155,7 @@ def compute_lexicalweight(weights,alignment,word_pairs,marginal,mode='counts',ca
     return lex
 
 
-def normalize_weights(weights,mode):
+def normalize_weights(weights,mode,flags=None):
     """make sure that probability mass in linear interpolation is 1
        for weighted counts, weight of first model is set to 1
     """
@@ -1203,7 +1184,7 @@ def normalize_weights(weights,mode):
             except ZeroDivisionError:
                 sys.stderr.write('Error: Zero division in weight normalization. Are some of your weights zero? This might lead to undefined behaviour if a phrase pair is only seen in model with weight 0\n')
 
-    elif mode == 'counts':
+    elif mode == 'counts_pure':
         
         if type(weights[0]) == list:
                 
@@ -1216,6 +1197,19 @@ def normalize_weights(weights,mode):
         else:
             ratio = 1/weights[0]
             new_weights = [weight * ratio for weight in weights]
+
+    # make sure that features other than the standard Moses features are always interpolated (since no count-based computation is defined)
+    elif mode == 'counts': 
+        
+        if type(weights[0]) == list:
+                norm_counts = normalize_weights(weights,'counts_pure')
+                new_weights = normalize_weights(weights,'interpolate')
+                for i in [flags['i_e2f'],flags['i_e2f_lex'],flags['i_f2e'],flags['i_f2e_lex']]:
+                    new_weights[i] = norm_counts[i]
+                return new_weights
+        
+        else:
+            return normalize_weights(weights,'counts_pure')
 
     return new_weights
 
@@ -1288,7 +1282,11 @@ class Combine_TMs():
             'normalize_s_given_t':None, 
             'normalize-lexical_weights':True, 
             'add_origin_features':False,
-            'lowmem': False
+            'lowmem': False,
+            'i_e2f':0,
+            'i_e2f_lex':1,
+            'i_f2e':2,
+            'i_f2e_lex':3
             }
 
     # each model needs a priority. See init docstring for more info
@@ -1296,7 +1294,17 @@ class Combine_TMs():
                     'map':2,
                     'supplementary':10}
     
-    def __init__(self,models,weights=None,output_file=None,mode='interpolate',number_of_features=4,model_interface=Moses,reference_interface=Moses_Alignment,reference_file=None,lang_src=None,lang_target=None,output_lexical=None,**flags):
+    def __init__(self,models,weights=None,
+                      output_file=None,
+                      mode='interpolate',
+                      number_of_features=4,
+                      model_interface=Moses,
+                      reference_interface=Moses_Alignment,
+                      reference_file=None,
+                      lang_src=None,
+                      lang_target=None,
+                      output_lexical=None,
+                      **flags):
         """The whole configuration of the task is done during intialization. Afterwards, you only need to call your intended method(s).
            You can change some of the class attributes afterwards (such as the weights, or the output file), but you should never change the models or mode after initialization.
            See unit_test function for example configurations
@@ -1317,11 +1325,16 @@ class Combine_TMs():
 
            mode: declares the basic mixture-model algorithm. there are currently three options:
                  'counts': weighted counts (requires some statistics that Moses doesn't produce. Apply train_model.patch to train_model.perl and repeat step 4 of Moses training to obtain them.)
+                           Only the standard Moses features are recomputed from weighted counts; additional features are linearly interpolated 
+                           (see number_of_features to allow more features, and i_e2f etc. if the standard features are in a non-standard position)
                  'interpolate': linear interpolation
                  'loglinear': loglinear interpolation (careful: this creates the intersection of phrase tables and is often of little use)
                  
            number_of_features: could be used to interpolate models with non-default Moses features. 4 features is currently still hardcoded in various places 
                                (e.g. cross_entropy calculations, mode 'counts')
+           
+           i_e2f,i_e2f_lex,i_f2e,i_f2e_lex: Index of the (Moses) phrase table features p(s|t), lex(s|t), p(t|s) and lex(t|s). 
+                Relevant for mode 'counts', and if 'recompute_lexweights' is True in mode 'interpolate'. In mode 'counts', any additional features are combined through linear interpolation.
            
            model_interface: class that handles reading phrase tables and lexical tables, and writing phrase tables. Currently only Moses is implemented.
                  default: Moses
@@ -1378,7 +1391,15 @@ class Combine_TMs():
         self.lang_target = lang_target
         self.loaded = defaultdict(int)
         self.output_lexical = output_lexical
+
+        self.flags = copy.copy(self.flags)
+        self.flags.update(flags)
         
+        self.flags['i_e2f'] = int(self.flags['i_e2f'])
+        self.flags['i_e2f_lex'] = int(self.flags['i_e2f_lex'])
+        self.flags['i_f2e'] = int(self.flags['i_f2e'])
+        self.flags['i_f2e_lex'] = int(self.flags['i_f2e_lex'])
+
         if reference_interface:
             self.reference_interface = reference_interface(reference_file)
 
@@ -1395,22 +1416,18 @@ class Combine_TMs():
 
         if mode == 'interpolate':
             self.score = score_interpolate
-            self.load_lines = self.model_interface.load_phrase_probabilities
         elif mode == 'loglinear':
             self.score = score_loglinear
-            self.load_lines = self.model_interface.load_phrase_probabilities
         elif mode == 'counts':
             self.score = score_counts
-            self.load_lines = self.model_interface.load_phrase_counts
-
-        self.flags = copy.copy(self.flags)
-        self.flags.update(flags)
             
 
     def _sanity_checks(self,models,number_of_features,weights):
         """check if input arguments make sense (correct number of weights, valid model priorities etc.)
            is only called on initialization. If you change weights afterwards, better know what you're doing.
         """
+        
+        number_of_features = int(number_of_features)
               
         for (model,priority) in models:
             assert(priority in self._priorities)
@@ -1437,12 +1454,12 @@ class Combine_TMs():
             sys.stderr.write('Warning: No weights defined: initializing with uniform weights\n')
 
 
-        new_weights = normalize_weights(weights,self.mode)
+        new_weights = normalize_weights(weights,self.mode,self.flags)
         if weights != new_weights:
             if self.mode == 'interpolate' or self.mode == 'loglinear':
                 sys.stderr.write('Warning: weights should sum to 1 - ')
             elif self.mode == 'counts':
-                sys.stderr.write('Warning: normalizing weights so that first model has weight 1 - ')
+                sys.stderr.write('Warning: normalizing weights so that first model has weight 1 (for features that are recomputed from counts) - ')
             sys.stderr.write('normalizing to: '+ str(new_weights) +'\n')
             weights = new_weights
             
@@ -1472,7 +1489,7 @@ class Combine_TMs():
         if 'pt-filtered' in data and not self.loaded['pt-filtered']:
             
             models_prioritized = [(self.model_interface.open_table(model,'phrase-table'),priority,i) for (model,priority,i) in priority_sort_models(self.models)]
-                
+            
             for model,priority,i in models_prioritized:
                 sys.stderr.write('Loading phrase table ' + str(i) + ' (only data relevant for reference set)')
                 j = 0
@@ -1481,7 +1498,7 @@ class Combine_TMs():
                         sys.stderr.write('...'+str(j))
                     j += 1
                     line = line.rstrip().split(b' ||| ')
-                    self.load_lines(line,priority,i,store='all',filter_by=self.reference_interface.word_pairs,filter_by_src=self.reference_interface.word_source,filter_by_target=self.reference_interface.word_target)
+                    self.model_interface.load_phrase_features(line,priority,i,store='all',mode=self.mode,filter_by=self.reference_interface.word_pairs,filter_by_src=self.reference_interface.word_source,filter_by_target=self.reference_interface.word_target,flags=self.flags)
                 sys.stderr.write(' done\n')
 
             self.loaded['pt-filtered'] = 1
@@ -1506,7 +1523,7 @@ class Combine_TMs():
                         sys.stderr.write('...'+str(j))
                     j += 1
                     line = line.rstrip().split(b' ||| ')
-                    self.load_lines(line,priority,i,store='target')
+                    self.model_interface.load_phrase_features(line,priority,i,mode=self.mode,store='target',flags=self.flags)
                 sys.stderr.write(' done\n')
 
             self.loaded['pt-target'] = 1
@@ -1554,8 +1571,8 @@ class Combine_TMs():
 
         i = 0
         sys.stderr.write('Incrementally loading and processing phrase tables...')
-        for block in self.model_interface.traverse_incrementally('phrase-table',models,self.load_lines,store_flag,inverted=inverted,lowmem=self.flags['lowmem']):
-            
+
+        for block in self.model_interface.traverse_incrementally('phrase-table',models,self.model_interface.load_phrase_features,store_flag,mode=self.mode,inverted=inverted,lowmem=self.flags['lowmem'],flags=self.flags):
             for src in sorted(self.model_interface.phrase_pairs, key = lambda x: x + b' |'):
                 for target in sorted(self.model_interface.phrase_pairs[src], key = lambda x: x + b' |'):
                     
@@ -1642,8 +1659,8 @@ class Combine_TMs():
         i = 0
         
         sys.stderr.write('Incrementally loading and processing phrase tables...')
-        for block in self.model_interface.traverse_incrementally('reordering-table',models,self.model_interface.load_reordering_probabilities,'pairs',lowmem=self.flags['lowmem']):
-            
+
+        for block in self.model_interface.traverse_incrementally('reordering-table',models,self.model_interface.load_reordering_probabilities,'pairs',mode=self.mode,lowmem=self.flags['lowmem'],flags=self.flags):
             for src in sorted(self.model_interface.reordering_pairs):
                 for target in sorted(self.model_interface.reordering_pairs[src]):
                     if not i % 1000000:
@@ -1676,18 +1693,21 @@ class Combine_TMs():
         results, (intersection,total_pairs,oov2) = cross_entropy(self.model_interface,self.reference_interface,self.weights,self.score,self.mode,self.flags)
         
         padding = 90
+        num_features = self.model_interface.number_of_features
         
         print('\nResults of model comparison\n')
         print('{0:<{padding}}: {1}'.format('phrase pairs in reference (tokens)',total_pairs, padding=padding))
         print('{0:<{padding}}: {1}'.format('phrase pairs in model intersection (tokens)',intersection, padding=padding))
         print('{0:<{padding}}: {1}\n'.format('phrase pairs in model union (tokens)',total_pairs-oov2, padding=padding))
         
-        for i,(cross_entropy_st,cross_entropy_lex_st,cross_entropy_ts,cross_entropy_lex_ts,other_translations,oov,ignored,n,total_pairs) in enumerate(results):
+        for i,data in enumerate(results):
+            
+            cross_entropies = data[:num_features]
+            (other_translations,oov,ignored,n,total_pairs) = data[num_features:]
+            
             print('model ' +str(i))
-            print('{0:<{padding}}: {1}'.format('cross-entropy p(s|t)', cross_entropy_st, padding=padding))
-            print('{0:<{padding}}: {1}'.format('cross-entropy lex(s|t)', cross_entropy_lex_st, padding=padding))
-            print('{0:<{padding}}: {1}'.format('cross-entropy p(t|s)', cross_entropy_ts, padding=padding))
-            print('{0:<{padding}}: {1}'.format('cross-entropy lex(t|s)', cross_entropy_lex_ts, padding=padding))
+            for j in range(num_features):
+                print('{0:<{padding}}: {1}'.format('cross-entropy for feature {0}'.format(j), cross_entropies[j], padding=padding))
             print('{0:<{padding}}: {1}'.format('phrase pairs in model (tokens)', n+ignored, padding=padding))
             print('{0:<{padding}}: {1}'.format('phrase pairs in model, but not in intersection (tokens)', ignored, padding=padding))
             print('{0:<{padding}}: {1}'.format('phrase pairs in union, but not in model (but source phrase is) (tokens)', other_translations, padding=padding))
@@ -1786,6 +1806,18 @@ def test():
     Combiner = Combine_TMs([[os.path.join('test','model1'),'primary'],[os.path.join('test','model2'),'map']],output_file=os.path.join('test','phrase-table_test8'),mode='counts',reference_file='test/extract')
     Combiner.combine_given_tuning_set()
 
+    # count-based combination of two non-default models, with fixed weights. Same as test 3, but with the standard features moved back
+    # command line: python tmcombine.py combine_given_weights test/model3 test/model4 -w "0.5,0.5;0.5,0.5;0.5,0.5;0.5,0.5;0.1,0.9;0.1,1;0.2,0.8;0.5,0.5" -o test/phrase-table_test9 -m counts --number_of_features 8 --i_e2f 4 --i_e2f_lex 5 --i_f2e 6 --i_f2e_lex 7 -r test/extract
+    sys.stderr.write('Regression test 9\n')
+    Combiner = Combine_TMs([[os.path.join('test','model3'),'primary'],[os.path.join('test','model4'),'primary']],[[0.5,0.5],[0.5,0.5],[0.5,0.5],[0.5,0.5],[0.1,0.9],[0.1,1],[0.2,0.8],[0.5,0.5]],os.path.join('test','phrase-table_test9'),mode='counts',number_of_features=8,i_e2f=4,i_e2f_lex=5,i_f2e=6,i_f2e_lex=7)
+    Combiner.combine_given_weights()
+
+    # count-based combination of two non-default models, with fixed weights. Same as test 5, but with the standard features moved back
+    # command line: python tmcombine.py combine_given_tuning_set test/model3 test/model4 -o test/phrase-table_test10 -m counts --number_of_features 8 --i_e2f 4 --i_e2f_lex 5 --i_f2e 6 --i_f2e_lex 7 -r test/extract
+    sys.stderr.write('Regression test 10\n')
+    Combiner = Combine_TMs([[os.path.join('test','model3'),'primary'],[os.path.join('test','model4'),'primary']],output_file=os.path.join('test','phrase-table_test10'),mode='counts',number_of_features=8,i_e2f=4,i_e2f_lex=5,i_f2e=6,i_f2e_lex=7,reference_file='test/extract')
+    Combiner.combine_given_tuning_set()
+    
 
 #convert weight vector passed as a command line argument
 class to_list(argparse.Action):
@@ -1800,46 +1832,68 @@ class to_list(argparse.Action):
 def parse_command_line():
     parser = argparse.ArgumentParser(description='Combine translation models. Check DOCSTRING of the class Combine_TMs() and its methods for a more in-depth documentation and additional configuration options not available through the command line. The function test() shows examples.')
     
-    parser.add_argument('action', metavar='ACTION', choices=["combine_given_weights","combine_given_tuning_set","combine_reordering_tables","compute_cross_entropy","return_best_cross_entropy","compare_cross_entropies"],
+    group1 = parser.add_argument_group('Main options')
+    group2 = parser.add_argument_group('More model combination options')
+    
+    group1.add_argument('action', metavar='ACTION', choices=["combine_given_weights","combine_given_tuning_set","combine_reordering_tables","compute_cross_entropy","return_best_cross_entropy","compare_cross_entropies"],
                     help='What you want to do with the models. One of %(choices)s.')
     
-    parser.add_argument('model', metavar='DIRECTORY', nargs='+',
+    group1.add_argument('model', metavar='DIRECTORY', nargs='+',
                     help='Model directory. Assumes default Moses structure (i.e. path to phrase table and lexical tables).')
                     
-    parser.add_argument('-w', '--weights', dest='weights', action=to_list,
+    group1.add_argument('-w', '--weights', dest='weights', action=to_list,
                     default=None,
                     help='weight vector. Format 1: single vector, one weight per model. Example: \"0.1,0.9\" ; format 2: one vector per feature, one weight per model: \"0.1,0.9;0.5,0.5;0.4,0.6;0.2,0.8\"')
 
-    parser.add_argument('-m', '--mode', type=str,
+    group1.add_argument('-m', '--mode', type=str,
                     default="interpolate",
                     choices=["counts","interpolate","loglinear"],
                     help='basic mixture-model algorithm. Default: %(default)s. Note: depending on mode and additional configuration, additional statistics are needed. Check docstring documentation of Combine_TMs() for more info.')
 
-    parser.add_argument('-r', '--reference', type=str,
+    group1.add_argument('-r', '--reference', type=str,
                     default=None,
                     help='File containing reference phrase pairs for cross-entropy calculation. Default interface expects \'path/model/extract.gz\' that is produced by training a model on the reference (i.e. development) corpus.')
 
-    parser.add_argument('-o', '--output', type=str,
+    group1.add_argument('-o', '--output', type=str,
                     default="-",
                     help='Output file (phrase table). If not specified, model is written to standard output.')
 
-    parser.add_argument('--output-lexical', type=str,
+    group1.add_argument('--output-lexical', type=str,
                     default=None,
                     help=('Not only create a combined phrase table, but also combined lexical tables. Writes to OUTPUT_LEXICAL.e2f and OUTPUT_LEXICAL.f2e, or OUTPUT_LEXICAL.counts.e2f in mode \'counts\'.'))
 
-    parser.add_argument('--lowmem', action="store_true",
+    group1.add_argument('--lowmem', action="store_true",
                     help=('Low memory mode: requires two passes (and sorting in between) to combine a phrase table, but loads less data into memory. Only relevant for mode "counts" and some configurations of mode "interpolate".'))
 
-    parser.add_argument('--normalized', action="store_true",
-                    help=('for each phrase pair x,y: ignore models with p(y)=0, and distribute probability mass among models with p(y)>0. (default: missing entries (x,y) are always interpreted as p(x|y)=0). Only relevant in mode "interpolate".'))
-
-    parser.add_argument('--recompute_lexweights', action="store_true",
-                    help=('don\'t directly interpolate lexical weights, but interpolate word translation probabilities instead and recompute the lexical weights. Only relevant in mode "interpolate".'))
-
-    parser.add_argument('--tempdir', type=str,
+    group1.add_argument('--tempdir', type=str,
                     default=None,
                     help=('Temporary directory in --lowmem mode.'))
 
+    group2.add_argument('--i_e2f', type=int,
+                    default=0, metavar='N',
+                    help=('Index of p(f|e) (relevant for mode counts if phrase table has custom feature order). (default: %(default)s)'))
+
+    group2.add_argument('--i_e2f_lex', type=int,
+                    default=1, metavar='N',
+                    help=('Index of lex(f|e) (relevant for mode counts or with option recompute_lexweights if phrase table has custom feature order). (default: %(default)s)'))
+
+    group2.add_argument('--i_f2e', type=int,
+                    default=2, metavar='N',
+                    help=('Index of p(e|f) (relevant for mode counts if phrase table has custom feature order). (default: %(default)s)'))
+
+    group2.add_argument('--i_f2e_lex', type=int,
+                    default=3, metavar='N',
+                    help=('Index of lex(e|f) (relevant for mode counts or with option recompute_lexweights if phrase table has custom feature order). (default: %(default)s)'))
+
+    group2.add_argument('--number_of_features', type=int,
+                    default=4, metavar='N',
+                    help=('Combine models with N + 1 features (last feature is constant phrase penalty). (default: %(default)s)'))
+
+    group2.add_argument('--normalized', action="store_true",
+                    help=('for each phrase pair x,y: ignore models with p(y)=0, and distribute probability mass among models with p(y)>0. (default: missing entries (x,y) are always interpreted as p(x|y)=0). Only relevant in mode "interpolate".'))
+
+    group2.add_argument('--recompute_lexweights', action="store_true",
+                    help=('don\'t directly interpolate lexical weights, but interpolate word translation probabilities instead and recompute the lexical weights. Only relevant in mode "interpolate".'))
 
     return parser.parse_args()
 
@@ -1854,7 +1908,21 @@ if __name__ == "__main__":
     else:
         args = parse_command_line()
         #initialize
-        combiner = Combine_TMs([(m,'primary') for m in args.model],weights=args.weights,mode=args.mode,output_file=args.output,reference_file=args.reference,output_lexical=args.output_lexical,lowmem=args.lowmem,normalized=args.normalized,recompute_lexweights=args.recompute_lexweights,tempdir=args.tempdir)
+        combiner = Combine_TMs([(m,'primary') for m in args.model],
+                               weights=args.weights,
+                               mode=args.mode,
+                               output_file=args.output,
+                               reference_file=args.reference,
+                               output_lexical=args.output_lexical,
+                               lowmem=args.lowmem,
+                               normalized=args.normalized,
+                               recompute_lexweights=args.recompute_lexweights,
+                               tempdir=args.tempdir,
+                               number_of_features=args.number_of_features,
+                               i_e2f=args.i_e2f,
+                               i_e2f_lex=args.i_e2f_lex,
+                               i_f2e=args.i_f2e,
+                               i_f2e_lex=args.i_f2e_lex)
         # execute right method
         f_string = "combiner."+args.action+'()'
         exec(f_string)

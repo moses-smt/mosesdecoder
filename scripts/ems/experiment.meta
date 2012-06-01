@@ -344,8 +344,21 @@ parse-relax
 	pass-unless: input-parse-relaxer output-parse-relaxer
 	template-if: input-parse-relaxer IN.$input-extension OUT.$input-extension
 	template-if: output-parse-relaxer IN.$output-extension OUT.$output-extension
+pcfg-extract
+  in: parse-relaxed-corpus
+  out: pcfg
+  default-name: model/pcfg
+  ignore-unless: use-pcfg-feature
+  rerun-on-change: use-pcfg-feature
+  template: $moses-script-dir/training/phrase-extract/pcfg-extract/pcfg-extract < IN.$output-extension > OUT.$output-extension
+pcfg-score
+  in: parse-relaxed-corpus pcfg
+  out: scored-corpus
+  default-name: model/scored-corpus
+  pass-unless: use-pcfg-feature
+  template: ln -s IN.$input-extension OUT.$input-extension ; $moses-script-dir/training/phrase-extract/pcfg-score/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
 extract-phrases
-	in: word-alignment parse-relaxed-corpus
+	in: word-alignment scored-corpus
 	out: extracted-phrases
 	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm
 	default-name: model/extract
@@ -738,6 +751,20 @@ ibm-bleu-c
         ignore-unless: ibm-bleu-c
         rerun-on-change: ibm-bleu-c
         template: $ibm-bleu-c -s $input-sgm -r IN1 -t IN > OUT
+bolt-bleu
+	in: detokenized-output
+	out: bolt-bleu-score
+	default-name: evaluation/bolt-bleu
+	ignore-unless: bolt-bleu
+	rerun-on-change: bolt-bleu
+	template: $bolt-bleu IN > OUT
+bolt-bleu-c
+	in: detokenized-output
+	out: bolt-bleu-c-score
+	default-name: evaluation/bolt-bleu-c
+	ignore-unless: bolt-bleu-c
+	rerun-on-change: bolt-bleu-c
+	template: $bolt-bleu-c IN > OUT
 multi-bleu
 	in: cleaned-output reference
 	out: multi-bleu-score
@@ -793,6 +820,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model
 	out: report
 	default-name: evaluation/report

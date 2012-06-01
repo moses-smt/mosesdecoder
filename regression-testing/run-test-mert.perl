@@ -10,14 +10,14 @@ my @SIGS = qw ( SIGHUP SIGINT SIGQUIT SIGILL SIGTRAP SIGABRT SIGIOT SIGBUS SIGFP
 my ($decoder, $test_name);
 
 my $test_dir = "$script_dir/tests";
-my $mert_dir = "$script_dir/../mert";
+my $bin_dir = "$script_dir/../bin";
 my $data_dir;
 my $BIN_TEST = $script_dir;
 my $results_dir;
 
 GetOptions("test=s"    => \$test_name,
            "data-dir=s"=> \$data_dir,
-           "mert-dir=s"=> \$mert_dir,
+           "bin-dir=s"=> \$bin_dir,
            "test-dir=s"=> \$test_dir,
            "results-dir=s"=> \$results_dir,
           ) or exit 1;
@@ -26,7 +26,7 @@ die "Please specify a test to run with --test\n" unless $test_name;
 
 die "Please specify the location of the data directory with --data-dir\n" unless $data_dir;
 
-die "Please specify the location of the mert directory with --mert-dir\n" unless $mert_dir;
+die "Please specify the location of the mert directory with --mert-dir\n" unless $bin_dir;
 
 die "Cannot locate test dir at $test_dir" unless (-d $test_dir);
 
@@ -92,7 +92,7 @@ exit 0;
 sub exec_test {
   my ($test_dir,$results) = @_;
   my $start_time = time;
-  my ($o, $ec, $sig) = run_command("sh $test_dir/command $mert_dir $test_dir 1> $results/run.stdout 2> $results/run.stderr");
+  my ($o, $ec, $sig) = run_command("sh $test_dir/command $bin_dir $test_dir 1> $results/run.stdout 2> $results/run.stderr");
   my $elapsed = 0;
   $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);

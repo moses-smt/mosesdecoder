@@ -15,6 +15,9 @@ FeatureStats.cpp
 FeatureArray.cpp
 FeatureData.cpp
 FeatureDataIterator.cpp
+MiraFeatureVector.cpp
+MiraWeightVector.cpp
+HypPackEnumerator.cpp
 Data.cpp
 BleuScorer.cpp
 SemposScorer.cpp
@@ -52,7 +55,9 @@ exe evaluator : evaluator.cpp mert_lib ;
 
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
-alias programs : mert extractor evaluator pro ;
+exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ;
+
+alias programs : mert extractor evaluator pro kbmira ;
 
 unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
@@ -66,4 +71,3 @@ unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ;
 
-install legacy : programs : <location>. ;

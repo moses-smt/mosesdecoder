@@ -13,7 +13,7 @@ void CheckFeatureMap(const FeatureData* feature_data,
     std::stringstream ss;
     ss << str << "_" << i;
     const std::string& s = ss.str();
-    BOOST_CHECK_EQUAL(feature_data->getFeatureIndex(s), *cnt);
+    BOOST_CHECK_EQUAL(feature_data->getFeatureIndex(s), (std::size_t)(*cnt));
     BOOST_CHECK_EQUAL(feature_data->getFeatureName(*cnt).c_str(), s);
     ++(*cnt);
   }
@@ -35,6 +35,6 @@ BOOST_AUTO_TEST_CASE(set_feature_map) {
   CheckFeatureMap(&feature_data, "lm", 2, &cnt);
   CheckFeatureMap(&feature_data, "tm", 5, &cnt);
 
-  BOOST_CHECK_EQUAL(feature_data.getFeatureIndex("w_0"), cnt);
+  BOOST_CHECK_EQUAL(feature_data.getFeatureIndex("w_0"), (std::size_t)cnt);
   BOOST_CHECK_EQUAL(feature_data.getFeatureName(cnt).c_str(), "w_0");
 }

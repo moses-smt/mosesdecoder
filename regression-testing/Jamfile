@@ -2,7 +2,7 @@ import option ;
 
 with-regtest = [ option.get "with-regtest" ] ;
 if $(with-regtest) {
-  path-constant TESTS : tests ;
+  path-constant TESTS : $(with-regtest)/tests ;
   
   rule reg_test ( name : tests * : program : action ) {
     alias $(name) : $(tests:D=).passed ;
@@ -15,18 +15,30 @@ if $(with-regtest) {
   actions reg_test_decode {
     $(TOP)/regression-testing/run-single-test.perl --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
   }
-  reg_test phrase : [ glob tests/phrase.* ] : ../moses-cmd/src//moses : @reg_test_decode ;
-  reg_test chart : chart.target-syntax chart.target-syntax.ondisk chart.hierarchical chart.hierarchical-withsrilm chart.hierarchical.ondisk : ../moses-chart-cmd/src//moses_chart : @reg_test_decode ;
+  reg_test phrase : [ glob $(TESTS)/phrase.* ] : ../moses-cmd/src//moses : @reg_test_decode ;
+  reg_test chart : [ glob $(TESTS)/chart.* : $(TESTS)/chart.hierarchical-withkenlm ] : ../moses-chart-cmd/src//moses_chart : @reg_test_decode ;
   
   actions reg_test_score {
     $(TOP)/regression-testing/run-test-scorer.perl --scorer=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
   }
-  reg_test score : [ glob tests/score.* ] : ../scripts/training/phrase-extract//score : @reg_test_score ;
+  reg_test score : [ glob $(TESTS)/score.* ] : ../phrase-extract//score : @reg_test_score ;
+
+  actions reg_test_extract {
+    $(TOP)/regression-testing/run-test-extract.perl --extractor=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
+  }
+  reg_test extract : [ glob $(TESTS)/extract.* ] : ../phrase-extract//extract : @reg_test_extract ;
+
+
+  actions reg_test_extractrules {
+    $(TOP)/regression-testing/run-test-extract.perl --extractor=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
+  }
+  reg_test extractrules : [ glob $(TESTS)/extract-rules.* : $(TESTS)/extract-rules.hierarchical ] : ../phrase-extract//extract-rules : @reg_test_extractrules ;
+
   
   actions reg_test_mert {
-    $(TOP)/regression-testing/run-test-mert.perl --mert-dir=$(TOP)/mert --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
+    $(TOP)/regression-testing/run-test-mert.perl --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(TESTS) && touch $(<)
   }
-  reg_test mert : [ glob tests/mert.* ] : ../mert//legacy : @reg_test_mert ;
-  
-  alias all : phrase chart score mert ;
+  reg_test mert : [ glob $(TESTS)/mert.* ] : ../mert//mert : @reg_test_mert ;
+
+   alias all : phrase chart mert score extract extractrules ;
 }
