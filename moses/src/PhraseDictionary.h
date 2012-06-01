@@ -69,7 +69,7 @@ public:
     return Translate;
   }
   const PhraseDictionaryFeature* GetFeature() const;
-
+  size_t GetDictIndex() const;
 
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
@@ -105,6 +105,7 @@ public:
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
+			    , size_t dictIndex
                             , size_t tableLimit
                             , const std::string &targetFile
                             , const std::string &alignmentsFile);
@@ -131,6 +132,10 @@ public:
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();
+  size_t GetDictIndex() const;
+
+protected:
+  size_t m_dictIndex;
 
 private:
   /** Load the appropriate phrase table */
@@ -138,7 +143,6 @@ private:
 
   unsigned m_numInputScores;
   std::string m_filePath;
-  std::vector<float> m_weight;
   size_t m_tableLimit;
   //We instantiate either the the thread-safe or non-thread-safe dictionary,
   //but not both. The thread-safe one can be instantiated in the constructor and shared

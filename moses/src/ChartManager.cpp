@@ -185,7 +185,8 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyD
 
   // Get all complete translations
   Word *w = new Word();
-  w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "TOP", true);
+  //w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "TOP", true);
+  w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "S", true);
   const HypoList topHypos = lastCell.GetSortedHypotheses(*w);
   
   // Create a ChartTrellisDetour for each complete translation and add it to the queue

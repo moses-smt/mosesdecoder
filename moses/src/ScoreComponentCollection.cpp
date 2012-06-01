@@ -137,12 +137,12 @@ float ScoreComponentCollection::GetLInfNorm() const {
   return m_scores.linfnorm();
 }
 
-void ScoreComponentCollection::L1Regularize(float lambda) {
-  m_scores.l1regularize(lambda);
+size_t ScoreComponentCollection::SparseL1Regularize(float lambda) {
+  return m_scores.sparseL1regularize(lambda);
 }
 
-void ScoreComponentCollection::L2Regularize(float lambda) {
-  m_scores.l2regularize(lambda);
+void ScoreComponentCollection::SparseL2Regularize(float lambda) {
+  m_scores.sparseL2regularize(lambda);
 }
 
 void ScoreComponentCollection::Save(ostream& out) const {

@@ -1397,6 +1397,7 @@ bool StaticData::LoadPhraseTables()
         , output
         , filePath
         , weight
+       	, currDict
         , maxTargetPhrase[index]
         , targetPath, alignmentsFile);
 
@@ -1551,6 +1552,7 @@ bool StaticData::LoadDecodeGraphs()
       DecodeGraph *decodeGraph;
       if (m_searchAlgorithm == ChartDecoding) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
+	cerr << "max-chart-span: " << maxChartSpans[decodeGraphInd] << endl;
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
       } else {
         decodeGraph = new DecodeGraph(m_decodeGraphs.size());

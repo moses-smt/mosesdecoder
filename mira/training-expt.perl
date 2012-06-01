@@ -177,7 +177,7 @@ else {
 		$mixing_frequency = 1;
 	    }
 
-	    print "Warning: mixing frequency must not be larger than shard size, setting mixing frequency to $mixing_frequency\n";
+	    print STDERR "Warning: mixing frequency must not be larger than shard size, setting mixing frequency to $mixing_frequency\n";
 	}
     }
 
@@ -188,7 +188,7 @@ else {
 		$weight_dump_frequency = 1;
 	    }
 	    
-	    print "Warning: weight dump frequency must not be larger than shard size, setting weight dump frequency to $weight_dump_frequency\n";
+	    print STDERR "Warning: weight dump frequency must not be larger than shard size, setting weight dump frequency to $weight_dump_frequency\n";
 	}
     }
 
@@ -199,7 +199,7 @@ else {
 		$mixing_frequency = 1;
 	    }
 	    
-	    print "Warning: mixing frequency must not be larger than (shard size/batch size), setting mixing frequency to $mixing_frequency\n";
+	    print STDERR "Warning: mixing frequency must not be larger than (shard size/batch size), setting mixing frequency to $mixing_frequency\n";
 	}
     }
 
@@ -210,7 +210,7 @@ else {
 		$weight_dump_frequency = 1;
 	    }
 
-	    print "Warning: weight dump frequency must not be larger than (shard size/batch size), setting weight dump frequency to $weight_dump_frequency\n";
+	    print STDERR "Warning: weight dump frequency must not be larger than (shard size/batch size), setting weight dump frequency to $weight_dump_frequency\n";
 	}
     }
 }
@@ -315,7 +315,7 @@ else {
 close TRAIN;
 
 if (! $execute) {
-    print "Written train file: $train_script_file\n";
+    print STDERR "Written train file: $train_script_file\n";
     exit 0;
 }
 
@@ -336,7 +336,7 @@ my $train_iteration = -1;
 # optionally continue from a later epoch (if $continue_from_epoch > 0)
 if ($continue_from_epoch > 0) {
     $train_iteration = $continue_from_epoch - 1;
-    print "Continuing training from epoch $continue_from_epoch, with weights from ini file $moses_ini_file.\n";  
+    print STDERR "Continuing training from epoch $continue_from_epoch, with weights from ini file $moses_ini_file.\n";  
 }
 
 while(1) {
@@ -344,7 +344,7 @@ while(1) {
     $train_iteration += 1;   # starts at 0
     my $new_weight_file = "$working_dir/$weight_file_stem" . "_";
     if ($weight_dump_frequency == 0) {
-	print "No weights, no testing..\n";
+	print STDERR "No weights, no testing..\n";
 	exit(0);
     }
     
@@ -369,34 +369,48 @@ while(1) {
     
     my $expected_num_files = $epochs*$weight_dump_frequency;
     if ($wait_for_bleu) {
-	print "Expected number of BLEU files: $expected_num_files \n";
+	print STDERR "Expected number of BLEU files: $expected_num_files \n";
     }
     if (-e "$working_dir/stopping") {
 	wait_for_bleu($expected_num_files) if ($wait_for_bleu);
 	
-	print "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
+	print STDERR "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
         exit 0;
     }
     else {
-	print "Waiting for $new_weight_file\n";
+	print STDERR "Waiting for $new_weight_file\n";
 	if (!$skipTrain) {
 	    while ((! -e $new_weight_file) && &check_running($train_job_id)) {
 		sleep 10;
 	    }
 	}
 	if (! -e $new_weight_file ) {
-	    wait_for_bleu($expected_num_files) if ($wait_for_bleu);
-	    
-	    print "Training finished at " . scalar(localtime()) . "\n";
-	    exit 0;
+	    if (-e "$working_dir/stopping" or -e "$working_dir/finished") {
+		wait_for_bleu($expected_num_files) if ($wait_for_bleu);
+		
+		print STDERR "Training finished at " . scalar(localtime()) . "\n";
+		exit 0;
+	    }
+	    else {
+		# training finished with error
+		print STDERR "Error: training was aborted at " . scalar(localtime()) . "\n";
+                exit 1;
+	    }
 	}
     }
 
     #new weight file written. create test script and submit    
     my $suffix = "";
-    print "weight file exists? ".(-e $new_weight_file)."\n";
+    print STDERR "weight file exists? ".(-e $new_weight_file)."\n";
     if (!$skip_devtest) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "devtest", $devtest_ini_file, $devtest_input_file, $devtest_reference_files, $skip_submit_test);
+
+	my $regularized_weight_file = $new_weight_file."_reg";
+	if (-e $regularized_weight_file) {
+	    print STDERR "Submitting test script for regularized weights. \n"; 
+	    $epoch_slice .= "_reg";
+	    createTestScriptAndSubmit($epoch, $epoch_slice, $regularized_weight_file, $suffix, "devtest", $devtest_ini_file, $devtest_input_file, $devtest_reference_files, $skip_submit_test);	    
+	}
     }
     if (!$skip_dev) {
 	createTestScriptAndSubmit($epoch, $epoch_slice, $new_weight_file, $suffix, "dev", $moses_ini_file, $input_file, $reference_files, $skip_submit_test);
@@ -405,13 +419,14 @@ while(1) {
 
 sub wait_for_bleu() {
     my $expected_num_files = $_[0];
-    print "Waiting for $expected_num_files bleu files..\n";
+    print STDERR "Waiting for $expected_num_files bleu files..\n";
     my @bleu_files = glob("*.bleu");
     while (scalar(@bleu_files) < $expected_num_files) {
-	sleep 10;
+	sleep 30;
 	@bleu_files = glob("*.bleu");
+	#print STDERR "currently have ".(scalar(@bleu_files))."\n";
     }
-    print "$expected_num_files BLEU files completed, continue.\n"; 
+    print STDERR "$expected_num_files BLEU files completed, continue.\n"; 
 }
 
 sub createTestScriptAndSubmit {
@@ -525,8 +540,8 @@ sub createTestScriptAndSubmit {
     }
     close WEIGHTS;
     
-    print "Number of core weights read: ".$readCoreWeights."\n";
-    print "Number of extra weights read: ".$readExtraWeights."\n";
+    print STDERR "Number of core weights read: ".$readCoreWeights."\n";
+    print STDERR "Number of extra weights read: ".$readExtraWeights."\n";
     
     # If there is a core weight file, we have to load the core weights from that file (NOTE: this is not necessary if the core weights are also printed to the weights file)
 #    if (defined $core_weight_file) {
@@ -696,7 +711,7 @@ sub createTestScriptAndSubmit {
     if(!$skip_submit) {
 	if ($have_sge) {
 	    if ($extra_memory_devtest) {
-		print "Extra memory for test job: $extra_memory_devtest \n";
+		print STDERR "Extra memory for test job: $extra_memory_devtest \n";
 		&submit_job_sge_extra_memory($test_script_file,$extra_memory_devtest);
 	    }
 	    else {
@@ -768,13 +783,13 @@ sub check_exists_noThrow {
 sub submit_job_sge {
     my($script_file) = @_;
     my $qsub_result = `qsub -P $queue $script_file`;
-    print "SUBMIT CMD: qsub -P $queue $script_file\n";
+    print STDERR "SUBMIT CMD: qsub -P $queue $script_file\n";
     if ($qsub_result !~ /Your job (\d+)/) {
-        print "Failed to qsub job: $qsub_result\n";
+        print STDERR "Failed to qsub job: $qsub_result\n";
         return 0;
     }
     my $job_name = basename($script_file);
-    print "Submitted job: $job_name  id: $1  " .
+    print STDERR "Submitted job: $job_name  id: $1  " .
         scalar(localtime()) . "\n";
     return $1;
 }
@@ -782,13 +797,13 @@ sub submit_job_sge {
 sub submit_job_sge_extra_memory {
     my($script_file,$extra_memory) = @_;
     my $qsub_result = `qsub -pe $extra_memory -P $queue $script_file`;                                                                                
-    print "SUBMIT CMD: qsub -pe $extra_memory -P $queue $script_file \n";
+    print STDERR "SUBMIT CMD: qsub -pe $extra_memory -P $queue $script_file \n";
     if ($qsub_result !~ /Your job (\d+)/) {
-        print "Failed to qsub job: $qsub_result\n";
+        print STDERR "Failed to qsub job: $qsub_result\n";
         return 0;
     }
     my $job_name = basename($script_file);
-    print "Submitted job: $job_name  id: $1  " .
+    print STDERR "Submitted job: $job_name  id: $1  " .
         scalar(localtime()) . "\n";
     return $1;
 }
@@ -802,10 +817,10 @@ sub submit_job_no_sge {
   my $pid = undef;
   if ($pid = fork) {
     my $job_name = basename($script_file);
-    print "Launched : $job_name  pid: $pid  " .  scalar(localtime()) . "\n";
+    print STDERR "Launched : $job_name  pid: $pid  " .  scalar(localtime()) . "\n";
     return $pid;
   } elsif (defined $pid) { 
-      print "Executing script $script_file, writing to $out and $err.\n";
+      print STDERR "Executing script $script_file, writing to $out and $err.\n";
       `cd $working_dir; sh $script_file 1>$out 2> $err`;
     exit;
   } else {

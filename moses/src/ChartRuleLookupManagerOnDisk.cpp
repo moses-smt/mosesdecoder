@@ -41,7 +41,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const WordPenaltyProducer *wpProducer,
   const std::vector<FactorType> &inputFactorsVec,
   const std::vector<FactorType> &outputFactorsVec,
-  const std::vector<float> &weight,
   const std::string &filePath)
   : ChartRuleLookupManager(sentence, cellColl)
   , m_dictionary(dictionary)
@@ -50,7 +49,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_wpProducer(wpProducer)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
-  , m_weight(weight)
   , m_filePath(filePath)
 {
   CHECK(m_expandableDottedRuleListVec.size() == 0);
@@ -241,12 +239,11 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
 
-            std::vector<float> weightT = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights();
+            std::vector<float> weightT = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights(m_dictionary.GetDictIndex());
             targetPhraseCollection
             = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
                                                ,m_outputFactorsVec
                                                ,m_dictionary
-                                               //, m_weight
                                                ,weightT
                                                ,m_wpProducer
                                                ,*m_languageModels

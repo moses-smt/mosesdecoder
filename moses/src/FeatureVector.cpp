@@ -156,29 +156,29 @@ namespace Moses {
       }
     }
 	
-	void FVector::clear() {
-	  m_coreFeatures.resize(0);
-	  m_features.clear();
-	}
+  void FVector::clear() {
+    m_coreFeatures.resize(0);
+    m_features.clear();
+  }
 	
-	bool FVector::load(const std::string& filename) {
+  bool FVector::load(const std::string& filename) {
     clear();
-		ifstream in (filename.c_str());
-		if (!in) {
+    ifstream in (filename.c_str());
+    if (!in) {
       return false;
-		}
-		string line;
-		while(getline(in,line)) {
-			if (line[0] == '#') continue;
-			istringstream linestream(line);
-			string namestring;
-			FValue value;
-			linestream >> namestring;
-			linestream >> value;
-			FName fname(namestring);
-			cerr << "Setting sparse weight " << fname << " to value " << value << "." << endl;
-			set(fname,value);
-		}
+    }
+    string line;
+    while(getline(in,line)) {
+      if (line[0] == '#') continue;
+      istringstream linestream(line);
+      string namestring;
+      FValue value;
+      linestream >> namestring;
+      linestream >> value;
+      FName fname(namestring);
+      //cerr << "Setting sparse weight " << fname << " to value " << value << "." << endl;
+      set(fname,value);
+    }
     return true;
   }
 
@@ -416,34 +416,38 @@ namespace Moses {
   void FVector::updateConfidenceCounts(const FVector& weightUpdate, bool signedCounts) {
     for (size_t i = 0; i < weightUpdate.m_coreFeatures.size(); ++i) {
       if (signedCounts) {
-	int sign = weightUpdate.m_coreFeatures[i] >= 0 ? 1 : -1;
-	m_coreFeatures[i] += (weightUpdate.m_coreFeatures[i] * weightUpdate.m_coreFeatures[i]) * sign;
+	//int sign = weightUpdate.m_coreFeatures[i] >= 0 ? 1 : -1;
+	//m_coreFeatures[i] += (weightUpdate.m_coreFeatures[i] * weightUpdate.m_coreFeatures[i]) * sign;
+	m_coreFeatures[i] += weightUpdate.m_coreFeatures[i];
       }
       else
-	m_coreFeatures[i] += (weightUpdate.m_coreFeatures[i] * weightUpdate.m_coreFeatures[i]);
+	//m_coreFeatures[i] += (weightUpdate.m_coreFeatures[i] * weightUpdate.m_coreFeatures[i]);
+	m_coreFeatures[i] += abs(weightUpdate.m_coreFeatures[i]);
     }
     
     for (const_iterator i = weightUpdate.cbegin(); i != weightUpdate.cend(); ++i) {
       if (weightUpdate[i->first] == 0)
 	continue;
-      float value = get(i->first);
+      float value = get(i->first);	  
       if (signedCounts) {
-	int sign = weightUpdate[i->first] >= 0 ? 1 : -1;
-	value += (weightUpdate[i->first] * weightUpdate[i->first]) * sign;
+	//int sign = weightUpdate[i->first] >= 0 ? 1 : -1;
+	//value += (weightUpdate[i->first] * weightUpdate[i->first]) * sign;
+	value += weightUpdate[i->first];
       }
       else 
-	value += (weightUpdate[i->first] * weightUpdate[i->first]);
+	//value += (weightUpdate[i->first] * weightUpdate[i->first]);
+	value += abs(weightUpdate[i->first]);
       set(i->first, value);
     }
   }
 
-  void FVector::updateLearningRates(float decay, const FVector &confidenceCounts, float core_r0, float sparse_r0) {
+  void FVector::updateLearningRates(float decay_core, float decay_sparse, const FVector &confidenceCounts, float core_r0, float sparse_r0) {
     for (size_t i = 0; i < confidenceCounts.m_coreFeatures.size(); ++i) {
-      m_coreFeatures[i] = 1.0/(1.0/core_r0 + decay * abs(confidenceCounts.m_coreFeatures[i]));     
+      m_coreFeatures[i] = 1.0/(1.0/core_r0 + decay_core * abs(confidenceCounts.m_coreFeatures[i]));     
     }
 
     for (const_iterator i = confidenceCounts.cbegin(); i != confidenceCounts.cend(); ++i) {
-      float value = 1.0/(1.0/sparse_r0 + decay * abs(i->second));
+      float value = 1.0/(1.0/sparse_r0 + decay_sparse * abs(i->second));
       set(i->first, value);
     }
   }
@@ -612,8 +616,8 @@ namespace Moses {
     return norm;
   }
 
-  void FVector::l1regularize(float lambda) {
-    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+  size_t FVector::sparseL1regularize(float lambda) {
+    /*for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       float value = m_coreFeatures[i];
       if (value > 0) {
         m_coreFeatures[i] = max(0.0f, value - lambda);
@@ -621,23 +625,39 @@ namespace Moses {
       else {
         m_coreFeatures[i] = min(0.0f, value + lambda);
       }
-    }
+      }*/
 
+    size_t numberPruned = size();
+    vector<FName> toErase;
     for (iterator i = begin(); i != end(); ++i) {
       float value = i->second;
-      if (value > 0) {
-        i->second = max(0.0f, value - lambda);
-      }
-      else {
-        i->second = min(0.0f, value + lambda);
+      if (value != 0.0f) {
+	if (value > 0) 
+	  value = max(0.0f, value - lambda);
+	else 
+	  value = min(0.0f, value + lambda);
+	
+	if (value != 0.0f) 
+	  i->second = value;
+	else {
+	  toErase.push_back(i->first);
+	  const std::string& fname = (i->first).name();
+	  FName::eraseId(FName::getId(fname));
+	}
       }
     }
+    
+    // erase features that have become zero
+    for (size_t i = 0; i < toErase.size(); ++i)
+      m_features.erase(toErase[i]);
+    numberPruned -= size();
+    return numberPruned;
   }
 
-  void FVector::l2regularize(float lambda)  {
-    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+  void FVector::sparseL2regularize(float lambda)  {
+    /*for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       m_coreFeatures[i] *= (1 - lambda);
-    }
+      }*/
 
     for (iterator i = begin(); i != end(); ++i) {
       i->second *= (1 - lambda);            

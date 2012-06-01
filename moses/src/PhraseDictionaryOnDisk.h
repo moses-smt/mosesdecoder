@@ -45,7 +45,6 @@ protected:
   const LMList* m_languageModels;
   const WordPenaltyProducer* m_wpProducer;
   std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
-  std::vector<float> m_weight;
   std::string m_filePath;
 
   void LoadTargetLookup();
@@ -63,7 +62,7 @@ public:
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
             , const std::string &filePath
-            , const std::vector<float> &weight
+	    , const std::vector<float> &weight
             , size_t tableLimit,
             const LMList& languageModels,
             const WordPenaltyProducer* wpProducer);

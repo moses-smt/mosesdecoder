@@ -123,7 +123,7 @@ public:
     FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
     										int featureID,
     										ScoreComponentCollection* accumulator) const;
-
+    bool Enabled() const { return m_enabled; }
     float CalculateBleu(BleuScoreState*) const;
     float CalculateBleu(Phrase translation) const;
     const FFState* EmptyHypothesisState(const InputType&) const;

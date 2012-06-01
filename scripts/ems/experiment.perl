@@ -1552,7 +1552,7 @@ sub define_tuning_tune {
     
     # the last 3 variables are only used for mira tuning 
     my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest) = &get_output_and_input($step_id); 
-    
+
     my $use_mira = &backoff_and_get("TUNING:use-mira");
     my $cmd = "";
     if ($use_mira && $use_mira eq "true") {
@@ -1564,7 +1564,9 @@ sub define_tuning_tune {
 	$mira_config .= "cfg";
 	
        	write_mira_config($mira_config,$experiment_dir,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest);
-	$cmd = "$tuning_script -config $mira_config -exec >& $mira_config_log";
+	#$cmd = "$tuning_script -config $mira_config -exec >& $mira_config_log";
+	# we want error messages in top-level log file
+	$cmd = "$tuning_script -config $mira_config -exec ";
 
 	# write script to select the best set of weights after training for the specified number of epochs --> 
 	# cp to tuning/tmp.?/moses.ini
@@ -1611,70 +1613,21 @@ sub define_tuning_tune {
 }
 
 sub write_mira_config {
-    my ($config_filename,$expt_dir,$tune_filtered_ini,$input,$reference,$devtest_filtered_ini,$input_devtest,$reference_devtest) = @_;
-    
+    my ($config_filename,$expt_dir,$tune_filtered_ini,$input,$reference,$devtest_filtered_ini,$input_devtest,$reference_devtest) = @_;  
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
-    my $core_weights = &backoff_and_get("TUNING:core-weight-config");
     my $start_weights = &backoff_and_get("TUNING:start-weight-config");
     my $tuning_settings = &check_and_get("TUNING:tuning-settings");
     my @settings = split(/ /, $tuning_settings);
     my $mira_tuning_settings = &check_and_get("TUNING:mira-tuning-settings");
 
-    # convert core weights into format expected by mira
-    my $core_file = "$expt_dir/core_weights";
-    my $start_file = "$expt_dir/start_weights";
-    if ($core_weights or $start_weights) {
-	open INI, $core_weights if $core_weights;
-	open INI, $start_weights if $start_weights;
-	#print STDERR "Reading core weights from file $core_weights \n";
-	open CORE_OR_START, ">$core_file" if $core_weights;
-	open CORE_OR_START, ">$start_file" if $start_weights;
-	while(<INI>) {
-	    if (/weight-l/) {
-		my @lm_weights; 
-		while (<INI>) {
-		    last if $_ eq "\n";
-		    push(@lm_weights, $_);
-		}
-		
-		print CORE_OR_START "LM ".$lm_weights[0];
-		for my $i (1 .. $#lm_weights) {
-		    print CORE_OR_START "LM:".($i+1)." ".$lm_weights[$i];
-		}
-		
-	    } elsif (/weight-t/) {
-		my @pm_weights; 
-		while (<INI>) {
-		    last if $_ eq "\n";
-		    push(@pm_weights, $_);
-		}
-		for my $i (0 .. $#pm_weights) {
-		    print CORE_OR_START "PhraseModel_".($i+1)." ".$pm_weights[$i];
-		}
-	    } elsif (/weight-d/) {
-		my @d_weights; 
-		while (<INI>) {
-		    last if $_ eq "\n";
-		    push(@d_weights, $_);
-		}
-		for my $i (0 .. $#d_weights) {
-		    if ($i == 0) {
-			print CORE_OR_START "Distortion ".$d_weights[0];
-		    }
-		    else {
-			print CORE_OR_START "LexicalReordering_wbe-msd-bidirectional-fe-allff_".($i+1)." ".$d_weights[$i];
-		    }
-		}
-		
-	    } elsif (/weight-w/) {
-		my $w = <INI>;
-		print CORE_OR_START "WordPenalty ".$w;
-	    } 
-	}
-	close INI;
-	close CORE_OR_START;
-    }
+    $tune_filtered_ini =~ /.*\/([A-Za-z0-9\.\-\_]*)$/;
+    my $tune_filtered_ini_start = $1;
+    $tune_filtered_ini_start =  $expt_dir."/".$tune_filtered_ini_start.".start";
+    if ($start_weights) {
+	# apply start weights to filtered ini file, and pass the new ini to mira
+        system("$Bin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start");
+    } 
     
     # mira config file
     open(CFG, ">$config_filename");
@@ -1686,27 +1639,21 @@ sub write_mira_config {
     print CFG "working-dir=".$expt_dir."\n";
     print CFG "wait-for-bleu=1 \n";
     print CFG "decoder-settings=".$tuning_decoder_settings."\n\n";   
-
-    if ($core_weights) {
-	print CFG "[core] \n"; 
-	print CFG "weightfile=".$core_file."\n\n";
-    }
-    if ($start_weights) {
-        print CFG "[start] \n";
-        print CFG "weightfile=".$start_file."\n\n";
-    }
-
     print CFG "[train] \n";
     print CFG "trainer=\${moses-home}/dist/bin/mira \n";
     print CFG "input-file=".$input."\n";
     print CFG "reference-files=".$reference."\n";
-    print CFG "moses-ini-file=".$tune_filtered_ini."\n";
+    if ($start_weights) {
+	print CFG "moses-ini-file=".$tune_filtered_ini_start."\n";
+    }
+    else {
+	print CFG "moses-ini-file=".$tune_filtered_ini."\n";
+    }
     print CFG "hours=48 \n"; 
     foreach my $setting (@settings) {
 	print CFG $setting."\n";
     }
-    print CFG "extra-args=".$mira_tuning_settings."\n\n";
-    
+    print CFG "extra-args=".$mira_tuning_settings."\n\n";   
     print CFG "[devtest] \n";
     if (&get("TRAINING:hierarchical-rule-set")) {
 	print CFG "moses=\${moses-home}/dist/bin/moses_chart \n";

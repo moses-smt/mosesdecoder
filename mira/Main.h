@@ -44,7 +44,7 @@ struct RandomIndex {
 
 //void OutputNBestList(const MosesChart::TrellisPathList &nBestList, const TranslationSystem* system, long translationId);
 bool loadSentences(const std::string& filename, std::vector<std::string>& sentences);
-bool loadCoreWeights(const std::string& filename, ProducerWeightMap& coreWeightMap, const std::vector<const Moses::ScoreProducer*> &featureFunctions);
+//bool loadCoreWeights(const std::string& filename, ProducerWeightMap& coreWeightMap, const std::vector<const Moses::ScoreProducer*> &featureFunctions);
 bool evaluateModulo(size_t shard_position, size_t mix_or_dump_base, size_t actual_batch_size);
 void printFeatureValues(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues);
 void ignoreCoreFeatures(std::vector<std::vector<Moses::ScoreComponentCollection> > &featureValues, ProducerWeightMap &coreWeightMap);

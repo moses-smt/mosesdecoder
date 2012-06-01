@@ -46,6 +46,11 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
   return GetTargetPhraseCollection(src.GetSubString(range));
 }
 
+size_t PhraseDictionary::GetDictIndex() const 
+{ 
+  return m_feature->GetDictIndex(); 
+}
+
 PhraseDictionaryFeature::PhraseDictionaryFeature
 (PhraseTableImplementation implementation
  , SparsePhraseDictionaryFeature* spdf
@@ -55,13 +60,14 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
  , const std::vector<FactorType> &output
  , const std::string &filePath
  , const std::vector<float> &weight
+ , size_t dictIndex
  , size_t tableLimit
  , const std::string &targetFile  // default param
  , const std::string &alignmentsFile) // default param
   :DecodeFeature("PhraseModel",numScoreComponent,input,output),
   m_numInputScores(numInputScores),
   m_filePath(filePath),
-  m_weight(weight),
+  m_dictIndex(dictIndex),
   m_tableLimit(tableLimit),
   m_implementation(implementation),
   m_targetFile(targetFile),
@@ -70,6 +76,10 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 {
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray) {
     m_useThreadSafePhraseDictionary = true;
+    if (implementation == SuffixArray) {
+      cerr << "Warning: implementation holds chached weights!" << endl;
+      exit(1);
+    }
   } else {
     m_useThreadSafePhraseDictionary = false;
   }
@@ -78,7 +88,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
 {
   const StaticData& staticData = StaticData::Instance();
-  std::vector<float> weightT = system->GetTranslationWeights();
+  std::vector<float> weightT = system->GetTranslationWeights(m_dictIndex);
   
   if (m_implementation == Memory) {
     // memory phrase table
@@ -95,7 +105,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(GetNumScoreComponents(),this);
     bool ret = pdm->Load(GetInput(), GetOutput()
                          , m_filePath
-                         //, m_weight
                          , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
@@ -107,7 +116,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdta->Load(                    GetInput()
                , GetOutput()
                , m_filePath
-               //, m_weight
                , weightT
                , m_tableLimit
                , system->GetLanguageModels()
@@ -126,8 +134,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         // m_weight
-                         , weightT
+			 , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
@@ -145,7 +152,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         //, m_weight
                          , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
@@ -154,6 +160,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     return pdm;
   } else if (m_implementation == ALSuffixArray) {
     // memory phrase table
+    cerr << "Warning: Implementation holds cached weights!" << endl;
+    exit(1);
     VERBOSE(2,"using Hiero format phrase tables" << std::endl);
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
@@ -164,9 +172,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         //, m_weight
-                         , weightT
-                         , m_tableLimit
+			 , weightT
+			 , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
     CHECK(ret);
@@ -177,14 +184,15 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     bool ret = pdta->Load(GetInput()
                           , GetOutput()
                           , m_filePath
-                          //, m_weight
-                          , weightT
-                          , m_tableLimit
+			  , weightT
+			  , m_tableLimit
                           , system->GetLanguageModels()
                           , system->GetWordPenaltyProducer());
     CHECK(ret);
     return pdta;
   } else if (m_implementation == SuffixArray) {
+    cerr << "Warning: Implementation holds cached weights!" << endl;
+    exit(1);
 #ifndef WIN32
     PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(GetNumScoreComponents(), this);
     if(!(pd->Load(
@@ -192,11 +200,10 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
            ,GetOutput()
            ,m_filePath
            ,m_targetFile
-           , m_alignmentsFile
-           //, m_weight, m_tableLimit
-           , weightT, m_tableLimit
-           , system->GetLanguageModels()
-           , system->GetWeightWordPenalty()))) {
+           ,m_alignmentsFile
+           ,weightT, m_tableLimit
+           ,system->GetLanguageModels()
+	   ,system->GetWeightWordPenalty()))) {
       std::cerr << "FAILED TO LOAD\n" << endl;
       delete pd;
       pd = NULL;
@@ -295,6 +302,11 @@ bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const
 const PhraseDictionaryFeature* PhraseDictionary::GetFeature() const
 {
   return m_feature;
+}
+
+size_t PhraseDictionaryFeature::GetDictIndex() const 
+{
+  return m_dictIndex;
 }
 
 }

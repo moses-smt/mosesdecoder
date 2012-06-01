@@ -25,7 +25,6 @@ using namespace std;
 namespace Mira {
 
 size_t Perceptron::updateWeightsHopeFear(
-		ScoreComponentCollection& currWeights,
 		ScoreComponentCollection& weightUpdate,
 		const vector< vector<ScoreComponentCollection> >& featureValuesHope,
 		const vector< vector<ScoreComponentCollection> >& featureValuesFear,

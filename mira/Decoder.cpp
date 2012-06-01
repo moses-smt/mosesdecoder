@@ -176,7 +176,8 @@ namespace Mira {
     		cerr << endl;  	
     	cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << path.GetTargetPhrase() << "\", score: " 
     		 << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
-    	cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
+	if (m_bleuScoreFeature->Enabled() && realBleu)
+	  cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);
@@ -239,7 +240,8 @@ namespace Mira {
     	  cerr << endl;
     	cerr << "Rank " << rank << ", epoch " << epoch << ", \"" << path.GetOutputPhrase() << "\", score: " 
     		 << scoreWithoutBleu << ", Bleu: " << bleuScore << ", total: " << path.GetTotalScore();
-    	cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
+	if (m_bleuScoreFeature->Enabled() && realBleu)
+	  cerr << " (d-bleu: " << dynBleuScore << ", r-bleu: " << realBleuScore << ") ";
 
     	// set bleu score to zero in the feature vector since we do not want to optimise its weight
     	setBleuScore(featureValues.back(), 0);

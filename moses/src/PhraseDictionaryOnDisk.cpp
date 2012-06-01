@@ -39,7 +39,7 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
                                   , const std::vector<FactorType> &output
                                   , const std::string &filePath
-                                  , const std::vector<float> &weight
+				  , const std::vector<float> &weight
                                   , size_t tableLimit
                                   , const LMList& languageModels
                                   , const WordPenaltyProducer* wpProducer)
@@ -50,8 +50,6 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
   m_tableLimit = tableLimit;
   m_inputFactorsVec		= input;
   m_outputFactorsVec	= output;
-
-  m_weight = weight;
 
   LoadTargetLookup();
 
@@ -94,13 +92,11 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const InputType &sentence,
   const ChartCellCollection &cellCollection)
 {
-  std::vector<float> weightT = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights();
+  std::vector<float> weightT = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights(GetDictIndex());
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
                                           m_dbWrapper, m_languageModels,
                                           m_wpProducer, m_inputFactorsVec,
-                                          //m_outputFactorsVec, m_weight,
-                                          m_outputFactorsVec, weightT,
-                                          m_filePath);
+                                          m_outputFactorsVec, m_filePath);
 }
 
 }

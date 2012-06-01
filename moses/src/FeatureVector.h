@@ -192,8 +192,8 @@ namespace Moses {
     FValue l1norm_coreFeatures() const;
     FValue l2norm() const;
     FValue linfnorm() const;
-    void l1regularize(float lambda);
-    void l2regularize(float lambda);
+    size_t sparseL1regularize(float lambda);
+    void sparseL2regularize(float lambda);
     FValue sum() const;
     
     /** pretty printing */
@@ -218,7 +218,7 @@ namespace Moses {
     size_t pruneSparseFeatures(size_t threshold);
     size_t pruneZeroWeightFeatures();
     void updateConfidenceCounts(const FVector& weightUpdate, bool signedCounts);
-    void updateLearningRates(float decay, const FVector& confidence_counts, float core_r0, float sparse_r0);
+    void updateLearningRates(float decay_core, float decay_sparse, const FVector& confidence_counts, float core_r0, float sparse_r0);
     
     // vector which, for each element of the original vector, reflects whether an element is zero or non-zero
     void setToBinaryOf(const FVector& rhs);

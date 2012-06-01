@@ -234,25 +234,29 @@ public:
     m_scores[fname] += score;
   }
 
-	void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
-	{
+  void Assign(const ScoreProducer* sp, const std::vector<float>& scores)
+  {
     IndexPair indexes = GetIndexes(sp);
     CHECK(scores.size() == indexes.second - indexes.first);
     for (size_t i = 0; i < scores.size(); ++i) {
       m_scores[i + indexes.first] = scores[i];
     }
-	}
-
-	//! Special version Assign(ScoreProducer, vector<float>)
-	//! to add the score from a single ScoreProducer that produces
-	//! a single value
-	void Assign(const ScoreProducer* sp, float score)
-	{
+  }
+  
+  //! Special version Assign(ScoreProducer, vector<float>)
+  //! to add the score from a single ScoreProducer that produces
+  //! a single value
+  void Assign(const ScoreProducer* sp, float score)
+  {
     IndexPair indexes = GetIndexes(sp);
     CHECK(1 == indexes.second - indexes.first);
     m_scores[indexes.first] = score;
-	}
-
+  }
+  
+  // Assign core weight by index
+  void Assign(size_t index, float score) {
+    m_scores[index] = score;
+  }
 
   //For features which have an unbounded number of components
   void Assign(const ScoreProducer*sp, const std::string name, float score)
@@ -367,8 +371,8 @@ public:
   float GetL1Norm() const;
   float GetL2Norm() const;
   float GetLInfNorm() const;
-  void L1Regularize(float lambda);
-  void L2Regularize(float lambda);
+  size_t SparseL1Regularize(float lambda);
+  void SparseL2Regularize(float lambda);
   void Save(const std::string& filename) const;
   void Save(std::ostream&) const;
   
@@ -381,7 +385,7 @@ public:
   size_t PruneSparseFeatures(size_t threshold) { return m_scores.pruneSparseFeatures(threshold); }
   size_t PruneZeroWeightFeatures() { return m_scores.pruneZeroWeightFeatures(); }
   void UpdateConfidenceCounts(ScoreComponentCollection &weightUpdate, bool signedCounts) { m_scores.updateConfidenceCounts(weightUpdate.m_scores, signedCounts); }
-  void UpdateLearningRates(float decay, ScoreComponentCollection &confidenceCounts, float core_r0, float sparse_r0) { m_scores.updateLearningRates(decay, confidenceCounts.m_scores, core_r0, sparse_r0); }
+  void UpdateLearningRates(float decay_core, float decay_sparse, ScoreComponentCollection &confidenceCounts, float core_r0, float sparse_r0) { m_scores.updateLearningRates(decay_core, decay_sparse, confidenceCounts.m_scores, core_r0, sparse_r0); }
 
 #ifdef MPI_ENABLE
   public:

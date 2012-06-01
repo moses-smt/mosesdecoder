@@ -5,7 +5,7 @@ use Frontier::Client;
 my $output_suffix = $ARGV[0];
 $output_suffix = "" if (not $output_suffix);
 
-my $port = "50007";
+my $port = "50015";
 my $url = "http://localhost:".$port."/RPC2";
 my $server = Frontier::Client->new('url' => $url, 'encoding' => 'UTF-8');
 my $verbose=0;

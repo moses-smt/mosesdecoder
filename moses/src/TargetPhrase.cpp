@@ -142,12 +142,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
   CHECK(weightT.size() == scoreVector.size());
   // calc average score if non-best
 
-  const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-  std::vector<float> weightsT = system.GetTranslationWeights();
-  weightWP = system.GetWeightWordPenalty();
-  
-  //m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
-  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightsT.begin(), 0.0f);
+  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
   m_scoreBreakdown.PlusEquals(sparseScoreVector);
 
@@ -197,15 +192,10 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
                                  ,const LMList &languageModels
                                  ,const WordPenaltyProducer* wpProducer)
 {
-
   CHECK(weightT.size() == scoreVector.size());
-
-  const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-  std::vector<float> weightsT = system.GetTranslationWeights();
   
   // calc average score if non-best
-  //m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
-  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightsT.begin(), 0.0f);
+  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
@@ -269,11 +259,7 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
      addition to the usual phrase translation scaling factors) the input
      weight factor as last element
   */
-  
-  const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-  std::vector<float> weightsT = system.GetTranslationWeights();
-  //m_transScore = m_scoreBreakdown.PartialInnerProduct(translationScoreProducer, weightT);
-  m_transScore = m_scoreBreakdown.PartialInnerProduct(translationScoreProducer, weightsT);
+  m_transScore = m_scoreBreakdown.PartialInnerProduct(translationScoreProducer, weightT);
 }
 
 void TargetPhrase::ResetScore()
