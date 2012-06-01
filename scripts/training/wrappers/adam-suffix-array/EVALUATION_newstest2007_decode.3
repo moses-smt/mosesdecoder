@@ -1,0 +1,11 @@
+#!/bin/bash
+
+PATH="/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/opt/local/bin:/opt/local/sbin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/bin:/usr/X11/bin:/usr/texbin"
+cd /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en
+echo 'starting at '`date`' on '`hostname`
+mkdir -p /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/evaluation
+
+/Users/hieuhoang/workspace/bin/current/dist/bin/moses_chart -threads 2 -cube-pruning-pop-limit 100 -s 30 -T /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/evaluation/newstest2007.output.3.trace -v 0 -f /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/evaluation/newstest2007.filtered.ini.3 < /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/evaluation/newstest2007.input.lc.3 > /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/evaluation/newstest2007.output.3
+
+echo 'finished at '`date`
+touch /Users/hieuhoang/unison/workspace/data/europarl/exp/fr-en/steps/3/EVALUATION_newstest2007_decode.3.DONE
