@@ -4,6 +4,7 @@ use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($Bin);
 use File::Spec::Functions;
+use File::Spec::Unix;
 use File::Basename;
 
 # Train Factored Phrase Model
@@ -146,6 +147,25 @@ if (defined($IGNORE)) {
   print STDERR "WARNING: Do not specify -bin-dir or -scripts-root-dir anymore. These variable are ignored and will be deleted soon";
 }
 
+# convert all paths to absolute paths
+$_ROOT_DIR = File::Spec->rel2abs($_ROOT_DIR) if defined($_ROOT_DIR);
+$_EXTERNAL_BINDIR = File::Spec->rel2abs($_EXTERNAL_BINDIR) if defined($_EXTERNAL_BINDIR);
+$_CORPUS_DIR = File::Spec->rel2abs($_CORPUS_DIR) if defined($_CORPUS_DIR);
+$_CORPUS = File::Spec->rel2abs($_CORPUS) if defined($_CORPUS);
+$_LEXICAL_FILE = File::Spec->rel2abs($_LEXICAL_FILE) if defined($_LEXICAL_FILE);
+$_MODEL_DIR = File::Spec->rel2abs($_MODEL_DIR) if defined($_MODEL_DIR);
+$_TEMP_DIR = File::Spec->rel2abs($_TEMP_DIR) if defined($_TEMP_DIR);
+$_ALIGNMENT_FILE = File::Spec->rel2abs($_ALIGNMENT_FILE) if defined($_ALIGNMENT_FILE);
+$_ALIGNMENT_STEM = File::Spec->rel2abs($_ALIGNMENT_STEM) if defined($_ALIGNMENT_STEM);
+$_GLUE_GRAMMAR_FILE = File::Spec->rel2abs($_GLUE_GRAMMAR_FILE) if defined($_GLUE_GRAMMAR_FILE);
+$_UNKNOWN_WORD_LABEL_FILE = File::Spec->rel2abs($_UNKNOWN_WORD_LABEL_FILE) if defined($_UNKNOWN_WORD_LABEL_FILE);
+$_EXTRACT_FILE = File::Spec->rel2abs($_EXTRACT_FILE) if defined($_EXTRACT_FILE);
+@_PHRASE_TABLE = File::Spec->rel2abs(@_PHRASE_TABLE) if ($#_PHRASE_TABLE > 0);
+@_REORDERING_TABLE = File::Spec->rel2abs(@_REORDERING_TABLE) if ($#_REORDERING_TABLE > 0);
+@_GENERATION_TABLE = File::Spec->rel2abs(@_GENERATION_TABLE) if ($#_GENERATION_TABLE > 0);
+$_GIZA_E2F = File::Spec->rel2abs($_GIZA_E2F) if defined($_GIZA_E2F);
+$_GIZA_F2E = File::Spec->rel2abs($_GIZA_F2E) if defined($_GIZA_F2E);
+
 $_HIERARCHICAL = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 $_XML = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
@@ -187,38 +207,39 @@ foreach my $step (@step_conf) {
 }
 
 
-
 # supporting binaries from other packages
+my $MKCLS = "$_EXTERNAL_BINDIR/mkcls";
 my $MGIZA_MERGE_ALIGN = "$_EXTERNAL_BINDIR/merge_alignment.py";
 my $GIZA;
 my $SNT2COOC;
 
-if(!defined $_MGIZA ){
-	$GIZA = "$_EXTERNAL_BINDIR/GIZA++";
-	if (-x "$_EXTERNAL_BINDIR/snt2cooc.out") {
-  	$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc.out";
-	} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same   
-		$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
+if ($STEPS[1] || $STEPS[2])
+{	
+	if(!defined $_MGIZA ){
+		$GIZA = "$_EXTERNAL_BINDIR/GIZA++";
+		if (-x "$_EXTERNAL_BINDIR/snt2cooc.out") {
+			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc.out";
+		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same   
+			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
+		}
+		print STDERR "Using single-thread GIZA\n";
+	} else {
+		$GIZA = "$_EXTERNAL_BINDIR/mgiza";
+		if (-x "$_EXTERNAL_BINDIR/snt2cooc") {
+			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
+		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $_EXTERNAL_BINDIR
+			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc.out";
+		}
+		print STDERR "Using multi-thread GIZA\n";	
+		if (!defined($_MGIZA_CPUS)) {
+			$_MGIZA_CPUS=4;
+		}
+		die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
 	}
-	print STDERR "Using single-thread GIZA\n";
-} else {
-  $GIZA = "$_EXTERNAL_BINDIR/mgiza";
-	if (-x "$_EXTERNAL_BINDIR/snt2cooc") {
-  	$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
-  } elsif (-x "$_EXTERNAL_BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $_EXTERNAL_BINDIR
-    $SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc.out";
-  }
-	print STDERR "Using multi-thread GIZA\n";	
-  if (!defined($_MGIZA_CPUS)) {
-  	$_MGIZA_CPUS=4;
-  }
-  die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
+	
+	# override
+	$SNT2COOC = "$_EXTERNAL_BINDIR/$_SNT2COOC" if defined($_SNT2COOC);	
 }
-
-# override
-$SNT2COOC = "$_EXTERNAL_BINDIR/$_SNT2COOC" if defined($_SNT2COOC);
-
-my $MKCLS = "$_EXTERNAL_BINDIR/mkcls";
 
 # parallel extract
 my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
