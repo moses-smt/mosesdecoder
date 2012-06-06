@@ -334,7 +334,7 @@ build-biconcor
 	error: usage
 build-suffix-array
 	in: word-alignment corpus
-	out: suffix-array-model
+	out: phrase-translation-table
 	default-name: model/suffix-array
 	ignore-unless: suffix-array
 	error: usage
@@ -396,7 +396,7 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 create-config
-	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm suffix-array-model
+	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
