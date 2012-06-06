@@ -13,6 +13,8 @@
 #include "tables-core.h"
 #include "score.h"
 
+#include <cstdlib>
+
 using namespace std;
 
 extern Vocabulary vcbT;
@@ -111,6 +113,9 @@ void PhraseAlignment::create( char line[], int lineID )
     }
     else if (item == 5) { // non-term lengths
       addNTLength(token[j]);
+    } else if (item == 6) { // target syntax PCFG score
+      float pcfgScore = std::atof(token[j].c_str());
+      pcfgSum = pcfgScore * count;
     }
   }
 
@@ -119,7 +124,7 @@ void PhraseAlignment::create( char line[], int lineID )
   if (item == 3) {
     count = 1.0;
   }
-  if (item < 3 || item > 5) {
+  if (item < 3 || item > 6) {
     cerr << "ERROR: faulty line " << lineID << ": " << line << endl;
   }
 }

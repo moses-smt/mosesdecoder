@@ -30,6 +30,7 @@ namespace GHKM {
 ScfgRule::ScfgRule(const Subgraph &fragment)
     : m_sourceLHS("X", NonTerminal)
     , m_targetLHS(fragment.GetRoot()->GetLabel(), NonTerminal)
+    , m_pcfgScore(fragment.GetPcfgScore())
 {
   // Source RHS
 

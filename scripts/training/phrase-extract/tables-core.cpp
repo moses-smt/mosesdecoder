@@ -5,6 +5,8 @@
 #define TABLE_LINE_MAX_LENGTH 1000
 #define UNKNOWNSTR	"UNK"
 
+using namespace std;
+
 // as in beamdecoder/tables.cpp
 vector<string> tokenize( const char* input )
 {

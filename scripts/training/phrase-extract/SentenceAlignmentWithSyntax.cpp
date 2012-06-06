@@ -27,6 +27,8 @@
 #include "XmlException.h"
 #include "XmlTree.h"
 
+using namespace std;
+
 bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID)
 {
   if (!m_options.targetSyntax) {

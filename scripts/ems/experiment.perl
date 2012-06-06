@@ -1020,7 +1020,7 @@ sub execute_steps {
     }
 	}
 
-	print "number of steps doable or running: ".(scalar keys %DO)."\n";
+	print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
   foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	
@@ -2018,6 +2018,7 @@ sub get_training_setting {
     my $target_syntax = &get("GENERAL:output-parser");
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
+    my $pcfg = &get("TRAINING:use-pcfg-feature");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2040,6 +2041,7 @@ sub get_training_setting {
     $cmd .= "-glue-grammar " if $hierarchical;
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
+    $cmd .= "-pcfg " if $pcfg;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
