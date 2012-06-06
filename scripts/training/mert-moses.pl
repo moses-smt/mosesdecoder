@@ -147,6 +147,12 @@ my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert & extractor
 my $mertmertargs = undef; # args to pass through to mert only
 my $extractorargs = undef; # args to pass through to extractor only
+
+# Args to pass through to batch mira only.  This flags is useful to
+# change MIRA's hyperparameters such as regularization parameter C,
+# BLEU decay factor, and the number of iterations of MIRA.
+my $batch_mira_args = undef;
+
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $filterfile = undef;
 my $qsubwrapper = undef;
@@ -210,6 +216,7 @@ GetOptions(
   "pro-starting-point" => \$___PRO_STARTING_POINT,
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
+  "batch-mira-args=s" => \$batch_mira_args,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -293,6 +300,10 @@ Options:
                                         (also works with regular optimizer, default: 0)
   --pairwise-ranked         ... Use PRO for optimisation (Hopkins and May, emnlp 2011)
   --pro-starting-point      ... Use PRO to get a starting point for MERT
+  --batch-mira              ... Use Batch MIRA for optimisation (Cherry and Foster, NAACL 2012)
+  --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
+                                change MIRA's hyperparameters such as regularization parameter C,
+                                BLEU decay factor, and the number of iterations of MIRA.
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -734,6 +745,10 @@ while (1) {
   }
 
   my $mira_settings = "";
+  if ($___BATCH_MIRA && $batch_mira_args) {
+    $mira_settings .= "$batch_mira_args ";
+  }
+
   $mira_settings .= " --dense-init run$run.$weights_in_file";
   if (-e "run$run.sparse-weights") {
     $mira_settings .= " --sparse-init run$run.sparse-weights";
@@ -921,10 +936,12 @@ chdir($cwd);
 sub get_weights_from_mert {
   my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
   my ($bestpoint, $devbleu);
-  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/) || $___BATCH_MIRA) {
+  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
+          || $___BATCH_MIRA) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
-    my (@WEIGHT, $sum);
+    my @WEIGHT;
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
+    my $sum = 0.0;
     while (<$fh>) {
       if (/^F(\d+) ([\-\.\de]+)/) {     # regular features
         $WEIGHT[$1] = $2;
@@ -933,11 +950,14 @@ sub get_weights_from_mert {
         $$sparse_weights{$1} = $2;
       }
     }
+    close $fh;
+    die "It seems feature values are invalid or unable to read $outfile." if $sum < 1e-09;
+
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ", @WEIGHT);
-    close $fh;
+
     if($___BATCH_MIRA) {
       open my $fh2, '<', $logfile or die "Can't open $logfile: $!";
       while(<$fh2>) {
@@ -945,6 +965,7 @@ sub get_weights_from_mert {
           $devbleu = $1;
         }
       }
+      close $fh2;
     }
   } else {
     open my $fh, '<', $logfile or die "Can't open $logfile: $!";
