@@ -2204,9 +2204,17 @@ sub define_tuningevaluation_filter {
     $cmd .= "-config $config\n";
     
     # filter command
-    $cmd .= "$scripts/training/filter-model-given-input.pl";
-    $cmd .= " $filter_dir $config $input_filter $settings\n";
-
+ 		my $sa_exec_dir = &check_and_get("TRAINING:suffix-array");
+		if ($sa_exec_dir eq "") {
+		  # normal phrase table
+	    $cmd .= "$scripts/training/filter-model-given-input.pl";
+  	  $cmd .= " $filter_dir $config $input_filter $settings\n";
+		}
+		else {
+			# suffix array
+			$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+		}
+		
     # clean-up
     $cmd .= "rm $config";
 
