@@ -1801,8 +1801,6 @@ sub define_training_create_config {
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
 
-		print STDERR "HIEU: $hierarchical \n $sa_exec_dir \n $cmd \n";
-
     my $decoding_graph_backoff = &get("TRAINING:decoding-graph-backoff");
     if ($decoding_graph_backoff) {
       $cmd .= "-decoding-graph-backoff \"$decoding_graph_backoff\" ";
