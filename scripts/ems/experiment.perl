@@ -2248,6 +2248,10 @@ sub define_tuningevaluation_filter {
 		if ($sa_exec_dir) {
 			# suffix array
 			$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+			
+			my $escaped_filter_dir = $filter_dir;
+			$escaped_filter_dir =~ s/\//\\\\\//g;
+			$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
 		}
 		else {
 		  # normal phrase table
