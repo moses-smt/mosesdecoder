@@ -302,7 +302,7 @@ $moses_parallel_cmd = "$SCRIPTS_ROOTDIR/generic/moses-parallel.pl"
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = "$SCRIPTS_ROOTDIR/../mert";
+  $mertdir = "/usr/bin";
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
 
@@ -684,9 +684,11 @@ while(1) {
 
 #   print FILE "$scorer_name $scorer_weight $score_file.$scorer_name $feature_file.$scorer_name\n";
   }
-#   print STDERR "CREATION INI\n";
+#  print STDERR "CREATION INI\n";
   my @scorer_content;
+  my @feature_content;
   my $fileIncrement=0;
+  my $minSizeIncrement=-1;
   open(FILE,">merge.init") || die ("File creation ERROR : merge.init");
   foreach $scorer_config_spec(@lists_scorer_config)
   {
@@ -694,12 +696,58 @@ while(1) {
     $scorer_name=$lists_scorer_config_spec[0];
     $scorer_weight=$lists_scorer_config_spec[1];
     print FILE "$scorer_name $scorer_weight $score_file.$scorer_name $feature_file.$scorer_name\n";
-    my @tmp_content=`/bin/cat $score_file.$scorer_name`;
-    $scorer_content[$fileIncrement] = [ @tmp_content ];
-    if ($fileIncrement==0)
+    my @tmp_load_content=`/bin/cat $score_file.$scorer_name`;
+    my @tmp_load_feat_content=`/bin/cat $feature_file.$scorer_name`;
+    my @tmp_content;
+    my @tmp_feat_content;
+    my $contentIncrement=0;
+    my @tmp_part_content;
+    my $increment_part=0;
+    while ($contentIncrement<scalar(@tmp_load_feat_content))
     {
-	`/bin/cp $feature_file.$scorer_name $feature_file`;
+	my $line=$tmp_load_feat_content[$contentIncrement];
+	chomp($line);
+        $line=~s/^[ ]+//g;
+        $line=~s/[ ]+$//g;
+        $line=~s/[ ]+/ /g;
+	push @tmp_part_content,$line;
+	if (rindex($line,"FEATURES_TXT_END")>-1)
+	{
+	   $tmp_feat_content[$increment_part] = [ @tmp_part_content ];
+	   $increment_part++;
+	   @tmp_part_content=();
+	}
+	$contentIncrement++;
     }
+    $contentIncrement=0;
+    $increment_part=0;
+    @tmp_part_content=();
+    while ($contentIncrement<scalar(@tmp_load_content))
+    {
+	my $line=$tmp_load_content[$contentIncrement];
+	chomp($line);
+        $line=~s/^[ ]+//g;
+        $line=~s/[ ]+$//g;
+        $line=~s/[ ]+/ /g;
+	push @tmp_part_content,$line;
+	if (rindex($line,"SCORES_TXT_END")>-1)
+	{
+	   $tmp_content[$increment_part] = [ @tmp_part_content ];
+	   $increment_part++;
+	   @tmp_part_content=();
+	}
+	$contentIncrement++;
+    }
+    if ($minSizeIncrement<0 || $minSizeIncrement>$increment_part)
+    {
+	$minSizeIncrement=$increment_part;
+    }
+    $scorer_content[$fileIncrement] = [ @tmp_content ];
+    $feature_content[$fileIncrement] = [ @tmp_feat_content ];
+#     if ($fileIncrement==0)
+#     {
+# 	`/bin/cp $feature_file.$scorer_name $feature_file`;
+#     }
     $fileIncrement++;
   }
   close(FILE);
@@ -709,41 +757,134 @@ while(1) {
   
 #   print STDERR "ON  VA RASSEMBLER dans $score_file\n";
   open(SCOREFILE,">$score_file") || die ("File creation ERROR : $score_file");
+  open(FEATFILE,">$feature_file") || die ("File creation ERROR : $feature_file");
   my $newFileIncrement=0;
   my $contentIncrement=0;
+  my $maxContent=100;
+  my $increment_part=0;
   my $contentSize=scalar(@{$scorer_content[0]});
-#   print STDERR "TAILLE : ".$contentSize."|".$fileIncrement."\n";
-  while ($contentIncrement< $contentSize)
+#   print STDERR "TAILLE : ".$contentSize."|".$fileIncrement."|".$minSizeIncrement."\n";
+  while ($increment_part<$minSizeIncrement)
   {
+    $contentIncrement=0;
+#	print STDERR "increment_part : $increment_part\n";
+    while ($contentIncrement< $maxContent)
+    {
+#      print STDERR "contentIncrement : $contentIncrement\n";
       my $line="";
+      my $featureLine="";
+      my $createLines=1;
       $newFileIncrement=0;
       while($newFileIncrement< $fileIncrement)
       {
-	 if (rindex($scorer_content[$newFileIncrement][$contentIncrement],"BEGIN")<0)
+#	print STDERR "newFileIncrement : $newFileIncrement\n";
+	 if (rindex($scorer_content[$newFileIncrement][$increment_part][$contentIncrement],"BEGIN")<0)
 	 {
-	    $line=$line." ".$scorer_content[$newFileIncrement][$contentIncrement];
-	    chomp($line);
+	         if (rindex($line,"SCORES_TXT_END")>-1)
+        	{
+#	            $line=$line;
+#	            chomp($line);
+	         }
+		elsif (rindex($scorer_content[$newFileIncrement][$increment_part][$contentIncrement],"SCORES_TXT_END")>-1)
+     		{
+			$line=$scorer_content[$newFileIncrement][$increment_part][$contentIncrement];
+			$featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+		}
+	    else
+		{
+			$line=$line." ".$scorer_content[$newFileIncrement][$increment_part][$contentIncrement];
+			chomp($line);
+			if (length($featureLine)>0 && rindex($featureLine,$feature_content[$newFileIncrement][$increment_part][$contentIncrement])==0)
+			{
+			    
+			    $featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+			    chomp($featureLine);
+			}
+			elsif (length($featureLine)>0)
+			{
+	    # 		$createLines=0;
+			    my @split_line=split(/[\s]+/,$featureLine);
+			    my @split_line_input=split(/[\s]+/,$feature_content[$newFileIncrement][$increment_part][$contentIncrement]);
+			    my $i=0;
+			    $featureLine="";
+			    for ($i=0;$i<scalar(@split_line_input);$i++)
+			    {
+				$split_line_input[$i]=($split_line_input[$i]+$split_line[$i])/2;
+				$featureLine=$featureLine.$split_line_input[$i]." ";
+			    }
+			}
+			elsif (length($featureLine)==0)
+			{
+			    $featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+			    chomp($featureLine);
+			}
+	        }
 	 }
-	 else
+	else
 	 {
-	    my @split_line_input=split(" ",$scorer_content[$newFileIncrement][$contentIncrement]);
+	    my @split_line_input=split(" ",$scorer_content[$newFileIncrement][$increment_part][$contentIncrement]);
+	    my @split_line_feat_input=split(/[\s]+/,$feature_content[$newFileIncrement][$increment_part][$contentIncrement]);
 	    my @split_line=split(" ",$line);
-	    if (scalar(@split_line)>0)
+	    if (scalar(@split_line)>4)
 	    {
 		$split_line_input[3]=$split_line[3]+$split_line_input[3];
 	    }
+	    if (scalar(@split_line_input)>4)
+	    {
+		if (scalar(@split_line)>4)
+		{
+			if ($split_line[2]<$split_line_input[2])
+			{
+				$split_line_input[2]=$split_line[2];
+			}
+		}
+		else
+		{
+			## Nothing to do
+		}
+		$maxContent=$split_line_input[2]+2;
+#                print STDERR "maxContent : $maxContent : ".$scorer_content[$newFileIncrement][$increment_part][$contentIncrement]."\n"; 
+	    }
+	    else
+	{
+		die "scoreFile bad format : ".$scorer_content[$newFileIncrement][$increment_part][$contentIncrement]."\n";
+	}
 	    $line=$split_line_input[0]." ".$split_line_input[1]." ".$split_line_input[2]." ".$split_line_input[3]." MERGE";
-	 }
+	    my $i=0;
+	    $featureLine="";
+	    for ($i=0;$i<scalar(@split_line_feat_input);$i++)
+	    {
+# 		$split_line_feat_input[$i]=($split_line_input[$i]+$split_line[$i])/2;
+		if ($i==2)
+		{
+		    $featureLine=$featureLine.$split_line_input[2]." ";
+		}
+		else
+		{
+		    $featureLine=$featureLine.$split_line_feat_input[$i]." ";
+		}
+	    }
+	    
+# 	    $featureLine=$feature_content[$newFileIncrement][$increment_part][$contentIncrement];
+	  }
 	 $newFileIncrement++;
       }
       $line=~s/^[ ]+//g;
       $line=~s/[ ]+$//g;
       $line=~s/[ ]+/ /g;
+#      $line=~s/( SCORES_TXT_END[^!]*)//g;
 #       print STDERR $line."\n";
-      print SCOREFILE $line."\n";
+#       if ($createLines>0)
+#       {
+	  print SCOREFILE $line."\n";
+	  print FEATFILE $featureLine."\n";
+#       }
       $contentIncrement++;
+    }
+  $increment_part++;
   }
   close(SCOREFILE);
+  close(FEATFILE);
 #   `/bin/cp `
   
 #   $cmd="$mertdir/mergeWeights -c merge.init -s $score_file -f $feature_file";

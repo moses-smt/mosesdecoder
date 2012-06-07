@@ -25,6 +25,7 @@ protected:
   void createAlignVec(size_t sourceSize, size_t targetSize);
   void addNTLength(const std::string &tok);
 public:
+  float pcfgSum;
   float count;
   std::vector< std::set<size_t> > alignedToT;
   std::vector< std::set<size_t> > alignedToS;

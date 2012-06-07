@@ -8,13 +8,15 @@
 #include "PerScorer.h"
 #include "CderScorer.h"
 
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
+#include "TER/tercalc.h"
+#include "TER/terAlignment.h"
 
+using namespace std;
 using namespace TERCpp;
 
 MergeScorer::MergeScorer(const string& config)
-    : StatisticsBasedScorer("MERGE",config), kLENGTH(4) {}
+    : StatisticsBasedScorer("MERGE", config) {}
+
 MergeScorer::~MergeScorer() {}
 
 void MergeScorer::setReferenceFiles(const vector<string>& referenceFiles)
@@ -39,74 +41,77 @@ float MergeScorer::calculateScore(const vector<int>& comps)
 
 float MergeScorer::calculateScore(const std::vector< int >& comps) const
 {
-  float result=0.0;
-  float weight=1.0;
-  float resultTmp=0.0;
+  float result = 0.0;
   vector<int> vecLine;
   vector<string> vecScorerType;
   vector<float> weightsModifier;
-  int pos=0;
-  int weightIncrement=0;
-  string initfile="merge.init";
+  int pos = 0;
+  int weightIncrement = 0;
+  string initfile = "merge.init";
   string line;
   ifstream opt(initfile.c_str());
-  float denom=0.0;
+  float denom = 0.0;
+
   if (opt.fail()) {
     cerr<<"MergeScorer::calculateScore : could not open initfile: " << initfile << endl;
     exit(3);
   }
   while (getline (opt, line)) {
     vector<string> vecLine=stringToVector(line, " ");
-    if ((int)vecLine.size() != 4) {
+    if (vecLine.size() != 4) {
       cerr<<"MergeScorer::calculateScore : Error in initfile: " << initfile << endl;
       exit(4);
     }
     vecScorerType.push_back(vecLine.at(0));
     weightsModifier.push_back(atof(vecLine.at(1).c_str()));
-    denom+=abs(atof(vecLine.at(1).c_str()));
+    denom += abs(atof(vecLine.at(1).c_str()));
   }
-  for (weightIncrement = 0; weightIncrement < (int) weightsModifier.size(); weightIncrement++)
+  const int weights_modifier_size = static_cast<int>(weightsModifier.size());
+  for (weightIncrement = 0; weightIncrement < weights_modifier_size; weightIncrement++)
   {
-    if (vecScorerType.at(weightIncrement).compare("BLEU")==0)
+    if (vecScorerType.at(weightIncrement).compare("BLEU") == 0)
     {
-      BleuScorer* scorer01= new BleuScorer("");
-      weight=weightsModifier.at(weightIncrement) / denom;
+      BleuScorer* scorer01 = new BleuScorer("");
+      const float weight = weightsModifier.at(weightIncrement) / denom;
       vecLine.clear();
-      vecLine=subVector(comps, pos,pos+(int)(scorer01->NumberOfScores()));
-      pos=pos+(int)(scorer01->NumberOfScores());
-      resultTmp=(scorer01->calculateScore(vecLine));
-      result+=(weight * resultTmp);
-
+      const int num_scores = static_cast<int>(scorer01->NumberOfScores());
+      vecLine = subVector(comps, pos, pos + num_scores);
+      pos += num_scores;
+      result += weight * scorer01->calculateScore(vecLine);;
+      delete scorer01;
     }
-    else if (vecScorerType.at(weightIncrement).compare("TER")==0)
+    else if (vecScorerType.at(weightIncrement).compare("TER") == 0)
     {
-      TerScorer* scorer02= new TerScorer("");
-      weight=weightsModifier.at(weightIncrement) / denom;
+      TerScorer* scorer02 = new TerScorer("");
+      const float weight = weightsModifier.at(weightIncrement) / denom;
       vecLine.clear();
-      vecLine=subVector(comps, pos,pos+(int)(scorer02->NumberOfScores()));
-      pos=pos+(int)(scorer02->NumberOfScores());
-      resultTmp=(scorer02->calculateScore(vecLine));
-      result+=(weight * resultTmp);
+      const int num_scores = static_cast<int>(scorer02->NumberOfScores());
+      vecLine = subVector(comps, pos, pos + num_scores);
+      pos += num_scores;
+      result += weight * scorer02->calculateScore(vecLine);
+      delete scorer02;
     }
-    else if (vecScorerType.at(weightIncrement).compare("PER")==0)
+    else if (vecScorerType.at(weightIncrement).compare("PER") == 0)
     {
-      PerScorer* scorer03= new PerScorer("");
-      weight=weightsModifier.at(weightIncrement) / denom;
+      PerScorer* scorer03 = new PerScorer("");
+      const float weight = weightsModifier.at(weightIncrement) / denom;
       vecLine.clear();
-      vecLine=subVector(comps, pos,pos+(int)(scorer03->NumberOfScores()));
-      pos=pos+(int)(scorer03->NumberOfScores());
-      resultTmp=(scorer03->calculateScore(vecLine));
-      result+=(weight * result);
+      const int num_scores = static_cast<int>(scorer03->NumberOfScores());
+      vecLine = subVector(comps, pos, pos + num_scores);
+      pos += num_scores;
+      result += weight * scorer03->calculateScore(vecLine);
+      delete scorer03;
     }
-    else if (vecScorerType.at(weightIncrement).compare("CER")==0)
+    else if (vecScorerType.at(weightIncrement).compare("CER") == 0)
     {
-      CderScorer* scorer04= new CderScorer("");
-      weight=weightsModifier.at(weightIncrement) / denom;
+      CderScorer* scorer04 = new CderScorer("");
+      const float weight = weightsModifier.at(weightIncrement) / denom;
       vecLine.clear();
-      vecLine=subVector(comps, pos,pos+(int)(scorer04->NumberOfScores()));
-      pos=pos+(int)(scorer04->NumberOfScores());
-      resultTmp=(scorer04->calculateScore(vecLine));
-      result+=(weight * resultTmp);
+      const int num_scores = static_cast<int>(scorer04->NumberOfScores());
+      vecLine = subVector(comps, pos, pos + num_scores);
+      pos += num_scores;
+      result += weight * scorer04->calculateScore(vecLine);
+      delete scorer04;
     }
     else
     {

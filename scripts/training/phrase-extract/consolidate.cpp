@@ -28,6 +28,7 @@
 #include "tables-core.h"
 #include "SafeGetline.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 #define LINE_MAX_LENGTH 10000
 
@@ -175,9 +176,9 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   istream &fileIndirectP = fileIndirect;
 
   // open output file: consolidated phrase table
-  ofstream fileConsolidated;
-  fileConsolidated.open(fileNameConsolidated);
-  if (fileConsolidated.fail()) {
+  Moses::OutputFileStream fileConsolidated;
+  bool success = fileConsolidated.Open(fileNameConsolidated);
+  if (!success) {
     cerr << "ERROR: could not open output file " << fileNameConsolidated << endl;
     exit(1);
   }
@@ -283,7 +284,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   }
   fileDirect.Close();
   fileIndirect.Close();
-  fileConsolidated.close();
+  fileConsolidated.Close();
 }
 
 

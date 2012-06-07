@@ -1,0 +1,1 @@
+lib CYKPlusParser : [ glob *.cpp ] ..//moses_internal ;

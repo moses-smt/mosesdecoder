@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
@@ -20,10 +19,6 @@
  ***********************************************************************/
 
 #pragma once
-
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
 
 #include <vector>
 #include "Util.h"
@@ -52,7 +47,6 @@ protected:
 #endif
 
   const TargetPhrase &m_targetPhrase;
-  const ChartTranslationOption &m_transOpt;
 
   WordsRange					m_currSourceWordsRange;
 	std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
@@ -96,9 +90,6 @@ public:
 
   unsigned GetId() const { return m_id; }
 
-  const ChartTranslationOption &GetTranslationOption()const {
-    return m_transOpt;
-  }
   const TargetPhrase &GetCurrTargetPhrase()const {
     return m_targetPhrase;
   }

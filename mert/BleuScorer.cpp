@@ -1,47 +1,56 @@
 #include "BleuScorer.h"
 
 #include <algorithm>
+#include <cassert>
 #include <cmath>
 #include <climits>
 #include <fstream>
-#include <iterator>
+#include <iostream>
 #include <stdexcept>
+
+#include "util/check.hh"
+#include "Ngram.h"
+#include "Reference.h"
 #include "Util.h"
 #include "ScoreDataIterator.h"
 #include "FeatureDataIterator.h"
+#include "Vocabulary.h"
+
+using namespace std;
+
+namespace {
+
+// configure regularisation
+const char KEY_REFLEN[] = "reflen";
+const char REFLEN_AVERAGE[] = "average";
+const char REFLEN_SHORTEST[] = "shortest";
+const char REFLEN_CLOSEST[] = "closest";
+
+} // namespace
 
 BleuScorer::BleuScorer(const string& config)
-    : StatisticsBasedScorer("BLEU",config),
-      kLENGTH(4),
-      _refLengthStrategy(BLEU_CLOSEST) {
-  //configure regularisation
-  static string KEY_REFLEN = "reflen";
-  static string REFLEN_AVERAGE = "average";
-  static string REFLEN_SHORTEST = "shortest";
-  static string REFLEN_CLOSEST = "closest";
-
-  string reflen = getConfig(KEY_REFLEN,REFLEN_CLOSEST);
+    : StatisticsBasedScorer("BLEU", config),
+      m_ref_length_type(CLOSEST) {
+  const string reflen = getConfig(KEY_REFLEN, REFLEN_CLOSEST);
   if (reflen == REFLEN_AVERAGE) {
-    _refLengthStrategy = BLEU_AVERAGE;
+    m_ref_length_type = AVERAGE;
   } else if (reflen == REFLEN_SHORTEST) {
-    _refLengthStrategy = BLEU_SHORTEST;
+    m_ref_length_type = SHORTEST;
   } else if (reflen == REFLEN_CLOSEST) {
-    _refLengthStrategy = BLEU_CLOSEST;
+    m_ref_length_type = CLOSEST;
   } else {
     throw runtime_error("Unknown reference length strategy: " + reflen);
   }
-  //    cerr << "Using reference length strategy: " << reflen << endl;
 }
 
 BleuScorer::~BleuScorer() {}
 
-size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned int n)
+size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
+                               unsigned int n)
 {
+  assert(n > 0);
   vector<int> encoded_tokens;
-  //cerr << line << endl;
-  encode(line,encoded_tokens);
-  //copy(encoded_tokens.begin(), encoded_tokens.end(), ostream_iterator<int>(cerr," "));
-  //cerr << endl;
+  TokenizeAndEncode(line, encoded_tokens);
   for (size_t k = 1; k <= n; ++k) {
     //ngram order longer than sentence - no point
     if (k > encoded_tokens.size()) {
@@ -52,167 +61,219 @@ size_t BleuScorer::countNgrams(const string& line, counts_t& counts, unsigned in
       for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
         ngram.push_back(encoded_tokens[j]);
       }
-      int count = 1;
-      counts_iterator oldcount = counts.find(ngram);
-      if (oldcount != counts.end()) {
-        count = (oldcount->second) + 1;
-      }
-      //cerr << count << endl;
-      counts[ngram] = count;
-      //cerr << endl;
+      counts.Add(ngram);
     }
   }
-  //cerr << "counted ngrams" << endl;
-  //dump_counts(counts);
   return encoded_tokens.size();
 }
 
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
-  //make sure reference data is clear
-  _refcounts.reset();
-  _reflengths.clear();
-  _encodings.clear();
+  // Make sure reference data is clear
+  m_references.reset();
+  mert::VocabularyFactory::GetVocabulary()->clear();
 
   //load reference data
   for (size_t i = 0; i < referenceFiles.size(); ++i) {
-    //TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
-    ifstream refin(referenceFiles[i].c_str());
-    if (!refin) {
-      throw runtime_error("Unable to open: " + referenceFiles[i]);
+    TRACE_ERR("Loading reference from " << referenceFiles[i] << endl);
+
+    if (!OpenReference(referenceFiles[i].c_str(), i)) {
+      throw runtime_error("Unable to open " + referenceFiles[i]);
     }
-    string line;
-    size_t sid = 0; //sentence counter
-    while (getline(refin,line)) {
-      //cerr << line << endl;
-      if (i == 0) {
-        counts_t *counts = new counts_t; //these get leaked
-        _refcounts.push_back(counts);
-        vector<size_t> lengths;
-        _reflengths.push_back(lengths);
-      }
-      if (_refcounts.size() <= sid) {
-        throw runtime_error("File " + referenceFiles[i] + " has too many sentences");
-      }
-      counts_t counts;
-      size_t length = countNgrams(line,counts,kLENGTH);
-      //for any counts larger than those already there, merge them in
-      for (counts_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
-        counts_iterator oldcount_it = _refcounts[sid]->find(ci->first);
-        int oldcount = 0;
-        if (oldcount_it != _refcounts[sid]->end()) {
-          oldcount = oldcount_it->second;
-        }
-        int newcount = ci->second;
-        if (newcount > oldcount) {
-          _refcounts[sid]->operator[](ci->first) = newcount;
-        }
-      }
-      //add in the length
-      _reflengths[sid].push_back(length);
-      if (sid > 0 && sid % 100 == 0) {
-        TRACE_ERR(".");
-      }
-      ++sid;
-    }
-    TRACE_ERR(endl);
   }
 }
 
+bool BleuScorer::OpenReference(const char* filename, size_t file_id) {
+  ifstream ifs(filename);
+  if (!ifs) {
+    cerr << "Cannot open " << filename << endl;
+    return false;
+  }
+  return OpenReferenceStream(&ifs, file_id);
+}
+
+bool BleuScorer::OpenReferenceStream(istream* is, size_t file_id) {
+  if (is == NULL) return false;
+
+  string line;
+  size_t sid = 0;
+  while (getline(*is, line)) {
+    line = preprocessSentence(line);
+    if (file_id == 0) {
+      Reference* ref = new Reference;
+      m_references.push_back(ref);    // Take ownership of the Reference object.
+    }
+    if (m_references.size() <= sid) {
+      cerr << "Reference " << file_id << "has too many sentences." << endl;
+      return false;
+    }
+    NgramCounts counts;
+    size_t length = CountNgrams(line, counts, kBleuNgramOrder);
+
+    //for any counts larger than those already there, merge them in
+    for (NgramCounts::const_iterator ci = counts.begin(); ci != counts.end(); ++ci) {
+      const NgramCounts::Key& ngram = ci->first;
+      const NgramCounts::Value newcount = ci->second;
+
+      NgramCounts::Value oldcount = 0;
+      m_references[sid]->get_counts()->Lookup(ngram, &oldcount);
+      if (newcount > oldcount) {
+        m_references[sid]->get_counts()->operator[](ngram) = newcount;
+      }
+    }
+    //add in the length
+    m_references[sid]->push_back(length);
+    if (sid > 0 && sid % 100 == 0) {
+      TRACE_ERR(".");
+    }
+    ++sid;
+  }
+  return true;
+}
 
 void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-//      cerr << text << endl;
-//      cerr << sid << endl;
-  //dump_counts(*_refcounts[sid]);
-  if (sid >= _refcounts.size()) {
+  if (sid >= m_references.size()) {
     stringstream msg;
     msg << "Sentence id (" << sid << ") not found in reference set";
     throw runtime_error(msg.str());
   }
-  counts_t testcounts;
-  //stats for this line
-  vector<float> stats(kLENGTH*2);;
-  size_t length = countNgrams(text,testcounts,kLENGTH);
-  //dump_counts(testcounts);
-  if (_refLengthStrategy == BLEU_SHORTEST) {
-    //cerr << reflengths.size() << " " << sid << endl;
-    int shortest = *min_element(_reflengths[sid].begin(),_reflengths[sid].end());
-    stats.push_back(shortest);
-  } else if (_refLengthStrategy == BLEU_AVERAGE) {
-    int total = 0;
-    for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
-      total += _reflengths[sid][i];
-    }
-    float mean = (float)total/_reflengths[sid].size();
-    stats.push_back(mean);
-  } else if (_refLengthStrategy == BLEU_CLOSEST)  {
-    int min_diff = INT_MAX;
-    int min_idx = 0;
-    for (size_t i = 0; i < _reflengths[sid].size(); ++i) {
-      int reflength = _reflengths[sid][i];
-      if (abs(reflength-(int)length) < abs(min_diff)) { //look for the closest reference
-        min_diff = reflength-length;
-        min_idx = i;
-      } else if (abs(reflength-(int)length) == abs(min_diff)) { // if two references has the same closest length, take the shortest
-        if (reflength < (int)_reflengths[sid][min_idx]) {
-          min_idx = i;
-        }
-      }
-    }
-    stats.push_back(_reflengths[sid][min_idx]);
-  } else {
-    throw runtime_error("Unsupported reflength strategy");
-  }
-  //cerr << "computed length" << endl;
+  NgramCounts testcounts;
+  // stats for this line
+  vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
+  string sentence = preprocessSentence(text);
+  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder);
+
+  const int reference_len = CalcReferenceLength(sid, length);
+  stats.push_back(reference_len);
+
   //precision on each ngram type
-  for (counts_iterator testcounts_it = testcounts.begin();
+  for (NgramCounts::const_iterator testcounts_it = testcounts.begin();
        testcounts_it != testcounts.end(); ++testcounts_it) {
-    counts_iterator refcounts_it = _refcounts[sid]->find(testcounts_it->first);
-    int correct = 0;
-    int guess = testcounts_it->second;
-    if (refcounts_it != _refcounts[sid]->end()) {
-      correct = min(refcounts_it->second,guess);
+    const NgramCounts::Value guess = testcounts_it->second;
+    const size_t len = testcounts_it->first.size();
+    NgramCounts::Value correct = 0;
+
+    NgramCounts::Value v = 0;
+    if (m_references[sid]->get_counts()->Lookup(testcounts_it->first, &v)) {
+      correct = min(v, guess);
     }
-    size_t len = testcounts_it->first.size();
-    stats[len*2-2] += correct;
-    stats[len*2-1] += guess;
+    stats[len * 2 - 2] += correct;
+    stats[len * 2 - 1] += guess;
   }
-  stringstream sout;
-  copy(stats.begin(),stats.end(),ostream_iterator<float>(sout," "));
-  //TRACE_ERR(sout.str() << endl);
-  string stats_str = sout.str();
-  entry.set(stats_str);
+  entry.set(stats);
 }
 
 float BleuScorer::calculateScore(const vector<int>& comps) const
 {
-  //cerr << "BLEU: ";
-  //copy(comps.begin(),comps.end(), ostream_iterator<int>(cerr," "));
+  CHECK(comps.size() == kBleuNgramOrder * 2 + 1);
+
   float logbleu = 0.0;
-  for (int i = 0; i < kLENGTH; ++i) {
+  for (int i = 0; i < kBleuNgramOrder; ++i) {
     if (comps[2*i] == 0) {
       return 0.0;
     }
     logbleu += log(comps[2*i]) - log(comps[2*i+1]);
 
   }
-  logbleu /= kLENGTH;
-  float brevity = 1.0 - (float)comps[kLENGTH*2]/comps[1];//reflength divided by test length
+  logbleu /= kBleuNgramOrder;
+  // reflength divided by test length
+  const float brevity = 1.0 - static_cast<float>(comps[kBleuNgramOrder * 2]) / comps[1];
   if (brevity < 0.0) {
     logbleu += brevity;
   }
-  //cerr << " " << exp(logbleu) << endl;
   return exp(logbleu);
 }
 
-void BleuScorer::dump_counts(counts_t& counts) const {
-  for (counts_const_iterator i = counts.begin(); i != counts.end(); ++i) {
-    cerr << "(";
-    copy(i->first.begin(), i->first.end(), ostream_iterator<int>(cerr," "));
-    cerr << ") " << i->second << ", ";
+int BleuScorer::CalcReferenceLength(size_t sentence_id, size_t length) {
+  switch (m_ref_length_type) {
+    case AVERAGE:
+      return m_references[sentence_id]->CalcAverage();
+      break;
+    case CLOSEST:
+      return m_references[sentence_id]->CalcClosest(length);
+      break;
+    case SHORTEST:
+      return m_references[sentence_id]->CalcShortest();
+      break;
+    default:
+      cerr << "unknown reference types." << endl;
+      exit(1);
   }
-  cerr << endl;
+}
+
+void BleuScorer::DumpCounts(ostream* os,
+                            const NgramCounts& counts) const {
+  for (NgramCounts::const_iterator it = counts.begin();
+       it != counts.end(); ++it) {
+    *os << "(";
+    const NgramCounts::Key& keys = it->first;
+    for (size_t i = 0; i < keys.size(); ++i) {
+      if (i != 0) {
+        *os << " ";
+      }
+      *os << keys[i];
+    }
+    *os << ") : " << it->second << ", ";
+  }
+  *os << endl;
+}
+
+float sentenceLevelBleuPlusOne(const vector<float>& stats) {
+  CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
+
+  float logbleu = 0.0;
+  for (int j = 0; j < kBleuNgramOrder; j++) {
+    logbleu += log(stats[2 * j] + 1.0) - log(stats[2 * j + 1] + 1.0);
+  }
+  logbleu /= kBleuNgramOrder;
+  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+  return exp(logbleu);
+}
+
+float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg)
+{
+  // Sum sent and background
+  std::vector<float> stats;
+  CHECK(sent.size()==bg.size());
+  CHECK(sent.size()==kBleuNgramOrder*2+1);
+  for(size_t i=0;i<sent.size();i++) 
+    stats.push_back(sent[i]+bg[i]);
+
+  // Calculate BLEU
+  float logbleu = 0.0;
+  for (int j = 0; j < kBleuNgramOrder; j++) {
+    logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
+  }
+  logbleu /= kBleuNgramOrder;
+  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+  
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+
+  // Exponentiate and scale by reference length (as per Chiang et al 08)
+  return exp(logbleu) * stats[kBleuNgramOrder*2];
+}
+
+float unsmoothedBleu(const std::vector<float>& stats) {
+  CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
+
+  float logbleu = 0.0;
+  for (int j = 0; j < kBleuNgramOrder; j++) {
+    logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
+  }
+  logbleu /= kBleuNgramOrder;
+  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+  return exp(logbleu);
 }
 
 vector<float> BleuScorer::ScoreNbestList(string scoreFile, string featureFile) {

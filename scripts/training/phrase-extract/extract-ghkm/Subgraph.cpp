@@ -101,5 +101,21 @@ int Subgraph::CalcDepth(const Node *n) const
   return maxChildDepth + 1;
 }
 
+float Subgraph::CalcPcfgScore() const
+{
+  if (m_root->GetType() != TREE || m_leaves.empty()) {
+    return 0.0f;
+  }
+  float score = m_root->GetPcfgScore();
+  for (std::set<const Node *>::const_iterator p = m_leaves.begin();
+       p != m_leaves.end(); ++p) {
+    const Node *leaf = *p;
+    if (leaf->GetType() == TREE) {
+      score -= leaf->GetPcfgScore();
+    }
+  }
+  return score;
+}
+
 }  // namespace Moses
 }  // namespace GHKM

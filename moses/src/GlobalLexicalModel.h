@@ -3,6 +3,7 @@
 
 #include <string>
 #include <vector>
+#include <memory>
 #include "Factor.h"
 #include "Phrase.h"
 #include "TypeDef.h"
@@ -50,8 +51,6 @@ private:
 #else
   std::auto_ptr<ThreadLocalStorage> m_local;
 #endif
-  std::map< const TargetPhrase*, float > *m_cache;
-  const Sentence *m_input;
   Word *m_bias;
 
   FactorMask m_inputFactors;

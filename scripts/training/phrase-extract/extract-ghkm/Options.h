@@ -30,11 +30,14 @@ struct Options {
  public:
   Options()
       : allowUnary(false)
+      , conditionOnTargetLhs(false)
+      , gzOutput(false)
       , maxNodes(15)
       , maxRuleDepth(3)
       , maxRuleSize(3)
       , maxScope(3)
       , minimal(false)
+      , pcfg(false)
       , unpairedExtractFormat(false) {}
 
   // Positional options
@@ -45,12 +48,15 @@ struct Options {
 
   // All other options
   bool allowUnary;
+  bool conditionOnTargetLhs;
   std::string glueGrammarFile;
+  bool gzOutput;
   int maxNodes;
   int maxRuleDepth;
   int maxRuleSize;
   int maxScope;
   bool minimal;
+  bool pcfg;
   bool unpairedExtractFormat;
   std::string unknownWordFile;
 };

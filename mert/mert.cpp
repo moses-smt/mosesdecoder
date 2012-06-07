@@ -1,5 +1,5 @@
 /**
- * \description The is the main for the new version of the mert algorithm developed during the 2nd MT marathon
+ * \description This is the main for the new version of the mert algorithm developed during the 2nd MT marathon
 */
 
 #include <limits>
@@ -11,6 +11,7 @@
 #include <ctime>
 
 #include <getopt.h>
+#include <boost/scoped_ptr.hpp>
 
 #include "Data.h"
 #include "Point.h"
@@ -19,16 +20,82 @@
 #include "ScoreData.h"
 #include "FeatureData.h"
 #include "Optimizer.h"
+#include "OptimizerFactory.h"
 #include "Types.h"
 #include "Timer.h"
 #include "Util.h"
 
 #include "../moses/src/ThreadPool.h"
 
-
-float min_interval = 1e-3;
-
 using namespace std;
+
+namespace {
+
+const char kDefaultOptimizer[] = "powell";
+const char kDefaultScorer[] = "BLEU";
+const char kDefaultScorerFile[] = "statscore.data";
+const char kDefaultFeatureFile[] = "features.data";
+const char kDefaultInitFile[] = "init.opt";
+const char kDefaultPositiveString[] = "";
+const char kDefaultSparseWeightsFile[] = "";
+
+// Used when saving optimized weights.
+const char kOutputFile[] = "weights.txt";
+
+/**
+ * Runs an optimisation, or a random restart.
+ */
+class OptimizationTask : public Moses::Task {
+ public:
+  OptimizationTask(Optimizer* optimizer, const Point& point)
+      : m_optimizer(optimizer), m_point(point) {}
+
+  ~OptimizationTask() {}
+
+  virtual void Run() {
+    m_score = m_optimizer->Run(m_point);
+  }
+
+  virtual bool DeleteAfterExecution() {
+    return false;
+  }
+
+  void resetOptimizer() {
+    if (m_optimizer) {
+      delete m_optimizer;
+      m_optimizer = NULL;
+    }
+  }
+
+  statscore_t getScore() const {
+    return m_score;
+  }
+
+  const Point& getPoint() const  {
+    return m_point;
+  }
+
+ private:
+  // Do not allow the user to instanciate without arguments.
+  OptimizationTask() {}
+
+  Optimizer* m_optimizer;
+  Point m_point;
+  statscore_t m_score;
+};
+
+bool WriteFinalWeights(const char* filename, const Point& point) {
+  ofstream ofs(filename);
+  if (!ofs) {
+    cerr << "Cannot open " << filename << endl;
+    return false;
+  }
+
+  ofs << point << endl;
+
+  return true;
+}
+
 
 void usage(int ret)
 {
@@ -76,204 +143,193 @@ static struct option long_options[] = {
   {"help",no_argument,0,'h'},
   {0, 0, 0, 0}
 };
-int option_index;
 
-/**
- * Runs an optimisation, or a random restart.
- */
-class OptimizationTask : public Moses::Task
-{
- public:
-  OptimizationTask(Optimizer* optimizer, const Point& point) :
-      m_optimizer(optimizer), m_point(point) {}
+struct ProgramOption {
+  string to_optimize_str;
+  int pdim;
+  int ntry;
+  int nrandom;
+  int seed;
+  bool has_seed;
+  string optimize_type;
+  string scorer_type;
+  string scorer_config;
+  string scorer_file;
+  string feature_file;
+  string init_file;
+  string positive_string;
+  string sparse_weights_file;
+  size_t num_threads;
+  float shard_size;
+  size_t shard_count;
 
-  ~OptimizationTask() {}
-
-  void resetOptimizer() {
-    if (m_optimizer) {
-      delete m_optimizer;
-      m_optimizer = NULL;
-    }
-  }
-
-  bool DeleteAfterExecution() {
-    return false;
-  }
-
-  void Run() {
-    m_score = m_optimizer->Run(m_point);
-  }
-
-  statscore_t getScore() const {
-    return m_score;
-  }
-
-  const Point& getPoint() const  {
-    return m_point;
-  }
-
- private:
-  // Do not allow the user to instanciate without arguments.
-  OptimizationTask() {}
-
-  Optimizer* m_optimizer;
-  Point m_point;
-  statscore_t m_score;
+  ProgramOption()
+      : to_optimize_str(""),
+        pdim(-1),
+        ntry(1),
+        nrandom(0),
+        seed(0),
+        has_seed(false),
+        optimize_type(kDefaultOptimizer),
+        scorer_type(kDefaultScorer),
+        scorer_config(""),
+        scorer_file(kDefaultScorerFile),
+        feature_file(kDefaultFeatureFile),
+        init_file(kDefaultInitFile),
+        positive_string(kDefaultPositiveString),
+        sparse_weights_file(kDefaultSparseWeightsFile),
+        num_threads(1),
+        shard_size(0),
+        shard_count(0) { }
 };
 
-int main (int argc, char **argv)
-{
-  ResetUserTime();
+void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
+  int c;
+  int option_index;
 
-  /*
-   Timer timer;
-   timer.start("Starting...");
-  */
-
-  int c,pdim;
-  pdim=-1;
-  int ntry=1;
-  int nrandom=0;
-  int seed=0;
-  bool hasSeed = false;
-#ifdef WITH_THREADS
-  size_t threads=1;
-#endif
-  float shard_size = 0;
-  size_t shard_count = 0;
-  string type("powell");
-  string scorertype("BLEU");
-  string scorerconfig("");
-  string scorerfile("statscore.data");
-  string featurefile("features.data");
-  string initfile("init.opt");
-  string sparseweightsfile;
-
-  string tooptimizestr("");
-  vector<unsigned> tooptimize;
-  vector<vector<parameter_t> > start_list;
-  vector<parameter_t> min;
-  vector<parameter_t> max;
-  // NOTE: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
-
-  while ((c=getopt_long (argc, argv, "o:r:d:n:m:t:s:S:F:v:p:", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "o:r:d:n:m:t:s:S:F:v:p:P:", long_options, &option_index)) != -1) {
     switch (c) {
       case 'o':
-        tooptimizestr = string(optarg);
+        opt->to_optimize_str = string(optarg);
         break;
       case 'd':
-        pdim = strtol(optarg, NULL, 10);
+        opt->pdim = strtol(optarg, NULL, 10);
         break;
       case 'n':
-        ntry=strtol(optarg, NULL, 10);
+        opt->ntry = strtol(optarg, NULL, 10);
         break;
       case 'm':
-        nrandom=strtol(optarg, NULL, 10);
+        opt->nrandom = strtol(optarg, NULL, 10);
         break;
       case 'r':
-        seed=strtol(optarg, NULL, 10);
-        hasSeed = true;
+        opt->seed = strtol(optarg, NULL, 10);
+        opt->has_seed = true;
         break;
       case 't':
-        type=string(optarg);
+        opt->optimize_type = string(optarg);
         break;
       case's':
-        scorertype=string(optarg);
+        opt->scorer_type = string(optarg);
         break;
       case 'c':
-        scorerconfig = string(optarg);
+        opt->scorer_config = string(optarg);
         break;
       case 'S':
-        scorerfile=string(optarg);
+        opt->scorer_file = string(optarg);
         break;
       case 'F':
-        featurefile=string(optarg);
+        opt->feature_file = string(optarg);
         break;
       case 'i':
-        initfile=string(optarg);
+        opt->init_file = string(optarg);
         break;
       case 'p':
-        sparseweightsfile=string(optarg);
+        opt->sparse_weights_file=string(optarg);
         break;
       case 'v':
-        setverboselevel(strtol(optarg,NULL,10));
+        setverboselevel(strtol(optarg, NULL, 10));
         break;
 #ifdef WITH_THREADS
       case 'T':
-        threads = strtol(optarg, NULL, 10);
-        if (threads < 1) threads = 1;
+        opt->num_threads = strtol(optarg, NULL, 10);
+        if (opt->num_threads < 1) opt->num_threads = 1;
         break;
 #endif
       case 'a':
-        shard_count = strtof(optarg,NULL);
+        opt->shard_count = strtof(optarg, NULL);
         break;
       case 'b':
-        shard_size = strtof(optarg,NULL);
+        opt->shard_size = strtof(optarg, NULL);
         break;
       case 'h':
         usage(0);
+        break;
+      case 'P':
+        opt->positive_string = string(optarg);
         break;
       default:
         usage(1);
     }
   }
-  if (pdim < 0)
+}
+
+} // anonymous namespace
+
+int main(int argc, char **argv)
+{
+  ResetUserTime();
+
+  ProgramOption option;
+  ParseCommandOptions(argc, argv, &option);
+
+  vector<unsigned> to_optimize;
+  vector<vector<parameter_t> > start_list;
+  vector<parameter_t> min;
+  vector<parameter_t> max;
+  vector<bool> positive;
+  // NOTE: those mins and max are the bound for the starting points of the algorithm, not strict bound on the result!
+
+  if (option.pdim < 0)
     usage(1);
 
-  cerr << "shard_size = " << shard_size << " shard_count = " << shard_count << endl;
-  if (shard_size && !shard_count) {
+  cerr << "shard_size = " << option.shard_size << " shard_count = " << option.shard_count << endl;
+  if (option.shard_size && !option.shard_count) {
     cerr << "Error: shard-size provided without shard-count" << endl;
     exit(1);
   }
-  if (shard_size > 1 || shard_size < 0) {
+  if (option.shard_size > 1 || option.shard_size < 0) {
     cerr << "Error: shard-size should be between 0 and 1" << endl;
     exit(1);
   }
 
-  if (hasSeed) {
-    cerr << "Seeding random numbers with " << seed << endl;
-    srandom(seed);
+  if (option.has_seed) {
+    cerr << "Seeding random numbers with " << option.seed << endl;
+    srandom(option.seed);
   } else {
     cerr << "Seeding random numbers with system clock " << endl;
     srandom(time(NULL));
   }
 
-  if (sparseweightsfile.size()) ++pdim;
+  if (option.sparse_weights_file.size()) ++option.pdim;
 
   // read in starting points
-  std::string onefile;
-  while (!initfile.empty()) {
-    getNextPound(initfile, onefile, ",");
+  string onefile;
+  while (!option.init_file.empty()) {
+    getNextPound(option.init_file, onefile, ",");
     vector<parameter_t> start;
     ifstream opt(onefile.c_str());
-    if(opt.fail()) {
-      cerr<<"could not open initfile: " << initfile << endl;
+    if (opt.fail()) {
+      cerr << "could not open initfile: " << option.init_file << endl;
       exit(3);
     }
-    start.resize(pdim);//to do:read from file
+    start.resize(option.pdim);//to do:read from file
     int j;
-    for( j=0; j<pdim&&!opt.fail(); j++)
-      opt>>start[j];
-    if(j<pdim) {
-      cerr<<initfile<<":Too few starting weights." << endl;
+    for (j = 0; j < option.pdim && !opt.fail(); j++) {
+      opt >> start[j];
+    }
+    if (j < option.pdim) {
+      cerr << option.init_file << ":Too few starting weights." << endl;
       exit(3);
     }
     start_list.push_back(start);
     // for the first time, also read in the min/max values for scores
     if (start_list.size() == 1) {
-      min.resize(pdim);
-      for( j=0; j<pdim&&!opt.fail(); j++)
-        opt>>min[j];
-      if(j<pdim) {
-        cerr<<initfile<<":Too few minimum weights." << endl;
-        cerr<<"error could not initialize start point with " << initfile << endl;
+      min.resize(option.pdim);
+      for (j = 0; j < option.pdim && !opt.fail(); j++) {
+        opt >> min[j];
+      }
+      if (j < option.pdim) {
+        cerr << option.init_file << ":Too few minimum weights." << endl;
+        cerr << "error could not initialize start point with " << option.init_file << endl;
+        cerr << "j: " << j << ", pdim: " << option.pdim << endl;
         exit(3);
       }
-      max.resize(pdim);
-      for( j=0; j<pdim&&!opt.fail(); j++)
-        opt>>max[j];
-      if(j<pdim) {
-        cerr<<initfile<<":Too few maximum weights." << endl;
+      max.resize(option.pdim);
+      for (j = 0; j < option.pdim && !opt.fail(); j++) {
+        opt >> max[j];
+      }
+      if (j < option.pdim) {
+        cerr << option.init_file << ":Too few maximum weights." << endl;
         exit(3);
       }
     }
@@ -281,13 +337,13 @@ int main (int argc, char **argv)
   }
 
   vector<string> ScoreDataFiles;
-  if (scorerfile.length() > 0) {
-    Tokenize(scorerfile.c_str(), ',', &ScoreDataFiles);
+  if (option.scorer_file.length() > 0) {
+    Tokenize(option.scorer_file.c_str(), ',', &ScoreDataFiles);
   }
 
   vector<string> FeatureDataFiles;
-  if (featurefile.length() > 0) {
-    Tokenize(featurefile.c_str(), ',', &FeatureDataFiles);
+  if (option.feature_file.length() > 0) {
+    Tokenize(option.feature_file.c_str(), ',', &FeatureDataFiles);
   }
 
   if (ScoreDataFiles.size() != FeatureDataFiles.size()) {
@@ -295,14 +351,20 @@ int main (int argc, char **argv)
   }
 
   // it make sense to know what parameter set were used to generate the nbest
-  Scorer *TheScorer = ScorerFactory::getScorer(scorertype,scorerconfig);
+  boost::scoped_ptr<Scorer> scorer(
+      ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
 
   //load data
-  Data D(*TheScorer,sparseweightsfile);
-  for (size_t i=0; i < ScoreDataFiles.size(); i++) {
-    cerr<<"Loading Data from: "<< ScoreDataFiles.at(i)  << " and " << FeatureDataFiles.at(i) << endl;
-    D.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
+  Data data(scorer.get(), option.sparse_weights_file);
+
+  for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
+    cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
+    data.load(FeatureDataFiles.at(i), ScoreDataFiles.at(i));
   }
+
+  scorer->setScoreData(data.getScoreData().get());
+
+  data.removeDuplicates();
 
   PrintUserTime("Data loaded");
 
@@ -312,71 +374,100 @@ int main (int argc, char **argv)
   //currently sparse weights are not even loaded
   //statscore_t score = TheScorer->score(bests);
 
-  if (tooptimizestr.length() > 0) {
-    cerr << "Weights to optimize: " << tooptimizestr << endl;
+  if (option.to_optimize_str.length() > 0) {
+    cerr << "Weights to optimize: " << option.to_optimize_str << endl;
 
-    // Parse string to get weights to optimize, and set them as active
-    std::string substring;
-    int index;
-    while (!tooptimizestr.empty()) {
-      getNextPound(tooptimizestr, substring, ",");
-      index = D.getFeatureIndex(substring);
-      cerr << "FeatNameIndex:" << index << " to insert" << endl;
-      //index = strtol(substring.c_str(), NULL, 10);
-      if (index >= 0 && index < pdim) {
-        tooptimize.push_back(index);
-      } else {
-        cerr << "Index " << index << " is out of bounds. Allowed indexes are [0," << (pdim-1) << "]." << endl;
+    // Parse the string to get weights to optimize, and set them as active.
+    vector<string> features;
+    Tokenize(option.to_optimize_str.c_str(), ',', &features);
+
+    for (vector<string>::const_iterator it = features.begin();
+         it != features.end(); ++it) {
+      const int feature_index = data.getFeatureIndex(*it);
+
+      // Note: previous implementaion checked whether
+      // feature_index is less than option.pdim.
+      // However, it does not make sense when we optimize 'discrete' features,
+      // given by '-o' option like -o "d_0,lm_0,tm_2,tm_3,tm_4,w_0".
+      if (feature_index < 0) {
+        cerr << "Error: invalid feature index = " << feature_index << endl;
+        exit(1);
       }
+      cerr << "FeatNameIndex: " << feature_index << " to insert" << endl;
+      to_optimize.push_back(feature_index);
     }
   } else {
     //set all weights as active
-    tooptimize.resize(pdim);//We'll optimize on everything
-    for(int  i=0; i<pdim; i++) {
-      tooptimize[i]=1;
+    to_optimize.resize(option.pdim);//We'll optimize on everything
+    for (int i = 0; i < option.pdim; i++) {
+      to_optimize[i] = 1;
+    }
+  }
+
+  positive.resize(option.pdim);
+  for (int i = 0; i < option.pdim; i++)
+    positive[i] = false;
+  if (option.positive_string.length() > 0) {
+    // Parse string to get weights that need to be positive
+    std::string substring;
+    int index;
+    while (!option.positive_string.empty()) {
+      getNextPound(option.positive_string, substring, ",");
+      index = data.getFeatureIndex(substring);
+      //index = strtol(substring.c_str(), NULL, 10);
+      if (index >= 0 && index < option.pdim) {
+        positive[index] = true;
+      } else {
+        cerr << "Index " << index
+             << " is out of bounds in positivity list. Allowed indexes are [0,"
+             << (option.pdim-1) << "]." << endl;
+      }
     }
   }
 
 #ifdef WITH_THREADS
-  cerr << "Creating a pool of " << threads << " threads" << endl;
-  Moses::ThreadPool pool(threads);
+  cerr << "Creating a pool of " << option.num_threads << " threads" << endl;
+  Moses::ThreadPool pool(option.num_threads);
 #endif
 
-  Point::setpdim(pdim);
-  Point::setdim(tooptimize.size());
+  Point::setpdim(option.pdim);
+  Point::setdim(to_optimize.size());
+  Point::set_optindices(to_optimize);
 
   //starting points consist of specified points and random restarts
   vector<Point> startingPoints;
 
   for (size_t i = 0; i < start_list.size(); ++i) {
-    startingPoints.push_back(Point(start_list[i],min,max));
-  }
-  for (int i = 0; i < ntry; ++i) {
-    startingPoints.push_back(Point(start_list[0],min,max));
-    startingPoints.back().Randomize();
+    startingPoints.push_back(Point(start_list[i], min, max));
   }
 
+  for (int i = 0; i < option.ntry; ++i) {
+    startingPoints.push_back(Point(start_list[0], min, max));
+    startingPoints.back().Randomize();
+  }
 
   vector<vector<OptimizationTask*> > allTasks(1);
 
   //optional sharding
   vector<Data> shards;
-  if (shard_count) {
-    D.createShards(shard_count, shard_size, scorerconfig, shards);
-    allTasks.resize(shard_count);
+  if (option.shard_count) {
+    data.createShards(option.shard_count, option.shard_size, option.scorer_config, shards);
+    allTasks.resize(option.shard_count);
   }
 
   // launch tasks
-  for (size_t i = 0 ; i < allTasks.size(); ++i) {
-    Data& data = D;
-    if (shard_count) data = shards[i]; //use the sharded data if it exists
+  for (size_t i = 0; i < allTasks.size(); ++i) {
+    Data& data_ref = data;
+    if (option.shard_count)
+      data_ref = shards[i]; //use the sharded data if it exists
+
     vector<OptimizationTask*>& tasks = allTasks[i];
-    Optimizer *O = OptimizerFactory::BuildOptimizer(pdim,tooptimize,start_list[0],type,nrandom);
-    O->SetScorer(data.getScorer());
-    O->SetFData(data.getFeatureData());
-    //A task for each start point
+    Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, positive, start_list[0], option.optimize_type, option.nrandom);
+    optimizer->SetScorer(data_ref.getScorer());
+    optimizer->SetFeatureData(data_ref.getFeatureData());
+    // A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
-      OptimizationTask* task = new OptimizationTask(O, startingPoints[j]);
+      OptimizationTask* task = new OptimizationTask(optimizer, startingPoints[j]);
       tasks.push_back(task);
 #ifdef WITH_THREADS
       pool.Submit(task);
@@ -396,27 +487,29 @@ int main (int argc, char **argv)
 
   // collect results
   for (size_t i = 0; i < allTasks.size(); ++i) {
-    statscore_t best=0, mean=0, var=0;
+    statscore_t best = 0, mean = 0, var = 0;
     Point bestP;
     for (size_t j = 0; j < allTasks[i].size(); ++j) {
       statscore_t score = allTasks[i][j]->getScore();
       mean += score;
-      var += score*score;
+      var += score * score;
       if (score > best) {
         bestP = allTasks[i][j]->getPoint();
         best = score;
       }
     }
 
-    mean/=(float)ntry;
-    var/=(float)ntry;
-    var=sqrt(abs(var-mean*mean));
-    if (verboselevel()>1)
-      cerr<<"shard " << i << " best score: "<< best << " variance of the score (for "<<ntry<<" try): "<<var<<endl;
+    mean /= static_cast<float>(option.ntry);
+    var /= static_cast<float>(option.ntry);
+    var = sqrt(abs(var - mean * mean));
+
+    if (verboselevel() > 1) {
+      cerr << "shard " << i << " best score: " << best << " variance of the score (for " << option.ntry << " try): " << var << endl;
+    }
 
     totalP += bestP;
     total += best;
-    if (verboselevel()>1)
+    if (verboselevel() > 1)
       cerr << "bestP " << bestP << endl;
   }
 
@@ -424,16 +517,19 @@ int main (int argc, char **argv)
   Point finalP = totalP * (1.0 / allTasks.size());
   statscore_t final = total / allTasks.size();
 
-  if (verboselevel()>1)
+  if (verboselevel() > 1)
     cerr << "bestP: " << finalP << endl;
 
   // L1-Normalization of the best Point
-  if ((int)tooptimize.size() == pdim)
+  if (static_cast<int>(to_optimize.size()) == option.pdim) {
     finalP.NormalizeL1();
+  }
 
   cerr << "Best point: " << finalP << " => " << final << endl;
-  ofstream res("weights.txt");
-  res<<finalP<<endl;
+
+  if (!WriteFinalWeights(kOutputFile, finalP)) {
+    cerr << "Warning: Failed to write the final point" << endl;
+  }
 
   for (size_t i = 0; i < allTasks.size(); ++i) {
     allTasks[i][0]->resetOptimizer();
@@ -442,6 +538,7 @@ int main (int argc, char **argv)
     }
   }
 
-  delete TheScorer;
   PrintUserTime("Stopping...");
+
+  return 0;
 }

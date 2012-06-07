@@ -22,6 +22,7 @@
 #include "SentenceAlignment.h"
 #include "tables-core.h"
 #include "InputFileStream.h"
+#include "OutputFileStream.h"
 
 using namespace std;
 
@@ -82,15 +83,16 @@ bool hierModel = false;
 REO_MODEL_TYPE hierType = REO_MSD;
 
 
-ofstream extractFile;
-ofstream extractFileInv;
-ofstream extractFileOrientation;
-ofstream extractFileSentenceId;
+Moses::OutputFileStream extractFile;
+Moses::OutputFileStream extractFileInv;
+Moses::OutputFileStream extractFileOrientation;
+Moses::OutputFileStream extractFileSentenceId;
 int maxPhraseLength;
 bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
+bool gzOutput = false;
 
 int main(int argc, char* argv[])
 {
@@ -116,6 +118,8 @@ int main(int argc, char* argv[])
       translationFlag = false;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
+    } else if (strcmp(argv[i], "--GZOutput") == 0) {
+      gzOutput = true;  
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -193,18 +197,18 @@ int main(int argc, char* argv[])
 
   // open output files
   if (translationFlag) {
-    string fileNameExtractInv = fileNameExtract + ".inv";
-    extractFile.open(fileNameExtract.c_str());
-    extractFileInv.open(fileNameExtractInv.c_str());
+    string fileNameExtractInv = fileNameExtract + ".inv" + (gzOutput?".gz":"");
+    extractFile.Open( (fileNameExtract + (gzOutput?".gz":"")).c_str());
+    extractFileInv.Open(fileNameExtractInv.c_str());
   }
   if (orientationFlag) {
-    string fileNameExtractOrientation = fileNameExtract + ".o";
-    extractFileOrientation.open(fileNameExtractOrientation.c_str());
+    string fileNameExtractOrientation = fileNameExtract + ".o" + (gzOutput?".gz":"");
+    extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
 
   if (sentenceIdFlag) {
-    string fileNameExtractSentenceId = fileNameExtract + ".sid";
-    extractFileSentenceId.open(fileNameExtractSentenceId.c_str());
+    string fileNameExtractSentenceId = fileNameExtract + ".sid" + (gzOutput?".gz":"");
+    extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
   int i=0;
@@ -239,12 +243,12 @@ int main(int argc, char* argv[])
   //az: only close if we actually opened it
   if (!onlyOutputSpanInfo) {
     if (translationFlag) {
-      extractFile.close();
-      extractFileInv.close();
+      extractFile.Close();
+      extractFileInv.Close();
     }
-    if (orientationFlag) extractFileOrientation.close();
+    if (orientationFlag) extractFileOrientation.Close();
     if (sentenceIdFlag) {
-      extractFileSentenceId.close();
+      extractFileSentenceId.Close();
     }
   }
 }
@@ -282,7 +286,7 @@ void extract(SentenceAlignment &sentence)
       int maxF = -1;
       vector< int > usedF = sentence.alignedCountS;
       for(int ei=startE; ei<=endE; ei++) {
-        for(int i=0; i<sentence.alignedToT[ei].size(); i++) {
+        for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
           int fi = sentence.alignedToT[ei][i];
           if (fi<minF) {
             minF = fi;
@@ -354,7 +358,7 @@ void extract(SentenceAlignment &sentence)
     string orientationInfo = "";
     REO_POS wordPrevOrient, wordNextOrient, phrasePrevOrient, phraseNextOrient, hierPrevOrient, hierNextOrient;
 
-    for(int i = 0; i < inboundPhrases.size(); i++) {
+    for(size_t i = 0; i < inboundPhrases.size(); i++) {
       int startF = inboundPhrases[i].first.first;
       int startE = inboundPhrases[i].first.second;
       int endF = inboundPhrases[i].second.first;
@@ -523,11 +527,11 @@ bool isAligned ( SentenceAlignment &sentence, int fi, int ei )
     return true;
   if (ei <= -1 || fi <= -1)
     return false;
-  if (ei == sentence.target.size() && fi == sentence.source.size())
+  if ((size_t)ei == sentence.target.size() && (size_t)fi == sentence.source.size())
     return true;
-  if (ei >= sentence.target.size() || fi >= sentence.source.size())
+  if ((size_t)ei >= sentence.target.size() || (size_t)fi >= sentence.source.size())
     return false;
-  for(int i=0; i<sentence.alignedToT[ei].size(); i++)
+  for(size_t i=0; i<sentence.alignedToT[ei].size(); i++)
     if (sentence.alignedToT[ei][i] == fi)
       return true;
   return false;
@@ -601,6 +605,7 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
     }
     break;
   }
+  return "";
 }
 
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
@@ -644,7 +649,7 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   // alignment
   if (translationFlag) {
     for(int ei=startE; ei<=endE; ei++) {
-      for(int i=0; i<sentence.alignedToT[ei].size(); i++) {
+      for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
         int fi = sentence.alignedToT[ei][i];
         extractFile << " " << fi-startF << "-" << ei-startE;
         extractFileInv << " " << ei-startE << "-" << fi-startF;

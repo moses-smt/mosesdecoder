@@ -249,7 +249,8 @@ int printgrow(fstream& out,int m,int *a,int n,int* b, bool diagonal=false,bool f
   }
 
 
-  int i,j,o;
+  int i,j;
+  size_t o;
 
 
   //covered foreign and english positions
@@ -391,8 +392,8 @@ int main(int argc, char** argv)
 {
 
   int alignment=0;
-  char* input="/dev/stdin";
-  char* output="/dev/stdout";
+  char* input=(char*)"/dev/stdin";
+  char* output=(char*)"/dev/stdout";
   int diagonal=false;
   int final=false;
   int bothuncovered=false;
@@ -410,10 +411,10 @@ int main(int argc, char** argv)
                 "o", CMDSTRINGTYPE, &output,
                 "v", CMDENUMTYPE,  &verbose, BoolEnum,
                 "verbose", CMDENUMTYPE,  &verbose, BoolEnum,
+                
+                (char*)NULL);
 
-                (char *)NULL);
-
-  GetParams(&argc, &argv, (char*) NULL);
+  GetParams(&argc, &argv, (char*)NULL);
 
   if (alignment==0) {
     cerr << "usage: symal [-i=<inputfile>] [-o=<outputfile>] -a=[u|i|g] -d=[yes|no] -b=[yes|no] -f=[yes|no] \n"

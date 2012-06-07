@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -49,7 +50,7 @@ LanguageModelIRST::~LanguageModelIRST()
 
 #ifndef WIN32
   TRACE_ERR( "reset mmap\n");
-  m_lmtb->reset_mmap();
+  if (m_lmtb) m_lmtb->reset_mmap();
 #endif
 
   delete m_lmtb;
@@ -61,6 +62,14 @@ bool LanguageModelIRST::Load(const std::string &filePath,
                              size_t nGramOrder)
 {
   cerr << "In LanguageModelIRST::Load: nGramOrder = " << nGramOrder << "\n";
+
+  const StaticData &staticData = StaticData::Instance();
+  int threadCount = staticData.ThreadCount();
+  if (threadCount != 1)
+  {
+    UserMessage::Add(threadCount + " number of threads specified but IRST LM is not threadsafe.");
+    return false;
+  }
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 

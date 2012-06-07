@@ -26,9 +26,9 @@
 namespace Moses {
 namespace GHKM {
 
-class Options;
+struct Options;
 class ScfgRule;
-class Symbol;
+struct Symbol;
 
 class ScfgRuleWriter
 {
@@ -45,8 +45,8 @@ class ScfgRuleWriter
   ScfgRuleWriter(const ScfgRuleWriter &);
   ScfgRuleWriter &operator=(const ScfgRuleWriter &);
 
-  void WriteStandardFormat(const ScfgRule &);
-  void WriteUnpairedFormat(const ScfgRule &);
+  void WriteStandardFormat(const ScfgRule &, std::ostream &, std::ostream &);
+  void WriteUnpairedFormat(const ScfgRule &, std::ostream &, std::ostream &);
   void WriteSymbol(const Symbol &, std::ostream &);
 
   std::ostream &m_fwd;

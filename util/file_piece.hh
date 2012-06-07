@@ -13,6 +13,10 @@
 
 #include <stdint.h>
 
+#ifdef HAVE_ZLIB
+#include <zlib.h>
+#endif
+
 namespace util {
 
 class ParseNumberException : public Exception {
@@ -23,7 +27,9 @@ class ParseNumberException : public Exception {
 
 class GZException : public Exception {
   public:
-    explicit GZException(void *file);
+#ifdef HAVE_ZLIB
+    explicit GZException(gzFile file);
+#endif
     GZException() throw() {}
     ~GZException() throw() {}
 };
@@ -117,7 +123,7 @@ class FilePiece {
     std::string file_name_;
 
 #ifdef HAVE_ZLIB
-    void *gz_file_;
+    gzFile gz_file_;
 #endif // HAVE_ZLIB
 };
 

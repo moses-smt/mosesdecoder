@@ -116,7 +116,7 @@ sub init_agenda_graph() {
     my $dir = &check_and_get("GENERAL:working-dir");    
 
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
-    open(PS,">".$graph_file.".ps");
+    open(PS,">".$graph_file.".ps") or die "Cannot open: $!";
     print PS "%!\n"
 		."/Helvetica findfont 36 scalefont setfont\n"
 		."72 72 moveto\n"
@@ -368,7 +368,7 @@ sub log_config {
     `mkdir -p $dir/steps`;
     my $config_file = &steps_file("config.$VERSION",$VERSION);
     `cp $CONFIG_FILE $config_file` unless $CONTINUE;
-    open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION));
+    open(PARAMETER,">".&steps_file("parameter.$VERSION",$VERSION)) or die "Cannot open: $!";
     foreach my $parameter (sort keys %CONFIG) {
 	print PARAMETER "$parameter =";
 	foreach (@{$CONFIG{$parameter}}) {
@@ -752,7 +752,7 @@ sub find_re_use {
 
     # summarize and convert hashes into integers for to be re-used 
     print "\nSTEP SUMMARY:\n";
-    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION));
+    open(RE_USE,">".&steps_file("re-use.$VERSION",$VERSION)) or die "Cannot open: $!";
     for(my $i=$#DO_STEP;$i>=0;$i--) {
         if ($PASS{$i}) {
 	    $RE_USE[$i] = 0;
@@ -798,7 +798,7 @@ sub find_dependencies {
 sub draw_agenda_graph {
     my %M;
     my $dir = &check_and_get("GENERAL:working-dir");
-    open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION));
+    open(DOT,">".&steps_file("graph.$VERSION.dot",$VERSION)) or die "Cannot open: $!";
     print DOT "digraph Experiment$VERSION {\n";
     print DOT "  ranksep=0;\n";
     for(my $i=0;$i<=$#DO_STEP;$i++) {
@@ -865,7 +865,7 @@ sub draw_agenda_graph {
     close(DOT);
     my $graph_file = &steps_file("graph.$VERSION",$VERSION);
     `dot -Tps $graph_file.dot >$graph_file.ps`;
-    `convert $graph_file.ps $graph_file.png`;
+    `convert -alpha off $graph_file.ps $graph_file.png`;
 }
 
 sub define_step {
@@ -1021,9 +1021,9 @@ sub execute_steps {
 		  delete($DO{$i});
       $repeat_if_passed = 1;
     }
-	}
+  }
 
-	print "number of steps doable or running: ".(scalar keys %DO)."\n";
+  print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
   foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	
@@ -1126,7 +1126,8 @@ sub write_info {
     my $module_set = $step; $module_set =~ s/:[^:]+$//;
     
 
-    open(INFO,">".&versionize(&step_file($i)).".INFO");
+
+    open(INFO,">".&versionize(&step_file($i)).".INFO") or die "Cannot open: $!";
     my %VALUE = &get_parameters_relevant_for_re_use($i);
     foreach my $parameter (keys %VALUE) {
 	print INFO "$parameter = $VALUE{$parameter}\n";
@@ -1153,7 +1154,7 @@ sub check_info {
     my %VALUE = &get_parameters_relevant_for_re_use($i);
 
     my %INFO;
-    open(INFO,&versionize(&step_file($i),$version).".INFO");
+    open(INFO,&versionize(&step_file($i),$version).".INFO") or die "Cannot open: $!";
     while(<INFO>) {
 	chop;
 	if (/ = /) {
@@ -1277,7 +1278,7 @@ sub check_if_crashed {
     my $error = 0;
 
     if (-e $file.".digest") {
-	open(DIGEST,$file.".digest");
+	open(DIGEST,$file.".digest") or die "Cannot open: $!";
 	while(<DIGEST>) {
 	    $error++;
 	    print "\t$DO_STEP[$i]($version) crashed: $_" if $VERBOSE;
@@ -1287,7 +1288,7 @@ sub check_if_crashed {
     }
 
     my @DIGEST;
-    open(ERROR,$file);
+    open(ERROR,$file) or die "Cannot open: $!";
     while(<ERROR>) {
 	foreach my $pattern (@{$ERROR{&defined_step_id($i)}},
 			     'error','killed','core dumped','can\'t read',
@@ -1313,7 +1314,7 @@ sub check_if_crashed {
     }
     close(ERROR);
 
-    open(DIGEST,">$file.digest");
+    open(DIGEST,">$file.digest") or die "Cannot open: $!";
     foreach (@DIGEST) {
 	print DIGEST $_."\n";
     }
@@ -1976,6 +1977,9 @@ sub define_training_create_config {
     my $additional_ini = &get("TRAINING:additional-ini");
     $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
 
+    my $additional_ini = &get("TRAINING:additional-ini");
+    $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
+
     &create_step($step_id,$cmd);
 }
 
@@ -1986,7 +1990,6 @@ sub define_interpolated_lm_interpolate {
 	$interpolation_script, $tuning, @LM) = &get_output_and_input($step_id);
     my $srilm_dir = &check_backoff_and_get("INTERPOLATED-LM:srilm-dir");
     my $group = &get("INTERPOLATED-LM:group");
-
     my $cmd = "";
 
     # go through language models by factor and order 
@@ -2089,7 +2092,6 @@ sub get_interpolated_lm_processed_names {
 
 sub get_interpolated_lm_sets {
   my %ILM_SETS;
-
   my @LM_SETS = &get_sets("LM");
   my %OUTPUT_FACTORS;
   %OUTPUT_FACTORS = &get_factor_id("output") if &backoff_and_get("TRAINING:output-factors");
@@ -2128,7 +2130,7 @@ sub get_training_setting {
     my $target_syntax = &get("GENERAL:output-parser");
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
-
+    my $pcfg = &get("TRAINING:use-pcfg-feature");
     my $xml = $source_syntax || $target_syntax;
 
     my $cmd = "$training_script ";
@@ -2150,6 +2152,7 @@ sub get_training_setting {
     $cmd .= "-glue-grammar " if $hierarchical;
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
+    $cmd .= "-pcfg " if $pcfg;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2257,8 +2260,8 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_config,
-	$config,$input) = &get_output_and_input($step_id);
+    my ($filter_dir,
+	$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2270,18 +2273,10 @@ sub define_tuningevaluation_filter {
     my $input_filter;
     $input_filter = &get("EVALUATION:$set:input-filter") unless $tuning_flag;
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
+    print "filter: $input_filter \n";
     $input_filter = $input unless $input_filter;
     
-    my $filter_dir;
-    if ($type) {
-	$filter_dir = "$dir/tuning/filtered.$type.$VERSION";
-    }
-    else {
-	$filter_dir = "$dir/tuning/filtered.$VERSION";
-    }
- 
-    $filter_dir = "$dir/evaluation/filtered.$set.$VERSION" unless $tuning_flag;
-
+    # additional settings
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
@@ -2291,8 +2286,31 @@ sub define_tuningevaluation_filter {
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
-    my $cmd = "$scripts/training/filter-model-given-input.pl";
-    $cmd .= " $filter_dir $config $input_filter $settings";
+    # create pseudo-config file
+    my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
+    my $cmd = &get_training_setting(9);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
+	if $reordering_table;
+    # additional settings for hierarchical models
+    if (&get("TRAINING:hierarchical-rule-set")) {
+      my $extract_version = $VERSION;
+      $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
+        if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
+      my $glue_grammar_file = &get("TRAINING:glue-grammar");
+      $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
+        unless $glue_grammar_file;
+      $cmd .= "-glue-grammar-file $glue_grammar_file ";
+    }
+    $cmd .= "-lm 0:3:$dir "; # dummy
+    $cmd .= "-config $config\n";
+    
+    # filter command
+    $cmd .= "$scripts/training/filter-model-given-input.pl";
+    $cmd .= " $filter_dir $config $input_filter $settings\n";
+
+    # clean-up
+    $cmd .= "rm $config";
 
     my $use_mira = &backoff_and_get("TUNING:use-mira");
     if ($type && $type eq "dev" && $use_mira) {
@@ -2715,7 +2733,7 @@ sub create_step {
     $subdir =~ tr/A-Z/a-z/; 
     $subdir = "evaluation" if $subdir eq "reporting";
     $subdir = "lm" if $subdir eq "interpolated-lm";
-    open(STEP,">$file");
+    open(STEP,">$file") or die "Cannot open: $!";
     print STEP "#!/bin/bash\n\n";
     print STEP "PATH=\"".$ENV{"PATH"}."\"\n";
     print STEP "cd $dir\n";

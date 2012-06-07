@@ -5,10 +5,11 @@
 #include <stdexcept>
 
 #include "ScoreStats.h"
-#include "TERsrc/tercalc.h"
-#include "TERsrc/terAlignment.h"
+#include "TER/tercalc.h"
+#include "TER/terAlignment.h"
 #include "Util.h"
 
+using namespace std;
 using namespace TERCpp;
 
 TerScorer::TerScorer(const string& config)
@@ -24,8 +25,8 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
     stringstream convert;
     m_references.clear();
 
-    _reftokens.clear();
-    _reflengths.clear();
+    m_ref_tokens.clear();
+    m_ref_lengths.clear();
     ifstream in ( referenceFiles.at ( incRefs ).c_str() );
     if ( !in ) {
       throw runtime_error ( "Unable to open " + referenceFiles.at ( incRefs ) );
@@ -33,8 +34,9 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
     string line;
     int sid = 0;
     while ( getline ( in, line ) ) {
+      line = this->preprocessSentence(line);
       vector<int> tokens;
-      encode ( line, tokens );
+      TokenizeAndEncode(line, tokens);
       m_references.push_back ( tokens );
       TRACE_ERR ( "." );
       ++sid;
@@ -48,6 +50,7 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
 
 void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry )
 {
+  string sentence = this->preprocessSentence(text);
 
   terAlignment result;
   result.numEdits = 0.0 ;
@@ -74,7 +77,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
       averageLength+=(double)m_multi_references.at ( incRefsBis ).at ( sid ).size();
     }
     averageLength=averageLength/( double ) m_multi_references.size();
-    encode ( text, testtokens );
+    TokenizeAndEncode(sentence, testtokens);
     terCalc * evaluation=new terCalc();
     evaluation->setDebugMode ( false );
     terAlignment tmp_result = evaluation->TER ( reftokens, testtokens );
@@ -84,7 +87,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
     } else if ( result.scoreAv() > tmp_result.scoreAv() ) {
       result = tmp_result;
     }
-
+    delete evaluation;
   }
   ostringstream stats;
   // multiplication by 100 in order to keep the average precision

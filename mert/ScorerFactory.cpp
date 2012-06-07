@@ -7,6 +7,8 @@
 #include "TerScorer.h"
 #include "CderScorer.h"
 #include "MergeScorer.h"
+#include "InterpolatedScorer.h"
+#include "SemposScorer.h"
 
 using namespace std;
 
@@ -16,22 +18,34 @@ vector<string> ScorerFactory::getTypes() {
   types.push_back(string("PER"));
   types.push_back(string("TER"));
   types.push_back(string("CDER"));
+  types.push_back(string("WER"));
   types.push_back(string("MERGE"));
+  types.push_back(string("SEMPOS"));
   return types;
 }
 
 Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
   if (type == "BLEU") {
-    return (BleuScorer*) new BleuScorer(config);
+    return new BleuScorer(config);
   } else if (type == "PER") {
-    return (PerScorer*) new PerScorer(config);
+    return new PerScorer(config);
   } else if (type == "TER") {
-    return (TerScorer*) new TerScorer(config);
+    return new TerScorer(config);
   } else if (type == "CDER") {
-    return (CderScorer*) new CderScorer(config);
+    return new CderScorer(config, true);
+  } else if (type == "WER") {
+    // CderScorer can compute both CDER and WER metric
+    return new CderScorer(config, false);
+  } else if (type == "SEMPOS") {
+    return new SemposScorer(config);
   } else if (type == "MERGE") {
-    return (MergeScorer*) new MergeScorer(config);
+    return new MergeScorer(config);
   } else {
-    throw runtime_error("Unknown scorer type: " + type);
+    if (type.find(',') != string::npos) {
+      return new InterpolatedScorer(type, config);
+    }
+    else {
+      throw runtime_error("Unknown scorer type: " + type);
+    }
   }
 }

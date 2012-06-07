@@ -47,11 +47,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationSystem.h"
 #include "ScoreComponentCollection.h"
 
-#if HAVE_CONFIG_H
-#include "config.h"
-#endif
-//#include "UnknownWordHandler.h"
-
 namespace Moses
 {
 
@@ -155,6 +150,7 @@ protected:
   bool m_outputHypoScore;
   bool m_enableOnlineCommand; //! flag indicating whether online commands to change some decoder parameters are enable; if yes, the persistent translation option cache is disabled
 
+  ParsingAlgorithm m_parsingAlgorithm;
   SearchAlgorithm m_searchAlgorithm;
   InputTypeEnum m_inputType;
   size_t m_numInputScores;
@@ -479,6 +475,9 @@ public:
   //! Sets the global score vector weights for a given ScoreProducer.
   InputTypeEnum GetInputType() const {
     return m_inputType;
+  }
+  ParsingAlgorithm GetParsingAlgorithm() const {
+    return m_parsingAlgorithm;
   }
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;

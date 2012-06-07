@@ -196,6 +196,12 @@ void TargetPhraseCollection::SetDebugStr(const std::string &str)
   m_debugStr = str;
 }
 
+const TargetPhrase &TargetPhraseCollection::GetTargetPhrase(size_t ind) const
+{
+  assert(ind < GetSize());
+  return *m_coll[ind];
+}
+  
 }
 
 

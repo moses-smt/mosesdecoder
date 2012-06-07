@@ -13,6 +13,7 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
+#include "InputFileStream.h"
 
 #include "reordering_classes.h"
 
@@ -37,7 +38,7 @@ int main(int argc, char* argv[])
   double smoothingValue = atof(argv[2]);
   string filepath = argv[3];
 
-  ifstream eFile(extractFileName);
+  Moses::InputFileStream eFile(extractFileName);
   if (!eFile) {
     cerr << "Could not open the extract file " << extractFileName <<"for scoring of lexical reordering models\n";
     exit(1);
@@ -113,16 +114,16 @@ int main(int argc, char* argv[])
     }
 
     // calculate smoothing for each model
-    for (int i=0; i<models.size(); ++i) {
+    for (size_t i=0; i<models.size(); ++i) {
       models[i]->createSmoothing(smoothingValue);
     }
 
     //reopen eFile
-    eFile.close();
-    eFile.open(extractFileName);
+    eFile.Close();
+    eFile.Open(extractFileName);
   } else {
     //constant smoothing
-    for (int i=0; i<models.size(); ++i) {
+    for (size_t i=0; i<models.size(); ++i) {
       models[i]->createConstSmoothing(smoothingValue);
     }
   }
@@ -140,7 +141,7 @@ int main(int argc, char* argv[])
       first = false;
     } else if (f.compare(f_current) != 0 || e.compare(e_current) != 0) {
       //fe - score
-      for (int i=0; i<models.size(); ++i) {
+      for (size_t i=0; i<models.size(); ++i) {
         models[i]->score_fe(f_current,e_current);
       }
       //reset
@@ -150,7 +151,7 @@ int main(int argc, char* argv[])
 
       if (f.compare(f_current) != 0) {
         //f - score
-        for (int i=0; i<models.size(); ++i) {
+        for (size_t i=0; i<models.size(); ++i) {
           models[i]->score_f(f_current);
         }
         //reset
@@ -177,15 +178,15 @@ int main(int argc, char* argv[])
     }
   }
   //Score the last phrases
-  for (int i=0; i<models.size(); ++i) {
+  for (size_t i=0; i<models.size(); ++i) {
     models[i]->score_fe(f,e);
   }
-  for (int i=0; i<models.size(); ++i) {
+  for (size_t i=0; i<models.size(); ++i) {
     models[i]->score_f(f);
   }
 
   //Zip all files
-  for (int i=0; i<models.size(); ++i) {
+  for (size_t i=0; i<models.size(); ++i) {
     models[i]->zipFile();
   }
 

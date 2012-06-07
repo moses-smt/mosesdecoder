@@ -66,7 +66,7 @@ public:
       return -std::numeric_limits<float>::infinity();
     return m_diversityWorstScore[ id ];
   }
-  float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
+  virtual float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
     return GetWorstScoreForBitmap( coverage.GetID() );
   }
 

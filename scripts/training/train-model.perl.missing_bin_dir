@@ -19,7 +19,7 @@ if ($SCRIPTS_ROOTDIR eq '') {
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_CORPUS,
+my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE,  $_SORT_COMPRESS, $_SORT_PARALLEL, $_CORPUS,
    $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
    $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
    $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
@@ -29,18 +29,21 @@ my($_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_
    $_DECODING_GRAPH_BACKOFF,
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS,  $_HMM_ALIGN, $_CONFIG,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+   $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    $_ADDITIONAL_INI,
    $_DICTIONARY, $_EPPEX, $_SPARSE_PHRASE_FEATURES);
 
+my $_CORES = 1;
+
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 # the following line is set installation time by 'make release'.  BEWARE!
-my $BINDIR="/home/pkoehn/statmt/bin";
+my $BINDIR="/Users/hieuhoang/workspace/bin/training-tools/";
 
 $_HELP = 1
     unless &GetOptions('root-dir=s' => \$_ROOT_DIR,
@@ -57,6 +60,9 @@ $_HELP = 1
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
            'sort-buffer-size=s' => \$_SORT_BUFFER_SIZE,
+           'sort-batch-size=i' => \$_SORT_BATCH_SIZE,
+           'sort-compress=s' => \$_SORT_COMPRESS,
+           'sort-parallel=i' => \$_SORT_PARALLEL,
 		       'extract-file=s' => \$_EXTRACT_FILE,
 		       'alignment=s' => \$_ALIGNMENT,
 		       'alignment-file=s' => \$_ALIGNMENT_FILE,
@@ -71,6 +77,7 @@ $_HELP = 1
 		       'help' => \$_HELP,
 		       'mgiza' => \$_MGIZA, # multi-thread 
 		       'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
+		       'snt2cooc=s' => \$_SNT2COOC, # override snt2cooc exe. For when you want to run reduced memory snt2cooc.perl from mgiza
 		       'hmm-align' => \$_HMM_ALIGN,
 		       'final-alignment-model=s' => \$_FINAL_ALIGNMENT_MODEL, # use word alignment model 1/2/hmm/3/4/5 as final (default is 4); value 'hmm' equivalent to the --hmm-align switch
 		       'debug' => \$debug,
@@ -100,6 +107,9 @@ $_HELP = 1
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'ghkm' => \$_GHKM,
+		       'pcfg' => \$_PCFG,
+		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
+		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
 		       'extract-options=s' => \$_EXTRACT_OPTIONS,
 		       'score-options=s' => \$_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
@@ -112,9 +122,10 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
-           'additional-ini=s' => \$_ADDITIONAL_INI,
            'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES,
 		       'eppex:s' => \$_EPPEX
+           'additional-ini=s' => \$_ADDITIONAL_INI,
+           'cores=i' => \$_CORES
                );
 
 if ($_HELP) {
@@ -180,24 +191,68 @@ foreach my $step (@step_conf) {
 # supporting binaries from other packages
 my $MGIZA_MERGE_ALIGN = "$BINDIR/merge_alignment.py";
 my $GIZA;
+my $SNT2COOC;
+
 if(!defined $_MGIZA ){
 	$GIZA = "$BINDIR/GIZA++";
+	if (-x "$BINDIR/snt2cooc.out") {
+  	$SNT2COOC = "$BINDIR/snt2cooc.out";
+	} elsif (-x "$BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same   
+		$SNT2COOC = "$BINDIR/snt2cooc";
+	}
 	print STDERR "Using single-thread GIZA\n";
-}
-else {
-    $GIZA = "$BINDIR/mgizapp";
+} else {
+  $GIZA = "$BINDIR/mgiza";
+	if (-x "$BINDIR/snt2cooc") {
+  	$SNT2COOC = "$BINDIR/snt2cooc";
+  } elsif (-x "$BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $BINDIR 
+    $SNT2COOC = "$BINDIR/snt2cooc.out";
+  }
 	print STDERR "Using multi-thread GIZA\n";	
-    if (!defined($_MGIZA_CPUS)) {
-        $_MGIZA_CPUS=4;
-    }
-    die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
+  if (!defined($_MGIZA_CPUS)) {
+  	$_MGIZA_CPUS=4;
+  }
+  die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
 }
 
-my $SNT2COOC = "$BINDIR/snt2cooc.out"; 
+# override
+$SNT2COOC = "$BINDIR/$_SNT2COOC" if defined($_SNT2COOC);
+
 my $MKCLS = "$BINDIR/mkcls";
+
+# parallel extract
+my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+if($SPLIT_EXEC) {
+  $SPLIT_EXEC = 'gsplit';
+}
+else {
+  $SPLIT_EXEC = 'split';
+}
+
+my $SORT_EXEC = `gsort --help 2>/dev/null`; 
+if($SORT_EXEC) {
+  $SORT_EXEC = 'gsort';
+}
+else {
+  $SORT_EXEC = 'sort';
+}
+
+my $__SORT_BUFFER_SIZE = "";
+$__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
+
+my $__SORT_BATCH_SIZE = "";
+$__SORT_BATCH_SIZE = "--batch-size $_SORT_BATCH_SIZE" if $_SORT_BATCH_SIZE;
+
+my $__SORT_COMPRESS = "";
+$__SORT_COMPRESS = "--compress-program $_SORT_COMPRESS" if $_SORT_COMPRESS;
+
+my $__SORT_PARALLEL = "";
+$__SORT_PARALLEL = "--parallel $_SORT_PARALLEL" if $_SORT_PARALLEL;
 
 # supporting scripts/binaries from this package
 my $PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract";
+$PHRASE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl $_CORES $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_EXTRACT";
+
 my $RULE_EXTRACT;
 if (defined($_GHKM)) {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-ghkm/tools/extract-ghkm";
@@ -205,12 +260,17 @@ if (defined($_GHKM)) {
 else {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/training/phrase-extract/extract-rules";
 }
+$RULE_EXTRACT = "$SCRIPTS_ROOTDIR/generic/extract-parallel.perl $_CORES $SPLIT_EXEC \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $RULE_EXTRACT";
+
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/training/memscore/memscore";
 my $EPPEX = "$SCRIPTS_ROOTDIR/training/eppex/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
+
 my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/training/phrase-extract/score";
+$PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
+
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/training/phrase-extract/consolidate";
 
 # utilities
@@ -220,8 +280,8 @@ my $BZCAT = "bzcat";
 # do a sanity check to make sure we can find the necessary binaries since
 # these are not installed by default
 # not needed if we start after step 2
-die("ERROR: Cannot find mkcls, GIZA++, & snt2cooc.out in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
-                                       (-x $GIZA && -x $SNT2COOC && -x $MKCLS));
+die("ERROR: Cannot find mkcls, GIZA++/mgiza, & snt2cooc.out/snt2cooc in $BINDIR.\nDid you install this script using 'make release'?") unless ((!$STEPS[2]) ||
+                                       (-x $GIZA && defined($SNT2COOC) && -x $MKCLS));
 
 # set varibles to defaults or from options
 my $___ROOT_DIR = ".";
@@ -298,13 +358,12 @@ $_DONT_ZIP = $___DONT_ZIP unless $___DONT_ZIP;
 my $___TEMP_DIR = $___MODEL_DIR;
 $___TEMP_DIR = $_TEMP_DIR if $_TEMP_DIR;
 
-my $__SORT_BUFFER_SIZE = "";
-$__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
-
 my $___CONTINUE = 0; 
 $___CONTINUE = $_CONTINUE if $_CONTINUE;
 
 my $___MAX_PHRASE_LENGTH = "7";
+$___MAX_PHRASE_LENGTH = "10" if $_HIERARCHICAL;
+
 my $___LEXICAL_WEIGHTING = 1;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
@@ -630,6 +689,7 @@ sub reduce_factors {
         # available factors
         my $inh = open_or_zcat($full);
         my $firstline = <$inh>;
+        die "Corpus file $full is empty" unless $firstline;
         close $inh;
         # pick first word
         $firstline =~ s/^\s*//;
@@ -1041,8 +1101,13 @@ sub run_single_snt2cooc {
     my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
     print STDERR "(2.1a) running snt2cooc $f-$e @ ".`date`."\n";
     safesystem("mkdir -p $dir") or die("ERROR");
+    if ($SNT2COOC eq "$BINDIR/snt2cooc.out") {
     print "$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc\n";
     safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc") or die("ERROR");
+    } else {
+    print "$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train\n";
+    safesystem("$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train") or die("ERROR");
+    } 
 }
 
 ### (3) CREATE WORD ALIGNMENT FROM GIZA ALIGNMENTS
@@ -1309,12 +1374,18 @@ sub extract_phrase {
     my $cmd;
     if ($_HIERARCHICAL)
     {
+        my $max_length = &get_max_phrase_length($table_number);
+
         $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
+        $cmd .= " --PCFG" if $_PCFG;
+        $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
+        $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
         if (!defined($_GHKM)) {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
+          $cmd .= " --MaxSpan $max_length";
         }
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
@@ -1338,20 +1409,16 @@ sub extract_phrase {
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
     }
+    
+    $cmd .= " --GZOutput ";
+    
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
     foreach my $f (@tempfiles) {
       unlink $f;
     }
-    if (! $___DONT_ZIP) { 
-      safesystem("gzip $extract_file.o") if -e "$extract_file.o";
-      safesystem("gzip $extract_file.sid") if -e "$extract_file.sid";
-      if ($ttable_flag) {
-        safesystem("gzip $extract_file.inv") or die("ERROR");
-        safesystem("gzip $extract_file") or die("ERROR");
-      }
-    }
+    
 }
 
 ### (6) PHRASE SCORING
@@ -1413,68 +1480,92 @@ sub score_phrase_phrase_extract {
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
 
     my $substep = 1;
+    my $isParent = 1;
+    my @children;
+
     for my $direction ("f2e","e2f") {
-	next if $___CONTINUE && -e "$ttable_file.half.$direction";
-	next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.sorted";
-	my $inverse = "";
-        my $extract_filename = $extract_file;
-	if ($direction eq "e2f") {
-	    $inverse = " --Inverse";
-            $extract_filename = $extract_file.".inv";
-        }
-	my $extract = "$extract_filename.sorted";
+      if ($___NOFORK and @children > 0) {
+        waitpid((shift @children), 0);
+		  $substep+=2;
+      }
+      my $pid = fork();
+    
+      if ($pid == 0)
+      {
+	      next if $___CONTINUE && -e "$ttable_file.half.$direction";
+	      next if $___CONTINUE && $direction eq "e2f" && -e "$ttable_file.half.e2f.gz";
+	      my $inverse = "";
+              my $extract_filename = $extract_file;
+	      if ($direction eq "e2f") {
+	          $inverse = " --Inverse";
+                  $extract_filename = $extract_file.".inv";
+              }
+	      my $extract = "$extract_filename.sorted.gz";
 
-	if (!($___CONTINUE && -e "$extract_filename.sorted")) {
-	    # sorting
-	    print STDERR "(6.".($substep++).")  sorting $direction @ ".`date`;
-	    if (-e "$extract_filename.gz") {
-		safesystem("gunzip < $extract_filename.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR > $extract_filename.sorted") or die("ERROR");
-	    }
-	    else {
-		safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR $extract_filename > $extract_filename.sorted") or die("ERROR");
-	    }
-        }
+	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-	print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
-
-        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction $inverse";
+        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
-        $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
-        $cmd .= " --GoodTuring $ttable_file.coc" if $GOOD_TURING && $inverse eq "";
+        $cmd .= " --KneserNey" if $KNESER_NEY;
+        $cmd .= " --GoodTuring" if $GOOD_TURING && $inverse eq "";
         $cmd .= " --UnalignedPenalty" if $UNALIGNED_COUNT;
         $cmd .= " --UnalignedFunctionWordPenalty ".($inverse ? $UNALIGNED_FW_F : $UNALIGNED_FW_E) if $UNALIGNED_FW_COUNT;
         $cmd .= " --MinCountHierarchical $MIN_COUNT_HIERARCHICAL" if $MIN_COUNT_HIERARCHICAL;
+        $cmd .= " --PCFG" if $_PCFG;
+        $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
+        $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
-        print $cmd."\n";
+
+				# sorting
+				if ($direction eq "e2f" || $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2) {
+					$cmd .= " 1 ";
+				}
+				else {
+					$cmd .= " 0 ";
+				}
+
+      print $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
-        if (! $debug) { safesystem("rm -f $extract") or die("ERROR"); }
+  
+        exit();
+      }
+      else
+      { # parent
+    	  push(@children, $pid);
+      }
+
     }
 
-    # sorting inverse phrase-table-half to sync up with regular one
-    print STDERR "(6.5) sorting inverse e2f table@ ".`date`;
-    if (! ($___CONTINUE && -e "$ttable_file.half.e2f.sorted")) {
-	safesystem("LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR $ttable_file.half.e2f > $ttable_file.half.e2f.sorted") or die("ERROR");
-	if (! $debug) { safesystem("rm -f $ttable_file.half.e2f") or die("ERROR"); }
+    # wait for everything is finished
+    if ($isParent)
+    {
+        foreach (@children) {
+	        waitpid($_, 0);
+        }
+    }
+    else
+    {
+        die "shouldn't be here";
     }
 
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e $ttable_file.half.e2f.sorted $ttable_file";
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e.gz $ttable_file.half.e2f.gz /dev/stdout";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
     $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
-    $cmd .= " --GoodTuring $ttable_file.coc" if $GOOD_TURING;
-    $cmd .= " --KneserNey $ttable_file.coc" if $KNESER_NEY;
+    $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
+    $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
+    
+    $cmd .= " | gzip -c > $ttable_file.gz";
+    
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
-    if (! $___DONT_ZIP) {
-        safesystem("gzip $ttable_file") || die("ERROR: could not gzip $ttable_file");
-    }
 }
 
 sub score_phrase_memscore {
@@ -1488,7 +1579,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1542,35 +1633,27 @@ sub get_reordering_factored {
 }
 
 sub get_reordering {
-    my ($extract_file,$reo_model_path) = @_;
-    if (-e "$extract_file.o.gz") {
-	safesystem("gunzip < $extract_file.o.gz | LC_ALL=C sort $__SORT_BUFFER_SIZE -T $___TEMP_DIR > $extract_file.o.sorted") or die("ERROR");
-    }
-    else {
-        safesystem("LC_ALL=C sort -T $___TEMP_DIR $extract_file.o > $extract_file.o.sorted") or die("ERROR");
-    }
-
-    my $smooth = $___REORDERING_SMOOTH;
-
-    print STDERR "(7.2) building tables @ ".`date`;
-
-    #create cmd string for lexical reordering scoring
-    my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted $smooth $reo_model_path";
-    $cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
-    for my $mtype (keys %REORDERING_MODEL_TYPES) {
-	$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
-	foreach my $model (@REORDERING_MODELS) {
-	    if ($model->{"type"} eq $mtype) {
-		$cmd .= " ".$model->{"filename"};
-	    }
+	my ($extract_file,$reo_model_path) = @_;
+	my $smooth = $___REORDERING_SMOOTH;
+	
+	print STDERR "(7.2) building tables @ ".`date`;
+	
+	#create cmd string for lexical reordering scoring
+	my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
+	$cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
+	for my $mtype (keys %REORDERING_MODEL_TYPES) {
+		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
+		foreach my $model (@REORDERING_MODELS) {
+			if ($model->{"type"} eq $mtype) {
+				$cmd .= " ".$model->{"filename"};
+			}
+		}
+		$cmd .= "\"";
 	}
-	$cmd .= "\"";
-    }
-    
-    #Call the lexical reordering scorer
-    safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
-
-    if (! $debug) { safesystem("rm $extract_file.o.sorted") or die("ERROR");}
+	
+	#Call the lexical reordering scorer
+	safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
+	
 }
 
 
@@ -1733,6 +1816,7 @@ sub create_ini {
    $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
    $basic_weight_count++ unless defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
    $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
+   $basic_weight_count++ if $_PCFG;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
      $num_of_ttables++;
      my $ff = $f;

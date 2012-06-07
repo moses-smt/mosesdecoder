@@ -1,54 +1,41 @@
-#ifndef __CDERSCORER_H__
-#define __CDERSCORER_H__
+#ifndef MERT_CDER_SCORER_H_
+#define MERT_CDER_SCORER_H_
 
-#include <algorithm>
-#include <iostream>
-#include <iterator>
 #include <string>
 #include <vector>
 #include "Types.h"
 #include "Scorer.h"
 
-using namespace std;
-
-class CderScorer: public StatisticsBasedScorer
-{
-public:
-  explicit CderScorer(const string& config);
+/**
+ * CderScorer class can compute both CDER and WER metric.
+ */
+class CderScorer: public StatisticsBasedScorer {
+ public:
+  explicit CderScorer(const std::string& config, bool allowed_long_jumps = true);
   ~CderScorer();
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry)
-  {
-    vector<int> stats;
-    prepareStatsVector(sid, text, stats);
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
 
-    stringstream sout;
-    copy(stats.begin(),stats.end(),ostream_iterator<float>(sout," "));
-    string stats_str = sout.str();
-    entry.set(stats_str);
-  }
-  virtual void prepareStatsVector(size_t sid, const string& text, vector<int>& stats);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
-  virtual size_t NumberOfScores() const {
-    return 2;
-  }
+  virtual void prepareStatsVector(std::size_t sid, const std::string& text, std::vector<int>& stats);
 
-  virtual float calculateScore(const vector<int>& comps) const;
+  virtual std::size_t NumberOfScores() const { return 2; }
 
-private:
-  typedef vector<int> sent_t;
-  vector<vector<sent_t> > ref_sentences;
+  virtual float calculateScore(const std::vector<int>& comps) const;
 
-  vector<int> computeCD(const sent_t& cand, const sent_t& ref) const;
-  int distance(int word1, int word2) const
-  {
-    return word1 == word2 ? 0 : 1;
-  }
+ private:
+  bool m_allowed_long_jumps;
+
+  typedef std::vector<int> sent_t;
+  std::vector<std::vector<sent_t> > m_ref_sentences;
+
+  void computeCD(const sent_t& cand, const sent_t& ref,
+                 std::vector<int>& stats) const;
 
   // no copying allowed
   CderScorer(const CderScorer&);
   CderScorer& operator=(const CderScorer&);
 };
 
-#endif  // __CDERSCORER_H__
+#endif  // MERT_CDER_SCORER_H_

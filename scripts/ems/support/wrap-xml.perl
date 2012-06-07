@@ -6,7 +6,7 @@ my ($language,$src,$system) = @ARGV;
 die("wrapping frame not found ($src)") unless -e $src;
 $system = "Edinburgh" unless $system;
 
-open(SRC,$src);
+open(SRC,$src) or die "Cannot open: $!";
 my @OUT = <STDIN>;
 chomp(@OUT);
 #my @OUT = `cat $decoder_output`;
@@ -18,8 +18,9 @@ while(<SRC>) {
     elsif (/^<\/srcset/) {
 	s/<\/srcset/<\/tstset/;
     }
-    elsif (/^<DOC/i) {
-	s/<DOC/<DOC sysid="$system"/i;
+    elsif (/^<doc/i) {
+  s/ *sysid="[^\"]+"//;
+	s/<doc/<doc sysid="$system"/i;
     }
     elsif (/<seg/) {
 	my $line = shift(@OUT);

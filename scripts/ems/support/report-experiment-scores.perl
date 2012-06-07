@@ -13,6 +13,11 @@ $TYPE{"nist-bleu-c"} = "BLEU-c";
 $TYPE{"multi-bleu-c"}= "BLEU-c";
 $TYPE{"ibm-bleu"}    = "IBM";
 $TYPE{"ibm-bleu-c"}  = "IBM-c";
+$TYPE{"meteor"} = "METEOR";
+$TYPE{"bolt-bleu"}     = "BLEU";
+$TYPE{"bolt-bleu-c"}   = "BLEU-c";
+$TYPE{"bolt-ter"}      = "TER";
+$TYPE{"bolt-ter-c"}    = "TER-c";
 
 my %SCORE;
 my %AVERAGE;
@@ -55,6 +60,12 @@ sub process {
     }
     elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c') {
 	$SCORE{$set} .= &extract_multi_bleu($file,$type)." ";
+    }
+    elsif ($type eq 'meteor') {
+	$SCORE{$set} .= &extract_meteor($file,$type)." ";
+    }
+    elsif ($type =~ /^bolt-(.+)$/) {
+      $SCORE{$set} .= &extract_bolt($file,$1)." ";
     }
 }
 
@@ -109,4 +120,32 @@ sub extract_multi_bleu {
     $AVERAGE{"multi-bleu"} += $bleu;
 
     return $output.$TYPE{$type};
+}
+
+sub extract_bolt {
+  my ($file,$type) = @_;
+  my $score;
+  foreach (`cat $file`) {
+    $score = $1 if $type eq 'bleu' && /Lowercase BLEU\s+([\d\.]+)/;
+    $score = $1 if $type eq 'bleu-c' && /Cased BLEU\s+([\d\.]+)/;
+    $score = $1 if $type eq 'ter' && /Lowercase TER\s+([\d\.]+)/;
+    $score = $1 if $type eq 'ter-c' && /Cased TER\s+([\d\.]+)/;
+  }
+  my $output = sprintf("%.02f ",$score*100);
+  $AVERAGE{"bolt-".$type} += $score*100;
+  return $output.$TYPE{"bolt-".$type};
+}
+sub extract_meteor {
+    my ($file,$type) = @_;
+    my ($meteor, $precision);
+    foreach (`cat $file`) {
+	    $meteor = $1*100 if /Final score:\s*(\S+)/;
+	    $precision = $1 if /Precision:\s*(\S+)/;
+    }
+    my $output = sprintf("%.02f ",$meteor);
+    $output .= sprintf("(%.03f) ",$precision) if $precision;
+    $AVERAGE{"meteor"} += $meteor;
+
+    return $output.$TYPE{$type};
+
 }

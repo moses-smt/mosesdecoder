@@ -1,3 +1,6 @@
+*.pyc
+*.lo
+*.o
 *.so
 *.lo
 *.o
@@ -7,6 +10,7 @@
 *.save
 *.cmd
 *~
+*.gch
 dist*
 jam-files/bjam
 jam-files/engine/bootstrap
@@ -18,6 +22,7 @@ mert/extractor
 mert/mert
 mert/megam_i686.opt
 mert/pro
+mert/kbmira
 misc/processLexicalTable
 misc/processPhraseTable
 misc/queryLexicalTable
@@ -55,5 +60,4 @@ scripts/training/symal/symal
 scripts/training/train-model.perl
 dist
 bin
-srilm
-giza-pp
+previous.sh

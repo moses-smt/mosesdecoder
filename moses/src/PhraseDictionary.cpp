@@ -1,4 +1,3 @@
-// $Id$
 // vim:tabstop=2
 
 /***********************************************************************
@@ -22,13 +21,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PhraseDictionary.h"
 #include "PhraseDictionaryTreeAdaptor.h"
-#include "PhraseDictionarySCFG.h"
-#include "PhraseDictionaryOnDisk.h"
-#include "PhraseDictionaryHiero.h"
-#include "PhraseDictionaryALSuffixArray.h"
+#include "RuleTable/PhraseDictionarySCFG.h"
+#include "RuleTable/PhraseDictionaryOnDisk.h"
+#include "RuleTable/PhraseDictionaryALSuffixArray.h"
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
 #endif
+#include "RuleTable/UTrie.h"
 
 #include "StaticData.h"
 #include "InputType.h"
@@ -122,34 +121,25 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                , system->GetWeightWordPenalty());
     CHECK(ret);
     return pdta;
-  } else if (m_implementation == SCFG) {
+  } else if (m_implementation == SCFG || m_implementation == Hiero) {
     // memory phrase table
-    VERBOSE(2,"using New Format phrase tables" << std::endl);
+    if (m_implementation == Hiero) {
+      VERBOSE(2,"using Hiero format phrase tables" << std::endl);
+    } else {
+      VERBOSE(2,"using New Format phrase tables" << std::endl);
+    }
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
 
-    PhraseDictionarySCFG* pdm  = new PhraseDictionarySCFG(GetNumScoreComponents(),this);
-    bool ret = pdm->Load(GetInput()
-                         , GetOutput()
-                         , m_filePath
-			 , weightT
-                         , m_tableLimit
-                         , system->GetLanguageModels()
-                         , system->GetWordPenaltyProducer());
-    CHECK(ret);
-    return pdm;
-  } else if (m_implementation == Hiero) {
-    // memory phrase table
-    VERBOSE(2,"using Hiero format phrase tables" << std::endl);
-    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-      m_filePath += ".gz";
-      VERBOSE(2,"Using gzipped file" << std::endl);
+    RuleTableTrie *dict;
+    if (staticData.GetParsingAlgorithm() == ParseScope3) {
+      dict = new RuleTableUTrie(GetNumScoreComponents(), this);
+    } else {
+      dict = new PhraseDictionarySCFG(GetNumScoreComponents(), this);
     }
-    
-    PhraseDictionaryHiero* pdm  = new PhraseDictionaryHiero(GetNumScoreComponents(),this);
-    bool ret = pdm->Load(GetInput()
+    bool ret = dict->Load(GetInput()
                          , GetOutput()
                          , m_filePath
                          , weightT
@@ -157,7 +147,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
     CHECK(ret);
-    return pdm;
+    return dict;
   } else if (m_implementation == ALSuffixArray) {
     // memory phrase table
     cerr << "Warning: Implementation holds cached weights!" << endl;

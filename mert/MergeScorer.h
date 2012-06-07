@@ -1,53 +1,36 @@
-#ifndef __MERGESCORER_H__
-#define __MERGESCORER_H__
+#ifndef MERT_MERGE_SCORER_H_
+#define MERT_MERGE_SCORER_H_
 
-#include <iostream>
-#include <set>
 #include <string>
 #include <vector>
 
 #include "Scorer.h"
 
-using namespace std;
-
-// enum MergeReferenceLengthStrategy { MERGE_AVERAGE, MERGE_SHORTEST, MERGE_CLOSEST };
-
 class PerScorer;
 class ScoreStats;
+
+const int kMergeScorerLength = 4;
 
 /**
  * Merge scoring.
  */
 class MergeScorer: public StatisticsBasedScorer {
 public:
-  explicit MergeScorer(const string& config = "");
+  explicit MergeScorer(const std::string& config = "");
   ~MergeScorer();
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-  virtual void whoami() const {
-    cerr << "I AM MergeScorer" << std::endl;
-  }
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
+  virtual std::size_t NumberOfScores() const { return 0; }
 
 protected:
   friend class PerScorer;
-  virtual float calculateScore(const vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<int>& comps) const;
 
  private:
-  const int kLENGTH;
-
-  string javaEnv;
-  string tercomEnv;
-
-  // data extracted from reference files
-  vector<size_t> _reflengths;
-  vector<multiset<int> > _reftokens;
-  vector<vector<int> > m_references;
-  string m_pid;
-
   // no copying allowed
   MergeScorer(const MergeScorer&);
   MergeScorer& operator=(const MergeScorer&);
 };
 
-#endif  //__TERSCORER_H
+#endif  // MERT_MERGE_SCORER_H_

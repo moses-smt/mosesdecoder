@@ -25,7 +25,7 @@
 #include <string>
 #include <set>
 #include <iostream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <sstream>
 #include "SyntaxTree.h"
 #include "XmlException.h"
@@ -128,6 +128,16 @@ string unescape(const string& str)
       s += string("<");
     } else if (name == "gt") {
       s += string(">");
+    } else if (name == "#91") {
+      s += string("[");
+    } else if (name == "#93") {
+      s += string("]");
+    } else if (name == "bra") {
+      s += string("[");
+    } else if (name == "ket") {
+      s += string("]");
+    } else if (name == "bar") {
+      s += string("|");
     } else if (name == "amp") {
       s += string("&");
     } else if (name == "apos") {
@@ -345,13 +355,18 @@ bool ProcessAndStripXMLTags(string &line, SyntaxTree &tree, set< string > &label
         string label = ParseXmlTagAttribute(tagContent,"label");
         labelCollection.insert( label );
 
+        string pcfgString = ParseXmlTagAttribute(tagContent,"pcfg");
+        float pcfgScore = pcfgString == "" ? 0.0f
+                                           : std::atof(pcfgString.c_str());
+
         // report what we have processed so far
         if (0) {
           cerr << "XML TAG NAME IS: '" << tagName << "'" << endl;
           cerr << "XML TAG LABEL IS: '" << label << "'" << endl;
           cerr << "XML SPAN IS: " << startPos << "-" << (endPos-1) << endl;
         }
-        tree.AddNode( startPos, endPos-1, label );
+        SyntaxNode *node = tree.AddNode( startPos, endPos-1, label );
+        node->SetPcfgScore(pcfgScore);
       }
     }
   }

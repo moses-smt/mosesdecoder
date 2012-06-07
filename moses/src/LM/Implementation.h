@@ -160,6 +160,8 @@ class LMRefCount : public LanguageModel {
     }
 
 
+    LanguageModelImplementation *MosesServerCppShouldNotHaveLMCode() { return m_impl.get(); }
+
   private:
     LMRefCount(const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {}
 

@@ -17,8 +17,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef _SCORE_DATA_ITERATOR_
-#define _SCORE_DATA_ITERATOR_
+#ifndef MERT_SCORE_DATA_ITERATOR_H_
+#define MERT_SCORE_DATA_ITERATOR_H_
 
 /*
  * For loading from the score data file.
@@ -62,4 +62,4 @@ class ScoreDataIterator :
     std::vector<ScoreDataItem> m_next;
 };
 
-#endif
+#endif  // MERT_SCORE_DATA_ITERATOR_H_

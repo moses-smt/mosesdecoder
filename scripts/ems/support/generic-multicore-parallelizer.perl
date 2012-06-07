@@ -3,6 +3,7 @@
 use strict;
 
 my $cores = 8;
+my $serial = 1;
 my ($infile,$outfile,$cmd,$tmpdir);
 my $parent = $$; 
 
@@ -12,6 +13,7 @@ GetOptions('cores=i' => \$cores,
 	   'in=s' => \$infile,
 	   'out=s' => \$outfile,
 	   'cmd=s' => \$cmd,
+     'serial=i' => \$serial
     ) or exit(1);
 
 die("ERROR: specify command with -cmd") unless $cmd;
@@ -24,8 +26,9 @@ die("ERROR: you need to specify a tempdir with -tmpdir") unless $tmpdir;
 
 # create split input files
 my $sentenceN = `cat $infile | wc -l`;
-my $splitN = int(($sentenceN+$cores-0.5) / $cores); 
-`split -a 2 -l $splitN $infile $tmpdir/in-$parent-`;
+my $splitN = int(($sentenceN+($cores*$serial)-0.5) / ($cores*$serial)); 
+print STDERR "split -a 3 -l $splitN $infile $tmpdir/in-$parent-\n";
+`split -a 4 -l $splitN $infile $tmpdir/in-$parent-`;
 
 # find out the names of the processes
 my @CORE=`ls $tmpdir/in-$parent-*`;
@@ -33,17 +36,23 @@ chomp(@CORE);
 grep(s/.+in\-\d+\-([a-z]+)$/$1/e,@CORE);
 
 # create core scripts
-foreach my $core (@CORE){    
-    open(BASH,">$tmpdir/core-$parent-$core.bash");
+for(my $i=0;$i<scalar(@CORE);$i++) {
+    my $core = $CORE[$i];
+    open(BASH,">$tmpdir/core-$parent-$core.bash") or die "Cannot open: $!";
     print  BASH "#bash\n\n";
 #    print  BASH "export PATH=$ENV{PATH}\n\n";
     printf BASH $cmd."\n", "$tmpdir/in-$parent-$core", "$tmpdir/out-$parent-$core";
+    for(my $j=2;$j<=$serial;$j++) {
+      $core = $CORE[++$i];
+      printf BASH $cmd."\n", "$tmpdir/in-$parent-$core", "$tmpdir/out-$parent-$core";
+    }
     close(BASH);
 }
 
 # fork processes
 my (@CHILDREN);
 foreach my $core (@CORE){
+    next unless -e "$tmpdir/core-$parent-$core.bash";
     my $child = fork();
     if (! $child) { # I am child
 	print STDERR "running child $core\n";

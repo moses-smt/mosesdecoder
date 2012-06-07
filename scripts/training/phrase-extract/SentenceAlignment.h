@@ -33,6 +33,8 @@ public:
   std::vector<std::vector<int> > alignedToT;
   int sentenceID;
 
+  virtual ~SentenceAlignment();
+
   virtual bool processTargetSentence(const char *, int);
 
   virtual bool processSourceSentence(const char *, int);

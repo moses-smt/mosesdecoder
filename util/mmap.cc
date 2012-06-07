@@ -101,9 +101,10 @@ void *MapOrThrow(std::size_t size, bool for_write, int flags, bool prefault, int
 #if defined(_WIN32) || defined(_WIN64)
   int protectC = for_write ? PAGE_READWRITE : PAGE_READONLY;
   int protectM = for_write ? FILE_MAP_WRITE : FILE_MAP_READ;
-  HANDLE hMapping = CreateFileMapping((HANDLE)_get_osfhandle(fd), NULL, protectC, 0, size + offset, NULL);
+  uint64_t total_size = size + offset;
+  HANDLE hMapping = CreateFileMapping((HANDLE)_get_osfhandle(fd), NULL, protectC, total_size >> 32, static_cast<DWORD>(total_size), NULL);
   UTIL_THROW_IF(!hMapping, ErrnoException, "CreateFileMapping failed");
-  LPVOID ret = MapViewOfFile(hMapping, protectM, 0, offset, size);
+  LPVOID ret = MapViewOfFile(hMapping, protectM, offset >> 32, offset, size);
   CloseHandle(hMapping);
   UTIL_THROW_IF(!ret, ErrnoException, "MapViewOfFile failed");
 #else
@@ -147,16 +148,20 @@ void MapRead(LoadMethod method, int fd, uint64_t offset, std::size_t size, scope
   }
 }
 
-void *MapAnonymous(std::size_t size) {
-  return MapOrThrow(size, true,
+// Allocates zeroed memory in to.
+void MapAnonymous(std::size_t size, util::scoped_memory &to) {
+  to.reset();
 #if defined(_WIN32) || defined(_WIN64)
-      0 // MapOrThrow ignores the flags anyway.
-#elif defined(MAP_ANONYMOUS)
-      MAP_ANONYMOUS | MAP_PRIVATE // Linux
+  to.reset(calloc(1, size), size, scoped_memory::MALLOC_ALLOCATED);
 #else
+  to.reset(MapOrThrow(size, true,
+#  if defined(MAP_ANONYMOUS)
+      MAP_ANONYMOUS | MAP_PRIVATE // Linux
+#  else
       MAP_ANON | MAP_PRIVATE // BSD
+#  endif
+      , false, -1, 0), size, scoped_memory::MMAP_ALLOCATED);
 #endif
-      , false, -1, 0);
 }
 
 void *MapZeroedWrite(int fd, std::size_t size) {
@@ -164,20 +169,6 @@ void *MapZeroedWrite(int fd, std::size_t size) {
   ResizeOrThrow(fd, size);
   return MapOrThrow(size, true, kFileFlags, false, fd, 0);
 }
-
-namespace {
-
-int CreateOrThrow(const char *name) {
-  int ret;
-#if defined(_WIN32) || defined(_WIN64)
-  UTIL_THROW_IF(-1 == (ret = _open(name, _O_CREAT | _O_TRUNC | _O_RDWR, _S_IREAD | _S_IWRITE)), ErrnoException, "while creating " << name);
-#else
-  UTIL_THROW_IF(-1 == (ret = open(name, O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)), ErrnoException, "while creating " << name);
-#endif
-  return ret;
-}
-
-} // namespace
 
 void *MapZeroedWrite(const char *name, std::size_t size, scoped_fd &file) {
   file.reset(CreateOrThrow(name));

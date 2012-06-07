@@ -13,18 +13,16 @@ GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
                                        const vector< FactorType >& outFactors)
   : StatelessFeatureFunction("GlobalLexicalModel",1)
 {
-	std::cerr << "Creating global lexical model...\n";
+  std::cerr << "Creating global lexical model...\n";
 
-	// load model
-	LoadData( filePath, inFactors, outFactors );
-	
-	// define bias word
-	FactorCollection &factorCollection = FactorCollection::Instance();
-	m_bias = new Word();
-	const Factor* factor = factorCollection.AddFactor( Input, inFactors[0], "**BIAS**" );
-	m_bias->SetFactor( inFactors[0], factor );
-	
-	m_cache = NULL;
+  // load model
+  LoadData( filePath, inFactors, outFactors );
+
+  // define bias word
+  FactorCollection &factorCollection = FactorCollection::Instance();
+  m_bias = new Word();
+  const Factor* factor = factorCollection.AddFactor( Input, inFactors[0], "**BIAS**" );
+  m_bias->SetFactor( inFactors[0], factor );
 }
 
 GlobalLexicalModel::~GlobalLexicalModel()
@@ -38,7 +36,6 @@ GlobalLexicalModel::~GlobalLexicalModel()
     }
     delete iter->first; // delete output word
   }
-  if (m_cache != NULL) delete m_cache;
 }
 
 void GlobalLexicalModel::LoadData(const string &filePath,
@@ -149,14 +146,14 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
 float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const
 {
   LexiconCache& m_cache = m_local->cache;
-  map< const TargetPhrase*, float >::const_iterator query = m_cache.find( &targetPhrase );
+  const LexiconCache::const_iterator query = m_cache.find( &targetPhrase );
   if ( query != m_cache.end() ) {
     return query->second;
   }
 
   float score = ScorePhrase( targetPhrase );
   m_cache.insert( pair<const TargetPhrase*, float>(&targetPhrase, score) );
-//  std::cerr << "add to cache " << targetPhrase << ": " << score << endl;
+  //VERBOSE(2, "add to cache " << targetPhrase << ": " << score << endl);
   return score;
 }
 

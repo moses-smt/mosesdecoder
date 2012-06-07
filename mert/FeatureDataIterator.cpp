@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <iostream>
 #include <sstream>
+#include <boost/functional/hash.hpp>
 
 #include "util/tokenize_piece.hh"
 
@@ -47,6 +48,16 @@ float ParseFloat(const StringPiece& str) {
   return value;
 }
 
+bool operator==(FeatureDataItem const& item1, FeatureDataItem const& item2) {
+  return item1.dense==item1.dense && item1.sparse==item1.sparse;
+}
+
+size_t hash_value(FeatureDataItem const& item) {
+  size_t seed = 0;
+  boost::hash_combine(seed,item.dense);
+  boost::hash_combine(seed,item.sparse);
+  return seed;
+}
 
 
 FeatureDataIterator::FeatureDataIterator() {}

@@ -68,9 +68,9 @@ template <class MH, class MO>
 template <class MH, class MO>
   SyntacticLanguageModelFiles<MH,MO>::~SyntacticLanguageModelFiles() {
 
-  std::cerr<<"Destructing syntactic language model files" << std::endl;
-  //delete hiddenModel;
-  //delete observedModel;
+  VERBOSE(3,"Destructing syntactic language model files" << std::endl);
+  delete hiddenModel;
+  delete observedModel;
 
 }
 

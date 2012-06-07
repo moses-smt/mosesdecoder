@@ -18,19 +18,26 @@ my $language = "en";
 my $QUIET = 0;
 my $HELP = 0;
 my $AGGRESSIVE = 0;
+my $SKIP_XML = 0;
 
 #my $start = [ Time::HiRes::gettimeofday( ) ];
 
 while (@ARGV) {
 	$_ = shift;
+	/^-b$/ && ($| = 1, next);
 	/^-l$/ && ($language = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
+	/^-x$/ && ($SKIP_XML = 1, next);
 	/^-a$/ && ($AGGRESSIVE = 1, next);
 }
 
 if ($HELP) {
 	print "Usage ./tokenizer.perl (-l [en|de|...]) < textfile > tokenizedfile\n";
+        print "Options:\n";
+        print "  -q  ... quiet.\n";
+        print "  -a  ... aggressive hyphen splitting.\n";
+        print "  -b  ... disable Perl buffering.\n";
 	exit;
 }
 if (!$QUIET) {
@@ -45,7 +52,7 @@ if (scalar(%NONBREAKING_PREFIX) eq 0){
 }
 
 while(<STDIN>) {
-	if (/^<.+>$/ || /^\s*$/) {
+	if (($SKIP_XML && /^<.+>$/) || /^\s*$/) {
 		#don't try to tokenize XML/HTML tag lines
 		print $_;
 	}
@@ -63,6 +70,10 @@ sub tokenize {
 	chomp($text);
 	$text = " $text ";
 	
+  # remove ASCII junk
+  $text =~ s/\s+/ /g;
+  $text =~ s/[\000-\037]//g;
+
 	# seperate out all "other" special characters
 	$text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 	
@@ -136,7 +147,17 @@ sub tokenize {
 		$text =~ s/DOTDOTMULTI/DOTMULTI./g;
 	}
 	$text =~ s/DOTMULTI/./g;
-	
+
+  #escape special chars
+  $text =~ s/\&/\&amp;/g;   # escape escape
+  $text =~ s/\|/\&bar;/g;   # factor separator
+  $text =~ s/\</\&lt;/g;    # xml
+  $text =~ s/\>/\&gt;/g;    # xml
+  $text =~ s/\'/\&apos;/g;  # xml
+  $text =~ s/\"/\&quot;/g;  # xml
+  $text =~ s/\[/\&#91;/g;   # syntax non-terminal
+  $text =~ s/\]/\&#93;/g;   # syntax non-terminal
+
 	#ensure final line break
 	$text .= "\n" unless $text =~ /\n$/;
 

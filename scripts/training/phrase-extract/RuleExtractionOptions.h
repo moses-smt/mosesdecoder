@@ -45,8 +45,12 @@ public:
   bool targetSyntax;
   bool duplicateRules;
   bool fractionalCounting;
+  bool pcfgScore;
   bool outputNTLengths;
-
+  bool gzOutput;
+  bool unpairedExtractFormat;
+  bool conditionOnTargetLhs;
+  
   RuleExtractionOptions()
     : maxSpan(10)
     , minHoleSource(2)
@@ -55,7 +59,7 @@ public:
     , maxSymbolsTarget(999)
     , maxSymbolsSource(5)
     , maxNonTerm(2)
-    , maxScope(3)
+    , maxScope(999)
     // int minHoleSize(1)
     // int minSubPhraseSize(1) // minimum size of a remaining lexical phrase
     , onlyDirectFlag(false)
@@ -73,7 +77,11 @@ public:
     , targetSyntax(false)
     , duplicateRules(true)
     , fractionalCounting(true)
+    , pcfgScore(false)
     , outputNTLengths(false)
+    , gzOutput(false)
+    , unpairedExtractFormat(false)
+    , conditionOnTargetLhs(false)
   {}
 };
 
