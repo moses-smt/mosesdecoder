@@ -19,6 +19,7 @@ pushd .
 cd $OUTPUT_DIR
 
 cat $INPUT_FILE | $SA_EXEC_DIR/escape-testset.pl | $SA_EXEC_DIR/extractor.py -c  $MODEL_DIR/extract.ini
+gzip $OUTPUT_DIR/grammar.out.*
 
 popd
 
