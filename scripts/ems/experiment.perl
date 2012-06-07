@@ -2175,8 +2175,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,
-	$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2200,10 +2199,27 @@ sub define_tuningevaluation_filter {
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
+		# get model, and whether suffix array is used. Determines the pt implementation.
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    my $sa_exec_dir = &get("TRAINING:suffix-array");
+
+		my $ptImpl;
+		if ($hierarchical) {
+		  if ($sa_exec_dir) {
+				$ptImpl = 10;  # suffix array
+			}
+			else {
+				$ptImpl = 6; # in-mem SCFG
+			}
+		}
+		else {
+			$ptImpl = 0; # phrase-based
+		}
+
     # create pseudo-config file
     my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table","$phrase_translation_table:$ptImpl");
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
     # additional settings for hierarchical models
