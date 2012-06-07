@@ -1843,9 +1843,8 @@ sub create_ini {
     my $ff = $f;
     $ff =~ s/\-/ /;
     my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
-    print STDERR "HIEU:".$SPECIFIED_TABLE[0] ."\n";
+    my $phrase_table_impl = ($_HIERARCHICAL? 6 : 0);
 
-    my $phrase_table_impl;
 		if (scalar(@SPECIFIED_TABLE)) {
 	    $file = shift @SPECIFIED_TABLE;
 	    my @toks = split(/:/,$file);
@@ -1855,6 +1854,9 @@ sub create_ini {
 			if (@toks == 3) {
 				$basic_weight_count = $toks[2];
 			}
+		}
+		else {
+
 		}
 		
     print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
