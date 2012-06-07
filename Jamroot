@@ -77,6 +77,8 @@ if [ option.get "with-tcmalloc" : : "yes" ] {
 if [ option.get "enable-mpi" : : "yes" ] {
   import mpi ;
   using mpi ;
+  external-lib boost_mpi ;
+  external-lib boost_serialization ;
   requirements += <define>MPI_ENABLE ;
   requirements += <library>mpi ;
   requirements += <library>boost_mpi ;
