@@ -1851,6 +1851,10 @@ sub create_ini {
 	    my @toks = split(/:/,$file);
 			$file = $toks[0];
 			$phrase_table_impl = $toks[1];
+			
+			if (@toks == 3) {
+				$basic_weight_count = $toks[2];
+			}
 		}
 		
     print INI "$phrase_table_impl $ff $basic_weight_count $file\n";

@@ -1777,10 +1777,11 @@ sub define_training_create_config {
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $sa_exec_dir = &get("TRAINING:suffix-array");
 		
-		my $ptImpl;
+		my ($ptImpl, $numFF);
 		if ($hierarchical) {
 		  if ($sa_exec_dir) {
 				$ptImpl = 10;  # suffix array
+				$numFF = 7;
 			}
 			else {
 				$ptImpl = 6; # in-mem SCFG
@@ -1791,7 +1792,9 @@ sub define_training_create_config {
 		}
 		
     # additional settings for factored models
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table","$phrase_translation_table:$ptImpl");
+    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    $ptCmd .= ":$numFF" if defined($numFF);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
@@ -2203,10 +2206,11 @@ sub define_tuningevaluation_filter {
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $sa_exec_dir = &get("TRAINING:suffix-array");
 
-		my $ptImpl;
+		my ($ptImpl, $numFF);
 		if ($hierarchical) {
 		  if ($sa_exec_dir) {
 				$ptImpl = 10;  # suffix array
+				$numFF = 7;
 			}
 			else {
 				$ptImpl = 6; # in-mem SCFG
@@ -2219,7 +2223,11 @@ sub define_tuningevaluation_filter {
     # create pseudo-config file
     my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table","$phrase_translation_table:$ptImpl");
+    
+    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    $ptCmd .= ":$numFF" if defined($numFF);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
+    
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
     # additional settings for hierarchical models
