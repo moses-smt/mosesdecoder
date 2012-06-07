@@ -15,10 +15,6 @@
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
-#--with-giza=/path/to/giza 
-#Indicates where binaries GIZA++, snt2cooc.out, and mkcls live.  
-#Builds scripts/training/train-model.perl using these paths. 
-#
 #Thread-caching malloc (optional):
 #--with-tcmalloc
 #
