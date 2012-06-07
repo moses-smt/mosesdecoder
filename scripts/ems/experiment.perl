@@ -1647,7 +1647,9 @@ sub define_training_build_suffix_array {
 		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
 		my $method = &check_and_get("TRAINING:alignment-symmetrization-method");
 	
-		my $cmd = "$scripts/training/wrappers/adam-suffix-array/suffix-array-create.sh $sa_exec_dir $corpus.$input_extension $corpus.$output_extension $aligned.$method $model";
+		my $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""));
+	
+		my $cmd = "$scripts/training/wrappers/adam-suffix-array/suffix-array-create.sh $sa_exec_dir $corpus.$input_extension $corpus.$output_extension $aligned.$method $model $glue_grammar_file";
 
 		&create_step($step_id,$cmd);
 }

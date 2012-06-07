@@ -8,6 +8,7 @@ SOURCE_CORPUS=$2
 TARGET_CORPUS=$3
 ALIGNMENT=$4
 SA_OUTPUT=$5
+GLUE_GRAMMAR=$6
 
 mkdir $SA_OUTPUT
 
@@ -20,3 +21,6 @@ cd $SA_EXEC_DIR
 
 popd
 
+echo "<s> [X] ||| <s> [S] ||| 1 ||| ||| 0\n" > $GLUE_GRAMMAR
+echo "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 ||| 0\n" >> $GLUE_GRAMMAR
+echo "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0\n" >> $GLUE_GRAMMAR
