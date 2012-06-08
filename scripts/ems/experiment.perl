@@ -2203,7 +2203,6 @@ sub define_tuningevaluation_filter {
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
 		# get model, and whether suffix array is used. Determines the pt implementation.
-    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $sa_exec_dir = &get("TRAINING:suffix-array");
 
 		my ($ptImpl, $numFF);
