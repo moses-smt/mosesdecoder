@@ -129,13 +129,14 @@ int main(int argc, char** argv)
   vector<parameter_t> initParams;
   if(!denseInitFile.empty()) {
     ifstream opt(denseInitFile.c_str());
-    string buffer; istringstream strstrm(buffer);
+    string buffer;
     if (opt.fail()) {
       cerr << "could not open dense initfile: " << denseInitFile << endl;
       exit(3);
     }
     parameter_t val;
     getline(opt,buffer);
+    istringstream strstrm(buffer);
     while(strstrm >> val) initParams.push_back(val);
     opt.close();
   }
