@@ -8,7 +8,7 @@ available at http://boost.org .
 
 There are several optional dependencies:
 
-GIZA++ from http://code.google.com/p/giza-pp/ is used to build phrase tables.
+GIZA++ from http://code.google.com/p/giza-pp/ is used to align words in the parallel corpus during training.
 
 Moses server requires xmlrpc-c with abyss-server.  Source is available from
 http://xmlrpc-c.sourceforge.net/.  
@@ -85,7 +85,6 @@ Building consists of running
 Common options are:
 --with-srilm=/path/to/srilm to compile the decoder with SRILM support
 --with-irstlm=/path/to/irstlm to compile the decoder with IRSTLM support
---with-giza=/path/to/giza to enable training scripts
 -jN where N is the number of CPUs
 
 --with-macports=/path/to/macports use MacPorts on Mac OS X.

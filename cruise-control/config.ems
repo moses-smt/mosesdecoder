@@ -8,6 +8,9 @@
 #
 working-dir = WORKDIR/ems_workdir
 
+# Giza and friends
+external-bin-dir = WORKDIR/giza-pp/bin/
+
 # specification of the language pair
 input-extension = fr
 output-extension = en
