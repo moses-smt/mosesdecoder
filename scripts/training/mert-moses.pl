@@ -656,6 +656,18 @@ while (1) {
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined $devbleu ? $devbleu : "--not-estimated--"), $sparse_weights_file);
 
+  # Save dense weights to simplify best dev recovery
+  {
+    my $densefile = "run$run.dense";
+    my @vals = @{$featlist->{"values"}};
+    my @names = @{$featlist->{"names"}};
+    open my $denseout, '>', $densefile or die "Can't write $densefile (WD now $___WORKING_DIR)";
+    for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+        print $denseout "$names[$i] $names[$i] $vals[$i]\n";
+    }
+    close $denseout;
+  }
+
   # skip running the decoder if the user wanted
   if (! $skip_decoder) {
     print "($run) run decoder to produce n-best lists\n";
@@ -944,7 +956,12 @@ if($___RETURN_BEST_DEV) {
     close $fh;
   }
   print "copying weights from best iteration ($bestit, bleu=$bestbleu) to moses.ini\n";
-  safesystem("\\cp -f run$bestit.moses.ini moses.ini") or die;
+  my $best_sparse_file = undef;
+  if(defined $sparse_weights_file) {
+      $best_sparse_file = "run$bestit.sparse-weights";
+  }
+  create_config($___CONFIG_ORIG, "./moses.ini", get_featlist_from_file("run$bestit.dense"),
+                $bestit, $bestbleu, $best_sparse_file);
 }
 else {
   create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
@@ -1123,7 +1140,11 @@ sub get_featlist_from_moses {
     my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
+  return get_featlist_from_file($featlistfn);
+}
 
+sub get_featlist_from_file {
+  my $featlistfn = shift;
   # read feature list
   my @names = ();
   my @startvalues = ();
