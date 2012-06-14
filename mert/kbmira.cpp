@@ -129,14 +129,17 @@ int main(int argc, char** argv)
   vector<parameter_t> initParams;
   if(!denseInitFile.empty()) {
     ifstream opt(denseInitFile.c_str());
-    string buffer; istringstream strstrm(buffer);
+    string buffer; 
     if (opt.fail()) {
       cerr << "could not open dense initfile: " << denseInitFile << endl;
       exit(3);
     }
     parameter_t val;
     getline(opt,buffer);
-    while(strstrm >> val) initParams.push_back(val);
+    istringstream strstrm(buffer);
+    while(strstrm >> val) {
+      initParams.push_back(val);
+    }
     opt.close();
   }
   size_t initDenseSize = initParams.size();
@@ -225,7 +228,7 @@ int main(int argc, char** argv)
         ValType hopeBleu = sentenceLevelBackgroundBleu(hope_stats, bg);
         const vector<float>& fear_stats = train->scoresAt(fear_index);
         ValType fearBleu = sentenceLevelBackgroundBleu(fear_stats, bg);
-        assert(hopeBleu > fearBleu);
+        assert(hopeBleu + 1e-8 >= fearBleu);
         ValType delta = hopeBleu - fearBleu;
         // Loss and update
         ValType diff_score = wv.score(diff);
