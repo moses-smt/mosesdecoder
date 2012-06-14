@@ -137,7 +137,9 @@ int main(int argc, char** argv)
     parameter_t val;
     getline(opt,buffer);
     istringstream strstrm(buffer);
-    while(strstrm >> val) initParams.push_back(val);
+    while(strstrm >> val) {
+      initParams.push_back(val);
+    }
     opt.close();
   }
   size_t initDenseSize = initParams.size();
@@ -226,7 +228,7 @@ int main(int argc, char** argv)
         ValType hopeBleu = sentenceLevelBackgroundBleu(hope_stats, bg);
         const vector<float>& fear_stats = train->scoresAt(fear_index);
         ValType fearBleu = sentenceLevelBackgroundBleu(fear_stats, bg);
-        assert(hopeBleu > fearBleu);
+        assert(hopeBleu + 1e-8 >= fearBleu);
         ValType delta = hopeBleu - fearBleu;
         // Loss and update
         ValType diff_score = wv.score(diff);
