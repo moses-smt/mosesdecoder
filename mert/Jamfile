@@ -71,4 +71,3 @@ unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ;
 
-install legacy : programs : <location>. ;

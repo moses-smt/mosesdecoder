@@ -46,8 +46,8 @@
 #include "XmlTree.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-#include "../../../moses/src/ThreadPool.h"
-#include "../../../moses/src/OutputCollector.h"
+#include "../moses/src/ThreadPool.h"
+#include "../moses/src/OutputCollector.h"
 
 #define LINE_MAX_LENGTH 500000
 
