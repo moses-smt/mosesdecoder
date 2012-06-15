@@ -163,7 +163,7 @@ void OnDiskWrapper::EndSave()
 
 void OnDiskWrapper::SaveMisc()
 {
-  m_fileMisc << "Version 3" << endl;
+  m_fileMisc << "Version 4" << endl;
   m_fileMisc << "NumSourceFactors " << m_numSourceFactors << endl;
   m_fileMisc << "NumTargetFactors " << m_numTargetFactors << endl;
   m_fileMisc << "NumScores " << m_numScores << endl;
