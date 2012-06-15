@@ -105,7 +105,7 @@ Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
   vector<string> toks = Moses::Tokenize(str, "|");
   for (size_t ind = 0; ind < toks.size(); ++ind) {
     Moses::FactorType factorType = outputFactorsVec[ind];
-    const Moses::Factor *factor = factorColl.AddFactor(direction, factorType, str);
+    const Moses::Factor *factor = factorColl.AddFactor(direction, factorType, toks[ind]);
     ret->SetFactor(factorType, factor);
   }
 
