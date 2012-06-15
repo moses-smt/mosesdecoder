@@ -277,17 +277,16 @@ SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicati
     // if a rule contains multiple sequences of terminals, we intersect their occurrences.
     if (hierarchical) {
         //   std::cerr << "splitting up phrase: " << phrase << "\n";
-        size_t pos = 0;
-        size_t endPos = 0;
+        int pos = 0;
+        int endPos = 0;
         vector<std::string> phrases;
 
-        // NT at start of rule
-        if (rule.find("[X][X] ") == 0) {
-            pos = 7;
-        }
-
-        while (rule.find(" [X][X] ", pos) < rule.size()-11) {
-            endPos = rule.find(" [X][X] ", pos);
+        while (rule.find("[X][X] ", pos) < rule.size()-10) {
+            endPos = rule.find("[X][X] ",pos) - 1; // -1 to cut space before NT
+            if (endPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
+                pos += 7; 
+                continue;
+            }
             phrases.push_back(rule.substr(pos,endPos-pos));
             pos = endPos + 8;
         }
