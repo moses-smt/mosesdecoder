@@ -288,6 +288,7 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					../../randlm/lib,
+					/opt/local/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -298,6 +299,7 @@
 					"-lflm",
 					"-llattice",
 					"-lrandlm",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};
@@ -318,6 +320,7 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					../../randlm/lib,
+					/opt/local/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -328,6 +331,7 @@
 					"-lflm",
 					"-llattice",
 					"-lrandlm",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};

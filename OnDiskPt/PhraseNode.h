@@ -51,7 +51,7 @@ protected:
   void AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
                        , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
                        , size_t tableLimit, const std::vector<float> &counts);
-  size_t ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem, size_t numFactors) const;
+  size_t ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem) const;
   void GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnDiskWrapper &onDiskWrapper) const;
 
 public:
