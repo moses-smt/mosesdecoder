@@ -58,14 +58,14 @@ ValType MiraFeatureVector::val(size_t index) const {
   if(index < m_dense.size())
     return m_dense[index];
   else
-    return m_sparseVals[index];
+    return m_sparseVals[index-m_dense.size()];
 }
 
 size_t MiraFeatureVector::feat(size_t index) const {
   if(index < m_dense.size())
     return index;
   else
-    return m_sparseFeats[index];
+    return m_sparseFeats[index-m_dense.size()];
 }
 
 size_t MiraFeatureVector::size() const {
