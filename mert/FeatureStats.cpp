@@ -10,6 +10,8 @@
 
 #include <fstream>
 #include <cmath>
+#include <boost/functional/hash.hpp>
+
 #include "Util.h"
 
 using namespace std;
@@ -80,6 +82,43 @@ SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
   res -= rhs;
   return res;
 }
+
+std::vector<std::size_t> SparseVector::feats() const {
+  std::vector<std::size_t> toRet;
+  for(fvector_t::const_iterator iter = m_fvector.begin();
+      iter!=m_fvector.end();
+      iter++) {
+    toRet.push_back(iter->first);
+  }
+  return toRet;
+}
+
+std::size_t SparseVector::encode(const std::string& name) {
+  name2id_t::const_iterator name2id_iter = m_name_to_id.find(name);
+  size_t id = 0;
+  if (name2id_iter == m_name_to_id.end()) {
+    id = m_id_to_name.size();
+    m_id_to_name.push_back(name);
+    m_name_to_id[name] = id;
+  } else {
+    id = name2id_iter->second;
+  }
+  return id;
+}
+
+std::string SparseVector::decode(std::size_t id) {
+  return m_id_to_name[id];
+}
+
+bool operator==(SparseVector const& item1, SparseVector const& item2) {
+  return item1.m_fvector==item2.m_fvector;
+}
+
+std::size_t hash_value(SparseVector const& item) {
+  boost::hash<SparseVector::fvector_t> hasher;
+  return hasher(item.m_fvector);
+}
+
 
 FeatureStats::FeatureStats()
     : m_available_size(kAvailableSize), m_entries(0),

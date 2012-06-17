@@ -1,0 +1,32 @@
+obj InputFileStream.o : InputFileStream.cpp : <include>. ;
+alias InputFileStream : InputFileStream.o ..//z ;
+
+obj tables-core.o : tables-core.cpp : <include>. ;
+obj AlignmentPhrase.o : AlignmentPhrase.cpp : <include>. ;
+obj SentenceAlignment.o : SentenceAlignment.cpp : <include>. ;
+obj SyntaxTree.o : SyntaxTree.cpp : <include>. ;
+obj XmlTree.o : XmlTree.cpp : <include>. ;
+
+alias filestreams : InputFileStream.cpp OutputFileStream.cpp : : : <include>. ;
+alias trees : SyntaxTree.cpp tables-core.o XmlTree.o : : : <include>. ;
+
+exe extract : tables-core.o SentenceAlignment.o extract.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+
+exe extract-rules : tables-core.o SentenceAlignment.o SyntaxTree.o XmlTree.o SentenceAlignmentWithSyntax.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp OutputFileStream.cpp InputFileStream ../moses/src//ThreadPool ..//boost_iostreams ;
+
+exe extract-lex : extract-lex.cpp InputFileStream ;
+
+exe score : tables-core.o AlignmentPhrase.o score.cpp PhraseAlignment.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+
+exe consolidate : consolidate.cpp tables-core.o OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+
+exe consolidate-direct : consolidate-direct.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+
+exe consolidate-reverse :  consolidate-reverse.cpp tables-core.o InputFileStream ;
+
+exe relax-parse : tables-core.o SyntaxTree.o XmlTree.o relax-parse.cpp ;
+
+exe statistics : tables-core.o AlignmentPhrase.o statistics.cpp InputFileStream ;
+
+alias programs : extract extract-rules extract-lex score consolidate consolidate-direct consolidate-reverse relax-parse statistics ;
+

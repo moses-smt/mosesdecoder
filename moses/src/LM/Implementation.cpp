@@ -406,7 +406,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartArray())
-      {
+      {        
         CHECK(phrasePos == 0);
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );

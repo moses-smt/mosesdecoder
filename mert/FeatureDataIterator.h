@@ -61,6 +61,9 @@ class FeatureDataItem
     SparseVector sparse;
 };
 
+bool operator==(FeatureDataItem const& item1, FeatureDataItem const& item2);
+std::size_t hash_value(FeatureDataItem const& item);
+
 class FeatureDataIterator : 
   public boost::iterator_facade<FeatureDataIterator,
                                 const std::vector<FeatureDataItem>,
