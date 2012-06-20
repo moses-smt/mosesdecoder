@@ -23,7 +23,6 @@
 
 #include <string>
 #include <iostream>
-#include <sstream>
 #include <map>
 
 // sentence-level collection of rules
@@ -38,15 +37,19 @@ public:
   std::string alignmentInv;
   std::string orientation;
   std::string orientationForward;
+  //new : left and right context of a rule
+  std::string leftContext;
+  std::string rightContext;
+
   int startT;
   int endT;
   int startS;
   int endS;
   float count;
-  double pcfgScore;
 
   std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
-  
+
+  //new : initialize left and right context
   ExtractedRule(int sT, int eT, int sS, int eS)
     : source()
     , target()
@@ -54,21 +57,21 @@ public:
     , alignmentInv()
     , orientation()
     , orientationForward()
+    , leftContext()
+    , rightContext()
     , startT(sT)
     , endT(eT)
     , startS(sS)
     , endS(eS)
     , count(0)
-    , pcfgScore(0.0)
   {}
-  
+
   void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength)
   {
     m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);
   }
-  
+
   void OutputNTLengths(std::ostream &out) const;
-  void OutputNTLengths(std::ostringstream &out) const;
 };
 
 #endif

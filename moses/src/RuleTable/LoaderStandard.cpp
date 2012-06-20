@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -56,7 +56,7 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
   return ret;
 
 }
-  
+
 void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
 {
   vector<string> toks;
@@ -70,10 +70,10 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
     { // no-term
       vector<string> split = Tokenize(tok, ",");
       CHECK(split.size() == 2);
-      
+
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
-      
+
       pair<size_t, size_t> &alignPoint = ntAlign[coIndex];
       if (sourceTarget == 0)
       {
@@ -85,9 +85,9 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
       }
     }
   }
-  
+
   phrase = Join(" ", toks) + " [X]";
-  
+
 }
 
 void ReformateHieroScore(string &scoreString)
@@ -103,15 +103,15 @@ void ReformateHieroScore(string &scoreString)
     score = exp(-score);
     tok = SPrint(score);
   }
-  
+
   scoreString = Join(" ", toks);
 }
-  
+
 string *ReformatHieroRule(const string &lineOrig)
-{  
+{
   vector<string> tokens;
   vector<float> scoreVector;
-  
+
   TokenizeMultiCharSeparator(tokens, lineOrig, "|||" );
 
   string &sourcePhraseString = tokens[1]
@@ -122,7 +122,7 @@ string *ReformatHieroRule(const string &lineOrig)
   ReformatHieroRule(0, sourcePhraseString, ntAlign);
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
-  
+
   stringstream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign)
@@ -130,16 +130,16 @@ string *ReformatHieroRule(const string &lineOrig)
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
-  
+
   stringstream ret;
   ret << sourcePhraseString << " ||| "
-      << targetPhraseString << " ||| " 
+      << targetPhraseString << " ||| "
       << scoreString << " ||| "
       << align.str();
-  
+
   return new string(ret.str());
 }
-  
+
 bool RuleTableLoaderStandard::Load(FormatType format
                                 , const std::vector<FactorType> &input
                                 , const std::vector<FactorType> &output
@@ -155,7 +155,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
   const StaticData &staticData = StaticData::Instance();
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
 
-
   string lineOrig;
   size_t count = 0;
 
@@ -168,7 +167,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     { // do nothing to format of line
       line = &lineOrig;
     }
-    
+
     vector<string> tokens;
     vector<float> scoreVector;
 
@@ -241,6 +240,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
   }
 
+  //FB : disable pruning of target phraseCollection prior to having sentence context
   // sort and prune each target phrase collection
   SortAndPrune(ruleTable);
 

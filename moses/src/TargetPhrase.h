@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
 
+#include "ClassExample.h"
 #include "util/string_piece.hh"
 
 #ifdef HAVE_PROTOBUF

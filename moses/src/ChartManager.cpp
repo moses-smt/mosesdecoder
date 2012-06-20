@@ -95,8 +95,15 @@ void ChartManager::ProcessSentence()
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
-      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
+      //TODO : call option and choose other method
+      cell.ProcessSentenceWithContext(m_transOptColl.GetTranslationOptionList()
                            ,m_hypoStackColl);
+
+
+
+      //TODO : pass option !!!
+      //cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
+                           //,m_hypoStackColl);
       m_transOptColl.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
@@ -287,7 +294,7 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
 	for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i)
 	{
 		FindReachableHypotheses( *i, reachable );
-	}	
+	}
 
 	// also loop over recombined hypotheses (arcs)
 	const ChartArcList *arcList = hypo->GetArcList();

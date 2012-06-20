@@ -96,7 +96,50 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // pluck things out of queue and add to hypo collection
   const size_t popLimit = staticData.GetCubePruningPopLimit();
-  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
+  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops)
+  {
+    ChartHypothesis *hypo = queue.Pop();
+    AddHypothesis(hypo);
+  }
+}
+
+//! (damt hiero) : process sentence and consider context (word to left)
+void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &transOptList
+                                , const ChartCellCollection &allChartCells)
+{
+  const StaticData &staticData = StaticData::Instance();
+
+  // priority queue for applicable rules with selected hypotheses
+  RuleCubeQueue queue(m_manager);
+
+  //Get Context here
+
+  // add all trans opt into queue. using only 1st child node.
+  for (size_t i = 0; i < transOptList.GetSize(); ++i) {
+    const ChartTranslationOption &transOpt = transOptList.Get(i);
+
+    //BEWARE : to access the source side and score of a rule, we have to access each target phrase
+    /*for(
+        TargetPhraseCollection::iterator.begin(); //= transOpt.GetTargetPhraseCollection().begin();
+        !TargetPhraseCollection::iterator.end(); //= transOpt.GetTargetPhraseCollection().end();
+        TargetPhraseCollection::iterator++)
+    {
+        //make example
+        ClassExample( (*iterator->GetSourcePhrase()->GetStringRep(0)),
+                       static_cast<Phrase&>(*iterator->GetTargetPhrase())->GetStringRep(0),
+                        *iterator->GetAlignment()
+                    )
+        //call classifier for this example
+        Classifier::Instance().find();
+        if(m_pred)
+    }
+    RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
+    queue.Add(ruleCube);
+  }
+
+  // pluck things out of queue and add to hypo collection
+  const size_t popLimit = staticData.GetCubePruningPopLimit();
+  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops)
   {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);

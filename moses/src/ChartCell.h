@@ -33,6 +33,9 @@
 #include "RuleCube.h"
 #include "ChartCellLabelSet.h"
 
+//DAMT hiero : include ClassExample
+#include "ClassExample.h"
+
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/version.hpp>
@@ -75,6 +78,11 @@ public:
 
   void ProcessSentence(const ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
+
+  //! (damt hiero) : process sentence and consider context (word to left)
+  void ProcessSentenceWithContext(const ChartTranslationOptionList &transOptList
+                       ,const ChartCellCollection &allChartCells);
+
 
   /** Get all hypotheses in the cell that have the specified constituent label */
   const HypoList *GetSortedHypotheses(const Word &constituentLabel) const

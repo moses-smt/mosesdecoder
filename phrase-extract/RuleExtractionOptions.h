@@ -45,12 +45,18 @@ public:
   bool targetSyntax;
   bool duplicateRules;
   bool fractionalCounting;
-  bool pcfgScore;
   bool outputNTLengths;
+  bool pcfgScore;
   bool gzOutput;
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
-  
+ 
+	
+
+  //new : size of context as otions
+  int leftContext;
+  int rightContext;
+
   RuleExtractionOptions()
     : maxSpan(10)
     , minHoleSource(2)
@@ -77,11 +83,13 @@ public:
     , targetSyntax(false)
     , duplicateRules(true)
     , fractionalCounting(true)
+    , outputNTLengths(false)	
     , pcfgScore(false)
-    , outputNTLengths(false)
     , gzOutput(false)
     , unpairedExtractFormat(false)
-    , conditionOnTargetLhs(false)
+    , conditionOnTargetLhs(false)			
+    , leftContext(1)
+    , rightContext(0)
   {}
 };
 
