@@ -1,4 +1,5 @@
 #!/usr/bin/perl -w
+use FindBin qw($Bin);
 use warnings;
 use strict;
 $|++;
@@ -27,12 +28,12 @@ use IPC::Open2;
 #------------------------------------------------------------------------------
 # constants, global vars, config
 
-my $MOSES      = '/local/herves/moses/moses-irst';
-my $MOSES_INI  = '/local/herves/moses/fr-en/moses.ini.2';
+my $MOSES      = "$Bin/../../../bin/moses";
 
-die "usage: daemon.pl <hostname> <port>" unless (@ARGV == 2);
+die "usage: daemon.pl <hostname> <port> <ini>" unless (@ARGV == 3);
 my $LISTEN_HOST = shift;
 my $LISTEN_PORT = shift;
+my $MOSES_INI = shift;
 
 #------------------------------------------------------------------------------
 # main

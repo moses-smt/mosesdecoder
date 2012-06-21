@@ -281,7 +281,7 @@ SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicati
         int endPos = 0;
         vector<std::string> phrases;
 
-        while (rule.find("[X][X] ", pos) < rule.size()-10) {
+        while (rule.find("[X][X] ", pos) < rule.size()) {
             endPos = rule.find("[X][X] ",pos) - 1; // -1 to cut space before NT
             if (endPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
                 pos += 7; 
@@ -291,16 +291,11 @@ SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicati
             pos = endPos + 8;
         }
 
-        // NT at end of rule
-        if (rule.find(" [X][X] [X]", pos) < rule.size()) {
-            endPos = rule.size()-11;
+        // cut LHS of rule
+        endPos = rule.size()-4;
+        if (endPos > pos) {
+            phrases.push_back(rule.substr(pos,endPos-pos));
         }
-        // rule doesn't end with NT: cut LHS of rule
-        else {
-            endPos = rule.size()-4;
-        }
-
-        phrases.push_back(rule.substr(pos,endPos-pos));
         sa_set = lookup_multiple_phrases(phrases, my_sa, rule, cache);
     }
     else {
