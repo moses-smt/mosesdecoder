@@ -97,12 +97,14 @@ protected:
   m_translationOptionThreshold,
   m_wordDeletionWeight;
 
+  
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
   // do it differently from old pharaoh
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
+  bool m_useFutureDistortionCost;
   size_t
   m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
   , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
@@ -337,6 +339,9 @@ public:
   }
   bool UseEarlyDiscarding() const {
     return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
+  }
+  bool UseFutureDistortionCost() const {
+    return m_useFutureDistortionCost;
   }
   float GetTranslationOptionThreshold() const {
     return m_translationOptionThreshold;

@@ -78,10 +78,10 @@ public:
     CHECK(!Overlap(x));
 
     if (x.m_endPos < m_startPos) {
-      return m_startPos - x.m_endPos;
+      return m_startPos - x.m_endPos - 1;
     }
 
-    return x.m_startPos - m_endPos;
+    return x.m_startPos - m_endPos - 1;
   }
 
 

@@ -359,6 +359,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter(&m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
 
+  // include future distortion cost in distortion penalty
+  SetBooleanParameter( &m_useFutureDistortionCost, "future-distortion-cost", false );
+
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
