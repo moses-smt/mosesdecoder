@@ -42,6 +42,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "LeftContextScoreProducer.h"
 
+#ifdef HAVE_VW
+#include "PSDScoreProducer.h"
+#endif
+
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
 #endif
@@ -169,6 +173,14 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
   }
+
+#ifdef HAVE_VW
+  if (m_parameter->GetParam("psd-model").size() > 0) {
+    float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
+    m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
+    m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0]);
+  }
+#endif // HAVE_VW
 
   if (m_parameter->GetParam("left-context-ttable").size() > 0) {
     float leftContextWeight = Scan<float>(m_parameter->GetParam("weight-left-context")[0]);
@@ -600,6 +612,11 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_leftContextScoreProducer != NULL ) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
     }
+#ifdef HAVE_VW    
+    if (m_PSDScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_PSDScoreProducer);
+    }
+#endif // HAVE_VW
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
@@ -655,6 +672,9 @@ StaticData::~StaticData()
   // small score producers
   delete m_unknownWordPenaltyProducer;
   delete m_leftContextScoreProducer;
+#ifdef HAVE_VW
+  delete m_PSDScoreProducer;
+#endif
 
   //delete m_parameter;
 
