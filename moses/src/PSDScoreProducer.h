@@ -22,7 +22,7 @@ class PSDScoreProducer : public StatefulFeatureFunction
 public:
   PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float weight);
 
-  // read the extended phrase table
+  // read the VW model
   void Initialize(const std::string &modelFile);
 
   // mandatory methods for features
@@ -51,8 +51,8 @@ public:
 private:
   feature feature_from_string(const string &feature_str, unsigned long seed, float value);  
 
-  ::vw vw;
-  std::vector<FactorType> srcFactors, tgtFactors; // which factors to use; XXX hard-coded for now
+  ::vw m_vw;
+  std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
 };
 
 }

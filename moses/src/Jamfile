@@ -9,7 +9,7 @@ local with-vw = [ option.get "with-vw" ] ;
 if $(with-vw) {
   lib vw : : <search>$(with-vw)/lib ;
   lib allreduce : : <search>$(with-vw)/lib ;
-  obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>$(with-vw)/vowpalwabbit ;
+  obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
   alias psd : PSDScoreProducer.o vw allreduce : : : <library>boost_program_options <define>HAVE_VW <include>$(with-vw)/vowpalwabbit ;
   echo "Linking with Vowpal Wabbit" ;
 } else {

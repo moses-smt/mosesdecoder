@@ -643,7 +643,7 @@ void printPSDTrainingExample(ostream &out, const string &src_phrase, const strin
     const vector<string> &src_context)
 {
     // label, namespace empty for now
-  out << tr(tgt_phrase, ' ', '_') << " | ";
+  out << "| |s";
 
   // source context as features
   vector<string>::const_iterator it;
@@ -651,7 +651,7 @@ void printPSDTrainingExample(ostream &out, const string &src_phrase, const strin
     out << "w^" << *it << " ";
 
   // source phrase as feature
-  out << "p^" << tr(src_phrase, ' ', '_') << endl;
+  out << "p^" << tr(src_phrase, ' ', '_') << "|t p^" << tr(tgt_phrase, ' ', '_') << endl;
 }
 
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
