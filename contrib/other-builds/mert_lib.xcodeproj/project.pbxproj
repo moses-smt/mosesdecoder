@@ -99,6 +99,12 @@
 		1E2CD02115939E5D00D858D1 /* Util.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFB415939E5D00D858D1 /* Util.h */; };
 		1E2CD02315939E5D00D858D1 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFB615939E5D00D858D1 /* Vocabulary.cpp */; };
 		1E2CD02415939E5D00D858D1 /* Vocabulary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFB715939E5D00D858D1 /* Vocabulary.h */; };
+		1E39621B1594CFD1006FE978 /* PermutationScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3962191594CFD1006FE978 /* PermutationScorer.cpp */; };
+		1E39621C1594CFD1006FE978 /* PermutationScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E39621A1594CFD1006FE978 /* PermutationScorer.h */; };
+		1E3962201594CFF9006FE978 /* Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E39621E1594CFF9006FE978 /* Permutation.cpp */; };
+		1E3962211594CFF9006FE978 /* Permutation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E39621F1594CFF9006FE978 /* Permutation.h */; };
+		1E3962231594D0FF006FE978 /* SentenceLevelScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */; };
+		1E3962251594D12C006FE978 /* SentenceLevelScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3962241594D12C006FE978 /* SentenceLevelScorer.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -195,6 +201,12 @@
 		1E2CCFB415939E5D00D858D1 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = ../../mert/Util.h; sourceTree = "<group>"; };
 		1E2CCFB615939E5D00D858D1 /* Vocabulary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocabulary.cpp; path = ../../mert/Vocabulary.cpp; sourceTree = "<group>"; };
 		1E2CCFB715939E5D00D858D1 /* Vocabulary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocabulary.h; path = ../../mert/Vocabulary.h; sourceTree = "<group>"; };
+		1E3962191594CFD1006FE978 /* PermutationScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PermutationScorer.cpp; path = ../../mert/PermutationScorer.cpp; sourceTree = "<group>"; };
+		1E39621A1594CFD1006FE978 /* PermutationScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PermutationScorer.h; path = ../../mert/PermutationScorer.h; sourceTree = "<group>"; };
+		1E39621E1594CFF9006FE978 /* Permutation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Permutation.cpp; path = ../../mert/Permutation.cpp; sourceTree = "<group>"; };
+		1E39621F1594CFF9006FE978 /* Permutation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Permutation.h; path = ../../mert/Permutation.h; sourceTree = "<group>"; };
+		1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SentenceLevelScorer.cpp; path = ../../mert/SentenceLevelScorer.cpp; sourceTree = "<group>"; };
+		1E3962241594D12C006FE978 /* SentenceLevelScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceLevelScorer.h; path = ../../mert/SentenceLevelScorer.h; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -211,6 +223,12 @@
 		1E2CCF2815939E2D00D858D1 = {
 			isa = PBXGroup;
 			children = (
+				1E3962241594D12C006FE978 /* SentenceLevelScorer.h */,
+				1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */,
+				1E39621E1594CFF9006FE978 /* Permutation.cpp */,
+				1E39621F1594CFF9006FE978 /* Permutation.h */,
+				1E3962191594CFD1006FE978 /* PermutationScorer.cpp */,
+				1E39621A1594CFD1006FE978 /* PermutationScorer.h */,
 				1E2CCF3A15939E5D00D858D1 /* BleuScorer.cpp */,
 				1E2CCF3B15939E5D00D858D1 /* BleuScorer.h */,
 				1E2CCF3D15939E5D00D858D1 /* CderScorer.cpp */,
@@ -380,6 +398,9 @@
 				1E2CD01F15939E5D00D858D1 /* Types.h in Headers */,
 				1E2CD02115939E5D00D858D1 /* Util.h in Headers */,
 				1E2CD02415939E5D00D858D1 /* Vocabulary.h in Headers */,
+				1E39621C1594CFD1006FE978 /* PermutationScorer.h in Headers */,
+				1E3962211594CFF9006FE978 /* Permutation.h in Headers */,
+				1E3962251594D12C006FE978 /* SentenceLevelScorer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -473,6 +494,9 @@
 				1E2CD01C15939E5D00D858D1 /* Timer.cpp in Sources */,
 				1E2CD02015939E5D00D858D1 /* Util.cpp in Sources */,
 				1E2CD02315939E5D00D858D1 /* Vocabulary.cpp in Sources */,
+				1E39621B1594CFD1006FE978 /* PermutationScorer.cpp in Sources */,
+				1E3962201594CFF9006FE978 /* Permutation.cpp in Sources */,
+				1E3962231594D0FF006FE978 /* SentenceLevelScorer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
