@@ -39,6 +39,9 @@ public:
     return true;
   };
 
+  void score(const candidates_t& candidates, const diffs_t& diffs,
+             statscores_t& scores) const;
+
 protected:
   statscore_t calculateScore(const std::vector<statscore_t>& scores);
   PermutationScorer(const PermutationScorer&);

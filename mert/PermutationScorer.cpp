@@ -1,3 +1,4 @@
+#include <cassert>
 #include "PermutationScorer.h"
 
 using namespace std;
@@ -203,6 +204,12 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
   entry.set(str);
 
   //cout << tempStream.str();
+}
+
+void PermutationScorer::score(const candidates_t& candidates, const diffs_t& diffs,
+           statscores_t& scores) const
+{
+  assert(false);
 }
 
 //Will just be final score

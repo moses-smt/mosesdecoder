@@ -45,6 +45,9 @@ CderScorer.cpp
 MergeScorer.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp
+SentenceLevelScorer.cpp
+Permutation.cpp
+PermutationScorer.cpp
 ../util//kenutil m ..//z ;
 
 exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
