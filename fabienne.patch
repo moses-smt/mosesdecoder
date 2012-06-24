@@ -1,0 +1,1456 @@
+diff --git a/moses/src/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp b/moses/src/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp
+index 574572b..9ad680a 100644
+--- a/moses/src/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp
++++ b/moses/src/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp
+@@ -1,17 +1,17 @@
+ /***********************************************************************
+  Moses - statistical machine translation system
+  Copyright (C) 2006-2012 University of Edinburgh
+- 
++
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+- 
++
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+- 
++
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+diff --git a/moses/src/ChartCell.cpp b/moses/src/ChartCell.cpp
+index 89341d8..e843f24 100644
+--- a/moses/src/ChartCell.cpp
++++ b/moses/src/ChartCell.cpp
+@@ -96,7 +96,50 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
+ 
+   // pluck things out of queue and add to hypo collection
+   const size_t popLimit = staticData.GetCubePruningPopLimit();
+-  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
++  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops)
++  {
++    ChartHypothesis *hypo = queue.Pop();
++    AddHypothesis(hypo);
++  }
++}
++
++//! (damt hiero) : process sentence and consider context (word to left)
++void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &transOptList
++                                , const ChartCellCollection &allChartCells)
++{
++  const StaticData &staticData = StaticData::Instance();
++
++  // priority queue for applicable rules with selected hypotheses
++  RuleCubeQueue queue(m_manager);
++
++  //Get Context here
++
++  // add all trans opt into queue. using only 1st child node.
++  for (size_t i = 0; i < transOptList.GetSize(); ++i) {
++    const ChartTranslationOption &transOpt = transOptList.Get(i);
++
++    //BEWARE : to access the source side and score of a rule, we have to access each target phrase
++    /*for(
++        TargetPhraseCollection::iterator.begin(); //= transOpt.GetTargetPhraseCollection().begin();
++        !TargetPhraseCollection::iterator.end(); //= transOpt.GetTargetPhraseCollection().end();
++        TargetPhraseCollection::iterator++)
++    {
++        //make example
++        ClassExample( (*iterator->GetSourcePhrase()->GetStringRep(0)),
++                       static_cast<Phrase&>(*iterator->GetTargetPhrase())->GetStringRep(0),
++                        *iterator->GetAlignment()
++                    )
++        //call classifier for this example
++        Classifier::Instance().find();
++        if(m_pred)
++    }
++    RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
++    queue.Add(ruleCube);
++  }
++
++  // pluck things out of queue and add to hypo collection
++  const size_t popLimit = staticData.GetCubePruningPopLimit();
++  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops)
+   {
+     ChartHypothesis *hypo = queue.Pop();
+     AddHypothesis(hypo);
+diff --git a/moses/src/ChartCell.h b/moses/src/ChartCell.h
+index df332a0..36f92d3 100644
+--- a/moses/src/ChartCell.h
++++ b/moses/src/ChartCell.h
+@@ -33,6 +33,9 @@
+ #include "RuleCube.h"
+ #include "ChartCellLabelSet.h"
+ 
++//DAMT hiero : include ClassExample
++#include "ClassExample.h"
++
+ #include <boost/functional/hash.hpp>
+ #include <boost/unordered_map.hpp>
+ #include <boost/version.hpp>
+@@ -76,6 +79,11 @@ public:
+   void ProcessSentence(const ChartTranslationOptionList &transOptList
+                        ,const ChartCellCollection &allChartCells);
+ 
++  //! (damt hiero) : process sentence and consider context (word to left)
++  void ProcessSentenceWithContext(const ChartTranslationOptionList &transOptList
++                       ,const ChartCellCollection &allChartCells);
++
++
+   /** Get all hypotheses in the cell that have the specified constituent label */
+   const HypoList *GetSortedHypotheses(const Word &constituentLabel) const
+   {
+diff --git a/moses/src/ChartManager.cpp b/moses/src/ChartManager.cpp
+index 3a4db4d..f3e7a66 100644
+--- a/moses/src/ChartManager.cpp
++++ b/moses/src/ChartManager.cpp
+@@ -95,8 +95,15 @@ void ChartManager::ProcessSentence()
+       // decode
+       ChartCell &cell = m_hypoStackColl.Get(range);
+ 
+-      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
++      //TODO : call option and choose other method
++      cell.ProcessSentenceWithContext(m_transOptColl.GetTranslationOptionList()
+                            ,m_hypoStackColl);
++
++
++
++      //TODO : pass option !!!
++      //cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
++                           //,m_hypoStackColl);
+       m_transOptColl.Clear();
+       cell.PruneToSize();
+       cell.CleanupArcList();
+@@ -287,7 +294,7 @@ void ChartManager::FindReachableHypotheses( const ChartHypothesis *hypo, std::ma
+ 	for(std::vector<const ChartHypothesis*>::const_iterator i = previous.begin(); i != previous.end(); ++i)
+ 	{
+ 		FindReachableHypotheses( *i, reachable );
+-	}	
++	}
+ 
+ 	// also loop over recombined hypotheses (arcs)
+ 	const ChartArcList *arcList = hypo->GetArcList();
+diff --git a/moses/src/ChartTranslationOptionList.cpp b/moses/src/ChartTranslationOptionList.cpp
+index eadd4b6..8700ab8 100644
+--- a/moses/src/ChartTranslationOptionList.cpp
++++ b/moses/src/ChartTranslationOptionList.cpp
+@@ -62,6 +62,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
+     return;
+   }
+ 
++  //FB TODO : Pruning without sentence context : disable or do other estimate
+   float score = ChartTranslationOption::CalcEstimateOfBestScore(tpc, stackVec);
+ 
+   // If the rule limit has already been reached then don't add the option
+diff --git a/moses/src/RuleTable/LoaderStandard.cpp b/moses/src/RuleTable/LoaderStandard.cpp
+index 3453dc3..5988587 100644
+--- a/moses/src/RuleTable/LoaderStandard.cpp
++++ b/moses/src/RuleTable/LoaderStandard.cpp
+@@ -1,17 +1,17 @@
+ /***********************************************************************
+  Moses - statistical machine translation system
+  Copyright (C) 2006-2011 University of Edinburgh
+- 
++
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+- 
++
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+- 
++
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+@@ -56,7 +56,7 @@ bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
+   return ret;
+ 
+ }
+-  
++
+ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
+ {
+   vector<string> toks;
+@@ -70,10 +70,10 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
+     { // no-term
+       vector<string> split = Tokenize(tok, ",");
+       CHECK(split.size() == 2);
+-      
++
+       tok = "[X]" + split[0] + "]";
+       size_t coIndex = Scan<size_t>(split[1]);
+-      
++
+       pair<size_t, size_t> &alignPoint = ntAlign[coIndex];
+       if (sourceTarget == 0)
+       {
+@@ -85,9 +85,9 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
+       }
+     }
+   }
+-  
++
+   phrase = Join(" ", toks) + " [X]";
+-  
++
+ }
+ 
+ void ReformateHieroScore(string &scoreString)
+@@ -103,15 +103,15 @@ void ReformateHieroScore(string &scoreString)
+     score = exp(-score);
+     tok = SPrint(score);
+   }
+-  
++
+   scoreString = Join(" ", toks);
+ }
+-  
++
+ string *ReformatHieroRule(const string &lineOrig)
+-{  
++{
+   vector<string> tokens;
+   vector<float> scoreVector;
+-  
++
+   TokenizeMultiCharSeparator(tokens, lineOrig, "|||" );
+ 
+   string &sourcePhraseString = tokens[1]
+@@ -122,7 +122,7 @@ string *ReformatHieroRule(const string &lineOrig)
+   ReformatHieroRule(0, sourcePhraseString, ntAlign);
+   ReformatHieroRule(1, targetPhraseString, ntAlign);
+   ReformateHieroScore(scoreString);
+-  
++
+   stringstream align;
+   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
+   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign)
+@@ -130,16 +130,16 @@ string *ReformatHieroRule(const string &lineOrig)
+     const pair<size_t, size_t> &alignPoint = iterAlign->second;
+     align << alignPoint.first << "-" << alignPoint.second << " ";
+   }
+-  
++
+   stringstream ret;
+   ret << sourcePhraseString << " ||| "
+-      << targetPhraseString << " ||| " 
++      << targetPhraseString << " ||| "
+       << scoreString << " ||| "
+       << align.str();
+-  
++
+   return new string(ret.str());
+ }
+-  
++
+ bool RuleTableLoaderStandard::Load(FormatType format
+                                 , const std::vector<FactorType> &input
+                                 , const std::vector<FactorType> &output
+@@ -155,7 +155,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
+   const StaticData &staticData = StaticData::Instance();
+   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+ 
+-
+   string lineOrig;
+   size_t count = 0;
+ 
+@@ -168,7 +167,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
+     { // do nothing to format of line
+       line = &lineOrig;
+     }
+-    
++
+     vector<string> tokens;
+     vector<float> scoreVector;
+ 
+@@ -241,6 +240,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
+ 
+   }
+ 
++  //FB : disable pruning of target phraseCollection prior to having sentence context
+   // sort and prune each target phrase collection
+   SortAndPrune(ruleTable);
+ 
+diff --git a/moses/src/TargetPhrase.h b/moses/src/TargetPhrase.h
+index d291ed0..a7fe713 100644
+--- a/moses/src/TargetPhrase.h
++++ b/moses/src/TargetPhrase.h
+@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ #include "ScoreComponentCollection.h"
+ #include "AlignmentInfo.h"
+ 
++#include "ClassExample.h"
+ #include "util/string_piece.hh"
+ 
+ #ifdef HAVE_PROTOBUF
+diff --git a/phrase-extract/ExtractedRule.h b/phrase-extract/ExtractedRule.h
+index be6e308..412a62a 100644
+--- a/phrase-extract/ExtractedRule.h
++++ b/phrase-extract/ExtractedRule.h
+@@ -23,7 +23,6 @@
+ 
+ #include <string>
+ #include <iostream>
+-#include <sstream>
+ #include <map>
+ 
+ // sentence-level collection of rules
+@@ -38,15 +37,19 @@ public:
+   std::string alignmentInv;
+   std::string orientation;
+   std::string orientationForward;
++  //new : left and right context of a rule
++  std::string leftContext;
++  std::string rightContext;
++
+   int startT;
+   int endT;
+   int startS;
+   int endS;
+   float count;
+-  double pcfgScore;
+ 
+   std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
+-  
++
++  //new : initialize left and right context
+   ExtractedRule(int sT, int eT, int sS, int eS)
+     : source()
+     , target()
+@@ -54,21 +57,21 @@ public:
+     , alignmentInv()
+     , orientation()
+     , orientationForward()
++    , leftContext()
++    , rightContext()
+     , startT(sT)
+     , endT(eT)
+     , startS(sS)
+     , endS(eS)
+     , count(0)
+-    , pcfgScore(0.0)
+   {}
+-  
++
+   void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength)
+   {
+     m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);
+   }
+-  
++
+   void OutputNTLengths(std::ostream &out) const;
+-  void OutputNTLengths(std::ostringstream &out) const;
+ };
+ 
+ #endif
+diff --git a/phrase-extract/RuleExtractionOptions.h b/phrase-extract/RuleExtractionOptions.h
+index 272af2c..501e079 100644
+--- a/phrase-extract/RuleExtractionOptions.h
++++ b/phrase-extract/RuleExtractionOptions.h
+@@ -45,12 +45,18 @@ public:
+   bool targetSyntax;
+   bool duplicateRules;
+   bool fractionalCounting;
+-  bool pcfgScore;
+   bool outputNTLengths;
++  bool pcfgScore;
+   bool gzOutput;
+   bool unpairedExtractFormat;
+   bool conditionOnTargetLhs;
+-  
++ 
++	
++
++  //new : size of context as otions
++  int leftContext;
++  int rightContext;
++
+   RuleExtractionOptions()
+     : maxSpan(10)
+     , minHoleSource(2)
+@@ -77,11 +83,13 @@ public:
+     , targetSyntax(false)
+     , duplicateRules(true)
+     , fractionalCounting(true)
++    , outputNTLengths(false)	
+     , pcfgScore(false)
+-    , outputNTLengths(false)
+     , gzOutput(false)
+     , unpairedExtractFormat(false)
+-    , conditionOnTargetLhs(false)
++    , conditionOnTargetLhs(false)			
++    , leftContext(1)
++    , rightContext(0)
+   {}
+ };
+ 
+diff --git a/phrase-extract/extract-rules.cpp b/phrase-extract/extract-rules.cpp
+index 7623276..fa8d934 100644
+--- a/phrase-extract/extract-rules.cpp
++++ b/phrase-extract/extract-rules.cpp
+@@ -45,9 +45,6 @@
+ #include "tables-core.h"
+ #include "XmlTree.h"
+ #include "InputFileStream.h"
+-#include "OutputFileStream.h"
+-#include "../moses/src/ThreadPool.h"
+-#include "../moses/src/OutputCollector.h"
+ 
+ #define LINE_MAX_LENGTH 500000
+ 
+@@ -56,48 +53,20 @@ using namespace std;
+ typedef vector< int > LabelIndex;
+ typedef map< int, int > WordIndex;
+ 
+-class ExtractTask : public Moses::Task {
+-private:
+-  size_t m_id;
+-  SentenceAlignmentWithSyntax *m_sentence;
+-  RuleExtractionOptions &m_options;
+-  Moses::OutputCollector* m_extractCollector;
+-  Moses::OutputCollector* m_extractCollectorInv;
+-
+-public:
+-  ExtractTask(size_t id, SentenceAlignmentWithSyntax *sentence, RuleExtractionOptions &options, Moses::OutputCollector* extractCollector, Moses::OutputCollector* extractCollectorInv):
+-    m_id(id),
+-    m_sentence(sentence),
+-    m_options(options),
+-    m_extractCollector(extractCollector),
+-    m_extractCollectorInv(extractCollectorInv) {}
+-  ~ExtractTask() { delete m_sentence; }
+-  void Run();
+-
+-private:
+-vector< ExtractedRule > m_extractedRules;
+-
+-// main functions
+-void extractRules();
++vector< ExtractedRule > extractedRules;
++
++void extractRules(SentenceAlignmentWithSyntax & );
+ void addRuleToCollection(ExtractedRule &rule);
+ void consolidateRules();
+ void writeRulesToFile();
++void writeGlueGrammar(const string &);
++void collectWordLabelCounts(SentenceAlignmentWithSyntax &sentence );
++void writeUnknownWordLabel(const string &);
+ 
+-// subs
+-void addRule( int, int, int, int, RuleExist &ruleExist);
+-void addHieroRule( int startT, int endT, int startS, int endS
++void addRule( SentenceAlignmentWithSyntax &, int, int, int, int
++              , RuleExist &ruleExist);
++void addHieroRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int startS, int endS
+                    , RuleExist &ruleExist, const HoleCollection &holeColl, int numHoles, int initStartF, int wordCountT, int wordCountS);
+-void printHieroPhrase( int startT, int endT, int startS, int endS
+-                       , HoleCollection &holeColl, LabelIndex &labelIndex);
+-string printTargetHieroPhrase(  int startT, int endT, int startS, int endS
+-                              , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex, double &logPCFGScore);
+-string printSourceHieroPhrase( int startT, int endT, int startS, int endS
+-                               , HoleCollection &holeColl, const LabelIndex &labelIndex);
+-void preprocessSourceHieroPhrase( int startT, int endT, int startS, int endS
+-                                  , WordIndex &indexS, HoleCollection &holeColl, const LabelIndex &labelIndex);
+-void printHieroAlignment(  int startT, int endT, int startS, int endS
+-                         , const WordIndex &indexS, const WordIndex &indexT, HoleCollection &holeColl, ExtractedRule &rule);
+-void printAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl);
+ 
+ inline string IntToString( int i )
+ {
+@@ -105,29 +74,22 @@ inline string IntToString( int i )
+   out << i;
+   return out.str();
+ }
+-};
+ 
+-// stats for glue grammar and unknown word label probabilities
+-void collectWordLabelCounts(SentenceAlignmentWithSyntax &sentence );
+-void writeGlueGrammar(const string &, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection);
+-void writeUnknownWordLabel(const string &);
++ofstream extractFile;
++ofstream extractFileInv;
++set< string > targetLabelCollection, sourceLabelCollection;
++map< string, int > targetTopLabelCollection, sourceTopLabelCollection;
+ 
++RuleExtractionOptions options;
+ 
+ int main(int argc, char* argv[])
+ {
+   cerr << "extract-rules, written by Philipp Koehn\n"
+        << "rule extraction from an aligned parallel corpus\n";
+ 
+-  RuleExtractionOptions options;
+-#ifdef WITH_THREADS
+-  int thread_count = 1;
+-#endif
+   if (argc < 5) {
+-    cerr << "syntax: extract-rules corpus.target corpus.source corpus.align extract ["
+-#ifdef WITH_THREADS
+-         << " --threads NUM |"
+-#endif
+-         << " --GlueGrammar FILE"
++    cerr << "syntax: extract-rules corpus.target corpus.source corpus.align extract "
++         << " [ --GlueGrammar FILE"
+          << " | --UnknownWordLabel FILE"
+          << " | --OnlyDirect"
+          << " | --OutputNTLengths"
+@@ -140,7 +102,7 @@ int main(int argc, char* argv[])
+          << " | --MaxNonTerm[" << options.maxNonTerm << "]"
+          << " | --MaxScope[" << options.maxScope << "]"
+          << " | --SourceSyntax | --TargetSyntax"
+-         << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting"
++	 << " | --AllowOnlyUnalignedWords | --DisallowNonTermConsecTarget |--NonTermConsecSource |  --NoNonTermFirstWord | --NoFractionalCounting"
+          << " | --UnpairedExtractFormat"
+          << " | --ConditionOnTargetLHS ]\n";
+     exit(1);
+@@ -215,9 +177,38 @@ int main(int argc, char* argv[])
+         exit(1);
+       }
+     }
+-    else if (strcmp(argv[i], "--GZOutput") == 0) {
++
++   else if (strcmp(argv[i], "--GZOutput") == 0) {
+       options.gzOutput = true;  
+     } 
++   
++   else if (strcmp(argv[i],"--PCFG") == 0) {     
++	 options.pcfgScore = true;
++   } 
++
++  else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {      
++	 options.unpairedExtractFormat = true;
++   } 
++
++  else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
++  	options.conditionOnTargetLhs = true;
++  }
++       // size of left context
++    else if (strcmp(argv[i],"--LeftContext") == 0) {
++      options.leftContext = atoi(argv[++i]);
++      if (options.leftContext < 0) {
++        cerr << "extract error: --LeftContext should be at least 0" << endl;
++        exit(1);
++      }
++    }
++    // size of right context
++    else if (strcmp(argv[i],"--RightContext") == 0) {
++      options.rightContext = atoi(argv[++i]);
++      if (options.rightContext < 0) {
++        cerr << "extract error: --RightContext should be at least 0" << endl;
++        exit(1);
++      }
++    }
+     // allow consecutive non-terminals (X Y | X Y)
+     else if (strcmp(argv[i],"--TargetSyntax") == 0) {
+       options.targetSyntax = true;
+@@ -259,20 +250,8 @@ int main(int argc, char* argv[])
+     // if an source phrase is paired with two target phrases, then count(t|s) = 0.5
+     else if (strcmp(argv[i],"--NoFractionalCounting") == 0) {
+       options.fractionalCounting = false;
+-    } else if (strcmp(argv[i],"--PCFG") == 0) {
+-      options.pcfgScore = true;
+     } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
+       options.outputNTLengths = true;
+-    } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
+-      options.unpairedExtractFormat = true;
+-    } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
+-      options.conditionOnTargetLhs = true;
+-#ifdef WITH_THREADS
+-    } else if (strcmp(argv[i],"-threads") == 0 || 
+-               strcmp(argv[i],"--threads") == 0 ||
+-               strcmp(argv[i],"--Threads") == 0) {
+-      thread_count = atoi(argv[++i]);
+-#endif
+     } else {
+       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
+       exit(1);
+@@ -291,29 +270,13 @@ int main(int argc, char* argv[])
+   istream *aFileP = &aFile;
+ 
+   // open output files
+-  string fileNameExtractInv = fileNameExtract + ".inv" + (options.gzOutput?".gz":"");
+-  Moses::OutputFileStream extractFile;
+-  Moses::OutputFileStream extractFileInv;
+-  extractFile.Open((fileNameExtract  + (options.gzOutput?".gz":"")).c_str());
++  string fileNameExtractInv = fileNameExtract + ".inv";
++  extractFile.open(fileNameExtract.c_str());
+   if (!options.onlyDirectFlag)
+-    extractFileInv.Open(fileNameExtractInv.c_str());
+-
+-  // output into file
+-  Moses::OutputCollector* extractCollector = new Moses::OutputCollector(&extractFile);
+-  Moses::OutputCollector* extractCollectorInv = new Moses::OutputCollector(&extractFileInv);
+-
+-  // stats on labels for glue grammar and unknown word label probabilities
+-  set< string > targetLabelCollection, sourceLabelCollection;
+-  map< string, int > targetTopLabelCollection, sourceTopLabelCollection;
+-
+-#ifdef WITH_THREADS
+-  // set up thread pool
+-  Moses::ThreadPool pool(thread_count);
+-  pool.SetQueueLimit(1000);
+-#endif
++    extractFileInv.open(fileNameExtractInv.c_str());
+ 
+   // loop through all sentence pairs
+-  size_t i=0;
++  int i=0;
+   while(true) {
+     i++;
+     if (i%1000 == 0) cerr << "." << flush;
+@@ -326,10 +289,11 @@ int main(int argc, char* argv[])
+     if (tFileP->eof()) break;
+     SAFE_GETLINE((*sFileP), sourceString, LINE_MAX_LENGTH, '\n', __FILE__);
+     SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
+-
+-    SentenceAlignmentWithSyntax *sentence = new SentenceAlignmentWithSyntax
+-      (targetLabelCollection, sourceLabelCollection, 
+-       targetTopLabelCollection, sourceTopLabelCollection, options);
++    SentenceAlignmentWithSyntax sentence(targetLabelCollection,
++                                         sourceLabelCollection,
++                                         targetTopLabelCollection,
++                                         sourceTopLabelCollection,
++                                         options);
+     //az: output src, tgt, and alingment line
+     if (options.onlyOutputSpanInfo) {
+       cout << "LOG: SRC: " << sourceString << endl;
+@@ -338,66 +302,45 @@ int main(int argc, char* argv[])
+       cout << "LOG: PHRASES_BEGIN:" << endl;
+     }
+ 
+-    if (sentence->create(targetString, sourceString, alignmentString, i)) {
++    if (sentence.create(targetString, sourceString, alignmentString, i)) {
+       if (options.unknownWordLabelFlag) {
+-        collectWordLabelCounts(*sentence);
+-      }
+-      ExtractTask *task = new ExtractTask(i-1, sentence, options, extractCollector, extractCollectorInv);
+-#ifdef WITH_THREADS
+-      if (thread_count == 1) {
+-        task->Run();
+-        delete task;
+-      }
+-      else {
+-        pool.Submit(task);
++        collectWordLabelCounts(sentence);
+       }
+-#else
+-      task->Run();
+-      delete task;
+-#endif
++      extractRules(sentence);
++      consolidateRules();
++      writeRulesToFile();
++      extractedRules.clear();
+     }
+     if (options.onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
+   }
+ 
+-#ifdef WITH_THREADS
+-  // wait for all threads to finish
+-  pool.Stop(true);
+-#endif
+-
+   tFile.Close();
+   sFile.Close();
+   aFile.Close();
+   // only close if we actually opened it
+   if (!options.onlyOutputSpanInfo) {
+-    extractFile.Close();
+-    if (!options.onlyDirectFlag) extractFileInv.Close();
++    extractFile.close();
++    if (!options.onlyDirectFlag) extractFileInv.close();
+   }
+ 
+   if (options.glueGrammarFlag)
+-    writeGlueGrammar(fileNameGlueGrammar, options, targetLabelCollection, targetTopLabelCollection);
++    writeGlueGrammar(fileNameGlueGrammar);
+ 
+   if (options.unknownWordLabelFlag)
+     writeUnknownWordLabel(fileNameUnknownWordLabel);
+ }
+ 
+-void ExtractTask::Run() {
+-  extractRules();
+-  consolidateRules();
+-  writeRulesToFile();
+-  m_extractedRules.clear();
+-}
+-
+-void ExtractTask::extractRules()
++void extractRules( SentenceAlignmentWithSyntax &sentence )
+ {
+-  int countT = m_sentence->target.size();
+-  int countS = m_sentence->source.size();
++  int countT = sentence.target.size();
++  int countS = sentence.source.size();
+ 
+   // phrase repository for creating hiero phrases
+   RuleExist ruleExist(countT);
+ 
+   // check alignments for target phrase startT...endT
+   for(int lengthT=1;
+-      lengthT <= m_options.maxSpan && lengthT <= countT;
++      lengthT <= options.maxSpan && lengthT <= countT;
+       lengthT++) {
+     for(int startT=0; startT < countT-(lengthT-1); startT++) {
+ 
+@@ -405,17 +348,17 @@ void ExtractTask::extractRules()
+       int endT = startT + lengthT - 1;
+ 
+       // if there is target side syntax, there has to be a node
+-      if (m_options.targetSyntax && !m_sentence->targetTree.HasNode(startT,endT))
++      if (options.targetSyntax && !sentence.targetTree.HasNode(startT,endT))
+         continue;
+ 
+       // find find aligned source words
+       // first: find minimum and maximum source word
+       int minS = 9999;
+       int maxS = -1;
+-      vector< int > usedS = m_sentence->alignedCountS;
++      vector< int > usedS = sentence.alignedCountS;
+       for(int ti=startT; ti<=endT; ti++) {
+-        for(unsigned int i=0; i<m_sentence->alignedToT[ti].size(); i++) {
+-          int si = m_sentence->alignedToT[ti][i];
++        for(int i=0; i<sentence.alignedToT[ti].size(); i++) {
++          int si = sentence.alignedToT[ti][i];
+           if (si<minS) {
+             minS = si;
+           }
+@@ -431,7 +374,7 @@ void ExtractTask::extractRules()
+         continue;
+ 
+       // source phrase has to be within limits
+-      if( maxS-minS >= m_options.maxSpan )
++      if( maxS-minS >= options.maxSpan )
+         continue;
+ 
+       // check if source words are aligned to out of bound target words
+@@ -449,23 +392,23 @@ void ExtractTask::extractRules()
+       // start point of source phrase may retreat over unaligned
+       for(int startS=minS;
+           (startS>=0 &&
+-           startS>maxS - m_options.maxSpan && // within length limit
+-           (startS==minS || m_sentence->alignedCountS[startS]==0)); // unaligned
++           startS>maxS - options.maxSpan && // within length limit
++           (startS==minS || sentence.alignedCountS[startS]==0)); // unaligned
+           startS--) {
+         // end point of source phrase may advance over unaligned
+         for(int endS=maxS;
+-            (endS<countS && endS<startS + m_options.maxSpan && // within length limit
+-             (endS==maxS || m_sentence->alignedCountS[endS]==0)); // unaligned
++            (endS<countS && endS<startS + options.maxSpan && // within length limit
++             (endS==maxS || sentence.alignedCountS[endS]==0)); // unaligned
+             endS++) {
+           // if there is source side syntax, there has to be a node
+-          if (m_options.sourceSyntax && !m_sentence->sourceTree.HasNode(startS,endS))
++          if (options.sourceSyntax && !sentence.sourceTree.HasNode(startS,endS))
+             continue;
+ 
+           // TODO: loop over all source and target syntax labels
+ 
+           // if within length limits, add as fully-lexical phrase pair
+-          if (endT-startT < m_options.maxSymbolsTarget && endS-startS < m_options.maxSymbolsSource) {
+-            addRule(startT,endT,startS,endS, ruleExist);
++          if (endT-startT < options.maxSymbolsTarget && endS-startS < options.maxSymbolsSource) {
++             addRule(sentence,startT,endT,startS,endS, ruleExist);
+           }
+ 
+           // take note that this is a valid phrase alignment
+@@ -474,10 +417,10 @@ void ExtractTask::extractRules()
+           // extract hierarchical rules
+ 
+           // are rules not allowed to start non-terminals?
+-          int initStartT = m_options.nonTermFirstWord ? startT : startT + 1;
++          int initStartT = options.nonTermFirstWord ? startT : startT + 1;
+ 
+           HoleCollection holeColl(startS, endS); // empty hole collection
+-          addHieroRule(startT, endT, startS, endS,
++          addHieroRule(sentence, startT, endT, startS, endS,
+                        ruleExist, holeColl, 0, initStartT,
+                        endT-startT+1, endS-startS+1);
+         }
+@@ -486,7 +429,8 @@ void ExtractTask::extractRules()
+   }
+ }
+ 
+-void ExtractTask::preprocessSourceHieroPhrase( int startT, int endT, int startS, int endS
++void preprocessSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
++                                  , int startT, int endT, int startS, int endS
+                                   , WordIndex &indexS, HoleCollection &holeColl, const LabelIndex &labelIndex)
+ {
+   vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
+@@ -506,8 +450,8 @@ void ExtractTask::preprocessSourceHieroPhrase( int startT, int endT, int startS,
+       Hole &hole = **iterHoleList;
+ 
+       int labelI = labelIndex[ 2+holeCount+holeTotal ];
+-      string label = m_options.sourceSyntax ?
+-                     m_sentence->sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
++      string label = options.sourceSyntax ?
++                     sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
+       hole.SetLabel(label, 0);
+ 
+       currPos = hole.GetEnd(0);
+@@ -524,8 +468,9 @@ void ExtractTask::preprocessSourceHieroPhrase( int startT, int endT, int startS,
+   assert(iterHoleList == holeColl.GetSortedSourceHoles().end());
+ }
+ 
+-string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, int endS
+-                              , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex, double &logPCFGScore)
++string printTargetHieroPhrase(SentenceAlignmentWithSyntax &sentence
++                              , int startT, int endT, int startS, int endS
++                              , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex)
+ {
+   HoleList::iterator iterHoleList = holeColl.GetHoles().begin();
+   assert(iterHoleList != holeColl.GetHoles().end());
+@@ -547,20 +492,11 @@ string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, in
+       assert(sourceLabel != "");
+ 
+       int labelI = labelIndex[ 2+holeCount ];
+-      string targetLabel = m_options.targetSyntax ?
+-                           m_sentence->targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
++      string targetLabel = options.targetSyntax ?
++                           sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
+       hole.SetLabel(targetLabel, 1);
+ 
+-      if (m_options.unpairedExtractFormat) {
+-        out += "[" + targetLabel + "] ";
+-      } else {
+-        out += "[" + sourceLabel + "][" + targetLabel + "] ";
+-      }
+-
+-      if (m_options.pcfgScore) {
+-        double score = m_sentence->targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->GetPcfgScore();
+-        logPCFGScore -= score;
+-      }
++      out += "[" + sourceLabel + "][" + targetLabel + "] ";
+ 
+       currPos = hole.GetEnd(1);
+       hole.SetPos(outPos, 1);
+@@ -568,7 +504,7 @@ string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, in
+       holeCount++;
+     } else {
+       indexT[currPos] = outPos;
+-      out += m_sentence->target[currPos] + " ";
++      out += sentence.target[currPos] + " ";
+     }
+ 
+     outPos++;
+@@ -578,7 +514,80 @@ string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, in
+   return out.erase(out.size()-1);
+ }
+ 
+-string ExtractTask::printSourceHieroPhrase( int startT, int endT, int startS, int endS
++string printHieroLeftContext(vector<int> contextPos, SentenceAlignmentWithSyntax &sentence)
++{ 		
++    vector<int> :: iterator itr_context;
++    string out = "";
++    int contextCounter = 0;
++    for(itr_context = contextPos.begin(); itr_context != contextPos.end(); itr_context++)
++    {
++        stringstream s;
++        s << ++contextCounter;
++
++         if((*itr_context) < 0)
++	 {
++	    out += "LCxt";
++            out += "(";
++            out += s.str();
++            out += ")";
++            out += "(";
++            out += "<s>";
++            out += ")";
++            out += " ";
++	 }
++         else
++         {
++            out += "LCxt";
++            out += "(";
++            out += s.str();
++            out += ")";
++            out += "(";
++            out += sentence.source[*itr_context];
++            out += ")";
++            out += " ";
++         }
++    }
++    return out;
++}
++
++string printHieroRightContext(vector<int> contextPos, SentenceAlignmentWithSyntax &sentence)
++{
++    vector<int> :: iterator itr_context;
++    string out = "";
++    int contextCounter = 0;
++    for(itr_context = contextPos.begin(); itr_context != contextPos.end(); itr_context++)
++    {
++        stringstream s;
++        s << ++contextCounter;
++
++         if((*itr_context) > sentence.source.size() -1)
++	 {
++	    out += "RCxt";
++            out += "(";
++            out += sentence.source.size();
++            out += ")";
++            out += "(";
++            out += "<\s>";
++            out += ")";
++            out += " ";
++	 }
++         else
++         {
++            out += "RCxt";
++            out += "(";
++            out += s.str();
++            out += ")";
++            out += "(";
++            out += sentence.source[*itr_context];
++            out += ")";
++            out += " ";
++         }
++    }
++    return out;
++}
++
++string printSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
++                               , int startT, int endT, int startS, int endS
+                                , HoleCollection &holeColl, const LabelIndex &labelIndex)
+ {
+   vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
+@@ -601,18 +610,14 @@ string ExtractTask::printSourceHieroPhrase( int startT, int endT, int startS, in
+       assert(targetLabel != "");
+ 
+       const string &sourceLabel =  hole.GetLabel(0);
+-      if (m_options.unpairedExtractFormat) {
+-        out += "[" + sourceLabel + "] ";
+-      } else {
+-        out += "[" + sourceLabel + "][" + targetLabel + "] ";
+-      }
++      out += "[" + sourceLabel + "][" + targetLabel + "] ";
+ 
+       currPos = hole.GetEnd(0);
+       hole.SetPos(outPos, 0);
+       ++iterHoleList;
+       ++holeCount;
+     } else {
+-      out += m_sentence->source[currPos] + " ";
++      out += sentence.source[currPos] + " ";
+     }
+ 
+     outPos++;
+@@ -622,19 +627,20 @@ string ExtractTask::printSourceHieroPhrase( int startT, int endT, int startS, in
+   return out.erase(out.size()-1);
+ }
+ 
+-void ExtractTask::printHieroAlignment( int startT, int endT, int startS, int endS
++void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
++                         , int startT, int endT, int startS, int endS
+                          , const WordIndex &indexS, const WordIndex &indexT, HoleCollection &holeColl, ExtractedRule &rule)
+ {
+   // print alignment of words
+   for(int ti=startT; ti<=endT; ti++) {
+     WordIndex::const_iterator p = indexT.find(ti);
+     if (p != indexT.end()) { // does word still exist?
+-      for(unsigned int i=0; i<m_sentence->alignedToT[ti].size(); i++) {
+-        int si = m_sentence->alignedToT[ti][i];
++      for(int i=0; i<sentence.alignedToT[ti].size(); i++) {
++        int si = sentence.alignedToT[ti][i];
+         std::string sourceSymbolIndex = IntToString(indexS.find(si)->second);
+         std::string targetSymbolIndex = IntToString(p->second);
+         rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
+-        if (! m_options.onlyDirectFlag)
++        if (! options.onlyDirectFlag)
+           rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
+       }
+     }
+@@ -644,24 +650,24 @@ void ExtractTask::printHieroAlignment( int startT, int endT, int startS, int end
+   HoleList::const_iterator iterHole;
+   for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
+     const Hole &hole = *iterHole;
+-        
++
+     std::string sourceSymbolIndex = IntToString(hole.GetPos(0));
+     std::string targetSymbolIndex = IntToString(hole.GetPos(1));
+     rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
+-    if (!m_options.onlyDirectFlag)
++    if (!options.onlyDirectFlag)
+       rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
+-  
++
+     rule.SetSpanLength(hole.GetPos(0), hole.GetSize(0), hole.GetSize(1) ) ;
+ 
+   }
+ 
+   rule.alignment.erase(rule.alignment.size()-1);
+-  if (!m_options.onlyDirectFlag) {
++  if (!options.onlyDirectFlag) {
+     rule.alignmentInv.erase(rule.alignmentInv.size()-1);
+   }
+ }
+ 
+-void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
++void printHieroPhraseWithContext( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int startS, int endS
+                        , HoleCollection &holeColl, LabelIndex &labelIndex)
+ {
+   WordIndex indexS, indexT; // to keep track of word positions in rule
+@@ -669,58 +675,72 @@ void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
+   ExtractedRule rule( startT, endT, startS, endS );
+ 
+   // phrase labels
+-  string targetLabel = m_options.targetSyntax ?
+-                       m_sentence->targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
+-  string sourceLabel = m_options.sourceSyntax ?
+-                       m_sentence->sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
++  string targetLabel = options.targetSyntax ?
++                       sentence.targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
++  string sourceLabel = options.sourceSyntax ?
++                       sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
++  //string sourceLabel = "X";
+ 
+   // create non-terms on the source side
+-  preprocessSourceHieroPhrase(startT, endT, startS, endS, indexS, holeColl, labelIndex);
++  preprocessSourceHieroPhrase(sentence, startT, endT, startS, endS, indexS, holeColl, labelIndex);
++
++  //new : print left context
++  vector<int> leftContextVec;
++  int sizeOfContext = 0;
++
++  while(sizeOfContext < options.leftContext)
++  {
++        leftContextVec.push_back(startS - (++sizeOfContext));
++  }
++
++  rule.leftContext = printHieroLeftContext(leftContextVec,sentence);
++
++  //new : print left context
++  vector<int> rightContextVec;
++  sizeOfContext = 0;
++
++  while(sizeOfContext < options.rightContext)
++  {
++        rightContextVec.push_back(endS + (++sizeOfContext));
++  }
++
++  rule.rightContext = printHieroRightContext(rightContextVec,sentence);
+ 
+   // target
+-  if (m_options.pcfgScore) {
+-    double logPCFGScore = m_sentence->targetTree.GetNodes(startT,endT)[labelIndex[0]]->GetPcfgScore();
+-    rule.target = printTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore)
++  rule.target = printTargetHieroPhrase(sentence, startT, endT, startS, endS, indexT, holeColl, labelIndex)
+                 + " [" + targetLabel + "]";
+-    rule.pcfgScore = std::exp(logPCFGScore);
+-  } else {
+-    double logPCFGScore = 0.0f;
+-    rule.target = printTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore)
+-                + " [" + targetLabel + "]";
+-  }
+ 
+   // source
+-  rule.source = printSourceHieroPhrase(startT, endT, startS, endS, holeColl, labelIndex);
+-  if (m_options.conditionOnTargetLhs) {
+-    rule.source += " [" + targetLabel + "]";
+-  } else {
+-    rule.source += " [" + sourceLabel + "]";
+-  }
++  // holeColl.SortSourceHoles();
++  rule.source = printSourceHieroPhrase(sentence, startT, endT, startS, endS, holeColl, labelIndex)
++                + " [" + sourceLabel + "]";
+ 
+   // alignment
+-  printHieroAlignment(startT, endT, startS, endS, indexS, indexT, holeColl, rule);
++  printHieroAlignment(sentence, startT, endT, startS, endS, indexS, indexT, holeColl, rule);
+ 
+   addRuleToCollection( rule );
+ }
+ 
+-void ExtractTask::printAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl)
++void printAllHieroPhrasesWithContext( SentenceAlignmentWithSyntax &sentence
++                           , int startT, int endT, int startS, int endS
++                           , HoleCollection &holeColl)
+ {
+   LabelIndex labelIndex,labelCount;
+ 
+   // number of target head labels
+-  int numLabels = m_options.targetSyntax ? m_sentence->targetTree.GetNodes(startT,endT).size() : 1;
++  int numLabels = options.targetSyntax ? sentence.targetTree.GetNodes(startT,endT).size() : 1;
+   labelCount.push_back(numLabels);
+   labelIndex.push_back(0);
+ 
+   // number of source head labels
+-  numLabels =  m_options.sourceSyntax ? m_sentence->sourceTree.GetNodes(startS,endS).size() : 1;
++  numLabels =  options.sourceSyntax ? sentence.sourceTree.GetNodes(startS,endS).size() : 1;
+   labelCount.push_back(numLabels);
+   labelIndex.push_back(0);
+ 
+   // number of target hole labels
+   for( HoleList::const_iterator hole = holeColl.GetHoles().begin();
+        hole != holeColl.GetHoles().end(); hole++ ) {
+-    int numLabels =  m_options.targetSyntax ? m_sentence->targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
++    int numLabels =  options.targetSyntax ? sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
+     labelCount.push_back(numLabels);
+     labelIndex.push_back(0);
+   }
+@@ -730,7 +750,7 @@ void ExtractTask::printAllHieroPhrases( int startT, int endT, int startS, int en
+   for( vector<Hole*>::iterator i = holeColl.GetSortedSourceHoles().begin();
+        i != holeColl.GetSortedSourceHoles().end(); i++ ) {
+     const Hole &hole = **i;
+-    int numLabels =  m_options.sourceSyntax ? m_sentence->sourceTree.GetNodes(hole.GetStart(0),hole.GetEnd(0)).size() : 1 ;
++    int numLabels =  options.sourceSyntax ? sentence.sourceTree.GetNodes(hole.GetStart(0),hole.GetEnd(0)).size() : 1 ;
+     labelCount.push_back(numLabels);
+     labelIndex.push_back(0);
+   }
+@@ -738,8 +758,8 @@ void ExtractTask::printAllHieroPhrases( int startT, int endT, int startS, int en
+   // loop through the holes
+   bool done = false;
+   while(!done) {
+-    printHieroPhrase( startT, endT, startS, endS, holeColl, labelIndex );
+-    for(unsigned int i=0; i<labelIndex.size(); i++) {
++    printHieroPhraseWithContext( sentence, startT, endT, startS, endS, holeColl, labelIndex );
++    for(int i=0; i<labelIndex.size(); i++) {
+       labelIndex[i]++;
+       if(labelIndex[i] == labelCount[i]) {
+         labelIndex[i] = 0;
+@@ -754,26 +774,27 @@ void ExtractTask::printAllHieroPhrases( int startT, int endT, int startS, int en
+ 
+ // this function is called recursively
+ // it pokes a new hole into the phrase pair, and then calls itself for more holes
+-void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
++void addHieroRule( SentenceAlignmentWithSyntax &sentence
++                   , int startT, int endT, int startS, int endS
+                    , RuleExist &ruleExist, const HoleCollection &holeColl
+                    , int numHoles, int initStartT, int wordCountT, int wordCountS)
+ {
+   // done, if already the maximum number of non-terminals in phrase pair
+-  if (numHoles >= m_options.maxNonTerm)
++  if (numHoles >= options.maxNonTerm)
+     return;
+ 
+   // find a hole...
+   for (int startHoleT = initStartT; startHoleT <= endT; ++startHoleT) {
+-    for (int endHoleT = startHoleT+(m_options.minHoleTarget-1); endHoleT <= endT; ++endHoleT) {
++    for (int endHoleT = startHoleT+(options.minHoleTarget-1); endHoleT <= endT; ++endHoleT) {
+       // if last non-terminal, enforce word count limit
+-      if (numHoles == m_options.maxNonTerm-1 && wordCountT - (endHoleT-startT+1) + (numHoles+1) > m_options.maxSymbolsTarget)
++      if (numHoles == options.maxNonTerm-1 && wordCountT - (endHoleT-startT+1) + (numHoles+1) > options.maxSymbolsTarget)
+         continue;
+ 
+       // determine the number of remaining target words
+       const int newWordCountT = wordCountT - (endHoleT-startHoleT+1);
+ 
+       // always enforce min word count limit
+-      if (newWordCountT < m_options.minWords)
++      if (newWordCountT < options.minWords)
+         continue;
+ 
+       // except the whole span
+@@ -793,18 +814,18 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
+         const int sourceHoleSize = sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1;
+ 
+         // enforce minimum hole size
+-        if (sourceHoleSize < m_options.minHoleSource)
++        if (sourceHoleSize < options.minHoleSource)
+           continue;
+ 
+         // determine the number of remaining source words
+         const int newWordCountS = wordCountS - sourceHoleSize;
+ 
+         // if last non-terminal, enforce word count limit
+-        if (numHoles == m_options.maxNonTerm-1 && newWordCountS + (numHoles+1) > m_options.maxSymbolsSource)
++        if (numHoles == options.maxNonTerm-1 && newWordCountS + (numHoles+1) > options.maxSymbolsSource)
+           continue;
+ 
+         // enforce min word count limit
+-        if (newWordCountS < m_options.minWords)
++        if (newWordCountS < options.minWords)
+           continue;
+ 
+         // hole must be subphrase of the source phrase
+@@ -817,16 +838,16 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
+           continue;
+ 
+         // if consecutive non-terminals are not allowed, also check for source
+-        if (!m_options.nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
++        if (!options.nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
+           continue;
+ 
+         // check that rule scope would not exceed limit if sourceHole
+         // were added
+-        if (holeColl.Scope(sourceHole) > m_options.maxScope)
++        if (holeColl.Scope(sourceHole) > options.maxScope)
+           continue;
+ 
+         // require that at least one aligned word is left (unless there are no words at all)
+-        if (m_options.requireAlignedWord && (newWordCountS > 0 || newWordCountT > 0)) {
++        if (options.requireAlignedWord && (newWordCountS > 0 || newWordCountT > 0)) {
+           HoleList::const_iterator iterHoleList = holeColl.GetHoles().begin();
+           bool foundAlignedWord = false;
+           // loop through all word positions
+@@ -842,7 +863,7 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
+             }
+             // covered by word? check if it is aligned
+             else {
+-              if (m_sentence->alignedToT[pos].size() > 0)
++              if (sentence.alignedToT[pos].size() > 0)
+                 foundAlignedWord = true;
+             }
+           }
+@@ -858,19 +879,20 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
+         bool allowablePhrase = true;
+ 
+         // maximum words count violation?
+-        if (newWordCountS + (numHoles+1) > m_options.maxSymbolsSource)
++        if (newWordCountS + (numHoles+1) > options.maxSymbolsSource)
+           allowablePhrase = false;
+ 
+-        if (newWordCountT + (numHoles+1) > m_options.maxSymbolsTarget)
++        if (newWordCountT + (numHoles+1) > options.maxSymbolsTarget)
+           allowablePhrase = false;
+ 
+         // passed all checks...
++        // new : write rule with choosen context
+         if (allowablePhrase)
+-          printAllHieroPhrases(startT, endT, startS, endS, copyHoleColl);
++          printAllHieroPhrasesWithContext(sentence, startT, endT, startS, endS, copyHoleColl);
+ 
+         // recursively search for next hole
+-        int nextInitStartT = m_options.nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
+-        addHieroRule(startT, endT, startS, endS
++        int nextInitStartT = options.nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
++        addHieroRule(sentence, startT, endT, startS, endS
+                      , ruleExist, copyHoleColl, numHoles + 1, nextInitStartT
+                      , newWordCountT, newWordCountS);
+       }
+@@ -878,11 +900,12 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
+   }
+ }
+ 
+-void ExtractTask::addRule( int startT, int endT, int startS, int endS, RuleExist &ruleExist)
++void addRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int startS, int endS
++              , RuleExist &ruleExist)
+ {
+   // source
+ 
+-  if (m_options.onlyOutputSpanInfo) {
++  if (options.onlyOutputSpanInfo) {
+     cout << startS << " " << endS << " " << startT << " " << endT << endl;
+     return;
+   }
+@@ -891,59 +914,74 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, RuleExist
+ 
+   // phrase labels
+   string targetLabel,sourceLabel;
+-  if (m_options.targetSyntax && m_options.conditionOnTargetLhs) {
+-    sourceLabel = targetLabel = m_sentence->targetTree.GetNodes(startT,endT)[0]->GetLabel();
+-  }
+-  else {
+-    sourceLabel = m_options.sourceSyntax ?
+-                  m_sentence->sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
+-    targetLabel = m_options.targetSyntax ?
+-                  m_sentence->targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
+-  }
++  sourceLabel = options.sourceSyntax ?
++                sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
++  targetLabel = options.targetSyntax ?
++                sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
+ 
+   // source
+   rule.source = "";
+   for(int si=startS; si<=endS; si++)
+-    rule.source += m_sentence->source[si] + " ";
++    rule.source += sentence.source[si] + " ";
+   rule.source += "[" + sourceLabel + "]";
+ 
+   // target
+   rule.target = "";
+   for(int ti=startT; ti<=endT; ti++)
+-    rule.target += m_sentence->target[ti] + " ";
++    rule.target += sentence.target[ti] + " ";
+   rule.target += "[" + targetLabel + "]";
+ 
+-  if (m_options.pcfgScore) {
+-    double logPCFGScore = m_sentence->targetTree.GetNodes(startT,endT)[0]->GetPcfgScore();
+-    rule.pcfgScore = std::exp(logPCFGScore);
+-  }
+-
+   // alignment
+   for(int ti=startT; ti<=endT; ti++) {
+-    for(unsigned int i=0; i<m_sentence->alignedToT[ti].size(); i++) {
+-      int si = m_sentence->alignedToT[ti][i];
++    for(int i=0; i<sentence.alignedToT[ti].size(); i++) {
++      int si = sentence.alignedToT[ti][i];
+       std::string sourceSymbolIndex = IntToString(si-startS);
+       std::string targetSymbolIndex = IntToString(ti-startT);
+       rule.alignment += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
+-      if (!m_options.onlyDirectFlag)
++      if (!options.onlyDirectFlag)
+         rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
+     }
+   }
+ 
++   //new : left context
++  vector<int> leftContextVec;
++  int sizeOfContext = 0;
++
++  while(sizeOfContext < options.leftContext)
++  {
++        leftContextVec.push_back(startS - (++sizeOfContext));
++  }
++
++  rule.leftContext = printHieroLeftContext(leftContextVec,sentence);
++
++
++  //new : right context
++  vector<int> rightContextVec;
++  sizeOfContext = 0;
++
++  while(sizeOfContext < options.rightContext)
++  {
++        rightContextVec.push_back(endS + (++sizeOfContext));
++  }
++
++  rule.rightContext = printHieroRightContext(rightContextVec,sentence);
++
++
++
+   rule.alignment.erase(rule.alignment.size()-1);
+-  if (!m_options.onlyDirectFlag)
++  if (!options.onlyDirectFlag)
+     rule.alignmentInv.erase(rule.alignmentInv.size()-1);
+ 
+   addRuleToCollection( rule );
+ }
+ 
+-void ExtractTask::addRuleToCollection( ExtractedRule &newRule )
++void addRuleToCollection( ExtractedRule &newRule )
+ {
+ 
+   // no double-counting of identical rules from overlapping spans
+-  if (!m_options.duplicateRules) {
++  if (!options.duplicateRules) {
+     vector<ExtractedRule>::const_iterator rule;
+-    for(rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
++    for(rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
+       if (rule->source.compare( newRule.source ) == 0 &&
+           rule->target.compare( newRule.target ) == 0 &&
+           !(rule->endT < newRule.startT || rule->startT > newRule.endT)) { // overlapping
+@@ -951,31 +989,31 @@ void ExtractTask::addRuleToCollection( ExtractedRule &newRule )
+       }
+     }
+   }
+-  m_extractedRules.push_back( newRule );
++  extractedRules.push_back( newRule );
+ }
+ 
+-void ExtractTask::consolidateRules()
++void consolidateRules()
+ {
+   typedef vector<ExtractedRule>::iterator R;
+   map<int, map<int, map<int, map<int,int> > > > spanCount;
+ 
+   // compute number of rules per span
+-  if (m_options.fractionalCounting) {
+-    for(R rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
++  if (options.fractionalCounting) {
++    for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
+       spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ]++;
+     }
+   }
+ 
+   // compute fractional counts
+-  for(R rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
+-    rule->count =    1.0/(float) (m_options.fractionalCounting ? spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ] : 1.0 );
++  for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
++    rule->count =    1.0/(float) (options.fractionalCounting ? spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ] : 1.0 );
+   }
+ 
+   // consolidate counts
+-  for(R rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
++  for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
+     if (rule->count == 0)
+       continue;
+-    for(R r2 = rule+1; r2 != m_extractedRules.end(); r2++ ) {
++    for(R r2 = rule+1; r2 != extractedRules.end(); r2++ ) {
+       if (rule->source.compare( r2->source ) == 0 &&
+           rule->target.compare( r2->target ) == 0 &&
+           rule->alignment.compare( r2->alignment ) == 0) {
+@@ -986,39 +1024,38 @@ void ExtractTask::consolidateRules()
+   }
+ }
+ 
+-void ExtractTask::writeRulesToFile()
++void writeRulesToFile()
+ {
+   vector<ExtractedRule>::const_iterator rule;
+-  ostringstream out;
+-  ostringstream outInv;
+-  for(rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
++  for(rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
+     if (rule->count == 0)
+       continue;
+ 
+-    out << rule->source << " ||| "
+-        << rule->target << " ||| "
+-        << rule->alignment << " ||| "
+-        << rule->count << " ||| ";
+-    if (m_options.outputNTLengths) {
+-      rule->OutputNTLengths(out); 
++    //write contexts to file
++    extractFile << rule->leftContext
++                << rule->source << " ||| "
++                << rule->rightContext
++                << rule->target << " ||| "
++                << rule->alignment << " ||| "
++                << rule->count;
++    if (options.outputNTLengths) {
++      extractFile << " ||| ";
++      rule->OutputNTLengths(extractFile);
+     }
+-    if (m_options.pcfgScore) {
+-      out << " ||| " << rule->pcfgScore;
+-    }
+-    out << "\n";
+-
+-    if (!m_options.onlyDirectFlag) {
+-      outInv << rule->target << " ||| "
+-             << rule->source << " ||| "
+-             << rule->alignmentInv << " ||| "
+-             << rule->count << "\n";
++    extractFile << "\n";
++
++    if (!options.onlyDirectFlag) {
++      extractFileInv << rule->target << " ||| "
++		     << rule->leftContext	
++                     << rule->source << " ||| "
++                     << rule->rightContext
++		     << rule->alignmentInv << " ||| "
++                     << rule->count << "\n";
+     }
+   }
+-  m_extractCollector->Write( m_id, out.str() );
+-  m_extractCollectorInv->Write( m_id, outInv.str() );;
+ }
+ 
+-void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection )
++void writeGlueGrammar( const string & fileName )
+ {
+   ofstream grammarFile;
+   grammarFile.open(fileName.c_str());
+@@ -1029,7 +1066,7 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options,
+   } else {
+     // chose a top label that is not already a label
+     string topLabel = "QQQQQQ";
+-    for( unsigned int i=1; i<=topLabel.length(); i++) {
++    for( int i=1; i<=topLabel.length(); i++) {
+       if(targetLabelCollection.find( topLabel.substr(0,i) ) == targetLabelCollection.end() ) {
+         topLabel = topLabel.substr(0,i);
+         break;
