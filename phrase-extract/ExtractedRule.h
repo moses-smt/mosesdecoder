@@ -23,6 +23,7 @@
 
 #include <string>
 #include <iostream>
+#include <sstream>
 #include <map>
 
 // sentence-level collection of rules
@@ -70,6 +71,8 @@ public:
   {
     m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);
   }
+
+  void OutputNTLengths(std::ostringstream &out) const;
 
   void OutputNTLengths(std::ostream &out) const;
 };

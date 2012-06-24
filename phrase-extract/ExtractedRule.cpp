@@ -10,14 +10,15 @@
 
 using namespace std;
 
-void ExtractedRule::OutputNTLengths(std::ostream &out) const
+//FB : outcommented in this version
+void ExtractedRule::OutputNTLengths(std::ostringstream &out) const
 {
-  ostringstream outString;
+  std::ostringstream outString;
   OutputNTLengths(outString);
   out << outString;
-}
+  }
 
-void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
+void ExtractedRule::OutputNTLengths(std::ostream &outString) const
 {
   std::map<size_t, std::pair<size_t, size_t> >::const_iterator iter;
   for (iter = m_ntLengths.begin(); iter != m_ntLengths.end(); ++iter)
