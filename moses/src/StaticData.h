@@ -46,6 +46,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
+//Cell Context feature function
+#include "CellContextScoreProducer.h"
 
 namespace Moses
 {
@@ -58,6 +60,9 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+//Cell Context feature
+class CellContextScoreProducer;
+
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
@@ -96,6 +101,9 @@ protected:
   m_earlyDiscardingThreshold,
   m_translationOptionThreshold,
   m_wordDeletionWeight;
+
+  //Cell context feature function
+  CellContextScoreProducer * m_cellContext;
 
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
@@ -233,6 +241,9 @@ protected:
   bool LoadGlobalLexicalModel();
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
+  
+  //! load cell context feature
+  bool LoadCellContextScoreProducer();
 
 public:
 

@@ -71,6 +71,18 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
   return max;
 }
 
+//Load Cell Context feature
+bool StaticData::LoadCellContextScoreProducer()
+{
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-cell-context"));
+
+  if (weight.size() == 1) // check if feature is used
+    {
+      m_cellContext = new CellContextScoreProducer(weight[0]); // create the feature
+    }
+  return true;
+}
+
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
@@ -587,6 +599,8 @@ bool StaticData::LoadData(Parameter *parameter)
     //Instigate dictionary loading
     m_translationSystems.find(config[0])->second.ConfigDictionaries();
 
+    //Register Cell Context feature in manager
+    m_translationSystems.find(config[0])->second.AddFeatureFunction(m_cellContext);
 
 
     //Add any other features here.
@@ -647,9 +661,11 @@ StaticData::~StaticData()
 
   //delete m_parameter;
 
+  // delete cell context feature
+  delete m_cellContext;
+
   // memory pools
   Phrase::FinalizeMemPool();
-
 }
 
 #ifdef HAVE_SYNLM
@@ -1086,11 +1102,6 @@ bool StaticData::LoadPhraseTables()
         , targetPath, alignmentsFile);
 
       m_phraseDictionary.push_back(pdf);
-
-
-
-
-
       index++;
     }
   }

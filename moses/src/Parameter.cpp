@@ -146,6 +146,10 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
+  //Choice to perform or not cell-context dependent decoding
+  AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
+  //Weight of cell-context dependent feature
+  AddParam("weight-cell-context", "wcc", "weight for cell context feature");
 }
 
 Parameter::~Parameter()

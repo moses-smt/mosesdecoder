@@ -17,10 +17,10 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************************/
-
+**********************************************************************/
 #include <algorithm>
 #include "ChartCell.h"
+#include "Classifier.h"
 #include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "RuleCubeQueue.h"
@@ -112,26 +112,58 @@ void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &tra
   // priority queue for applicable rules with selected hypotheses
   RuleCubeQueue queue(m_manager);
 
-  //Get Context here
+  //Get source-sentence Context in form of a vector of words
+  std::vector<Word> sourceContext;
+
+  //Determine factored representation
+  vector<FactorType> srcFactors;
+  vector<FactorType> tgtFactors;
+
+  srcFactors.push_back(0);
+  tgtFactors.push_back(0);
+
+  for(int i=0; i < m_manager.GetSource().GetSize(); i++)
+    {
+      sourceContext.push_back(m_manager.GetSource().GetWord(i));
+    }
 
   // add all trans opt into queue. using only 1st child node.
   for (size_t i = 0; i < transOptList.GetSize(); ++i) {
     const ChartTranslationOption &transOpt = transOptList.Get(i);
-
+    float score = 0;
+    TargetPhraseCollection::const_iterator itr_targets;
     //BEWARE : to access the source side and score of a rule, we have to access each target phrase
-    /*for(
-        TargetPhraseCollection::iterator.begin(); //= transOpt.GetTargetPhraseCollection().begin();
-        !TargetPhraseCollection::iterator.end(); //= transOpt.GetTargetPhraseCollection().end();
-        TargetPhraseCollection::iterator++)
+    for(
+        itr_targets = transOpt.GetTargetPhraseCollection().begin();
+        itr_targets != transOpt.GetTargetPhraseCollection().end();
+        itr_targets++)
     {
+       
         //make example
-        ClassExample( (*iterator->GetSourcePhrase()->GetStringRep(0)),
-                       static_cast<Phrase&>(*iterator->GetTargetPhrase())->GetStringRep(0),
-                        *iterator->GetAlignment()
-                    )
-        //call classifier for this example
-        Classifier::Instance().find();
-        if(m_pred)
+      //make source vector
+      std::vector<std::string> sourceWords;
+      std::vector<std::string> targetWords;
+
+      for(int i=0; i<(*itr_targets)->GetSourcePhrase()->GetSize();i++)
+      {
+	  sourceWords.push_back((*itr_targets)->GetSourcePhrase()->GetWord(i).GetString(srcFactors,0));
+      }
+
+      for(int i=0; i<(*itr_targets)->GetSize();i++)
+      {
+	  //make target vector
+	targetWords.push_back((*itr_targets)->GetWord(i).GetString(srcFactors,0));
+      }
+
+      ClassExample exampleToSearch = ClassExample(sourceContext,sourceWords,targetWords, &(*itr_targets)->GetAlignmentInfo());
+        //call classifier for this example	
+      //float score = Classifier::Instance().GetPrediction(exampleToSearch);
+
+      //reset score of target phrase
+      
+
+        //
+
     }
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);
