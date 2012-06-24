@@ -79,12 +79,7 @@ class Scorer
    * Calculate the score of the sentences corresponding to the list of candidate
    * indices. Each index indicates the 1-best choice from the n-best list.
    */
-  float score(const candidates_t& candidates) const {
-    diffs_t diffs;
-    statscores_t scores;
-    score(candidates, diffs, scores);
-    return scores[0];
-  }
+  float score(const candidates_t& candidates) const; 
 
   const std::string& getName() const {
     return m_name;
@@ -167,36 +162,6 @@ class Scorer
 
 };
 
-/**
- * Abstract base class for Scorers that work by adding statistics across all
- * outout sentences, then apply some formula, e.g., BLEU, PER.
- */
-class StatisticsBasedScorer : public Scorer
-{
- public:
-  StatisticsBasedScorer(const std::string& name, const std::string& config);
-  virtual ~StatisticsBasedScorer() {}
-  virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores) const;
-
- protected:
-
-  enum RegularisationType {
-    NONE,
-    AVERAGE,
-    MINIMUM
-  };
-
-  /**
-   * Calculate the actual score.
-   */
-  virtual statscore_t calculateScore(const std::vector<int>& totals) const = 0;
-
-  // regularisation
-  RegularisationType m_regularization_type;
-  std::size_t  m_regularization_window;
-};
-
 namespace {
   
   //regularisation strategies
@@ -226,5 +191,6 @@ namespace {
   }
   
 } // namespace
+
 
 #endif // MERT_SCORER_H_

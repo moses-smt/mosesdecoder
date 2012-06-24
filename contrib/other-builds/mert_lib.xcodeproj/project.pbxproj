@@ -105,6 +105,8 @@
 		1E3962211594CFF9006FE978 /* Permutation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E39621F1594CFF9006FE978 /* Permutation.h */; };
 		1E3962231594D0FF006FE978 /* SentenceLevelScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */; };
 		1E3962251594D12C006FE978 /* SentenceLevelScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3962241594D12C006FE978 /* SentenceLevelScorer.h */; };
+		1EE52B561596B3E4006DC938 /* StatisticsBasedScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE52B551596B3E4006DC938 /* StatisticsBasedScorer.h */; };
+		1EE52B591596B3FC006DC938 /* StatisticsBasedScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EE52B581596B3FC006DC938 /* StatisticsBasedScorer.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -207,6 +209,8 @@
 		1E39621F1594CFF9006FE978 /* Permutation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Permutation.h; path = ../../mert/Permutation.h; sourceTree = "<group>"; };
 		1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SentenceLevelScorer.cpp; path = ../../mert/SentenceLevelScorer.cpp; sourceTree = "<group>"; };
 		1E3962241594D12C006FE978 /* SentenceLevelScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceLevelScorer.h; path = ../../mert/SentenceLevelScorer.h; sourceTree = "<group>"; };
+		1EE52B551596B3E4006DC938 /* StatisticsBasedScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StatisticsBasedScorer.h; path = ../../mert/StatisticsBasedScorer.h; sourceTree = "<group>"; };
+		1EE52B581596B3FC006DC938 /* StatisticsBasedScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StatisticsBasedScorer.cpp; path = ../../mert/StatisticsBasedScorer.cpp; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -223,6 +227,8 @@
 		1E2CCF2815939E2D00D858D1 = {
 			isa = PBXGroup;
 			children = (
+				1EE52B581596B3FC006DC938 /* StatisticsBasedScorer.cpp */,
+				1EE52B551596B3E4006DC938 /* StatisticsBasedScorer.h */,
 				1E3962241594D12C006FE978 /* SentenceLevelScorer.h */,
 				1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */,
 				1E39621E1594CFF9006FE978 /* Permutation.cpp */,
@@ -401,6 +407,7 @@
 				1E39621C1594CFD1006FE978 /* PermutationScorer.h in Headers */,
 				1E3962211594CFF9006FE978 /* Permutation.h in Headers */,
 				1E3962251594D12C006FE978 /* SentenceLevelScorer.h in Headers */,
+				1EE52B561596B3E4006DC938 /* StatisticsBasedScorer.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -497,6 +504,7 @@
 				1E39621B1594CFD1006FE978 /* PermutationScorer.cpp in Sources */,
 				1E3962201594CFF9006FE978 /* Permutation.cpp in Sources */,
 				1E3962231594D0FF006FE978 /* SentenceLevelScorer.cpp in Sources */,
+				1EE52B591596B3FC006DC938 /* StatisticsBasedScorer.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

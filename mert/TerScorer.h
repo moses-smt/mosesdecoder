@@ -6,7 +6,7 @@
 #include <vector>
 
 #include "Types.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
 
 class ScoreStats;
 

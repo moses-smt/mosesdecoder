@@ -15,6 +15,7 @@
 // However, currently SemposScorer uses a bunch of typedefs, which are
 // used in SemposScorer as well as inherited SemposOverlapping classes.
 #include "SemposOverlapping.h"
+#include "StatisticsBasedScorer.h"
 
 /**
  * This class represents sempos based metrics.

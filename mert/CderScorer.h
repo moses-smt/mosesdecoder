@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
 
 /**
  * CderScorer class can compute both CDER and WER metric.

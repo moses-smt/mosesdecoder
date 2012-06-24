@@ -6,7 +6,7 @@ using namespace std;
 const int PermutationScorer::SCORE_PRECISION = 5;
 
 PermutationScorer::PermutationScorer(const string &distanceMetric, const string &config)
-  :SentenceLevelScorer(distanceMetric,config)
+  :StatisticsBasedScorer(distanceMetric,config)
 {
   //configure regularisation
 
@@ -206,14 +206,8 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
   //cout << tempStream.str();
 }
 
-void PermutationScorer::score(const candidates_t& candidates, const diffs_t& diffs,
-           statscores_t& scores) const
-{
-  assert(false);
-}
-
 //Will just be final score
-statscore_t PermutationScorer::calculateScore(const vector<statscore_t>& comps)
+statscore_t PermutationScorer::calculateScore(const vector<int>& comps) const
 {
   //cerr << "*******PermutationScorer::calculateScore" ;
   //cerr << " " << comps[0] << endl;
