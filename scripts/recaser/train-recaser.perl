@@ -149,7 +149,6 @@ sub train_recase_model {
     else {
         $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:0";
     }
-    $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
     system($cmd) == 0 || die("Recaser model training failed with error " . ($? >> 8) . "\n");

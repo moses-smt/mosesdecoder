@@ -332,6 +332,13 @@ build-biconcor
 	default-name: model/biconcor
 	ignore-unless: biconcor
 	error: usage
+build-suffix-array
+	in: word-alignment corpus
+	out: phrase-translation-table
+	default-name: model/suffix-array
+	ignore-unless: suffix-array
+	error: usage
+
 build-lex-trans
 	in: word-alignment corpus
 	out: lexical-translation-table
@@ -362,6 +369,7 @@ extract-phrases
 	out: extracted-phrases
 	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm
 	default-name: model/extract
+	ignore-if: suffix-array
 build-reordering
 	in: extracted-phrases
 	out: reordering-table
@@ -373,6 +381,7 @@ build-ttable
 	out: phrase-translation-table
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
 	default-name: model/phrase-table
+	ignore-if: suffix-array
 build-generation
 	in: corpus
 	out: generation-table
@@ -820,6 +829,6 @@ analysis-precision
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model 
 	out: report
 	default-name: evaluation/report
