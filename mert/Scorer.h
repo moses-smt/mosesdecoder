@@ -6,6 +6,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <limits>
 #include "Types.h"
 #include "ScoreData.h"
 
