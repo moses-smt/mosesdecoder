@@ -150,7 +150,7 @@ sub tokenize {
 
   #escape special chars
   $text =~ s/\&/\&amp;/g;   # escape escape
-  $text =~ s/\|/\&bar;/g;   # factor separator
+  $text =~ s/\|/\&#124;/g;  # factor separator
   $text =~ s/\</\&lt;/g;    # xml
   $text =~ s/\>/\&gt;/g;    # xml
   $text =~ s/\'/\&apos;/g;  # xml
