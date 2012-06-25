@@ -2231,7 +2231,9 @@ sub define_evaluation_decode {
 
     # create command
     my $cmd;
-    $nbest =~ s/[^\d]//g if $nbest;
+    my $nbest_size;
+    $nbest_size = $nbest if $nbest;
+    $nbest_size =~ s/[^\d]//g if $nbest;
     if ($jobs && $CLUSTER) {
 	$cmd .= "mkdir -p $dir/evaluation/tmp.$set.$VERSION\n";
 	$cmd .= "cd $dir/evaluation/tmp.$set.$VERSION\n";
@@ -2247,11 +2249,11 @@ sub define_evaluation_decode {
 	$cmd .= " -input-file $input";
 	$cmd .= " --jobs $jobs";
 	$cmd .= " -decoder-parameters \"$settings\" > $system_output";	
-	$cmd .= " -n-best-file $system_output.best$nbest -n-best-size $nbest" if $nbest;
+	$cmd .= " -n-best-file $system_output.best$nbest_size -n-best-size $nbest" if $nbest;
     }
     else {
 	$cmd = "$decoder $settings -v 0 -f $config < $input > $system_output";
-	$cmd .= " -n-best-list $system_output.best$nbest $nbest" if $nbest;
+	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
 
     &create_step($step_id,$cmd);
