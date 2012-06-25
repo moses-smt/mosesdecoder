@@ -1839,13 +1839,27 @@ sub create_ini {
    $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
    $basic_weight_count++ if $_PCFG;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-     $num_of_ttables++;
-     my $ff = $f;
-     $ff =~ s/\-/ /;
-     my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
-     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-     my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
-     print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
+  	$num_of_ttables++;
+    my $ff = $f;
+    $ff =~ s/\-/ /;
+    my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
+    my $phrase_table_impl = ($_HIERARCHICAL? 6 : 0);
+
+		if (scalar(@SPECIFIED_TABLE)) {
+	    $file = shift @SPECIFIED_TABLE;
+	    my @toks = split(/:/,$file);
+			$file = $toks[0];
+			$phrase_table_impl = $toks[1];
+			
+			if (@toks == 3) {
+				$basic_weight_count = $toks[2];
+			}
+		}
+		else {
+
+		}
+		
+    print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
    }
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);

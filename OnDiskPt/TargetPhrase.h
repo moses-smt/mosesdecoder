@@ -91,7 +91,7 @@ public:
                                       , const Moses::WordPenaltyProducer* wpProducer
                                       , const Moses::LMList &lmList) const;
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
-  UINT64 ReadFromFile(std::fstream &fileTP, size_t numFactors);
+  UINT64 ReadFromFile(std::fstream &fileTP);
 
 	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 

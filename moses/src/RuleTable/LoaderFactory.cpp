@@ -27,6 +27,9 @@
 #include "Util.h"
 
 #include <sstream>
+#include <iostream>
+
+using namespace std;
 
 namespace Moses
 {
@@ -38,25 +41,32 @@ std::auto_ptr<RuleTableLoader> RuleTableLoaderFactory::Create(
 {
   InputFileStream input(path);
   std::string line;
-  std::getline(input, line);
-  std::vector<std::string> tokens;
-  Tokenize(tokens, line);
-  if (tokens.size() == 1) {
-    if (tokens[0] == "1") {
-      return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderCompact());
+  bool cont = std::getline(input, line);
+
+  if (cont) {
+    std::vector<std::string> tokens;
+    Tokenize(tokens, line);
+    if (tokens.size() == 1) {
+      if (tokens[0] == "1") {
+        return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderCompact());
+      }
+      std::stringstream msg;
+      msg << "Unsupported compact rule table format: " << tokens[0];
+      UserMessage::Add(msg.str());
+      return std::auto_ptr<RuleTableLoader>();
     }
-    std::stringstream msg;
-    msg << "Unsupported compact rule table format: " << tokens[0];
-    UserMessage::Add(msg.str());
-    return std::auto_ptr<RuleTableLoader>();
-  }
-  else if (tokens[0] == "[X]" && tokens[1] == "|||") {
-    return std::auto_ptr<RuleTableLoader>(new 
-        RuleTableLoaderHiero());
+    else if (tokens[0] == "[X]" && tokens[1] == "|||") {
+      return std::auto_ptr<RuleTableLoader>(new 
+          RuleTableLoaderHiero());
+      
+    }
     
+    return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderStandard());
   }
-  
-  return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderStandard());
+  else
+  { // empty phrase table
+    return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderStandard());
+  }
 }
 
 }  // namespace Moses

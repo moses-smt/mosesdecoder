@@ -116,6 +116,15 @@ inline FeatureStatsType ConvertStringToFeatureStatsType(const std::string &str)
   return ConvertCharToFeatureStatsType(str.c_str());
 }
 
+inline std::string trimStr(const std::string& Src, const std::string& c = " \r\n")
+{
+  unsigned int p2 = Src.find_last_not_of(c);
+  if (p2 == std::string::npos) return std::string();
+  unsigned int p1 = Src.find_first_not_of(c);
+  if (p1 == std::string::npos) p1 = 0;
+  return Src.substr(p1, (p2-p1)+1);
+}
+
 // Utilities to measure decoding time
 void ResetUserTime();
 void PrintUserTime(const std::string &message);

@@ -8,36 +8,6 @@
 
 using namespace std;
 
-namespace {
-
-//regularisation strategies
-inline float score_min(const statscores_t& scores, size_t start, size_t end)
-{
-  float min = numeric_limits<float>::max();
-  for (size_t i = start; i < end; ++i) {
-    if (scores[i] < min) {
-      min = scores[i];
-    }
-  }
-  return min;
-}
-
-inline float score_average(const statscores_t& scores, size_t start, size_t end)
-{
-  if ((end - start) < 1) {
-    // this shouldn't happen
-    return 0;
-  }
-  float total = 0;
-  for (size_t j = start; j < end; ++j) {
-    total += scores[j];
-  }
-
-  return total / (end - start);
-}
-
-} // namespace
-
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
       m_vocab(mert::VocabularyFactory::GetVocabulary()),

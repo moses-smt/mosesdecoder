@@ -18,6 +18,8 @@ class Vocabulary;
 
 } // namespace mert
 
+enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
+
 /**
  * Superclass of all scorers and dummy implementation.
  *
@@ -194,5 +196,35 @@ class StatisticsBasedScorer : public Scorer
   RegularisationType m_regularization_type;
   std::size_t  m_regularization_window;
 };
+
+namespace {
+  
+  //regularisation strategies
+  inline float score_min(const statscores_t& scores, size_t start, size_t end)
+  {
+    float min = std::numeric_limits<float>::max();
+    for (size_t i = start; i < end; ++i) {
+      if (scores[i] < min) {
+        min = scores[i];
+      }
+    }
+    return min;
+  }
+  
+  inline float score_average(const statscores_t& scores, size_t start, size_t end)
+  {
+    if ((end - start) < 1) {
+      // this shouldn't happen
+      return 0;
+    }
+    float total = 0;
+    for (size_t j = start; j < end; ++j) {
+      total += scores[j];
+    }
+    
+    return total / (end - start);
+  }
+  
+} // namespace
 
 #endif // MERT_SCORER_H_

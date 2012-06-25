@@ -24,9 +24,11 @@ my $source = $ARGV[5]; # 2nd arg of extract argument
 my $align = $ARGV[6]; # 3rd arg of extract argument
 my $extract = $ARGV[7]; # 4th arg of extract argument
 
+my $makeTTable = 1; # whether to build the ttable extract files
 my $otherExtractArgs= "";
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
+  $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
@@ -123,11 +125,14 @@ $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n
 
 
 @children = ();
-$pid = RunFork($catCmd);
-push(@children, $pid);
+if ($makeTTable)
+{
+  $pid = RunFork($catCmd);
+  push(@children, $pid);
 
-$pid = RunFork($catInvCmd);
-push(@children, $pid);
+  $pid = RunFork($catInvCmd);
+  push(@children, $pid);
+}
 
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")
