@@ -29,6 +29,8 @@ namespace Moses
 class InputType;
 class ChartManager;
 
+/** Hold all the hypotheses in a chart cell that have the same LHS non-term.
+ */
 class ChartCellCollection : public CellCollection
 {
 public:

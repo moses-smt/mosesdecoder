@@ -30,7 +30,7 @@ namespace Moses
 class TargetPhraseCollection;
 class WordsRange;
 
-//! a list of target phrases that is trsnalated from the same source phrase
+//! a vector of translations options for a specific range, in a specific sentence
 class ChartTranslationOptionList
 {
  public:

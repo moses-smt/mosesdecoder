@@ -37,6 +37,9 @@ class RuleCubeItem;
 
 typedef std::vector<ChartHypothesis*> ChartArcList;
 
+/** a hypothesis in the hierarchical/syntax decoder.
+ * Contain a pointer to the current target phrase, a vector of previous hypos, and some scores
+ */
 class ChartHypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesis&);

@@ -11,7 +11,7 @@ class Phrase;
 class ScoreColl;
 class ScoreComponentCollection;
 
-//! List of language models
+//! List of language models and function to calc scores from each LM, given a phrase
 class LMList
 {
 protected:

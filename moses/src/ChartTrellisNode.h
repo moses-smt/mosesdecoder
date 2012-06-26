@@ -30,6 +30,8 @@ class ScoreComponentCollection;
 class ChartHypothesis;
 class ChartTrellisDetour;
 
+/**  1 node in the output hypergraph. Used in ChartTrellisPath
+ */
 class ChartTrellisNode
 {
  public:

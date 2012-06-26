@@ -42,7 +42,7 @@ public:
 };
 
 /** Doesn't do anything but provide a key into the global
- * score array to store the word penalty in.
+ *  score array to store the word penalty in.
  */
 class WordPenaltyProducer : public StatelessFeatureFunction
 {

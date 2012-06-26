@@ -28,7 +28,7 @@
 namespace Moses
 {
 
-// order by descending score
+//! functor to compare (chart) hypotheses by (descending) score
 class ChartHypothesisScoreOrderer
 {
 public:
@@ -37,6 +37,9 @@ public:
   }
 };
 
+/** functor to compare (chart) hypotheses by feature function states.
+ *  If 2 hypos are equal, according to this functor, then they can be recombined.
+ */
 class ChartHypothesisRecombinationOrderer
 {
 public:
@@ -57,7 +60,9 @@ public:
   }
 };
 
-// 1 of these for each target LHS in each cell
+/** Contains a set of unique hypos that have the same HS non-term.
+  * ie. 1 of these for each target LHS in each cell
+  */
 class ChartHypothesisCollection
 {
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesisCollection&);
