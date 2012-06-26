@@ -4,10 +4,6 @@
 #include <map>
 #include <string>
 
-#ifdef WITH_THREADS
-#include <boost/thread/shared_mutex.hpp>
-#endif
-
 namespace mert {
 
 /**
@@ -51,11 +47,6 @@ class Vocabulary {
  private:
   std::map<std::string, int> m_vocab;
   
-#ifdef WITH_THREADS
-  //reader-writer lock
-  mutable boost::shared_mutex m_accessLock;
-#endif
-
 };
 
 class VocabularyFactory {
