@@ -84,6 +84,7 @@ int main(int argc, char** argv)
   bool streaming = false; // Stream all k-best lists?
   bool no_shuffle = false; // Don't shuffle, even for in memory version
   bool model_bg = false; // Use model for background corpus
+  bool verbose = false; // Verbose updates
   
   // Command-line processing follows pro.cpp
   po::options_description desc("Allowed options");
@@ -100,7 +101,8 @@ int main(int argc, char** argv)
       ("sparse-init,s", po::value<string>(&sparseInitFile), "Weight file for sparse features")
       ("streaming", po::value(&streaming)->zero_tokens()->default_value(false), "Stream n-best lists to save memory, implies --no-shuffle")
       ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
-      ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background");
+      ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
+      ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
       ;
 
   po::options_description cmdline_options;
@@ -114,6 +116,8 @@ int main(int argc, char** argv)
       cout << desc << endl;
       exit(0);
   }
+
+  cerr << "kbmira with c=" << c << " decay=" << decay << " no_shuffle=" << no_shuffle << endl;
 
   if (vm.count("random-seed")) {
     cerr << "Initialising random seed to " << seed << endl;
@@ -233,6 +237,14 @@ int main(int argc, char** argv)
         // Loss and update
         ValType diff_score = wv.score(diff);
         ValType loss = delta - diff_score;
+	if(verbose) {
+	  cerr << "Updating sent " << train->cur_id() << endl;
+	  cerr << "Wght: " << wv << endl;
+	  cerr << "Hope: " << hope << " => " << hopeBleu << " <> " << wv.score(hope) << endl;
+	  cerr << "Fear: " << fear << " => " << fearBleu << " <> " << wv.score(fear) << endl;
+	  cerr << "Diff: " << diff << " => " << delta << " <> " << diff_score << endl;
+	  cerr << endl;
+	}
         if(loss > 0) {
           ValType eta = min(c, loss / diff.sqrNorm());
           wv.update(diff,eta);

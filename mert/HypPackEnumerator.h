@@ -27,6 +27,7 @@ public:
   virtual bool finished() = 0;
   virtual void next() = 0;
 
+  virtual std::size_t cur_id() = 0;
   virtual std::size_t cur_size() = 0;
   virtual std::size_t num_dense() const = 0;
   virtual const FeatureDataItem& featuresAt(std::size_t i) = 0;
@@ -46,6 +47,7 @@ public:
   virtual bool finished();
   virtual void next();
 
+  virtual std::size_t cur_id();
   virtual std::size_t cur_size();
   virtual const FeatureDataItem& featuresAt(std::size_t i);
   virtual const ScoreDataItem& scoresAt(std::size_t i);
@@ -79,6 +81,7 @@ public:
   virtual bool finished();
   virtual void next();
 
+  virtual std::size_t cur_id();
   virtual std::size_t cur_size();
   virtual const FeatureDataItem& featuresAt(std::size_t i);
   virtual const ScoreDataItem& scoresAt(std::size_t i);

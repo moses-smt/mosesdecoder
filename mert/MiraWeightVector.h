@@ -11,6 +11,7 @@
 #define MERT_MIRA_WEIGHT_VECTOR_H
 
 #include <vector>
+#include <iostream>
 
 #include "MiraFeatureVector.h"
 
@@ -58,6 +59,8 @@ public:
   AvgWeightVector avg();
 
   friend class AvgWeightVector;
+
+  friend std::ostream& operator<<(std::ostream& o, const MiraWeightVector& e);
 
 private:
   /**

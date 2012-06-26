@@ -132,6 +132,10 @@ const ScoreDataItem& StreamingHypPackEnumerator::scoresAt(size_t index) {
   return m_scoreDataIters[pij.first]->operator[](pij.second);
 }
 
+size_t StreamingHypPackEnumerator::cur_id() {
+  return m_sentenceId;
+}
+
 /* --------- RandomAccessHypPackEnumerator ------------- */
 
 RandomAccessHypPackEnumerator::RandomAccessHypPackEnumerator(vector<string> const& featureFiles,
@@ -181,7 +185,9 @@ const ScoreDataItem& RandomAccessHypPackEnumerator::scoresAt(size_t i) {
   return m_scores[m_indexes[m_cur_index]][i];
 }
 
-  
+size_t RandomAccessHypPackEnumerator::cur_id() {
+  return m_indexes[m_cur_index];
+}  
 // --Emacs trickery--
 // Local Variables:
 // mode:c++

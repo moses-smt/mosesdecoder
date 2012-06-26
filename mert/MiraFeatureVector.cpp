@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iomanip>
 
 #include "MiraFeatureVector.h"
 
@@ -137,6 +138,15 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
 
   // Create and return vector
   return MiraFeatureVector(dense,sparseFeats,sparseVals);
+}
+
+ostream& operator<<(ostream& o, const MiraFeatureVector& e)
+{
+  for(size_t i=0;i<e.size();i++) {
+    if(i>0) o << " ";
+    o << e.feat(i) << ":" << e.val(i);
+  }
+  return o;
 }
 
 // --Emacs trickery--
