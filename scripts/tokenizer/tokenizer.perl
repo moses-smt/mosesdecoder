@@ -11,7 +11,7 @@ use FindBin qw($RealBin);
 use strict;
 #use Time::HiRes;
 
-my $mydir = "$RealBin/nonbreaking_prefixes";
+my $mydir = "$RealBin/../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
