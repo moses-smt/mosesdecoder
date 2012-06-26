@@ -11,6 +11,8 @@ MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   vector<size_t> sparseFeats = vec.sparse.feats();
   bool bFirst = true;
   size_t lastFeat = 0;
+  m_sparseFeats.reserve(sparseFeats.size());
+  m_sparseVals.reserve(sparseFeats.size());
   for(size_t i=0;i<sparseFeats.size();i++)
   {
     size_t feat = m_dense.size() + sparseFeats[i];

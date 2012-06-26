@@ -201,7 +201,7 @@ int main(int argc, char** argv)
       size_t hope_index=0, fear_index=0, model_index=0;
       ValType hope_score=0, fear_score=0, model_score=0;
       for(size_t i=0; i< train->cur_size(); i++) {
-        MiraFeatureVector vec(train->featuresAt(i));
+        const MiraFeatureVector& vec=train->featuresAt(i);
         ValType score = wv.score(vec);
         ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
         // Hope
@@ -224,8 +224,8 @@ int main(int argc, char** argv)
       // Update weights
       if(hope_index!=fear_index) {
         // Vector difference
-        MiraFeatureVector hope(train->featuresAt(hope_index));
-        MiraFeatureVector fear(train->featuresAt(fear_index));
+        const MiraFeatureVector& hope=train->featuresAt(hope_index);
+        const MiraFeatureVector& fear=train->featuresAt(fear_index);
         MiraFeatureVector diff = hope - fear;
         // Bleu difference
         const vector<float>& hope_stats = train->scoresAt(hope_index);
