@@ -15,12 +15,12 @@
 #include "ScoreData.h"
 #include "Scorer.h"
 #include "Permutation.h"
-#include "SentenceLevelScorer.h"
+#include "StatisticsBasedScorer.h"
 
 /**
   * Permutation
  **/
-class PermutationScorer: public SentenceLevelScorer
+class PermutationScorer: public StatisticsBasedScorer
 {
 
 public:
@@ -39,11 +39,9 @@ public:
     return true;
   };
 
-  void score(const candidates_t& candidates, const diffs_t& diffs,
-             statscores_t& scores) const;
 
 protected:
-  statscore_t calculateScore(const std::vector<statscore_t>& scores);
+  statscore_t calculateScore(const std::vector<int>& scores) const;
   PermutationScorer(const PermutationScorer&);
   ~PermutationScorer() {};
   PermutationScorer& operator=(const PermutationScorer&);

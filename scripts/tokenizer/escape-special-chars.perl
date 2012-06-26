@@ -13,7 +13,7 @@ while(<STDIN>) {
 
   # special characters in moses
   s/\&/\&amp;/g;   # escape escape
-  s/\|/\&bar;/g;   # factor separator
+  s/\|/\&#124;/g;  # factor separator
   s/\</\&lt;/g;    # xml
   s/\>/\&gt;/g;    # xml
   s/\'/\&apos;/g;  # xml

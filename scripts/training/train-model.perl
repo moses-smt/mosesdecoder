@@ -2,7 +2,7 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Spec::Functions;
 use File::Spec::Unix;
 use File::Basename;
@@ -13,7 +13,7 @@ use File::Basename;
 # Train a model from a parallel corpus
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 if ($SCRIPTS_ROOTDIR eq '') {
     $SCRIPTS_ROOTDIR = dirname(__FILE__);
 }

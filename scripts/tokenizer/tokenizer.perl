@@ -7,11 +7,11 @@
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use strict;
 #use Time::HiRes;
 
-my $mydir = "$Bin/nonbreaking_prefixes";
+my $mydir = "$RealBin/../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
@@ -150,7 +150,7 @@ sub tokenize {
 
   #escape special chars
   $text =~ s/\&/\&amp;/g;   # escape escape
-  $text =~ s/\|/\&bar;/g;   # factor separator
+  $text =~ s/\|/\&#124;/g;  # factor separator
   $text =~ s/\</\&lt;/g;    # xml
   $text =~ s/\>/\&gt;/g;    # xml
   $text =~ s/\'/\&apos;/g;  # xml
