@@ -48,13 +48,13 @@
 # Original version by Philipp Koehn
 
 use strict;
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Basename;
 use File::Path;
 use File::Spec;
 use Cwd;
 
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
