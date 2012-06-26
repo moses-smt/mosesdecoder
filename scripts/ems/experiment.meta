@@ -357,9 +357,14 @@ build-reordering
 	default-name: model/reordering-table
 build-ttable
 	in: extracted-phrases lexical-translation-table
-	out: phrase-translation-table
+	out: phrase-translation-table-nonfiltered
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
-	default-name: model/phrase-table
+	default-name: model/phrase-table-nonfiltered
+sigtest-filter
+  in: phrase-translation-table-nonfiltered corpus
+  out: phrase-translation-table
+  pass-unless: use-sigtest-filter
+  default-name: model/phrase-table
 build-generation
 	in: corpus
 	out: generation-table

@@ -928,6 +928,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+  elsif ($DO_STEP[$i] eq 'TRAINING:sigtest-filter') {
+      &define_training_sigtest_filter($i);
+        }
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
         }
@@ -1711,6 +1714,19 @@ sub define_training_build_ttable {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_sigtest_filter {
+  my $step_id = shift;
+  my ($out, $phrase_table, $corpus) = &get_output_and_input($step_id);
+  my $salm = &get("GENERAL:salm-path");
+  my $salm_bin = "$salm/Bin/Linux/Index/IndexSA.O32";
+  my $src = "$corpus." . &get("GENERAL:input-extension");
+  my $tgt =" $corpus." . &get("GENERAL:output-extension");
+  my $filter = &get("GENERAL:moses-src-dir") . "/contrib/sigtest-filter/filter-pt";
+  my $cmd = "$salm_bin $src && $salm_bin $tgt";
+  $cmd .= " && zcat $phrase_table | $filter -e $tgt -f $src -l a+e -n 30 > $out";
+
+  &create_step($step_id, $cmd);
+}
 
 sub define_training_build_reordering {
     my ($step_id) = @_;
