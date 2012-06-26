@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
 
 class PerScorer;
 class ScoreStats;

@@ -1,7 +1,6 @@
 #See ../Jamroot for options.  
 import option path ;
 
-build-project ems/biconcor ;
 build-project training ;
 
 with-giza = [ option.get "with-giza" ] ;
@@ -27,7 +26,7 @@ if $(with-giza) {
   check-for-bin mkcls ;
 } else {
   if $(CLEANING) = no {
-    echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza-pp" ;
+    #echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza-pp" ;
   }
   constant WITH-GIZA : "no" ;
 }
@@ -38,14 +37,16 @@ if $(location) {
   location = $(location)$(GITTAG) ;
 
   #These two used to live in a tools directory.  
-  install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
-  install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
+  #install ghkm : training/phrase-extract/extract-ghkm//extract-ghkm : <location>$(location)/training/phrase-extract/extract-ghkm/tools ;
+  #install compactify : training/compact-rule-table//compactify : <location>$(location)/training/compact-rule-table/tools ;
 
-  install phrase-extract : training/phrase-extract//programs : <location>$(location)/training/phrase-extract ;
-  install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
-  install symal : training/symal//symal : <location>$(location)/training/symal ;
+  #install phrase-extract : training/phrase-extract//programs : <location>$(location)/training/phrase-extract ;
+  #install pcfg-extract : training/phrase-extract/pcfg-extract//pcfg-extract : <location>$(location)/training/phrase-extract/pcfg-extract ;
+  #install pcfg-score : training/phrase-extract/pcfg-score//pcfg-score : <location>$(location)/training/phrase-extract/pcfg-score ;
+  #install lexical-reordering : training/lexical-reordering//score : <location>$(location)/training/lexical-reordering ;
+  #install symal : training/symal//symal : <location>$(location)/training/symal ;
 
-  install biconcor : ems/biconcor//biconcor : <location>$(location)/ems/biconcor ;
+  #install biconcor : ems/biconcor//biconcor : <location>$(location)/ems/biconcor ;
 
   if $(WITH-GIZA) != no {
     install train-model : training//train-model.perl : <location>$(location)/training ;

@@ -108,6 +108,7 @@ my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iter
 my $___RANDOM_DIRECTIONS = 0; # search in random directions only
 my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
 my $___RANDOM_RESTARTS = 20;
+my $___RETURN_BEST_DEV = 0; # return the best weights according to dev, not the last
 
 # Flags related to PRO (Hopkins & May, 2011)
 my $___PAIRWISE_RANKED_OPTIMIZER = 0; # flag to enable PRO.
@@ -116,6 +117,9 @@ my $___HISTORIC_INTERPOLATION = 0; # interpolate optimize weights with previous 
 # MegaM's options for PRO optimization.
 # TODO: Should we also add these values to options of this script?
 my $megam_default_options = "-fvals -maxi 30 -nobias binary";
+
+# Flags related to Batch MIRA (Cherry & Foster, 2012)
+my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
 my $__THREADS = 0;
 
@@ -144,6 +148,12 @@ my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert & extractor
 my $mertmertargs = undef; # args to pass through to mert only
 my $extractorargs = undef; # args to pass through to extractor only
+
+# Args to pass through to batch mira only.  This flags is useful to
+# change MIRA's hyperparameters such as regularization parameter C,
+# BLEU decay factor, and the number of iterations of MIRA.
+my $batch_mira_args = undef;
+
 my $filtercmd = undef; # path to filter-model-given-input.pl
 my $filterfile = undef;
 my $qsubwrapper = undef;
@@ -199,6 +209,7 @@ GetOptions(
   "random-directions" => \$___RANDOM_DIRECTIONS, # search only in random directions
   "number-of-random-directions=i" => \$___NUM_RANDOM_DIRECTIONS, # number of random directions
   "random-restarts=i" => \$___RANDOM_RESTARTS, # number of random restarts
+  "return-best-dev" => \$___RETURN_BEST_DEV, # return the best weights according to dev, not the last
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "range=s@" => \$___RANGES,
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
@@ -206,6 +217,8 @@ GetOptions(
   "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
   "pro-starting-point" => \$___PRO_STARTING_POINT,
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
+  "batch-mira" => \$___BATCH_MIRA,
+  "batch-mira-args=s" => \$batch_mira_args,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -284,11 +297,17 @@ Options:
                                      N means this and N previous iterations
 
   --maximum-iterations=ITERS ... Maximum number of iterations. Default: $maximum_iterations
+  --return-best-dev          ... Return the weights according to dev bleu, instead of returning
+                                 the last iteration
   --random-directions               ... search only in random directions
   --number-of-random-directions=int ... number of random directions
                                         (also works with regular optimizer, default: 0)
   --pairwise-ranked         ... Use PRO for optimisation (Hopkins and May, emnlp 2011)
   --pro-starting-point      ... Use PRO to get a starting point for MERT
+  --batch-mira              ... Use Batch MIRA for optimisation (Cherry and Foster, NAACL 2012)
+  --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
+                                change MIRA's hyperparameters such as regularization parameter C,
+                                BLEU decay factor, and the number of iterations of MIRA.
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -324,10 +343,14 @@ if (!defined $mertdir) {
 my $mert_extract_cmd = File::Spec->catfile($mertdir, "extractor");
 my $mert_mert_cmd    = File::Spec->catfile($mertdir, "mert");
 my $mert_pro_cmd     = File::Spec->catfile($mertdir, "pro");
+my $mert_mira_cmd    = File::Spec->catfile($mertdir, "kbmira");
+my $mert_eval_cmd    = File::Spec->catfile($mertdir, "evaluator");
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd"    if ! -x $mert_mert_cmd;
 die "Not executable: $mert_pro_cmd"     if ! -x $mert_pro_cmd;
+die "Not executable: $mert_mira_cmd"    if ! -x $mert_mira_cmd;
+die "Not executable: $mert_eval_cmd"    if ! -x $mert_eval_cmd;
 
 my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set to your installation
 
@@ -633,6 +656,18 @@ while (1) {
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined $devbleu ? $devbleu : "--not-estimated--"), $sparse_weights_file);
 
+  # Save dense weights to simplify best dev recovery
+  {
+    my $densefile = "run$run.dense";
+    my @vals = @{$featlist->{"values"}};
+    my @names = @{$featlist->{"names"}};
+    open my $denseout, '>', $densefile or die "Can't write $densefile (WD now $___WORKING_DIR)";
+    for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+        print $denseout "$names[$i] $names[$i] $vals[$i]\n";
+    }
+    close $denseout;
+  }
+
   # skip running the decoder if the user wanted
   if (! $skip_decoder) {
     print "($run) run decoder to produce n-best lists\n";
@@ -727,6 +762,15 @@ while (1) {
     $scfiles = "$score_file";
   }
 
+  my $mira_settings = "";
+  if ($___BATCH_MIRA && $batch_mira_args) {
+    $mira_settings .= "$batch_mira_args ";
+  }
+
+  $mira_settings .= " --dense-init run$run.$weights_in_file";
+  if (-e "run$run.sparse-weights") {
+    $mira_settings .= " --sparse-init run$run.sparse-weights";
+  }
   my $file_settings = " --ffile $ffiles --scfile $scfiles";
   my $pro_file_settings = "--ffile " . join(" --ffile ", split(/,/, $ffiles)) .
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
@@ -759,6 +803,10 @@ while (1) {
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
+  } elsif ($___BATCH_MIRA) { # batch MIRA optimization
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
+    &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
   }
@@ -884,7 +932,6 @@ while (1) {
   print "loading data from $prev_score_file\n"   if defined($prev_score_file);
   print "loading data from $prev_init_file\n"    if defined($prev_init_file);
 }
-print "Training finished at " . `date`;
 
 if (defined $allsorted) {
     safesystem ("\\rm -f $allsorted") or die;
@@ -893,23 +940,50 @@ if (defined $allsorted) {
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
+if($___RETURN_BEST_DEV) {
+  my $bestit=1;
+  my $bestbleu=0;
+  my $evalout = "eval.out";
+  for (my $i = 1; $i < $run; $i++) {
+    safesystem("$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out 2> /dev/null 1> $evalout");
+    open my $fh, '<', $evalout or die "Can't read $evalout : $!";
+    my $bleu = <$fh>;
+    chomp $bleu;
+    if($bleu > $bestbleu) {
+      $bestbleu = $bleu;
+      $bestit = $i;
+    }
+    close $fh;
+  }
+  print "copying weights from best iteration ($bestit, bleu=$bestbleu) to moses.ini\n";
+  my $best_sparse_file = undef;
+  if(defined $sparse_weights_file) {
+      $best_sparse_file = "run$bestit.sparse-weights";
+  }
+  create_config($___CONFIG_ORIG, "./moses.ini", get_featlist_from_file("run$bestit.dense"),
+                $bestit, $bestbleu, $best_sparse_file);
+}
+else {
+  create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
+}
 
 # just to be sure that we have the really last finished step marked
 &save_finished_step($finished_step_file, $run);
 
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
-
+print "Training finished at " . `date`;
 } # end of local scope
 
 sub get_weights_from_mert {
   my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
   my ($bestpoint, $devbleu);
-  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)) {
+  if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
+          || $___BATCH_MIRA) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
-    my (@WEIGHT, $sum);
+    my @WEIGHT;
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
+    my $sum = 0.0;
     while (<$fh>) {
       if (/^F(\d+) ([\-\.\de]+)/) {     # regular features
         $WEIGHT[$1] = $2;
@@ -918,11 +992,23 @@ sub get_weights_from_mert {
         $$sparse_weights{$1} = $2;
       }
     }
+    close $fh;
+    die "It seems feature values are invalid or unable to read $outfile." if $sum < 1e-09;
+
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
     $bestpoint = join(" ", @WEIGHT);
-    close $fh;
+
+    if($___BATCH_MIRA) {
+      open my $fh2, '<', $logfile or die "Can't open $logfile: $!";
+      while(<$fh2>) {
+        if(/Best BLEU = ([\-\d\.]+)/) {
+          $devbleu = $1;
+        }
+      }
+      close $fh2;
+    }
   } else {
     open my $fh, '<', $logfile or die "Can't open $logfile: $!";
     while (<$fh>) {
@@ -1054,7 +1140,11 @@ sub get_featlist_from_moses {
     my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
+  return get_featlist_from_file($featlistfn);
+}
 
+sub get_featlist_from_file {
+  my $featlistfn = shift;
   # read feature list
   my @names = ();
   my @startvalues = ();
@@ -1089,7 +1179,7 @@ sub get_order_of_scores_from_nbestlist {
   # return the score labels in order
   my $fname_or_source = shift;
   # print STDERR "Peeking at the beginning of nbestlist to get order of scores: $fname_or_source\n";
-  open my $fh, '<', $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source': $!";
+  open my $fh, $fname_or_source or die "Failed to get order of scores from nbestlist '$fname_or_source': $!";
   my $line = <$fh>;
   close $fh;
   die "Line empty in nbestlist '$fname_or_source'" if !defined $line;
@@ -1169,7 +1259,7 @@ sub create_config {
   }
 
   if (defined($sparse_weights_file)) {
-    push @{$P{"weights-file"}}, File::Spec->catfile($___WORKING_DIR, $sparse_weights_file);
+    push @{$P{"weight-file"}}, File::Spec->catfile($___WORKING_DIR, $sparse_weights_file);
   }
 
   # create new moses.ini decoder config file by cloning and overriding the original one

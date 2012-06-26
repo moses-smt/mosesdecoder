@@ -39,4 +39,7 @@ typedef std::vector<ScoreArray> scoredata_t;
 typedef std::map<std::size_t, std::string> idx2name;
 typedef std::map<std::string, std::size_t> name2idx;
 
+typedef enum { HAMMING_DISTANCE=0, KENDALL_DISTANCE } distanceMetric_t;
+typedef enum { REFERENCE_CHOICE_AVERAGE=0, REFERENCE_CHOICE_CLOSEST } distanceMetricReferenceChoice_t;
+
 #endif  // MERT_TYPE_H_

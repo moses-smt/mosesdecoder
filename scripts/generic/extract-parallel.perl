@@ -6,11 +6,15 @@
 use strict;
 use File::Basename;
 
+sub RunFork($);
+sub systemCheck($);
 sub NumStr($);
 
 print "Started ".localtime() ."\n";
 
 my $numParallel= $ARGV[0];
+$numParallel = 1 if $numParallel < 1;
+
 my $splitCmd= $ARGV[1];
 my $sortCmd= $ARGV[2];
 my $extractCmd= $ARGV[3];
@@ -20,34 +24,45 @@ my $source = $ARGV[5]; # 2nd arg of extract argument
 my $align = $ARGV[6]; # 3rd arg of extract argument
 my $extract = $ARGV[7]; # 4th arg of extract argument
 
+my $makeTTable = 1; # whether to build the ttable extract files
 my $otherExtractArgs= "";
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
+  $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
 mkdir $TMPDIR;
 
-my $totalLines = int(`wc -l $align`);
+my $totalLines = int(`cat $align | wc -l`);
 my $linesPerSplit = int($totalLines / $numParallel) + 1;
 
 print "total=$totalLines line-per-split=$linesPerSplit \n";
 
+my @children;
+my $pid;
 my $cmd;
+
 if ($numParallel > 1)
 {
 	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
-	print STDERR "Executing: $cmd \n";
-	`$cmd`;
+	$pid = RunFork($cmd);
+	push(@children, $pid);
 	
 	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
-	print STDERR "Executing: $cmd \n";
-	`$cmd`;
+	$pid = RunFork($cmd);
+	push(@children, $pid);
 
 	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
-	print STDERR "Executing: $cmd \n";
-	`$cmd`;
+	$pid = RunFork($cmd);
+	push(@children, $pid);
+	
+	# wait for everything is finished
+	foreach (@children) {
+		waitpid($_, 0);
+	}
+
 }
 else
 {
@@ -67,15 +82,13 @@ else
 }
 
 # run extract
-my $isParent = 1;
-my @childs;
+@children = ();
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
   
   if ($pid == 0)
   { # child
-    $isParent = 0;
     my $numStr = NumStr($i);
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs \n";
     print STDERR $cmd;
@@ -85,20 +98,13 @@ for (my $i = 0; $i < $numParallel; ++$i)
   }
   else
   { # parent
-  	push(@childs, $pid);
+  	push(@children, $pid);
   }
 }
 
 # wait for everything is finished
-if ($isParent)
-{
-  foreach (@childs) {
-  	waitpid($_, 0);
-  }
-}
-else
-{
-    die "shouldn't be here";
+foreach (@children) {
+	waitpid($_, 0);
 }
 
 # merge
@@ -116,20 +122,31 @@ for (my $i = 0; $i < $numParallel; ++$i)
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
-print STDERR $catCmd;
-print STDERR $catInvCmd;
-print STDERR $catOCmd;
 
-systemCheck($catCmd);
-systemCheck($catInvCmd);
+
+@children = ();
+if ($makeTTable)
+{
+  $pid = RunFork($catCmd);
+  push(@children, $pid);
+
+  $pid = RunFork($catInvCmd);
+  push(@children, $pid);
+}
 
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
-	systemCheck($catOCmd);
+	$pid = RunFork($catOCmd);
+	push(@children, $pid);
 }
 
+# wait for all sorting to finish
+foreach (@children) {
+	waitpid($_, 0);
+}
 
+# delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
 `$cmd`;
@@ -138,6 +155,21 @@ print STDERR "Finished ".localtime() ."\n";
 
 # -----------------------------------------
 # -----------------------------------------
+
+sub RunFork($)
+{
+  my $cmd = shift;
+
+  my $pid = fork();
+  
+  if ($pid == 0)
+  { # child
+    print STDERR $cmd;
+    systemCheck($cmd);
+    exit();
+  }
+  return $pid;
+}
 
 sub systemCheck($)
 {
@@ -170,5 +202,4 @@ sub NumStr($)
     }
     return $numStr;
 }
-
 

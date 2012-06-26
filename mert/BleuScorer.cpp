@@ -162,7 +162,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   entry.set(stats);
 }
 
-float BleuScorer::calculateScore(const vector<int>& comps) const
+statscore_t BleuScorer::calculateScore(const vector<int>& comps) const
 {
   CHECK(comps.size() == kBleuNgramOrder * 2 + 1);
 
@@ -223,6 +223,47 @@ float sentenceLevelBleuPlusOne(const vector<float>& stats) {
   float logbleu = 0.0;
   for (int j = 0; j < kBleuNgramOrder; j++) {
     logbleu += log(stats[2 * j] + 1.0) - log(stats[2 * j + 1] + 1.0);
+  }
+  logbleu /= kBleuNgramOrder;
+  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+  return exp(logbleu);
+}
+
+float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg)
+{
+  // Sum sent and background
+  std::vector<float> stats;
+  CHECK(sent.size()==bg.size());
+  CHECK(sent.size()==kBleuNgramOrder*2+1);
+  for(size_t i=0;i<sent.size();i++) 
+    stats.push_back(sent[i]+bg[i]);
+
+  // Calculate BLEU
+  float logbleu = 0.0;
+  for (int j = 0; j < kBleuNgramOrder; j++) {
+    logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
+  }
+  logbleu /= kBleuNgramOrder;
+  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+  
+  if (brevity < 0.0) {
+    logbleu += brevity;
+  }
+
+  // Exponentiate and scale by reference length (as per Chiang et al 08)
+  return exp(logbleu) * stats[kBleuNgramOrder*2];
+}
+
+float unsmoothedBleu(const std::vector<float>& stats) {
+  CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
+
+  float logbleu = 0.0;
+  for (int j = 0; j < kBleuNgramOrder; j++) {
+    logbleu += log(stats[2 * j]) - log(stats[2 * j + 1]);
   }
   logbleu /= kBleuNgramOrder;
   const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];

@@ -226,20 +226,19 @@ void PhraseNode::GetChild(Word &wordFound, UINT64 &childFilePos, size_t ind, OnD
 
   size_t wordSize = onDiskWrapper.GetSourceWordSize();
   size_t childSize = wordSize + sizeof(UINT64);
-  size_t numFactors = onDiskWrapper.GetNumSourceFactors();
 
   char *currMem = m_memLoad
                   + sizeof(UINT64) * 2 // size & file pos of target phrase coll
                   + sizeof(float) * onDiskWrapper.GetNumCounts() // count info
                   + childSize * ind;
 
-  size_t memRead = ReadChild(wordFound, childFilePos, currMem, numFactors);
+  size_t memRead = ReadChild(wordFound, childFilePos, currMem);
   CHECK(memRead == childSize);
 }
 
-size_t PhraseNode::ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem, size_t numFactors) const
+size_t PhraseNode::ReadChild(Word &wordFound, UINT64 &childFilePos, const char *mem) const
 {
-  size_t memRead = wordFound.ReadFromMemory(mem, numFactors);
+  size_t memRead = wordFound.ReadFromMemory(mem);
 
   const char *currMem = mem + memRead;
   UINT64 *memArray = (UINT64*) (currMem);

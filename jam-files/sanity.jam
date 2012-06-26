@@ -13,8 +13,13 @@ rule _shell ( cmd : extras * ) {
   return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
+cxxflags = [ os.environ "CXXFLAGS" ] ;
+cflags = [ os.environ "CFLAGS" ] ;
+ldflags = [ os.environ "LDFLAGS" ] ;
+
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
+  flags = $(cxxflags) $(ldflags) $(flags) ;
   local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
   local ret = [ SHELL $(cmd) : exit-status ] ;
   if --debug-configuration in [ modules.peek : ARGV ] {
@@ -26,6 +31,14 @@ rule test_flags ( flags * ) {
   } else {
     return ;
   }
+}
+
+rule test_header ( name ) {
+  return [ test_flags "-include $(name)" ] ;
+}
+
+rule test_library ( name ) {
+  return [ test_flags "-l$(name)" ] ;
 }
 
 {
@@ -60,6 +73,7 @@ if $(with-macports) {
 }
 else {
   with-boost = [ option.get "with-boost" ] ;
+  with-boost ?= [ os.environ "BOOST_ROOT" ] ;
   if $(with-boost) {
     L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
     boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
@@ -134,10 +148,6 @@ rule external-lib ( name : search-path * ) {
 
 requirements = ;
 {
-  local cxxflags = [ os.environ "CXXFLAGS" ] ;
-  local cflags = [ os.environ "CFLAGS" ] ;
-  local ldflags = [ os.environ "LDFLAGS" ] ;
-
   #Boost jam's static clang for Linux is buggy.
   requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
@@ -158,12 +168,14 @@ if [ option.get "git" : : "yes" ] {
 prefix = [ option.get "prefix" ] ;
 if $(prefix) {
   prefix = [ path.root $(prefix) [ path.pwd ] ] ;
+  prefix = $(prefix)$(GITTAG) ;
 } else {
-  prefix = $(TOP)/dist$(GITTAG) ;
+  prefix = $(TOP)$(GITTAG) ;
 }
+
+bindir = [ option.get "bindir" : $(prefix)/bin ] ;
+libdir = [ option.get "libdir" : $(prefix)/lib ] ;
 rule install-bin-libs ( deps * ) {
-  local bindir = [ option.get "bindir" : $(prefix)/bin ] ;
-  local libdir = [ option.get "libdir" : $(prefix)/lib ] ;
   install prefix-bin : $(deps) : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
   install prefix-lib : $(deps) : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
 }
@@ -171,4 +183,10 @@ rule install-headers ( name : list * : source-root ? ) {
   local includedir = [ option.get "includedir" : $(prefix)/include ] ;
   source-root ?= "." ;
   install $(name) : $(list) : <location>$(includedir) <install-source-root>$(source-root) ;
+}
+
+rule build-projects ( projects * ) {
+  for p in $(projects) {
+    build-project $(p) ;
+  }
 }

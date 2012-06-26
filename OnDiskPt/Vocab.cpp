@@ -21,7 +21,6 @@
 #include <fstream>
 #include "OnDiskWrapper.h"
 #include "Vocab.h"
-#include "../moses/src/FactorCollection.h"
 
 using namespace std;
 
@@ -69,13 +68,13 @@ void Vocab::Save(OnDiskWrapper &onDiskWrapper)
   }
 }
 
-UINT64 Vocab::AddVocabId(const std::string &factorString)
+UINT64 Vocab::AddVocabId(const std::string &str)
 {
   // find string id
-  CollType::const_iterator iter = m_vocabColl.find(factorString);
+  CollType::const_iterator iter = m_vocabColl.find(str);
   if (iter == m_vocabColl.end()) {
     // add new vocab entry
-    m_vocabColl[factorString] = m_nextId;
+    m_vocabColl[str] = m_nextId;
     return m_nextId++;
   } else {
     // return existing entry
@@ -83,10 +82,10 @@ UINT64 Vocab::AddVocabId(const std::string &factorString)
   }
 }
 
-UINT64 Vocab::GetVocabId(const std::string &factorString, bool &found) const
+UINT64 Vocab::GetVocabId(const std::string &str, bool &found) const
 {
   // find string id
-  CollType::const_iterator iter = m_vocabColl.find(factorString);
+  CollType::const_iterator iter = m_vocabColl.find(str);
   if (iter == m_vocabColl.end()) {
     found = false;
     return 0; //return whatever
@@ -95,16 +94,6 @@ UINT64 Vocab::GetVocabId(const std::string &factorString, bool &found) const
     found = true;
     return iter->second;
   }
-}
-
-const Moses::Factor *Vocab::GetFactor(UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const
-{
-  string str = GetString(vocabId);
-  if (isNonTerminal) {
-    str = str.substr(1, str.size() - 2);
-  }
-  const Moses::Factor *factor = Moses::FactorCollection::Instance().AddFactor(direction, factorType, str);
-  return factor;
 }
 
 }
