@@ -7,11 +7,11 @@
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use strict;
 #use Time::HiRes;
 
-my $mydir = "$Bin/nonbreaking_prefixes";
+my $mydir = "$RealBin/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";

@@ -4,14 +4,14 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
 my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$VERBOSE,$IGNORE_TIME);
 my $SLEEP = 2;
-my $META = "$Bin/experiment.meta";
+my $META = "$RealBin/experiment.meta";
 
 # check if it is run on a multi-core machine
 # set number of maximal concurrently active processes
@@ -156,7 +156,7 @@ sub detect_machine {
 
 sub detect_if_cluster {
     my $hostname = `hostname`; chop($hostname);
-    foreach my $line (`cat $Bin/experiment.machines`) {
+    foreach my $line (`cat $RealBin/experiment.machines`) {
 	next unless $line =~ /^cluster: (.+)$/;
 	if (&detect_machine($hostname,$1)) {
 	    $CLUSTER = 1;
@@ -167,7 +167,7 @@ sub detect_if_cluster {
 
 sub detect_if_multicore {
     my $hostname = `hostname`; chop($hostname);
-    foreach my $line (`cat $Bin/experiment.machines`) {
+    foreach my $line (`cat $RealBin/experiment.machines`) {
 	next unless $line =~ /^multicore-(\d+): (.+)$/;
 	my ($cores,$list) = ($1,$2);
 	if (&detect_machine($hostname,$list)) {
