@@ -9,7 +9,7 @@ binmode(STDERR, ":utf8");
 use FindBin qw($RealBin);
 use strict;
 
-my $mydir = "$RealBin/nonbreaking_prefixes";
+my $mydir = "$RealBin/../../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
