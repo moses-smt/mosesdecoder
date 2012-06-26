@@ -196,9 +196,19 @@
 		1EB0AF101593A2180007E2A4 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					WITH_THREADS,
+				);
 				HEADER_SEARCH_PATHS = (
 					../..,
 					/opt/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /opt/local/lib/;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
@@ -207,9 +217,15 @@
 		1EB0AF111593A2180007E2A4 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = WITH_THREADS;
 				HEADER_SEARCH_PATHS = (
 					../..,
 					/opt/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /opt/local/lib/;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_thread-mt",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
