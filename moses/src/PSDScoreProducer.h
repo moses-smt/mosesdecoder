@@ -10,12 +10,15 @@
 #include <string>
 #include <vector>
 
-struct vw;
-
 namespace Moses
 {
 
 typedef std::map<std::pair<std::string, std::string>, float> TTable;
+
+struct VWInstance
+{
+  static ::vw m_vw;
+};
 
 class PSDScoreProducer : public StatefulFeatureFunction
 {
@@ -50,8 +53,6 @@ public:
 	}
 private:
   feature feature_from_string(const string &feature_str, unsigned long seed, float value);  
-
-  ::vw m_vw;
   std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
 };
 
