@@ -42,6 +42,8 @@ class ChartTrellisNode;
 class ChartTrellisPath;
 class ChartTrellisPathList;
 
+/** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
+ */
 class ChartManager
 {
 private:

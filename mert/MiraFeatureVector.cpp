@@ -1,4 +1,5 @@
 #include <cmath>
+#include <iomanip>
 
 #include "MiraFeatureVector.h"
 
@@ -10,6 +11,8 @@ MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   vector<size_t> sparseFeats = vec.sparse.feats();
   bool bFirst = true;
   size_t lastFeat = 0;
+  m_sparseFeats.reserve(sparseFeats.size());
+  m_sparseVals.reserve(sparseFeats.size());
   for(size_t i=0;i<sparseFeats.size();i++)
   {
     size_t feat = m_dense.size() + sparseFeats[i];
@@ -137,6 +140,15 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
 
   // Create and return vector
   return MiraFeatureVector(dense,sparseFeats,sparseVals);
+}
+
+ostream& operator<<(ostream& o, const MiraFeatureVector& e)
+{
+  for(size_t i=0;i<e.size();i++) {
+    if(i>0) o << " ";
+    o << e.feat(i) << ":" << e.val(i);
+  }
+  return o;
 }
 
 // --Emacs trickery--

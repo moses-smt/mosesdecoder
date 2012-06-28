@@ -295,6 +295,7 @@
 		1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA808514D19FBF003D2191 /* UTrieNode.h */; };
 		1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */; };
 		1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF0709214B9EFCC0052152A /* ParallelBackoff.h */; };
+		1EF8F2C4159A61970047B613 /* HypoList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF8F2C3159A61970047B613 /* HypoList.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -597,6 +598,7 @@
 		1EDA808514D19FBF003D2191 /* UTrieNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UTrieNode.h; path = ../../moses/src/RuleTable/UTrieNode.h; sourceTree = "<group>"; };
 		1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelBackoff.cpp; sourceTree = "<group>"; };
 		1EF0709214B9EFCC0052152A /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallelBackoff.h; sourceTree = "<group>"; };
+		1EF8F2C3159A61970047B613 /* HypoList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HypoList.h; path = ../../moses/src/HypoList.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -707,6 +709,7 @@
 				1EC7364214B977AA00238410 /* hash.cpp */,
 				1EC7364314B977AA00238410 /* hash.h */,
 				1EC7364414B977AA00238410 /* hypergraph.proto */,
+				1EF8F2C3159A61970047B613 /* HypoList.h */,
 				1EC7364514B977AA00238410 /* Hypothesis.cpp */,
 				1EC7364614B977AA00238410 /* Hypothesis.h */,
 				1EC7364714B977AA00238410 /* HypothesisStack.cpp */,
@@ -1150,6 +1153,7 @@
 				1EDA808F14D19FBF003D2191 /* Trie.h in Headers */,
 				1EDA809114D19FBF003D2191 /* UTrie.h in Headers */,
 				1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */,
+				1EF8F2C4159A61970047B613 /* HypoList.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

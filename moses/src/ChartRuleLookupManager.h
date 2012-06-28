@@ -30,11 +30,12 @@ namespace Moses
 class ChartTranslationOptionList;
 class WordsRange;
 
-// Defines an interface for looking up rules in a rule table.  Concrete
-// implementation classes should correspond to specific PhraseDictionary
-// subclasses (memory or on-disk).  Since a ChartRuleLookupManager object
-// maintains sentence-specific state, exactly one should be created for
-// each sentence that is to be decoded.
+/** Defines an interface for looking up rules in a rule table.  Concrete
+ *  implementation classes should correspond to specific PhraseDictionary
+ *  subclasses (memory or on-disk).  Since a ChartRuleLookupManager object
+ *  maintains sentence-specific state, exactly one should be created for
+ *  each sentence that is to be decoded.
+ */
 class ChartRuleLookupManager
 {
 public:

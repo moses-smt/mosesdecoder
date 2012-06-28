@@ -27,6 +27,8 @@ class ChartHypothesis;
 class ChartTrellisNode;
 class ChartTrellisPath;
 
+/** @todo Something to do with make deviant paths
+ */
 class ChartTrellisDetour
 {
  public:

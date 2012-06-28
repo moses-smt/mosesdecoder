@@ -36,6 +36,11 @@ class DottedRule;
 class WordPenaltyProducer;
 class ChartCellCollection;
 
+/** list of list of ALL target phrases for a sentence. NOT translation option
+ * 1 of these is held by the chart manager
+ *  @todo Why is the manager holding target phrases, and not the translation option, or it's collection?
+ *  @todo Why isn't each TargetPhraseCollection held in separate chart cell?
+ */
 class ChartTranslationOptionCollection
 {
 protected:

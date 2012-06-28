@@ -8,6 +8,8 @@
 namespace Moses
 {
 
+/** @todo What is the difference between this and the classes in FeatureFunction?
+ */
 class FFState
 {
 public:

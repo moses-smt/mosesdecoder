@@ -40,10 +40,12 @@
 namespace Moses
 {
 class ChartTranslationOptionList;
-class ChartTranslationOptionCollection;
 class ChartCellCollection;
 class ChartManager;
 
+/** 1 cell in chart decoder.
+ *  Doesn't directly hold hypotheses. Each cell contain a map of ChartHypothesisCollection that have different LHS non-terms
+ */
 class ChartCell
 {
   friend std::ostream& operator<<(std::ostream&, const ChartCell&);

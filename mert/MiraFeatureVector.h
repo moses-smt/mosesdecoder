@@ -13,6 +13,7 @@
 #define MERT_MIRA_FEATURE_VECTOR_H
 
 #include <vector>
+#include <iostream>
 
 #include "FeatureDataIterator.h"
 
@@ -33,6 +34,8 @@ public:
 
   friend MiraFeatureVector operator-(const MiraFeatureVector& a,
                                      const MiraFeatureVector& b);
+
+  friend std::ostream& operator<<(std::ostream& o, const MiraFeatureVector& e);
 
 private:
   std::vector<ValType> m_dense;
