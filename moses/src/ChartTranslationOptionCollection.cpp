@@ -126,7 +126,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       CHECK(targetLHS.GetFactor(0) != NULL);
 
       // add to dictionary
-      TargetPhrase *targetPhrase = new TargetPhrase(Output);
+      TargetPhrase *targetPhrase = new TargetPhrase(Output,*m_unksrc);
       TargetPhraseCollection *tpc = new TargetPhraseCollection;
       tpc->Add(targetPhrase);
 
@@ -140,7 +140,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       //targetPhrase->SetScore();
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetScore(m_system->GetWordPenaltyProducer(), wordPenaltyScore);
-      targetPhrase->SetSourcePhrase(m_unksrc);
+       //damt hiero : source phrase built in constructor of target phrase
+      //targetPhrase->SetSourcePhrase(m_unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
 
       // chart rule
@@ -150,7 +151,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
     // drop source word. create blank trans opt
     vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
 
-    TargetPhrase *targetPhrase = new TargetPhrase(Output);
+    TargetPhrase *targetPhrase = new TargetPhrase(Output,*m_unksrc);
     TargetPhraseCollection *tpc = new TargetPhraseCollection;
     tpc->Add(targetPhrase);
     // loop
@@ -165,7 +166,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       CHECK(targetLHS.GetFactor(0) != NULL);
 
       m_cacheTargetPhraseCollection.push_back(tpc);
-      targetPhrase->SetSourcePhrase(m_unksrc);
+      //damt hiero : source phrase built in constructor of target phrase
+      //targetPhrase->SetSourcePhrase(m_unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
 

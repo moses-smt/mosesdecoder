@@ -104,9 +104,11 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 }
 
 //! (damt hiero) : process sentence and consider context (word to left)
-void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &transOptList
-                                , const ChartCellCollection &allChartCells)
+void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &transOptList, const ChartCellCollection &allChartCells)
 {
+
+  std::cout << "Processing Sentence with context..." << std::endl;
+
   const StaticData &staticData = StaticData::Instance();
 
   // priority queue for applicable rules with selected hypotheses
@@ -131,6 +133,9 @@ void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &tra
   for (size_t i = 0; i < transOptList.GetSize(); ++i) {
     const ChartTranslationOption &transOpt = transOptList.Get(i);
     float score = 0;
+
+    std::cout <<  "Size of target phrase collection : " << transOpt.GetTargetPhraseCollection().GetSize() << std::endl;
+
     TargetPhraseCollection::const_iterator itr_targets;
     //BEWARE : to access the source side and score of a rule, we have to access each target phrase
     for(
@@ -138,32 +143,49 @@ void ChartCell::ProcessSentenceWithContext(const ChartTranslationOptionList &tra
         itr_targets != transOpt.GetTargetPhraseCollection().end();
         itr_targets++)
     {
-       
+
         //make example
       //make source vector
       std::vector<std::string> sourceWords;
       std::vector<std::string> targetWords;
 
-      for(int i=0; i<(*itr_targets)->GetSourcePhrase()->GetSize();i++)
+      //can create everything locally
+      //TargetPhrase target = **itr_targets;
+      //std::cout << "Target Phrase : " << target << std::endl;
+
+      //const Phrase *source = target.GetSourcePhrase();
+
+      if((**itr_targets).GetSourcePhrase() != NULL)
       {
-	  sourceWords.push_back((*itr_targets)->GetSourcePhrase()->GetWord(i).GetString(srcFactors,0));
-      }
+            std::cout << "Source Phrase : " << (*(**itr_targets).GetSourcePhrase()) << std::endl;
 
-      for(int i=0; i<(*itr_targets)->GetSize();i++)
-      {
-	  //make target vector
-	targetWords.push_back((*itr_targets)->GetWord(i).GetString(srcFactors,0));
-      }
+            for(int i=0; i<(**itr_targets).GetSourcePhrase()->GetSize();i++)
+            {
+                sourceWords.push_back((**itr_targets).GetSourcePhrase()->GetWord(i).GetString(srcFactors,0));
+            }
+            for(int i=0; i<(**itr_targets).GetSize();i++)
+            {
+                //make target vector
+                targetWords.push_back((**itr_targets).GetWord(i).GetString(srcFactors,0));
+            }
+            ClassExample exampleToSearch = ClassExample(sourceContext,sourceWords,targetWords, &(*itr_targets)->GetAlignmentInfo());
 
-      ClassExample exampleToSearch = ClassExample(sourceContext,sourceWords,targetWords, &(*itr_targets)->GetAlignmentInfo());
-        //call classifier for this example	
-      //float score = Classifier::Instance().GetPrediction(exampleToSearch);
+            //call classifier for this exampl
+            std::cout << "Getting Prediction : " << std::endl;
+            float score = Classifier::Instance().GetPrediction(exampleToSearch);
+            std::cout << "Prediction here" << std::endl;
 
-      //reset score of target phrase
-      
+            //FB : TODO : set score
 
-        //
-
+            //FB : new feature will be evaluated automatically at hypothesis creation
+            //FB : no need to reset score of translation option, will not be used again
+            //FB : pruning using score of translation options performed before but pruning
+            //limit can be increased in moses.ini
+        }
+        else
+        {
+            std::cout << "Source Phrase is NULL : " << (**itr_targets) << std::endl;
+        }
     }
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);

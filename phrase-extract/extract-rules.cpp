@@ -518,71 +518,43 @@ string printHieroLeftContext(vector<int> contextPos, SentenceAlignmentWithSyntax
 { 		
     vector<int> :: iterator itr_context;
     string out = "";
-    int contextCounter = 0;
     for(itr_context = contextPos.begin(); itr_context != contextPos.end(); itr_context++)
     {
-        stringstream s;
-        s << ++contextCounter;
-
          if((*itr_context) < 0)
 	 {
-	    out += "LCxt";
-            out += "(";
-            out += s.str();
-            out += ")";
-            out += "(";
             out += "<s>";
-            out += ")";
-            out += " ";
 	 }
          else
          {
-            out += "LCxt";
-            out += "(";
-            out += s.str();
-            out += ")";
-            out += "(";
+
             out += sentence.source[*itr_context];
-            out += ")";
-            out += " ";
          }
     }
+
+    //print separator
+    out += " ### "; 	
     return out;
 }
 
 string printHieroRightContext(vector<int> contextPos, SentenceAlignmentWithSyntax &sentence)
 {
-    vector<int> :: iterator itr_context;
-    string out = "";
-    int contextCounter = 0;
+     vector<int> :: iterator itr_context;
+
+    std::string out = "";
     for(itr_context = contextPos.begin(); itr_context != contextPos.end(); itr_context++)
     {
-        stringstream s;
-        s << ++contextCounter;
-
          if((*itr_context) > sentence.source.size() -1)
 	 {
-	    out += "RCxt";
-            out += "(";
-            out += sentence.source.size();
-            out += ")";
-            out += "(";
             out += "<\s>";
-            out += ")";
-            out += " ";
 	 }
          else
          {
-            out += "RCxt";
-            out += "(";
-            out += s.str();
-            out += ")";
-            out += "(";
             out += sentence.source[*itr_context];
-            out += ")";
-            out += " ";
          }
     }
+
+    //print pipe separator
+    out += " ### ";
     return out;
 }
 
@@ -693,7 +665,9 @@ void printHieroPhraseWithContext( SentenceAlignmentWithSyntax &sentence, int sta
         leftContextVec.push_back(startS - (++sizeOfContext));
   }
 
-  rule.leftContext = printHieroLeftContext(leftContextVec,sentence);
+  //FB : TODO : option could be better integrated
+  if(options.leftContext > 0)
+  {rule.leftContext = printHieroLeftContext(leftContextVec,sentence);}
 
   //new : print left context
   vector<int> rightContextVec;
@@ -704,7 +678,8 @@ void printHieroPhraseWithContext( SentenceAlignmentWithSyntax &sentence, int sta
         rightContextVec.push_back(endS + (++sizeOfContext));
   }
 
-  rule.rightContext = printHieroRightContext(rightContextVec,sentence);
+  if(options.rightContext > 0)
+  {rule.rightContext = printHieroRightContext(rightContextVec,sentence);}
 
   // target
   rule.target = printTargetHieroPhrase(sentence, startT, endT, startS, endS, indexT, holeColl, labelIndex)
@@ -952,7 +927,9 @@ void addRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int s
         leftContextVec.push_back(startS - (++sizeOfContext));
   }
 
-  rule.leftContext = printHieroLeftContext(leftContextVec,sentence);
+  //FB : TODO : better integrate options
+  if(options.leftContext > 0)
+  {rule.leftContext = printHieroLeftContext(leftContextVec,sentence);}
 
 
   //new : right context
@@ -1031,10 +1008,12 @@ void writeRulesToFile()
     if (rule->count == 0)
       continue;
 
+    //FB: todo : handle right context	
+
     //write contexts to file
     extractFile << rule->leftContext
                 << rule->source << " ||| "
-                << rule->rightContext
+                //<< rule->rightContext
                 << rule->target << " ||| "
                 << rule->alignment << " ||| "
                 << rule->count;
@@ -1048,7 +1027,7 @@ void writeRulesToFile()
       extractFileInv << rule->target << " ||| "
 		     << rule->leftContext	
                      << rule->source << " ||| "
-                     << rule->rightContext
+                     //<< rule->rightContext
 		     << rule->alignmentInv << " ||| "
                      << rule->count << "\n";
     }

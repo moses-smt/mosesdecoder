@@ -6,6 +6,8 @@ DAMT Hiero : Classifier
 
 namespace Moses {
 
+Classifier Classifier::s_instance;
+
 void Classifier::LoadScores(const std::string &ttableFile)
 {
   std::vector<FactorType> srcFactors;
@@ -20,8 +22,13 @@ void Classifier::LoadScores(const std::string &ttableFile)
     const std::string *line;
 
     std::vector<std::string> tokens;
+    std::vector<std::string> lContext;
 
     std::vector<Word> sourceContext;
+    std::vector<std::string> leftSourceContext;
+
+    //FB : TODO : handle right context
+    //std::vector<std::string> rightSourceContext;
     std::vector<std::string> sourceSide;
     std::vector<std::string> targetSide;
     //read in all scores but just keep p(e|f)
@@ -38,17 +45,22 @@ void Classifier::LoadScores(const std::string &ttableFile)
                , &scoreString        = tokens[2]
                , &alignString        = tokens[3];
 
+    TokenizeMultiCharSeparator(lContext,sourcePhraseString,"###");
     Tokenize(sourceSide,sourcePhraseString);
     Tokenize(targetSide,targetPhraseString);
     Tokenize<float>(scoreVector,scoreString);
 
-    std::string context = sourceSide.front();
-    Word contextWord;
-    contextWord.CreateFromString(Input, srcFactors, context, 0);
-    sourceContext.push_back(contextWord);
+    std::string leftSource = lContext[0];
+    Tokenize(leftSourceContext,leftSource);
 
-     //TODO : should not erase here, inefficient
-    sourceSide.erase(sourceSide.begin());
+    //Get source context into words : for factor representation
+    std::vector<std::string>::iterator itr_sourceContext;
+    for(itr_sourceContext = leftSourceContext.begin(); itr_sourceContext != leftSourceContext.end(); itr_sourceContext++)
+    {
+        Word contextWord;
+        contextWord.CreateFromString(Input, srcFactors, *itr_sourceContext, 0);
+        sourceContext.push_back(contextWord);
+    }
 
     //TODO : alignments cannot be retrieved in string form : modify?
     std::set<std::pair<size_t,size_t> > alignmentInfo;
@@ -70,9 +82,13 @@ void Classifier::LoadScores(const std::string &ttableFile)
   {
     float score = 0.0;
     PredictMap :: iterator itr_predict;
-    if ((itr_predict = m_predict.find(ce)) != m_predict.end()) 
-      {score = log(itr_predict->second);}
+    if ((itr_predict = m_predict.find(ce)) != m_predict.end())
+      {
+          score = log(itr_predict->second);
+          std::cout << "Prediction made : " << score << std::endl;
+      }
 
+    std::cout << "Returned score : " << score << std::endl;
     return score;
   }
 

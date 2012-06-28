@@ -40,37 +40,41 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase( std::string out_string)
+TargetPhrase::TargetPhrase( std::string out_string, Phrase sourcePhrase)
   :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
-
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   CreateFromString(staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
+  m_sourcePhrase = new Phrase(sourcePhrase);
 }
 
-
-TargetPhrase::TargetPhrase()
+TargetPhrase::TargetPhrase(Phrase sourcePhrase)
   :Phrase(ARRAY_SIZE_INCR)
   , m_transScore(0.0)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  //damt-hiero : source phrase created in constructor
+  //, m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
+    m_sourcePhrase = new Phrase(sourcePhrase);
 }
 
-TargetPhrase::TargetPhrase(const Phrase &phrase)
+TargetPhrase::TargetPhrase(const Phrase &phrase, Phrase sourcePhrase)
   : Phrase(phrase)
   , m_transScore(0.0)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  //damt-hiero : source phrase created in constructor
+  //, m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
+    m_sourcePhrase = new Phrase(sourcePhrase);
 }
 
 TargetPhrase::~TargetPhrase()
 {
+    delete m_sourcePhrase;
 }
 
 void TargetPhrase::SetScore(const TranslationSystem* system)

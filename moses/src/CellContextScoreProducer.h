@@ -10,14 +10,15 @@
 #include <string>
 #include <vector>
 
+using namespace std;
+
 namespace Moses {
 
-  class CellContextScoreProducer : public StatelessFeatureFunction 
+  class CellContextScoreProducer : public StatelessFeatureFunction
 {
-   
- 
- public : 
-  CellContextScoreProducer(float weight);
+
+ public :
+  CellContextScoreProducer(float weight,string ttableFile);
 
     // mandatory methods for features
     std::string GetScoreProducerDescription(unsigned) const;

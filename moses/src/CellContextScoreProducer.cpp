@@ -17,17 +17,18 @@ using namespace std;
 namespace Moses
 {
 
-CellContextScoreProducer::CellContextScoreProducer(float weight)
+CellContextScoreProducer::CellContextScoreProducer(float weight,string ttableFile)
 {
   const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
   vector<float> weights;
   weights.push_back(weight);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+  LoadScores(ttableFile);
 }
 
 void CellContextScoreProducer::LoadScores(const string &ttableFile)
 {
-  //Classifier::Instance().LoadScores(ttableFile);
+  Classifier::Instance().LoadScores(ttableFile);
 }
 
 void CellContextScoreProducer::EvaluateChart(const TargetPhrase&, ScoreComponentCollection* out, float score) const

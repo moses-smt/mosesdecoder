@@ -74,14 +74,22 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 //Load Cell Context feature
 bool StaticData::LoadCellContextScoreProducer()
 {
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-cell-context"));
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lc"));
+  const vector<string> &file = m_parameter->GetParam("lc-model-file");
+
+  if (weight.size() != file.size())
+   {
+     // mismatch in number of weights and file, write some error message
+     return false;
+   }
 
   if (weight.size() == 1) // check if feature is used
     {
-      m_cellContext = new CellContextScoreProducer(weight[0]); // create the feature
+      m_cellContext = new CellContextScoreProducer(weight[0],file[0]); // create the feature
     }
-  return true;
+   return true;
 }
+
 
 StaticData StaticData::s_instance;
 
@@ -153,7 +161,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if(m_parameter->GetParam("sort-word-alignment").size()) {
     m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
   }
-  
+
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -420,6 +428,11 @@ bool StaticData::LoadData(Parameter *parameter)
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
 
+
+  //context-dependent decoding
+  m_cellContextDecoding = (m_parameter->GetParam("sentence-cell-context").size() > 0) ?
+                            Scan<size_t>(m_parameter->GetParam("sentence-cell-context")[0]) : -1;
+
   m_threadCount = 1;
   const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
   if (!threadInfo.empty()) {
@@ -464,7 +477,7 @@ bool StaticData::LoadData(Parameter *parameter)
     InputFileStream constraintFile(m_constraintFileName);
 
     std::string line;
-    
+
     long sentenceID = GetStartTranslationId() - 1;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
@@ -513,7 +526,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	  if (!LoadSyntacticLanguageModel()) return false;
 	}
 #endif
-	
+
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -600,6 +613,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_translationSystems.find(config[0])->second.ConfigDictionaries();
 
     //Register Cell Context feature in manager
+    if(m_cellContext != NULL)
     m_translationSystems.find(config[0])->second.AddFeatureFunction(m_cellContext);
 
 
@@ -642,7 +656,7 @@ StaticData::~StaticData()
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
   RemoveAllInColl(m_globalLexicalModels);
-	
+
 #ifdef HAVE_SYNLM
 	delete m_syntacticLanguageModel;
 #endif
@@ -671,10 +685,10 @@ StaticData::~StaticData()
 #ifdef HAVE_SYNLM
   bool StaticData::LoadSyntacticLanguageModel() {
     cerr << "Loading syntactic language models..." << std::endl;
-    
+
     const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
     const vector<string> files = m_parameter->GetParam("slmodel-file");
-    
+
     const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
       TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
       : 0;
@@ -693,11 +707,11 @@ StaticData::~StaticData()
 
       //cout.setf(ios::scientific,ios::floatfield);
       //cerr.setf(ios::scientific,ios::floatfield);
-      
-      // create the feature
-      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
 
-      /* 
+      // create the feature
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth);
+
+      /*
       /////////////////////////////////////////
       // BEGIN LANE's UNSTABLE EXPERIMENT :)
       //
@@ -717,7 +731,7 @@ StaticData::~StaticData()
       }
 
     }
-    
+
     return true;
 
   }
@@ -849,7 +863,7 @@ bool StaticData::LoadLanguageModels()
     for(size_t i=0; i<lmVector.size(); i++) {
       LanguageModel* lm = NULL;
       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager); 
+        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager);
       } else {
         vector<string>	token		= Tokenize(lmVector[i]);
         if (token.size() != 4 && token.size() != 5 ) {
@@ -1028,13 +1042,13 @@ bool StaticData::LoadPhraseTables()
         // it only work with binrary file. This is a hack
 
         m_numInputScores=m_parameter->GetParam("weight-i").size();
-        
+
         if (implementation == Binary)
         {
           for(unsigned k=0; k<m_numInputScores; ++k)
             weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
         }
-        
+
         if(m_parameter->GetParam("link-param-count").size())
           m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
 
@@ -1052,7 +1066,7 @@ bool StaticData::LoadPhraseTables()
             return false;
           }
         }
-        
+
       }
       if (!m_inputType) {
         m_numInputScores=0;

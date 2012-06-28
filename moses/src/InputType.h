@@ -39,7 +39,7 @@ class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
 class ChartTranslationOption;
-  
+
 //! base class for sentences and confusion networks
 class InputType
 {
@@ -54,10 +54,15 @@ public:
   // used in -continue-partial-translation
   std::vector<bool> m_sourceCompleted;
   std::string m_initialTargetPhrase;
+
+  //damt hiero : initial source phrase
+  Phrase m_initialSourcePhrase;
+
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
   InputType(long translationId = 0);
+
   virtual ~InputType();
 
   virtual InputTypeEnum GetType() const = 0;

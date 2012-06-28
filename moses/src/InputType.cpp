@@ -28,7 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-InputType::InputType(long translationId) : m_translationId(translationId)
+InputType::InputType(long translationId) : m_translationId(translationId), m_initialSourcePhrase(Phrase(0))
+
 {
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
@@ -67,7 +68,7 @@ std::vector <ChartTranslationOption*> InputType::GetXmlChartTranslationOptions()
   std::vector <ChartTranslationOption*> ret;
   return ret;
 }
-  
+
 }
 
 

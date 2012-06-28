@@ -79,9 +79,6 @@ void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalM
   AddFeatureFunction(globalLexicalModel);
 }
 
-
-
-
 void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff)
 {
   if (ff->IsStateless()) {

@@ -60,13 +60,10 @@ protected:
   Word m_lhsTarget;
 
 public:
-  TargetPhrase();
-  TargetPhrase(std::string out_string);
-  TargetPhrase(const Phrase &);
-  ~TargetPhrase();
-
-  //! used by the unknown word handler- these targets
-  //! don't have a translation score, so wp is the only thing used
+  TargetPhrase(Phrase);
+  TargetPhrase(std::string out_string,Phrase sourcePhrase);
+  TargetPhrase(const Phrase &, Phrase);
+  ~TargetPhrase();  //! don't have a translation score, so wp is the only thing used
   void SetScore(const TranslationSystem* system);
 
   //!Set score for Sentence XML target options

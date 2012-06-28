@@ -208,12 +208,15 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word sourceLHS, targetLHS;
 
     // source
+    // FB : note : will also be created in constructor of Target Phrase
     Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
-    // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase(Output);
+    // create target phraset
+    // damt hiero : constructor of target phrase changed, pass source Phrase as argument
+    TargetPhrase *targetPhrase = new TargetPhrase(sourcePhrase);
     targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
+
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
@@ -240,9 +243,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
   }
 
-  //FB : disable pruning of target phraseCollection prior to having sentence context
-  // sort and prune each target phrase collection
-  SortAndPrune(ruleTable);
+  //FB : if working with cell context option, disable pruning of target phraseCollection prior to having sentence context
+  //FB : note : static pruning using rhs : weights and features
+  if(StaticData::Instance().GetCellContextOption() == -1)
+  {
+    SortAndPrune(ruleTable);
+  }
 
   return true;
 }

@@ -31,6 +31,7 @@ namespace Moses
 
         private:
         static Classifier s_instance;
+        Classifier(){};
         PredictMap m_predict;
 
         public :
@@ -39,7 +40,7 @@ namespace Moses
 
         void LoadScores(const std::string &ttableFile);
 
-	float GetPrediction(const ClassExample& example);
+        float GetPrediction(const ClassExample& example);
     };
 }
 #endif

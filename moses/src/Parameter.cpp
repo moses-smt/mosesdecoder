@@ -149,7 +149,10 @@ Parameter::Parameter()
   //Choice to perform or not cell-context dependent decoding
   AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
   //Weight of cell-context dependent feature
-  AddParam("weight-cell-context", "wcc", "weight for cell context feature");
+  AddParam("weight-lc", "wlc", "weight for cell context feature");
+  //File to load cell-context dependent feature;
+  AddParam("lc-model-file", "lcm", "file for cell context feature");
+
 }
 
 Parameter::~Parameter()
@@ -279,14 +282,14 @@ bool Parameter::Validate()
   PARAM_MAP::const_iterator iterParams;
   for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
     const std::string &key = iterParams->first;
-    
+
     if (m_valid.find(key) == m_valid.end())
     {
       UserMessage::Add("Unknown parameter " + key);
       noErrorFlag = false;
     }
   }
-  
+
 
   // required parameters
   if (m_setting["ttable-file"].size() == 0) {

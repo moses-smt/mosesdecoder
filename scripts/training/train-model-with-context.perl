@@ -202,15 +202,15 @@ if (defined($_GHKM)) {
   $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/phrase-extract/extract-ghkm/tools/extract-ghkm";
 }
 else {
-  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/phrase-extract/extract-rules";
+  $RULE_EXTRACT = "$SCRIPTS_ROOTDIR/extract-rules";
 }
 my $LEXICAL_REO_SCORER = "$SCRIPTS_ROOTDIR/training/lexical-reordering/score";
 my $MEMSCORE = "$SCRIPTS_ROOTDIR/memscore/memscore";
 my $EPPEX = "$SCRIPTS_ROOTDIR/training/eppex/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/training/symal/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/symal/giza2bal.pl";
-my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/phrase-extract/score";
-my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/phrase-extract/consolidate";
+my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/score";
+my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/consolidate";
 
 # utilities
 my $ZCAT = "gzip -cd";

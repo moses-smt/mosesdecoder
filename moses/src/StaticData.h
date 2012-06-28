@@ -206,6 +206,7 @@ protected:
   bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
+  int m_cellContextDecoding; //! use cell context decoding
 
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
@@ -216,7 +217,7 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -241,7 +242,7 @@ protected:
   bool LoadGlobalLexicalModel();
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
-  
+
   //! load cell context feature
   bool LoadCellContextScoreProducer();
 
@@ -449,8 +450,8 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  LMList GetLMList() const { 
-    return m_languageModel; 
+  LMList GetLMList() const {
+    return m_languageModel;
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;
@@ -626,9 +627,14 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
-  
+
   long GetStartTranslationId() const
   { return m_startTranslationId; }
+
+  //! damt hiero access cell context option
+    int GetCellContextOption() const
+    {return m_cellContextDecoding;}
+
 };
 
 }

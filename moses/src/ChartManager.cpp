@@ -95,15 +95,12 @@ void ChartManager::ProcessSentence()
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
-      //TODO : call option and choose other method
-      cell.ProcessSentenceWithContext(m_transOptColl.GetTranslationOptionList()
-                           ,m_hypoStackColl);
-
-
-
-      //TODO : pass option !!!
-      //cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
-                           //,m_hypoStackColl);
+      // damt hiero : process sentence with context if option is on
+      if(StaticData::Instance().GetCellContextOption() != -1)
+      {cell.ProcessSentenceWithContext(m_transOptColl.GetTranslationOptionList()
+                           ,m_hypoStackColl);}
+      else{cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
+                           ,m_hypoStackColl);}
       m_transOptColl.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();

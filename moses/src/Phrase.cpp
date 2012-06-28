@@ -50,6 +50,16 @@ Phrase::Phrase(const vector< const Word* > &mergeWords)
   }
 }
 
+Phrase::Phrase(const Phrase &copy)
+{
+    //go through word vectors and populate
+   m_words.reserve(copy.GetSize());
+   for(int i=0; i<copy.GetSize();i++)
+   {
+        m_words.push_back(copy.GetWord(i));
+   }
+}
+
 Phrase::~Phrase()
 {
 }
@@ -143,8 +153,8 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
   for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
     Word &word = AddWord();
     size_t index = 0;
-    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
-        factor_it && (index < factorOrder.size()); 
+    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter));
+        factor_it && (index < factorOrder.size());
         ++factor_it, ++index) {
       word[factorOrder[index]] = factorCollection.AddFactor(*factor_it);
     }
