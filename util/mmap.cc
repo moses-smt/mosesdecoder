@@ -20,6 +20,7 @@
 #include <io.h>
 #else
 #include <sys/mman.h>
+#include <unistd.h>
 #endif
 
 namespace util {
