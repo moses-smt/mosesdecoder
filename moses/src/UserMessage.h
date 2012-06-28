@@ -29,8 +29,8 @@ namespace Moses
 {
 
 /** User warnings/error messages.
-	* Not the same as tracing messages, this should be usable even if Moses front-end if GUI
-*/
+ * Not the same as tracing messages, this should be usable even if Moses front-end if GUI
+ */
 class UserMessage
 {
 protected:

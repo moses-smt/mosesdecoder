@@ -28,6 +28,7 @@ template<class T>  T const* uniqueObject(const T& x,int mode=0)
   }
 }
 
+//! @todo what is this?
 template<class T> class UniqueObjectManager
 {
 public:

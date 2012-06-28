@@ -24,6 +24,8 @@
 namespace Moses
 {
 
+/** @todo what is this?
+ */
 class DottedRule
 {
  public:

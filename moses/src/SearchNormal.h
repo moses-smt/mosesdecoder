@@ -14,6 +14,9 @@ class Manager;
 class InputType;
 class TranslationOptionCollection;
 
+/** Functions and variables you need to decoder an input using the phrase-based decoder (NO cube-pruning)
+ *  Instantiated by the Manager class
+ */
 class SearchNormal: public Search
 {
 protected:

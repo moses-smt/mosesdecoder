@@ -21,6 +21,7 @@ typedef struct ParamDefs {
   std::string description;
 } ParamDefs;
 
+  //! @todo ask abby2
 class Parameters {
 public:
   static const std::string kNotSetValue; 

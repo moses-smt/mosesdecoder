@@ -36,6 +36,8 @@ class Ngram;
 namespace Moses
 {
 
+/** Implementation of single factor LM using IRST's code.
+ */
 class LanguageModelSRI : public LanguageModelPointerState
 {
 protected:
