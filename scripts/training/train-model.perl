@@ -160,9 +160,9 @@ $_ALIGNMENT_STEM = File::Spec->rel2abs($_ALIGNMENT_STEM) if defined($_ALIGNMENT_
 $_GLUE_GRAMMAR_FILE = File::Spec->rel2abs($_GLUE_GRAMMAR_FILE) if defined($_GLUE_GRAMMAR_FILE);
 $_UNKNOWN_WORD_LABEL_FILE = File::Spec->rel2abs($_UNKNOWN_WORD_LABEL_FILE) if defined($_UNKNOWN_WORD_LABEL_FILE);
 $_EXTRACT_FILE = File::Spec->rel2abs($_EXTRACT_FILE) if defined($_EXTRACT_FILE);
-@_PHRASE_TABLE = File::Spec->rel2abs(@_PHRASE_TABLE) if ($#_PHRASE_TABLE > 0);
-@_REORDERING_TABLE = File::Spec->rel2abs(@_REORDERING_TABLE) if ($#_REORDERING_TABLE > 0);
-@_GENERATION_TABLE = File::Spec->rel2abs(@_GENERATION_TABLE) if ($#_GENERATION_TABLE > 0);
+foreach (@_PHRASE_TABLE) { $_ = File::Spec->rel2abs($_); }
+foreach (@_REORDERING_TABLE) { $_ = File::Spec->rel2abs($_); }
+foreach (@_GENERATION_TABLE) { $_ = File::Spec->rel2abs($_); }
 $_GIZA_E2F = File::Spec->rel2abs($_GIZA_E2F) if defined($_GIZA_E2F);
 $_GIZA_F2E = File::Spec->rel2abs($_GIZA_F2E) if defined($_GIZA_F2E);
 
