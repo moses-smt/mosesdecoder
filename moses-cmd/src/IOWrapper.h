@@ -53,6 +53,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "WordLattice.h"
 #include "LatticeMBR.h"
 
+/** Helper class that holds misc variables to write data out to command line.
+ */
 class IOWrapper
 {
 protected:
@@ -118,7 +120,7 @@ public:
   }
 };
 
-IOWrapper *GetIODevice(const Moses::StaticData &staticData);
+IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
 bool ReadInput(IOWrapper &ioWrapper, Moses::InputTypeEnum inputType, Moses::InputType*& source);
 void OutputBestSurface(std::ostream &out, const Moses::Hypothesis *hypo, const std::vector<Moses::FactorType> &outputFactorOrder, bool reportSegmentation, bool reportAllFactors);
 void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>&,
