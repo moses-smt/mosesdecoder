@@ -287,7 +287,7 @@ int main(int argc, char* argv[])
 #endif
 }
 
-IOWrapper *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
