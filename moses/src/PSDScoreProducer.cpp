@@ -116,11 +116,10 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   if (!in.good())
     return false;
   string line;
-  while (in) {
-    size_t idx;
-    string phrase;
-    in >> phrase >> idx;
-    m_phraseIndex.insert(make_pair<string, size_t>(phrase, idx));
+  while (getline(in, line)) {
+    vector<string> columns = Tokenize(line, "\t");
+    size_t idx = Scan<size_t>(columns[1]);
+    m_phraseIndex.insert(make_pair<string, size_t>(columns[0], idx));
   }
   in.close();
 
