@@ -42,9 +42,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "LeftContextScoreProducer.h"
 
-#ifdef HAVE_VW
+// #ifdef HAVE_VW
 #include "PSDScoreProducer.h"
-#endif
+//#endif
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -174,7 +174,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
   }
 
-#ifdef HAVE_VW
+//#ifdef HAVE_VW
   if (m_parameter->GetParam("psd-model").size() > 0) {
     if (m_parameter->GetParam("psd-index").size() <= 0) {
       UserMessage::Add(string("--psd-index not specified"));
@@ -182,12 +182,13 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
     m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
+    std::cerr << "ADDED SCORE PRODUCER" << std::endl;
     if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
       m_parameter->GetParam("psd-index")[0])) {
       return false;  
     }
   }
-#endif // HAVE_VW
+//#endif // HAVE_VW
 
   if (m_parameter->GetParam("left-context-ttable").size() > 0) {
     float leftContextWeight = Scan<float>(m_parameter->GetParam("weight-left-context")[0]);
@@ -619,11 +620,11 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_leftContextScoreProducer != NULL ) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
     }
-#ifdef HAVE_VW    
+//#ifdef HAVE_VW    
     if (m_PSDScoreProducer != NULL ) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_PSDScoreProducer);
     }
-#endif // HAVE_VW
+//#endif // HAVE_VW
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
@@ -679,9 +680,9 @@ StaticData::~StaticData()
   // small score producers
   delete m_unknownWordPenaltyProducer;
   delete m_leftContextScoreProducer;
-#ifdef HAVE_VW
+//#ifdef HAVE_VW
   delete m_PSDScoreProducer;
-#endif
+//#endif
 
   //delete m_parameter;
 
