@@ -626,6 +626,13 @@ public:
   
   long GetStartTranslationId() const
   { return m_startTranslationId; }
+
+#ifdef HAVE_VW
+  PSDScoreProducer *GetPSDScoreProducer() const {
+    return m_PSDScoreProducer;
+  }
+#endif
+
 };
 
 }

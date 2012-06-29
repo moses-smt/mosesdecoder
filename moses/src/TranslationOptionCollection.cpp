@@ -34,6 +34,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
 
+#ifdef HAVE_VW
+#include "PSDScoreProducer.h"
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -505,9 +509,18 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       // add to fully formed translation option list
       PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
       const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
+#ifdef HAVE_VW
+      PSDScoreProducer psd = StaticData::Instance().GetPSDScoreProducer();
+      vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList, m_source);
+      vector<ScoreComponentCollection>::const_iterator iterPSD = scores.begin();
+#endif
       vector<TranslationOption*>::const_iterator iterColl;
       for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
         TranslationOption *transOpt = *iterColl;
+#ifdef HAVE_VW
+        assert(iterPSD != scores.end());
+        transOpt->AddStatelessScore(*iterPSD++);
+#endif
         transOpt->CalcScore(m_system);
         Add(transOpt);
       }

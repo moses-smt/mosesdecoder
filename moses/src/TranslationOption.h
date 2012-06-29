@@ -161,6 +161,9 @@ public:
       return it->second;
   }
 
+  /** Adds score produced by a stateless feature before decoding */
+  void AddStatelessScore(const ScoreComponentCollection &score);
+
   /** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
   void CalcScore(const TranslationSystem* system);
 

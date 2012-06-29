@@ -176,9 +176,16 @@ bool StaticData::LoadData(Parameter *parameter)
 
 #ifdef HAVE_VW
   if (m_parameter->GetParam("psd-model").size() > 0) {
+    if (m_parameter->GetParam("psd-index").size() <= 0) {
+      UserMessage::Add(string("--psd-index not specified"));
+      return false;
+    }
     float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
     m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
-    m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0]);
+    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
+      m_parameter->GetParam("psd-index")[0])) {
+      return false;  
+    }
   }
 #endif // HAVE_VW
 

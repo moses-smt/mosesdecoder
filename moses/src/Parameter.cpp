@@ -151,6 +151,7 @@ Parameter::Parameter()
 #ifdef HAVE_VW
   AddParam("weight-psd", "wpsd", "weight for phrase sense disambiguation");
   AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation"); 
+  AddParam("psd-index", "psdi", "file with indexes of target phrases"); 
 #endif
 }
 

@@ -114,6 +114,11 @@ void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreCompon
   m_scoreBreakdown.PlusEquals(score);
 }
 
+void TranslationOption::AddStatelessScore(const ScoreComponentCollection &score)
+{
+  m_scoreBreakdown.PlusEquals(score);
+}
+
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
 {
   if (featuresToCheck.size() == 1) {

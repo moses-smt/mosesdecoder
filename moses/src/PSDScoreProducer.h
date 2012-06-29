@@ -6,6 +6,9 @@
 #include "FeatureFunction.h"
 #include "vw.h"
 #include "TypeDef.h"
+#include "TranslationOption.h"
+#include "ScoreComponentCollection.h"
+#include "InputType.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -13,7 +16,7 @@
 namespace Moses
 {
 
-typedef std::map<std::pair<std::string, std::string>, float> TTable;
+typedef std::map<std::string, size_t> PhraseIndexType;
 
 struct VWInstance
 {
@@ -22,13 +25,20 @@ struct VWInstance
 
 extern VWInstance vwInstance;
 
-class PSDScoreProducer : public StatefulFeatureFunction
+class PSDScoreProducer : public StatelessFeatureFunction
 {
 public:
   PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float weight);
 
-  // read the VW model
-  void Initialize(const std::string &modelFile);
+  // read required data files
+  bool Initialize(const std::string &modelFile, const std::string &indexFile);
+
+  // score a list of translation options
+  // this is required to contain all possible translations
+  // of a given source span
+  vector<ScoreComponentCollection> ScoreOptions(
+    const vector<TranslationOption *> &options,
+    const InputType &source);
 
   // mandatory methods for features
   size_t GetNumScoreComponents() const;
@@ -36,26 +46,15 @@ public:
   std::string GetScoreProducerWeightShortName(unsigned) const;
   size_t GetNumInputScores() const;
 
-  // maintain hypothesis state (currently not used)
-  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
-
-  // score translation hypothesis
-  virtual FFState* Evaluate(
-    const Hypothesis& cur_hypo,
-    const FFState* prev_state,
-    ScoreComponentCollection* accumulator) const;
-
-  // not implemented yet
-  virtual FFState* EvaluateChart(
-    const ChartHypothesis&,
-    int /* featureID */,
-    ScoreComponentCollection*) const {
-		CHECK(0); // feature function not valid in chart decoder
-		return NULL;
-	}
+  virtual bool ComputeValueInTranslationOption() const
+  {
+    return true;
+  }
 private:
-  feature feature_from_string(const string &feature_str, unsigned long seed, float value);  
+  bool LoadPhraseIndex(const string &indexFile);
+
   std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
+  PhraseIndexType m_phraseIndex;
 };
 
 }
