@@ -510,7 +510,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       PartialTranslOptColl &lastPartialTranslOptColl	= *oldPtoc;
       const vector<TranslationOption*>& partTransOptList = lastPartialTranslOptColl.GetList();
 #ifdef HAVE_VW
-      PSDScoreProducer psd = StaticData::Instance().GetPSDScoreProducer();
+      PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
       vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList, m_source);
       vector<ScoreComponentCollection>::const_iterator iterPSD = scores.begin();
 #endif
