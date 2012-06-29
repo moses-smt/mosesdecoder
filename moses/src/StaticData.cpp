@@ -182,7 +182,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
     m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
-    std::cerr << "ADDED SCORE PRODUCER" << std::endl;
     if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
       m_parameter->GetParam("psd-index")[0])) {
       return false;  

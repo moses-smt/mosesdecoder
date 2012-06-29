@@ -43,7 +43,10 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
   vector<ScoreComponentCollection> scores;
   float sum = 0;
 
-  string srcPhrase = (*it)->GetSourcePhrase()->GetStringRep(m_srcFactors);
+  string srcPhrase;
+  if (options.size() != 0) {
+    srcPhrase = options[0]->GetSourcePhrase()->GetStringRep(m_srcFactors);
+  }
 
   // create VW example, add source-side features
   ezexample ex(&vwInstance.m_vw, false);
