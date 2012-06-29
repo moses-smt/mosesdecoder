@@ -17,8 +17,10 @@ typedef std::map<std::pair<std::string, std::string>, float> TTable;
 
 struct VWInstance
 {
-  static ::vw m_vw;
+  ::vw m_vw;
 };
+
+extern VWInstance vwInstance;
 
 class PSDScoreProducer : public StatefulFeatureFunction
 {

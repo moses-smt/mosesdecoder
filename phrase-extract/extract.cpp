@@ -643,19 +643,10 @@ string tr(const string &str, char c_old, char c_new)
   return out;
 }
 
-void printPSDTrainingExample(ostream &out, const string &src_phrase, const string &tgt_phrase,
+void printPSDContext(ostream &out, const string &src_phrase, const string &tgt_phrase,
     const vector<string> &src_context)
 {
-    // label, namespace empty for now
-  out << "| |s";
-
-  // source context as features
-  vector<string>::const_iterator it;
-  for (it = src_context.begin(); it != src_context.end(); it++)
-    out << "w^" << *it << " ";
-
-  // source phrase as feature
-  out << "p^" << tr(src_phrase, ' ', '_') << "|t p^" << tr(tgt_phrase, ' ', '_') << endl;
+  out << src_phrase << " ||| " << tgt_phrase << " ||| " << join(" ", src_context.begin(), src_context.end()) << std::endl;
 }
 
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
@@ -671,7 +662,7 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (PSDExamplesFile.is_open()) {
     string src_phrase = join(" ", sentence.source.begin() + startF, sentence.source.begin() + endF + 1);
     string tgt_phrase = join(" ", sentence.target.begin() + startE, sentence.target.begin() + endE + 1);
-    printPSDTrainingExample(PSDExamplesFile, src_phrase, tgt_phrase, sentence.source);
+    printPSDContext(PSDExamplesFile, src_phrase, tgt_phrase, sentence.source);
   }
 
   if (translationFlag && oneWordToTheLeftFlag) {

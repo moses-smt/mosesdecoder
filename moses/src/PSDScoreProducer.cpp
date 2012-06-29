@@ -18,6 +18,8 @@ using namespace std;
 namespace Moses
 {
 
+VWInstance vwInstance;
+
 PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float weight)
 {
   scoreIndexManager.AddScoreProducer(this);
@@ -35,14 +37,14 @@ const FFState* PSDScoreProducer::EmptyHypothesisState(const InputType &input) co
 
 feature PSDScoreProducer::feature_from_string(const string &feature_str, unsigned long seed, float value)
 {
-  uint32_t feature_hash = VW::hash_feature(VWInstance::m_vw, feature_str, seed);
+  uint32_t feature_hash = VW::hash_feature(vwInstance.m_vw, feature_str, seed);
   feature f = { value, feature_hash };
   return f;
 }
 
 void PSDScoreProducer::Initialize(const string &modelFile)
 {
-  VWInstance::m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
+  vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
 }
 
 FFState* PSDScoreProducer::Evaluate(
@@ -55,7 +57,7 @@ FFState* PSDScoreProducer::Evaluate(
   string srcPhrase = hypo.GetSourcePhraseStringRep(m_srcFactors);
   string tgtPhrase = hypo.GetTargetPhraseStringRep(m_tgtFactors);
 
-  ezexample ex(& VWInstance::m_vw, false);
+  ezexample ex(& vwInstance.m_vw, false);
   ex(vw_namespace('s')) ("p^" + srcPhrase);
 
   for (size_t i = 0; i < hypo.GetInput().GetSize(); i++) {
