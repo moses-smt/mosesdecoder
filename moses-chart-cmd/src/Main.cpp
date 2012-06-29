@@ -225,7 +225,7 @@ int main(int argc, char* argv[])
     CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
   
     // set up read/writing class
-    IOWrapper *ioWrapper = GetIODevice(staticData);
+    IOWrapper *ioWrapper = GetIOWrapper(staticData);
   
     // check on weights
     vector<float> weights = staticData.GetAllWeights();

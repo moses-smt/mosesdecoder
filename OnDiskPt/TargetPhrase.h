@@ -42,6 +42,9 @@ typedef std::vector<AlignPair> AlignType;
 
 class Vocab;
 
+/** A target phrase, with the score breakdowns, alignment info and assorted other information it need.
+ *  Readable and writeable to disk
+ */
 class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
