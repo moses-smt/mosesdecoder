@@ -21,6 +21,9 @@
 
 #include <algorithm>
 
+namespace MosesTraining
+{
+
 void HoleCollection::SortSourceHoles()
 {
   assert(m_sortedSourceHoles.size() == 0);
@@ -59,4 +62,6 @@ int HoleCollection::Scope(const Hole &proposedHole) const
     ++scope; // Adding hole would introduce choice point at end of hole.
   }
   return scope;
+}
+
 }

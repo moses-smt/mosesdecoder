@@ -26,6 +26,9 @@
 #include <sstream>
 #include <map>
 
+namespace MosesTraining
+{
+
 // sentence-level collection of rules
 class ExtractedRule
 {
@@ -70,5 +73,7 @@ public:
   void OutputNTLengths(std::ostream &out) const;
   void OutputNTLengths(std::ostringstream &out) const;
 };
+
+}
 
 #endif
