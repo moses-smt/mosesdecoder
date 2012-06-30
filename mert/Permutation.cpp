@@ -14,6 +14,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 Permutation::Permutation(const string &alignment, const int sourceLength, const int targetLength )
 {
   if (sourceLength > 0) {
@@ -316,5 +320,7 @@ string Permutation::convertMosesToStandard(string const & alignment)
   //cout <<  "ConverttoStandard: " << out << endl;
 
   return out;
+}
+
 }
 

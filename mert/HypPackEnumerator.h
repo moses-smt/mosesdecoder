@@ -18,6 +18,10 @@
 #include "ScoreDataIterator.h"
 #include "MiraFeatureVector.h"
 
+namespace MosesTuning
+{
+  
+
 // Start with these abstract classes
 
 class HypPackEnumerator {
@@ -96,6 +100,8 @@ private:
   std::vector<std::vector<MiraFeatureVector> > m_features;
   std::vector<std::vector<ScoreDataItem> > m_scores;
 };
+
+}
 
 #endif // MERT_HYP_PACK_COLLECTION_H
 

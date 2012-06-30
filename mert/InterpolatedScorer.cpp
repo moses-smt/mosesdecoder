@@ -4,6 +4,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 // TODO: This is too long. Consider creating a function for
 // initialization such as Init().
 InterpolatedScorer::InterpolatedScorer(const string& name, const string& config)
@@ -195,3 +199,6 @@ void InterpolatedScorer::setFilter(const string& filterCommand)
       m_scorers[i]->setFilter(csplit[i]);
     }
 }
+
+}
+

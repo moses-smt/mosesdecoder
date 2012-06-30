@@ -10,10 +10,13 @@
 #include "StatisticsBasedScorer.h"
 #include "ScopedVector.h"
 
+namespace MosesTuning
+{
+
 const int kBleuNgramOrder = 4;
 
 class NgramCounts;
-class Reference;
+class Reference;  
 
 /**
  * Bleu scoring
@@ -79,5 +82,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
  * Computes plain old BLEU from a vector of stats
  */
 float unsmoothedBleu(const std::vector<float>& stats);
+
+}
 
 #endif  // MERT_BLEU_SCORER_H_

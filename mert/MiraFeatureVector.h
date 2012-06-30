@@ -17,6 +17,10 @@
 
 #include "FeatureDataIterator.h"
 
+namespace MosesTuning
+{
+  
+
 typedef FeatureStatsType ValType;
 
 class MiraFeatureVector {
@@ -50,3 +54,5 @@ private:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}

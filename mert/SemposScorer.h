@@ -17,6 +17,10 @@
 #include "SemposOverlapping.h"
 #include "StatisticsBasedScorer.h"
 
+namespace MosesTuning
+{
+  
+
 /**
  * This class represents sempos based metrics.
  */
@@ -61,5 +65,7 @@ private:
   SemposScorer(const SemposScorer&);
   SemposScorer& operator=(const SemposScorer&);
 };
+
+}
 
 #endif  // MERT_SEMPOSSCORER_H_

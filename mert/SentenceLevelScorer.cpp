@@ -11,6 +11,9 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
 
 /** The sentence level scores have already been calculated, just need to average them
  and include the differences. Allows scores which are floats **/
@@ -100,3 +103,6 @@ void  SentenceLevelScorer::score(const candidates_t& candidates, const diffs_t& 
     }
   }
 }
+
+}
+
