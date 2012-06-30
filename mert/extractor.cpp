@@ -18,6 +18,7 @@
 #include "Util.h"
 
 using namespace std;
+using namespace MosesTuning;
 
 namespace {
 

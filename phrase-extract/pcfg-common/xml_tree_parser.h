@@ -40,13 +40,13 @@ class XmlTreeParser {
   XmlTreeParser();
   std::auto_ptr<PcfgTree> Parse(const std::string &);
  private:
-  std::auto_ptr<PcfgTree> ConvertTree(const SyntaxNode &,
+  std::auto_ptr<PcfgTree> ConvertTree(const MosesTraining::SyntaxNode &,
                                       const std::vector<std::string> &);
 
   std::set<std::string> m_labelSet;
   std::map<std::string, int> m_topLabelSet;
   std::string m_line;
-  ::SyntaxTree m_tree;
+  MosesTraining::SyntaxTree m_tree;
   std::vector<std::string> m_words;
 };
 
