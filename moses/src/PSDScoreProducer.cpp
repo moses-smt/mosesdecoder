@@ -68,7 +68,10 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
     ex(vw_namespace('t')) ("p^" + Replace(tgtPhrase, " ", "_"));
 
     // get prediction
-    float score = ex();
+    float score = 1 / (1 + exp(-ex()));
+
+//    cerr << srcPhrase << " ||| " << tgtPhrase << " ||| " << score << endl;
+
     sum += score;
   
     // create score object
@@ -84,7 +87,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
   // normalize
   vector<ScoreComponentCollection>::iterator colIt;
   for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-    colIt->Assign(this, colIt->GetScoreForProducer(this) / sum);
+    colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
   }
 
   return scores;
