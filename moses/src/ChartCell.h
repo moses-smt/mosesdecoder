@@ -33,9 +33,6 @@
 #include "RuleCube.h"
 #include "ChartCellLabelSet.h"
 
-//DAMT hiero : include ClassExample
-#include "ClassExample.h"
-
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/version.hpp>

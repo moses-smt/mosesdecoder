@@ -26,6 +26,7 @@
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
 #include "Util.h"
+#include "RuleMap.h"
 
 using namespace std;
 
@@ -54,6 +55,7 @@ ChartTranslationOptionCollection::~ChartTranslationOptionCollection()
 void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
   const WordsRange &wordsRange)
 {
+
   assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
 
   m_translationOptionList.Clear();
@@ -68,7 +70,115 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
       ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
     }
+
+    //FB : loop through translation options and check that they have the same source range
+    vector<FactorType> srcFactors;
+    srcFactors.push_back(0);
+
+    for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
+        const ChartTranslationOption &transOpt = m_translationOptionList.Get(i);
+        //all words ranges should be the same, otherwise crash
+        CHECK(transOpt.GetSourceWordsRange() == wordsRange);
+        float score = 0;
+
+        std::string sourceSide = "";
+        std::string targetRepresentation;
+        TargetPhraseCollection::const_iterator itr_targets;
+        std::vector<TargetPhrase> accumulator;
+        //BEWARE : to access the source side and score of a rule, we have to access each target phrase
+        //1. Go through each target phrase
+        //2. Store all targetPhrases for this source phrase
+        //3. Call vw
+        //4. Store new score in each targetPhrase
+        //5. Re-estimate score of translation option
+        for(
+            itr_targets = transOpt.GetTargetPhraseCollection().begin();
+            itr_targets != transOpt.GetTargetPhraseCollection().end();
+            itr_targets++)
+        {
+            //get lhs of rule
+            CHECK((**itr_targets).GetSourcePhrase() != NULL);
+            std::cout << "Source Side of rule : " << (*(**itr_targets).GetSourcePhrase()) << std::endl;
+            std::cout << "Target Side of rule : " << **itr_targets << std::endl;
+
+            for(int i=0; i<(**itr_targets).GetSourcePhrase()->GetSize();i++)
+            {
+                sourceSide += (**itr_targets).GetSourcePhrase()->GetWord(i).GetString(srcFactors,0);
+                std::cout << "Added string" << sourceSide << std::endl;
+            }
+
+            //Append alignments to non-terminals
+            std::vector<size_t> ntim = (*itr_targets)->GetAlignmentInfo().GetNonTermIndexMap();
+            int nonTermCounter = 0;
+
+            //NonTermCounter should stay smaller than nonTermIndexMap
+            for(int i=0; i<(**itr_targets).GetSize();i++)
+            {
+                CHECK(nonTermCounter < (**itr_targets).GetSize());
+
+                //look for non-terminals
+                if((**itr_targets).GetWord(i).IsNonTerminal() == 1)
+                {
+                    //append non-terminal
+                    targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
+
+                    //append alignment
+                    stringstream s;
+                    s << ntim[nonTermCounter];
+                    string alignInd = s.str();
+                    targetRepresentation += alignInd;
+                    nonTermCounter++;
+                }
+                else
+                {
+                    targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
+                }
+            }
+            //accumulate target phrases
+            RuleMap ruleMap;
+            ruleMap.AddRule(sourceSide,targetRepresentation);
+        }
+        //map is done, iterate over and call vw
+        std::map<std::string,std::string>::const_iterator itr_ruleMap;
+        for(itr_ruleMap = RuleMap.begin(); itr_ruleMap != RuleMap.end(); itr_ruleMap++)
+        {
+
+        }
+    }
+
   }
+//#ifdef HAVE_VW
+      // add PSD scores if user specified it
+      //PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
+      //if (psd != NULL) {
+        //vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList, m_source);
+        //vector<ScoreComponentCollection>::const_iterator iterPSD = scores.begin();
+        //for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
+        //  assert(iterPSD != scores.end());
+        //  (*iterColl)->AddStatelessScore(*iterPSD++);
+        //}
+      //}
+//#endif // HAVE_VW
+
+
+
+
+/*
+
+         //call vw here
+  //m_transopt : all to
+    foreach lhs
+        foreach rhs
+        accumulate rhs
+        call vw
+    foreach rhs
+        normalize
+    prune
+  //ohter loop: normalize
+*/
+
+
+  //prune here
 
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();

@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
 
-#include "ClassExample.h"
 #include "util/string_piece.hh"
 
 #ifdef HAVE_PROTOBUF
@@ -93,11 +92,13 @@ public:
   void SetScoreChart(const ScoreProducer* translationScoreProducer
                      ,const Scores &scoreVector
                      ,const std::vector<float> &weightT
-                     ,const LMList &languageModels
+                     ,const LMList &languageModelss
                      ,const WordPenaltyProducer* wpProducer);
 
   // used by for unknown word proc in chart decoding
   void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
+
+
 
 
   // used when creating translations of unknown words:

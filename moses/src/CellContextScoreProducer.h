@@ -1,7 +1,9 @@
 /* Damt hiero : feature called from inside a chart cell */
-#ifndef moses_CellContextScoreProducer_h
+/*#ifndef moses_CellContextScoreProducer_h
 #define moses_CellContextScoreProducer_h
 
+#include "vw.h"
+#include "ezexample.h"
 #include "FeatureFunction.h"
 #include "TargetPhrase.h"
 #include "TypeDef.h"
@@ -18,20 +20,23 @@ namespace Moses {
 {
 
  public :
-  CellContextScoreProducer(float weight,string ttableFile);
+  CellContextScoreProducer(float weight);
 
     // mandatory methods for features
     std::string GetScoreProducerDescription(unsigned) const;
     std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumScoreComponents() const;
+    size_t GetNumInputScores() const;
 
-    // load rule table
-    void LoadScores(const std::string& );
+    // initialize vw
+    bool Initialize(const string &modelFile, const string &indexFile);
 
-    // score target phrase
-    void EvaluateChart( const TargetPhrase& , ScoreComponentCollection*, float score ) const;
+    // load index between
+    bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 
+    vector<ScoreComponentCollection> ScoreOptions(const vector<ChartTranslationOption *> &options,
+    const InputType &source);
   };
 }//end of namespace
 
-#endif
+#endif*/

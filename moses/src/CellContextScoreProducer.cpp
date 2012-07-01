@@ -3,7 +3,6 @@
 #include "util/check.hh"
 #include "FFState.h"
 #include "StaticData.h"
-#include "Classifier.h"
 #include "CellContextScoreProducer.h"
 #include "WordsRange.h"
 #include "TranslationOption.h"
@@ -17,23 +16,101 @@ using namespace std;
 namespace Moses
 {
 
-CellContextScoreProducer::CellContextScoreProducer(float weight,string ttableFile)
+VWInstance vwInstance;
+
+CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndexManager, float weight)
+{
+  scoreIndexManager.AddScoreProducer(this);
+  vector<float> weights;
+  weights.push_back(weight);
+  m_srcFactors.push_back(0);
+  m_tgtFactors.push_back(0);
+  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+}
+
+CellContextScoreProducer::CellContextScoreProducer(float weight)
 {
   const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
   vector<float> weights;
   weights.push_back(weight);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
-  LoadScores(ttableFile);
 }
 
-void CellContextScoreProducer::LoadScores(const string &ttableFile)
+bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
-  Classifier::Instance().LoadScores(ttableFile);
+  vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
+  return LoadRuleIndex(indexFile);
 }
 
-void CellContextScoreProducer::EvaluateChart(const TargetPhrase&, ScoreComponentCollection* out, float score) const
+bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 {
-  out->PlusEquals(this, score);
+  ifstream in(indexFile.c_str());
+  if (!in.good())
+    return false;
+  string line;
+  while (getline(in, line)) {
+    vector<string> columns = Tokenize(line, "\t");
+    size_t idx = Scan<size_t>(columns[1]);
+    m_ruleIndex.insert(make_pair<string, size_t>(columns[0], idx));
+  }
+  in.close();
+  return true;
+}
+
+vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(const std::string &sourceSide, const std::vector<std::string> &targetRepresentations, const InputType &source)
+{
+  vector<ChartTranslationOption *>::const_iterator it;
+  vector<ScoreComponentCollection> scores;
+  float sum = 0;
+
+  string srcPhrase;
+  if (options.size() != 0) {
+    srcPhrase = options[0]->GetSourcePhrase()->GetStringRep(m_srcFactors);
+  }
+
+  // create VW example, add source-side features
+  ezexample ex(&vwInstance.m_vw, false);
+  ex(vw_namespace('s')) ("p^" + Replace(srcPhrase, " ", "_"));
+
+  for (size_t i = 0; i < source.GetSize(); i++) {
+    string word = source.GetWord(i).GetString(m_srcFactors, false);
+    ex("w^" + word);
+  }
+
+  // get scores for all possible translations
+  for (it = options.begin(); it != options.end(); it++) {
+    string tgtPhrase = (*it)->GetTargetPhrase().GetStringRep(m_srcFactors);
+
+    // set label to target phrase index
+    ex.set_label(SPrint(m_phraseIndex[tgtPhrase]));
+
+    // move to target namespace, add target phrase as a feature
+    ex(vw_namespace('t')) ("p^" + Replace(tgtPhrase, " ", "_"));
+
+    // get prediction
+    float score = 1 / (1 + exp(-ex()));
+
+//    cerr << srcPhrase << " ||| " << tgtPhrase << " ||| " << score << endl;
+
+    sum += score;
+
+    // create score object
+    ScoreComponentCollection scoreCol;
+    scoreCol.Assign(this, score);
+    scores.push_back(scoreCol);
+
+    // move out of target namespace
+    --ex;
+  }
+  VW::finish(vwInstance.m_vw);
+
+  // normalize
+  vector<ScoreComponentCollection>::iterator colIt;
+  for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+    colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
+  }
+
+  return scores;
 }
 
 size_t CellContextScoreProducer::GetNumScoreComponents() const
@@ -51,9 +128,9 @@ std::string CellContextScoreProducer::GetScoreProducerWeightShortName(unsigned) 
   return "cc";
 }
 
-  /*size_t CellContextScoreProducer::GetNumInputScores() const
+size_t CellContextScoreProducer::GetNumInputScores() const
 {
   return 0;
-  }*/
+}
 
 } // namespace Moses

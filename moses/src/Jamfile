@@ -2,6 +2,20 @@ alias headers : ../../util//kenutil : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
+boost 103600 ;
+
+# VW
+local with-vw = [ option.get "with-vw" ] ;
+if $(with-vw) {
+  lib vw : : <search>$(with-vw)/lib ;
+  lib allreduce : : <search>$(with-vw)/lib ;
+  obj CellContextScoreProducer.o : CellContextScoreProducer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
+  alias ccsc : CellContextScoreProducer.o vw allreduce : : : <library>boost_program_options <define>HAVE_VW <include>$(with-vw)/vowpalwabbit ;
+  echo "Linking with Vowpal Wabbit" ;
+} else {
+  alias ccsc ;
+}
+
 if [ option.get "with-synlm" : no : yes ] = yes
 {
   lib m ;
