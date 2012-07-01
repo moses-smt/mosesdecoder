@@ -51,11 +51,12 @@ public:
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
  
-	
+  
 
-  //new : size of context as otions
+  //new : size of context as options
   int leftContext;
   int rightContext;
+  bool outputPsdInfo;
 
   RuleExtractionOptions()
     : maxSpan(10)
@@ -90,6 +91,7 @@ public:
     , conditionOnTargetLhs(false)			
     , leftContext(1)
     , rightContext(0)
+    , outputPsdInfo(false)
   {}
 };
 
