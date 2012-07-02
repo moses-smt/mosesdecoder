@@ -372,7 +372,7 @@ int main(int argc, char** argv)
     srand(time(NULL));
   
     // set up read/writing class
-    IOWrapper* ioWrapper = GetIODevice(staticData);
+    IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);

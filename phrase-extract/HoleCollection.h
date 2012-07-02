@@ -26,6 +26,9 @@
 
 #include "Hole.h"
 
+namespace MosesTraining
+{
+
 class HoleCollection
 {
 protected:
@@ -93,5 +96,7 @@ public:
   void SortSourceHoles();
 
 };
+
+}
 
 #endif

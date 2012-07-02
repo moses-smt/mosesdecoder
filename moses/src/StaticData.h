@@ -70,7 +70,10 @@ class PSDScoreProducer;
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 
-/** Contains global variables and contants */
+/** Contains global variables and contants.
+ *  Only 1 object of this class should be instantiated.
+ *  A const object of this class is accessible by any function during decoding by calling StaticData::Instance();
+ */
 class StaticData
 {
 private:

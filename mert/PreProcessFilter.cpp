@@ -16,6 +16,10 @@ using namespace std;
 #define CHILD_STDERR_READ pipefds_error[0]
 #define CHILD_STDERR_WRITE pipefds_error[1]
 
+namespace MosesTuning
+{
+  
+
 // Child exec error signal
 void exec_failed (int sig)
 {
@@ -135,3 +139,6 @@ PreProcessFilter::~PreProcessFilter()
     delete m_toFilter;
     delete m_fromFilter;
 }
+
+}
+

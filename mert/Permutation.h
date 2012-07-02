@@ -17,6 +17,9 @@
 
 #include "Util.h"
 
+namespace MosesTuning
+{
+  
 
 class Permutation
 {
@@ -62,5 +65,7 @@ protected:
 private:
 };
 
+
+}
 
 #endif

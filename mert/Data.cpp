@@ -19,6 +19,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 Data::Data()
   : m_scorer(NULL),
     m_num_scores(0),
@@ -269,3 +273,6 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     //cerr << endl;
   }
 }
+
+}
+

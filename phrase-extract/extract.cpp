@@ -27,8 +27,12 @@
 #include "OutputFileStream.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 #define LINE_MAX_LENGTH 500000
+
+namespace MosesTraining
+{
 
 // HPhraseVertex represents a point in the alignment matrix
 typedef pair <int, int> HPhraseVertex;
@@ -97,6 +101,8 @@ bool onlyOutputSpanInfo = false;
 bool oneWordToTheLeftFlag = false; // output one word to the left for each phrase
 ofstream PSDExamplesFile; // file to write PSD examples into
 bool gzOutput = false;
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -268,6 +274,9 @@ int main(int argc, char* argv[])
     }
   }
 }
+
+namespace MosesTraining
+{
 
 void extract(SentenceAlignment &sentence)
 {
@@ -752,3 +761,6 @@ void extractBase( SentenceAlignment &sentence )
     }
   }
 }
+
+}
+

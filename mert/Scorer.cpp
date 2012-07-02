@@ -8,6 +8,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
       m_vocab(mert::VocabularyFactory::GetVocabulary()),
@@ -137,3 +141,4 @@ float Scorer::score(const candidates_t& candidates) const {
   return scores[0];
 }
 
+}

@@ -33,6 +33,8 @@ class WordPenaltyProducer;
 namespace OnDiskPt
 {
 
+/** A vector of target phrases
+ */
 class TargetPhraseCollection
 {
   class TargetPhraseOrderByScore

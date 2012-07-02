@@ -294,7 +294,7 @@ class Moses():
                 sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment\n')
                 exit()
             
-            self.phrase_pairs[src][target][1] = ['',line[3].lstrip(b'| ')]
+            self.phrase_pairs[src][target][1] = [b'',line[3].lstrip(b'| ')]
    
         else:
             sys.stderr.write('Error: unexpected phrase table format. Are you using a very old/new version of Moses with different formatting?\n')

@@ -11,6 +11,8 @@ namespace Moses
 
 class TranslationOption;
 
+/** wrapper around vector of translation options
+ */
 class TranslationOptionList
 {
   friend std::ostream& operator<<(std::ostream& out, const TranslationOptionList& coll);

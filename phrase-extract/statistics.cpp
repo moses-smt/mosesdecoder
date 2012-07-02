@@ -17,6 +17,7 @@
 #include "InputFileStream.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 #define LINE_MAX_LENGTH 10000
 

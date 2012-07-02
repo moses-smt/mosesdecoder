@@ -12,6 +12,10 @@
 using namespace std;
 using namespace TERCpp;
 
+namespace MosesTuning
+{
+  
+
 TerScorer::TerScorer(const string& config)
     : StatisticsBasedScorer("TER",config), kLENGTH(2) {}
 
@@ -107,4 +111,6 @@ float TerScorer::calculateScore(const vector<int>& comps) const
   } else {
     return (1.0+(num / denom));
   }
+}
+
 }

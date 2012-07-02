@@ -30,6 +30,7 @@ enum FormatType
   ,HieroFormat
 };
 
+//! Loader to load Moses-formatted SCFG rules from a text file
 class RuleTableLoaderStandard : public RuleTableLoader
 {
 protected:

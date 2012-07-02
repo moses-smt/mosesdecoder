@@ -4,6 +4,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 /**
  * Constructor, initializes to the zero vector
  */
@@ -156,3 +160,5 @@ size_t AvgWeightVector::size() const {
 // mode:c++
 // c-basic-offset:2
 // End:
+}
+

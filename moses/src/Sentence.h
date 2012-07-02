@@ -38,7 +38,7 @@ class TranslationOption;
 class TranslationOptionCollection;
 
 
-/***
+/**
  * A Phrase class with an ID. Used specifically as source input so contains functionality to read
  *	from IODevice and create trans opt
  */

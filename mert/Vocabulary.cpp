@@ -30,7 +30,7 @@ bool Vocabulary::Lookup(const std::string&str , int* v) const {
 
 Vocabulary* VocabularyFactory::GetVocabulary() {
   if (g_vocab == NULL) {
-    return Singleton<Vocabulary>::GetInstance();
+    return MosesTuning::Singleton<Vocabulary>::GetInstance();
   } else {
     return g_vocab;
   }

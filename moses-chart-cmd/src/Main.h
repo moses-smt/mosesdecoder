@@ -39,4 +39,4 @@ POSSIBILITY OF SUCH DAMAGE.
 class IOWrapper;
 
 int main(int argc, char* argv[]);
-IOWrapper *GetIODevice(const Moses::StaticData &staticData);
+IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);
