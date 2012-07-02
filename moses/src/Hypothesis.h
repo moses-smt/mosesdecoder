@@ -236,9 +236,19 @@ public:
   float GetScore() const {
     return m_totalScore-m_futureScore;
   }
+  const FFState* GetFFState(int idx) const {
+    return m_ffStates[idx];
+  }
+  void SetFFState(int idx, FFState* state) {
+    m_ffStates[idx] = state;
+  }
 
-
-
+  // Added by oliver.wilson@ed.ac.uk for async lm stuff.
+  void IncorporateTransOptScores();
+  void EvaluateWith(StatefulFeatureFunction* sfff, int state_idx);
+  void EvaluateWith(const StatelessFeatureFunction* slff);
+  void CalculateFutureScore(const SquareMatrix& futureScore);
+  void CalculateFinalScore();
 
   //! target span that trans opt would populate if applied to this hypo. Used for alignment check
   size_t GetNextStartPos(const TranslationOption &transOpt) const;
