@@ -10,14 +10,17 @@
 #include "Types.h"
 #include "ScoreData.h"
 
-class PreProcessFilter;
-class ScoreStats;
-
 namespace mert {
 
 class Vocabulary;
 
 } // namespace mert
+
+namespace MosesTuning
+{
+  
+class PreProcessFilter;
+class ScoreStats;
 
 enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
 
@@ -193,5 +196,6 @@ namespace {
   
 } // namespace
 
+}
 
 #endif // MERT_SCORER_H_

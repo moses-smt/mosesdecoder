@@ -14,6 +14,9 @@ class InputType;
 class TranslationOptionCollection;
 class Manager;
 
+/** Abstract class used in the phrase-based decoder. 
+ *  Cube pruning and normal searches are the classes that inherits from this class
+ */
 class Search
 {
 public:

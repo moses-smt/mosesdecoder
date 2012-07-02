@@ -24,6 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+namespace MosesTraining
+{
+
 void AlignmentElement::Merge(size_t align)
 {
   m_elements.insert(align);
@@ -40,3 +43,7 @@ void AlignmentPhrase::Merge(const std::vector< std::vector<size_t> > &source)
     }
   }
 }
+
+} // namespace
+
+

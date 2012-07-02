@@ -27,7 +27,7 @@ namespace Moses
 
 class RuleTableLoader;
 
-// Creates a RuleTableLoader object suitable for loading the specified file.
+//! Creates a RuleTableLoader object suitable for loading the specified file.
 class RuleTableLoaderFactory
 {
  public:

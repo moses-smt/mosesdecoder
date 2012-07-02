@@ -16,6 +16,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 ScoreData::ScoreData(Scorer* scorer) :
   m_scorer(scorer)
 {
@@ -133,3 +137,6 @@ void ScoreData::setIndex()
     j++;
   }
 }
+
+}
+

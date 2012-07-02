@@ -25,6 +25,9 @@
 
 #include "Hole.h"
 
+namespace MosesTraining
+{
+
 // reposity of extracted phrase pairs
 // which are potential holes in larger phrase pairs
 class RuleExist
@@ -55,5 +58,8 @@ public:
   }
 
 };
+
+}
+
 
 #endif

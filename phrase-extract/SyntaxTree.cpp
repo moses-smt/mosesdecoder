@@ -26,6 +26,9 @@
 #include <cassert>
 #include <iostream>
 
+namespace MosesTraining
+{
+
 SyntaxTree::~SyntaxTree()
 {
   Clear();
@@ -178,3 +181,6 @@ std::ostream& operator<<(std::ostream& os, const SyntaxTree& t)
   }
   return os;
 }
+
+}
+

@@ -6,6 +6,14 @@ use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
 
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
@@ -1797,7 +1805,8 @@ sub define_training_create_config {
     my $ptCmd = $phrase_translation_table;
     $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
+    $cmd .= "$ptCmd ";
+
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
@@ -2227,7 +2236,7 @@ sub define_tuningevaluation_filter {
     my $ptCmd = $phrase_translation_table;
     $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
+    $cmd .= "$ptCmd ";
     
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;

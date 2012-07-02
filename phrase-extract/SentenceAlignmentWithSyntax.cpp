@@ -29,6 +29,9 @@
 
 using namespace std;
 
+namespace MosesTraining
+{
+
 bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID)
 {
   if (!m_options.targetSyntax) {
@@ -68,3 +71,8 @@ bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceStrin
   source = tokenize(sourceStringCPP.c_str());
   return true;
 }
+
+} // namespace
+
+
+

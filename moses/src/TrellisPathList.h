@@ -29,7 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-/** used to return n-best list of Trellis Paths from the Manager to the caller */
+/** used to return n-best list of Trellis Paths from the Manager to the caller.
+ *  Used by phrase-based decoding
+ */
 class TrellisPathList
 {
 protected:

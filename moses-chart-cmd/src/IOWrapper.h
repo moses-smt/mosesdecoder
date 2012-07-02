@@ -50,6 +50,11 @@ class FactorCollection;
 class ChartTrellisPathList;
 }
 
+namespace MosesChartCmd
+{
+
+/** Helper class that holds misc variables to write data out to command line.
+ */
 class IOWrapper
 {
 protected:
@@ -93,3 +98,5 @@ public:
 
   static void FixPrecision(std::ostream &, size_t size=3);
 };
+
+}

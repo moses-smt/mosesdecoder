@@ -10,6 +10,11 @@
 #define mert_lib_StatisticsBasedScorer_h
 
 #include "Scorer.h"
+
+namespace MosesTuning
+{
+  
+
 /**
  * Abstract base class for Scorers that work by adding statistics across all
  * outout sentences, then apply some formula, e.g., BLEU, PER.
@@ -40,6 +45,6 @@ protected:
   std::size_t  m_regularization_window;
 };
 
-
+} // namespace
 
 #endif

@@ -42,7 +42,8 @@ class InputType;
 class LMList;
 class FactorMask;
 class Word;
-
+class DecodeGraph;
+  
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
  * conditions (trelliss, factored input, normal text, xml markup)
@@ -53,12 +54,9 @@ class Word;
  * depends on the input condition, but they all are presented to
  * decoding algorithm in the same form, using this class.
  *
- * This class cannot, and should not be instantiated directly. Instantiate 1 of the inherited
+ * This is a abstract class, and cannot be instantiated directly. Instantiate 1 of the inherited
  * classes instead, for a particular input type
  **/
-
-class DecodeGraph;
-
 class TranslationOptionCollection
 {
   friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);

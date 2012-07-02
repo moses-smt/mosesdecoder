@@ -8,6 +8,10 @@
 #include "Scorer.h"
 #include "ScopedVector.h"
 
+namespace MosesTuning
+{
+  
+
 /**
   * Class that includes other scorers eg.
   * Interpolated HAMMING and BLEU scorer **/
@@ -51,5 +55,7 @@ protected:
 
   std::vector<float> m_scorer_weights;
 };
+
+}
 
 #endif  // MERT_INTERPOLATED_SCORER_H_

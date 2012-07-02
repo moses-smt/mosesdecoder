@@ -22,6 +22,9 @@
 
 #include <string>
 
+namespace MosesTraining
+{
+
 class XmlException
 {
 public:
@@ -37,5 +40,7 @@ public:
 private:
   std::string m_msg;
 };
+
+}
 
 #endif

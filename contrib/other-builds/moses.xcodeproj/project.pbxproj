@@ -365,25 +365,16 @@
 		1EC7361514B977AA00238410 /* file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file.cpp; sourceTree = "<group>"; };
 		1EC7361614B977AA00238410 /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = file.h; sourceTree = "<group>"; };
 		1EC7361714B977AA00238410 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
-		1EC7361814B977AA00238410 /* hash.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = hash.h.orig; sourceTree = "<group>"; };
 		1EC7361914B977AA00238410 /* onlineRLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = onlineRLM.h; sourceTree = "<group>"; };
-		1EC7361A14B977AA00238410 /* onlineRLM.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = onlineRLM.h.orig; sourceTree = "<group>"; };
 		1EC7361B14B977AA00238410 /* params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = params.cpp; sourceTree = "<group>"; };
-		1EC7361C14B977AA00238410 /* params.cpp.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = params.cpp.orig; sourceTree = "<group>"; };
 		1EC7361D14B977AA00238410 /* params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = params.h; sourceTree = "<group>"; };
-		1EC7361E14B977AA00238410 /* params.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = params.h.orig; sourceTree = "<group>"; };
 		1EC7361F14B977AA00238410 /* perfectHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = perfectHash.h; sourceTree = "<group>"; };
-		1EC7362014B977AA00238410 /* perfectHash.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = perfectHash.h.orig; sourceTree = "<group>"; };
 		1EC7362114B977AA00238410 /* quantizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quantizer.h; sourceTree = "<group>"; };
-		1EC7362214B977AA00238410 /* quantizer.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = quantizer.h.orig; sourceTree = "<group>"; };
 		1EC7362314B977AA00238410 /* RandLMCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RandLMCache.h; sourceTree = "<group>"; };
-		1EC7362414B977AA00238410 /* RandLMCache.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RandLMCache.h.orig; sourceTree = "<group>"; };
 		1EC7362514B977AA00238410 /* RandLMFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RandLMFilter.h; sourceTree = "<group>"; };
-		1EC7362614B977AA00238410 /* RandLMFilter.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RandLMFilter.h.orig; sourceTree = "<group>"; };
 		1EC7362714B977AA00238410 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		1EC7362814B977AA00238410 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		1EC7362914B977AA00238410 /* vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vocab.cpp; sourceTree = "<group>"; };
-		1EC7362A14B977AA00238410 /* vocab.cpp.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vocab.cpp.orig; sourceTree = "<group>"; };
 		1EC7362B14B977AA00238410 /* vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vocab.h; sourceTree = "<group>"; };
 		1EC7362C14B977AA00238410 /* DynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DynSuffixArray.cpp; path = ../../moses/src/DynSuffixArray.cpp; sourceTree = "<group>"; };
 		1EC7362D14B977AA00238410 /* DynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DynSuffixArray.h; path = ../../moses/src/DynSuffixArray.h; sourceTree = "<group>"; };
@@ -885,25 +876,16 @@
 				1EC7361514B977AA00238410 /* file.cpp */,
 				1EC7361614B977AA00238410 /* file.h */,
 				1EC7361714B977AA00238410 /* hash.h */,
-				1EC7361814B977AA00238410 /* hash.h.orig */,
 				1EC7361914B977AA00238410 /* onlineRLM.h */,
-				1EC7361A14B977AA00238410 /* onlineRLM.h.orig */,
 				1EC7361B14B977AA00238410 /* params.cpp */,
-				1EC7361C14B977AA00238410 /* params.cpp.orig */,
 				1EC7361D14B977AA00238410 /* params.h */,
-				1EC7361E14B977AA00238410 /* params.h.orig */,
 				1EC7361F14B977AA00238410 /* perfectHash.h */,
-				1EC7362014B977AA00238410 /* perfectHash.h.orig */,
 				1EC7362114B977AA00238410 /* quantizer.h */,
-				1EC7362214B977AA00238410 /* quantizer.h.orig */,
 				1EC7362314B977AA00238410 /* RandLMCache.h */,
-				1EC7362414B977AA00238410 /* RandLMCache.h.orig */,
 				1EC7362514B977AA00238410 /* RandLMFilter.h */,
-				1EC7362614B977AA00238410 /* RandLMFilter.h.orig */,
 				1EC7362714B977AA00238410 /* types.h */,
 				1EC7362814B977AA00238410 /* utils.h */,
 				1EC7362914B977AA00238410 /* vocab.cpp */,
-				1EC7362A14B977AA00238410 /* vocab.cpp.orig */,
 				1EC7362B14B977AA00238410 /* vocab.h */,
 			);
 			name = DynSAInclude;

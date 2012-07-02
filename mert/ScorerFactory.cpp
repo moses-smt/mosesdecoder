@@ -13,6 +13,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 vector<string> ScorerFactory::getTypes() {
   vector<string> types;
   types.push_back(string("BLEU"));
@@ -53,3 +57,6 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     }
   }
 }
+
+}
+

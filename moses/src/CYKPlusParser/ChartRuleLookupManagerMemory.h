@@ -41,7 +41,7 @@ class ChartTranslationOptionList;
 class DottedRuleColl;
 class WordsRange;
 
-// Implementation of ChartRuleLookupManager for in-memory rule tables.
+//! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 {
  public:

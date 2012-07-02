@@ -42,6 +42,7 @@ class FactorCollection;
 class Factor;
 class Phrase;
 
+//! to be returned from LM functions
 struct LMResult {
   // log probability
   float score;

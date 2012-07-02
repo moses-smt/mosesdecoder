@@ -7,6 +7,10 @@
 
 #include "Ngram.h"
 
+namespace MosesTuning
+{
+  
+
 /**
  * Reference class represents reference translations for an output
  * translation used in calculating BLEU score.
@@ -78,5 +82,8 @@ inline int Reference::CalcClosest(std::size_t length) const {
 inline int Reference::CalcShortest() const {
   return *std::min_element(m_length.begin(), m_length.end());
 }
+
+}
+
 
 #endif  // MERT_REFERENCE_H_

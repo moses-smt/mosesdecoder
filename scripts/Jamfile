@@ -54,7 +54,7 @@ if $(location) {
 
   install scripts : 
     [ glob-tree README *.js *.pl *.perl *.pm *.py *.sh *.php : tests regression-testing other bin train_model.perl ]
-    [ glob tokenizer/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ems/web/* analysis/smtgui/* : ems/web/javascripts ]
+    [ glob share/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ems/web/* analysis/smtgui/* : ems/web/javascripts ]
     generic/fsa-sample.fsa
     ems/experiment.machines
     ems/experiment.meta

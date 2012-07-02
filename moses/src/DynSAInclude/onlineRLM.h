@@ -15,6 +15,7 @@ using randlm::Cache;
 
 const bool strict_checks_ = false;
 
+//! @todo ask abby2
 template<typename T>
 class OnlineRLM: public PerfectHash<T> {
 public:
@@ -86,6 +87,7 @@ private:
   BitFilter* bPrefix_;
   BitFilter* bHit_;
 };
+
 template<typename T>
 bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value) {
   int len = ngram.size();
@@ -103,6 +105,7 @@ bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value) {
     markQueried(index);
   return true;
 }
+
 template<typename T>
 bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
   int len = ngram.size();
@@ -143,6 +146,7 @@ int OnlineRLM<T>::query(const wordID_t* IDs, int len) {
   }
   return value > 0 ? value : 0;
 }
+
 template<typename T>
 bool OnlineRLM<T>::markPrefix(const wordID_t* IDs, const int len, bool bSet) {
   if(len <= 1) return true; // only do this for for ngrams with context 
@@ -171,16 +175,19 @@ bool OnlineRLM<T>::markPrefix(const wordID_t* IDs, const int len, bool bSet) {
   }
   return true;
 }
+
 template<typename T>
 void OnlineRLM<T>::markQueried(const uint64_t& index) {
   bHit_->setBit(index);
   //cerr << "filter[" << index << "] = " << this->filter_->read(index) << endl;
 }
+
 template<typename T>
 void OnlineRLM<T>::markQueried(hpdEntry_t& value) {
   // set high bit of counter to indicate "hit" status 
   value->second |= this->hitMask_;
 }
+
 template<typename T>
 void OnlineRLM<T>::remove(const std::vector<string>& ngram) {
   wordID_t IDs[ngram.size()];
@@ -188,6 +195,7 @@ void OnlineRLM<T>::remove(const std::vector<string>& ngram) {
     IDs[i] = vocab_->GetWordID(ngram[i]);
   PerfectHash<T>::remove(IDs, ngram.size());
 }
+
 template<typename T>
 count_t OnlineRLM<T>::heurDelete(count_t num2del, count_t order) {
   count_t deleted = 0;
@@ -218,6 +226,7 @@ count_t OnlineRLM<T>::heurDelete(count_t num2del, count_t order) {
   cerr << "Total deleted = " << deleted << endl;
   return deleted;
 }
+
 template<typename T>
 int OnlineRLM<T>::sbsqQuery(const std::vector<string>& ngram, int* codes,
   bool bStrict) {
@@ -226,6 +235,7 @@ int OnlineRLM<T>::sbsqQuery(const std::vector<string>& ngram, int* codes,
     IDs[i] = vocab_->GetWordID(ngram[i]);
   return sbsqQuery(IDs, ngram.size(), codes, bStrict);
 }
+
 template<typename T>
 int OnlineRLM<T>::sbsqQuery(const wordID_t* IDs, const int len, int* codes, 
   bool bStrict) {
@@ -254,6 +264,7 @@ int OnlineRLM<T>::sbsqQuery(const wordID_t* IDs, const int len, int* codes,
   }
   return fnd;
 }
+
 template<typename T>
 float OnlineRLM<T>::getProb(const wordID_t* ngram, int len, 
   const void** state) {
@@ -309,6 +320,7 @@ float OnlineRLM<T>::getProb(const wordID_t* ngram, int len,
   } // end checkCache
   return logprob; 
 }
+
 template<typename T>
 const void* OnlineRLM<T>::getContext(const wordID_t* ngram, int len) {
   int dummy(0);
@@ -317,6 +329,7 @@ const void* OnlineRLM<T>::getContext(const wordID_t* ngram, int len) {
   // return address of cache node
   return (const void*)addresses[0]; 
 }
+
 template<typename T>
 void OnlineRLM<T>::randDelete(int num2del) {
   int deleted = 0;
@@ -328,6 +341,7 @@ void OnlineRLM<T>::randDelete(int num2del) {
     if(deleted >= num2del) break;
   }
 }
+
 template<typename T>
 int OnlineRLM<T>::countHits() {
   int hit(0);
@@ -339,6 +353,7 @@ int OnlineRLM<T>::countHits() {
   cerr << "Hit count = " << hit << endl;
   return hit;
 }
+
 template<typename T>
 int OnlineRLM<T>::countPrefixes() {
   int pfx(0);
@@ -348,6 +363,7 @@ int OnlineRLM<T>::countPrefixes() {
   cerr << "Prefix count (in filter) = " << pfx << endl;
   return pfx;
 }
+
 template<typename T>
 int OnlineRLM<T>::cleanUpHPD() {
   cerr << "HPD size before = " << this->dict_.size() << endl;
@@ -363,6 +379,7 @@ int OnlineRLM<T>::cleanUpHPD() {
   cerr << "HPD size after = " << this->dict_.size() << endl;
   return vDel.size();
 }
+
 template<typename T>
 void OnlineRLM<T>::clearMarkings() {
   cerr << "clearing all event hits\n";
@@ -373,6 +390,7 @@ void OnlineRLM<T>::clearMarkings() {
     *value -= ((*value & this->hitMask_) != 0) ? this->hitMask_ : 0;
   }
 }
+
 template<typename T>
 void OnlineRLM<T>::save(FileHandler* fout) {
   cerr << "Saving ORLM...\n";
@@ -386,6 +404,7 @@ void OnlineRLM<T>::save(FileHandler* fout) {
   PerfectHash<T>::save(fout);
   cerr << "Finished saving ORLM." << endl;
 }
+
 template<typename T>
 void OnlineRLM<T>::load(FileHandler* fin) {
   cerr << "Loading ORLM...\n";
@@ -401,6 +420,7 @@ void OnlineRLM<T>::load(FileHandler* fin) {
   // load everything else
   PerfectHash<T>::load(fin);
 }
+
 template<typename T>
 void OnlineRLM<T>::removeNonMarked() {
   cerr << "deleting all unused events\n";
@@ -415,6 +435,7 @@ void OnlineRLM<T>::removeNonMarked() {
   deleted += cleanUpHPD();
   cerr << "total removed from ORLM = " << deleted << endl;
 }
+
 /*
 template<typename T>
 float OnlineRLM<T>::getProb2(const wordID_t* ngram, int len, const void** state) {

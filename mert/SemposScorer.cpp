@@ -10,6 +10,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 SemposScorer::SemposScorer(const string& config)
   : StatisticsBasedScorer("SEMPOS", config),
     m_ovr(SemposOverlappingFactory::GetOverlapping(getConfig("overlapping", "cap-micro"),this)),
@@ -178,3 +182,6 @@ void SemposScorer::loadWeights(const string& weightsfile)
     }
 
 }
+
+}
+

@@ -28,6 +28,9 @@ namespace OnDiskPt
 
 class OnDiskWrapper;
 
+/* A bidirectional map of string<->contiguous id
+ * No distinction between source and target language
+ */
 class Vocab
 {
 protected:

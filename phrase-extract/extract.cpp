@@ -25,8 +25,12 @@
 #include "OutputFileStream.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 #define LINE_MAX_LENGTH 500000
+
+namespace MosesTraining
+{
 
 // HPhraseVertex represents a point in the alignment matrix
 typedef pair <int, int> HPhraseVertex;
@@ -93,6 +97,8 @@ bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
 bool gzOutput = false;
+
+}
 
 int main(int argc, char* argv[])
 {
@@ -252,6 +258,9 @@ int main(int argc, char* argv[])
     }
   }
 }
+
+namespace MosesTraining
+{
 
 void extract(SentenceAlignment &sentence)
 {
@@ -697,3 +706,6 @@ void extractBase( SentenceAlignment &sentence )
     }
   }
 }
+
+}
+

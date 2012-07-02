@@ -5,7 +5,7 @@
 #Each optional model has a section below.  The top level rule is lib LM, which
 #appears after the optional models.  
 
-import option path build-system ;
+import option path ;
 
 local dependencies = ;
 
@@ -82,33 +82,15 @@ lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp
 #the install path doesn't encode features).  It stores a file lm.log with the
 #previous options and forces a rebuild if the current options differ.  
 path-constant LM-LOG : bin/lm.log ;
-#Is there no other way to read a file with bjam?  
-local previous = none ;
-if [ path.exists $(LM-LOG) ] {
-  previous = [ _shell "cat $(LM-LOG)" ] ;
-}
-current = "" ;
+
+local current = ;
 for local i in srilm irstlm randlm {
   local optval = [ option.get "with-$(i)" ] ;
   if $(optval) {
-    current = "$(current) --with-$(i)=$(optval)" ;
+    current += "--with-$(i)=$(optval)" ;
   }
 }
+current = $(current:J=" ") ;
+current ?= "" ;
 
-if $(current) != $(previous) {
-  #Write inconsistent while the build is running
-  if [ path.exists $(LM-LOG) ] {
-    local ignored = @($(LM-LOG):E=inconsistent) ;
-  }
-  #Write $(current) to $(LM-LOG) after the build completes.  
-  rule post-build ( ok ? ) {
-    if $(ok) {
-      local ignored = @($(LM-LOG):E=$(current)) ;
-    }
-  }
-  IMPORT $(__name__) : post-build : : $(__name__).post-build ;
-  build-system.set-post-build-hook $(__name__).post-build ;
-
-  always Factory.o ;
-  always LM ;
-}
+always-if-changed $(LM-LOG) $(current) : Factory.o LM ;
