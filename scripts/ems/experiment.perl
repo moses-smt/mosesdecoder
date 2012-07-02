@@ -1794,7 +1794,8 @@ sub define_training_create_config {
 		}
 		
     # additional settings for factored models
-    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    my $ptCmd = $phrase_translation_table;
+    $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
@@ -2223,7 +2224,8 @@ sub define_tuningevaluation_filter {
     my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
     
-    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    my $ptCmd = $phrase_translation_table;
+    $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
     
@@ -2243,7 +2245,6 @@ sub define_tuningevaluation_filter {
     $cmd .= "-config $config\n";
     
     # filter command
- 		my $sa_exec_dir = &get("TRAINING:suffix-array");
 		if ($sa_exec_dir) {
 			# suffix array
 			$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
