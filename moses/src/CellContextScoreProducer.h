@@ -1,5 +1,5 @@
 /* Damt hiero : feature called from inside a chart cell */
-/*#ifndef moses_CellContextScoreProducer_h
+#ifndef moses_CellContextScoreProducer_h
 #define moses_CellContextScoreProducer_h
 
 #include "vw.h"
@@ -20,7 +20,11 @@ namespace Moses {
 {
 
  public :
-  CellContextScoreProducer(float weight);
+
+
+    vector<FactorType> m_srcFactors;
+    vector<FactorType> m_tgtFactors;
+    CellContextScoreProducer(float weight);
 
     // mandatory methods for features
     std::string GetScoreProducerDescription(unsigned) const;
@@ -39,4 +43,4 @@ namespace Moses {
   };
 }//end of namespace
 
-#endif*/
+#endif

@@ -57,35 +57,34 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
   return true;
 }
 
-vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(const std::string &sourceSide, const std::vector<std::string> &targetRepresentations, const InputType &source)
+vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
+                                                                      const std::string &sourceSide,
+                                                                      const std::vector<std::string> &targetRepresentations,
+                                                                      const InputType source
+                                                                      )
 {
-  vector<ChartTranslationOption *>::const_iterator it;
   vector<ScoreComponentCollection> scores;
   float sum = 0;
 
-  string srcPhrase;
-  if (options.size() != 0) {
-    srcPhrase = options[0]->GetSourcePhrase()->GetStringRep(m_srcFactors);
-  }
-
   // create VW example, add source-side features
   ezexample ex(&vwInstance.m_vw, false);
-  ex(vw_namespace('s')) ("p^" + Replace(srcPhrase, " ", "_"));
+  ex(vw_namespace('s')) ("p^" + Replace(sourceSide, " ", "_"));
 
   for (size_t i = 0; i < source.GetSize(); i++) {
     string word = source.GetWord(i).GetString(m_srcFactors, false);
     ex("w^" + word);
   }
 
+   std::vector<std::string> itr_targ_rep;
   // get scores for all possible translations
-  for (it = options.begin(); it != options.end(); it++) {
-    string tgtPhrase = (*it)->GetTargetPhrase().GetStringRep(m_srcFactors);
+  for (itr_targ_rep = targetRepresentations.begin(); itr_targ_rep != targetRepresentations.end(); itr_targ_rep++) {
+    string tgtRep = *itr_targ_rep;
 
     // set label to target phrase index
-    ex.set_label(SPrint(m_phraseIndex[tgtPhrase]));
+    ex.set_label(SPrint(m_phraseIndex[tgtRep]));
 
     // move to target namespace, add target phrase as a feature
-    ex(vw_namespace('t')) ("p^" + Replace(tgtPhrase, " ", "_"));
+    ex(vw_namespace('t')) ("p^" + Replace(tgtRep, " ", "_"));
 
     // get prediction
     float score = 1 / (1 + exp(-ex()));

@@ -635,6 +635,11 @@ public:
     int GetCellContextOption() const
     {return m_cellContextDecoding;}
 
+    CellContextScoreProducer *GetCellContextScoreProducer() const
+    {
+        return m_cellContext;
+    }
+
 };
 
 }

@@ -71,7 +71,15 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
       ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
     }
 
-    //FB : loop through translation options and check that they have the same source range
+
+    //damt hiero : if we use context features then : For each translation option :
+        //1. Go through each target phrase and access corresponding source phrase
+        //2. Store all targetPhrases for this source phrase
+        //3. Store references to targets in map (TargetRepresentation,TargetPhrase*)
+        //4. Call vw
+        //5. Store new score in each targetPhrase
+        //6. Re-estimate score of this translation option
+    #ifdef HAVE_VW
     vector<FactorType> srcFactors;
     srcFactors.push_back(0);
 
@@ -84,13 +92,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         std::string sourceSide = "";
         std::string targetRepresentation;
         TargetPhraseCollection::const_iterator itr_targets;
-        std::vector<TargetPhrase> accumulator;
-        //BEWARE : to access the source side and score of a rule, we have to access each target phrase
-        //1. Go through each target phrase
-        //2. Store all targetPhrases for this source phrase
-        //3. Call vw
-        //4. Store new score in each targetPhrase
-        //5. Re-estimate score of translation option
+
         for(
             itr_targets = transOpt.GetTargetPhraseCollection().begin();
             itr_targets != transOpt.GetTargetPhraseCollection().end();
@@ -137,48 +139,34 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             //accumulate target phrases
             RuleMap ruleMap;
             ruleMap.AddRule(sourceSide,targetRepresentation);
+
+            //Map target representation to targetPhrase
+            std::map<std::string,TargetPhrase*> targetRepMap;
+            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
         }
         //map is done, iterate over and call vw
         std::map<std::string,std::string>::const_iterator itr_ruleMap;
         for(itr_ruleMap = RuleMap.begin(); itr_ruleMap != RuleMap.end(); itr_ruleMap++)
         {
+            LeftContextScoreProducer *lcsp = StaticData::Instance().GetCellContextScoreProducer();
+            CHECK(lcsp != NULL);
+            //score vector is for vector of target representations
+            vector<ScoreComponentCollection> scores = lcsp->ScoreRules(itr_ruleMap->first,itr_ruleMap->second,m_source);
+            std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
+            std::vector<std::string> itr_targetRep;
 
+            //get target phrases from representation and add score to breakdown
+            for (itr_targetRep = (itr_ruleMap->second).begin() ; itr_targetRep != (itr_ruleMap->second).end() ; itr_targetRep++) {
+                CHECK(iterLCSP != scores.end());
+                //Find target phrase corresponding to representation
+                std::map<std::string,TargetPhrase*> :: iterator itr_rep;
+                itr_rep = targetRepMap.find(*itr_targetRep);
+                CHECK(itr_rep != targetRepMap.end());
+                (itr_rep.second)->AddStatelessScore(*iterLCSP++);
+                }
         }
+        transOpt.CalcEstimateOfBestScore();
     }
-
-  }
-//#ifdef HAVE_VW
-      // add PSD scores if user specified it
-      //PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
-      //if (psd != NULL) {
-        //vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList, m_source);
-        //vector<ScoreComponentCollection>::const_iterator iterPSD = scores.begin();
-        //for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
-        //  assert(iterPSD != scores.end());
-        //  (*iterColl)->AddStatelessScore(*iterPSD++);
-        //}
-      //}
-//#endif // HAVE_VW
-
-
-
-
-/*
-
-         //call vw here
-  //m_transopt : all to
-    foreach lhs
-        foreach rhs
-        accumulate rhs
-        call vw
-    foreach rhs
-        normalize
-    prune
-  //ohter loop: normalize
-*/
-
-
-  //prune here
 
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
@@ -189,6 +177,8 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     }
   }
 
+  //pruning after loading rule table differed here
+  m_translationOptionList.ShrinkToLimit();
   m_translationOptionList.ApplyThreshold();
 }
 

@@ -266,6 +266,10 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
+void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
+{
+  m_scoreBreakdown.PlusEquals(score);
+}
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {

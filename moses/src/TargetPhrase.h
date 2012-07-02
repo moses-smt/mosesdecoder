@@ -98,8 +98,8 @@ public:
   // used by for unknown word proc in chart decoding
   void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 
-
-
+  /** Adds score produced by a stateless feature before decoding */
+  void AddStatelessScore(const ScoreComponentCollection &score);
 
   // used when creating translations of unknown words:
   void ResetScore();
