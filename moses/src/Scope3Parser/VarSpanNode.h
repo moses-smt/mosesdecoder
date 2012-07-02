@@ -31,6 +31,8 @@
 namespace Moses
 {
 
+/** @todo what is this?
+ */
 struct VarSpanNode
 {
  public:

@@ -5,6 +5,8 @@
 #include <boost/test/unit_test.hpp>
 #include <boost/scoped_ptr.hpp>
 
+using namespace MosesTuning;
+
 namespace {
 
 inline bool CheckBuildOptimizer(unsigned dim,

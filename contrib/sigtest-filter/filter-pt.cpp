@@ -37,9 +37,11 @@ bool print_neglog_significance = false; // add -log(p) to phrase table?
 double sig_filter_limit = 0;            // keep phrase pairs with -log(sig) > sig_filter_limit
 //    higher = filter-more
 bool pef_filter_only = false;           // only filter based on pef
+bool hierarchical = false;
 
 // globals
 PhraseSetMap esets;
+PhraseSetMap fsets;
 double p_111 = 0.0;                     // alpha
 size_t nremoved_sigfilter = 0;
 size_t nremoved_pfefilter = 0;
@@ -59,7 +61,8 @@ void usage()
             << "   [-l threshold] >0.0, a+e, or a-e: keep values that have a -log significance > this\n"
             << "   [-n num      ] 0, 1...: 0=no filtering, >0 sort by P(e|f) and keep the top num elements\n"
             << "   [-c          ] add the cooccurence counts to the phrase table\n"
-            << "   [-p          ] add -log(significance) to the phrasetable\n\n";
+            << "   [-p          ] add -log(significance) to the phrasetable\n"
+            << "   [-h          ] filter hierarchical rule table\n";
   exit(1);
 }
 
@@ -190,6 +193,118 @@ double fisher_exact(int cfe, int ce, int cf)
   return total_p;
 }
 
+template <class setType>
+setType unordered_set_intersect(setType & set_1, setType & set_2)
+{
+    setType set_out;
+
+    if (set_1.size() < set_2.size()) {
+        for (SentIdSet::iterator i=set_1.begin(); i != set_1.end(); ++i) {
+            if (set_2.find(*i) != set_2.end()) set_out.insert(*i);
+    }
+    }
+    else {
+        for (SentIdSet::iterator i=set_2.begin(); i != set_2.end(); ++i) {
+            if (set_1.find(*i) != set_1.end()) set_out.insert(*i);
+        }
+    }
+    return set_out;
+}
+
+
+SentIdSet lookup_phrase(const std::string & phrase, C_SuffixArraySearchApplicationBase & my_sa)
+{
+    SentIdSet occur_set;
+    vector<S_SimplePhraseLocationElement> locations;
+
+    locations = my_sa.locateExactPhraseInCorpus(phrase.c_str());
+    if(locations.size()==0) {
+        cerr<<"No occurrences found!!\n";
+    }
+    for (vector<S_SimplePhraseLocationElement>::iterator i=locations.begin(); i != locations.end(); ++i) {
+        occur_set.insert(i->sentIdInCorpus);
+    }
+    return occur_set;
+}
+
+
+// slight simplicifaction: we consider all sentences in which "a" and "b" occur to be instances of the rule "a [X][X] b".
+SentIdSet lookup_multiple_phrases(vector<std::string> & phrases, C_SuffixArraySearchApplicationBase & my_sa, const std::string & rule, PhraseSetMap & cache) 
+{
+
+    if (phrases.size() == 1) {
+        return lookup_phrase(phrases.front(), my_sa);
+    }
+
+    else {
+        SentIdSet main_set;
+        SentIdSet & first_set = cache[phrases.front()];
+        bool first = true;
+        if (first_set.empty()) {
+            first_set = lookup_phrase(phrases.front(), my_sa);
+        }
+        for (vector<std::string>::iterator phrase=phrases.begin()+1; phrase != phrases.end(); ++phrase) {
+            SentIdSet & temp_set = cache[*phrase];
+            if (temp_set.empty()) {
+                temp_set = lookup_phrase(*phrase, my_sa);
+            }
+            if (first) {
+                main_set = unordered_set_intersect(first_set,temp_set);
+                first = false;
+            }
+            else {
+                main_set = unordered_set_intersect(main_set,temp_set);
+            }
+            if (temp_set.size() < MINIMUM_SIZE_TO_KEEP) {
+                cache.erase(*phrase);
+            }
+        }
+
+        if (first_set.size() < MINIMUM_SIZE_TO_KEEP) {
+            cache.erase(phrases.front());
+        }
+
+        return main_set;
+    }
+}
+
+
+SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicationBase & my_sa, PhraseSetMap & cache)
+{
+    SentIdSet sa_set;
+
+    // we search for hierarchical rules by stripping away NT and looking for terminals sequences
+    // if a rule contains multiple sequences of terminals, we intersect their occurrences.
+    if (hierarchical) {
+        //   std::cerr << "splitting up phrase: " << phrase << "\n";
+        int pos = 0;
+        int endPos = 0;
+        vector<std::string> phrases;
+
+        while (rule.find("[X][X] ", pos) < rule.size()) {
+            endPos = rule.find("[X][X] ",pos) - 1; // -1 to cut space before NT
+            if (endPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
+                pos += 7; 
+                continue;
+            }
+            phrases.push_back(rule.substr(pos,endPos-pos));
+            pos = endPos + 8;
+        }
+
+        // cut LHS of rule
+        endPos = rule.size()-4;
+        if (endPos > pos) {
+            phrases.push_back(rule.substr(pos,endPos-pos));
+        }
+        sa_set = lookup_multiple_phrases(phrases, my_sa, rule, cache);
+    }
+    else {
+        sa_set = lookup_phrase(rule, my_sa);
+    }
+  return sa_set;
+}
+
+
 // input: unordered list of translation options for a single source phrase
 void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
 {
@@ -201,32 +316,17 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
     options.erase(options.begin()+pfe_filter_limit,options.end());
   }
   if (pef_filter_only) return;
-
+//   std::cerr << "f phrase: " << options.front()->f_phrase << "\n";
   SentIdSet fset;
-  vector<S_SimplePhraseLocationElement> locations;
-  //std::cerr << "Looking up f-phrase: " << options.front()->f_phrase << "\n";
-
-  locations = f_sa.locateExactPhraseInCorpus(options.front()->f_phrase.c_str());
-  if(locations.size()==0) {
-    cerr<<"No occurrences found!!\n";
-  }
-  for (vector<S_SimplePhraseLocationElement>::iterator i=locations.begin();
-       i != locations.end();
-       ++i) {
-    fset.insert(i->sentIdInCorpus);
-  }
+  fset = find_occurrences(options.front()->f_phrase, f_sa, fsets);
   size_t cf = fset.size();
   for (std::vector<PTEntry*>::iterator i=options.begin(); i != options.end(); ++i) {
     const std::string& e_phrase = (*i)->e_phrase;
     size_t cef=0;
-    SentIdSet& eset = esets[(*i)->e_phrase];
+    SentIdSet& eset = esets[e_phrase];
     if (eset.empty()) {
-      //std::cerr << "Looking up e-phrase: " << e_phrase << "\n";
-      vector<S_SimplePhraseLocationElement> locations = e_sa.locateExactPhraseInCorpus(e_phrase.c_str());
-      for (vector<S_SimplePhraseLocationElement>::iterator i=locations.begin(); i!= locations.end(); ++i) {
-        TextLenType curSentId = i->sentIdInCorpus;
-        eset.insert(curSentId);
-      }
+        eset = find_occurrences(e_phrase, e_sa, esets);
+        //std::cerr << "Looking up e-phrase: " << e_phrase << "\n";
     }
     size_t ce=eset.size();
     if (ce < cf) {
@@ -243,6 +343,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
     if (ce < MINIMUM_SIZE_TO_KEEP) {
       esets.erase(e_phrase);
     }
+
   }
   std::vector<PTEntry*>::iterator new_end =
     std::remove_if(options.begin(), options.end(), NlogSigThresholder(sig_filter_limit));
@@ -256,7 +357,7 @@ int main(int argc, char * argv[])
   const char* efile=0;
   const char* ffile=0;
   int pfe_index = 2;
-  while ((c = getopt(argc, argv, "cpf:e:i:n:l:")) != -1) {
+  while ((c = getopt(argc, argv, "cpf:e:i:n:l:h")) != -1) {
     switch (c) {
     case 'e':
       efile = optarg;
@@ -276,6 +377,9 @@ int main(int argc, char * argv[])
       break;
     case 'p':
       print_neglog_significance = true;
+      break;
+    case 'h':
+      hierarchical = true;
       break;
     case 'l':
       std::cerr << "-l = " << optarg << "\n";

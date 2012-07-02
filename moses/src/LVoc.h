@@ -13,8 +13,11 @@ extern const LabelId Epsilon;
 
 typedef std::vector<LabelId> IPhrase;
 
-// A = type of things to numberize, ie, std::string
-// B = map type to use, might consider using hash_map for better performance
+/** class used in phrase-based binary phrase-table.
+ *  @todo vocab?
+ *  A = type of things to numberize, ie, std::string
+ *  B = map type to use, might consider using hash_map for better performance
+ */
 template<typename A,typename B=std::map<A,LabelId> >
 class LVoc
 {

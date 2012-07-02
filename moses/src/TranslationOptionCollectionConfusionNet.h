@@ -10,6 +10,9 @@ namespace Moses
 class ConfusionNet;
 class TranslationSystem;
 
+/** Holds all translation options, for all spans, of a particular confusion network input
+ * Inherited from TranslationOptionCollection.
+ */
 class TranslationOptionCollectionConfusionNet : public TranslationOptionCollection
 {
 public:

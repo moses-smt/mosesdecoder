@@ -39,6 +39,7 @@ namespace Moses
 
 class PhraseDictionarySCFG;
 
+  //! @todo why?
 class NonTerminalMapKeyHasher
 {
 public:
@@ -55,6 +56,7 @@ public:
   }
 };
 
+//! @todo why?
 class NonTerminalMapKeyEqualityPred
 {
 public:

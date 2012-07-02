@@ -13,7 +13,7 @@ using namespace std;
 
 namespace {
 
-Timer g_timer;
+MosesTuning::Timer g_timer;
 int g_verbose = 0;
 
 bool FindDelimiter(const std::string &str, const std::string &delim, size_t *pos)
@@ -23,6 +23,9 @@ bool FindDelimiter(const std::string &str, const std::string &delim, size_t *pos
 }
 
 } // namespace
+
+namespace MosesTuning
+{
 
 int verboselevel()
 {
@@ -85,4 +88,6 @@ void PrintUserTime(const std::string &message)
 double GetUserTime()
 {
   return g_timer.get_elapsed_cpu_time();
+}
+
 }

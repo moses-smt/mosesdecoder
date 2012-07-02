@@ -37,8 +37,8 @@
 namespace Moses
 {
 /**
-  * Makes sure output goes in the correct order.
-  **/
+* Makes sure output goes in the correct order when multi-threading
+**/
 class OutputCollector
 {
 public:

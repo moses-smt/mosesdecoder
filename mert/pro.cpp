@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ScoreDataIterator.h"
 
 using namespace std;
+using namespace MosesTuning;
 
 namespace po = boost::program_options;
 

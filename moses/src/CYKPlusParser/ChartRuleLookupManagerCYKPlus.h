@@ -31,6 +31,8 @@ class DottedRule;
 class TargetPhraseCollection;
 class WordsRange;
 
+/** @todo what is this?
+ */
 class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
 {
  public:

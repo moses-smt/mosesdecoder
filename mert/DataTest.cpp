@@ -7,6 +7,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
+using namespace MosesTuning;
+
 //very basic test of sharding
 BOOST_AUTO_TEST_CASE(shard_basic) {
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
@@ -33,8 +35,8 @@ BOOST_AUTO_TEST_CASE(shard_basic) {
   std::vector<Data> shards;
   data.createShards(2,0,"",shards);
 
-  BOOST_CHECK_EQUAL(shards.size(),2);
-  BOOST_CHECK_EQUAL(shards[1].getFeatureData()->size(),2);
+  BOOST_CHECK_EQUAL(shards.size(),(std::size_t)2);
+  BOOST_CHECK_EQUAL(shards[1].getFeatureData()->size(),(std::size_t)2);
 }
 
 BOOST_AUTO_TEST_CASE(init_feature_map_test) {

@@ -163,7 +163,7 @@ void OnDiskWrapper::EndSave()
 
 void OnDiskWrapper::SaveMisc()
 {
-  m_fileMisc << "Version 3" << endl;
+  m_fileMisc << "Version 4" << endl;
   m_fileMisc << "NumSourceFactors " << m_numSourceFactors << endl;
   m_fileMisc << "NumTargetFactors " << m_numTargetFactors << endl;
   m_fileMisc << "NumScores " << m_numScores << endl;
@@ -172,12 +172,12 @@ void OnDiskWrapper::SaveMisc()
 
 size_t OnDiskWrapper::GetSourceWordSize() const
 {
-  return m_numSourceFactors * sizeof(UINT64) + sizeof(char);
+  return sizeof(UINT64) + sizeof(char);
 }
 
 size_t OnDiskWrapper::GetTargetWordSize() const
 {
-  return m_numTargetFactors * sizeof(UINT64) + sizeof(char);
+  return sizeof(UINT64) + sizeof(char);
 }
 
 UINT64 OnDiskWrapper::GetMisc(const std::string &key) const
@@ -199,32 +199,37 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
                                       , const Moses::Word &origWord) const
 {
   bool isNonTerminal = origWord.IsNonTerminal();
-  Word *newWord = new Word(1, isNonTerminal); // TODO - num of factors
+  Word *newWord = new Word(isNonTerminal);
+  stringstream strme;
 
-  for (size_t ind = 0 ; ind < factorsVec.size() ; ++ind) {
+  size_t factorType = factorsVec[0];  
+  const Moses::Factor *factor = origWord.GetFactor(factorType);
+  CHECK(factor);  
+  string str = factor->GetString();
+  strme << str;
+
+  for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
     size_t factorType = factorsVec[ind];
-
     const Moses::Factor *factor = origWord.GetFactor(factorType);
+    if (factor == NULL)
+    { // can have less factors than factorType.size()
+      break;
+    }
     CHECK(factor);
-
     string str = factor->GetString();
-    if (isNonTerminal) {
-      str = "[" + str + "]";
-    }
-
-    bool found;
-    UINT64 vocabId = m_vocab.GetVocabId(str, found);
-    if (!found) {
-      // factor not in phrase table -> phrse definately not in. exit
-      delete newWord;
-      return NULL;
-    } else {
-      newWord->SetVocabId(ind, vocabId);
-    }
+    strme << "|" << str;    
   } // for (size_t factorType
 
-  return newWord;
-
+  bool found;
+  UINT64 vocabId = m_vocab.GetVocabId(strme.str(), found);
+  if (!found) {
+    // factor not in phrase table -> phrse definately not in. exit
+    delete newWord;
+    return NULL;
+  } else {
+    newWord->SetVocabId(vocabId);
+    return newWord;
+  }
 }
 
 

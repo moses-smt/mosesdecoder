@@ -28,7 +28,9 @@ namespace Moses
 
 class AlignmentInfoCollection;
 
-// Collection of non-terminal alignment pairs, ordered by source index.
+/** Collection of non-terminal alignment pairs, ordered by source index.
+  * Usually held by a TargetPhrase to map non-terms in hierarchical/syntax models
+ */
 class AlignmentInfo
 {
   typedef std::set<std::pair<size_t,size_t> > CollType;
@@ -69,8 +71,9 @@ class AlignmentInfo
   NonTermIndexMap m_nonTermIndexMap;
 };
 
-// Define an arbitrary strict weak ordering between AlignmentInfo objects
-// for use by AlignmentInfoCollection.
+/** Define an arbitrary strict weak ordering between AlignmentInfo objects
+ * for use by AlignmentInfoCollection.
+ */
 struct AlignmentInfoOrderer
 {
   bool operator()(const AlignmentInfo &a, const AlignmentInfo &b) const {

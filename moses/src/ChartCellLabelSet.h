@@ -31,6 +31,8 @@ namespace Moses
 
 class ChartHypothesisCollection;
 
+/** @todo I have no idea what's in here
+ */
 class ChartCellLabelSet
 {
  private:

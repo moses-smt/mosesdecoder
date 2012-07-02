@@ -17,35 +17,33 @@
 #include "Manager.h"
 #include "TrellisPathList.h"
 
-using namespace Moses;
-
 
 
 class Edge;
 
-typedef std::vector< const Hypothesis *> Lattice;
+typedef std::vector< const Moses::Hypothesis *> Lattice;
 typedef std::vector<const Edge*> Path;
 typedef std::map<Path, size_t> PathCounts;
-typedef std::map<Phrase, PathCounts > NgramHistory;
+typedef std::map<Moses::Phrase, PathCounts > NgramHistory;
 
 class Edge
 {
-  const Hypothesis* m_tailNode;
-  const Hypothesis* m_headNode;
+  const Moses::Hypothesis* m_tailNode;
+  const Moses::Hypothesis* m_headNode;
   float m_score;
-  TargetPhrase m_targetPhrase;
+  Moses::TargetPhrase m_targetPhrase;
   NgramHistory m_ngrams;
 
 public:
-  Edge(const Hypothesis* from, const Hypothesis* to, float score, const TargetPhrase& targetPhrase) : m_tailNode(from), m_headNode(to), m_score(score), m_targetPhrase(targetPhrase) {
+  Edge(const Moses::Hypothesis* from, const Moses::Hypothesis* to, float score, const Moses::TargetPhrase& targetPhrase) : m_tailNode(from), m_headNode(to), m_score(score), m_targetPhrase(targetPhrase) {
     //cout << "Creating new edge from Node " << from->GetId() << ", to Node : " << to->GetId() << ", score: " << score << " phrase: " << targetPhrase << endl;
   }
 
-  const Hypothesis* GetHeadNode() const {
+  const Moses::Hypothesis* GetHeadNode() const {
     return m_headNode;
   }
 
-  const Hypothesis* GetTailNode() const {
+  const Moses::Hypothesis* GetTailNode() const {
     return m_tailNode;
   }
 
@@ -57,19 +55,19 @@ public:
     return m_targetPhrase.GetSize();
   }
 
-  const Phrase& GetWords() const {
+  const Moses::Phrase& GetWords() const {
     return m_targetPhrase;
   }
 
   friend std::ostream& operator<< (std::ostream& out, const Edge& edge);
 
-  const NgramHistory&  GetNgrams(  std::map<const Hypothesis*, std::vector<Edge> > & incomingEdges) ;
+  const NgramHistory&  GetNgrams(  std::map<const Moses::Hypothesis*, std::vector<Edge> > & incomingEdges) ;
 
   bool operator < (const Edge & compare) const;
 
-  void GetPhraseSuffix(const Phrase& origPhrase, size_t lastN, Phrase& targetPhrase) const;
+  void GetPhraseSuffix(const Moses::Phrase& origPhrase, size_t lastN, Moses::Phrase& targetPhrase) const;
 
-  void storeNgramHistory(const Phrase& phrase, Path & path, size_t count = 1) {
+  void storeNgramHistory(const Moses::Phrase& phrase, Path & path, size_t count = 1) {
     m_ngrams[phrase][path]+= count;
   }
 
@@ -84,16 +82,16 @@ public:
   NgramScores() {}
 
   /** logsum this score to the existing score */
-  void addScore(const Hypothesis* node, const Phrase& ngram, float score);
+  void addScore(const Moses::Hypothesis* node, const Moses::Phrase& ngram, float score);
 
   /** Iterate through ngrams for selected node */
-  typedef std::map<const Phrase*, float>::const_iterator NodeScoreIterator;
-  NodeScoreIterator nodeBegin(const Hypothesis* node);
-  NodeScoreIterator nodeEnd(const Hypothesis* node);
+  typedef std::map<const Moses::Phrase*, float>::const_iterator NodeScoreIterator;
+  NodeScoreIterator nodeBegin(const Moses::Hypothesis* node);
+  NodeScoreIterator nodeEnd(const Moses::Hypothesis* node);
 
 private:
-  std::set<Phrase> m_ngrams;
-  std::map<const Hypothesis*, std::map<const Phrase*, float> > m_scores;
+  std::set<Moses::Phrase> m_ngrams;
+  std::map<const Moses::Hypothesis*, std::map<const Moses::Phrase*, float> > m_scores;
 };
 
 
@@ -102,11 +100,11 @@ class LatticeMBRSolution
 {
 public:
   /** Read the words from the path */
-  LatticeMBRSolution(const TrellisPath& path, bool isMap);
+  LatticeMBRSolution(const Moses::TrellisPath& path, bool isMap);
   const std::vector<float>& GetNgramScores() const {
     return m_ngramScores;
   }
-  const std::vector<Word>& GetWords() const {
+  const std::vector<Moses::Word>& GetWords() const {
     return m_words;
   }
   float GetMapScore() const {
@@ -117,10 +115,10 @@ public:
   }
 
   /** Initialise ngram scores */
-  void CalcScore(std::map<Phrase, float>& finalNgramScores, const std::vector<float>& thetas, float mapWeight);
+  void CalcScore(std::map<Moses::Phrase, float>& finalNgramScores, const std::vector<float>& thetas, float mapWeight);
 
 private:
-  std::vector<Word> m_words;
+  std::vector<Moses::Word> m_words;
   float m_mapScore;
   std::vector<float> m_ngramScores;
   float m_score;
@@ -132,18 +130,18 @@ struct LatticeMBRSolutionComparator {
   }
 };
 
-void pruneLatticeFB(Lattice & connectedHyp, std::map < const Hypothesis*, std::set <const Hypothesis* > > & outgoingHyps, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges,
-                    const std::vector< float> & estimatedScores, const Hypothesis*, size_t edgeDensity,float scale);
+void pruneLatticeFB(Lattice & connectedHyp, std::map < const Moses::Hypothesis*, std::set <const Moses::Hypothesis* > > & outgoingHyps, std::map<const Moses::Hypothesis*, std::vector<Edge> >& incomingEdges,
+                    const std::vector< float> & estimatedScores, const Moses::Hypothesis*, size_t edgeDensity,float scale);
 
 //Use the ngram scores to rerank the nbest list, return at most n solutions
-void getLatticeMBRNBest(Manager& manager, TrellisPathList& nBestList, std::vector<LatticeMBRSolution>& solutions, size_t n);
+void getLatticeMBRNBest(Moses::Manager& manager, Moses::TrellisPathList& nBestList, std::vector<LatticeMBRSolution>& solutions, size_t n);
 //calculate expectated ngram counts, clipping at 1 (ie calculating posteriors) if posteriors==true.
-void calcNgramExpectations(Lattice & connectedHyp, std::map<const Hypothesis*, std::vector<Edge> >& incomingEdges, std::map<Phrase,
+void calcNgramExpectations(Lattice & connectedHyp, std::map<const Moses::Hypothesis*, std::vector<Edge> >& incomingEdges, std::map<Moses::Phrase,
                            float>& finalNgramScores, bool posteriors);
-void GetOutputFactors(const TrellisPath &path, std::vector <Word> &translation);
-void extract_ngrams(const std::vector<Word >& sentence, std::map < Phrase, int >  & allngrams);
-bool ascendingCoverageCmp(const Hypothesis* a, const Hypothesis* b);
-std::vector<Word> doLatticeMBR(Manager& manager, TrellisPathList& nBestList);
-const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
-//std::vector<Word> doConsensusDecoding(Manager& manager, TrellisPathList& nBestList);
+void GetOutputFactors(const Moses::TrellisPath &path, std::vector <Moses::Word> &translation);
+void extract_ngrams(const std::vector<Moses::Word >& sentence, std::map < Moses::Phrase, int >  & allngrams);
+bool ascendingCoverageCmp(const Moses::Hypothesis* a, const Moses::Hypothesis* b);
+std::vector<Moses::Word> doLatticeMBR(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
+const Moses::TrellisPath doConsensusDecoding(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
+//std::vector<Moses::Word> doConsensusDecoding(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
 #endif

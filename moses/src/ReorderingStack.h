@@ -19,6 +19,8 @@
 namespace Moses
 {
 
+/** @todo what is this?
+ */
 class ReorderingStack
 {
 private:

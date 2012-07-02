@@ -30,6 +30,9 @@
 namespace Moses
 {
 
+/** Functor to create hash for words.
+ * @todo uses all factors, not just factor 0
+ */
 class NonTerminalHasher
 {
 public:
@@ -40,6 +43,9 @@ public:
   }
 };
 
+/** Functor to test whether 2 words are the same
+ * @todo uses all factors, not just factor 0
+ */
 class NonTerminalEqualityPred
 {
 public:

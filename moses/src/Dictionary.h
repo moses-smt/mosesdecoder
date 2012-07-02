@@ -29,9 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-/** Abstract class from which PhraseDictionary and GenerationDictionary
-	* are inherited.
-*/
+/** Abstract class from which PhraseDictionary and GenerationDictionary are inherited.
+ */
 class Dictionary
 {
 protected:

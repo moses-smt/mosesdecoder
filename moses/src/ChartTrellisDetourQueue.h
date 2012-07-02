@@ -25,10 +25,11 @@
 
 namespace Moses {
 
-// A bounded priority queue of ChartTrellisDetour pointers.  The top item is
-// the best scoring detour.  The queue assumes ownership of pushed items and
-// relinquishes ownership when they are popped.  Any remaining items at the
-// time of the queue's destruction are deleted.
+/** A bounded priority queue of ChartTrellisDetour pointers.  The top item is
+ *  the best scoring detour.  The queue assumes ownership of pushed items and
+ *  relinquishes ownership when they are popped.  Any remaining items at the
+ *  time of the queue's destruction are deleted.
+ */
 class ChartTrellisDetourQueue {
  public:
   // Create empty queue with fixed capacity of c.  Capacity 0 means unbounded.

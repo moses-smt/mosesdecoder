@@ -15,7 +15,7 @@ namespace Moses
 {
 typedef std::string FileExtension;
 
-
+//! @todo ask abby2
 class FileHandler: public std::fstream
 {
 public:

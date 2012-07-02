@@ -4,14 +4,14 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
 my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$VERBOSE,$IGNORE_TIME);
 my $SLEEP = 2;
-my $META = "$Bin/experiment.meta";
+my $META = "$RealBin/experiment.meta";
 
 # check if it is run on a multi-core machine
 # set number of maximal concurrently active processes
@@ -156,7 +156,7 @@ sub detect_machine {
 
 sub detect_if_cluster {
     my $hostname = `hostname`; chop($hostname);
-    foreach my $line (`cat $Bin/experiment.machines`) {
+    foreach my $line (`cat $RealBin/experiment.machines`) {
 	next unless $line =~ /^cluster: (.+)$/;
 	if (&detect_machine($hostname,$1)) {
 	    $CLUSTER = 1;
@@ -167,7 +167,7 @@ sub detect_if_cluster {
 
 sub detect_if_multicore {
     my $hostname = `hostname`; chop($hostname);
-    foreach my $line (`cat $Bin/experiment.machines`) {
+    foreach my $line (`cat $RealBin/experiment.machines`) {
 	next unless $line =~ /^multicore-(\d+): (.+)$/;
 	my ($cores,$list) = ($1,$2);
 	if (&detect_machine($hostname,$list)) {
@@ -916,6 +916,10 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-biconcor') {
             &define_training_build_biconcor($i);
 	}
+	elsif ($DO_STEP[$i] eq 'TRAINING:build-suffix-array') {
+            &define_training_build_suffix_array($i);
+	}
+
         elsif ($DO_STEP[$i] eq 'TRAINING:build-lex-trans') {
             &define_training_build_lex_trans($i);
         }
@@ -1020,7 +1024,7 @@ sub execute_steps {
     }
 	}
 
-	print "number of steps doable or running: ".(scalar keys %DO)."\n";
+	print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
   foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	
@@ -1632,6 +1636,24 @@ sub define_training_symmetrize_giza {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_build_suffix_array {
+		my ($step_id) = @_;
+	
+		my $scripts = &check_and_get("GENERAL:moses-script-dir");
+	
+		my ($model, $aligned,$corpus) = &get_output_and_input($step_id);
+		my $sa_exec_dir = &check_and_get("TRAINING:suffix-array");
+		my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+		my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+		my $method = &check_and_get("TRAINING:alignment-symmetrization-method");
+	
+		my $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""));
+	
+		my $cmd = "$scripts/training/wrappers/adam-suffix-array/suffix-array-create.sh $sa_exec_dir $corpus.$input_extension $corpus.$output_extension $aligned.$method $model $glue_grammar_file";
+
+		&create_step($step_id,$cmd);
+}
+
 sub define_training_build_biconcor {
     my ($step_id) = @_;
 
@@ -1748,18 +1770,35 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,
-	$reordering_table,$phrase_translation_table,$generation_table,@LM)
-	= &get_output_and_input($step_id);
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,@LM)
+			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
 
+		# get model, and whether suffix array is used. Determines the pt implementation.
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    my $sa_exec_dir = &get("TRAINING:suffix-array");
+		
+		my ($ptImpl, $numFF);
+		if ($hierarchical) {
+		  if ($sa_exec_dir) {
+				$ptImpl = 10;  # suffix array
+				$numFF = 7;
+			}
+			else {
+				$ptImpl = 6; # in-mem SCFG
+			}
+		}
+		else {
+			$ptImpl = 0; # phrase-based
+		}
+		
     # additional settings for factored models
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
-    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
-	if $reordering_table;
-    $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)
-	if $generation_table;
+    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    $ptCmd .= ":$numFF" if defined($numFF);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
+    $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
 
     my $decoding_graph_backoff = &get("TRAINING:decoding-graph-backoff");
@@ -1994,6 +2033,7 @@ sub get_training_setting {
     my ($step) = @_;
     my $dir = &check_and_get("GENERAL:working-dir");
     my $training_script = &check_and_get("TRAINING:script");
+    my $external_bin_dir = &check_backoff_and_get("TRAINING:external-bin-dir");
     my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
     my $reordering = &get("TRAINING:lexicalized-reordering");
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
@@ -2007,6 +2047,7 @@ sub get_training_setting {
     my $target_syntax = &get("GENERAL:output-parser");
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
+    my $pcfg = &get("TRAINING:use-pcfg-feature");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2015,7 +2056,7 @@ sub get_training_setting {
     $cmd .= "-dont-zip ";
     $cmd .= "-first-step $step " if $step>1;
     $cmd .= "-last-step $step "  if $step<9;
-    $cmd .= "-scripts-root-dir $scripts ";
+    $cmd .= "-external-bin-dir $external_bin_dir " if defined($external_bin_dir);
     $cmd .= "-f $input_extension -e $output_extension ";
     $cmd .= "-alignment $alignment ";
     $cmd .= "-max-phrase-length $phrase_length " if $phrase_length;
@@ -2029,6 +2070,7 @@ sub get_training_setting {
     $cmd .= "-glue-grammar " if $hierarchical;
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
+    $cmd .= "-pcfg " if $pcfg;
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2136,8 +2178,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,
-	$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2161,10 +2202,31 @@ sub define_tuningevaluation_filter {
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
+		# get model, and whether suffix array is used. Determines the pt implementation.
+    my $sa_exec_dir = &get("TRAINING:suffix-array");
+
+		my ($ptImpl, $numFF);
+		if ($hierarchical) {
+		  if ($sa_exec_dir) {
+				$ptImpl = 10;  # suffix array
+				$numFF = 7;
+			}
+			else {
+				$ptImpl = 6; # in-mem SCFG
+			}
+		}
+		else {
+			$ptImpl = 0; # phrase-based
+		}
+
     # create pseudo-config file
     my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_translation_table);
+    
+    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    $ptCmd .= ":$numFF" if defined($numFF);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
+    
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
     # additional settings for hierarchical models
@@ -2181,9 +2243,21 @@ sub define_tuningevaluation_filter {
     $cmd .= "-config $config\n";
     
     # filter command
-    $cmd .= "$scripts/training/filter-model-given-input.pl";
-    $cmd .= " $filter_dir $config $input_filter $settings\n";
-
+ 		my $sa_exec_dir = &get("TRAINING:suffix-array");
+		if ($sa_exec_dir) {
+			# suffix array
+			$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+			
+			my $escaped_filter_dir = $filter_dir;
+			$escaped_filter_dir =~ s/\//\\\\\//g;
+			$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
+		}
+		else {
+		  # normal phrase table
+	    $cmd .= "$scripts/training/filter-model-given-input.pl";
+  	  $cmd .= " $filter_dir $config $input_filter $settings\n";
+		}
+		
     # clean-up
     $cmd .= "rm $config";
 
@@ -2228,7 +2302,9 @@ sub define_evaluation_decode {
 
     # create command
     my $cmd;
-    $nbest =~ s/[^\d]//g if $nbest;
+    my $nbest_size;
+    $nbest_size = $nbest if $nbest;
+    $nbest_size =~ s/[^\d]//g if $nbest;
     if ($jobs && $CLUSTER) {
 	$cmd .= "mkdir -p $dir/evaluation/tmp.$set.$VERSION\n";
 	$cmd .= "cd $dir/evaluation/tmp.$set.$VERSION\n";
@@ -2244,11 +2320,11 @@ sub define_evaluation_decode {
 	$cmd .= " -input-file $input";
 	$cmd .= " --jobs $jobs";
 	$cmd .= " -decoder-parameters \"$settings\" > $system_output";	
-	$cmd .= " -n-best-file $system_output.best$nbest -n-best-size $nbest" if $nbest;
+	$cmd .= " -n-best-file $system_output.best$nbest_size -n-best-size $nbest" if $nbest;
     }
     else {
 	$cmd = "$decoder $settings -v 0 -f $config < $input > $system_output";
-	$cmd .= " -n-best-list $system_output.best$nbest $nbest" if $nbest;
+	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
 
     &create_step($step_id,$cmd);

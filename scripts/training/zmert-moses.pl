@@ -12,9 +12,9 @@
 
 # 29 Dec 2009 Derived from mert-moses-new.pl (Kamil Kos)
 
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Basename;
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 

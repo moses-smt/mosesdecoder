@@ -22,16 +22,15 @@
 #include <map>
 #include "../moses/src/TypeDef.h"
 
-namespace Moses
-{
-class Factor;
-}
 
 namespace OnDiskPt
 {
 
 class OnDiskWrapper;
 
+/* A bidirectional map of string<->contiguous id
+ * No distinction between source and target language
+ */
 class Vocab
 {
 protected:
@@ -45,9 +44,8 @@ public:
   Vocab()
     :m_nextId(1)
   {}
-  UINT64 AddVocabId(const std::string &factorString);
-  UINT64 GetVocabId(const std::string &factorString, bool &found) const;
-  const Moses::Factor *GetFactor(UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const;
+  UINT64 AddVocabId(const std::string &str);
+  UINT64 GetVocabId(const std::string &str, bool &found) const;
   const std::string &GetString(UINT32 vocabId) const {
     return m_lookup[vocabId];
   }

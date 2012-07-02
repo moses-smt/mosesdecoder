@@ -19,10 +19,13 @@ pair-extension = fr-en
 moses-src-dir = /home/pkoehn/moses
 #
 # moses binaries
-moses-bin-dir = $moses-src-dir/dist/bin
+moses-bin-dir = $moses-src-dir/bin
 #
 # moses scripts
 moses-script-dir = $moses-src-dir/scripts
+#
+# directory where GIZA++/MGIZA programs resides
+external-bin-dir = /Users/hieuhoang/workspace/bin/training-tools
 #
 # srilm
 srilm-dir = $moses-src-dir/srilm/bin/i686
@@ -260,7 +263,8 @@ script = $moses-script-dir/training/train-model.perl
 ### general options
 # these are options that are passed on to train-model.perl, for instance
 # * "-mgiza -mgiza-cpus 8" to use mgiza instead of giza
-# * "-sort-buffer-size 8G" to reduce on-disk sorting
+# * "-sort-buffer-size 8G -sort-compress gzip" to reduce on-disk sorting
+# * "-sort-parallel 8 -cores 8" to speed up phrase table building
 #
 #training-options = ""
 

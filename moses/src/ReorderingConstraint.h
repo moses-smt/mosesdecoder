@@ -39,7 +39,8 @@ namespace Moses
 class InputType;
 
 #define NOT_A_ZONE 999999999
-/** vector of boolean used to represent whether a word has been translated or not */
+/** A list of zones and walls to limit which reordering can occur
+ */
 class ReorderingConstraint
 {
   friend std::ostream& operator<<(std::ostream& out, const ReorderingConstraint& reorderingConstraint);

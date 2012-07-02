@@ -3,6 +3,9 @@
 
 #include <vector>
 
+namespace MosesTuning
+{
+  
 template <class T>
 class ScopedVector {
  public:
@@ -50,5 +53,7 @@ class ScopedVector {
   ScopedVector<T>(const ScopedVector<T>&);
   void operator=(const ScopedVector<T>&);
 };
+
+}
 
 #endif // MERT_SCOPED_VECTOR_H_

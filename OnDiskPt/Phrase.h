@@ -26,6 +26,8 @@ namespace OnDiskPt
 {
 class Vocab;
 
+/** A contiguous phrase. SourcePhrase & TargetPhrase inherit from this and add the on-disk functionality
+ */
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const Phrase&);

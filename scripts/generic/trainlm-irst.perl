@@ -12,7 +12,7 @@
 # And make sure the $settings variable is empty. This script doesn't understand some of the sri args like -unk and will complain.
 
 use strict;
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use Getopt::Long;
 
 my $order = 3;

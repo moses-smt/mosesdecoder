@@ -28,6 +28,8 @@
 namespace Moses
 {
 
+/** @todo what is this?
+ */
 class DottedRuleInMemory : public DottedRule
 {
  public:
