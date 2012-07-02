@@ -4,6 +4,8 @@ alias ThreadPool : ThreadPool.cpp ;
 
 boost 103600 ;
 
+local current = ;
+
 # VW
 local with-vw = [ option.get "with-vw" ] ;
 if $(with-vw) {
@@ -11,6 +13,7 @@ if $(with-vw) {
   lib allreduce : : <search>$(with-vw)/lib ;
   obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
   alias psd : PSDScoreProducer.o vw allreduce : : : <library>boost_program_options <define>HAVE_VW <include>$(with-vw)/vowpalwabbit ;
+  current += "--with-vw=$(with-vw)" ;
   echo "Linking with Vowpal Wabbit" ;
 } else {
   alias psd ;
@@ -33,3 +36,10 @@ synlm psd ThreadPool headers ;
 alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
+
+path-constant PSD-LOG : bin/psd.log ;
+
+current = $(current:J=" ") ;
+current ?= "" ;
+
+always-if-changed $(PSD-LOG) $(current) : moses_internal moses ;
