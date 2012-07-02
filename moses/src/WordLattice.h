@@ -8,7 +8,9 @@
 namespace Moses
 {
 
-/** General word lattice */
+/** An input to the decoder that represent a word lattice.
+ *  @todo why is this inherited from confusion net?
+ */
 class WordLattice: public ConfusionNet
 {
 private:

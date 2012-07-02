@@ -50,6 +50,8 @@ class FactorCollection;
 class ChartTrellisPathList;
 }
 
+/** Helper class that holds misc variables to write data out to command line.
+ */
 class IOWrapper
 {
 protected:

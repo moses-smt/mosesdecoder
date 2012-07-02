@@ -8,6 +8,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 PerScorer::PerScorer(const string& config)
   : StatisticsBasedScorer("PER",config) {}
 
@@ -86,3 +90,6 @@ float PerScorer::calculateScore(const vector<int>& comps) const
     return num/denom;
   }
 }
+
+}
+

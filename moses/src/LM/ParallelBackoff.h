@@ -26,6 +26,8 @@ namespace Moses
 
 class LanguageModelMultiFactor;
 
+/** @todo what is this?
+ */
 LanguageModelMultiFactor *NewParallelBackoff();
 
 }

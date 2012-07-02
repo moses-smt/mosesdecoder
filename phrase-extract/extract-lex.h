@@ -6,6 +6,9 @@
 #include <fstream>
 #include <iostream>
 
+namespace MosesTraining
+{
+
 
 //! convert string to variable of type T. Used to reading floats, int etc from files
 template<typename T>
@@ -115,3 +118,4 @@ public:
 
 };
 
+} // namespace

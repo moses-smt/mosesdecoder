@@ -15,6 +15,10 @@
 
 #include "MiraFeatureVector.h"
 
+namespace MosesTuning
+{
+  
+
 class AvgWeightVector;
 
 class MiraWeightVector {
@@ -105,3 +109,5 @@ private:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}

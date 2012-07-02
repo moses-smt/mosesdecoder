@@ -10,6 +10,10 @@
 
 static const float kMaxFloat = std::numeric_limits<float>::max();
 
+namespace MosesTuning
+{
+  
+
 class Point;
 
 /**
@@ -108,5 +112,7 @@ public:
       : Optimizer(dim, i2O, positive, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
 };
+
+}
 
 #endif  // OPTIMIZER_H

@@ -35,6 +35,8 @@ class TargetPhraseCollection;
 class DottedRuleStackOnDisk;
 class WordPenaltyProducer;
 
+/** Implementation of on-disk phrase table for hierarchical/syntax model.
+ */   
 class PhraseDictionaryOnDisk : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;

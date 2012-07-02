@@ -28,6 +28,8 @@ namespace Moses
 
 class ChartCellCollection;
 
+/** @todo what is this?
+ */
 class StackLatticeBuilder
 {
  public:

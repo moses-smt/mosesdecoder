@@ -84,6 +84,15 @@ public:
    * \param oovCount number of LM OOVs
    */
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
+
+  virtual void IssueRequestsFor(Hypothesis& hypo,
+                                const FFState* input_state) {
+  }
+  virtual void sync() {
+  }
+  virtual void SetFFStateIdx(int state_idx) {
+  }
+
 };
 
 }

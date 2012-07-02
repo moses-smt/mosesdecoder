@@ -26,6 +26,10 @@ const char REFLEN_CLOSEST[] = "closest";
 
 } // namespace
 
+namespace MosesTuning
+{
+  
+
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
       m_ref_length_type(CLOSEST) {
@@ -273,3 +277,6 @@ float unsmoothedBleu(const std::vector<float>& stats) {
   }
   return exp(logbleu);
 }
+
+}
+

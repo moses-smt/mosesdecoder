@@ -22,6 +22,9 @@
 
 #include "Types.h"
 
+namespace MosesTuning
+{
+
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
 #else
@@ -129,5 +132,7 @@ inline std::string trimStr(const std::string& Src, const std::string& c = " \r\n
 void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
+
+}
 
 #endif  // MERT_UTIL_H_

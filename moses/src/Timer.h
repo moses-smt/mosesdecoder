@@ -9,6 +9,8 @@
 namespace Moses
 {
 
+/** Wrapper around time_t to time how long things have been running
+ */
 class Timer
 {
   friend std::ostream& operator<<(std::ostream& os, Timer& t);

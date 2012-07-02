@@ -18,7 +18,7 @@ class WordsRange;
 class InputType;
 
 /*** Implementation of a phrase table in a trie that is binarized and
- * stored on disk.
+ * stored on disk. Wrapper around PDTAimp class
  */
 class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 {

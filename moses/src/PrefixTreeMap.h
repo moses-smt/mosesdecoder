@@ -21,6 +21,8 @@ typedef FilePtr<PTF>               CPT;
 typedef std::vector<CPT>           Data;
 typedef LVoc<std::string>          WordVoc;
 
+/** @todo How is this used in the pb binary phrase table?
+ */
 class GenericCandidate
 {
 public:
@@ -57,19 +59,9 @@ private:
   ScoreList  m_ScoreList;
 };
 
-/*
-class PPtr {
- public:
-  typedef unsigned IndexType;
- public:
-  PPtr(PTF const* p, IndexType i, bool isRoot)
-    : m_Ptr(p), m_Index(i), m_IsRoot(isRoot){
-  };
-  ~PPtr(){
-  };
-};
-*/
-
+  
+/** @todo How is this used in the pb binary phrase table?
+ */
 struct PPimp {
   PTF const*p;
   unsigned idx;
@@ -89,6 +81,8 @@ struct PPimp {
 };
 
 
+/** @todo How is this used in the pb binary phrase table?
+ */
 class Candidates : public std::vector<GenericCandidate>
 {
   typedef std::vector<GenericCandidate> MyBase;

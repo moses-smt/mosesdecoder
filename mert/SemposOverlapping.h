@@ -7,6 +7,10 @@
 #include <utility>
 #include <vector>
 
+namespace MosesTuning
+{
+  
+
 class SemposScorer;
 
 // TODO: need comments about this number.
@@ -86,5 +90,7 @@ public:
   CapMacroOverlapping& operator=(const CapMacroOverlapping&);
   const SemposScorer* semposScorer;
 };
+
+}
 
 #endif  // MERT_SEMPOSOVERLAPPING_H_

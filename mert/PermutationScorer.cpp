@@ -3,6 +3,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 const int PermutationScorer::SCORE_PRECISION = 5;
 
 PermutationScorer::PermutationScorer(const string &distanceMetric, const string &config)
@@ -212,5 +216,7 @@ statscore_t PermutationScorer::calculateScore(const vector<int>& comps) const
   //cerr << "*******PermutationScorer::calculateScore" ;
   //cerr << " " << comps[0] << endl;
   return comps[0];
+}
+
 }
 

@@ -34,7 +34,9 @@ class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
 
-// wrapper around list of target phrase translation options
+/** wrapper around list of target phrase translation options
+ * @todo How is this used. Split out into separate source file
+ */
 class TranslationDimension
 {
  public:
@@ -68,7 +70,9 @@ class TranslationDimension
 };
 
 
-// wrapper around list of hypotheses for a particular non-term of a trans opt
+/** wrapper around list of hypotheses for a particular non-term of a trans opt
+ * @todo How is this used. Split out into separate source file
+ */
 class HypothesisDimension
 {
 public:
@@ -102,6 +106,7 @@ private:
 
 std::size_t hash_value(const HypothesisDimension &);
 
+/** @todo How is this used. Split out into separate source file */
 class RuleCubeItem
 {
  public:

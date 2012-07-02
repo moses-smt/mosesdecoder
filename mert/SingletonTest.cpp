@@ -3,6 +3,8 @@
 #define BOOST_TEST_MODULE MertSingleton
 #include <boost/test/unit_test.hpp>
 
+using namespace MosesTuning;
+
 namespace {
 
 static int g_count = 0;

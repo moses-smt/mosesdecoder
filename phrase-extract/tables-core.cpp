@@ -30,6 +30,9 @@ vector<string> tokenize( const char* input )
   return token;
 }
 
+namespace MosesTraining
+{
+
 bool isNonTerminal( const WORD &symbol ) {
    return symbol.substr(0, 1) == "[" && symbol.substr(symbol.size()-1, 1) == "]";
 }
@@ -120,5 +123,7 @@ double DTable::get( int distortion )
   if (dtable.find( distortion ) == dtable.end())
     return log( 0.00001 );
   return dtable[ distortion ];
+}
+
 }
 

@@ -6,6 +6,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 StreamingHypPackEnumerator::StreamingHypPackEnumerator
 (
  vector<std::string> const& featureFiles,
@@ -195,3 +199,5 @@ size_t RandomAccessHypPackEnumerator::cur_id() {
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}

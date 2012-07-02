@@ -9,6 +9,9 @@
 namespace Moses
 {
 
+/** Implementation of a phrase table using the biconcor suffix array.
+ *  Wrapper around a BilingualDynSuffixArray object
+ */
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary
 {
 public:

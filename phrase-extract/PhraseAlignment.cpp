@@ -17,6 +17,9 @@
 
 using namespace std;
 
+namespace MosesTraining
+{
+
 extern Vocabulary vcbT;
 extern Vocabulary vcbS;
 
@@ -236,4 +239,5 @@ int PhraseAlignment::Compare(const PhraseAlignment &other) const
   
 }
 
+}
 

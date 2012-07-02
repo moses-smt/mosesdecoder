@@ -18,6 +18,8 @@
 namespace Moses
 {
 
+/** @todo How is this used in the pb binary phrase table?
+ */
 template<typename T,typename D>
 class PrefixTreeSA
 {
@@ -129,6 +131,8 @@ template<typename T,typename D> D PrefixTreeSA<T,D>::def;
 
 /////////////////////////////////////////////////////////////////////////////
 
+/** @todo How is this used in the pb binary phrase table?
+ */
 template<typename T,typename D>
 class PrefixTreeF
 {

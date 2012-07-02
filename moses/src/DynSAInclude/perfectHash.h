@@ -7,7 +7,8 @@
 #include "hash.h"
 #include "RandLMFilter.h"
 #include "quantizer.h"
-/*
+
+/**
  * PerfectHash handles setting up hash functions and storage 
  * for LM data. 
  */ 
@@ -16,6 +17,7 @@ using randlm::BitFilter;
 typedef std::map<string, count_t> hpDict_t;
 typedef hpDict_t::iterator hpdEntry_t;
 static count_t collisions_ = 0;
+
 /* Based on Mortenson et. al. 2006 */ 
 template<typename T>
 class PerfectHash {
@@ -60,6 +62,7 @@ private:
   UnivHash_linear<T>* fingerHash_;
   LogQtizer* qtizer_;
 };
+
 template<typename T>
 PerfectHash<T>::PerfectHash(uint16_t MBs, int width, int bucketRange, 
   float qBase): hitMask_(1 << 31), memBound_(MBs * (1ULL << 20)), 
@@ -84,6 +87,7 @@ PerfectHash<T>::PerfectHash(uint16_t MBs, int width, int bucketRange,
   bucketHash_ = new UnivHash_linear<count_t>(totBuckets_, 1, PRIME);
   fingerHash_ = new UnivHash_linear<T>(pow(2.0f, cellWidth_), MAX_HASH_FUNCS, PRIME);
 }
+
 template<typename T>
 PerfectHash<T>::~PerfectHash() {
   delete[] idxTracker_;
@@ -94,6 +98,7 @@ PerfectHash<T>::~PerfectHash() {
   delete qtizer_;
   delete values_;
 }
+
 template<typename T>  
 uint64_t PerfectHash<T>::insert(const wordID_t* IDs, const int len, 
                             const count_t value) {
@@ -128,6 +133,7 @@ uint64_t PerfectHash<T>::insert(const wordID_t* IDs, const int len,
     return cells_ + 1;
   }
 }
+
 template<typename T>  
 bool PerfectHash<T>::update(const wordID_t* IDs, const int len, 
   const count_t value, hpdEntry_t& hpdAddr, uint64_t& filterIdx) {
@@ -157,6 +163,7 @@ bool PerfectHash<T>::update(const wordID_t* IDs, const int len,
   // could add if it gets here. 
   return false;
 }
+
 template<typename T>   
 int PerfectHash<T>::query(const wordID_t* IDs, const int len, 
   hpdEntry_t& hpdAddr, uint64_t& filterIdx) {
@@ -187,6 +194,7 @@ int PerfectHash<T>::query(const wordID_t* IDs, const int len,
   }
   return -1;
 }
+
 template<typename T>
 void PerfectHash<T>::remove(const wordID_t* IDs, const int len) {
   // delete key if in high perf. dictionary
@@ -212,6 +220,7 @@ void PerfectHash<T>::remove(const wordID_t* IDs, const int len) {
     }
   }
 }
+
 template<typename T> // clear filter index
 void PerfectHash<T>::remove(uint64_t index) {
   CHECK(index < cells_);
@@ -222,6 +231,7 @@ void PerfectHash<T>::remove(uint64_t index) {
   count_t bucket = index / bucketRange_;
   --idxTracker_[bucket];
 }
+
 template<typename T>
 T PerfectHash<T>::nonZeroSignature(const wordID_t* IDs, const int len,
   count_t bucket) {
@@ -235,6 +245,7 @@ T PerfectHash<T>::nonZeroSignature(const wordID_t* IDs, const int len,
     cerr << "WARNING: Unable to find non-zero signature for ngram\n" << endl;
   return fingerprint;
 }
+
 template<typename T>
 string PerfectHash<T>::hpDictKeyValue(const wordID_t* IDs, const int len) {
   string skey(" ");
@@ -243,16 +254,19 @@ string PerfectHash<T>::hpDictKeyValue(const wordID_t* IDs, const int len) {
   Utils::trim(skey);
   return skey;
 }
+
 template<typename T>
 count_t PerfectHash<T>::hpDictMemUse() {
   // return hpDict memory usage in MBs
   return (count_t) sizeof(hpDict_t::value_type)* dict_.size() >> 20;
 }
+
 template<typename T>
 count_t PerfectHash<T>::bucketsMemUse() {
   // return bucket memory usage in MBs
   return (count_t) (filter_->size() + values_->size()); 
 }
+
 template<typename T>
 void PerfectHash<T>::save(FileHandler* fout) {
   CHECK(fout != 0);
@@ -278,6 +292,7 @@ void PerfectHash<T>::save(FileHandler* fout) {
   iterate(dict_, t) 
     *fout << t->first << "\t" << t->second << "\n";
 }
+
 template<typename T>
 void PerfectHash<T>::load(FileHandler* fin) {
   CHECK(fin != 0);
@@ -314,6 +329,7 @@ void PerfectHash<T>::load(FileHandler* fin) {
   cerr << "\tHPD size=" << dict_.size() << endl;
   cerr << "Finished loading ORLM." << endl;
 }
+
 template<typename T>
 void PerfectHash<T>::analyze() {
   cerr << "Analyzing Dynamic Bloomier Filter...\n";
@@ -373,6 +389,7 @@ void PerfectHash<T>::analyze() {
   cerr << "values MBs= " << values_->size() << endl;
   delete[] bucketCnt;
 }
+
 template<typename T>  
 bool PerfectHash<T>::update2(const wordID_t* IDs, const int len, 
   const count_t value, hpdEntry_t& hpdAddr, uint64_t& filterIdx) {
@@ -404,4 +421,6 @@ bool PerfectHash<T>::update2(const wordID_t* IDs, const int len,
   insert(IDs, len, value);
   return false;
 }
+
 #endif
+

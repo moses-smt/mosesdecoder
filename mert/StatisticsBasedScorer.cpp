@@ -11,6 +11,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 StatisticsBasedScorer::StatisticsBasedScorer(const string& name, const string& config)
 : Scorer(name,config) {
   //configure regularisation
@@ -117,3 +121,6 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
     }
   }
 }
+
+}
+

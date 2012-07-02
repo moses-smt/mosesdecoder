@@ -15,6 +15,8 @@ namespace Moses
 class Factor;
 class Phrase;
 
+/** @todo ask ollie
+ */
 class LanguageModelORLM : public LanguageModelPointerState {
 public:
   typedef count_t T;  // type for ORLM filter
