@@ -1482,6 +1482,10 @@ sub score_phrase_phrase_extract {
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
     my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
+    my $COUNT_BIN = "";
+    if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CountBinFeature ([\s\d]*\d)/) {
+      $COUNT_BIN = $1;
+    }
     my $UNALIGNED_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/);
     my ($UNALIGNED_FW_COUNT,$UNALIGNED_FW_F,$UNALIGNED_FW_E);
     if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty +(\S+) +(\S+)/) {
@@ -1580,6 +1584,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
     $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
+    $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     
@@ -1837,6 +1842,9 @@ sub create_ini {
    $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
    $basic_weight_count++ unless defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
    $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
+   if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(CountBinFeature [\s\d]*\d)/) {
+     $basic_weight_count += scalar split(/\s+/,$1);
+   }
    $basic_weight_count++ if $_PCFG;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
   	$num_of_ttables++;
@@ -1849,8 +1857,9 @@ sub create_ini {
 	    $file = shift @SPECIFIED_TABLE;
 	    my @toks = split(/:/,$file);
 			$file = $toks[0];
-			$phrase_table_impl = $toks[1];
-			
+      if (@toks > 1) {
+			  $phrase_table_impl = $toks[1];
+			}
 			if (@toks == 3) {
 				$basic_weight_count = $toks[2];
 			}
