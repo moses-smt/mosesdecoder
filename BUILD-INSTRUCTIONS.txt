@@ -1,5 +1,5 @@
 PRELIMINARIES
-testting
+
 Moses is primarily targeted at gcc on UNIX.  
 
 Moses requires gcc, Boost >= 1.36, and zlib including the headers that some
