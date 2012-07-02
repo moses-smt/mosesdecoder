@@ -47,6 +47,9 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
+namespace MosesCmd
+{
+
 IOWrapper::IOWrapper(
   const vector<FactorType>				&inputFactorOrder
   , const vector<FactorType>			&outputFactorOrder
@@ -572,3 +575,6 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
 
   return ioWrapper;
 }
+
+}
+

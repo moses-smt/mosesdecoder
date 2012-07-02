@@ -35,19 +35,20 @@ class AlignmentInfoCollection
  public:
   static AlignmentInfoCollection &Instance() { return s_instance; }
 
-  // Returns a pointer to an AlignmentInfo object with the same source-target
-  // alignment pairs as given in the argument.  If the collection already
-  // contains such an object then returns a pointer to it; otherwise a new
-  // one is inserted.
+  /** Returns a pointer to an AlignmentInfo object with the same source-target
+    * alignment pairs as given in the argument.  If the collection already
+    * contains such an object then returns a pointer to it; otherwise a new
+    * one is inserted.
+   */
   const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &);
 
-  // Returns a pointer to an empty AlignmentInfo object.
+  //! Returns a pointer to an empty AlignmentInfo object.
   const AlignmentInfo &GetEmptyAlignmentInfo() const;
 
  private:
   typedef std::set<AlignmentInfo, AlignmentInfoOrderer> AlignmentInfoSet;
 
-  // Only a single static variable should be created.
+  //! Only a single static variable should be created.
   AlignmentInfoCollection();
 
   static AlignmentInfoCollection s_instance;

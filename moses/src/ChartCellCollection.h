@@ -29,7 +29,7 @@ namespace Moses
 class InputType;
 class ChartManager;
 
-/** Hold all the hypotheses in a chart cell that have the same LHS non-term.
+/** Hold all the chart cells for 1 input sentence. A variable of this type is held by the ChartManager
  */
 class ChartCellCollection : public CellCollection
 {
@@ -44,9 +44,12 @@ public:
   ChartCellCollection(const InputType &input, ChartManager &manager);
   ~ChartCellCollection();
 
+  //! get a chart cell for a particular range
   ChartCell &Get(const WordsRange &coverage) {
     return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
+  
+  //! get a chart cell for a particular range
   const ChartCell &Get(const WordsRange &coverage) const {
     return *m_hypoStackColl[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];
   }
