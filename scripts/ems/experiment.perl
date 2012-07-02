@@ -6,6 +6,14 @@ use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
 
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
@@ -1794,9 +1802,13 @@ sub define_training_create_config {
 		}
 		
     # additional settings for factored models
-    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    my $ptCmd = "$phrase_translation_table";
+    $ptCmd = &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
+    $ptCmd = trim($ptCmd);
+    $ptCmd .= ":$ptImpl";
     $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
+    $cmd .= "$ptCmd ";
+
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
@@ -2223,9 +2235,12 @@ sub define_tuningevaluation_filter {
     my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
     
-    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    my $ptCmd = "$phrase_translation_table";
+    $ptCmd = &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
+    $ptCmd = trim($ptCmd);
+    $ptCmd .= ":$ptImpl";
     $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
+    $cmd .= "$ptCmd ";
     
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
