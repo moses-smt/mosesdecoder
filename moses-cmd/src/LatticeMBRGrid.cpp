@@ -54,9 +54,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+using namespace MosesCmd;
 
 //keys
 enum gridkey {lmbr_p,lmbr_r,lmbr_prune,lmbr_scale};
+
+namespace MosesCmd
+{
 
 class Grid
 {
@@ -127,6 +131,8 @@ private:
   map<gridkey,vector<float> > m_grid;
   map<string,gridkey> m_args;
 };
+
+} // namespace
 
 int main(int argc, char* argv[])
 {

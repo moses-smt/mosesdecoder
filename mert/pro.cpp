@@ -47,6 +47,9 @@ using namespace MosesTuning;
 
 namespace po = boost::program_options;
 
+namespace MosesTuning
+{
+
 class SampledPair {
 private:
   pair<size_t,size_t> m_translation1;
@@ -88,6 +91,7 @@ static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureD
   }
 }
 
+}
 
 int main(int argc, char** argv)
 {

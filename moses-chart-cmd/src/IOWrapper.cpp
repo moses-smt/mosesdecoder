@@ -50,6 +50,9 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
+namespace MosesChartCmd
+{
+
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
                      , const FactorMask							&inputFactorUsed
@@ -509,3 +512,6 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
   stream.setf(std::ios::fixed);
   stream.precision(size);
 }
+
+}
+
