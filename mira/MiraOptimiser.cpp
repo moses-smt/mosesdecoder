@@ -883,7 +883,7 @@ size_t MiraOptimiser::updateWeightsHopeFearSummed(
     averagedFeatureDiffs.DivideEquals(featureValuesHope[0].size());
     averagedViolations /= featureValuesHope[0].size();
   }
-  cerr << "Rank " << rank << ", epoch " << epoch << ", averaged feature diffs: " << averagedFeatureDiffs << endl;
+  //cerr << "Rank " << rank << ", epoch " << epoch << ", averaged feature diffs: " << averagedFeatureDiffs << endl;
   cerr << "Rank " << rank << ", epoch " << epoch << ", averaged violations: " << averagedViolations << endl;
 
   if (violatedConstraintsBefore > 0) {
@@ -972,7 +972,7 @@ size_t MiraOptimiser::updateWeightsRankModelSummed(
   averagedFeatureDiffs.DivideEquals(numConstraints);
   averagedViolations /= numConstraints;
 
-  cerr << "Rank " << rank << ", epoch " << epoch << ", averaged feature diffs: " << averagedFeatureDiffs << endl;
+  //cerr << "Rank " << rank << ", epoch " << epoch << ", averaged feature diffs: " << averagedFeatureDiffs << endl;
   cerr << "Rank " << rank << ", epoch " << epoch << ", averaged violations: " << averagedViolations << endl;
 
   if (violatedConstraintsBefore > 0) {

@@ -284,7 +284,6 @@ int main(int argc, char** argv) {
   	trainWithMultipleFolds = true;
   }
 
-  cerr << "test 1" << endl;
   if (dumpMixedWeights && (mixingFrequency != weightDumpFrequency)) {
 	  cerr << "Set mixing frequency = weight dump frequency for dumping mixed weights!" << endl;
 	  exit(1);
@@ -295,7 +294,6 @@ int main(int argc, char** argv) {
 	  exit(1);
   }
 
-  cerr << "test 2" << endl;
   if (trainWithMultipleFolds) {
 	  if (!mosesConfigFilesFolds.size()) {
 		  cerr << "Error: No moses ini files specified for training with folds" << endl;
@@ -330,7 +328,6 @@ int main(int argc, char** argv) {
   }
 
 	// load input and references
-  cerr << "test 3" << endl;
   	vector<string> inputSentences;
   	size_t inputSize = trainWithMultipleFolds? inputFilesFolds.size(): 0;
   	size_t refSize = trainWithMultipleFolds? referenceFilesFolds.size(): referenceFiles.size(); 
@@ -408,7 +405,6 @@ int main(int argc, char** argv) {
 	// add initial Bleu weight and references to initialize Bleu feature
 	boost::trim(decoder_settings);
 	decoder_settings += " -mira -distinct-nbest -weight-bl 1 -references";
-	cerr << "test 4" << endl;
 	if (trainWithMultipleFolds) {
 		decoder_settings += " ";
 		decoder_settings += referenceFilesFolds[myFold];
@@ -420,22 +416,17 @@ int main(int argc, char** argv) {
 		}
 	}
 	
-	cerr << "test 5" << endl;
 	vector<string> decoder_params;
 	boost::split(decoder_params, decoder_settings, boost::is_any_of("\t "));
 	
 	string configFile = trainWithMultipleFolds? mosesConfigFilesFolds[myFold] : mosesConfigFile;
 	VERBOSE(1, "Rank " << rank << " reading config file from " << configFile << endl);
-	cerr << "test 6" << endl;
 	MosesDecoder* decoder = new MosesDecoder(configFile, verbosity, decoder_params.size(), decoder_params);
-	cerr << "test 7" << endl;
 	decoder->setBleuParameters(disableBleuFeature, sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
 			scaleByInverseLength, scaleByAvgInverseLength,
 			scaleByX, historySmoothing, bleu_smoothing_scheme);
-	cerr << "test 8" << endl;
 	SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
 	bool chartDecoding = (searchAlgorithm == ChartDecoding);
-	cerr << "test 9" << endl;
 
 	// Optionally shuffle the sentences
 	vector<size_t> order;
@@ -515,7 +506,7 @@ int main(int argc, char** argv) {
 	// Create shards according to the number of processes used
 	vector<size_t> shard;
 	if (trainWithMultipleFolds) {			
-		float shardSize = (float) (order.size())/coresPerFold;
+		size_t shardSize = order.size()/coresPerFold;
 		size_t shardStart = (size_t) (shardSize * (rank % coresPerFold));
 		size_t shardEnd = shardStart + shardSize;
 		if (rank % coresPerFold == coresPerFold - 1) { // last rank of each fold 
@@ -529,7 +520,7 @@ int main(int argc, char** argv) {
 		batchSize = 1;
 	}
 	else {
-		float shardSize = (float) (order.size()) / size;
+	        size_t shardSize = order.size() / size;
 		size_t shardStart = (size_t) (shardSize * rank);
 		size_t shardEnd = (size_t) (shardSize * (rank + 1));
 		if (rank == size - 1) {
@@ -541,7 +532,7 @@ int main(int argc, char** argv) {
 		shard.resize(shardSize);
 		copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
 		if (batchEqualsShard)
-			batchSize = shardSize;
+			batchSize = shardSize;		
 	}
 
 	// get reference to feature functions
@@ -697,7 +688,7 @@ int main(int argc, char** argv) {
 
 	    // redo shards 
 	    if (trainWithMultipleFolds) {			
-	      float shardSize = (float) (order.size())/coresPerFold;
+	      size_t shardSize = order.size()/coresPerFold;
 	      size_t shardStart = (size_t) (shardSize * (rank % coresPerFold));
 	      size_t shardEnd = shardStart + shardSize;
 	      if (rank % coresPerFold == coresPerFold - 1) { // last rank of each fold 
@@ -711,7 +702,7 @@ int main(int argc, char** argv) {
 	      batchSize = 1;
 	    }
 	    else {
-	      float shardSize = (float) (order.size()) / size;
+	      size_t shardSize = order.size()/size;
 	      size_t shardStart = (size_t) (shardSize * rank);
 	      size_t shardEnd = (size_t) (shardSize * (rank + 1));
 	      if (rank == size - 1) {
@@ -781,15 +772,16 @@ int main(int argc, char** argv) {
 					input = inputSentencesFolds[myFold][*sid];
 				else
 					input = inputSentences[*sid];
-//				const vector<string>& refs = referenceSentences[*sid];
-				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"" << input << "\"" << " (batch pos " << batchPosition << ")" << endl;
-
+				
 				Moses::Sentence *sentence = new Sentence();
-			    stringstream in(input + "\n");
-			    const vector<FactorType> inputFactorOrder = staticData.GetInputFactorOrder();
-			    sentence->Read(in,inputFactorOrder);
-			    size_t current_input_length = (*sentence).GetSize();
-
+				stringstream in(input + "\n");
+				const vector<FactorType> inputFactorOrder = staticData.GetInputFactorOrder();
+				sentence->Read(in,inputFactorOrder);
+				cerr << "\nRank " << rank << ", epoch " << epoch << ", input sentence " << *sid << ": \"";
+				sentence->Print(cerr);
+				cerr << "\"" << " (batch pos " << batchPosition << ")" << endl;
+				size_t current_input_length = (*sentence).GetSize();
+				
 				if (epoch == 0 && (scaleByAvgInputLength || scaleByAvgInverseLength)) {
 					sumOfInputs += current_input_length;
 					++numberOfInputs;
@@ -1515,9 +1507,9 @@ int main(int argc, char** argv) {
 				if (feature_confidence) {
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", apply feature learning rates with decays " << decay_core << "/" << decay_sparse << ": " << featureLearningRates << endl;
 				  if (sample) {
-				    cerr << "Rank " << rank << ", epoch " << epoch << ", feature values before: " << featureValuesHopeSample[0][0] << endl;
+				    //cerr << "Rank " << rank << ", epoch " << epoch << ", feature values before: " << featureValuesHopeSample[0][0] << endl;
 				    applyPerFeatureLearningRates(featureValuesHopeSample, featureLearningRates, sparse_r0);
-				    cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
+				    //cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
 				    applyPerFeatureLearningRates(featureValuesFearSample, featureLearningRates, sparse_r0);
 				  }
 				  else {
@@ -1531,9 +1523,9 @@ int main(int argc, char** argv) {
 				  cerr << "Rank " << rank << ", epoch " << epoch << ", apply fixed learning rates, core: " << core_r0 << ", sparse: " << sparse_r0 << endl;
 				  if (core_r0 != 1.0 || sparse_r0 != 1.0) {
 				    if (sample) {
-				      cerr << "Rank " << rank << ", epoch " << epoch << ", feature values before: " << featureValuesHopeSample[0][0] << endl;
+				      //cerr << "Rank " << rank << ", epoch " << epoch << ", feature values before: " << featureValuesHopeSample[0][0] << endl;
 				      applyLearningRates(featureValuesHopeSample, core_r0, sparse_r0);
-				      cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
+				      //cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
 				      applyLearningRates(featureValuesFearSample, core_r0, sparse_r0);
                                     }
                                     else {
@@ -1652,7 +1644,7 @@ int main(int argc, char** argv) {
 
 				if (update_status == 0) {	 // if weights were updated
 					// apply weight update
-				        cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
+				        //cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
 					
 					if (feature_confidence) {
 					  // update confidence counts based on weight update
@@ -1689,7 +1681,7 @@ int main(int argc, char** argv) {
 
 					// set new Moses weights
 					decoder->setWeights(mosesWeights);
-					cerr << "Rank " << rank << ", epoch " << epoch << ", new weights: " << mosesWeights << endl;
+					//cerr << "Rank " << rank << ", epoch " << epoch << ", new weights: " << mosesWeights << endl;
 
 					// adjust bleu weight
 					if (bleu_weight_lm_adjust) {

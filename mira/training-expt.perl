@@ -367,14 +367,18 @@ while(1) {
 	}	
     }
     
-    my $expected_num_files = $epochs*$weight_dump_frequency;
+    my $expected_num_files = ($epoch+1)*$weight_dump_frequency;
     if ($wait_for_bleu) {
 	print STDERR "Expected number of BLEU files: $expected_num_files \n";
     }
     if (-e "$working_dir/stopping") {
-	wait_for_bleu($expected_num_files) if ($wait_for_bleu);
-	
+	wait_for_bleu($expected_num_files, $working_dir) if ($wait_for_bleu);
 	print STDERR "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
+        exit 0;
+    }
+    elsif (-e "$working_dir/finished") {
+	wait_for_bleu($expected_num_files, $working_dir) if ($wait_for_bleu);
+	print STDERR "Training finished at " . scalar(localtime()) . " because maximum number of epochs was reached.\n";
         exit 0;
     }
     else {
@@ -385,10 +389,14 @@ while(1) {
 	    }
 	}
 	if (! -e $new_weight_file ) {
-	    if (-e "$working_dir/stopping" or -e "$working_dir/finished") {
-		wait_for_bleu($expected_num_files) if ($wait_for_bleu);
-		
-		print STDERR "Training finished at " . scalar(localtime()) . "\n";
+	    if (-e "$working_dir/stopping") {
+		wait_for_bleu($expected_num_files, $working_dir) if ($wait_for_bleu);
+		print STDERR "Training finished at " . scalar(localtime()) . " because stopping criterion was reached.\n";
+		exit 0;
+	    }
+	    elsif (-e "$working_dir/finished") {
+		wait_for_bleu($expected_num_files, $working_dir) if ($wait_for_bleu);
+		print STDERR "Training finished at " . scalar(localtime()) . " because maximum number of epochs was reached.\n";
 		exit 0;
 	    }
 	    else {
@@ -419,12 +427,14 @@ while(1) {
 
 sub wait_for_bleu() {
     my $expected_num_files = $_[0];
+    my $working_dir = $_[1];
     print STDERR "Waiting for $expected_num_files bleu files..\n";
-    my @bleu_files = glob("*.bleu");
+    print STDERR "Path: $working_dir/*.bleu \n";
+    my @bleu_files = glob("$working_dir/*.bleu");
     while (scalar(@bleu_files) < $expected_num_files) {
 	sleep 30;
-	@bleu_files = glob("*.bleu");
-	#print STDERR "currently have ".(scalar(@bleu_files))."\n";
+	@bleu_files = glob("$working_dir/*.bleu");
+	print STDERR "currently have ".(scalar(@bleu_files))."\n";
     }
     print STDERR "$expected_num_files BLEU files completed, continue.\n"; 
 }
