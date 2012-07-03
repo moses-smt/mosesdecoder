@@ -113,6 +113,8 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
       scores.push_back(ScoreFactory(score));
       // move out of target namespace
       --ex;
+
+      cerr << tgtPhrase << " ||| " << score << endl;
     }
     VW::finish(vwInstance.m_vw);
   } else {
