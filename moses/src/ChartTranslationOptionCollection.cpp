@@ -70,6 +70,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
       ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
     }
+  }
 
 
     //damt hiero : if we use context features then : For each translation option :
@@ -92,6 +93,12 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         std::string sourceSide = "";
         std::string targetRepresentation;
         TargetPhraseCollection::const_iterator itr_targets;
+
+        //map source to accumulated target phrases
+         RuleMap ruleMap;
+
+         //Map target representation to targetPhrase
+         std::map<std::string,TargetPhrase*> targetRepMap;
 
         for(
             itr_targets = transOpt.GetTargetPhraseCollection().begin();
@@ -136,37 +143,34 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                     targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
                 }
             }
-            //accumulate target phrases
-            RuleMap ruleMap;
             ruleMap.AddRule(sourceSide,targetRepresentation);
 
-            //Map target representation to targetPhrase
-            std::map<std::string,TargetPhrase*> targetRepMap;
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
         }
         //map is done, iterate over and call vw
-        std::map<std::string,std::string>::const_iterator itr_ruleMap;
-        for(itr_ruleMap = RuleMap.begin(); itr_ruleMap != RuleMap.end(); itr_ruleMap++)
+        RuleMap::const_iterator itr_ruleMap;
+        for(itr_ruleMap = ruleMap.begin(); itr_ruleMap != ruleMap.end(); itr_ruleMap++)
         {
-            LeftContextScoreProducer *lcsp = StaticData::Instance().GetCellContextScoreProducer();
-            CHECK(lcsp != NULL);
+            CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
+            CHECK(ccsp != NULL);
             //score vector is for vector of target representations
-            vector<ScoreComponentCollection> scores = lcsp->ScoreRules(itr_ruleMap->first,itr_ruleMap->second,m_source);
+            vector<ScoreComponentCollection> scores = ccsp->ScoreRules(itr_ruleMap->first,itr_ruleMap->second,m_source);
             std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
-            std::vector<std::string> itr_targetRep;
+            std::vector<std::string> :: iterator itr_targetRep;
 
             //get target phrases from representation and add score to breakdown
-            for (itr_targetRep = (itr_ruleMap->second).begin() ; itr_targetRep != (itr_ruleMap->second).end() ; itr_targetRep++) {
+            for (itr_targetRep = (itr_ruleMap->second)->begin() ; itr_targetRep != (itr_ruleMap->second)->end() ; itr_targetRep++) {
                 CHECK(iterLCSP != scores.end());
                 //Find target phrase corresponding to representation
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
                 itr_rep = targetRepMap.find(*itr_targetRep);
                 CHECK(itr_rep != targetRepMap.end());
-                (itr_rep.second)->AddStatelessScore(*iterLCSP++);
+                (itr_rep->second)->AddStatelessScore(*iterLCSP++);
                 }
         }
         transOpt.CalcEstimateOfBestScore();
     }
+    #endif
 
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();

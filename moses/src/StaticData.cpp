@@ -49,6 +49,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread.hpp>
 #endif
 
+#ifdef HAVE_VW
+#include "CellContextScoreProducer.h"
+#endif
+
 using namespace std;
 
 namespace Moses
@@ -69,25 +73,6 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
   for (vector<size_t>::const_iterator i=z.begin(); i != z.end(); ++i)
     if (*i > max) max = *i;
   return max;
-}
-
-//Load Cell Context feature
-bool StaticData::LoadCellContextScoreProducer()
-{
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lc"));
-  const vector<string> &file = m_parameter->GetParam("lc-model-file");
-
-  if (weight.size() != file.size())
-   {
-     // mismatch in number of weights and file, write some error message
-     return false;
-   }
-
-  if (weight.size() == 1) // check if feature is used
-    {
-      m_cellContext = new CellContextScoreProducer(weight[0],file[0]); // create the feature
-    }
-   return true;
 }
 
 
@@ -428,10 +413,20 @@ bool StaticData::LoadData(Parameter *parameter)
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
 
-
-  //context-dependent decoding
-  m_cellContextDecoding = (m_parameter->GetParam("sentence-cell-context").size() > 0) ?
-                            Scan<size_t>(m_parameter->GetParam("sentence-cell-context")[0]) : -1;
+#ifdef HAVE_VW
+  if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
+    if (m_parameter->GetParam("rule-index").size() <= 0) {
+      UserMessage::Add(string("--rule-index not specified"));
+      return false;
+    }
+    float PSDWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
+    m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, PSDWeight);
+    if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
+      m_parameter->GetParam("rule-index")[0])) {
+      return false;
+    }
+  }
+#endif // HAVE_VW
 
   m_threadCount = 1;
   const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
@@ -612,10 +607,11 @@ bool StaticData::LoadData(Parameter *parameter)
     //Instigate dictionary loading
     m_translationSystems.find(config[0])->second.ConfigDictionaries();
 
+#ifdef HAVE_VW
     //Register Cell Context feature in manager
     if(m_cellContext != NULL)
     m_translationSystems.find(config[0])->second.AddFeatureFunction(m_cellContext);
-
+#endif
 
     //Add any other features here.
 #ifdef HAVE_SYNLM
@@ -675,8 +671,10 @@ StaticData::~StaticData()
 
   //delete m_parameter;
 
+#ifdef HAVE_VW
   // delete cell context feature
   delete m_cellContext;
+#endif
 
   // memory pools
   Phrase::FinalizeMemPool();

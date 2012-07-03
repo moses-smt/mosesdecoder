@@ -7,6 +7,8 @@
 #include "WordsRange.h"
 #include "TranslationOption.h"
 #include "Util.h"
+#include "vw.h"
+#include "ezexample.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -25,14 +27,6 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
   weights.push_back(weight);
   m_srcFactors.push_back(0);
   m_tgtFactors.push_back(0);
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
-}
-
-CellContextScoreProducer::CellContextScoreProducer(float weight)
-{
-  const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-  vector<float> weights;
-  weights.push_back(weight);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
@@ -59,7 +53,7 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 
 vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                       const std::string &sourceSide,
-                                                                      const std::vector<std::string> &targetRepresentations,
+                                                                      std::vector<std::string> * targetRepresentations,
                                                                       const InputType source
                                                                       )
 {
@@ -77,7 +71,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
    std::vector<std::string> itr_targ_rep;
   // get scores for all possible translations
-  for (itr_targ_rep = targetRepresentations.begin(); itr_targ_rep != targetRepresentations.end(); itr_targ_rep++) {
+  for (itr_targ_rep = targetRepresentations->begin(); itr_targ_rep != targetRepresentations->end(); itr_targ_rep++) {
     string tgtRep = *itr_targ_rep;
 
     // set label to target phrase index

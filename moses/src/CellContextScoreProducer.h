@@ -2,11 +2,10 @@
 #ifndef moses_CellContextScoreProducer_h
 #define moses_CellContextScoreProducer_h
 
-#include "vw.h"
-#include "ezexample.h"
 #include "FeatureFunction.h"
 #include "TargetPhrase.h"
 #include "TypeDef.h"
+#include "vw.h"
 #include "ScoreComponentCollection.h"
 #include <map>
 #include <string>
@@ -16,15 +15,22 @@ using namespace std;
 
 namespace Moses {
 
-  class CellContextScoreProducer : public StatelessFeatureFunction
+typedef std::map<std::string, size_t> RuleIndexType;
+
+struct VWInstance
+{
+  ::vw m_vw;
+};
+
+extern VWInstance vwInstance;
+
+class CellContextScoreProducer : public StatelessFeatureFunction
 {
 
  public :
-
-
     vector<FactorType> m_srcFactors;
     vector<FactorType> m_tgtFactors;
-    CellContextScoreProducer(float weight);
+    CellContextScoreProducer(ScoreIndexManager &sci, float weight);
 
     // mandatory methods for features
     std::string GetScoreProducerDescription(unsigned) const;
@@ -36,10 +42,11 @@ namespace Moses {
     bool Initialize(const string &modelFile, const string &indexFile);
 
     // load index between
-    bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
+    bool LoadRuleIndex(const string &indexFile);
 
-    vector<ScoreComponentCollection> ScoreOptions(const vector<ChartTranslationOption *> &options,
-    const InputType &source);
+    vector<ScoreComponentCollection> ScoreRules(    const std::string &sourceSide,
+                                                    std::vector<std::string> *targetRepresentations,
+                                                    const InputType &source);
   };
 }//end of namespace
 
