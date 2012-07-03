@@ -107,6 +107,10 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
         ex.addf(*fIt);
       }
 
+//      cerr << SPrint(m_phraseIndex[tgtPhrase]) << " |s "
+//        << Join(" ", sourceFeatures) << " |t "
+//        << Join(" ", targetFeatures) << endl;
+
       // get prediction
       float score = 1 / (1 + exp(-ex()));
       sum += score;
@@ -114,9 +118,9 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
       // move out of target namespace
       --ex;
 
-      cerr << tgtPhrase << " ||| " << score << endl;
+//      cerr << tgtPhrase << " ||| " << score << endl;
     }
-    VW::finish(vwInstance.m_vw);
+//    VW::finish(vwInstance.m_vw);
   } else {
     for (size_t i = 0; i < options.size(); i++) {
       scores.push_back(ScoreFactory(0));
