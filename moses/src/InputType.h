@@ -45,9 +45,11 @@ class InputType
 {
 protected:
   long m_translationId; 	//< contiguous Id
+  long m_documentId;
   bool m_hasMetaData;
   long m_segId;
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
+  std::string m_textType;
 
 public:
 
@@ -68,6 +70,18 @@ public:
   void SetTranslationId(long translationId) {
     m_translationId = translationId;
   }
+  long GetDocumentId() const {
+    return m_documentId;
+  }
+  void SetDocumentId(long documentId) {
+    m_documentId = documentId;
+  }  
+  std::string GetTextType() const {
+    return m_textType;
+  }
+  void SetTextType(std::string type) {
+    m_textType = type;
+  }  
   //! returns the number of words moved
   virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 

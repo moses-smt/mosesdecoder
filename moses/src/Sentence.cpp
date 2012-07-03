@@ -92,6 +92,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("id") != meta.end()) {
     this->SetTranslationId(atol(meta["id"].c_str()));
   }
+  if (meta.find("docid") != meta.end()) {
+    this->SetDocumentId(atol(meta["docid"].c_str()));
+  }
 
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
@@ -180,7 +183,7 @@ Sentence::CreateTranslationOptionCollection(const TranslationSystem* system) con
 }
 void Sentence::Print(std::ostream& out) const
 {
-  out<<*static_cast<Phrase const*>(this)<<"\n";
+  out<<*static_cast<Phrase const*>(this);
 }
 
 
