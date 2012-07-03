@@ -52,6 +52,10 @@ public:
   }
 private:
   bool LoadPhraseIndex(const string &indexFile);
+  bool IsOOV(const TargetPhrase &tgtPhrase);
+  ScoreComponentCollection ScoreFactory(float score);
+  vector<string> GetSourceFeatures(const InputType &srcSentence, const Phrase *srcPhrase);
+  vector<string> GetTargetFeatures(const Phrase &tgtPhrase);
 
   std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
   PhraseIndexType m_phraseIndex;
