@@ -148,14 +148,14 @@ Parameter::Parameter()
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   //Choice to perform or not cell-context dependent decoding
 
-  #ifdef HAVE_VW
+//  #ifdef HAVE_VW
   AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
   //Weight of cell-context dependent feature
   AddParam("weight-lc", "wlc", "weight for cell context feature");
   //File to load cell-context dependent feature;
   AddParam("lc-model-file", "lcm", "file for cell context feature");
   AddParam("rule-index", "rli", "file with indexes of targetRepresentations of rules");
-  #endif
+//  #endif
 }
 
 Parameter::~Parameter()

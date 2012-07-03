@@ -46,8 +46,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
-//Cell Context feature function
-#include "CellContextScoreProducer.h"
 
 namespace Moses
 {

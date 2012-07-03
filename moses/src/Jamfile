@@ -28,7 +28,8 @@ if [ option.get "with-synlm" : no : yes ] = yes
 lib moses_internal :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp CellContextScoreProducer.cpp ]
-ccsc synlm ThreadPool headers ;
+synlm ccsc ThreadPool headers ;
+
 
 alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
 

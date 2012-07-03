@@ -80,7 +80,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         //4. Call vw
         //5. Store new score in each targetPhrase
         //6. Re-estimate score of this translation option
-    #ifdef HAVE_VW
+//    #ifdef HAVE_VW
     vector<FactorType> srcFactors;
     srcFactors.push_back(0);
 
@@ -170,7 +170,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         }
         transOpt.CalcEstimateOfBestScore();
     }
-    #endif
+//    #endif // HAVE_VW
 
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();

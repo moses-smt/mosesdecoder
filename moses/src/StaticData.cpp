@@ -49,9 +49,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread.hpp>
 #endif
 
-#ifdef HAVE_VW
+// #ifdef HAVE_VW
 #include "CellContextScoreProducer.h"
-#endif
+// #endif
 
 using namespace std;
 
@@ -413,7 +413,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
 
-#ifdef HAVE_VW
+// #ifdef HAVE_VW
   if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
     if (m_parameter->GetParam("rule-index").size() <= 0) {
       UserMessage::Add(string("--rule-index not specified"));
@@ -426,7 +426,7 @@ bool StaticData::LoadData(Parameter *parameter)
       return false;
     }
   }
-#endif // HAVE_VW
+// #endif // HAVE_VW
 
   m_threadCount = 1;
   const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
@@ -607,11 +607,11 @@ bool StaticData::LoadData(Parameter *parameter)
     //Instigate dictionary loading
     m_translationSystems.find(config[0])->second.ConfigDictionaries();
 
-#ifdef HAVE_VW
+// #ifdef HAVE_VW
     //Register Cell Context feature in manager
     if(m_cellContext != NULL)
     m_translationSystems.find(config[0])->second.AddFeatureFunction(m_cellContext);
-#endif
+// #endif
 
     //Add any other features here.
 #ifdef HAVE_SYNLM
@@ -671,10 +671,10 @@ StaticData::~StaticData()
 
   //delete m_parameter;
 
-#ifdef HAVE_VW
+// #ifdef HAVE_VW
   // delete cell context feature
   delete m_cellContext;
-#endif
+// #endif
 
   // memory pools
   Phrase::FinalizeMemPool();
