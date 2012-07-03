@@ -61,7 +61,11 @@ ChartCell::~ChartCell()
   delete m_sourceWordLabel;
 }
 
-/** Add the given hypothesis to the cell */
+/** Add the given hypothesis to the cell. 
+ *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
+ *  This function just calls the correspondind AddHypothesis() in ChartHypothesisCollection
+ *  \param hypo Hypothesis to be added
+ */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {
   const Word &targetLHS = hypo->GetTargetLHS();
@@ -119,7 +123,7 @@ void ChartCell::SortHypotheses()
   }
 }
 
-/** Return the highest scoring hypothesis in the cell from the all the hypo collection */
+/** Return the highest scoring hypothesis out of all the  hypo collection in this cell */
 const ChartHypothesis *ChartCell::GetBestHypothesis() const
 {
   const ChartHypothesis *ret = NULL;

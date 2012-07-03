@@ -67,8 +67,11 @@ protected:
 
   unsigned m_id; /* pkoehn wants to log the order in which hypotheses were generated */
 
-  ChartHypothesis(); // not implemented
-  ChartHypothesis(const ChartHypothesis &copy); // not implemented
+  //! not implemented
+  ChartHypothesis(); 
+  
+  //! not implemented
+  ChartHypothesis(const ChartHypothesis &copy);
 
 public:
 #ifdef USE_HYPO_POOL
@@ -129,9 +132,11 @@ public:
   void CleanupArcList();
   void SetWinningHypo(const ChartHypothesis *hypo);
 
+  //! get the unweighted score for each feature function
   const ScoreComponentCollection &GetScoreBreakdown() const 
   { return m_scoreBreakdown; }
   
+  //! Get the weighted total score
   float GetTotalScore() const 
   { return m_totalScore; }
 
@@ -144,7 +149,7 @@ public:
 		return m_prevHypos[pos];
 	}
   
-  //! get the LHS non-term for this particular rule
+  //! get the constituency label that covers this hypo
   const Word &GetTargetLHS() const {
     return GetCurrTargetPhrase().GetTargetLHS();
   }

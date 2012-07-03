@@ -179,7 +179,7 @@ void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
 
 /** prune number of hypo to a particular number of hypos, specified by m_maxHypoStackSize, according to score
   * Don't prune of hypos have identical scores on the boundary, so occasionally number of hypo can remain above m_maxHypoStackSize.
-  * \param manager pointer back to manager. Used for collecting stats
+  * \param manager reference back to manager. Used for collecting stats
  */
 void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 {
