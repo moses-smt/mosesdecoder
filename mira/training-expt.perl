@@ -367,7 +367,7 @@ while(1) {
 	}	
     }
     
-    my $expected_num_files = ($epoch+1)*$weight_dump_frequency;
+    my $expected_num_files = $epoch*$weight_dump_frequency;
     if ($wait_for_bleu) {
 	print STDERR "Expected number of BLEU files: $expected_num_files \n";
     }

@@ -33,6 +33,7 @@ void HypothesisQueue::Push(BleuIndexPair hypo) {
 
   if (m_capacity == 0 || m_queue.size() < m_capacity) {
     ret = m_queue.insert(hypo);
+    //m_queue.insert(hypo);
   } else if (hypo.first > (*(m_queue.rbegin())).first) {
     // Remove the worst-scoring item from the queue and insert hypo (only erase item if new item was successfully added )
     ret = m_queue.insert(hypo);
@@ -41,6 +42,11 @@ void HypothesisQueue::Push(BleuIndexPair hypo) {
       --p;
       m_queue.erase(p);
     }
+    // with multisets we do not have to check whether the item was successfully added
+    /*m_queue.insert(hypo);
+    HypoQueueType::iterator p = m_queue.end();
+    --p;
+    m_queue.erase(p);*/
   } else {
     // The hypo is unusable: the queue is full and hypo has a worse (or
     // equal) score than the worst-scoring item already held.

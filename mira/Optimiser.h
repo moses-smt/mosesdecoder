@@ -100,29 +100,6 @@ namespace Mira {
       						  size_t rank,
       						  size_t epoch,
       						  int updatePosition = -1);
-     size_t updateWeightsHopeFearSelective(Moses::ScoreComponentCollection& weightUpdate,
-					  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-					  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-					  const std::vector<std::vector<float> >& bleuScoresHope,
-					  const std::vector<std::vector<float> >& bleuScoresFear,
-					  const std::vector<std::vector<float> >& modelScoresHope,
-					  const std::vector<std::vector<float> >& modelScoresFear,
-					  float learning_rate,
-					  size_t rank,
-					  size_t epoch,
-					  int updatePosition = -1);
-     size_t updateWeightsHopeFearSummed(Moses::ScoreComponentCollection& weightUpdate,
-					  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesHope,
-					  const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValuesFear,
-					  const std::vector<std::vector<float> >& bleuScoresHope,
-					  const std::vector<std::vector<float> >& bleuScoresFear,
-					  const std::vector<std::vector<float> >& modelScoresHope,
-					  const std::vector<std::vector<float> >& modelScoresFear,
-					  float learning_rate,
-					  size_t rank,
-					  size_t epoch,
-					  bool rescaleSlack,
-					  bool makePairs);
      size_t updateWeightsAnalytically(Moses::ScoreComponentCollection& weightUpdate,
     		 Moses::ScoreComponentCollection& featureValuesHope,
     		 Moses::ScoreComponentCollection& featureValuesFear,
@@ -140,13 +117,6 @@ namespace Mira {
     		 float learning_rate,
     		 size_t rank,
     		 size_t epoch);
-     size_t updateWeightsRankModelSummed(Moses::ScoreComponentCollection& weightUpdate,
-				   const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
-				   const std::vector<std::vector<float> >& bleuScores,
-				   const std::vector<std::vector<float> >& modelScores,
-				   float learning_rate,
-				   size_t rank,
-				   size_t epoch);
 
      void setSlack(float slack) {
     	 m_slack = slack;
