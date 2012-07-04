@@ -74,3 +74,4 @@ unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_fram
 install legacy : programs : <location>. ;
 
 lib bleu_lib : BleuScorer.cpp mert_lib : : : <include>. ;
+

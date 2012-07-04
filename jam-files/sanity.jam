@@ -158,9 +158,11 @@ if [ option.get "git" : : "yes" ] {
 prefix = [ option.get "prefix" ] ;
 if $(prefix) {
   prefix = [ path.root $(prefix) [ path.pwd ] ] ;
+  prefix = $(prefix)$(GITTAG) ;
 } else {
-  prefix = $(TOP)/dist$(GITTAG) ;
+  prefix = $(TOP)$(GITTAG) ;
 }
+
 rule install-bin-libs ( deps * ) {
   local bindir = [ option.get "bindir" : $(prefix)/bin ] ;
   local libdir = [ option.get "libdir" : $(prefix)/lib ] ;

@@ -1,7 +1,6 @@
 #See ../Jamroot for options.  
 import option path ;
 
-build-project ems/biconcor ;
 build-project training ;
 
 with-giza = [ option.get "with-giza" ] ;
@@ -27,7 +26,7 @@ if $(with-giza) {
   check-for-bin mkcls ;
 } else {
   if $(CLEANING) = no {
-    echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza-pp" ;
+    #echo "If you want scripts/training/train-model.perl, pass --with-giza=/path/to/giza-pp" ;
   }
   constant WITH-GIZA : "no" ;
 }

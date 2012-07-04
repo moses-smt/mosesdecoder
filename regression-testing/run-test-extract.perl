@@ -53,7 +53,7 @@ my $truthPath = "$test_dir/$test_name/truth/";
 
 if (-e $outPath)
 {
-  my $cmd = "diff --exclude=.DS_Store $outPath/ $truthPath/ | wc -l";
+  my $cmd = "diff --exclude=.DS_Store --exclude=._* $outPath/ $truthPath/ | wc -l";
   my $numDiff = `$cmd`;
 
   if ($numDiff == 0)
