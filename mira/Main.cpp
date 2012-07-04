@@ -115,7 +115,6 @@ int main(int argc, char** argv) {
   bool avgRefLength;
   bool print_weights, print_core_weights, clear_static, debug_model, scale_lm, scale_wp;
   float scale_lm_factor, scale_wp_factor;
-  bool sample;
   string moses_src;
   float sigmoidParam;
   float bleuWeight, bleuWeight_hope, bleuWeight_fear;
@@ -211,7 +210,6 @@ int main(int argc, char** argv) {
     ("rank-only", po::value<bool>(&rank_only)->default_value(false), "Use only model translations for optimisation")
     ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
     ("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")	       
-    ("sample", po::value<bool>(&sample)->default_value(false), "Sample a translation pair from hope/(model)/fear translations") 
     ("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale BLEU by (history of) inverse input length")
     ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale BLEU by (history of) input length")
     ("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by average input length")
@@ -463,8 +461,6 @@ int main(int argc, char** argv) {
 	if (rank_n == -1)
 	  rank_n = n;
 
-	if (sample)
-	  model_hope_fear = true;
 	if (model_hope_fear || hope_model || rank_only || megam)
 	  hope_fear = false; // is true by default
 	if (learner == "mira" && !(hope_fear || hope_model || model_hope_fear || rank_only || megam)) {
@@ -667,12 +663,12 @@ int main(int argc, char** argv) {
 			vector<vector<float> > modelScores;
 
 			// variables for hope-fear/perceptron setting
-			vector<vector<ScoreComponentCollection> > featureValuesHope, featureValuesHopeSample;
-			vector<vector<ScoreComponentCollection> > featureValuesFear, featureValuesFearSample;
-			vector<vector<float> > bleuScoresHope, bleuScoresHopeSample;
-			vector<vector<float> > bleuScoresFear, bleuScoresFearSample;
-			vector<vector<float> > modelScoresHope, modelScoresHopeSample;
-			vector<vector<float> > modelScoresFear, modelScoresFearSample;
+			vector<vector<ScoreComponentCollection> > featureValuesHope;
+			vector<vector<ScoreComponentCollection> > featureValuesFear;
+			vector<vector<float> > bleuScoresHope;
+			vector<vector<float> > bleuScoresFear;
+			vector<vector<float> > modelScoresHope;
+			vector<vector<float> > modelScoresFear;
 			
 			// get moses weights
 			ScoreComponentCollection mosesWeights = decoder->getWeights();
@@ -690,7 +686,6 @@ int main(int argc, char** argv) {
 			string nbestFileMegam, referenceFileMegam;
 			vector<size_t>::const_iterator current_sid_start = sid;
 			size_t examples_in_batch = 0;
-			bool skip_sample = false;
 			for (size_t batchPosition = 0; batchPosition < batchSize && sid
 			    != shard.end(); ++batchPosition) {
 				string input;
@@ -1006,7 +1001,7 @@ int main(int argc, char** argv) {
 			} // end of batch loop
 
 			
-			if (examples_in_batch == 0 || (sample && skip_sample)) {
+			if (examples_in_batch == 0) {
 			  cerr << "Rank " << rank << ", epoch " << epoch << ", batch is empty." << endl;
 			}
 			else {
@@ -1033,13 +1028,7 @@ int main(int argc, char** argv) {
 				// print out the feature values
 				if (print_feature_values) {
 					cerr << "\nRank " << rank << ", epoch " << epoch << ", feature values: " << endl;
-					if (sample) {
-						cerr << "hope: " << endl;
-						printFeatureValues(featureValuesHopeSample);
-						cerr << "fear: " << endl;
-						printFeatureValues(featureValuesFearSample);
-					}
-					else if (model_hope_fear || rank_only) printFeatureValues(featureValues);
+					if (model_hope_fear || rank_only) printFeatureValues(featureValues);
 					else {
 						cerr << "hope: " << endl;
 						printFeatureValues(featureValuesHope);
