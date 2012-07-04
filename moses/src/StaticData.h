@@ -110,7 +110,7 @@ protected:
   PhraseLengthFeature* m_phraseLengthFeature;
   TargetWordInsertionFeature* m_targetWordInsertionFeature;
   SourceWordDeletionFeature* m_sourceWordDeletionFeature;
-  WordTranslationFeature* m_wordTranslationFeature;
+  std::vector<WordTranslationFeature*> m_wordTranslationFeatures;
   float
   m_beamWidth,
   m_earlyDiscardingThreshold,

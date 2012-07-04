@@ -92,7 +92,7 @@ StaticData::StaticData()
   ,m_phraseLengthFeature(NULL)
   ,m_targetWordInsertionFeature(NULL)
   ,m_sourceWordDeletionFeature(NULL)
-  ,m_wordTranslationFeature(NULL)
+   //  ,m_wordTranslationFeature(NULL)
   ,m_numLinkParams(1)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
@@ -621,8 +621,12 @@ bool StaticData::LoadData(Parameter *parameter)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
       if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName(0)) == 0)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
-      if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName(0)) == 0)
-        m_wordTranslationFeature->SetSparseFeatureReporting();
+      //      if (m_wordTranslationFeature && name.compare(m_wordTranslationFeature->GetScoreProducerWeightShortName(0)) == 0)
+      //       m_wordTranslationFeature->SetSparseFeatureReporting();
+      if (m_wordTranslationFeatures.size() > 0)
+      	for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
+	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerWeightShortName(0)) == 0)
+	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
         if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerWeightShortName(0)) == 0) {
           m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();          
@@ -734,8 +738,12 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_sourceWordDeletionFeature) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sourceWordDeletionFeature);
     }
-    if (m_wordTranslationFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_wordTranslationFeature);
+    //    if (m_wordTranslationFeature) {
+    //  m_translationSystems.find(config[0])->second.AddFeatureFunction(m_wordTranslationFeature);
+    //}
+    if (m_wordTranslationFeatures.size() > 0) {
+      for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
+    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_wordTranslationFeatures[i]);
     }
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
@@ -786,12 +794,13 @@ bool StaticData::LoadData(Parameter *parameter)
     }
 
     // WT: apply additional weight to sparse features if applicable
-    if (m_wordTranslationFeature) {
-    	float weight = m_wordTranslationFeature->GetSparseProducerWeight();
-    	if (weight != 1) {
-    		extraWeights.MultiplyEquals(m_wordTranslationFeature, weight);
-    		cerr << "Set wt sparse producer weight: " << weight << endl;
-    	}
+    //if (m_wordTranslationFeature) {
+    for (size_t i = 0; i < m_wordTranslationFeatures.size(); ++i) {
+      float weight = m_wordTranslationFeatures[i]->GetSparseProducerWeight();
+      if (weight != 1) {
+	extraWeights.MultiplyEquals(m_wordTranslationFeatures[i], weight);
+	cerr << "Set wt sparse producer weight: " << weight << endl;
+      }
     }
     
     // PP: apply additional weight to sparse features if applicable
@@ -880,7 +889,9 @@ StaticData::~StaticData()
   delete m_phraseLengthFeature;
   delete m_targetWordInsertionFeature;
   delete m_sourceWordDeletionFeature;
-  delete m_wordTranslationFeature;
+  //delete m_wordTranslationFeature;
+  for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
+    delete m_wordTranslationFeatures[i];
   for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
   	delete m_globalLexicalModelsUnlimited[i];
 
@@ -1744,10 +1755,9 @@ bool StaticData::LoadPhrasePairFeature()
     return false;
   }
   vector<string> tokens = Tokenize(phrasePairFactors[0]);
-//  if (! (tokens.size() >= 1  && tokens.size() <= 4)) {
-  if (! (tokens.size() >= 1  && tokens.size() <= 5)) {
+  if (! (tokens.size() >= 1  && tokens.size() <= 6)) {
     UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
-    		"[simple source-trigger] [ignore-punctuation]");
+    		"[simple source-trigger] [ignore-punctuation] [filename-src]");
     return false;
   }
   
@@ -1761,21 +1771,26 @@ bool StaticData::LoadPhrasePairFeature()
   size_t targetFactorId = Scan<size_t>(factors[1]);
   bool simple = true, sourceContext = false, ignorePunctuation = false;
   if (tokens.size() >= 3) {
-  	simple = Scan<size_t>(tokens[1]);
-  	sourceContext = Scan<size_t>(tokens[2]);
+    simple = Scan<size_t>(tokens[1]);
+    sourceContext = Scan<size_t>(tokens[2]);
   }
-  if (tokens.size() == 4) 
-  	ignorePunctuation = Scan<size_t>(tokens[3]);
-  
-  // temporary
-  string filePath = "";
-  if (tokens.size() == 5)
-  	filePath = Scan<string>(tokens[4]);
-
+  if (tokens.size() >= 4) 
+    ignorePunctuation = Scan<size_t>(tokens[3]);
+ 
   m_phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext, 
-		  ignorePunctuation, filePath);
+					      ignorePunctuation);
   if (weight.size() > 0)
     m_phrasePairFeature->SetSparseProducerWeight(weight[0]);
+
+  // load word list 
+  if (tokens.size() == 5) {
+    string filenameSource = tokens[4];
+    cerr << "loading word translation word list from " << filenameSource << endl;
+    if (!m_phrasePairFeature->Load(filenameSource)) {
+      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
+      return false;
+    }
+  }
   return true;
 }
 
@@ -1877,51 +1892,64 @@ bool StaticData::LoadWordTranslationFeature()
   if (parameters.empty())
     return true;
 
-  if (parameters.size() != 1) {
+  /*if (parameters.size() != 1) {
     UserMessage::Add("Can only have one word-translation-feature");
     return false;
-  }
+    }*/
 
-  vector<string> tokens = Tokenize(parameters[0]);
-  if (tokens.size() != 1 && tokens.size() != 4 && tokens.size() != 5 && tokens.size() != 7) {
-    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src>-<factor-tgt> "
-    		"[simple source-trigger target-trigger] [ignore-punctuation] [filename-src filename-tgt]");
-    return false;
-  }
-
-  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-    UserMessage::Add("Word translation feature needs word alignments in phrase table.");
-    return false;
-  }
-
-  // set factor
-  vector <string> factors = Tokenize(tokens[0],"-");
-  FactorType factorIdSource = Scan<size_t>(factors[0]);
-  FactorType factorIdTarget = Scan<size_t>(factors[1]);
-  
-  bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = false;
-  if (tokens.size() >= 4) {
-	simple = Scan<size_t>(tokens[1]);
-  	sourceTrigger = Scan<size_t>(tokens[2]);
-  	targetTrigger = Scan<size_t>(tokens[3]);
-  }
-  if (tokens.size() >= 5) {
-	  ignorePunctuation = Scan<size_t>(tokens[4]);
-  }
-
-  m_wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
-		  sourceTrigger, targetTrigger, ignorePunctuation);
-  if (weight.size() > 0)
-    m_wordTranslationFeature->SetSparseProducerWeight(weight[0]);
-
-  // load word list for restricted feature set
-  if (tokens.size() == 7) {
-    string filenameSource = tokens[5];
-    string filenameTarget = tokens[6];
-    cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
-    if (!m_wordTranslationFeature->Load(filenameSource, filenameTarget)) {
-      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+  for (size_t i=0; i<parameters.size(); ++i) {
+    //vector<string> tokens = Tokenize(parameters[0]);
+    vector<string> tokens = Tokenize(parameters[i]);
+    if (tokens.size() != 1 &&  !(tokens.size() >= 4 && tokens.size() <= 8)) {
+      UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src>-<factor-tgt> "
+		       "[simple source-trigger target-trigger] [ignore-punctuation] [filename-src] [filename-tgt]");
       return false;
+    }
+    
+    if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
+      UserMessage::Add("Word translation feature needs word alignments in phrase table.");
+      return false;
+    }
+    
+    // set factor
+    vector <string> factors = Tokenize(tokens[0],"-");
+    FactorType factorIdSource = Scan<size_t>(factors[0]);
+    FactorType factorIdTarget = Scan<size_t>(factors[1]);
+    
+    bool simple = true, sourceTrigger = false, targetTrigger = false, ignorePunctuation = false;
+    if (tokens.size() >= 4) {
+      simple = Scan<size_t>(tokens[1]);
+      sourceTrigger = Scan<size_t>(tokens[2]);
+      targetTrigger = Scan<size_t>(tokens[3]);
+    }
+    if (tokens.size() >= 5) {
+      ignorePunctuation = Scan<size_t>(tokens[4]);
+    }
+        
+    //m_wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
+    //							  sourceTrigger, targetTrigger, ignorePunctuation);
+    m_wordTranslationFeatures.push_back(new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
+							sourceTrigger, targetTrigger, ignorePunctuation));
+    if (weight.size() > i)
+      m_wordTranslationFeatures[i]->SetSparseProducerWeight(weight[i]);
+    
+    // load word list for restricted feature set
+    if (tokens.size() == 6) {
+      string filenameSource = tokens[5];
+      cerr << "loading word translation word lists from " << filenameSource << endl;
+      if (!m_wordTranslationFeatures[i]->Load(filenameSource, "")) {
+	UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
+	return false;
+      }
+    }
+    else if (tokens.size() == 7) {
+      string filenameSource = tokens[5];
+      string filenameTarget = tokens[6];
+      cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
+      if (!m_wordTranslationFeatures[i]->Load(filenameSource, filenameTarget)) {
+	UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+	return false;
+      }
     }
   }
 

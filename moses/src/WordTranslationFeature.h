@@ -22,11 +22,13 @@ namespace Moses
 class WordTranslationFeature : public StatelessFeatureFunction {
 
   typedef std::map< char, short > CharHash;
+  typedef std::vector< std::set<std::string> > DocumentVector;
 	
   struct ThreadLocalStorage
   {
     const Sentence *input;
   };
+
 
 private:
 #ifdef WITH_THREADS
@@ -49,7 +51,7 @@ private:
   
 public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
-			bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation):
+			       bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation):
      StatelessFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),

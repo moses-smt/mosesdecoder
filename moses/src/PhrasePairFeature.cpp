@@ -2,6 +2,7 @@
 #include "PhrasePairFeature.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -17,7 +18,42 @@ size_t PhrasePairFeature::GetNumInputScores() const
   return 0;
 }
 
-void PhrasePairFeature::InitializeForInput( Sentence const& in )
+  bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::string &filePathTarget*/) 
+{
+    // restricted source word vocabulary
+    ifstream inFileSource(filePathSource.c_str());
+    if (!inFileSource)
+      {
+	cerr << "could not open file " << filePathSource << endl;
+	return false;
+      }
+    
+    std::string line;
+    while (getline(inFileSource, line)) {
+      m_vocabSource.insert(line);
+    }
+    
+    inFileSource.close();
+    
+    /*  // restricted target word vocabulary
+    ifstream inFileTarget(filePathTarget.c_str());
+    if (!inFileTarget)
+    {
+      cerr << "could not open file " << filePathTarget << endl;
+      return false;
+    }
+
+    while (getline(inFileTarget, line)) {
+    m_vocabTarget.insert(line);
+    }
+
+    inFileTarget.close();*/
+
+    m_unrestricted = false;
+    return true;
+}
+
+  void PhrasePairFeature::InitializeForInput( Sentence const& in )
 {
   m_local.reset(new ThreadLocalStorage);
   m_local->input = &in;
@@ -54,14 +90,7 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
 		   namestr << targetFactor->GetString();
 	   }
 
-	   // temporary: limit training to particular phrases
-	   if (!m_unrestricted) {
-	  	 string feature = namestr.str();
-	  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )
-	  		 accumulator->SparsePlusEquals(feature,1);
-	   }
-	   else 
-	  	 accumulator->SparsePlusEquals(namestr.str(),1);	   
+	   accumulator->SparsePlusEquals(namestr.str(),1);	   
    }
    if (m_sourceContext) {
 	   const Sentence& input = *(m_local->input);
@@ -78,8 +107,8 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
 		  	}
 		   
 		   bool sourceTriggerExists = false;
-//		   if (!m_unrestricted)
-//			   sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+		   if (!m_unrestricted)
+		     sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
 
 		   if (m_unrestricted || sourceTriggerExists) {
 			   ostringstream namestr;
@@ -100,14 +129,7 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
 				   namestr << targetFactor->GetString();
 			   }
 			   
-			   // temporary:
-			   if (!m_unrestricted) {
-			  	 string feature = namestr.str();
-			  	 if (m_limitedFeatures.find(feature) != m_limitedFeatures.end() )
-			  		 accumulator->SparsePlusEquals(feature,1);
-			   }
-			   else
-			  	 accumulator->SparsePlusEquals(namestr.str(),1);
+			   accumulator->SparsePlusEquals(namestr.str(),1);
 		   }
 	   }
 	}

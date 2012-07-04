@@ -17,10 +17,11 @@ namespace Moses {
 class PhrasePairFeature: public StatelessFeatureFunction {
 	
 	typedef std::map< char, short > CharHash;
+	typedef std::vector< std::set<std::string> > DocumentVector;
 	
 	struct ThreadLocalStorage
 	{
-		const Sentence *input;
+	  const Sentence *input;
 	};
 	
 	private:
@@ -30,6 +31,8 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 	  std::auto_ptr<ThreadLocalStorage> m_local;
 #endif
 
+	  std::set<std::string> m_vocabSource;
+	  //std::set<std::string> m_vocabTarget;
 	  FactorType m_sourceFactorId;
 	  FactorType m_targetFactorId;
 	  bool m_unrestricted;
@@ -39,17 +42,15 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 	  bool m_ignorePunctuation;
 	  CharHash m_punctuationHash;
 	
-	  std::set<std::string> m_limitedFeatures;
-
   public:
 	  PhrasePairFeature (FactorType sourceFactorId, FactorType targetFactorId, 
-			  bool simple, bool sourceContext, bool ignorePunctuation, std::string filePath) :
+			     bool simple, bool sourceContext, bool ignorePunctuation) :
 				  StatelessFeatureFunction("pp", ScoreProducer::unlimited),
 	    m_sourceFactorId(sourceFactorId),
 	    m_targetFactorId(targetFactorId),
 	    m_unrestricted(true),
 	    m_simple(simple),
-	    m_sourceContext(sourceContext),	    
+	    m_sourceContext(sourceContext),		    
 	    m_sparseProducerWeight(1),
 	    m_ignorePunctuation(ignorePunctuation) {
 		  std::cerr << "Creating phrase pair feature.. " << std::endl;
@@ -62,26 +63,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 			  char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
 			  for (size_t i=0; i < sizeof(punctuation)-1; ++i)
 				  m_punctuationHash[punctuation[i]] = 1;
-		  }
-		  
-		  std::cerr << "done." << std::endl;
-
-		  // only temporary: features for restricted training
-		  if (!filePath.empty()) {
-		    std::cerr << "Loading features for restricted training.. ";
-		  	std::ifstream inFile(filePath.c_str());
-		  	if (!inFile)
-		  	{
-		      	std::cerr << "could not open file " << filePath << std::endl;
-			exit(1);
-		  	}
-
-		  	std::string line;
-		  	while (getline(inFile, line)) 
-			  m_limitedFeatures.insert(line);
-			inFile.close();
-		  	m_unrestricted = false;
-			std::cerr << "done." << std::endl;
 		  }		  
 	  }
 
@@ -101,6 +82,8 @@ class PhrasePairFeature: public StatelessFeatureFunction {
     
     std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumInputScores() const;
+
+    bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 
     void InitializeForInput( Sentence const& in );
     
