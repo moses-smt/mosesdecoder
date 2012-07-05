@@ -4,6 +4,18 @@
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
 # For other options see below or run 'mert-moses.pl --help'
 
+#
+# NB: This is a variant of of mert-moses.pl for use with the interpolated scorer
+# (MergeScorer) described in the following paper:
+# 
+# "Optimising Multiple Metrics with MERT" by Christophe Servan and Holger Schwenk,
+#   Prague Bulletin of Mathematical Linguistics 96 (2011) p109-117
+#   http://www-lium.univ-lemans.fr/~servan/publications/Servan_PBML_2011.pdf
+#
+# If you are not using MergeScorer, then you should use the mert-moses.pl script instead
+# 
+
+
 # Notes:
 # <foreign> and <english> should be raw text files, one sentence per line
 # <english> can be a prefix, in which case the files are <english>0, <english>1, etc. are used
