@@ -1904,7 +1904,7 @@ sub define_training_create_config {
     $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
 
     # sparse lexical features provide additional content for config file
-    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if defined($sparse_lexical_features);
+    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
 
     &create_step($step_id,$cmd);
 }
