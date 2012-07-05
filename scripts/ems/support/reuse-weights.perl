@@ -10,17 +10,27 @@ my ($weight_file) = @ARGV;
 
 my %WEIGHT;
 my $current_weight = "";
+my $weights_file_spec = "";
+my $weights_file_flag = 0;
 open(WEIGHT,$weight_file)
     || die("ERROR: could not open weight file: $weight_file");
 while(<WEIGHT>) {
-    if (/^\[weight\-(\S+)\]/) {
+    if (/^\[weight-file\]/) {
+      $weights_file_spec = "\n".$_;
+      $weights_file_flag = 1;
+    }
+    elsif (/^\[weight\-(\S+)\]/) {
 	$current_weight = $1;
     }
   elsif ($current_weight && /^(([\-\d\.]+)([Ee][+-]?[\d]+)?)$/) {
 	push @{$WEIGHT{$current_weight}},$1;
     }
+    elsif ($weights_file_flag && !/^\[/ && !/^\s*$/) {
+      $weights_file_spec .= $_;
+    }
     elsif (/^\[/) {
-	$current_weight = "";
+      $current_weight = "";
+      $weights_file_flag = 0;
     }
 }
 close(WEIGHT);
@@ -67,3 +77,6 @@ foreach my $weight (keys %WEIGHT) {
 	}
     }
 }
+
+print $weights_file_spec;
+

@@ -43,6 +43,7 @@
 #include "MiraWeightVector.h"
 
 using namespace std;
+using namespace MosesTuning;
 
 namespace po = boost::program_options;
 

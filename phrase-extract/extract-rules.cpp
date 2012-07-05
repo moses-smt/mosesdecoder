@@ -52,6 +52,7 @@
 #define LINE_MAX_LENGTH 500000
 
 using namespace std;
+using namespace MosesTraining;
 
 typedef vector< int > LabelIndex;
 typedef map< int, int > WordIndex;

@@ -5,6 +5,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   : m_dense(vec.dense)
 {
@@ -156,3 +160,6 @@ ostream& operator<<(ostream& o, const MiraFeatureVector& e)
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}
+

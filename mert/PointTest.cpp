@@ -7,6 +7,7 @@
 #include "Util.h"
 
 using namespace std;
+using namespace MosesTuning;
 
 BOOST_AUTO_TEST_CASE(point_operators) {
   const unsigned int dim = 5;

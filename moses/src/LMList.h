@@ -42,6 +42,22 @@ public:
   ~LMList();
 
   void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore,  ScoreComponentCollection* breakdown) const;
+  void InitializeBeforeSentenceProcessing() {
+    std::list<LanguageModel*>::iterator lm_iter;
+    for (lm_iter = m_coll.begin();
+         lm_iter != m_coll.end();
+         ++lm_iter) {
+        (*lm_iter)->InitializeBeforeSentenceProcessing();
+    }
+  }
+  void CleanUpAfterSentenceProcessing() {
+    std::list<LanguageModel*>::iterator lm_iter;
+    for (lm_iter = m_coll.begin();
+         lm_iter != m_coll.end();
+         ++lm_iter) {
+        (*lm_iter)->CleanUpAfterSentenceProcessing();
+    }
+  }
 
   void Add(LanguageModel *lm);
 

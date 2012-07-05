@@ -17,6 +17,10 @@
 
 #include "FeatureDataIterator.h"
 
+namespace MosesTuning
+{
+  
+
 typedef FeatureStatsType ValType;
 
 class MiraFeatureVector {
@@ -43,6 +47,8 @@ private:
   std::vector<ValType> m_sparseVals;
 };
 
+} // namespace
+
 #endif // MERT_FEATURE_VECTOR_H
 
 // --Emacs trickery--
@@ -50,3 +56,5 @@ private:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+

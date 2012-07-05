@@ -20,6 +20,10 @@ namespace {
 const int kAvailableSize = 8;
 } // namespace
 
+namespace MosesTuning
+{
+  
+
 SparseVector::name2id_t SparseVector::m_name_to_id;
 SparseVector::id2name_t SparseVector::m_id_to_name;
 
@@ -263,7 +267,6 @@ ostream& operator<<(ostream& o, const FeatureStats& e)
   return o;
 }
 
-//ADEED_BY_TS
 bool operator==(const FeatureStats& f1, const FeatureStats& f2) {
   size_t size = f1.size();
 
@@ -277,4 +280,5 @@ bool operator==(const FeatureStats& f1, const FeatureStats& f2) {
 
   return true;
 }
-//END_ADDED
+
+}

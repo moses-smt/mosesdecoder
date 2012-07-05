@@ -50,7 +50,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 using namespace Moses;
+using namespace MosesCmd;
 
+namespace MosesCmd
+{
 // output floats with three significant digits
 static const size_t PRECISION = 3;
 
@@ -323,6 +326,8 @@ static void ShowWeights()
   }
 }
 
+} //namespace
+
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
@@ -372,7 +377,7 @@ int main(int argc, char** argv)
     srand(time(NULL));
   
     // set up read/writing class
-    IOWrapper* ioWrapper = GetIODevice(staticData);
+    IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);

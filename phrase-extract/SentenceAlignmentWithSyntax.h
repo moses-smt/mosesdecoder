@@ -30,6 +30,9 @@
 #include "SentenceAlignment.h"
 #include "SyntaxTree.h"
 
+namespace MosesTraining
+{
+
 class SentenceAlignmentWithSyntax : public SentenceAlignment
 {
 public:
@@ -61,5 +64,7 @@ public:
   bool
   processSourceSentence(const char *, int);
 };
+
+}
 
 #endif
