@@ -74,10 +74,22 @@ vector<string> PSDScoreProducer::GetSourceFeatures(
   return out;
 }
 
-vector<string> PSDScoreProducer::GetTargetFeatures(const Phrase &tgtPhrase)
+vector<string> PSDScoreProducer::GetTargetFeatures(const TargetPhrase &tgtPhrase)
 {
   vector<string> out;
+
+  // target phrase as a feature
   out.push_back("p^" + Replace(tgtPhrase.GetStringRep(m_tgtFactors), " ", "_"));
+
+  // phrase-internal word pairs
+  const Phrase *srcPhrase = tgtPhrase.GetSourcePhrase();
+  const AlignmentInfo &alignInfo = tgtPhrase.GetAlignmentInfo();
+  AlignmentInfo::const_iterator it;
+  for (it = alignInfo.begin(); it != alignInfo.end(); it++) {
+    string srcWord = srcPhrase->GetWord(it->first).GetString(m_srcFactors, false);
+    string tgtWord = tgtPhrase.GetWord(it->second).GetString(m_tgtFactors, false);
+    out.push_back("wp^" + srcWord + "_" + tgtWord);
+  }
 
   return out;
 }
