@@ -45,9 +45,22 @@ ScoreComponentCollection PSDScoreProducer::ScoreFactory(float score)
 
 vector<string> PSDScoreProducer::GetSourceFeatures(
   const InputType &srcSent,
-  const Phrase *srcPhrase)
+  const TranslationOption *tOpt)
 {
   vector<string> out;
+  const Phrase *srcPhrase = tOpt->GetSourcePhrase();
+
+  // context features
+  for (size_t i = 1; i <= CONTEXT_SIZE; i++) {
+    if (tOpt->GetStartPos() >= i) {
+      out.push_back("0_-" + SPrint(i) + "_"
+          + srcSent.GetWord(tOpt->GetStartPos() - i).GetString(m_srcFactors, false));
+    }    
+    if (tOpt->GetEndPos() + i < srcSent.GetSize()) {
+      out.push_back("0_" + SPrint(i) + "_"
+          + srcSent.GetWord(tOpt->GetStartPos() + i).GetString(m_srcFactors, false));
+    }
+  }
 
   // bag of words features
   for (size_t i = 0; i < srcSent.GetSize(); i++) {
@@ -83,7 +96,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
   float sum = 0;
 
   if (! IsOOV(options[0]->GetTargetPhrase())) {
-    vector<string> sourceFeatures = GetSourceFeatures(source, options[0]->GetSourcePhrase());
+    vector<string> sourceFeatures = GetSourceFeatures(source, options[0]);
 
     // create VW example, add source-side features
     ezexample ex(&vwInstance.m_vw, false);

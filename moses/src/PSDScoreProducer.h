@@ -16,6 +16,7 @@
 namespace Moses
 {
 
+const size_t CONTEXT_SIZE = 2;
 typedef std::map<std::string, size_t> PhraseIndexType;
 
 struct VWInstance
@@ -54,7 +55,7 @@ private:
   bool LoadPhraseIndex(const string &indexFile);
   bool IsOOV(const TargetPhrase &tgtPhrase);
   ScoreComponentCollection ScoreFactory(float score);
-  vector<string> GetSourceFeatures(const InputType &srcSentence, const Phrase *srcPhrase);
+  vector<string> GetSourceFeatures(const InputType &srcSentence, const TranslationOption *tOpt);
   vector<string> GetTargetFeatures(const Phrase &tgtPhrase);
 
   std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
