@@ -93,13 +93,11 @@
     <ClCompile Include="src\IOWrapper.cpp" />
     <ClCompile Include="src\Main.cpp" />
     <ClCompile Include="src\mbr.cpp" />
-    <ClCompile Include="src\TranslationAnalysis.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="src\IOWrapper.h" />
     <ClInclude Include="src\Main.h" />
     <ClInclude Include="src\mbr.h" />
-    <ClInclude Include="src\TranslationAnalysis.h" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\moses\moses.vcxproj">
