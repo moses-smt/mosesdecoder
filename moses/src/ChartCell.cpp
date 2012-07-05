@@ -38,6 +38,10 @@ namespace Moses
 {
 extern bool g_debug;
 
+/** Constructor
+ * \param startPos endPos range of this cell
+ * \param manager pointer back to the manager 
+ */
 ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager)
   :m_coverage(startPos, endPos)
   ,m_sourceWordLabel(NULL)
@@ -57,14 +61,18 @@ ChartCell::~ChartCell()
   delete m_sourceWordLabel;
 }
 
-/** Add the given hypothesis to the cell */
+/** Add the given hypothesis to the cell. 
+ *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
+ *  This function just calls the correspondind AddHypothesis() in ChartHypothesisCollection
+ *  \param hypo Hypothesis to be added
+ */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {
   const Word &targetLHS = hypo->GetTargetLHS();
   return m_hypoColl[targetLHS].AddHypothesis(hypo, m_manager);
 }
 
-/** Pruning */
+/** Prune each collection in this cell to a particular size */
 void ChartCell::PruneToSize()
 {
   MapType::iterator iter;
@@ -103,9 +111,9 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   }
 }
 
+//! call SortHypotheses() in each hypo collection in this cell
 void ChartCell::SortHypotheses()
 {
-  // sort each mini cells & fill up target lhs list
   CHECK(m_targetLabelSet.Empty());
   MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
@@ -115,7 +123,7 @@ void ChartCell::SortHypotheses()
   }
 }
 
-/** Return the highest scoring hypothesis in the cell */
+/** Return the highest scoring hypothesis out of all the  hypo collection in this cell */
 const ChartHypothesis *ChartCell::GetBestHypothesis() const
 {
   const ChartHypothesis *ret = NULL;
@@ -136,6 +144,7 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
   return ret;
 }
 
+//! call CleanupArcList() in each hypo collection in this cell
 void ChartCell::CleanupArcList()
 {
   // only necessary if n-best calculations are enabled
@@ -148,6 +157,7 @@ void ChartCell::CleanupArcList()
   }
 }
 
+//! debug info - size of each hypo collection in this cell
 void ChartCell::OutputSizes(std::ostream &out) const
 {
   MapType::const_iterator iter;
@@ -159,6 +169,7 @@ void ChartCell::OutputSizes(std::ostream &out) const
   }
 }
 
+//! debug info - total number of hypos in all hypo collection in this cell
 size_t ChartCell::GetSize() const
 {
   size_t ret = 0;
@@ -172,6 +183,7 @@ size_t ChartCell::GetSize() const
   return ret;
 }
 
+//! call GetSearchGraph() for each hypo collection
 void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
 {
   MapType::const_iterator iterOutside;

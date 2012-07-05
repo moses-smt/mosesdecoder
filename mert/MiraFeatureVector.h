@@ -47,6 +47,8 @@ private:
   std::vector<ValType> m_sparseVals;
 };
 
+} // namespace
+
 #endif // MERT_FEATURE_VECTOR_H
 
 // --Emacs trickery--
@@ -55,4 +57,4 @@ private:
 // c-basic-offset:2
 // End:
 
-}
+

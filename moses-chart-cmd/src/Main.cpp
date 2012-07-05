@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+using namespace MosesChartCmd;
 
 /**
   * Translates a sentence.

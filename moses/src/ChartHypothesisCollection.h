@@ -77,9 +77,6 @@ protected:
   size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
-  /** add hypothesis to stack. Prune if necessary.
-   * Returns false if equiv hypo exists in collection, otherwise returns true
-   */
   std::pair<HCType::iterator, bool> Add(ChartHypothesis *hypo, ChartManager &manager);
 
 public:
@@ -97,9 +94,7 @@ public:
   ~ChartHypothesisCollection();
   bool AddHypothesis(ChartHypothesis *hypo, ChartManager &manager);
 
-  //! remove hypothesis pointed to by iterator but don't delete the object
   void Detach(const HCType::iterator &iter);
-  /** destroy Hypothesis pointed to by iterator (object pool version) */
   void Remove(const HCType::iterator &iter);
 
   void PruneToSize(ChartManager &manager);
@@ -114,10 +109,12 @@ public:
   void SortHypotheses();
   void CleanupArcList();
 
+  //! return vector of hypothesis that has been sorted by score
   const HypoList &GetSortedHypotheses() const {
     return m_hyposOrdered;
   }
 
+  //! return the best total score of all hypos in this collection
   float GetBestScore() const { return m_bestScore; }
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
