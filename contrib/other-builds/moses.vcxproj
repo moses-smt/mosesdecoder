@@ -23,8 +23,6 @@
     <ClInclude Include="..\..\moses\src\ChartHypothesisCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartManager.h" />
     <ClInclude Include="..\..\moses\src\ChartRuleLookupManager.h" />
-    <ClInclude Include="..\..\moses\src\ChartRuleLookupManagerMemory.h" />
-    <ClInclude Include="..\..\moses\src\ChartRuleLookupManagerOnDisk.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOption.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOptionCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOptionList.h" />
@@ -40,9 +38,6 @@
     <ClInclude Include="..\..\moses\src\DecodeStepGeneration.h" />
     <ClInclude Include="..\..\moses\src\DecodeStepTranslation.h" />
     <ClInclude Include="..\..\moses\src\Dictionary.h" />
-    <ClInclude Include="..\..\moses\src\DotChart.h" />
-    <ClInclude Include="..\..\moses\src\DotChartInMemory.h" />
-    <ClInclude Include="..\..\moses\src\DotChartOnDisk.h" />
     <ClInclude Include="..\..\moses\src\DummyScoreProducers.h" />
     <ClInclude Include="..\..\moses\src\DynSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\Factor.h" />
@@ -85,13 +80,9 @@
     <ClInclude Include="..\..\moses\src\PDTAimp.h" />
     <ClInclude Include="..\..\moses\src\Phrase.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionary.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionaryALSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryDynSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryMemory.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryNode.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionaryNodeSCFG.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionaryOnDisk.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionarySCFG.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryTree.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryTreeAdaptor.h" />
     <ClInclude Include="..\..\moses\src\PrefixTree.h" />
@@ -150,9 +141,6 @@
     <ClCompile Include="..\..\moses\src\ChartHypothesis.cpp" />
     <ClCompile Include="..\..\moses\src\ChartHypothesisCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartManager.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartRuleLookupManager.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartRuleLookupManagerMemory.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartRuleLookupManagerOnDisk.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOption.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOptionCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOptionList.cpp" />
@@ -167,9 +155,6 @@
     <ClCompile Include="..\..\moses\src\DecodeStepGeneration.cpp" />
     <ClCompile Include="..\..\moses\src\DecodeStepTranslation.cpp" />
     <ClCompile Include="..\..\moses\src\Dictionary.cpp" />
-    <ClCompile Include="..\..\moses\src\DotChart.cpp" />
-    <ClCompile Include="..\..\moses\src\DotChartInMemory.cpp" />
-    <ClCompile Include="..\..\moses\src\DotChartOnDisk.cpp" />
     <ClCompile Include="..\..\moses\src\DummyScoreProducers.cpp" />
     <ClCompile Include="..\..\moses\src\DynSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\Factor.cpp" />
@@ -207,13 +192,9 @@
     <ClCompile Include="..\..\moses\src\PCNTools.cpp" />
     <ClCompile Include="..\..\moses\src\Phrase.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionary.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionaryALSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryDynSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryMemory.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryNode.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionaryNodeSCFG.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionaryOnDisk.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionarySCFG.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryTree.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryTreeAdaptor.cpp" />
     <ClCompile Include="..\..\moses\src\PrefixTreeMap.cpp" />
