@@ -49,9 +49,12 @@ class ChartTranslationOption
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);
 
+  //!damt hiero : neeed to set estimate of best score when recomputing with context
+  void CalcEstimateOfBestScore();
+
   const StackVec &GetStackVec() const { return m_stackVec; }
 
-  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+  const TargetPhraseCollection &GetTargetPhraseCollection() const {
     return *m_targetPhraseCollection;
   }
 

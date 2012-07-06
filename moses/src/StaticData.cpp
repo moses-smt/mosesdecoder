@@ -419,8 +419,8 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add(string("--rule-index not specified"));
       return false;
     }
-    float PSDWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
-    m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, PSDWeight);
+    float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
+    m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
     if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
       m_parameter->GetParam("rule-index")[0])) {
       return false;

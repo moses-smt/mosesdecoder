@@ -28,6 +28,9 @@
 #include "Util.h"
 #include "RuleMap.h"
 
+#include "CellContextScoreProducer.h"
+
+
 using namespace std;
 
 namespace Moses
@@ -56,6 +59,8 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
   const WordsRange &wordsRange)
 {
 
+  //std::cout << "Creating translation options for range : " << wordsRange << std::endl;
+
   assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
 
   m_translationOptionList.Clear();
@@ -71,8 +76,6 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
       ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
     }
   }
-
-
     //damt hiero : if we use context features then : For each translation option :
         //1. Go through each target phrase and access corresponding source phrase
         //2. Store all targetPhrases for this source phrase
@@ -85,10 +88,11 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     srcFactors.push_back(0);
 
     for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
-        const ChartTranslationOption &transOpt = m_translationOptionList.Get(i);
+
+        ChartTranslationOption &transOpt = m_translationOptionList.Get(i);
+
         //all words ranges should be the same, otherwise crash
         CHECK(transOpt.GetSourceWordsRange() == wordsRange);
-        float score = 0;
 
         std::string sourceSide = "";
         std::string targetRepresentation;
@@ -100,6 +104,8 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
          //Map target representation to targetPhrase
          std::map<std::string,TargetPhrase*> targetRepMap;
 
+         VERBOSE(5, "Looping over target phrase collection for recomputing feature scores" << endl);
+
         for(
             itr_targets = transOpt.GetTargetPhraseCollection().begin();
             itr_targets != transOpt.GetTargetPhraseCollection().end();
@@ -107,23 +113,28 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         {
             //get lhs of rule
             CHECK((**itr_targets).GetSourcePhrase() != NULL);
-            std::cout << "Source Side of rule : " << (*(**itr_targets).GetSourcePhrase()) << std::endl;
-            std::cout << "Target Side of rule : " << **itr_targets << std::endl;
+            VERBOSE(5, "Source Side of rule : " << (*(**itr_targets).GetSourcePhrase()) << endl);
+            VERBOSE(5, "Target Side of rule : " << (**itr_targets) << endl);
 
             for(int i=0; i<(**itr_targets).GetSourcePhrase()->GetSize();i++)
             {
                 sourceSide += (**itr_targets).GetSourcePhrase()->GetWord(i).GetString(srcFactors,0);
-                std::cout << "Added string" << sourceSide << std::endl;
+                if(i<(**itr_targets).GetSourcePhrase()->GetSize() -1)
+                {
+                    sourceSide += " ";
+                }
             }
+
+            std::cout << "Added string" << sourceSide << std::endl;
 
             //Append alignments to non-terminals
             std::vector<size_t> ntim = (*itr_targets)->GetAlignmentInfo().GetNonTermIndexMap();
-            int nonTermCounter = 0;
+            int wordCounter = 0;
 
             //NonTermCounter should stay smaller than nonTermIndexMap
             for(int i=0; i<(**itr_targets).GetSize();i++)
             {
-                CHECK(nonTermCounter < (**itr_targets).GetSize());
+                CHECK(wordCounter < (**itr_targets).GetSize());
 
                 //look for non-terminals
                 if((**itr_targets).GetWord(i).IsNonTerminal() == 1)
@@ -131,28 +142,47 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                     //append non-terminal
                     targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
 
+                    //Debugging : everything OK in non term index map
+                    for(int i=0; i < 3; i++)
+                    {std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
+
                     //append alignment
                     stringstream s;
-                    s << ntim[nonTermCounter];
+                    s << ntim[wordCounter];
                     string alignInd = s.str();
                     targetRepresentation += alignInd;
-                    nonTermCounter++;
+                    std::cout << "Non term counter : " << wordCounter << std::endl;
+                    std::cout << "Target representation with alignment : " << alignInd << " : " << targetRepresentation << std::endl;
                 }
                 else
                 {
                     targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
                 }
+                if(i<(**itr_targets).GetSize() -1)
+                {
+                    targetRepresentation += " ";
+                }
+                wordCounter++;
             }
+            std::cout << "Before putting in map : " << sourceSide << "::" << targetRepresentation << std::endl;
             ruleMap.AddRule(sourceSide,targetRepresentation);
-
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
+
+            //clean strings
+            sourceSide = "";
+            targetRepresentation = "";
         }
+
+        std::cout << "Loop over map and call vw : " << std::endl;
         //map is done, iterate over and call vw
         RuleMap::const_iterator itr_ruleMap;
         for(itr_ruleMap = ruleMap.begin(); itr_ruleMap != ruleMap.end(); itr_ruleMap++)
         {
             CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
             CHECK(ccsp != NULL);
+
+            std::cout << "Calling vw with : " << itr_ruleMap->first << " : " << itr_ruleMap->second << std::endl;
+            std::cout << "Source context : " << m_source << std::endl;
             //score vector is for vector of target representations
             vector<ScoreComponentCollection> scores = ccsp->ScoreRules(itr_ruleMap->first,itr_ruleMap->second,m_source);
             std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
@@ -168,6 +198,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
                 }
         }
+        //NOTE : What happens with the stack vector?
         transOpt.CalcEstimateOfBestScore();
     }
 //    #endif // HAVE_VW

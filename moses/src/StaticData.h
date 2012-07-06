@@ -58,7 +58,7 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
-//Cell Context feature
+//damt score producer
 class CellContextScoreProducer;
 
 #ifdef HAVE_SYNLM
