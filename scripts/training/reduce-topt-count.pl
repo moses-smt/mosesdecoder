@@ -144,7 +144,7 @@ sub filter_table
     my @cols = split / \|\|\| /, $line;
     if ($cols[0] ne $src_phrase) {
       my @sorted = sort { $b->{score} <=> $a->{score} } @tgt_phrases;
-      for my $phrase (@sorted[0 .. min($#sorted, $limit)]) {
+      for my $phrase (@sorted[0 .. min($#sorted, $limit - 1)]) {
         $kept++;
         print $out $phrase->{str}, "\n";
       }
