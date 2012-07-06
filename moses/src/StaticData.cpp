@@ -184,6 +184,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
     if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
       m_parameter->GetParam("psd-index")[0])) {
+      UserMessage::Add(string("Failed to load phrase index from " + m_parameter->GetParam("psd-index")[0]));
       return false;  
     }
   }
