@@ -12,6 +12,7 @@ SearchNormalBatch::SearchNormalBatch(Manager& manager, const InputType &source, 
   :SearchNormal(manager, source, transOptColl)
   ,m_batch_size(10000)
 {
+  m_max_stack_size = StaticData::Instance().GetMaxHypoStackSize();
 
   // Split the feature functions into sets of stateless, stateful
   // distributed lm, and stateful non-distributed.
@@ -77,6 +78,7 @@ void SearchNormalBatch::ProcessSentence()
       Hypothesis &hypothesis = **iterHypo;
       ProcessOneHypothesis(hypothesis); // expand the hypothesis
     }
+    EvalAndMergePartialHypos();
 
     // some logging
     IFVERBOSE(2) {
@@ -86,6 +88,8 @@ void SearchNormalBatch::ProcessSentence()
     // this stack is fully expanded;
     actual_hypoStack = &sourceHypoColl;
   }
+
+  EvalAndMergePartialHypos();
 
   // some more logging
   IFVERBOSE(2) {
@@ -203,7 +207,6 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
         m_hypoStackColl[wordsTranslated]->AddPrune(hypo);
     }
     m_partial_hypos.clear();
-
 
     std::vector < HypothesisStack* >::iterator stack_iter;
     HypothesisStackNormal* stack;
