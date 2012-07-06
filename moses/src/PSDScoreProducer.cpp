@@ -74,15 +74,16 @@ vector<string> PSDScoreProducer::GetSourceFeatures(
   return out;
 }
 
-vector<string> PSDScoreProducer::GetTargetFeatures(const TargetPhrase &tgtPhrase)
+vector<string> PSDScoreProducer::GetTargetFeatures(const TranslationOption *tOpt)
 {
   vector<string> out;
+  const Phrase *srcPhrase = tOpt->GetSourcePhrase();
+  const TargetPhrase &tgtPhrase = tOpt->GetTargetPhrase();
 
   // target phrase as a feature
   out.push_back("p^" + Replace(tgtPhrase.GetStringRep(m_tgtFactors), " ", "_"));
 
   // phrase-internal word pairs
-  const Phrase *srcPhrase = tgtPhrase.GetSourcePhrase();
   const AlignmentInfo &alignInfo = tgtPhrase.GetAlignmentInfo();
   AlignmentInfo::const_iterator it;
   for (it = alignInfo.begin(); it != alignInfo.end(); it++) {
@@ -120,7 +121,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
 
     // get scores for all possible translations
     for (it = options.begin(); it != options.end(); it++) {
-      vector<string> targetFeatures = GetTargetFeatures((*it)->GetTargetPhrase());
+      vector<string> targetFeatures = GetTargetFeatures(*it);
       string tgtPhrase = (*it)->GetTargetPhrase().GetStringRep(m_srcFactors);
 
       // set label to target phrase index
