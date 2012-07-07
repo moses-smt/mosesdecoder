@@ -21,6 +21,9 @@ using namespace MosesTraining;
 
 #define LINE_MAX_LENGTH 10000
 
+namespace MosesTraining
+{
+
 class PhraseAlignment
 {
 public:
@@ -39,6 +42,8 @@ public:
   map< WORD_ID, map< WORD_ID, double > > ltable;
   void load( char[] );
 };
+
+}
 
 void processPhrasePairs( vector< PhraseAlignment > & );
 

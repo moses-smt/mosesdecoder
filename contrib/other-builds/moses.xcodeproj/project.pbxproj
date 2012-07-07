@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E879EA715A346F90051F346 /* SearchNormalBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */; };
+		1E879EA815A346F90051F346 /* SearchNormalBatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E879EA615A346F90051F346 /* SearchNormalBatch.h */; };
 		1EAC363514CDC79300DF97C3 /* Loader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC362C14CDC79300DF97C3 /* Loader.h */; };
 		1EAC363614CDC79300DF97C3 /* LoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */; };
 		1EAC363714CDC79300DF97C3 /* LoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */; };
@@ -299,6 +301,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SearchNormalBatch.cpp; path = ../../moses/src/SearchNormalBatch.cpp; sourceTree = "<group>"; };
+		1E879EA615A346F90051F346 /* SearchNormalBatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SearchNormalBatch.h; path = ../../moses/src/SearchNormalBatch.h; sourceTree = "<group>"; };
 		1EAC362C14CDC79300DF97C3 /* Loader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Loader.h; path = ../../moses/src/RuleTable/Loader.h; sourceTree = "<group>"; };
 		1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderCompact.cpp; path = ../../moses/src/RuleTable/LoaderCompact.cpp; sourceTree = "<group>"; };
 		1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderCompact.h; path = ../../moses/src/RuleTable/LoaderCompact.h; sourceTree = "<group>"; };
@@ -617,6 +621,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */,
+				1E879EA615A346F90051F346 /* SearchNormalBatch.h */,
 				1EDA803514D19ECD003D2191 /* Scope3Parser */,
 				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
 				1EC7365B14B977AA00238410 /* LM */,
@@ -1136,6 +1142,7 @@
 				1EDA809114D19FBF003D2191 /* UTrie.h in Headers */,
 				1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */,
 				1EF8F2C4159A61970047B613 /* HypoList.h in Headers */,
+				1E879EA815A346F90051F346 /* SearchNormalBatch.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1320,6 +1327,7 @@
 				1EDA808E14D19FBF003D2191 /* Trie.cpp in Sources */,
 				1EDA809014D19FBF003D2191 /* UTrie.cpp in Sources */,
 				1EDA809214D19FBF003D2191 /* UTrieNode.cpp in Sources */,
+				1E879EA715A346F90051F346 /* SearchNormalBatch.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -6,6 +6,14 @@ use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
 
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
@@ -1786,7 +1794,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1810,9 +1818,10 @@ sub define_training_create_config {
 		}
 		
     # additional settings for factored models
-    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    my $ptCmd = $phrase_translation_table;
+    $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
-    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$ptCmd);
+    $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
@@ -1909,6 +1918,9 @@ sub define_training_create_config {
 
     my $additional_ini = &get("TRAINING:additional-ini");
     $cmd .= "-additional-ini '$additional_ini' " if defined($additional_ini);
+
+    # sparse lexical features provide additional content for config file
+    $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
 
     &create_step($step_id,$cmd);
 }
@@ -2239,10 +2251,10 @@ sub define_tuningevaluation_filter {
     my $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
     my $cmd = &get_training_setting(9);
     
-    my $ptCmd = "$phrase_translation_table:$ptImpl";
+    my $ptCmd = $phrase_translation_table;
+    $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
-    
     $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
 	if $reordering_table;
     # additional settings for hierarchical models
@@ -2259,7 +2271,6 @@ sub define_tuningevaluation_filter {
     $cmd .= "-config $config\n";
     
     # filter command
- 		my $sa_exec_dir = &get("TRAINING:suffix-array");
 		if ($sa_exec_dir) {
 			# suffix array
 			$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
