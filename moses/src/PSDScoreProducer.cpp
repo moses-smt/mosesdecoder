@@ -108,7 +108,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
   vector<ScoreComponentCollection> scores;
   float sum = 0;
 
-  if (! IsOOV(options[0]->GetTargetPhrase())) {
+  if (options.size() != 0 && ! IsOOV(options[0]->GetTargetPhrase())) {
     vector<string> sourceFeatures = GetSourceFeatures(source, options[0]);
 
     // create VW example, add source-side features
