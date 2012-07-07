@@ -84,6 +84,8 @@ public:
    * \param oovCount number of LM OOVs
    */
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
+  virtual void CalcScoreFromCache(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
+  }
 
   virtual void IssueRequestsFor(Hypothesis& hypo,
                                 const FFState* input_state) {
