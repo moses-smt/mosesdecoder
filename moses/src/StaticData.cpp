@@ -423,6 +423,7 @@ bool StaticData::LoadData(Parameter *parameter)
     m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
     if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
       m_parameter->GetParam("rule-index")[0])) {
+      UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("rule-index")[0]));
       return false;
     }
   }
