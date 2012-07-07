@@ -103,6 +103,10 @@ public:
 
   // used when creating translations of unknown words:
   void ResetScore();
+
+  //! Damt hiero : used to add score obtained using context information
+  void AddToFullScore(float score);
+
   void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;

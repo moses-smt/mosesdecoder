@@ -33,7 +33,7 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
 //note : initialized in static data ln.
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
-  std::cout << "Initializing vw..." << std::endl;
+  VERBOSE(4, "Initializing vw..." << endl);
   vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
   return LoadRuleIndex(indexFile);
 }
@@ -43,7 +43,6 @@ vector<string> CellContextScoreProducer::GetSourceFeatures(
   const std::string &sourceSide)
 {
 
-  std::cout << "Getting source features : " << srcSent.GetSize() << std::endl;
   vector<string> out;
 
   // bag of words features
@@ -93,16 +92,14 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                       const InputType &source
                                                                       )
 {
+  //debugging : check that everything is fine in index map
+  //RuleIndexType :: iterator itr_rule_index;
+  //for(itr_rule_index = m_ruleIndex.begin(); itr_rule_index != m_ruleIndex.end(); itr_rule_index++)
+  //{
+  //    std::cout << "Index : " << itr_rule_index->first << " : " << itr_rule_index->second << std::endl;
+  //}
 
-  std::cout << "Scoring Rules... " << sourceSide << " : " << targetRepresentations->front() << " : "<< source << std::endl;
-
-  //FB : debugging : check what in index map :
-  RuleIndexType :: iterator itr_rule_index;
-  for(itr_rule_index = m_ruleIndex.begin(); itr_rule_index != m_ruleIndex.end(); itr_rule_index++)
-  {
-      std::cout << "Index : " << itr_rule_index->first << " : " << itr_rule_index->second << std::endl;
-  }
-    vector<ScoreComponentCollection> scores;
+  vector<ScoreComponentCollection> scores;
   // iterator over target representations
   std::vector<std::string> :: iterator itr_targ_rep;
   float sum = 0;
@@ -110,30 +107,30 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     std::vector<string> sourceFeatures = GetSourceFeatures(source, sourceSide);
 
     //FB: for debugging
-    std::vector<std::string> :: iterator itr_source_feat;
-    for(itr_source_feat = sourceFeatures.begin(); itr_source_feat != sourceFeatures.end(); itr_source_feat++)
-    {
-        std::cout << *itr_source_feat << std::endl;
-    }
+    //std::vector<std::string> :: iterator itr_source_feat;
+    //for(itr_source_feat = sourceFeatures.begin(); itr_source_feat != sourceFeatures.end(); itr_source_feat++)
+    //{
+    //    std::cout << *itr_source_feat << std::endl;
+    //}
 
     // create VW example, add source-side features
     ezexample ex(&vwInstance.m_vw, false);
     ex(vw_namespace('s'));
     std::vector<std::string>::const_iterator fIt;
     for (fIt = sourceFeatures.begin(); fIt != sourceFeatures.end(); fIt++) {
-      std::cout << "Source Feature vw : " << *fIt << std::endl;
-      ex.addf(*fIt);
+        VERBOSE(4, "Source Feature vw : " << *fIt << endl);
+        ex.addf(*fIt);
     }
 
     float score = 0.0;
     for (itr_targ_rep = targetRepresentations->begin(); itr_targ_rep != targetRepresentations->end(); itr_targ_rep++) {
 
-        std::cout << "Target representation : " << *itr_targ_rep << std::endl;
-        std::cout << (m_ruleIndex.find(*itr_targ_rep) == m_ruleIndex.end()) <<  std::endl;
+        //debugging : check that args have been passed correctly
+        //std::cout << "Target representation : " << *itr_targ_rep << std::endl;
+        //std::cout << (m_ruleIndex.find(*itr_targ_rep) == m_ruleIndex.end()) <<  std::endl;
 
         if (! IsOOV(*itr_targ_rep) ) {
 
-            std::cout << "Target Representation vw : " << *itr_targ_rep << std::endl;
             vector<string> targetFeatures = GetTargetFeatures(*itr_targ_rep);
 
             // set label to target phrase index
@@ -142,18 +139,16 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
             // move to target namespace, add target phrase as a feature
             ex(vw_namespace('p'));
             for (fIt = targetFeatures.begin(); fIt != targetFeatures.end(); fIt++) {
-            std::cout << "Target feature vw : " << *fIt << std::endl;
-            ex.addf(*fIt);
-
-            score = 1 / (1 + exp(-ex()));
-            std::cout << "Score " << score << std::endl;
-
+                VERBOSE(4, "Rule target side feature for vw : " << *fIt << endl);
+                ex.addf(*fIt);
+                score = 1 / (1 + exp(-ex()));
+                VERBOSE(4, "Obtained Score : " << score << endl);
             }
         }
         else
         {
             score = 0;
-            std::cout << *itr_targ_rep << "Is out of vocabulary : " << score << std::endl;
+            VERBOSE(4, *itr_targ_rep << "Is out of vocabulary : " << score << endl);
         }
 
         //    cerr << srcPhrase << " ||| " << tgtPhrase << " ||| " << score << endl;
@@ -163,6 +158,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         ScoreComponentCollection scoreCol;
         scoreCol.Assign(this, score);
         scores.push_back(scoreCol);
+        //std::cout << "Collection before normalization : " << scoreCol << std::endl;
         // move out of target namespace
         --ex;
     }
@@ -170,7 +166,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     if (sum != 0) {
         vector<ScoreComponentCollection>::iterator colIt;
         for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-        std::cout << "Added feature : " << colIt->GetScoreForProducer(this) << " : " << std::endl;
+        //std::cout << "Normalizing : " << colIt->GetScoreForProducer(this) << " : " << std::endl;
         colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
         }
     }

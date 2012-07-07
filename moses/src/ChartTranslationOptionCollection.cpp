@@ -124,9 +124,6 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                     sourceSide += " ";
                 }
             }
-
-            std::cout << "Added string" << sourceSide << std::endl;
-
             //Append alignments to non-terminals
             std::vector<size_t> ntim = (*itr_targets)->GetAlignmentInfo().GetNonTermIndexMap();
             int wordCounter = 0;
@@ -143,16 +140,14 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                     targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
 
                     //Debugging : everything OK in non term index map
-                    for(int i=0; i < 3; i++)
-                    {std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
+                    //for(int i=0; i < 3; i++)
+                    //{std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
 
                     //append alignment
                     stringstream s;
                     s << ntim[wordCounter];
                     string alignInd = s.str();
                     targetRepresentation += alignInd;
-                    std::cout << "Non term counter : " << wordCounter << std::endl;
-                    std::cout << "Target representation with alignment : " << alignInd << " : " << targetRepresentation << std::endl;
                 }
                 else
                 {
@@ -164,7 +159,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 }
                 wordCounter++;
             }
-            std::cout << "Before putting in map : " << sourceSide << "::" << targetRepresentation << std::endl;
+            VERBOSE(6, "Strings put in rule map : " << sourceSide << "::" << targetRepresentation << endl);
             ruleMap.AddRule(sourceSide,targetRepresentation);
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
 
@@ -173,16 +168,15 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             targetRepresentation = "";
         }
 
-        std::cout << "Loop over map and call vw : " << std::endl;
-        //map is done, iterate over and call vw
         RuleMap::const_iterator itr_ruleMap;
         for(itr_ruleMap = ruleMap.begin(); itr_ruleMap != ruleMap.end(); itr_ruleMap++)
         {
             CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
             CHECK(ccsp != NULL);
 
-            std::cout << "Calling vw with : " << itr_ruleMap->first << " : " << itr_ruleMap->second << std::endl;
-            std::cout << "Source context : " << m_source << std::endl;
+            VERBOSE(5, "Calling vw for rule: " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
+            VERBOSE(5, "Calling vw for source context : " << m_source << endl);
+
             //score vector is for vector of target representations
             vector<ScoreComponentCollection> scores = ccsp->ScoreRules(itr_ruleMap->first,itr_ruleMap->second,m_source);
             std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
@@ -195,11 +189,15 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
                 itr_rep = targetRepMap.find(*itr_targetRep);
                 CHECK(itr_rep != targetRepMap.end());
+                VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
+                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }
         }
         //NOTE : What happens with the stack vector?
+        VERBOSE(5, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
         transOpt.CalcEstimateOfBestScore();
+        VERBOSE(5, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
 //    #endif // HAVE_VW
 

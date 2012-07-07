@@ -268,7 +268,15 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 
 void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
 {
+  //std::cout << "Adding stateless score " << score << std::endl;
   m_scoreBreakdown.PlusEquals(score);
+  AddToFullScore(score.GetWeightedScore());
+
+}
+
+void TargetPhrase::AddToFullScore(const float score)
+{
+    m_fullScore += score;
 }
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
@@ -289,6 +297,7 @@ void TargetPhrase::ResetScore()
   m_fullScore = 0;
   m_scoreBreakdown.ZeroAll();
 }
+
 
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 {

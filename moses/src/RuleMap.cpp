@@ -24,14 +24,14 @@ void RuleMap::AddRule(std::string &sourceSide, std::string &targetRepresentation
     //If source is not im map, insert new vector
     if ( gotSource == m_targetsForSource.end() )
     {
-        std::cout << "Source not found : insert new pair" << std::endl;
+        //std::cout << "Source not found : insert new pair" << std::endl;
         std::vector<std::string> * targetAccumulator = new std::vector<std::string>;
         targetAccumulator->push_back(targetRepresentation);
         m_targetsForSource.insert(std::make_pair(sourceSide,targetAccumulator));
     }
     else
     {
-        std::cout << "Source found : accumulate target" << std::endl;
+        //std::cout << "Source found : accumulate target" << std::endl;
         gotSource->second->push_back(targetRepresentation);
     }
 
