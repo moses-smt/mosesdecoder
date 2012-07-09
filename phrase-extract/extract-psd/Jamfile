@@ -8,10 +8,10 @@ obj VwFiles.o : VwFiles.cpp : <include>. ;
 
 obj PsdPhraseUtils.o : PsdPhraseUtils.cpp : <include>. <include>.. ;
 
-exe extract-psd : psd_extract_features.cpp ..//tables-core ..//InputFileStream  ..//SafeGetline.h ContextFeatureSet.o StringUtils.o TaggedCorpus.o VwFiles.o PsdPhraseUtils.o ;
+exe extract-psd : psd_extract_features.cpp ..//tables-core.o ..//InputFileStream ..//SafeGetline.h ContextFeatureSet.o StringUtils.o TaggedCorpus.o VwFiles.o PsdPhraseUtils.o ;
 
-exe make-psd-table : psd_make_phrasetable.cpp  ..//tables-core ..//InputFileStream ..//SafeGetline.h  StringUtils.o TaggedCorpus.o VwFiles.o PsdPhraseUtils.o ;
+exe make-psd-table : psd_make_phrasetable.cpp  ..//tables-core.o ..//InputFileStream ..//SafeGetline.h  StringUtils.o TaggedCorpus.o VwFiles.o PsdPhraseUtils.o ;
 
-exe tag-test-psd : psd_extract_test.cpp ..//tables-core ..//InputFileStream ..//SafeGetline.h PsdPhraseUtils.o StringUtils.o ;
+exe tag-test-psd : psd_extract_test.cpp ..//tables-core.o ..//InputFileStream ..//SafeGetline.h PsdPhraseUtils.o StringUtils.o ;
 
 
