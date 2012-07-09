@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-/* We don't want Factor to be copyable by anybody.  But we also want to store
+/** We don't want Factor to be copyable by anybody.  But we also want to store
  * it in an STL container.  The solution is that Factor's copy constructor is
  * private and friended to FactorFriend.  The STL containers can delegate
  * copying, so friending the container isn't sufficient.  STL containers see

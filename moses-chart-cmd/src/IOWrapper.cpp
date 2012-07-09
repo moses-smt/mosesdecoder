@@ -50,6 +50,9 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
+namespace MosesChartCmd
+{
+
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
                      , const FactorMask							&inputFactorUsed
@@ -159,9 +162,12 @@ void OutputSurface(std::ostream &out, const Phrase &phrase, const std::vector<Fa
     for (size_t pos = 0 ; pos < size ; pos++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
       out << *factor;
+      CHECK(factor);
 
       for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
         const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
+	CHECK(factor);
+
         out << "|" << *factor;
       }
       out << " ";
@@ -203,6 +209,8 @@ void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, l
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
+    CHECK(factor);
+
     cout << *factor << " ";
   }
 }
@@ -504,3 +512,6 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
   stream.setf(std::ios::fixed);
   stream.precision(size);
 }
+
+}
+

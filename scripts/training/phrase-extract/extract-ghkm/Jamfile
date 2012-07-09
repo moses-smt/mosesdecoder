@@ -1,3 +1,0 @@
-exe extract-ghkm : [ glob *.cpp ] ..//trees ../../../..//boost_program_options ;
-
-install tools : extract-ghkm : <install-type>EXE ;

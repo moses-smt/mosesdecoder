@@ -24,7 +24,10 @@
 
 namespace OnDiskPt
 {
+class Vocab;
 
+/** A contiguous phrase. SourcePhrase & TargetPhrase inherit from this and add the on-disk functionality
+ */
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const Phrase&);
@@ -47,6 +50,8 @@ public:
   size_t GetSize() const {
     return m_words.size();
   }
+
+  virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
   int Compare(const Phrase &compare) const;
   bool operator<(const Phrase &compare) const;

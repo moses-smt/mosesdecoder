@@ -165,13 +165,13 @@ void TranslationOptionCollection::ProcessUnknownWord()
   const vector<DecodeGraph*>& decodeGraphList = m_system->GetDecodeGraphs();
   size_t size = m_source.GetSize();
   // try to translation for coverage with no trans by expanding table limit
-  for (size_t graph = 0 ; graph < decodeGraphList.size() ; graph++) {
-    const DecodeGraph &decodeGraph = *decodeGraphList[graph];
+  for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
+    const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     for (size_t pos = 0 ; pos < size ; ++pos) {
       TranslationOptionList &fullList = GetTranslationOptionList(pos, pos);
       size_t numTransOpt = fullList.size();
       if (numTransOpt == 0) {
-        CreateTranslationOptionsForRange(decodeGraph, pos, pos, false);
+        CreateTranslationOptionsForRange(decodeGraph, pos, pos, false, graphInd);
       }
     }
   }
@@ -367,12 +367,12 @@ void TranslationOptionCollection::CreateTranslationOptions()
   size_t size = m_source.GetSize();
 
   // loop over all decoding graphs, each generates translation options
-  for (size_t graph = 0 ; graph < decodeGraphList.size() ; graph++) {
+  for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
     if (decodeGraphList.size() > 1) {
-      VERBOSE(3,"Creating translation options from decoding graph " << graph << endl);
+      VERBOSE(3,"Creating translation options from decoding graph " << graphInd << endl);
     }
 
-    const DecodeGraph &decodeGraph = *decodeGraphList[graph];
+    const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
       size_t maxSize = size - startPos; // don't go over end of sentence
@@ -381,22 +381,25 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
-        if (graph > 0 && // only skip subsequent graphs
-            decodeGraphBackoff[graph] != 0 && // use of backoff specified
-            (endPos-startPos+1 >= decodeGraphBackoff[graph] || // size exceeds backoff limit or ...
+        if (graphInd > 0 && // only skip subsequent graphs
+            decodeGraphBackoff[graphInd] != 0 && // use of backoff specified
+            (endPos-startPos+1 >= decodeGraphBackoff[graphInd] || // size exceeds backoff limit or ...
              m_collection[startPos][endPos-startPos].size() > 0)) { // no phrases found so far
-          VERBOSE(3,"No backoff to graph " << graph << " for span [" << startPos << ";" << endPos << "]" << endl);
+          VERBOSE(3,"No backoff to graph " << graphInd << " for span [" << startPos << ";" << endPos << "]" << endl);
           // do not create more options
           continue;
         }
 
         // create translation options for that range
-        CreateTranslationOptionsForRange( decodeGraph, startPos, endPos, true);
+        CreateTranslationOptionsForRange( decodeGraph, startPos, endPos, true, graphInd);
       }
     }
   }
 
   VERBOSE(2,"Translation Option Collection\n " << *this << endl);
+
+  // Incorporate distributed lm scores.
+  IncorporateDLMScores();
 
   ProcessUnknownWord();
 
@@ -410,6 +413,72 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
+}
+
+void TranslationOptionCollection::IncorporateDLMScores() {
+    // Build list of dlms.
+    const vector<const StatefulFeatureFunction*>& ffs =
+           m_system->GetStatefulFeatureFunctions();
+    std::map<int, LanguageModel*> dlm_ffs;
+    for (unsigned i = 0; i < ffs.size(); ++i) {
+        if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") {
+            dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
+            dlm_ffs[i]->SetFFStateIdx(i);
+        }
+    }
+
+    // Don't need to do anything if we don't have any distributed
+    // language models.
+    if (dlm_ffs.size() == 0) {
+        return;
+    }
+
+    // Iterate over all translation options in the collection.
+    std::vector< std::vector< TranslationOptionList > >::iterator start_iter; 
+    for (start_iter = m_collection.begin();
+         start_iter != m_collection.end();
+         ++start_iter) {
+        std::vector< TranslationOptionList >::iterator end_iter;
+        for (end_iter = (*start_iter).begin();
+             end_iter != (*start_iter).end();
+             ++end_iter) {
+            std::vector< TranslationOption* >::iterator option_iter;
+            for (option_iter = (*end_iter).begin();
+                 option_iter != (*end_iter).end();
+                 ++option_iter) {
+
+                // Get a handle on the current translation option.
+                TranslationOption* option = *option_iter;
+
+                std::map<int, LanguageModel*>::iterator dlm_iter;
+                for (dlm_iter = dlm_ffs.begin();
+                     dlm_iter != dlm_ffs.end();
+                     ++dlm_iter) {
+                    LanguageModel* dlm = (*dlm_iter).second;
+
+
+                    float full_score;
+                    float ngram_score;
+                    size_t oov_count;
+                    TargetPhrase& phrase =
+                        const_cast<TargetPhrase&>(option->GetTargetPhrase());
+                    dlm->CalcScoreFromCache(phrase,
+                                            full_score,
+                                            ngram_score,
+                                            oov_count);
+                    ScoreComponentCollection& option_scores = 
+                        const_cast<ScoreComponentCollection&>(option->GetScoreBreakdown());
+                    option_scores.Assign(dlm, ngram_score);
+                    ScoreComponentCollection& phrase_scores =
+                        const_cast<ScoreComponentCollection&>(phrase.GetScoreBreakdown());
+                    phrase_scores.Assign(dlm, ngram_score);
+
+                    float weighted_score = full_score * dlm->GetWeight();
+                    phrase.SetFutureScore(phrase.GetFutureScore() + weighted_score);
+                }
+            }
+        }
+    }
 }
 
 void TranslationOptionCollection::Sort()
@@ -440,7 +509,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   const DecodeGraph &decodeGraph
   , size_t startPos
   , size_t endPos
-  , bool adhereTableLimit)
+  , bool adhereTableLimit
+  , size_t graphInd)
 {
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
@@ -529,7 +599,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       delete sourcePhrase;
   } // if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos))
 
-  if ((StaticData::Instance().GetXmlInputType() != XmlPassThrough) && HasXmlOptionsOverlappingRange(startPos,endPos)) {
+  if (graphInd == 0 && StaticData::Instance().GetXmlInputType() != XmlPassThrough && HasXmlOptionsOverlappingRange(startPos,endPos)) {
     CreateXmlOptionsForRange(startPos, endPos);
   }
 }

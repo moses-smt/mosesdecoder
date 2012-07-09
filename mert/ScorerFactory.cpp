@@ -9,8 +9,13 @@
 #include "MergeScorer.h"
 #include "InterpolatedScorer.h"
 #include "SemposScorer.h"
+#include "PermutationScorer.h"
 
 using namespace std;
+
+namespace MosesTuning
+{
+  
 
 vector<string> ScorerFactory::getTypes() {
   vector<string> types;
@@ -18,8 +23,10 @@ vector<string> ScorerFactory::getTypes() {
   types.push_back(string("PER"));
   types.push_back(string("TER"));
   types.push_back(string("CDER"));
+  types.push_back(string("WER"));
   types.push_back(string("MERGE"));
   types.push_back(string("SEMPOS"));
+  types.push_back(string("LRSCORE"));
   return types;
 }
 
@@ -31,11 +38,16 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
   } else if (type == "TER") {
     return new TerScorer(config);
   } else if (type == "CDER") {
-    return new CderScorer(config);
+    return new CderScorer(config, true);
+  } else if (type == "WER") {
+    // CderScorer can compute both CDER and WER metric
+    return new CderScorer(config, false);
   } else if (type == "SEMPOS") {
     return new SemposScorer(config);
   } else if (type == "MERGE") {
     return new MergeScorer(config);
+  } else if (type == "LRSCORE") {
+    return new PermutationScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
@@ -45,3 +57,6 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     }
   }
 }
+
+}
+

@@ -7,15 +7,16 @@
 
 #include "Types.h"
 #include "ScoreData.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
 #include "ScopedVector.h"
 
-using namespace std;
+namespace MosesTuning
+{
 
 const int kBleuNgramOrder = 4;
 
 class NgramCounts;
-class Reference;
+class Reference;  
 
 /**
  * Bleu scoring
@@ -29,15 +30,15 @@ public:
     SHORTEST
   };
 
-  explicit BleuScorer(const string& config = "");
+  explicit BleuScorer(const std::string& config = "");
   ~BleuScorer();
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
-  virtual float calculateScore(const vector<int>& comps) const;
-  virtual size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
+  virtual statscore_t calculateScore(const std::vector<int>& comps) const;
+  virtual std::size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
 
-  int CalcReferenceLength(size_t sentence_id, size_t length);
+  int CalcReferenceLength(std::size_t sentence_id, std::size_t length);
 
   ReferenceLengthType GetReferenceLengthType() const { return m_ref_length_type; }
   void SetReferenceLengthType(ReferenceLengthType type) { m_ref_length_type = type; }
@@ -47,14 +48,14 @@ public:
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  size_t CountNgrams(const string& line, NgramCounts& counts, unsigned int n);
+  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n);
 
   void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
-  bool OpenReference(const char* filename, size_t file_id);
+  bool OpenReference(const char* filename, std::size_t file_id);
 
   // NOTE: this function is used for unit testing.
-  bool OpenReferenceStream(std::istream* is, size_t file_id);
+  bool OpenReferenceStream(std::istream* is, std::size_t file_id);
 
 private:
   ReferenceLengthType m_ref_length_type;
@@ -70,6 +71,18 @@ private:
 /** Computes sentence-level BLEU+1 score.
  * This function is used in PRO.
  */
-float sentenceLevelBleuPlusOne(const vector<float>& stats);
+float sentenceLevelBleuPlusOne(const std::vector<float>& stats);
+
+/** Computes sentence-level BLEU score given a background corpus.
+ * This function is used in batch MIRA.
+ */
+float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg);
+
+/**
+ * Computes plain old BLEU from a vector of stats
+ */
+float unsmoothedBleu(const std::vector<float>& stats);
+
+}
 
 #endif  // MERT_BLEU_SCORER_H_

@@ -42,6 +42,8 @@ class ChartTrellisNode;
 class ChartTrellisPath;
 class ChartTrellisPathList;
 
+/** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
+ */
 class ChartManager
 {
 private:
@@ -67,29 +69,38 @@ public:
   void ProcessSentence();
   void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
-  void CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct=0) const;
+  void CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyDistinct=0) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 	void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
 
+  //! the input sentence being decoded
   const InputType& GetSource() const {
     return m_source;
   }
+  
+  //! which particular set of models is in use
   const TranslationSystem* GetTranslationSystem() const {
     return m_system;
   }
 
+  //! debug data collected when decoding sentence
   SentenceStats& GetSentenceStats() const {
     return *m_sentenceStats;
   }
+  
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
+   * currently an empty function
    */
-  void CalcDecoderStatistics() const;
+  void CalcDecoderStatistics() const
+  { }
+  
   void ResetSentenceStats(const InputType& source) {
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
   }
 
+  //! contigious hypo id for each input sentence. For debugging purposes
   unsigned GetNextHypoId() { return m_hypothesisId++; }
 };
 

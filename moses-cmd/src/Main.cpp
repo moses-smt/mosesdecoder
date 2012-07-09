@@ -50,7 +50,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 using namespace Moses;
+using namespace MosesCmd;
 
+namespace MosesCmd
+{
 // output floats with three significant digits
 static const size_t PRECISION = 3;
 
@@ -154,7 +157,7 @@ public:
             OutputInput(out, bestHypo);
             out << "||| ";
           }
-          OutputSurface(
+          OutputBestSurface(
             out,
             bestHypo,
             staticData.GetOutputFactorOrder(),
@@ -239,7 +242,8 @@ public:
       TrellisPathList nBestList;
       ostringstream out;
       manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-      OutputNBest(out,nBestList, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber);
+      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber,
+		  staticData.GetReportSegmentation());
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
 
@@ -248,7 +252,8 @@ public:
       TrellisPathList latticeSamples;
       ostringstream out;
       manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber);
+      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber,
+		  staticData.GetReportSegmentation());
       m_latticeSamplesCollector->Write(m_lineNumber, out.str());
     }
 
@@ -321,6 +326,8 @@ static void ShowWeights()
   }
 }
 
+} //namespace
+
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
@@ -370,7 +377,7 @@ int main(int argc, char** argv)
     srand(time(NULL));
   
     // set up read/writing class
-    IOWrapper* ioWrapper = GetIODevice(staticData);
+    IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);

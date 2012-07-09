@@ -8,10 +8,10 @@
 use strict;
 use warnings;
 use Getopt::Long;
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Basename;
 use File::Path;
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 

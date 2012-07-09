@@ -8,6 +8,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 PerScorer::PerScorer(const string& config)
   : StatisticsBasedScorer("PER",config) {}
 
@@ -29,7 +33,7 @@ void PerScorer::setReferenceFiles(const vector<string>& referenceFiles)
   string line;
   int sid = 0;
   while (getline(in,line)) {
-    line = this->applyFactors(line);
+    line = this->preprocessSentence(line);
     vector<int> tokens;
     TokenizeAndEncode(line, tokens);
     m_ref_tokens.push_back(multiset<int>());
@@ -54,7 +58,7 @@ void PerScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
     throw runtime_error(msg.str());
   }
 
-  string sentence = this->applyFactors(text);
+  string sentence = this->preprocessSentence(text);
 
   // Calculate correct, output_length and ref_length for
   // the line and store it in entry
@@ -86,3 +90,6 @@ float PerScorer::calculateScore(const vector<int>& comps) const
     return num/denom;
   }
 }
+
+}
+

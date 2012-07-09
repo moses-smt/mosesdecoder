@@ -54,9 +54,13 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+using namespace MosesCmd;
 
 //keys
 enum gridkey {lmbr_p,lmbr_r,lmbr_prune,lmbr_scale};
+
+namespace MosesCmd
+{
 
 class Grid
 {
@@ -128,6 +132,8 @@ private:
   map<string,gridkey> m_args;
 };
 
+} // namespace
+
 int main(int argc, char* argv[])
 {
   cerr << "Lattice MBR Grid search" << endl;
@@ -151,7 +157,7 @@ int main(int argc, char* argv[])
 
   StaticData& staticData = const_cast<StaticData&>(StaticData::Instance());
   staticData.SetUseLatticeMBR(true);
-  IOWrapper* ioWrapper = GetIODevice(staticData);
+  IOWrapper* ioWrapper = GetIOWrapper(staticData);
 
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");

@@ -5,7 +5,7 @@
 #include "Factor.h"
 #include "Util.h"
 #include "LM/SingleFactor.h"
-#include "onlineRLM.h"
+#include "DynSAInclude/onlineRLM.h"
 //#include "multiOnlineRLM.h"
 #include "DynSAInclude/file.h"
 #include "DynSAInclude/vocab.h"
@@ -15,6 +15,8 @@ namespace Moses
 class Factor;
 class Phrase;
 
+/** @todo ask ollie
+ */
 class LanguageModelORLM : public LanguageModelPointerState {
 public:
   typedef count_t T;  // type for ORLM filter

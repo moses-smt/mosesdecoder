@@ -9,7 +9,12 @@
 #include "TER/terAlignment.h"
 #include "Util.h"
 
+using namespace std;
 using namespace TERCpp;
+
+namespace MosesTuning
+{
+  
 
 TerScorer::TerScorer(const string& config)
     : StatisticsBasedScorer("TER",config), kLENGTH(2) {}
@@ -33,7 +38,7 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
     string line;
     int sid = 0;
     while ( getline ( in, line ) ) {
-      line = this->applyFactors(line);
+      line = this->preprocessSentence(line);
       vector<int> tokens;
       TokenizeAndEncode(line, tokens);
       m_references.push_back ( tokens );
@@ -49,7 +54,7 @@ void TerScorer::setReferenceFiles ( const vector<string>& referenceFiles )
 
 void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry )
 {
-  string sentence = this->applyFactors(text);
+  string sentence = this->preprocessSentence(text);
 
   terAlignment result;
   result.numEdits = 0.0 ;
@@ -106,4 +111,6 @@ float TerScorer::calculateScore(const vector<int>& comps) const
   } else {
     return (1.0+(num / denom));
   }
+}
+
 }

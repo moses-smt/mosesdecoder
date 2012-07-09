@@ -39,6 +39,7 @@ namespace Moses
 
 class RuleTableUTrie;
 
+//! @todo ask phil williams
 class UTrieNode
 {
  public:

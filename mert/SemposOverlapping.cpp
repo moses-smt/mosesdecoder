@@ -8,9 +8,13 @@ using namespace std;
 
 namespace {
 
-SemposOverlapping* g_overlapping = NULL;
+MosesTuning::SemposOverlapping* g_overlapping = NULL;
 
 } // namespace
+
+namespace MosesTuning
+{
+  
 
 SemposOverlapping* SemposOverlappingFactory::GetOverlapping(const string& str, const SemposScorer* sempos) {
   if (str == "cap-micro") {
@@ -106,4 +110,6 @@ float CapMacroOverlapping::calculateScore(const vector<int>& stats) const
   }
   if (n == 0) return 1;
   return sum / n;
+}
+
 }

@@ -21,7 +21,6 @@
 #include <fstream>
 #include "OnDiskWrapper.h"
 #include "Vocab.h"
-#include "../moses/src/FactorCollection.h"
 
 using namespace std;
 
@@ -44,7 +43,8 @@ bool Vocab::Load(OnDiskWrapper &onDiskWrapper)
   // create lookup
   // assume contiguous vocab id
   m_lookup.resize(m_vocabColl.size() + 1);
-
+	m_nextId = m_lookup.size();
+  
   CollType::const_iterator iter;
   for (iter = m_vocabColl.begin(); iter != m_vocabColl.end(); ++iter) {
     UINT32 vocabId = iter->second;
@@ -68,13 +68,13 @@ void Vocab::Save(OnDiskWrapper &onDiskWrapper)
   }
 }
 
-UINT64 Vocab::AddVocabId(const std::string &factorString)
+UINT64 Vocab::AddVocabId(const std::string &str)
 {
   // find string id
-  CollType::const_iterator iter = m_vocabColl.find(factorString);
+  CollType::const_iterator iter = m_vocabColl.find(str);
   if (iter == m_vocabColl.end()) {
     // add new vocab entry
-    m_vocabColl[factorString] = m_nextId;
+    m_vocabColl[str] = m_nextId;
     return m_nextId++;
   } else {
     // return existing entry
@@ -82,10 +82,10 @@ UINT64 Vocab::AddVocabId(const std::string &factorString)
   }
 }
 
-UINT64 Vocab::GetVocabId(const std::string &factorString, bool &found) const
+UINT64 Vocab::GetVocabId(const std::string &str, bool &found) const
 {
   // find string id
-  CollType::const_iterator iter = m_vocabColl.find(factorString);
+  CollType::const_iterator iter = m_vocabColl.find(str);
   if (iter == m_vocabColl.end()) {
     found = false;
     return 0; //return whatever
@@ -94,16 +94,6 @@ UINT64 Vocab::GetVocabId(const std::string &factorString, bool &found) const
     found = true;
     return iter->second;
   }
-}
-
-const Moses::Factor *Vocab::GetFactor(UINT32 vocabId, Moses::FactorType factorType, Moses::FactorDirection direction, bool isNonTerminal) const
-{
-  string str = GetString(vocabId);
-  if (isNonTerminal) {
-    str = str.substr(1, str.size() - 2);
-  }
-  const Moses::Factor *factor = Moses::FactorCollection::Instance().AddFactor(direction, factorType, str);
-  return factor;
 }
 
 }

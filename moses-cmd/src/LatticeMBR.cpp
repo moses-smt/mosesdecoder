@@ -13,6 +13,10 @@
 #include <set>
 
 using namespace std;
+using namespace Moses;
+
+namespace MosesCmd
+{
 
 size_t bleu_order = 4;
 float UNKNGRAMLOGPROB = -20;
@@ -658,6 +662,8 @@ const TrellisPath doConsensusDecoding(Manager& manager, TrellisPathList& nBestLi
   //vector<Word> bestWords;
   //GetOutputWords(**best,bestWords);
   //return bestWords;
+}
+
 }
 
 

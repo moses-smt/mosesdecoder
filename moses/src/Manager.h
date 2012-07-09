@@ -59,7 +59,7 @@ struct SearchGraphNode {
 
 };
 
-/** The Manager class implements a stack decoding algorithm.
+/** The Manager class implements a stack decoding algorithm for phrase-based decoding
  * Hypotheses are organized in stacks. One stack contains all hypothesis that have
  * the same number of foreign words translated.  The data structure for hypothesis
  * stacks is the class HypothesisStack. The data structure for a hypothesis

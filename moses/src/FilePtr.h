@@ -13,9 +13,9 @@
 namespace Moses
 {
 
-// smart pointer for on-demand loading from file
-// requirement: T has a constructor T(FILE*)
-
+/** smart pointer for on-demand loading from file
+ *  requirement: T has a constructor T(FILE*)
+ */
 template<typename T> class FilePtr
 {
 public:

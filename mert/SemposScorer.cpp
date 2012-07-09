@@ -10,6 +10,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 SemposScorer::SemposScorer(const string& config)
   : StatisticsBasedScorer("SEMPOS", config),
     m_ovr(SemposOverlappingFactory::GetOverlapping(getConfig("overlapping", "cap-micro"),this)),
@@ -43,7 +47,7 @@ void SemposScorer::setReferenceFiles(const vector<string>& referenceFiles)
     m_ref_sentences.push_back(vector<sentence_t>());
     string line;
     while (getline(refin,line)) {
-      line = applyFactors(line);
+      line = preprocessSentence(line);
 
       str_sentence_t sentence;
       splitSentence(line, sentence);
@@ -60,7 +64,7 @@ void SemposScorer::prepareStats(size_t sid, const string& text, ScoreStats& entr
 {
   vector<ScoreStatsType> stats;
 
-  const string& sentence = applyFactors(text);
+  const string& sentence = preprocessSentence(text);
   str_sentence_t splitCandSentence;
   splitSentence(sentence, splitCandSentence);
 
@@ -89,6 +93,7 @@ void SemposScorer::splitSentence(const string& sentence, str_sentence_t& splitSe
   split(sentence, ' ', tokens);
   for (vector<string>::iterator it = tokens.begin(); it != tokens.end(); ++it) {
     vector<string> factors;
+    if (it->empty()) continue;
     split(*it, '|', factors);
     if (factors.size() != 2) throw runtime_error("Sempos scorer accepts two factors (item|class)");
     const string& item = factors[0];
@@ -177,3 +182,6 @@ void SemposScorer::loadWeights(const string& weightsfile)
     }
 
 }
+
+}
+

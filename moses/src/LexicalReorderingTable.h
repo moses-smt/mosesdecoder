@@ -27,8 +27,7 @@ class Phrase;
 class InputType;
 class ConfusionNet;
 
-//additional types
-
+//! additional types
 class LexicalReorderingTable
 {
 public:
@@ -69,6 +68,7 @@ protected:
   FactorList m_FactorsC;
 };
 
+//! @todo what is this?
 class LexicalReorderingTableMemory : public LexicalReorderingTable
 {
   //implements LexicalReorderingTable saving all scores in one large std::map<> thingy

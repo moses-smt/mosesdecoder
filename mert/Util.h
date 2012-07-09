@@ -22,7 +22,8 @@
 
 #include "Types.h"
 
-using namespace std;
+namespace MosesTuning
+{
 
 #ifdef TRACE_ENABLE
 #define TRACE_ERR(str) { std::cerr << str; }
@@ -40,11 +41,11 @@ const float kEPS = 0.0001f;
 
 template <typename T>
 bool IsAlmostEqual(T expected, T actual, float round=kEPS) {
-  if (abs(expected - actual) < round) {
+  if (std::abs(expected - actual) < round) {
     return true;
   } else {
-    cerr << "Fail: expected = " << expected
-         << " (actual = " << actual << ")" << endl;
+    std::cerr << "Fail: expected = " << expected
+              << " (actual = " << actual << ")" << std::endl;
     return false;
   }
 }
@@ -118,9 +119,20 @@ inline FeatureStatsType ConvertStringToFeatureStatsType(const std::string &str)
   return ConvertCharToFeatureStatsType(str.c_str());
 }
 
+inline std::string trimStr(const std::string& Src, const std::string& c = " \r\n")
+{
+  size_t p2 = Src.find_last_not_of(c);
+  if (p2 == std::string::npos) return std::string();
+  size_t p1 = Src.find_first_not_of(c);
+  if (p1 == std::string::npos) p1 = 0;
+  return Src.substr(p1, (p2-p1)+1);
+}
+
 // Utilities to measure decoding time
 void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
+
+}
 
 #endif  // MERT_UTIL_H_

@@ -6,10 +6,10 @@ binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
 
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use strict;
 
-my $mydir = "$Bin/nonbreaking_prefixes";
+my $mydir = "$RealBin/../../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";

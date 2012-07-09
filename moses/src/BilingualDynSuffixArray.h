@@ -11,6 +11,8 @@
 
 namespace Moses {
 
+/** @todo ask Abbey Levenberg
+ */
 class SAPhrase
 {
 public:
@@ -29,6 +31,8 @@ public:
   { return words < phr2.words; }
 };
 
+/** @todo ask Abbey Levenberg
+ */
 class PhrasePair
 {
 public:
@@ -45,6 +49,8 @@ public:
 	{ return m_endTarget - m_startTarget + 1; }
 };
 	
+/** @todo ask Abbey Levenberg
+ */
 class SentenceAlignment 
 {
 public:
@@ -77,6 +83,8 @@ private:
   const std::vector<float>& m_weights;
 };
 	
+/** @todo ask Abbey Levenberg
+ */
 class BilingualDynSuffixArray {
 public: 
 	BilingualDynSuffixArray();

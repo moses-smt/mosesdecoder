@@ -156,7 +156,6 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   fstream &fileTP = onDiskWrapper.GetFileTargetInd();
 
   size_t numScores = onDiskWrapper.GetNumScores();
-  size_t numTargetFactors = onDiskWrapper.GetNumTargetFactors();
 
   UINT64 numPhrases;
 
@@ -173,7 +172,7 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
     TargetPhrase *tp = new TargetPhrase(numScores);
 
     UINT64 sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
-    tp->ReadFromFile(fileTP, numTargetFactors);
+    tp->ReadFromFile(fileTP);
 
     currFilePos += sizeOtherInfo;
 
@@ -196,6 +195,12 @@ void TargetPhraseCollection::SetDebugStr(const std::string &str)
   m_debugStr = str;
 }
 
+const TargetPhrase &TargetPhraseCollection::GetTargetPhrase(size_t ind) const
+{
+  assert(ind < GetSize());
+  return *m_coll[ind];
+}
+  
 }
 
 

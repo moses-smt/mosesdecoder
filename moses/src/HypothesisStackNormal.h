@@ -33,7 +33,7 @@ namespace Moses
 // class WordsBitmap;
 // typedef size_t WordsBitmapID;
 
-/** Stack for instances of Hypothesis, includes functions for pruning. */
+/** A stack for standard phrase-based decoding. */
 class HypothesisStackNormal: public HypothesisStack
 {
 public:
@@ -66,7 +66,7 @@ public:
       return -std::numeric_limits<float>::infinity();
     return m_diversityWorstScore[ id ];
   }
-  float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
+  virtual float GetWorstScoreForBitmap( const WordsBitmap &coverage ) {
     return GetWorstScoreForBitmap( coverage.GetID() );
   }
 

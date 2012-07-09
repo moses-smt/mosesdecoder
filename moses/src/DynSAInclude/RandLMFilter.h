@@ -22,14 +22,15 @@
 
 namespace randlm {
   
-  // Class Filter wraps a contiguous array of data. Filter and its subclasses
-  // implement read/write/increment functionality on arrays with arbitrary sized addresses
-  // (i.e. an address may not use a full number of bytes). When converting to byte-based 
-  // representation we assume "unused" bits are to left. 
-  // E.g. if the underlying data is stored in units T = uint16 and the 'width' = 11
-  // to read 'address' = 3 we extract bits at indices [33,42] (i.e. [11*3, 11*4 - 1])
-  // and store in a uint16 in positions 0000 0001 111111 where the first 7 bits have 
-  // been masked out.
+  /* Class Filter wraps a contiguous array of data. Filter and its subclasses
+    * implement read/write/increment functionality on arrays with arbitrary sized addresses
+    * (i.e. an address may not use a full number of bytes). When converting to byte-based 
+    * representation we assume "unused" bits are to left. 
+    * E.g. if the underlying data is stored in units T = uint16 and the 'width' = 11
+    * to read 'address' = 3 we extract bits at indices [33,42] (i.e. [11*3, 11*4 - 1])
+    * and store in a uint16 in positions 0000 0001 111111 where the first 7 bits have 
+    * been masked out.
+   */
   template<typename T>
   class Filter {
   public:

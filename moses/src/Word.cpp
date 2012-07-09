@@ -94,7 +94,7 @@ void Word::CreateFromString(FactorDirection direction
 
   vector<string> wordVec;
   Tokenize(wordVec, str, "|");
-  CHECK(wordVec.size() == factorOrder.size());
+  CHECK(wordVec.size() <= factorOrder.size());
 
   const Factor *factor;
   for (size_t ind = 0; ind < wordVec.size(); ++ind) {

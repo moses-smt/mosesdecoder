@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureStats.h"
 
+namespace MosesTuning
+{
+  
 
 class FileFormatException : public util::Exception 
 {
@@ -60,6 +63,9 @@ class FeatureDataItem
     std::vector<float> dense;
     SparseVector sparse;
 };
+
+bool operator==(FeatureDataItem const& item1, FeatureDataItem const& item2);
+std::size_t hash_value(FeatureDataItem const& item);
 
 class FeatureDataIterator : 
   public boost::iterator_facade<FeatureDataIterator,
@@ -87,5 +93,7 @@ class FeatureDataIterator :
     boost::shared_ptr<util::FilePiece> m_in;
     std::vector<FeatureDataItem> m_next;
 };
+
+}
 
 #endif  // MERT_FEATURE_DATA_ITERATOR_H_

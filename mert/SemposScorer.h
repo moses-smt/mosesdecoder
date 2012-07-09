@@ -15,6 +15,11 @@
 // However, currently SemposScorer uses a bunch of typedefs, which are
 // used in SemposScorer as well as inherited SemposOverlapping classes.
 #include "SemposOverlapping.h"
+#include "StatisticsBasedScorer.h"
+
+namespace MosesTuning
+{
+  
 
 /**
  * This class represents sempos based metrics.
@@ -54,11 +59,13 @@ private:
 
   std::map<int, float> weightsMap;
 
-  void loadWeights(const string& weightsfile);
+  void loadWeights(const std::string& weightsfile);
 
   // no copying allowed.
   SemposScorer(const SemposScorer&);
   SemposScorer& operator=(const SemposScorer&);
 };
+
+}
 
 #endif  // MERT_SEMPOSSCORER_H_

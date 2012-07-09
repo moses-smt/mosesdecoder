@@ -18,6 +18,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
+#include "../moses/src/FactorCollection.h"
 #include "../moses/src/Util.h"
 #include "../moses/src/Word.h"
 #include "Word.h"
@@ -29,7 +30,7 @@ namespace OnDiskPt
 
 Word::Word(const Word &copy)
   :m_isNonTerminal(copy.m_isNonTerminal)
-  ,m_factors(copy.m_factors)
+  ,m_vocabId(copy.m_vocabId)
 {}
 
 Word::~Word()
@@ -40,23 +41,21 @@ void Word::CreateFromString(const std::string &inString, Vocab &vocab)
   if (inString.substr(0, 1) == "[" && inString.substr(inString.size() - 1, 1) == "]") {
     // non-term
     m_isNonTerminal = true;
+    string str = inString.substr(1, inString.size() - 2);
+    m_vocabId = vocab.AddVocabId(str);
   } else {
     m_isNonTerminal = false;
+    m_vocabId = vocab.AddVocabId(inString);
   }
 
-  m_factors.resize(1);
-  m_factors[0] = vocab.AddVocabId(inString);
 }
 
 size_t Word::WriteToMemory(char *mem) const
 {
   UINT64 *vocabMem = (UINT64*) mem;
+  vocabMem[0] = m_vocabId;
 
-  // factors
-  for (size_t ind = 0; ind < m_factors.size(); ind++)
-    vocabMem[ind] = m_factors[ind];
-
-  size_t size = sizeof(UINT64) * m_factors.size();
+  size_t size = sizeof(UINT64);
 
   // is non-term
   char bNonTerm = (char) m_isNonTerminal;
@@ -66,16 +65,12 @@ size_t Word::WriteToMemory(char *mem) const
   return size;
 }
 
-size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
+size_t Word::ReadFromMemory(const char *mem)
 {
-  m_factors.resize(numFactors);
   UINT64 *vocabMem = (UINT64*) mem;
+  m_vocabId = vocabMem[0];
 
-  // factors
-  for (size_t ind = 0; ind < m_factors.size(); ind++)
-    m_factors[ind] = vocabMem[ind];
-
-  size_t memUsed = sizeof(UINT64) * m_factors.size();
+  size_t memUsed = sizeof(UINT64);
 
   // is non-term
   char bNonTerm;
@@ -86,13 +81,13 @@ size_t Word::ReadFromMemory(const char *mem, size_t numFactors)
   return memUsed;
 }
 
-size_t Word::ReadFromFile(std::fstream &file, size_t numFactors)
+size_t Word::ReadFromFile(std::fstream &file)
 {
-  size_t memAlloc = numFactors * sizeof(UINT64) + sizeof(char);
+  size_t memAlloc = sizeof(UINT64) + sizeof(char);
   char *mem = (char*) malloc(memAlloc);
   file.read(mem, memAlloc);
 
-  size_t memUsed = ReadFromMemory(mem, numFactors);
+  size_t memUsed = ReadFromMemory(mem);
   CHECK(memAlloc == memUsed);
   free(mem);
 
@@ -103,12 +98,14 @@ Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
                                   , const std::vector<Moses::FactorType> &outputFactorsVec
                                   , const Vocab &vocab) const
 {
+  Moses::FactorCollection &factorColl = Moses::FactorCollection::Instance();
   Moses::Word *ret = new Moses::Word(m_isNonTerminal);
 
-  for (size_t ind = 0; ind < m_factors.size(); ++ind) {
+  const string &str = vocab.GetString(m_vocabId);
+  vector<string> toks = Moses::Tokenize(str, "|");
+  for (size_t ind = 0; ind < toks.size(); ++ind) {
     Moses::FactorType factorType = outputFactorsVec[ind];
-    UINT32 vocabId = m_factors[ind];
-    const Moses::Factor *factor = vocab.GetFactor(vocabId, factorType, direction, m_isNonTerminal);
+    const Moses::Factor *factor = factorColl.AddFactor(direction, factorType, toks[ind]);
     ret->SetFactor(factorType, factor);
   }
 
@@ -123,9 +120,9 @@ int Word::Compare(const Word &compare) const
   if (m_isNonTerminal != compare.m_isNonTerminal)
     return m_isNonTerminal ?-1 : 1;
 
-  if (m_factors < compare.m_factors)
+  if (m_vocabId < compare.m_vocabId)
     ret = -1;
-  else if (m_factors > compare.m_factors)
+  else if (m_vocabId > compare.m_vocabId)
     ret = 1;
   else
     ret = 0;
@@ -145,17 +142,19 @@ bool Word::operator==(const Word &compare) const
   return ret == 0;
 }
 
+void Word::DebugPrint(ostream &out, const Vocab &vocab) const
+{
+ 	const string &str = vocab.GetString(m_vocabId);
+  out << str;
+}
+
 std::ostream& operator<<(std::ostream &out, const Word &word)
 {
-  out << "[";
-
-  std::vector<UINT64>::const_iterator iter;
-  for (iter = word.m_factors.begin(); iter != word.m_factors.end(); ++iter) {
-    out << *iter << "|";
-  }
+  out << "(";
+ 	out << word.m_vocabId;
 
   out << (word.m_isNonTerminal ? "n" : "t");
-  out << "]";
+  out << ")";
 
   return out;
 }

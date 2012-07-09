@@ -1,0 +1,2 @@
+exe biconcor : Vocabulary.cpp SuffixArray.cpp TargetCorpus.cpp Alignment.cpp Mismatch.cpp PhrasePair.cpp PhrasePairCollection.cpp biconcor.cpp base64.cpp ;
+

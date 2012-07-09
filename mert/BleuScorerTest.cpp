@@ -8,6 +8,8 @@
 #include "Vocabulary.h"
 #include "Util.h"
 
+using namespace MosesTuning;
+
 namespace {
 
 NgramCounts* g_counts = NULL;
@@ -125,6 +127,18 @@ BOOST_AUTO_TEST_CASE(bleu_reference_type) {
   BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::SHORTEST);
 }
 
+BOOST_AUTO_TEST_CASE(bleu_reference_type_with_config) {
+  {
+    BleuScorer scorer("reflen:average");
+    BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::AVERAGE);
+  }
+
+  {
+    BleuScorer scorer("reflen:shortest");
+    BOOST_CHECK_EQUAL(scorer.GetReferenceLengthType(), BleuScorer::SHORTEST);
+  }
+}
+
 BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
   BleuScorer scorer;
 
@@ -140,10 +154,10 @@ BOOST_AUTO_TEST_CASE(bleu_count_ngrams) {
   //          "girl with a telescope", "with a telescope ."
   NgramCounts counts;
   BOOST_REQUIRE(scorer.CountNgrams(line, counts, kBleuNgramOrder) == 8);
-  BOOST_CHECK_EQUAL(25, counts.size());
+  BOOST_CHECK_EQUAL((std::size_t)25, counts.size());
 
   mert::Vocabulary* vocab = scorer.GetVocab();
-  BOOST_CHECK_EQUAL(7, vocab->size());
+  BOOST_CHECK_EQUAL((std::size_t)7, vocab->size());
 
   std::vector<std::string> res;
   Tokenize(line.c_str(), ' ', &res);
@@ -191,7 +205,7 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
   ScoreStats entry;
   scorer.prepareStats(0, line, entry);
 
-  BOOST_CHECK_EQUAL(entry.size(), 2 * kBleuNgramOrder + 1);
+  BOOST_CHECK_EQUAL(entry.size(), (std::size_t)(2 * kBleuNgramOrder + 1));
 
   // Test hypothesis ngram counts
   BOOST_CHECK_EQUAL(entry.get(0), 5);  // unigram
@@ -208,7 +222,7 @@ BOOST_AUTO_TEST_CASE(bleu_clipped_counts) {
 
 BOOST_AUTO_TEST_CASE(calculate_actual_score) {
   BOOST_REQUIRE(4 == kBleuNgramOrder);
-  vector<int> stats(2 * kBleuNgramOrder + 1);
+  std::vector<int> stats(2 * kBleuNgramOrder + 1);
   BleuScorer scorer;
 
   // unigram
@@ -235,7 +249,7 @@ BOOST_AUTO_TEST_CASE(calculate_actual_score) {
 
 BOOST_AUTO_TEST_CASE(sentence_level_bleu) {
   BOOST_REQUIRE(4 == kBleuNgramOrder);
-  vector<float> stats(2 * kBleuNgramOrder + 1);
+  std::vector<float> stats(2 * kBleuNgramOrder + 1);
 
   // unigram
   stats[0] = 6.0;

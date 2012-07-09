@@ -8,10 +8,18 @@
 
 #include "Util.h"
 #include "ScoreStats.h"
+#include <fstream>
+#include <iostream>
+
+using namespace std;
 
 namespace {
 const int kAvailableSize = 8;
 } // namespace
+
+namespace MosesTuning
+{
+  
 
 ScoreStats::ScoreStats()
     : m_available_size(kAvailableSize), m_entries(0),
@@ -132,7 +140,6 @@ ostream& operator<<(ostream& o, const ScoreStats& e)
   return o;
 }
 
-//ADDED_BY_TS
 bool operator==(const ScoreStats& s1, const ScoreStats& s2) {
   size_t size = s1.size();
 
@@ -146,4 +153,5 @@ bool operator==(const ScoreStats& s1, const ScoreStats& s2) {
 
   return true;
 }
-//END_ADDED
+
+}

@@ -1,0 +1,311 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E73031E1597355A00C0E7FB /* kbmira.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E73031D1597355A00C0E7FB /* kbmira.cpp */; };
+		1EC060861597392900614957 /* libmert_lib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC060821597386600614957 /* libmert_lib.a */; };
+		1EC060B41597490F00614957 /* liblm.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EC060B11597490800614957 /* liblm.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1EC060811597386600614957 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EC0607A1597386500614957 /* mert_lib.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1E2CCF3315939E2D00D858D1;
+			remoteInfo = mert_lib;
+		};
+		1EC060841597386C00614957 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EC0607A1597386500614957 /* mert_lib.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 1E2CCF3215939E2D00D858D1;
+			remoteInfo = mert_lib;
+		};
+		1EC060B01597490800614957 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EC060A51597490800614957 /* lm.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1EE8C2E91476A48E002496F2;
+			remoteInfo = lm;
+		};
+		1EC060B51597491400614957 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EC060A51597490800614957 /* lm.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = 1EE8C2E81476A48E002496F2;
+			remoteInfo = lm;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1E43CA3E159734A5000E29D3 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1E43CA40159734A5000E29D3 /* kbmira */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = kbmira; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E73031D1597355A00C0E7FB /* kbmira.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = kbmira.cpp; path = ../../mert/kbmira.cpp; sourceTree = "<group>"; };
+		1EC0607A1597386500614957 /* mert_lib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = mert_lib.xcodeproj; sourceTree = "<group>"; };
+		1EC060A51597490800614957 /* lm.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = lm.xcodeproj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1E43CA3D159734A5000E29D3 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EC060B41597490F00614957 /* liblm.a in Frameworks */,
+				1EC060861597392900614957 /* libmert_lib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1E43CA35159734A5000E29D3 = {
+			isa = PBXGroup;
+			children = (
+				1EC060A51597490800614957 /* lm.xcodeproj */,
+				1EC0607A1597386500614957 /* mert_lib.xcodeproj */,
+				1E73031D1597355A00C0E7FB /* kbmira.cpp */,
+				1E43CA41159734A5000E29D3 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1E43CA41159734A5000E29D3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E43CA40159734A5000E29D3 /* kbmira */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EC0607B1597386500614957 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EC060821597386600614957 /* libmert_lib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EC060A61597490800614957 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EC060B11597490800614957 /* liblm.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1E43CA3F159734A5000E29D3 /* kbmira */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E43CA4A159734A5000E29D3 /* Build configuration list for PBXNativeTarget "kbmira" */;
+			buildPhases = (
+				1E43CA3C159734A5000E29D3 /* Sources */,
+				1E43CA3D159734A5000E29D3 /* Frameworks */,
+				1E43CA3E159734A5000E29D3 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1EC060B61597491400614957 /* PBXTargetDependency */,
+				1EC060851597386C00614957 /* PBXTargetDependency */,
+			);
+			name = kbmira;
+			productName = kbmira;
+			productReference = 1E43CA40159734A5000E29D3 /* kbmira */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1E43CA37159734A5000E29D3 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1E43CA3A159734A5000E29D3 /* Build configuration list for PBXProject "kbmira" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1E43CA35159734A5000E29D3;
+			productRefGroup = 1E43CA41159734A5000E29D3 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1EC060A61597490800614957 /* Products */;
+					ProjectRef = 1EC060A51597490800614957 /* lm.xcodeproj */;
+				},
+				{
+					ProductGroup = 1EC0607B1597386500614957 /* Products */;
+					ProjectRef = 1EC0607A1597386500614957 /* mert_lib.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				1E43CA3F159734A5000E29D3 /* kbmira */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1EC060821597386600614957 /* libmert_lib.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmert_lib.a;
+			remoteRef = 1EC060811597386600614957 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EC060B11597490800614957 /* liblm.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = liblm.a;
+			remoteRef = 1EC060B01597490800614957 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1E43CA3C159734A5000E29D3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E73031E1597355A00C0E7FB /* kbmira.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1EC060851597386C00614957 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = mert_lib;
+			targetProxy = 1EC060841597386C00614957 /* PBXContainerItemProxy */;
+		};
+		1EC060B61597491400614957 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = lm;
+			targetProxy = 1EC060B51597491400614957 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1E43CA48159734A5000E29D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1E43CA49159734A5000E29D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = /opt/local/lib;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_LDFLAGS = "";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1E43CA4B159734A5000E29D3 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options",
+					"-lz",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1E43CA4C159734A5000E29D3 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options",
+					"-lz",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E43CA3A159734A5000E29D3 /* Build configuration list for PBXProject "kbmira" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E43CA48159734A5000E29D3 /* Debug */,
+				1E43CA49159734A5000E29D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E43CA4A159734A5000E29D3 /* Build configuration list for PBXNativeTarget "kbmira" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E43CA4B159734A5000E29D3 /* Debug */,
+				1E43CA4C159734A5000E29D3 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1E43CA37159734A5000E29D3 /* Project object */;
+}

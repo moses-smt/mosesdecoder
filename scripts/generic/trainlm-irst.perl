@@ -7,11 +7,12 @@
 #    settings = ""
 # Also, make sure that $irst-dir is defined (in the [LM] or [GENERAL] section. 
 # It should point to the root of the LM toolkit, eg
-#    irst-dir = /Users/hieu/workspace/irstlm/trunk
+#    irst-dir = /Users/hieu/workspace/irstlm/trunk/bin
 # And make sure that $cores is defined, eg $cores = 8
+# And make sure the $settings variable is empty. This script doesn't understand some of the sri args like -unk and will complain.
 
 use strict;
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use Getopt::Long;
 
 my $order = 3;

@@ -11,6 +11,9 @@ namespace Moses
 
 class Manager;
 
+/** abstract unique set of hypotheses that cover a certain number of words, 
+ *  ie. a stack in phrase-based decoding
+ */
 class HypothesisStack
 {
 
@@ -39,7 +42,7 @@ public:
   virtual float GetWorstScoreForBitmap( WordsBitmapID ) {
     return -std::numeric_limits<float>::infinity();
   };
-  virtual float GetWorstScoreForBitmap( WordsBitmap ) {
+  virtual float GetWorstScoreForBitmap( const WordsBitmap& ) {
     return -std::numeric_limits<float>::infinity();
   };
 

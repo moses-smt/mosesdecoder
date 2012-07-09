@@ -8,6 +8,10 @@
 #include "Scorer.h"
 #include "ScopedVector.h"
 
+namespace MosesTuning
+{
+  
+
 /**
   * Class that includes other scorers eg.
   * Interpolated HAMMING and BLEU scorer **/
@@ -15,17 +19,17 @@ class InterpolatedScorer : public Scorer
 {
 public:
   // name would be: "HAMMING,BLEU" or similar
-  InterpolatedScorer(const string& name, const string& config);
+  InterpolatedScorer(const std::string& name, const std::string& config);
   virtual ~InterpolatedScorer() {}
 
   virtual void score(const candidates_t& candidates, const diffs_t& diffs,
                      statscores_t& scores) const;
 
-  virtual void setReferenceFiles(const vector<string>& referenceFiles);
-  virtual void prepareStats(size_t sid, const string& text, ScoreStats& entry);
+  virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
+  virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
-  virtual size_t NumberOfScores() const {
-    size_t sz = 0;
+  virtual std::size_t NumberOfScores() const {
+    std::size_t sz = 0;
     for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
          itsc != m_scorers.end(); ++itsc) {
       sz += (*itsc)->NumberOfScores();
@@ -38,7 +42,9 @@ public:
   /**
    * Set the factors, which should be used for this metric
    */
-  virtual void setFactors(const string& factors);
+  virtual void setFactors(const std::string& factors);
+
+  virtual void setFilter(const std::string& filterCommand);
 
 protected:
   ScopedVector<Scorer> m_scorers;
@@ -47,7 +53,9 @@ protected:
   // by Scorer objects.
   ScopedVector<ScoreData> m_scorers_score_data;
 
-  vector<float> m_scorer_weights;
+  std::vector<float> m_scorer_weights;
 };
+
+}
 
 #endif  // MERT_INTERPOLATED_SCORER_H_

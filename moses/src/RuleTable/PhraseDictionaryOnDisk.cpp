@@ -1,4 +1,4 @@
-// vim:tabstop=2
+  // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2010 Hieu Hoang
@@ -57,7 +57,7 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
   if (!m_dbWrapper.BeginLoad(filePath))
     return false;
 
-  CHECK(m_dbWrapper.GetMisc("Version") == 3);
+  CHECK(m_dbWrapper.GetMisc("Version") == 4);
   CHECK(m_dbWrapper.GetMisc("NumSourceFactors") == input.size());
   CHECK(m_dbWrapper.GetMisc("NumTargetFactors") == output.size());
   CHECK(m_dbWrapper.GetMisc("NumScores") == weight.size());

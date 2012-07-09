@@ -14,6 +14,8 @@ namespace Moses
 
 typedef std::vector<unsigned> vuint_t;
 
+/** @todo ask Abbey Levenberg
+ */
 class DynSuffixArray
 {
 

@@ -10,6 +10,12 @@
 #include "Util.h"
 #include "FileStream.h"
 
+using namespace std;
+
+namespace MosesTuning
+{
+  
+
 ScoreArray::ScoreArray()
     : m_num_scores(0), m_index("") {}
 
@@ -158,3 +164,6 @@ bool ScoreArray::check_consistency() const
   }
   return true;
 }
+
+}
+
