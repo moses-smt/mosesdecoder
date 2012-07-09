@@ -13,7 +13,7 @@
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
-
+$|=1;
 use FindBin qw($RealBin);
 use strict;
 use Time::HiRes;
