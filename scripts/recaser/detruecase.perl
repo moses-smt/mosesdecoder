@@ -5,6 +5,7 @@ use Getopt::Long "GetOptions";
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
+$| = 1; # autoflush stdout
 
 
 my ($SRC,$INFILE);
@@ -67,7 +68,7 @@ sub process {
     if (defined($SRC) && $HEADLINE[$sentence]) {
 	foreach (@WORD) {
 	    &uppercase(\$_) unless $ALWAYS_LOWER{$_};
-	}	
+	}
     }
 
     # output
