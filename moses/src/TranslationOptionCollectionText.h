@@ -30,6 +30,9 @@ namespace Moses
 class Sentence;
 class LMList;
 
+/** Holds all translation options, for all spans, of a particular sentence input
+ * Inherited from TranslationOptionCollection.
+ */
 class TranslationOptionCollectionText : public TranslationOptionCollection
 {
 public:

@@ -26,6 +26,7 @@ namespace Moses
 
 class ChartHypothesis;
 
+//! vector of chart hypotheses. May get turned into a class
 typedef std::vector<const ChartHypothesis*> HypoList;
 
 }

@@ -35,43 +35,12 @@
 #include "OutputFileStream.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 #define LINE_MAX_LENGTH 100000
 
-Vocabulary vcbT;
-Vocabulary vcbS;
-
-class LexicalTable
+namespace MosesTraining
 {
-public:
-  map< WORD_ID, map< WORD_ID, double > > ltable;
-  void load( char[] );
-  double permissiveLookup( WORD_ID wordS, WORD_ID wordT ) {
-    // cout << endl << vcbS.getWord( wordS ) << "-" << vcbT.getWord( wordT ) << ":";
-    if (ltable.find( wordS ) == ltable.end()) return 1.0;
-    if (ltable[ wordS ].find( wordT ) == ltable[ wordS ].end()) return 1.0;
-    // cout << ltable[ wordS ][ wordT ];
-    return ltable[ wordS ][ wordT ];
-  }
-};
-
-vector<string> tokenize( const char [] );
-
-void writeCountOfCounts( const string &fileNameCountOfCounts );
-void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
-PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
-double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
-double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
-set<string> functionWordList;
-void loadFunctionWords( const char* fileNameFunctionWords );
-double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
-                      , map<size_t, map<size_t, float> > &sourceProb
-                      , map<size_t, map<size_t, float> > &targetProb);
-void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
-void printTargetPhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
-
 LexicalTable lexTable;
 bool inverseFlag = false;
 bool hierarchicalFlag = false;
@@ -91,6 +60,28 @@ bool outputNTLengths = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
+
+Vocabulary vcbT;
+Vocabulary vcbS;
+  
+} // namespace
+
+vector<string> tokenize( const char [] );
+
+void writeCountOfCounts( const string &fileNameCountOfCounts );
+void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
+PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
+double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
+double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
+set<string> functionWordList;
+void loadFunctionWords( const char* fileNameFunctionWords );
+double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
+void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
+                      , map<size_t, map<size_t, float> > &sourceProb
+                      , map<size_t, map<size_t, float> > &targetProb);
+void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
+void printTargetPhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
 
 int main(int argc, char* argv[])
 {

@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+/** Representation of a phrase, ie. a contiguous number of words.
+ *  Wrapper for vector of words
+ */
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const Phrase&);

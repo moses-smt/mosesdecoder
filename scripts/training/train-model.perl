@@ -2,7 +2,7 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Spec::Functions;
 use File::Spec::Unix;
 use File::Basename;
@@ -13,7 +13,7 @@ use File::Basename;
 # Train a model from a parallel corpus
 # -----------------------------------------------------
 $ENV{"LC_ALL"} = "C";
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 if ($SCRIPTS_ROOTDIR eq '') {
     $SCRIPTS_ROOTDIR = dirname(__FILE__);
 }
@@ -36,7 +36,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
-   $_ADDITIONAL_INI,
+   $_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    $_DICTIONARY, $_EPPEX, $IGNORE);
 my $_CORES = 1;
 
@@ -121,8 +121,9 @@ $_HELP = 1
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
 		       'eppex:s' => \$_EPPEX,
-           'additional-ini=s' => \$_ADDITIONAL_INI, 
-           'cores=i' => \$_CORES
+		       'additional-ini=s' => \$_ADDITIONAL_INI, 
+		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
+		       'cores=i' => \$_CORES
                );
 
 if ($_HELP) {
@@ -160,9 +161,9 @@ $_ALIGNMENT_STEM = File::Spec->rel2abs($_ALIGNMENT_STEM) if defined($_ALIGNMENT_
 $_GLUE_GRAMMAR_FILE = File::Spec->rel2abs($_GLUE_GRAMMAR_FILE) if defined($_GLUE_GRAMMAR_FILE);
 $_UNKNOWN_WORD_LABEL_FILE = File::Spec->rel2abs($_UNKNOWN_WORD_LABEL_FILE) if defined($_UNKNOWN_WORD_LABEL_FILE);
 $_EXTRACT_FILE = File::Spec->rel2abs($_EXTRACT_FILE) if defined($_EXTRACT_FILE);
-@_PHRASE_TABLE = File::Spec->rel2abs(@_PHRASE_TABLE) if ($#_PHRASE_TABLE > 0);
-@_REORDERING_TABLE = File::Spec->rel2abs(@_REORDERING_TABLE) if ($#_REORDERING_TABLE > 0);
-@_GENERATION_TABLE = File::Spec->rel2abs(@_GENERATION_TABLE) if ($#_GENERATION_TABLE > 0);
+foreach (@_PHRASE_TABLE) { $_ = File::Spec->rel2abs($_); }
+foreach (@_REORDERING_TABLE) { $_ = File::Spec->rel2abs($_); }
+foreach (@_GENERATION_TABLE) { $_ = File::Spec->rel2abs($_); }
 $_GIZA_E2F = File::Spec->rel2abs($_GIZA_E2F) if defined($_GIZA_E2F);
 $_GIZA_F2E = File::Spec->rel2abs($_GIZA_F2E) if defined($_GIZA_F2E);
 
@@ -1482,6 +1483,10 @@ sub score_phrase_phrase_extract {
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
     my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
+    my $COUNT_BIN = "";
+    if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CountBinFeature ([\s\d]*\d)/) {
+      $COUNT_BIN = $1;
+    }
     my $UNALIGNED_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/);
     my ($UNALIGNED_FW_COUNT,$UNALIGNED_FW_F,$UNALIGNED_FW_E);
     if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty +(\S+) +(\S+)/) {
@@ -1580,6 +1585,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
     $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
+    $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     
@@ -1837,15 +1843,33 @@ sub create_ini {
    $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
    $basic_weight_count++ unless defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
    $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
+   if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(CountBinFeature [\s\d]*\d)/) {
+     $basic_weight_count += scalar split(/\s+/,$1);
+   }
    $basic_weight_count++ if $_PCFG;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-     $num_of_ttables++;
-     my $ff = $f;
-     $ff =~ s/\-/ /;
-     my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
-     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-     my $phrase_table_impl = ($_HIERARCHICAL ? 6 : 0);
-     print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
+  	$num_of_ttables++;
+    my $ff = $f;
+    $ff =~ s/\-/ /;
+    my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").($___NOT_FACTORED ? "" : ".$f").".gz";
+    my $phrase_table_impl = ($_HIERARCHICAL? 6 : 0);
+
+		if (scalar(@SPECIFIED_TABLE)) {
+	    $file = shift @SPECIFIED_TABLE;
+	    my @toks = split(/:/,$file);
+			$file = $toks[0];
+      if (@toks > 1) {
+			  $phrase_table_impl = $toks[1];
+			}
+			if (@toks == 3) {
+				$basic_weight_count = $toks[2];
+			}
+		}
+		else {
+
+		}
+		
+    print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
    }
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
@@ -1975,9 +1999,14 @@ sub create_ini {
     print INI "\n# delimiter between factors in input\n[factor-delimiter]\n$___FACTOR_DELIMITER\n\n"
   }
 
+  # get addititional content for config file from switch or file
   if ($_ADDITIONAL_INI) {
     print INI "\n# additional settings\n\n";
     foreach (split(/<br>/i,$_ADDITIONAL_INI)) { print INI $_."\n"; }
+  }
+  if ($_ADDITIONAL_INI_FILE) {
+    print INI "\n# additional settings\n\n";
+    print INI `cat $_ADDITIONAL_INI_FILE`;
   }
 
   close(INI);

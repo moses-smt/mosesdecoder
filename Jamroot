@@ -89,16 +89,7 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-project lm ; 
-build-project util ;
-#Trigger instllation into legacy paths.  
-build-project mert ;
-build-project moses-cmd/src ;
-build-project moses-chart-cmd/src ;
-#Scripts have their own binaries.
-build-project scripts ;
-#Regression tests (only does anything if --with-regtest is passed)
-build-project regression-testing ;
+build-projects util lm mert moses-cmd/src moses-chart-cmd/src scripts regression-testing ;
 
 alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor ;
 

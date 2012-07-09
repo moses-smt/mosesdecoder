@@ -7,13 +7,16 @@
 
 #include "Types.h"
 #include "ScoreData.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
 #include "ScopedVector.h"
+
+namespace MosesTuning
+{
 
 const int kBleuNgramOrder = 4;
 
 class NgramCounts;
-class Reference;
+class Reference;  
 
 /**
  * Bleu scoring
@@ -32,7 +35,7 @@ public:
 
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual statscore_t calculateScore(const std::vector<int>& comps) const;
   virtual std::size_t NumberOfScores() const { return 2 * kBleuNgramOrder + 1; }
 
   int CalcReferenceLength(std::size_t sentence_id, std::size_t length);
@@ -79,5 +82,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
  * Computes plain old BLEU from a vector of stats
  */
 float unsmoothedBleu(const std::vector<float>& stats);
+
+}
 
 #endif  // MERT_BLEU_SCORER_H_

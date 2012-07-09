@@ -36,7 +36,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "StaticData.h"
 
-class IOWrapper;
+namespace MosesChartCmd {
+  class IOWrapper;
+}
 
 int main(int argc, char* argv[]);
-IOWrapper *GetIODevice(const Moses::StaticData &staticData);
+MosesChartCmd::IOWrapper *GetIOWrapper(const Moses::StaticData &staticData);

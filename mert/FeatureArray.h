@@ -13,6 +13,10 @@
 #include <iosfwd>
 #include "FeatureStats.h"
 
+namespace MosesTuning
+{
+  
+
 const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";
 const char FEATURES_TXT_END[] = "FEATURES_TXT_END_0";
 const char FEATURES_BIN_BEGIN[] = "FEATURES_BIN_BEGIN_0";
@@ -78,5 +82,7 @@ public:
 
   bool check_consistency() const;
 };
+
+}
 
 #endif  // MERT_FEATURE_ARRAY_H_

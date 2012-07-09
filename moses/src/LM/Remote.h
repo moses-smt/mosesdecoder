@@ -11,6 +11,8 @@
 namespace Moses
 {
 
+/** @todo ask miles
+ */
 class LanguageModelRemote : public LanguageModelPointerState
 {
 private:

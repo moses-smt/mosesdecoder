@@ -2,7 +2,7 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 
 my ($JAR,$GRAMMAR,$SPLIT_HYPHEN,$MARK_SPLIT,$BINARIZE);
 
@@ -19,12 +19,12 @@ die("ERROR: could not find jar file '$JAR'\n") unless -e $JAR;
 die("ERROR: could not find grammar file '$GRAMMAR'\n") unless -e $GRAMMAR;
 
 $BINARIZE = $BINARIZE ? "-binarize" : "";
-$SPLIT_HYPHEN = $SPLIT_HYPHEN ? "| $Bin/syntax-hyphen-splitting.perl $BINARIZE" : "";
+$SPLIT_HYPHEN = $SPLIT_HYPHEN ? "| $RealBin/syntax-hyphen-splitting.perl $BINARIZE" : "";
 $SPLIT_HYPHEN .= " -mark-split" if $SPLIT_HYPHEN && $MARK_SPLIT;
 
 my $tmp = "/tmp/parse-de-berkeley.$$";
 
-open(TMP,"| $Bin/../../tokenizer/deescape-special-chars.perl > $tmp");
+open(TMP,"| $RealBin/../../tokenizer/deescape-special-chars.perl > $tmp");
 while(<STDIN>) {
   # unsplit hyphens
   s/ \@-\@ /-/g if $SPLIT_HYPHEN;
@@ -37,7 +37,7 @@ while(<STDIN>) {
 }
 close(TMP);
 
-my $cmd = "cat $tmp | java -Xmx10000m -Xms10000m -Dfile.encoding=UTF8 -jar $JAR -gr $GRAMMAR -maxLength 1000 $BINARIZE | $Bin/berkeleyparsed2mosesxml.perl $SPLIT_HYPHEN";
+my $cmd = "cat $tmp | java -Xmx10000m -Xms10000m -Dfile.encoding=UTF8 -jar $JAR -gr $GRAMMAR -maxLength 1000 $BINARIZE | $RealBin/berkeleyparsed2mosesxml.perl $SPLIT_HYPHEN";
 print STDERR $cmd."\n";
 
 open(PARSE,"$cmd|");

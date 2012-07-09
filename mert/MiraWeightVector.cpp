@@ -1,6 +1,12 @@
 #include "MiraWeightVector.h"
 
+#include <cmath>
+
 using namespace std;
+
+namespace MosesTuning
+{
+  
 
 /**
  * Constructor, initializes to the zero vector
@@ -113,6 +119,17 @@ AvgWeightVector::AvgWeightVector(const MiraWeightVector& wv)
   :m_wv(wv)
 {}
 
+ostream& operator<<(ostream& o, const MiraWeightVector& e) 
+{
+  for(size_t i=0;i<e.m_weights.size();i++) {
+    if(abs(e.m_weights[i])>1e-8) {
+      if(i>0) o << " ";
+      cerr << i << ":" << e.m_weights[i];
+    }
+  }
+  return o;
+}
+
 ValType AvgWeightVector::weight(size_t index) const
 {
   if(m_wv.m_numUpdates==0) return m_wv.weight(index);
@@ -143,3 +160,5 @@ size_t AvgWeightVector::size() const {
 // mode:c++
 // c-basic-offset:2
 // End:
+}
+

@@ -36,8 +36,9 @@ struct CompareTrellisPathCollection {
 };
 
 /** priority queue used in Manager to store list of contenders for N-Best list.
-	* Stored in order of total score so that the best path can just be popped from the top
-	*/
+ * Stored in order of total score so that the best path can just be popped from the top
+ *  Used by phrase-based decoding
+ */
 class TrellisPathCollection
 {
   friend std::ostream& operator<<(std::ostream&, const TrellisPathCollection&);

@@ -48,13 +48,13 @@
 # Original version by Philipp Koehn
 
 use strict;
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Basename;
 use File::Path;
 use File::Spec;
 use Cwd;
 
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
@@ -108,6 +108,7 @@ my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iter
 my $___RANDOM_DIRECTIONS = 0; # search in random directions only
 my $___NUM_RANDOM_DIRECTIONS = 0; # number of random directions, also works with default optimizer [Cer&al.,2008]
 my $___RANDOM_RESTARTS = 20;
+my $___RETURN_BEST_DEV = 0; # return the best weights according to dev, not the last
 
 # Flags related to PRO (Hopkins & May, 2011)
 my $___PAIRWISE_RANKED_OPTIMIZER = 0; # flag to enable PRO.
@@ -208,6 +209,7 @@ GetOptions(
   "random-directions" => \$___RANDOM_DIRECTIONS, # search only in random directions
   "number-of-random-directions=i" => \$___NUM_RANDOM_DIRECTIONS, # number of random directions
   "random-restarts=i" => \$___RANDOM_RESTARTS, # number of random restarts
+  "return-best-dev" => \$___RETURN_BEST_DEV, # return the best weights according to dev, not the last
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "range=s@" => \$___RANGES,
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
@@ -295,6 +297,8 @@ Options:
                                      N means this and N previous iterations
 
   --maximum-iterations=ITERS ... Maximum number of iterations. Default: $maximum_iterations
+  --return-best-dev          ... Return the weights according to dev bleu, instead of returning
+                                 the last iteration
   --random-directions               ... search only in random directions
   --number-of-random-directions=int ... number of random directions
                                         (also works with regular optimizer, default: 0)
@@ -331,7 +335,7 @@ $moses_parallel_cmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "generic", "moses-pa
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = File::Spec->catfile(File::Basename::dirname($SCRIPTS_ROOTDIR), "dist", "bin");
+  $mertdir = File::Spec->catfile(File::Basename::dirname($SCRIPTS_ROOTDIR), "bin");
   die "mertdir does not exist: $mertdir" if ! -x $mertdir;
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
@@ -340,11 +344,13 @@ my $mert_extract_cmd = File::Spec->catfile($mertdir, "extractor");
 my $mert_mert_cmd    = File::Spec->catfile($mertdir, "mert");
 my $mert_pro_cmd     = File::Spec->catfile($mertdir, "pro");
 my $mert_mira_cmd    = File::Spec->catfile($mertdir, "kbmira");
+my $mert_eval_cmd    = File::Spec->catfile($mertdir, "evaluator");
 
 die "Not executable: $mert_extract_cmd" if ! -x $mert_extract_cmd;
 die "Not executable: $mert_mert_cmd"    if ! -x $mert_mert_cmd;
 die "Not executable: $mert_pro_cmd"     if ! -x $mert_pro_cmd;
 die "Not executable: $mert_mira_cmd"    if ! -x $mert_mira_cmd;
+die "Not executable: $mert_eval_cmd"    if ! -x $mert_eval_cmd;
 
 my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set to your installation
 
@@ -650,6 +656,18 @@ while (1) {
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined $devbleu ? $devbleu : "--not-estimated--"), $sparse_weights_file);
 
+  # Save dense weights to simplify best dev recovery
+  {
+    my $densefile = "run$run.dense";
+    my @vals = @{$featlist->{"values"}};
+    my @names = @{$featlist->{"names"}};
+    open my $denseout, '>', $densefile or die "Can't write $densefile (WD now $___WORKING_DIR)";
+    for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+        print $denseout "$names[$i] $names[$i] $vals[$i]\n";
+    }
+    close $denseout;
+  }
+
   # skip running the decoder if the user wanted
   if (! $skip_decoder) {
     print "($run) run decoder to produce n-best lists\n";
@@ -914,7 +932,6 @@ while (1) {
   print "loading data from $prev_score_file\n"   if defined($prev_score_file);
   print "loading data from $prev_init_file\n"    if defined($prev_init_file);
 }
-print "Training finished at " . `date`;
 
 if (defined $allsorted) {
     safesystem ("\\rm -f $allsorted") or die;
@@ -923,14 +940,39 @@ if (defined $allsorted) {
 safesystem("\\cp -f $weights_in_file run$run.$weights_in_file") or die;
 safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
 
-create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
+if($___RETURN_BEST_DEV) {
+  my $bestit=1;
+  my $bestbleu=0;
+  my $evalout = "eval.out";
+  for (my $i = 1; $i < $run; $i++) {
+    safesystem("$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out 2> /dev/null 1> $evalout");
+    open my $fh, '<', $evalout or die "Can't read $evalout : $!";
+    my $bleu = <$fh>;
+    chomp $bleu;
+    if($bleu > $bestbleu) {
+      $bestbleu = $bleu;
+      $bestit = $i;
+    }
+    close $fh;
+  }
+  print "copying weights from best iteration ($bestit, bleu=$bestbleu) to moses.ini\n";
+  my $best_sparse_file = undef;
+  if(defined $sparse_weights_file) {
+      $best_sparse_file = "run$bestit.sparse-weights";
+  }
+  create_config($___CONFIG_ORIG, "./moses.ini", get_featlist_from_file("run$bestit.dense"),
+                $bestit, $bestbleu, $best_sparse_file);
+}
+else {
+  create_config($___CONFIG_ORIG, "./moses.ini", $featlist, $run, $devbleu, $sparse_weights_file);
+}
 
 # just to be sure that we have the really last finished step marked
 &save_finished_step($finished_step_file, $run);
 
 #chdir back to the original directory # useless, just to remind we were not there
 chdir($cwd);
-
+print "Training finished at " . `date`;
 } # end of local scope
 
 sub get_weights_from_mert {
@@ -1098,7 +1140,11 @@ sub get_featlist_from_moses {
     my $cmd = "$___DECODER $___DECODER_FLAGS -config $configfn  -inputtype $___INPUTTYPE -show-weights > $featlistfn";
     safesystem($cmd) or die "Failed to run moses with the config $configfn";
   }
+  return get_featlist_from_file($featlistfn);
+}
 
+sub get_featlist_from_file {
+  my $featlistfn = shift;
   # read feature list
   my @names = ();
   my @startvalues = ();

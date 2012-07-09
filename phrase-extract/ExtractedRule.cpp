@@ -10,8 +10,11 @@
 
 using namespace std;
 
-//FB : outcommented in this version
-void ExtractedRule::OutputNTLengths(std::ostringstream &out) const
+
+namespace MosesTraining
+{
+
+void ExtractedRule::OutputNTLengths(std::ostream &out) const
 {
   std::ostringstream outString;
   OutputNTLengths(outString);
@@ -40,3 +43,4 @@ std::ostream& operator<<(std::ostream &out, const ExtractedRule &obj)
   return out;
 }
 
+} // namespace

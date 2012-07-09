@@ -38,7 +38,7 @@ class Manager;
 
 typedef std::map<WordsBitmap, BitmapContainer*> _BMType;
 
-/** Stack for instances of Hypothesis, includes functions for pruning. */
+/** A stack for phrase-based decoding with cube-pruning. */
 class HypothesisStackCubePruning : public HypothesisStack
 {
 public:

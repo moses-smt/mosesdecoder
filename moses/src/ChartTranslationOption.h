@@ -30,8 +30,9 @@
 namespace Moses
 {
 
-// Similar to a DottedRule, but contains a direct reference to a list
-// of translations and provdes an estimate of the best score.
+/** Similar to a DottedRule, but contains a direct reference to a list
+ * of translations and provdes an estimate of the best score.
+ */
 class ChartTranslationOption
 {
  public:

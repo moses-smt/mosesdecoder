@@ -25,6 +25,8 @@ inline double Exp(double x)
   return exp(x);
 }
 
+/** implementation of the binary phrase table for the phrase-based decoder. Used by PhraseDictionaryTreeAdaptor
+ */
 class PDTAimp
 {
   // only these classes are allowed to instantiate this class

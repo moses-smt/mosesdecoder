@@ -1,9 +1,10 @@
 #include "Vocabulary.h"
+#include "Singleton.h"
 
 #define BOOST_TEST_MODULE MertVocabulary
 #include <boost/test/unit_test.hpp>
 
-#include "Singleton.h"
+using namespace MosesTuning;
 
 namespace mert {
 namespace {

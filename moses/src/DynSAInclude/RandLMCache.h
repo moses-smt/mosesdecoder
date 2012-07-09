@@ -24,6 +24,7 @@
 
 namespace randlm {
     
+  //! @todo ask abby2
   template<typename T>
   class CacheNode {
   public:

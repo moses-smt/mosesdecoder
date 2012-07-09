@@ -8,6 +8,8 @@
 #include "types.h"
 
 static const float kFloatErr = 0.00001f;
+
+//! @todo ask abby2
 class LogQtizer {
 public:
   LogQtizer(float i): base_(pow(2, 1 / i)) {

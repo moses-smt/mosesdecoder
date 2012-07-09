@@ -44,6 +44,8 @@
 		1E671A80155C22C500119DD9 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E671A82155C234500119DD9 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
 		1E671A83155C234500119DD9 /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
+		1E9B03A8159F58CC00E91032 /* OutputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */; };
+		1E9B03A9159F58CC00E91032 /* OutputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E671A7F155C22C500119DD9 /* OutputFileStream.h */; };
 		1EB1C8321200D5C00079FCBB /* PhraseAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */; };
 		1EB29A3B1511C253005BC4BA /* InputFileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A211129C024C00041956 /* InputFileStream.cpp */; };
 		1EB29A3C1511C253005BC4BA /* InputFileStream.h in Sources */ = {isa = PBXBuildFile; fileRef = 1EB8A210129C024C00041956 /* InputFileStream.h */; };
@@ -106,6 +108,8 @@
 		1E7C2CFC11F1146300213451 /* consolidate-direct */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "consolidate-direct"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E7C2CFE11F1146300213451 /* extract-rules */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "extract-rules"; sourceTree = BUILT_PRODUCTS_DIR; };
 		1E7C2D0011F1146300213451 /* statistics */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = statistics; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E9B03A4159E70A100E91032 /* consolidate-reverse.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = "consolidate-reverse.cpp"; sourceTree = "<group>"; };
+		1E9B03A5159E70A100E91032 /* XmlException.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = XmlException.h; sourceTree = "<group>"; };
 		1EB1C8301200D5C00079FCBB /* PhraseAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PhraseAlignment.h; sourceTree = "<group>"; };
 		1EB1C8311200D5C00079FCBB /* PhraseAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = PhraseAlignment.cpp; sourceTree = "<group>"; };
 		1EB1C8491200D77E0079FCBB /* score.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = score.h; sourceTree = "<group>"; };
@@ -174,6 +178,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E9B03A4159E70A100E91032 /* consolidate-reverse.cpp */,
+				1E9B03A5159E70A100E91032 /* XmlException.h */,
 				1E671A7E155C22C500119DD9 /* OutputFileStream.cpp */,
 				1E671A7F155C22C500119DD9 /* OutputFileStream.h */,
 				1E3EF29E13DBEAF300C1D54A /* extract-lex.cpp */,
@@ -441,6 +447,8 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1E9B03A8159F58CC00E91032 /* OutputFileStream.cpp in Sources */,
+				1E9B03A9159F58CC00E91032 /* OutputFileStream.h in Sources */,
 				1EB8A297129C06A300041956 /* gzfilebuf.h in Sources */,
 				1EB8A261129C04C700041956 /* InputFileStream.cpp in Sources */,
 				1CFE962911762A3A006FF13B /* consolidate-direct.cpp in Sources */,
@@ -623,7 +631,10 @@
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
 				INSTALL_PATH = /usr/local/bin;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PRODUCT_NAME = "consolidate-direct";
 				SDKROOT = macosx;
 			};
@@ -639,7 +650,10 @@
 				GCC_MODEL_TUNING = G5;
 				INSTALL_PATH = /usr/local/bin;
 				ONLY_ACTIVE_ARCH = YES;
-				OTHER_LDFLAGS = "-lz";
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_iostreams",
+				);
 				PRODUCT_NAME = "consolidate-direct";
 				SDKROOT = macosx;
 				ZERO_LINK = NO;

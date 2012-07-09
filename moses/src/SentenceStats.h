@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+//! Hold info about recombination. Used by SentenceStats class
 struct RecombinationInfo {
   RecombinationInfo() {} //for std::vector
   RecombinationInfo(size_t srcWords, float gProb, float bProb)
@@ -44,7 +45,7 @@ struct RecombinationInfo {
   float betterProb, worseProb;
 };
 
-/***
+/**
  * stats relating to decoder operation on a given sentence
  */
 class SentenceStats

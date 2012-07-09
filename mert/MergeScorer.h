@@ -4,7 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
+
+namespace MosesTuning
+{
+  
 
 class PerScorer;
 class ScoreStats;
@@ -32,5 +36,7 @@ protected:
   MergeScorer(const MergeScorer&);
   MergeScorer& operator=(const MergeScorer&);
 };
+
+}
 
 #endif  // MERT_MERGE_SCORER_H_

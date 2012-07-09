@@ -22,6 +22,10 @@ uint64_t GetTimeOfDayMicroSeconds() {
 
 } // namespace
 
+namespace MosesTuning
+{
+  
+
 void Timer::GetCPUTimeMicroSeconds(Timer::CPUTime* cpu_time) const {
 #if !defined(_WIN32) && !defined(_WIN64)
   struct rusage usage;
@@ -101,4 +105,6 @@ std::string Timer::ToString() const {
   res.append(ss.str());
 
   return res;
+}
+
 }

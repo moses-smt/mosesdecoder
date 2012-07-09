@@ -258,6 +258,32 @@ void Hypothesis::ResetScore()
   m_futureScore = m_totalScore = 0.0f;
 }
 
+void Hypothesis::IncorporateTransOptScores() {
+  m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+}
+
+void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
+                              int state_idx) {
+  m_ffStates[state_idx] = sfff->Evaluate(
+      *this,
+      m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+      &m_scoreBreakdown);
+            
+}
+
+void Hypothesis::EvaluateWith(const StatelessFeatureFunction* slff) {
+  slff->Evaluate(m_targetPhrase, &m_scoreBreakdown);
+}
+
+void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
+  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
+}
+
+void Hypothesis::CalculateFinalScore() {
+  m_totalScore = m_scoreBreakdown.InnerProduct(
+        StaticData::Instance().GetAllWeights()) + m_futureScore;
+}
+
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
