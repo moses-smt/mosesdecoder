@@ -99,7 +99,7 @@ bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
 bool oneWordToTheLeftFlag = false; // output one word to the left for each phrase
-ofstream PSDExamplesFile; // file to write PSD examples into
+Moses::OutputFileStream PSDExamplesFile; // file to write PSD examples into
 bool gzOutput = false;
 
 }
