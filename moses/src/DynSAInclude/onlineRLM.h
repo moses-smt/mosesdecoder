@@ -109,7 +109,7 @@ bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value) {
 template<typename T>
 bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
   int len = ngram.size();
-  wordID_t wrdIDs[len];
+  wordID_t *wrdIDs = new wordID_t[len];
   uint64_t index(this->cells_ + 1);
   hpdEntry_t hpdItr;
   vocab_->MakeOpen();
@@ -126,6 +126,7 @@ bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
     }
     else if(hpdItr != this->dict_.end()) markQueried(hpdItr);
   }
+  delete[] wrdIDs;
   return bIncluded;
 }
 template<typename T>
@@ -262,6 +263,7 @@ int OnlineRLM<T>::sbsqQuery(const wordID_t* IDs, const int len, int* codes,
     if(val != -1) break; // if anything found
     else --fnd; // else decrement found
   }
+  //free( in );
   return fnd;
 }
 
@@ -275,7 +277,7 @@ float OnlineRLM<T>::getProb(const wordID_t* ngram, int len,
   if(!cache_->checkCacheNgram(ngram, len, &logprob, &context)) {
     // get full prob and put in cache
     int num_fnd(0), den_val(0);
-    int in[len]; // in[] keeps counts of increasing order numerator 
+    int *in = new int[len]; // in[] keeps counts of increasing order numerator 
     for(int i = 0; i < len; ++i) in[i] = 0;
     for(int i = len - 1; i >= 0; --i) {
       if(ngram[i] == vocab_->GetkOOVWordID()) break;  // no need to query if OOV
@@ -324,10 +326,13 @@ float OnlineRLM<T>::getProb(const wordID_t* ngram, int len,
 template<typename T>
 const void* OnlineRLM<T>::getContext(const wordID_t* ngram, int len) {
   int dummy(0);
-  float* addresses[len];  // only interested in addresses of cache
+  float* *addresses = new float*[len];  // only interested in addresses of cache
   CHECK(cache_->getCache2(ngram, len, &addresses[0], &dummy) == len);
   // return address of cache node
-  return (const void*)addresses[0]; 
+  
+  float *addr0 = addresses[0];
+  free( addresses );
+  return (const void*)addr0;
 }
 
 template<typename T>
