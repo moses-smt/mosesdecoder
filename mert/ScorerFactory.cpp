@@ -46,8 +46,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     return new SemposScorer(config);
   } else if (type == "MERGE") {
     return new MergeScorer(config);
-  } else if (type == "LRSCORE") {
-    return new PermutationScorer(config);
+  } else if ((type == "HAMMING") || (type == "KENDALL")) {
+    return (PermutationScorer*) new PermutationScorer(type, config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
