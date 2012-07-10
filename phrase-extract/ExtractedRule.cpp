@@ -21,7 +21,7 @@ void ExtractedRule::OutputNTLengths(std::ostream &out) const
   out << outString;
   }
 
-void ExtractedRule::OutputNTLengths(std::ostream &outString) const
+void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
 {
   std::map<size_t, std::pair<size_t, size_t> >::const_iterator iter;
   for (iter = m_ntLengths.begin(); iter != m_ntLengths.end(); ++iter)
