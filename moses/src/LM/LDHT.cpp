@@ -87,6 +87,10 @@ public:
                            float& fullScore,
                            float& ngramScore,
                            std::size_t& oovCount) const;
+    virtual void CalcScoreFromCache(const Phrase& phrase,
+                                    float& fullScore,
+                                    float& ngramScore,
+                                    std::size_t& oovCount) const;
     FFState* Evaluate(const Hypothesis& hypo,
                       const FFState* input_state,
                       ScoreComponentCollection* score_output) const;
@@ -105,6 +109,7 @@ protected:
     std::string m_configPath;
     FactorType m_factorType;
     int m_state_idx;
+    int m_calc_score_count;
     uint64_t m_start_tick;
 
 };
@@ -121,6 +126,7 @@ LanguageModelLDHT::LanguageModelLDHT() : LanguageModel(), m_client(NULL) {
 
 LanguageModelLDHT::LanguageModelLDHT(ScoreIndexManager& manager,
                                      LanguageModelLDHT& copyFrom) {
+    m_calc_score_count = 0;
     //m_client = copyFrom.m_client;
     m_factorType = copyFrom.m_factorType;
     m_configPath = copyFrom.m_configPath;
@@ -214,8 +220,45 @@ void LanguageModelLDHT::CalcScore(const Phrase& phrase,
                                   float& fullScore,
                                   float& ngramScore,
                                   std::size_t& oovCount) const {
+    const_cast<LanguageModelLDHT*>(this)->m_calc_score_count++;
+    if (m_calc_score_count > 10000) {
+        const_cast<LanguageModelLDHT*>(this)->m_calc_score_count = 0;
+        const_cast<LanguageModelLDHT*>(this)->sync();
+    }
+
+    // TODO(wilson): handle nonterminal words.
+    LDHT::Client* client = getClientUnsafe();
+    // Score the first order - 1 words of the phrase.
+    int order = LDHT::NewNgram::k_max_order;
+    int prefix_start = 0;
+    int prefix_end = std::min(phrase.GetSize(), static_cast<size_t>(order - 1));
+    LDHT::NewNgram ngram;
+    for (int word_idx = prefix_start; word_idx < prefix_end; ++word_idx) {
+        ngram.appendGram(phrase.GetWord(word_idx)
+                .GetFactor(m_factorType)->GetString().c_str());
+        client->requestNgram(ngram);
+    }
+    // Now score all subsequent ngrams to end of phrase.
+    int internal_start = prefix_end;
+    int internal_end = phrase.GetSize();
+    for (int word_idx = internal_start; word_idx < internal_end; ++word_idx) {
+        ngram.appendGram(phrase.GetWord(word_idx)
+                .GetFactor(m_factorType)->GetString().c_str());
+        client->requestNgram(ngram);
+    }
+
+    fullScore = 0;
+    ngramScore = 0;
+    oovCount = 0;
+}
+
+void LanguageModelLDHT::CalcScoreFromCache(const Phrase& phrase,
+                                           float& fullScore,
+                                           float& ngramScore,
+                                           std::size_t& oovCount) const {
     // Issue requests for phrase internal ngrams.
     // Sync if necessary. (or autosync).
+    const_cast<LanguageModelLDHT*>(this)->sync();
 
     // TODO(wilson): handle nonterminal words.
     LDHT::Client* client = getClientUnsafe();
@@ -241,7 +284,7 @@ void LanguageModelLDHT::CalcScore(const Phrase& phrase,
     }
 
     // Wait for resposes from the servers.
-    client->awaitResponses();
+    //client->awaitResponses();
 
     // Calculate the full phrase score, and the internal score.
     fullScore = 0.0;
@@ -315,6 +358,7 @@ void LanguageModelLDHT::IssueRequestsFor(Hypothesis& hypo,
 }
 
 void LanguageModelLDHT::sync() {
+    m_calc_score_count = 0;
     getClientUnsafe()->awaitResponses();
 }
 

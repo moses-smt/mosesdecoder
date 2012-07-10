@@ -21,7 +21,6 @@ protected:
   std::vector<Hypothesis*> m_partial_hypos;
   int m_batch_size;
   int m_max_stack_size;
-  void EvalAndMerge();
 
   // functions for creating hypotheses
   void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
