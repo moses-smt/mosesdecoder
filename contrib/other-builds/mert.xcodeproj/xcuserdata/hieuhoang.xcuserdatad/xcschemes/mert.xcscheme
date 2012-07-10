@@ -33,7 +33,8 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.GDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.GDB"
       launchStyle = "0"
-      useCustomWorkingDirectory = "NO"
+      useCustomWorkingDirectory = "YES"
+      customWorkingDirectory = "/Users/hieuhoang/unison/workspace/experiment/data/lrscore/271"
       buildConfiguration = "Debug">
       <BuildableProductRunnable>
          <BuildableReference
@@ -44,6 +45,12 @@
             ReferencedContainer = "container:mert.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "-d 16  --sctype KENDALL,BLEU  --scconfig refalign:/Users/hieuhoang/unison/workspace/experiment/data/lrscore/ref/Tune.berkeley.0+/Users/hieuhoang/unison/workspace/experiment/data/lrscore/ref/Tune.berkeley.1+/Users/hieuhoang/unison/workspace/experiment/data/lrscore/ref/Tune.berkeley.2+/Users/hieuhoang/unison/workspace/experiment/data/lrscore/ref/Tune.berkeley.3,source:/Users/hieuhoang/unison/workspace/experiment/data/lrscore/ref/Tune.chi.text.nw.v3.tok,weights:0.2623+0.7377,case:true -n 20 --ffile run1.features.dat --scfile run1.scores.dat --ifile tmp.271/run1.init.opt"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
