@@ -57,9 +57,10 @@ void FeatureExtractor::GenerateFeatures(const ContextType &context,
     GenerateInternalFeatures(sourceForms);
   }
 
-  vector<size_t>::const_iterator transIt;
+  vector<size_t>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
-  for (transIt = translations.begin(); transIt != translations.end(); transIt++, lossIt++) {
+  for (; transIt != translations.end(); transIt++, lossIt++) {
+    assert(lossIt != losses.end());
     m_fc->SetNamespace("t", false);
     if (m_ft.m_targetInternal) {
       GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right[*transIt]));
