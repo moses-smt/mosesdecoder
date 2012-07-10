@@ -1,7 +1,9 @@
 // $Id$
 // vim:tabstop=2
 /***********************************************************************
-
+K-best Batch MIRA for Moses
+Copyright (C) 2012, National Research Council Canada / Conseil national 
+de recherches du Canada
 ***********************************************************************/
 
 /**
