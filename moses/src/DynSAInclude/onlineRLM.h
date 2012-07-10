@@ -2,6 +2,7 @@
 #define INC_DYNAMICLM_H
 
 #include <algorithm>
+#include <vector>
 #include "perfectHash.h"
 #include "RandLMCache.h"
 #include "types.h"
@@ -109,7 +110,7 @@ bool OnlineRLM<T>::insert(const std::vector<string>& ngram, const int value) {
 template<typename T>
 bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
   int len = ngram.size();
-  wordID_t *wrdIDs = new wordID_t[len];
+  std::vector<wordID_t> wrdIDs(len);
   uint64_t index(this->cells_ + 1);
   hpdEntry_t hpdItr;
   vocab_->MakeOpen();
@@ -118,15 +119,15 @@ bool OnlineRLM<T>::update(const std::vector<string>& ngram, const int value) {
   // if updating, minimize false positives by pre-checking if context already in model 
   bool bIncluded(true); 
   if(value > 1 && len < (int)order_)
-    bIncluded = markPrefix(wrdIDs, ngram.size(), true); // mark context
+    bIncluded = markPrefix(&wrdIDs[0], ngram.size(), true); // mark context
   if(bIncluded) { // if context found 
-    bIncluded = PerfectHash<T>::update2(wrdIDs, len, value, hpdItr, index);
+    bIncluded = PerfectHash<T>::update2(&wrdIDs[0], len, value, hpdItr, index);
     if(index < this->cells_) {
       markQueried(index);
     }
     else if(hpdItr != this->dict_.end()) markQueried(hpdItr);
   }
-  delete[] wrdIDs;
+
   return bIncluded;
 }
 template<typename T>
