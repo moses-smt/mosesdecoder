@@ -234,7 +234,8 @@ public:
       }
 
       // report best translation to output collector
-      m_outputCollector->Write(m_lineNumber,out.str(),debug.str());
+      const long m_translationId = m_source->GetTranslationId();
+      m_outputCollector->Write(m_translationId, m_lineNumber,out.str(),debug.str());
     }
 
     // output n-best list

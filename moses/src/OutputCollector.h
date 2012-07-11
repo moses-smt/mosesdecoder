@@ -49,20 +49,32 @@ public:
   /**
     * Write or cache the output, as appropriate.
     **/
-  void Write(int sourceId,const std::string& output,const std::string& debug="") {
+  void Write(const int sourceId,const std::string& output,const std::string& debug="") {
+	  Write(0, sourceId, output, debug);
+  }
+
+  void Write(const int translationId, const int sourceId,const std::string& output,const std::string& debug="") {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
     if (sourceId == m_nextOutput || !m_sortOutput) {
       //This is the one we were expecting
-      if (m_outputId) *m_outStream << sourceId << " ";
+      if (m_outputId) *m_outStream << translationId << " ";
       *m_outStream << output << std::flush;
       *m_debugStream << debug << std::flush;
       ++m_nextOutput;
       //see if there's any more
       std::map<int,std::string>::iterator iter;
       while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
-        if (m_outputId) *m_outStream << iter->first << " ";
+        if (m_outputId) {
+            std::map<int, long>::iterator debugIter = m_translationIds.find(iter->first);
+            if (debugIter != m_translationIds.end()) {
+            	*m_outStream << iter->first << " ";
+              *m_debugStream << debugIter->second << std::flush;
+              m_debugs.erase(debugIter);
+            }
+        	// *m_outStream << iter->first << " ";
+        }
         *m_outStream << iter->second << std::flush;
         m_outputs.erase(iter);
         ++m_nextOutput;
@@ -76,6 +88,7 @@ public:
       //save for later
       m_outputs[sourceId] = output;
       m_debugs[sourceId] = debug;
+      m_translationIds[sourceId] = translationId;
     }
   }
 
@@ -89,6 +102,7 @@ public:
 private:
   std::map<int,std::string> m_outputs;
   std::map<int,std::string> m_debugs;
+  std::map<int,long> m_translationIds;
   int m_nextOutput;
   std::ostream* m_outStream;
   std::ostream* m_debugStream;
