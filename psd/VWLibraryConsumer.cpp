@@ -1,7 +1,7 @@
+#include "FeatureConsumer.h"
 #include "vw.h"
 #include "Util.h"
 #include "ezexample.h"
-#include "FeatureConsumer.h"
 #include <stdexcept>
 #include <exception>
 #include <string>

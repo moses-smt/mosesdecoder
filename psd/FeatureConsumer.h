@@ -3,6 +3,9 @@
 
 #include <iostream>
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <deque>
 
 #ifdef HAVE_VW
   // forward declarations to avoid dependency on VW 
@@ -29,21 +32,20 @@ class VWFileTrainConsumer : public FeatureConsumer
 public:
   VWFileTrainConsumer(const std::string &outputFile);
 
+  // interface implementation
   virtual void SetNamespace(char ns, bool shared);
-  //newline and prepend share
   virtual void AddFeature(const std::string &name);
-  //print " "
   virtual void AddFeature(const std::string &name, float value);
-  //look in file
   virtual void FinishExample();
-  //nweline (look in file)
   virtual void Finish();
-  //close the file
   virtual void Train(const std::string &label, float loss);
   virtual float Predict(const std::string &label);
 
 private:
-  std::ostream os;
+  std::ofstream m_os;
+  std::deque<std::string> m_outputBuffer;
+
+  void WriteBuffer();
 };
   
 #ifdef HAVE_VW
