@@ -1,6 +1,6 @@
 #ifndef psd_phrase_utils_h
 #define psd_phrase_utils_h
-#include "../tables-core.h"
+#include "tables-core.h"
 #include <set>
 #include <map>
 

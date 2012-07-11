@@ -1,15 +1,15 @@
-#include "../InputFileStream.h"
-#include "../SafeGetline.h"
+#include "InputFileStream.h"
+#include "SafeGetline.h"
 #include "PsdPhraseUtils.h"
-#include "StringUtils.h"
+#include "Util.h"
 #include <iostream>
 
 using namespace MosesTraining;
-//#include "../../../../moses/src/Util.h"
+using namespace Moses;
 
 PHRASE makePhrase(const string phrase, Vocabulary &wordVocab){
     PHRASE p;
-    vector<string> toks = tokenize(phrase.c_str());
+    vector<string> toks = Tokenize(phrase);
     for(size_t j = 0; j < toks.size(); ++j){
 	WORD_ID id = wordVocab.getWordID(toks[j]);
 	if (id){
@@ -25,7 +25,7 @@ PHRASE makePhrase(const string phrase, Vocabulary &wordVocab){
 
 PHRASE makePhraseAndVoc(const string phrase, Vocabulary &wordVocab){
     PHRASE p;
-    vector<string> toks = tokenize(phrase.c_str());
+    vector<string> toks = Tokenize(phrase);
     for(size_t j = 0; j < toks.size(); j++){
 	WORD_ID id = wordVocab.storeIfNew(toks[j]);
 	p.push_back(id);
@@ -53,7 +53,7 @@ string getPhrase(PHRASE_ID labelid, Vocabulary &tgtVocab, PhraseVocab &tgtPhrase
 
 
 bool readPhraseVocab(const char* vocabFile, Vocabulary &wordVocab, PhraseVocab &vocab){
-    Moses::InputFileStream file(vocabFile);
+    InputFileStream file(vocabFile);
     if (!file) return false;
     while(!file.eof()){
       char line[LINE_MAX_LENGTH];
@@ -66,14 +66,13 @@ bool readPhraseVocab(const char* vocabFile, Vocabulary &wordVocab, PhraseVocab &
 }
 
 bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable){
-    Moses::InputFileStream file(ptFile);
+    InputFileStream file(ptFile);
     if(!file) return false;
     while(!file.eof()){
 	char line[LINE_MAX_LENGTH];
 	SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
 	if (file.eof()) return true;
-//	vector<string> fields = Moses::TokenizeMultiCharSeparator(string(line)," ||| ");
-	vector<string> fields = tokenizeString(string(line)," ||| ");
+	vector<string> fields = TokenizeMultiCharSeparator(string(line), " ||| ");
 	//	cerr << "TOKENIZED: " << fields.size()  << " tokens in " << line << endl;
 	if (fields.size() < 2){
 	    cerr << "Skipping malformed phrase-table entry: " << line << endl;
@@ -144,14 +143,13 @@ bool printTransStringToFile(string fileName, PhraseTranslations &transTable, PHR
 }
 
 bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable, map<string,string> &transTableScores){
-    Moses::InputFileStream file(ptFile);
+    InputFileStream file(ptFile);
     if(!file) return false;
     while(!file.eof()){
 	char line[LINE_MAX_LENGTH];
 	SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
 	if (file.eof()) return true;
-//	vector<string> fields = Moses::TokenizeMultiCharSeparator(string(line)," ||| ");
-	vector<string> fields = tokenizeString(string(line)," ||| ");
+	vector<string> fields = TokenizeMultiCharSeparator(string(line)," ||| ");
 	if (fields.size() < 2){
 	    cerr << "Skipping malformed phrase-table entry: " << line << endl;
 	}
@@ -159,7 +157,7 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
 	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
 	if (src && tgt){
 	  PhraseTranslations::iterator itr = transTable.find(src);
-	  string stpair = int2string(src)+" "+int2string(tgt);
+	  string stpair = SPrint(src)+" "+SPrint(tgt);
 	  transTableScores.insert(make_pair (stpair,fields[2]));
 	  if (itr == transTable.end() ){
 	    map<PHRASE_ID,int> tgts;

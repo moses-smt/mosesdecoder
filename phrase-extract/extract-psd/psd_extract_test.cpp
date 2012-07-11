@@ -5,17 +5,17 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "../SafeGetline.h"
-#include "../InputFileStream.h"
-#include "../OutputFileStream.h"
-#include "../tables-core.h"
+#include "SafeGetline.h"
+#include "InputFileStream.h"
+#include "OutputFileStream.h"
+#include "tables-core.h"
+#include "Util.h"
 
 #include "psd.h"
 #include "PsdPhraseUtils.h"
-#include "MegamFormat.h"
-#include "StringUtils.h"
 
 using namespace std;
+using namespace Moses;
 
 #define LINE_MAX_LENGTH 10000
 
@@ -35,7 +35,7 @@ int main(int argc,char* argv[]){
     char* &fileNamePT = argv[2]; // phrase table
     char* &fileNameSrcVoc = argv[3]; // source phrase vocabulary
     char* &fileNameTgtVoc = argv[4];
-    int maxPhraseLength = atoi(argv[5]);
+    int maxPhraseLength = Scan<int>(argv[5]);
     char* &fileNameOut = argv[6]; // output file
         
     // store word and phrase vocab and phrase table
@@ -66,7 +66,7 @@ int main(int argc,char* argv[]){
     }
 
     // read in corpus
-    Moses::InputFileStream src(fileNameSrcRaw);
+    InputFileStream src(fileNameSrcRaw);
     if (src.fail()){
       cerr << "ERROR: could not open " << fileNameSrcRaw << endl;
       exit(1);
@@ -80,7 +80,7 @@ int main(int argc,char* argv[]){
       SAFE_GETLINE((src),srcLine,LINE_MAX_LENGTH, '\n', __FILE__);
       sid++;
       if (src.eof()) break;      
-      vector<string> sentence = tokenize(srcLine);
+      vector<string> sentence = Tokenize(srcLine);
       for(int s = 0; s < sentence.size(); s++){
 	string phrase = "";
 	for(int e = s; e < s+maxPhraseLength && e < sentence.size(); e++){
