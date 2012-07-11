@@ -1,79 +1,95 @@
 #include "vw.h"
 #include "ezexample.h"
 #include "FeatureConsumer.h"
+#include <stdexcept>
+#include <exception>
 
-VWLibraryTrainConsumer::VWLibraryConsumer()
-{
-    m_vwInstance = NULL;
-    m_ex = NULL;
-}
+using namespace std;
 
-VWLibraryTrainConsumer::VWLibraryConsumer(const string &modelFile)
-{
-    m_vwInstance = new VW::initialize("--hash all -q st --noconstant -f " + modelFile);
-    m_ex = new ezexample(m_vwInstance,false);
-}
-
-~VWLibraryTrainConsumer::VWLibraryConsumer();
-{
-    delete m_vwInstance;
-    delete m_ex;
-}
-
-VWLibraryPredictConsumer::VWLibraryConsumer(const string &modelFile)
-{
-    m_vwInstance = new VW::initialize("--hash all -q st --noconstant -i " + modelFile);
-    m_ex = new ezexample(m_vwInstance,false);
-}
-
-~VWLibraryConsumer::VWLibraryConsumer()
-{
-    delete m_vwInstance;
-    delete m_ex;
-}
+// 
+// VWLibraryConsumer
+//
 
 void VWLibraryConsumer::SetNamespace(const string &ns, bool shared)
 {
-    if(!m_shared)
-    {
-        --(*m_ex);
-    }
-    (*m_ex)(vw_namespace(ns));
-    m_shared = shared;
-}
+  if (!m_shared)
+    m_ex->remns();
 
-void VWLibraryConsumer::FinishExample()
-{
-    m_ex.clear();
-}
-
-void VWLibraryConsumer::Finish()
-{
-    finish(m_VWInstance);
+  m_ex->addns(vw_namespace(ns).namespace_letter);
+  m_shared = shared;
 }
 
 void VWLibraryConsumer::AddFeature(const string &name)
 {
-    m_ex(name);
+  m_ex->addf(name);
 }
 
 void VWLibraryConsumer::AddFeature(const string &name, real value)
 {
-    (*m_ex)(name,value);
+  m_ex->addf(name, value);
 }
 
-//Note : model passed to initialize
-/*float VWLibraryPredictConsumer::LoadModel(const string &model)
+void VWLibraryConsumer::FinishExample()
 {
+  m_ex->clear();
+}
 
-}*/
+void VWLibraryConsumer::Finish()
+{
+  finish(m_VWInstance);
+}
+
+~VWLibraryConsumer::VWLibraryConsumer()
+{
+  delete m_vwInstance;
+  delete m_ex;
+}
+
+//
+// VWLibraryTrainConsumer
+//
+
+VWLibraryTrainConsumer::VWLibraryConsumer(const string &modelFile)
+{
+  m_vwInstance = new VW::initialize("--hash all -q st --noconstant -f " + modelFile);
+  m_ex = new ezexample(m_vwInstance, false);
+}
+
+void VWLibraryTrainConsumer::Train(const string &label, float loss)
+{
+  m_ex->set_label(label, loss);
+  m_ex->train();
+}
+
+void VWLibraryTrainConsumer::FinishExample()
+{
+  m_ex->finish();
+  VWLibraryConsumer::FinishExample();
+}
+
+float VWLibraryTrainConsumer::Predict(const string &label)
+{
+  throw logic_error("Trying to predict during training!");
+}
+
+//
+// VWLibraryPredictConsumer
+//
+
+VWLibraryPredictConsumer::VWLibraryConsumer(const string &modelFile)
+{
+  m_vwInstance = new VW::initialize("--hash all -q st --noconstant -i " + modelFile);
+  m_ex = new ezexample(m_vwInstance, false);
+}
+
+void VWLibraryTrainConsumer::Train(const string &label, float loss)
+{
+  throw logic_error("Trying to train during prediction!");
+}
 
 float VWLibraryPredictConsumer::Predict(const string &label)
 {
-    return m_ex->predict();
+  m_ex->set_label(label);
+  return m_ex->predict();
 }
 
-VWLibraryTrainConsumer::Train(const string &label, float loss)
-{
-    m_ex->predict(loss);
-}

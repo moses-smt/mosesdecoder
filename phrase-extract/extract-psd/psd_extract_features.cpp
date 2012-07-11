@@ -203,6 +203,12 @@ int main(int argc,char* argv[]){
 
     if (srcid != 0){
       if ( psd_train_mode && exists(srcid,labelid,transTable) || !psd_train_mode && exists(srcid,transTable)){
+        FeatureConsumer *fc = NULL;
+        if (psd_classifier == RAW) 
+          fc = new VWLibraryTrainConsumer();
+        else
+          fc = new VWFileTrainConsumer();
+
         vector<string> features = fs.extract(src_start,src_end,escapedTagSrcLine,factorDelim);
         if (psd_model == PHRASAL){
           map<PHRASE_ID, ostream*>::iterator i = outFiles.find(srcid);
