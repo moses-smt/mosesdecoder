@@ -67,7 +67,7 @@ void FeatureExtractor::GenerateFeatures(const ContextType &context,
       GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second));
     }  
 
-    if (train) {
+    if (m_train) {
       m_fc->Train(SPrint(*transIt), *lossIt);
     } else {
       *lossIt = m_fc->Predict(SPrint(*transIt));

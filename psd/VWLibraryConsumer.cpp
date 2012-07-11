@@ -1,4 +1,5 @@
 #include "vw.h"
+#include "Util.h"
 #include "ezexample.h"
 #include "FeatureConsumer.h"
 #include <stdexcept>
@@ -32,7 +33,7 @@ void VWLibraryConsumer::AddFeature(const string &name, float value)
 
 void VWLibraryConsumer::FinishExample()
 {
-  m_ex->clear();
+  m_ex->clear_features();
 }
 
 void VWLibraryConsumer::Finish()
@@ -58,8 +59,7 @@ VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
 
 void VWLibraryTrainConsumer::Train(const string &label, float loss)
 {
-  m_ex->set_label(label, loss);
-  m_ex->train();
+  m_ex->set_label(label + Moses::SPrint(loss));
 }
 
 void VWLibraryTrainConsumer::FinishExample()
