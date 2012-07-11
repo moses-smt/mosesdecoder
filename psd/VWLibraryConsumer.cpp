@@ -1,12 +1,38 @@
-VWLibraryConsumer::VWLibraryConsumer()
+#include "vw.h"
+#include "ezexample.h"
+#include "FeatureConsumer.h"
+
+VWLibraryTrainConsumer::VWLibraryConsumer()
+{
+    m_vwInstance = NULL;
+    m_ex = NULL;
+}
+
+VWLibraryTrainConsumer::VWLibraryConsumer(const string &modelFile)
+{
+    m_vwInstance = new VW::initialize("--hash all -q st --noconstant -f " + modelFile);
+    m_ex = new ezexample(m_vwInstance,false);
+}
+
+~VWLibraryTrainConsumer::VWLibraryConsumer();
+{
+    delete m_vwInstance;
+    delete m_ex;
+}
+
+VWLibraryPredictConsumer::VWLibraryConsumer(const string &modelFile)
 {
     m_vwInstance = new VW::initialize("--hash all -q st --noconstant -i " + modelFile);
     m_ex = new ezexample(m_vwInstance,false);
 }
 
-//Destructor
+~VWLibraryConsumer::VWLibraryConsumer()
+{
+    delete m_vwInstance;
+    delete m_ex;
+}
 
-VWLibraryConsumer::SetNamespace(const string &ns, bool shared)
+void VWLibraryConsumer::SetNamespace(const string &ns, bool shared)
 {
     if(!m_shared)
     {
@@ -16,41 +42,38 @@ VWLibraryConsumer::SetNamespace(const string &ns, bool shared)
     m_shared = shared;
 }
 
-VWLibraryConsumer::FinishExample()
+void VWLibraryConsumer::FinishExample()
 {
-    delete m_ex;
-    m_ex = new ezexample(m_vwInstance,false);
+    m_ex.clear();
 }
 
-VWLibraryConsumer::Finish()
+void VWLibraryConsumer::Finish()
 {
     finish(m_VWInstance);
 }
 
-VWLibraryConsumer::AddFeature(const string &name)
+void VWLibraryConsumer::AddFeature(const string &name)
 {
     m_ex(name);
 }
 
-
-VWLibraryConsumer::AddFeature(const string &name, real value)
+void VWLibraryConsumer::AddFeature(const string &name, real value)
 {
     (*m_ex)(name,value);
 }
 
-VWLibraryPredictConsumer::Predict(const string &label)
+//Note : model passed to initialize
+/*float VWLibraryPredictConsumer::LoadModel(const string &model)
+{
+
+}*/
+
+float VWLibraryPredictConsumer::Predict(const string &label)
 {
     return m_ex->predict();
 }
 
 VWLibraryTrainConsumer::Train(const string &label, float loss)
 {
-  //???
-}
-
-VWFileTrainConsumer::VWFileBasedConsumer(const string &outputFile)
-{
-    ostream os;
-    os.open();
-    outputFile >> ss;
+    m_ex->predict(loss);
 }

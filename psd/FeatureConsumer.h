@@ -1,9 +1,10 @@
 #ifndef moses_FeatureConsumer_h
 #define moses_FeatureConsumer_h
 
-#include "vw.h"
-#include "ezexample.h"
 #include <iostream>
+
+struct VW::vw;
+struct ezexample;
 
 class FeatureConsumer
 {
@@ -39,6 +40,7 @@ class VWFileTrainConsumer : public FeatureConsumer
 class VWLibraryConsumer : public FeatureConsumer
 {
     public:
+    VWLibraryConsumer();
 	void SetNamespace(const string &ns, bool shared) = 0;
 	void AddFeature(const string &name) = 0;
 	void AddFeature(const string &name, real value) = 0;
@@ -53,16 +55,16 @@ class VWLibraryConsumer : public FeatureConsumer
 class VWLibraryPredictConsumer : public VWLibraryConsumer
 {
     public:
-    VWLibraryPredictConsumer() { m_VWInstance = NULL; }
-    LoadModel(const string &model);
+    VWLibraryPredictConsumer(const string &modelFile);
+    ~VWLibraryPredictConsumer();
+    float Predict(const string &label);
 };
 
 class VWLibraryTrainConsumer : public VWLibraryConsumer
 {
     public:
-    VWLibraryTrainConsumer() { m_VWInstance = NULL; }
-    virtual void Finish() { VWLibraryConsumer::finish(); modelHdl.close(); }
-    bool InitializeOutput(const string &model);
-
+    VWLibraryTrainConsumer(const string &modelFile);
+    ~VWLibraryTrainConsumer();
+    void Train();
 };
 
