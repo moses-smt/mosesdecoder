@@ -39,8 +39,9 @@ class ChartCellCollection;
 class ChartManager;
 class ChartTranslationOption;
 
-// Define an ordering between RuleCubeItems based on their scores.  This
-// is used to order items in the cube's priority queue.
+/** Define an ordering between RuleCubeItems based on their scores.
+ * This is used to order items in the cube's priority queue.
+ */
 class RuleCubeItemScoreOrderer
 {
  public:
@@ -49,9 +50,10 @@ class RuleCubeItemScoreOrderer
   }
 };
 
-// Define an ordering between RuleCubeItems based on their positions in the
-// cube.  This is used to record which positions in the cube have been covered
-// during search.
+/** Define an ordering between RuleCubeItems based on their positions in the
+ * cube.  This is used to record which positions in the cube have been covered
+ * during search.
+ */
 class RuleCubeItemPositionOrderer
 {
  public:
@@ -60,6 +62,8 @@ class RuleCubeItemPositionOrderer
   }
 };
 
+/** @todo what is this?
+ */
 class RuleCubeItemHasher
 {
  public:
@@ -71,6 +75,8 @@ class RuleCubeItemHasher
   }
 };
 
+/** @todo what is this?
+ */
 class RuleCubeItemEqualityPred
 {
  public:
@@ -80,6 +86,8 @@ class RuleCubeItemEqualityPred
   }
 };
 
+/** @todo what is this?
+ */
 class RuleCube
 {
  public:

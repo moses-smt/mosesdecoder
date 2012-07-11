@@ -3,6 +3,8 @@
 #define BOOST_TEST_MODULE MertNgram
 #include <boost/test/unit_test.hpp>
 
+using namespace MosesTuning;
+
 BOOST_AUTO_TEST_CASE(ngram_basic) {
   NgramCounts counts;
   NgramCounts::Key key;

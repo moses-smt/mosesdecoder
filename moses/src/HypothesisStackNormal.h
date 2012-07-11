@@ -33,7 +33,7 @@ namespace Moses
 // class WordsBitmap;
 // typedef size_t WordsBitmapID;
 
-/** Stack for instances of Hypothesis, includes functions for pruning. */
+/** A stack for standard phrase-based decoding. */
 class HypothesisStackNormal: public HypothesisStack
 {
 public:

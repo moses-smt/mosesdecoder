@@ -30,11 +30,12 @@ namespace Moses
 class ChartTranslationOptionList;
 class WordsRange;
 
-// Defines an interface for looking up rules in a rule table.  Concrete
-// implementation classes should correspond to specific PhraseDictionary
-// subclasses (memory or on-disk).  Since a ChartRuleLookupManager object
-// maintains sentence-specific state, exactly one should be created for
-// each sentence that is to be decoded.
+/** Defines an interface for looking up rules in a rule table.  Concrete
+ *  implementation classes should correspond to specific PhraseDictionary
+ *  subclasses (memory or on-disk).  Since a ChartRuleLookupManager object
+ *  maintains sentence-specific state, exactly one should be created for
+ *  each sentence that is to be decoded.
+ */
 class ChartRuleLookupManager
 {
 public:
@@ -45,20 +46,28 @@ public:
 
   virtual ~ChartRuleLookupManager() {}
 
+  //! the sentence being decoded
   const InputType &GetSentence() const {
     return m_sentence;
   }
+  
+  //! all the chart cells
   const ChartCellCollection &GetCellCollection() const {
     return m_cellCollection;
   }
 
+  /** abstract function. Return a vector of translation options for given a range in the input sentence
+   *  \param range source range for which you want the translation options
+   *  \param outColl return argument
+   */
   virtual void GetChartRuleCollection(
     const WordsRange &range,
     ChartTranslationOptionList &outColl) = 0;
 
 private:
-  // Non-copyable: copy constructor and assignment operator not implemented.
+  //! Non-copyable: copy constructor and assignment operator not implemented.
   ChartRuleLookupManager(const ChartRuleLookupManager &);
+  //! Non-copyable: copy constructor and assignment operator not implemented.
   ChartRuleLookupManager &operator=(const ChartRuleLookupManager &);
 
   const InputType &m_sentence;

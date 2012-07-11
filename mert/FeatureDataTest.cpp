@@ -5,6 +5,8 @@
 
 #include <sstream>
 
+using namespace MosesTuning;
+
 namespace {
 
 void CheckFeatureMap(const FeatureData* feature_data,

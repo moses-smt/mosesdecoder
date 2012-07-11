@@ -13,6 +13,9 @@
 #include <set>
 #include <map>
 
+namespace MosesTraining
+{
+
 // data structure for a single phrase pair
 class PhraseAlignment
 {
@@ -52,3 +55,6 @@ public:
   { return m_ntLengths; }
 
 };
+
+}
+

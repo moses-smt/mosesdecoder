@@ -35,8 +35,8 @@ namespace Moses
 
 class Phrase;
 
-/***
- * hold a set of factors for a single word
+/** Represent a word (terminal or non-term)
+ * Wrapper around hold a set of factors for a single word
  */
 class Word
 {

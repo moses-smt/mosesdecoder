@@ -4,6 +4,10 @@
 #include <vector>
 #include "Types.h"
 
+namespace MosesTuning
+{
+  
+
 class Optimizer;
 
 class OptimizerFactory
@@ -38,5 +42,8 @@ class OptimizerFactory
 
   static std::vector<std::string> m_type_names;
 };
+
+}
+
 
 #endif  // MERT_OPTIMIZER_FACTORY_H_

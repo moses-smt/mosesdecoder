@@ -11,6 +11,10 @@
 #include <string.h>
 #include <stdint.h>
 
+#ifdef WIN32
+#include <float.h>
+#endif
+
 namespace lm {
 
 // 1 for '\t', '\n', and ' '.  This is stricter than isspace.  
@@ -84,7 +88,7 @@ void ReadBackoff(util::FilePiece &in, Prob &/*weights*/) {
   }
 }
 
-void ReadBackoff(util::FilePiece &in, ProbBackoff &weights) {
+void ReadBackoff(util::FilePiece &in, float &backoff) {
   // Always make zero negative.  
   // Negative zero means that no (n+1)-gram has this n-gram as context.  
   // Therefore the hypothesis state can be shorter.  Of course, many n-grams
@@ -92,16 +96,21 @@ void ReadBackoff(util::FilePiece &in, ProbBackoff &weights) {
   // back and set the backoff to positive zero in these cases.
   switch (in.get()) {
     case '\t':
-      weights.backoff = in.ReadFloat();
-      if (weights.backoff == ngram::kExtensionBackoff) weights.backoff = ngram::kNoExtensionBackoff;
+      backoff = in.ReadFloat();
+      if (backoff == ngram::kExtensionBackoff) backoff = ngram::kNoExtensionBackoff;
       {
-        int float_class = fpclassify(weights.backoff);
-        UTIL_THROW_IF(float_class == FP_NAN || float_class == FP_INFINITE, FormatLoadException, "Bad backoff " << weights.backoff);
+#ifdef WIN32
+		int float_class = _fpclass(backoff);
+        UTIL_THROW_IF(float_class == _FPCLASS_SNAN || float_class == _FPCLASS_QNAN || float_class == _FPCLASS_NINF || float_class == _FPCLASS_PINF, FormatLoadException, "Bad backoff " << backoff);
+#else
+        int float_class = fpclassify(backoff);
+        UTIL_THROW_IF(float_class == FP_NAN || float_class == FP_INFINITE, FormatLoadException, "Bad backoff " << backoff);
+#endif
       }
-      UTIL_THROW_IF((in.get() != '\n'), FormatLoadException, "Expected newline after backoff");
+      UTIL_THROW_IF(in.get() != '\n', FormatLoadException, "Expected newline after backoff");
       break;
     case '\n':
-      weights.backoff = ngram::kNoExtensionBackoff;
+      backoff = ngram::kNoExtensionBackoff;
       break;
     default:
       UTIL_THROW(FormatLoadException, "Expected tab or newline for backoff");

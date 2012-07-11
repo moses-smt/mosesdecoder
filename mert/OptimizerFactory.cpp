@@ -3,6 +3,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 vector<string> OptimizerFactory::m_type_names;
 
 void OptimizerFactory::SetTypeNames()
@@ -64,4 +68,6 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,
       cerr << "Error: unknown optimizer" << type << endl;
       return NULL;
   }
+}
+
 }

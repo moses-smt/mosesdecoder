@@ -16,6 +16,10 @@
 #include "ScoreArray.h"
 #include "ScoreStats.h"
 
+namespace MosesTuning
+{
+  
+
 class Scorer;
 
 class ScoreData
@@ -104,5 +108,7 @@ public:
     return i->second;
   }
 };
+
+}
 
 #endif  // MERT_SCORE_DATA_H_

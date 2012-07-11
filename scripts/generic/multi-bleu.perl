@@ -49,7 +49,7 @@ while(<STDIN>) {
     foreach my $reference (@{$REF[$s]}) {
 #      print "$s $_ <=> $reference\n";
   $reference = lc($reference) if $lowercase;
-	my @WORD = split(/ /,$reference);
+	my @WORD = split(' ',$reference);
 	my $length = scalar(@WORD);
         my $diff = abs($length_translation_this_sentence-$length);
 	if ($diff < $closest_diff) {

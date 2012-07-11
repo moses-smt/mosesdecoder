@@ -32,7 +32,7 @@
 namespace Moses
 {
 
-// Implementation of ChartRuleLookupManager for on-disk rule tables.
+//! Implementation of ChartRuleLookupManager for on-disk rule tables.
 class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
 {
  public:

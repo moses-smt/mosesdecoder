@@ -31,8 +31,8 @@ namespace Moses
 class LMList;
 class WordPenaltyProducer;
 
-// Abstract base class defining RuleTableLoader interface.  Friend of
-// RuleTableTrie.
+/** Abstract base class defining RuleTableLoader interface.  Friend of RuleTableTrie.
+ */
 class RuleTableLoader
 {
  public:

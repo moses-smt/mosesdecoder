@@ -256,7 +256,7 @@ sub apply {
 	    }
       if ($best_split !~ / /) {
         print join(" ",@BUFFER)." " if scalar(@BUFFER); @BUFFER = (); # clear buffer
-        print $word; # do not change case for unsplit words
+        print $factored_word; # do not change case for unsplit words
         next;
       }
       if (!$SYNTAX) {

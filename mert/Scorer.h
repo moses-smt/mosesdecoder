@@ -6,17 +6,23 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
+#include <limits>
 #include "Types.h"
 #include "ScoreData.h"
-
-class PreProcessFilter;
-class ScoreStats;
 
 namespace mert {
 
 class Vocabulary;
 
 } // namespace mert
+
+namespace MosesTuning
+{
+  
+class PreProcessFilter;
+class ScoreStats;
+
+enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
 
 /**
  * Superclass of all scorers and dummy implementation.
@@ -77,12 +83,7 @@ class Scorer
    * Calculate the score of the sentences corresponding to the list of candidate
    * indices. Each index indicates the 1-best choice from the n-best list.
    */
-  float score(const candidates_t& candidates) const {
-    diffs_t diffs;
-    statscores_t scores;
-    score(candidates, diffs, scores);
-    return scores[0];
-  }
+  float score(const candidates_t& candidates) const; 
 
   const std::string& getName() const {
     return m_name;
@@ -101,6 +102,15 @@ class Scorer
   virtual void setScoreData(ScoreData* data) {
     m_score_data = data;
   }
+
+  /**
+   * The scorer returns if it uses the reference alignment data
+   * for permutation distance scores
+   **/
+  virtual bool useAlignment() const {
+    //cout << "Scorer::useAlignment returning false " << endl;
+    return false;
+  };
 
   /**
    * Set the factors, which should be used for this metric
@@ -165,34 +175,36 @@ class Scorer
 
 };
 
-/**
- * Abstract base class for Scorers that work by adding statistics across all
- * outout sentences, then apply some formula, e.g., BLEU, PER.
- */
-class StatisticsBasedScorer : public Scorer
-{
- public:
-  StatisticsBasedScorer(const std::string& name, const std::string& config);
-  virtual ~StatisticsBasedScorer() {}
-  virtual void score(const candidates_t& candidates, const diffs_t& diffs,
-                     statscores_t& scores) const;
+namespace {
+  
+  //regularisation strategies
+  inline float score_min(const statscores_t& scores, size_t start, size_t end)
+  {
+    float min = std::numeric_limits<float>::max();
+    for (size_t i = start; i < end; ++i) {
+      if (scores[i] < min) {
+        min = scores[i];
+      }
+    }
+    return min;
+  }
+  
+  inline float score_average(const statscores_t& scores, size_t start, size_t end)
+  {
+    if ((end - start) < 1) {
+      // this shouldn't happen
+      return 0;
+    }
+    float total = 0;
+    for (size_t j = start; j < end; ++j) {
+      total += scores[j];
+    }
+    
+    return total / (end - start);
+  }
+  
+} // namespace
 
- protected:
-
-  enum RegularisationType {
-    NONE,
-    AVERAGE,
-    MINIMUM
-  };
-
-  /**
-   * Calculate the actual score.
-   */
-  virtual statscore_t calculateScore(const std::vector<int>& totals) const = 0;
-
-  // regularisation
-  RegularisationType m_regularization_type;
-  std::size_t  m_regularization_window;
-};
+}
 
 #endif // MERT_SCORER_H_

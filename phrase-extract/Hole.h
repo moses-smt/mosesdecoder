@@ -26,6 +26,9 @@
 #include <string>
 #include <vector>
 
+namespace MosesTraining
+{
+
 class Hole
 {
 protected:
@@ -107,5 +110,7 @@ public:
     return holeA->GetStart(0) < holeB->GetStart(0);
   }
 };
+
+}
 
 #endif

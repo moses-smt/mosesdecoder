@@ -27,6 +27,8 @@
 #include <cassert>
 #include <vector>
 
+using namespace MosesTraining;
+
 namespace Moses {
 namespace GHKM {
 

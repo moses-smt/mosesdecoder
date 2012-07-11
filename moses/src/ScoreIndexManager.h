@@ -18,9 +18,9 @@ class StatefulFeatureFunction;
 class StatelessFeatureFunction;
 
 /** Keep track of scores and score producers. Each score producer is reserved contiguous set of slots
-	* to put their score components. All the score components are arranged in a vector with no gaps.
+ * to put their score components. All the score components are arranged in a vector with no gaps.
  * Only 1 ScoreIndexManager object should be instantiated
-*/
+ */
 class ScoreIndexManager
 {
   friend std::ostream& operator<<(std::ostream& os, const ScoreIndexManager& sim);

@@ -19,6 +19,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 Data::Data()
   : m_scorer(NULL),
     m_num_scores(0),
@@ -136,7 +140,7 @@ void Data::loadNBest(const string &file)
     throw runtime_error("Unable to open: " + file);
 
   ScoreStats scoreentry;
-  string line, sentence_index, sentence, feature_str;
+  string line, sentence_index, sentence, feature_str, alignment;
 
   while (getline(inp, line, '\n')) {
     if (line.empty()) continue;
@@ -147,7 +151,21 @@ void Data::loadNBest(const string &file)
     getNextPound(line, sentence, "|||");       // second field
     getNextPound(line, feature_str, "|||");    // third field
 
+    if (line.length() > 0) {
+      string temp;
+      getNextPound(line, temp, "|||"); //fourth field sentence score
+      if (line.length() > 0) {
+        getNextPound(line, alignment, "|||"); //fourth field only there if alignment scorer
+      }
+    }
+    //TODO check alignment exists if scorers need it
+
+    if (m_scorer->useAlignment()) {
+      sentence += "|||";
+      sentence += alignment;
+    }
     m_scorer->prepareStats(sentence_index, sentence, scoreentry);
+    
     m_score_data->add(scoreentry, sentence_index);
 
     // examine first line for name of features
@@ -269,3 +287,6 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     //cerr << endl;
   }
 }
+
+}
+

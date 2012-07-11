@@ -30,11 +30,18 @@
 namespace Moses
 {
 
-// Similar to a DottedRule, but contains a direct reference to a list
-// of translations and provdes an estimate of the best score.
+/** Similar to a DottedRule, but contains a direct reference to a list
+ * of translations and provdes an estimate of the best score. For a specific range in the input sentence
+ */
 class ChartTranslationOption
 {
  public:
+  /** Constructor
+      \param targetPhraseColl @todo dunno
+      \param stackVec @todo dunno
+      \param wordsRange the range in the source sentence this translation option covers
+      \param score @todo dunno
+   */
   ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
                          const StackVec &stackVec,
                          const WordsRange &wordsRange,
@@ -42,31 +49,36 @@ class ChartTranslationOption
       : m_stackVec(stackVec)
       , m_targetPhraseCollection(&targetPhraseColl)
       , m_wordsRange(&wordsRange)
-      , m_estimateOfBestScore(score) {}
+      , m_estimateOfBestScore(score) 
+  {}
 
   ~ChartTranslationOption() {}
 
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);
 
+  //! @todo dunno
   const StackVec &GetStackVec() const { return m_stackVec; }
 
+  //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
   const TargetPhraseCollection &GetTargetPhraseCollection() const { 
     return *m_targetPhraseCollection;
   }
 
+  //! the range in the source sentence this translation option covers
   const WordsRange &GetSourceWordsRange() const {
     return *m_wordsRange;
   }
 
-  // return an estimate of the best score possible with this translation option.
-  // the estimate is the sum of the top target phrase's estimated score plus the
-  // scores of the best child hypotheses.
+  /** return an estimate of the best score possible with this translation option.
+    * the estimate is the sum of the top target phrase's estimated score plus the
+    * scores of the best child hypotheses.
+    */
   inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
 
  private:
 
-  StackVec m_stackVec;
+  StackVec m_stackVec; //! vector of hypothesis list!
   const TargetPhraseCollection *m_targetPhraseCollection;
   const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;

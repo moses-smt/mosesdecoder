@@ -32,7 +32,7 @@ namespace Moses
 {
 
 /** set of unique FactorTypes. Used to store what factor types are used in phrase tables etc
-*/
+ */
 class FactorMask : public std::bitset<MAX_NUM_FACTORS>
 {
   friend std::ostream& operator<<(std::ostream&, const FactorMask&);

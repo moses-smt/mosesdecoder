@@ -14,6 +14,10 @@ inline int CalcDistance(int word1, int word2) {
 
 } // namespace
 
+namespace MosesTuning
+{
+  
+
 CderScorer::CderScorer(const string& config, bool allowed_long_jumps)
     : StatisticsBasedScorer(allowed_long_jumps ? "CDER" : "WER", config),
       m_allowed_long_jumps(allowed_long_jumps) {}
@@ -123,4 +127,6 @@ void CderScorer::computeCD(const sent_t& cand, const sent_t& ref,
   stats[1] = ref.size();
 
   delete row;
+}
+
 }

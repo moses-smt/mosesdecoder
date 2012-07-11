@@ -19,6 +19,9 @@
 
 
 
+namespace MosesCmd
+{
+
 class Edge;
 
 typedef std::vector< const Moses::Hypothesis *> Lattice;
@@ -144,4 +147,7 @@ bool ascendingCoverageCmp(const Moses::Hypothesis* a, const Moses::Hypothesis* b
 std::vector<Moses::Word> doLatticeMBR(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
 const Moses::TrellisPath doConsensusDecoding(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
 //std::vector<Moses::Word> doConsensusDecoding(Moses::Manager& manager, Moses::TrellisPathList& nBestList);
+
+}
+
 #endif

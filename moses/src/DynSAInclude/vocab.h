@@ -4,15 +4,15 @@
 #include <map>
 #include <string>
 #include "types.h"
-#include "file.h"
+#include "FileHandler.h"
 #include "utils.h"
 #include "../TypeDef.h"
 #include "../Word.h"
 
 namespace Moses
 {
-// Vocab maps between strings and uint32 ids.
-
+  
+//! Vocab maps between strings and uint32 ids.
 class Vocab
 {
 public:

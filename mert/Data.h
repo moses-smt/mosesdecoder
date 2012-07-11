@@ -16,6 +16,9 @@
 #include "FeatureData.h"
 #include "ScoreData.h"
 
+namespace MosesTuning
+{
+  
 class Scorer;
 
 typedef boost::shared_ptr<ScoreData> ScoreDataHandle;
@@ -96,5 +99,7 @@ public:
   void AddFeatures(const std::string& str,
                    const std::string& sentence_index);
 };
+
+}
 
 #endif  // MERT_DATA_H_

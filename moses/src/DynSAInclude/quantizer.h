@@ -8,6 +8,12 @@
 #include "types.h"
 
 static const float kFloatErr = 0.00001f;
+
+#ifdef WIN32
+#define log2(X) (log((double)X)/log((double)2))
+#endif
+
+//! @todo ask abby2
 class LogQtizer {
 public:
   LogQtizer(float i): base_(pow(2, 1 / i)) {

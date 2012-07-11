@@ -42,6 +42,8 @@ class ChartCellCollection;
 class ChartHypothesisCollection;
 class WordsRange;
 
+/** @todo what is this?
+ */
 class Scope3Parser : public ChartRuleLookupManager
 {
  public:

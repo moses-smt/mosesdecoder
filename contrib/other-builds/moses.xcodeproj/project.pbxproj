@@ -7,6 +7,10 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */; };
+		1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1D823F15AC29BB00FE42E9 /* FileHandler.h */; };
+		1E879EA715A346F90051F346 /* SearchNormalBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */; };
+		1E879EA815A346F90051F346 /* SearchNormalBatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E879EA615A346F90051F346 /* SearchNormalBatch.h */; };
 		1EAC363514CDC79300DF97C3 /* Loader.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC362C14CDC79300DF97C3 /* Loader.h */; };
 		1EAC363614CDC79300DF97C3 /* LoaderCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */; };
 		1EAC363714CDC79300DF97C3 /* LoaderCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */; };
@@ -70,8 +74,6 @@
 		1EC7378414B977AB00238410 /* DummyScoreProducers.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7361114B977AA00238410 /* DummyScoreProducers.cpp */; };
 		1EC7378514B977AB00238410 /* DummyScoreProducers.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361214B977AA00238410 /* DummyScoreProducers.h */; };
 		1EC7378614B977AB00238410 /* fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361414B977AA00238410 /* fdstream.h */; };
-		1EC7378714B977AB00238410 /* file.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7361514B977AA00238410 /* file.cpp */; };
-		1EC7378814B977AB00238410 /* file.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361614B977AA00238410 /* file.h */; };
 		1EC7378914B977AB00238410 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361714B977AA00238410 /* hash.h */; };
 		1EC7378A14B977AB00238410 /* onlineRLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7361914B977AA00238410 /* onlineRLM.h */; };
 		1EC7378B14B977AB00238410 /* params.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7361B14B977AA00238410 /* params.cpp */; };
@@ -295,9 +297,14 @@
 		1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA808514D19FBF003D2191 /* UTrieNode.h */; };
 		1EF0709314B9EFCC0052152A /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */; };
 		1EF0709414B9EFCC0052152A /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF0709214B9EFCC0052152A /* ParallelBackoff.h */; };
+		1EF8F2C4159A61970047B613 /* HypoList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EF8F2C3159A61970047B613 /* HypoList.h */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileHandler.cpp; sourceTree = "<group>"; };
+		1E1D823F15AC29BB00FE42E9 /* FileHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHandler.h; sourceTree = "<group>"; };
+		1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SearchNormalBatch.cpp; path = ../../moses/src/SearchNormalBatch.cpp; sourceTree = "<group>"; };
+		1E879EA615A346F90051F346 /* SearchNormalBatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SearchNormalBatch.h; path = ../../moses/src/SearchNormalBatch.h; sourceTree = "<group>"; };
 		1EAC362C14CDC79300DF97C3 /* Loader.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Loader.h; path = ../../moses/src/RuleTable/Loader.h; sourceTree = "<group>"; };
 		1EAC362D14CDC79300DF97C3 /* LoaderCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderCompact.cpp; path = ../../moses/src/RuleTable/LoaderCompact.cpp; sourceTree = "<group>"; };
 		1EAC362E14CDC79300DF97C3 /* LoaderCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderCompact.h; path = ../../moses/src/RuleTable/LoaderCompact.h; sourceTree = "<group>"; };
@@ -361,28 +368,17 @@
 		1EC7361114B977AA00238410 /* DummyScoreProducers.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DummyScoreProducers.cpp; path = ../../moses/src/DummyScoreProducers.cpp; sourceTree = "<group>"; };
 		1EC7361214B977AA00238410 /* DummyScoreProducers.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DummyScoreProducers.h; path = ../../moses/src/DummyScoreProducers.h; sourceTree = "<group>"; };
 		1EC7361414B977AA00238410 /* fdstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = fdstream.h; sourceTree = "<group>"; };
-		1EC7361514B977AA00238410 /* file.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = file.cpp; sourceTree = "<group>"; };
-		1EC7361614B977AA00238410 /* file.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = file.h; sourceTree = "<group>"; };
 		1EC7361714B977AA00238410 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hash.h; sourceTree = "<group>"; };
-		1EC7361814B977AA00238410 /* hash.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = hash.h.orig; sourceTree = "<group>"; };
 		1EC7361914B977AA00238410 /* onlineRLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = onlineRLM.h; sourceTree = "<group>"; };
-		1EC7361A14B977AA00238410 /* onlineRLM.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = onlineRLM.h.orig; sourceTree = "<group>"; };
 		1EC7361B14B977AA00238410 /* params.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = params.cpp; sourceTree = "<group>"; };
-		1EC7361C14B977AA00238410 /* params.cpp.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = params.cpp.orig; sourceTree = "<group>"; };
 		1EC7361D14B977AA00238410 /* params.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = params.h; sourceTree = "<group>"; };
-		1EC7361E14B977AA00238410 /* params.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = params.h.orig; sourceTree = "<group>"; };
 		1EC7361F14B977AA00238410 /* perfectHash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = perfectHash.h; sourceTree = "<group>"; };
-		1EC7362014B977AA00238410 /* perfectHash.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = perfectHash.h.orig; sourceTree = "<group>"; };
 		1EC7362114B977AA00238410 /* quantizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = quantizer.h; sourceTree = "<group>"; };
-		1EC7362214B977AA00238410 /* quantizer.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = quantizer.h.orig; sourceTree = "<group>"; };
 		1EC7362314B977AA00238410 /* RandLMCache.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RandLMCache.h; sourceTree = "<group>"; };
-		1EC7362414B977AA00238410 /* RandLMCache.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RandLMCache.h.orig; sourceTree = "<group>"; };
 		1EC7362514B977AA00238410 /* RandLMFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RandLMFilter.h; sourceTree = "<group>"; };
-		1EC7362614B977AA00238410 /* RandLMFilter.h.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = RandLMFilter.h.orig; sourceTree = "<group>"; };
 		1EC7362714B977AA00238410 /* types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = types.h; sourceTree = "<group>"; };
 		1EC7362814B977AA00238410 /* utils.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = utils.h; sourceTree = "<group>"; };
 		1EC7362914B977AA00238410 /* vocab.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = vocab.cpp; sourceTree = "<group>"; };
-		1EC7362A14B977AA00238410 /* vocab.cpp.orig */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; path = vocab.cpp.orig; sourceTree = "<group>"; };
 		1EC7362B14B977AA00238410 /* vocab.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = vocab.h; sourceTree = "<group>"; };
 		1EC7362C14B977AA00238410 /* DynSuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = DynSuffixArray.cpp; path = ../../moses/src/DynSuffixArray.cpp; sourceTree = "<group>"; };
 		1EC7362D14B977AA00238410 /* DynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = DynSuffixArray.h; path = ../../moses/src/DynSuffixArray.h; sourceTree = "<group>"; };
@@ -597,6 +593,7 @@
 		1EDA808514D19FBF003D2191 /* UTrieNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = UTrieNode.h; path = ../../moses/src/RuleTable/UTrieNode.h; sourceTree = "<group>"; };
 		1EF0709114B9EFCC0052152A /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelBackoff.cpp; sourceTree = "<group>"; };
 		1EF0709214B9EFCC0052152A /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallelBackoff.h; sourceTree = "<group>"; };
+		1EF8F2C3159A61970047B613 /* HypoList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HypoList.h; path = ../../moses/src/HypoList.h; sourceTree = "<group>"; };
 		D2AAC046055464E500DB518D /* libmoses.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmoses.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -624,6 +621,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */,
+				1E879EA615A346F90051F346 /* SearchNormalBatch.h */,
 				1EDA803514D19ECD003D2191 /* Scope3Parser */,
 				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
 				1EC7365B14B977AA00238410 /* LM */,
@@ -707,6 +706,7 @@
 				1EC7364214B977AA00238410 /* hash.cpp */,
 				1EC7364314B977AA00238410 /* hash.h */,
 				1EC7364414B977AA00238410 /* hypergraph.proto */,
+				1EF8F2C3159A61970047B613 /* HypoList.h */,
 				1EC7364514B977AA00238410 /* Hypothesis.cpp */,
 				1EC7364614B977AA00238410 /* Hypothesis.h */,
 				1EC7364714B977AA00238410 /* HypothesisStack.cpp */,
@@ -878,29 +878,20 @@
 		1EC7361314B977AA00238410 /* DynSAInclude */ = {
 			isa = PBXGroup;
 			children = (
+				1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */,
+				1E1D823F15AC29BB00FE42E9 /* FileHandler.h */,
 				1EC7361414B977AA00238410 /* fdstream.h */,
-				1EC7361514B977AA00238410 /* file.cpp */,
-				1EC7361614B977AA00238410 /* file.h */,
 				1EC7361714B977AA00238410 /* hash.h */,
-				1EC7361814B977AA00238410 /* hash.h.orig */,
 				1EC7361914B977AA00238410 /* onlineRLM.h */,
-				1EC7361A14B977AA00238410 /* onlineRLM.h.orig */,
 				1EC7361B14B977AA00238410 /* params.cpp */,
-				1EC7361C14B977AA00238410 /* params.cpp.orig */,
 				1EC7361D14B977AA00238410 /* params.h */,
-				1EC7361E14B977AA00238410 /* params.h.orig */,
 				1EC7361F14B977AA00238410 /* perfectHash.h */,
-				1EC7362014B977AA00238410 /* perfectHash.h.orig */,
 				1EC7362114B977AA00238410 /* quantizer.h */,
-				1EC7362214B977AA00238410 /* quantizer.h.orig */,
 				1EC7362314B977AA00238410 /* RandLMCache.h */,
-				1EC7362414B977AA00238410 /* RandLMCache.h.orig */,
 				1EC7362514B977AA00238410 /* RandLMFilter.h */,
-				1EC7362614B977AA00238410 /* RandLMFilter.h.orig */,
 				1EC7362714B977AA00238410 /* types.h */,
 				1EC7362814B977AA00238410 /* utils.h */,
 				1EC7362914B977AA00238410 /* vocab.cpp */,
-				1EC7362A14B977AA00238410 /* vocab.cpp.orig */,
 				1EC7362B14B977AA00238410 /* vocab.h */,
 			);
 			name = DynSAInclude;
@@ -1021,7 +1012,6 @@
 				1EC7377D14B977AB00238410 /* Dictionary.h in Headers */,
 				1EC7378514B977AB00238410 /* DummyScoreProducers.h in Headers */,
 				1EC7378614B977AB00238410 /* fdstream.h in Headers */,
-				1EC7378814B977AB00238410 /* file.h in Headers */,
 				1EC7378914B977AB00238410 /* hash.h in Headers */,
 				1EC7378A14B977AB00238410 /* onlineRLM.h in Headers */,
 				1EC7378C14B977AB00238410 /* params.h in Headers */,
@@ -1150,6 +1140,9 @@
 				1EDA808F14D19FBF003D2191 /* Trie.h in Headers */,
 				1EDA809114D19FBF003D2191 /* UTrie.h in Headers */,
 				1EDA809314D19FBF003D2191 /* UTrieNode.h in Headers */,
+				1EF8F2C4159A61970047B613 /* HypoList.h in Headers */,
+				1E879EA815A346F90051F346 /* SearchNormalBatch.h in Headers */,
+				1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1229,7 +1222,6 @@
 				1EC7377A14B977AB00238410 /* DecodeStepTranslation.cpp in Sources */,
 				1EC7377C14B977AB00238410 /* Dictionary.cpp in Sources */,
 				1EC7378414B977AB00238410 /* DummyScoreProducers.cpp in Sources */,
-				1EC7378714B977AB00238410 /* file.cpp in Sources */,
 				1EC7378B14B977AB00238410 /* params.cpp in Sources */,
 				1EC7379314B977AB00238410 /* vocab.cpp in Sources */,
 				1EC7379514B977AB00238410 /* DynSuffixArray.cpp in Sources */,
@@ -1334,6 +1326,8 @@
 				1EDA808E14D19FBF003D2191 /* Trie.cpp in Sources */,
 				1EDA809014D19FBF003D2191 /* UTrie.cpp in Sources */,
 				1EDA809214D19FBF003D2191 /* UTrieNode.cpp in Sources */,
+				1E879EA715A346F90051F346 /* SearchNormalBatch.cpp in Sources */,
+				1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
