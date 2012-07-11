@@ -5,17 +5,17 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#include "../SafeGetline.h"
-#include "../InputFileStream.h"
-#include "../OutputFileStream.h"
-#include "../tables-core.h"
+#include "SafeGetline.h"
+#include "InputFileStream.h"
+#include "OutputFileStream.h"
+#include "tables-core.h"
+#include "Util.h"
 
 #include "psd.h"
 #include "PsdPhraseUtils.h"
-#include "ContextFeatureSet.h"
-#include "MegamFormat.h"
-#include "StringUtils.h"
+
 using namespace std;
+using namespace Moses;
 
 #define LINE_MAX_LENGTH 10000
 
@@ -85,11 +85,11 @@ int main(int argc,char* argv[]){
     string pt = string(fileNameOutput) + ".phrase-table";
     ofstream outPT(pt.c_str());
 
-    Moses::InputFileStream src(fileNameSrcRaw);
+    InputFileStream src(fileNameSrcRaw);
     if (src.fail()){
       cerr << "ERROR: could not open " << fileNameSrcRaw << endl;
     }
-    Moses::InputFileStream psd(fileNamePsd);
+    InputFileStream psd(fileNamePsd);
     if (psd.fail()){
       cerr << "ERROR: could not open " << fileNamePsd << endl;
     }
@@ -113,8 +113,8 @@ int main(int argc,char* argv[]){
     }
 
     // get ready to read in VW predictions
-    map<MosesTraining::PHRASE_ID,Moses::InputFileStream*> vwPredFiles; //for phrasal model
-    Moses::InputFileStream* vwPredFile; //for global model
+    map<MosesTraining::PHRASE_ID,InputFileStream*> vwPredFiles; //for phrasal model
+    InputFileStream* vwPredFile; //for global model
 
     
     // go through tagged PSD examples in the order they occur in the test corpus
@@ -130,31 +130,31 @@ int main(int argc,char* argv[]){
 	char psdLine[LINE_MAX_LENGTH];
 	SAFE_GETLINE((psd),psdLine, LINE_MAX_LENGTH, '\n', __FILE__);
 	if (psd.eof()) break;
-	vector<string> token = tokenize(psdLine);
+	vector<string> token = Tokenize(psdLine);
 	assert(token.size() > 2);
-	int sid = std::atoi(token[0].c_str());
-	int src_start = std::atoi(token[1].c_str());
-	int src_end = std::atoi(token[2].c_str());
-	//	int tgt_start = std::atoi(token[3].c_str());
-	//	int tgt_end = std::atoi(token[4].c_str());
+	int sid = Scan<int>(token[0].c_str());
+	int src_start = Scan<int>(token[1].c_str());
+	int src_end = Scan<int>(token[2].c_str());
+	//	int tgt_start = Scan<int>(token[3].c_str());
+	//	int tgt_end = Scan<int>(token[4].c_str());
 		
 	char rawSrcLine[LINE_MAX_LENGTH];	
 	while(csid < sid){
 	  if (src.eof()) break;
 	  SAFE_GETLINE((src),rawSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);	
-	  vector<string> sent = tokenize(rawSrcLine);
+	  vector<string> sent = Tokenize(rawSrcLine);
 	  // print integerized test set sentence
 	  string isent;
 	  for(int j = 0; j < sent.size(); j++){
 	    if (isent != "") isent+=" ";
-	    isent += int2string(toks_covered+j+1);
+	    isent += SPrint(toks_covered+j+1);
 	  }
 	  outCorpus << isent << endl;
 	  toks_covered += sent.size();
 	  ++csid;
 	}
 	assert(csid == sid);
-	vector<string> sent = tokenize(rawSrcLine);
+	vector<string> sent = Tokenize(rawSrcLine);
 	string phrase = sent[src_start];
 	assert(src_end < sent.size());
 	for(size_t j = src_start + 1; j < src_end + 1; j++){
@@ -164,9 +164,9 @@ int main(int argc,char* argv[]){
 	MosesTraining::PHRASE_ID srcid = getPhraseID(phrase,srcVocab,psdPhraseVoc);
 	if (srcid != 0){
 	  // make integerized source id
-	  string src2int = int2string(toks_covered-sent.size()+src_start+1);
+	  string src2int = SPrint(toks_covered-sent.size()+src_start+1);
 	  for(int i = src_start+1; i < src_end + 1; ++i){
-	    src2int = src2int + " " + int2string(toks_covered-sent.size()+i+1);
+	    src2int = src2int + " " + SPrint(toks_covered-sent.size()+i+1);
 	  }
 
 	  // for now don't get PSD prediction, only integerize PT without adding context-dependent score
@@ -181,7 +181,7 @@ int main(int argc,char* argv[]){
 	    for(map<MosesTraining::PHRASE_ID,int>::iterator itr2 = itr->second.begin(); itr2 != itr->second.end(); itr2++){
 	      MosesTraining::PHRASE_ID labelid = itr2->first;
 	      string label = getPhrase(labelid, tgtVocab, tgtPhraseVoc);
-	      string sl_key = int2string(srcid) + " " + int2string(labelid);
+	      string sl_key = SPrint(srcid) + " " + SPrint(labelid);
 	      map<string,string>::iterator itr3 = transTableScores.find(sl_key);
 		if (itr3 != transTableScores.end()){
 		  // print integerized phrase-table
