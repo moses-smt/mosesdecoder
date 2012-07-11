@@ -46,6 +46,7 @@ private:
   std::deque<std::string> m_outputBuffer;
 
   void WriteBuffer();
+  std::string EscapeSpecialChars(const std::string &str);
 };
   
 #ifdef HAVE_VW

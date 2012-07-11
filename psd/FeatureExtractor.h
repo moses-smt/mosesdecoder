@@ -50,11 +50,9 @@ private:
   const TargetIndexType &m_targetIndex;
   bool m_train;
 
-  void GenerateContextFeatures(const ContextType &context,
-    size_t spanStart,
-    size_t spanEnd);
-
+  void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd);
   void GenerateInternalFeatures(const std::vector<std::string> &span);
+  std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 
 #endif // moses_FeatureExtractor_h

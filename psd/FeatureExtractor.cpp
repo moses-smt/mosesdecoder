@@ -13,32 +13,6 @@ FeatureExtractor::FeatureExtractor(FeatureTypes ft,
 {  
 }
 
-void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
-  size_t spanStart,
-  size_t spanEnd)
-{
-  vector<size_t>::const_iterator factorIt;
-  for (factorIt = m_ft.m_factors.begin(); factorIt != m_ft.m_factors.end(); factorIt++) {
-    for (size_t i = 1; i <= m_ft.m_contextWindow; i++) {
-      if (spanStart >= i) {
-        m_fc->AddFeature("c^-" + SPrint(i) + "_" + context[spanStart - i][*factorIt]);
-      }    
-      if (spanEnd + i < context.size()) {
-        m_fc->AddFeature("c^" + SPrint(i) + "_" + context[spanStart + i][*factorIt]);
-      }
-    }
-  }
-}
-
-void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span)
-{
-  m_fc->AddFeature("p^" + Join(" ", span));
-  vector<string>::const_iterator it;
-  for (it = span.begin(); it != span.end(); it++) {
-    m_fc->AddFeature("w^" + *it);
-  }
-}
-
 void FeatureExtractor::GenerateFeatures(const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
@@ -74,3 +48,37 @@ void FeatureExtractor::GenerateFeatures(const ContextType &context,
     }
   }
 }
+
+//
+// private methods
+//
+
+string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
+{
+  return "c^" + SPrint(factor) + "_-" + SPrint(index) + "_" + value;
+}
+
+void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
+  size_t spanStart,
+  size_t spanEnd)
+{
+  vector<size_t>::const_iterator factorIt;
+  for (factorIt = m_ft.m_factors.begin(); factorIt != m_ft.m_factors.end(); factorIt++) {
+    for (size_t i = 1; i <= m_ft.m_contextWindow; i++) {
+      if (spanStart >= i) 
+        m_fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
+      if (spanEnd + i < context.size())
+        m_fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
+    }
+  }
+}
+
+void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span)
+{
+  m_fc->AddFeature("p^" + Join("_", span));
+  vector<string>::const_iterator it;
+  for (it = span.begin(); it != span.end(); it++) {
+    m_fc->AddFeature("w^" + *it);
+  }
+}
+
