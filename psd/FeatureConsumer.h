@@ -2,20 +2,23 @@
 #define moses_FeatureConsumer_h
 
 #include <iostream>
+#include <string>
 
-// forward declarations to avoid dependency VW 
-struct VW::vw;
-class ezexample;
+#ifdef HAVE_VW
+  // forward declarations to avoid dependency on VW 
+  struct vw;
+  class ezexample;
+#endif
 
 // abstract consumer
 class FeatureConsumer
 {
 public:
-  virtual void SetNamespace(const string &ns, bool shared) = 0;
-  virtual void AddFeature(const string &name) = 0;
-  virtual void AddFeature(const string &name, real value) = 0;
-  virtual void Train(const string &label, float loss) = 0;
-  virtual float Predict(const string &label) = 0;
+  virtual void SetNamespace(char ns, bool shared) = 0;
+  virtual void AddFeature(const std::string &name) = 0;
+  virtual void AddFeature(const std::string &name, float value) = 0;
+  virtual void Train(const std::string &label, float loss) = 0;
+  virtual float Predict(const std::string &label) = 0;
   virtual void FinishExample() = 0;
   virtual void Finish() = 0;
 };
@@ -24,55 +27,62 @@ public:
 class VWFileTrainConsumer : public FeatureConsumer
 {
 public:
-  virtual void SetNamespace(const string &ns, bool shared);
+  VWFileTrainConsumer(const std::string &outputFile);
+
+  virtual void SetNamespace(char ns, bool shared);
   //newline and prepend share
-  virtual void AddFeature(const string &name);
+  virtual void AddFeature(const std::string &name);
   //print " "
-  virtual void AddFeature(const string &name, real value);
+  virtual void AddFeature(const std::string &name, float value);
   //look in file
   virtual void FinishExample();
   //nweline (look in file)
   virtual void Finish();
   //close the file
-  virtual void Train(const string &label, float loss);
-  virtual float Predict(const string &label);
-
-  VWFileBasedConsumer(const string &outputFile);
+  virtual void Train(const std::string &label, float loss);
+  virtual float Predict(const std::string &label);
 
 private:
   std::ostream os;
 };
+  
+#ifdef HAVE_VW
+  // abstract consumer that trains/predicts using VW library interface
+  class VWLibraryConsumer : public FeatureConsumer
+  {
+  public:
+    virtual void SetNamespace(char ns, bool shared);
+    virtual void AddFeature(const std::string &name);
+    virtual void AddFeature(const std::string &name, float value);
+    virtual void FinishExample();
+    virtual void Finish();
+  
+  protected:
+    vw *m_VWInstance;
+    ezexample *m_ex;
+    bool m_shared;
 
-// abstract consumer that trains/predicts using VW library interface
-class VWLibraryConsumer : public FeatureConsumer
-{
-public:
-  virtual void SetNamespace(const string &ns, bool shared);
-  virtual void AddFeature(const string &name);
-  virtual void AddFeature(const string &name, real value);
-  virtual void FinishExample();
-  virtual void Finish();
+    ~VWLibraryConsumer();
+  };
+  
+  // train using VW
+  class VWLibraryTrainConsumer : public VWLibraryConsumer
+  {
+  public:
+    VWLibraryTrainConsumer(const std::string &modelFile);
+    virtual void Train(const std::string &label, float loss);
+    virtual float Predict(const std::string &label);
+    virtual void FinishExample();
+  };
+  
+  // predict using VW
+  class VWLibraryPredictConsumer : public VWLibraryConsumer
+  {
+  public:
+    VWLibraryPredictConsumer(const std::string &modelFile);
+    virtual void Train(const std::string &label, float loss);
+    virtual float Predict(const std::string &label);
+  };
+#endif // HAVE_VW
 
-private:
-  VW::vw *m_VWInstance;
-  ezexample *m_ex;
-}
-
-// train using VW
-class VWLibraryTrainConsumer : public VWLibraryConsumer
-{
-public:
-  VWLibraryTrainConsumer(const string &modelFile);
-  virtual void Train(const string &label, float loss);
-  virtual float Predict(const string &label);
-};
-
-// predict using VW
-class VWLibraryPredictConsumer : public VWLibraryConsumer
-{
-public:
-  VWLibraryPredictConsumer(const string &modelFile);
-  virtual void Train(const string &label, float loss);
-  virtual float Predict(const string &label);
-};
-
+#endif // moses_FeatureConsumer_h

@@ -3,6 +3,7 @@
 
 using namespace std;
 using namespace boost::bimaps;
+using namespace Moses;
 
 FeatureExtractor::FeatureExtractor(FeatureTypes ft,
   FeatureConsumer *fc,
@@ -23,7 +24,7 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
         m_fc->AddFeature("c^-" + SPrint(i) + "_" + context[spanStart - i][*factorIt]);
       }    
       if (spanEnd + i < context.size()) {
-        m_fc->AddFeature("c^" + SPrint(i) + "_" + context[spanStart + I][*factorIt]);
+        m_fc->AddFeature("c^" + SPrint(i) + "_" + context[spanStart + i][*factorIt]);
       }
     }
   }
@@ -44,7 +45,7 @@ void FeatureExtractor::GenerateFeatures(const ContextType &context,
   const vector<size_t> &translations,
   vector<float> &losses)
 {  
-  m_fc->SetNamespace("s", true);
+  m_fc->SetNamespace('s', true);
   if (m_ft.m_sourceExternal) {
     GenerateContextFeatures(context, spanStart, spanEnd);
   }
@@ -61,9 +62,9 @@ void FeatureExtractor::GenerateFeatures(const ContextType &context,
   vector<float>::iterator lossIt = losses.begin();
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());
-    m_fc->SetNamespace("t", false);
+    m_fc->SetNamespace('t', false);
     if (m_ft.m_targetInternal) {
-      GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right[*transIt]));
+      GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second));
     }  
 
     if (train) {
