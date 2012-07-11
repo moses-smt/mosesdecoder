@@ -4,7 +4,7 @@
 #include <map>
 #include <string>
 #include "types.h"
-#include "file.h"
+#include "FileHandler.h"
 #include "utils.h"
 #include "../TypeDef.h"
 #include "../Word.h"

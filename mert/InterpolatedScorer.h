@@ -46,6 +46,8 @@ public:
 
   virtual void setFilter(const std::string& filterCommand);
 
+  bool useAlignment() const;
+
 protected:
   ScopedVector<Scorer> m_scorers;
 
