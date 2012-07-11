@@ -621,8 +621,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */,
-				1E879EA615A346F90051F346 /* SearchNormalBatch.h */,
 				1EDA803514D19ECD003D2191 /* Scope3Parser */,
 				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
 				1EC7365B14B977AA00238410 /* LM */,
@@ -782,6 +780,8 @@
 				1EC736F414B977AB00238410 /* SearchCubePruning.h */,
 				1EC736F514B977AB00238410 /* SearchNormal.cpp */,
 				1EC736F614B977AB00238410 /* SearchNormal.h */,
+				1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */,
+				1E879EA615A346F90051F346 /* SearchNormalBatch.h */,
 				1EC736F714B977AB00238410 /* Sentence.cpp */,
 				1EC736F814B977AB00238410 /* Sentence.h */,
 				1EC736F914B977AB00238410 /* SentenceStats.cpp */,

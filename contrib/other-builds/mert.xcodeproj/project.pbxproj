@@ -312,6 +312,7 @@
 				1E1D826815AC640800FE42E9 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1EB0AEFF1593A2180007E2A4 /* Build configuration list for PBXProject "mert" */ = {
 			isa = XCConfigurationList;
