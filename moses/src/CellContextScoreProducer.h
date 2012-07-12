@@ -53,9 +53,6 @@ class CellContextScoreProducer : public StatelessFeatureFunction
         bool IsOOV(const std::string &targetRep);
         bool LoadRuleIndex(const string &indexFile);
         std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
-
-
-
   };
 }//end of namespace
 
