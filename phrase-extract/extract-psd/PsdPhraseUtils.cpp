@@ -42,11 +42,11 @@ PHRASE_ID getPhraseID(const string phrase, Vocabulary &wordVocab, PhraseVocab &v
 string getPhrase(PHRASE_ID labelid, Vocabulary &tgtVocab, PhraseVocab &tgtPhraseVoc){
   PHRASE p = tgtPhraseVoc.getPhrase(labelid);
   string phrase = "";
-  for(int i = 0; i < p.size(); ++i){
-      if (phrase != ""){
-	phrase += " ";
-      }
-      phrase += tgtVocab.getWord(p[i]);
+  for(size_t i = 0; i < p.size(); ++i){
+    if (phrase != ""){
+      phrase += " ";
+    }
+    phrase += tgtVocab.getWord(p[i]);
   }  
   return phrase;
 }
@@ -60,35 +60,34 @@ bool readPhraseVocab(const char* vocabFile, Vocabulary &wordVocab, PhraseVocab &
       SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
       if (file.eof()) return true;
       PHRASE phrase = makePhraseAndVoc(string(line),wordVocab);
-      int pid = vocab.storeIfNew(phrase);
+      vocab.storeIfNew(phrase);
     }
     return true;
 }
 
 bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable){
-    InputFileStream file(ptFile);
-    if(!file) return false;
-    while(!file.eof()){
-	char line[LINE_MAX_LENGTH];
-	SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
-	if (file.eof()) return true;
-	vector<string> fields = TokenizeMultiCharSeparator(string(line), " ||| ");
-	//	cerr << "TOKENIZED: " << fields.size()  << " tokens in " << line << endl;
-	if (fields.size() < 2){
-	    cerr << "Skipping malformed phrase-table entry: " << line << endl;
-	}
-	PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
-	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
-	if (src && tgt){
-    transTable.insert(make_pair(src, tgt));
-	  }
-	}
-	/*	}else{
-	    cerr << "Skipping phrase-table entry due to OOV phrase: " << line << endl;
-	}
-*/
+  InputFileStream file(ptFile);
+  if(!file) return false;
+  while(!file.eof()){
+    char line[LINE_MAX_LENGTH];
+    SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
+    if (file.eof()) return true;
+    vector<string> fields = TokenizeMultiCharSeparator(string(line), " ||| ");
+    //	cerr << "TOKENIZED: " << fields.size()  << " tokens in " << line << endl;
+    if (fields.size() < 2){
+      cerr << "Skipping malformed phrase-table entry: " << line << endl;
     }
-    return true;
+    PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
+    PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
+    if (src && tgt){
+      transTable.insert(make_pair(src, tgt));
+    }
+  }
+  /*	}else{
+    cerr << "Skipping phrase-table entry due to OOV phrase: " << line << endl;
+  }
+  */
+  return true;
 }
 
 bool exists(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){

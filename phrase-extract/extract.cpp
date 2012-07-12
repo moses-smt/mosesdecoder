@@ -97,6 +97,7 @@ bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
+bool doPSD = false;
 Moses::OutputFileStream PSDOutputFile; // file to write PSD examples into
 bool gzOutput = false;
 
@@ -129,8 +130,8 @@ int main(int argc, char* argv[])
         cerr << "extract: syntax error, no file given with --PSDOutputFile" << endl;
         exit(1);
       }
-      PSDOutputFile.open(argv[++i]);
-      if (! PSDOutputFile.good()) {
+      doPSD = true;
+      if (! PSDOutputFile.Open(argv[++i])) {
         cerr << "extract: failed to open " << argv[i] << endl;
         exit(1);
       }
@@ -664,7 +665,7 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     return;
   }
 
-  if (PSDOutputFile.is_open()) {
+  if (doPSD) {
     string src_phrase = join(" ", sentence.source.begin() + startF, sentence.source.begin() + endF + 1);
     string tgt_phrase = join(" ", sentence.target.begin() + startE, sentence.target.begin() + endE + 1);
     printPSDContext(PSDOutputFile, src_phrase, tgt_phrase, sentence.source);

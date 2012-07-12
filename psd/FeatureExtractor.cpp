@@ -67,9 +67,9 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   for (factorIt = m_ft.m_factors.begin(); factorIt != m_ft.m_factors.end(); factorIt++) {
     for (size_t i = 1; i <= m_ft.m_contextWindow; i++) {
       if (spanStart >= i) 
-        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
+        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanStart - i][*factorIt]));
       if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
+        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanStart - i][*factorIt]));
     }
   }
 }

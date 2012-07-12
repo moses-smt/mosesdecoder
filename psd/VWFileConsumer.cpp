@@ -68,7 +68,7 @@ void VWFileTrainConsumer::WriteBuffer()
 }
 
 
-std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str);
+std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str)
 {
   string out;
   out = Replace(str, "|", "_PIPE_");

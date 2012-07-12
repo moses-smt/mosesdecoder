@@ -51,7 +51,7 @@ private:
 
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
-  std::string BuildContextFeature(size_t factor, int index, const std::string &value, FeatureConsumer *fc);
+  std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 
 #endif // moses_FeatureExtractor_h

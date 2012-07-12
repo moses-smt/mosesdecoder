@@ -16,10 +16,12 @@
 #include "PsdPhraseUtils.h"
 #include "FeatureExtractor.h"
 #include "FeatureConsumer.h"
+#include "TaggedCorpus.h"
 
 using namespace std;
 using namespace Moses;
 using namespace MosesTraining;
+using namespace boost::bimaps;
 
 #define LINE_MAX_LENGTH 10000
 
@@ -117,7 +119,7 @@ int main(int argc,char* argv[]){
   FeatureTypes ft;
   ft.m_sourceExternal = true;
   ft.m_sourceInternal = true;
-  ft.m_target_Internal = true;
+  ft.m_targetInternal = true;
   ft.m_paired = false;
   ft.m_bagOfWords = false;
   ft.m_contextWindow = 2;
@@ -125,7 +127,12 @@ int main(int argc,char* argv[]){
   ft.m_factors.push_back(1);
   ft.m_factors.push_back(2);
 
-  FeatureExtractor extractor(ft, bidirectionalIndex, true);
+  // create target phrase index for feature extractor
+  TargetIndexType extractorTargetIndex;
+  for (size_t i = 0; i < tgtPhraseVoc.phraseTable.size(); i++) {
+    extractorTargetIndex.insert(TargetIndexType::value_type(getPhrase(i, tgtVocab, tgtPhraseVoc), i));
+  }
+  FeatureExtractor extractor(ft, extractorTargetIndex, true);
 
   // prep feature consumers for PHRASAL setting
   map<PHRASE_ID, FeatureConsumer*> consumers;
@@ -133,9 +140,9 @@ int main(int argc,char* argv[]){
   // feature consumer for GLOBAL setting
   FeatureConsumer *globalOut = NULL;
   if (psd_classifier == VWLib) 
-    globalOut = new VWLibraryTrainConsumer();
+    globalOut = new VWLibraryTrainConsumer(output);
   else
-    globalOut = new VWFileTrainConsumer();
+    globalOut = new VWFileTrainConsumer(output);
 
   cerr<< "Phrase tables read. Now reading in corpus." << endl;
   while(true) {
@@ -149,11 +156,11 @@ int main(int argc,char* argv[]){
 
     vector<string> token = Tokenize(psdLine,"\t");
 
-    int sid = Scan<int>(token[0].c_str());
-    int src_start = Scan<int>(token[1].c_str());
-    int src_end = Scan<int>(token[2].c_str());
-    tgt_start = Scan<int>(token[3].c_str());
-    tgt_end = Scan<int>(token[4].c_str());
+    size_t sid = Scan<size_t>(token[0].c_str());
+    size_t src_start = Scan<size_t>(token[1].c_str());
+    size_t src_end = Scan<size_t>(token[2].c_str());
+    size_t tgt_start = Scan<size_t>(token[3].c_str());
+    size_t tgt_end = Scan<size_t>(token[4].c_str());
 
     char rawSrcLine[LINE_MAX_LENGTH];
     char tagSrcLine[LINE_MAX_LENGTH];
@@ -182,21 +189,26 @@ int main(int argc,char* argv[]){
 
     PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
     cout << "PHRASE : " << srcid << " " << phrase << endl;
-    string tagSrcLine = string(tagSrcLine);
+    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
 
     string tgtphrase = token[6];
     PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
+    vector<float> losses;
+    vector<size_t> translations;
+    PhraseTranslations::const_iterator transIt;
+    for (transIt = transTable.lower_bound(srcid); transIt != transTable.upper_bound(srcid); transIt++) {
+      translations.push_back(transIt->second);
+      losses.push_back(labelid == transIt->second ? 0 : 1);
+    }
 
     if (srcid != 0){
       if (exists(srcid, labelid, transTable)) {
-//        vector<string> features = fs.extract(src_start,src_end,tagSrcLine,factorDelim);
         if (psd_model == PHRASAL){
           map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
           if (i == consumers.end()){
             int low = floor(srcid/subdirsize)*subdirsize;
             int high = low+subdirsize-1;
             string output_subdir = output +"/"+SPrint(low)+"-"+SPrint(high);
-            struct stat stat_buf;
             mkdir(output_subdir.c_str(),S_IREAD | S_IWRITE | S_IEXEC);
             string fileName = output_subdir + "/" + SPrint(srcid) + ext;
             FeatureConsumer *fc = NULL;
@@ -206,9 +218,9 @@ int main(int argc,char* argv[]){
               fc = new VWFileTrainConsumer(fileName);
             consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
           }
-          extractor.GenerateFeatures(consumers[srcId] /* TODO */ );
+          extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, src_start, src_end, translations, losses);
         } else { // GLOBAL model
-          extractor.GenerateFeatures(globalOut /* TODO */ );
+          extractor.GenerateFeatures(globalOut, factoredSrcLine, src_start, src_end, translations, losses);
         }
       }
     }
