@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <boost/version.hpp>
+#include <boost/thread/locks.hpp>
 #include <ostream>
 #include <string>
 #include "FactorCollection.h"

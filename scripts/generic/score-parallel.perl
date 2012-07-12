@@ -13,7 +13,7 @@ sub GetSourcePhrase($);
 sub NumStr($);
 
 #my $EXTRACT_SPLIT_LINES = 5000000;
-my $EXTRACT_SPLIT_LINES = 1000000;
+my $EXTRACT_SPLIT_LINES = 10000000;
 
 print "Started ".localtime() ."\n";
 

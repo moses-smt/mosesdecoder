@@ -1,5 +1,4 @@
-/*
- * extract.cpp
+ /* extract.cpp
  *
  *      Modified by: Nadi Tomeh - LIMSI/CNRS
  *      Machine Translation Marathon 2010, Dublin
@@ -98,8 +97,8 @@ bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
-bool oneWordToTheLeftFlag = false; // output one word to the left for each phrase
-Moses::OutputFileStream PSDExamplesFile; // file to write PSD examples into
+bool doPSD = false;
+Moses::OutputFileStream PSDOutputFile; // file to write PSD examples into
 bool gzOutput = false;
 
 }
@@ -126,15 +125,13 @@ int main(int argc, char* argv[])
       orientationFlag = true;
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
-    } else if (strcmp(argv[i], "--OneWordToTheLeft") == 0) {
-      oneWordToTheLeftFlag = true;
-    } else if (strcmp(argv[i], "--PSDExamplesFile") == 0) {
+    } else if (strcmp(argv[i], "--PSDOutputFile") == 0) {
       if (i + 1 >= argc) {
-        cerr << "extract: syntax error, no file given with --PSDExamplesFile" << endl;
+        cerr << "extract: syntax error, no file given with --PSDOutputFile" << endl;
         exit(1);
       }
-      PSDExamplesFile.open(argv[++i]);
-      if (! PSDExamplesFile.good()) {
+      doPSD = true;
+      if (! PSDOutputFile.Open(argv[++i])) {
         cerr << "extract: failed to open " << argv[i] << endl;
         exit(1);
       }
@@ -668,14 +665,10 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
     return;
   }
 
-  if (PSDExamplesFile.is_open()) {
+  if (doPSD) {
     string src_phrase = join(" ", sentence.source.begin() + startF, sentence.source.begin() + endF + 1);
     string tgt_phrase = join(" ", sentence.target.begin() + startE, sentence.target.begin() + endE + 1);
-    printPSDContext(PSDExamplesFile, src_phrase, tgt_phrase, sentence.source);
-  }
-
-  if (translationFlag && oneWordToTheLeftFlag) {
-    extractFile << "{" << sentence.source[max(0, startF - 1)] << "} ";
+    printPSDContext(PSDOutputFile, src_phrase, tgt_phrase, sentence.source);
   }
 
   for(int fi=startF; fi<=endF; fi++) {
@@ -698,10 +691,6 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (translationFlag) extractFileInv << "||| ";
   if (orientationFlag) extractFileOrientation << "||| ";
   if (sentenceIdFlag) extractFileSentenceId << "||| ";
-
-  if (translationFlag && oneWordToTheLeftFlag) {
-    extractFileInv << "{" << sentence.source[max(0, startF - 1)] << "} ";
-  }
 
   // source (for inverse)
   if (translationFlag) {

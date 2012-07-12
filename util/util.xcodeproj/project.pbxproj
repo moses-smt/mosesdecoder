@@ -22,7 +22,6 @@
 		1EE8C2B11476A2EA002496F2 /* getopt.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EE8C28B1476A2E9002496F2 /* getopt.hh */; };
 		1EE8C2B21476A2EA002496F2 /* have.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EE8C28C1476A2E9002496F2 /* have.hh */; };
 		1EE8C2B41476A2EA002496F2 /* joint_sort.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EE8C28E1476A2E9002496F2 /* joint_sort.hh */; };
-		1EE8C2B61476A2EA002496F2 /* key_value_packing.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EE8C2901476A2E9002496F2 /* key_value_packing.hh */; };
 		1EE8C2B81476A2EA002496F2 /* mmap.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EE8C2951476A2E9002496F2 /* mmap.cc */; };
 		1EE8C2B91476A2EA002496F2 /* mmap.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EE8C2961476A2E9002496F2 /* mmap.hh */; };
 		1EE8C2BA1476A2EA002496F2 /* murmur_hash.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EE8C2971476A2E9002496F2 /* murmur_hash.cc */; };
@@ -53,7 +52,6 @@
 		1EE8C28B1476A2E9002496F2 /* getopt.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = getopt.hh; sourceTree = "<group>"; };
 		1EE8C28C1476A2E9002496F2 /* have.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = have.hh; sourceTree = "<group>"; };
 		1EE8C28E1476A2E9002496F2 /* joint_sort.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = joint_sort.hh; sourceTree = "<group>"; };
-		1EE8C2901476A2E9002496F2 /* key_value_packing.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = key_value_packing.hh; sourceTree = "<group>"; };
 		1EE8C2951476A2E9002496F2 /* mmap.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = mmap.cc; sourceTree = "<group>"; };
 		1EE8C2961476A2E9002496F2 /* mmap.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; path = mmap.hh; sourceTree = "<group>"; };
 		1EE8C2971476A2E9002496F2 /* murmur_hash.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = murmur_hash.cc; sourceTree = "<group>"; };
@@ -96,7 +94,6 @@
 				1EE8C28B1476A2E9002496F2 /* getopt.hh */,
 				1EE8C28C1476A2E9002496F2 /* have.hh */,
 				1EE8C28E1476A2E9002496F2 /* joint_sort.hh */,
-				1EE8C2901476A2E9002496F2 /* key_value_packing.hh */,
 				1EE8C2951476A2E9002496F2 /* mmap.cc */,
 				1EE8C2961476A2E9002496F2 /* mmap.hh */,
 				1EE8C2971476A2E9002496F2 /* murmur_hash.cc */,
@@ -136,7 +133,6 @@
 				1EE8C2B11476A2EA002496F2 /* getopt.hh in Headers */,
 				1EE8C2B21476A2EA002496F2 /* have.hh in Headers */,
 				1EE8C2B41476A2EA002496F2 /* joint_sort.hh in Headers */,
-				1EE8C2B61476A2EA002496F2 /* key_value_packing.hh in Headers */,
 				1EE8C2B91476A2EA002496F2 /* mmap.hh in Headers */,
 				1EE8C2BB1476A2EA002496F2 /* murmur_hash.hh in Headers */,
 				1EE8C2BD1476A2EA002496F2 /* probing_hash_table.hh in Headers */,

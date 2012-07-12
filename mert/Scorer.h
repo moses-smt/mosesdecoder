@@ -104,6 +104,15 @@ class Scorer
   }
 
   /**
+   * The scorer returns if it uses the reference alignment data
+   * for permutation distance scores
+   **/
+  virtual bool useAlignment() const {
+    //cout << "Scorer::useAlignment returning false " << endl;
+    return false;
+  };
+
+  /**
    * Set the factors, which should be used for this metric
    */
   virtual void setFactors(const std::string& factors);
