@@ -583,7 +583,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       // add PSD scores if user specified it
       PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
       if (psd != NULL) {
-        vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList, m_source);
+        vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList);
         vector<ScoreComponentCollection>::const_iterator iterPSD = scores.begin();
         for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
           assert(iterPSD != scores.end());

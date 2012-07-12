@@ -4,27 +4,19 @@
 #define moses_PSDScoreProducer_h
 
 #include "FeatureFunction.h"
-#include "vw.h"
 #include "TypeDef.h"
 #include "TranslationOption.h"
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
+#include "FeatureExtractor.h"
+#include "FeatureConsumer.h"
+
 #include <map>
 #include <string>
 #include <vector>
 
 namespace Moses
 {
-
-const size_t CONTEXT_SIZE = 2;
-typedef std::map<std::string, size_t> PhraseIndexType;
-
-struct VWInstance
-{
-  ::vw m_vw;
-};
-
-extern VWInstance vwInstance;
 
 class PSDScoreProducer : public StatelessFeatureFunction
 {
@@ -37,9 +29,11 @@ public:
   // score a list of translation options
   // this is required to contain all possible translations
   // of a given source span
-  vector<ScoreComponentCollection> ScoreOptions(
-    const vector<TranslationOption *> &options,
-    const InputType &source);
+  std::vector<ScoreComponentCollection> ScoreOptions(const std::vector<TranslationOption *> &options);
+
+  // sets current source-side context
+  // must be called when starting to translate a new sentence
+  void SetSentence(const InputType &inputSent);
 
   // mandatory methods for features
   size_t GetNumScoreComponents() const;
@@ -52,14 +46,15 @@ public:
     return true;
   }
 private:
-  bool LoadPhraseIndex(const string &indexFile);
+  bool LoadPhraseIndex(const std::string &indexFile);
   bool IsOOV(const TargetPhrase &tgtPhrase);
   ScoreComponentCollection ScoreFactory(float score);
-  vector<string> GetSourceFeatures(const InputType &srcSentence, const TranslationOption *tOpt);
-  vector<string> GetTargetFeatures(const TranslationOption *tOpt);
 
   std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
-  PhraseIndexType m_phraseIndex;
+  PSD::TargetIndexType m_phraseIndex;
+  PSD::FeatureConsumer *m_consumer;
+  PSD::FeatureExtractor *m_extractor;
+  PSD::ContextType m_currentContext;
 };
 
 }

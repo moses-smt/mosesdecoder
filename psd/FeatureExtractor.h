@@ -26,7 +26,7 @@ const bool PSD_BAG_OF_wORDS = false;   // generate bag-of-words features
 
 const size_t PSD_CONTEXT_WINDOW = 2; // window size for context features
 
-const size_t[] PSD_FACTORS = { 0, 1, 2 }; 
+const size_t PSD_FACTORS[3] = { 0, 1, 2 }; 
 const size_t PSD_FACTOR_COUNT = 3;
 
 // extract features
@@ -52,4 +52,5 @@ private:
 };
 
 } // namespace PSD
+
 #endif // moses_FeatureExtractor_h

@@ -8,9 +8,7 @@ using namespace Moses;
 namespace PSD
 {
 
-FeatureExtractor::FeatureExtractor(FeatureTypes ft,
-  const TargetIndexType &targetIndex,
-  bool train)
+FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, bool train)
   : m_targetIndex(targetIndex), m_train(train)
 {  
 }

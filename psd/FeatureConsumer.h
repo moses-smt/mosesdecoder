@@ -7,14 +7,14 @@
 #include <sstream>
 #include <deque>
 
-namespace PSD
-{
-
 // #ifdef HAVE_VW
   // forward declarations to avoid dependency on VW 
   struct vw;
   class ezexample;
 // #endif
+
+namespace PSD
+{
 
 // abstract consumer
 class FeatureConsumer
@@ -64,8 +64,8 @@ private:
     virtual void Finish();
   
   protected:
-    vw *m_VWInstance;
-    ezexample *m_ex;
+    ::vw *m_VWInstance;
+    ::ezexample *m_ex;
     bool m_shared;
 
     ~VWLibraryConsumer();
