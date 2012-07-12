@@ -5,6 +5,9 @@ using namespace std;
 using namespace boost::bimaps;
 using namespace Moses;
 
+namespace PSD
+{
+
 FeatureExtractor::FeatureExtractor(FeatureTypes ft,
   const TargetIndexType &targetIndex,
   bool train)
@@ -83,3 +86,4 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   }
 }
 
+} // namespace PSD

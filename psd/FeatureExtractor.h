@@ -8,6 +8,9 @@
 #include <map>
 #include <boost/bimap/bimap.hpp>
 
+namespace PSD
+{
+
 // vector of words, each word is a vector of factors
 typedef std::vector<std::vector<std::string> > ContextType; 
 
@@ -54,4 +57,5 @@ private:
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 
+} // namespace PSD
 #endif // moses_FeatureExtractor_h
