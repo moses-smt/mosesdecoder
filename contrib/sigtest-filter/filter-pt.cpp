@@ -99,10 +99,15 @@ PTEntry::PTEntry(const std::string& str, int index) :
 
   pos = nextPos + SEPARATOR.size();
   nextPos = str.find(SEPARATOR, pos);
-  this->scores = str.substr(pos,nextPos-pos);
+  if (nextPos < str.size()) {
+    this->scores = str.substr(pos,nextPos-pos);
 
-  pos = nextPos + SEPARATOR.size();
-  this->extra = str.substr(pos);
+    pos = nextPos + SEPARATOR.size();
+    this->extra = str.substr(pos);
+  }
+  else {
+    this->scores = str.substr(pos,str.size()-pos);
+  }
 
   int c = 0;
   std::string::iterator i=scores.begin();
