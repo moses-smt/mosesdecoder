@@ -26,7 +26,7 @@ struct FeatureTypes
   size_t m_contextWindow; // window size for context features
 
   // list of factors that should be extracted from context (e.g. 0,1,2)
-  std::vector<size_t> m_factors;     
+  std::vector<size_t> m_factors; 
 };
 
 // extract features
@@ -34,11 +34,11 @@ class FeatureExtractor
 {
 public:
   FeatureExtractor(FeatureTypes ft,                  
-    FeatureConsumer *fc,
     const TargetIndexType &targetIndex,
     bool train);
 
-  void GenerateFeatures(const ContextType &context,
+  void GenerateFeatures(FeatureConsumer *fc,
+    const ContextType &context,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<size_t> &translations,
@@ -46,13 +46,12 @@ public:
 
 private:
   FeatureTypes m_ft;
-  FeatureConsumer *m_fc;
   const TargetIndexType &m_targetIndex;
   bool m_train;
 
-  void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd);
-  void GenerateInternalFeatures(const std::vector<std::string> &span);
-  std::string BuildContextFeature(size_t factor, int index, const std::string &value);
+  void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
+  void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
+  std::string BuildContextFeature(size_t factor, int index, const std::string &value, FeatureConsumer *fc);
 };
 
 #endif // moses_FeatureExtractor_h

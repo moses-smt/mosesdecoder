@@ -113,6 +113,20 @@ int main(int argc,char* argv[]){
   int i = 0;
   int csid = 0;
 
+  // configure features
+  FeatureTypes ft;
+  ft.m_sourceExternal = true;
+  ft.m_sourceInternal = true;
+  ft.m_target_Internal = true;
+  ft.m_paired = false;
+  ft.m_bagOfWords = false;
+  ft.m_contextWindow = 2;
+  ft.m_factors.push_back(0);
+  ft.m_factors.push_back(1);
+  ft.m_factors.push_back(2);
+
+  FeatureExtractor extractor(ft, bidirectionalIndex, true);
+
   // prep feature consumers for PHRASAL setting
   map<PHRASE_ID, FeatureConsumer*> consumers;
 
@@ -192,9 +206,9 @@ int main(int argc,char* argv[]){
               fc = new VWFileTrainConsumer(fileName);
             consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
           }
-          consumers[srcId]->GenerateFeatures( /* TODO */ );
+          extractor.GenerateFeatures(consumers[srcId] /* TODO */ );
         } else { // GLOBAL model
-          globalOut->GenerateFeatures( /* TODO */ );
+          extractor.GenerateFeatures(globalOut /* TODO */ );
         }
       }
     }

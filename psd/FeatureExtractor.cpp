@@ -6,22 +6,22 @@ using namespace boost::bimaps;
 using namespace Moses;
 
 FeatureExtractor::FeatureExtractor(FeatureTypes ft,
-  FeatureConsumer *fc,
   const TargetIndexType &targetIndex,
   bool train)
-  : m_ft(ft), m_fc(fc), m_targetIndex(targetIndex), m_train(train)
+  : m_ft(ft), m_targetIndex(targetIndex), m_train(train)
 {  
 }
 
-void FeatureExtractor::GenerateFeatures(const ContextType &context,
+void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
+  const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
   const vector<size_t> &translations,
   vector<float> &losses)
 {  
-  m_fc->SetNamespace('s', true);
+  fc->SetNamespace('s', true);
   if (m_ft.m_sourceExternal) {
-    GenerateContextFeatures(context, spanStart, spanEnd);
+    GenerateContextFeatures(context, spanStart, spanEnd, fc);
   }
 
   if (m_ft.m_sourceInternal) {
@@ -29,22 +29,22 @@ void FeatureExtractor::GenerateFeatures(const ContextType &context,
     for (size_t i = spanStart; i <= spanEnd; i++) {
       sourceForms[i] = context[i][0]; // XXX assumes that form is the 0th factor
     }
-    GenerateInternalFeatures(sourceForms);
+    GenerateInternalFeatures(sourceForms, fc);
   }
 
   vector<size_t>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());
-    m_fc->SetNamespace('t', false);
+    fc->SetNamespace('t', false);
     if (m_ft.m_targetInternal) {
-      GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second));
+      GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second), fc);
     }  
 
     if (m_train) {
-      m_fc->Train(SPrint(*transIt), *lossIt);
+      fc->Train(SPrint(*transIt), *lossIt);
     } else {
-      *lossIt = m_fc->Predict(SPrint(*transIt));
+      *lossIt = fc->Predict(SPrint(*transIt));
     }
   }
 }
@@ -60,25 +60,26 @@ string FeatureExtractor::BuildContextFeature(size_t factor, int index, const str
 
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanStart,
-  size_t spanEnd)
+  size_t spanEnd,
+  FeatureConsumer *fc)
 {
   vector<size_t>::const_iterator factorIt;
   for (factorIt = m_ft.m_factors.begin(); factorIt != m_ft.m_factors.end(); factorIt++) {
     for (size_t i = 1; i <= m_ft.m_contextWindow; i++) {
       if (spanStart >= i) 
-        m_fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
+        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
       if (spanEnd + i < context.size())
-        m_fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
+        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanstart - i][*factorit]);
     }
   }
 }
 
-void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span)
+void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
 {
-  m_fc->AddFeature("p^" + Join("_", span));
+  fc->AddFeature("p^" + Join("_", span));
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
-    m_fc->AddFeature("w^" + *it);
+    fc->AddFeature("w^" + *it);
   }
 }
 
