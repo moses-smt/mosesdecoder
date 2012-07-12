@@ -50,7 +50,7 @@ bool CellContextScoreProducer::Initialize(const string &modelFile, const string 
   ft.m_factors.push_back(2);
 
   FeatureExtractor m_extractor = new FeatureExtractor(ft,m_ruleIndex,0);
-  FeatureConsumer m_consumer = new FeatureConsumer();
+  FeatureConsumer m_consumer = new VWLibraryPredictConsumer(modelFile);
   //vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
   return isGood;
 }
@@ -106,7 +106,9 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                       const std::string &sourceSide,
                                                                       std::vector<std::string> * targetRepresentations,
-                                                                      const InputType &source
+                                                                      const InputType &source,
+                                                                      size_t startSpan,
+                                                                      size_t endSpan
                                                                       )
 {
   //debugging : check that everything is fine in index map
@@ -121,8 +123,6 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     std::vector<std::string> :: iterator itr_targ_rep;
     float sum = 0;
 
-    std::vector<string> sourceFeatures = GetSourceFeatures(source, sourceSide);
-
     //FB: for debugging
     //std::vector<std::string> :: iterator itr_source_feat;
     //for(itr_source_feat = sourceFeatures.begin(); itr_source_feat != sourceFeatures.end(); itr_source_feat++)
@@ -130,42 +130,14 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     //    std::cout << *itr_source_feat << std::endl;
     //}
 
-    //Define contextType
+    float score = 0.0;
     ContextType contextType;
     vector<std::string> tokSourceSide = Tokenize(" ",sourceSide);
-
-
-    float score = 0.0;
     m_extractor.GenerateFeatures(m_fc,contextType,tokSourceSide,spanStart,spanEnd,targetRepresentations,losses);
-
-    for (itr_targ_rep = ->begin(); itr_targ_rep != targetRepresentations->end(); itr_targ_rep++) {
-
-        //debugging : check that args have been passed correctly
-        //std::cout << "Target representation : " << *itr_targ_rep << std::endl;
-        //std::cout << (m_ruleIndex.find(*itr_targ_rep) == m_ruleIndex.end()) <<  std::endl;
-
-        if (! IsOOV(*itr_targ_rep) ) {
-
-            vector<string> targetFeatures = GetTargetFeatures(*itr_targ_rep);
-
-            // set label to target phrase index
-            ex.set_label(SPrint(m_ruleIndex[*itr_targ_rep]));
-
-            // move to target namespace, add target phrase as a feature
-            ex(vw_namespace('p'));
-            for (fIt = targetFeatures.begin(); fIt != targetFeatures.end(); fIt++) {
-                VERBOSE(4, "Rule target side feature for vw : " << *fIt << endl);
-                ex.addf(*fIt);
-                score = 1 / (1 + exp(-ex()));
-                VERBOSE(4, "Obtained Score : " << score << endl);
-            }
-        }
-        else
-        {
-            score = 0;
-            VERBOSE(4, *itr_targ_rep << "Is out of vocabulary : " << score << endl);
-        }
-
+    vector<std::string> * :: iterator itr_target_rep;
+    for(itr_target_rep = targetRepresentations.begin(); itr_target_rep != targetRepresentations,end(); itr_target_rep++)
+    {
+        score = m_consumer.predict(**itr_target_rep);
         //    cerr << srcPhrase << " ||| " << tgtPhrase << " ||| " << score << endl;
         sum += score;
 
@@ -174,8 +146,6 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         scoreCol.Assign(this, score);
         scores.push_back(scoreCol);
         //std::cout << "Collection before normalization : " << scoreCol << std::endl;
-        // move out of target namespace
-        --ex;
     }
     // normalize
     if (sum != 0) {

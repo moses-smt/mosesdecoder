@@ -178,7 +178,11 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             VERBOSE(5, "Calling vw for source context : " << m_source << endl);
 
             //score vector is for vector of target representations
-            vector<ScoreComponentCollection> scores = ccsp->ScoreRules(itr_ruleMap->first,itr_ruleMap->second,m_source);
+            vector<ScoreComponentCollection> scores = ccsp->ScoreRules(
+                                                                       transOpt.GetSourceWordsRange().GetStartPos(),
+                                                                       transOpt.GetSourceWordsRange().GetEndPos(),
+                                                                       itr_ruleMap->first,itr_ruleMap->second,m_source
+                                                                       );
             std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
             std::vector<std::string> :: iterator itr_targetRep;
 

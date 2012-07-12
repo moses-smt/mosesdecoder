@@ -7,6 +7,8 @@
 #include "TypeDef.h"
 //#include "vw.h"
 #include "ScoreComponentCollection.h"
+#include "psd/FeatureExtractor.h"
+#include "psd/FeatureConsumer.h"
 #include <map>
 #include <string>
 #include <vector>
@@ -39,13 +41,15 @@ class CellContextScoreProducer : public StatelessFeatureFunction
     // initialize vw
     bool Initialize(const string &modelFile, const string &indexFile);
 
-    vector<ScoreComponentCollection> ScoreRules(    const std::string &sourceSide,
+    vector<ScoreComponentCollection> ScoreRules(    size_t startSpan,
+                                                    size_t endSpan,
+                                                    const std::string &sourceSide,
                                                     std::vector<std::string> *targetRepresentations,
                                                     const InputType &source);
 
     private :
-        FeatureExtractor *m_extactor;
-        FeatureConsumer *m_consumer;
+        PSD::FeatureExtractor *m_extactor;
+        PSD::FeatureConsumer *m_consumer;
         RuleIndexType m_ruleIndex;
         bool IsOOV(const std::string &targetRep);
         bool LoadRuleIndex(const string &indexFile);

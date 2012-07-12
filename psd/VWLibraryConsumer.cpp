@@ -8,6 +8,9 @@
 
 using namespace std;
 
+namespace PSD
+{
+
 // 
 // VWLibraryConsumer
 //
@@ -94,3 +97,4 @@ float VWLibraryPredictConsumer::Predict(const string &label)
   return m_ex->predict();
 }
 
+} // namespace PSD

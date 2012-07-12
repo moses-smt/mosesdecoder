@@ -8,35 +8,32 @@
 #include <map>
 #include <boost/bimap/bimap.hpp>
 
+namespace PSD
+{
+
 // vector of words, each word is a vector of factors
 typedef std::vector<std::vector<std::string> > ContextType;
 
 // index of possible target spans
 typedef boost::bimaps::bimap<std::string, size_t> TargetIndexType;
 
-// configuration of feature extractor
-struct FeatureTypes
-{
-  bool m_sourceExternal; // generate context features
-  bool m_sourceInternal; // generate source-side phrase-internal features
-  bool m_targetInternal; // generate target-side phrase-internal features
-  bool m_paired;         // generate paired features
-  bool m_bagOfWords;     // generate bag-of-words features
-  bool m_syntacticParent; // generate sysntactic features on the whole rule
+// configuration of feature extraction, shared, global
+const bool PSD_SOURCE_EXTERNAL = true; // generate context features
+const bool PSD_SOURCE_INTERNAL = true; // generate source-side phrase-internal features
+const bool PSD_TARGET_INTERNAL = true; // generate target-side phrase-internal features
+const bool PSD_PAIRED = false;         // generate paired features
+const bool PSD_BAG_OF_wORDS = false;   // generate bag-of-words features
 
-  size_t m_contextWindow; // window size for context features
+const size_t PSD_CONTEXT_WINDOW = 2; // window size for context features
 
-  // list of factors that should be extracted from context (e.g. 0,1,2)
-  std::vector<size_t> m_factors;
-};
+const size_t[] PSD_FACTORS = { 0, 1, 2 };
+const size_t PSD_FACTOR_COUNT = 3;
 
 // extract features
 class FeatureExtractor
 {
 public:
-  FeatureExtractor(FeatureTypes ft,
-    const TargetIndexType &targetIndex,
-    bool train);
+  FeatureExtractor(const TargetIndexType &targetIndex, bool train);
 
     void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
@@ -47,13 +44,13 @@ public:
 
     void GenerateFeaturesChart(FeatureConsumer *fc,
     const ContextType &context,
+    vector<string> sourceSide,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<size_t> &translations,
     std::vector<float> &losses);
 
 private:
-  FeatureTypes m_ft;
   const TargetIndexType &m_targetIndex;
   bool m_train;
 
@@ -62,4 +59,5 @@ private:
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 
+} // namespace PSD
 #endif // moses_FeatureExtractor_h
