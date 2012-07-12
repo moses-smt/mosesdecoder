@@ -59,6 +59,7 @@ class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 //damt score producer
+
 class CellContextScoreProducer;
 
 #ifdef HAVE_SYNLM

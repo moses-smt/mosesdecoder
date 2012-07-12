@@ -40,6 +40,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+#include "CellContextScoreProducer.h"
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"

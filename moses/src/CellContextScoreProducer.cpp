@@ -18,7 +18,7 @@ using namespace std;
 namespace Moses
 {
 
-VWInstance vwInstance;
+//VWInstance vwInstance;
 
 CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndexManager, float weight)
 {
@@ -34,7 +34,7 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
   VERBOSE(4, "Initializing vw..." << endl);
-  vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
+  //vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
   return LoadRuleIndex(indexFile);
 }
 

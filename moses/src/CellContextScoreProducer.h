@@ -5,7 +5,7 @@
 #include "FeatureFunction.h"
 #include "TargetPhrase.h"
 #include "TypeDef.h"
-#include "vw.h"
+//#include "vw.h"
 #include "ScoreComponentCollection.h"
 #include <map>
 #include <string>
@@ -17,12 +17,12 @@ namespace Moses {
 
 typedef std::map<std::string, size_t> RuleIndexType;
 
-struct VWInstance
-{
-  ::vw m_vw;
-};
+//struct VWInstance
+//{
+//  ::vw m_vw;
+//};
 
-extern VWInstance vwInstance;
+//extern VWInstance vwInstance;
 
 class CellContextScoreProducer : public StatelessFeatureFunction
 {
