@@ -1,4 +1,4 @@
-alias headers : ../../util//kenutil ..//..//psd//psd/ : : : <include>. ;
+alias headers : ../../util//kenutil ..//..//psd//psd : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
 

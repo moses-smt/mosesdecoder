@@ -148,11 +148,11 @@ Parameter::Parameter()
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("weight-left-context", "wlc", "weight for context-aware phrase scorer");
   AddParam("left-context-ttable", "lctt", "phrase table for context-aware phrase scorer"); 
-#ifdef HAVE_VW
+//#ifdef HAVE_VW
   AddParam("weight-psd", "wpsd", "weight for phrase sense disambiguation");
   AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation"); 
   AddParam("psd-index", "psdi", "file with indexes of target phrases"); 
-#endif
+//#endif
 }
 
 Parameter::~Parameter()
