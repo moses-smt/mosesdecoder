@@ -8,6 +8,9 @@
 using namespace std;
 using namespace Moses;
 
+namespace PSD
+{
+
 VWFileTrainConsumer::VWFileTrainConsumer(const std::string &outputFile)
 {
   m_os.open(outputFile.c_str());
@@ -68,7 +71,7 @@ void VWFileTrainConsumer::WriteBuffer()
 }
 
 
-std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str);
+std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str)
 {
   string out;
   out = Replace(str, "|", "_PIPE_");
@@ -76,3 +79,5 @@ std::string VWFileTrainConsumer::EscapeSpecialChars(const std::string &str);
   out = Replace(out, " ", "_");
   return out;
 }
+
+} // namespace PSD
