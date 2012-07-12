@@ -9,7 +9,7 @@ FeatureExtractor::FeatureExtractor(FeatureTypes ft,
   const TargetIndexType &targetIndex,
   bool train)
   : m_ft(ft), m_targetIndex(targetIndex), m_train(train)
-{  
+{
 }
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
@@ -18,7 +18,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   size_t spanEnd,
   const vector<size_t> &translations,
   vector<float> &losses)
-{  
+{
   fc->SetNamespace('s', true);
   if (m_ft.m_sourceExternal) {
     GenerateContextFeatures(context, spanStart, spanEnd, fc);
@@ -39,8 +39,46 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     fc->SetNamespace('t', false);
     if (m_ft.m_targetInternal) {
       GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second), fc);
-    }  
+    }
 
+    if (m_train) {
+      fc->Train(SPrint(*transIt), *lossIt);
+    } else {
+      *lossIt = fc->Predict(SPrint(*transIt));
+    }
+  }
+}
+
+
+void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
+  const ContextType &context,
+  vector<string> sourceSide,
+  size_t spanStart,
+  size_t spanEnd,
+  const vector<size_t> &translations,
+  vector<float> &losses)
+{
+  fc->SetNamespace('s', true);
+  if (m_ft.m_sourceExternal) {
+    GenerateContextFeatures(context, spanStart, spanEnd, fc);
+  }
+
+  if (m_ft.m_sourceInternal) {
+    GenerateInternalFeatures(sourceSide, fc);
+  }
+
+  if (m_ft.m_syntacticParent) {
+      std::cout << "Generate syntactic parent feature" << std::endl;
+  }
+
+  vector<size_t>::const_iterator transIt = translations.begin();
+  vector<float>::iterator lossIt = losses.begin();
+  for (; transIt != translations.end(); transIt++, lossIt++) {
+    assert(lossIt != losses.end());
+    fc->SetNamespace('t', false);
+    if (m_ft.m_targetInternal) {
+      GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second), fc);
+    }
     if (m_train) {
       fc->Train(SPrint(*transIt), *lossIt);
     } else {
@@ -66,9 +104,10 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   vector<size_t>::const_iterator factorIt;
   for (factorIt = m_ft.m_factors.begin(); factorIt != m_ft.m_factors.end(); factorIt++) {
     for (size_t i = 1; i <= m_ft.m_contextWindow; i++) {
-      if (spanStart >= i) 
+      if (spanStart >= i)
         fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanStart - i][*factorIt]));
       if (spanEnd + i < context.size())
+        //shouldn't this be plus
         fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanStart - i][*factorIt]));
     }
   }
@@ -79,6 +118,15 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   fc->AddFeature("p^" + Join("_", span));
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
+    fc->AddFeature("w^" + *it);
+  }
+}
+
+void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &sourceSide, FeatureConsumer *fc)
+{
+  fc->AddFeature("p^" + Join("_", sourceSide));
+  vector<string>::const_iterator it;
+  for (it = sourceSide.begin(); it != sourceSide.end(); it++) {
     fc->AddFeature("w^" + *it);
   }
 }

@@ -17,19 +17,14 @@ namespace Moses {
 
 typedef std::map<std::string, size_t> RuleIndexType;
 
-//struct VWInstance
-//{
-//  ::vw m_vw;
-//};
-
-//extern VWInstance vwInstance;
-
 class CellContextScoreProducer : public StatelessFeatureFunction
 {
 
  public :
 
     CellContextScoreProducer(ScoreIndexManager &sci, float weight);
+    ~CellContextScoreProducer();
+
 
     // mandatory methods for features
     std::string GetScoreProducerDescription(unsigned) const;
@@ -49,6 +44,8 @@ class CellContextScoreProducer : public StatelessFeatureFunction
                                                     const InputType &source);
 
     private :
+        FeatureExtractor *m_extactor;
+        FeatureConsumer *m_consumer;
         RuleIndexType m_ruleIndex;
         bool IsOOV(const std::string &targetRep);
         bool LoadRuleIndex(const string &indexFile);

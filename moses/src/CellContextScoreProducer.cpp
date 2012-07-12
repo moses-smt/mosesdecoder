@@ -13,12 +13,12 @@
 #include <iostream>
 #include <fstream>
 
+#include "FeatureExtractor.h"
+#include "FeatureConsumer.h"
 using namespace std;
 
 namespace Moses
 {
-
-//VWInstance vwInstance;
 
 CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndexManager, float weight)
 {
@@ -33,9 +33,26 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
 //note : initialized in static data ln.
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
+  bool isGood = LoadRuleIndex(indexFile);
+
   VERBOSE(4, "Initializing vw..." << endl);
+  // configure features
+  FeatureTypes ft;
+  ft.m_sourceExternal = true;
+  ft.m_sourceInternal = true;
+  ft.m_targetInternal = true;
+  ft.m_paired = false;
+  ft.m_bagOfWords = false;
+  ft.m_syntacticParent = true;
+  ft.m_contextWindow = 2;
+  ft.m_factors.push_back(0);
+  ft.m_factors.push_back(1);
+  ft.m_factors.push_back(2);
+
+  FeatureExtractor m_extractor = new FeatureExtractor(ft,m_ruleIndex,0);
+  FeatureConsumer m_consumer = new FeatureConsumer();
   //vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
-  return LoadRuleIndex(indexFile);
+  return isGood;
 }
 
 vector<string> CellContextScoreProducer::GetSourceFeatures(
@@ -99,10 +116,10 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
   //    std::cout << "Index : " << itr_rule_index->first << " : " << itr_rule_index->second << std::endl;
   //}
 
-  vector<ScoreComponentCollection> scores;
-  // iterator over target representations
-  std::vector<std::string> :: iterator itr_targ_rep;
-  float sum = 0;
+    vector<ScoreComponentCollection> scores;
+    // iterator over target representations
+    std::vector<std::string> :: iterator itr_targ_rep;
+    float sum = 0;
 
     std::vector<string> sourceFeatures = GetSourceFeatures(source, sourceSide);
 
@@ -113,17 +130,15 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     //    std::cout << *itr_source_feat << std::endl;
     //}
 
-    // create VW example, add source-side features
-    ezexample ex(&vwInstance.m_vw, false);
-    ex(vw_namespace('s'));
-    std::vector<std::string>::const_iterator fIt;
-    for (fIt = sourceFeatures.begin(); fIt != sourceFeatures.end(); fIt++) {
-        VERBOSE(4, "Source Feature vw : " << *fIt << endl);
-        ex.addf(*fIt);
-    }
+    //Define contextType
+    ContextType contextType;
+    vector<std::string> tokSourceSide = Tokenize(" ",sourceSide);
+
 
     float score = 0.0;
-    for (itr_targ_rep = targetRepresentations->begin(); itr_targ_rep != targetRepresentations->end(); itr_targ_rep++) {
+    m_extractor.GenerateFeatures(m_fc,contextType,tokSourceSide,spanStart,spanEnd,targetRepresentations,losses);
+
+    for (itr_targ_rep = ->begin(); itr_targ_rep != targetRepresentations->end(); itr_targ_rep++) {
 
         //debugging : check that args have been passed correctly
         //std::cout << "Target representation : " << *itr_targ_rep << std::endl;
