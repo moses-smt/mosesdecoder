@@ -7,6 +7,9 @@
 #include <sstream>
 #include <deque>
 
+namespace PSD
+{
+
 // #ifdef HAVE_VW
   // forward declarations to avoid dependency on VW 
   struct vw;
@@ -87,5 +90,7 @@ private:
     virtual float Predict(const std::string &label);
   };
 // #endif // HAVE_VW
+
+} // namespace PSD
 
 #endif // moses_FeatureConsumer_h

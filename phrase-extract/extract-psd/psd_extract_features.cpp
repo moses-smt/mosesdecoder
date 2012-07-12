@@ -22,6 +22,7 @@ using namespace std;
 using namespace Moses;
 using namespace MosesTraining;
 using namespace boost::bimaps;
+using namespace PSD;
 
 #define LINE_MAX_LENGTH 10000
 
@@ -115,24 +116,12 @@ int main(int argc,char* argv[]){
   int i = 0;
   int csid = 0;
 
-  // configure features
-  FeatureTypes ft;
-  ft.m_sourceExternal = true;
-  ft.m_sourceInternal = true;
-  ft.m_targetInternal = true;
-  ft.m_paired = false;
-  ft.m_bagOfWords = false;
-  ft.m_contextWindow = 2;
-  ft.m_factors.push_back(0);
-  ft.m_factors.push_back(1);
-  ft.m_factors.push_back(2);
-
   // create target phrase index for feature extractor
   TargetIndexType extractorTargetIndex;
   for (size_t i = 0; i < tgtPhraseVoc.phraseTable.size(); i++) {
     extractorTargetIndex.insert(TargetIndexType::value_type(getPhrase(i, tgtVocab, tgtPhraseVoc), i));
   }
-  FeatureExtractor extractor(ft, extractorTargetIndex, true);
+  FeatureExtractor extractor(extractorTargetIndex, true);
 
   // prep feature consumers for PHRASAL setting
   map<PHRASE_ID, FeatureConsumer*> consumers;

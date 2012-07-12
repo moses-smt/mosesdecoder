@@ -5,10 +5,13 @@ using namespace std;
 using namespace boost::bimaps;
 using namespace Moses;
 
+namespace PSD
+{
+
 FeatureExtractor::FeatureExtractor(FeatureTypes ft,
   const TargetIndexType &targetIndex,
   bool train)
-  : m_ft(ft), m_targetIndex(targetIndex), m_train(train)
+  : m_targetIndex(targetIndex), m_train(train)
 {  
 }
 
@@ -20,11 +23,11 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   vector<float> &losses)
 {  
   fc->SetNamespace('s', true);
-  if (m_ft.m_sourceExternal) {
+  if (PSD_SOURCE_EXTERNAL) {
     GenerateContextFeatures(context, spanStart, spanEnd, fc);
   }
 
-  if (m_ft.m_sourceInternal) {
+  if (PSD_SOURCE_INTERNAL) {
     vector<string> sourceForms(spanEnd - spanStart + 1);
     for (size_t i = spanStart; i <= spanEnd; i++) {
       sourceForms[i] = context[i][0]; // XXX assumes that form is the 0th factor
@@ -37,7 +40,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
-    if (m_ft.m_targetInternal) {
+    if (PSD_TARGET_INTERNAL) {
       GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second), fc);
     }  
 
@@ -63,13 +66,12 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanEnd,
   FeatureConsumer *fc)
 {
-  vector<size_t>::const_iterator factorIt;
-  for (factorIt = m_ft.m_factors.begin(); factorIt != m_ft.m_factors.end(); factorIt++) {
-    for (size_t i = 1; i <= m_ft.m_contextWindow; i++) {
+  for (size_t fact = 0; fact <= PSD_FACTOR_COUNT; fact++) {
+    for (size_t i = 1; i <= PSD_CONTEXT_WINDOW; i++) {
       if (spanStart >= i) 
-        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanStart - i][*factorIt]));
+        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
       if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(*factorIt, i, context[spanStart - i][*factorIt]));
+        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
     }
   }
 }
@@ -83,3 +85,4 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   }
 }
 
+} // namespace PSD
