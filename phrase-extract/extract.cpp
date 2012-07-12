@@ -1,5 +1,4 @@
-/*
- * extract.cpp
+ /* extract.cpp
  *
  *      Modified by: Nadi Tomeh - LIMSI/CNRS
  *      Machine Translation Marathon 2010, Dublin
@@ -17,6 +16,8 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <algorithm>
+#include <sstream>
 
 #include "SafeGetline.h"
 #include "SentenceAlignment.h"
@@ -96,6 +97,8 @@ bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
 bool onlyOutputSpanInfo = false;
+bool doPSD = false;
+Moses::OutputFileStream PSDOutputFile; // file to write PSD examples into
 bool gzOutput = false;
 
 }
@@ -122,6 +125,16 @@ int main(int argc, char* argv[])
       orientationFlag = true;
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
+    } else if (strcmp(argv[i], "--PSDOutputFile") == 0) {
+      if (i + 1 >= argc) {
+        cerr << "extract: syntax error, no file given with --PSDOutputFile" << endl;
+        exit(1);
+      }
+      doPSD = true;
+      if (! PSDOutputFile.Open(argv[++i])) {
+        cerr << "extract: failed to open " << argv[i] << endl;
+        exit(1);
+      }
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
@@ -617,6 +630,31 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
   return "";
 }
 
+template<typename It>
+string join(const string &delim, It begin, It end)
+{
+  ostringstream out;
+  if (begin != end)
+    out << *begin++;
+  for ( ; begin != end; ++begin)
+    out << delim << *begin;
+  return out.str();
+}
+
+string tr(const string &str, char c_old, char c_new)
+{
+  string out = str;
+  for (size_t i = 0; i < str.length(); i++)
+    out[i] = str[i] == c_old ? c_new : str[i];
+  return out;
+}
+
+void printPSDContext(ostream &out, const string &src_phrase, const string &tgt_phrase,
+    const vector<string> &src_context)
+{
+  out << src_phrase << " ||| " << tgt_phrase << " ||| " << join(" ", src_context.begin(), src_context.end()) << std::endl;
+}
+
 void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
 {
   // source
@@ -625,6 +663,12 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (onlyOutputSpanInfo) {
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
     return;
+  }
+
+  if (doPSD) {
+    string src_phrase = join(" ", sentence.source.begin() + startF, sentence.source.begin() + endF + 1);
+    string tgt_phrase = join(" ", sentence.target.begin() + startE, sentence.target.begin() + endE + 1);
+    printPSDContext(PSDOutputFile, src_phrase, tgt_phrase, sentence.source);
   }
 
   for(int fi=startF; fi<=endF; fi++) {

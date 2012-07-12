@@ -18,7 +18,11 @@
 #define INC_RANDLM_FILTER_H
 
 #include <cmath>
-#include "file.h"
+#include "FileHandler.h"
+
+#ifdef WIN32
+#define log2(X) (log((double)X)/log((double)2))
+#endif
 
 namespace randlm {
   
@@ -40,7 +44,7 @@ namespace randlm {
       // current implementation has following constraints
       CHECK(cell_width_ > 0 && cell_width_ <= 64 && cell_width_ >= width);
       // used for >> division
-      log_cell_width_ = static_cast<int>(floor(log(cell_width_)/log(2) + 0.000001)); 
+      log_cell_width_ = static_cast<int>(floor(log((double)cell_width_)/log((double)2) + 0.000001)); 
       // size of underlying data in Ts
       cells_ = ((addresses * width) + cell_width_ - 1) >> log_cell_width_; 
       // instantiate underlying data

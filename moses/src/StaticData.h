@@ -260,15 +260,6 @@ public:
     return s_instance;
   }
 
-  /** delete current static instance and replace with another.
-  	* Used by gui front end
-  	*/
-#ifdef WIN32
-  static void Reset() {
-    s_instance = StaticData();
-  }
-#endif
-
   //! Load data into static instance. This function is required as LoadData() is not const
   static bool LoadDataStatic(Parameter *parameter) {
     return s_instance.LoadData(parameter);
