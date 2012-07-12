@@ -37,6 +37,7 @@ void usage()
   cerr << "[--prev-scfile|-R] comma separated list of previous scorer data" << endl;
   cerr << "[--factors|-f] list of factors passed to the scorer (e.g. 0|2)" << endl;
   cerr << "[--filter|-l] filter command used to preprocess the sentences" << endl;
+  cerr << "[--allow-duplicates|-d] omit the duplicate removal step" << endl;
   cerr << "[-v] verbose level" << endl;
   cerr << "[--help|-h] print this message and exit" << endl;
   exit(1);
@@ -56,6 +57,7 @@ static struct option long_options[] = {
   {"prev-ffile", required_argument, 0, 'E'},
   {"verbose", required_argument, 0, 'v'},
   {"help", no_argument, 0, 'h'},
+  {"allow-duplicates", no_argument, 0, 'd'},
   {0, 0, 0, 0}
 };
 
@@ -72,6 +74,7 @@ struct ProgramOption {
   string prevScoreDataFile;
   string prevFeatureDataFile;
   bool binmode;
+  bool allowDuplicates;
   int verbosity;
 
   ProgramOption()
@@ -86,6 +89,7 @@ struct ProgramOption {
         prevScoreDataFile(""),
         prevFeatureDataFile(""),
         binmode(false),
+        allowDuplicates(false),
         verbosity(0) { }
 };
 
@@ -130,6 +134,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
         break;
       case 'v':
         opt->verbosity = atoi(optarg);
+        break;
+      case 'd':
+        opt->allowDuplicates = true;
         break;
       default:
         usage();
@@ -224,7 +231,9 @@ int main(int argc, char** argv)
     PrintUserTime("Nbest entries loaded and scored");
 
     //ADDED_BY_TS
-    data.removeDuplicates();
+    if (!option.allowDuplicates) {
+      data.removeDuplicates();
+    }
     //END_ADDED
 
     data.save(option.featureDataFile, option.scoreDataFile, option.binmode);
