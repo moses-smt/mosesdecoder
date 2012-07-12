@@ -24,8 +24,8 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
   vector<float> weights;
   weights.push_back(weight);
   m_srcFactors.push_back(0); 
-//  m_srcFactors.push_back(1);
-//  m_srcFactors.push_back(2);
+  m_srcFactors.push_back(1);
+  m_srcFactors.push_back(2);
 
   m_tgtFactors.push_back(0);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);

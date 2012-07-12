@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
     } else if (strcmp(argv[i],"--OutputPsdInfo") == 0) {
-      outputPsd = false;
+      outputPsd = true;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
