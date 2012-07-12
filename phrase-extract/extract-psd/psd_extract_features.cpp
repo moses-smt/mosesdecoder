@@ -40,22 +40,21 @@ Vocabulary tgtVocab;
 int main(int argc,char* argv[]){
   cerr << "PSD phrase-extractor\n\n";
   if (argc < 8){
-    cerr << "syntax: extract-psd context.template corpus.psd corpus.raw corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
+    cerr << "syntax: extract-psd corpus.psd corpus.raw corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
     cerr << "\t --ClassifierType vw|megam" << endl;
     cerr << "\t --PsdType phrasal|global" << endl;
     exit(1);
   }
-  char* &fileNameContext = argv[1]; // context template
-  char* &fileNamePsd = argv[2]; // location in corpus of PSD phrases (optionallly annotated with the position and phrase type of their translations.)
-  char* &fileNameSrcRaw = argv[3]; // raw source context
-  char* &fileNameSrcTag = argv[4]; // tagged source context in Moses factored format
-  char* &fileNamePT = argv[5]; // phrase table
-  char* &fileNameSrcVoc = argv[6]; // source phrase vocabulary
-  char* &fileNameTgtVoc = argv[7]; // target phrase vocabulary
-  string output = string(argv[8]);//output directory (for phrasal models) or root of filename (for global models)
-  for(int i =9; i < argc; i++){
+  char* &fileNamePsd = argv[1]; // location in corpus of PSD phrases (optionallly annotated with the position and phrase type of their translations.)
+  char* &fileNameSrcRaw = argv[2]; // raw source context
+  char* &fileNameSrcTag = argv[3]; // tagged source context in Moses factored format
+  char* &fileNamePT = argv[4]; // phrase table
+  char* &fileNameSrcVoc = argv[5]; // source phrase vocabulary
+  char* &fileNameTgtVoc = argv[6]; // target phrase vocabulary
+  string output = string(argv[7]);//output directory (for phrasal models) or root of filename (for global models)
+  for(int i =8; i < argc; i++){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"vw") == 0){

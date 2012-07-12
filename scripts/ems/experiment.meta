@@ -387,6 +387,16 @@ sigtest-filter
   out: phrase-translation-table
   pass-unless: use-sigtest-filter
   default-name: model/phrase-table
+psd-build-index
+  in: phrase-translation-table 
+  out: psd-index
+  ignore-unless: use-psd
+  default-name: model/psd.index
+psd-build-model
+  in: phrase-translation-table corpus psd-index
+  out: psd-model
+  ignore-unless: use-psd
+  default-name: model/psd.model
 build-generation
 	in: corpus
 	out: generation-table

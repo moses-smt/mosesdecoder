@@ -1,27 +1,28 @@
 #!/usr/bin/perl -w
 use strict;
 
-if (@ARGV != 3){
+if (@ARGV < 2 || @ARGV > 3){
     print STDERR "$0\n";
     print STDERR "select French and English phrases from phrase-table for PSD modeling\n";
     print STDERR "  - French phrases: all phrases from phrase-table, except those that start or end with numbers, punctuation or stopwords\n";
     print STDERR "  - English phrases: all translation candidates from the phrase-table for the selected French phrases\n\n";
-   die "Usage: $0 phrase-table output-name French-stoplist"
+   die "Usage: $0 output-name [French-stoplist]"
 }
 
 my($pt,$out,$frStop) = @ARGV;
 
 my %frStop = ();
-open(FRS,$frStop) || die "Can't open $frStop:$!\n";
-while(<FRS>){
+if (defined $frStop) {
+  open(FRS,$frStop) || die "Can't open $frStop:$!\n";
+  while(<FRS>){
     chomp;
     $frStop{$_}++;
+  }
+  close(FRS);
 }
-close(FRS);
 
 my %frPhrases = (); my %enPhrases = ();
-open(PT,$pt) || die "Can't open $pt:$!\n";
-while(<PT>){
+while(<STDIN>){
     chomp;
     my ($f,$e,$a,$s) = split(/ \|\|\| /);
     my @f = split(/ /,$f);
@@ -32,7 +33,6 @@ while(<PT>){
     $frPhrases{$f}++;
     $enPhrases{$e}++;
 }
-close(PT);
 
 open(EN,">$out.en") || die "Can't write to $out.en:$!\n";
 foreach my $e (keys %enPhrases){

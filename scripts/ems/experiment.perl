@@ -940,6 +940,12 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+  elsif ($DO_STEP[$i] eq 'TRAINING:psd-build-index') {
+      &define_training_psd_index($i);
+        }
+  elsif ($DO_STEP[$i] eq 'TRAINING:psd-build-model') {
+      &define_training_psd_model($i);
+        }
   elsif ($DO_STEP[$i] eq 'TRAINING:sigtest-filter') {
       &define_training_sigtest_filter($i);
         }
@@ -1742,6 +1748,20 @@ sub define_training_build_ttable {
     }
 
     &create_step($step_id,$cmd);
+}
+
+sub define_training_psd_index {
+  my $step_id = shift;
+  my ($out, $phrase_table) = &get_output_and_input($step_id);
+  my $psd_indexer = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd/select_psd_vocab.pl";
+  my $cmd = "zcat $phrase_table | $psd_indexer $out";
+
+  &create_step($step_id, $out);
+}
+
+sub define_training_psd_model {
+  my $step_id = shift;
+  my ($out, $phrase_table, $corpus, $psd_index) = &get_output_and_input($step_id);
 }
 
 sub define_training_sigtest_filter {
