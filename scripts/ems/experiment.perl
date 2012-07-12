@@ -1753,7 +1753,12 @@ sub define_training_sigtest_filter {
   my $tgt =" $corpus." . &get("GENERAL:output-extension");
   my $filter = &get("GENERAL:moses-src-dir") . "/contrib/sigtest-filter/filter-pt";
   my $cmd = "$salm_bin $src && $salm_bin $tgt";
-  $cmd .= " && zcat $phrase_table | $filter -e $tgt -f $src -l a+e -n 30 > $out";
+  $cmd .= " && zcat $phrase_table | $filter -e $tgt -f $src -l a+e -n 30 ";
+  my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+  if ($hierarchical) {
+      $cmd .= "-h ";
+  }
+  $cmd .= "> $out";
 
   &create_step($step_id, $cmd);
 }
