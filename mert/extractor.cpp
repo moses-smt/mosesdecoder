@@ -97,7 +97,7 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
   int c;
   int option_index;
 
-  while ((c = getopt_long(argc, argv, "s:r:f:l:n:S:F:R:E:v:hb", long_options, &option_index)) != -1) {
+  while ((c = getopt_long(argc, argv, "s:r:f:l:n:S:F:R:E:v:hbd", long_options, &option_index)) != -1) {
     switch (c) {
       case 's':
         opt->scorerType = string(optarg);
