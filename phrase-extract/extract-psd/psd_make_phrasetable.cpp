@@ -20,7 +20,7 @@ using namespace Moses;
 #define LINE_MAX_LENGTH 10000
 
 // globals
-CLASSIFIER_TYPE psd_classifier = RAW;
+CLASSIFIER_TYPE psd_classifier = VWFile;
 PSD_MODEL_TYPE psd_model = GLOBAL;
 string ptDelim = " ||| ";
 string factorDelim = "|";
@@ -54,10 +54,8 @@ int main(int argc,char* argv[]){
 	if (strcmp(argv[i],"--ClassifierType") == 0){
 	    char* format = argv[++i];
 	    if (strcmp(format,"vw") == 0){
-		psd_classifier = VW;
+		psd_classifier = VWFile;
 		predext = ".vw.pred";
-	    }else if (strcmp(format,"none") == 0){
-		psd_classifier = RAW;
 	    }else if (strcmp(format,"megam") == 0){
 		psd_classifier = MEGAM;
 		predext = ".megam";
@@ -170,10 +168,10 @@ int main(int argc,char* argv[]){
 	  }
 
 	  // for now don't get PSD prediction, only integerize PT without adding context-dependent score
-	  if (psd_classifier != RAW){
-	    cerr << "classifier type not supported yet" << endl;
-	    exit(1);
-	  }
+//	  if (true){
+//	    cerr << "classifier type not supported yet" << endl;
+//	    exit(1);
+//	  }
 
 	  // find candidate translations
 	  PhraseTranslations::iterator itr = transTable.find(srcid);

@@ -80,16 +80,7 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
 	PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
 	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
 	if (src && tgt){
-	  PhraseTranslations::iterator itr = transTable.find(src);
-	  if (itr == transTable.end() ){
-	    map<PHRASE_ID,int> tgts;
-	    tgts.insert(make_pair (tgt,0)); 
-	    transTable.insert(make_pair (src,tgts));
-	  }else{
-	    map<PHRASE_ID,int>::iterator itr2 = itr->second.find(tgt);
-	    if (itr2 == itr->second.end()){
-	      itr->second.insert(make_pair(tgt,itr->second.size()));
-	    }
+    transTable.insert(make_pair(src, tgt));
 	  }
 	}
 	/*	}else{
@@ -101,45 +92,16 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
 }
 
 bool exists(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){
-    PhraseTranslations::iterator itr = transTable.find(src);
-    if (itr == transTable.end()) return false;
-    map<PHRASE_ID,int>::iterator itr2 = (itr->second).find(tgt);
-    if (itr2 == (itr->second).end()) return false;
-    return true;
+  PhraseTranslations::const_iterator it;
+  for (it = transTable.lower_bound(src); it != transTable.upper_bound(src); it++) {
+    if (it->second == tgt)
+      return true;
+  }
+  return false;
 }
 
 bool exists(PHRASE_ID src, PhraseTranslations &transTable){
   return (transTable.find(src) != transTable.end());
-}
-
-bool printTransToFile(string fileName, PhraseTranslations &transTable, PHRASE_ID src){
-    ofstream out(fileName.c_str());
-    PhraseTranslations::iterator itr = transTable.find(src);
-    if (itr == transTable.end()) return false;
-    for(map<PHRASE_ID,int>::iterator itr2 = (itr->second).begin(); itr2 != (itr->second).end(); itr2++){
-	out << itr2->second << " " << itr2->first << endl; 
-    }
-    return true;    
-}
-
-
-bool printTransStringToFile(string fileName, PhraseTranslations &transTable, PHRASE_ID src, PhraseVocab &pVocab, Vocabulary &wVocab){
-    ofstream out(fileName.c_str());
-    PhraseTranslations::iterator itr = transTable.find(src);
-    if (itr == transTable.end()) return false;
-    for(map<PHRASE_ID,int>::iterator itr2 = (itr->second).begin(); itr2 != (itr->second).end(); itr2++){
-      PHRASE p = pVocab.getPhrase(itr2->first);
-      if (p.size() > 0){
-	string phrase = wVocab.getWord(p[0]);
-	for(int i = 1; i < p.size(); i++){
-	  phrase = phrase + " " + wVocab.getWord(p[i]);
-	}
-	out << itr2->second << " " << phrase << endl; 
-      }else{
-	return false;
-      }
-    }
-    return true;    
 }
 
 bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable, map<string,string> &transTableScores){
@@ -156,19 +118,9 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
 	PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
 	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
 	if (src && tgt){
-	  PhraseTranslations::iterator itr = transTable.find(src);
+    transTable.insert(make_pair(src, tgt));
 	  string stpair = SPrint(src)+" "+SPrint(tgt);
 	  transTableScores.insert(make_pair (stpair,fields[2]));
-	  if (itr == transTable.end() ){
-	    map<PHRASE_ID,int> tgts;
-	    tgts.insert(make_pair (tgt,0));
-	    transTable.insert(make_pair (src,tgts));
-	  }else{
-	    map<PHRASE_ID,int>::iterator itr2 = itr->second.find(tgt);
-	    if (itr2 == itr->second.end()){
-	      itr->second.insert(make_pair(tgt,itr->second.size()));
-	    }
-	  }
 	}
 	/*	}else{
 	    cerr << "Skipping phrase-table entry due to OOV phrase: " << line << endl;

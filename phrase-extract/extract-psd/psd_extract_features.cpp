@@ -24,14 +24,12 @@ using namespace MosesTraining;
 #define LINE_MAX_LENGTH 10000
 
 // globals
-CLASSIFIER_TYPE psd_classifier = RAW;
+CLASSIFIER_TYPE psd_classifier = VWFile;
 PSD_MODEL_TYPE psd_model = GLOBAL;
 string ptDelim = " ||| ";
 string factorDelim = "|";
 int subdirsize=1000;
 string ext = ".contexts";
-string labelext = ".labels";
-bool psd_train_mode = true;
 
 Vocabulary srcVocab;
 Vocabulary tgtVocab;
@@ -42,7 +40,7 @@ int main(int argc,char* argv[]){
     cerr << "syntax: extract-psd context.template corpus.psd corpus.raw corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
-    cerr << "\t --ClassifierType vw|megam|none" << endl;
+    cerr << "\t --ClassifierType vw|megam" << endl;
     cerr << "\t --PsdType phrasal|global" << endl;
     exit(1);
   }
@@ -58,12 +56,8 @@ int main(int argc,char* argv[]){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"vw") == 0){
-        psd_classifier = VW;
+        psd_classifier = VWFile;
         ext = ".vw-data";
-        labelext = ".vw-header";
-      }else if (strcmp(format,"none") == 0){
-        psd_classifier = RAW;
-        ext = ".context";
       }else if (strcmp(format,"megam") == 0){
         psd_classifier = MEGAM;
         ext = ".megam";
@@ -119,54 +113,38 @@ int main(int argc,char* argv[]){
   int i = 0;
   int csid = 0;
 
-  //  prep output files for PHRASAL setting
-  map<PHRASE_ID, ostream*> outFiles;
+  // prep feature consumers for PHRASAL setting
+  map<PHRASE_ID, FeatureConsumer*> consumers;
 
-  // get label info and prep output data file for GLOBAL setting
-  ofstream* globalDataOut = new ofstream();
-  //OutputFileStream* globalDataOut;
-  if (psd_model == GLOBAL){
-    //globalDataOut = new OutputFileStream(output+ext);
-    globalDataOut->open((output+ext).c_str());
-    string labelName = output+labelext;
-    if (psd_train_mode && ! printVwHeaderFile(labelName,transTable,tgtPhraseVoc,tgtVocab)){
-      cerr << "Failed to write file " << labelName << endl;
-    }     
-  }
-
+  // feature consumer for GLOBAL setting
+  FeatureConsumer *globalOut = NULL;
+  if (psd_classifier == VWLib) 
+    globalOut = new VWLibraryTrainConsumer();
+  else
+    globalOut = new VWFileTrainConsumer();
 
   cerr<< "Phrase tables read. Now reading in corpus." << endl;
   while(true) {
     if (psd.eof()) break;
     if (++i % 100000 == 0) cerr << "." << flush;
     char psdLine[LINE_MAX_LENGTH];
+
+    // get phrase pair
     SAFE_GETLINE((psd),psdLine, LINE_MAX_LENGTH, '\n', __FILE__);
     if (psd.eof()) break;
 
     vector<string> token = Tokenize(psdLine,"\t");
-    //ycerr << "TOKENIZED: " << token.size()  << " tokens in " << psdLine << endl;
-    //  in test mode if no labels are provided
-    if (token.size() == 3){
-      psd_train_mode = false;
-    }else if (token.size() == 7 ){
-      psd_train_mode = true;
-    }else{
-      cerr << "Malformed psd entry: " << psdLine << endl;
-      exit(1);
-    }
 
     int sid = Scan<int>(token[0].c_str());
     int src_start = Scan<int>(token[1].c_str());
     int src_end = Scan<int>(token[2].c_str());
-    int tgt_start = -1; 
-    int tgt_end = -1;
-    if (psd_train_mode == true){
-      tgt_start = Scan<int>(token[3].c_str());
-      tgt_end = Scan<int>(token[4].c_str());
-    }
+    tgt_start = Scan<int>(token[3].c_str());
+    tgt_end = Scan<int>(token[4].c_str());
 
     char rawSrcLine[LINE_MAX_LENGTH];
     char tagSrcLine[LINE_MAX_LENGTH];
+
+    // go to current sentence
     while(csid < sid){
       if (src.eof()) break;
       SAFE_GETLINE((src),rawSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
@@ -174,6 +152,7 @@ int main(int argc,char* argv[]){
       SAFE_GETLINE((srcTag),tagSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
       ++csid;
     }
+
     assert(csid == sid);
     vector<string> sent = Tokenize(rawSrcLine);
     string phrase;
@@ -187,89 +166,35 @@ int main(int argc,char* argv[]){
       }
     }
 
-    PHRASE_ID srcid = getPhraseID(phrase,srcVocab,psdPhraseVoc);
+    PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
     cout << "PHRASE : " << srcid << " " << phrase << endl;
-    string escapedTagSrcLine = string(tagSrcLine);
-    if (psd_classifier == VW){
-      escapedTagSrcLine = escapeVwSpecialChars(string(tagSrcLine));
-      factorDelim = "_PIPE_";
-    }
+    string tagSrcLine = string(tagSrcLine);
 
-    PHRASE_ID labelid = -1;
-    if (psd_train_mode == true){
-      string tgtphrase = token[6];
-      labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
-    }
+    string tgtphrase = token[6];
+    PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
 
     if (srcid != 0){
-      if ( psd_train_mode && exists(srcid,labelid,transTable) || !psd_train_mode && exists(srcid,transTable)){
-        FeatureConsumer *fc = NULL;
-        if (psd_classifier == RAW) 
-          fc = new VWLibraryTrainConsumer();
-        else
-          fc = new VWFileTrainConsumer();
-
-        vector<string> features = fs.extract(src_start,src_end,escapedTagSrcLine,factorDelim);
+      if (exists(srcid, labelid, transTable)) {
+//        vector<string> features = fs.extract(src_start,src_end,tagSrcLine,factorDelim);
         if (psd_model == PHRASAL){
-          map<PHRASE_ID, ostream*>::iterator i = outFiles.find(srcid);
-          if (i == outFiles.end()){
+          map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
+          if (i == consumers.end()){
             int low = floor(srcid/subdirsize)*subdirsize;
             int high = low+subdirsize-1;
             string output_subdir = output +"/"+SPrint(low)+"-"+SPrint(high);
             struct stat stat_buf;
             mkdir(output_subdir.c_str(),S_IREAD | S_IWRITE | S_IEXEC);
             string fileName = output_subdir + "/" + SPrint(srcid) + ext;
-            ofstream* testFile = new ofstream();
-            testFile->open(fileName.c_str());
-            outFiles.insert(pair<PHRASE_ID,ostream*>(srcid,testFile));
-            // also print out label dictionary
-            string labelName = output_subdir + "/" + SPrint(srcid) + labelext;
-            switch(psd_classifier) {
-              case VW:
-                if ( psd_train_mode && ! printVwHeaderFile(labelName,transTable,srcid,tgtPhraseVoc,tgtVocab)){
-                  cerr << "ERROR: could not write file " << labelName << endl;
-                }
-                break;
-              case RAW:
-                break;
-              default:
-                if ( psd_train_mode && ! printTransStringToFile(labelName,transTable,srcid,tgtPhraseVoc,tgtVocab)){
-                  cerr << "ERROR: could not write file " << labelName << endl;
-                }
-            }
+            FeatureConsumer *fc = NULL;
+            if (psd_classifier == VWLib) 
+              fc = new VWLibraryTrainConsumer(fileName);
+            else
+              fc = new VWFileTrainConsumer(fileName);
+            consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
           }
-          int perPhraseLabelid = transTable[srcid][labelid];
-          string sf = "";
-          if (psd_train_mode){
-            sf = makeVwTrainingInstance(features,perPhraseLabelid);
-          }else{
-            sf = makeVwTestingInstance(features);
-          }
-          switch (psd_classifier) {
-            case VW:
-              //(*outFiles[srcid]) << perPhraseLabelid << " | " << sf << endl;
-              (*outFiles[srcid]) << sf << endl;
-              break;
-            default:
-              (*outFiles[srcid]) << src_start << "\t" << src_end << "\t" << perPhraseLabelid << "\t" << tagSrcLine << endl;
-              break;
-          }
-        }
-        if (psd_model == GLOBAL && psd_classifier == VW ){
-          set<PHRASE_ID> labels;
-          labels.insert(labelid); //TODO: collect all translation candidates with fractional counts!
-          string sfeatures = "";
-          if (psd_train_mode){
-            sfeatures = makeVwGlobalTrainingInstance(srcid,features,labels,transTable,tgtPhraseVoc,tgtVocab);
-            (*globalDataOut) << sfeatures << endl;
-          }else{
-            sfeatures = makeVwGlobalTestingInstance(srcid,features,transTable,tgtPhraseVoc,tgtVocab);
-            cout << "FEATURES " << sfeatures << endl;
-            (*globalDataOut) << sfeatures << endl;
-          }
-        }
-        if (psd_model == GLOBAL && psd_classifier == RAW ){
-          (*globalDataOut) << psdLine << "\t" << srcid  << "\t" << labelid << "\t" << tagSrcLine << endl;
+          consumers[srcId]->GenerateFeatures( /* TODO */ );
+        } else { // GLOBAL model
+          globalOut->GenerateFeatures( /* TODO */ );
         }
       }
     }
