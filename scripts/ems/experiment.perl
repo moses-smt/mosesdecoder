@@ -1874,7 +1874,7 @@ sub define_training_create_config {
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
 
-    if (&get("GENERAL:use-psd")) {
+    if (&get("TRAINING:use-psd")) {
       $cmd .= " -psd-model $psd_model -psd-index $psd_index ";
     }
 
