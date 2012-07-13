@@ -31,14 +31,13 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
-bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &contextFile)
+bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
   m_consumer = new VWLibraryPredictConsumer(modelFile);
   if (! LoadPhraseIndex(indexFile))
     return false;
 
   m_extractor = new FeatureExtractor(m_phraseIndex, false);
-  m_contextFile.open(contextFile.c_str());
   return true;
 }
 
@@ -54,18 +53,7 @@ bool PSDScoreProducer::IsOOV(const TargetPhrase &tgtPhrase)
   return m_phraseIndex.left.find(tgtPhrase.GetStringRep(m_tgtFactors)) == m_phraseIndex.left.end();
 }
 
-void PSDScoreProducer::NextSentence()
-{
-  m_currentContext.clear();
-  string line;
-  getline(m_contextFile, line);
-  vector<string> words = Tokenize(line, " ");
-  for (size_t i = 0; i < words.size(); i++) {
-    m_currentContext.push_back(Tokenize(line, "|"));
-  }
-}
-
-vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<TranslationOption *> &options)
+vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
   vector<ScoreComponentCollection> scores;
   float sum = 0;
@@ -80,7 +68,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
       optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
     }
     cerr << "Getting predictions... " << endl;
-    m_extractor->GenerateFeatures(m_consumer, m_currentContext, options[0]->GetStartPos(),
+    m_extractor->GenerateFeatures(m_consumer, src.m_PSDContext, options[0]->GetStartPos(),
         options[0]->GetEndPos(), optionIDs, losses);
     cerr << "Done." << endl;
 

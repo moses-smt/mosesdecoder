@@ -125,13 +125,6 @@ void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& sour
     (*i)->InitDictionary(this,source);
   }
 
-// #ifdef HAVE_VW
-  PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
-  if (psd != NULL) {
-    psd->NextSentence();
-  }
-// #endif
-
   for(size_t i=0; i<m_reorderingTables.size(); ++i) {
     m_reorderingTables[i]->InitializeForInput(source);
   }

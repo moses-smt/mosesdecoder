@@ -480,9 +480,21 @@ int main(int argc, char** argv)
     // main loop over set of input sentences
     InputType* source = NULL;
     size_t lineCount = 0;
+    ifstream *contextFile = NULL;
+    if (staticData.GetParam("psd-context").size() > 0) {
+      contextFile = new ifstream(staticData.GetParam("psd-context")[0].c_str());
+    }
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
-      IFVERBOSE(1) {
-        ResetUserTime();
+      if (contextFile != NULL) {
+        string line; 
+        getline(*contextFile, line);
+        vector<string> words = Tokenize(line, " ");
+        for (size_t i = 0; i < words.size(); i++) {
+          source->m_PSDContext.push_back(Tokenize(words[i], "|"));
+        }
+      }
+          IFVERBOSE(1) {
+          ResetUserTime();
       }
       // set up task of translating one sentence
       TranslationTask* task =
