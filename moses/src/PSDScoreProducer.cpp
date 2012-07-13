@@ -86,8 +86,9 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
 
     vector<float>::iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-      *lossIt = exp(-*lossIt);
-      sum += *lossIt;
+      float score = exp(-*lossIt);
+      sum += score;
+      scores.push_back(ScoreFactory(score));
     }
   } else {
     for (size_t i = 0; i < options.size(); i++) {
