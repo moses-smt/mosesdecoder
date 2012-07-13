@@ -149,7 +149,7 @@ Parameter::Parameter()
   AddParam("weight-left-context", "wlc", "weight for context-aware phrase scorer");
   AddParam("left-context-ttable", "lctt", "phrase table for context-aware phrase scorer"); 
 //#ifdef HAVE_VW
-  AddParam("weight-psd", "wpsd", "weight for phrase sense disambiguation");
+  AddParam("weight-psd", "psd", "weight for phrase sense disambiguation");
   AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation"); 
   AddParam("psd-index", "psdi", "file with indexes of target phrases"); 
   AddParam("psd-context", "psdc", "input data with rich factored annotation for PSD"); 

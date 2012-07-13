@@ -43,6 +43,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ThreadPool.h"
 #include "TranslationAnalysis.h"
 #include "OutputCollector.h"
+#include "PSDScoreProducer.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -323,6 +324,9 @@ static void ShowWeights()
   }
   for (size_t i = 0; i < gds.size(); ++i) {
     PrintFeatureWeight(gds[i]);
+  }
+  if (StaticData::Instance().GetPSDScoreProducer() != NULL) {
+    PrintFeatureWeight(dynamic_cast<const FeatureFunction *>(StaticData::Instance().GetPSDScoreProducer()));
   }
 }
 
