@@ -564,7 +564,7 @@ split-reference
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:psd-index TRAINING:psd-model
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings

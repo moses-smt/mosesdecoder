@@ -2242,7 +2242,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_index, $psd_model) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2303,6 +2303,11 @@ sub define_tuningevaluation_filter {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
+
+    if (&get("TRAINING:use-psd")) {
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.fr ";
+    }
+
     $cmd .= "-lm 0:3:$dir "; # dummy
     $cmd .= "-config $config\n";
     
