@@ -393,7 +393,7 @@ psd-build-index
   ignore-unless: use-psd
   default-name: model/psd.index
 psd-build-model
-  in: phrase-translation-table extracted-phrases corpus psd-index
+  in: phrase-translation-table extracted-phrases psd-corpus psd-index
   out: psd-model
   ignore-unless: use-psd
   default-name: model/psd.model

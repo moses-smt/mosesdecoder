@@ -1,0 +1,73 @@
+################################################
+### CONFIGURATION FILE FOR AN SMT EXPERIMENT ###
+################################################
+
+[GENERAL]
+working-dir = /home/ales/mt/mosesdecoder/scripts/ems/test-psd/
+input-extension = fr
+output-extension = en
+pair-extension = fr-en
+moses-src-dir = /home/ales/mt/mosesdecoder/
+moses-bin-dir = $moses-src-dir/bin
+moses-script-dir = $moses-src-dir/scripts
+external-bin-dir = /home/ales/mt/gizapp/bin/
+srilm-dir = /home/ales/mt/statmt/playground/s.srilm.d677a362.20120624-2231/srilm/bin/i686-m64/
+psd-data = /home/ales/baltimore/test-psd2/
+decoder = $moses-bin-dir/moses
+ttable-binarizer = $moses-bin-dir/processPhraseTable
+generic-parallelizer = $moses-script-dir/ems/support/generic-multicore-parallelizer.perl
+cores = 4
+vw-path = /home/ales/mt/vowpal_wabbit/
+
+[CORPUS]
+max-sentence-length = 80
+
+[CORPUS:emeatiny]
+lowercased-stem = $psd-data/train
+
+[LM]
+lm-training = $srilm-dir/ngram-count
+settings = "-interpolate -kndiscount -unk"
+order = 5
+lm-binarizer = $moses-bin-dir/build_binary
+type = 8
+
+[LM:emeatiny]
+tokenized-corpus = $psd-data/train.$output-extension
+
+[INTERPOLATED-LM]
+lm-binarizer = $moses-bin-dir/build_binary
+type = 8
+
+[TRAINING]
+use-psd = 1
+psd-corpus = $psd-data/train.$input-extension.psd
+script = $moses-script-dir/training/train-model.perl
+parallel = yes
+alignment-symmetrization-method = grow-diag-final-and
+score-settings = "--GoodTuring"
+
+[TUNING]
+tuning-script = $moses-script-dir/training/mert-moses.pl
+tuning-settings = "-mertdir $moses-bin-dir --batch-mira --return-best-dev "
+nbest = 100
+filter-settings = ""
+decoder-settings = " -search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -psd-context $psd-data/dev.$input-extension.psd "
+input = $psd-data/dev.$input-extension
+reference = $psd-data/dev.$output-extension
+
+[RECASING]
+
+[TRUECASER]
+
+[EVALUATION]
+decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000 -psd-context $psd-data/test.$input-extension.psd"
+multi-bleu = $moses-script-dir/generic/multi-bleu.perl
+
+[EVALUATION:test]
+
+input = $psd-data/test.$input-extension
+reference = $psd-data/test.$output-extension
+
+[REPORTING]
+
