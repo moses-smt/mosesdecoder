@@ -28,7 +28,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   if (PSD_SOURCE_INTERNAL) {
     vector<string> sourceForms(spanEnd - spanStart + 1);
     for (size_t i = spanStart; i <= spanEnd; i++) {
-      sourceForms[i] = context[i][0]; // XXX assumes that form is the 0th factor
+      sourceForms[i - spanStart] = context[i][0]; // XXX assumes that form is the 0th factor
     }
     GenerateInternalFeatures(sourceForms, fc);
   }
@@ -39,7 +39,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
     if (PSD_TARGET_INTERNAL) {
-      GenerateInternalFeatures(Tokenize(" ", m_targetIndex.right.find(*transIt)->second), fc);
+      GenerateInternalFeatures(Tokenize(m_targetIndex.right.find(*transIt)->second, " "), fc);
     }  
 
     if (m_train) {
@@ -48,6 +48,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
       *lossIt = fc->Predict(SPrint(*transIt));
     }
   }
+  fc->FinishExample();
 }
 
 //
@@ -56,7 +57,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
 string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
 {
-  return "c^" + SPrint(factor) + "_-" + SPrint(index) + "_" + value;
+  return "c^" + SPrint(factor) + "_" + SPrint(index) + "_" + value;
 }
 
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
@@ -64,12 +65,12 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanEnd,
   FeatureConsumer *fc)
 {
-  for (size_t fact = 0; fact <= PSD_FACTOR_COUNT; fact++) {
+  for (size_t fact = 0; fact < PSD_FACTOR_COUNT; fact++) {
     for (size_t i = 1; i <= PSD_CONTEXT_WINDOW; i++) {
       if (spanStart >= i) 
-        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
+        fc->AddFeature(BuildContextFeature(fact, -i, context[spanStart - i][fact]));
       if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
+        fc->AddFeature(BuildContextFeature(fact, i, context[spanEnd + i][fact]));
     }
   }
 }

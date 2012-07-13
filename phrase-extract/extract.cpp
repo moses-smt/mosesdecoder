@@ -641,8 +641,8 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
 
   if (outputPsd) {
     extractFilePsd << sentence.sentenceID << "\t";
-    extractFilePsd << startE << "\t" << endE << "\t";
     extractFilePsd << startF << "\t" << endF << "\t";
+    extractFilePsd << startE << "\t" << endE << "\t";
   }
 
   for(int fi=startF; fi<=endF; fi++) {

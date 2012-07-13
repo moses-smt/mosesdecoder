@@ -126,7 +126,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
-$catPSDCmd .= " > $extract.psd \n";
+$catPSDCmd .= " | gzip -c > $extract.psd.gz \n";
 
 
 @children = ();

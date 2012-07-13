@@ -122,10 +122,12 @@ int main(int argc,char* argv[]){
 
   // feature consumer for GLOBAL setting
   FeatureConsumer *globalOut = NULL;
-  if (psd_classifier == VWLib) 
-    globalOut = new VWLibraryTrainConsumer(output);
-  else
-    globalOut = new VWFileTrainConsumer(output);
+  if (psd_model == GLOBAL) {
+    if (psd_classifier == VWLib) 
+      globalOut = new VWLibraryTrainConsumer(output);
+    else
+      globalOut = new VWFileTrainConsumer(output);
+  }
 
   cerr<< "Phrase tables read. Now reading in corpus." << endl;
   while(true) {
@@ -176,7 +178,6 @@ int main(int argc,char* argv[]){
     }
 
     PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
-    cout << "PHRASE : " << srcid << " " << phrase << endl;
 
     string tgtphrase = token[6];
     PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
@@ -187,6 +188,8 @@ int main(int argc,char* argv[]){
       translations.push_back(transIt->second);
       losses.push_back(labelid == transIt->second ? 0 : 1);
     }
+    if (factoredSrcLine.size() <= src_end && sent.size() <= src_end)
+      cerr << "Phrase goes beyond sentence (" << csid << "): " << phrase << endl;
 
     if (srcid != 0){
       if (exists(srcid, labelid, transTable)) {
@@ -212,5 +215,14 @@ int main(int argc,char* argv[]){
       }
     }
   }
+  if (psd_model == GLOBAL) {
+    globalOut->Finish();
+  } else {
+    map<PHRASE_ID, FeatureConsumer*>::iterator i;
+    for (i = consumers.begin(); i != consumers.end(); i++) {
+      i->second->Finish();
+    }
+  }
+  
   //freem
 }

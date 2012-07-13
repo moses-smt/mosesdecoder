@@ -1,7 +1,7 @@
 #!/usr/bin/perl -w
 use strict;
 
-if (@ARGV < 2 || @ARGV > 3){
+if (@ARGV == 0 || @ARGV > 2){
     print STDERR "$0\n";
     print STDERR "select French and English phrases from phrase-table for PSD modeling\n";
     print STDERR "  - French phrases: all phrases from phrase-table, except those that start or end with numbers, punctuation or stopwords\n";
@@ -9,7 +9,7 @@ if (@ARGV < 2 || @ARGV > 3){
    die "Usage: $0 output-name [French-stoplist]"
 }
 
-my($pt,$out,$frStop) = @ARGV;
+my($out,$frStop) = @ARGV;
 
 my %frStop = ();
 if (defined $frStop) {

@@ -26,7 +26,7 @@ void VWFileTrainConsumer::SetNamespace(char ns, bool shared)
   if (shared)
     m_outputBuffer.push_back("shared");
 
-  m_outputBuffer.push_back("|" + ns);
+  m_outputBuffer.push_back("|" + SPrint(ns));
 }
 
 void VWFileTrainConsumer::AddFeature(const std::string &name)

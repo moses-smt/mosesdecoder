@@ -1765,8 +1765,8 @@ sub define_training_psd_model {
   my ($out, $phrase_table, $extract, $corpus, $psd_index) = &get_output_and_input($step_id);
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
-  my $cmd = "$psd_extractor $extract.psd $corpus $phrase_table $psd_index.fr $psd_index.en $out.train";
-  $cmd .= " && cat $out.train $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
+  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.fr $psd_index.en $out.train";
+  $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
 
   &create_step($step_id, $cmd);
 }
