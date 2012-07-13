@@ -39,7 +39,7 @@ Vocabulary tgtVocab;
 
 int main(int argc,char* argv[]){
   cerr << "PSD phrase-extractor\n\n";
-  if (argc < 8){
+  if (argc < 7){
     cerr << "syntax: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
