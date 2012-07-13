@@ -1761,7 +1761,14 @@ sub define_training_psd_index {
 
 sub define_training_psd_model {
   my $step_id = shift;
-  my ($out, $phrase_table, $corpus, $psd_index) = &get_output_and_input($step_id);
+  my ($out, $phrase_table, $extract, $corpus, $psd_index) = &get_output_and_input($step_id);
+  my $src_corpus = "$corpus." . &get("GENERAL:input-extension");
+  my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
+  my $vw = &get("GENERAL:vw-path") . "/bin/vw";
+  my $cmd = "$psd_extractor $extract.psd $src_corpus $phrase_table $psd_index.fr $psd_index.en $out.train";
+  $cmd .= " && cat $out.train $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
+
+  &create_step($step_id, $cmd);
 }
 
 sub define_training_sigtest_filter {
@@ -1819,7 +1826,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_model,$psd_index,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1865,6 +1872,10 @@ sub define_training_create_config {
       $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
+    }
+
+    if (&get("GENERAL:use-psd")) {
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index ";
     }
 
     # additional settings for syntax models

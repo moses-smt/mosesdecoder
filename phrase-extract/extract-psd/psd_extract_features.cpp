@@ -40,7 +40,7 @@ Vocabulary tgtVocab;
 int main(int argc,char* argv[]){
   cerr << "PSD phrase-extractor\n\n";
   if (argc < 8){
-    cerr << "syntax: extract-psd corpus.psd corpus.raw corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
+    cerr << "syntax: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
     cerr << "\t --ClassifierType vw|megam" << endl;
@@ -48,13 +48,12 @@ int main(int argc,char* argv[]){
     exit(1);
   }
   char* &fileNamePsd = argv[1]; // location in corpus of PSD phrases (optionallly annotated with the position and phrase type of their translations.)
-  char* &fileNameSrcRaw = argv[2]; // raw source context
-  char* &fileNameSrcTag = argv[3]; // tagged source context in Moses factored format
-  char* &fileNamePT = argv[4]; // phrase table
-  char* &fileNameSrcVoc = argv[5]; // source phrase vocabulary
-  char* &fileNameTgtVoc = argv[6]; // target phrase vocabulary
-  string output = string(argv[7]);//output directory (for phrasal models) or root of filename (for global models)
-  for(int i =8; i < argc; i++){
+  char* &fileNameSrcTag = argv[2]; // tagged source context in Moses factored format
+  char* &fileNamePT = argv[3]; // phrase table
+  char* &fileNameSrcVoc = argv[4]; // source phrase vocabulary
+  char* &fileNameTgtVoc = argv[5]; // target phrase vocabulary
+  string output = string(argv[6]);//output directory (for phrasal models) or root of filename (for global models)
+  for(int i = 7; i < argc; i++){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"vw") == 0){
@@ -81,10 +80,6 @@ int main(int argc,char* argv[]){
         exit(1);
       }
     } 
-  }
-  InputFileStream src(fileNameSrcRaw);
-  if (src.fail()){
-    cerr << "ERROR: could not open " << fileNameSrcRaw << endl;
   }
   InputFileStream srcTag(fileNameSrcTag);
   if (srcTag.fail()){
@@ -150,20 +145,25 @@ int main(int argc,char* argv[]){
     size_t tgt_start = Scan<size_t>(token[3].c_str());
     size_t tgt_end = Scan<size_t>(token[4].c_str());
 
-    char rawSrcLine[LINE_MAX_LENGTH];
     char tagSrcLine[LINE_MAX_LENGTH];
 
     // go to current sentence
     while(csid < sid){
-      if (src.eof()) break;
-      SAFE_GETLINE((src),rawSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
       if (srcTag.eof()) break;
       SAFE_GETLINE((srcTag),tagSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
       ++csid;
     }
 
     assert(csid == sid);
-    vector<string> sent = Tokenize(rawSrcLine);
+    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
+
+    // get surface forms from factored format
+    vector<string> sent;
+    ContextType::const_iterator tagSrcIt;
+    for (tagSrcIt = factoredSrcLine.begin(); tagSrcIt != factoredSrcLine.end(); tagSrcIt++) {
+      sent.push_back(*tagSrcIt->begin());
+    }
+    
     string phrase;
     if (token.size() > 6){
       phrase = token[5];
@@ -177,7 +177,6 @@ int main(int argc,char* argv[]){
 
     PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
     cout << "PHRASE : " << srcid << " " << phrase << endl;
-    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
 
     string tgtphrase = token[6];
     PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
