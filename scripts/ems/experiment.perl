@@ -1726,6 +1726,7 @@ sub define_training_extract_phrases {
 
     my $extract_settings = &get("TRAINING:extract-settings");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
+    $cmd .= " -extract-psd-anot " if &get("TRAINING:use-psd");
 
     &create_step($step_id,$cmd);
 }
@@ -1756,7 +1757,7 @@ sub define_training_psd_index {
   my $psd_indexer = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd/select_psd_vocab.pl";
   my $cmd = "zcat $phrase_table | $psd_indexer $out";
 
-  &create_step($step_id, $out);
+  &create_step($step_id, $cmd);
 }
 
 sub define_training_psd_model {

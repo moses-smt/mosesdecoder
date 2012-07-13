@@ -25,10 +25,12 @@ my $align = $ARGV[6]; # 3rd arg of extract argument
 my $extract = $ARGV[7]; # 4th arg of extract argument
 
 my $makeTTable = 1; # whether to build the ttable extract files
+my $outputPSD = 0; 
 my $otherExtractArgs= "";
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
   $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
+  $outputPSD = 1 if $ARGV[$i] eq "--OutputPsdInfo";
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
@@ -111,17 +113,20 @@ foreach (@children) {
 my $catCmd = "zcat ";
 my $catInvCmd = "zcat ";
 my $catOCmd = "zcat ";
+my $catPSDCmd = "zcat ";
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
 		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
 		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
 		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
+		$catPSDCmd .= "$TMPDIR/extract.$numStr.psd.gz ";
 }
 
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
+$catPSDCmd .= " > $extract.psd \n";
 
 
 @children = ();
@@ -139,6 +144,11 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
 	$pid = RunFork($catOCmd);
 	push(@children, $pid);
+}
+
+if ($outputPSD) {
+  $pid = RunFork($catPSDCmd);
+  push(@children, $pid);
 }
 
 # wait for all sorting to finish
