@@ -1875,7 +1875,7 @@ sub define_training_create_config {
     }
 
     if (&get("TRAINING:use-psd")) {
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index ";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.fr ";
     }
 
     # additional settings for syntax models

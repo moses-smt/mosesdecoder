@@ -1887,7 +1887,9 @@ sub create_ini {
    }
 
    if (defined $_PSD_MODEL) {
-    print INI "\n[psd-model]\n$_PSD_MODEL\n\n[psd-index]\n$_PSD_INDEX\n";
+     print INI "\n# Phrase-sense disambiugation";
+     print INI "\n[psd-model]\n$_PSD_MODEL\n\n[psd-index]\n$_PSD_INDEX\n";
+     print INI "\n[weight-psd]\n0.1\n";
    }
 
     if (defined $___GENERATION_FACTORS) {
