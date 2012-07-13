@@ -1429,9 +1429,9 @@ sub extract_phrase {
       if ($reordering_flag) {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
-        $cmd .= " --NoTTable" if !$ttable_flag;
-        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
+      $cmd .= " --NoTTable" if !$ttable_flag;
+      $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
     $cmd .= " --GZOutput ";

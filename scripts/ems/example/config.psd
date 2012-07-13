@@ -45,6 +45,7 @@ psd-corpus = $psd-data/train.$input-extension.psd
 script = $moses-script-dir/training/train-model.perl
 parallel = yes
 alignment-symmetrization-method = grow-diag-final-and
+extract-settings = " --OutputPsdInfo "
 score-settings = "--GoodTuring"
 
 [TUNING]

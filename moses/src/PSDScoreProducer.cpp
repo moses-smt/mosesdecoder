@@ -31,13 +31,14 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
-bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile)
+bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &contextFile)
 {
   m_consumer = new VWLibraryPredictConsumer(modelFile);
   if (! LoadPhraseIndex(indexFile))
     return false;
 
   m_extractor = new FeatureExtractor(m_phraseIndex, false);
+  m_contextFile.open(contextFile.c_str());
   return true;
 }
 
@@ -53,17 +54,14 @@ bool PSDScoreProducer::IsOOV(const TargetPhrase &tgtPhrase)
   return m_phraseIndex.left.find(tgtPhrase.GetStringRep(m_tgtFactors)) == m_phraseIndex.left.end();
 }
 
-void PSDScoreProducer::SetSentence(const InputType &inputSent)
+void PSDScoreProducer::NextSentence()
 {
   m_currentContext.clear();
-  for (size_t i = 0; i < inputSent.GetSize(); i++) {
-    vector<string> factors;
-    Word word = inputSent.GetWord(i);
-    vector<size_t>::const_iterator it;
-    for (it = m_srcFactors.begin(); it != m_srcFactors.end(); it++) {
-      factors.push_back(word.GetFactor(*it)->GetString());
-    }
-    m_currentContext.push_back(factors);
+  string line;
+  getline(m_contextFile, line);
+  vector<string> words = Tokenize(line, " ");
+  for (size_t i = 0; i < words.size(); i++) {
+    m_currentContext.push_back(Tokenize(line, "|"));
   }
 }
 
@@ -78,7 +76,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
 
     vector<TranslationOption *>::const_iterator optIt;
     for (optIt = options.begin(); optIt != options.end(); optIt++) {
-      string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_srcFactors);
+      string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_tgtFactors);
       optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
     }
     m_extractor->GenerateFeatures(m_consumer, m_currentContext, options[0]->GetStartPos(),

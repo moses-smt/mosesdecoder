@@ -14,6 +14,8 @@
 #include <map>
 #include <string>
 #include <vector>
+#include <iostream>
+#include <fstream>
 
 namespace Moses
 {
@@ -24,7 +26,7 @@ public:
   PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float weight);
 
   // read required data files
-  bool Initialize(const std::string &modelFile, const std::string &indexFile);
+  bool Initialize(const std::string &modelFile, const std::string &indexFile, const std::string &contextFile);
 
   // score a list of translation options
   // this is required to contain all possible translations
@@ -33,7 +35,7 @@ public:
 
   // sets current source-side context
   // must be called when starting to translate a new sentence
-  void SetSentence(const InputType &inputSent);
+  void NextSentence();
 
   // mandatory methods for features
   size_t GetNumScoreComponents() const;
@@ -55,6 +57,7 @@ private:
   PSD::FeatureConsumer *m_consumer;
   PSD::FeatureExtractor *m_extractor;
   PSD::ContextType m_currentContext;
+  std::ifstream m_contextFile;
 };
 
 }

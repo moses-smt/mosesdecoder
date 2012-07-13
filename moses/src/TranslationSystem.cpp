@@ -128,7 +128,7 @@ void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& sour
 // #ifdef HAVE_VW
   PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
   if (psd != NULL) {
-    psd->SetSentence(source);
+    psd->NextSentence();
   }
 // #endif
 

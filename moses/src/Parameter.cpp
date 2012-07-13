@@ -152,6 +152,7 @@ Parameter::Parameter()
   AddParam("weight-psd", "wpsd", "weight for phrase sense disambiguation");
   AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation"); 
   AddParam("psd-index", "psdi", "file with indexes of target phrases"); 
+  AddParam("psd-context", "psdc", "input data with rich factored annotation for PSD"); 
 //#endif
 }
 
