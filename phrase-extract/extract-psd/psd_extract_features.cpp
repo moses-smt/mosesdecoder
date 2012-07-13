@@ -113,7 +113,8 @@ int main(int argc,char* argv[]){
   // create target phrase index for feature extractor
   TargetIndexType extractorTargetIndex;
   for (size_t i = 0; i < tgtPhraseVoc.phraseTable.size(); i++) {
-    extractorTargetIndex.insert(TargetIndexType::value_type(getPhrase(i, tgtVocab, tgtPhraseVoc), i));
+    // label 0 is not allowed
+    extractorTargetIndex.insert(TargetIndexType::value_type(getPhrase(i, tgtVocab, tgtPhraseVoc), i + 1));
   }
   FeatureExtractor extractor(extractorTargetIndex, true);
 
@@ -180,12 +181,12 @@ int main(int argc,char* argv[]){
     PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
 
     string tgtphrase = token[6];
-    PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
+    PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
     vector<float> losses;
     vector<size_t> translations;
     PhraseTranslations::const_iterator transIt;
     for (transIt = transTable.lower_bound(srcid); transIt != transTable.upper_bound(srcid); transIt++) {
-      translations.push_back(transIt->second);
+      translations.push_back(transIt->second + 1);
       losses.push_back(labelid == transIt->second ? 0 : 1);
     }
     if (factoredSrcLine.size() <= src_end && sent.size() <= src_end)

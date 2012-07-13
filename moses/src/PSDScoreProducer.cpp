@@ -72,15 +72,17 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
 
   if (options.size() != 0 && ! IsOOV(options[0]->GetTargetPhrase())) {
     vector<float> losses(options.size());
-    vector<size_t> optionIDs(options.size());
+    vector<size_t> optionIDs;
 
     vector<TranslationOption *>::const_iterator optIt;
     for (optIt = options.begin(); optIt != options.end(); optIt++) {
       string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_tgtFactors);
       optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
     }
+    cerr << "Getting predictions... " << endl;
     m_extractor->GenerateFeatures(m_consumer, m_currentContext, options[0]->GetStartPos(),
         options[0]->GetEndPos(), optionIDs, losses);
+    cerr << "Done." << endl;
 
     vector<float>::iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
@@ -133,8 +135,7 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   string line;
   size_t index = 0;
   while (getline(in, line)) {
-    m_phraseIndex.insert(TargetIndexType::value_type(line, index));
-    index++;
+    m_phraseIndex.insert(TargetIndexType::value_type(line, ++index));
   }
   in.close();
 

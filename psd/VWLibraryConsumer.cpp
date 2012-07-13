@@ -56,7 +56,7 @@ VWLibraryConsumer::~VWLibraryConsumer()
 
 VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
 {
-  m_VWInstance = new ::vw(VW::initialize("--hash all -q st --noconstant -f " + modelFile));
+  m_VWInstance = new ::vw(VW::initialize("--hash all --csoaa_ldf s -q st --noconstant -f " + modelFile));
   m_ex = new ::ezexample(m_VWInstance, false);
 }
 
@@ -82,7 +82,7 @@ float VWLibraryTrainConsumer::Predict(const string &label)
 
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile)
 {
-  m_VWInstance = new ::vw(VW::initialize("--hash all -q st --noconstant -i " + modelFile));
+  m_VWInstance = new ::vw(VW::initialize("--hash all --csoaa_ldf s -q st --noconstant -i " + modelFile));
   m_ex = new ::ezexample(m_VWInstance, false);
 }
 
