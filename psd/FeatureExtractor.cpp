@@ -38,12 +38,10 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
-    cerr << "Set namespace to 't'" << endl;
     if (PSD_TARGET_INTERNAL) {
       GenerateInternalFeatures(Tokenize(m_targetIndex.right.find(*transIt)->second, " "), fc);
     }  
 
-    cerr << "Asking to train/predict ID " << *transIt << endl;
     if (m_train) {
       fc->Train(SPrint(*transIt), *lossIt);
     } else {
