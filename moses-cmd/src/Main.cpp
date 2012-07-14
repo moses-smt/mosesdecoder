@@ -326,7 +326,7 @@ static void ShowWeights()
     PrintFeatureWeight(gds[i]);
   }
   if (StaticData::Instance().GetPSDScoreProducer() != NULL) {
-    PrintFeatureWeight(dynamic_cast<const FeatureFunction *>(StaticData::Instance().GetPSDScoreProducer()));
+    PrintFeatureWeight(StaticData::Instance().GetPSDScoreProducer());
   }
 }
 

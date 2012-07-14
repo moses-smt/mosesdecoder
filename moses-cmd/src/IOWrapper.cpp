@@ -43,6 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
+#include "PSDScoreProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -412,18 +413,18 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (pds.size() > 0) {
 
       for( size_t i=0; i<pds.size(); i++ ) {
-	size_t pd_numinputscore = pds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = pds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+        for (size_t j = 0; j<scores.size(); ++j){
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ){
+            if ((j == 0) || (j == pd_numinputscore)){
+              lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 
@@ -432,18 +433,27 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (gds.size() > 0) {
 
       for( size_t i=0; i<gds.size(); i++ ) {
-	size_t pd_numinputscore = gds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = gds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+        for (size_t j = 0; j<scores.size(); ++j){
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ){
+            if ((j == 0) || (j == pd_numinputscore)){
+              lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
+      }
+    }
+
+    PSDScoreProducer *psdProducer = staticData.GetPSDScoreProducer();
+    if (psdProducer != NULL) {
+      out << " " << psdProducer->GetScoreProducerWeightShortName(0) << ":";
+      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(psdProducer);
+      for (size_t j = 0; j<scores.size(); ++j) {
+        out << " " << scores[j];
       }
     }
 

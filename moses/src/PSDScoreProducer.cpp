@@ -67,10 +67,8 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
       string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_tgtFactors);
       optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
     }
-    cerr << "Getting predictions... " << endl;
     m_extractor->GenerateFeatures(m_consumer, src.m_PSDContext, options[0]->GetStartPos(),
         options[0]->GetEndPos(), optionIDs, losses);
-    cerr << "Done." << endl;
 
     vector<float>::iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
