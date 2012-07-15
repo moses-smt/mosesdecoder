@@ -26,7 +26,7 @@ void VWFileTrainConsumer::SetNamespace(char ns, bool shared)
   if (shared)
     m_outputBuffer.push_back("shared");
 
-  m_outputBuffer.push_back("|" + ns);
+  m_outputBuffer.push_back("|" + SPrint(ns));
 }
 
 void VWFileTrainConsumer::AddFeature(const std::string &name)
@@ -55,7 +55,7 @@ void VWFileTrainConsumer::Train(const std::string &label, float loss)
   m_outputBuffer.push_front(label + ":" + SPrint(loss));
 }
 
-float VWFileTrainConsumer::Predict(const std::string &label) 
+float VWFileTrainConsumer::Predict(const std::string &label)
 {
   throw logic_error("Trying to predict during training!");
 }
