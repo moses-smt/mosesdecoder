@@ -1,10 +1,6 @@
-//read a rule
-//read a parsed input sent
-//build a chart for input sentr
 #include "XmlTree.h"
 #include "InputFileStream.h"
 #include "InputTreeRep.h"
-#include "Word.h"
 #include "TypeDef.h"
 
 #define LINE_MAX_LENGTH 500000
@@ -25,13 +21,9 @@ int main(int argc, char* argv[])
 
     istream *sourceFileP = &sourceFile;
 
-    //Construct input factors
-    std::vector<Moses::FactorType> srcFactors;
-    srcFactors.push_back(0);
-
     //Read in source sentence and create label chart
     Moses::InputTreeRep myInputChart = Moses::InputTreeRep();
-    myInputChart.Read(sourceFile,srcFactors);
+    myInputChart.Read(sourceFile);
     myInputChart.Print(std::cout);
 
     //Read in extract file line by line

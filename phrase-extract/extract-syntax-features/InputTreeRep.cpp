@@ -2,7 +2,7 @@
 
 #include "InputTreeRep.h"
 #include "Util.h"
-#include "XmlOption.h"
+#include "XmlTree.h"
 #include "FactorCollection.h"
 
 using namespace std;
@@ -15,6 +15,12 @@ namespace Moses
  * to query for getting label for different spans
 */
 
+SyntaxLabel::SyntaxLabel(const std::string &label, bool isNonTerm)
+{
+	m_label = label;
+	m_nonTerm = isNonTerm;
+}
+
 //A copy of the same method in InputTree
 bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutputForTrain> &sourceLabels)
 {
@@ -26,7 +32,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
 
   // break up input into a vector of xml tags and text
   // example: (this), (<b>), (is a), (</b>), (test .)
-  vector<string> xmlTokens = TokenizeXml(line);
+  vector<string> xmlTokens = MosesTraining::TokenizeXml(line);
 
   // we need to store opened tags, until they are closed
   // tags are stored as tripled (tagname, startpos, contents)
@@ -39,7 +45,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
     // not a xml tag, but regular text (may contain many words)
-    if(!isXmlTag(xmlTokens[xmlTokenPos])) {
+    if(!MosesTraining::isXmlTag(xmlTokens[xmlTokenPos])) {
       // add a space at boundary, if necessary
       if (cleanLine.size()>0 &&
           cleanLine[cleanLine.size() - 1] != ' ' &&
@@ -55,7 +61,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
       // *** get essential information about tag ***
 
       // strip extra boundary spaces and "<" and ">"
-      string tag =  Trim(TrimXml(xmlTokens[xmlTokenPos]));
+      string tag =  MosesTraining::Trim(MosesTraining::TrimXml(xmlTokens[xmlTokenPos]));
       //VERBOSE(3,"XML TAG IS: " << tag << std::endl);
 
       if (tag.size() == 0) {
@@ -121,7 +127,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
         size_t endPos = wordPos;
 
         // span attribute overwrites position
-        string span = ParseXmlTagAttribute(tagContent,"span");
+        string span = MosesTraining::ParseXmlTagAttribute(tagContent,"span");
         if (! span.empty()) {
           vector<string> ij = Tokenize(span, "-");
           if (ij.size() != 1 && ij.size() != 2) {
@@ -141,7 +147,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
         }
 
         // may be either a input span label ("label"), or a specified output translation "translation"
-        string label = ParseXmlTagAttribute(tagContent,"label");
+        string label = MosesTraining::ParseXmlTagAttribute(tagContent,"label");
 
         //no need to do something with translation here
         //string translation = ParseXmlTagAttribute(tagContent,"translation");
@@ -166,7 +172,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
   return true;
 }
 
-int InputTreeRep::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int InputTreeRep::Read(std::istream& in)
 {
 
   string line;
@@ -196,54 +202,42 @@ int InputTreeRep::Read(std::istream& in,const std::vector<FactorType>& factorOrd
     const XMLParseOutputForTrain &labelItem = *iterLabel;
     const WordsRange &range = labelItem.m_range;
     const string &label = labelItem.m_label;
-    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
+    SyntaxLabel syntLabel(label,true);
+    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, syntLabel);
   }
 
 
   // default label
   const string noLabel = "NOTAG";
+  SyntaxLabel syntNoLabel(noLabel,true);
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
-      AddChartLabel(startPos, endPos, noLabel, factorOrder);
+      AddChartLabel(startPos, endPos, syntNoLabel);
     }
   }
   return 1;
 }
 
-void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, const Word &label
-                              , const std::vector<FactorType>& /* factorOrder */)
+void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, const SyntaxLabel &label)
 {
-  CHECK(label.IsNonTerminal());
+  CHECK(label.IsNonTerm());
 
   SyntLabels &syntLabels = GetLabels(startPos, endPos);
   syntLabels.push_back(label);
 }
 
-void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, const string &label
-                              , const std::vector<FactorType>& factorOrder)
-{
-  Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label); // TODO - no factors
-  word.SetFactor(0, factor);
-
-  AddChartLabel(startPos, endPos, word, factorOrder);
-}
-
 void InputTreeRep::Print(std::ostream &out)
 {
-  vector<FactorType> sourceFactors;
-  sourceFactors.push_back(0);
-
   size_t size = m_sourceSentence.size();
   for (size_t startPos = 0; startPos < size; ++startPos) {
     for (size_t endPos = startPos; endPos < size; ++endPos) {
-      vector<Word> &labelSet = m_sourceChart[startPos][endPos - startPos];
-      vector<Word>::iterator iter;
+      vector<SyntaxLabel> &labelSet = m_sourceChart[startPos][endPos - startPos];
+      vector<SyntaxLabel>::iterator iter;
       for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
-        Word &word = *iter;
+        SyntaxLabel sLabel = *iter;
         out << "[" << startPos <<"," << endPos << "]="
-            << word.GetString(sourceFactors,false) << "(" << word.IsNonTerminal() << ") ";
-        CHECK(word.IsNonTerminal());
+            << sLabel.GetString() << "(" << sLabel.IsNonTerm() << ") ";
+        CHECK(sLabel.IsNonTerm());
       }
     }
   }
