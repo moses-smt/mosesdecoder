@@ -35,13 +35,13 @@ while(<STDIN>){
 }
 
 open(EN,">$out.en") || die "Can't write to $out.en:$!\n";
-foreach my $e (keys %enPhrases){
+foreach my $e (sort keys %enPhrases){
     print EN "$e\n";
 }
 close(EN);
 
 open(FR,">$out.fr") || die "Can't write to $out.fr:$!\n";
-foreach my $f (keys %frPhrases){
+foreach my $f (sort keys %frPhrases){
     print FR "$f\n";
 }
 close(FR);
