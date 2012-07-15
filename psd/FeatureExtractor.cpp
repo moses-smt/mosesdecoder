@@ -1,5 +1,6 @@
 #include "FeatureExtractor.h"
 #include "Util.h"
+#include "StaticData.h"
 
 using namespace std;
 using namespace boost::bimaps;
@@ -8,10 +9,9 @@ using namespace Moses;
 namespace PSD
 {
 
-FeatureExtractor::FeatureExtractor(FeatureTypes ft,
-  const TargetIndexType &targetIndex,
+FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex,
   bool train)
-  : m_targetIndex(targetIndex), m_train(train)
+  : m_targetIndex(targetIndex), m_train(train){}
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
@@ -67,7 +67,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     GenerateInternalFeatures(sourceSide, fc);
   }
 
-   if (m_ft.m_syntacticParent) {
+   if (SYNTAX_PARENT) {
       std::cout << "Generate syntactic parent feature" << std::endl;
   }
 
@@ -94,7 +94,9 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
 
 string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
 {
-  return "c^" + SPrint(factor) + "_-" + SPrint(index) + "_" + value;
+  string featureString = "c^" + SPrint(factor) + "_-" + SPrint(index) + "_" + value;
+  //Moses::VERBOSE(5, "Adding source context feature..." << featureString <<  endl);
+  return featureString;
 }
 
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
@@ -107,7 +109,7 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
       if (spanStart >= i)
         fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
       if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
+        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart + i][fact]));
     }
   }
 }

@@ -22,11 +22,12 @@ const bool PSD_SOURCE_EXTERNAL = true; // generate context features
 const bool PSD_SOURCE_INTERNAL = true; // generate source-side phrase-internal features
 const bool PSD_TARGET_INTERNAL = true; // generate target-side phrase-internal features
 const bool PSD_PAIRED = false;         // generate paired features
-const bool PSD_BAG_OF_wORDS = false;   // generate bag-of-words features
+const bool PSD_BAG_OF_WORDS = false;   // generate bag-of-words features
+const bool SYNTAX_PARENT = true;
 
 const size_t PSD_CONTEXT_WINDOW = 2; // window size for context features
 
-const size_t[] PSD_FACTORS = { 0, 1, 2 };
+const size_t PSD_FACTORS[3] = { 0, 1, 2 };
 const size_t PSD_FACTOR_COUNT = 3;
 
 // extract features
@@ -44,7 +45,7 @@ public:
 
     void GenerateFeaturesChart(FeatureConsumer *fc,
     const ContextType &context,
-    vector<string> sourceSide,
+    std::vector<std::string> sourceSide,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<size_t> &translations,

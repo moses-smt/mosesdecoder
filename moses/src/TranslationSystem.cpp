@@ -31,6 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationSystem.h"
 #include "Util.h"
 
+// #ifdef HAVE_VW
+#include "CellContextScoreProducer.h"
+// #endif
+
 using namespace std;
 
 namespace Moses
@@ -117,6 +121,11 @@ void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& sour
        i != m_phraseDictionaries.end(); ++i) {
     (*i)->InitDictionary(this,source);
   }
+
+  // #ifdef HAVE_VW
+  CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
+    ccsp->SetSentence(source);
+  // #endif
 
   for(size_t i=0; i<m_reorderingTables.size(); ++i) {
     m_reorderingTables[i]->InitializeForInput(source);

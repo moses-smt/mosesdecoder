@@ -7,14 +7,14 @@
 #include <sstream>
 #include <deque>
 
-namespace PSD
-{
-
 // #ifdef HAVE_VW
-  // forward declarations to avoid dependency on VW 
+  // forward declarations to avoid dependency on VW
   struct vw;
   class ezexample;
 // #endif
+
+namespace PSD
+{
 
 // abstract consumer
 class FeatureConsumer
@@ -51,7 +51,7 @@ private:
   void WriteBuffer();
   std::string EscapeSpecialChars(const std::string &str);
 };
-  
+
 // #ifdef HAVE_VW
   // abstract consumer that trains/predicts using VW library interface
   class VWLibraryConsumer : public FeatureConsumer
@@ -62,15 +62,15 @@ private:
     virtual void AddFeature(const std::string &name, float value);
     virtual void FinishExample();
     virtual void Finish();
-  
+
   protected:
-    vw *m_VWInstance;
-    ezexample *m_ex;
+    ::vw *m_VWInstance;
+    ::ezexample *m_ex;
     bool m_shared;
 
     ~VWLibraryConsumer();
   };
-  
+
   // train using VW
   class VWLibraryTrainConsumer : public VWLibraryConsumer
   {
@@ -80,7 +80,7 @@ private:
     virtual float Predict(const std::string &label);
     virtual void FinishExample();
   };
-  
+
   // predict using VW
   class VWLibraryPredictConsumer : public VWLibraryConsumer
   {

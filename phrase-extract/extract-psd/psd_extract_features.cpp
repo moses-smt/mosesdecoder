@@ -38,24 +38,22 @@ Vocabulary srcVocab;
 Vocabulary tgtVocab;
 
 int main(int argc,char* argv[]){
-  cerr << "PSD phrase-extractor\n\n";
-  if (argc < 8){
-    cerr << "syntax: extract-psd context.template corpus.psd corpus.raw corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
+ /* cerr << "PSD phrase-extractor\n\n";
+  if (argc < 7){
+    cerr << "syntax: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
     cerr << "\t --ClassifierType vw|megam" << endl;
     cerr << "\t --PsdType phrasal|global" << endl;
     exit(1);
   }
-  char* &fileNameContext = argv[1]; // context template
-  char* &fileNamePsd = argv[2]; // location in corpus of PSD phrases (optionallly annotated with the position and phrase type of their translations.)
-  char* &fileNameSrcRaw = argv[3]; // raw source context
-  char* &fileNameSrcTag = argv[4]; // tagged source context in Moses factored format
-  char* &fileNamePT = argv[5]; // phrase table
-  char* &fileNameSrcVoc = argv[6]; // source phrase vocabulary
-  char* &fileNameTgtVoc = argv[7]; // target phrase vocabulary
-  string output = string(argv[8]);//output directory (for phrasal models) or root of filename (for global models)
-  for(int i =9; i < argc; i++){
+  char* &fileNamePsd = argv[1]; // location in corpus of PSD phrases (optionallly annotated with the position and phrase type of their translations.)
+  char* &fileNameSrcTag = argv[2]; // tagged source context in Moses factored format
+  char* &fileNamePT = argv[3]; // phrase table
+  char* &fileNameSrcVoc = argv[4]; // source phrase vocabulary
+  char* &fileNameTgtVoc = argv[5]; // target phrase vocabulary
+  string output = string(argv[6]);//output directory (for phrasal models) or root of filename (for global models)
+  for(int i = 7; i < argc; i++){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"vw") == 0){
@@ -70,7 +68,7 @@ int main(int argc,char* argv[]){
         cerr << "classifier " << format << "isn't supported" << endl;
         exit(1);
       }
-    } 
+    }
     if (strcmp(argv[i],"--PsdType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"global") == 0){
@@ -81,11 +79,7 @@ int main(int argc,char* argv[]){
         cerr << "PSD model type " << format << "isn't supported" << endl;
         exit(1);
       }
-    } 
-  }
-  InputFileStream src(fileNameSrcRaw);
-  if (src.fail()){
-    cerr << "ERROR: could not open " << fileNameSrcRaw << endl;
+    }
   }
   InputFileStream srcTag(fileNameSrcTag);
   if (srcTag.fail()){
@@ -128,7 +122,7 @@ int main(int argc,char* argv[]){
 
   // feature consumer for GLOBAL setting
   FeatureConsumer *globalOut = NULL;
-  if (psd_classifier == VWLib) 
+  if (psd_classifier == VWLib)
     globalOut = new VWLibraryTrainConsumer(output);
   else
     globalOut = new VWFileTrainConsumer(output);
@@ -151,20 +145,25 @@ int main(int argc,char* argv[]){
     size_t tgt_start = Scan<size_t>(token[3].c_str());
     size_t tgt_end = Scan<size_t>(token[4].c_str());
 
-    char rawSrcLine[LINE_MAX_LENGTH];
     char tagSrcLine[LINE_MAX_LENGTH];
 
     // go to current sentence
     while(csid < sid){
-      if (src.eof()) break;
-      SAFE_GETLINE((src),rawSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
       if (srcTag.eof()) break;
       SAFE_GETLINE((srcTag),tagSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
       ++csid;
     }
 
     assert(csid == sid);
-    vector<string> sent = Tokenize(rawSrcLine);
+    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
+
+    // get surface forms from factored format
+    vector<string> sent;
+    ContextType::const_iterator tagSrcIt;
+    for (tagSrcIt = factoredSrcLine.begin(); tagSrcIt != factoredSrcLine.end(); tagSrcIt++) {
+      sent.push_back(*tagSrcIt->begin());
+    }
+
     string phrase;
     if (token.size() > 6){
       phrase = token[5];
@@ -178,7 +177,6 @@ int main(int argc,char* argv[]){
 
     PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
     cout << "PHRASE : " << srcid << " " << phrase << endl;
-    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
 
     string tgtphrase = token[6];
     PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc);
@@ -201,7 +199,7 @@ int main(int argc,char* argv[]){
             mkdir(output_subdir.c_str(),S_IREAD | S_IWRITE | S_IEXEC);
             string fileName = output_subdir + "/" + SPrint(srcid) + ext;
             FeatureConsumer *fc = NULL;
-            if (psd_classifier == VWLib) 
+            if (psd_classifier == VWLib)
               fc = new VWLibraryTrainConsumer(fileName);
             else
               fc = new VWFileTrainConsumer(fileName);
@@ -215,4 +213,5 @@ int main(int argc,char* argv[]){
     }
   }
   //freem
+  */
 }

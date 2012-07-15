@@ -5,19 +5,14 @@
 #include "FeatureFunction.h"
 #include "TargetPhrase.h"
 #include "TypeDef.h"
-//#include "vw.h"
 #include "ScoreComponentCollection.h"
-#include "psd/FeatureExtractor.h"
-#include "psd/FeatureConsumer.h"
+#include "FeatureExtractor.h"
+#include "FeatureConsumer.h"
 #include <map>
 #include <string>
 #include <vector>
 
-using namespace std;
-
 namespace Moses {
-
-typedef std::map<std::string, size_t> RuleIndexType;
 
 class CellContextScoreProducer : public StatelessFeatureFunction
 {
@@ -27,33 +22,35 @@ class CellContextScoreProducer : public StatelessFeatureFunction
     CellContextScoreProducer(ScoreIndexManager &sci, float weight);
     ~CellContextScoreProducer();
 
-
     // mandatory methods for features
     std::string GetScoreProducerDescription(unsigned) const;
     std::string GetScoreProducerWeightShortName(unsigned) const;
     size_t GetNumScoreComponents() const;
     size_t GetNumInputScores() const;
 
-    vector<string> GetSourceFeatures(const InputType &srcSent,const std::string &sourceSide);
-    vector<string> GetTargetFeatures(const std::string &targetRep);
-
 
     // initialize vw
-    bool Initialize(const string &modelFile, const string &indexFile);
+    bool Initialize(const std::string &modelFile, const std::string &indexFile);
 
-    vector<ScoreComponentCollection> ScoreRules(    size_t startSpan,
+    // sets current source-side context
+    // must be called when starting to translate a new sentence
+    void SetSentence(const InputType &inputSent);
+
+    std::vector<ScoreComponentCollection> ScoreRules(    size_t startSpan,
                                                     size_t endSpan,
                                                     const std::string &sourceSide,
                                                     std::vector<std::string> *targetRepresentations,
                                                     const InputType &source);
 
     private :
-        PSD::FeatureExtractor *m_extactor;
-        PSD::FeatureConsumer *m_consumer;
-        RuleIndexType m_ruleIndex;
-        bool IsOOV(const std::string &targetRep);
-        bool LoadRuleIndex(const string &indexFile);
-        std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
+    PSD::ContextType m_currentContext;
+    PSD::FeatureExtractor *m_extractor;
+    PSD::FeatureConsumer *m_consumer;
+    ScoreComponentCollection ScoreFactory(float score);
+    PSD::TargetIndexType m_ruleIndex;
+    bool IsOOV(const std::string &targetRep);
+    bool LoadRuleIndex(const std::string &indexFile);
+    std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
   };
 }//end of namespace
 

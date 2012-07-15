@@ -239,7 +239,9 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   stringstream strme;
   strme << line << endl;
 
+  std::vector<std::string> sentTokens = Tokenize(" ",line);
   Sentence::Read(strme, factorOrder);
+
 
   // size input chart
   size_t sourceSize = GetSize();

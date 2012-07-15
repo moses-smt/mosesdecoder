@@ -1,20 +1,6 @@
-alias headers : ../../util//kenutil : : : <include>. ;
+alias headers : ../../util//kenutil ..//..//psd//psd : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
-
-boost 103600 ;
-
-# VW
-local with-vw = [ option.get "with-vw" ] ;
-if $(with-vw) {
-  lib vw : : <search>$(with-vw)/lib ;
-  lib allreduce : : <search>$(with-vw)/lib ;
-  obj CellContextScoreProducer.o : CellContextScoreProducer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
-  alias ccsc : CellContextScoreProducer.o vw allreduce : : : <library>boost_program_options <define>HAVE_VW <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
-  echo "Linking with Vowpal Wabbit" ;
-} else {
-  alias ccsc ;
-}
 
 if [ option.get "with-synlm" : no : yes ] = yes
 {
@@ -25,12 +11,16 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
+obj CellContextScoreProducer.o : CellContextScoreProducer.cpp headers : <include>..//..//psd ;
+
 lib moses_internal :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp CellContextScoreProducer.cpp ]
-synlm ccsc ThreadPool headers ;
-
+CellContextScoreProducer.o synlm ThreadPool headers ;
 
 alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
+
+
+

@@ -7,15 +7,15 @@
 #include "WordsRange.h"
 #include "TranslationOption.h"
 #include "Util.h"
-#include "vw.h"
-#include "ezexample.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
 
 #include "FeatureExtractor.h"
 #include "FeatureConsumer.h"
+
 using namespace std;
+using namespace PSD;
 
 namespace Moses
 {
@@ -30,63 +30,34 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
+CellContextScoreProducer::~CellContextScoreProducer()
+{
+    delete m_extractor;
+    delete m_consumer;
+}
+
 //note : initialized in static data ln.
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
   bool isGood = LoadRuleIndex(indexFile);
 
-  VERBOSE(4, "Initializing vw..." << endl);
-  // configure features
-  FeatureTypes ft;
-  ft.m_sourceExternal = true;
-  ft.m_sourceInternal = true;
-  ft.m_targetInternal = true;
-  ft.m_paired = false;
-  ft.m_bagOfWords = false;
-  ft.m_syntacticParent = true;
-  ft.m_contextWindow = 2;
-  ft.m_factors.push_back(0);
-  ft.m_factors.push_back(1);
-  ft.m_factors.push_back(2);
-
-  FeatureExtractor m_extractor = new FeatureExtractor(ft,m_ruleIndex,0);
-  FeatureConsumer m_consumer = new VWLibraryPredictConsumer(modelFile);
-  //vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
+  m_extractor = new FeatureExtractor(m_ruleIndex,false);
+  m_consumer = new VWLibraryPredictConsumer(modelFile);
+  VERBOSE(4, "Constructing score producers : " << isGood << endl);
   return isGood;
 }
 
-vector<string> CellContextScoreProducer::GetSourceFeatures(
-  const InputType &srcSent,
-  const std::string &sourceSide)
+ScoreComponentCollection CellContextScoreProducer::ScoreFactory(float score)
 {
-
-  vector<string> out;
-
-  // bag of words features
-  for (size_t i = 0; i < srcSent.GetSize(); i++) {
-    string word = srcSent.GetWord(i).GetString(m_srcFactors, false);
-    out.push_back("w^" + word);
-  }
-
-  // phrase feature
-  out.push_back("p^" + Replace(sourceSide, " ", "_"));
-
-  return out;
-}
-
-vector<string> CellContextScoreProducer::GetTargetFeatures(const std::string &targetRep)
-{
-  vector<string> out;
-  out.push_back("p^" + Replace(targetRep, " ", "_"));
-
+  ScoreComponentCollection out;
+  out.Assign(this, score);
   return out;
 }
 
 bool CellContextScoreProducer::IsOOV(const std::string &targetRep)
 {
-  return m_ruleIndex.find(targetRep) == m_ruleIndex.end();
+  return m_ruleIndex.left.find(targetRep) == m_ruleIndex.left.end();
 }
-
 
 bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 {
@@ -97,18 +68,32 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
   while (getline(in, line)) {
     vector<string> columns = Tokenize(line, "\t");
     size_t idx = Scan<size_t>(columns[1]);
-    m_ruleIndex.insert(make_pair<string, size_t>(columns[0], idx));
+    m_ruleIndex.insert(TargetIndexType::value_type(columns[0], idx));
   }
   in.close();
   return true;
 }
 
+void CellContextScoreProducer::SetSentence(const InputType &inputSent)
+{
+  m_currentContext.clear();
+  for (size_t i = 0; i < inputSent.GetSize(); i++) {
+    vector<string> factors;
+    Word word = inputSent.GetWord(i);
+    vector<size_t>::const_iterator it;
+    for (it = m_srcFactors.begin(); it != m_srcFactors.end(); it++) {
+      factors.push_back(word.GetFactor(*it)->GetString());
+    }
+    m_currentContext.push_back(factors);
+  }
+}
+
 vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
-                                                                      const std::string &sourceSide,
-                                                                      std::vector<std::string> * targetRepresentations,
-                                                                      const InputType &source,
-                                                                      size_t startSpan,
-                                                                      size_t endSpan
+                                                                        size_t startSpan,
+                                                                        size_t endSpan,
+                                                                        const std::string &sourceSide,
+                                                                        std::vector<std::string> * targetRepresentations,
+                                                                        const InputType &source
                                                                       )
 {
   //debugging : check that everything is fine in index map
@@ -119,39 +104,44 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
   //}
 
     vector<ScoreComponentCollection> scores;
-    // iterator over target representations
-    std::vector<std::string> :: iterator itr_targ_rep;
-    float sum = 0;
-
-    //FB: for debugging
-    //std::vector<std::string> :: iterator itr_source_feat;
-    //for(itr_source_feat = sourceFeatures.begin(); itr_source_feat != sourceFeatures.end(); itr_source_feat++)
-    //{
-    //    std::cout << *itr_source_feat << std::endl;
-    //}
-
+    float sum = 0.0;
     float score = 0.0;
-    ContextType contextType;
-    vector<std::string> tokSourceSide = Tokenize(" ",sourceSide);
-    m_extractor.GenerateFeatures(m_fc,contextType,tokSourceSide,spanStart,spanEnd,targetRepresentations,losses);
-    vector<std::string> * :: iterator itr_target_rep;
-    for(itr_target_rep = targetRepresentations.begin(); itr_target_rep != targetRepresentations,end(); itr_target_rep++)
-    {
-        score = m_consumer.predict(**itr_target_rep);
-        //    cerr << srcPhrase << " ||| " << tgtPhrase << " ||| " << score << endl;
-        sum += score;
 
-        // create score object
-        ScoreComponentCollection scoreCol;
-        scoreCol.Assign(this, score);
-        scores.push_back(scoreCol);
-        //std::cout << "Collection before normalization : " << scoreCol << std::endl;
+    //If the source is OOV, it will be copied into target
+    if (! IsOOV(targetRepresentations->front()))
+    {
+        vector<float> losses(targetRepresentations->size());
+        vector<size_t> targetIDs(targetRepresentations->size());
+
+         vector<std::string> :: iterator itr_target_rep;
+
+        //loop over target representation and create id for vw
+        for(itr_target_rep = (*targetRepresentations).begin(); itr_target_rep != (*targetRepresentations).end(); itr_target_rep++)
+        {
+            targetIDs.push_back(m_ruleIndex.left.find(*itr_target_rep)->second);
+        }
+
+        VERBOSE(5, "Extracting features features for source : " << sourceSide << endl);
+        vector<std::string> tokSourceSide = Tokenize(" ",sourceSide);
+        m_extractor->GenerateFeaturesChart(m_consumer,m_currentContext,tokSourceSide,startSpan,endSpan,targetIDs,losses);
+
+        vector<float>::iterator lossIt;
+        for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
+        VERBOSE(5, "Obtained prediction : " << sourceSide << endl);
+        *lossIt = exp(-*lossIt);
+        //put the score into scores
+        scores.push_back(ScoreFactory(*lossIt));
+        sum += *lossIt;
+        }
+    }
+    else {
+    for (size_t i = 0; i < targetRepresentations->size(); i++) {
+      scores.push_back(ScoreFactory(0));}
     }
     // normalize
     if (sum != 0) {
         vector<ScoreComponentCollection>::iterator colIt;
         for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-        //std::cout << "Normalizing : " << colIt->GetScoreForProducer(this) << " : " << std::endl;
         colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
         }
     }
