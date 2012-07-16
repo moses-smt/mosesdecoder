@@ -1,15 +1,18 @@
 #!/usr/bin/perl -w
 use strict;
 
-if (@ARGV == 0 || @ARGV > 2){
+my $source_ext = shift;
+my $target_ext = shift;
+my $out = shift;
+my $frStop = shift;
+
+if (not defined($out)) {
     print STDERR "$0\n";
     print STDERR "select French and English phrases from phrase-table for PSD modeling\n";
     print STDERR "  - French phrases: all phrases from phrase-table, except those that start or end with numbers, punctuation or stopwords\n";
     print STDERR "  - English phrases: all translation candidates from the phrase-table for the selected French phrases\n\n";
-   die "Usage: $0 output-name [French-stoplist]"
+    die "Usage: $0 source-ext target-ext output-name [French-stoplist]\n";
 }
-
-my($out,$frStop) = @ARGV;
 
 my %frStop = ();
 if (defined $frStop) {
@@ -34,13 +37,13 @@ while(<STDIN>){
     $enPhrases{$e}++;
 }
 
-open(EN,">$out.en") || die "Can't write to $out.en:$!\n";
+open(EN,">$out.$target_ext") || die "Can't write to $out.$target_ext:$!\n";
 foreach my $e (sort keys %enPhrases){
     print EN "$e\n";
 }
 close(EN);
 
-open(FR,">$out.fr") || die "Can't write to $out.fr:$!\n";
+open(FR,">$out.$source_ext") || die "Can't write to $out.$source_ext:$!\n";
 foreach my $f (sort keys %frPhrases){
     print FR "$f\n";
 }

@@ -1754,8 +1754,10 @@ sub define_training_build_ttable {
 sub define_training_psd_index {
   my $step_id = shift;
   my ($out, $phrase_table) = &get_output_and_input($step_id);
+  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
   my $psd_indexer = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd/select_psd_vocab.pl";
-  my $cmd = "zcat $phrase_table | $psd_indexer $out";
+  my $cmd = "zcat $phrase_table | $psd_indexer $input_extension $output_extension $out";
 
   &create_step($step_id, $cmd);
 }
@@ -1763,9 +1765,11 @@ sub define_training_psd_index {
 sub define_training_psd_model {
   my $step_id = shift;
   my ($out, $phrase_table, $extract, $corpus, $psd_index) = &get_output_and_input($step_id);
+  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
-  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.fr $psd_index.en $out.train";
+  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.$input_extension $psd_index.$output_extension $out.train";
   $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
 
   &create_step($step_id, $cmd);
@@ -1874,8 +1878,10 @@ sub define_training_create_config {
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
 
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
     if (&get("TRAINING:use-psd")) {
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index.fr ";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension ";
     }
 
     # additional settings for syntax models
@@ -2305,7 +2311,11 @@ sub define_tuningevaluation_filter {
     }
 
     if (&get("TRAINING:use-psd")) {
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index.fr ";
+      die "ERROR: psd_model is not defined" unless defined($psd_model);
+      die "ERROR: psd_index is not defined" unless defined($psd_index);
+      my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+      my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension ";
     }
 
     $cmd .= "-lm 0:3:$dir "; # dummy
