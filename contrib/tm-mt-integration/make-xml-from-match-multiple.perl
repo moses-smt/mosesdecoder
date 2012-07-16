@@ -5,12 +5,15 @@ use strict;
 my $DEBUG = 1;
 my $OUTPUT_RULES = 1;
 
-my $match_file  = "tm/BEST.acquis-xml-escaped.4.uniq.multi.tuning";
-my $source_file = "data/acquis.truecased.4.en.uniq";
-my $target_file = "data/acquis.truecased.4.fr.uniq";
-my $alignment_file = "data/acquis.truecased.4.align.uniq";
-my $out_file = "data/ac-test.input.xml.4.uniq.multi.tuning";
-my $in_file = "tuning/input.tc.4";
+my $scripts_root_dir = "/Users/hieuhoang/workspace/github/hieuhoang/scripts";
+
+my $data_root = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/";
+my $match_file  = "$data_root/in/BEST.acquis-xml-escaped.4.uniq.multi.tuning";
+my $source_file = "$data_root/in/acquis.truecased.4.en.uniq";
+my $target_file = "$data_root/in/acquis.truecased.4.fr.uniq";
+my $alignment_file = "$data_root/in/acquis.truecased.4.align.uniq";
+my $out_file = "$data_root/out/ac-test.input.xml.4.uniq.multi.tuning";
+my $in_file = "$data_root/in/input.tc.4";
 
 #my $match_file  = "tm/BEST.acquis-xml-escaped.4.uniq.multi";
 #my $source_file = "data/acquis.truecased.4.en.uniq";
@@ -61,7 +64,10 @@ close(MATCH);
 close(RULE) if $OUTPUT_RULES;
 close(RULE_INV) if $OUTPUT_RULES;
 
-`/home/pkoehn/moses/scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -scripts-root-dir /home/pkoehn/moses/scripts -hierarchical -extract-file $out_file.extract -lexical-file /home/pkoehn/experiment/fuzzy-acquis/model/lex.4 -phrase-translation-table $out_file.phrase-table` if $OUTPUT_RULES;
+`LC_ALL=C sort $out_file.extract | gzip -c > $out_file.extract.sorted.gz`;
+`LC_ALL=C sort $out_file.extract.inv | gzip -c > $out_file.extract.inv.sorted.gz`;
+
+`$scripts_root_dir/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $out_file.extract -lexical-file $data_root/in/lex.4 -phrase-translation-table $out_file.phrase-table` if $OUTPUT_RULES;
 
 sub create_xml {
     my ($source,$input,$target,$alignment,$path) = @_;
