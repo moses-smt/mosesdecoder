@@ -39,8 +39,8 @@ Vocabulary tgtVocab;
 
 int main(int argc,char* argv[]){
   cerr << "PSD phrase-extractor\n\n";
-  if (argc < 7){
-    cerr << "syntax: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename [options]\n";
+  if (argc < 8){
+    cerr << "syntax: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename extractor-config [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
     cerr << "\t --ClassifierType vw|megam" << endl;
@@ -53,7 +53,8 @@ int main(int argc,char* argv[]){
   char* &fileNameSrcVoc = argv[4]; // source phrase vocabulary
   char* &fileNameTgtVoc = argv[5]; // target phrase vocabulary
   string output = string(argv[6]);//output directory (for phrasal models) or root of filename (for global models)
-  for(int i = 7; i < argc; i++){
+  string configFile = string(argv[7]); // configuration file for the feature extractor
+  for(int i = 8; i < argc; i++){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"vw") == 0){
@@ -116,7 +117,10 @@ int main(int argc,char* argv[]){
     // label 0 is not allowed
     extractorTargetIndex.insert(TargetIndexType::value_type(getPhrase(i, tgtVocab, tgtPhraseVoc), i + 1));
   }
-  FeatureExtractor extractor(extractorTargetIndex, true);
+
+  ExtractorConfig config;
+  config.Load(configFile);
+  FeatureExtractor extractor(extractorTargetIndex, config, true);
 
   // prep feature consumers for PHRASAL setting
   map<PHRASE_ID, FeatureConsumer*> consumers;

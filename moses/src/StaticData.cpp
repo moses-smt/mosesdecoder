@@ -180,6 +180,10 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add(string("--psd-index not specified"));
       return false;
     }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
     if (m_parameter->GetParam("weight-psd").size() <= 0) {
       UserMessage::Add(string("weight-psd not specified"));
       return false;
@@ -187,7 +191,8 @@ bool StaticData::LoadData(Parameter *parameter)
     float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
     m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
     if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
-      m_parameter->GetParam("psd-index")[0])) {
+      m_parameter->GetParam("psd-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
       UserMessage::Add(string("Failed to load phrase index from " + m_parameter->GetParam("psd-index")[0]));
       return false;  
     }

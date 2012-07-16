@@ -26,7 +26,7 @@ public:
   PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float weight);
 
   // read required data files
-  bool Initialize(const std::string &modelFile, const std::string &indexFile);
+  bool Initialize(const std::string &modelFile, const std::string &indexFile, const std::string &configFile);
 
   // score a list of translation options
   // this is required to contain all possible translations
@@ -52,6 +52,7 @@ private:
   PSD::TargetIndexType m_phraseIndex;
   PSD::FeatureConsumer *m_consumer;
   PSD::FeatureExtractor *m_extractor;
+  PSD::ExtractorConfig m_extractorConfig;
   std::ifstream m_contextFile;
 };
 

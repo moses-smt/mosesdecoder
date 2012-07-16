@@ -31,13 +31,15 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
-bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile)
+bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
 {
   m_consumer = new VWLibraryPredictConsumer(modelFile);
   if (! LoadPhraseIndex(indexFile))
     return false;
 
-  m_extractor = new FeatureExtractor(m_phraseIndex, false);
+  m_extractorConfig.Load(configFile);
+
+  m_extractor = new FeatureExtractor(m_phraseIndex, m_extractorConfig, false);
   return true;
 }
 

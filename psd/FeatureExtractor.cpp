@@ -1,16 +1,24 @@
 #include "FeatureExtractor.h"
 #include "Util.h"
 
+#include <boost/property_tree/ptree.hpp>
+#include <boost/property_tree/ini_parser.hpp>
+#include <exception>
+#include <stdexcept>
+
 using namespace std;
 using namespace boost::bimaps;
+using namespace boost::property_tree;
 using namespace Moses;
 
 namespace PSD
 {
 
-FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, bool train)
-  : m_targetIndex(targetIndex), m_train(train)
+FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, const ExtractorConfig &config, bool train)
+  : m_targetIndex(targetIndex), m_config(config), m_train(train)
 {  
+  if (! m_config.IsLoaded())
+    throw logic_error("configuration file not loaded");
 }
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
@@ -21,11 +29,11 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   vector<float> &losses)
 {  
   fc->SetNamespace('s', true);
-  if (PSD_SOURCE_EXTERNAL) {
+  if (m_config.GetSourceExternal()) {
     GenerateContextFeatures(context, spanStart, spanEnd, fc);
   }
 
-  if (PSD_SOURCE_INTERNAL) {
+  if (m_config.GetSourceInternal()) {
     vector<string> sourceForms(spanEnd - spanStart + 1);
     for (size_t i = spanStart; i <= spanEnd; i++) {
       sourceForms[i - spanStart] = context[i][0]; // XXX assumes that form is the 0th factor
@@ -38,7 +46,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
-    if (PSD_TARGET_INTERNAL) {
+    if (m_config.GetTargetInternal()) {
       GenerateInternalFeatures(Tokenize(m_targetIndex.right.find(*transIt)->second, " "), fc);
     }  
 
@@ -49,6 +57,32 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     }
   }
   fc->FinishExample();
+}
+
+ExtractorConfig::ExtractorConfig()
+
+  : m_paired(false), m_bagOfWords(false), m_sourceExternal(false),
+         m_sourceInternal(false), m_targetInternal(false), m_windowSize(0)
+{}
+
+void ExtractorConfig::Load(const string &configFile)
+{
+  ptree pTree;
+  ini_parser::read_ini(configFile, pTree);
+  m_sourceInternal = pTree.get<bool>("features.source-internal", false);
+  m_sourceExternal = pTree.get<bool>("features.source-external", false);
+  m_targetInternal = pTree.get<bool>("features.target-internal", false);
+  m_paired         = pTree.get<bool>("features.paired", false);
+  m_bagOfWords     = pTree.get<bool>("features.bag-of-words", false);
+  m_windowSize     = pTree.get<size_t>("features.window-size", 0);  
+
+  vector<string> factors = Tokenize(",", pTree.get<string>("features.factors", ""));
+  vector<string>::const_iterator it;
+  for (it = factors.begin(); it != factors.end(); it++) {
+    m_factors.push_back(Scan<size_t>(*it));
+  }
+
+  m_isLoaded = true;
 }
 
 //
@@ -65,12 +99,13 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanEnd,
   FeatureConsumer *fc)
 {
-  for (size_t fact = 0; fact < PSD_FACTOR_COUNT; fact++) {
-    for (size_t i = 1; i <= PSD_CONTEXT_WINDOW; i++) {
+  vector<size_t>::const_iterator factIt;
+  for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
+    for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
       if (spanStart >= i) 
-        fc->AddFeature(BuildContextFeature(fact, -i, context[spanStart - i][fact]));
+        fc->AddFeature(BuildContextFeature(*factIt, -i, context[spanStart - i][*factIt]));
       if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(fact, i, context[spanEnd + i][fact]));
+        fc->AddFeature(BuildContextFeature(*factIt, i, context[spanEnd + i][*factIt]));
     }
   }
 }
