@@ -43,6 +43,7 @@ namespace Moses
 TargetPhrase::TargetPhrase( std::string out_string, Phrase sourcePhrase)
   :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_wordAlignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
   //ACAT
   const StaticData &staticData = StaticData::Instance();
@@ -57,6 +58,7 @@ TargetPhrase::TargetPhrase(Phrase sourcePhrase)
   //damt-hiero : source phrase created in constructor
   //, m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_wordAlignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
     m_sourcePhrase = new Phrase(sourcePhrase);
 }
@@ -68,6 +70,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, Phrase sourcePhrase)
   //damt-hiero : source phrase created in constructor
   //, m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_wordAlignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
     m_sourcePhrase = new Phrase(sourcePhrase);
 }
@@ -333,6 +336,7 @@ void MosesShouldUseExceptions(bool value) {
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
   set<pair<size_t,size_t> > alignmentInfo;
+  set<pair<size_t,size_t> > wordAlignmentInfo;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
     util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
     MosesShouldUseExceptions(dash);
@@ -340,11 +344,14 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     MosesShouldUseExceptions(dash);
     size_t targetPos = boost::lexical_cast<size_t>(*dash++);
     MosesShouldUseExceptions(!dash);
-
-    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    if(GetWord(targetPos).IsNonTerminal())
+        alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    else 
+        wordAlignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
   }
 
   SetAlignmentInfo(alignmentInfo);
+  SetWordAlignmentInfo(wordAlignmentInfo);
 }
 
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
@@ -352,6 +359,10 @@ void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &a
   m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
 }
 
+void TargetPhrase::SetWordAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+{
+    m_wordAlignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+}
 
 TO_STRING_BODY(TargetPhrase);
 

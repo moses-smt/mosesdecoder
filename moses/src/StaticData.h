@@ -382,6 +382,9 @@ public:
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
+  bool IsAlignmentReportingEnabled() const {
+        return !m_alignmentOutputFile.empty();
+  }
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
