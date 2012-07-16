@@ -1764,12 +1764,12 @@ sub define_training_psd_index {
 
 sub define_training_psd_model {
   my $step_id = shift;
-  my ($out, $phrase_table, $extract, $corpus, $psd_index) = &get_output_and_input($step_id);
+  my ($out, $phrase_table, $extract, $corpus, $psd_index, $psd_config) = &get_output_and_input($step_id);
   my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
   my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
-  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.$input_extension $psd_index.$output_extension $out.train";
+  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.$input_extension $psd_index.$output_extension $out.train $psd_config";
   $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
 
   &create_step($step_id, $cmd);
@@ -1852,7 +1852,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_model,$psd_index,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_model,$psd_index,$psd_config,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1903,7 +1903,7 @@ sub define_training_create_config {
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
     my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
     if (&get("TRAINING:use-psd")) {
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension ";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension -psd-config $psd_config ";
     }
 
     # additional settings for syntax models
@@ -2270,7 +2270,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_index, $psd_model) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_index, $psd_model, $psd_config) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2335,9 +2335,10 @@ sub define_tuningevaluation_filter {
     if (&get("TRAINING:use-psd")) {
       die "ERROR: psd_model is not defined" unless defined($psd_model);
       die "ERROR: psd_index is not defined" unless defined($psd_index);
+      die "ERROR: psd_index is not defined" unless defined($psd_config);
       my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
       my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension ";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension -psd-config $psd_config ";
     }
 
     $cmd .= "-lm 0:3:$dir "; # dummy

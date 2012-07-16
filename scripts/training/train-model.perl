@@ -37,7 +37,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    $_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
-   $_DICTIONARY, $_EPPEX, $IGNORE, $_PSD_MODEL, $_PSD_INDEX, $_EXTRACT_PSD);
+   $_DICTIONARY, $_EPPEX, $IGNORE, $_PSD_MODEL, $_PSD_INDEX, $_PSD_CONFIG, $_EXTRACT_PSD);
 my $_CORES = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -126,6 +126,7 @@ $_HELP = 1
            'extract-psd-anot' => \$_EXTRACT_PSD,
            'psd-index=s' => \$_PSD_INDEX,
            'psd-model=s' => \$_PSD_MODEL,
+           'psd-config=s' => \$_PSD_CONFIG,
 		       'cores=i' => \$_CORES
                );
 
@@ -1899,7 +1900,7 @@ sub create_ini {
 
    if (defined $_PSD_MODEL) {
      print INI "\n# Phrase-sense disambiugation";
-     print INI "\n[psd-model]\n$_PSD_MODEL\n\n[psd-index]\n$_PSD_INDEX\n";
+     print INI "\n[psd-model]\n$_PSD_MODEL\n\n[psd-index]\n$_PSD_INDEX\n\n[psd-config]\n$_PSD_CONFIG\n";
      print INI "\n[weight-psd]\n0.1\n";
    }
 
