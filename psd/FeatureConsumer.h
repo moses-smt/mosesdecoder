@@ -6,6 +6,12 @@
 #include <fstream>
 #include <sstream>
 #include <deque>
+#include <vector>
+
+#include <boost/noncopyable.hpp>
+#include <boost/thread/condition_variable.hpp>
+#include <boost/thread/locks.hpp>
+#include <boost/thread/mutex.hpp>
 
 // #ifdef HAVE_VW
   // forward declarations to avoid dependency on VW 
@@ -35,7 +41,7 @@ class VWFileTrainConsumer : public FeatureConsumer
 public:
   VWFileTrainConsumer(const std::string &outputFile);
 
-  // interface implementation
+  // FeatureConsumer interface implementation
   virtual void SetNamespace(char ns, bool shared);
   virtual void AddFeature(const std::string &name);
   virtual void AddFeature(const std::string &name, float value);
@@ -51,10 +57,10 @@ private:
   void WriteBuffer();
   std::string EscapeSpecialChars(const std::string &str);
 };
-  
+
 // #ifdef HAVE_VW
   // abstract consumer that trains/predicts using VW library interface
-  class VWLibraryConsumer : public FeatureConsumer
+  class VWLibraryConsumer : public FeatureConsumer, private boost::noncopyable
   {
   public:
     virtual void SetNamespace(char ns, bool shared);
@@ -66,7 +72,12 @@ private:
   protected:
     ::vw *m_VWInstance;
     ::ezexample *m_ex;
+    // this contains state about which namespaces are shared
     bool m_shared;
+    // if true, then the VW instance is owned by an external party and should NOT be
+    // deleted at end; if false, then we own the VW instance and must clean up after it.
+    bool m_sharedVwInstance;
+    int m_index;
 
     ~VWLibraryConsumer();
   };
@@ -88,7 +99,32 @@ private:
     VWLibraryPredictConsumer(const std::string &modelFile);
     virtual void Train(const std::string &label, float loss);
     virtual float Predict(const std::string &label);
+
+    friend class VWLibraryPredictConsumerFactory;
+
+  private:
+    VWLibraryPredictConsumer(vw * instance, int index);
   };
+
+  class VWLibraryPredictConsumerFactory : private boost::noncopyable
+  {
+  public:
+    VWLibraryPredictConsumerFactory(const std::string &modelFile, const int poolSize);
+
+    VWLibraryPredictConsumer * Acquire();
+    void Release(VWLibraryPredictConsumer * fc);
+
+    ~VWLibraryPredictConsumerFactory();
+
+  private:
+    ::vw *m_VWInstance;
+    int m_firstFree;
+    std::vector<int> m_nextFree;
+    std::vector<VWLibraryPredictConsumer *> m_consumers;
+    boost::mutex m_mutex;
+    boost::condition_variable m_cond;
+  };
+
 // #endif // HAVE_VW
 
 } // namespace PSD
