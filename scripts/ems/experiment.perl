@@ -1750,15 +1750,37 @@ sub define_training_sigtest_filter {
   my $salm = &get("GENERAL:salm-path");
   my $salm_bin = "$salm/Bin/Linux/Index/IndexSA.O32";
   my $src = "$corpus." . &get("GENERAL:input-extension");
-  my $tgt =" $corpus." . &get("GENERAL:output-extension");
+  my $tgt = "$corpus." . &get("GENERAL:output-extension");
   my $filter = &get("GENERAL:moses-src-dir") . "/contrib/sigtest-filter/filter-pt";
-  my $cmd = "$salm_bin $src && $salm_bin $tgt";
-  $cmd .= " && zcat $phrase_table | $filter -e $tgt -f $src -l a+e -n 30 ";
+
+  ### Single threaded version of sigtest directly in experiment.perl with no wrapper
+  # my $cmd = "$salm_bin $src && $salm_bin $tgt";
+  # $cmd .= " && zcat $phrase_table | $filter -e $tgt -f $src -l a+e -n 30 ";
+  # my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+  # if ($hierarchical) {
+  #     $cmd .= "-h ";
+  # }
+  # $cmd .= "> $out";
+
+  my $cores = &get("GENERAL:cores");
+  $cores = 1 if not defined($cores);
+
+  my $cmd = "";
+  $cmd .= &get("GENERAL:moses-src-dir") . "/contrib/sigtest-filter/sigtest-parallel.perl ";
+  $cmd .= "$cores ";
+  $cmd .= "$filter ";
+  $cmd .= '"-l a+e -n 30';
   my $hierarchical = &get("TRAINING:hierarchical-rule-set");
   if ($hierarchical) {
-      $cmd .= "-h ";
+      $cmd .= " -h";
   }
-  $cmd .= "> $out";
+  $cmd .= '" ';
+  $cmd .= "$phrase_table ";
+  #$cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
+  $cmd .= "$salm_bin ";
+  $cmd .= "$src ";
+  $cmd .= "$tgt ";
+  $cmd .= "$out ";
 
   &create_step($step_id, $cmd);
 }
