@@ -50,7 +50,7 @@ private:
 
   std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::TargetIndexType m_phraseIndex;
-  PSD::FeatureConsumer *m_consumer;
+  PSD::VWLibraryPredictConsumerFactory	*m_consumerFactory;
   PSD::FeatureExtractor *m_extractor;
   PSD::ExtractorConfig m_extractorConfig;
   std::ifstream m_contextFile;

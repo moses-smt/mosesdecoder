@@ -1195,6 +1195,8 @@ sub word_align {
 
 sub get_lexical_factored {
     print STDERR "(4) generate lexical translation table $___TRANSLATION_FACTORS @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     if ($___NOT_FACTORED && !$_XML) {
 	&get_lexical($___CORPUS.".".$___F,
 		     $___CORPUS.".".$___E,
@@ -1299,6 +1301,8 @@ sub get_lexical {
 
 sub extract_phrase_factored {
     print STDERR "(5) extract phrases @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     if ($___NOT_FACTORED) {
 	&extract_phrase($___CORPUS.".".$___F,
 			$___CORPUS.".".$___E,
@@ -1453,6 +1457,8 @@ sub extract_phrase {
 
 sub score_phrase_factored {
     print STDERR "(6) score phrases @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     my @SPECIFIED_TABLE = @_PHRASE_TABLE;
     if ($___NOT_FACTORED) {
 	my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table");
@@ -1627,6 +1633,7 @@ sub score_phrase_memscore {
 
 sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
 
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     if ($REORDERING_LEXICAL) {
@@ -1696,6 +1703,8 @@ sub get_reordering {
 my $factor_e_source;
 sub get_generation_factored {
     print STDERR "(8) learn generation model @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     if (defined $___GENERATION_FACTORS) {
 	my @SPECIFIED_TABLE = @_GENERATION_TABLE;
 	my @TYPE = @_GENERATION_TYPE;
@@ -1778,6 +1787,8 @@ sub get_generation {
 
 sub create_ini {
     print STDERR "(9) create moses.ini @ ".`date`;
+    ## This should be done here, but it is done below instead for some reason...
+    #safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
     
     &full_path(\$___MODEL_DIR);
     &full_path(\$___VCB_E);

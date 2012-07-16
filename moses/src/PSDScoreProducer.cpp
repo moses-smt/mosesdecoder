@@ -33,7 +33,7 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
 
 bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
 {
-  m_consumer = new VWLibraryPredictConsumer(modelFile);
+  m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, 255);
   if (! LoadPhraseIndex(indexFile))
     return false;
 
@@ -69,8 +69,10 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
       string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_tgtFactors);
       optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
     }
-    m_extractor->GenerateFeatures(m_consumer, src.m_PSDContext, options[0]->GetStartPos(),
+    VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
+    m_extractor->GenerateFeatures(p_consumer, src.m_PSDContext, options[0]->GetStartPos(),
         options[0]->GetEndPos(), optionIDs, losses);
+    m_consumerFactory->Release(p_consumer);
 
     vector<float>::iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
