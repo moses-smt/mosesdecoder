@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
+#include "FeatureExtractor.h"
 
 namespace Moses
 {
@@ -57,6 +58,7 @@ public:
   std::vector<bool> m_sourceCompleted;
   std::string m_initialTargetPhrase;
   size_t m_frontSpanCoveredLength;
+  PSD::ContextType m_PSDContext;
   // how many words from the beginning are covered
 
   InputType(long translationId = 0);

@@ -37,7 +37,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    $_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
-   $_DICTIONARY, $_EPPEX, $IGNORE);
+   $_DICTIONARY, $_EPPEX, $IGNORE, $_PSD_MODEL, $_PSD_INDEX, $_EXTRACT_PSD);
 my $_CORES = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -123,6 +123,9 @@ $_HELP = 1
 		       'eppex:s' => \$_EPPEX,
 		       'additional-ini=s' => \$_ADDITIONAL_INI, 
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
+           'extract-psd-anot' => \$_EXTRACT_PSD,
+           'psd-index=s' => \$_PSD_INDEX,
+           'psd-model=s' => \$_PSD_MODEL,
 		       'cores=i' => \$_CORES
                );
 
@@ -1427,12 +1430,15 @@ sub extract_phrase {
       if ($reordering_flag) {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
-        $cmd .= " --NoTTable" if !$ttable_flag;
-        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
+      $cmd .= " --NoTTable" if !$ttable_flag;
+      $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
     $cmd .= " --GZOutput ";
+    if ($_EXTRACT_PSD) {
+      $cmd .= " --OutputPsdInfo ";
+    }
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
@@ -1878,6 +1884,12 @@ sub create_ini {
    if ($num_of_ttables != $stepsused{"T"}) {
      print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$num_of_ttables\n";
      exit 1 if $num_of_ttables < $stepsused{"T"}; # fatal to define less
+   }
+
+   if (defined $_PSD_MODEL) {
+     print INI "\n# Phrase-sense disambiugation";
+     print INI "\n[psd-model]\n$_PSD_MODEL\n\n[psd-index]\n$_PSD_INDEX\n";
+     print INI "\n[weight-psd]\n0.1\n";
    }
 
     if (defined $___GENERATION_FACTORS) {

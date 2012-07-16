@@ -1,8 +1,6 @@
 // $Id$
 
 #include "util/check.hh"
-#include "vw.h"
-#include "ezexample.h"
 #include "FFState.h"
 #include "StaticData.h"
 #include "PSDScoreProducer.h"
@@ -14,26 +12,33 @@
 #include <algorithm>
 
 using namespace std;
+using namespace boost::bimaps;
+using namespace PSD;
 
 namespace Moses
 {
-
-VWInstance vwInstance;
 
 PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float weight)
 {
   scoreIndexManager.AddScoreProducer(this);
   vector<float> weights;
   weights.push_back(weight);
-  m_srcFactors.push_back(0);
+  m_srcFactors.push_back(0); 
+  m_srcFactors.push_back(1);
+  m_srcFactors.push_back(2);
+
   m_tgtFactors.push_back(0);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
 bool PSDScoreProducer::Initialize(const string &modelFile, const string &indexFile)
 {
-  vwInstance.m_vw = VW::initialize("--hash all -q st --noconstant -i " + modelFile);
-  return LoadPhraseIndex(indexFile);
+  m_consumer = new VWLibraryPredictConsumer(modelFile);
+  if (! LoadPhraseIndex(indexFile))
+    return false;
+
+  m_extractor = new FeatureExtractor(m_phraseIndex, false);
+  return true;
 }
 
 ScoreComponentCollection PSDScoreProducer::ScoreFactory(float score)
@@ -43,102 +48,33 @@ ScoreComponentCollection PSDScoreProducer::ScoreFactory(float score)
   return out;
 }
 
-vector<string> PSDScoreProducer::GetSourceFeatures(
-  const InputType &srcSent,
-  const TranslationOption *tOpt)
-{
-  vector<string> out;
-  const Phrase *srcPhrase = tOpt->GetSourcePhrase();
-
-  // context features
-  for (size_t i = 1; i <= CONTEXT_SIZE; i++) {
-    if (tOpt->GetStartPos() >= i) {
-      out.push_back("0_-" + SPrint(i) + "_"
-          + srcSent.GetWord(tOpt->GetStartPos() - i).GetString(m_srcFactors, false));
-    }    
-    if (tOpt->GetEndPos() + i < srcSent.GetSize()) {
-      out.push_back("0_" + SPrint(i) + "_"
-          + srcSent.GetWord(tOpt->GetStartPos() + i).GetString(m_srcFactors, false));
-    }
-  }
-
-  // bag of words features
-  for (size_t i = 0; i < srcSent.GetSize(); i++) {
-    string word = srcSent.GetWord(i).GetString(m_srcFactors, false);
-    out.push_back("w^" + word);
-  }
-
-  // phrase feature
-  out.push_back("p^" + Replace(srcPhrase->GetStringRep(m_srcFactors), " ", "_"));
-
-  return out;
-}
-
-vector<string> PSDScoreProducer::GetTargetFeatures(const TranslationOption *tOpt)
-{
-  vector<string> out;
-  const Phrase *srcPhrase = tOpt->GetSourcePhrase();
-  const TargetPhrase &tgtPhrase = tOpt->GetTargetPhrase();
-
-  // target phrase as a feature
-  out.push_back("p^" + Replace(tgtPhrase.GetStringRep(m_tgtFactors), " ", "_"));
-
-  // phrase-internal word pairs
-  const AlignmentInfo &alignInfo = tgtPhrase.GetAlignmentInfo();
-  AlignmentInfo::const_iterator it;
-  for (it = alignInfo.begin(); it != alignInfo.end(); it++) {
-    string srcWord = srcPhrase->GetWord(it->first).GetString(m_srcFactors, false);
-    string tgtWord = tgtPhrase.GetWord(it->second).GetString(m_tgtFactors, false);
-    out.push_back("wp^" + srcWord + "_" + tgtWord);
-  }
-
-  return out;
-}
-
 bool PSDScoreProducer::IsOOV(const TargetPhrase &tgtPhrase)
 {
-  return m_phraseIndex.find(tgtPhrase.GetStringRep(m_tgtFactors)) == m_phraseIndex.end();
+  return m_phraseIndex.left.find(tgtPhrase.GetStringRep(m_tgtFactors)) == m_phraseIndex.left.end();
 }
 
-vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(
-  const vector<TranslationOption *> &options,
-  const InputType &source)
+vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
-  vector<TranslationOption *>::const_iterator it;
   vector<ScoreComponentCollection> scores;
   float sum = 0;
 
   if (options.size() != 0 && ! IsOOV(options[0]->GetTargetPhrase())) {
-    vector<string> sourceFeatures = GetSourceFeatures(source, options[0]);
+    vector<float> losses(options.size());
+    vector<size_t> optionIDs;
 
-    // create VW example, add source-side features
-    ezexample ex(&vwInstance.m_vw, false);
-    ex(vw_namespace('s'));
-    vector<string>::const_iterator fIt;
-    for (fIt = sourceFeatures.begin(); fIt != sourceFeatures.end(); fIt++) {
-      ex.addf(*fIt);
+    vector<TranslationOption *>::const_iterator optIt;
+    for (optIt = options.begin(); optIt != options.end(); optIt++) {
+      string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_tgtFactors);
+      optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
     }
+    m_extractor->GenerateFeatures(m_consumer, src.m_PSDContext, options[0]->GetStartPos(),
+        options[0]->GetEndPos(), optionIDs, losses);
 
-    // get scores for all possible translations
-    for (it = options.begin(); it != options.end(); it++) {
-      vector<string> targetFeatures = GetTargetFeatures(*it);
-      string tgtPhrase = (*it)->GetTargetPhrase().GetStringRep(m_srcFactors);
-
-      // set label to target phrase index
-      ex.set_label(SPrint(m_phraseIndex[tgtPhrase]));
-
-      // move to target namespace, add target phrase as a feature
-      ex(vw_namespace('t'));
-      for (fIt = targetFeatures.begin(); fIt != targetFeatures.end(); fIt++) {
-        ex.addf(*fIt);
-      }
-
-      // get prediction
-      float score = 1 / (1 + exp(-ex()));
+    vector<float>::iterator lossIt;
+    for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
+      float score = exp(-*lossIt);
       sum += score;
       scores.push_back(ScoreFactory(score));
-      // move out of target namespace
-      --ex;
     }
   } else {
     for (size_t i = 0; i < options.size(); i++) {
@@ -183,10 +119,9 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   if (!in.good())
     return false;
   string line;
+  size_t index = 0;
   while (getline(in, line)) {
-    vector<string> columns = Tokenize(line, "\t");
-    size_t idx = Scan<size_t>(columns[1]);
-    m_phraseIndex.insert(make_pair<string, size_t>(columns[0], idx));
+    m_phraseIndex.insert(TargetIndexType::value_type(line, ++index));
   }
   in.close();
 

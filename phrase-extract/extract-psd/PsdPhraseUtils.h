@@ -1,6 +1,6 @@
 #ifndef psd_phrase_utils_h
 #define psd_phrase_utils_h
-#include "../tables-core.h"
+#include "tables-core.h"
 #include <set>
 #include <map>
 
@@ -10,7 +10,7 @@
 using namespace std;
 
 typedef MosesTraining::PhraseTable PhraseVocab;
-typedef map< MosesTraining::PHRASE_ID, map< MosesTraining::PHRASE_ID, int > > PhraseTranslations;
+typedef multimap< MosesTraining::PHRASE_ID, MosesTraining::PHRASE_ID > PhraseTranslations;
 
 bool readPhraseVocab(const char* vocabFile, MosesTraining::Vocabulary &wordVocab, PhraseVocab &vocab);
 
@@ -28,10 +28,5 @@ string getPhrase(MosesTraining::PHRASE_ID labelid, MosesTraining::Vocabulary &tg
 bool exists(MosesTraining::PHRASE_ID src, MosesTraining::PHRASE_ID tgt, PhraseTranslations &transTable);
 
 bool exists(MosesTraining::PHRASE_ID src, PhraseTranslations &transTable);
-
-bool printTransToFile(string fileName, PhraseTranslations &transTable, MosesTraining::PHRASE_ID src);
-
-bool printTransStringToFile(string fileName, PhraseTranslations &transTable, MosesTraining::PHRASE_ID src, PhraseVocab &pVocab, MosesTraining::Vocabulary &wVocab);
-
 
 #endif

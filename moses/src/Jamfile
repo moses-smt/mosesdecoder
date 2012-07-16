@@ -1,23 +1,6 @@
-alias headers : ../../util//kenutil : : : <include>. ;
+alias headers : ../../util//kenutil ..//..//psd//psd : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
-
-boost 103600 ;
-
-local current = ;
-
-# VW
-local with-vw = [ option.get "with-vw" ] ;
-if $(with-vw) {
-  lib vw : : <search>$(with-vw)/lib ;
-  lib allreduce : : <search>$(with-vw)/lib ;
-  obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>$(with-vw)/library <include>$(with-vw)/vowpalwabbit ;
-  alias psd : PSDScoreProducer.o vw allreduce : : : <library>boost_program_options <define>HAVE_VW <include>$(with-vw)/vowpalwabbit ;
-  current += "--with-vw=$(with-vw)" ;
-  echo "Linking with Vowpal Wabbit" ;
-} else {
-  alias psd ;
-}
 
 if [ option.get "with-synlm" : no : yes ] = yes
 {
@@ -28,18 +11,13 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
+obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>..//..//psd ;
+
 lib moses_internal :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp PSDScoreProducer.cpp ]
-synlm psd ThreadPool headers ;
+PSDScoreProducer.o synlm ThreadPool headers ;
 
 alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
-
-path-constant PSD-LOG : bin/psd.log ;
-
-current = $(current:J=" ") ;
-current ?= "" ;
-
-always-if-changed $(PSD-LOG) $(current) : moses_internal moses ;

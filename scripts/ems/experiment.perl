@@ -940,6 +940,12 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+  elsif ($DO_STEP[$i] eq 'TRAINING:psd-build-index') {
+      &define_training_psd_index($i);
+        }
+  elsif ($DO_STEP[$i] eq 'TRAINING:psd-build-model') {
+      &define_training_psd_model($i);
+        }
   elsif ($DO_STEP[$i] eq 'TRAINING:sigtest-filter') {
       &define_training_sigtest_filter($i);
         }
@@ -1720,6 +1726,7 @@ sub define_training_extract_phrases {
 
     my $extract_settings = &get("TRAINING:extract-settings");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
+    $cmd .= " -extract-psd-anot " if &get("TRAINING:use-psd");
 
     &create_step($step_id,$cmd);
 }
@@ -1742,6 +1749,30 @@ sub define_training_build_ttable {
     }
 
     &create_step($step_id,$cmd);
+}
+
+sub define_training_psd_index {
+  my $step_id = shift;
+  my ($out, $phrase_table) = &get_output_and_input($step_id);
+  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+  my $psd_indexer = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd/select_psd_vocab.pl";
+  my $cmd = "zcat $phrase_table | $psd_indexer $input_extension $output_extension $out";
+
+  &create_step($step_id, $cmd);
+}
+
+sub define_training_psd_model {
+  my $step_id = shift;
+  my ($out, $phrase_table, $extract, $corpus, $psd_index) = &get_output_and_input($step_id);
+  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+  my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
+  my $vw = &get("GENERAL:vw-path") . "/bin/vw";
+  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.$input_extension $psd_index.$output_extension $out.train";
+  $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
+
+  &create_step($step_id, $cmd);
 }
 
 sub define_training_sigtest_filter {
@@ -1821,7 +1852,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_model,$psd_index,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1867,6 +1898,12 @@ sub define_training_create_config {
       $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
+    }
+
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    if (&get("TRAINING:use-psd")) {
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension ";
     }
 
     # additional settings for syntax models
@@ -2233,7 +2270,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_index, $psd_model) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2294,6 +2331,15 @@ sub define_tuningevaluation_filter {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
+
+    if (&get("TRAINING:use-psd")) {
+      die "ERROR: psd_model is not defined" unless defined($psd_model);
+      die "ERROR: psd_index is not defined" unless defined($psd_index);
+      my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+      my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension ";
+    }
+
     $cmd .= "-lm 0:3:$dir "; # dummy
     $cmd .= "-config $config\n";
     
