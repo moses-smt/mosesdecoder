@@ -355,7 +355,6 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
   size_t numTokens    = 0;
   size_t numKeyTokens = 0;
   while(getline(inFile, line)) {
-    //TRACE_ERR(lnc<<":"<<line<<"\n");
     ++lnc;
     if(0 == lnc % 10000) {
       TRACE_ERR(".");
@@ -464,6 +463,10 @@ bool LexicalReorderingTableTree::Create(std::istream& inFile,
       }
     }
     cands.push_back(GenericCandidate(tgt_phrases, scores));
+  }
+  if (lnc == 0) {
+    TRACE_ERR("ERROR: empty lexicalised reordering file\n" << std::endl);
+    return false;
   }
   //flush remainders
   cands.writeBin(ot);
