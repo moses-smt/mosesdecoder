@@ -280,6 +280,8 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
        //damt hiero : source phrase built in constructor of target phrase
       //targetPhrase->SetSourcePhrase(m_unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
+      targetPhrase->SetAlignmentInfo("0-0");
+      
 
       // chart rule
       m_translationOptionList.Add(*tpc, m_emptyStackVec, range);

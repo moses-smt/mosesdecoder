@@ -74,6 +74,10 @@ protected:
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
 
+  //damt_hiero: to output word-alignments
+  std::ofstream  *m_wordAlignmentStream;
+  Moses::OutputCollector  *m_wordAlignmentOutputCollector;
+
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
             , const std::vector<Moses::FactorType>	&outputFactorOrder

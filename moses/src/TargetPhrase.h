@@ -56,6 +56,8 @@ protected:
   Phrase const* m_sourcePhrase;
 
   const AlignmentInfo *m_alignmentInfo;
+  // damt_hiero: stroing alignments between words in each rule
+  const AlignmentInfo* m_wordAlignmentInfo;
   Word m_lhsTarget;
 
 public:
@@ -156,9 +158,13 @@ public:
   void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
     m_alignmentInfo = alignmentInfo;
   }
+  void SetWordAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
 
   const AlignmentInfo &GetAlignmentInfo() const {
     return *m_alignmentInfo;
+  }
+  const AlignmentInfo &GetWordAlignmentInfo() const{ 
+    return *m_wordAlignmentInfo; 
   }
 
   TO_STRING();
