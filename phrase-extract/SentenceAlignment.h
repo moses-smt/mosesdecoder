@@ -24,6 +24,9 @@
 #include <string>
 #include <vector>
 
+namespace MosesTraining
+{
+
 class SentenceAlignment
 {
 public:
@@ -42,5 +45,8 @@ public:
   bool create(char targetString[], char sourceString[],
               char alignmentString[], int sentenceID);
 };
+
+}
+
 
 #endif

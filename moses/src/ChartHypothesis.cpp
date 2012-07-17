@@ -41,7 +41,11 @@ namespace Moses
 ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
 #endif
 
-/** Create a hypothesis from a rule */
+/** Create a hypothesis from a rule 
+ * \param transOpt wrapper around the rule
+ * \param item @todo dunno
+ * \param manager reference back to manager
+ */
 ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
@@ -84,7 +88,7 @@ ChartHypothesis::~ChartHypothesis()
 }
 
 /** Create full output phrase that is contained in the hypothesis (and its children)
- * \param outPhrase full output phrase
+ * \param outPhrase full output phrase as return argument
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
@@ -116,14 +120,15 @@ Phrase ChartHypothesis::GetOutputPhrase() const
 /** check, if two hypothesis can be recombined.
     this is actually a sorting function that allows us to
     keep an ordered list of hypotheses. This makes recombination
-    much quicker.
+    much quicker. Returns one of 3 possible values:
+      -1 = this < compare
+      +1 = this > compare
+      0	= this ==compare
+ \param compare the other hypo to compare to
 */
 int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 {
 	int comp = 0;
-  // -1 = this < compare
-  // +1 = this > compare
-  // 0	= this ==compare
 
   for (unsigned i = 0; i < m_ffStates.size(); ++i) 
 	{
@@ -139,6 +144,9 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
   return 0;
 }
 
+/** calculate total score
+  * @todo this should be in ScoreBreakdown
+ */
 void ChartHypothesis::CalcScore()
 {
   // total scores from prev hypos

@@ -25,6 +25,9 @@
 
 #include "tables-core.h"
 
+namespace MosesTraining
+{
+
 SentenceAlignment::~SentenceAlignment() {}
 
 bool SentenceAlignment::processTargetSentence(const char * targetString, int)
@@ -89,3 +92,6 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
   }
   return true;
 }
+
+}
+

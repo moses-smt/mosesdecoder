@@ -14,6 +14,10 @@
 #include <stdexcept>
 #include "FeatureArray.h"
 
+namespace MosesTuning
+{
+  
+
 class FeatureData
 {
 private:
@@ -129,5 +133,7 @@ public:
   /* For debugging */
   std::string ToString() const;
 };
+
+}
 
 #endif  // MERT_FEATURE_DATA_H_

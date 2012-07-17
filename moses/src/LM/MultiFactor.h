@@ -33,7 +33,9 @@ namespace Moses
 
 class Phrase;
 
-//! Abstract class for for multi factor LM
+/* Abstract class for for multi factor LM. Only inherited by the JointLM at the moment. 
+ * Could use this when factored LM are implemented
+ */
 class LanguageModelMultiFactor : public LanguageModelImplementation
 {
 protected:

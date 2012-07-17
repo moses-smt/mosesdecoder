@@ -34,7 +34,6 @@ struct FactorFriend;
 class FactorCollection;
 
 /** Represents a factor (word, POS, etc).  
- *
  * A Factor has a contiguous identifier and string value.  
  */
 class Factor

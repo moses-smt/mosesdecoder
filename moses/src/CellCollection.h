@@ -29,6 +29,10 @@ namespace Moses
 {
 class Word;
 
+/** base class of the collection that contains all cells for hierarchical/syntax decoding
+ *  @todo check whether this is still needed. It was required when chart decoding was in 
+ *  a separate lib but that's not the case anymore
+ */
 class CellCollection
 {
 public:

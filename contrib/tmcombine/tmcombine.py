@@ -217,11 +217,11 @@ class Moses():
         
         a, b, prob = line.split(b' ')
         
-        if side == 'e2f' and not e2f_filter or a in e2f_filter and b in e2f_filter[a]:
+        if side == 'e2f' and (not e2f_filter or a in e2f_filter and b in e2f_filter[a]):
             
             self.word_pairs_e2f[a][b][i] = float(prob)
             
-        elif side == 'f2e' and not f2e_filter or a in f2e_filter and b in f2e_filter[a]:
+        elif side == 'f2e' and (not f2e_filter or a in f2e_filter and b in f2e_filter[a]):
             
             self.word_pairs_f2e[a][b][i] = float(prob)
     
@@ -294,7 +294,7 @@ class Moses():
                 sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment\n')
                 exit()
             
-            self.phrase_pairs[src][target][1] = ['',line[3].lstrip(b'| ')]
+            self.phrase_pairs[src][target][1] = [b'',line[3].lstrip(b'| ')]
    
         else:
             sys.stderr.write('Error: unexpected phrase table format. Are you using a very old/new version of Moses with different formatting?\n')

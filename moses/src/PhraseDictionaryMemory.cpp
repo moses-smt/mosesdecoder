@@ -66,6 +66,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
                                   , const LMList &languageModels
                                   , float weightWP)
 {
+  const_cast<LMList&>(languageModels).InitializeBeforeSentenceProcessing();
+
   const StaticData &staticData = StaticData::Instance();
 
   m_tableLimit = tableLimit;
@@ -177,6 +179,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
   // sort each target phrase collection
   m_collection.Sort(m_tableLimit);
+
+  const_cast<LMList&>(languageModels).CleanUpAfterSentenceProcessing();
 
   return true;
 }

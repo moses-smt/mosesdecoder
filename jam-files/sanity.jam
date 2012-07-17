@@ -3,6 +3,7 @@ import option ;
 import os ;
 import path ;
 import project ;
+import build-system ;
 
 #Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
 rule trim-nl ( str extras * ) {
@@ -13,8 +14,13 @@ rule _shell ( cmd : extras * ) {
   return [ trim-nl [ SHELL $(cmd) : $(extras) ] ] ;
 }
 
+cxxflags = [ os.environ "CXXFLAGS" ] ;
+cflags = [ os.environ "CFLAGS" ] ;
+ldflags = [ os.environ "LDFLAGS" ] ;
+
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
+  flags = $(cxxflags) $(ldflags) $(flags) ;
   local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
   local ret = [ SHELL $(cmd) : exit-status ] ;
   if --debug-configuration in [ modules.peek : ARGV ] {
@@ -26,6 +32,14 @@ rule test_flags ( flags * ) {
   } else {
     return ;
   }
+}
+
+rule test_header ( name ) {
+  return [ test_flags "-include $(name)" ] ;
+}
+
+rule test_library ( name ) {
+  return [ test_flags "-l$(name)" ] ;
 }
 
 {
@@ -60,6 +74,7 @@ if $(with-macports) {
 }
 else {
   with-boost = [ option.get "with-boost" ] ;
+  with-boost ?= [ os.environ "BOOST_ROOT" ] ;
   if $(with-boost) {
     L-boost-search = -L$(with-boost)/lib" "-L$(with-boost)/lib64 ;
     boost-search = <search>$(with-boost)/lib <search>$(with-boost)/lib64 ;
@@ -76,15 +91,15 @@ else {
 #Are we linking static binaries against shared boost?
 boost-auto-shared = [ auto-shared "boost_program_options" : $(L-boost-search) ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
-rule boost-lib ( name macro ) {
+rule boost-lib ( name macro : deps * ) {
   #Link multi-threaded programs against the -mt version if available.  Old 
   #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
   #boost.jam does not handle this correctly.  
   if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
+    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) : : <library>$(deps) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt : : <library>$(deps) ;
   } else {
-    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) ;
+    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) : : <library>$(deps) ;
   }
 
   alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) $(boost-include) ;
@@ -103,7 +118,8 @@ rule boost ( min-version ) {
     exit You have Boost $(boost-version).  This package requires Boost at least $(min-version) (and preferably newer). : 1 ;
   }
   #See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
-  boost-lib thread THREAD_DYN_DLL ;
+  boost-lib system SYSTEM_DYN_LINK ;
+  boost-lib thread THREAD_DYN_DLL : boost_system ;
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
   boost-lib unit_test_framework TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
@@ -134,10 +150,6 @@ rule external-lib ( name : search-path * ) {
 
 requirements = ;
 {
-  local cxxflags = [ os.environ "CXXFLAGS" ] ;
-  local cflags = [ os.environ "CFLAGS" ] ;
-  local ldflags = [ os.environ "LDFLAGS" ] ;
-
   #Boost jam's static clang for Linux is buggy.
   requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
@@ -163,9 +175,9 @@ if $(prefix) {
   prefix = $(TOP)$(GITTAG) ;
 }
 
+bindir = [ option.get "bindir" : $(prefix)/bin ] ;
+libdir = [ option.get "libdir" : $(prefix)/lib ] ;
 rule install-bin-libs ( deps * ) {
-  local bindir = [ option.get "bindir" : $(prefix)/bin ] ;
-  local libdir = [ option.get "libdir" : $(prefix)/lib ] ;
   install prefix-bin : $(deps) : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
   install prefix-lib : $(deps) : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
 }
@@ -173,4 +185,62 @@ rule install-headers ( name : list * : source-root ? ) {
   local includedir = [ option.get "includedir" : $(prefix)/include ] ;
   source-root ?= "." ;
   install $(name) : $(list) : <location>$(includedir) <install-source-root>$(source-root) ;
+}
+
+rule build-projects ( projects * ) {
+  for local p in $(projects) {
+    build-project $(p) ;
+  }
+}
+
+#Only one post build hook is allowed.  Allow multiple.  
+post-hooks = ;
+rule post-build ( ok ? ) {
+  for local r in $(post-hooks) {
+    $(r) $(ok) ;
+  }
+}
+IMPORT $(__name__) : post-build : : $(__name__).post-build ;
+build-system.set-post-build-hook $(__name__).post-build ;
+rule add-post-hook ( names * ) {
+  post-hooks += $(names) ;
+}
+
+
+#Backend for writing content to files after build completes.
+post-files = ;
+post-contents = ;
+rule save-post-build ( ok ? ) {
+  if $(ok) {
+    while $(post-files) {
+      local ignored = @($(post-files[1]):E=$(post-contents[1])) ;
+      post-files = $(post-files[2-]) ;
+      post-contents = $(post-contents[2-]) ;
+    }
+  }
+}
+add-post-hook save-post-build ;
+
+#Queue content to be written to file when build completes successfully.  
+rule add-post-write ( name content ) {
+  post-files += $(name) ;
+  post-contents += $(content) ;
+}
+
+#Compare contents of file with current.  If they're different, force the targets to rebuild then overwrite the file.  
+rule always-if-changed ( file current : targets * ) {
+  local previous = inconsistent ;
+  if [ path.exists $(file) ] {
+    previous = [ _shell "cat $(file)" ] ;
+  }
+  if $(current) != $(previous) {
+    #Write inconsistent while the build is running
+    if [ path.exists $(file) ] {
+      local ignored = @($(file):E=inconsistent) ;
+    }
+    add-post-write $(file) $(current) ;
+    for local i in $(targets) {
+      always $(i) ;
+    }
+  }
 }

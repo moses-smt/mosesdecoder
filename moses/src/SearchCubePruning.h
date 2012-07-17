@@ -11,6 +11,9 @@ namespace Moses
 class InputType;
 class TranslationOptionCollection;
 
+/** Functions and variables you need to decoder an input using the phrase-based decoder with cube-pruning
+ *  Instantiated by the Manager class
+ */
 class SearchCubePruning: public Search
 {
 protected:

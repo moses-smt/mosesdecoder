@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+using namespace MosesChartCmd;
 
 /**
   * Translates a sentence.
@@ -233,8 +234,8 @@ int main(int argc, char* argv[])
     CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
 
     // set up read/writing class
-    IOWrapper *ioWrapper = GetIODevice(staticData);
-
+    IOWrapper *ioWrapper = GetIOWrapper(staticData);
+  
     // check on weights
     const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
@@ -287,7 +288,7 @@ int main(int argc, char* argv[])
 #endif
 }
 
-IOWrapper *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()

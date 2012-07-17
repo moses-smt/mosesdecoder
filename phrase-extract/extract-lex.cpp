@@ -6,6 +6,7 @@
 #include "InputFileStream.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 float COUNT_INCR = 1;
 
@@ -79,6 +80,9 @@ int main(int argc, char* argv[])
 
   cerr << "\nFinished\n";
 }
+
+namespace MosesTraining
+{
 
 const std::string *Vocab::GetOrAdd(const std::string &word)
 {
@@ -219,4 +223,5 @@ void WordCount::AddCount(float incr)
   m_count += incr;
 }
 
+} // namespace
 

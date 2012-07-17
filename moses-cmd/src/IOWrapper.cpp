@@ -49,6 +49,9 @@ POSSIBILITY OF SUCH DAMAGE.
 using namespace std;
 using namespace Moses;
 
+namespace MosesCmd
+{
+
 IOWrapper::IOWrapper(
   const vector<FactorType>				&inputFactorOrder
   , const vector<FactorType>			&outputFactorOrder
@@ -578,7 +581,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 
 
 
-IOWrapper *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
@@ -607,3 +610,6 @@ IOWrapper *GetIODevice(const StaticData &staticData)
 
   return ioWrapper;
 }
+
+}
+

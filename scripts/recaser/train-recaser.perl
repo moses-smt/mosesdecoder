@@ -2,6 +2,7 @@
 
 # $Id$
 use strict;
+use FindBin qw($Bin);
 use Getopt::Long "GetOptions";
 
 binmode(STDIN, ":utf8");
@@ -59,7 +60,7 @@ if ($HELP || $ERROR) {
   --ngram-count=file        ... path to ngram-count.sh if not in \$PATH (used only with --lm=SRILM).
 
   = Steps this script will perform =
-  (1) Truecasing (disabled);
+  (1) Truecasing;
   (2) Language Model Training;
   (3) Data Preparation
   (4-10) Recaser Model Training; 
@@ -78,7 +79,8 @@ if ($HELP || $ERROR) {
 
 # main loop
 `mkdir -p $DIR`;
-&truecase()           if 0 && $FIRST_STEP == 1;
+&truecase()           if $FIRST_STEP == 1;
+$CORPUS = "$DIR/aligned.truecased" if (-e "$DIR/aligned.truecased");
 &train_lm()           if $FIRST_STEP <= 2;
 &prepare_data()       if $FIRST_STEP <= 3 && $LAST_STEP >= 3;
 &train_recase_model() if $FIRST_STEP <= 10 && $LAST_STEP >= 3;
@@ -87,7 +89,17 @@ if ($HELP || $ERROR) {
 ### subs ###
 
 sub truecase {
-    # to do
+    print STDERR "(1) Truecase data @ ".`date`;
+    print STDERR "(1) To build model without truecasing, use --first-step 2, and make sure $DIR/aligned.truecased does not exist\n";
+
+    my $cmd = "$Bin/train-truecaser.perl --model $DIR/truecaser_model --corpus $CORPUS";
+    print STDERR $cmd."\n";
+    system($cmd) == 0 || die("Training truecaser died with error " . ($? >> 8) . "\n");
+
+    $cmd = "$Bin/truecase.perl --model $DIR/truecaser_model < $CORPUS > $DIR/aligned.truecased";
+    print STDERR $cmd."\n";
+    system($cmd) == 0 || die("Applying truecaser died with error " . ($? >> 8) . "\n");
+
 }
 
 sub train_lm {
@@ -149,7 +161,6 @@ sub train_recase_model {
     else {
         $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:0";
     }
-    $cmd .= " -scripts-root-dir $SCRIPTS_ROOT_DIR" if $SCRIPTS_ROOT_DIR;
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";
     system($cmd) == 0 || die("Recaser model training failed with error " . ($? >> 8) . "\n");
@@ -163,7 +174,9 @@ sub cleanup {
     my $clean_2 = $?;
     `rm -f $DIR/lex*`;
     my $clean_3 = $?;
-    if ($clean_1 + $clean_2 + $clean_3 != 0) {
+    `rm -f $DIR/truecaser_model`;
+    my $clean_4 = $?;
+    if ($clean_1 + $clean_2 + $clean_3 + $clean_4 != 0) {
         print STDERR "Training successful but some files could not be cleaned.\n";
     }
 }

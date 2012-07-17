@@ -37,6 +37,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureStats.h"
 
+namespace MosesTuning
+{
+  
 
 class FileFormatException : public util::Exception 
 {
@@ -90,5 +93,7 @@ class FeatureDataIterator :
     boost::shared_ptr<util::FilePiece> m_in;
     std::vector<FeatureDataItem> m_next;
 };
+
+}
 
 #endif  // MERT_FEATURE_DATA_ITERATOR_H_

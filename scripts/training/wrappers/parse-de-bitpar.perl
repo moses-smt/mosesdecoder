@@ -2,7 +2,7 @@
 
 use strict;
 use Getopt::Long "GetOptions";
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Basename;
 use File::Temp qw/tempfile/;
 

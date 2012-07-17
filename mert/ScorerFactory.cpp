@@ -9,8 +9,13 @@
 #include "MergeScorer.h"
 #include "InterpolatedScorer.h"
 #include "SemposScorer.h"
+#include "PermutationScorer.h"
 
 using namespace std;
+
+namespace MosesTuning
+{
+  
 
 vector<string> ScorerFactory::getTypes() {
   vector<string> types;
@@ -21,6 +26,7 @@ vector<string> ScorerFactory::getTypes() {
   types.push_back(string("WER"));
   types.push_back(string("MERGE"));
   types.push_back(string("SEMPOS"));
+  types.push_back(string("LRSCORE"));
   return types;
 }
 
@@ -40,6 +46,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     return new SemposScorer(config);
   } else if (type == "MERGE") {
     return new MergeScorer(config);
+  } else if ((type == "HAMMING") || (type == "KENDALL")) {
+    return (PermutationScorer*) new PermutationScorer(type, config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
@@ -49,3 +57,6 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     }
   }
 }
+
+}
+

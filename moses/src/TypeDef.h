@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <string>
 
+//! all the typedefs and enums goes here
+
 #ifdef WIN32
 #include <BaseTsd.h>
 #else
@@ -168,6 +170,7 @@ enum SearchAlgorithm {
   ,CubePruning	= 1
   ,CubeGrowing	= 2
   ,ChartDecoding= 3
+  ,NormalBatch  = 4
 };
 
 enum SourceLabelOverlap {

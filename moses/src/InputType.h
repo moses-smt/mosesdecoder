@@ -40,7 +40,9 @@ class TranslationOptionCollection;
 class TranslationSystem;
 class ChartTranslationOption;
   
-//! base class for sentences and confusion networks
+/** base class for all types of inputs to the decoder,
+ *  eg. sentences, confusion networks, lattices and tree 
+ */
 class InputType
 {
 protected:

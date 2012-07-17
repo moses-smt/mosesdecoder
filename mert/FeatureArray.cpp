@@ -14,6 +14,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 FeatureArray::FeatureArray()
     : m_index(""), m_num_features(0){}
 
@@ -154,3 +158,6 @@ bool FeatureArray::check_consistency() const
   }
   return true;
 }
+
+}
+

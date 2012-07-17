@@ -49,6 +49,7 @@ void processFiles( char*, char*, char*, char* );
 void loadCountOfCounts( char* );
 bool getLine( istream &fileP, vector< string > &item );
 vector< string > splitLine();
+vector< int > countBin;
 
 int main(int argc, char* argv[])
 {
@@ -93,6 +94,17 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--LowCountFeature") == 0) {
       lowCountFlag = true;
       cerr << "including the low count feature\n";
+    } else if (strcmp(argv[i],"--CountBinFeature") == 0) {
+      cerr << "include count bin feature:";
+      int prev = 0;
+      while(i+1<argc && argv[i+1][0]>='0' && argv[i+1][0]<='9') {
+        int binCount = atoi(argv[++i]);
+        countBin.push_back( binCount );
+        if (prev+1 == binCount) { cerr << " " << binCount; }
+        else { cerr << " " << (prev+1) << "-" << binCount; }
+        prev = binCount;
+      }
+      cerr << " " << (prev+1) << "+\n";
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
@@ -269,6 +281,21 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
       fileConsolidated << " " << maybeLogProb(exp(-1.0/countEF));
     }
 
+    // count bin feature
+    if (countBin.size()>0) {
+      bool foundBin = false;
+      for(size_t i=0; i < countBin.size(); i++) {
+        if (!foundBin && countEF <= countBin[i]) {
+          fileConsolidated << " " << maybeLogProb(2.718);
+          foundBin = true;
+        }
+        else {
+          fileConsolidated << " " << maybeLogProb(1);
+        }
+      }
+      fileConsolidated << " " << maybeLogProb( foundBin ? 1 : 2.718 );   
+    }
+
     // alignment
     fileConsolidated << " ||| " << itemDirect[3];
 
@@ -305,7 +332,6 @@ bool getLine( istream &fileP, vector< string > &item )
 vector< string > splitLine()
 {
   vector< string > item;
-  bool betweenWords = true;
   int start=0;
   int i=0;
   for(; line[i] != '\0'; i++) {

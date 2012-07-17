@@ -31,7 +31,6 @@ class InputType;
  * each output word from _all_ the input words. The intuition behind this
  * feature is that it uses context words for disambiguation
  */
-
 class GlobalLexicalModel : public StatelessFeatureFunction
 {
   typedef std::map< const Word*, std::map< const Word*, float, WordComparer >, WordComparer > DoubleHash;

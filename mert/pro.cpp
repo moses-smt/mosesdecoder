@@ -44,8 +44,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "BleuScorer.h"
 
 using namespace std;
+using namespace MosesTuning;
 
 namespace po = boost::program_options;
+
+namespace MosesTuning
+{
 
 class SampledPair {
 private:
@@ -88,6 +92,7 @@ static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureD
   }
 }
 
+}
 
 int main(int argc, char** argv)
 {

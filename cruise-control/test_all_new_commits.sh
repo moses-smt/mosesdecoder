@@ -44,7 +44,7 @@ GITREPO="$MCC_GITREPO"
 # location of moses regression test data archive (assumes url at the moment)
 REGTEST_ARCHIVE="$MCC_REGTEST_ARCHIVE"
 [ -n "$REGTEST_ARCHIVE" ] \
-  || REGTEST_ARCHIVE="http://www.statmt.org/moses/reg-testing/moses-reg-test-data-10.tgz"
+  || REGTEST_ARCHIVE="git://github.com/hieuhoang/moses-reg-test-data.git"
 
 if [ ! -d "$WORKDIR" ]; then
   mkdir "$WORKDIR" || die "Failed to create workdir $WORKDIR"
@@ -87,16 +87,24 @@ function run_single_test () {
   err=""
 
    cd regression-testing
-  regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
+  #regtest_file=$(echo "$REGTEST_ARCHIVE" | sed 's/^.*\///')
 
   # download data for regression tests if necessary
-  if [ ! -f $regtest_file.ok ]; then
-    wget $REGTEST_ARCHIVE &> /dev/null \
-      || die "Failed to download data for regression tests"
-    tar xzf $regtest_file
-    touch $regtest_file.ok
+  regtest_dir=$PWD/moses-reg-test-data
+  if [ -e $regtest_dir ]; then
+    (cd $regtest_dir; git pull)  &> /dev/null ||
+      die "Failed to update regression testing data"
+  else
+    git clone $REGTEST_ARCHIVE $regtest_dir &> /dev/null ||
+      die "Failed to clone regression testing data"
   fi
-  regtest_dir=$PWD/$(basename $regtest_file .tgz)
+  #if [ ! -f $regtest_file.ok ]; then
+  #  wget $REGTEST_ARCHIVE &> /dev/null \
+  #    || die "Failed to download data for regression tests"
+  #  tar xzf $regtest_file
+  #  touch $regtest_file.ok
+  #fi
+  #regtest_dir=$PWD/$(basename $regtest_file .tgz)
   cd ..
 
 

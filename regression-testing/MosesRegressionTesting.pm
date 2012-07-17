@@ -5,16 +5,14 @@ use strict;
 # if your tests need a new version of the test data, increment this
 # and make sure that a moses-regression-tests-vX.Y is available for
 # download from statmt.org (redpony AT umd dot edu for more info)
-use constant TESTING_DATA_VERSION => '11';
 
 # find the data directory in a few likely locations and make sure
 # that it is the correct version
 sub find_data_directory
 {
   my ($test_script_root, $data_dir) = @_;
-	my $data_version = TESTING_DATA_VERSION;
   my @ds = ();
-	my $mrtp = "moses-reg-test-data-$data_version";
+	my $mrtp = "moses-reg-test-data";
 	push @ds, $data_dir if defined $data_dir;
   push @ds, "$test_script_root/$mrtp";
   push @ds, "/export/ws06osmt/regression-testing/$mrtp";
@@ -41,9 +39,7 @@ standard locations: $test_script_root, /tmp, or /var/tmp with these
 commands:
 
   cd <DESIRED_INSTALLATION_DIRECTORY>
-  wget http://www.statmt.org/moses/reg-testing/moses-reg-test-data-$data_version.tgz
-  tar xzf moses-reg-test-data-$data_version.tgz
-  rm moses-reg-test-data-$data_version.tgz
+  git clone https://github.com/hieuhoang/moses-reg-test-data.git
 
 EOT
 	exit 1;

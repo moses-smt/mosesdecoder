@@ -27,11 +27,12 @@
 namespace Moses
 {
 
-// For an entry, lattice[i][j][k][l]:
-//  i = offset from span start
-//  j = NT index (zero-based, from left of rule)
-//  k = span
-//  l = label index (as in UTrieNode)
+/** For an entry, lattice[i][j][k][l]:
+ *  i = offset from span start
+ *  j = NT index (zero-based, from left of rule)
+ *  k = span
+ *  l = label index (as in UTrieNode)
+ */
 typedef std::vector<std::vector<std::vector<StackVec> > > StackLattice;
 
 }

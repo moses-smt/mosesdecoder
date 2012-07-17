@@ -13,6 +13,9 @@
 
 #define BUFFER_SIZE (32768)
 
+namespace MosesTuning 
+{
+
 class _fdstream
 {
 protected:
@@ -163,5 +166,7 @@ private:
 #else
 #error "Not supported"
 #endif
+
+}
 
 #endif // _FDSTREAM_

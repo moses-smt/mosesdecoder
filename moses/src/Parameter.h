@@ -37,7 +37,8 @@ typedef std::map<std::string, std::string > PARAM_STRING;
 
 /** Handles parameter values set in config file or on command line.
  * Process raw parameter data (names and values as strings) for StaticData
- * to parse; to get useful values, see StaticData. */
+ * to parse; to get useful values, see StaticData. 
+ */
 class Parameter
 {
 protected:

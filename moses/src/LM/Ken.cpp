@@ -326,15 +326,17 @@ LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bo
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
       switch(model_type) {
-        case lm::ngram::HASH_PROBING:
-          return new LanguageModelKen<lm::ngram::ProbingModel>(file, factorType, lazy);
-        case lm::ngram::TRIE_SORTED:
+        case lm::ngram::PROBING:
+          return new LanguageModelKen<lm::ngram::ProbingModel>(file,  factorType, lazy);
+        case lm::ngram::REST_PROBING:
+          return new LanguageModelKen<lm::ngram::RestProbingModel>(file, factorType, lazy);
+        case lm::ngram::TRIE:
           return new LanguageModelKen<lm::ngram::TrieModel>(file, factorType, lazy);
-        case lm::ngram::QUANT_TRIE_SORTED:
+        case lm::ngram::QUANT_TRIE:
           return new LanguageModelKen<lm::ngram::QuantTrieModel>(file, factorType, lazy);
-        case lm::ngram::ARRAY_TRIE_SORTED:
+        case lm::ngram::ARRAY_TRIE:
           return new LanguageModelKen<lm::ngram::ArrayTrieModel>(file, factorType, lazy);
-        case lm::ngram::QUANT_ARRAY_TRIE_SORTED:
+        case lm::ngram::QUANT_ARRAY_TRIE:
           return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(file, factorType, lazy);
         default:
           std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;

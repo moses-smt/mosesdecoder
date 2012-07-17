@@ -57,7 +57,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
   
-  string grammarFile = GetFilePath() + "/grammar.out." + SPrint(translationId);
+  string grammarFile = GetFilePath() + "/grammar.out." + SPrint(translationId) + ".gz";
   
   // data from file
   InputFileStream inFile(grammarFile);

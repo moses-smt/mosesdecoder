@@ -38,8 +38,9 @@ class Phrase;
 class FactorCollection;
 
 /** LM of multiple factors. A simple extension of single factor LM - factors backoff together.
- *	Rather slow as this uses string concatenation/split
-*/
+ *	Rather slow as this uses string concatenation/split.
+ *  Not used for a long time
+ */
 class LanguageModelJoint : public LanguageModelMultiFactor
 {
 protected:

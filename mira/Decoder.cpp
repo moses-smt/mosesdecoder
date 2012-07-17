@@ -153,7 +153,7 @@ namespace Mira {
     		throw runtime_error(msg.str());
     	}
     	// TODO: handle sentence id (for now always 0)
-    	OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
+    	//OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
     	out.close();
     }
 
@@ -313,11 +313,11 @@ namespace Mira {
     			throw runtime_error(msg.str());
     		}
     		// TODO: handle sentence id (for now always 0)
-    		OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
+    		//OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
     		out.close();
       }
       else {
-	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid, false);
+	//OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid, false);
     	  streamOut.flush();
       }
     }

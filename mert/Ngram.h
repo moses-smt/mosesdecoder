@@ -5,6 +5,9 @@
 #include <map>
 #include <string>
 
+namespace MosesTuning
+{
+  
 /** A simple STL-std::map based n-gram counts. Basically, we provide
  * typical accessors and mutaors, but we intentionally does not allow
  * erasing elements.
@@ -94,5 +97,7 @@ class NgramCounts {
   const int kDefaultCount;
   std::map<Key, Value, NgramComparator> m_counts;
 };
+
+}
 
 #endif  // MERT_NGRAM_H_

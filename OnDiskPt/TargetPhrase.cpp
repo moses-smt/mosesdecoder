@@ -295,7 +295,7 @@ UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPC
   return memUsed;
 }
 
-UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors, size_t numSourceFactors)
+UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP)
 {
   UINT64 bytesRead = 0;
 
@@ -307,7 +307,7 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors, size_
 
   for (size_t ind = 0; ind < numWords; ++ind) {
     Word *word = new Word();
-    bytesRead += word->ReadFromFile(fileTP, numFactors);
+    bytesRead += word->ReadFromFile(fileTP);
     AddWord(word);
   }
   
@@ -319,7 +319,7 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors, size_
   SourcePhrase *sp = new SourcePhrase();
   for (size_t ind = 0; ind < numSourceWords; ++ind) {
     Word *word = new Word();
-    bytesRead += word->ReadFromFile(fileTP, numSourceFactors);
+    bytesRead += word->ReadFromFile(fileTP);
     sp->AddWord(word);
   }
   SetSourcePhrase(sp);

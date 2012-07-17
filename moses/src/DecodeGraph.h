@@ -33,7 +33,7 @@ namespace Moses
 
 class DecodeStep;
 
-//! list of DecodeStep s which factorizes the translation
+//! list of DecodeSteps which factorizes the translation
 class DecodeGraph
 {
 protected:

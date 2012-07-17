@@ -13,6 +13,11 @@
 
 namespace Moses {
   
+/** Implementation of in-memory phrase table for use with Adam Lopez's suffix array.
+ * Does 2 things that the normal in-memory pt doesn't do:
+ *  1. Loads grammar for a sentence to be decoded only when the sentence is being decoded. Unload afterwards
+    2. Format of the pt file follows Hiero, rather than Moses
+ */   
 class PhraseDictionaryALSuffixArray : public PhraseDictionarySCFG
 {
 public:

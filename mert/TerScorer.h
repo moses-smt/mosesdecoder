@@ -6,7 +6,11 @@
 #include <vector>
 
 #include "Types.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
+
+namespace MosesTuning
+{
+  
 
 class ScoreStats;
 
@@ -46,5 +50,7 @@ private:
   TerScorer(const TerScorer&);
   TerScorer& operator=(const TerScorer&);
 };
+
+}
 
 #endif // MERT_TER_SCORER_H_

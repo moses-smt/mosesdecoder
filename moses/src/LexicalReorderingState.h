@@ -18,7 +18,9 @@ namespace Moses
 class LexicalReorderingState;
 class LexicalReordering;
 
-//! Factory class for lexical reordering states
+/** Factory class for lexical reordering states
+ *  @todo There's a lot of classes for lexicalized reordering. Perhaps put them in a separate dir
+ */
 class LexicalReorderingConfiguration
 {
 public:
@@ -122,6 +124,7 @@ protected:
   static const ReorderingType L = 1;  // left
 };
 
+//! @todo what is this?
 class BidirectionalReorderingState : public LexicalReorderingState
 {
 private:

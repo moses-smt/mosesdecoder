@@ -14,6 +14,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 
 FeatureData::FeatureData()
     : m_num_features(0) {}
@@ -162,3 +166,6 @@ string FeatureData::ToString() const {
 
   return res;
 }
+
+}
+

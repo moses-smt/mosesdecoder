@@ -43,6 +43,9 @@ typedef std::vector<AlignPair> AlignType;
 
 class Vocab;
 
+/** A target phrase, with the score breakdowns, alignment info and assorted other information it need.
+ *  Readable and writeable to disk
+ */
 class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
@@ -102,7 +105,7 @@ public:
                                       , const Moses::WordPenaltyProducer* wpProducer
                                       , const Moses::LMList &lmList) const;
   UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
-  UINT64 ReadFromFile(std::fstream &fileTP, size_t numFactors, size_t numSourceFactors);
+  UINT64 ReadFromFile(std::fstream &fileTP);
 
 	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 

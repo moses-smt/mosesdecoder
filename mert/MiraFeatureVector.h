@@ -13,8 +13,13 @@
 #define MERT_MIRA_FEATURE_VECTOR_H
 
 #include <vector>
+#include <iostream>
 
 #include "FeatureDataIterator.h"
+
+namespace MosesTuning
+{
+  
 
 typedef FeatureStatsType ValType;
 
@@ -34,11 +39,15 @@ public:
   friend MiraFeatureVector operator-(const MiraFeatureVector& a,
                                      const MiraFeatureVector& b);
 
+  friend std::ostream& operator<<(std::ostream& o, const MiraFeatureVector& e);
+
 private:
   std::vector<ValType> m_dense;
   std::vector<std::size_t> m_sparseFeats;
   std::vector<ValType> m_sparseVals;
 };
+
+} // namespace
 
 #endif // MERT_FEATURE_VECTOR_H
 
@@ -47,3 +56,5 @@ private:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+

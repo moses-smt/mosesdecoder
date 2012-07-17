@@ -3,6 +3,8 @@
 #define BOOST_TEST_MODULE UtilTest
 #include <boost/test/unit_test.hpp>
 
+using namespace MosesTuning;
+
 BOOST_AUTO_TEST_CASE(util_get_next_pound_test) {
   {
     std::string str("9 9 7 ");

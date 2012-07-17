@@ -15,6 +15,10 @@ class FFState;
 class InputType;
 class ScoreComponentCollection;
 
+/** base class for all feature functions.
+ * @todo is this for pb & hiero too?
+ * @todo what's the diff between FeatureFunction and ScoreProducer?
+ */
 class FeatureFunction: public ScoreProducer
 {
 
@@ -26,6 +30,9 @@ public:
 
 };
 
+/** base class for all stateless feature functions.
+ * eg. phrase table, word penalty, phrase penalty
+ */
 class StatelessFeatureFunction: public FeatureFunction
 {
 
@@ -49,6 +56,9 @@ public:
   bool IsStateless() const;
 };
 
+/** base class for all stateful feature functions.
+ * eg. LM, distortion penalty 
+ */
 class StatefulFeatureFunction: public FeatureFunction
 {
 
