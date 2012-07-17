@@ -221,25 +221,25 @@ int main(int argc,char* argv[]){
         SyntaxLabel syntaxLabel = *itr_syn_lab;
         CHECK(syntaxLabel.IsNonTerm() == 1);
         string syntFeat = syntaxLabel.GetString();
-        std::cerr << "EXTRACTED FEATURE : " << syntFeat << std::endl;
+        //std::cerr << "EXTRACTED FEATURE : " << syntFeat << std::endl;
         syntFeats.push_back(syntFeat);
     }
 
     //std::cerr << "Reading in rule table" << std::endl;
 
-    std::cerr << "Source Rule : " << sourceRule << std::endl;
+    //std::cerr << "Source Rule : " << sourceRule << std::endl;
 
 
     //hiero : use source side in extract file
     PHRASE_ID srcid = getPhraseID(sourceRule, srcVocab, psdPhraseVoc);
 
-    std::cerr << "Source ID : " << srcid << std::endl;
-    std::cerr << "Target rule " << targetRule << std::endl;
+    //std::cerr << "Source ID : " << srcid << std::endl;
+    //std::cerr << "Target rule " << targetRule << std::endl;
 
     //get all target phrase for this source phrase
     PHRASE_ID labelid = getPhraseID(targetRule,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
 
-    std::cerr << "Label ID : " << labelid << std::endl;
+    //std::cerr << "Label ID : " << labelid << std::endl;
 
     vector<float> losses;
     vector<size_t> translations;
@@ -251,9 +251,9 @@ int main(int argc,char* argv[]){
 
     //only extract featues if id has been found in phrase table
     if (srcid != 0){
-        std:cerr << "Source ID not zero " << std::endl;
+        //std:cerr << "Source ID not zero " << std::endl;
       if (existsRule(srcid, labelid, transTable)) {
-          std::cerr << "Source ID is in table" << std::endl;
+          //std::cerr << "Source ID is in table" << std::endl;
         if (psd_model == PHRASAL){
           map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
           if (i == consumers.end()){
@@ -272,7 +272,7 @@ int main(int argc,char* argv[]){
           //NOTE : check that sourceRule (from extract) is still the right string for context features
           extractor.GenerateFeaturesChart(consumers[srcid], factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
         } else { // GLOBAL model
-          std::cerr << "Generating fetures ..." << std::endl;
+          //std::cerr << "Generating fetures ..." << std::endl;
           extractor.GenerateFeaturesChart(globalOut, factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
         }
       }

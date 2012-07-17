@@ -120,10 +120,10 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
 
 bool exists(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){
 
-  std::cerr << "Looking for translations involving " << src << " : " << tgt << std::endl;
+  //std::cerr << "Looking for translations involving " << src << " : " << tgt << std::endl;
   PhraseTranslations::const_iterator it;
   for (it = transTable.lower_bound(src); it != transTable.upper_bound(src); it++) {
-    std::cerr << "Target : " << it->second << std::endl;
+    //std::cerr << "Target : " << it->second << std::endl;
     if (it->second == tgt)
       return true;
   }
@@ -135,10 +135,10 @@ bool existsRule(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){
 
    //Hack : decrement passed target ID because incremented in extract-syntax-features
   tgt--;
-  std::cerr << "Looking for translations involving " << src << " : " << tgt << std::endl;
+  //std::cerr << "Looking for translations involving " << src << " : " << tgt << std::endl;
   PhraseTranslations::const_iterator it;
   for (it = transTable.lower_bound(src); it != transTable.upper_bound(src); it++) {
-    std::cerr << "Target : " << it->second << std::endl;
+    //std::cerr << "Target : " << it->second << std::endl;
     if (it->second == tgt)
       return true;
   }
@@ -163,8 +163,8 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
 	    cerr << "Skipping malformed phrase-table entry: " << line << endl;
 	}
 
-	cerr << "Source Phrase " << fields[0]<< " : " << endl;
-    cerr << "Target Phrase " << fields[1]<< " : " << endl;
+	//cerr << "Source Phrase " << fields[0]<< " : " << endl;
+    //cerr << "Target Phrase " << fields[1]<< " : " << endl;
 
 	PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
 	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);

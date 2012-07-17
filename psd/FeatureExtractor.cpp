@@ -74,7 +74,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     GenerateInternalFeatures(sourceToken, fc);
   }
 
-    cerr << "Syntax parent : " << m_config.GetSyntaxParent() << endl;
+    //cerr << "Syntax parent : " << m_config.GetSyntaxParent() << endl;
    if (m_config.GetSyntaxParent()) {
     GenerateSyntaxFeatures(parentLabels,fc);
   }
@@ -132,7 +132,7 @@ void ExtractorConfig::Load(const string &configFile)
 string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
 {
   string featureString = "c^" + SPrint(factor) + "_-" + SPrint(index) + "_" + value;
-  std::cout << "Adding source context feature..." << featureString <<  std::endl;
+  //std::cout << "Adding source context feature..." << featureString <<  std::endl;
   return featureString;
 }
 
@@ -142,9 +142,9 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   FeatureConsumer *fc)
 {
   for (size_t fact = 0; fact < m_config.GetFactors().size(); fact++) {
-      cerr << "Factor : " << fact << endl;
+      //cerr << "Factor : " << fact << endl;
     for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
-      cerr << "Start : " << spanStart << " : " << i << endl;
+      //cerr << "Start : " << spanStart << " : " << i << endl;
       if (spanStart >= i)
         //TODO : GET FACTORS FROM CONFIG
         fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
@@ -162,7 +162,7 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   for (it = span.begin(); it != span.end(); it++) {
     fc->AddFeature("w^" + *it);
   }
-  std::cout << "Adding internal feature..." << Join( "_",span) <<  std::endl;
+  //std::cout << "Adding internal feature..." << Join( "_",span) <<  std::endl;
 }
 
 void FeatureExtractor::GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabel, FeatureConsumer *fc)
