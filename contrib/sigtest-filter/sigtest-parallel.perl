@@ -5,11 +5,14 @@
 
 use strict;
 use File::Basename;
+use POSIX;
 
 sub RunFork($);
 sub systemCheck($);
 sub GetSourcePhrase($);
 sub NumStr($);
+
+my $SIGTEST_SPLIT_LINES = 2000000;
 
 print "Started ".localtime() ."\n";
 
@@ -66,7 +69,9 @@ else
 	    $totalLines = int(`cat $ptFile | wc -l`);
 	    open(IN, $ptFile) || die "can't open $ptFile";
 	}
-	my $linesPerSplit = int($totalLines / $numParallel) + 1;
+
+	## This does not scale due to a RAM issue with filter-p, so using hardcoded upper limit of 2M lines
+	my $linesPerSplit = min($SIGTEST_SPLIT_LINES, int($totalLines/$numParallel)+1);
 
 	my $filePath  = "$TMPDIR/unfiltered.$fileCount.gz";
 	open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";
@@ -121,10 +126,6 @@ for (my $i = 0; $i < $numParallel; ++$i)
   open(my $fh, ">", $path) or die "cannot open $path: $!";
   $runFiles[$i] = $fh;
 }
-
-### TODO: fix this - it is confusing that fileCount and numParallel
-### are the same here - this logic is copied from parallel score,
-### which creates many more files than numParallel files
 
 # write filtering of unfiltered mini-phrasetables to run scripts
 for (my $i = 0; $i < $fileCount; ++$i)

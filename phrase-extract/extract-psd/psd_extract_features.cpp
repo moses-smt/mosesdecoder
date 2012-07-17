@@ -29,6 +29,8 @@ using namespace PSD;
 // globals
 CLASSIFIER_TYPE psd_classifier = VWFile;
 PSD_MODEL_TYPE psd_model = GLOBAL;
+int StartSNo = 0;
+int EndSNo = 0;
 string ptDelim = " ||| ";
 string factorDelim = "|";
 int subdirsize=1000;
@@ -70,7 +72,7 @@ int main(int argc,char* argv[]){
         exit(1);
       }
     } 
-    if (strcmp(argv[i],"--PsdType") == 0){
+    else if (strcmp(argv[i],"--PsdType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"global") == 0){
         psd_model = GLOBAL;
@@ -81,7 +83,20 @@ int main(int argc,char* argv[]){
         exit(1);
       }
     } 
+    else if (strcmp(argv[i],"--StartSNo") == 0){
+      char* s = argv[++i];
+      StartSNo = atoi(s);
+		}
+    else if (strcmp(argv[i],"--EndSNo") == 0){
+      char* s = argv[++i];
+      EndSNo = atoi(s);
+		}
+		else {
+			cerr << "failed to parse option: " << argv[i] << endl;
+			exit(1);
+		}
   }
+
   InputFileStream srcTag(fileNameSrcTag);
   if (srcTag.fail()){
     cerr << "ERROR: could not open " << fileNameSrcTag << endl;
@@ -108,7 +123,7 @@ int main(int argc,char* argv[]){
   }
 
   // loop through tagged PSD examples in the order they occur in the training corpus
-  int i = 0;
+  int extractlinenum = 0;
   int csid = 0;
 
   // create target phrase index for feature extractor
@@ -137,16 +152,24 @@ int main(int argc,char* argv[]){
   cerr<< "Phrase tables read. Now reading in corpus." << endl;
   while(true) {
     if (psd.eof()) break;
-    if (++i % 100000 == 0) cerr << "." << flush;
     char psdLine[LINE_MAX_LENGTH];
 
     // get phrase pair
     SAFE_GETLINE((psd),psdLine, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (psd.eof()) break;
+    if (++extractlinenum % 100000 == 0) cerr << "." << flush;
 
     vector<string> token = Tokenize(psdLine,"\t");
 
     size_t sid = Scan<size_t>(token[0].c_str());
+
+		if (sid < StartSNo) {
+			continue;
+		}
+
+		if (EndSNo != 0 and sid > EndSNo) {
+			break;
+		}
+
     size_t src_start = Scan<size_t>(token[1].c_str());
     size_t src_end = Scan<size_t>(token[2].c_str());
     size_t tgt_start = Scan<size_t>(token[3].c_str());

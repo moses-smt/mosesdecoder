@@ -85,6 +85,7 @@ else
 
 # run extract
 @children = ();
+
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
@@ -113,21 +114,17 @@ foreach (@children) {
 my $catCmd = "zcat ";
 my $catInvCmd = "zcat ";
 my $catOCmd = "zcat ";
-my $catPSDCmd = "zcat ";
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
 		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
 		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
 		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
-		$catPSDCmd .= "$TMPDIR/extract.$numStr.psd.gz ";
 }
 
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
-$catPSDCmd .= " | gzip -c > $extract.psd.gz \n";
-
 
 @children = ();
 if ($makeTTable)
@@ -146,9 +143,30 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 	push(@children, $pid);
 }
 
+my @psd_lines;
 if ($outputPSD) {
-  $pid = RunFork($catPSDCmd);
-  push(@children, $pid);
+    # need to renumber sentence ids in PSD output, (mis)use the parent process to do this...
+
+    open(OUTPSD, "| gzip -c > $extract.psd.gz") or die "failed to open $extract.psd.gz output pipe";
+    my $lineOffset = 0;
+    for (my $i = 0; $i < $numParallel; ++$i)
+    {
+	my $numStr = NumStr($i);
+	print STDERR "opening extract.$numStr.psd.gz pipe";
+	open(INPSD, "gzip -dc $TMPDIR/extract.$numStr.psd.gz |") or die "failed to open extract.$numStr.psd.gz input pipe";
+	while (<INPSD>) {
+	    chomp;
+	    my ($SNo, $rest) = split("\t", $_, 2);
+	    die unless defined($rest);
+	    $SNo += $lineOffset;
+	    print OUTPSD $SNo, "\t", $rest, "\n";
+	}
+	close(INPSD);
+
+	$lineOffset += `cat $TMPDIR/source.$numStr | wc -l`;
+    }
+    print STDERR "closing $extract.psd.gz pipe";
+    close(OUTPSD) or die "failed to close $extract.psd.gz output pipe";
 }
 
 # wait for all sorting to finish
@@ -158,8 +176,8 @@ foreach (@children) {
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
-`$cmd`;
+print STDERR "WARNING, SKIPPING: $cmd\n";
+#`$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
 
