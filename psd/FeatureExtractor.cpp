@@ -76,7 +76,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_bagOfWords     = pTree.get<bool>("features.bag-of-words", false);
   m_windowSize     = pTree.get<size_t>("features.window-size", 0);  
 
-  vector<string> factors = Tokenize(",", pTree.get<string>("features.factors", ""));
+  vector<string> factors = Tokenize(pTree.get<string>("features.factors", ""), ",");
   vector<string>::const_iterator it;
   for (it = factors.begin(); it != factors.end(); it++) {
     m_factors.push_back(Scan<size_t>(*it));

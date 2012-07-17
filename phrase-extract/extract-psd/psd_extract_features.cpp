@@ -184,7 +184,10 @@ int main(int argc,char* argv[]){
       ++csid;
     }
 
-    assert(csid == sid);
+    if (csid != sid) {
+      cerr << "Inconsistent sentence ID " << sid << " on line " << i << endl;
+      return 1;
+    }
     ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
 
     // get surface forms from factored format
