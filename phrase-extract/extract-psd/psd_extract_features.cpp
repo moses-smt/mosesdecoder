@@ -161,7 +161,10 @@ int main(int argc,char* argv[]){
       ++csid;
     }
 
-    assert(csid == sid);
+    if (csid != sid) {
+      cerr << "Inconsistent sentence ID " << sid << " on line " << i << endl;
+      return 1;
+    }
     ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
 
     // get surface forms from factored format
@@ -174,17 +177,6 @@ int main(int argc,char* argv[]){
     string phrase;
     if (token.size() > 6){
       phrase = token[5];
-      string phrase_check = sent[src_start];
-      assert(src_end < sent.size());
-      for(size_t j = src_start + 1; j < src_end + 1; j++){
-        phrase_check = phrase_check + " " + sent[j];
-      }
-      if (phrase != phrase_check) {
-        cerr << "sent. id: " << csid << endl;
-        cerr << "phrase (extract): " << phrase << endl;
-        cerr << "phrase (corpus):  " << phrase << endl;
-        return 1;
-      }
     }else{
       phrase = sent[src_start];
       assert(src_end < sent.size());
