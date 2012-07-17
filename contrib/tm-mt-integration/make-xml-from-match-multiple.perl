@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 use strict;
 
@@ -8,12 +8,13 @@ my $OUTPUT_RULES = 1;
 my $scripts_root_dir = "/Users/hieuhoang/workspace/github/hieuhoang/scripts";
 
 my $data_root = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/";
-my $match_file  = "$data_root/in/BEST.acquis-xml-escaped.4.uniq.multi.tuning";
+#my $match_file  = "$data_root/in/BEST.acquis-xml-escaped.4.uniq.multi.tuning";
+my $match_file  = "$data_root/out/BEST";
 my $source_file = "$data_root/in/acquis.truecased.4.en.uniq";
 my $target_file = "$data_root/in/acquis.truecased.4.fr.uniq";
 my $alignment_file = "$data_root/in/acquis.truecased.4.align.uniq";
 my $out_file = "$data_root/out/ac-test.input.xml.4.uniq.multi.tuning";
-my $in_file = "$data_root/in/input.tc.4";
+my $in_file = "$data_root/in/ac-test.input.tc.4";
 
 #my $match_file  = "tm/BEST.acquis-xml-escaped.4.uniq.multi";
 #my $source_file = "data/acquis.truecased.4.en.uniq";
@@ -23,9 +24,9 @@ my $in_file = "$data_root/in/input.tc.4";
 #my $in_file = "evaluation/ac-test.input.tc.4";
 
 my @INPUT = `cat $in_file`; chop(@INPUT);
-my @SOURCE = `cat $source_file`; chop(@SOURCE);
-my @TARGET = `cat $target_file`; chop(@TARGET);
-my @ALIGNMENT = `cat $alignment_file`; chop(@ALIGNMENT);
+my @ALL_SOURCE = `cat $source_file`; chop(@ALL_SOURCE);
+my @ALL_TARGET = `cat $target_file`; chop(@ALL_TARGET);
+my @ALL_ALIGNMENT = `cat $alignment_file`; chop(@ALL_ALIGNMENT);
 
 open(MATCH,$match_file);
 open(FRAME,">$out_file");
@@ -41,22 +42,24 @@ while( my $match = <MATCH> ) {
 
     # construct frame
     if ($sentence < 1e9 && $sentence >= 0) {
-	my @ALIGNMENT = split(/ \|\|\| /,$ALIGNMENT[$sentence]);
-	my @TARGET = split(/ \|\|\| /,$TARGET[$sentence]);
-	for(my $j=0;$j<scalar(@TARGET);$j++) {
-	    $TARGET[$j] =~ /^(\d+) (.+)$/ || die;
-	    my ($target_count,$target) = ($1,$2);
-	    my ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv) = 
-		&create_xml($SOURCE[$sentence],
-			    $INPUT[$i],
-			    $target,
-			    $ALIGNMENT[$j],
-			    $path);
-	    print FRAME $frame."\n";
-	    print RULE "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $target_count\n" if $OUTPUT_RULES;
-	    print RULE_INV "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $target_count\n" if $OUTPUT_RULES;
-	    print INFO "$i ||| $match_score ||| $target_count\n";
-	}
+		my $SOURCE = $ALL_SOURCE[$sentence];
+		my @ALIGNMENT = split(/ \|\|\| /,$ALL_ALIGNMENT[$sentence]);
+		my @TARGET = split(/ \|\|\| /,$ALL_TARGET[$sentence]);
+		
+		for(my $j=0;$j<scalar(@TARGET);$j++) {
+			$TARGET[$j] =~ /^(\d+) (.+)$/ || die;
+			my ($target_count,$target) = ($1,$2);
+			my ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv) = 
+			&create_xml($SOURCE,
+					$INPUT[$i],
+					$target,
+					$ALIGNMENT[$j],
+					$path);
+			print FRAME $frame."\n";
+			print RULE "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $target_count\n" if $OUTPUT_RULES;
+			print RULE_INV "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $target_count\n" if $OUTPUT_RULES;
+			print INFO "$i ||| $match_score ||| $target_count\n";
+		}
     }
 }
 close(FRAME);
