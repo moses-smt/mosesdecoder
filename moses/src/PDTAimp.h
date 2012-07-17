@@ -139,8 +139,9 @@ protected:
       return 0;
     }
 
+    //TODO: Multiple models broken here
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weights = system.GetTranslationWeights(m_obj->GetDictIndex());
+    std::vector<float> weights = StaticData::Instance().GetWeights(m_obj->GetFeature());
     float weightWP = system.GetWeightWordPenalty();
 
     std::vector<TargetPhrase> tCands;
@@ -374,7 +375,7 @@ protected:
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weightT = system.GetTranslationWeights(m_obj->GetDictIndex());
+    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj->GetFeature());
     float weightWP = system.GetWeightWordPenalty();
 
     while(!stack.empty()) {

@@ -64,7 +64,7 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 
   std::auto_ptr<RuleTableLoader> loader =
   RuleTableLoaderFactory::Create(grammarFile);
-  std::vector<float> weightT = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights(GetDictIndex());
+  std::vector<float> weightT = StaticData::Instance().GetWeights(GetFeature());
   bool ret = loader->Load(*m_input, *m_output, inFile, weightT, m_tableLimit,
                           *m_languageModels, m_wpProducer, *this);
   

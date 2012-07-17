@@ -87,7 +87,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
 {
   const StaticData& staticData = StaticData::Instance();
-  std::vector<float> weightT = system->GetTranslationWeights(m_dictIndex);
+  std::vector<float> weightT = staticData.GetWeights(this);
   
   if (m_implementation == Memory) {
     // memory phrase table

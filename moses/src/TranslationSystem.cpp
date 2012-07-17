@@ -175,12 +175,4 @@ namespace Moses {
       return StaticData::Instance().GetWeight(m_distortionScoreProducer);
     }
 
-    std::vector<float> TranslationSystem::GetTranslationWeights(size_t index) const {
-    	std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer(index));
-    	//VERBOSE(1, "Read weightT from translation sytem.. ");
-    	for (size_t i = 0; i < weights.size(); ++i)
-	  //VERBOSE(1, weights[i] << " ");
-	//VERBOSE(1, std::endl);
-    	return weights;
-    }
 };

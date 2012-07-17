@@ -91,7 +91,6 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const InputType &sentence,
   const ChartCellCollection &cellCollection)
 {
-  std::vector<float> weightT = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT).GetTranslationWeights(GetDictIndex());
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
                                           m_dbWrapper, m_languageModels,
                                           m_wpProducer, m_inputFactorsVec,
