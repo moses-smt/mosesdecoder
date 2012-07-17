@@ -74,8 +74,9 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     GenerateInternalFeatures(sourceToken, fc);
   }
 
+    cerr << "Syntax parent : " << m_config.GetSyntaxParent() << endl;
    if (m_config.GetSyntaxParent()) {
-      std::cout << "Generate syntactic parent feature" << std::endl;
+    GenerateSyntaxFeatures(parentLabels,fc);
   }
 
   vector<size_t>::const_iterator transIt = translations.begin();
@@ -116,7 +117,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_bagOfWords     = pTree.get<bool>("features.bag-of-words", false);
   m_windowSize     = pTree.get<size_t>("features.window-size", 0);
 
-  vector<string> factors = Tokenize(",", pTree.get<string>("features.factors", ""));
+  vector<string> factors = Tokenize(pTree.get<string>("features.factors", ""),",");
   vector<string>::const_iterator it;
   for (it = factors.begin(); it != factors.end(); it++) {
     m_factors.push_back(Scan<size_t>(*it));
@@ -140,7 +141,8 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanEnd,
   FeatureConsumer *fc)
 {
-  for (size_t fact = 0; fact <= m_config.GetFactors().size(); fact++) {
+  for (size_t fact = 0; fact < m_config.GetFactors().size(); fact++) {
+      cerr << "Factor : " << fact << endl;
     for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
       cerr << "Start : " << spanStart << " : " << i << endl;
       if (spanStart >= i)

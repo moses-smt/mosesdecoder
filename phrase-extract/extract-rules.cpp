@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - factored phrase-based language decoder
  Copyright (C) 2009 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -76,6 +76,18 @@ inline string IntToString( int i )
     return out.str();
 }
 
+inline std::string Replace(const std::string& str,
+                           const std::string& todelStr,
+                           const std::string& toaddStr)
+{
+  size_t pos=0;
+  std::string newStr=str;
+  while ((pos=newStr.find(todelStr,pos))!=std::string::npos) {
+    newStr.replace(pos++,todelStr.size(),toaddStr);
+  }
+  return newStr;
+}
+
 ofstream extractFile;
 ofstream extractFileInv;
 ofstream extractFilePsdInfo;
@@ -89,7 +101,7 @@ int main(int argc, char* argv[])
 {
     cerr << "extract-rules, written by Philipp Koehn\n"
     << "rule extraction from an aligned parallel corpus\n";
-    
+
     if (argc < 5) {
         cerr << "syntax: extract-rules corpus.target corpus.source corpus.align extract "
         << " [ --GlueGrammar FILE"
@@ -117,9 +129,9 @@ int main(int argc, char* argv[])
     string fileNameGlueGrammar;
     string fileNameUnknownWordLabel;
     string fileNameExtract = string(argv[4]);
-    
+
     int optionInd = 5;
-    
+
     for(int i=optionInd; i<argc; i++) {
         // maximum span length
         if (strcmp(argv[i],"--MaxSpan") == 0) {
@@ -181,19 +193,19 @@ int main(int argc, char* argv[])
                 exit(1);
             }
         }
-        
+
         else if (strcmp(argv[i], "--GZOutput") == 0) {
-            options.gzOutput = true;  
-        } 
-        
-        else if (strcmp(argv[i],"--PCFG") == 0) {     
+            options.gzOutput = true;
+        }
+
+        else if (strcmp(argv[i],"--PCFG") == 0) {
             options.pcfgScore = true;
-        } 
-        
-        else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {      
+        }
+
+        else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
             options.unpairedExtractFormat = true;
-        } 
-        
+        }
+
         else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
             options.conditionOnTargetLhs = true;
         }
@@ -263,25 +275,25 @@ int main(int argc, char* argv[])
             exit(1);
         }
     }
-    
+
     cerr << "extracting hierarchical rules" << endl;
-    
+
     // open input files
     Moses::InputFileStream tFile(fileNameT);
     Moses::InputFileStream sFile(fileNameS);
     Moses::InputFileStream aFile(fileNameA);
-    
-    
+
+
     istream *tFileP = &tFile;
     istream *sFileP = &sFile;
     istream *aFileP = &aFile;
-    
+
     // open output files
     string fileNameExtractInv = fileNameExtract + ".inv";
     extractFile.open(fileNameExtract.c_str());
     if (!options.onlyDirectFlag)
         extractFileInv.open(fileNameExtractInv.c_str());
-    if (options.outputPsdInfo) 
+    if (options.outputPsdInfo)
     {
         string psdFileNameExtract=fileNameExtract+".psd";
         extractFilePsdInfo.open(psdFileNameExtract.c_str());
@@ -312,7 +324,7 @@ int main(int argc, char* argv[])
             cout << "LOG: ALT: " << alignmentString << endl;
             cout << "LOG: PHRASES_BEGIN:" << endl;
         }
-        
+
         if (sentence.create(targetString, sourceString, alignmentString, i)) {
             if (options.unknownWordLabelFlag) {
                 collectWordLabelCounts(sentence);
@@ -324,7 +336,7 @@ int main(int argc, char* argv[])
         }
         if (options.onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
     }
-    
+
     tFile.Close();
     sFile.Close();
     aFile.Close();
@@ -334,37 +346,37 @@ int main(int argc, char* argv[])
         if (!options.onlyDirectFlag) extractFileInv.close();
     }
     if (options.outputPsdInfo) extractFilePsdInfo.close();
-    
+
     if (options.glueGrammarFlag)
         writeGlueGrammar(fileNameGlueGrammar);
-    
+
     if (options.unknownWordLabelFlag)
         writeUnknownWordLabel(fileNameUnknownWordLabel);
-    
-    
+
+
 }
 
 void extractRules( SentenceAlignmentWithSyntax &sentence )
 {
     int countT = sentence.target.size();
     int countS = sentence.source.size();
-    
+
     // phrase repository for creating hiero phrases
     RuleExist ruleExist(countT);
-    
+
     // check alignments for target phrase startT...endT
     for(int lengthT=1;
         lengthT <= options.maxSpan && lengthT <= countT;
         lengthT++) {
         for(int startT=0; startT < countT-(lengthT-1); startT++) {
-            
+
             // that's nice to have
             int endT = startT + lengthT - 1;
-            
+
             // if there is target side syntax, there has to be a node
             if (options.targetSyntax && !sentence.targetTree.HasNode(startT,endT))
                 continue;
-            
+
             // find find aligned source words
             // first: find minimum and maximum source word
             int minS = 9999;
@@ -382,26 +394,26 @@ void extractRules( SentenceAlignmentWithSyntax &sentence )
                     usedS[ si ]--;
                 }
             }
-            
+
             // unaligned phrases are not allowed
             if( maxS == -1 )
                 continue;
-            
+
             // source phrase has to be within limits
             if( maxS-minS >= options.maxSpan )
                 continue;
-            
+
             // check if source words are aligned to out of bound target words
             bool out_of_bounds = false;
             for(int si=minS; si<=maxS && !out_of_bounds; si++)
                 if (usedS[si]>0) {
                     out_of_bounds = true;
                 }
-            
+
             // if out of bound, you gotta go
             if (out_of_bounds)
                 continue;
-            
+
             // done with all the checks, lets go over all consistent phrase pairs
             // start point of source phrase may retreat over unaligned
             for(int startS=minS;
@@ -417,22 +429,22 @@ void extractRules( SentenceAlignmentWithSyntax &sentence )
                     // if there is source side syntax, there has to be a node
                     if (options.sourceSyntax && !sentence.sourceTree.HasNode(startS,endS))
                         continue;
-                    
+
                     // TODO: loop over all source and target syntax labels
-                    
+
                     // if within length limits, add as fully-lexical phrase pair
                     if (endT-startT < options.maxSymbolsTarget && endS-startS < options.maxSymbolsSource) {
                         addRule(sentence,startT,endT,startS,endS, ruleExist);
                     }
-                    
+
                     // take note that this is a valid phrase alignment
                     ruleExist.Add(startT, endT, startS, endS);
-                    
+
                     // extract hierarchical rules
-                    
+
                     // are rules not allowed to start non-terminals?
                     int initStartT = options.nonTermFirstWord ? startT : startT + 1;
-                    
+
                     HoleCollection holeColl(startS, endS); // empty hole collection
                     addHieroRule(sentence, startT, endT, startS, endS,
                                  ruleExist, holeColl, 0, initStartT,
@@ -449,7 +461,7 @@ void preprocessSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
 {
     vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
     assert(iterHoleList != holeColl.GetSortedSourceHoles().end());
-    
+
     int outPos = 0;
     int holeCount = 0;
     int holeTotal = holeColl.GetHoles().size();
@@ -459,15 +471,15 @@ void preprocessSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
             const Hole &hole = **iterHoleList;
             isHole = hole.GetStart(0) == currPos;
         }
-        
+
         if (isHole) {
             Hole &hole = **iterHoleList;
-            
+
             int labelI = labelIndex[ 2+holeCount+holeTotal ];
             string label = options.sourceSyntax ?
             sentence.sourceTree.GetNodes(currPos,hole.GetEnd(0))[ labelI ]->GetLabel() : "X";
             hole.SetLabel(label, 0);
-            
+
             currPos = hole.GetEnd(0);
             hole.SetPos(outPos, 0);
             ++iterHoleList;
@@ -475,10 +487,10 @@ void preprocessSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
         } else {
             indexS[currPos] = outPos;
         }
-        
+
         outPos++;
     }
-    
+
     assert(iterHoleList == holeColl.GetSortedSourceHoles().end());
 }
 
@@ -488,7 +500,7 @@ string printTargetHieroPhrase(SentenceAlignmentWithSyntax &sentence
 {
     HoleList::iterator iterHoleList = holeColl.GetHoles().begin();
     assert(iterHoleList != holeColl.GetHoles().end());
-    
+
     string out = "";
     int outPos = 0;
     int holeCount = 0;
@@ -498,20 +510,20 @@ string printTargetHieroPhrase(SentenceAlignmentWithSyntax &sentence
             const Hole &hole = *iterHoleList;
             isHole = hole.GetStart(1) == currPos;
         }
-        
+
         if (isHole) {
             Hole &hole = *iterHoleList;
-            
+
             const string &sourceLabel = hole.GetLabel(0);
             assert(sourceLabel != "");
-            
+
             int labelI = labelIndex[ 2+holeCount ];
             string targetLabel = options.targetSyntax ?
             sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[ labelI ]->GetLabel() : "X";
             hole.SetLabel(targetLabel, 1);
-            
+
             out += "[" + sourceLabel + "][" + targetLabel + "] ";
-            
+
             currPos = hole.GetEnd(1);
             hole.SetPos(outPos, 1);
             ++iterHoleList;
@@ -520,16 +532,16 @@ string printTargetHieroPhrase(SentenceAlignmentWithSyntax &sentence
             indexT[currPos] = outPos;
             out += sentence.target[currPos] + " ";
         }
-        
+
         outPos++;
     }
-    
+
     assert(iterHoleList == holeColl.GetHoles().end());
     return out.erase(out.size()-1);
 }
 
 string printHieroLeftContext(vector<int> contextPos, SentenceAlignmentWithSyntax &sentence)
-{ 		
+{
     vector<int> :: iterator itr_context;
     string out = "";
     for(itr_context = contextPos.begin(); itr_context != contextPos.end(); itr_context++)
@@ -540,20 +552,20 @@ string printHieroLeftContext(vector<int> contextPos, SentenceAlignmentWithSyntax
         }
         else
         {
-            
+
             out += sentence.source[*itr_context];
         }
     }
-    
+
     //print separator
-    out += " ### "; 	
+    out += " ### ";
     return out;
 }
 
 string printHieroRightContext(vector<int> contextPos, SentenceAlignmentWithSyntax &sentence)
 {
     vector<int> :: iterator itr_context;
-    
+
     std::string out = "";
     for(itr_context = contextPos.begin(); itr_context != contextPos.end(); itr_context++)
     {
@@ -566,7 +578,7 @@ string printHieroRightContext(vector<int> contextPos, SentenceAlignmentWithSynta
             out += sentence.source[*itr_context];
         }
     }
-    
+
     //print pipe separator
     out += " ### ";
     return out;
@@ -578,7 +590,7 @@ string printSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
 {
     vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
     assert(iterHoleList != holeColl.GetSortedSourceHoles().end());
-    
+
     string out = "";
     int outPos = 0;
     int holeCount = 0;
@@ -588,16 +600,16 @@ string printSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
             const Hole &hole = **iterHoleList;
             isHole = hole.GetStart(0) == currPos;
         }
-        
+
         if (isHole) {
             Hole &hole = **iterHoleList;
-            
+
             const string &targetLabel = hole.GetLabel(1);
             assert(targetLabel != "");
-            
+
             const string &sourceLabel =  hole.GetLabel(0);
             out += "[" + sourceLabel + "][" + targetLabel + "] ";
-            
+
             currPos = hole.GetEnd(0);
             hole.SetPos(outPos, 0);
             ++iterHoleList;
@@ -605,10 +617,10 @@ string printSourceHieroPhrase( SentenceAlignmentWithSyntax &sentence
         } else {
             out += sentence.source[currPos] + " ";
         }
-        
+
         outPos++;
     }
-    
+
     assert(iterHoleList == holeColl.GetSortedSourceHoles().end());
     return out.erase(out.size()-1);
 }
@@ -631,22 +643,22 @@ void printHieroAlignment(SentenceAlignmentWithSyntax &sentence
             }
         }
     }
-    
+
     // print alignment of non terminals
     HoleList::const_iterator iterHole;
     for (iterHole = holeColl.GetHoles().begin(); iterHole != holeColl.GetHoles().end(); ++iterHole) {
         const Hole &hole = *iterHole;
-        
+
         std::string sourceSymbolIndex = IntToString(hole.GetPos(0));
         std::string targetSymbolIndex = IntToString(hole.GetPos(1));
         rule.alignment      += sourceSymbolIndex + "-" + targetSymbolIndex + " ";
         if (!options.onlyDirectFlag)
             rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
-        
+
         rule.SetSpanLength(hole.GetPos(0), hole.GetSize(0), hole.GetSize(1) ) ;
-        
+
     }
-    
+
     rule.alignment.erase(rule.alignment.size()-1);
     if (!options.onlyDirectFlag) {
         rule.alignmentInv.erase(rule.alignmentInv.size()-1);
@@ -657,56 +669,56 @@ void printHieroPhraseWithContext( SentenceAlignmentWithSyntax &sentence, int sta
                                  , HoleCollection &holeColl, LabelIndex &labelIndex)
 {
     WordIndex indexS, indexT; // to keep track of word positions in rule
-    
+
     ExtractedRule rule( startT, endT, startS, endS );
-    
+
     // phrase labels
     string targetLabel = options.targetSyntax ?
     sentence.targetTree.GetNodes(startT,endT)[ labelIndex[0] ]->GetLabel() : "X";
     string sourceLabel = options.sourceSyntax ?
     sentence.sourceTree.GetNodes(startS,endS)[ labelIndex[1] ]->GetLabel() : "X";
     //string sourceLabel = "X";
-    
+
     // create non-terms on the source side
     preprocessSourceHieroPhrase(sentence, startT, endT, startS, endS, indexS, holeColl, labelIndex);
-    
+
     //new : print left context
     vector<int> leftContextVec;
     int sizeOfContext = 0;
-    
+
     while(sizeOfContext < options.leftContext)
     {
         leftContextVec.push_back(startS - (++sizeOfContext));
     }
-    
+
     //FB : TODO : option could be better integrated
     if(options.leftContext > 0)
     {rule.leftContext = printHieroLeftContext(leftContextVec,sentence);}
-    
+
     //new : print left context
     vector<int> rightContextVec;
     sizeOfContext = 0;
-    
+
     while(sizeOfContext < options.rightContext)
     {
         rightContextVec.push_back(endS + (++sizeOfContext));
     }
-    
+
     if(options.rightContext > 0)
     {rule.rightContext = printHieroRightContext(rightContextVec,sentence);}
-    
+
     // target
     rule.target = printTargetHieroPhrase(sentence, startT, endT, startS, endS, indexT, holeColl, labelIndex)
     + " [" + targetLabel + "]";
-    
+
     // source
     // holeColl.SortSourceHoles();
     rule.source = printSourceHieroPhrase(sentence, startT, endT, startS, endS, holeColl, labelIndex)
     + " [" + sourceLabel + "]";
-    
+
     // alignment
     printHieroAlignment(sentence, startT, endT, startS, endS, indexS, indexT, holeColl, rule);
-    
+
     addRuleToCollection( rule );
 }
 
@@ -715,17 +727,17 @@ void printAllHieroPhrasesWithContext( SentenceAlignmentWithSyntax &sentence
                                      , HoleCollection &holeColl)
 {
     LabelIndex labelIndex,labelCount;
-    
+
     // number of target head labels
     int numLabels = options.targetSyntax ? sentence.targetTree.GetNodes(startT,endT).size() : 1;
     labelCount.push_back(numLabels);
     labelIndex.push_back(0);
-    
+
     // number of source head labels
     numLabels =  options.sourceSyntax ? sentence.sourceTree.GetNodes(startS,endS).size() : 1;
     labelCount.push_back(numLabels);
     labelIndex.push_back(0);
-    
+
     // number of target hole labels
     for( HoleList::const_iterator hole = holeColl.GetHoles().begin();
         hole != holeColl.GetHoles().end(); hole++ ) {
@@ -733,7 +745,7 @@ void printAllHieroPhrasesWithContext( SentenceAlignmentWithSyntax &sentence
         labelCount.push_back(numLabels);
         labelIndex.push_back(0);
     }
-    
+
     // number of source hole labels
     holeColl.SortSourceHoles();
     for( vector<Hole*>::iterator i = holeColl.GetSortedSourceHoles().begin();
@@ -743,7 +755,7 @@ void printAllHieroPhrasesWithContext( SentenceAlignmentWithSyntax &sentence
         labelCount.push_back(numLabels);
         labelIndex.push_back(0);
     }
-    
+
     // loop through the holes
     bool done = false;
     while(!done) {
@@ -771,70 +783,70 @@ void addHieroRule( SentenceAlignmentWithSyntax &sentence
     // done, if already the maximum number of non-terminals in phrase pair
     if (numHoles >= options.maxNonTerm)
         return;
-    
+
     // find a hole...
     for (int startHoleT = initStartT; startHoleT <= endT; ++startHoleT) {
         for (int endHoleT = startHoleT+(options.minHoleTarget-1); endHoleT <= endT; ++endHoleT) {
             // if last non-terminal, enforce word count limit
             if (numHoles == options.maxNonTerm-1 && wordCountT - (endHoleT-startT+1) + (numHoles+1) > options.maxSymbolsTarget)
                 continue;
-            
+
             // determine the number of remaining target words
             const int newWordCountT = wordCountT - (endHoleT-startHoleT+1);
-            
+
             // always enforce min word count limit
             if (newWordCountT < options.minWords)
                 continue;
-            
+
             // except the whole span
             if (startHoleT == startT && endHoleT == endT)
                 continue;
-            
+
             // does a phrase cover this target span?
             // if it does, then there should be a list of mapped source phrases
             // (multiple possible due to unaligned words)
             const HoleList &sourceHoles = ruleExist.GetSourceHoles(startHoleT, endHoleT);
-            
+
             // loop over sub phrase pairs
             HoleList::const_iterator iterSourceHoles;
             for (iterSourceHoles = sourceHoles.begin(); iterSourceHoles != sourceHoles.end(); ++iterSourceHoles) {
                 const Hole &sourceHole = *iterSourceHoles;
-                
+
                 const int sourceHoleSize = sourceHole.GetEnd(0)-sourceHole.GetStart(0)+1;
-                
+
                 // enforce minimum hole size
                 if (sourceHoleSize < options.minHoleSource)
                     continue;
-                
+
                 // determine the number of remaining source words
                 const int newWordCountS = wordCountS - sourceHoleSize;
-                
+
                 // if last non-terminal, enforce word count limit
                 if (numHoles == options.maxNonTerm-1 && newWordCountS + (numHoles+1) > options.maxSymbolsSource)
                     continue;
-                
+
                 // enforce min word count limit
                 if (newWordCountS < options.minWords)
                     continue;
-                
+
                 // hole must be subphrase of the source phrase
                 // (may be violated if subphrase contains additional unaligned source word)
                 if (startS > sourceHole.GetStart(0) || endS <  sourceHole.GetEnd(0))
                     continue;
-                
+
                 // make sure target side does not overlap with another hole
                 if (holeColl.OverlapSource(sourceHole))
                     continue;
-                
+
                 // if consecutive non-terminals are not allowed, also check for source
                 if (!options.nonTermConsecSource && holeColl.ConsecSource(sourceHole) )
                     continue;
-                
+
                 // check that rule scope would not exceed limit if sourceHole
                 // were added
                 if (holeColl.Scope(sourceHole) > options.maxScope)
                     continue;
-                
+
                 // require that at least one aligned word is left (unless there are no words at all)
                 if (options.requireAlignedWord && (newWordCountS > 0 || newWordCountT > 0)) {
                     HoleList::const_iterator iterHoleList = holeColl.GetHoles().begin();
@@ -859,26 +871,26 @@ void addHieroRule( SentenceAlignmentWithSyntax &sentence
                     if (!foundAlignedWord)
                         continue;
                 }
-                
+
                 // update list of holes in this phrase pair
                 HoleCollection copyHoleColl(holeColl);
                 copyHoleColl.Add(startHoleT, endHoleT, sourceHole.GetStart(0), sourceHole.GetEnd(0));
-                
+
                 // now some checks that disallow this phrase pair, but not further recursion
                 bool allowablePhrase = true;
-                
+
                 // maximum words count violation?
                 if (newWordCountS + (numHoles+1) > options.maxSymbolsSource)
                     allowablePhrase = false;
-                
+
                 if (newWordCountT + (numHoles+1) > options.maxSymbolsTarget)
                     allowablePhrase = false;
-                
+
                 // passed all checks...
                 // new : write rule with choosen context
                 if (allowablePhrase)
                     printAllHieroPhrasesWithContext(sentence, startT, endT, startS, endS, copyHoleColl);
-                
+
                 // recursively search for next hole
                 int nextInitStartT = options.nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
                 addHieroRule(sentence, startT, endT, startS, endS
@@ -893,38 +905,38 @@ void addRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int s
              , RuleExist &ruleExist)
 {
     // source
-    
+
     if (options.onlyOutputSpanInfo) {
         cout << startS << " " << endS << " " << startT << " " << endT << endl;
         return;
     }
 
-    
+
     ExtractedRule rule(startT, endT, startS, endS);
-    
+
     // phrase labels
     string targetLabel,sourceLabel;
     sourceLabel = options.sourceSyntax ?
     sentence.sourceTree.GetNodes(startS,endS)[0]->GetLabel() : "X";
     targetLabel = options.targetSyntax ?
     sentence.targetTree.GetNodes(startT,endT)[0]->GetLabel() : "X";
-    
+
     // source
     rule.source = "";
     for(int si=startS; si<=endS; si++)
         rule.source += sentence.source[si] + " ";
 
-    
+
     // target
     rule.target = "";
     for(int ti=startT; ti<=endT; ti++)
         rule.target += sentence.target[ti] + " ";
-    
+
     rule.source += "[" + sourceLabel + "]";
     rule.target += "[" + targetLabel + "]";
-    
-    
-    
+
+
+
     // alignment
     for(int ti=startT; ti<=endT; ti++) {
         for(int i=0; i<sentence.alignedToT[ti].size(); i++) {
@@ -936,44 +948,44 @@ void addRule( SentenceAlignmentWithSyntax &sentence, int startT, int endT, int s
                 rule.alignmentInv += targetSymbolIndex + "-" + sourceSymbolIndex + " ";
         }
     }
-    
+
     //new : left context
     vector<int> leftContextVec;
     int sizeOfContext = 0;
-    
+
     while(sizeOfContext < options.leftContext)
     {
         leftContextVec.push_back(startS - (++sizeOfContext));
     }
-    
+
     //FB : TODO : better integrate options
     if(options.leftContext > 0)
     {rule.leftContext = printHieroLeftContext(leftContextVec,sentence);}
-    
-    
+
+
     //new : right context
     vector<int> rightContextVec;
     sizeOfContext = 0;
-    
+
     while(sizeOfContext < options.rightContext)
     {
         rightContextVec.push_back(endS + (++sizeOfContext));
     }
-    
+
     rule.rightContext = printHieroRightContext(rightContextVec,sentence);
-    
-    
-    
+
+
+
     rule.alignment.erase(rule.alignment.size()-1);
     if (!options.onlyDirectFlag)
         rule.alignmentInv.erase(rule.alignmentInv.size()-1);
-    
+
     addRuleToCollection( rule );
 }
 
 void addRuleToCollection( ExtractedRule &newRule )
 {
-    
+
     // no double-counting of identical rules from overlapping spans
     if (!options.duplicateRules) {
         vector<ExtractedRule>::const_iterator rule;
@@ -992,19 +1004,19 @@ void consolidateRules()
 {
     typedef vector<ExtractedRule>::iterator R;
     map<int, map<int, map<int, map<int,int> > > > spanCount;
-    
+
     // compute number of rules per span
     if (options.fractionalCounting) {
         for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
             spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ]++;
         }
     }
-    
+
     // compute fractional counts
     for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
         rule->count =    1.0/(float) (options.fractionalCounting ? spanCount[ rule->startT ][ rule->endT ][ rule->startS ][ rule->endS ] : 1.0 );
     }
-    
+
     // consolidate counts
     for(R rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
         if (rule->count == 0)
@@ -1026,9 +1038,9 @@ void writeRulesToFile(int sentID)
     for(rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
         if (rule->count == 0)
             continue;
-        
-        //FB: todo : handle right context	
-        
+
+        //FB: todo : handle right context
+
         //write contexts to file
         extractFile << rule->leftContext
         << rule->source << " ||| "
@@ -1041,26 +1053,34 @@ void writeRulesToFile(int sentID)
             rule->OutputNTLengths(extractFile);
         }
         extractFile << "\n";
-        
+
         if (!options.onlyDirectFlag) {
             extractFileInv << rule->target << " ||| "
-            << rule->leftContext	
+            << rule->leftContext
             << rule->source << " ||| "
             //<< rule->rightContext
             << rule->alignmentInv << " ||| "
             << rule->count << "\n";
         }
-        
-        
+
+
         if (options.outputPsdInfo)
         {
-          extractFilePsdInfo << sentID << "\t" 
+
+          //trnasform source and target side of rules
+          const std::string source = rule->source;
+          const std::string target = rule->target;
+          const std::string nonTerm = "[X][X]";
+          const std::string newNonTerm = "X";
+          std::string newSource = Replace( source, nonTerm, newNonTerm);
+          std::string newTarget = Replace( target, nonTerm, newNonTerm);
+          extractFilePsdInfo << sentID << "\t"
           << rule->startS << "\t"
-          << rule->endS << "\t" 
+          << rule->endS << "\t"
           << rule->startT << "\t"
           << rule->endT << "\t"
-          << rule->source<< "\t"
-          << rule->target << endl;
+          << newSource << "\t"
+          << newTarget << endl;
         }
     }
 }
@@ -1085,13 +1105,13 @@ void writeGlueGrammar( const string & fileName )
         // basic rules
         grammarFile << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| " << endl
         << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 " << endl;
-        
+
         // top rules
         for( map<string,int>::const_iterator i =  targetTopLabelCollection.begin();
             i !=  targetTopLabelCollection.end(); i++ ) {
             grammarFile << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 1-1" << endl;
         }
-        
+
         // glue rules
         for( set<string>::const_iterator i =  targetLabelCollection.begin();
             i !=  targetLabelCollection.end(); i++ ) {
@@ -1126,7 +1146,7 @@ void writeUnknownWordLabel(const string & fileName)
     ofstream outFile;
     outFile.open(fileName.c_str());
     typedef map<string,int>::const_iterator I;
-    
+
     map<string,int> count;
     int total = 0;
     for(I word = wordCount.begin(); word != wordCount.end(); word++) {
@@ -1136,12 +1156,12 @@ void writeUnknownWordLabel(const string & fileName)
             total++;
         }
     }
-    
+
     for(I pos = count.begin(); pos != count.end(); pos++) {
         double ratio = ((double) pos->second / (double) total);
         if (ratio > 0.03)
             outFile << pos->first << " " << ratio << endl;
     }
-    
+
     outFile.close();
 }

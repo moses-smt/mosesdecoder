@@ -124,18 +124,23 @@ void VWLibraryConsumer::AddFeature(const string &name, float value)
 
 void VWLibraryConsumer::FinishExample()
 {
-  m_ex->clear_features();
+   m_shared = true;
+   m_ex->clear_features();
 }
 
 void VWLibraryConsumer::Finish()
 {
-  VW::finish(*m_VWInstance);
+    if (m_sharedVwInstance)
+    m_VWInstance = NULL;
+    else
+    VW::finish(*m_VWInstance);
 }
 
 VWLibraryConsumer::~VWLibraryConsumer()
 {
-  delete m_VWInstance;
-  delete m_ex;
+    delete m_ex;
+    if (!m_sharedVwInstance)
+    delete m_VWInstance;
 }
 
 //
@@ -144,7 +149,9 @@ VWLibraryConsumer::~VWLibraryConsumer()
 
 VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
 {
+  m_shared = true;
   m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -f " + modelFile)));
+  m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
 
@@ -170,8 +177,10 @@ float VWLibraryTrainConsumer::Predict(const string &label)
 
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile)
 {
-  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile)));
-  m_ex = new ::ezexample(m_VWInstance, false);
+    m_shared = true;
+    m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile)));
+    m_sharedVwInstance = false;
+    m_ex = new ::ezexample(m_VWInstance, false);
 }
 
 void VWLibraryPredictConsumer::Train(const string &label, float loss)
