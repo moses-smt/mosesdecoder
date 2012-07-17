@@ -7,36 +7,36 @@
 using namespace MosesTraining;
 using namespace Moses;
 
-PHRASE makePhrase(const string phrase, Vocabulary &wordVocab){
+PHRASE makePhrase(const string &phrase, Vocabulary &wordVocab){
     PHRASE p;
     vector<string> toks = Tokenize(phrase);
     for(size_t j = 0; j < toks.size(); ++j){
-	WORD_ID id = wordVocab.getWordID(toks[j]);
-	if (id){
-	    p.push_back(id);
-	}else{
-	  //	    cerr << "Warning: OOV word " << toks[j] << " in phrase " << phrase <<  endl;
-	    p.clear();
-	    return p;
-	}	
+      WORD_ID id = wordVocab.getWordID(toks[j]);
+      if (id){
+        p.push_back(id);
+      }else{
+        //	    cerr << "Warning: OOV word " << toks[j] << " in phrase " << phrase <<  endl;
+        p.clear();
+        return p;
+      }	
     }
     return p;
 }
 
-PHRASE makePhraseAndVoc(const string phrase, Vocabulary &wordVocab){
-    PHRASE p;
-    vector<string> toks = Tokenize(phrase);
-    for(size_t j = 0; j < toks.size(); j++){
-	WORD_ID id = wordVocab.storeIfNew(toks[j]);
-	p.push_back(id);
-    }
-    return p;
+PHRASE makePhraseAndVoc(const string &phrase, Vocabulary &wordVocab){
+  PHRASE p;
+  vector<string> toks = Tokenize(phrase);
+  for(size_t j = 0; j < toks.size(); j++){
+    WORD_ID id = wordVocab.storeIfNew(toks[j]);
+    p.push_back(id);
+  }
+  return p;
 }
 
-PHRASE_ID getPhraseID(const string phrase, Vocabulary &wordVocab, PhraseVocab &vocab){
-    PHRASE p = makePhrase(phrase,wordVocab);
-    if (p.size() > 0) return vocab.getPhraseID(p);
-    return 0;
+PHRASE_ID getPhraseID(const string &phrase, Vocabulary &wordVocab, PhraseVocab &vocab){
+  PHRASE p = makePhrase(phrase,wordVocab);
+  if (p.size() > 0) return vocab.getPhraseID(p);
+  return 0;
 }
 
 string getPhrase(PHRASE_ID labelid, Vocabulary &tgtVocab, PhraseVocab &tgtPhraseVoc){

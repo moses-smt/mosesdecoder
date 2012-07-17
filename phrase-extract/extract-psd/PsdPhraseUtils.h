@@ -18,10 +18,10 @@ bool readPhraseTranslations(const char *ptFile, MosesTraining::Vocabulary &srcWo
 
 bool readPhraseTranslations(const char *ptFile, MosesTraining::Vocabulary &srcWordVocab, MosesTraining::Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable, map<string,string> &transTableScores);
 
-MosesTraining::PHRASE makePhrase(const string phrase, MosesTraining::Vocabulary &wordVocab);
-MosesTraining::PHRASE makePhraseAndVoc(const string phrase, MosesTraining::Vocabulary &wordVocab);
+MosesTraining::PHRASE makePhrase(const string &phrase, MosesTraining::Vocabulary &wordVocab);
+MosesTraining::PHRASE makePhraseAndVoc(const string &phrase, MosesTraining::Vocabulary &wordVocab);
 
-MosesTraining::PHRASE_ID getPhraseID(const string phrase, MosesTraining::Vocabulary &wordVocab, PhraseVocab &vocab);
+MosesTraining::PHRASE_ID getPhraseID(const string &phrase, MosesTraining::Vocabulary &wordVocab, PhraseVocab &vocab);
 
 string getPhrase(MosesTraining::PHRASE_ID labelid, MosesTraining::Vocabulary &tgtVocab, PhraseVocab &tgtPhraseVoc);
 

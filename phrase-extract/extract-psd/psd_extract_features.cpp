@@ -184,8 +184,12 @@ int main(int argc,char* argv[]){
 
     PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
 
-    string tgtphrase = token[6];
-    PHRASE_ID labelid = getPhraseID(tgtphrase,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
+    PHRASE tgtPhrase = makePhrase(token[6], tgtVocab);
+    map<PHRASE, PHRASE_ID>::const_iterator tgtPhraseIt = tgtPhraseVoc.lookup.find(tgtPhrase);
+    if (tgtPhraseIt == tgtPhraseVoc.lookup.end())
+      continue;
+
+    PHRASE_ID labelid = tgtPhraseIt->second + 1; // 0 is not allowed (in VW)
     vector<float> losses;
     vector<size_t> translations;
     PhraseTranslations::const_iterator transIt;

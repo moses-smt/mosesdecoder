@@ -29,10 +29,7 @@ while(<STDIN>){
     chomp;
     my ($f,$e,$a,$s) = split(/ \|\|\| /);
     my @f = split(/ /,$f);
-    if ($f !~ m/[a-zA-Z]/){next};
     if (defined($frStop{$f[0]}) || defined($frStop{$f[$#f]})){next;};
-    if ($f =~ m/^[\p{P}\p{S}0-9]+/){next};
-    if ($f =~ m/[\p{P}\p{S}0-9]+$/){next};
     $frPhrases{$f}++;
     $enPhrases{$e}++;
 }
