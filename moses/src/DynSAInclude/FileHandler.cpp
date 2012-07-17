@@ -1,4 +1,10 @@
-#include "file.h"
+#include "FileHandler.h"
+#include <stdio.h>
+
+#ifdef WIN32
+#define popen(A, B) _popen(A, B)
+#define pclose(A) _pclose(A)
+#endif
 
 namespace Moses
 {
@@ -17,7 +23,7 @@ const std::string FileHandler::kBzip2Command = "bzip2 -f";
 const std::string FileHandler::kBunzip2Command = "bunzip2 -f";
 
 FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags, bool /* checkExists */)
-  : std::fstream(NULL), path_(path), flags_(flags), buffer_(NULL), fp_(NULL)
+  : std::fstream((const char*) NULL), path_(path), flags_(flags), buffer_(NULL), fp_(NULL)
 {
   if( !(flags^(std::ios::in|std::ios::out)) ) {
     fprintf(stderr, "ERROR: FileHandler does not support bidirectional files (%s).\n", path_.c_str());

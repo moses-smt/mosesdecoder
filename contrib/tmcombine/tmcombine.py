@@ -217,11 +217,11 @@ class Moses():
         
         a, b, prob = line.split(b' ')
         
-        if side == 'e2f' and not e2f_filter or a in e2f_filter and b in e2f_filter[a]:
+        if side == 'e2f' and (not e2f_filter or a in e2f_filter and b in e2f_filter[a]):
             
             self.word_pairs_e2f[a][b][i] = float(prob)
             
-        elif side == 'f2e' and not f2e_filter or a in f2e_filter and b in f2e_filter[a]:
+        elif side == 'f2e' and (not f2e_filter or a in f2e_filter and b in f2e_filter[a]):
             
             self.word_pairs_f2e[a][b][i] = float(prob)
     
