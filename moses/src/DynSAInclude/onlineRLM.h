@@ -264,7 +264,7 @@ int OnlineRLM<T>::sbsqQuery(const wordID_t* IDs, const int len, int* codes,
     if(val != -1) break; // if anything found
     else --fnd; // else decrement found
   }
-  //free( in );
+
   return fnd;
 }
 
