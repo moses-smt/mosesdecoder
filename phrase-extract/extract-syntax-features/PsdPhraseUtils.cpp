@@ -18,7 +18,7 @@ PHRASE makePhrase(const string phrase, Vocabulary &wordVocab){
 	  //	    cerr << "Warning: OOV word " << toks[j] << " in phrase " << phrase <<  endl;
 	    p.clear();
 	    return p;
-	}	
+	}
     }
     return p;
 }
@@ -47,7 +47,7 @@ string getPhrase(PHRASE_ID labelid, Vocabulary &tgtVocab, PhraseVocab &tgtPhrase
       phrase += " ";
     }
     phrase += tgtVocab.getWord(p[i]);
-  }  
+  }
   return phrase;
 }
 
@@ -90,14 +90,62 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
   return true;
 }
 
+bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable){
+  InputFileStream file(ptFile);
+  if(!file) return false;
+  while(!file.eof()){
+    char line[LINE_MAX_LENGTH];
+    SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
+    if (file.eof()) return true;
+    vector<string> fields = TokenizeMultiCharSeparator(string(line), " ||| ");
+    	//cerr << "TOKENIZED: " << fields.size()  << " tokens in " << line << endl;
+    if (fields.size() < 2){
+      cerr << "Skipping malformed phrase-table entry: " << line << endl;
+    }
+
+    //increment target ids to match target indexes
+    PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
+    PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
+    if (src && tgt){
+      transTable.insert(make_pair(src, tgt));
+    }
+  }
+  /*	}else{
+    cerr << "Skipping phrase-table entry due to OOV phrase: " << line << endl;
+  }
+  */
+  return true;
+}
+
+
 bool exists(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){
+
+  std::cerr << "Looking for translations involving " << src << " : " << tgt << std::endl;
   PhraseTranslations::const_iterator it;
   for (it = transTable.lower_bound(src); it != transTable.upper_bound(src); it++) {
+    std::cerr << "Target : " << it->second << std::endl;
     if (it->second == tgt)
       return true;
   }
   return false;
 }
+
+
+bool existsRule(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){
+
+   //Hack : decrement passed target ID because incremented in extract-syntax-features
+  tgt--;
+  std::cerr << "Looking for translations involving " << src << " : " << tgt << std::endl;
+  PhraseTranslations::const_iterator it;
+  for (it = transTable.lower_bound(src); it != transTable.upper_bound(src); it++) {
+    std::cerr << "Target : " << it->second << std::endl;
+    if (it->second == tgt)
+      return true;
+  }
+  return false;
+}
+
+
 
 bool exists(PHRASE_ID src, PhraseTranslations &transTable){
   return (transTable.find(src) != transTable.end());
@@ -114,6 +162,10 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
 	if (fields.size() < 2){
 	    cerr << "Skipping malformed phrase-table entry: " << line << endl;
 	}
+
+	cerr << "Source Phrase " << fields[0]<< " : " << endl;
+    cerr << "Target Phrase " << fields[1]<< " : " << endl;
+
 	PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
 	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
 	if (src && tgt){

@@ -132,7 +132,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         vector<std::string> syntaxFeats;
         NonTerminalSet labelSet = source.GetLabelSet(startSpan,endSpan);
         //check if there is a label for this span
-        std::string noTag = "NOTAG";
+        std::string noTag = "X";
         std::string syntFeat;
         if(labelSet.size() == 0)
         {

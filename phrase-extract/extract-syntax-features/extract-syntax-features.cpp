@@ -57,8 +57,8 @@ int main(int argc,char* argv[]){
   char* &fileNamePT = argv[4]; // phrase table
   char* &fileNameSrcVoc = argv[5]; // source phrase vocabulary
   char* &fileNameTgtVoc = argv[6]; // target phrase vocabulary
-  string output = string(argv[7]);//output directory (for phrasal models) or root of filename (for global models)
-  string configFile = string(argv[8]); // configuration file for the feature extractor
+  string configFile = string(argv[7]); // configuration file for the feature extractor
+  string output = string(argv[8]);//output directory (for phrasal models) or root of filename (for global models)
   for(int i = 9; i < argc; i++){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
@@ -110,13 +110,14 @@ int main(int argc,char* argv[]){
   if (!readPhraseVocab(fileNameSrcVoc,srcVocab,psdPhraseVoc)){
     cerr << "Error reading in source phrase vocab" << endl;
   }
+
   PhraseVocab tgtPhraseVoc;
   if (!readPhraseVocab(fileNameTgtVoc,tgtVocab,tgtPhraseVoc)){
     cerr << "Error reading in target phrase vocab" << endl;
   }
   // store translation phrase pair table
   PhraseTranslations transTable;
-  if (!readPhraseTranslations(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
+  if (!readRules(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
     cerr << "Error reading in phrase translation table " << endl;
   }
 
@@ -226,11 +227,20 @@ int main(int argc,char* argv[]){
 
     //std::cerr << "Reading in rule table" << std::endl;
 
+    std::cerr << "Source Rule : " << sourceRule << std::endl;
+
+
     //hiero : use source side in extract file
     PHRASE_ID srcid = getPhraseID(sourceRule, srcVocab, psdPhraseVoc);
 
+    std::cerr << "Source ID : " << srcid << std::endl;
+    std::cerr << "Target rule " << targetRule << std::endl;
+
     //get all target phrase for this source phrase
     PHRASE_ID labelid = getPhraseID(targetRule,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
+
+    std::cerr << "Label ID : " << labelid << std::endl;
+
     vector<float> losses;
     vector<size_t> translations;
     PhraseTranslations::const_iterator transIt;
@@ -241,7 +251,9 @@ int main(int argc,char* argv[]){
 
     //only extract featues if id has been found in phrase table
     if (srcid != 0){
-      if (exists(srcid, labelid, transTable)) {
+        std:cerr << "Source ID not zero " << std::endl;
+      if (existsRule(srcid, labelid, transTable)) {
+          std::cerr << "Source ID is in table" << std::endl;
         if (psd_model == PHRASAL){
           map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
           if (i == consumers.end()){
@@ -260,6 +272,7 @@ int main(int argc,char* argv[]){
           //NOTE : check that sourceRule (from extract) is still the right string for context features
           extractor.GenerateFeaturesChart(consumers[srcid], factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
         } else { // GLOBAL model
+          std::cerr << "Generating fetures ..." << std::endl;
           extractor.GenerateFeaturesChart(globalOut, factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
         }
       }

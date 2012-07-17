@@ -104,6 +104,9 @@ ExtractorConfig::ExtractorConfig()
 void ExtractorConfig::Load(const string &configFile)
 {
   ptree pTree;
+
+  std::cerr << "CONFIG FILE : " << configFile << std::endl;
+
   ini_parser::read_ini(configFile, pTree);
   m_sourceInternal = pTree.get<bool>("features.source-internal", false);
   m_sourceExternal = pTree.get<bool>("features.source-external", false);
@@ -139,9 +142,11 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
 {
   for (size_t fact = 0; fact <= m_config.GetFactors().size(); fact++) {
     for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
+      cerr << "Start : " << spanStart << " : " << i << endl;
       if (spanStart >= i)
         //TODO : GET FACTORS FROM CONFIG
         fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
+      //cerr << "End : " << spanEnd << " : " << i << endl;
       if (spanEnd + i < context.size())
         fc->AddFeature(BuildContextFeature(fact, i, context[spanStart + i][fact]));
     }
@@ -160,7 +165,10 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
 
 void FeatureExtractor::GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabel, FeatureConsumer *fc)
 {
-  std::cout << "I am a syntax feature" << std::endl;
+  vector<string>::const_iterator it;
+  for (it = syntaxLabel.begin(); it != syntaxLabel.end(); it++) {
+     fc->AddFeature("sp^" + *it);
+  }
 }
 
 
