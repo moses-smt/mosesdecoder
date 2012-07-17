@@ -155,6 +155,8 @@ Parameter::Parameter()
   //File to load cell-context dependent feature;
   AddParam("lc-model-file", "lcm", "file for cell context feature");
   AddParam("rule-index", "rli", "file with indexes of targetRepresentations of rules");
+  AddParam("psd-context", "psdc", "input data with rich factored annotation for PSD");
+  AddParam("psd-hiero-config", "psdf", "PSD configuration file for feature extraction");
 //  #endif
 }
 

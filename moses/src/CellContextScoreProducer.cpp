@@ -33,16 +33,22 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
 CellContextScoreProducer::~CellContextScoreProducer()
 {
     delete m_extractor;
-    delete m_consumer;
+    delete m_consumerFactory;
 }
 
-//note : initialized in static data ln.
-bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile)
+
+bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
 {
   bool isGood = LoadRuleIndex(indexFile);
 
-  m_extractor = new FeatureExtractor(m_ruleIndex,false);
-  m_consumer = new VWLibraryPredictConsumer(modelFile);
+  m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, 255);
+  if (! LoadRuleIndex(indexFile))
+  isGood = false;
+
+  m_extractorConfig.Load(configFile);
+
+  m_extractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, false);
+  isGood = true;
   VERBOSE(4, "Constructing score producers : " << isGood << endl);
   return isGood;
 }
@@ -122,8 +128,34 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         }
 
         VERBOSE(5, "Extracting features features for source : " << sourceSide << endl);
-        vector<std::string> tokSourceSide = Tokenize(" ",sourceSide);
-        m_extractor->GenerateFeaturesChart(m_consumer,m_currentContext,tokSourceSide,startSpan,endSpan,targetIDs,losses);
+        //damt hiero : extract syntax features
+        vector<std::string> syntaxFeats;
+        NonTerminalSet labelSet = source.GetLabelSet(startSpan,endSpan);
+        //check if there is a label for this span
+        std::string noTag = "NOTAG";
+        std::string syntFeat;
+        if(labelSet.size() == 0)
+        {
+            syntaxFeats.push_back(noTag);
+            VERBOSE(6, "Added syntax label : " << noTag << endl);
+        }
+        else
+        {
+            NonTerminalSet::const_iterator itr_label;
+            for(itr_label = labelSet.begin(); itr_label != labelSet.end(); itr_label++)
+            {
+                Word label = *itr_label;
+                CHECK(label.IsNonTerminal() == 1);
+                syntFeat = label.GetString(m_srcFactors,0);
+                syntaxFeats.push_back(syntFeat);
+                VERBOSE(6, "Added syntax label : " << syntFeat << endl);
+
+            }
+
+        }
+        VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
+        m_extractor->GenerateFeaturesChart(p_consumer,m_currentContext,sourceSide,syntaxFeats,startSpan,endSpan,targetIDs,losses);
+        m_consumerFactory->Release(p_consumer);
 
         vector<float>::iterator lossIt;
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {

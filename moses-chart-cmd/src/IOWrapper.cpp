@@ -45,7 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTranslationOption.h"
 #include "ChartHypothesis.h"
-
+#include "CellContextScoreProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -474,6 +474,15 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
       }
     }
 
+    //Cell context features
+    CellContextScoreProducer *ccsProducer = StaticData::Instance().GetCellContextScoreProducer();
+    if (ccsProducer != NULL) {
+      out << " " << ccsProducer->GetScoreProducerWeightShortName(0) << ":";
+      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(ccsProducer);
+      for (size_t j = 0; j<scores.size(); ++j) {
+        out << " " << scores[j];
+      }
+    }
 
     // total
     out << " |||" << path.GetTotalScore();

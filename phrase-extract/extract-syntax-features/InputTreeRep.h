@@ -49,11 +49,11 @@ class InputTreeRep
 
 typedef std::vector<SyntaxLabel> SyntLabels;
 
-protected:
+public:
   std::vector<std::vector<SyntLabels> > m_sourceChart;
   std::vector<std::string> m_sourceSentence;
 
-  void AddChartLabel(size_t startPos, size_t endPos, const SyntaxLabel &label);
+  void AddChartLabel(size_t startPos, size_t endPos, SyntaxLabel &label);
   SyntLabels &GetLabels(size_t startPos, size_t endPos) {
     return m_sourceChart[startPos][endPos - startPos];
   }
@@ -61,8 +61,7 @@ protected:
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutputForTrain> &sourceLabelss);
 
 public:
-  InputTreeRep()
-  {}
+  InputTreeRep(size_t sourceSize);
 
   InputTypeEnum GetType() const {
     return TreeInputType;
@@ -79,7 +78,7 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  int Read(std::istream& in);
+  int Read(std::string &in);
 
   //! Output debugging info to stream out
   void Print(std::ostream&);

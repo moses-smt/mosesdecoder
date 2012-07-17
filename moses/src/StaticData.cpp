@@ -415,15 +415,24 @@ bool StaticData::LoadData(Parameter *parameter)
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
 
 // #ifdef HAVE_VW
-  if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
+ if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
     if (m_parameter->GetParam("rule-index").size() <= 0) {
       UserMessage::Add(string("--rule-index not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-lc").size() <= 0) {
+      UserMessage::Add(string("weight-lc not specified"));
       return false;
     }
     float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
     m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
     if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
-      m_parameter->GetParam("rule-index")[0])) {
+      m_parameter->GetParam("rule-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
       UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("rule-index")[0]));
       return false;
     }

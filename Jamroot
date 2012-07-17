@@ -91,7 +91,7 @@ project : requirements
 #Add directories here if you want their incidental targets too (i.e. tests).
 build-projects util lm mert moses-cmd/src moses-chart-cmd/src scripts regression-testing ;
 
-alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-psd phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor ;
+alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-syntax-features phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor ;
 
 install-bin-libs programs ;
 install-headers headers-base : [ glob-tree *.h *.hh : jam-files dist bin lib include kenlm moses ] : . ;

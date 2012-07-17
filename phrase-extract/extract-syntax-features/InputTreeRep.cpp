@@ -21,6 +21,23 @@ SyntaxLabel::SyntaxLabel(const std::string &label, bool isNonTerm)
 	m_nonTerm = isNonTerm;
 }
 
+InputTreeRep::InputTreeRep(size_t sourceSize)
+{
+  const string noLabel = "X";
+  SyntaxLabel syntNoLabel(noLabel,true);
+  for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
+      //cerr << "startPos" << startPos << endl;
+      vector<vector<SyntaxLabel> > internal;
+      for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
+        //cerr << "endPos" << endPos << endl;
+        vector<SyntaxLabel> oneCell;
+        oneCell.push_back(syntNoLabel);
+        internal.push_back(oneCell);
+    }
+    m_sourceChart.push_back(internal);
+  }
+}
+
 //A copy of the same method in InputTree
 bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutputForTrain> &sourceLabels)
 {
@@ -148,6 +165,7 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
 
         // may be either a input span label ("label"), or a specified output translation "translation"
         string label = MosesTraining::ParseXmlTagAttribute(tagContent,"label");
+        //std::cerr << "Obtained Label : " << label << std::endl;
 
         //no need to do something with translation here
         //string translation = ParseXmlTagAttribute(tagContent,"translation");
@@ -172,29 +190,23 @@ bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutp
   return true;
 }
 
-int InputTreeRep::Read(std::istream& in)
+int InputTreeRep::Read(std::string &line)
 {
-
-  string line;
-  if (getline(in, line, '\n').eof())
-    return 0;
-  // remove extra spaces
-  //line = Trim(line);
+  //std::cerr << "Reading in parse tree..." << line << std::endl;
 
   std::vector<XMLParseOutputForTrain> sourceLabels;
   ProcessAndStripXMLTags(line, sourceLabels);
 
-    //tokenize line
-    std::cerr << "Sentence string : " << line << std::cerr;
-    m_sourceSentence = Tokenize(" ",line);
+  //tokenize line
+  //std::cerr << "Sentence string : " << line << std::cerr;
+  m_sourceSentence = Tokenize(" ",line);
 
   // size input chart
   size_t sourceSize = m_sourceSentence.size();
-  m_sourceChart.resize(sourceSize);
 
-  for (size_t pos = 0; pos < sourceSize; ++pos) {
-    m_sourceChart[pos].resize(sourceSize - pos);
-  }
+  //std::cerr << "Size of source sentence : " << sourceSize << std::endl;
+
+  // default label
 
   // do source labels
   vector<XMLParseOutputForTrain>::const_iterator iterLabel;
@@ -203,27 +215,21 @@ int InputTreeRep::Read(std::istream& in)
     const WordsRange &range = labelItem.m_range;
     const string &label = labelItem.m_label;
     SyntaxLabel syntLabel(label,true);
-    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, syntLabel);
+
+    //std::cerr << "Adding chart label : " << range.GetStartPos() << " : "<< range.GetEndPos() << std::endl;
+
+    AddChartLabel(range.GetStartPos(), range.GetEndPos(), syntLabel);
   }
 
-
-  // default label
-  const string noLabel = "NOTAG";
-  SyntaxLabel syntNoLabel(noLabel,true);
-  for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
-    for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
-      AddChartLabel(startPos, endPos, syntNoLabel);
-    }
-  }
   return 1;
 }
 
-void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, const SyntaxLabel &label)
+void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, SyntaxLabel &label)
 {
   CHECK(label.IsNonTerm());
 
-  SyntLabels &syntLabels = GetLabels(startPos, endPos);
-  syntLabels.push_back(label);
+  //cerr << "Add at positions : " << startPos << " : "<< endPos << endl;
+  m_sourceChart[startPos][endPos-startPos].push_back(label);
 }
 
 void InputTreeRep::Print(std::ostream &out)
