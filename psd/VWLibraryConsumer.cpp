@@ -152,7 +152,7 @@ VWLibraryConsumer::~VWLibraryConsumer()
 VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
 {
   m_shared = true;
-  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -t " + modelFile)));
+  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -f " + modelFile)));
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
