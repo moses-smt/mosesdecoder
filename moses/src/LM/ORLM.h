@@ -7,7 +7,7 @@
 #include "LM/SingleFactor.h"
 #include "DynSAInclude/onlineRLM.h"
 //#include "multiOnlineRLM.h"
-#include "DynSAInclude/file.h"
+#include "DynSAInclude/FileHandler.h"
 #include "DynSAInclude/vocab.h"
 
 namespace Moses

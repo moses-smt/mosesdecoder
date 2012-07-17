@@ -331,12 +331,21 @@ PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair )
   PhraseAlignment* bestAlignment;
   
   for(size_t i=0; i<phrasePair.size(); i++) {
-    if (phrasePair[i]->count > bestAlignmentCount) {
-      bestAlignmentCount = phrasePair[i]->count;
-      bestAlignment = phrasePair[i];
+    size_t alignInd;
+    if (inverseFlag) 
+    { // count backwards, so that alignments for ties will be the same for both normal & inverse scores
+      alignInd = phrasePair.size() - i - 1;
     }
-  }
-  
+    else {
+      alignInd = i;
+    }
+    
+    if (phrasePair[alignInd]->count > bestAlignmentCount) {
+      bestAlignmentCount = phrasePair[alignInd]->count;
+      bestAlignment = phrasePair[alignInd];
+    }
+  }    
+
   return bestAlignment;
 }
 

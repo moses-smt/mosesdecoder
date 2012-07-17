@@ -5,7 +5,7 @@
 #include <cmath>
 #include "types.h"
 #include "utils.h"
-#include "file.h"
+#include "FileHandler.h"
 using namespace Moses;
 typedef uint64_t P;   // largest input range is 2^64
 
