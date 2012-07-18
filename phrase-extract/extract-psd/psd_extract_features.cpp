@@ -29,12 +29,15 @@ using namespace PSD;
 // globals
 CLASSIFIER_TYPE psd_classifier = VWFile;
 PSD_MODEL_TYPE psd_model = GLOBAL;
-int StartSNo = 0;
-int EndSNo = 0;
 string ptDelim = " ||| ";
 string factorDelim = "|";
 int subdirsize=1000;
 string ext = ".contexts";
+
+// settings for debugging
+int StartSNo = 0;
+int EndSNo = 0;
+bool skipPT = false;
 
 Vocabulary srcVocab;
 Vocabulary tgtVocab;
@@ -92,6 +95,9 @@ int main(int argc,char* argv[]){
       char* s = argv[++i];
       EndSNo = atoi(s);
 		}
+    else if (strcmp(argv[i],"--SkipPT") == 0){
+      skipPT = true;
+		}
 		else {
 			cerr << "failed to parse option: " << argv[i] << endl;
 			exit(1);
@@ -119,8 +125,10 @@ int main(int argc,char* argv[]){
   }
   // store translation phrase pair table
   PhraseTranslations transTable;
-  if (!readPhraseTranslations(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
-    cerr << "Error reading in phrase translation table " << endl;
+  if (! skipPT) {
+    if (!readPhraseTranslations(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
+      cerr << "Error reading in phrase translation table " << endl;
+    }
   }
 
   // loop through tagged PSD examples in the order they occur in the training corpus
