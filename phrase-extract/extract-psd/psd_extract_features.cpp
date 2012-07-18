@@ -208,7 +208,7 @@ int main(int argc,char* argv[]){
       exit(1);
     }
 
-    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
+    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim, config.GetFactors().size());
 
     // get surface forms from factored format
     vector<string> sent;
