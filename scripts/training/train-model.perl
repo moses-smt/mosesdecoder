@@ -587,7 +587,7 @@ die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DE
 
 sub prepare {
     print STDERR "(1) preparing corpus @ ".`date`;
-    safesystem("mkdir -p '$___CORPUS_DIR'") or die("ERROR: could not create corpus dir $___CORPUS_DIR");
+    safesystem("mkdir -p $___CORPUS_DIR") or die("ERROR: could not create corpus dir $___CORPUS_DIR");
     
     print STDERR "(1.0) selecting factors @ ".`date`;
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
@@ -769,12 +769,12 @@ sub reduce_factors {
     print STDERR "\n";
     close(OUT);
     close(IN);
-    `rm -f '$reduced.lock'`;
+    `rm -f $reduced.lock`;
 }
 
 sub make_classes {
     my ($corpus,$classes) = @_;
-    my $cmd = "$MKCLS -c50 -n2 -p'$corpus' -V'$classes' opt";
+    my $cmd = "$MKCLS -c50 -n2 -p$corpus -V$classes opt";
     print STDERR "(1.1) running mkcls  @ ".`date`."$cmd\n";
     if (-e $classes) {
         print STDERR "  $classes already in place, reusing\n";
@@ -973,7 +973,7 @@ sub run_single_giza_on_parts {
 	    if ($i%3==1 && $part < ($___PARTS*$i)/$size && $part<$___PARTS) {
 		close(PART) if $part;
 		$part++;
-		safesystem("mkdir -p '$___CORPUS_DIR/part$part'") or die("ERROR: could not create $___CORPUS_DIR/part$part");
+		safesystem("mkdir -p $___CORPUS_DIR/part$part") or die("ERROR: could not create $___CORPUS_DIR/part$part");
 		open(PART,">$___CORPUS_DIR/part$part/$f-$e-int-train.snt")
                    or die "ERROR: Can't write $___CORPUS_DIR/part$part/$f-$e-int-train.snt";
 	    }
@@ -1091,9 +1091,6 @@ sub run_single_giza {
     my $GizaOptions;
     foreach my $option (sort keys %GizaDefaultOptions){
 	my $value = $GizaDefaultOptions{$option} ;
-	if ($value =~ /\s+/) {
-		$value = qq('$value') #makes '/file name/' from /file name/
-	}
 	$GizaOptions .= " -$option $value" ;
     }
     
@@ -1119,17 +1116,17 @@ sub run_single_giza {
 
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
-    safesystem("rm -f '$dir/$f-$e.$___GIZA_EXTENSION.gz'") or die;
-    safesystem("gzip '$dir/$f-$e.$___GIZA_EXTENSION'") or die;
+    safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
+    safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
 }
 
 sub run_single_snt2cooc {
     my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
     print STDERR "(2.1a) running snt2cooc $f-$e @ ".`date`."\n";
-    safesystem("mkdir -p '$dir'") or die("ERROR");
+    safesystem("mkdir -p $dir") or die("ERROR");
     if ($SNT2COOC eq "$_EXTERNAL_BINDIR/snt2cooc.out") {
     print "$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc\n";
-    safesystem("$SNT2COOC '$vcb_e' '$vcb_f' '$train' > '$dir/$f-$e.cooc'") or die("ERROR");
+    safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc") or die("ERROR");
     } else {
     print "$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train\n";
     safesystem("$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train") or die("ERROR");
@@ -1150,22 +1147,22 @@ sub word_align {
     my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
     
     if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2"){
-      $__ALIGNMENT_CMD="\"$BZCAT '$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2'\"";
+      $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2\"";
     } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz") {
-      $__ALIGNMENT_CMD="\"$ZCAT '$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz'\"";
+      $__ALIGNMENT_CMD="\"$ZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz\"";
     } else {
       die "ERROR: Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
     }
   
     if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2"){
-      $__ALIGNMENT_INV_CMD="\"$BZCAT '$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2'\"";
+      $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2\"";
     }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz"){
-      $__ALIGNMENT_INV_CMD="\"$ZCAT '$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz'\"";
+      $__ALIGNMENT_INV_CMD="\"$ZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz\"";
     }else{
       die "ERROR: Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n\n";
     }
     
-   safesystem("mkdir -p '$___MODEL_DIR'") or die("ERROR: could not create dir $___MODEL_DIR");
+   safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
    
    #build arguments for symal
     my($__symal_a)="";
@@ -1186,7 +1183,7 @@ sub word_align {
     safesystem("$GIZA2BAL -d $__ALIGNMENT_INV_CMD -i $__ALIGNMENT_CMD |".
 	  "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
 	  "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
-	  "'$___ALIGNMENT_FILE.$___ALIGNMENT'") 
+	  "$___ALIGNMENT_FILE.$___ALIGNMENT") 
       ||
        die "ERROR: Can't generate symmetrized alignment file\n"
 	
@@ -1393,7 +1390,7 @@ sub extract_phrase {
     my @tempfiles = ();
     foreach my $f ($alignment_file_e, $alignment_file_f, $alignment_file_a) {
      if (! -e $f && -e $f.".gz") {
-       safesystem("gunzip < '$f.gz' > '$f'") or die("Failed to gunzip corpus $f");
+       safesystem("gunzip < $f.gz > $f") or die("Failed to gunzip corpus $f");
        push @tempfiles, "$f.gz";
      }
     }
@@ -1402,7 +1399,7 @@ sub extract_phrase {
     {
         my $max_length = &get_max_phrase_length($table_number);
 
-        $cmd = "$RULE_EXTRACT '$alignment_file_e' '$alignment_file_f' '$alignment_file_a' '$extract_file'";
+        $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
         $cmd .= " --PCFG" if $_PCFG;
@@ -1419,14 +1416,14 @@ sub extract_phrase {
     {
 		if ( $_EPPEX ) {
 			# eppex sets max_phrase_length itself (as the maximum phrase length for which any Lossy Counter is defined)
-      		$cmd = "$EPPEX '$alignment_file_e' '$alignment_file_f' '$alignment_file_a' '$extract_file' $_EPPEX";
+      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $_EPPEX";
 		}
 		else {
       my $max_length = &get_max_phrase_length($table_number);
       print "MAX $max_length $reordering_flag $table_number\n";
       $max_length = &get_max_phrase_length(-1) if $reordering_flag;
 
-      $cmd = "$PHRASE_EXTRACT '$alignment_file_e' '$alignment_file_f' '$alignment_file_a' '$extract_file' '$max_length'";
+      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
 		}
       if ($reordering_flag) {
         $cmd .= " orientation";
@@ -1534,7 +1531,7 @@ sub score_phrase_phrase_extract {
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-        my $cmd = "$PHRASE_SCORE '$extract' '$lexical_file.$direction' '$ttable_file.half.$direction.gz' $inverse";
+        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction' $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " --KneserNey" if $KNESER_NEY;
@@ -1582,7 +1579,7 @@ sub score_phrase_phrase_extract {
     # merging the two halves
     print STDERR "(6.6) consolidating the two halves @ ".`date`;
     return if $___CONTINUE && -e "$ttable_file.gz";
-    my $cmd = "$PHRASE_CONSOLIDATE '$ttable_file.half.f2e.gz' '$ttable_file.half.e2f.gz' /dev/stdout";
+    my $cmd = "$PHRASE_CONSOLIDATE $ttable_file.half.f2e.gz $ttable_file.half.e2f.gz /dev/stdout";
     $cmd .= " --Hierarchical" if $_HIERARCHICAL;
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
@@ -1593,10 +1590,10 @@ sub score_phrase_phrase_extract {
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     
-    $cmd .= " | gzip -c > '$ttable_file.gz'";
+    $cmd .= " | gzip -c > $ttable_file.gz";
     
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
-    if (! $debug) { safesystem("rm -f '$ttable_file.half.'*") or die("ERROR"); }
+    if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
 }
 
 sub score_phrase_memscore {
@@ -1610,7 +1607,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >'$ttable_file.gz'";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1670,7 +1667,7 @@ sub get_reordering {
 	print STDERR "(7.2) building tables @ ".`date`;
 	
 	#create cmd string for lexical reordering scoring
-	my $cmd = "$LEXICAL_REO_SCORER '$extract_file.o.sorted.gz' $smooth '$reo_model_path'";
+	my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
 	$cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
 	for my $mtype (keys %REORDERING_MODEL_TYPES) {
 		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
@@ -1768,8 +1765,8 @@ sub get_generation {
 	}
     }
     close(GEN);
-    safesystem("rm -f '$file.gz'") or die("ERROR");
-    safesystem("gzip '$file'") or die("ERROR");
+    safesystem("rm -f $file.gz") or die("ERROR");
+    safesystem("gzip $file") or die("ERROR");
 }
 
 ### (9) CREATE CONFIGURATION FILE

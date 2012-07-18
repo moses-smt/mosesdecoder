@@ -44,7 +44,7 @@ my $cmd;
 my $fileCount = 0;
 if ($numParallel <= 1)
 { # don't do parallel. Just link the extract file into place
-  $cmd = "ln -s '$extractFile' '$TMPDIR/extract.0.gz'";
+  $cmd = "ln -s $extractFile $TMPDIR/extract.0.gz";
   print STDERR "$cmd \n";
   systemCheck($cmd);
   
@@ -121,7 +121,7 @@ for (my $i = 0; $i < $fileCount; ++$i)
 
   my $fileInd = $i % $numParallel;
   my $fh = $runFiles[$fileInd];
-  my $cmd = "'$scoreCmd' '$TMPDIR'/extract.$i.gz '$lexFile' '$TMPDIR'/phrase-table.half.$numStr.gz $otherExtractArgs\n";
+  my $cmd = "$scoreCmd $TMPDIR/extract.$i.gz $lexFile $TMPDIR/phrase-table.half.$numStr.gz $otherExtractArgs\n";
   print $fh $cmd;
 }
 
@@ -129,7 +129,7 @@ for (my $i = 0; $i < $fileCount; ++$i)
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   close($runFiles[$i]);
-  my $path = "'$TMPDIR'/run.$i.sh";
+  my $path = "$TMPDIR/run.$i.sh";
   systemCheck("chmod +x $path");
 }
 
@@ -137,7 +137,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
 my @children;
 for (my $i = 0; $i < $numParallel; ++$i)
 {
-  my $cmd = "'$TMPDIR'/run.$i.sh";
+  my $cmd = "$TMPDIR/run.$i.sh";
 	my $pid = RunFork($cmd);
 	push(@children, $pid);
 }
@@ -152,19 +152,19 @@ $cmd = "\n\nOH SHIT. This should have been filled in \n\n";
 if ($fileCount == 1 && !$doSort)
 {
   my $numStr = NumStr(0);
-  $cmd = "mv '$TMPDIR/phrase-table.half.$numStr.gz' '$ptHalf'";
+  $cmd = "mv $TMPDIR/phrase-table.half.$numStr.gz $ptHalf";
 }
 else
 {
   my $_is_osx = ($^O eq "darwin");
   my $_catCmd = $_is_osx?"gunzip -c ":"zcat ";
-  $cmd = $_catCmd."'$TMPDIR'/phrase-table.half.*.gz";
+  $cmd = $_catCmd."$TMPDIR/phrase-table.half.*.gz";
 
   if ($doSort) {
-    $cmd .= "| LC_ALL=C $sortCmd -T '$TMPDIR' ";
+    $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
   }
 
-  $cmd .= " | gzip -c > '$ptHalf'";
+  $cmd .= " | gzip -c > $ptHalf";
 }
 print STDERR $cmd;
 systemCheck($cmd);
@@ -215,7 +215,7 @@ if (-e $cocPath)
   close(FHCOC);
 }
 
-$cmd = "rm -rf '$TMPDIR' \n";
+$cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
 systemCheck($cmd);
 
