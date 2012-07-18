@@ -39,14 +39,15 @@ namespace Moses
     
   public:
     PhraseDictionaryTMExtract(size_t numScoreComponents,
-                         PhraseDictionaryFeature* feature)
-    : PhraseDictionarySCFG(numScoreComponents, feature) {}
+                              PhraseDictionaryFeature* feature);
     
     const PhraseDictionaryNodeSCFG &GetRootNode() const { return m_collection; }
     
     ChartRuleLookupManager *CreateRuleLookupManager(
                                                     const InputType &,
                                                     const ChartCellCollection &);
+    void InitializeForInput(InputType const& source);
+    void CleanUp();
     
     TO_STRING();
     
@@ -60,7 +61,7 @@ namespace Moses
     
     void SortAndPrune();
     
-    PhraseDictionaryNodeSCFG m_collection;
+    //PhraseDictionaryNodeSCFG m_collection;
   };
   
 }  // namespace Moses

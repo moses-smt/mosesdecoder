@@ -39,7 +39,14 @@ using namespace std;
 
 namespace Moses
 {
-  
+  PhraseDictionaryTMExtract::PhraseDictionaryTMExtract(size_t numScoreComponents,
+                            PhraseDictionaryFeature* feature)
+  : PhraseDictionarySCFG(numScoreComponents, feature) 
+  {
+    const StaticData &staticData = StaticData::Instance();
+    CHECK(staticData.ThreadCount() == 1);
+  }
+
   TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(
                                                                                   const Phrase &source
                                                                                   , const TargetPhrase &target
@@ -103,6 +110,29 @@ namespace Moses
     }
   }
   
+  void PhraseDictionaryTMExtract::InitializeForInput(InputType const& source)
+  {
+    string data_root = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/";
+    string pt_file = data_root + "out/pt";
+    string cmd = "perl ~/workspace/github/hieuhoang/contrib/tm-mt-integration/make-pt-from-tm.perl "
+    + data_root + "in/ac-test.input.tc.4 "
+    + data_root + "in/acquis.truecased.4.en.uniq "
+    + data_root + "in/acquis.truecased.4.fr.uniq "
+    + data_root + "in/acquis.truecased.4.align.uniq "
+    + data_root + "in/lex.4 "
+    + pt_file;
+    system(cmd.c_str());
+
+    
+    
+  }
+  
+  void PhraseDictionaryTMExtract::CleanUp()
+  {
+    m_collection.Clear();
+  }
+
+
   TO_STRING_BODY(PhraseDictionaryTMExtract);
   
   // friend

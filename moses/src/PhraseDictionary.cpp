@@ -24,6 +24,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "RuleTable/PhraseDictionarySCFG.h"
 #include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "RuleTable/PhraseDictionaryTMExtract.h"
+
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
 #endif
@@ -115,7 +117,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     if (m_implementation == Hiero) {
       VERBOSE(2,"using Hiero format phrase tables" << std::endl);
     } else {
-      VERBOSE(2,"using New Format phrase tables" << std::endl);
+      VERBOSE(2,"using Moses-formatted SCFG phrase tables" << std::endl);
     }
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
@@ -188,6 +190,20 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
+  } else if (m_implementation == TMExtract) {
+    
+    RuleTableTrie *dict = new PhraseDictionaryTMExtract(m_numScoreComponent, this);
+
+    bool ret = dict->Load(GetInput()
+                          , GetOutput()
+                          , m_filePath
+                          , m_weight
+                          , m_tableLimit
+                          , system->GetLanguageModels()
+                          , system->GetWordPenaltyProducer());
+    assert(ret);
+    return dict;    
+
   } else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
     CHECK(false);

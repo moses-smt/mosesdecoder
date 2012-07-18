@@ -7,8 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
-		1E0066EA15B6E925005BFE5F /* PhraseDictionaryTMExtract.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E0066E915B6E925005BFE5F /* PhraseDictionaryTMExtract.h */; };
-		1E0066ED15B6E94F005BFE5F /* PhraseDictionaryTMExtract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E0066EC15B6E94F005BFE5F /* PhraseDictionaryTMExtract.cpp */; };
+		1E0BA41815B70E5F00AC70E1 /* PhraseDictionaryTMExtract.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E0BA41615B70E5F00AC70E1 /* PhraseDictionaryTMExtract.cpp */; };
+		1E0BA41915B70E5F00AC70E1 /* PhraseDictionaryTMExtract.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryTMExtract.h */; };
 		1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */; };
 		1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1D823F15AC29BB00FE42E9 /* FileHandler.h */; };
 		1E879EA715A346F90051F346 /* SearchNormalBatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */; };
@@ -303,8 +303,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		1E0066E915B6E925005BFE5F /* PhraseDictionaryTMExtract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTMExtract.h; path = ../../moses/src/PhraseDictionaryTMExtract.h; sourceTree = "<group>"; };
-		1E0066EC15B6E94F005BFE5F /* PhraseDictionaryTMExtract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTMExtract.cpp; path = ../../moses/src/PhraseDictionaryTMExtract.cpp; sourceTree = "<group>"; };
+		1E0BA41615B70E5F00AC70E1 /* PhraseDictionaryTMExtract.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryTMExtract.cpp; path = ../../moses/src/RuleTable/PhraseDictionaryTMExtract.cpp; sourceTree = "<group>"; };
+		1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryTMExtract.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryTMExtract.h; path = ../../moses/src/RuleTable/PhraseDictionaryTMExtract.h; sourceTree = "<group>"; };
 		1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileHandler.cpp; sourceTree = "<group>"; };
 		1E1D823F15AC29BB00FE42E9 /* FileHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHandler.h; sourceTree = "<group>"; };
 		1E879EA515A346F90051F346 /* SearchNormalBatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SearchNormalBatch.cpp; path = ../../moses/src/SearchNormalBatch.cpp; sourceTree = "<group>"; };
@@ -860,8 +860,8 @@
 				1EDA807D14D19FBF003D2191 /* PhraseDictionaryOnDisk.h */,
 				1EDA807E14D19FBF003D2191 /* PhraseDictionarySCFG.cpp */,
 				1EDA807F14D19FBF003D2191 /* PhraseDictionarySCFG.h */,
-				1E0066E915B6E925005BFE5F /* PhraseDictionaryTMExtract.h */,
-				1E0066EC15B6E94F005BFE5F /* PhraseDictionaryTMExtract.cpp */,
+				1E0BA41615B70E5F00AC70E1 /* PhraseDictionaryTMExtract.cpp */,
+				1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryTMExtract.h */,
 				1EDA808014D19FBF003D2191 /* Trie.cpp */,
 				1EDA808114D19FBF003D2191 /* Trie.h */,
 				1EDA808214D19FBF003D2191 /* UTrie.cpp */,
@@ -1149,7 +1149,7 @@
 				1EF8F2C4159A61970047B613 /* HypoList.h in Headers */,
 				1E879EA815A346F90051F346 /* SearchNormalBatch.h in Headers */,
 				1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */,
-				1E0066EA15B6E925005BFE5F /* PhraseDictionaryTMExtract.h in Headers */,
+				1E0BA41915B70E5F00AC70E1 /* PhraseDictionaryTMExtract.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1335,7 +1335,7 @@
 				1EDA809214D19FBF003D2191 /* UTrieNode.cpp in Sources */,
 				1E879EA715A346F90051F346 /* SearchNormalBatch.cpp in Sources */,
 				1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */,
-				1E0066ED15B6E94F005BFE5F /* PhraseDictionaryTMExtract.cpp in Sources */,
+				1E0BA41815B70E5F00AC70E1 /* PhraseDictionaryTMExtract.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
