@@ -1769,6 +1769,7 @@ sub define_training_psd_model {
   my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
+  die "no psd_config" unless defined($psd_config);
   my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_index.$input_extension $psd_index.$output_extension $out.train $psd_config";
   $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out";
 
@@ -1903,6 +1904,9 @@ sub define_training_create_config {
     my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
     my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
     if (&get("TRAINING:use-psd")) {
+      die "no psd_model" unless defined($psd_model);
+      die "no psd_index" unless defined($psd_index);
+      die "no psd_config" unless defined($psd_config);
       $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension -psd-config $psd_config ";
     }
 

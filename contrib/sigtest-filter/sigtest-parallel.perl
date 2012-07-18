@@ -5,7 +5,6 @@
 
 use strict;
 use File::Basename;
-use POSIX;
 
 sub RunFork($);
 sub systemCheck($);
@@ -17,6 +16,7 @@ my $SIGTEST_SPLIT_LINES = 2000000;
 print "Started ".localtime() ."\n";
 
 my $numParallel	= shift;
+die "$0 called incorrectly, error\n" unless defined($numParallel);
 $numParallel = 1 if $numParallel < 1;
 my $filterCmd = shift;
 my $filterArgs = shift;
@@ -25,6 +25,7 @@ my $indexCmd = shift;
 my $fCorpus = shift;
 my $eCorpus = shift;
 my $outFile = shift;
+die "$0 called incorrectly, error\n" unless defined($outFile);
 
 # Currently hardcoded to take gzipped phrase table (and output gzipped too, see below)
 if (-f $ptFile) {
@@ -71,7 +72,8 @@ else
 	}
 
 	## This does not scale due to a RAM issue with filter-p, so using hardcoded upper limit of 2M lines
-	my $linesPerSplit = min($SIGTEST_SPLIT_LINES, int($totalLines/$numParallel)+1);
+	my $linesPerSplit = int($totalLines/$numParallel)+1;
+	$linesPerSplit = $SIGTEST_SPLIT_LINES if $SIGTEST_SPLIT_LINES < $linesPerSplit;
 
 	my $filePath  = "$TMPDIR/unfiltered.$fileCount.gz";
 	open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";

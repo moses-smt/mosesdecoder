@@ -42,7 +42,8 @@ Vocabulary tgtVocab;
 int main(int argc,char* argv[]){
   cerr << "PSD phrase-extractor\n\n";
   if (argc < 8){
-    cerr << "syntax: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename extractor-config [options]\n";
+		cerr << "error in syntax" << endl;
+    cerr << "usage: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename extractor-config [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
     cerr << "\t --ClassifierType vw|megam" << endl;
@@ -156,6 +157,8 @@ int main(int argc,char* argv[]){
 
     // get phrase pair
     SAFE_GETLINE((psd),psdLine, LINE_MAX_LENGTH, '\n', __FILE__);
+    if (psd.eof()) break;
+
     if (++extractlinenum % 100000 == 0) cerr << "." << flush;
 
     vector<string> token = Tokenize(psdLine,"\t");
@@ -185,9 +188,10 @@ int main(int argc,char* argv[]){
     }
 
     if (csid != sid) {
-      cerr << "Inconsistent sentence ID " << sid << " on line " << i << endl;
+      cerr << "Inconsistent sentence ID " << sid << " on extract line " << extractlinenum << " error" << endl;
       return 1;
     }
+
     ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
 
     // get surface forms from factored format
