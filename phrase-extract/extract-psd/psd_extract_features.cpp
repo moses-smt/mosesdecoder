@@ -151,6 +151,7 @@ int main(int argc,char* argv[]){
   }
 
   cerr<< "Phrase tables read. Now reading in corpus." << endl;
+	int prevSNo = 0;
   while(true) {
     if (psd.eof()) break;
     char psdLine[LINE_MAX_LENGTH];
@@ -173,6 +174,13 @@ int main(int argc,char* argv[]){
 			break;
 		}
 
+		if (StartSNo > 0) {
+			if (prevSNo != sid) {
+				cerr << "extract line number " << extractlinenum << " SNo " << sid << endl;
+				prevSNo = sid;
+			}
+		}
+
     size_t src_start = Scan<size_t>(token[1].c_str());
     size_t src_end = Scan<size_t>(token[2].c_str());
     size_t tgt_start = Scan<size_t>(token[3].c_str());
@@ -189,7 +197,7 @@ int main(int argc,char* argv[]){
 
     if (csid != sid) {
       cerr << "Inconsistent sentence ID " << sid << " on extract line " << extractlinenum << " error" << endl;
-      return 1;
+      exit(1);
     }
 
     ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
