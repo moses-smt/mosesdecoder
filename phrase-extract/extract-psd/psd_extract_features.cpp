@@ -246,27 +246,25 @@ int main(int argc,char* argv[]){
     if (factoredSrcLine.size() <= src_end && sent.size() <= src_end)
       cerr << "Phrase goes beyond sentence (" << csid << "): " << phrase << endl;
 
-    if (srcid != 0){
-      if (exists(srcid, labelid, transTable)) {
-        if (psd_model == PHRASAL){
-          map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
-          if (i == consumers.end()){
-            int low = floor(srcid/subdirsize)*subdirsize;
-            int high = low+subdirsize-1;
-            string output_subdir = output +"/"+SPrint(low)+"-"+SPrint(high);
-            mkdir(output_subdir.c_str(),S_IREAD | S_IWRITE | S_IEXEC);
-            string fileName = output_subdir + "/" + SPrint(srcid) + ext;
-            FeatureConsumer *fc = NULL;
-            if (psd_classifier == VWLib) 
-              fc = new VWLibraryTrainConsumer(fileName);
-            else
-              fc = new VWFileTrainConsumer(fileName);
-            consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
-          }
-          extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, src_start, src_end, translations, losses);
-        } else { // GLOBAL model
-          extractor.GenerateFeatures(globalOut, factoredSrcLine, src_start, src_end, translations, losses);
+    if (exists(srcid, labelid, transTable)) {
+      if (psd_model == PHRASAL){
+        map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
+        if (i == consumers.end()){
+          int low = floor(srcid/subdirsize)*subdirsize;
+          int high = low+subdirsize-1;
+          string output_subdir = output +"/"+SPrint(low)+"-"+SPrint(high);
+          mkdir(output_subdir.c_str(),S_IREAD | S_IWRITE | S_IEXEC);
+          string fileName = output_subdir + "/" + SPrint(srcid) + ext;
+          FeatureConsumer *fc = NULL;
+          if (psd_classifier == VWLib) 
+            fc = new VWLibraryTrainConsumer(fileName);
+          else
+            fc = new VWFileTrainConsumer(fileName);
+          consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
         }
+        extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, src_start, src_end, translations, losses);
+      } else { // GLOBAL model
+        extractor.GenerateFeatures(globalOut, factoredSrcLine, src_start, src_end, translations, losses);
       }
     }
   }
