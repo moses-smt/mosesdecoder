@@ -38,7 +38,8 @@ namespace Moses
 {
 
 class PhraseDictionarySCFG;
-
+class PhraseDictionaryTMExtract;
+  
   //! @todo why?
 class NonTerminalMapKeyHasher
 {
@@ -111,9 +112,11 @@ public:
 
 private:
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryTMExtract&);
 
   // only these classes are allowed to instantiate this class
   friend class PhraseDictionarySCFG;
+  friend class PhraseDictionaryTMExtract;
   friend class std::map<Word, PhraseDictionaryNodeSCFG>;
 
 protected:
