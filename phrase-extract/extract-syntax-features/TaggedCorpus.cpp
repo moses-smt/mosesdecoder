@@ -12,7 +12,11 @@ vector< vector<string> > parseTaggedString(const string &input, const string &de
   for(int i =0; i < words.size(); i++)  {
     string& word = words[i];
     vector<string> tags = Tokenize(word, delimiter);
-    taggedWords.push_back(tags);
+    if (tags.size() != factorCount) {
+       cerr << "error: unexpected number of factors (" << tags.size() << ") in token: " << word << endl;
+       exit(1);
+     }
+     taggedWords.push_back(tags);
   }
   return taggedWords;
 }

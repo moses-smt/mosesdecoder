@@ -135,9 +135,12 @@ IOWrapper::~IOWrapper()
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
-  m_wordAlignmentStream->close();
-  delete m_wordAlignmentStream;
-  delete m_wordAlignmentOutputCollector;
+
+  //damt hiero : maybe check for option
+  if(m_wordAlignmentStream != NULL)
+  {delete m_wordAlignmentStream;}
+  if(m_wordAlignmentOutputCollector != NULL)
+  {delete m_wordAlignmentOutputCollector;}
 }
 
 void IOWrapper::ResetTranslationId() {
@@ -315,7 +318,7 @@ void OutputTranslationOptions(std::ostream &out, std::ostream &alignOut, const C
   //damt_hiero: Printing out word alignments in the user-specified file
   AlignVec alignments = hypo->GetCurrTargetPhrase().GetWordAlignmentInfo().GetSortedAlignments();
   AlignVec::const_iterator it;
-  for (it = alignments.begin(); it != alignments.end(); ++it) 
+  for (it = alignments.begin(); it != alignments.end(); ++it)
   {
         const std::pair<size_t,size_t> &alignment = **it;
         //Word srcWord=hypo->GetCurrTargetPhrase().GetWord(alignment.first);
