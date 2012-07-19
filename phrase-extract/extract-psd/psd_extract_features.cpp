@@ -231,7 +231,6 @@ int main(int argc,char* argv[]){
     PHRASE srcPhrase = makePhrase(phrase, srcVocab);
     map<PHRASE, PHRASE_ID>::const_iterator srcPhraseIt = psdPhraseVoc.lookup.find(srcPhrase);
     if (srcPhraseIt == psdPhraseVoc.lookup.end()) {
-      cerr << "error: OOV source phrase " << phrase << endl;
       continue;
     }
     PHRASE_ID srcid = srcPhraseIt->second;
@@ -239,7 +238,6 @@ int main(int argc,char* argv[]){
     PHRASE tgtPhrase = makePhrase(token[6], tgtVocab);
     map<PHRASE, PHRASE_ID>::const_iterator tgtPhraseIt = tgtPhraseVoc.lookup.find(tgtPhrase);
     if (tgtPhraseIt == tgtPhraseVoc.lookup.end()) {
-      cerr << "error: OOV target phrase " << token[6] << endl;
       continue;
     }
 

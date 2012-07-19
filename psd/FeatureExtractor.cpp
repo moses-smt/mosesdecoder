@@ -24,7 +24,7 @@ FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, const Ext
 
 float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
 {
-  float maxProb = -numeric_limits<float>::max(); // minus "infinity"
+  float maxProb = 0; 
   vector<Translation>::const_iterator it;
   for (it = translations.begin(); it != translations.end(); it++) 
     maxProb = max(it->m_scores[P_E_F_INDEX], maxProb);
@@ -46,7 +46,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   for (size_t i = spanStart; i <= spanEnd; i++)
     sourceForms[i - spanStart] = context[i][FACTOR_FORM]; 
   
-  float maxProb;
+  float maxProb = 0;
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
 
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
