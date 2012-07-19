@@ -94,7 +94,9 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
       vector<string>::const_iterator alignIt;
       for (alignIt = alignPoints.begin(); alignIt != alignPoints.end(); alignIt++) {
         vector<string> point = Tokenize(*alignIt, "-");
-        translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
+        if (point.size() == 2) {
+          translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
+        }
       }
     }
 

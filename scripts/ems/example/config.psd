@@ -3,7 +3,7 @@
 ################################################
 
 [GENERAL]
-working-dir = /home/ales/mt/mosesdecoder/scripts/ems/test-psd2/
+working-dir = /home/ales/mt/mosesdecoder/scripts/ems/test-psd/
 input-extension = fr
 output-extension = en
 pair-extension = fr-en
@@ -13,7 +13,7 @@ moses-script-dir = $moses-src-dir/scripts
 external-bin-dir = /home/ales/mt/gizapp/bin/
 srilm-dir = /home/ales/mt/statmt/playground/s.srilm.d677a362.20120624-2231/srilm/bin/i686-m64/
 psd-data = /home/ales/baltimore/test-psd2/
-psd-config = $moses-script-dir/ems/example/data/psd-features.ini
+psd-config = $moses-script-dir/ems/psd-features.ini
 decoder = $moses-bin-dir/moses
 ttable-binarizer = $moses-bin-dir/processPhraseTable
 generic-parallelizer = $moses-script-dir/ems/support/generic-multicore-parallelizer.perl
@@ -47,6 +47,7 @@ script = $moses-script-dir/training/train-model.perl
 parallel = yes
 alignment-symmetrization-method = grow-diag-final-and
 score-settings = "--GoodTuring"
+include-word-alignment-in-rules = yes
 
 [TUNING]
 tuning-script = $moses-script-dir/training/mert-moses.pl
