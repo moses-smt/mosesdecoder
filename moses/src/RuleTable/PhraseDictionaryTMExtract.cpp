@@ -112,6 +112,7 @@ namespace Moses
   
   void PhraseDictionaryTMExtract::InitializeForInput(InputType const& source)
   {
+    /*
     string data_root = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/";
     string pt_file = data_root + "out/pt";
     string cmd = "perl ~/workspace/github/hieuhoang/contrib/tm-mt-integration/make-pt-from-tm.perl "
@@ -122,7 +123,7 @@ namespace Moses
     + data_root + "in/lex.4 "
     + pt_file;
     system(cmd.c_str());
-
+     */
     
     
   }

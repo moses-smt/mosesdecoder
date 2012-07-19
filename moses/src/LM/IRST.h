@@ -70,7 +70,7 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
 
-  void CleanUpAfterSentenceProcessing();
+  void CleanUpAfterSentenceProcessing(const InputType& source);
   void InitializeBeforeSentenceProcessing();
 
   void set_dictionary_upperbound(int dub) {

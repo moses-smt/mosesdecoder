@@ -94,7 +94,7 @@ public:
 		std::string source, std::string target, std::string alignments, 
 		const std::vector<float> &weight);
 	void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
-	void CleanUp();
+	void CleanUp(const InputType& source);
   void addSntPair(string& source, string& target, string& alignment);
 private:
 	DynSuffixArray* m_srcSA;

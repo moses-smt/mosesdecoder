@@ -170,7 +170,7 @@ bool BilingualDynSuffixArray::ExtractPhrases(const int& sntIndex, const int& wor
 	return curSnt.Extract(m_maxPhraseLength, phrasePairs, leftIdx, rightIdx); // extract all phrase Alignments in sentence
 }
 
-void BilingualDynSuffixArray::CleanUp() 
+void BilingualDynSuffixArray::CleanUp(const InputType& source) 
 {
 	//m_wordPairCache.clear();
 }

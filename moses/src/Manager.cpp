@@ -65,7 +65,7 @@ Manager::~Manager()
   delete m_transOptColl;
   delete m_search;
 
-  m_system->CleanUpAfterSentenceProcessing();
+  m_system->CleanUpAfterSentenceProcessing(m_source);
 
   clock_t end = clock();
   float et = (end - m_start);
