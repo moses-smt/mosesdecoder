@@ -85,11 +85,17 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
     Translation translation;
     translation.m_index = tgt + 1; // one based!!!
 
-    vector<string> alignPoints = Tokenize(fields[3], " ");
-    vector<string>::const_iterator alignIt;
-    for (alignIt = alignPoints.begin(); alignIt != alignPoints.end(); alignIt++) {
-      vector<string> point = Tokenize(*alignIt, "-");
-      translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
+    if (fields.size() >= 3) {
+      translation.m_scores = Scan<float>(Tokenize(fields[2], " "));
+    }
+
+    if (fields.size() >= 4) {
+      vector<string> alignPoints = Tokenize(fields[3], " ");
+      vector<string>::const_iterator alignIt;
+      for (alignIt = alignPoints.begin(); alignIt != alignPoints.end(); alignIt++) {
+        vector<string> point = Tokenize(*alignIt, "-");
+        translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
+      }
     }
 
     transTable.insert(make_pair(src, translation));

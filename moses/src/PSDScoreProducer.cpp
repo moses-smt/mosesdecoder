@@ -66,10 +66,15 @@ Translation PSDScoreProducer::GetPSDTranslation(const TranslationOption *option)
 
   // alignment
   const AlignmentInfo &alignInfo = option->GetTargetPhrase().GetAlignmentInfo();
-  //copy(alignInfo.begin(), alignInfo.end(), psdOpt.m_alignment.begin());
   AlignmentInfo::const_iterator it;
   for (it = alignInfo.begin(); it != alignInfo.end(); it++)
     psdOpt.m_alignment.insert(*it);
+
+  // scores
+  const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+  const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
+  const ScoreComponentCollection &scoreCollection = option->GetTargetPhrase().GetScoreBreakdown();
+  psdOpt.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
 
   return psdOpt;
 }
