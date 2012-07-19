@@ -155,9 +155,10 @@ void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, c
 
 void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)
 {
-  vector<float>::const_iterator it;
-  for (it = scores.begin(); it != scores.end(); it++)
-    fc->AddFeature(SPrint((int)log(*it)));
+  vector<size_t>::const_iterator it;
+  const vector<size_t>& scoreIDs = m_config.GetScoreIndexes();
+  for (it = scoreIDs.begin(); it != scoreIDs.end(); it++)
+    fc->AddFeature("sc^" + SPrint<size_t>(*it) + "_" + SPrint((int)log(scores[*it])));
 }
 
 } // namespace PSD
