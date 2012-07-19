@@ -137,11 +137,12 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   }
 }
 
-void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t factorID, FeatureConsumer *fc)
+void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc)
 {
-  ContextType::const_iterator it;
-  for (it = context.begin(); it != context.end(); it++)
-    fc->AddFeature("bow^" + it->at(factorID));
+  for (size_t i = 0; i < spanStart; i++)
+    fc->AddFeature("bow^" + context[i][factorID]);
+  for (size_t i = spanEnd + 1; i < context.size(); i++)
+    fc->AddFeature("bow^" + context[i][factorID]);
 }
 
 void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase, 
