@@ -33,7 +33,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
-#include "CYKPlusParser/ChartRuleLookupManagerMemory.h"
+#include "CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 
 using namespace std;
 
@@ -41,7 +41,7 @@ namespace Moses
 {
   PhraseDictionaryTMExtract::PhraseDictionaryTMExtract(size_t numScoreComponents,
                             PhraseDictionaryFeature* feature)
-  : PhraseDictionarySCFG(numScoreComponents, feature) 
+  : PhraseDictionary(numScoreComponents, feature) 
   {
     const StaticData &staticData = StaticData::Instance();
     CHECK(staticData.ThreadCount() == 1);
@@ -99,7 +99,7 @@ namespace Moses
                                                                         const InputType &sentence,
                                                                         const ChartCellCollection &cellCollection)
   {
-    return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
+    return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
   }
   
   void PhraseDictionaryTMExtract::SortAndPrune()
@@ -128,7 +128,7 @@ namespace Moses
     
   }
   
-  void PhraseDictionaryTMExtract::CleanUp()
+  void PhraseDictionaryTMExtract::CleanUp(const InputType &source)
   {
     m_collection.Clear();
   }

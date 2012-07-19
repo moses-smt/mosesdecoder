@@ -192,8 +192,9 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #endif
   } else if (m_implementation == TMExtract) {
     
-    RuleTableTrie *dict = new PhraseDictionaryTMExtract(m_numScoreComponent, this);
+    PhraseDictionaryTMExtract *dict = new PhraseDictionaryTMExtract(m_numScoreComponent, this);
 
+    /*
     bool ret = dict->Load(GetInput()
                           , GetOutput()
                           , m_filePath
@@ -202,6 +203,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                           , system->GetLanguageModels()
                           , system->GetWordPenaltyProducer());
     assert(ret);
+     */
     return dict;    
 
   } else {
