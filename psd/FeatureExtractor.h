@@ -11,6 +11,9 @@
 namespace PSD
 {
 
+const size_t FACTOR_FORM = 0; // index of surface forms
+const size_t P_E_F_INDEX = 2; // index of P(e|f) score in phrase table
+
 class ExtractorConfig
 {
   public:
@@ -21,6 +24,7 @@ class ExtractorConfig
     inline bool GetTargetInternal() const { return m_targetInternal; }
     inline bool GetPaired() const         { return m_paired; }
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
+    inline bool GetMostFrequent() const   { return m_mostFrequent; }
     inline size_t GetWindowSize() const   { return m_windowSize; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
 
@@ -29,7 +33,7 @@ class ExtractorConfig
   private:
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
-         m_sourceInternal, m_targetInternal;
+         m_sourceInternal, m_targetInternal, m_mostFrequent;
     size_t m_windowSize;
     std::vector<size_t> m_factors;
 
@@ -46,6 +50,7 @@ struct Translation
 {
   size_t m_index;
   AlignmentType m_alignment;
+  std::vector<float> m_scores;
 };
 
 // index of possible target spans
@@ -69,6 +74,7 @@ private:
   const ExtractorConfig &m_config;
   bool m_train;
 
+  float GetMaxProb(const std::vector<Translation> &translations);
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t factorID, FeatureConsumer *fc);

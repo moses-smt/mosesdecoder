@@ -5,6 +5,7 @@
 #include <boost/property_tree/ini_parser.hpp>
 #include <exception>
 #include <stdexcept>
+#include <algorithm>
 
 using namespace std;
 using namespace boost::bimaps;
@@ -21,6 +22,15 @@ FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, const Ext
     throw logic_error("configuration file not loaded");
 }
 
+float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
+{
+  float maxProb = -numeric_limits<float>::max(); // minus "infinity"
+  vector<Translation>::const_iterator it;
+  for (it = translations.begin(); it != translations.end(); it++) 
+    maxProb = max(it->m_scores[P_E_F_INDEX], maxProb);
+  return maxProb;
+}
+
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
   size_t spanStart,
@@ -34,10 +44,13 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   // get words (surface forms) in source phrase
   vector<string> sourceForms(spanEnd - spanStart + 1);
   for (size_t i = spanStart; i <= spanEnd; i++)
-    sourceForms[i - spanStart] = context[i][0]; // XXX assumes that form is the 0th factor
+    sourceForms[i - spanStart] = context[i][FACTOR_FORM]; 
   
+  float maxProb;
+  if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
+
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
-  if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, 0, fc); // 0th factor = form
+  if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, FACTOR_FORM, fc);
 
   vector<Translation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
@@ -50,6 +63,9 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
     if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, transIt->m_alignment, fc);
+
+    if (m_config.GetMostFrequent() && Equals(transIt->m_scores[P_E_F_INDEX], maxProb)) 
+      fc->AddFeature("MOST_FREQUENT");
 
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
@@ -75,6 +91,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_targetInternal = pTree.get<bool>("features.target-internal", false);
   m_paired         = pTree.get<bool>("features.paired", false);
   m_bagOfWords     = pTree.get<bool>("features.bag-of-words", false);
+  m_mostFrequent   = pTree.get<bool>("features.most-frequent", false);
   m_windowSize     = pTree.get<size_t>("features.window-size", 0);  
 
   vector<string> factors = Tokenize(pTree.get<string>("features.factors", ""), ",");
