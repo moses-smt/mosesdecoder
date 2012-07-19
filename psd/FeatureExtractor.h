@@ -26,16 +26,19 @@ class ExtractorConfig
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
     inline bool GetMostFrequent() const   { return m_mostFrequent; }
     inline size_t GetWindowSize() const   { return m_windowSize; }
+    inline bool GetBinnedScores() const   { return m_binnedScores; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
+    inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
 
     inline bool IsLoaded() const { return m_isLoaded; }
 
   private:
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
-         m_sourceInternal, m_targetInternal, m_mostFrequent;
+         m_sourceInternal, m_targetInternal, m_mostFrequent,
+         m_binnedScores;
     size_t m_windowSize;
-    std::vector<size_t> m_factors;
+    std::vector<size_t> m_factors, m_scoreIndexes;
 
     // internal variables
     bool m_isLoaded;
@@ -82,6 +85,7 @@ private:
       const std::vector<std::string> &tgtPhrase,
       const AlignmentType &align,
       FeatureConsumer *fc);
+  void GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 

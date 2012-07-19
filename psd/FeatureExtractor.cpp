@@ -67,6 +67,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     if (m_config.GetMostFrequent() && Equals(transIt->m_scores[P_E_F_INDEX], maxProb)) 
       fc->AddFeature("MOST_FREQUENT");
 
+    if (m_config.GetBinnedScores()) GenerateScoreFeatures(transIt->m_scores, fc);
+
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
     } else {
@@ -93,12 +95,10 @@ void ExtractorConfig::Load(const string &configFile)
   m_bagOfWords     = pTree.get<bool>("features.bag-of-words", false);
   m_mostFrequent   = pTree.get<bool>("features.most-frequent", false);
   m_windowSize     = pTree.get<size_t>("features.window-size", 0);  
+  m_binnedScores   = pTree.get<bool>("features.binned-scores", 0);
 
-  vector<string> factors = Tokenize(pTree.get<string>("features.factors", ""), ",");
-  vector<string>::const_iterator it;
-  for (it = factors.begin(); it != factors.end(); it++) {
-    m_factors.push_back(Scan<size_t>(*it));
-  }
+  m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
+  m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
 
   m_isLoaded = true;
 }
@@ -150,6 +150,13 @@ void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, c
   AlignmentType::const_iterator it;
   for (it = align.begin(); it != align.end(); it++)
     fc->AddFeature("pair^" + srcPhrase[it->first] + "^" + tgtPhrase[it->second]);
+}
+
+void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)
+{
+  vector<float>::const_iterator it;
+  for (it = scores.begin(); it != scores.end(); it++)
+    fc->AddFeature(SPrint((int)log(*it)));
 }
 
 } // namespace PSD
