@@ -39,12 +39,14 @@ bool isNonTerminal( const WORD &symbol ) {
 
 WORD_ID Vocabulary::storeIfNew( const WORD& word )
 {
+  //cerr << "Storing new into map : " << word << endl;
   map<WORD, WORD_ID>::iterator i = lookup.find( word );
 
   if( i != lookup.end() )
     return i->second;
 
   WORD_ID id = vocab.size();
+  //cerr << "Found ID : " << id << endl;
   vocab.push_back( word );
   lookup[ word ] = id;
   return id;
@@ -105,7 +107,7 @@ void DTable::load( const string& fileName )
       std::cerr << "Error reading from " << fileName << std::endl;
       abort();
     }
-    
+
     vector<string> token = tokenize(line.c_str());
     if (token.size() < 2) {
       cerr << "line " << i << " in " << fileName << " too short, skipping\n";

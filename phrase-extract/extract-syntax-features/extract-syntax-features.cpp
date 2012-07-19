@@ -29,6 +29,8 @@ using namespace PSD;
 
 #define LINE_MAX_LENGTH 10000
 
+//NOTE : HIERO : FORMAT OF EXTRACT.PSD IS WRONG FOR TARGET SIDE : X INSTEAD OF X0.
+
 // globals
 CLASSIFIER_TYPE psd_classifier = VWFile;
 PSD_MODEL_TYPE psd_model = GLOBAL;
@@ -106,16 +108,19 @@ int main(int argc,char* argv[]){
   }
 
   // store word and phrase vocab
+  //cerr << "READING RULE VOCAB SOURCE"<< endl;
   PhraseVocab psdPhraseVoc;
-  if (!readPhraseVocab(fileNameSrcVoc,srcVocab,psdPhraseVoc)){
+  if (!readRuleVocab(fileNameSrcVoc,srcVocab,psdPhraseVoc)){
     cerr << "Error reading in source phrase vocab" << endl;
   }
 
+  //cerr << "READING RULE VOCAB TARGET"<< endl;
   PhraseVocab tgtPhraseVoc;
-  if (!readPhraseVocab(fileNameTgtVoc,tgtVocab,tgtPhraseVoc)){
+  if (!readRuleVocab(fileNameTgtVoc,tgtVocab,tgtPhraseVoc)){
     cerr << "Error reading in target phrase vocab" << endl;
   }
   // store translation phrase pair table
+  //cerr << "READING RULES"<< endl;
   PhraseTranslations transTable;
   if (!readRules(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
     cerr << "Error reading in phrase translation table " << endl;
@@ -129,7 +134,7 @@ int main(int argc,char* argv[]){
     TargetIndexType extractorTargetIndex;
     for (size_t i = 0; i < tgtPhraseVoc.phraseTable.size(); i++) {
         // label 0 is not allowed
-        extractorTargetIndex.insert(TargetIndexType::value_type(getPhrase(i, tgtVocab, tgtPhraseVoc), i + 1));
+        extractorTargetIndex.insert(TargetIndexType::value_type(getTargetRule(i, tgtVocab, tgtPhraseVoc), i + 1));
     }
 
     ExtractorConfig config;
@@ -160,7 +165,7 @@ int main(int argc,char* argv[]){
     SAFE_GETLINE((extract),extractLine, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extract.eof()) break;
 
-    //cerr << "Reading extract file at line : " << extractLine << endl;
+    //cerr << "READING EXTRACT FILE : " << extractLine << endl;
 
     vector<string> token = Tokenize(extractLine,"\t");
 
@@ -226,18 +231,19 @@ int main(int argc,char* argv[]){
     }
 
     //std::cerr << "Reading in rule table" << std::endl;
-
     //std::cerr << "Source Rule : " << sourceRule << std::endl;
 
 
     //hiero : use source side in extract file
-    PHRASE_ID srcid = getPhraseID(sourceRule, srcVocab, psdPhraseVoc);
+    //cerr << "GETTING SOURCE ID... " << endl;
+    PHRASE_ID srcid = getRuleID(sourceRule, srcVocab, psdPhraseVoc);
 
     //std::cerr << "Source ID : " << srcid << std::endl;
     //std::cerr << "Target rule " << targetRule << std::endl;
 
     //get all target phrase for this source phrase
-    PHRASE_ID labelid = getPhraseID(targetRule,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
+    //cerr << "GETTING TARGET ID... " << endl;
+    PHRASE_ID labelid = getRuleID(targetRule,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
 
     //std::cerr << "Label ID : " << labelid << std::endl;
 
@@ -250,7 +256,6 @@ int main(int argc,char* argv[]){
     }
 
     //only extract featues if id has been found in phrase table
-    if (srcid != 0){
         //std:cerr << "Source ID not zero " << std::endl;
       if (existsRule(srcid, labelid, transTable)) {
           //std::cerr << "Source ID is in table" << std::endl;
@@ -276,7 +281,6 @@ int main(int argc,char* argv[]){
           extractor.GenerateFeaturesChart(globalOut, factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
         }
       }
-    }
   }
   if (psd_model == GLOBAL) {
     globalOut->Finish();

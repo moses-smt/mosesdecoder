@@ -30,6 +30,12 @@ public:
   inline WORD &getWord( WORD_ID id ) {
     return vocab[ id ];
   }
+
+  //for testing
+  size_t getSize()
+  {
+      return vocab.size();
+  }
 };
 
 typedef std::vector< WORD_ID > PHRASE;
