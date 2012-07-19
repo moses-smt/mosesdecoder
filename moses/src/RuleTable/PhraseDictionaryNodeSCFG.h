@@ -118,6 +118,7 @@ private:
   friend class PhraseDictionarySCFG;
   friend class PhraseDictionaryTMExtract;
   friend class std::map<Word, PhraseDictionaryNodeSCFG>;
+  friend class std::map<long, PhraseDictionaryNodeSCFG>;
 
 protected:
   TerminalMap m_sourceTermMap;

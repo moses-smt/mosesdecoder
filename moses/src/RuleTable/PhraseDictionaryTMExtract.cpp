@@ -47,6 +47,15 @@ namespace Moses
     CHECK(staticData.ThreadCount() == 1);
   }
 
+  void PhraseDictionaryTMExtract::Initialize(const string &initStr)
+  {
+    cerr << "initStr=" << initStr << endl;
+    m_config = Tokenize(initStr, ";");
+    assert(m_config.size() == 4);
+    
+    
+  }
+  
   TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(const InputType &inputSentence
                                                                                   , const Phrase &source
                                                                                   , const TargetPhrase &target
@@ -117,25 +126,37 @@ namespace Moses
   
   void PhraseDictionaryTMExtract::InitializeForInput(InputType const& source)
   {
-    /*
-    string data_root = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/";
-    string pt_file = data_root + "out/pt";
-    string cmd = "perl ~/workspace/github/hieuhoang/contrib/tm-mt-integration/make-pt-from-tm.perl "
-    + data_root + "in/ac-test.input.tc.4 "
-    + data_root + "in/acquis.truecased.4.en.uniq "
-    + data_root + "in/acquis.truecased.4.fr.uniq "
-    + data_root + "in/acquis.truecased.4.align.uniq "
-    + data_root + "in/lex.4 "
-    + pt_file;
-    system(cmd.c_str());
-     */
+    string data_root = "/tmp";
+    string in_file = data_root + "/in";
+    string pt_file = data_root + "/pt.out";
     
+    ofstream inFile(in_file.c_str());
+    
+    for (size_t i = 1; i < source.GetSize() - 1; ++i)
+    {
+      inFile << source.GetWord(i) << " ";
+    }
+    inFile << endl;
+    inFile.close();
+    
+    string cmd = "perl ~/workspace/github/hieuhoang/contrib/tm-mt-integration/make-pt-from-tm.perl "
+              + in_file + " "
+              + m_config[0] + " "
+              + m_config[1] + " "
+              + m_config[2] + " "
+              + m_config[3] + " "
+              + pt_file;
+    system(cmd.c_str());    
+    
+    cerr << "done\n";
+    
+    m_collection[source.GetTranslationId()];
     
   }
   
   void PhraseDictionaryTMExtract::CleanUp(const InputType &source)
   {
-    GetRootNode(source).Clear();
+    m_collection.erase(source.GetTranslationId());
   }
 
   const PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetRootNode(const InputType &source) const 

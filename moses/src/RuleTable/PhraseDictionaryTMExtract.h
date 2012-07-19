@@ -41,6 +41,8 @@ namespace Moses
     PhraseDictionaryTMExtract(size_t numScoreComponents,
                               PhraseDictionaryFeature* feature);
     
+    void Initialize(const std::string &initStr);
+
     const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const;
     
     ChartRuleLookupManager *CreateRuleLookupManager(
@@ -71,6 +73,7 @@ namespace Moses
     PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source);
 
     std::map<long, PhraseDictionaryNodeSCFG> m_collection;
+    std::vector<std::string> m_config;
   };
   
 }  // namespace Moses
