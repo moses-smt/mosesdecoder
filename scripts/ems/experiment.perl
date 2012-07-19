@@ -1907,7 +1907,7 @@ sub define_training_create_config {
       die "no psd_model" unless defined($psd_model);
       die "no psd_index" unless defined($psd_index);
       die "no psd_config" unless defined($psd_config);
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension -psd-config $psd_config ";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$output_extension -psd-config $psd_config ";
     }
 
     # additional settings for syntax models
@@ -2342,7 +2342,7 @@ sub define_tuningevaluation_filter {
       die "ERROR: psd_index is not defined" unless defined($psd_config);
       my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
       my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$input_extension -psd-config $psd_config ";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index.$output_extension -psd-config $psd_config ";
     }
 
     $cmd .= "-lm 0:3:$dir "; # dummy

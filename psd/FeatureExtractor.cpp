@@ -50,7 +50,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
 
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
-  if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, FACTOR_FORM, fc);
+  if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
 
   vector<Translation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
