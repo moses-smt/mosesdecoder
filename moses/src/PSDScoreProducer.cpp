@@ -23,9 +23,6 @@ PSDScoreProducer::PSDScoreProducer(ScoreIndexManager &scoreIndexManager, float w
   scoreIndexManager.AddScoreProducer(this);
   vector<float> weights;
   weights.push_back(weight);
-  m_srcFactors.push_back(0); 
-  m_srcFactors.push_back(1);
-  m_srcFactors.push_back(2);
 
   m_tgtFactors.push_back(0);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
@@ -55,6 +52,24 @@ bool PSDScoreProducer::IsOOV(const TargetPhrase &tgtPhrase)
   return m_phraseIndex.left.find(tgtPhrase.GetStringRep(m_tgtFactors)) == m_phraseIndex.left.end();
 }
 
+Translation PSDScoreProducer::GetPSDTranslation(const TranslationOption *option)
+{
+  Translation psdOpt;
+
+  // phrase ID
+  string tgtPhrase = option->GetTargetPhrase().GetStringRep(m_tgtFactors);
+  psdOpt.m_index = m_phraseIndex.left.find(tgtPhrase)->second;
+
+  // alignment
+  const AlignmentInfo &alignInfo = option->GetTargetPhrase().GetAlignmentInfo();
+  //copy(alignInfo.begin(), alignInfo.end(), psdOpt.m_alignment.begin());
+  AlignmentInfo::const_iterator it;
+  for (it = alignInfo.begin(); it != alignInfo.end(); it++)
+    psdOpt.m_alignment.insert(*it);
+
+  return psdOpt;
+}
+
 vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
   vector<ScoreComponentCollection> scores;
@@ -62,16 +77,15 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
 
   if (options.size() != 0 && ! IsOOV(options[0]->GetTargetPhrase())) {
     vector<float> losses(options.size());
-    vector<size_t> optionIDs;
+    vector<Translation> psdOptions;
 
     vector<TranslationOption *>::const_iterator optIt;
     for (optIt = options.begin(); optIt != options.end(); optIt++) {
-      string tgtPhrase = (*optIt)->GetTargetPhrase().GetStringRep(m_tgtFactors);
-      optionIDs.push_back(m_phraseIndex.left.find(tgtPhrase)->second);
+      psdOptions.push_back(GetPSDTranslation(*optIt));
     }
     VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
     m_extractor->GenerateFeatures(p_consumer, src.m_PSDContext, options[0]->GetStartPos(),
-        options[0]->GetEndPos(), optionIDs, losses);
+        options[0]->GetEndPos(), psdOptions, losses);
     m_consumerFactory->Release(p_consumer);
 
     vector<float>::iterator lossIt;

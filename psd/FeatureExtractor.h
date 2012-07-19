@@ -40,6 +40,14 @@ class ExtractorConfig
 // vector of words, each word is a vector of factors
 typedef std::vector<std::vector<std::string> > ContextType; 
 
+typedef std::multimap<size_t, size_t> AlignmentType;
+
+struct Translation
+{
+  size_t m_index;
+  AlignmentType m_alignment;
+};
+
 // index of possible target spans
 typedef boost::bimaps::bimap<std::string, size_t> TargetIndexType;
 
@@ -53,7 +61,7 @@ public:
     const ContextType &context,
     size_t spanStart,
     size_t spanEnd,
-    const std::vector<size_t> &translations,
+    const std::vector<Translation> &translations,
     std::vector<float> &losses);
 
 private:
@@ -63,6 +71,11 @@ private:
 
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
+  void GenerateBagOfWordsFeatures(const ContextType &context, size_t factorID, FeatureConsumer *fc);
+  void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
+      const std::vector<std::string> &tgtPhrase,
+      const AlignmentType &align,
+      FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 

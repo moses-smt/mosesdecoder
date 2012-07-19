@@ -47,8 +47,9 @@ private:
   bool LoadPhraseIndex(const std::string &indexFile);
   bool IsOOV(const TargetPhrase &tgtPhrase);
   ScoreComponentCollection ScoreFactory(float score);
+  PSD::Translation GetPSDTranslation(const TranslationOption *option);
 
-  std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
+  std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::TargetIndexType m_phraseIndex;
   PSD::VWLibraryPredictConsumerFactory	*m_consumerFactory;
   PSD::FeatureExtractor *m_extractor;

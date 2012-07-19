@@ -25,35 +25,36 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
-  const vector<size_t> &translations,
+  const vector<Translation> &translations,
   vector<float> &losses)
 {  
   fc->SetNamespace('s', true);
-  if (m_config.GetSourceExternal()) {
-    GenerateContextFeatures(context, spanStart, spanEnd, fc);
-  }
+  if (m_config.GetSourceExternal()) GenerateContextFeatures(context, spanStart, spanEnd, fc);
 
-  if (m_config.GetSourceInternal()) {
-    vector<string> sourceForms(spanEnd - spanStart + 1);
-    for (size_t i = spanStart; i <= spanEnd; i++) {
-      sourceForms[i - spanStart] = context[i][0]; // XXX assumes that form is the 0th factor
-    }
-    GenerateInternalFeatures(sourceForms, fc);
-  }
+  // get words (surface forms) in source phrase
+  vector<string> sourceForms(spanEnd - spanStart + 1);
+  for (size_t i = spanStart; i <= spanEnd; i++)
+    sourceForms[i - spanStart] = context[i][0]; // XXX assumes that form is the 0th factor
+  
+  if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
+  if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, 0, fc); // 0th factor = form
 
-  vector<size_t>::const_iterator transIt = translations.begin();
+  vector<Translation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
   for (; transIt != translations.end(); transIt++, lossIt++) {
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
-    if (m_config.GetTargetInternal()) {
-      GenerateInternalFeatures(Tokenize(m_targetIndex.right.find(*transIt)->second, " "), fc);
-    }  
+
+    // get words in target phrase
+    vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
+
+    if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
+    if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, transIt->m_alignment, fc);
 
     if (m_train) {
-      fc->Train(SPrint(*transIt), *lossIt);
+      fc->Train(SPrint(transIt->m_index), *lossIt);
     } else {
-      *lossIt = fc->Predict(SPrint(*transIt));
+      *lossIt = fc->Predict(SPrint(transIt->m_index));
     }
   }
   fc->FinishExample();
@@ -117,6 +118,21 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   for (it = span.begin(); it != span.end(); it++) {
     fc->AddFeature("w^" + *it);
   }
+}
+
+void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t factorID, FeatureConsumer *fc)
+{
+  ContextType::const_iterator it;
+  for (it = context.begin(); it != context.end(); it++)
+    fc->AddFeature("bow^" + it->at(factorID));
+}
+
+void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase, 
+    const AlignmentType &align, FeatureConsumer *fc)
+{
+  AlignmentType::const_iterator it;
+  for (it = align.begin(); it != align.end(); it++)
+    fc->AddFeature("pair^" + srcPhrase[it->first] + "^" + tgtPhrase[it->second]);
 }
 
 } // namespace PSD

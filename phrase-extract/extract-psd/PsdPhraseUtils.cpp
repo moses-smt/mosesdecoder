@@ -2,10 +2,12 @@
 #include "SafeGetline.h"
 #include "PsdPhraseUtils.h"
 #include "Util.h"
+#include "FeatureExtractor.h"
 #include <iostream>
 
 using namespace MosesTraining;
 using namespace Moses;
+using namespace PSD;
 
 PHRASE makePhrase(const string &phrase, Vocabulary &wordVocab){
     PHRASE p;
@@ -79,21 +81,26 @@ bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabu
     }
     PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
     PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
-    if (src && tgt){
-      transTable.insert(make_pair(src, tgt));
+
+    Translation translation;
+    translation.m_index = tgt + 1; // one based!!!
+
+    vector<string> alignPoints = Tokenize(fields[3], " ");
+    vector<string>::const_iterator alignIt;
+    for (alignIt = alignPoints.begin(); alignIt != alignPoints.end(); alignIt++) {
+      vector<string> point = Tokenize(*alignIt, "-");
+      translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
     }
+
+    transTable.insert(make_pair(src, translation));
   }
-  /*	}else{
-    cerr << "Skipping phrase-table entry due to OOV phrase: " << line << endl;
-  }
-  */
   return true;
 }
 
 bool exists(PHRASE_ID src, PHRASE_ID tgt, PhraseTranslations &transTable){
   PhraseTranslations::const_iterator it;
   for (it = transTable.lower_bound(src); it != transTable.upper_bound(src); it++) {
-    if (it->second == tgt)
+    if (it->second.m_index == tgt)
       return true;
   }
   return false;
@@ -103,28 +110,3 @@ bool exists(PHRASE_ID src, PhraseTranslations &transTable){
   return (transTable.find(src) != transTable.end());
 }
 
-bool readPhraseTranslations(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWordVocab, PhraseVocab &srcPhraseVocab, PhraseVocab &tgtPhraseVocab, PhraseTranslations &transTable, map<string,string> &transTableScores){
-    InputFileStream file(ptFile);
-    if(!file) return false;
-    while(!file.eof()){
-	char line[LINE_MAX_LENGTH];
-	SAFE_GETLINE(file, line, LINE_MAX_LENGTH, '\n', __FILE__);
-	if (file.eof()) return true;
-	vector<string> fields = TokenizeMultiCharSeparator(string(line)," ||| ");
-	if (fields.size() < 2){
-	    cerr << "Skipping malformed phrase-table entry: " << line << endl;
-	}
-	PHRASE_ID src = getPhraseID(fields[0],srcWordVocab,srcPhraseVocab);
-	PHRASE_ID tgt = getPhraseID(fields[1],tgtWordVocab,tgtPhraseVocab);
-	if (src && tgt){
-    transTable.insert(make_pair(src, tgt));
-	  string stpair = SPrint(src)+" "+SPrint(tgt);
-	  transTableScores.insert(make_pair (stpair,fields[2]));
-	}
-	/*	}else{
-	    cerr << "Skipping phrase-table entry due to OOV phrase: " << line << endl;
-	}
-*/
-    }
-    return true;
-}

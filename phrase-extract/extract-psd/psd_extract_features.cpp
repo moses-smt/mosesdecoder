@@ -228,20 +228,28 @@ int main(int argc,char* argv[]){
       }
     }
 
-    PHRASE_ID srcid = getPhraseID(phrase, srcVocab, psdPhraseVoc);
+    PHRASE srcPhrase = makePhrase(phrase, srcVocab);
+    map<PHRASE, PHRASE_ID>::const_iterator srcPhraseIt = psdPhraseVoc.lookup.find(srcPhrase);
+    if (srcPhraseIt == psdPhraseVoc.lookup.end()) {
+      cerr << "error: OOV source phrase " << phrase << endl;
+      continue;
+    }
+    PHRASE_ID srcid = srcPhraseIt->second;
 
     PHRASE tgtPhrase = makePhrase(token[6], tgtVocab);
     map<PHRASE, PHRASE_ID>::const_iterator tgtPhraseIt = tgtPhraseVoc.lookup.find(tgtPhrase);
-    if (tgtPhraseIt == tgtPhraseVoc.lookup.end())
+    if (tgtPhraseIt == tgtPhraseVoc.lookup.end()) {
+      cerr << "error: OOV target phrase " << token[6] << endl;
       continue;
+    }
 
     PHRASE_ID labelid = tgtPhraseIt->second + 1; // 0 is not allowed (in VW)
     vector<float> losses;
-    vector<size_t> translations;
+    vector<Translation> translations;
     PhraseTranslations::const_iterator transIt;
     for (transIt = transTable.lower_bound(srcid); transIt != transTable.upper_bound(srcid); transIt++) {
-      translations.push_back(transIt->second + 1);
-      losses.push_back(labelid == transIt->second ? 0 : 1);
+      translations.push_back(transIt->second);
+      losses.push_back(labelid == transIt->second.m_index ? 0 : 1);
     }
     if (factoredSrcLine.size() <= src_end && sent.size() <= src_end)
       cerr << "Phrase goes beyond sentence (" << csid << "): " << phrase << endl;
