@@ -10,6 +10,8 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <stdexcept>
+#include <exception>
 
 using namespace std;
 using namespace boost::bimaps;
@@ -47,9 +49,11 @@ ScoreComponentCollection PSDScoreProducer::ScoreFactory(float score)
   return out;
 }
 
-bool PSDScoreProducer::IsOOV(const TargetPhrase &tgtPhrase)
+void PSDScoreProducer::CheckIndex(const TargetPhrase &tgtPhrase)
 {
-  return m_phraseIndex.left.find(tgtPhrase.GetStringRep(m_tgtFactors)) == m_phraseIndex.left.end();
+  string phraseStr = tgtPhrase.GetStringRep(m_tgtFactors);
+  if (m_phraseIndex.left.find(phraseStr) == m_phraseIndex.left.end())
+    throw runtime_error("Phrase not in index: " + phraseStr);
 }
 
 Translation PSDScoreProducer::GetPSDTranslation(const TranslationOption *option)
@@ -75,12 +79,13 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
   vector<ScoreComponentCollection> scores;
   float sum = 0;
 
-  if (options.size() != 0 && ! IsOOV(options[0]->GetTargetPhrase())) {
+  if (options.size() != 0 && ! options[0]->IsOOV()) {
     vector<float> losses(options.size());
     vector<Translation> psdOptions;
 
     vector<TranslationOption *>::const_iterator optIt;
     for (optIt = options.begin(); optIt != options.end(); optIt++) {
+      CheckIndex((*optIt)->GetTargetPhrase());
       psdOptions.push_back(GetPSDTranslation(*optIt));
     }
     VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();

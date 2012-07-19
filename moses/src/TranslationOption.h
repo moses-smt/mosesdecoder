@@ -66,6 +66,7 @@ protected:
   Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
   const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
+  bool                m_isOOV;
 
   //! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
   //! for example, know the full n-gram score since the length of the
@@ -150,6 +151,10 @@ public:
   /** returns detailed component scores */
   inline const ScoreComponentCollection &GetScoreBreakdown() const {
     return m_scoreBreakdown;
+  }
+
+  inline bool IsOOV() const {
+    return m_isOOV;
   }
 
   /** returns cached scores */

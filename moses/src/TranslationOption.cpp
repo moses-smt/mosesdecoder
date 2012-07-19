@@ -62,6 +62,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
   , m_sourceWordsRange	(wordsRange)
   , m_futureScore(0)
 {
+  m_isOOV = true;
   if (up) {
     const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
     vector<float> score(1);

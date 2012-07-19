@@ -45,7 +45,7 @@ public:
   }
 private:
   bool LoadPhraseIndex(const std::string &indexFile);
-  bool IsOOV(const TargetPhrase &tgtPhrase);
+  void CheckIndex(const TargetPhrase &tgtPhrase);
   ScoreComponentCollection ScoreFactory(float score);
   PSD::Translation GetPSDTranslation(const TranslationOption *option);
 
