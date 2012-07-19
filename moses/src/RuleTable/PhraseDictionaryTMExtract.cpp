@@ -47,16 +47,17 @@ namespace Moses
     CHECK(staticData.ThreadCount() == 1);
   }
 
-  TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(
-                                                                                  const Phrase &source
+  TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(const InputType &inputSentence
+                                                                                  , const Phrase &source
                                                                                   , const TargetPhrase &target
                                                                                   , const Word &sourceLHS)
   {
-    PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(source, target, sourceLHS);
+    PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(inputSentence, source, target, sourceLHS);
     return currNode.GetOrCreateTargetPhraseCollection();
   }
   
-  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetOrCreateNode(const Phrase &source
+  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetOrCreateNode(const InputType &inputSentence
+                                                                  , const Phrase &source
                                                                   , const TargetPhrase &target
                                                                   , const Word &sourceLHS)
   {
@@ -65,7 +66,7 @@ namespace Moses
     const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
     AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
     
-    PhraseDictionaryNodeSCFG *currNode = &m_collection;
+    PhraseDictionaryNodeSCFG *currNode = &GetRootNode(inputSentence);
     for (size_t pos = 0 ; pos < size ; ++pos) {
       const Word& word = source.GetWord(pos);
       
@@ -102,11 +103,15 @@ namespace Moses
     return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
   }
   
-  void PhraseDictionaryTMExtract::SortAndPrune()
+  void PhraseDictionaryTMExtract::SortAndPrune(const InputType &source)
   {
     if (GetTableLimit())
     {
-      m_collection.Sort(GetTableLimit());
+      long transId = source.GetTranslationId();
+      std::map<long, PhraseDictionaryNodeSCFG>::iterator iter = m_collection.find(transId);
+      CHECK(iter != m_collection.end());
+
+      (iter->second).Sort(GetTableLimit());
     }
   }
   
@@ -130,7 +135,22 @@ namespace Moses
   
   void PhraseDictionaryTMExtract::CleanUp(const InputType &source)
   {
-    m_collection.Clear();
+    GetRootNode(source).Clear();
+  }
+
+  const PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetRootNode(const InputType &source) const 
+  {
+    long transId = source.GetTranslationId();
+    std::map<long, PhraseDictionaryNodeSCFG>::const_iterator iter = m_collection.find(transId);
+    CHECK(iter != m_collection.end());
+    return iter->second; 
+  }
+  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetRootNode(const InputType &source) 
+  {
+    long transId = source.GetTranslationId();
+    std::map<long, PhraseDictionaryNodeSCFG>::iterator iter = m_collection.find(transId);
+    CHECK(iter != m_collection.end());
+    return iter->second; 
   }
 
 
@@ -142,6 +162,7 @@ namespace Moses
     typedef PhraseDictionaryNodeSCFG::TerminalMap TermMap;
     typedef PhraseDictionaryNodeSCFG::NonTerminalMap NonTermMap;
     
+    /*
     const PhraseDictionaryNodeSCFG &coll = phraseDict.m_collection;
     for (NonTermMap::const_iterator p = coll.m_nonTermMap.begin(); p != coll.m_nonTermMap.end(); ++p) {
       const Word &sourceNonTerm = p->first.first;
@@ -151,7 +172,8 @@ namespace Moses
       const Word &sourceTerm = p->first;
       out << sourceTerm;
     }
-
+     */
+    
     return out;
   }
   

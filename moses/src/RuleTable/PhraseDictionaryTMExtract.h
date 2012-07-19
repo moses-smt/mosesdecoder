@@ -41,7 +41,7 @@ namespace Moses
     PhraseDictionaryTMExtract(size_t numScoreComponents,
                               PhraseDictionaryFeature* feature);
     
-    const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const { return m_collection; }
+    const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const;
     
     ChartRuleLookupManager *CreateRuleLookupManager(
                                                     const InputType &,
@@ -57,16 +57,20 @@ namespace Moses
     TO_STRING();
     
   protected:
-    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-                                                              const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
+    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const InputType &inputSentence
+                                                              , const Phrase &source
+                                                              , const TargetPhrase &target
+                                                              , const Word &sourceLHS);
     
-    PhraseDictionaryNodeSCFG &GetOrCreateNode(const Phrase &source
+    PhraseDictionaryNodeSCFG &GetOrCreateNode(const InputType &inputSentence
+                                              , const Phrase &source
                                               , const TargetPhrase &target
                                               , const Word &sourceLHS);
     
-    void SortAndPrune();
-    
-    PhraseDictionaryNodeSCFG m_collection;
+    void SortAndPrune(const InputType &source);
+    PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source);
+
+    std::map<long, PhraseDictionaryNodeSCFG> m_collection;
   };
   
 }  // namespace Moses
