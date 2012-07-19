@@ -39,6 +39,11 @@ string factorDelim = "|";
 int subdirsize=1000;
 string ext = ".contexts";
 
+// settings for debugging
+int StartSNo = 0;
+int EndSNo = 0;
+bool skipPT = false;
+
 Vocabulary srcVocab;
 Vocabulary tgtVocab;
 
@@ -77,7 +82,7 @@ int main(int argc,char* argv[]){
         exit(1);
       }
     }
-    if (strcmp(argv[i],"--PsdType") == 0){
+    else if (strcmp(argv[i],"--PsdType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"global") == 0){
         psd_model = GLOBAL;
@@ -88,6 +93,23 @@ int main(int argc,char* argv[]){
         exit(1);
       }
     }
+    else if (strcmp(argv[i],"--StartSNo") == 0){
+      char* s = argv[++i];
+      StartSNo = atoi(s);
+                }
+    else if (strcmp(argv[i],"--EndSNo") == 0){
+      char* s = argv[++i];
+      EndSNo = atoi(s);
+                }
+    else if (strcmp(argv[i],"--SkipPT") == 0){
+      skipPT = true;
+                }
+                else {
+                        cerr << "failed to parse option: " << argv[i] << endl;
+                        exit(1);
+                }
+
+
   }
 
   //cerr << "Reading inputs !" << endl;
@@ -190,7 +212,7 @@ int main(int argc,char* argv[]){
     }
 
     assert(csid == sid);
-    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim);
+    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim,config.GetFactors().size());
 
     // get surface forms from factored format
     vector<string> sent;

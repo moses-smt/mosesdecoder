@@ -89,6 +89,7 @@ void ChartManager::ProcessSentence()
 
   // MAIN LOOP
   size_t size = m_source.GetSize();
+  std::cout << "PROCESSING SENTENCE OF SIZE : " << size << std::endl;
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
@@ -97,11 +98,16 @@ void ChartManager::ProcessSentence()
       // create trans opt
       m_transOptColl.CreateTranslationOptionsForRange(range);
 
+      std::cout << " Translation Options created : " << std::endl;
+
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
       cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
                            ,m_hypoStackColl);
+
+      std::cout << "Cell processed ... " << std::endl;
+
       m_transOptColl.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();

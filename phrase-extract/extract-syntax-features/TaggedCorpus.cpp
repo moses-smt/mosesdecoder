@@ -6,7 +6,7 @@
 using namespace std;
 using namespace Moses;
 
-vector< vector<string> > parseTaggedString(const string &input, const string &delimiter){
+vector< vector<string> > parseTaggedString(const string &input, const string &delimiter, size_t factorCount){
   vector< vector<string> > taggedWords;
   vector<string> words = Tokenize(input," ");
   for(int i =0; i < words.size(); i++)  {

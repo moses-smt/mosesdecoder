@@ -6,6 +6,6 @@
 
 using namespace std;
 
-vector< vector<string> > parseTaggedString(const string& input, const string& delimiter);
+vector< vector<string> > parseTaggedString(const string& input, const string& delimiter,size_t factorCount);
 
 #endif
