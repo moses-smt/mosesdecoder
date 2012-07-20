@@ -1530,7 +1530,7 @@ sub score_phrase_phrase_extract {
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
 
-        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction' $ttable_file.half.$direction.gz $inverse";
+        my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
         $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
         $cmd .= " --KneserNey" if $KNESER_NEY;
@@ -1776,7 +1776,7 @@ sub create_ini {
     &full_path(\$___MODEL_DIR);
     &full_path(\$___VCB_E);
     &full_path(\$___VCB_F);
-    `mkdir -p '$___MODEL_DIR'`;
+    `mkdir -p $___MODEL_DIR`;
     open(INI,">$___CONFIG") or die("ERROR: Can't write $___CONFIG");
     print INI "#########################
 ### MOSES CONFIG FILE ###
