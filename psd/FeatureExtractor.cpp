@@ -88,14 +88,16 @@ void ExtractorConfig::Load(const string &configFile)
 {
   ptree pTree;
   ini_parser::read_ini(configFile, pTree);
-  m_sourceInternal = pTree.get<bool>("features.source-internal", false);
-  m_sourceExternal = pTree.get<bool>("features.source-external", false);
-  m_targetInternal = pTree.get<bool>("features.target-internal", false);
-  m_paired         = pTree.get<bool>("features.paired", false);
-  m_bagOfWords     = pTree.get<bool>("features.bag-of-words", false);
-  m_mostFrequent   = pTree.get<bool>("features.most-frequent", false);
-  m_windowSize     = pTree.get<size_t>("features.window-size", 0);  
-  m_binnedScores   = pTree.get<bool>("features.binned-scores", 0);
+  m_sourceInternal  = pTree.get<bool>("features.source-internal", false);
+  m_sourceExternal  = pTree.get<bool>("features.source-external", false);
+  m_targetInternal  = pTree.get<bool>("features.target-internal", false);
+  m_sourceIndicator = pTree.get<bool>("features.source-indicator", false);
+  m_targetIndicator = pTree.get<bool>("features.target-indicator", false);
+  m_paired          = pTree.get<bool>("features.paired", false);
+  m_bagOfWords      = pTree.get<bool>("features.bag-of-words", false);
+  m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
+  m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
+  m_binnedScores    = pTree.get<bool>("features.binned-scores", 0);
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
@@ -128,9 +130,13 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   }
 }
 
-void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
+void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, FeatureConsumer *fc)
 {
   fc->AddFeature("p^" + Join("_", span));
+}
+
+void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
+{
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
     fc->AddFeature("w^" + *it);

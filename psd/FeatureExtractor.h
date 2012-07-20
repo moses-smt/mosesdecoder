@@ -22,6 +22,8 @@ class ExtractorConfig
     inline bool GetSourceExternal() const { return m_sourceExternal; }
     inline bool GetSourceInternal() const { return m_sourceInternal; }
     inline bool GetTargetInternal() const { return m_targetInternal; }
+    inline bool GetSourceIndicator() const { return m_sourceIndicator; }
+    inline bool GetTargetIndicator() const { return m_targetIndicator; }
     inline bool GetPaired() const         { return m_paired; }
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
     inline bool GetMostFrequent() const   { return m_mostFrequent; }
@@ -36,7 +38,7 @@ class ExtractorConfig
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal, m_mostFrequent,
-         m_binnedScores;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
 
@@ -80,6 +82,7 @@ private:
   float GetMaxProb(const std::vector<Translation> &translations);
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
+  void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
       const std::vector<std::string> &tgtPhrase,
