@@ -56,9 +56,6 @@ private:
 
   NonTerminalSet m_defaultLabelSet;
 
-  //damt hiero : psd context
-  PSD::ContextType m_PSDContext;
-
   void InitStartEndWord();
 
 
@@ -66,7 +63,7 @@ public:
 
   Sentence();
 
-  void SetPSDContext(const std::vector<std::string> &psdFact)
+  virtual void SetPSDContext(const std::vector<std::string> &psdFact)
   {
         m_PSDContext.push_back(psdFact);
   }

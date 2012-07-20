@@ -44,7 +44,6 @@ class CellContextScoreProducer : public StatelessFeatureFunction
                                                     const InputType &source);
 
     private :
-    PSD::ContextType m_currentContext;
     PSD::FeatureExtractor *m_extractor;
     PSD::VWLibraryPredictConsumerFactory  *m_consumerFactory;
     PSD::ExtractorConfig m_extractorConfig;

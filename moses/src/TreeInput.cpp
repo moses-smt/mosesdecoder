@@ -232,6 +232,8 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // remove extra spaces
   //line = Trim(line);
 
+  cerr << "TREE INPUT : LINE : " << line << endl;
+
   std::vector<XMLParseOutput> sourceLabels;
   std::vector<XmlOption*> xmlOptionsList;
   ProcessAndStripXMLTags(line, sourceLabels, xmlOptionsList);
@@ -239,6 +241,8 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // do words 1st - hack
   stringstream strme;
   strme << line << endl;
+
+  cerr << "TREE INPUT : SENTENCE : " << line << endl;
 
   std::vector<std::string> sentTokens = Tokenize(" ",line);
   //damt hiero : when reading sentence, also read in factors, see Read method in Sentence

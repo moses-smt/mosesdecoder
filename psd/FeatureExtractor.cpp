@@ -64,6 +64,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
   const vector<size_t> &translations,
   vector<float> &losses)
 {
+
   fc->SetNamespace('s', true);
   if (m_config.GetSourceExternal()) {
     GenerateContextFeatures(context, spanStart, spanEnd, fc);
@@ -131,6 +132,8 @@ void ExtractorConfig::Load(const string &configFile)
 
 string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
 {
+  //cerr << "Building factors for : " << factor << " : " << index << " : " << value << endl;
+
   string featureString = "c^" + SPrint(factor) + "_-" + SPrint(index) + "_" + value;
   //std::cout << "Adding source context feature..." << featureString <<  std::endl;
   return featureString;
@@ -141,16 +144,13 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   size_t spanEnd,
   FeatureConsumer *fc)
 {
-  for (size_t fact = 0; fact < m_config.GetFactors().size(); fact++) {
-      //cerr << "Factor : " << fact << endl;
+   vector<size_t>::const_iterator factIt;
+  for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
     for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
-      //cerr << "Start : " << spanStart << " : " << i << endl;
       if (spanStart >= i)
-        //TODO : GET FACTORS FROM CONFIG
-        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart - i][fact]));
-      //cerr << "End : " << spanEnd << " : " << i << endl;
+        fc->AddFeature(BuildContextFeature(*factIt, -i, context[spanStart - i][*factIt]));
       if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(fact, i, context[spanStart + i][fact]));
+        fc->AddFeature(BuildContextFeature(*factIt, i, context[spanEnd + i][*factIt]));
     }
   }
 }

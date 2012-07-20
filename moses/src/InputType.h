@@ -65,6 +65,9 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
+  //damt hiero : psd context
+  PSD::ContextType m_PSDContext;
+
   InputType(long translationId = 0);
 
   virtual ~InputType();

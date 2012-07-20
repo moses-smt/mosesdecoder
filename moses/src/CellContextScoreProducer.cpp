@@ -80,20 +80,6 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
   return true;
 }
 
-void CellContextScoreProducer::SetSentence(const InputType &inputSent)
-{
-  m_currentContext.clear();
-  for (size_t i = 0; i < inputSent.GetSize(); i++) {
-    vector<string> factors;
-    Word word = inputSent.GetWord(i);
-    vector<size_t>::const_iterator it;
-    for (it = m_srcFactors.begin(); it != m_srcFactors.end(); it++) {
-      factors.push_back(word.GetFactor(*it)->GetString());
-    }
-    m_currentContext.push_back(factors);
-  }
-}
-
 vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                         size_t startSpan,
                                                                         size_t endSpan,
@@ -154,7 +140,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
         }
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
-        m_extractor->GenerateFeaturesChart(p_consumer,m_currentContext,sourceSide,syntaxFeats,startSpan,endSpan,targetIDs,losses);
+        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntaxFeats,startSpan,endSpan,targetIDs,losses);
         m_consumerFactory->Release(p_consumer);
 
         vector<float>::iterator lossIt;

@@ -92,7 +92,7 @@ public:
     , gzOutput(false)
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)			
-    , leftContext(1)
+    , leftContext(0)
     , rightContext(0)
     , outputPsdInfo(false)
   {}

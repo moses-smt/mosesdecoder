@@ -281,7 +281,7 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       //targetPhrase->SetSourcePhrase(m_unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
-      
+
 
       // chart rule
       m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
