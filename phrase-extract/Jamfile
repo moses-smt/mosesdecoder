@@ -3,6 +3,7 @@ alias InputFileStream : InputFileStream.o ..//z ;
 alias tables-core : tables-core.o ;
 
 obj tables-core.o : tables-core.cpp : <include>. ;
+
 obj AlignmentPhrase.o : AlignmentPhrase.cpp : <include>. ;
 obj SentenceAlignment.o : SentenceAlignment.cpp : <include>. ;
 obj SyntaxTree.o : SyntaxTree.cpp : <include>. ;

@@ -55,7 +55,7 @@ void VWFileTrainConsumer::Train(const std::string &label, float loss)
   m_outputBuffer.push_front(label + ":" + SPrint(loss));
 }
 
-float VWFileTrainConsumer::Predict(const std::string &label) 
+float VWFileTrainConsumer::Predict(const std::string &label)
 {
   throw logic_error("Trying to predict during training!");
 }

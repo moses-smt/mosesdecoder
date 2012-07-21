@@ -42,6 +42,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "CellContextScoreProducer.h"
 
+//damt hiero : TODO remove this, is not usefull anymore
+#include "LeftContextScoreProducer.h"
+
+// #ifdef HAVE_VW
+#include "PSDScoreProducer.h"
+//#endif
+
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
 #endif
@@ -173,6 +180,64 @@ bool StaticData::LoadData(Parameter *parameter)
 
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+  }
+
+//#ifdef HAVE_VW
+  if (m_parameter->GetParam("psd-model").size() > 0) {
+    if (m_parameter->GetParam("psd-index").size() <= 0) {
+      UserMessage::Add(string("--psd-index not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-psd").size() <= 0) {
+      UserMessage::Add(string("weight-psd not specified"));
+      return false;
+    }
+    float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
+    m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
+    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
+      m_parameter->GetParam("psd-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
+      UserMessage::Add(string("Failed to load phrase index from " + m_parameter->GetParam("psd-index")[0]));
+      return false;
+    }
+  }
+//#endif // HAVE_VW
+
+ // #ifdef HAVE_VW
+ if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
+    if (m_parameter->GetParam("rule-index").size() <= 0) {
+      UserMessage::Add(string("--rule-index not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-lc").size() <= 0) {
+      UserMessage::Add(string("weight-lc not specified"));
+      return false;
+    }
+    float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
+    m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
+    if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
+      m_parameter->GetParam("rule-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
+      UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("rule-index")[0]));
+      return false;
+    }
+  }
+// #endif // HAVE_VW
+
+  m_threadCount = 1;
+
+  if (m_parameter->GetParam("left-context-ttable").size() > 0) {
+    float leftContextWeight = Scan<float>(m_parameter->GetParam("weight-left-context")[0]);
+    m_leftContextScoreProducer = new LeftContextScoreProducer(m_scoreIndexManager, leftContextWeight);
+    m_leftContextScoreProducer->LoadScores(m_parameter->GetParam("left-context-ttable")[0]);
   }
 
   // n-best
@@ -625,6 +690,14 @@ bool StaticData::LoadData(Parameter *parameter)
 // #endif
 
     //Add any other features here.
+    if (m_leftContextScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
+    }
+//#ifdef HAVE_VW
+    if (m_PSDScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_PSDScoreProducer);
+    }
+//#endif // HAVE_VW
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
@@ -679,6 +752,10 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
+  delete m_leftContextScoreProducer;
+//#ifdef HAVE_VW
+  delete m_PSDScoreProducer;
+//#endif
 
   //delete m_parameter;
 

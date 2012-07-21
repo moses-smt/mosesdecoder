@@ -173,26 +173,25 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         {
             CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
             CHECK(ccsp != NULL);
-
             VERBOSE(5, "Calling vw for rule: " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
             VERBOSE(5, "Calling vw for source context : " << m_source << endl);
 
-            //score vector is for vector of target representations
             vector<ScoreComponentCollection> scores = ccsp->ScoreRules(
                                                                        transOpt.GetSourceWordsRange().GetStartPos(),
                                                                        transOpt.GetSourceWordsRange().GetEndPos(),
-                                                                       itr_ruleMap->first,itr_ruleMap->second,m_source
+                                                                       itr_ruleMap->first,itr_ruleMap->second,
+                                                                       m_source,
+                                                                       &targetRepMap
                                                                        );
+
+            //loop over target phrases and add score
             std::vector<ScoreComponentCollection>::const_iterator iterLCSP = scores.begin();
             std::vector<std::string> :: iterator itr_targetRep;
-
-            //get target phrases from representation and add score to breakdown
             for (itr_targetRep = (itr_ruleMap->second)->begin() ; itr_targetRep != (itr_ruleMap->second)->end() ; itr_targetRep++) {
-                CHECK(iterLCSP != scores.end());
                 //Find target phrase corresponding to representation
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
+                CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
                 itr_rep = targetRepMap.find(*itr_targetRep);
-                CHECK(itr_rep != targetRepMap.end());
                 VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
                 VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);

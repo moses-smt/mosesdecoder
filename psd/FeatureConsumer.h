@@ -6,7 +6,6 @@
 #include <fstream>
 #include <sstream>
 #include <deque>
-
 #include <vector>
 
 #include <boost/noncopyable.hpp>
@@ -43,7 +42,7 @@ class VWFileTrainConsumer : public FeatureConsumer
 public:
   VWFileTrainConsumer(const std::string &outputFile);
 
-  // interface implementation
+  // FeatureConsumer interface implementation
   virtual void SetNamespace(char ns, bool shared);
   virtual void AddFeature(const std::string &name);
   virtual void AddFeature(const std::string &name, float value);
@@ -62,7 +61,6 @@ private:
 
 // #ifdef HAVE_VW
   // abstract consumer that trains/predicts using VW library interface
-    // consumer that builds VW training files
   class VWLibraryConsumer : public FeatureConsumer, private boost::noncopyable
   {
   public:
@@ -75,6 +73,8 @@ private:
   protected:
     ::vw *m_VWInstance;
     ::ezexample *m_ex;
+
+    // this contains state about which namespaces are shared
     bool m_shared;
     // if true, then the VW instance is owned by an external party and should NOT be
     // deleted at end; if false, then we own the VW instance and must clean up after it.

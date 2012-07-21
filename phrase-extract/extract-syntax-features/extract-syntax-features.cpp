@@ -144,13 +144,17 @@ int main(int argc,char* argv[]){
   // store translation phrase pair table
   //cerr << "READING RULES"<< endl;
   PhraseTranslations transTable;
-  if (!readRules(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
-    cerr << "Error reading in phrase translation table " << endl;
+  if (! skipPT) {
+   if (!readRules(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
+     cerr << "Error reading in phrase translation table " << endl;
+   }
   }
 
     // loop through tagged PSD examples in the order they occur in the training corpus
-    int i = 0;
+    int extractlinenum = 0;
     int csid = 0;
+
+    // loop through tagged PSD examples in the order they occur in the training corpus
 
     // create target phrase index for feature extractor
     TargetIndexType extractorTargetIndex;
@@ -178,20 +182,35 @@ int main(int argc,char* argv[]){
 
   cerr<< "Phrase/Rule tables read. Now reading in psd-extract-file." << endl;
 
+  int prevSNo = 0;
   while(true) {
     if (extract.eof()) break;
-    if (++i % 100000 == 0) cerr << "." << flush;
     char extractLine[LINE_MAX_LENGTH];
 
     // get phrase pair
     SAFE_GETLINE((extract),extractLine, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extract.eof()) break;
 
-    //cerr << "READING EXTRACT FILE : " << extractLine << endl;
-
+    if (++extractlinenum % 100000 == 0) cerr << "." << flush;
     vector<string> token = Tokenize(extractLine,"\t");
-
     size_t sid = Scan<size_t>(token[0].c_str());
+
+    //cerr << "READING EXTRACT FILE : " << extractLine << endl;
+       	if (sid < StartSNo) {
+			continue;
+		}
+
+		if (EndSNo != 0 and sid > EndSNo) {
+			break;
+		}
+
+		if (StartSNo > 0) {
+			if (prevSNo != sid) {
+				cerr << "extract line number " << extractlinenum << " SNo " << sid << endl;
+				prevSNo = sid;
+			}
+		}
+
     size_t src_start = Scan<size_t>(token[1].c_str());
     size_t src_end = Scan<size_t>(token[2].c_str());
     size_t tgt_start = Scan<size_t>(token[3].c_str());
@@ -201,6 +220,8 @@ int main(int argc,char* argv[]){
 
     char tagSrcLine[LINE_MAX_LENGTH];
     char parseSrcLine[LINE_MAX_LENGTH];
+
+
 
     // go to current sentence
     // hiero : current sentence and current parse
@@ -270,11 +291,11 @@ int main(int argc,char* argv[]){
     //std::cerr << "Label ID : " << labelid << std::endl;
 
     vector<float> losses;
-    vector<size_t> translations;
+    vector<Translation> translations;
     PhraseTranslations::const_iterator transIt;
     for (transIt = transTable.lower_bound(srcid); transIt != transTable.upper_bound(srcid); transIt++) {
-      translations.push_back(transIt->second + 1);
-      losses.push_back(labelid == transIt->second ? 0 : 1);
+      translations.push_back(transIt->second);
+      losses.push_back(labelid == transIt->second.m_index ? 0 : 1);
     }
 
     //only extract featues if id has been found in phrase table

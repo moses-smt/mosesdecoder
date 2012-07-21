@@ -36,7 +36,6 @@ CellContextScoreProducer::~CellContextScoreProducer()
     delete m_consumerFactory;
 }
 
-
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
 {
   bool isGood = LoadRuleIndex(indexFile);
@@ -60,10 +59,42 @@ ScoreComponentCollection CellContextScoreProducer::ScoreFactory(float score)
   return out;
 }
 
+void CellContextScoreProducer::CheckIndex(const std::string &targetRep)
+{
+  if (m_ruleIndex.left.find(targetRep) == m_ruleIndex.left.end())
+    throw runtime_error("Phrase not in index: " + targetRep);
+}
+
 bool CellContextScoreProducer::IsOOV(const std::string &targetRep)
 {
   return m_ruleIndex.left.find(targetRep) == m_ruleIndex.left.end();
 }
+
+Translation CellContextScoreProducer::GetPSDTranslation(const TargetPhrase *tp)
+{
+
+  VERBOSE(5, "Target Phrase score before adding stateless : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
+  Translation psdOpt;
+
+  // phrase ID
+  string tgtPhrase = tp->GetStringRep(m_tgtFactors);
+  psdOpt.m_index = m_ruleIndex.left.find(tgtPhrase)->second;
+
+  // alignment
+  const AlignmentInfo &alignInfo = tp->GetWordAlignmentInfo();
+  AlignmentInfo::const_iterator it;
+  for (it = alignInfo.begin(); it != alignInfo.end(); it++)
+    psdOpt.m_alignment.insert(*it);
+
+  // scores
+  const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+  const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
+  const ScoreComponentCollection &scoreCollection = tp->GetScoreBreakdown();
+  psdOpt.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
+
+  return psdOpt;
+}
+
 
 bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 {
@@ -85,7 +116,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                         size_t endSpan,
                                                                         const std::string &sourceSide,
                                                                         std::vector<std::string> * targetRepresentations,
-                                                                        const InputType &source
+                                                                        const InputType &source,
+                                                                        map<string,TargetPhrase*> * targetMap
                                                                       )
 {
   //debugging : check that everything is fine in index map
@@ -102,16 +134,19 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     //If the source is OOV, it will be copied into target
     if (! IsOOV(targetRepresentations->front()))
     {
+
         vector<float> losses(targetRepresentations->size());
-        vector<size_t> targetIDs(targetRepresentations->size());
+        vector<Translation> psdOptions;
 
-         vector<std::string> :: iterator itr_target_rep;
-
-        //loop over target representation and create id for vw
-        for(itr_target_rep = (*targetRepresentations).begin(); itr_target_rep != (*targetRepresentations).end(); itr_target_rep++)
-        {
-            targetIDs.push_back(m_ruleIndex.left.find(*itr_target_rep)->second);
+        map<string,TargetPhrase*> :: iterator itr_rep;
+        vector<std::string>::const_iterator tgtRepIt;
+        for (tgtRepIt = targetRepresentations->begin(); tgtRepIt != targetRepresentations->end(); tgtRepIt++) {
+          CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
+          itr_rep = targetMap->find(*tgtRepIt);
+          CheckIndex(*tgtRepIt);
+          psdOptions.push_back(GetPSDTranslation(itr_rep->second));
         }
+
 
         VERBOSE(5, "Extracting features features for source : " << sourceSide << endl);
         //damt hiero : extract syntax features
@@ -140,7 +175,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
         }
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
-        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntaxFeats,startSpan,endSpan,targetIDs,losses);
+        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntaxFeats,startSpan,endSpan,psdOptions,losses);
         m_consumerFactory->Release(p_consumer);
 
         vector<float>::iterator lossIt;
@@ -165,6 +200,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     }
     //normalize
     return scores;
+
+
 }
 
 size_t CellContextScoreProducer::GetNumScoreComponents() const

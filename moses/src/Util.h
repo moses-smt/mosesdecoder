@@ -58,6 +58,12 @@ namespace Moses
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
+const float EPS = 0.0001; // for floating point comparisons
+inline bool Equals(float a, float b)
+{
+  return fabs(a - b) < EPS;
+}
+
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 const std::string ToLower(const std::string& str);

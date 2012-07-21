@@ -32,16 +32,18 @@ class CellContextScoreProducer : public StatelessFeatureFunction
     // initialize vw
     bool Initialize(const std::string &modelFile, const std::string &indexFile, const std::string &configFile);
 
-    // sets current source-side context
-    // must be called when starting to translate a new sentence
-    void SetSentence(const InputType &inputSent);
 
     std::vector<ScoreComponentCollection> ScoreRules(
                                                     size_t startSpan,
                                                     size_t endSpan,
                                                     const std::string &sourceSide,
                                                     std::vector<std::string> *targetRepresentations,
-                                                    const InputType &source);
+                                                    const InputType &source,
+                                                    std::map<std::string,TargetPhrase*> * targetMap);
+
+
+    void CheckIndex(const std::string &targetRep);
+    PSD::Translation GetPSDTranslation(const TargetPhrase * tp);
 
     private :
     PSD::FeatureExtractor *m_extractor;

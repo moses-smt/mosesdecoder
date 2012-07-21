@@ -125,7 +125,7 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       translationFlag = false;
     } else if (strcmp(argv[i],"--OutputPsdInfo") == 0) {
-      outputPsd = false;
+      outputPsd = true;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
@@ -641,8 +641,8 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
 
   if (outputPsd) {
     extractFilePsd << sentence.sentenceID << "\t";
-    extractFilePsd << startE << "\t" << endE << "\t";
     extractFilePsd << startF << "\t" << endF << "\t";
+    extractFilePsd << startE << "\t" << endE << "\t";
   }
 
   for(int fi=startF; fi<=endF; fi++) {

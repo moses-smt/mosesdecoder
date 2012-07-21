@@ -11,7 +11,7 @@ using namespace std;
 namespace PSD
 {
 
-const char * VW_INIT_OPTIONS = "--hash all --csoaa_ldf s -q st --noconstant ";
+const char * VW_INIT_OPTIONS = "--hash all --csoaa_ldf m --noconstant ";
 
 //
 // VWLibraryPredictConsumerFactory
@@ -99,14 +99,14 @@ void VWLibraryPredictConsumerFactory::Release(VWLibraryPredictConsumer * fc)
   // release the semaphore *AFTER* the lock goes out of scope
   m_cond.notify_one();
 }
-//
 // VWLibraryConsumer
 //
 
 void VWLibraryConsumer::SetNamespace(char ns, bool shared)
 {
-  if (!m_shared)
+  if (!m_shared) {
     m_ex->remns();
+  }
 
   m_ex->addns(ns);
   m_shared = shared;
@@ -130,16 +130,16 @@ void VWLibraryConsumer::FinishExample()
 
 void VWLibraryConsumer::Finish()
 {
-    if (m_sharedVwInstance)
+  if (m_sharedVwInstance)
     m_VWInstance = NULL;
-    else
+  else
     VW::finish(*m_VWInstance);
 }
 
 VWLibraryConsumer::~VWLibraryConsumer()
 {
-    delete m_ex;
-    if (!m_sharedVwInstance)
+  delete m_ex;
+  if (!m_sharedVwInstance)
     delete m_VWInstance;
 }
 
@@ -177,10 +177,10 @@ float VWLibraryTrainConsumer::Predict(const string &label)
 
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile)
 {
-    m_shared = true;
-    m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile)));
-    m_sharedVwInstance = false;
-    m_ex = new ::ezexample(m_VWInstance, false);
+  m_shared = true;
+  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile)));
+  m_sharedVwInstance = false;
+  m_ex = new ::ezexample(m_VWInstance, false);
 }
 
 void VWLibraryPredictConsumer::Train(const string &label, float loss)
