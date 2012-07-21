@@ -78,8 +78,12 @@ close(RULE_INV) if $OUTPUT_RULES;
 `LC_ALL=C sort $out_file.extract | gzip -c > $out_file.extract.sorted.gz`;
 `LC_ALL=C sort $out_file.extract.inv | gzip -c > $out_file.extract.inv.sorted.gz`;
 
-`$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $out_file.extract -lexical-file $lex_file -phrase-translation-table $pt_file` if $OUTPUT_RULES;
-
+if ($OUTPUT_RULES)
+{
+  $cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $out_file.extract -lexical-file $lex_file -phrase-translation-table $pt_file";
+  print STDERR "Executing: $cmd \n";
+  `$cmd`;
+}
 sub create_xml {
     my ($source,$input,$target,$alignment,$path) = @_;
     
@@ -194,16 +198,16 @@ sub create_xml {
     my $rule_pos_s = 0;
     my %RULE_ALIGNMENT_S;
     for(my $i=0;$i<scalar(@INPUT_BITMAP);$i++) {
-	if ($INPUT_BITMAP[$i]) {
-	    $rule_s .= $INPUT[$i]." ";
-	    $RULE_ALIGNMENT_S{$ALIGNMENT_I_TO_S{$i}} = $rule_pos_s++;
-	}
-	foreach my $NT (@NT) {
-	    if ($i == $$NT{"start_i"}) {
-		$rule_s .= "[X][X] ";
-		$$NT{"rule_pos_s"} = $rule_pos_s++;
-	    }
-	}
+		if ($INPUT_BITMAP[$i]) {
+			$rule_s .= $INPUT[$i]." ";
+			$RULE_ALIGNMENT_S{$ALIGNMENT_I_TO_S{$i}} = $rule_pos_s++;
+		}
+		foreach my $NT (@NT) {
+			if ($i == $$NT{"start_i"}) {
+				$rule_s .= "[X][X] ";
+				$$NT{"rule_pos_s"} = $rule_pos_s++;
+			}
+		}
     }
 
     my $rule_t = "";

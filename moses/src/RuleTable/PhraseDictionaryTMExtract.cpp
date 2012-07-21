@@ -134,7 +134,7 @@ namespace Moses
     
     for (size_t i = 1; i < source.GetSize() - 1; ++i)
     {
-      inFile << source.GetWord(i) << " ";
+      inFile << source.GetWord(i);
     }
     inFile << endl;
     inFile.close();
@@ -146,6 +146,7 @@ namespace Moses
               + m_config[2] + " "
               + m_config[3] + " "
               + pt_file;
+    cerr << cmd << endl;
     system(cmd.c_str());    
     
     cerr << "done\n";
