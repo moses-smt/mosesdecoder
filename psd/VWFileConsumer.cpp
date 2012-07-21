@@ -1,9 +1,9 @@
 #include "FeatureConsumer.h"
 #include "Util.h"
-#include "FeatureConsumer.h"
 #include <stdexcept>
 #include <exception>
 #include <string>
+#include <boost/iostreams/device/file.hpp>
 
 using namespace std;
 using namespace Moses;
@@ -13,9 +13,10 @@ namespace PSD
 
 VWFileTrainConsumer::VWFileTrainConsumer(const std::string &outputFile)
 {
-  m_os.open(outputFile.c_str());
-  if (! m_os.good())
-    throw runtime_error("Cannot write into file: " + outputFile);
+  if (outputFile.size() > 3 && outputFile.substr(outputFile.size() - 3, 3) == ".gz") {
+    m_bfos.push(boost::iostreams::gzip_compressor());
+  }
+	m_bfos.push(boost::iostreams::file_sink(outputFile));
 }
 
 void VWFileTrainConsumer::SetNamespace(char ns, bool shared)
@@ -42,12 +43,13 @@ void VWFileTrainConsumer::AddFeature(const std::string &name, float value)
 void VWFileTrainConsumer::FinishExample()
 {
   WriteBuffer();
-  m_os << endl;
+  m_bfos << endl;
 }
 
 void VWFileTrainConsumer::Finish()
 {
-  m_os.close();
+  //m_os.close();
+	close(m_bfos);
 }
 
 void VWFileTrainConsumer::Train(const std::string &label, float loss)
@@ -66,7 +68,7 @@ float VWFileTrainConsumer::Predict(const std::string &label)
 
 void VWFileTrainConsumer::WriteBuffer()
 {
-  m_os << Join(" ", m_outputBuffer.begin(), m_outputBuffer.end()) << endl;
+  m_bfos << Join(" ", m_outputBuffer.begin(), m_outputBuffer.end()) << endl;
   m_outputBuffer.clear();
 }
 

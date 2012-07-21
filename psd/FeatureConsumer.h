@@ -12,6 +12,8 @@
 #include <boost/thread/condition_variable.hpp>
 #include <boost/thread/locks.hpp>
 #include <boost/thread/mutex.hpp>
+#include <boost/iostreams/filtering_stream.hpp> 
+#include <boost/iostreams/filter/gzip.hpp> 
 
 // #ifdef HAVE_VW
   // forward declarations to avoid dependency on VW 
@@ -51,7 +53,7 @@ public:
   virtual float Predict(const std::string &label);
 
 private:
-  std::ofstream m_os;
+  boost::iostreams::filtering_ostream m_bfos;
   std::deque<std::string> m_outputBuffer;
 
   void WriteBuffer();
