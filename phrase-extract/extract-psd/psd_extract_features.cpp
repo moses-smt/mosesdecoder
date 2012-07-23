@@ -275,9 +275,9 @@ int main(int argc,char* argv[]){
             fc = new VWFileTrainConsumer(fileName);
           consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
         }
-        extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, sourceTopics, src_start, src_end, translations, losses);
+        extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, src_start, src_end, translations, losses);
       } else { // GLOBAL model
-        extractor.GenerateFeatures(globalOut, factoredSrcLine, sourceTopics, src_start, src_end, translations, losses);
+        extractor.GenerateFeatures(globalOut, factoredSrcLine, src_start, src_end, translations, losses);
       }
     }
   }
