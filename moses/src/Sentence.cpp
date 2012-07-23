@@ -104,6 +104,14 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       throw runtime_error(msg);
     }
   }
+
+  //damt hiero : get psd input
+  vector<string> words = Tokenize(line, " ");
+    for (size_t i = 0; i < words.size(); i++) {
+          //std::cerr << "Setting context for : " << words[i] << std::endl;
+          SetPSDContext(Tokenize(words[i], factorDelimiter));
+        }
+
   Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 
   if (staticData.GetSearchAlgorithm() == ChartDecoding) {

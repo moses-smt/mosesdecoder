@@ -16,7 +16,8 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTargetPhrase(source.m_initialTargetPhrase)
+  //!damt hiero : source phrase has to be passed to construct target phrase, maybe fix an initial source phrase
+  ,m_initialTargetPhrase(source.m_initialTargetPhrase,source.m_initialSourcePhrase)
   ,m_start(clock())
   ,interrupted_flag(0)
   ,m_transOptColl(transOptColl)
@@ -29,6 +30,7 @@ SearchNormal::SearchNormal(Manager& manager, const InputType &source, const Tran
   }
 
   // only if constraint decoding (having to match a specified output)
+
   long sentenceID = source.GetTranslationId();
   m_constraint = staticData.GetConstrainingPhrase(sentenceID);
   if (m_constraint) {

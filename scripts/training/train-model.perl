@@ -37,7 +37,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    $_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
-   $_DICTIONARY, $_EPPEX, $IGNORE);
+   $_DICTIONARY, $_EPPEX, $IGNORE, $_PSD_MODEL, $_PSD_INDEX, $_PSD_CONFIG, $_EXTRACT_PSD);
 my $_CORES = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -123,7 +123,11 @@ $_HELP = 1
 		       'eppex:s' => \$_EPPEX,
 		       'additional-ini=s' => \$_ADDITIONAL_INI, 
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
-		       'cores=i' => \$_CORES
+           'extract-psd-anot' => \$_EXTRACT_PSD,
+           'psd-index=s' => \$_PSD_INDEX,
+           'psd-model=s' => \$_PSD_MODEL,
+           'psd-config=s' => \$_PSD_CONFIG,
+           'cores=i' => \$_CORES
                );
 
 if ($_HELP) {
@@ -1192,6 +1196,8 @@ sub word_align {
 
 sub get_lexical_factored {
     print STDERR "(4) generate lexical translation table $___TRANSLATION_FACTORS @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     if ($___NOT_FACTORED && !$_XML) {
 	&get_lexical($___CORPUS.".".$___F,
 		     $___CORPUS.".".$___E,
@@ -1296,6 +1302,8 @@ sub get_lexical {
 
 sub extract_phrase_factored {
     print STDERR "(5) extract phrases @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     if ($___NOT_FACTORED) {
 	&extract_phrase($___CORPUS.".".$___F,
 			$___CORPUS.".".$___E,
@@ -1427,12 +1435,15 @@ sub extract_phrase {
       if ($reordering_flag) {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
-        $cmd .= " --NoTTable" if !$ttable_flag;
-        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
+      $cmd .= " --NoTTable" if !$ttable_flag;
+      $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
     $cmd .= " --GZOutput ";
+    if ($_EXTRACT_PSD) {
+      $cmd .= " --OutputPsdInfo ";
+    }
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
@@ -1447,6 +1458,8 @@ sub extract_phrase {
 
 sub score_phrase_factored {
     print STDERR "(6) score phrases @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     my @SPECIFIED_TABLE = @_PHRASE_TABLE;
     if ($___NOT_FACTORED) {
 	my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table");
@@ -1621,6 +1634,7 @@ sub score_phrase_memscore {
 
 sub get_reordering_factored {
     print STDERR "(7) learn reordering model @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
 
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     if ($REORDERING_LEXICAL) {
@@ -1690,6 +1704,8 @@ sub get_reordering {
 my $factor_e_source;
 sub get_generation_factored {
     print STDERR "(8) learn generation model @ ".`date`;
+    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
+
     if (defined $___GENERATION_FACTORS) {
 	my @SPECIFIED_TABLE = @_GENERATION_TABLE;
 	my @TYPE = @_GENERATION_TYPE;
@@ -1772,6 +1788,8 @@ sub get_generation {
 
 sub create_ini {
     print STDERR "(9) create moses.ini @ ".`date`;
+    ## This should be done here, but it is done below instead for some reason...
+    #safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
     
     &full_path(\$___MODEL_DIR);
     &full_path(\$___VCB_E);
@@ -1878,6 +1896,12 @@ sub create_ini {
    if ($num_of_ttables != $stepsused{"T"}) {
      print STDERR "WARNING: Your [mapping-steps] require translation steps up to id $stepsused{T} but you defined translation steps 0..$num_of_ttables\n";
      exit 1 if $num_of_ttables < $stepsused{"T"}; # fatal to define less
+   }
+
+   if (defined $_PSD_MODEL) {
+     print INI "\n# Phrase-sense disambiugation";
+     print INI "\n[psd-model]\n$_PSD_MODEL\n\n[psd-index]\n$_PSD_INDEX\n\n[psd-config]\n$_PSD_CONFIG\n";
+     print INI "\n[weight-psd]\n0.1\n";
    }
 
     if (defined $___GENERATION_FACTORS) {

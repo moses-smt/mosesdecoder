@@ -140,6 +140,8 @@ private:
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
+
+  std::cerr << "READING INPUT" << std::endl;
   delete source;
   switch(inputType) {
   case SentenceInput:
@@ -152,6 +154,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
     source = ioWrapper.GetInput(new WordLattice);
     break;
   case TreeInputType:
+    std::cerr << "READING TREE INPUT" << std::endl;
     source = ioWrapper.GetInput(new TreeInput);
     break;
   default:
@@ -204,30 +207,30 @@ int main(int argc, char* argv[])
       for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
       TRACE_ERR(endl);
     }
-  
+
     IOWrapper::FixPrecision(cout);
     IOWrapper::FixPrecision(cerr);
-  
+
     // load data structures
     Parameter parameter;
     if (!parameter.LoadParam(argc, argv)) {
       return EXIT_FAILURE;
     }
-  
+
     const StaticData &staticData = StaticData::Instance();
     if (!StaticData::LoadDataStatic(&parameter))
       return EXIT_FAILURE;
-  
+
     if (parameter.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
-  
+
     CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
-  
+
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
-  
+
     // check on weights
     vector<float> weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
@@ -243,14 +246,14 @@ int main(int argc, char* argv[])
       TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
       return EXIT_FAILURE;
     }
-  
+
     if (ioWrapper == NULL)
       return EXIT_FAILURE;
-  
+
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
-  
+
     // read each sentence & decode
     InputType *source=0;
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
@@ -265,16 +268,16 @@ int main(int argc, char* argv[])
       delete task;
 #endif
     }
-  
+
 #ifdef WITH_THREADS
     pool.Stop(true);  // flush remaining jobs
 #endif
-  
+
     delete ioWrapper;
-  
+
     IFVERBOSE(1)
     PrintUserTime("End.");
-  
+
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;

@@ -25,10 +25,12 @@ my $align = $ARGV[6]; # 3rd arg of extract argument
 my $extract = $ARGV[7]; # 4th arg of extract argument
 
 my $makeTTable = 1; # whether to build the ttable extract files
+my $outputPSD = 0; 
 my $otherExtractArgs= "";
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
   $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
+  $outputPSD = 1 if $ARGV[$i] eq "--OutputPsdInfo";
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
@@ -84,6 +86,7 @@ else
 
 # run extract
 @children = ();
+
 for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $pid = fork();
@@ -125,7 +128,6 @@ $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
 $catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
 $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
 
-
 @children = ();
 if ($makeTTable)
 {
@@ -143,6 +145,32 @@ if (-e "$TMPDIR/extract.$numStr.o.gz")
 	push(@children, $pid);
 }
 
+my @psd_lines;
+if ($outputPSD) {
+    # need to renumber sentence ids in PSD output, (mis)use the parent process to do this...
+
+    open(OUTPSD, "| gzip -c > $extract.psd.gz") or die "failed to open $extract.psd.gz output pipe";
+    my $lineOffset = 0;
+    for (my $i = 0; $i < $numParallel; ++$i)
+    {
+	my $numStr = NumStr($i);
+	print STDERR "opening extract.$numStr.psd.gz pipe";
+	open(INPSD, "gzip -dc $TMPDIR/extract.$numStr.psd.gz |") or die "failed to open extract.$numStr.psd.gz input pipe";
+	while (<INPSD>) {
+	    chomp;
+	    my ($SNo, $rest) = split("\t", $_, 2);
+	    die unless defined($rest);
+	    $SNo += $lineOffset;
+	    print OUTPSD $SNo, "\t", $rest, "\n";
+	}
+	close(INPSD);
+
+	$lineOffset += `cat $TMPDIR/source.$numStr | wc -l`;
+    }
+    print STDERR "closing $extract.psd.gz pipe";
+    close(OUTPSD) or die "failed to close $extract.psd.gz output pipe";
+}
+
 # wait for all sorting to finish
 foreach (@children) {
 	waitpid($_, 0);
@@ -150,8 +178,8 @@ foreach (@children) {
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
-`$cmd`;
+print STDERR "WARNING, SKIPPING: $cmd\n";
+#`$cmd`;
 
 print STDERR "Finished ".localtime() ."\n";
 

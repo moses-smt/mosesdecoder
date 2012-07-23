@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
+#include "FeatureExtractor.h"
 
 namespace Moses
 {
@@ -39,10 +40,11 @@ class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
 class ChartTranslationOption;
-  
+
 /** base class for all types of inputs to the decoder,
- *  eg. sentences, confusion networks, lattices and tree 
+ *  eg. sentences, confusion networks, lattices and tree
  */
+
 class InputType
 {
 protected:
@@ -56,10 +58,15 @@ public:
   // used in -continue-partial-translation
   std::vector<bool> m_sourceCompleted;
   std::string m_initialTargetPhrase;
+
+  //damt hiero : initial source phrase
+  Phrase m_initialSourcePhrase;
+
   size_t m_frontSpanCoveredLength;
-  // how many words from the beginning are covered
+  PSD::ContextType m_PSDContext;
 
   InputType(long translationId = 0);
+
   virtual ~InputType();
 
   virtual InputTypeEnum GetType() const = 0;

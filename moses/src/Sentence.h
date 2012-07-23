@@ -60,7 +60,13 @@ private:
 
 
 public:
+
   Sentence();
+
+  virtual void SetPSDContext(const std::vector<std::string> &psdFact)
+  {
+        m_PSDContext.push_back(psdFact);
+  }
 
   InputTypeEnum GetType() const {
     return SentenceInput;

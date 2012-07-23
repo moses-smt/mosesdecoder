@@ -31,6 +31,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationSystem.h"
 #include "Util.h"
 
+// #ifdef HAVE_VW
+  #include "PSDScoreProducer.h"
+// #endif
+
 using namespace std;
 
 namespace Moses
@@ -78,9 +82,6 @@ void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalM
   m_globalLexicalModels.push_back(globalLexicalModel);
   AddFeatureFunction(globalLexicalModel);
 }
-
-
-
 
 void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff)
 {

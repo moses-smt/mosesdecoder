@@ -57,11 +57,13 @@ class ChartTranslationOption
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);
 
-  //! @todo dunno
+  //!damt hiero : neeed to set estimate of best score when recomputing with context
+  void CalcEstimateOfBestScore();
+
   const StackVec &GetStackVec() const { return m_stackVec; }
 
-  //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
-  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+  const TargetPhraseCollection &GetTargetPhraseCollection() const {
+
     return *m_targetPhraseCollection;
   }
 

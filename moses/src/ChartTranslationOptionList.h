@@ -39,6 +39,9 @@ class ChartTranslationOptionList
 
   const ChartTranslationOption &Get(size_t i) const { return *m_collection[i]; }
 
+  //!damt non-const get for recomputing context aware estimate of best score
+  ChartTranslationOption &Get(size_t i) { return *m_collection[i]; }
+
   //! number of translation options
   size_t GetSize() const { return m_size; }
 

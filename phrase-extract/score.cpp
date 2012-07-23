@@ -520,33 +520,38 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   phraseTableFile << " ||| ";
 
-  // alignment info for non-terminals
-  if (! inverseFlag) {
-    if (hierarchicalFlag) {
-      // always output alignment if hiero style, but only for non-terms
-      assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
-      for(size_t j = 0; j < phraseT.size() - 1; j++) {
-        if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
-          if (bestAlignment->alignedToT[ j ].size() != 1) {
-            cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
-            phraseTableFile.flush();
-            assert(bestAlignment->alignedToT[ j ].size() == 1);
+  // alignment info for terminals and non-terminals
+  if (! inverseFlag) 
+  {  
+      if (hierarchicalFlag) 
+      {
+              assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);  
+              for(size_t j = 0; j < phraseT.size() - 1; j++) 
+              {
+                 if (isNonTerminal(vcbT.getWord( phraseT[j] ))) 
+                 {
+                      if (bestAlignment->alignedToT[ j ].size() != 1) 
+                      {
+                         cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
+                         phraseTableFile.flush();
+                         assert(bestAlignment->alignedToT[ j ].size() == 1);
+                      }
+                      int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
+                      phraseTableFile << sourcePos << "-" << j << " ";
+                 }
+              }
+      }
+      if (wordAlignmentFlag)
+      {
+          // alignment info in pb model
+          for(size_t j=0; j<bestAlignment->alignedToT.size(); j++) {
+            const set< size_t > &aligned = bestAlignment->alignedToT[j];
+            for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p) {
+              phraseTableFile << *p << "-" << j << " ";
+            }
           }
-          int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
-          phraseTableFile << sourcePos << "-" << j << " ";
-        }
       }
-    } else if (wordAlignmentFlag) {
-      // alignment info in pb model
-      for(size_t j=0; j<bestAlignment->alignedToT.size(); j++) {
-        const set< size_t > &aligned = bestAlignment->alignedToT[j];
-        for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p) {
-          phraseTableFile << *p << "-" << j << " ";
-        }
-      }
-    }
   }
-
   // counts
   
   phraseTableFile << " ||| " << totalCount << " " << count;

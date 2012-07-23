@@ -66,6 +66,7 @@ protected:
   Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
   const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
+  bool                m_isOOV;
 
   //! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
   //! for example, know the full n-gram score since the length of the
@@ -152,6 +153,10 @@ public:
     return m_scoreBreakdown;
   }
 
+  inline bool IsOOV() const {
+    return m_isOOV;
+  }
+
   /** returns cached scores */
   inline const Scores *GetCachedScores(const ScoreProducer *scoreProducer) const {
     _ScoreCacheMap::const_iterator it = m_cachedScores.find(scoreProducer);
@@ -160,6 +165,9 @@ public:
     else
       return it->second;
   }
+
+  /** Adds score produced by a stateless feature before decoding */
+  void AddStatelessScore(const ScoreComponentCollection &score);
 
   /** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
   void CalcScore(const TranslationSystem* system);

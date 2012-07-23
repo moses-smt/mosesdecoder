@@ -20,6 +20,7 @@ namespace Moses
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
+
 bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
 {
   //parse XML markup in translation line
@@ -231,6 +232,8 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // remove extra spaces
   //line = Trim(line);
 
+  cerr << "TREE INPUT : LINE : " << line << endl;
+
   std::vector<XMLParseOutput> sourceLabels;
   std::vector<XmlOption*> xmlOptionsList;
   ProcessAndStripXMLTags(line, sourceLabels, xmlOptionsList);
@@ -239,6 +242,10 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   stringstream strme;
   strme << line << endl;
 
+  cerr << "TREE INPUT : SENTENCE : " << line << endl;
+
+  std::vector<std::string> sentTokens = Tokenize(" ",line);
+  //damt hiero : when reading sentence, also read in factors, see Read method in Sentence
   Sentence::Read(strme, factorOrder);
 
   // size input chart
