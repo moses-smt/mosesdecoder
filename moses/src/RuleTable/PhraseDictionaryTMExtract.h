@@ -43,14 +43,12 @@ namespace Moses
                               PhraseDictionaryFeature* feature);
     bool Load(const std::vector<FactorType> &input
               , const std::vector<FactorType> &output
-              , const std::string &filePath
+              , const std::string &initStr
               , const std::vector<float> &weight
               , size_t tableLimit,
               const LMList& languageModels,
               const WordPenaltyProducer* wpProducer);
     
-    void Initialize(const std::string &initStr);
-
     const PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source) const;
     
     ChartRuleLookupManager *CreateRuleLookupManager(

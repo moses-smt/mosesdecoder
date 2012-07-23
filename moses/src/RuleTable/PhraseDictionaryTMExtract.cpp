@@ -49,7 +49,7 @@ namespace Moses
 
   bool PhraseDictionaryTMExtract::Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
-            , const std::string &filePath
+            , const std::string &initStr
             , const std::vector<float> &weight
             , size_t tableLimit,
             const LMList& languageModels,
@@ -62,17 +62,12 @@ namespace Moses
     m_output	= &output;
     
     m_weight = &weight;
-    
-    return true;
-  }
-
-  void PhraseDictionaryTMExtract::Initialize(const string &initStr)
-  {
+   
     cerr << "initStr=" << initStr << endl;
     m_config = Tokenize(initStr, ";");
     assert(m_config.size() == 4);
-    
-    
+
+    return true;
   }
     
   ChartRuleLookupManager *PhraseDictionaryTMExtract::CreateRuleLookupManager(

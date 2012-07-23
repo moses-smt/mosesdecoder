@@ -194,7 +194,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     
     PhraseDictionaryTMExtract *dict = new PhraseDictionaryTMExtract(m_numScoreComponent, this);
 
-    dict->Initialize(m_filePath);
     bool ret = dict->Load(GetInput()
                           , GetOutput()
                           , m_filePath
