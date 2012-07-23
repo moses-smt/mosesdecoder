@@ -185,6 +185,12 @@ enum WordAlignmentSort {
   ,TargetOrder = 1
 };
 
+enum FormatType
+{
+  MosesFormat
+  ,HieroFormat
+};
+
 // typedef
 typedef size_t FactorType;
 

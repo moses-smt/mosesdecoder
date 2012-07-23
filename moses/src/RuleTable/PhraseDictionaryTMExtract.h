@@ -74,6 +74,12 @@ namespace Moses
 
     std::map<long, PhraseDictionaryNodeSCFG> m_collection;
     std::vector<std::string> m_config;
+    
+    const std::vector<FactorType> *m_input, *m_output;
+    const LMList *m_languageModels;
+    const WordPenaltyProducer *m_wpProducer;
+    const std::vector<float> *m_weight;
+
   };
   
 }  // namespace Moses

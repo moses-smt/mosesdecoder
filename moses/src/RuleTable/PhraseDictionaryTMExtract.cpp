@@ -126,6 +126,7 @@ namespace Moses
   
   void PhraseDictionaryTMExtract::InitializeForInput(InputType const& source)
   {
+    /*
     string data_root = "/tmp";
     string in_file = data_root + "/in";
     string pt_file = data_root + "/pt.out";
@@ -150,8 +151,114 @@ namespace Moses
     system(cmd.c_str());    
     
     cerr << "done\n";
+    */
     
-    m_collection[source.GetTranslationId()];
+    PhraseDictionaryNodeSCFG &rootNode = m_collection[source.GetTranslationId()];
+    FormatType format = MosesFormat;
+    
+    // populate with rules for this sentence
+    long translationId = source.GetTranslationId();
+    
+    string grammarFile = "/tmp/pt.gz";
+    
+    // data from file
+    InputFileStream inStream(grammarFile);
+    
+    // copied from class LoaderStandard
+    PrintUserTime("Start loading new format pt model");
+    
+    const StaticData &staticData = StaticData::Instance();
+    const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+    
+    
+    string lineOrig;
+    size_t count = 0;
+    
+    while(getline(inStream, lineOrig)) {
+      const string *line;
+      if (format == HieroFormat) { // reformat line
+        assert(false);
+        //line = ReformatHieroRule(lineOrig);
+      }
+      else
+      { // do nothing to format of line
+        line = &lineOrig;
+      }
+      
+      vector<string> tokens;
+      vector<float> scoreVector;
+      
+      TokenizeMultiCharSeparator(tokens, *line , "|||" );
+      
+      if (tokens.size() != 4 && tokens.size() != 5) {
+        stringstream strme;
+        strme << "Syntax error at " << grammarFile << ":" << count;
+        UserMessage::Add(strme.str());
+        abort();
+      }
+      
+      const string &sourcePhraseString = tokens[0]
+      , &targetPhraseString = tokens[1]
+      , &scoreString        = tokens[2]
+      , &alignString        = tokens[3];
+      
+      bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
+      if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+        TRACE_ERR( grammarFile << ":" << count << ": pt entry contains empty target, skipping\n");
+        continue;
+      }
+      
+      Tokenize<float>(scoreVector, scoreString);
+      const size_t numScoreComponents = GetFeature()->GetNumScoreComponents();
+      if (scoreVector.size() != numScoreComponents) {
+        stringstream strme;
+        strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
+        << numScoreComponents << ") of score components on line " << count;
+        UserMessage::Add(strme.str());
+        abort();
+      }
+      CHECK(scoreVector.size() == numScoreComponents);
+      
+      // parse source & find pt node
+      
+      // constituent labels
+      Word sourceLHS, targetLHS;
+      
+      // source
+      Phrase sourcePhrase( 0);
+      sourcePhrase.CreateFromStringNewFormat(Input, *m_input, sourcePhraseString, factorDelimiter, sourceLHS);
+      
+      // create target phrase obj
+      TargetPhrase *targetPhrase = new TargetPhrase(Output);
+      targetPhrase->CreateFromStringNewFormat(Output, *m_output, targetPhraseString, factorDelimiter, targetLHS);
+      
+      // rest of target phrase
+      targetPhrase->SetAlignmentInfo(alignString);
+      targetPhrase->SetTargetLHS(targetLHS);
+      //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
+      
+      // component score, for n-best output
+      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
+      std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
+      
+      targetPhrase->SetScoreChart(GetFeature(), scoreVector, *m_weight, *m_languageModels, *m_wpProducer);
+      
+      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
+      phraseColl.Add(targetPhrase);
+      
+      count++;
+      
+      if (format == HieroFormat) { // reformat line
+        delete line;
+      }
+      else
+      { // do nothing
+      }
+      
+    }
+    
+    // sort and prune each target phrase collection
+    SortAndPrune(ruleTable);
     
   }
   
