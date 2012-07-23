@@ -98,7 +98,7 @@ namespace Moses
     PhraseDictionaryNodeSCFG &rootNode = m_collection[translationId];
     FormatType format = MosesFormat;
     
-    string grammarFile = "/tmp/pt.gz";
+    string grammarFile = "/tmp/pt.out.gz";
     
     // data from file
     InputFileStream inStream(grammarFile);
@@ -215,6 +215,7 @@ namespace Moses
                                                                   , const TargetPhrase &target
                                                                   , const Word &sourceLHS)
   {
+    cerr << source << endl << target << endl;
     const size_t size = source.GetSize();
     
     const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
