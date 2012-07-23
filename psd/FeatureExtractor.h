@@ -71,7 +71,7 @@ public:
 
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
-    const vector<string> &sourceTopics,
+    const std::vector<std::string> &sourceTopics,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<Translation> &translations,
@@ -87,6 +87,7 @@ private:
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
+  void GenerateSourceTopicFeatures(const std::vector<std::string> &wordSpan, const std::vector<std::string> &sourceTopics, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
       const std::vector<std::string> &tgtPhrase,
       const AlignmentType &align,

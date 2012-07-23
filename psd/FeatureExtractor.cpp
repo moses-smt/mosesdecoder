@@ -50,8 +50,9 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   float maxProb = 0;
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
 
-  if (m_config.GetSourceTopic()) GenerateSourceTopicFeatures(sourceTopics, fc);
+  vector<string> phraseTopics(sourceTopics.begin() + spanStart, sourceTopics.begin() + spanEnd + 1);
 
+  if (m_config.GetSourceTopic()) GenerateSourceTopicFeatures(sourceForms, phraseTopics, fc);
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
 
@@ -82,9 +83,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 }
 
 ExtractorConfig::ExtractorConfig()
-
-  : m_paired(false), m_bagOfWords(false), m_sourceExternal(false),
-         m_sourceInternal(false), m_targetInternal(false), m_windowSize(0)
+: m_paired(false), m_bagOfWords(false), m_sourceExternal(false),
+    m_sourceInternal(false), m_targetInternal(false), m_windowSize(0)
 {}
 
 void ExtractorConfig::Load(const string &configFile)
@@ -99,9 +99,9 @@ void ExtractorConfig::Load(const string &configFile)
   m_paired          = pTree.get<bool>("features.paired", false);
   m_bagOfWords      = pTree.get<bool>("features.bag-of-words", false);
   m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
-  m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
-  m_binnedScores    = pTree.get<bool>("features.binned-scores", 0);
+  m_binnedScores    = pTree.get<bool>("features.binned-scores", false);
   m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
+  m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
@@ -122,13 +122,10 @@ void FeatureExtractor::GenerateSourceTopicFeatures(const vector<string> &wordSpa
 {
 //this grabs the words in the span of the current phrase
 //next, adds topics values string for span
-  vector<string>::const_iterator wordSpan;
-  topic_it = sourceTopics.begin()
-  for (w_it = wordSpan.begin(); w_it != wordSpan.end(); w_it++) {
-    fc->AddFeature("srcTopic^" + *w_it + "_" + *topic_it);
-    topic_it++;
-  }
-
+  vector<string>::const_iterator wordIt;
+  vector<string>::const_iterator topicIt = sourceTopics.begin();
+  for (wordIt = wordSpan.begin(); wordIt != wordSpan.end(); wordIt++, topicIt++)
+    fc->AddFeature("srcTopic^" + *wordIt + "_" + *topicIt);
 }
 
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
