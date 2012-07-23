@@ -84,6 +84,11 @@ if ($OUTPUT_RULES)
   print STDERR "Executing: $cmd \n";
   `$cmd`;
 }
+
+$cmd = "rm -rf $TMPDIR";
+`$cmd`;
+
+#######################################################
 sub create_xml {
     my ($source,$input,$target,$alignment,$path) = @_;
     

@@ -84,16 +84,22 @@ namespace Moses
     
   void PhraseDictionaryTMExtract::InitializeForInput(InputType const& inputSentence)
   {
-    /*
-    string data_root = "/tmp";
-    string in_file = data_root + "/in";
-    string pt_file = data_root + "/pt.out";
+    char buffer [L_tmpnam];
+    
+    tmpnam (buffer);
+    printf ("Tempname #1: %s\n",buffer);
+
+    string in_file = buffer;
+
+    tmpnam (buffer);
+    printf ("Tempname #1: %s\n",buffer);
+    string pt_file = buffer;;
     
     ofstream inFile(in_file.c_str());
     
-    for (size_t i = 1; i < source.GetSize() - 1; ++i)
+    for (size_t i = 1; i < inputSentence.GetSize() - 1; ++i)
     {
-      inFile << source.GetWord(i);
+      inFile << inputSentence.GetWord(i);
     }
     inFile << endl;
     inFile.close();
@@ -108,8 +114,7 @@ namespace Moses
     cerr << cmd << endl;
     system(cmd.c_str());    
     
-    cerr << "done\n";
-    */
+    cerr << "TM-MT extraction done\n";
     
     // populate with rules for this sentence
     long translationId = inputSentence.GetTranslationId();
@@ -117,10 +122,10 @@ namespace Moses
     PhraseDictionaryNodeSCFG &rootNode = m_collection[translationId];
     FormatType format = MosesFormat;
     
-    string grammarFile = "/tmp/pt.out.gz";
+    pt_file += ".gz";
     
     // data from file
-    InputFileStream inStream(grammarFile);
+    InputFileStream inStream(pt_file);
     
     // copied from class LoaderStandard
     PrintUserTime("Start loading new format pt model");
@@ -150,7 +155,7 @@ namespace Moses
       
       if (tokens.size() != 4 && tokens.size() != 5) {
         stringstream strme;
-        strme << "Syntax error at " << grammarFile << ":" << count;
+        strme << "Syntax error at " << pt_file << ":" << count;
         UserMessage::Add(strme.str());
         abort();
       }
@@ -162,7 +167,7 @@ namespace Moses
       
       bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
       if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-        TRACE_ERR( grammarFile << ":" << count << ": pt entry contains empty target, skipping\n");
+        TRACE_ERR( pt_file << ":" << count << ": pt entry contains empty target, skipping\n");
         continue;
       }
       
@@ -217,7 +222,9 @@ namespace Moses
     
     // sort and prune each target phrase collection
     SortAndPrune(rootNode);
-    
+   
+    remove(pt_file.c_str());
+    remove(in_file.c_str());
   }
   
   TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
