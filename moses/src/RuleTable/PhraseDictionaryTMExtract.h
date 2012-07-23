@@ -28,6 +28,7 @@
 
 namespace Moses
 {
+  class PhraseDictionaryNodeSCFG;
   
   /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
    * length n symbols requires n look-ups to find the TargetPhraseCollection.
@@ -48,7 +49,7 @@ namespace Moses
     ChartRuleLookupManager *CreateRuleLookupManager(
                                                     const InputType &,
                                                     const ChartCellCollection &);
-    void InitializeForInput(InputType const& source);
+    void InitializeForInput(InputType const& inputSentence);
     void CleanUp(const InputType& source);
     
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const
@@ -59,17 +60,17 @@ namespace Moses
     TO_STRING();
     
   protected:
-    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const InputType &inputSentence
+    TargetPhraseCollection &GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
                                                               , const Phrase &source
                                                               , const TargetPhrase &target
                                                               , const Word &sourceLHS);
     
-    PhraseDictionaryNodeSCFG &GetOrCreateNode(const InputType &inputSentence
+    PhraseDictionaryNodeSCFG &GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
                                               , const Phrase &source
                                               , const TargetPhrase &target
                                               , const Word &sourceLHS);
     
-    void SortAndPrune(const InputType &source);
+    void SortAndPrune(PhraseDictionaryNodeSCFG &rootNode);
     PhraseDictionaryNodeSCFG &GetRootNode(const InputType &source);
 
     std::map<long, PhraseDictionaryNodeSCFG> m_collection;

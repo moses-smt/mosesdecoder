@@ -55,76 +55,15 @@ namespace Moses
     
     
   }
-  
-  TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(const InputType &inputSentence
-                                                                                  , const Phrase &source
-                                                                                  , const TargetPhrase &target
-                                                                                  , const Word &sourceLHS)
-  {
-    PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(inputSentence, source, target, sourceLHS);
-    return currNode.GetOrCreateTargetPhraseCollection();
-  }
-  
-  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetOrCreateNode(const InputType &inputSentence
-                                                                  , const Phrase &source
-                                                                  , const TargetPhrase &target
-                                                                  , const Word &sourceLHS)
-  {
-    const size_t size = source.GetSize();
     
-    const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
-    AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
-    
-    PhraseDictionaryNodeSCFG *currNode = &GetRootNode(inputSentence);
-    for (size_t pos = 0 ; pos < size ; ++pos) {
-      const Word& word = source.GetWord(pos);
-      
-      if (word.IsNonTerminal()) {
-        // indexed by source label 1st
-        const Word &sourceNonTerm = word;
-        
-        CHECK(iterAlign != target.GetAlignmentInfo().end());
-        CHECK(iterAlign->first == pos);
-        size_t targetNonTermInd = iterAlign->second;
-        ++iterAlign;
-        const Word &targetNonTerm = target.GetWord(targetNonTermInd);
-        
-        currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
-      } else {
-        currNode = currNode->GetOrCreateChild(word);
-      }
-      
-      CHECK(currNode != NULL);
-    }
-    
-    // finally, the source LHS
-    //currNode = currNode->GetOrCreateChild(sourceLHS);
-    //CHECK(currNode != NULL);
-    
-    
-    return *currNode;
-  }
-  
   ChartRuleLookupManager *PhraseDictionaryTMExtract::CreateRuleLookupManager(
                                                                         const InputType &sentence,
                                                                         const ChartCellCollection &cellCollection)
   {
     return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
   }
-  
-  void PhraseDictionaryTMExtract::SortAndPrune(const InputType &source)
-  {
-    if (GetTableLimit())
-    {
-      long transId = source.GetTranslationId();
-      std::map<long, PhraseDictionaryNodeSCFG>::iterator iter = m_collection.find(transId);
-      CHECK(iter != m_collection.end());
-
-      (iter->second).Sort(GetTableLimit());
-    }
-  }
-  
-  void PhraseDictionaryTMExtract::InitializeForInput(InputType const& source)
+    
+  void PhraseDictionaryTMExtract::InitializeForInput(InputType const& inputSentence)
   {
     /*
     string data_root = "/tmp";
@@ -153,11 +92,11 @@ namespace Moses
     cerr << "done\n";
     */
     
-    PhraseDictionaryNodeSCFG &rootNode = m_collection[source.GetTranslationId()];
-    FormatType format = MosesFormat;
-    
     // populate with rules for this sentence
-    long translationId = source.GetTranslationId();
+    long translationId = inputSentence.GetTranslationId();
+
+    PhraseDictionaryNodeSCFG &rootNode = m_collection[translationId];
+    FormatType format = MosesFormat;
     
     string grammarFile = "/tmp/pt.gz";
     
@@ -241,9 +180,9 @@ namespace Moses
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
       
-      targetPhrase->SetScoreChart(GetFeature(), scoreVector, *m_weight, *m_languageModels, *m_wpProducer);
+      targetPhrase->SetScoreChart(GetFeature(), scoreVector, *m_weight, *m_languageModels, m_wpProducer);
       
-      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
+      TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
       phraseColl.Add(targetPhrase);
       
       count++;
@@ -258,8 +197,65 @@ namespace Moses
     }
     
     // sort and prune each target phrase collection
-    SortAndPrune(ruleTable);
+    SortAndPrune(rootNode);
     
+  }
+  
+  TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
+                                                                                  , const Phrase &source
+                                                                                  , const TargetPhrase &target
+                                                                                  , const Word &sourceLHS)
+  {
+    PhraseDictionaryNodeSCFG &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
+    return currNode.GetOrCreateTargetPhraseCollection();
+  }
+
+  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
+                                                                  , const Phrase &source
+                                                                  , const TargetPhrase &target
+                                                                  , const Word &sourceLHS)
+  {
+    const size_t size = source.GetSize();
+    
+    const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+    AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
+    
+    PhraseDictionaryNodeSCFG *currNode = &rootNode;
+    for (size_t pos = 0 ; pos < size ; ++pos) {
+      const Word& word = source.GetWord(pos);
+      
+      if (word.IsNonTerminal()) {
+        // indexed by source label 1st
+        const Word &sourceNonTerm = word;
+        
+        CHECK(iterAlign != target.GetAlignmentInfo().end());
+        CHECK(iterAlign->first == pos);
+        size_t targetNonTermInd = iterAlign->second;
+        ++iterAlign;
+        const Word &targetNonTerm = target.GetWord(targetNonTermInd);
+        
+        currNode = currNode->GetOrCreateChild(sourceNonTerm, targetNonTerm);
+      } else {
+        currNode = currNode->GetOrCreateChild(word);
+      }
+      
+      CHECK(currNode != NULL);
+    }
+    
+    // finally, the source LHS
+    //currNode = currNode->GetOrCreateChild(sourceLHS);
+    //CHECK(currNode != NULL);
+    
+    
+    return *currNode;
+  }
+
+  void PhraseDictionaryTMExtract::SortAndPrune(PhraseDictionaryNodeSCFG &rootNode)
+  {
+    if (GetTableLimit())
+    {
+      rootNode.Sort(GetTableLimit());
+    }
   }
   
   void PhraseDictionaryTMExtract::CleanUp(const InputType &source)
