@@ -11,7 +11,7 @@ using namespace std;
 namespace PSD
 {
 
-const char * VW_INIT_OPTIONS = "--hash all --csoaa_ldf m --noconstant ";
+const char * VW_INIT_OPTIONS = "--hash all --noconstant ";
 
 //
 // VWLibraryPredictConsumerFactory
@@ -152,7 +152,7 @@ VWLibraryConsumer::~VWLibraryConsumer()
 VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
 {
   m_shared = true;
-  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -f " + modelFile)));
+  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" --csoaa_ldf m -f " + modelFile)));
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
