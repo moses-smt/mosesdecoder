@@ -47,6 +47,25 @@ namespace Moses
     CHECK(staticData.ThreadCount() == 1);
   }
 
+  bool PhraseDictionaryTMExtract::Load(const std::vector<FactorType> &input
+            , const std::vector<FactorType> &output
+            , const std::string &filePath
+            , const std::vector<float> &weight
+            , size_t tableLimit,
+            const LMList& languageModels,
+            const WordPenaltyProducer* wpProducer)
+  {
+    m_languageModels = &(languageModels);
+    m_wpProducer = wpProducer;
+    m_tableLimit = tableLimit;
+    m_input		= &input;
+    m_output	= &output;
+    
+    m_weight = &weight;
+    
+    return true;
+  }
+
   void PhraseDictionaryTMExtract::Initialize(const string &initStr)
   {
     cerr << "initStr=" << initStr << endl;

@@ -41,6 +41,13 @@ namespace Moses
   public:
     PhraseDictionaryTMExtract(size_t numScoreComponents,
                               PhraseDictionaryFeature* feature);
+    bool Load(const std::vector<FactorType> &input
+              , const std::vector<FactorType> &output
+              , const std::string &filePath
+              , const std::vector<float> &weight
+              , size_t tableLimit,
+              const LMList& languageModels,
+              const WordPenaltyProducer* wpProducer);
     
     void Initialize(const std::string &initStr);
 
