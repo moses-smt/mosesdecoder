@@ -87,12 +87,9 @@ namespace Moses
     char buffer [L_tmpnam];
     
     tmpnam (buffer);
-    printf ("Tempname #1: %s\n",buffer);
-
     string in_file = buffer;
 
     tmpnam (buffer);
-    printf ("Tempname #1: %s\n",buffer);
     string pt_file = buffer;;
     
     ofstream inFile(in_file.c_str());

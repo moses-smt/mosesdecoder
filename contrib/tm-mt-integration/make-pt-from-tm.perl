@@ -17,7 +17,6 @@ my $pt_file			= $ARGV[5]; #"$data_root/out/pt";
 
 my $cmd;
 
-print "pt_file=$pt_file \n";
 my $TMPDIR=dirname($pt_file)  ."/tmp.$$";
 $cmd = "mkdir -p $TMPDIR";
 `$cmd`;
@@ -108,7 +107,7 @@ sub create_xml {
     my ($start_s,$start_i) = (0,0);
 
     $path .= "X"; # indicate end
-    print "$input\n$source\n$target\n$path\n";
+    print STDERR "$input\n$source\n$target\n$path\n";
     for(my $p=0;$p<length($path);$p++) {
 	my $action = substr($path,$p,1);
 
@@ -133,7 +132,7 @@ sub create_xml {
 	    }
 	    
 	    # are there input words that need to be inserted ?
-	    print "($start_i<$i)?\n";
+	    print STDERR "($start_i<$i)?\n";
 	    if ($start_i<$i) {
 		
 		# take note of input words to be inserted
@@ -174,14 +173,14 @@ sub create_xml {
 	    $currently_matching = 1;
 	}
 	
-	print "$action $s $i ($start_s $start_i) $currently_matching";
+	print STDERR "$action $s $i ($start_s $start_i) $currently_matching";
 	if ($action ne "I") {
-	    print " ->";
+	    print STDERR " ->";
 	    foreach my $tt (keys %{${$ALIGN{'s'}}[$s]}) {
-		print " ".$tt;
+		print STDERR " ".$tt;
 	    }
 	}
-	print "\n";
+	print STDERR "\n";
 	$s++ unless $action eq "I";
 	$i++ unless $action eq "D";
 	$ALIGNMENT_I_TO_S{$i} = $s unless $action eq "D";
@@ -190,10 +189,10 @@ sub create_xml {
     }
     
 
-    print $target."\n";
-    foreach (@TARGET_BITMAP) { print $_; } print "\n";
+    print STDERR $target."\n";
+    foreach (@TARGET_BITMAP) { print STDERR $_; } print STDERR "\n";
     foreach (sort keys %FRAME_INPUT) { 
-	print "$_: $FRAME_INPUT{$_}\n";
+	print STDERR "$_: $FRAME_INPUT{$_}\n";
     }
 
     ### STEP 2: BUILD RULE AND FRAME
@@ -274,7 +273,7 @@ sub create_xml {
 	    # add xml (unless change is at the beginning of the sentence
 	    if ($start_t >= 0) {
 		my $target = "";
-		print "for(tt=$start_t;tt<$t+$TARGET_BITMAP[$t]);\n";
+		print STDERR "for(tt=$start_t;tt<$t+$TARGET_BITMAP[$t]);\n";
 		for(my $tt=$start_t;$tt<$t+$TARGET_BITMAP[$t];$tt++) {
 		    $target .= $TARGET[$tt] . " ";
 		}
@@ -285,10 +284,10 @@ sub create_xml {
 	}
 	
 	$frame .= $FRAME_INPUT{$t} if defined $FRAME_INPUT{$t};
-	print "$TARGET_BITMAP[$t] $t ($start_t) $currently_included\n";
+	print STDERR "$TARGET_BITMAP[$t] $t ($start_t) $currently_included\n";
     }
 
-    print $frame."\n-------------------------------------\n";
+    print STDERR $frame."\n-------------------------------------\n";
     return ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv);
 }
 
