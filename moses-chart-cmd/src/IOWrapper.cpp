@@ -165,15 +165,53 @@ void IOWrapper::ResetTranslationId() {
 
 InputType*IOWrapper::GetInput(InputType* inputType)
 {
+  cerr << "GETTING INPUT" << endl;
+
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
       if (x>=m_translationId) m_translationId = x+1;
     } else inputType->SetTranslationId(m_translationId++);
-  //damt hiero : also read context file
-  if(!inputType->ReadContext(*m_contextStream))
-  {
+
+    //damt hiero : also read context file
+    if(!ReadContext(*m_contextStream, inputType))
+    {
         cerr << "Warning : If using DAMT, no context read"<< endl;
+    }
+
+    return inputType;
+  } else {
+    delete inputType;
+    return NULL;
   }
+}
+
+//Damt hiero : read context
+int IOWrapper::ReadContext(std::istream& in, InputType* input)
+{
+    cerr << "READING CONTEXT" << endl;
+
+    string line;
+    if (getline(in, line, '\n').eof())
+    return 0;
+
+    vector<string> words = Tokenize(line, " ");
+    for (size_t i = 0; i < words.size(); i++) {
+    SetPSDContext(Tokenize(words[i], "|"),input);
+    }
+    return 1;
+}
+
+void IOWrapper::SetPSDContext(const std::vector<std::string> &psdFact, InputType* input)
+{
+    cerr << "SETTING PSD CONTEXT" << endl;
+
+    //damt hiero debugging
+    std::vector<std::string> :: const_iterator itr_fact;
+    for(itr_fact = psdFact.begin(); itr_fact != psdFact.end(); itr_fact++)
+    {
+        std::cerr << "Added source factor : " << *itr_fact << std::endl;
+    }
+    input->m_PSDContext.push_back(psdFact);
 }
 
 /***

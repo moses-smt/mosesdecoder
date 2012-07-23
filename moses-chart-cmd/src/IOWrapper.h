@@ -67,7 +67,8 @@ protected:
   std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::string										m_inputFilePath;
-  std::istream									*m_inputStream,
+  std::string m_contextFilePath;
+  std::istream									*m_inputStream;
   //damt hiero
   std::istream *m_contextStream;
   bool													m_surpressSingleBestOutput;
@@ -86,7 +87,8 @@ public:
             , const Moses::FactorMask							&inputFactorUsed
             , size_t												nBestSize
             , const std::string							&nBestFilePath
-            , const std::string							&inputFilePath="");
+            , const std::string							&inputFilePath=""
+            , const std::string &contextFilePath="");
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
@@ -98,11 +100,18 @@ public:
 
   void ResetTranslationId();
 
+  //damt hiero
+  int ReadContext(std::istream&, Moses::InputType *inputType);
+
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;
   }
 
   static void FixPrecision(std::ostream &, size_t size=3);
+
+private :
+  void SetPSDContext(const std::vector<std::string> &psdFact, Moses::InputType *inputType);
+
 };
 
 }

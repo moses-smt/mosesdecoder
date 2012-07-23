@@ -33,6 +33,7 @@ float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
+  //const vector<string> &sourceTopics,
   size_t spanStart,
   size_t spanEnd,
   const vector<Translation> &translations,
@@ -48,6 +49,10 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
   float maxProb = 0;
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
+
+  //vector<string> phraseTopics(sourceTopics.begin() + spanStart, sourceTopics.begin() + spanEnd + 1);
+
+  //if (m_config.GetSourceTopic()) GenerateSourceTopicFeatures(sourceForms, phraseTopics, fc);
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
 
@@ -79,8 +84,9 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
 void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
   const ContextType &context,
-  const string &sourceSide,
-  vector<string> &parentLabels,
+  const std::string &sourceSide,
+  //const vector<string> &sourceTopics,
+  const vector<string> &syntaxLabels,
   size_t spanStart,
   size_t spanEnd,
   const vector<Translation> &translations,
@@ -88,19 +94,20 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
 {
   fc->SetNamespace('s', true);
   if (m_config.GetSourceExternal()) GenerateContextFeatures(context, spanStart, spanEnd, fc);
-       //cerr << "Syntax parent : " << m_config.GetSyntaxParent() << endl;
-  if (m_config.GetSyntaxParent()) GenerateSyntaxFeatures(parentLabels,fc);
 
-  // get words (surface forms) in source phrase
-  vector<string> sourceForms(spanEnd - spanStart + 1);
-  for (size_t i = spanStart; i <= spanEnd; i++)
-    sourceForms[i - spanStart] = context[i][FACTOR_FORM];
+  // tokenize source side of rule
+  vector<string> sourceForms;
+  sourceForms = Tokenize(sourceSide, " ");
 
   float maxProb = 0;
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
+
+  //vector<string> phraseTopics(sourceTopics.begin() + spanStart, sourceTopics.begin() + spanEnd + 1);
+
+  //if (m_config.GetSourceTopic()) GenerateSourceTopicFeatures(sourceForms, phraseTopics, fc);
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
-  if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms,fc);
+  if (m_config.GetSyntaxParent()) GenerateSyntaxFeatures(syntaxLabels,fc);
 
   vector<Translation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
@@ -112,7 +119,6 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
-    if (m_config.GetSourceInternal()) GenerateInternalFeatures(targetForms, fc);
     if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, transIt->m_alignment, fc);
 
     if (m_config.GetMostFrequent() && Equals(transIt->m_scores[P_E_F_INDEX], maxProb))
@@ -129,28 +135,28 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
   fc->FinishExample();
 }
 
-ExtractorConfig::ExtractorConfig()
 
-  : m_paired(false), m_bagOfWords(false), m_sourceExternal(false),
-         m_sourceInternal(false), m_targetInternal(false), m_syntaxParent(false), m_windowSize(0)
+ExtractorConfig::ExtractorConfig()
+: m_paired(false), m_bagOfWords(false), m_sourceExternal(false),
+    m_sourceInternal(false), m_targetInternal(false), m_windowSize(0)
 {}
 
 void ExtractorConfig::Load(const string &configFile)
 {
   ptree pTree;
-
   ini_parser::read_ini(configFile, pTree);
   m_sourceInternal  = pTree.get<bool>("features.source-internal", false);
   m_sourceExternal  = pTree.get<bool>("features.source-external", false);
   m_targetInternal  = pTree.get<bool>("features.target-internal", false);
-  m_syntaxParent    = pTree.get<bool>("features.syntax-parent", false);
   m_sourceIndicator = pTree.get<bool>("features.source-indicator", false);
   m_targetIndicator = pTree.get<bool>("features.target-indicator", false);
   m_paired          = pTree.get<bool>("features.paired", false);
   m_bagOfWords      = pTree.get<bool>("features.bag-of-words", false);
   m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
+  m_binnedScores    = pTree.get<bool>("features.binned-scores", false);
+  m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);
-  m_binnedScores    = pTree.get<bool>("features.binned-scores", 0);
+  m_syntaxParent = pTree.get<bool>("features.syntax-parent", false);
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
@@ -165,6 +171,16 @@ void ExtractorConfig::Load(const string &configFile)
 string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
 {
   return "c^" + SPrint(factor) + "_" + SPrint(index) + "_" + value;
+}
+
+void FeatureExtractor::GenerateSourceTopicFeatures(const vector<string> &wordSpan, const vector<string> &sourceTopics, FeatureConsumer *fc)
+{
+//this grabs the words in the span of the current phrase
+//next, adds topics values string for span
+  vector<string>::const_iterator wordIt;
+  vector<string>::const_iterator topicIt = sourceTopics.begin();
+  for (wordIt = wordSpan.begin(); wordIt != wordSpan.end(); wordIt++, topicIt++)
+    fc->AddFeature("srcTopic^" + *wordIt + "_" + *topicIt);
 }
 
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
@@ -194,15 +210,6 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   for (it = span.begin(); it != span.end(); it++) {
     fc->AddFeature("w^" + *it);
   }
-  //std::cout << "Adding internal feature..." << Join( "_",span) <<  std::endl;
-}
-
-void FeatureExtractor::GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabel, FeatureConsumer *fc)
-{
-  vector<string>::const_iterator it;
-  for (it = syntaxLabel.begin(); it != syntaxLabel.end(); it++) {
-     fc->AddFeature("sp^" + *it);
-  }
 }
 
 void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc)
@@ -227,6 +234,14 @@ void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, Fe
   const vector<size_t>& scoreIDs = m_config.GetScoreIndexes();
   for (it = scoreIDs.begin(); it != scoreIDs.end(); it++)
     fc->AddFeature("sc^" + SPrint<size_t>(*it) + "_" + SPrint((int)log(scores[*it])));
+}
+
+void FeatureExtractor::GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabel, FeatureConsumer *fc)
+{
+  vector<string>::const_iterator it;
+  for (it = syntaxLabel.begin(); it != syntaxLabel.end(); it++) {
+     fc->AddFeature("sp^" + *it);
+  }
 }
 
 } // namespace PSD

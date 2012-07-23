@@ -36,6 +36,7 @@ class ExtractorConfig
     inline bool GetMostFrequent() const   { return m_mostFrequent; }
     inline size_t GetWindowSize() const   { return m_windowSize; }
     inline bool GetBinnedScores() const   { return m_binnedScores; }
+    inline bool GetSourceTopic() const    { return m_sourceTopic; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
 
@@ -46,7 +47,7 @@ class ExtractorConfig
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal,
          m_syntaxParent, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
 
@@ -84,7 +85,7 @@ public:
   void GenerateFeaturesChart(FeatureConsumer *fc,
     const ContextType &context,
     const std::string &sourceSide,
-    std::vector<std::string> &parentLabels,
+    const std::vector<std::string> &parentLabels,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<Translation> &translations,
@@ -100,6 +101,7 @@ private:
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabels, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
+  void GenerateSourceTopicFeatures(const std::vector<std::string> &wordSpan, const std::vector<std::string> &sourceTopics, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
       const std::vector<std::string> &tgtPhrase,
