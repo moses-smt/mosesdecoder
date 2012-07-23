@@ -221,6 +221,18 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
   return true;
 }
 
+int TreeInput::ReadContext(std::istream& in)
+{
+    string line;
+    if (getline(in, line, '\n').eof())
+    {
+        vector<string> words = Tokenize(line, " ");
+        for (size_t i = 0; i < words.size(); i++) {
+         SetPSDContext(Tokenize(words[i], "|"));
+        }
+    }
+}
+
 //! populate this InputType with data from in stream
 int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {

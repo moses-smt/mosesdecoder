@@ -67,7 +67,9 @@ protected:
   std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::string										m_inputFilePath;
-  std::istream									*m_inputStream;
+  std::istream									*m_inputStream,
+  //damt hiero
+  std::istream *m_contextStream;
   bool													m_surpressSingleBestOutput;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;

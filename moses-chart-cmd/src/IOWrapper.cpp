@@ -58,7 +58,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const FactorMask							&inputFactorUsed
                      , size_t												nBestSize
                      , const std::string							&nBestFilePath
-                     , const std::string							&inputFilePath)
+                     , const std::string							&inputFilePath
+                     //damt hiero : context file path
+                     , const std::string &contextFilePath)
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
@@ -70,6 +72,8 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
+  //damt hiero : input containing context
+  ,m_contextFilePath(contextFilePath)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -77,6 +81,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_inputStream = &std::cin;
   } else {
     m_inputStream = new InputFileStream(inputFilePath);
+  }
+
+  if (m_contextFilePath.empty()) {
+    m_contextStream = &std::cin;
+  } else {
+    m_contextStream = new InputFileStream(contextFilePath);
   }
 
   m_surpressSingleBestOutput = false;
@@ -125,6 +135,12 @@ IOWrapper::~IOWrapper()
   if (!m_inputFilePath.empty()) {
     delete m_inputStream;
   }
+
+  //damt hiero
+  if (!m_contextFilePath.empty()) {
+    delete m_contextStream;
+  }
+
   if (!m_surpressSingleBestOutput) {
     // outputting n-best to file, rather than stdout. need to close file and delete obj
     delete m_nBestStream;
@@ -153,11 +169,10 @@ InputType*IOWrapper::GetInput(InputType* inputType)
     if (long x = inputType->GetTranslationId()) {
       if (x>=m_translationId) m_translationId = x+1;
     } else inputType->SetTranslationId(m_translationId++);
-
-    return inputType;
-  } else {
-    delete inputType;
-    return NULL;
+  //damt hiero : also read context file
+  if(!inputType->ReadContext(*m_contextStream))
+  {
+        cerr << "Warning : If using DAMT, no context read"<< endl;
   }
 }
 

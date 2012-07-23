@@ -6,4 +6,4 @@ obj PsdPhraseUtils.o : PsdPhraseUtils.cpp header_paths ;
 
 obj InputTreeRep.o : InputTreeRep.cpp header_paths ;
 
-exe extract-syntax-features : extract-syntax-features.cpp TaggedCorpus.o ..//..//psd//psd ..//trees ..//tables-core ..//InputFileStream ..//SafeGetline.h PsdPhraseUtils.o InputTreeRep.o header_paths ;
+exe extract-syntax-features : extract-syntax-features.cpp TaggedCorpus.o ..//..//psd//psd ..//trees ..//tables-core ..//InputFileStream ..//SafeGetline.h PsdPhraseUtils.o InputTreeRep.o header_paths ..//..//boost_iostreams ;

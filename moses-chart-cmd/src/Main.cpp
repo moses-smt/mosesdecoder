@@ -154,7 +154,6 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
     source = ioWrapper.GetInput(new WordLattice);
     break;
   case TreeInputType:
-    std::cerr << "READING TREE INPUT" << std::endl;
     source = ioWrapper.GetInput(new TreeInput);
     break;
   default:
