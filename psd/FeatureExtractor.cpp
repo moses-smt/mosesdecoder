@@ -33,6 +33,7 @@ float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
+  const vector<string> &sourceTopics,
   size_t spanStart,
   size_t spanEnd,
   const vector<Translation> &translations,
@@ -48,6 +49,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   
   float maxProb = 0;
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
+
+  if (m_config.GetSourceTopic()) GenerateSourceTopicFeatures(sourceTopics, fc);
 
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
@@ -98,6 +101,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
   m_binnedScores    = pTree.get<bool>("features.binned-scores", 0);
+  m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
@@ -112,6 +116,19 @@ void ExtractorConfig::Load(const string &configFile)
 string FeatureExtractor::BuildContextFeature(size_t factor, int index, const string &value)
 {
   return "c^" + SPrint(factor) + "_" + SPrint(index) + "_" + value;
+}
+
+void FeatureExtractor::GenerateSourceTopicFeatures(const vector<string> &wordSpan, const vector<string> &sourceTopics, FeatureConsumer *fc)
+{
+//this grabs the words in the span of the current phrase
+//next, adds topics values string for span
+  vector<string>::const_iterator wordSpan;
+  topic_it = sourceTopics.begin()
+  for (w_it = wordSpan.begin(); w_it != wordSpan.end(); w_it++) {
+    fc->AddFeature("srcTopic^" + *w_it + "_" + *topic_it);
+    topic_it++;
+  }
+
 }
 
 void FeatureExtractor::GenerateContextFeatures(const ContextType &context,

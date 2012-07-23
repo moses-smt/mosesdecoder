@@ -29,6 +29,7 @@ class ExtractorConfig
     inline bool GetMostFrequent() const   { return m_mostFrequent; }
     inline size_t GetWindowSize() const   { return m_windowSize; }
     inline bool GetBinnedScores() const   { return m_binnedScores; }
+    inline bool GetSourceTopic() const    { return m_sourceTopic; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
 
@@ -38,7 +39,8 @@ class ExtractorConfig
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator,
+         m_sourceTopic;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
 
@@ -69,6 +71,7 @@ public:
 
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
+    const vector<string> &sourceTopics,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<Translation> &translations,
