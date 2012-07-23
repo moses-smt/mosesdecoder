@@ -44,9 +44,9 @@ Vocabulary tgtVocab;
 
 int main(int argc,char* argv[]){
   cerr << "PSD phrase-extractor\n\n";
-  if (argc < 8){
+  if (argc < 9){
 		cerr << "error in syntax" << endl;
-    cerr << "usage: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename extractor-config [options]\n";
+    cerr << "usage: extract-psd corpus.psd corpus.factored phrase-table sourcePhraseVocab targetPhraseVocab outputdir/filename extractor-config source-topic-file [options]\n";
     cerr << endl;
     cerr << "Options:" << endl;
     cerr << "\t --ClassifierType vw|megam" << endl;
@@ -60,7 +60,8 @@ int main(int argc,char* argv[]){
   char* &fileNameTgtVoc = argv[5]; // target phrase vocabulary
   string output = string(argv[6]);//output directory (for phrasal models) or root of filename (for global models)
   string configFile = string(argv[7]); // configuration file for the feature extractor
-  for(int i = 8; i < argc; i++){
+  string topicFile = string(argv[8]); // file containing source-word topic distributions
+  for(int i = 9; i < argc; i++){
     if (strcmp(argv[i],"--ClassifierType") == 0){
       char* format = argv[++i];
       if (strcmp(format,"vw") == 0){
@@ -113,6 +114,9 @@ int main(int argc,char* argv[]){
   if (psd.fail()){
     cerr << "ERROR: could not open " << fileNamePsd << endl;
   }
+
+  InputFileStream topics(topicFile);
+  if (topics.fail()) cerr << "ERROR: could not open " << topicFile << endl;
 
   // store word and phrase vocab
   PhraseVocab psdPhraseVoc;
@@ -195,11 +199,13 @@ int main(int argc,char* argv[]){
     size_t tgt_end = Scan<size_t>(token[4].c_str());
 
     char tagSrcLine[LINE_MAX_LENGTH];
+    char topicLine[LINE_MAX_LENGTH];
 
     // go to current sentence
     while(csid < sid){
       if (srcTag.eof()) break;
       SAFE_GETLINE((srcTag),tagSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
+      SAFE_GETLINE((topics), topicLine, LINE_MAX_LENGTH, '\n', __FILE__);
       ++csid;
     }
 
@@ -209,6 +215,7 @@ int main(int argc,char* argv[]){
     }
 
     ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim, config.GetFactors().size());
+    vector<string> sourceTopics = Tokenize(topicLine, " "); 
 
     // get surface forms from factored format
     vector<string> sent;
@@ -268,9 +275,9 @@ int main(int argc,char* argv[]){
             fc = new VWFileTrainConsumer(fileName);
           consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
         }
-        extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, src_start, src_end, translations, losses);
+        extractor.GenerateFeatures(consumers[srcid], factoredSrcLine, sourceTopics, src_start, src_end, translations, losses);
       } else { // GLOBAL model
-        extractor.GenerateFeatures(globalOut, factoredSrcLine, src_start, src_end, translations, losses);
+        extractor.GenerateFeatures(globalOut, factoredSrcLine, sourceTopics, src_start, src_end, translations, losses);
       }
     }
   }

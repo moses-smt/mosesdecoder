@@ -94,7 +94,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
       psdOptions.push_back(GetPSDTranslation(*optIt));
     }
     VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
-    m_extractor->GenerateFeatures(p_consumer, src.m_PSDContext, options[0]->GetStartPos(),
+    m_extractor->GenerateFeatures(p_consumer, src.m_PSDContext, src.m_topics, options[0]->GetStartPos(),
         options[0]->GetEndPos(), psdOptions, losses);
     m_consumerFactory->Release(p_consumer);
 

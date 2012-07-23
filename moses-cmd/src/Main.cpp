@@ -481,16 +481,23 @@ int main(int argc, char** argv)
     InputType* source = NULL;
     size_t lineCount = 0;
     ifstream *contextFile = NULL;
-    if (staticData.GetParam("psd-context").size() > 0) {
+    ifstream *topicFile = NULL;
+    if (staticData.GetParam("psd-context").size() > 0)
       contextFile = new ifstream(staticData.GetParam("psd-context")[0].c_str());
-    }
+
+    if (staticData.GetParam("psd-topics").size() > 0)
+      topicFile = new ifstream(staticData.GetParam("psd-topics")[0].c_str());
+
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       if (contextFile != NULL) {
-        string line; 
-        getline(*contextFile, line);
-        vector<string> words = Tokenize(line, " ");
+        string contextLine, topicLine; 
+        getline(*contextFile, contextLine);        
+        getline(*topicFile, topicLine);        
+        vector<string> words = Tokenize(contextLine, " ");
+        vector<string> topics = Tokenize(topicLine, " ");
         for (size_t i = 0; i < words.size(); i++) {
           source->m_PSDContext.push_back(Tokenize(words[i], "|"));
+          source->m_topics.push_back(topics[i]);
         }
       }
           IFVERBOSE(1) {

@@ -59,6 +59,7 @@ public:
   std::string m_initialTargetPhrase;
   size_t m_frontSpanCoveredLength;
   PSD::ContextType m_PSDContext;
+  vector<string> m_topics;
   // how many words from the beginning are covered
 
   InputType(long translationId = 0);

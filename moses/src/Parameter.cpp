@@ -153,6 +153,7 @@ Parameter::Parameter()
   AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation"); 
   AddParam("psd-index", "psdi", "file with indexes of target phrases"); 
   AddParam("psd-context", "psdc", "input data with rich factored annotation for PSD"); 
+  AddParam("psd-topics", "psdt", "source-side per-word topic distributions for PSD"); 
   AddParam("psd-config", "psdf", "PSD configuration file for feature extraction"); 
 //#endif
 }
