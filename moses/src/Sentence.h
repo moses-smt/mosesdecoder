@@ -65,6 +65,12 @@ public:
 
   virtual void SetPSDContext(const std::vector<std::string> &psdFact)
   {
+        //damt hiero debugging
+        std::vector<std::string> :: const_iterator itr_fact;
+        for(itr_fact = psdFact.begin(); itr_fact != psdFact.end(); itr_fact++)
+        {
+            std::cerr << "Added source factor : " << *itr_fact << std::endl;
+        }
         m_PSDContext.push_back(psdFact);
   }
 

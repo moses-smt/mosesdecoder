@@ -288,15 +288,16 @@ int main(int argc, char* argv[])
     istream *sFileP = &sFile;
     istream *aFileP = &aFile;
 
+
     // open output files
-    string fileNameExtractInv = fileNameExtract + ".inv";
-    extractFile.open(fileNameExtract.c_str());
+    string fileNameExtractInv = fileNameExtract + ".inv" + (options.gzOutput?".gz":"");
+    extractFile.open( (fileNameExtract + (options.gzOutput?".gz":"")).c_str() );
     if (!options.onlyDirectFlag)
         extractFileInv.open(fileNameExtractInv.c_str());
     if (options.outputPsdInfo)
     {
-        string psdFileNameExtract=fileNameExtract+".psd";
-        extractFilePsdInfo.open(psdFileNameExtract.c_str());
+        string psdFileNameExtract=fileNameExtract+".psd"+ (options.gzOutput?".gz":"");
+        extractFilePsdInfo.open(psdFileNameExtract.c_str() );
     }
     // loop through all sentence pairs
     int i=0;

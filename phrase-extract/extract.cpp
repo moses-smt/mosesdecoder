@@ -139,7 +139,7 @@ private:
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
-  
+
 };
 
 int main(int argc, char* argv[])
@@ -184,9 +184,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--OutputPsdInfo") == 0) {
       outputPsd = true;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
-      options.initSentenceIdFlag(true);  
+      options.initSentenceIdFlag(true);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
-      options.initGzOutput(true);  
+      options.initGzOutput(true);
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -361,9 +361,9 @@ int main(int argc, char* argv[])
     if (options.isTranslationFlag()) {
       extractFile.Close();
       extractFileInv.Close();
-      
+
     }
-    if (options.isOrientationFlag()){ 
+    if (options.isOrientationFlag()){
 	extractFileOrientation.Close();
 	}
     if (options.isSentenceIdFlag()) {
