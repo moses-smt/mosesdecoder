@@ -11,3 +11,6 @@ suffix-test: Vocabulary.o SuffixArray.o suffix-test.o
 
 fuzzy-match: Vocabulary.o SuffixArray.o fuzzy-match.o
 	g++ Vocabulary.o SuffixArray.o fuzzy-match.o -o fuzzy-match
+
+fuzzy-match2: Vocabulary.o SuffixArray.o fuzzy-match2.o
+	g++ Vocabulary.o SuffixArray.o fuzzy-match2.o -o fuzzy-match2
