@@ -39,8 +39,7 @@ class ExtractorConfig
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator,
-         m_sourceTopic;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
 
@@ -71,7 +70,6 @@ public:
 
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
-    const std::vector<std::string> &sourceTopics,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<Translation> &translations,

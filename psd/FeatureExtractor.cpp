@@ -33,7 +33,6 @@ float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
-  const vector<string> &sourceTopics,
   size_t spanStart,
   size_t spanEnd,
   const vector<Translation> &translations,
@@ -50,9 +49,6 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   float maxProb = 0;
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
 
-  vector<string> phraseTopics(sourceTopics.begin() + spanStart, sourceTopics.begin() + spanEnd + 1);
-
-  if (m_config.GetSourceTopic()) GenerateSourceTopicFeatures(sourceForms, phraseTopics, fc);
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
 
