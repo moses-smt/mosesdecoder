@@ -84,7 +84,7 @@ Translation CellContextScoreProducer::GetPSDTranslation(const TargetPhrase *tp)
   const AlignmentInfo &alignInfo = tp->GetWordAlignmentInfo();
   AlignmentInfo::const_iterator it;
   for (it = alignInfo.begin(); it != alignInfo.end(); it++)
-    cerr << "Added Alignment : " << (*it) << endl;
+    //cerr << "Added Alignment : " << (*it) << endl;
     psdOpt.m_alignment.insert(*it);
 
   // scores

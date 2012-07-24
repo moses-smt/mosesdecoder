@@ -188,6 +188,7 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
             {
                 CHECK((*itr_targets).size() > 1);
                 string indexString = (*itr_targets).substr(1,1);
+                cerr << "INDEX STRING" << indexString << endl;
                 targetAligns.push_back(indexString);
             }
       }
@@ -202,6 +203,7 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
           {
               if(point.back()==(*itr_targets)) isNonTerm = true;
           }
+          cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
           if(!isNonTerm) translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
         }
       }
