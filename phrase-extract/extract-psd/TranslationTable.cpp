@@ -22,7 +22,7 @@ TranslationTable::TranslationTable(const string &fileName)
   string line;
   while (getline(in, line)) {
     vector<string> columns = TokenizeMultiCharSeparator(line, " ||| ");
-    AddPhrasePair(columns[0], columns[1], GetAlignment(columns[4]), GetScores(columns[3]));
+    AddPhrasePair(columns[0], columns[1], GetScores(columns[2]), GetAlignment(columns[3]));
   }
 }
 
@@ -61,7 +61,7 @@ const vector<Translation> &TranslationTable::GetTranslations(const string &srcPh
 //
 
 void TranslationTable::AddPhrasePair(const std::string &src, const std::string &tgt,
-    const PSD::AlignmentType &align, const std::vector<float> &scores)
+    const std::vector<float> &scores, const PSD::AlignmentType &align)
 {
   pair<DictionaryType::iterator, bool> ret = m_ttable.insert(make_pair(src, vector<Translation>()));
   vector<Translation> &translations = ret.first->second;

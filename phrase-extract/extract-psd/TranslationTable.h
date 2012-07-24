@@ -29,7 +29,7 @@ private:
   PSD::TargetIndexType m_targetIndex;
 
   void AddPhrasePair(const std::string &src, const std::string &tgt,
-      const PSD::AlignmentType &align, const std::vector<float> &scores);
+      const std::vector<float> &scores, const PSD::AlignmentType &align); 
   std::vector<float> GetScores(const std::string &scoreStr);
   PSD::AlignmentType GetAlignment(const std::string &alignStr);
 

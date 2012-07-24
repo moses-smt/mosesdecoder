@@ -76,7 +76,15 @@ int main(int argc, char**argv)
     exit(1);
   }
   InputFileStream psd(argv[1]);
+  if (! psd.good()) {
+    cerr << "error: Failed to open " << argv[1] << endl;
+    exit(1);
+  }
   InputFileStream corpus(argv[2]);
+  if (! corpus.good()) {
+    cerr << "error: Failed to open " << argv[2] << endl;
+    exit(1);
+  }
   TranslationTable ttable(argv[3]);
   ExtractorConfig config;
   config.Load(argv[4]);
@@ -120,6 +128,8 @@ int main(int argc, char**argv)
       
       // set new source phrase, context, translations and losses
       srcPhrase = psdLine.GetSrcPhrase(); 
+      spanStart = psdLine.GetSrcStart();
+      spanEnd = psdLine.GetSrcEnd();
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
       translations = ttable.GetTranslations(srcPhrase);
       losses.clear();
@@ -131,7 +141,7 @@ int main(int argc, char**argv)
     if (foundTgt) {
       // add correct translation (i.e., set its loss to 0)
       for (size_t i = 0; i < translations.size(); i++) {
-        if (translations[0].m_index == tgtPhraseID) {
+        if (translations[i].m_index == tgtPhraseID) {
           losses[i] = 0;
           break;
         }
@@ -142,7 +152,8 @@ int main(int argc, char**argv)
   }
   
   // generate features for the last source phrase
-  extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+  if (srcPhrase.length() != 0) // happens when source is empty
+    extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
 
   // output statistics about filtering
   cerr << "Filtered phrases: source " << srcFiltered << ", target " << tgtFiltered << endl;

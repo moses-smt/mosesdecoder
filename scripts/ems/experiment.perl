@@ -1754,7 +1754,7 @@ sub define_training_psd_model {
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
   die "ERROR: no psd_config" unless defined($psd_config);
-  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $out.train $out.index $psd_config";
+  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_config $out.train $out.index";
   $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out.model";
 
   &create_step($step_id, $cmd);
