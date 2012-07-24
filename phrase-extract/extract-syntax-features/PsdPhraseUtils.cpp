@@ -181,6 +181,8 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
       vector<string> :: iterator itr_targets;
       std::string nonTermString = "X";
 
+      cerr << "TARGET STRING : " << fields[1] << endl;
+
       for(itr_targets = targetToken.begin();itr_targets != targetToken.end(); itr_targets++)
       {
             cerr << "TARGET TOKEN : " << *itr_targets << endl;
