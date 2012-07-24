@@ -2,12 +2,13 @@
 #define _TranslationTable_h_
 
 #include "tables-core.h"
+#include "FeatureExtractor.h"
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
 
-typedef std::map<string, std::vector<PSD::Translation> > DictionaryType;
+typedef std::map<std::string, std::vector<PSD::Translation> > DictionaryType;
 
 class TranslationTable
 {
@@ -21,16 +22,19 @@ public:
 
   // get all translations of source phrase, assumes that srcPhrase is known 
   // (throws logic_error otherwise)
-  const std::vector<PSD::Translation> &GetTranslations(const string &srcPhrase);
+  const std::vector<PSD::Translation> &GetTranslations(const std::string &srcPhrase);
 
 private:
   DictionaryType m_ttable;
   PSD::TargetIndexType m_targetIndex;
 
   void AddPhrasePair(const std::string &src, const std::string &tgt,
-      const PSD::AlignmentType &align, const std::vector<float> &scores);
+      const std::vector<float> &scores, const PSD::AlignmentType &align); 
   std::vector<float> GetScores(const std::string &scoreStr);
   PSD::AlignmentType GetAlignment(const std::string &alignStr);
+
+  // add phrase to index (if it does not exist yet), return its ID
+  size_t AddTargetPhrase(const std::string &phrase);
 };
 
 #endif // _TranslationTable_h_
