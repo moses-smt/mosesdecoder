@@ -68,13 +68,56 @@ bool BilingualDynSuffixArray::Load(
   CacheFreqWords();
 	return true;
 }
+  
+bool BilingualDynSuffixArray::LoadTM(
+                                   const std::vector<FactorType>& inputFactors,
+                                   const std::vector<FactorType>& outputFactors,
+                                   std::string source, std::string target, std::string alignments, 
+                                   const std::vector<float> &weight)
+{
+  m_inputFactors = inputFactors;
+  m_outputFactors = outputFactors;
+  
+  m_scoreCmp = new ScoresComp(weight);
+  InputFileStream sourceStrme(source);
+  InputFileStream targetStrme(target);
+
+  cerr << "Loading target corpus...\n";	
+  LoadCorpus(targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
+  
+  cerr << "Loading source corpus...\n";	
+  LoadCorpus(sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
+  
+  CHECK(m_srcSntBreaks.size() == m_trgSntBreaks.size());
+  
+  // build suffix arrays and auxilliary arrays
+  cerr << "Building Source Suffix Array...\n"; 
+  m_srcSA = new DynSuffixArray(m_srcCorpus); 
+  if(!m_srcSA) return false;
+  cerr << "Building Target Suffix Array...\n"; 
+  //m_trgSA = new DynSuffixArray(m_trgCorpus); 
+  //if(!m_trgSA) return false;
+  cerr << "\t(Skipped. Not used)\n";
+  
+  InputFileStream alignStrme(alignments);
+  cerr << "Loading Alignment File...\n"; 
+  LoadRawAlignments(alignStrme);
+  //LoadAlignments(alignStrme);
+  cerr << "Building frequent word cache...\n";
+  CacheFreqWords();
+  return true;
+  
+}
 
 int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align) 
 {
 	// stores the alignments in the raw file format 
 	std::string line;
 	std::vector<int> vtmp;
+  int lineNum = 1;
 	while(getline(align, line)) {
+    if (lineNum % 10000 == 0)
+      cerr << lineNum;
 		Utils::splitToInt(line, vtmp, "- ");
 		CHECK(vtmp.size() % 2 == 0);
 		std::vector<short> vAlgn;	// store as short ints for memory
@@ -83,6 +126,7 @@ int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align)
             vAlgn.push_back(short(*itr));
         }
 		m_rawAlignments.push_back(vAlgn);
+    ++lineNum;
 	}
 	return m_rawAlignments.size();
 }

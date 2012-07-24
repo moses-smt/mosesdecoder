@@ -34,6 +34,7 @@
 #include "WordsRange.h"
 #include "UserMessage.h"
 #include "CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
+#include "BilingualDynSuffixArray.h"
 
 using namespace std;
 
@@ -44,7 +45,7 @@ namespace Moses
   : PhraseDictionary(numScoreComponents, feature) 
   {
     const StaticData &staticData = StaticData::Instance();
-    CHECK(staticData.ThreadCount() == 1);
+    CHECK(staticData.ThreadCount() == 1);    
   }
 
   bool PhraseDictionaryTMExtract::Load(const std::vector<FactorType> &input
@@ -66,6 +67,9 @@ namespace Moses
     cerr << "initStr=" << initStr << endl;
     m_config = Tokenize(initStr, ";");
     assert(m_config.size() == 4);
+
+    BilingualDynSuffixArray *sa = new BilingualDynSuffixArray();
+    sa->LoadTM(input, output, m_config[0], m_config[1], m_config[2], weight);
 
     return true;
   }
