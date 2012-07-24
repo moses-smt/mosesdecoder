@@ -294,6 +294,7 @@ int main(int argc,char* argv[]){
     vector<Translation> translations;
     PhraseTranslations::const_iterator transIt;
     for (transIt = transTable.lower_bound(srcid); transIt != transTable.upper_bound(srcid); transIt++) {
+      cerr << "INSERTING TRANSLATION : " << transIt->second.m_index << endl;
       translations.push_back(transIt->second);
       losses.push_back(labelid == transIt->second.m_index ? 0 : 1);
     }

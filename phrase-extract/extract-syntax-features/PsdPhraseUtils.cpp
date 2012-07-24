@@ -203,8 +203,11 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
           {
               if(point.back()==(*itr_targets)) isNonTerm = true;
           }
-          cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
-          if(!isNonTerm) translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
+          if(!isNonTerm)
+          {
+              cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
+              translation.m_alignment.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
+          }
         }
       }
     }
