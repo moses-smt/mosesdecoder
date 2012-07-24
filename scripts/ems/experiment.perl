@@ -1771,7 +1771,6 @@ sub define_training_psd_model {
   die "ERROR: no psd_config" unless defined($psd_config);
   my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5";
   $cmd .= " && zcat $out.train | $vw $vw_opts --cache_file $out.vwcache -f $out.model";
-  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_config $out.train $out.index";
 
   &create_step($step_id, $cmd);
 }
