@@ -183,6 +183,8 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
 
       for(itr_targets = targetToken.begin();itr_targets != targetToken.end(); itr_targets++)
       {
+            cerr << "TARGET TOKEN : " << *itr_targets << endl;
+
             size_t found = (*itr_targets).find(nonTermString);
             if(found != string::npos)
             {
