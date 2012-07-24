@@ -203,6 +203,7 @@ bool readRules(const char *ptFile, Vocabulary &srcWordVocab, Vocabulary &tgtWord
         bool isNonTerm = false;
         if (point.size() == 2) {
           //damt_hiero : NOTE : maybe inefficient change if hurts performance
+          //WRONG : TODO : REMOVE THE i-th index STRING INDEX
           for(itr_targets = targetAligns.begin(); itr_targets != targetAligns.end(); itr_targets++)
           {
               if(point.back()==(*itr_targets)) isNonTerm = true;

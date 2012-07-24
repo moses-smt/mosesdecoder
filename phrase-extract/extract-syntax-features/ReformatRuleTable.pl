@@ -89,10 +89,30 @@ while(<STDIN>){
     #$enPhrases{$e}++;
 }
 
+sub CountNonTerminals
+{
+    my @e = @{ $_[0] };
+    my $countNonTerm = 0;
+
+ 	foreach(@e)
+	{
+		if($_ eq "[X][X]")
+		{
+		    $countNonTerm++;
+		}
+	}
+	return $countNonTerm;  
+}
+
 sub CreateAlignedTarget
 {
 	my @e = @{ $_[0] };
 	my @a = @{ $_[1] }; 
+
+	my $countNonTerms = &CountNonTerminals(\@e);
+	#print "COUNT NON TERMS : $countNonTerms \n";
+
+	my @nonTermAlign;
 
 	my @newEn;	
 
@@ -101,6 +121,7 @@ sub CreateAlignedTarget
 	my $sourcePos = 0;
 	foreach(@a)
 	{
+	        last if ($sourcePos == $countNonTerms); 
 		my @align = split("-",$_);
 		splice(@nonTermMap,pop(@align),0,$sourcePos++);	
 	}	
