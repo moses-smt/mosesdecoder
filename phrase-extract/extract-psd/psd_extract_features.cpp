@@ -27,8 +27,8 @@ public:
     m_srcPhrase = columns[5];
     m_tgtPhrase = columns[6];
   }
-  string GetSrcPhrase() { return m_srcPhrase; }
-  string GetTgtPhrase() { return m_tgtPhrase; }
+  const string &GetSrcPhrase() { return m_srcPhrase; }
+  const string &GetTgtPhrase() { return m_tgtPhrase; }
   size_t GetSentID()    { return m_sentID; }
   size_t GetSrcStart()  { return m_srcStart; }
   size_t GetSrcEnd()    { return m_srcEnd; }
