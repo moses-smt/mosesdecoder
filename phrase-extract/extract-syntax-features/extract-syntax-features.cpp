@@ -221,8 +221,6 @@ int main(int argc,char* argv[]){
     char tagSrcLine[LINE_MAX_LENGTH];
     char parseSrcLine[LINE_MAX_LENGTH];
 
-
-
     // go to current sentence
     // hiero : current sentence and current parse
     while(csid < sid){

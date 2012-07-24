@@ -38,6 +38,25 @@ InputTreeRep::InputTreeRep(size_t sourceSize)
   }
 }
 
+vector<SyntaxLabel> InputTreeRep::GetParent(size_t startPos, size_t endPos)
+{
+    if(startPos == 0)
+    {
+        if(endPos == (m_sourceChart.front().size() -1) )
+        {
+            return GetLabels[startPos][endPos];
+        }
+        else
+        {
+            return GetLabels[startPos][endPos+1];
+        }
+    }
+    else
+    {
+        return GetLabels[startPos-1][endPos+1];
+    }
+}
+
 //A copy of the same method in InputTree
 bool InputTreeRep::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutputForTrain> &sourceLabels)
 {

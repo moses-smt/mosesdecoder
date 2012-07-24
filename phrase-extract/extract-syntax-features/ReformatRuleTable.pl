@@ -79,7 +79,7 @@ while(<STDIN>){
     my $s = join(" ",@s);
     my $r = join(" ",@r);
 
-    print "$f ||| $e ||| $a ||| $s ||| $r \n"
+    print "$f ||| $e ||| $s ||| $a ||| $r \n"
     #For hiero : add alignments to target phrases
     #$frPhrases{$f}++;
     #print "Align augmented line \n"; 

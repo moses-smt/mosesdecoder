@@ -58,6 +58,8 @@ public:
     return m_sourceChart[startPos][endPos - startPos];
   }
 
+  std::vector<SyntaxLabel> GetParent(size_t startPos, size_t endPos);
+
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutputForTrain> &sourceLabelss);
 
 public:
