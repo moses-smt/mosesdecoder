@@ -53,7 +53,7 @@ void createIdForRule(int id, string word, PHRASE &p)
                 }
                 else
                 {
-                    cerr << "Warning: OOV word " << word << endl;
+                    cerr << " Warning: OOV word : " << word << endl;
                     p.clear();
                 }
         }

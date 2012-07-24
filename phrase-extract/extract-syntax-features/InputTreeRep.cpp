@@ -44,16 +44,16 @@ vector<SyntaxLabel> InputTreeRep::GetParent(size_t startPos, size_t endPos)
     {
         if(endPos == (m_sourceChart.front().size() -1) )
         {
-            return GetLabels[startPos][endPos];
+            return GetLabels(startPos,endPos);
         }
         else
         {
-            return GetLabels[startPos][endPos+1];
+            return GetLabels(startPos,endPos+1);
         }
     }
     else
     {
-        return GetLabels[startPos-1][endPos+1];
+        return GetLabels(startPos-1,endPos+1);
     }
 }
 

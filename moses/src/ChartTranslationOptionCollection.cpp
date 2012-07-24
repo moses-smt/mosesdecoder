@@ -113,8 +113,6 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         {
             //get lhs of rule
             CHECK((**itr_targets).GetSourcePhrase() != NULL);
-            VERBOSE(5, "Source Side of rule : " << (*(**itr_targets).GetSourcePhrase()) << endl);
-            VERBOSE(5, "Target Side of rule : " << (**itr_targets) << endl);
 
             for(int i=0; i<(**itr_targets).GetSourcePhrase()->GetSize();i++)
             {
@@ -124,6 +122,12 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                     sourceSide += " ";
                 }
             }
+
+            //Add parent to source
+            std::string parentNonTerm = "[X]";
+            sourceSide += " ";
+            sourceSide += parentNonTerm;
+
             //Append alignments to non-terminals
             std::vector<size_t> ntim = (*itr_targets)->GetAlignmentInfo().GetNonTermIndexMap();
             int wordCounter = 0;
@@ -159,6 +163,11 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 }
                 wordCounter++;
             }
+
+            //add parent label to target
+            targetRepresentation += " ";
+            targetRepresentation += parentNonTerm;
+
             VERBOSE(6, "Strings put in rule map : " << sourceSide << "::" << targetRepresentation << endl);
             ruleMap.AddRule(sourceSide,targetRepresentation);
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));

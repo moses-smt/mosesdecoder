@@ -84,6 +84,7 @@ Translation CellContextScoreProducer::GetPSDTranslation(const TargetPhrase *tp)
   const AlignmentInfo &alignInfo = tp->GetWordAlignmentInfo();
   AlignmentInfo::const_iterator it;
   for (it = alignInfo.begin(); it != alignInfo.end(); it++)
+    cerr << "Added Alignment : " << (*it) << endl;
     psdOpt.m_alignment.insert(*it);
 
   // scores
@@ -147,8 +148,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
           psdOptions.push_back(GetPSDTranslation(itr_rep->second));
         }
 
-
-        VERBOSE(5, "Extracting features features for source : " << sourceSide << endl);
+        VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
+        VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
         //damt hiero : extract syntax features
         vector<std::string> syntaxFeats;
         NonTerminalSet labelSet = source.GetLabelSet(startSpan,endSpan);
@@ -182,12 +183,14 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
         VERBOSE(5, "Obtained prediction : " << sourceSide << endl);
         *lossIt = exp(-*lossIt);
+        VERBOSE(5, "Obtained score : " <<  *lossIt  << endl);
         //put the score into scores
         scores.push_back(ScoreFactory(*lossIt));
         sum += *lossIt;
         }
     }
     else {
+    std:cerr << "WARNING : TARGET OOV"<< std::endl;
     for (size_t i = 0; i < targetRepresentations->size(); i++) {
       scores.push_back(ScoreFactory(0));}
     }
