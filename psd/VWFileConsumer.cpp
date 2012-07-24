@@ -43,7 +43,7 @@ void VWFileTrainConsumer::AddFeature(const std::string &name, float value)
 void VWFileTrainConsumer::FinishExample()
 {
   WriteBuffer();
-  m_bfos << endl;
+  m_bfos << "\n";
 }
 
 void VWFileTrainConsumer::Finish()
@@ -68,7 +68,7 @@ float VWFileTrainConsumer::Predict(const std::string &label)
 
 void VWFileTrainConsumer::WriteBuffer()
 {
-  m_bfos << Join(" ", m_outputBuffer.begin(), m_outputBuffer.end()) << endl;
+  m_bfos << Join(" ", m_outputBuffer.begin(), m_outputBuffer.end()) << "\n";
   m_outputBuffer.clear();
 }
 
