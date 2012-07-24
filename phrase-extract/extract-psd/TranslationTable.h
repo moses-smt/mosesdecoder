@@ -2,12 +2,13 @@
 #define _TranslationTable_h_
 
 #include "tables-core.h"
+#include "FeatureExtractor.h"
 #include <vector>
 #include <string>
 #include <map>
 #include <set>
 
-typedef std::map<string, std::vector<PSD::Translation> > DictionaryType;
+typedef std::map<std::string, std::vector<PSD::Translation> > DictionaryType;
 
 class TranslationTable
 {
@@ -21,7 +22,7 @@ public:
 
   // get all translations of source phrase, assumes that srcPhrase is known 
   // (throws logic_error otherwise)
-  const std::vector<PSD::Translation> &GetTranslations(const string &srcPhrase);
+  const std::vector<PSD::Translation> &GetTranslations(const std::string &srcPhrase);
 
 private:
   DictionaryType m_ttable;

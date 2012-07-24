@@ -1,4 +1,4 @@
-#include <iosteam>
+#include <iostream>
 #include <vector>
 #include <string>
 #include <cstdlib>
@@ -48,7 +48,7 @@ void WritePhraseIndex(const TargetIndexType &index, const string &outFile)
   }
   for (size_t i = 0; i < index.size(); i++)
     out << index.right.find(i)->second << "\n";
-  out.close();
+  out.Close();
 }
 
 ContextType ReadFactoredLine(const string &line, size_t factorCount)
@@ -67,7 +67,7 @@ ContextType ReadFactoredLine(const string &line, size_t factorCount)
   return out;
 }
 
-int main(size_t argc, const char**argv)
+int main(int argc, char**argv)
 {  
   if (argc != 7) {
     cerr << "error: wrong arguments" << endl;
@@ -88,7 +88,7 @@ int main(size_t argc, const char**argv)
   string srcPhrase = "";
   ContextType context;
   vector<float> losses;
-  const vector<Translation> &translations;
+  vector<Translation> translations;
   size_t spanStart = 0;
   size_t spanEnd = 0;
   size_t sentID = 0;
@@ -115,7 +115,7 @@ int main(size_t argc, const char**argv)
     if (psdLine.GetSrcPhrase() != srcPhrase) {
       // generate features
       if (srcPhrase.length() != 0) // avoid the initial state
-        extractor.GenerateFeatures(context, spanStart, spanEnd, translations, losses);
+        extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
       
       // set new source phrase, context, translations and losses
       srcPhrase = psdLine.GetSrcPhrase(); 
@@ -141,7 +141,7 @@ int main(size_t argc, const char**argv)
   }
   
   // generate features for the last source phrase
-  extractor.GenerateFeatures(consumer, context, spanStart, spanEnd, translations, losses);
+  extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
 
   // output statistics about filtering
   cerr << "Filtered phrases: source " << srcFiltered << ", target " << tgtFiltered << endl;

@@ -38,10 +38,10 @@ bool TranslationTable::SrcExists(const string &phrase)
 
 size_t TranslationTable::GetTgtPhraseID(const string &phrase, /* out */ bool *found)
 {
-  found = false;
+  *found = false;
   TargetIndexType::left_map::const_iterator it = m_targetIndex.left.find(phrase);
   if (it != m_targetIndex.left.end()) {
-    found = true;
+    *found = true;
     return it->second;
   } else {
     return 0; // user must test value of found!
@@ -93,13 +93,13 @@ PSD::AlignmentType TranslationTable::GetAlignment(const std::string &alignStr)
   return out;
 }
 
-size_t TranslationType::AddTargetPhrase(const string &phrase)
+size_t TranslationTable::AddTargetPhrase(const string &phrase)
 {
   bool found;
-  size_t id = GetTgtPhraseID(tgt, &found);
+  size_t id = GetTgtPhraseID(phrase, &found);
   if (! found) {
     id = m_targetIndex.size();
-    m_targetIndex.left.insert(DictionaryType::value_type(tgt, id));
+    m_targetIndex.left.insert(TargetIndexType::left_map::value_type(phrase, id));
   }
   return id;
 }

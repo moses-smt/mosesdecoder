@@ -1,5 +1,9 @@
 obj InputFileStream.o : InputFileStream.cpp : <include>. ;
 alias InputFileStream : InputFileStream.o ..//z ;
+
+obj OutputFileStream.o : OutputFileStream.cpp : <include>. ;
+alias OutputFileStream : OutputFileStream.o ..//z ;
+
 alias tables-core : tables-core.o ;
 
 obj tables-core.o : tables-core.cpp : <include>. ;
