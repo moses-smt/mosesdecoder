@@ -1,0 +1,206 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E806DCC15BED3AC001914A2 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */; };
+		1E806DCE15BED3BC001914A2 /* fuzzy-match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */; };
+		1E806DD115BED3D4001914A2 /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1ED87EEB15BED331003E47AA /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocabulary.cpp; path = "../tm-mt-integration/Vocabulary.cpp"; sourceTree = "<group>"; };
+		1E806DCB15BED3AC001914A2 /* Vocabulary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocabulary.h; path = "../tm-mt-integration/Vocabulary.h"; sourceTree = "<group>"; };
+		1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "fuzzy-match.cpp"; path = "../tm-mt-integration/fuzzy-match.cpp"; sourceTree = "<group>"; };
+		1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SuffixArray.cpp; path = "../tm-mt-integration/SuffixArray.cpp"; sourceTree = "<group>"; };
+		1E806DD015BED3D4001914A2 /* SuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SuffixArray.h; path = "../tm-mt-integration/SuffixArray.h"; sourceTree = "<group>"; };
+		1ED87EED15BED331003E47AA /* fuzzy-match */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "fuzzy-match"; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1ED87EEA15BED331003E47AA /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1ED87EE215BED32F003E47AA = {
+			isa = PBXGroup;
+			children = (
+				1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */,
+				1E806DD015BED3D4001914A2 /* SuffixArray.h */,
+				1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */,
+				1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */,
+				1E806DCB15BED3AC001914A2 /* Vocabulary.h */,
+				1ED87EEE15BED331003E47AA /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1ED87EEE15BED331003E47AA /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1ED87EED15BED331003E47AA /* fuzzy-match */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1ED87EEC15BED331003E47AA /* fuzzy-match */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1ED87EF715BED331003E47AA /* Build configuration list for PBXNativeTarget "fuzzy-match" */;
+			buildPhases = (
+				1ED87EE915BED331003E47AA /* Sources */,
+				1ED87EEA15BED331003E47AA /* Frameworks */,
+				1ED87EEB15BED331003E47AA /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "fuzzy-match";
+			productName = "fuzzy-match";
+			productReference = 1ED87EED15BED331003E47AA /* fuzzy-match */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1ED87EE415BED32F003E47AA /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1ED87EE715BED32F003E47AA /* Build configuration list for PBXProject "fuzzy-match" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1ED87EE215BED32F003E47AA;
+			productRefGroup = 1ED87EEE15BED331003E47AA /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1ED87EEC15BED331003E47AA /* fuzzy-match */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1ED87EE915BED331003E47AA /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E806DCC15BED3AC001914A2 /* Vocabulary.cpp in Sources */,
+				1E806DCE15BED3BC001914A2 /* fuzzy-match.cpp in Sources */,
+				1E806DD115BED3D4001914A2 /* SuffixArray.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1ED87EF515BED331003E47AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1ED87EF615BED331003E47AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1ED87EF815BED331003E47AA /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1ED87EF915BED331003E47AA /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1ED87EE715BED32F003E47AA /* Build configuration list for PBXProject "fuzzy-match" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1ED87EF515BED331003E47AA /* Debug */,
+				1ED87EF615BED331003E47AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1ED87EF715BED331003E47AA /* Build configuration list for PBXNativeTarget "fuzzy-match" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1ED87EF815BED331003E47AA /* Debug */,
+				1ED87EF915BED331003E47AA /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1ED87EE415BED32F003E47AA /* Project object */;
+}
