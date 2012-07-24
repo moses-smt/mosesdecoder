@@ -98,7 +98,7 @@ size_t TranslationTable::AddTargetPhrase(const string &phrase)
   bool found;
   size_t id = GetTgtPhraseID(phrase, &found);
   if (! found) {
-    id = m_targetIndex.size();
+    id = m_targetIndex.size() + 1; // index is one-based because of VW
     m_targetIndex.left.insert(TargetIndexType::left_map::value_type(phrase, id));
   }
   return id;
