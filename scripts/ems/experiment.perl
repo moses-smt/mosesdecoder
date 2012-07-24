@@ -1740,22 +1740,35 @@ sub define_training_build_ttable {
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    if ((defined($word_report) && $word_report eq "yes") ||
-	(defined($word_alignment) && $word_alignment eq "yes")) {
+## PSD always requires the word alignment
+#    if ((defined($word_report) && $word_report eq "yes") ||
+#	(defined($word_alignment) && $word_alignment eq "yes")) {
       $cmd .= "-phrase-word-alignment ";
-    }
+#    }
 
     &create_step($step_id,$cmd);
 }
 
 sub define_training_psd_model {
   my $step_id = shift;
-  my ($out, $phrase_table, $extract, $corpus, $psd_config) = &get_output_and_input($step_id);
+  my ($out, $phrase_table, $extract, $src_corpus, $psd_config) = &get_output_and_input($step_id);
+  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+
+  die "no psd_config" unless defined($psd_config);
+
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
+  my $cmd = "$psd_extractor $extract.psd.gz $src_corpus $phrase_table.gz $psd_config $out.train.gz $out.index";
+
+  my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+  if ($hierarchical) {
+      $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd-chart";
+      # TODO: fix .psd.parse.xml problem below, should be .parse.xml
+      $cmd = "$psd_extractor $extract.psd.gz $src_corpus $src_corpus.parse.xml $phrase_table.psd.gz $psd_config $out.train.gz";
+  }
+
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
-  die "ERROR: no psd_config" unless defined($psd_config);
-  my $cmd = "$psd_extractor $extract.psd.gz $corpus $phrase_table.gz $psd_config $out.train $out.index";
-  $cmd .= " && cat $out.train | $vw -c -k --passes 100 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5 -f $out.model";
+  $cmd .= " && zcat $out.train | $vw --cache_file vw_cache -k --passes 10 --csoaa_ldf m --hash all --noconstant --exact_adaptive_norm --power_t 0.5 -q st -f $out";
 
   &create_step($step_id, $cmd);
 }
