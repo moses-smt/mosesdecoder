@@ -491,6 +491,7 @@ int main(int argc, char** argv)
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       if (contextFile != NULL) {
         string contextLine;
+        getline(*contextFile, contextLine);
         vector<string> words = Tokenize(contextLine, " ");
         for (size_t i = 0; i < words.size(); i++) {
           source->m_PSDContext.push_back(Tokenize(words[i], "|"));
@@ -498,6 +499,7 @@ int main(int argc, char** argv)
       }
       if (topicFile != NULL) {
         string topicLine; 
+        getline(*topicFile, topicLine);
         vector<string> topics = Tokenize(topicLine, " ");
         for (size_t i = 0; i < topics.size(); i++) {
           source->m_topics.push_back(topics[i]);
