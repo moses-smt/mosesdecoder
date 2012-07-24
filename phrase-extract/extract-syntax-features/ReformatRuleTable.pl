@@ -123,7 +123,8 @@ sub CreateAlignedTarget
 	{
 	        last if ($sourcePos == $countNonTerms); 
 		my @align = split("-",$_);
-		splice(@nonTermMap,pop(@align),0,$sourcePos++);	
+		splice(@nonTermMap,pop(@align),0,shift(@align));	
+		$sourcePos++;
 	}	
 
 	my $loopCounter = 0;
