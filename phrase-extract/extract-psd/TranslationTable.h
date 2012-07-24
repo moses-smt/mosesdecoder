@@ -31,6 +31,9 @@ private:
       const PSD::AlignmentType &align, const std::vector<float> &scores);
   std::vector<float> GetScores(const std::string &scoreStr);
   PSD::AlignmentType GetAlignment(const std::string &alignStr);
+
+  // add phrase to index (if it does not exist yet), return its ID
+  size_t AddTargetPhrase(const std::string &phrase);
 };
 
 #endif // _TranslationTable_h_
