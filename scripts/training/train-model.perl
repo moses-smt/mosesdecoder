@@ -1440,7 +1440,8 @@ sub extract_phrase {
       $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
-    $cmd .= " --GZOutput ";
+    warn "WARNING, not using GZOutput flag, because hiero extract does not support it";
+    #$cmd .= " --GZOutput ";
     if ($_EXTRACT_PSD) {
       $cmd .= " --OutputPsdInfo ";
     }

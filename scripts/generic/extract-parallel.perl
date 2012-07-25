@@ -111,6 +111,14 @@ foreach (@children) {
 	waitpid($_, 0);
 }
 
+
+# hack because gzip output flag is not implemented in damt_hiero
+$cmd = "gzip -9 $TMPDIR/extract*";
+warn "WARNING: trying to gzip extract files because gzip output is broken\n";
+print STDERR $cmd, "\n";
+`$cmd`;
+
+
 # merge
 my $is_osx = ($^O eq "darwin");
 my $catCmd = $is_osx?"gunzip -c ":"zcat ";
