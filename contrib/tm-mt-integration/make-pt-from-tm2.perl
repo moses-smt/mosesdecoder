@@ -25,16 +25,11 @@ $TMPDIR = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/out/tmp.
 my $match_file  = "$TMPDIR/match";
 
 # suffix array creation and extraction
-#$cmd = "$RealBin/fuzzy-match --multiple $in_file  $source_file > $match_file";
-#`$cmd`;
+$cmd = "$RealBin/fuzzy-match --multiple $in_file  $source_file > $match_file";
+`$cmd`;
 
 # make into xml and pt
 my $out_file = "$TMPDIR/ac-test.input.xml.4.uniq.multi.tuning";
-
-my @INPUT = `cat $in_file`; chop(@INPUT);
-my @ALL_SOURCE = `cat $source_file`; chop(@ALL_SOURCE);
-my @ALL_TARGET = `cat $target_file`; chop(@ALL_TARGET);
-my @ALL_ALIGNMENT = `cat $alignment_file`; chop(@ALL_ALIGNMENT);
 
 open(MATCH,$match_file);
 open(FRAME,">$out_file");

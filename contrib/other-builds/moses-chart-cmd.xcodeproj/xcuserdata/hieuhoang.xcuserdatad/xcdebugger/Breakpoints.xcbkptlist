@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Bucket
+   type = "1"
+   version = "1.0">
+   <FileBreakpoints>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/RuleTable/PhraseDictionaryTMExtract.cpp"
+         timestampString = "364753205.405679"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "71"
+         endingLineNumber = "71"
+         landmarkName = "PhraseDictionaryTMExtract::Load(const std::vector&lt;FactorType&gt; &amp;input , const std::vector&lt;FactorType&gt; &amp;output , const std::string &amp;initStr , const std::vector&lt;float&gt; &amp;weight , size_t tableLimit, const LMList&amp; languageModels, const WordPenaltyProducer* wpProducer)"
+         landmarkType = "5">
+      </FileBreakpoint>
+   </FileBreakpoints>
+</Bucket>
