@@ -184,8 +184,10 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         *lossIt = exp(-*lossIt);
         VERBOSE(5, "Obtained score : " <<  *lossIt  << endl);
         //put the score into scores
+        std::cerr << "Scores produced by factory : " << ScoreFactory(*lossIt) << std::endl;
         scores.push_back(ScoreFactory(*lossIt));
         sum += *lossIt;
+        std::cerr << "Sum to normalize" << sum << std::endl;
         }
     }
     else {
@@ -197,7 +199,9 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     if (sum != 0) {
         vector<ScoreComponentCollection>::iterator colIt;
         for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+        std::cerr << "Score before normalizing : " << *colIt << std::endl;
         colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
+        std::cerr << "Score after normalizing : " << *colIt << std::endl;
         }
     }
     //normalize

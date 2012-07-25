@@ -220,6 +220,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
                 itr_rep = targetRepMap.find(*itr_targetRep);
                 VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                std::cerr << "Score component collection : " << *iterLCSP << std::endl;
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
                 VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }

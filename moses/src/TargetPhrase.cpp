@@ -271,7 +271,7 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 
 void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
 {
-  //std::cout << "Adding stateless score " << score << std::endl;
+  std::cerr << "Adding stateless score " << score << std::endl;
   m_scoreBreakdown.PlusEquals(score);
   AddToFullScore(score.GetWeightedScore());
 
@@ -279,6 +279,7 @@ void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
 
 void TargetPhrase::AddToFullScore(const float score)
 {
+    std::cerr << "Adding to full score " << score << std::endl;
     m_fullScore += score;
 }
 
@@ -346,7 +347,7 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     MosesShouldUseExceptions(!dash);
     if(GetWord(targetPos).IsNonTerminal())
         alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
-    else 
+    else
         wordAlignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
   }
 
