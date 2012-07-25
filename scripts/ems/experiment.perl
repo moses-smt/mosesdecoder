@@ -1763,9 +1763,11 @@ sub define_training_psd_extract {
 
   my $hierarchical = &get("TRAINING:hierarchical-rule-set");
   if ($hierarchical) {
+      my $pt_fix = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd-chart/ReformatRuleTable.pl";
+      $cmd = "zcat $phrase_table.gz | $pt_fix | gzip > $phrase_table.psd.gz";
       $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd-chart";
       # TODO: fix .psd.parse.xml problem below, should be .parse.xml
-      $cmd = "$psd_extractor $extract.psd.gz $src_corpus $src_corpus.parse.xml $phrase_table.psd.gz $psd_config $out.train.gz";
+      $cmd .= " && $psd_extractor $extract.psd.gz $src_corpus $src_corpus.parse.xml $phrase_table.psd.gz $psd_config $out.train.gz $out.index";
   }
 
   &create_step($step_id, $cmd);
