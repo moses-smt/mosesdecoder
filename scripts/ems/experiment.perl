@@ -940,6 +940,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+  elsif ($DO_STEP[$i] eq 'TRAINING:psd-extract-examples') {
+      &define_training_psd_extract($i);
+        }
   elsif ($DO_STEP[$i] eq 'TRAINING:psd-build-model') {
       &define_training_psd_model($i);
         }
@@ -1749,13 +1752,11 @@ sub define_training_build_ttable {
     &create_step($step_id,$cmd);
 }
 
-sub define_training_psd_model {
+sub define_training_psd_extract {
   my $step_id = shift;
   my ($out, $phrase_table, $extract, $src_corpus, $psd_config) = &get_output_and_input($step_id);
-  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
-  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
 
-  die "no psd_config" unless defined($psd_config);
+  die "error: no psd_config" unless defined($psd_config);
 
   my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
   my $cmd = "$psd_extractor $extract.psd.gz $src_corpus $phrase_table.gz $psd_config $out.train.gz $out.index";
@@ -1767,10 +1768,17 @@ sub define_training_psd_model {
       $cmd = "$psd_extractor $extract.psd.gz $src_corpus $src_corpus.parse.xml $phrase_table.psd.gz $psd_config $out.train.gz";
   }
 
+  &create_step($step_id, $cmd);
+}
+
+sub define_training_psd_model {
+  my $step_id = shift;
+  my ($out, $psd_output) = &get_output_and_input($step_id);
+  my $trainfile = "$psd_output.train.gz";
+
   my $vw = &get("GENERAL:vw-path") . "/bin/vw";
-  die "ERROR: no psd_config" unless defined($psd_config);
   my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5";
-  $cmd .= " && zcat $out.train | $vw $vw_opts --cache_file $out.vwcache -f $out.model";
+  my $cmd .= "zcat $trainfile | $vw $vw_opts --cache_file $out.vwcache -f $out.model";
 
   &create_step($step_id, $cmd);
 }

@@ -103,6 +103,11 @@ int main(int argc, char**argv)
   size_t sentID = 0;
   size_t srcFiltered = 0;
   size_t tgtFiltered = 0;
+  size_t srcSurvived = 0;
+  size_t tgtSurvived = 0;
+
+  // don't generate features if no translations survived filtering
+  bool hasTranslation = false;
 
   string corpusLine;
   string rawPSDLine;
@@ -123,10 +128,13 @@ int main(int argc, char**argv)
     // we have all correct translations of the current phrase
     if (psdLine.GetSrcPhrase() != srcPhrase) {
       // generate features
-      if (srcPhrase.length() != 0) // avoid the initial state
+      if (hasTranslation) {
+        srcSurvived++;
         extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+      }
       
       // set new source phrase, context, translations and losses
+      hasTranslation = false;
       srcPhrase = psdLine.GetSrcPhrase(); 
       spanStart = psdLine.GetSrcStart();
       spanEnd = psdLine.GetSrcEnd();
@@ -136,27 +144,38 @@ int main(int argc, char**argv)
       losses.resize(translations.size(), 1);
     }
 
-    bool foundTgt;
-    size_t tgtPhraseID = ttable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
-    if (foundTgt) {
+    bool inIndex = false;
+    bool inTranslations = false;
+    size_t tgtPhraseID = ttable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &inIndex);
+    
+    if (inIndex) {
       // add correct translation (i.e., set its loss to 0)
       for (size_t i = 0; i < translations.size(); i++) {
         if (translations[i].m_index == tgtPhraseID) {
           losses[i] = 0;
+          inTranslations = true;
           break;
         }
       }
+    } 
+
+    if (inTranslations) {
+      hasTranslation = true;    
+      tgtSurvived = true;
     } else {
       tgtFiltered++;
     }
   }
   
   // generate features for the last source phrase
-  if (srcPhrase.length() != 0) // happens when source is empty
+  if (hasTranslation) {
+    srcSurvived++;
     extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+  }
 
   // output statistics about filtering
   cerr << "Filtered phrases: source " << srcFiltered << ", target " << tgtFiltered << endl;
+  cerr << "Remaining phrases: source " << srcSurvived << ", target " << tgtSurvived << endl;
 
   // flush FeatureConsumer
   consumer.Finish();
