@@ -160,8 +160,6 @@ int main(int argc, char**argv)
     myInputChart.Read(parseLine);
     //myInputChart.Print(std::cerr);
 
-    //cerr << "Getting syntax labels : " << src_start << " : " << src_end << endl;
-
     //get syntax label associated to span
     vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
 

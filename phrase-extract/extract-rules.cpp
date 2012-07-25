@@ -1064,24 +1064,15 @@ void writeRulesToFile(int sentID)
             << rule->count << "\n";
         }
 
-
         if (options.outputPsdInfo)
         {
-
-          //trnasform source and target side of rules
-          const std::string source = rule->source;
-          const std::string target = rule->target;
-          const std::string nonTerm = "[X][X]";
-          const std::string newNonTerm = "X";
-          std::string newSource = Replace( source, nonTerm, newNonTerm);
-          std::string newTarget = Replace( target, nonTerm, newNonTerm);
           extractFilePsdInfo << sentID << "\t"
           << rule->startS << "\t"
           << rule->endS << "\t"
           << rule->startT << "\t"
           << rule->endT << "\t"
-          << newSource << "\t"
-          << newTarget << endl;
+          << rule->source << "\t"
+          << rule->target << endl;
         }
     }
 }

@@ -90,7 +90,7 @@ PSD::AlignmentType RuleTable::GetAlignment(const std::string &alignStr, const st
     vector<string> targetToken = Tokenize(targetStr, " ");
     //look for non-terminals in target side
     vector<string> :: iterator itr_targets;
-    std::string nonTermString = "X";
+    std::string nonTermString = "[X][X]";
 
     cerr << "TARGET STRING : " << targetStr << endl;
 
@@ -102,7 +102,7 @@ PSD::AlignmentType RuleTable::GetAlignment(const std::string &alignStr, const st
         if(found != string::npos)
         {
             CHECK((*itr_targets).size() > 1);
-            string indexString = (*itr_targets).substr(1,1);
+            string indexString = (*itr_targets).substr(6,1);
             cerr << "INDEX STRING" << indexString << endl;
             targetAligns.push_back(indexString);
         }

@@ -70,10 +70,8 @@ while(<STDIN>){
 
     my @newEn;
     @newEn = &CreateAlignedTarget(\@e,\@a);
-    my @newFr;
-    @newFr = &ReplaceTermsInSource(\@f); 		
 
-    my $f = join(" ",@newFr);	
+    my $f = join(" ",@f);	
     my $e = join(" ",@newEn);
     my $a = join(" ",@a);
     my $s = join(" ",@s);
@@ -132,7 +130,7 @@ sub CreateAlignedTarget
 	{
 		if($_ eq "[X][X]")
 		{
-			my $NonTermAlign = "X".$nonTermMap[$loopCounter];
+			my $NonTermAlign = "[X][X]".$nonTermMap[$loopCounter];
 			#print "Non term align : $NonTermAlign \n";
 			push(@newEn,$NonTermAlign);
 		}
@@ -143,23 +141,4 @@ sub CreateAlignedTarget
 		#{print " ";}
 	}
 	return @newEn;
-}
-
-sub ReplaceTermsInSource
-{
-	my @f = @{ $_[0] };
-	my @newFr;
-
-	foreach(@f)
-	{
-		if($_ eq "[X][X]")
-		{
-			my $NonTerm = "X";
-			#print "Non term align : $NonTermAlign \n";
-			push(@newFr,$NonTerm);
-		}
-		else
-		{push(@newFr,$_)}
-	}
-	return @newFr;
 }	
