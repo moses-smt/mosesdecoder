@@ -32,7 +32,10 @@ int multiple_flag = false;
 int multiple_slack = 0;
 int multiple_max = 100;
 map< WORD_ID,vector< int > > single_word_index;
+// global cache for word pairs
+map< pair< WORD_ID, WORD_ID >, unsigned int > lsed;
 
+void create_extract(const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path);
 
 void load_corpus( const char* fileName, vector< vector< WORD_ID > > &corpus )
 { // source 
@@ -158,9 +161,6 @@ void load_alignment( const char* fileName, vector< vector< SentenceAlignment > >
 }
 
 /* Letter string edit distance, e.g. sub 'their' to 'there' costs 2 */
-
-// global cache for word pairs
-map< pair< WORD_ID, WORD_ID >, unsigned int > lsed;
 
 unsigned int letter_sed( WORD_ID aIdx, WORD_ID bIdx )
 {

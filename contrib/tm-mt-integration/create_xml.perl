@@ -1,100 +1,45 @@
 #!/usr/bin/perl -w 
 
+binmode(STDIN, ":utf8");
+binmode(STDOUT, ":utf8");
+
 use strict;
 use FindBin qw($RealBin);
 use File::Basename;
 
-my $DEBUG = 1;
-my $OUTPUT_RULES = 1;
+sub trim($);
 
-#my $data_root = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/";
-my $in_file 		= $ARGV[0]; #"$data_root/in/ac-test.input.tc.4";
-my $source_file 	= $ARGV[1]; #"$data_root/in/acquis.truecased.4.en.uniq";
-my $target_file 	= $ARGV[2]; #"$data_root/in/acquis.truecased.4.fr.uniq";
-my $alignment_file	= $ARGV[3]; #"$data_root/in/acquis.truecased.4.align.uniq";
-my $lex_file		= $ARGV[4]; #$data_root/in/lex.4;
-my $pt_file			= $ARGV[5]; #"$data_root/out/pt";
+my ($source, $input, $target, $align, $path);
 
-my $cmd;
-
-my $TMPDIR=dirname($pt_file)  ."/tmp.$$";
-$cmd = "mkdir -p $TMPDIR";
-`$cmd`;
-
-my $match_file  = "$TMPDIR/match";
-
-# suffix array creation and extraction
-$cmd = "$RealBin/fuzzy-match --multiple $in_file  $source_file > $match_file";
-print STDERR "$cmd \n";
-`$cmd`;
-
-# make into xml and pt
-my $out_file = "$TMPDIR/ac-test.input.xml.4.uniq.multi.tuning";
-
-my @INPUT = `cat $in_file`; chop(@INPUT);
-my @ALL_SOURCE = `cat $source_file`; chop(@ALL_SOURCE);
-my @ALL_TARGET = `cat $target_file`; chop(@ALL_TARGET);
-my @ALL_ALIGNMENT = `cat $alignment_file`; chop(@ALL_ALIGNMENT);
-
-open(MATCH,$match_file);
-open(FRAME,">$out_file");
-open(RULE,">$out_file.extract") if $OUTPUT_RULES;
-open(RULE_INV,">$out_file.extract.inv") if $OUTPUT_RULES;
-open(INFO,">$out_file.info");
-while( my $match = <MATCH> ) {
-    chop($match);
-    my ($score,$sentence,$path) = split(/ \|\|\| /,$match);
-
-    $score =~ /^(\d+) (.+)/ || die;
-    my ($i,$match_score) = ($1,$2);
-	print STDERR "i=$i\n";
+while ($source = <STDIN>) { 
+	$input = <STDIN>;
+	$target = <STDIN>;
+	$align = <STDIN>;
+	$path = <STDIN>;
+	chomp($source);
+	chomp($input);
+	chomp($target);
+	chomp($align);
+	chomp($path);
+	$source = trim($source);
+	$input 	= trim($input);
+	$target	= trim($target);
+	$align	= trim($align);
+	$path	= trim($path);
 	
-    # construct frame
-    if ($sentence < 1e9 && $sentence >= 0) {
-		my $SOURCE = $ALL_SOURCE[$sentence];
-		my @ALIGNMENT = split(/ \|\|\| /,$ALL_ALIGNMENT[$sentence]);
-		my @TARGET = split(/ \|\|\| /,$ALL_TARGET[$sentence]);
-		
-		for(my $j=0;$j<scalar(@TARGET);$j++) {
-			$TARGET[$j] =~ /^(\d+) (.+)$/ || die;
-			my ($target_count,$target) = ($1,$2);
-			my ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv) = 
-			&create_xml($SOURCE,
-					$INPUT[$i],
-					$target,
-					$ALIGNMENT[$j],
-					$path);
-			print FRAME $frame."\n";
-			print RULE "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $target_count\n" if $OUTPUT_RULES;
-			print RULE_INV "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $target_count\n" if $OUTPUT_RULES;
-			print INFO "$i ||| $match_score ||| $target_count\n";
-		}
-    }
+	my ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv) = &create_xml($source, $input, $target, $align, $path);
+
+	print STDOUT $frame."\n";
+	print STDOUT "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $target_count\n";
+	print STDOUT "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $target_count\n";
+	print STDOUT "$i ||| $match_score ||| $target_count\n";
+
 }
-close(FRAME);
-close(MATCH);
-close(RULE) if $OUTPUT_RULES;
-close(RULE_INV) if $OUTPUT_RULES;
-
-`LC_ALL=C sort $out_file.extract | gzip -c > $out_file.extract.sorted.gz`;
-`LC_ALL=C sort $out_file.extract.inv | gzip -c > $out_file.extract.inv.sorted.gz`;
-
-if ($OUTPUT_RULES)
-{
-  $cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $out_file.extract -lexical-file $lex_file -phrase-translation-table $pt_file";
-  print STDERR "Executing: $cmd \n";
-  `$cmd`;
-}
-
-#$cmd = "rm -rf $TMPDIR";
-#`$cmd`;
 
 #######################################################
 sub create_xml {
     my ($source,$input,$target,$alignment,$path) = @_;
     
-	print STDERR " HIEU \n $source \n $input \n $target \n $alignment \n $path \n";
-
     my @INPUT = split(/ /,$input);
     my @SOURCE = split(/ /,$source);
     my @TARGET = split(/ /,$target);
@@ -305,4 +250,27 @@ sub create_alignment {
 	}
 	my %ALIGNMENT = ( 's' => \@ALIGNED_TO_S, 't' => \@ALIGNED_TO_T );
 	return %ALIGNMENT;
+}
+
+# Perl trim function to remove whitespace from the start and end of the string
+sub trim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	$string =~ s/\s+$//;
+	return $string;
+}
+# Left trim function to remove leading whitespace
+sub ltrim($)
+{
+	my $string = shift;
+	$string =~ s/^\s+//;
+	return $string;
+}
+# Right trim function to remove trailing whitespace
+sub rtrim($)
+{
+	my $string = shift;
+	$string =~ s/\s+$//;
+	return $string;
 }

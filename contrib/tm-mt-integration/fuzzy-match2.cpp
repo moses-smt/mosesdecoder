@@ -7,6 +7,7 @@
 #include <fstream>
 #include <cstring>
 #include <time.h>
+#include <fstream>
 
 #include "fuzzy-match2.h"
 
@@ -348,7 +349,7 @@ int main(int argc, char* argv[])
     // create xml and extract files
     string inputStr, sourceStr;
     for (size_t pos = 0; pos < input_length; ++pos) {
-      inputStr += input[i][pos] + " ";
+      inputStr += vocabulary.GetWord(input[i][pos]) + " ";
     }
     
 		// do not try to find the best ... report multiple matches
@@ -363,6 +364,11 @@ int main(int argc, char* argv[])
 				cout << letter_cost << "/" << input_letter_length << " ";
 				cout << "(" << best_cost <<"/" << input_length <<") ";
 				cout << "||| " << s << " ||| " << path << endl;
+        
+        vector<WORD_ID> &sourceSentence = source[s];
+        vector<SentenceAlignment> &targets = targetAndAlignment[s];
+        create_extract(sourceSentence, targets, inputStr, path);
+
 			}
 		} // if (multiple_flag)
     else {
@@ -410,23 +416,8 @@ int main(int argc, char* argv[])
 
       // creat xml & extracts
       vector<WORD_ID> &sourceSentence = source[best_match];
-      for (size_t pos = 0; pos < sourceSentence.size(); ++pos) {
-        WORD_ID wordId = sourceSentence[pos];
-        sourceStr += vocabulary.GetWord(wordId) + " ";
-      }
-      
       vector<SentenceAlignment> &targets = targetAndAlignment[best_match];
-      for (size_t targetInd = 0; targetInd < targets.size(); ++targetInd) {
-        const SentenceAlignment &sentenceAlignment = targets[targetInd]; 
-        string targetStr = sentenceAlignment.getTargetString();
-        string alignStr = sentenceAlignment.getAlignmentString();
-        
-        cerr << "create_xml " << endl 
-        << sourceStr << endl 
-        << inputStr << endl
-        << targetStr << endl
-        << alignStr << endl;
-      }
+      create_extract(sourceSentence, targets, inputStr, best_path);
 
     } // else if (multiple_flag)
     
@@ -434,4 +425,34 @@ int main(int argc, char* argv[])
   }
 	cerr << "total: " << (1000 * (clock()-start_main_clock) / CLOCKS_PER_SEC) << endl;
 	
+}
+
+void create_extract(const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path)
+{
+  string sourceStr;
+  for (size_t pos = 0; pos < sourceSentence.size(); ++pos) {
+    WORD_ID wordId = sourceSentence[pos];
+    sourceStr += vocabulary.GetWord(wordId) + " ";
+  }
+    
+  char *inputFileName = tmpnam(NULL);
+  ofstream inputFile(inputFileName);
+
+  for (size_t targetInd = 0; targetInd < targets.size(); ++targetInd) {
+    const SentenceAlignment &sentenceAlignment = targets[targetInd]; 
+    string targetStr = sentenceAlignment.getTargetString();
+    string alignStr = sentenceAlignment.getAlignmentString();
+    
+    inputFile 
+      << sourceStr << endl 
+      << inputStr << endl
+      << targetStr << endl
+      << alignStr << endl
+      << path << endl;
+  }
+  
+  string cmd = string("perl create_xml.perl ") + inputFileName;
+  cerr << cmd << endl;
+  inputFile.close();
+  
 }

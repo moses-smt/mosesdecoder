@@ -44,6 +44,12 @@
             ReferencedContainer = "container:fuzzy-match.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <CommandLineArguments>
+         <CommandLineArgument
+            argument = "--multiple /Users/hieuhoang/workspace/experiment/data/tm-mt-integration//in/ac-test.input.tc.4 /Users/hieuhoang/workspace/experiment/data/tm-mt-integration//in/acquis.truecased.4.en.uniq"
+            isEnabled = "YES">
+         </CommandLineArgument>
+      </CommandLineArguments>
       <AdditionalOptions>
       </AdditionalOptions>
    </LaunchAction>
