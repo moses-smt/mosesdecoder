@@ -7,12 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E42EFB615BEFAEB00E937EB /* fuzzy-match2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E42EFA515BEFABD00E937EB /* fuzzy-match2.cpp */; };
+		1E42EFB715BEFAEB00E937EB /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */; };
+		1E42EFB815BEFAEB00E937EB /* SuffixArray.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DD015BED3D4001914A2 /* SuffixArray.h */; };
+		1E42EFB915BEFAEB00E937EB /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */; };
+		1E42EFBA15BEFAEB00E937EB /* Vocabulary.h in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCB15BED3AC001914A2 /* Vocabulary.h */; };
 		1E806DCC15BED3AC001914A2 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */; };
 		1E806DCE15BED3BC001914A2 /* fuzzy-match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */; };
 		1E806DD115BED3D4001914A2 /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		1E42EFAA15BEFAD300E937EB /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
 		1ED87EEB15BED331003E47AA /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -25,6 +39,12 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		1E42EFA515BEFABD00E937EB /* fuzzy-match2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "fuzzy-match2.cpp"; path = "../tm-mt-integration/fuzzy-match2.cpp"; sourceTree = "<group>"; };
+		1E42EFAC15BEFAD300E937EB /* fuzzy-match2 */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "fuzzy-match2"; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E42EFD115C00AC100E937EB /* fuzzy-match2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = "fuzzy-match2.h"; path = "../tm-mt-integration/fuzzy-match2.h"; sourceTree = "<group>"; };
+		1E42EFD215C00BAE00E937EB /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = "../tm-mt-integration/Util.h"; sourceTree = "<group>"; };
+		1E42EFD315C00C0A00E937EB /* SentenceAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceAlignment.h; path = "../tm-mt-integration/SentenceAlignment.h"; sourceTree = "<group>"; };
+		1E42EFD715C00D6300E937EB /* Match.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Match.h; path = "../tm-mt-integration/Match.h"; sourceTree = "<group>"; };
 		1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocabulary.cpp; path = "../tm-mt-integration/Vocabulary.cpp"; sourceTree = "<group>"; };
 		1E806DCB15BED3AC001914A2 /* Vocabulary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocabulary.h; path = "../tm-mt-integration/Vocabulary.h"; sourceTree = "<group>"; };
 		1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "fuzzy-match.cpp"; path = "../tm-mt-integration/fuzzy-match.cpp"; sourceTree = "<group>"; };
@@ -34,6 +54,13 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		1E42EFA915BEFAD300E937EB /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1ED87EEA15BED331003E47AA /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -47,9 +74,14 @@
 		1ED87EE215BED32F003E47AA = {
 			isa = PBXGroup;
 			children = (
+				1E42EFD715C00D6300E937EB /* Match.h */,
+				1E42EFD315C00C0A00E937EB /* SentenceAlignment.h */,
+				1E42EFD215C00BAE00E937EB /* Util.h */,
+				1E42EFD115C00AC100E937EB /* fuzzy-match2.h */,
 				1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */,
 				1E806DD015BED3D4001914A2 /* SuffixArray.h */,
 				1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */,
+				1E42EFA515BEFABD00E937EB /* fuzzy-match2.cpp */,
 				1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */,
 				1E806DCB15BED3AC001914A2 /* Vocabulary.h */,
 				1ED87EEE15BED331003E47AA /* Products */,
@@ -60,6 +92,7 @@
 			isa = PBXGroup;
 			children = (
 				1ED87EED15BED331003E47AA /* fuzzy-match */,
+				1E42EFAC15BEFAD300E937EB /* fuzzy-match2 */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -67,6 +100,23 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		1E42EFAB15BEFAD300E937EB /* fuzzy-match2 */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E42EFB315BEFAD300E937EB /* Build configuration list for PBXNativeTarget "fuzzy-match2" */;
+			buildPhases = (
+				1E42EFA815BEFAD300E937EB /* Sources */,
+				1E42EFA915BEFAD300E937EB /* Frameworks */,
+				1E42EFAA15BEFAD300E937EB /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = "fuzzy-match2";
+			productName = "fuzzy-match2";
+			productReference = 1E42EFAC15BEFAD300E937EB /* fuzzy-match2 */;
+			productType = "com.apple.product-type.tool";
+		};
 		1ED87EEC15BED331003E47AA /* fuzzy-match */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = 1ED87EF715BED331003E47AA /* Build configuration list for PBXNativeTarget "fuzzy-match" */;
@@ -102,11 +152,24 @@
 			projectRoot = "";
 			targets = (
 				1ED87EEC15BED331003E47AA /* fuzzy-match */,
+				1E42EFAB15BEFAD300E937EB /* fuzzy-match2 */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXSourcesBuildPhase section */
+		1E42EFA815BEFAD300E937EB /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E42EFB615BEFAEB00E937EB /* fuzzy-match2.cpp in Sources */,
+				1E42EFB715BEFAEB00E937EB /* SuffixArray.cpp in Sources */,
+				1E42EFB815BEFAEB00E937EB /* SuffixArray.h in Sources */,
+				1E42EFB915BEFAEB00E937EB /* Vocabulary.cpp in Sources */,
+				1E42EFBA15BEFAEB00E937EB /* Vocabulary.h in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		1ED87EE915BED331003E47AA /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -120,6 +183,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		1E42EFB415BEFAD300E937EB /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1E42EFB515BEFAD300E937EB /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		1ED87EF515BED331003E47AA /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -182,6 +259,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		1E42EFB315BEFAD300E937EB /* Build configuration list for PBXNativeTarget "fuzzy-match2" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E42EFB415BEFAD300E937EB /* Debug */,
+				1E42EFB515BEFAD300E937EB /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		1ED87EE715BED32F003E47AA /* Build configuration list for PBXProject "fuzzy-match" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
