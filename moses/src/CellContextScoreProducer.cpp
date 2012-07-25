@@ -103,10 +103,9 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
   if (!in.good())
     return false;
   string line;
+  size_t index = 0;
   while (getline(in, line)) {
-    vector<string> columns = Tokenize(line, "\t");
-    size_t idx = Scan<size_t>(columns[1]);
-    m_ruleIndex.insert(TargetIndexType::value_type(columns[0], idx));
+    m_ruleIndex.insert(TargetIndexType::value_type(line, ++index));
   }
   in.close();
   return true;
@@ -190,7 +189,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         }
     }
     else {
-    std:cerr << "WARNING : TARGET OOV"<< std::endl;
+    std:cerr << "WARNING : TARGET OOV : XX"<< targetRepresentations->front() << "XX" << std::endl;
     for (size_t i = 0; i < targetRepresentations->size(); i++) {
       scores.push_back(ScoreFactory(0));}
     }

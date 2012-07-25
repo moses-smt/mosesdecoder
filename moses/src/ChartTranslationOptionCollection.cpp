@@ -86,6 +86,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
 //    #ifdef HAVE_VW
     vector<FactorType> srcFactors;
     srcFactors.push_back(0);
+    string nonTermRep = "[X][X]";
 
     for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
 
@@ -111,12 +112,22 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             itr_targets != transOpt.GetTargetPhraseCollection().end();
             itr_targets++)
         {
-            //get lhs of rule
+            //get source side of rule
             CHECK((**itr_targets).GetSourcePhrase() != NULL);
 
+            //rewrite non-terminals non source side with "[][]"
             for(int i=0; i<(**itr_targets).GetSourcePhrase()->GetSize();i++)
             {
-                sourceSide += (**itr_targets).GetSourcePhrase()->GetWord(i).GetString(srcFactors,0);
+                //replace X by [X][X] for coherence with rule table
+                if((**itr_targets).GetSourcePhrase()->GetWord(i).IsNonTerminal())
+                {
+                    sourceSide += nonTermRep;
+                }
+                else
+                {
+                    sourceSide += (**itr_targets).GetSourcePhrase()->GetWord(i).GetString(srcFactors,0);
+                }
+
                 if(i<(**itr_targets).GetSourcePhrase()->GetSize() -1)
                 {
                     sourceSide += " ";
@@ -128,8 +139,6 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             sourceSide += " ";
             sourceSide += parentNonTerm;
 
-            //Append alignments to non-terminals
-            std::vector<size_t> ntim = (*itr_targets)->GetAlignmentInfo().GetNonTermIndexMap();
             int wordCounter = 0;
 
             //NonTermCounter should stay smaller than nonTermIndexMap
@@ -141,16 +150,25 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 if((**itr_targets).GetWord(i).IsNonTerminal() == 1)
                 {
                     //append non-terminal
-                    targetRepresentation += (**itr_targets).GetWord(i).GetString(srcFactors,0);
+                    targetRepresentation += nonTermRep;
 
                     //Debugging : everything OK in non term index map
                     //for(int i=0; i < 3; i++)
                     //{std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
-
-                    //append alignment
-                    stringstream s;
-                    s << ntim[wordCounter];
-                    string alignInd = s.str();
+                    const AlignmentInfo alignInfo = (*itr_targets)->GetAlignmentInfo();
+                    AlignmentInfo::const_iterator itr_align;
+                    string alignInd;
+                    //damt hiero : not nice. TODO : better implementation
+                    for(itr_align = alignInfo.begin(); itr_align != alignInfo.end(); itr_align++)
+                    {
+                        //look for current target
+                        if( itr_align->second == wordCounter)
+                        {
+                            stringstream s;
+                            s << itr_align->first;
+                            alignInd = s.str();
+                        }
+                    }
                     targetRepresentation += alignInd;
                 }
                 else
