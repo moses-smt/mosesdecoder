@@ -52,6 +52,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
 
+	if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc); 
+
   vector<Translation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
   for (; transIt != translations.end(); transIt++, lossIt++) {
@@ -68,6 +70,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
       fc->AddFeature("MOST_FREQUENT");
 
     if (m_config.GetBinnedScores()) GenerateScoreFeatures(transIt->m_scores, fc);
+
+		if (m_config.GetTargetIndicator()) GenerateIndicatorFeature(targetForms, fc); 
 
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
