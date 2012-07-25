@@ -92,18 +92,18 @@ PSD::AlignmentType RuleTable::GetAlignment(const std::string &alignStr, const st
     vector<string> :: iterator itr_targets;
     std::string nonTermString = "[X][X]";
 
-    cerr << "TARGET STRING : " << targetStr << endl;
+    //cerr << "TARGET STRING : " << targetStr << endl;
 
     for(itr_targets = targetToken.begin();itr_targets != targetToken.end(); itr_targets++)
     {
-        cerr << "TARGET TOKEN : " << *itr_targets << endl;
+        //cerr << "TARGET TOKEN : " << *itr_targets << endl;
 
         size_t found = (*itr_targets).find(nonTermString);
         if(found != string::npos)
         {
             CHECK((*itr_targets).size() > 1);
             string indexString = (*itr_targets).substr(6,1);
-            cerr << "INDEX STRING" << indexString << endl;
+            //cerr << "INDEX STRING" << indexString << endl;
             targetAligns.push_back(indexString);
         }
      }
@@ -120,7 +120,7 @@ PSD::AlignmentType RuleTable::GetAlignment(const std::string &alignStr, const st
           }
           if(!isNonTerm)
           {
-              cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
+              //cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
               out.insert(make_pair(Scan<size_t>(point[0]), Scan<size_t>(point[1])));
           }
         }

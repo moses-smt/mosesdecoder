@@ -150,31 +150,32 @@ int main(int argc, char**argv)
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
       translations = rtable.GetTranslations(srcPhrase);
       losses.clear();
+      syntFeats.clear();
       losses.resize(translations.size(), 1);
 
-     // set new syntax features
-     size_t sentSize = GetSizeOfSentence(corpusLine);
+        // set new syntax features
+        size_t sentSize = GetSizeOfSentence(corpusLine);
 
-    //cerr << "Extracting syntactic features..." << parseLineString << endl;
-    Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sentSize);
-    myInputChart.Read(parseLine);
-    //myInputChart.Print(std::cerr);
+        //cerr << "Extracting syntactic features..." << parseLineString << endl;
+        Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sentSize);
+        myInputChart.Read(parseLine);
+        //myInputChart.Print(std::cerr);
 
-    //get syntax label associated to span
-    vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
+        //get syntax label associated to span
+        vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
 
-    //iterate over labels and get strings
-    //MAYBE INEFFICIENT
-    vector<SyntaxLabel>::iterator itr_syn_lab;
-    for(itr_syn_lab = syntaxLabels.begin(); itr_syn_lab != syntaxLabels.end(); itr_syn_lab++)
-    {
-        SyntaxLabel syntaxLabel = *itr_syn_lab;
-        CHECK(syntaxLabel.IsNonTerm() == 1);
-        string syntFeat = syntaxLabel.GetString();
-        //std::cerr << "EXTRACTED FEATURE : " << syntFeat << std::endl;
-        syntFeats.push_back(syntFeat);
+        //iterate over labels and get strings
+        //MAYBE INEFFICIENT
+        vector<SyntaxLabel>::iterator itr_syn_lab;
+        for(itr_syn_lab = syntaxLabels.begin(); itr_syn_lab != syntaxLabels.end(); itr_syn_lab++)
+        {
+            SyntaxLabel syntaxLabel = *itr_syn_lab;
+            CHECK(syntaxLabel.IsNonTerm() == 1);
+            string syntFeat = syntaxLabel.GetString();
+            //std::cerr << "EXTRACTED FEATURE : " << syntFeat << std::endl;
+            syntFeats.push_back(syntFeat);
+        }
     }
-}
     bool foundTgt;
     size_t tgtPhraseID = rtable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
     if (foundTgt) {
