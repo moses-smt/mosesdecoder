@@ -60,6 +60,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
     // get words in target phrase
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
+    // cerr << "Predicting score for phrase " << Join(" ", targetForms) << endl;
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
     if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, transIt->m_alignment, fc);

@@ -40,6 +40,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const InputType &inputType)
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange(wordsRange)
+  , m_isOOV(false)
 {
   // set score
   m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
@@ -61,8 +62,8 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange	(wordsRange)
   , m_futureScore(0)
+  , m_isOOV(true)
 {
-  m_isOOV = true;
   if (up) {
     const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
     vector<float> score(1);
@@ -90,6 +91,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy)
   , m_futureScore(copy.m_futureScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_cachedScores(copy.m_cachedScores)
+  , m_isOOV(copy.m_isOOV)
 {}
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
@@ -100,6 +102,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
   , m_futureScore(copy.m_futureScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_cachedScores(copy.m_cachedScores)
+  , m_isOOV(copy.m_isOOV)
 {}
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)

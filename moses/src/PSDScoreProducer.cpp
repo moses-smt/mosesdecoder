@@ -103,6 +103,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
       float score = exp(-*lossIt);
       sum += score;
       scores.push_back(ScoreFactory(score));
+//      cerr << "VW output: " << *lossIt << endl;
     }
   } else {
     for (size_t i = 0; i < options.size(); i++) {
@@ -115,9 +116,9 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
     vector<ScoreComponentCollection>::iterator colIt;
     for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
       colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
+//      cerr << colIt->GetScoreForProducer(this) << endl;
     }
   }
-
   return scores;
 }
 
