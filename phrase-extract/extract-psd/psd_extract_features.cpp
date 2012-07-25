@@ -101,8 +101,8 @@ int main(int argc, char**argv)
   size_t spanStart = 0;
   size_t spanEnd = 0;
   size_t sentID = 0;
-  size_t srcFiltered = 0;
-  size_t tgtFiltered = 0;
+  size_t srcTotal = 0;
+  size_t tgtTotal = 0;
   size_t srcSurvived = 0;
   size_t tgtSurvived = 0;
 
@@ -112,6 +112,7 @@ int main(int argc, char**argv)
   string corpusLine;
   string rawPSDLine;
   while (getline(psd, rawPSDLine)) {
+    tgtTotal++;
     PSDLine psdLine(rawPSDLine); // parse one line in PSD file
 
     // get to the current sentence in annotated corpus
@@ -120,10 +121,9 @@ int main(int argc, char**argv)
       sentID++;
     }
 
-    if (! ttable.SrcExists(psdLine.GetSrcPhrase())) {
-      srcFiltered++;
+    if (! ttable.SrcExists(psdLine.GetSrcPhrase()))
       continue;
-    }
+    
 
     // we have all correct translations of the current phrase
     if (psdLine.GetSrcPhrase() != srcPhrase) {
@@ -142,29 +142,23 @@ int main(int argc, char**argv)
       translations = ttable.GetTranslations(srcPhrase);
       losses.clear();
       losses.resize(translations.size(), 1);
+      srcTotal++;
     }
 
-    bool inIndex = false;
-    bool inTranslations = false;
-    size_t tgtPhraseID = ttable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &inIndex);
+    bool foundTgt = false;
+    size_t tgtPhraseID = ttable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
     
-    if (inIndex) {
+    if (foundTgt) {
       // add correct translation (i.e., set its loss to 0)
       for (size_t i = 0; i < translations.size(); i++) {
         if (translations[i].m_index == tgtPhraseID) {
           losses[i] = 0;
-          inTranslations = true;
+          hasTranslation = true;
+          tgtSurvived++;
           break;
         }
       }
     } 
-
-    if (inTranslations) {
-      hasTranslation = true;    
-      tgtSurvived = true;
-    } else {
-      tgtFiltered++;
-    }
   }
   
   // generate features for the last source phrase
@@ -174,7 +168,7 @@ int main(int argc, char**argv)
   }
 
   // output statistics about filtering
-  cerr << "Filtered phrases: source " << srcFiltered << ", target " << tgtFiltered << endl;
+  cerr << "Filtered phrases: source " << srcTotal - srcSurvived << ", target " << tgtTotal - tgtSurvived << endl;
   cerr << "Remaining phrases: source " << srcSurvived << ", target " << tgtSurvived << endl;
 
   // flush FeatureConsumer
