@@ -204,6 +204,24 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         std::cerr << "Score after normalizing : " << *colIt << std::endl;
         }
     }
+    else
+    {
+        vector<ScoreComponentCollection>::iterator colIt;
+        for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+        std::cerr << "Score before putting to 0: " << *colIt << std::endl;
+        colIt->ZeroAll();
+        std::cerr << "Score after putting to 0 : " << *colIt << std::endl;
+        }
+    }
+
+    /*else //make sure that when sum is zero, then all factors are 0
+    {
+        vector<ScoreComponentCollection>::iterator colIt;
+        for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+        colIt->Assign(this, log(0));
+        std::cerr << "All score should be zero here : " << *colIt << std::endl;
+        }
+    }*/
     //normalize
     return scores;
 
