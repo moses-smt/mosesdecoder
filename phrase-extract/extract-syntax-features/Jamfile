@@ -1,9 +1,7 @@
 alias header_paths : : : : <include>. <include>.. <include>../../moses/src <include>../.. <include>../../psd ;
 
-obj TaggedCorpus.o : TaggedCorpus.cpp header_paths ;
-
-obj PsdPhraseUtils.o : PsdPhraseUtils.cpp header_paths ;
+obj RuleTable.o : RuleTable.cpp header_paths ;
 
 obj InputTreeRep.o : InputTreeRep.cpp header_paths ;
 
-exe extract-syntax-features : extract-syntax-features.cpp TaggedCorpus.o ..//..//psd//psd ..//trees ..//tables-core ..//InputFileStream ..//SafeGetline.h PsdPhraseUtils.o InputTreeRep.o header_paths ..//..//boost_iostreams ;
+exe extract-syntax-features : extract-syntax-features.cpp ..//..//psd//psd ..//trees ..//tables-core ..//OutputFileStream.cpp ..//InputFileStream ..//SafeGetline.h RuleTable.o InputTreeRep.o header_paths ..//..//boost_iostreams ;

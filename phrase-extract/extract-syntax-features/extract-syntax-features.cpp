@@ -1,265 +1,169 @@
 #include <iostream>
 #include <vector>
 #include <string>
-#include <cstring>
-#include <set>
-#include <sys/stat.h>
-#include <sys/types.h>
+#include <cstdlib>
 
-#include "SafeGetline.h"
+#include "Util.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-#include "tables-core.h"
-#include "Util.h"
-
-#include "psd.h"
-#include "PsdPhraseUtils.h"
 #include "FeatureExtractor.h"
 #include "FeatureConsumer.h"
-#include "TaggedCorpus.h"
-
+#include "RuleTable.h"
 #include "InputTreeRep.h"
-#include "XmlTree.h"
 
 using namespace std;
 using namespace Moses;
 using namespace MosesTraining;
-using namespace boost::bimaps;
 using namespace PSD;
 
-#define LINE_MAX_LENGTH 10000
+class PSDLine
+{
+public:
+  PSDLine(const string &line)
+  {
+    vector<string> columns = Tokenize(line, "\t");
+    m_sentID   = Scan<size_t>(columns[0]);
+    m_srcStart = Scan<size_t>(columns[1]);
+    m_srcEnd   = Scan<size_t>(columns[2]);
+    m_srcPhrase = columns[5];
+    m_tgtPhrase = columns[6];
+  }
+  const string &GetSrcPhrase() { return m_srcPhrase; }
+  const string &GetTgtPhrase() { return m_tgtPhrase; }
+  size_t GetSentID()    { return m_sentID; }
+  size_t GetSrcStart()  { return m_srcStart; }
+  size_t GetSrcEnd()    { return m_srcEnd; }
 
-//NOTE : HIERO : FORMAT OF EXTRACT.PSD IS WRONG FOR TARGET SIDE : X INSTEAD OF X0.
+private:
+  PSDLine();
+  size_t m_sentID, m_srcStart, m_srcEnd;
+  string m_srcPhrase, m_tgtPhrase;
+};
 
-// globals
-CLASSIFIER_TYPE psd_classifier = VWFile;
-PSD_MODEL_TYPE psd_model = GLOBAL;
-string ptDelim = " ||| ";
-string factorDelim = "|";
-int subdirsize=1000;
-string ext = ".contexts";
+void WritePhraseIndex(const TargetIndexType &index, const string &outFile)
+{
+  OutputFileStream out(outFile);
+  if (! out.good()) {
+    cerr << "error: Failed to open " << outFile << endl;
+    exit(1);
+  }
+  TargetIndexType::right_map::const_iterator it; // keys are sorted in the map
+  for (it = index.right.begin(); it != index.right.end(); it++)
+    out << it->second << "\n";
+  out.Close();
+}
 
-// settings for debugging
-int StartSNo = 0;
-int EndSNo = 0;
-bool skipPT = false;
+ContextType ReadFactoredLine(const string &line, size_t factorCount)
+{
+  ContextType out;
+  vector<string> words = Tokenize(line, " ");
+  vector<string>::const_iterator it;
+  for (it = words.begin(); it != words.end(); it++) {
+    vector<string> factors = Tokenize(*it, "|");
+    if (factors.size() != factorCount) {
+      cerr << "error: Wrong count of factors: " << *it << endl;
+      exit(1);
+    }
+    out.push_back(factors);
+  }
+  return out;
+}
 
-Vocabulary srcVocab;
-Vocabulary tgtVocab;
+size_t GetSizeOfSentence(const string &line)
+{
+	vector<string> words = Tokenize(line, " ");
+	return words.size();
+}
 
-int main(int argc,char* argv[]){
-  cerr << "PSD and Syntax feature-extractor\n\n";
-  if (argc < 8){
-    cerr << "syntax: extract-syntax-features extract-file corpus.factored corpus.parsed phrase-table sourcePhraseVocab targetPhraseVocab extractor-config outputdir/filename [options]\n";
-    cerr << endl;
-    cerr << "Options:" << endl;
-    cerr << "\t --ClassifierType vw|megam" << endl;
-    cerr << "\t --PsdType phrasal|global" << endl;
+int main(int argc, char**argv)
+{
+  if (argc != 8) {
+    cerr << "error: wrong arguments" << endl;
+    cerr << "Usage: extract-psd psd-file parsed-file corpus phrase-table extractor-config output-train output-index" << endl;
+    exit(1);
+  }
+  InputFileStream psd(argv[1]);
+  if (! psd.good()) {
+    cerr << "error: Failed to open " << argv[1] << endl;
+    exit(1);
+  }
+  InputFileStream corpus(argv[2]);
+  if (! corpus.good()) {
+    cerr << "error: Failed to open " << argv[2] << endl;
+    exit(1);
+  }
+  InputFileStream parse(argv[3]);
+  if (! corpus.good()) {
+    cerr << "error: Failed to open " << argv[3] << endl;
     exit(1);
   }
 
-  char* &fileNameExtract = argv[1]; // location in corpus of PSD phrases (optionallly annotated with the position and phrase type of their translations.)
-  char* &fileNameSrcTag = argv[2]; // tagged source context in Moses factored format
-  string fileNameSrcParse = string(argv[3]); //parsed source file in Moses tagged format
-  char* &fileNamePT = argv[4]; // phrase table
-  char* &fileNameSrcVoc = argv[5]; // source phrase vocabulary
-  char* &fileNameTgtVoc = argv[6]; // target phrase vocabulary
-  string configFile = string(argv[7]); // configuration file for the feature extractor
-  string output = string(argv[8]);//output directory (for phrasal models) or root of filename (for global models)
-  for(int i = 9; i < argc; i++){
-    if (strcmp(argv[i],"--ClassifierType") == 0){
-      char* format = argv[++i];
-      if (strcmp(format,"vw") == 0){
-        psd_classifier = VWFile;
-        ext = ".vw-data";
-      }else if (strcmp(format,"megam") == 0){
-        psd_classifier = MEGAM;
-        ext = ".megam";
-        cerr << "megam format isn't supported" << endl;
-        exit(1);
-      }else{
-        cerr << "classifier " << format << "isn't supported" << endl;
-        exit(1);
-      }
-    }
-    else if (strcmp(argv[i],"--PsdType") == 0){
-      char* format = argv[++i];
-      if (strcmp(format,"global") == 0){
-        psd_model = GLOBAL;
-      }else if (strcmp(format,"phrasal") == 0){
-        psd_model = PHRASAL;
-      }else{
-        cerr << "PSD model type " << format << "isn't supported" << endl;
-        exit(1);
-      }
-    }
-    else if (strcmp(argv[i],"--StartSNo") == 0){
-      char* s = argv[++i];
-      StartSNo = atoi(s);
-                }
-    else if (strcmp(argv[i],"--EndSNo") == 0){
-      char* s = argv[++i];
-      EndSNo = atoi(s);
-                }
-    else if (strcmp(argv[i],"--SkipPT") == 0){
-      skipPT = true;
-                }
-                else {
-                        cerr << "failed to parse option: " << argv[i] << endl;
-                        exit(1);
-                }
+  RuleTable rtable(argv[4]);
+  ExtractorConfig config;
+  config.Load(argv[5]);
+  FeatureExtractor extractor(rtable.GetTargetIndex(), config, true);
+  VWFileTrainConsumer consumer(argv[6]);
+  WritePhraseIndex(rtable.GetTargetIndex(), argv[7]);
 
+  // one source phrase can have multiple correct translations
+  // these will be on consecutive lines in the input PSD file
+  string srcPhrase = "";
+  ContextType context;
+  vector<float> losses;
+  vector<string> syntFeats;
+  vector<Translation> translations;
+  vector<SyntaxLabel> syntLabels;
+  size_t spanStart = 0;
+  size_t spanEnd = 0;
+  size_t sentID = 0;
+  size_t srcFiltered = 0;
+  size_t tgtFiltered = 0;
 
-  }
+  string corpusLine;
+  string rawPSDLine;
+  string parseLine;
+  while (getline(psd, rawPSDLine)) {
+    PSDLine psdLine(rawPSDLine); // parse one line in PSD file
 
-  //cerr << "Reading inputs !" << endl;
-
-  InputFileStream extract(fileNameExtract);
-  if (extract.fail()){
-    cerr << "ERROR: could not open " << fileNameExtract << endl;
-  }
-
-  InputFileStream srcTag(fileNameSrcTag);
-  if (srcTag.fail()){
-    cerr << "ERROR: could not open " << fileNameSrcTag << endl;
-  }
-
-  InputFileStream srcParse(fileNameSrcParse);
-  if (srcParse.fail()){
-    cerr << "ERROR: could not open " << fileNameSrcParse << endl;
-  }
-
-  // store word and phrase vocab
-  //cerr << "READING RULE VOCAB SOURCE"<< endl;
-  PhraseVocab psdPhraseVoc;
-  if (!readRuleVocab(fileNameSrcVoc,srcVocab,psdPhraseVoc)){
-    cerr << "Error reading in source phrase vocab" << endl;
-  }
-
-  //cerr << "READING RULE VOCAB TARGET"<< endl;
-  PhraseVocab tgtPhraseVoc;
-  if (!readRuleVocab(fileNameTgtVoc,tgtVocab,tgtPhraseVoc)){
-    cerr << "Error reading in target phrase vocab" << endl;
-  }
-  // store translation phrase pair table
-  //cerr << "READING RULES"<< endl;
-  PhraseTranslations transTable;
-  if (! skipPT) {
-   if (!readRules(fileNamePT, srcVocab, tgtVocab, psdPhraseVoc, tgtPhraseVoc, transTable)){
-     cerr << "Error reading in phrase translation table " << endl;
-   }
-  }
-
-    // loop through tagged PSD examples in the order they occur in the training corpus
-    int extractlinenum = 0;
-    int csid = 0;
-
-    // loop through tagged PSD examples in the order they occur in the training corpus
-
-    // create target phrase index for feature extractor
-    TargetIndexType extractorTargetIndex;
-    for (size_t i = 0; i < tgtPhraseVoc.phraseTable.size(); i++) {
-        // label 0 is not allowed
-        extractorTargetIndex.insert(TargetIndexType::value_type(getTargetRule(i, tgtVocab, tgtPhraseVoc), i + 1));
+    // get to the current sentence in annotated corpus
+    while (psdLine.GetSentID() > sentID) {
+      getline(corpus, corpusLine);
+      getline(parse, parseLine);
+      sentID++;
     }
 
-    ExtractorConfig config;
-    config.Load(configFile);
-    FeatureExtractor extractor(extractorTargetIndex, config, true);
-
-
-    // prep feature consumers for PHRASAL setting
-    map<PHRASE_ID, FeatureConsumer*> consumers;
-
-    // feature consumer for GLOBAL setting
-    FeatureConsumer *globalOut = NULL;
-    if (psd_model == GLOBAL) {
-        if (psd_classifier == VWLib)
-        globalOut = new VWLibraryTrainConsumer(output);
-        else
-        globalOut = new VWFileTrainConsumer(output);
+    if (! rtable.SrcExists(psdLine.GetSrcPhrase())) {
+      srcFiltered++;
+      continue;
     }
 
-  cerr<< "Phrase/Rule tables read. Now reading in psd-extract-file." << endl;
+    // we have all correct translations of the current phrase
+    if (psdLine.GetSrcPhrase() != srcPhrase) {
+      // generate features
+      if (srcPhrase.length() != 0) // avoid the initial state
+        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, spanStart, spanEnd, translations, losses);
 
-  int prevSNo = 0;
-  while(true) {
-    if (extract.eof()) break;
-    char extractLine[LINE_MAX_LENGTH];
+      // set new source phrase, context, translations and losses
+      srcPhrase = psdLine.GetSrcPhrase();
+      spanStart = psdLine.GetSrcStart();
+      spanEnd = psdLine.GetSrcEnd();
+      context = ReadFactoredLine(corpusLine, config.GetFactors().size());
+      translations = rtable.GetTranslations(srcPhrase);
+      losses.clear();
+      losses.resize(translations.size(), 1);
 
-    // get phrase pair
-    SAFE_GETLINE((extract),extractLine, LINE_MAX_LENGTH, '\n', __FILE__);
-    if (extract.eof()) break;
-
-    if (++extractlinenum % 100000 == 0) cerr << "." << flush;
-    vector<string> token = Tokenize(extractLine,"\t");
-    size_t sid = Scan<size_t>(token[0].c_str());
-
-    //cerr << "READING EXTRACT FILE : " << extractLine << endl;
-       	if (sid < StartSNo) {
-			continue;
-		}
-
-		if (EndSNo != 0 and sid > EndSNo) {
-			break;
-		}
-
-		if (StartSNo > 0) {
-			if (prevSNo != sid) {
-				cerr << "extract line number " << extractlinenum << " SNo " << sid << endl;
-				prevSNo = sid;
-			}
-		}
-
-    size_t src_start = Scan<size_t>(token[1].c_str());
-    size_t src_end = Scan<size_t>(token[2].c_str());
-    size_t tgt_start = Scan<size_t>(token[3].c_str());
-    size_t tgt_end = Scan<size_t>(token[4].c_str());
-    string sourceRule = token[5];
-    string targetRule = token[6];
-
-    char tagSrcLine[LINE_MAX_LENGTH];
-    char parseSrcLine[LINE_MAX_LENGTH];
-
-    // go to current sentence
-    // hiero : current sentence and current parse
-    while(csid < sid){
-      if (srcTag.eof()) break;
-      SAFE_GETLINE((srcTag),tagSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
-      SAFE_GETLINE((srcParse),parseSrcLine, LINE_MAX_LENGTH, '\n', __FILE__);
-      ++csid;
-    }
-
-    assert(csid == sid);
-    ContextType factoredSrcLine = parseTaggedString(tagSrcLine, factorDelim,config.GetFactors().size());
-
-    // get surface forms from factored format
-    vector<string> sent;
-    ContextType::const_iterator tagSrcIt;
-    for (tagSrcIt = factoredSrcLine.begin(); tagSrcIt != factoredSrcLine.end(); tagSrcIt++) {
-      sent.push_back(*tagSrcIt->begin());
-      //cerr << "Pushed back to sentence : " << *tagSrcIt->begin() << endl;
-    }
-
-   //cerr << "Extracting syntactic features..." << parseSrcLine << endl;
-   //cerr << "Size of sentence : " << sent.size() << endl;
-
-    //Read in source sentence and create label chart
-    stringstream ss;
-    std::string parseLineString = string(parseSrcLine);
+     // set new syntax features
+     size_t sentSize = GetSizeOfSentence(corpusLine);
 
     //cerr << "Extracting syntactic features..." << parseLineString << endl;
-
-    Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sent.size());
-    myInputChart.Read(parseLineString);
+    Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sentSize);
+    myInputChart.Read(parseLine);
     //myInputChart.Print(std::cerr);
 
     //cerr << "Getting syntax labels : " << src_start << " : " << src_end << endl;
 
     //get syntax label associated to span
-    vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(src_start, src_end);
-    vector<string> syntFeats;
-
+    vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
 
     //iterate over labels and get strings
     //MAYBE INEFFICIENT
@@ -272,68 +176,29 @@ int main(int argc,char* argv[]){
         //std::cerr << "EXTRACTED FEATURE : " << syntFeat << std::endl;
         syntFeats.push_back(syntFeat);
     }
-
-    //std::cerr << "Reading in rule table" << std::endl;
-    //std::cerr << "Source Rule : " << sourceRule << std::endl;
-
-
-    //hiero : use source side in extract file
-    //cerr << "GETTING SOURCE ID... " << endl;
-    PHRASE_ID srcid = getRuleID(sourceRule, srcVocab, psdPhraseVoc);
-
-    //std::cerr << "Source ID : " << srcid << std::endl;
-    //std::cerr << "Target rule " << targetRule << std::endl;
-
-    //get all target phrase for this source phrase
-    //cerr << "GETTING TARGET ID... " << endl;
-    PHRASE_ID labelid = getRuleID(targetRule,tgtVocab,tgtPhraseVoc) + 1; // label 0 is not allowed
-
-    //std::cerr << "Label ID : " << labelid << std::endl;
-
-    vector<float> losses;
-    vector<Translation> translations;
-    PhraseTranslations::const_iterator transIt;
-    for (transIt = transTable.lower_bound(srcid); transIt != transTable.upper_bound(srcid); transIt++) {
-      cerr << "INSERTING TRANSLATION : " << transIt->second.m_index << endl;
-      translations.push_back(transIt->second);
-      losses.push_back(labelid == transIt->second.m_index ? 0 : 1);
-    }
-
-    //only extract featues if id has been found in phrase table
-        //std:cerr << "Source ID not zero " << std::endl;
-      if (existsRule(srcid, labelid, transTable)) {
-          //std::cerr << "Source ID is in table" << std::endl;
-        if (psd_model == PHRASAL){
-          map<PHRASE_ID, FeatureConsumer*>::iterator i = consumers.find(srcid);
-          if (i == consumers.end()){
-            int low = floor(srcid/subdirsize)*subdirsize;
-            int high = low+subdirsize-1;
-            string output_subdir = output +"/"+SPrint(low)+"-"+SPrint(high);
-            mkdir(output_subdir.c_str(),S_IREAD | S_IWRITE | S_IEXEC);
-            string fileName = output_subdir + "/" + SPrint(srcid) + ext;
-            FeatureConsumer *fc = NULL;
-            if (psd_classifier == VWLib)
-              fc = new VWLibraryTrainConsumer(fileName);
-            else
-              fc = new VWFileTrainConsumer(fileName);
-            consumers.insert(pair<PHRASE_ID,FeatureConsumer*>(srcid, fc));
-          }
-          //NOTE : check that sourceRule (from extract) is still the right string for context features
-          extractor.GenerateFeaturesChart(consumers[srcid], factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
-        } else { // GLOBAL model
-          //std::cerr << "Generating fetures ..." << std::endl;
-          extractor.GenerateFeaturesChart(globalOut, factoredSrcLine, sourceRule, syntFeats, src_start, src_end, translations, losses);
+}
+    bool foundTgt;
+    size_t tgtPhraseID = rtable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
+    if (foundTgt) {
+      // add correct translation (i.e., set its loss to 0)
+      for (size_t i = 0; i < translations.size(); i++) {
+        if (translations[i].m_index == tgtPhraseID) {
+          losses[i] = 0;
+          break;
         }
       }
-  }
-  if (psd_model == GLOBAL) {
-    globalOut->Finish();
-  } else {
-    map<PHRASE_ID, FeatureConsumer*>::iterator i;
-    for (i = consumers.begin(); i != consumers.end(); i++) {
-      i->second->Finish();
+    } else {
+      tgtFiltered++;
     }
   }
-  //freem
-}
 
+  // generate features for the last source phrase
+  if (srcPhrase.length() != 0) // happens when source is empty
+    extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, spanStart, spanEnd, translations, losses);
+
+  // output statistics about filtering
+  cerr << "Filtered phrases: source " << srcFiltered << ", target " << tgtFiltered << endl;
+
+  // flush FeatureConsumer
+  consumer.Finish();
+}
