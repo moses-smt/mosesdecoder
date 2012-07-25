@@ -116,13 +116,19 @@ int main(int argc, char**argv)
   size_t spanStart = 0;
   size_t spanEnd = 0;
   size_t sentID = 0;
-  size_t srcFiltered = 0;
-  size_t tgtFiltered = 0;
+  size_t srcTotal = 0;
+  size_t tgtTotal = 0;
+  size_t srcSurvived = 0;
+  size_t tgtSurvived = 0;
+
+   // don't generate features if no translations survived filtering
+   bool hasTranslation = false;
 
   string corpusLine;
   string rawPSDLine;
   string parseLine;
   while (getline(psd, rawPSDLine)) {
+    tgtTotal++;
     PSDLine psdLine(rawPSDLine); // parse one line in PSD file
 
     // get to the current sentence in annotated corpus
@@ -133,16 +139,17 @@ int main(int argc, char**argv)
     }
 
     if (! rtable.SrcExists(psdLine.GetSrcPhrase())) {
-      srcFiltered++;
       continue;
     }
 
     // we have all correct translations of the current phrase
+       // we have all correct translations of the current phrase
     if (psdLine.GetSrcPhrase() != srcPhrase) {
       // generate features
-      if (srcPhrase.length() != 0) // avoid the initial state
+      if (hasTranslation) {
+        srcSurvived++;
         extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, spanStart, spanEnd, translations, losses);
-
+      }
       // set new source phrase, context, translations and losses
       srcPhrase = psdLine.GetSrcPhrase();
       spanStart = psdLine.GetSrcStart();
@@ -152,6 +159,7 @@ int main(int argc, char**argv)
       losses.clear();
       syntFeats.clear();
       losses.resize(translations.size(), 1);
+      srcTotal++;
 
         // set new syntax features
         size_t sentSize = GetSizeOfSentence(corpusLine);
@@ -176,27 +184,32 @@ int main(int argc, char**argv)
             syntFeats.push_back(syntFeat);
         }
     }
-    bool foundTgt;
+    bool foundTgt = false;
     size_t tgtPhraseID = rtable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
+
     if (foundTgt) {
       // add correct translation (i.e., set its loss to 0)
       for (size_t i = 0; i < translations.size(); i++) {
         if (translations[i].m_index == tgtPhraseID) {
           losses[i] = 0;
+          hasTranslation = true;
+          tgtSurvived++;
           break;
         }
       }
-    } else {
-      tgtFiltered++;
     }
   }
 
   // generate features for the last source phrase
-  if (srcPhrase.length() != 0) // happens when source is empty
+   // generate features for the last source phrase
+  if (hasTranslation) {
+    srcSurvived++;
     extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, spanStart, spanEnd, translations, losses);
+  }
 
-  // output statistics about filtering
-  cerr << "Filtered phrases: source " << srcFiltered << ", target " << tgtFiltered << endl;
+    // output statistics about filtering
+  cerr << "Filtered phrases: source " << srcTotal - srcSurvived << ", target " << tgtTotal - tgtSurvived << endl;
+  cerr << "Remaining phrases: source " << srcSurvived << ", target " << tgtSurvived << endl;
 
   // flush FeatureConsumer
   consumer.Finish();
