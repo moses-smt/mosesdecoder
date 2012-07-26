@@ -124,7 +124,7 @@ foreach (@children) {
 
 systemCheck("mv $TMPDIR/index.0 $out.index");
 my $catargs = join(" ", map { "$TMPDIR/train.$_" } (0 .. $cores - 1));
-systemCheck("cat $catargs > $out.train");
+systemCheck("cat $catargs | gzip -c > $out.train.gz");
 
 my $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
