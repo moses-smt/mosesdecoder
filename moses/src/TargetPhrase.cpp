@@ -271,7 +271,6 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 
 void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
 {
-  std::cerr << "Adding stateless score " << score << std::endl;
   m_scoreBreakdown.PlusEquals(score);
   AddToFullScore(score.GetWeightedScore());
 
@@ -279,7 +278,7 @@ void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
 
 void TargetPhrase::AddToFullScore(const float score)
 {
-    std::cerr << "Adding to full score " << score << std::endl;
+    VERBOSE(3, "Dot Product added to target phrase score " << score << std::endl);
     m_fullScore += score;
 }
 

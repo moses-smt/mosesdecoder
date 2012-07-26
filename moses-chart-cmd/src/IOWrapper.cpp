@@ -165,8 +165,6 @@ void IOWrapper::ResetTranslationId() {
 
 InputType*IOWrapper::GetInput(InputType* inputType)
 {
-  cerr << "GETTING INPUT" << endl;
-
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
       if (x>=m_translationId) m_translationId = x+1;
@@ -188,8 +186,6 @@ InputType*IOWrapper::GetInput(InputType* inputType)
 //Damt hiero : read context
 int IOWrapper::ReadContext(std::istream& in, InputType* input)
 {
-    cerr << "READING CONTEXT" << endl;
-
     string line;
     if (getline(in, line, '\n').eof())
     return 0;
@@ -203,14 +199,12 @@ int IOWrapper::ReadContext(std::istream& in, InputType* input)
 
 void IOWrapper::SetPSDContext(const std::vector<std::string> &psdFact, InputType* input)
 {
-    cerr << "SETTING PSD CONTEXT" << endl;
-
     //damt hiero debugging
-    std::vector<std::string> :: const_iterator itr_fact;
+    /*std::vector<std::string> :: const_iterator itr_fact;
     for(itr_fact = psdFact.begin(); itr_fact != psdFact.end(); itr_fact++)
     {
         std::cerr << "Added source factor : " << *itr_fact << std::endl;
-    }
+    }*/
     input->m_PSDContext.push_back(psdFact);
 }
 

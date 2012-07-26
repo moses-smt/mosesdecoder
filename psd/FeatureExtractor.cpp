@@ -63,6 +63,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     fc->SetNamespace('t', false);
 
     // get words in target phrase
+    //lookup in rule index
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
@@ -116,9 +117,14 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     fc->SetNamespace('t', false);
 
     // get words in target phrase
+    //WRONG INDEX !!!
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
+
+
+    //source forms
+    //target forms
     if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, transIt->m_alignment, fc);
 
     if (m_config.GetMostFrequent() && Equals(transIt->m_scores[P_E_F_INDEX], maxProb))
@@ -223,9 +229,23 @@ void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, si
 void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase,
     const AlignmentType &align, FeatureConsumer *fc)
 {
+  /*vector<string> :: const_iterator itr_source;
+  for(itr_source = srcPhrase.begin(); itr_source != srcPhrase.end(); itr_source++)
+  {cerr << "Source : " << *itr_source << endl;}
+
+   vector<string> :: const_iterator itr_target;
+  for(itr_target = tgtPhrase.begin(); itr_target != tgtPhrase.end(); itr_target++)
+  {cerr << "Target : " << *itr_target << endl;}*/
+
   AlignmentType::const_iterator it;
   for (it = align.begin(); it != align.end(); it++)
+  {
+    //cerr << "Alignment : " << it->first << " : " << it->second << endl;
+    CHECK(it->first < srcPhrase.size());
+    CHECK(it->second < tgtPhrase.size());
     fc->AddFeature("pair^" + srcPhrase[it->first] + "^" + tgtPhrase[it->second]);
+  }
+
 }
 
 void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)

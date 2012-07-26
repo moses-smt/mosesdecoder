@@ -65,23 +65,20 @@ void CellContextScoreProducer::CheckIndex(const std::string &targetRep)
     throw runtime_error("Phrase not in index: " + targetRep);
 }
 
-bool CellContextScoreProducer::IsOOV(const std::string &targetRep)
+Translation CellContextScoreProducer::GetPSDTranslation(const string targetRep, const TargetPhrase *tp)
 {
-  return m_ruleIndex.left.find(targetRep) == m_ruleIndex.left.end();
-}
-
-Translation CellContextScoreProducer::GetPSDTranslation(const TargetPhrase *tp)
-{
-
-  VERBOSE(5, "Target Phrase score before adding stateless : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
+  VERBOSE(5, "Target Phrase put into translation vector : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
   Translation psdOpt;
 
   // phrase ID
-  string tgtPhrase = tp->GetStringRep(m_tgtFactors);
-  psdOpt.m_index = m_ruleIndex.left.find(tgtPhrase)->second;
+  VERBOSE(6, "LOOKED UP TARGET REP : " << targetRep << endl);
+  CHECK(m_ruleIndex.left.find(targetRep) != m_ruleIndex.left.end());
+  psdOpt.m_index = m_ruleIndex.left.find(targetRep)->second;
+  VERBOSE(6, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
 
   // alignment
   const AlignmentInfo &alignInfo = tp->GetWordAlignmentInfo();
+  VERBOSE(5, "Added alignment Info : " << alignInfo << std::endl);
   AlignmentInfo::const_iterator it;
   for (it = alignInfo.begin(); it != alignInfo.end(); it++)
     //cerr << "Added Alignment : " << (*it) << endl;
@@ -131,10 +128,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     float sum = 0.0;
     float score = 0.0;
 
-    //If the source is OOV, it will be copied into target
-    if (! IsOOV(targetRepresentations->front()))
+    if(targetRepresentations->size() > 1)
     {
-
         vector<float> losses(targetRepresentations->size());
         vector<Translation> psdOptions;
 
@@ -143,8 +138,12 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         for (tgtRepIt = targetRepresentations->begin(); tgtRepIt != targetRepresentations->end(); tgtRepIt++) {
           CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
           itr_rep = targetMap->find(*tgtRepIt);
+          VERBOSE(6, "CHECKING INDEX FOR : " << *tgtRepIt << endl);
           CheckIndex(*tgtRepIt);
-          psdOptions.push_back(GetPSDTranslation(itr_rep->second));
+
+          //WRONG : PUT TARGET PHRASE WHERE IT SHOULD NOT GO
+          //PASS BOTH ??
+          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));
         }
 
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
@@ -182,50 +181,38 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
         VERBOSE(5, "Obtained prediction : " << sourceSide << endl);
         *lossIt = exp(-*lossIt);
-        VERBOSE(5, "Obtained score : " <<  *lossIt  << endl);
+        VERBOSE(4, "Obtained score : " <<  *lossIt  << endl);
         //put the score into scores
-        std::cerr << "Scores produced by factory : " << ScoreFactory(*lossIt) << std::endl;
         scores.push_back(ScoreFactory(*lossIt));
         sum += *lossIt;
-        std::cerr << "Sum to normalize" << sum << std::endl;
+        VERBOSE(4, "Sum to normalize" << sum << std::endl);
         }
-    }
-    else {
-    std:cerr << "WARNING : TARGET OOV : XX"<< targetRepresentations->front() << "XX" << std::endl;
-    for (size_t i = 0; i < targetRepresentations->size(); i++) {
-      scores.push_back(ScoreFactory(0));}
-    }
-    // normalize
-    if (sum != 0) {
-        vector<ScoreComponentCollection>::iterator colIt;
-        for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-        std::cerr << "Score before normalizing : " << *colIt << std::endl;
-        colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
-        std::cerr << "Score after normalizing : " << *colIt << std::endl;
-        }
-    }
-    else
-    {
-        vector<ScoreComponentCollection>::iterator colIt;
-        for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-        std::cerr << "Score before putting to 0: " << *colIt << std::endl;
-        colIt->ZeroAll();
-        std::cerr << "Score after putting to 0 : " << *colIt << std::endl;
-        }
-    }
 
-    /*else //make sure that when sum is zero, then all factors are 0
-    {
-        vector<ScoreComponentCollection>::iterator colIt;
-        for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-        colIt->Assign(this, log(0));
-        std::cerr << "All score should be zero here : " << *colIt << std::endl;
+        // normalize
+        if (sum != 0) {
+            vector<ScoreComponentCollection>::iterator colIt;
+            for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+            VERBOSE(5, "Score before normalizing : " << *colIt << std::endl);
+            colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
+            VERBOSE(5, "Score after normalizing : " << *colIt << std::endl);
+            }
         }
-    }*/
-    //normalize
+        else
+        {
+            VERBOSE(5, "SUM IS ZERO : SCORES PUT TO 0 " << std::endl);
+            vector<ScoreComponentCollection>::iterator colIt;
+            for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+            colIt->ZeroAll();
+            }
+        }
+    }
+    else //make sure that when sum is zero, then all factors are 0
+    {
+        for (size_t i = 0; i < targetRepresentations->size(); i++) {
+        scores.push_back(ScoreFactory(0));
+        }
+    }
     return scores;
-
-
 }
 
 size_t CellContextScoreProducer::GetNumScoreComponents() const

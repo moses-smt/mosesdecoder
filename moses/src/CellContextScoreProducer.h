@@ -43,17 +43,20 @@ class CellContextScoreProducer : public StatelessFeatureFunction
 
 
     void CheckIndex(const std::string &targetRep);
-    PSD::Translation GetPSDTranslation(const TargetPhrase * tp);
+    PSD::Translation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
 
     private :
     PSD::FeatureExtractor *m_extractor;
     PSD::VWLibraryPredictConsumerFactory  *m_consumerFactory;
     PSD::ExtractorConfig m_extractorConfig;
-    ScoreComponentCollection ScoreFactory(float score);
     PSD::TargetIndexType m_ruleIndex;
     bool IsOOV(const std::string &targetRep);
     bool LoadRuleIndex(const std::string &indexFile);
     std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now
+
+    public :
+    ScoreComponentCollection ScoreFactory(float score);
+
   };
 }//end of namespace
 

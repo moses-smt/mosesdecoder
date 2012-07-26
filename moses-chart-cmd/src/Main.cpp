@@ -140,8 +140,6 @@ private:
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
-
-  std::cerr << "READING INPUT" << std::endl;
   delete source;
   switch(inputType) {
   case SentenceInput:

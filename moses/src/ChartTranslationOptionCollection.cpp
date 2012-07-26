@@ -200,8 +200,8 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         {
             CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
             CHECK(ccsp != NULL);
-            VERBOSE(5, "Calling vw for rule: " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
-            VERBOSE(5, "Calling vw for source context : " << m_source << endl);
+            VERBOSE(3, "Calling vw for rule: " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
+            VERBOSE(4, "Calling vw for source context : " << m_source << endl);
 
             vector<ScoreComponentCollection> scores = ccsp->ScoreRules(
                                                                        transOpt.GetSourceWordsRange().GetStartPos(),
@@ -219,16 +219,16 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
                 CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
                 itr_rep = targetRepMap.find(*itr_targetRep);
-                VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
-                std::cerr << "Score component collection : " << *iterLCSP << std::endl;
+                VERBOSE(3, "Target Phrase score before adding stateless : " << *itr_targetRep << " : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(3, "Score component collection : " << *iterLCSP << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
-                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(3, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }
         }
         //NOTE : What happens with the stack vector?
-        VERBOSE(5, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(3, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
         transOpt.CalcEstimateOfBestScore();
-        VERBOSE(5, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(3, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
 //    #endif // HAVE_VW
 
@@ -304,11 +304,15 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       //targetPhrase->SetScore();
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetScore(m_system->GetWordPenaltyProducer(), wordPenaltyScore);
-       //damt hiero : source phrase built in constructor of target phrase
+
       //targetPhrase->SetSourcePhrase(m_unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       targetPhrase->SetAlignmentInfo("0-0");
 
+      //damt hiero : get cell context score producer and add 0 psdscore
+      CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
+      CHECK(ccsp != NULL);
+      targetPhrase->AddStatelessScore(ccsp->ScoreFactory(0));
 
       // chart rule
       m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
