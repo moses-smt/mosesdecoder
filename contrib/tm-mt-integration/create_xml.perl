@@ -9,16 +9,29 @@ use File::Basename;
 
 sub trim($);
 
+############################################
+# START 
+
+my $inPath = $ARGV[0];
+open(IN,"<".$inPath);
+
+my $TMPROOT=dirname($inPath)  ."/tmp.$$";
+print STDERR "TMPROOT=$TMPROOT \n";
+
+open(RULE,">$TMPROOT.extract");
+open(RULE_INV,">$TMPROOT.extract.inv");
+
 my ($sentenceInd, $score, $source, $input, $target, $align, $path, $count);
 
-while ($sentenceInd = <STDIN>) { 
-	$score = <STDIN>;
-	$source = <STDIN>;
-	$input = <STDIN>;
-	$target = <STDIN>;
-	$align = <STDIN>;
-	$path = <STDIN>;
-	$count = <STDIN>;
+# MAIN LOOP
+while ($sentenceInd = <IN>) { 
+	$score = <IN>;
+	$source = <IN>;
+	$input = <IN>;
+	$target = <IN>;
+	$align = <IN>;
+	$path = <IN>;
+	$count = <IN>;
 	chomp($sentenceInd);
 	chomp($score);
 	chomp($source);
@@ -38,12 +51,26 @@ while ($sentenceInd = <STDIN>) {
 	
 	my ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv) = &create_xml($source, $input, $target, $align, $path);
 
-	print STDOUT $frame."\n";
-	print STDOUT "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $count\n";
-	print STDOUT "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $count\n";
-	print STDOUT "$sentenceInd ||| $score ||| $count\n";
+	#print STDOUT $frame."\n";
+	print RULE "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $count\n";
+	print RULE_INV "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $count\n";
+	#print STDOUT "$sentenceInd ||| $score ||| $count\n";
 
 }
+
+close(IN);
+close(RULE);
+close(RULE_INV);
+
+`LC_ALL=C sort $TMPROOT.extract | gzip -c > $TMPROOT.extract.sorted.gz`;
+`LC_ALL=C sort $TMPROOT.extract.inv | gzip -c > $TMPROOT.extract.inv.sorted.gz`;
+
+my $lex_file = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/in/lex.4";
+
+my $cmd;
+$cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $TMPROOT.extract -lexical-file $lex_file -phrase-translation-table $TMPROOT.pt";
+print STDERR "Executing: $cmd \n";
+`$cmd`;
 
 #######################################################
 sub create_xml {

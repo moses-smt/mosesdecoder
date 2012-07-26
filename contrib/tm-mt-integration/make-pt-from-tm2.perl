@@ -17,7 +17,7 @@ my $pt_file			= $ARGV[5]; #"$data_root/out/pt";
 
 my $cmd;
 
-my $TMPDIR=dirname($pt_file)  ."/tmp.$$";
+my $TMPDIR= "/tmp/tmp.$$";
 $cmd = "mkdir -p $TMPDIR";
 `$cmd`;
 $TMPDIR = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/out/tmp.3196";
