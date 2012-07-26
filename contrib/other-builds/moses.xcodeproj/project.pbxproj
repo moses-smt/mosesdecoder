@@ -24,6 +24,7 @@
 		1EAC363B14CDC79300DF97C3 /* LoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363214CDC79300DF97C3 /* LoaderHiero.h */; };
 		1EAC363C14CDC79300DF97C3 /* LoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */; };
 		1EAC363D14CDC79300DF97C3 /* LoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363414CDC79300DF97C3 /* LoaderStandard.h */; };
+		1EC72A1E15C201D8002D0CBC /* SentenceAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC72A1D15C201D8002D0CBC /* SentenceAlignment.cpp */; };
 		1EC7374614B977AB00238410 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D314B977AA00238410 /* AlignmentInfo.cpp */; };
 		1EC7374714B977AB00238410 /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735D414B977AA00238410 /* AlignmentInfo.h */; };
 		1EC7374814B977AB00238410 /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */; };
@@ -261,6 +262,14 @@
 		1EC7387D14B977AB00238410 /* WordsRange.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7373F14B977AB00238410 /* WordsRange.h */; };
 		1EC7387F14B977AB00238410 /* XmlOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7374214B977AB00238410 /* XmlOption.cpp */; };
 		1EC7388014B977AB00238410 /* XmlOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7374314B977AB00238410 /* XmlOption.h */; };
+		1ECF13E215C1A8CB00EA1DCE /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ECF13E015C1A8CB00EA1DCE /* Vocabulary.cpp */; };
+		1ECF13E315C1A8CB00EA1DCE /* Vocabulary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECF13E115C1A8CB00EA1DCE /* Vocabulary.h */; };
+		1ECF13E715C1AF6800EA1DCE /* SentenceAlignment.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECF13E415C1AF6800EA1DCE /* SentenceAlignment.h */; };
+		1ECF13E815C1AF6800EA1DCE /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ECF13E515C1AF6800EA1DCE /* SuffixArray.cpp */; };
+		1ECF13E915C1AF6800EA1DCE /* SuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECF13E615C1AF6800EA1DCE /* SuffixArray.h */; };
+		1ECF13EF15C1E2C700EA1DCE /* TMMTWrapper.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECF13EE15C1E2C700EA1DCE /* TMMTWrapper.h */; };
+		1ECF13F115C1E2E700EA1DCE /* TMMTWrapper.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ECF13F015C1E2E700EA1DCE /* TMMTWrapper.cpp */; };
+		1ECF13F315C1F75200EA1DCE /* Match.h in Headers */ = {isa = PBXBuildFile; fileRef = 1ECF13F215C1F75200EA1DCE /* Match.h */; };
 		1EDA804F14D19EEF003D2191 /* ApplicableRuleTrie.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EDA803614D19EEF003D2191 /* ApplicableRuleTrie.cpp */; };
 		1EDA805014D19EEF003D2191 /* ApplicableRuleTrie.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA803714D19EEF003D2191 /* ApplicableRuleTrie.h */; };
 		1EDA805614D19EEF003D2191 /* IntermediateVarSpanNode.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EDA804314D19EEF003D2191 /* IntermediateVarSpanNode.h */; };
@@ -322,6 +331,7 @@
 		1EAC363214CDC79300DF97C3 /* LoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderHiero.h; path = ../../moses/src/RuleTable/LoaderHiero.h; sourceTree = "<group>"; };
 		1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderStandard.cpp; path = ../../moses/src/RuleTable/LoaderStandard.cpp; sourceTree = "<group>"; };
 		1EAC363414CDC79300DF97C3 /* LoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderStandard.h; path = ../../moses/src/RuleTable/LoaderStandard.h; sourceTree = "<group>"; };
+		1EC72A1D15C201D8002D0CBC /* SentenceAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SentenceAlignment.cpp; path = "../../moses/src/tm-mt/SentenceAlignment.cpp"; sourceTree = "<group>"; };
 		1EC735D314B977AA00238410 /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = ../../moses/src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1EC735D414B977AA00238410 /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = ../../moses/src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = ../../moses/src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
@@ -561,6 +571,14 @@
 		1EC7373F14B977AB00238410 /* WordsRange.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordsRange.h; path = ../../moses/src/WordsRange.h; sourceTree = "<group>"; };
 		1EC7374214B977AB00238410 /* XmlOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = XmlOption.cpp; path = ../../moses/src/XmlOption.cpp; sourceTree = "<group>"; };
 		1EC7374314B977AB00238410 /* XmlOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = XmlOption.h; path = ../../moses/src/XmlOption.h; sourceTree = "<group>"; };
+		1ECF13E015C1A8CB00EA1DCE /* Vocabulary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocabulary.cpp; path = "../../moses/src/tm-mt/Vocabulary.cpp"; sourceTree = "<group>"; };
+		1ECF13E115C1A8CB00EA1DCE /* Vocabulary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocabulary.h; path = "../../moses/src/tm-mt/Vocabulary.h"; sourceTree = "<group>"; };
+		1ECF13E415C1AF6800EA1DCE /* SentenceAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceAlignment.h; path = "../../moses/src/tm-mt/SentenceAlignment.h"; sourceTree = "<group>"; };
+		1ECF13E515C1AF6800EA1DCE /* SuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SuffixArray.cpp; path = "../../moses/src/tm-mt/SuffixArray.cpp"; sourceTree = "<group>"; };
+		1ECF13E615C1AF6800EA1DCE /* SuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SuffixArray.h; path = "../../moses/src/tm-mt/SuffixArray.h"; sourceTree = "<group>"; };
+		1ECF13EE15C1E2C700EA1DCE /* TMMTWrapper.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TMMTWrapper.h; path = "../../moses/src/tm-mt/TMMTWrapper.h"; sourceTree = "<group>"; };
+		1ECF13F015C1E2E700EA1DCE /* TMMTWrapper.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TMMTWrapper.cpp; path = "../../moses/src/tm-mt/TMMTWrapper.cpp"; sourceTree = "<group>"; };
+		1ECF13F215C1F75200EA1DCE /* Match.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Match.h; path = "../../moses/src/tm-mt/Match.h"; sourceTree = "<group>"; };
 		1EDA803614D19EEF003D2191 /* ApplicableRuleTrie.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ApplicableRuleTrie.cpp; path = ../../moses/src/Scope3Parser/ApplicableRuleTrie.cpp; sourceTree = "<group>"; };
 		1EDA803714D19EEF003D2191 /* ApplicableRuleTrie.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ApplicableRuleTrie.h; path = ../../moses/src/Scope3Parser/ApplicableRuleTrie.h; sourceTree = "<group>"; };
 		1EDA804314D19EEF003D2191 /* IntermediateVarSpanNode.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = IntermediateVarSpanNode.h; path = ../../moses/src/Scope3Parser/IntermediateVarSpanNode.h; sourceTree = "<group>"; };
@@ -629,6 +647,7 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1ECF13DE15C1A82400EA1DCE /* tm-mt */,
 				1EDA803514D19ECD003D2191 /* Scope3Parser */,
 				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
 				1EC7365B14B977AA00238410 /* LM */,
@@ -940,6 +959,22 @@
 			path = ../../moses/src/LM;
 			sourceTree = "<group>";
 		};
+		1ECF13DE15C1A82400EA1DCE /* tm-mt */ = {
+			isa = PBXGroup;
+			children = (
+				1ECF13F215C1F75200EA1DCE /* Match.h */,
+				1ECF13E415C1AF6800EA1DCE /* SentenceAlignment.h */,
+				1EC72A1D15C201D8002D0CBC /* SentenceAlignment.cpp */,
+				1ECF13E515C1AF6800EA1DCE /* SuffixArray.cpp */,
+				1ECF13E615C1AF6800EA1DCE /* SuffixArray.h */,
+				1ECF13E015C1A8CB00EA1DCE /* Vocabulary.cpp */,
+				1ECF13E115C1A8CB00EA1DCE /* Vocabulary.h */,
+				1ECF13EE15C1E2C700EA1DCE /* TMMTWrapper.h */,
+				1ECF13F015C1E2E700EA1DCE /* TMMTWrapper.cpp */,
+			);
+			name = "tm-mt";
+			sourceTree = "<group>";
+		};
 		1EDA803414D19EB8003D2191 /* CYKPlusParser */ = {
 			isa = PBXGroup;
 			children = (
@@ -1157,6 +1192,11 @@
 				1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */,
 				1E0BA41915B70E5F00AC70E1 /* PhraseDictionaryTMExtract.h in Headers */,
 				1E619EA215B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h in Headers */,
+				1ECF13E315C1A8CB00EA1DCE /* Vocabulary.h in Headers */,
+				1ECF13E715C1AF6800EA1DCE /* SentenceAlignment.h in Headers */,
+				1ECF13E915C1AF6800EA1DCE /* SuffixArray.h in Headers */,
+				1ECF13EF15C1E2C700EA1DCE /* TMMTWrapper.h in Headers */,
+				1ECF13F315C1F75200EA1DCE /* Match.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1344,6 +1384,10 @@
 				1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */,
 				1E0BA41815B70E5F00AC70E1 /* PhraseDictionaryTMExtract.cpp in Sources */,
 				1E619EA115B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp in Sources */,
+				1ECF13E215C1A8CB00EA1DCE /* Vocabulary.cpp in Sources */,
+				1ECF13E815C1AF6800EA1DCE /* SuffixArray.cpp in Sources */,
+				1ECF13F115C1E2E700EA1DCE /* TMMTWrapper.cpp in Sources */,
+				1EC72A1E15C201D8002D0CBC /* SentenceAlignment.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -58,9 +58,13 @@ namespace Moses
     void CleanUp(const InputType& source);
     
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const
-    {}
+    {
+      assert(false);
+    }
     virtual DecodeType GetDecodeType() const
-    {}
+    {
+      assert(false);
+    }
     
     TO_STRING();
     
@@ -85,6 +89,7 @@ namespace Moses
     const LMList *m_languageModels;
     const WordPenaltyProducer *m_wpProducer;
     const std::vector<float> *m_weight;
+    
 
   };
   
