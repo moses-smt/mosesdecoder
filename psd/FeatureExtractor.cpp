@@ -205,8 +205,8 @@ void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, Fe
 
   for (scoreIt = scoreIDs.begin(); scoreIt != scoreIDs.end(); scoreIt++) {
     for (binIt = bins.begin(); binIt != bins.end(); binIt++) {
-      float binnedLog = (int)log(scores[*scoreIt]);
-      if (binnedLog < *binIt || Equals(binnedLog, *binIt))
+      float logScore = log(scores[*scoreIt]);
+      if (logScore < *binIt || Equals(logScore, *binIt))
         fc->AddFeature("sc^" + SPrint<size_t>(*scoreIt) + "_" + SPrint(*binIt));
     }
   }
