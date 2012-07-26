@@ -15,11 +15,8 @@ sub trim($);
 my $inPath = $ARGV[0];
 open(IN,"<".$inPath);
 
-my $TMPROOT=dirname($inPath)  ."/tmp.$$";
-print STDERR "TMPROOT=$TMPROOT \n";
-
-open(RULE,">$TMPROOT.extract");
-open(RULE_INV,">$TMPROOT.extract.inv");
+open(RULE,">$inPath.extract");
+open(RULE_INV,">$inPath.extract.inv");
 
 my ($sentenceInd, $score, $source, $input, $target, $align, $path, $count);
 
@@ -62,13 +59,13 @@ close(IN);
 close(RULE);
 close(RULE_INV);
 
-`LC_ALL=C sort $TMPROOT.extract | gzip -c > $TMPROOT.extract.sorted.gz`;
-`LC_ALL=C sort $TMPROOT.extract.inv | gzip -c > $TMPROOT.extract.inv.sorted.gz`;
+`LC_ALL=C sort $inPath.extract | gzip -c > $inPath.extract.sorted.gz`;
+`LC_ALL=C sort $inPath.extract.inv | gzip -c > $inPath.extract.inv.sorted.gz`;
 
 my $lex_file = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/in/lex.4";
 
 my $cmd;
-$cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $TMPROOT.extract -lexical-file $lex_file -phrase-translation-table $TMPROOT.pt";
+$cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $inPath.extract -lexical-file $lex_file -phrase-translation-table $inPath.pt";
 print STDERR "Executing: $cmd \n";
 `$cmd`;
 
