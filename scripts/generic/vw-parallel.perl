@@ -2,9 +2,11 @@
 
 # example
 # 1st arg: num_cores
-# 2nd arg: training file (used with vw -f)
+# 2nd arg: training file (built by extract-psd)
 # 3rd arg: cache prefix (used with vw --cache_file)
-# vw-parallel.perl 8 train_file vw_cache /home/fraser/src/vowpal_wabbit/bin/vw --passes 10 --csoaa_ldf m --hash all --noconstant --exact_adaptive_norm --power_t 0.5 -q st
+# 4th arg: model output file (used with vw -f)
+# 5th arg: path to VW
+# vw-parallel.perl 8 train_file vw_cache vw_model /home/fraser/src/vowpal_wabbit/ --passes 10 --csoaa_ldf m --hash all --noconstant --exact_adaptive_norm --power_t 0.5 -q st
 
 
 use strict;
@@ -17,78 +19,71 @@ sub NumStr($);
 
 print "Started ".localtime() ."\n";
 
-my $numParallel	= shift;
-die "usage error" unless defined($numParallel);
+my ($numParallel, $trainFile, $cacheFile, $modelFile, $vwPath, @args) = @ARGV;
+die "Error in args. Usage: vw-parallel.perl cores train_file cache_prefix model_file vw_path vw_args" if ! defined $vwPath;
+
+my $vwCmd = "$vwPath/bin/vw " . join(" ", @args);
+
 $numParallel = 1 if $numParallel < 1;
 
 my $TMPDIR="tmp.$$";
 mkdir $TMPDIR;
 
-my $cmd;
-
 my $fileCount = 0;
 if ($numParallel <= 1)
-{ # don't do parallel. Just link the extract file into place
-  $cmd = "ln -s $extractFile $TMPDIR/extract.0.gz";
+{ # don't do parallel. Just link the train file into place
+  my $cmd = "ln -s $trainFile $TMPDIR/train.0.gz";
   print STDERR "$cmd \n";
   systemCheck($cmd);
   
   $fileCount = 1;
 }
 else
-{	# cut up extract file into smaller mini-extract files.
-	if ($extractFile =~ /\.gz$/) {
-		open(IN, "gunzip -c $extractFile |") || die "can't open pipe to $extractFile";
+{
+  # count the number of lines first
+  my $totalLines;
+	if ($trainFile =~ /\.gz$/) {
+    $totalLines = `zcat $trainFile | wc -l`;
+	}	else {
+    $totalLines = `wc -l < $trainFile`;
+	}
+
+  my $linesPerFile = int($totalLines / $numParallel);
+
+  # cut up train file into smaller mini-train files.
+	if ($trainFile =~ /\.gz$/) {
+		open(IN, "gunzip -c $trainFile |") || die "can't open pipe to $trainFile";
 	}
 	else {
-		open(IN, $extractFile) || die "can't open $extractFile";
+		open(IN, $trainFile) || die "can't open $trainFile";
 	}
 	
-	my $filePath  = "$TMPDIR/extract.$fileCount.gz";
+	my $filePath  = "$TMPDIR/train.$fileCount.gz";
 	open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";
 	
 	my $lineCount = 0;
 	my $line;
-	my $prevSourcePhrase = "";
 	while ($line=<IN>) 
 	{
 		chomp($line);
+  	print OUT "$line\n";
 		++$lineCount;
 	
-		if ($lineCount > $EXTRACT_SPLIT_LINES)
-		{ # over line limit. Cut off at next source phrase change
-			my $sourcePhrase = GetSourcePhrase($line);
-			
-			if ($prevSourcePhrase eq "")
-			{ # start comparing
-				$prevSourcePhrase = $sourcePhrase;
-			}
-			elsif ($sourcePhrase eq $prevSourcePhrase)
-			{ # can't cut off yet. Do nothing      
-			}
-			else
-			{ # cut off, open next min-extract file & write to that instead
-				close OUT;
-	
-				$prevSourcePhrase = "";
-				$lineCount = 0;
-				++$fileCount;
-				my $filePath  = $fileCount;
-				$filePath     = "$TMPDIR/extract.$filePath.gz";
-				open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";
-			}
-		}
-		else
-		{ # keep on writing to current mini-extract file
-		}
-	
-		print OUT "$line\n";
-	
-	}
+    if ($lineCount > $linesPerFile && $line eq "") {
+      close OUT;
+      $lineCount = 0;
+      ++$fileCount;
+      $filePath = "$TMPDIR/train.$fileCount.gz";
+      open (OUT, "| gzip -c > $filePath") or die "error starting gzip $!";
+    }
+  }
 	close OUT;
 	++$fileCount;
 }
 
+if ($fileCount != $numParallel) {
+  die "error: Number of files $fileCount different from number of processes $numParallel";
+}
 
 # create run scripts
 my @runFiles = (0..($numParallel-1));
@@ -100,13 +95,13 @@ for (my $i = 0; $i < $numParallel; ++$i)
 }
 
 # write scoring of mini-extracts to run scripts
-for (my $i = 0; $i < $fileCount; ++$i)
+for (my $i = 0; $i < $numParallel; ++$i)
 {
   my $numStr = NumStr($i);
 
-  my $fileInd = $i % $numParallel;
-  my $fh = $runFiles[$fileInd];
-  my $cmd = "$scoreCmd $TMPDIR/extract.$i.gz $lexFile $TMPDIR/phrase-table.half.$numStr.gz $otherExtractArgs\n";
+  my $fh = $runFiles[$i];
+  my $cmd = "zcat $TMPDIR/train.$i.gz ";
+  $cmd .= "| $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id 0 --save_per_pass";
   print $fh $cmd;
 }
 
@@ -118,6 +113,9 @@ for (my $i = 0; $i < $numParallel; ++$i)
   systemCheck("chmod +x $path");
 }
 
+# start VW master process
+my $masterPid = RunFork("$vwPath/cluster/spanning_tree");
+
 # run each score script in parallel
 my @children;
 for (my $i = 0; $i < $numParallel; ++$i)
@@ -127,78 +125,14 @@ for (my $i = 0; $i < $numParallel; ++$i)
 	push(@children, $pid);
 }
 
-# wait for everything is finished
+# wait for children to finish
 foreach (@children) {
 	waitpid($_, 0);
 }
 
-# merge & sort
-$cmd = "\n\nOH SHIT. This should have been filled in \n\n";
-if ($fileCount == 1 && !$doSort)
-{
-  my $numStr = NumStr(0);
-  $cmd = "mv $TMPDIR/phrase-table.half.$numStr.gz $ptHalf";
-}
-else
-{
-  $cmd = "zcat $TMPDIR/phrase-table.half.*.gz";
+kill 1, $masterPid;
 
-  if ($doSort) {
-    $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
-  }
-
-  $cmd .= " | gzip -c > $ptHalf";
-}
-print STDERR $cmd;
-systemCheck($cmd);
-
-# merge coc
-my $numStr = NumStr(0);
-my $cocPath = "$TMPDIR/phrase-table.half.$numStr.gz.coc";
-
-if (-e $cocPath)
-{
-  my @arrayCOC;
-  my $line;
-
-  # 1st file
-  open(FHCOC, $cocPath) || die "can't open pipe to $cocPath";
-  while ($line = <FHCOC>)
-  {
-    my $coc = int($line);
-    push(@arrayCOC, $coc);
-  }
-  close(FHCOC);
-
-  # all other files
-  for (my $i = 1; $i < $fileCount; ++$i)
-  {
-  	$numStr = NumStr($i);
-    $cocPath = "$TMPDIR/phrase-table.half.$numStr.gz.coc";
-    open(FHCOC, $cocPath) || die "can't open pipe to $cocPath";
-    my $arrayInd = 0;
-    while ($line = <FHCOC>)
-    {
-      my $coc = int($line);
-      $arrayCOC[$arrayInd] += $coc;
-
-      ++$arrayInd;
-    }
-
-    close(FHCOC);
-  }
-
-  # output
-  $cocPath = "$ptHalf.coc";
-  open(FHCOC, ">", $cocPath) or die "cannot open $cocPath: $!";
-  for (my $i = 0; $i < @arrayCOC; ++$i)
-  {
-    print FHCOC $arrayCOC[$i]."\n";
-  }
-  close(FHCOC);
-}
-
-$cmd = "rm -rf $TMPDIR \n";
+my $cmd = "rm -rf $TMPDIR $modelFile.*\n";
 print STDERR $cmd;
 systemCheck($cmd);
 
@@ -221,6 +155,7 @@ sub RunFork($)
   }
   return $pid;
 }
+
 sub systemCheck($)
 {
   my $cmd = shift;
@@ -230,15 +165,6 @@ sub systemCheck($)
     exit(1);
   }
 }
-
-sub GetSourcePhrase($)
-{
-  my $line = shift;
-  my $pos = index($line, "|||");
-  my $sourcePhrase = substr($line, 0, $pos);
-  return $sourcePhrase;
-}
-
 
 sub NumStr($)
 {
@@ -261,5 +187,3 @@ sub NumStr($)
     }
     return $numStr;
 }
-
-
