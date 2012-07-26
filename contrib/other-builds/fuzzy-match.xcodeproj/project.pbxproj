@@ -15,6 +15,7 @@
 		1E806DCC15BED3AC001914A2 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCA15BED3AC001914A2 /* Vocabulary.cpp */; };
 		1E806DCE15BED3BC001914A2 /* fuzzy-match.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */; };
 		1E806DD115BED3D4001914A2 /* SuffixArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */; };
+		1ECD60A815C15E28004172A4 /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1ECD60A515C15D3A004172A4 /* Util.cpp */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -50,6 +51,7 @@
 		1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = "fuzzy-match.cpp"; path = "../tm-mt-integration/fuzzy-match.cpp"; sourceTree = "<group>"; };
 		1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SuffixArray.cpp; path = "../tm-mt-integration/SuffixArray.cpp"; sourceTree = "<group>"; };
 		1E806DD015BED3D4001914A2 /* SuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SuffixArray.h; path = "../tm-mt-integration/SuffixArray.h"; sourceTree = "<group>"; };
+		1ECD60A515C15D3A004172A4 /* Util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Util.cpp; path = "../tm-mt-integration/Util.cpp"; sourceTree = "<group>"; };
 		1ED87EED15BED331003E47AA /* fuzzy-match */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = "fuzzy-match"; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -77,6 +79,7 @@
 				1E42EFD715C00D6300E937EB /* Match.h */,
 				1E42EFD315C00C0A00E937EB /* SentenceAlignment.h */,
 				1E42EFD215C00BAE00E937EB /* Util.h */,
+				1ECD60A515C15D3A004172A4 /* Util.cpp */,
 				1E806DCF15BED3D4001914A2 /* SuffixArray.cpp */,
 				1E806DD015BED3D4001914A2 /* SuffixArray.h */,
 				1E806DCD15BED3BC001914A2 /* fuzzy-match.cpp */,
@@ -162,6 +165,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				1ECD60A815C15E28004172A4 /* Util.cpp in Sources */,
 				1E42EFB615BEFAEB00E937EB /* fuzzy-match2.cpp in Sources */,
 				1E42EFB715BEFAEB00E937EB /* SuffixArray.cpp in Sources */,
 				1E42EFB815BEFAEB00E937EB /* SuffixArray.h in Sources */,
@@ -266,6 +270,7 @@
 				1E42EFB515BEFAD300E937EB /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		1ED87EE715BED32F003E47AA /* Build configuration list for PBXProject "fuzzy-match" */ = {
 			isa = XCConfigurationList;

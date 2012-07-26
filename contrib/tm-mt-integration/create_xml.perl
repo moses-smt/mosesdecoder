@@ -9,30 +9,39 @@ use File::Basename;
 
 sub trim($);
 
-my ($source, $input, $target, $align, $path);
+my ($sentenceInd, $score, $source, $input, $target, $align, $path, $count);
 
-while ($source = <STDIN>) { 
+while ($sentenceInd = <STDIN>) { 
+	$score = <STDIN>;
+	$source = <STDIN>;
 	$input = <STDIN>;
 	$target = <STDIN>;
 	$align = <STDIN>;
 	$path = <STDIN>;
+	$count = <STDIN>;
+	chomp($sentenceInd);
+	chomp($score);
 	chomp($source);
 	chomp($input);
 	chomp($target);
 	chomp($align);
 	chomp($path);
+	chomp($count);
+	$source = trim($sentenceInd);
+	$source = trim($score);
 	$source = trim($source);
 	$input 	= trim($input);
 	$target	= trim($target);
 	$align	= trim($align);
 	$path	= trim($path);
+	$count	= trim($count);
 	
 	my ($frame,$rule_s,$rule_t,$rule_alignment,$rule_alignment_inv) = &create_xml($source, $input, $target, $align, $path);
 
 	print STDOUT $frame."\n";
-	print STDOUT "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $target_count\n";
-	print STDOUT "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $target_count\n";
-	print STDOUT "$i ||| $match_score ||| $target_count\n";
+	print STDOUT "$rule_s [X] ||| $rule_t [X] ||| $rule_alignment ||| $count\n";
+	print STDOUT "$rule_t [X] ||| $rule_s [X] ||| $rule_alignment_inv ||| $count\n";
+	print STDOUT "$sentenceInd ||| $score ||| $count\n";
 
 }
 

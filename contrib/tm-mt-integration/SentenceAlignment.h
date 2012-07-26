@@ -9,6 +9,7 @@
 #ifndef fuzzy_match_SentenceAlignment_h
 #define fuzzy_match_SentenceAlignment_h
 
+#include <sstream>
 #include "Vocabulary.h"
 
 extern Vocabulary vocabulary;

@@ -47,7 +47,7 @@ while( my $match = <MATCH> ) {
 
     $score =~ /^(\d+) (.+)/ || die;
     my ($i,$match_score) = ($1,$2);
-	print STDERR "i=$i\n";
+	print STDERR "i=$i match_score=$match_score\n";
 	
     # construct frame
     if ($sentence < 1e9 && $sentence >= 0) {

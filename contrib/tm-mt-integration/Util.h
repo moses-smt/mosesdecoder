@@ -9,6 +9,16 @@
 #ifndef fuzzy_match_Util_h
 #define fuzzy_match_Util_h
 
+#include <vector>
+#include <sstream>
+#include "Vocabulary.h"
+
+class SentenceAlignment;
+
+void load_corpus( const char* fileName, std::vector< std::vector< WORD_ID > > &corpus );
+void load_target( const char* fileName, std::vector< std::vector< SentenceAlignment > > &corpus);
+void load_alignment( const char* fileName, std::vector< std::vector< SentenceAlignment > > &corpus );
+
 /**
  * Convert vector of type T to string
  */

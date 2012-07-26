@@ -8,8 +8,9 @@
 #include <cstring>
 #include <time.h>
 #include <fstream>
-
+#include "SentenceAlignment.h"
 #include "fuzzy-match2.h"
+#include "SuffixArray.h"
 
 /** This implementation is explained in
        Koehn and Senellart: "Fast Approximate String Matching 
@@ -72,8 +73,6 @@ int main(int argc, char* argv[])
 		exit(1);
 	}
 	
-	cerr << "loading corpus...\n";
-
 	load_corpus(argv[optind], input);
 	load_corpus(argv[optind+1], source);
 	load_target(argv[optind+2], targetAndAlignment);
@@ -110,16 +109,15 @@ int main(int argc, char* argv[])
 
 	// looping through all input sentences...
 	cerr << "looping...\n";
-	for(unsigned int i=0;i<input.size();i++)
+	for(unsigned int sentenceInd = 0; sentenceInd < input.size(); sentenceInd++)
 	{
 		clock_t start_clock = clock();
 		// if (i % 10 == 0) cerr << ".";
-		int input_id = i; // clean up this mess!
 
 		// establish some basic statistics
 
 		// int input_length = compute_length( input[i] );
-		int input_length = input[i].size();
+		int input_length = input[sentenceInd].size();
 		int best_cost = input_length * (100-min_match) / 100 + 1;
 
 		int match_count = 0; // how many substring matches to be considered
@@ -127,7 +125,7 @@ int main(int argc, char* argv[])
 
 		// find match ranges in suffix array
 		vector< vector< pair< SuffixArray::INDEX, SuffixArray::INDEX > > > match_range;
-		for(size_t start=0;start<input[i].size();start++) 
+		for(size_t start=0;start<input[sentenceInd].size();start++) 
 		{
 			SuffixArray::INDEX prior_first_match = 0;
 			SuffixArray::INDEX prior_last_match = suffixArray.GetSize()-1;
@@ -135,9 +133,9 @@ int main(int argc, char* argv[])
 			bool stillMatched = true;
 			vector< pair< SuffixArray::INDEX, SuffixArray::INDEX > > matchedAtThisStart;
 			//cerr << "start: " << start;
-			for(int word=start; stillMatched && word<input[i].size(); word++)
+			for(int word=start; stillMatched && word<input[sentenceInd].size(); word++)
 			{
-				substring.push_back( vocabulary.GetWord( input[i][word] ) );
+				substring.push_back( vocabulary.GetWord( input[sentenceInd][word] ) );
 
 				// only look up, if needed (i.e. no unnecessary short gram lookups)
 //				if (! word-start+1 <= short_match_max_length( input_length ) )
@@ -165,7 +163,7 @@ int main(int argc, char* argv[])
 		map< int, int > sentence_match_word_count;
 
 		// go through all matches, longest first
-		for(int length = input[i].size(); length >= 1; length--)
+		for(int length = input[sentenceInd].size(); length >= 1; length--)
 		{
 			// do not create matches, if these are handled by the short match function
 			if (length <= short_match_max_length( input_length ) )
@@ -174,7 +172,7 @@ int main(int argc, char* argv[])
 			}
 
 			unsigned int count = 0;
-			for(int start = 0; start <= input[i].size() - length; start++)
+			for(int start = 0; start <= input[sentenceInd].size() - length; start++)
 			{
 				if (match_range[start].size() >= length)
 				{
@@ -267,7 +265,7 @@ int main(int argc, char* argv[])
 		int pruned_match_count = 0;
 		if (short_match_max_length( input_length ))
 		{
-			init_short_matches( input[i] );
+			init_short_matches( input[sentenceInd] );
 		}
 		vector< int > best_tm;
 		typedef map< int, vector< Match > >::iterator I;
@@ -317,7 +315,7 @@ int main(int argc, char* argv[])
 			    pruned.size()>=10) // to prevent worst cases
 			{
 				string path;
-				cost = sed( input[input_id], source[tmID], path, false );
+				cost = sed( input[sentenceInd], source[tmID], path, false );
 				if (cost <  best_cost) 
 				{
 					best_cost = cost;
@@ -349,25 +347,25 @@ int main(int argc, char* argv[])
     // create xml and extract files
     string inputStr, sourceStr;
     for (size_t pos = 0; pos < input_length; ++pos) {
-      inputStr += vocabulary.GetWord(input[i][pos]) + " ";
+      inputStr += vocabulary.GetWord(input[sentenceInd][pos]) + " ";
     }
     
 		// do not try to find the best ... report multiple matches
 		if (multiple_flag) {
-			int input_letter_length = compute_length( input[input_id] );
+			int input_letter_length = compute_length( input[sentenceInd] );
 			for(int si=0; si<best_tm.size(); si++) {
 				int s = best_tm[si];
 				string path;
-				unsigned int letter_cost = sed( input[input_id], source[s], path, true );
+				unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
 				// do not report multiple identical sentences, but just their count
-				cout << i << " "; // sentence number
+				cout << sentenceInd << " "; // sentence number
 				cout << letter_cost << "/" << input_letter_length << " ";
 				cout << "(" << best_cost <<"/" << input_length <<") ";
 				cout << "||| " << s << " ||| " << path << endl;
         
         vector<WORD_ID> &sourceSentence = source[s];
         vector<SentenceAlignment> &targets = targetAndAlignment[s];
-        create_extract(sourceSentence, targets, inputStr, path);
+        create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, path);
 
 			}
 		} // if (multiple_flag)
@@ -378,12 +376,12 @@ int main(int argc, char* argv[])
       int best_match = -1;
       int best_letter_cost;
       if (lsed_flag) {
-        best_letter_cost = compute_length( input[input_id] ) * min_match / 100 + 1;
+        best_letter_cost = compute_length( input[sentenceInd] ) * min_match / 100 + 1;
         for(int si=0; si<best_tm.size(); si++)
         {
           int s = best_tm[si];
           string path;
-          unsigned int letter_cost = sed( input[input_id], source[s], path, true );
+          unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
           if (letter_cost < best_letter_cost)
           {
             best_letter_cost = letter_cost;
@@ -396,7 +394,7 @@ int main(int argc, char* argv[])
       else {
         if (best_tm.size() > 0) {
           string path;
-          sed( input[input_id], source[best_tm[0]], path, false );
+          sed( input[sentenceInd], source[best_tm[0]], path, false );
           best_path = path;
           best_match = best_tm[0];
         }
@@ -408,7 +406,7 @@ int main(int argc, char* argv[])
            << " (validation: " << (1000 * (clock_validation_sum) / CLOCKS_PER_SEC) << ")"
            << " )" << endl;
       if (lsed_flag) {
-        cout << best_letter_cost << "/" << compute_length( input[input_id] ) << " (";
+        cout << best_letter_cost << "/" << compute_length( input[sentenceInd] ) << " (";
       }
       cout << best_cost <<"/" << input_length;
       if (lsed_flag) 	cout << ")";
@@ -417,7 +415,7 @@ int main(int argc, char* argv[])
       // creat xml & extracts
       vector<WORD_ID> &sourceSentence = source[best_match];
       vector<SentenceAlignment> &targets = targetAndAlignment[best_match];
-      create_extract(sourceSentence, targets, inputStr, best_path);
+      create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, best_path);
 
     } // else if (multiple_flag)
     
@@ -427,7 +425,7 @@ int main(int argc, char* argv[])
 	
 }
 
-void create_extract(const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path)
+void create_extract(int sentenceInd, int cost, const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path)
 {
   string sourceStr;
   for (size_t pos = 0; pos < sourceSentence.size(); ++pos) {
@@ -444,14 +442,18 @@ void create_extract(const vector< WORD_ID > &sourceSentence, const vector<Senten
     string alignStr = sentenceAlignment.getAlignmentString();
     
     inputFile 
+      << sentenceInd << endl
+      << cost << endl
       << sourceStr << endl 
       << inputStr << endl
       << targetStr << endl
       << alignStr << endl
-      << path << endl;
+      << path << endl
+      << sentenceAlignment.count << endl;
+
   }
   
-  string cmd = string("perl create_xml.perl ") + inputFileName;
+  string cmd = string("perl create_xml.perl < ") + inputFileName;
   cerr << cmd << endl;
   inputFile.close();
   
