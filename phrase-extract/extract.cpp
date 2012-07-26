@@ -67,7 +67,6 @@ typedef map <int, set<int> > HSentenceVertices;
   void insertVertex(HSentenceVertices &, int, int);
   void insertPhraseVertices(HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &,
                           int, int, int, int);
-  string getOrientString(REO_POS, REO_MODEL_TYPE);
 
   bool ge(int, int);
   bool le(int, int);
@@ -75,9 +74,42 @@ typedef map <int, set<int> > HSentenceVertices;
 
   bool isAligned (SentenceAlignment &, int, int);
 
+string getOrientString(REO_POS, REO_MODEL_TYPE);
+
+bool ge(int, int);
+bool le(int, int);
+bool lt(int, int);
+
+void extractBase(SentenceAlignment &);
+void extract(SentenceAlignment &);
+void addPhrase(SentenceAlignment &, int, int, int, int, string &);
+bool isAligned (SentenceAlignment &, int, int);
+
+bool allModelsOutputFlag = false;
+
+bool wordModel = false;
+REO_MODEL_TYPE wordType = REO_MSD;
+bool phraseModel = false;
+REO_MODEL_TYPE phraseType = REO_MSD;
+bool hierModel = false;
+REO_MODEL_TYPE hierType = REO_MSD;
+
+
+Moses::OutputFileStream extractFile;
+Moses::OutputFileStream extractFileInv;
+Moses::OutputFileStream extractFileOrientation;
+Moses::OutputFileStream extractFileSentenceId;
+Moses::OutputFileStream extractFilePsd;
+int maxPhraseLength;
+bool orientationFlag = false;
+bool translationFlag = true;
+bool sentenceIdFlag = false; //create extract file with sentence id
+bool onlyOutputSpanInfo = false;
+bool gzOutput = false;
+bool outputPsd = false; // output positions of PSD targets and labels
 
 }
-namespace MosesTraining{
+
 class ExtractTask : public Moses::Task{
         private:
         size_t m_id;
@@ -107,9 +139,8 @@ private:
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
-  
+
 };
-}
 
 int main(int argc, char* argv[])
 {
@@ -126,6 +157,8 @@ int main(int argc, char* argv[])
     cerr<< "| --threads NUM ";
     #endif
     cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput ]\n";
+  if (argc < 6) {
+    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --OutputPsdInfo | --NoTTable | --SentenceId]\n";
     exit(1);
   }
 
@@ -145,11 +178,15 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
       options.initOrientationFlag(true);
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
+
       options.initTranslationFlag(false);
+      translationFlag = false;
+    } else if (strcmp(argv[i],"--OutputPsdInfo") == 0) {
+      outputPsd = true;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
-      options.initSentenceIdFlag(true);  
+      options.initSentenceIdFlag(true);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
-      options.initGzOutput(true);  
+      options.initGzOutput(true);
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -255,7 +292,6 @@ int main(int argc, char* argv[])
     extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
-
     Moses::OutputCollector* extractCollector = new Moses::OutputCollector(&extractFile);//r
     Moses::OutputCollector* extractCollectorInv = new Moses::OutputCollector(&extractFileInv);//r
     Moses::OutputCollector* extractCollectorOrientation = new Moses::OutputCollector(&extractFileOrientation);//r
@@ -265,7 +301,10 @@ int main(int argc, char* argv[])
      Moses::ThreadPool pool(thread_count);
      pool.SetQueueLimit(1000);
 #endif
-
+  if (outputPsd) {
+    string fileNameExtractPsd = fileNameExtract + ".psd" + (gzOutput?".gz":"");
+    extractFilePsd.Open(fileNameExtractPsd.c_str());
+  }
   int i=0;
   while(true) {
     i++;
@@ -322,19 +361,20 @@ int main(int argc, char* argv[])
     if (options.isTranslationFlag()) {
       extractFile.Close();
       extractFileInv.Close();
-      
+
     }
-    if (options.isOrientationFlag()){ 
+    if (options.isOrientationFlag()){
 	extractFileOrientation.Close();
 	}
     if (options.isSentenceIdFlag()) {
       extractFileSentenceId.Close();
     }
+    if (outputPsd){
+      extractFilePsd.Close();
+    }
   }
 }
 
-namespace MosesTraining
-{
 void ExtractTask::Run() {
   extract(*m_sentence);
   writePhrasesToFile();
@@ -342,7 +382,6 @@ void ExtractTask::Run() {
   m_extractedPhrasesInv.clear();
   m_extractedPhrasesOri.clear();
   m_extractedPhrasesSid.clear();
-
 }
 
 void ExtractTask::extract(SentenceAlignment &sentence)
@@ -735,6 +774,39 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
   if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "||| ";
 
+  if (outputPsd) {
+    extractFilePsd << sentence.sentenceID << "\t";
+    extractFilePsd << startF << "\t" << endF << "\t";
+    extractFilePsd << startE << "\t" << endE << "\t";
+  }
+
+  for(int fi=startF; fi<=endF; fi++) {
+    if (translationFlag) extractFile << sentence.source[fi] << " ";
+    if (orientationFlag) extractFileOrientation << sentence.source[fi] << " ";
+    if (sentenceIdFlag) extractFileSentenceId << sentence.source[fi] << " ";
+    if (outputPsd) extractFilePsd << sentence.source[fi];
+    if (outputPsd && fi != endF) extractFilePsd << " ";
+  }
+  if (translationFlag) extractFile << "||| ";
+  if (orientationFlag) extractFileOrientation << "||| ";
+  if (sentenceIdFlag) extractFileSentenceId << "||| ";
+  if (outputPsd) extractFilePsd << "\t";
+
+  // target
+  for(int ei=startE; ei<=endE; ei++) {
+    if (translationFlag) extractFile << sentence.target[ei] << " ";
+    if (translationFlag) extractFileInv << sentence.target[ei] << " ";
+    if (orientationFlag) extractFileOrientation << sentence.target[ei] << " ";
+    if (sentenceIdFlag) extractFileSentenceId << sentence.target[ei] << " ";
+    if (outputPsd) extractFilePsd << sentence.target[ei];
+    if (outputPsd && ei != endE) extractFilePsd << " ";
+  }
+  if (translationFlag) extractFile << "|||";
+  if (translationFlag) extractFileInv << "||| ";
+  if (orientationFlag) extractFileOrientation << "||| ";
+  if (sentenceIdFlag) extractFileSentenceId << "||| ";
+  if (outputPsd) extractFilePsd << endl;
+
   // source (for inverse)
 
  if (m_options.isTranslationFlag()) {
@@ -836,4 +908,3 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
 }
 
 }
-

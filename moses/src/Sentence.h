@@ -60,6 +60,7 @@ private:
 
 
 public:
+
   Sentence();
 
   InputTypeEnum GetType() const {

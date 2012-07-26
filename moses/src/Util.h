@@ -58,6 +58,12 @@ namespace Moses
 #define VERBOSE(level,str) { if (StaticData::Instance().GetVerboseLevel() >= level) { TRACE_ERR(str); } }
 #define IFVERBOSE(level) if (StaticData::Instance().GetVerboseLevel() >= level)
 
+const float EPS = 0.0001; // for floating point comparisons
+inline bool Equals(float a, float b)
+{
+  return fabs(a - b) < EPS;
+}
+
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 const std::string ToLower(const std::string& str);
@@ -245,6 +251,18 @@ std::string Join(const std::string& delimiter, const std::vector<T>& items)
   outstr << items[0];
   for(unsigned int i = 1; i < items.size(); i++)
     outstr << delimiter << items[i];
+  return outstr.str();
+}
+
+// Convert any container to string
+template<typename It>
+std::string Join(const std::string &delim, It begin, It end)
+{
+  std::ostringstream outstr;
+  if (begin != end)
+    outstr << *begin++;
+  for ( ; begin != end; ++begin)
+    outstr << delim << *begin;
   return outstr.str();
 }
 

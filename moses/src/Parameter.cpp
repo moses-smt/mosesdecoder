@@ -146,6 +146,27 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
+
+//  #ifdef HAVE_VW
+  AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
+  //Weight of cell-context dependent feature
+  AddParam("weight-lc", "wlc", "weight for cell context feature");
+  //File to load cell-context dependent feature;
+  AddParam("lc-model-file", "lcm", "file for cell context feature");
+  AddParam("rule-index", "rli", "file with indexes of targetRepresentations of rules");
+  AddParam("psd-hiero-context", "psdc", "input data with rich factored annotation for PSD");
+  AddParam("psd-hiero-config", "psdf", "PSD configuration file for feature extraction");
+//  #endif
+
+  AddParam("weight-left-context", "wlc", "weight for context-aware phrase scorer");
+  AddParam("left-context-ttable", "lctt", "phrase table for context-aware phrase scorer");
+//#ifdef HAVE_VW
+  AddParam("weight-psd", "psd", "weight for phrase sense disambiguation");
+  AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation");
+  AddParam("psd-index", "psdi", "file with indexes of target phrases");
+  AddParam("psd-context", "psdc", "input data with rich factored annotation for PSD");
+  AddParam("psd-config", "psdf", "PSD configuration file for feature extraction");
+//#endif
 }
 
 Parameter::~Parameter()
@@ -275,14 +296,14 @@ bool Parameter::Validate()
   PARAM_MAP::const_iterator iterParams;
   for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
     const std::string &key = iterParams->first;
-    
+
     if (m_valid.find(key) == m_valid.end())
     {
       UserMessage::Add("Unknown parameter " + key);
       noErrorFlag = false;
     }
   }
-  
+
 
   // required parameters
   if (m_setting["ttable-file"].size() == 0) {

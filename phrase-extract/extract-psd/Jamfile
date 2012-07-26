@@ -1,0 +1,7 @@
+alias header_paths : : : : <include>. <include>.. <include>../../moses/src <include>../.. <include>../../psd ;
+
+obj TaggedCorpus.o : TaggedCorpus.cpp header_paths ;
+
+obj PsdPhraseUtils.o : PsdPhraseUtils.cpp header_paths ;
+
+exe extract-psd : psd_extract_features.cpp TaggedCorpus.o ..//..//psd//psd ..//tables-core ..//InputFileStream  ..//SafeGetline.h PsdPhraseUtils.o header_paths ..//..//boost_iostreams ;

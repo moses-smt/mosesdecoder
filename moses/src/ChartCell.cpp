@@ -17,8 +17,7 @@
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
- ***********************************************************************/
-
+**********************************************************************/
 #include <algorithm>
 #include "ChartCell.h"
 #include "ChartTranslationOptionCollection.h"
@@ -104,7 +103,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // pluck things out of queue and add to hypo collection
   const size_t popLimit = staticData.GetCubePruningPopLimit();
-  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) 
+  for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops)
   {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);

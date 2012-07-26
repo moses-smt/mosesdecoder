@@ -58,13 +58,16 @@ public:
   /** create phrase from vectors of words	*/
   Phrase(const std::vector< const Word* > &mergeWords);
 
+  /**damt hiero : copy constructor */
+  Phrase(const Phrase &copy);
+
   /** destructor */
   virtual ~Phrase();
 
   /** Fills phrase with words from format string, typically from phrase table or sentence input
   	* \param factorOrder factor types of each element in 2D string vector
   	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter between factors.  
+  	*	\param factorDelimiter delimiter between factors.
   */
   void CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter);
 
@@ -89,6 +92,7 @@ public:
   bool IsCompatible(const Phrase &inputPhrase) const;
   bool IsCompatible(const Phrase &inputPhrase, FactorType factorType) const;
   bool IsCompatible(const Phrase &inputPhrase, const std::vector<FactorType>& factorVec) const;
+
 
   //! number of words
   inline size_t GetSize() const {

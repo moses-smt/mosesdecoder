@@ -40,6 +40,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
+#include "CellContextScoreProducer.h"
+
+//damt hiero : TODO remove this, is not usefull anymore
+#include "LeftContextScoreProducer.h"
+
+// #ifdef HAVE_VW
+#include "PSDScoreProducer.h"
+//#endif
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -48,6 +56,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif
+
+// #ifdef HAVE_VW
+#include "CellContextScoreProducer.h"
+// #endif
 
 using namespace std;
 
@@ -70,6 +82,7 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
     if (*i > max) max = *i;
   return max;
 }
+
 
 StaticData StaticData::s_instance;
 
@@ -141,7 +154,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if(m_parameter->GetParam("sort-word-alignment").size()) {
     m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
   }
-  
+
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -167,6 +180,64 @@ bool StaticData::LoadData(Parameter *parameter)
 
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+  }
+
+//#ifdef HAVE_VW
+  if (m_parameter->GetParam("psd-model").size() > 0) {
+    if (m_parameter->GetParam("psd-index").size() <= 0) {
+      UserMessage::Add(string("--psd-index not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-psd").size() <= 0) {
+      UserMessage::Add(string("weight-psd not specified"));
+      return false;
+    }
+    float PSDWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
+    m_PSDScoreProducer = new PSDScoreProducer(m_scoreIndexManager, PSDWeight);
+    if (! m_PSDScoreProducer->Initialize(m_parameter->GetParam("psd-model")[0],
+      m_parameter->GetParam("psd-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
+      UserMessage::Add(string("Failed to load phrase index from " + m_parameter->GetParam("psd-index")[0]));
+      return false;
+    }
+  }
+//#endif // HAVE_VW
+
+ // #ifdef HAVE_VW
+ if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
+    if (m_parameter->GetParam("rule-index").size() <= 0) {
+      UserMessage::Add(string("--rule-index not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-lc").size() <= 0) {
+      UserMessage::Add(string("weight-lc not specified"));
+      return false;
+    }
+    float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
+    m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
+    if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
+      m_parameter->GetParam("rule-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
+      UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("rule-index")[0]));
+      return false;
+    }
+  }
+// #endif // HAVE_VW
+
+  m_threadCount = 1;
+
+  if (m_parameter->GetParam("left-context-ttable").size() > 0) {
+    float leftContextWeight = Scan<float>(m_parameter->GetParam("weight-left-context")[0]);
+    m_leftContextScoreProducer = new LeftContextScoreProducer(m_scoreIndexManager, leftContextWeight);
+    m_leftContextScoreProducer->LoadScores(m_parameter->GetParam("left-context-ttable")[0]);
   }
 
   // n-best
@@ -408,6 +479,31 @@ bool StaticData::LoadData(Parameter *parameter)
   m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
                                 Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
 
+// #ifdef HAVE_VW
+ if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
+    if (m_parameter->GetParam("rule-index").size() <= 0) {
+      UserMessage::Add(string("--rule-index not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("psd-config").size() <= 0) {
+      UserMessage::Add(string("psd-config not specified"));
+      return false;
+    }
+    if (m_parameter->GetParam("weight-lc").size() <= 0) {
+      UserMessage::Add(string("weight-lc not specified"));
+      return false;
+    }
+    float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
+    m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
+    if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
+      m_parameter->GetParam("rule-index")[0],
+      m_parameter->GetParam("psd-config")[0])) {
+      UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("rule-index")[0]));
+      return false;
+    }
+  }
+// #endif // HAVE_VW
+
   m_threadCount = 1;
   const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
   if (!threadInfo.empty()) {
@@ -452,7 +548,7 @@ bool StaticData::LoadData(Parameter *parameter)
     InputFileStream constraintFile(m_constraintFileName);
 
     std::string line;
-    
+
     long sentenceID = GetStartTranslationId() - 1;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
@@ -501,7 +597,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	  if (!LoadSyntacticLanguageModel()) return false;
 	}
 #endif
-	
+
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -587,9 +683,21 @@ bool StaticData::LoadData(Parameter *parameter)
     //Instigate dictionary loading
     m_translationSystems.find(config[0])->second.ConfigDictionaries();
 
-
+// #ifdef HAVE_VW
+    //Register Cell Context feature in manager
+    if(m_cellContext != NULL)
+    m_translationSystems.find(config[0])->second.AddFeatureFunction(m_cellContext);
+// #endif
 
     //Add any other features here.
+    if (m_leftContextScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
+    }
+//#ifdef HAVE_VW
+    if (m_PSDScoreProducer != NULL ) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_PSDScoreProducer);
+    }
+//#endif // HAVE_VW
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
@@ -628,7 +736,7 @@ StaticData::~StaticData()
   RemoveAllInColl(m_generationDictionary);
   RemoveAllInColl(m_reorderModels);
   RemoveAllInColl(m_globalLexicalModels);
-	
+
 #ifdef HAVE_SYNLM
 	delete m_syntacticLanguageModel;
 #endif
@@ -644,21 +752,29 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
+  delete m_leftContextScoreProducer;
+//#ifdef HAVE_VW
+  delete m_PSDScoreProducer;
+//#endif
 
   //delete m_parameter;
 
+// #ifdef HAVE_VW
+  // delete cell context feature
+  delete m_cellContext;
+// #endif
+
   // memory pools
   Phrase::FinalizeMemPool();
-
 }
 
 #ifdef HAVE_SYNLM
   bool StaticData::LoadSyntacticLanguageModel() {
     cerr << "Loading syntactic language models..." << std::endl;
-    
+
     const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
     const vector<string> files = m_parameter->GetParam("slmodel-file");
-    
+
     const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
       TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
       : 0;
@@ -677,11 +793,11 @@ StaticData::~StaticData()
 
       //cout.setf(ios::scientific,ios::floatfield);
       //cerr.setf(ios::scientific,ios::floatfield);
-      
-      // create the feature
-      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
 
-      /* 
+      // create the feature
+      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth);
+
+      /*
       /////////////////////////////////////////
       // BEGIN LANE's UNSTABLE EXPERIMENT :)
       //
@@ -701,7 +817,7 @@ StaticData::~StaticData()
       }
 
     }
-    
+
     return true;
 
   }
@@ -833,7 +949,7 @@ bool StaticData::LoadLanguageModels()
     for(size_t i=0; i<lmVector.size(); i++) {
       LanguageModel* lm = NULL;
       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager); 
+        lm = languageModelsLoaded[lmVector[i]]->Duplicate(m_scoreIndexManager);
       } else {
         vector<string>	token		= Tokenize(lmVector[i]);
         if (token.size() != 4 && token.size() != 5 ) {
@@ -1012,13 +1128,13 @@ bool StaticData::LoadPhraseTables()
         // it only work with binrary file. This is a hack
 
         m_numInputScores=m_parameter->GetParam("weight-i").size();
-        
+
         if (implementation == Binary)
         {
           for(unsigned k=0; k<m_numInputScores; ++k)
             weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
         }
-        
+
         if(m_parameter->GetParam("link-param-count").size())
           m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
 
@@ -1036,7 +1152,7 @@ bool StaticData::LoadPhraseTables()
             return false;
           }
         }
-        
+
       }
       if (!m_inputType) {
         m_numInputScores=0;
@@ -1086,11 +1202,6 @@ bool StaticData::LoadPhraseTables()
         , targetPath, alignmentsFile);
 
       m_phraseDictionary.push_back(pdf);
-
-
-
-
-
       index++;
     }
   }

@@ -76,11 +76,11 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   // get list of all rules that apply to spans at same starting position
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
-  
+
   const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
 
   // loop through the rules
-  // (note that expandableDottedRuleList can be expanded as the loop runs 
+  // (note that expandableDottedRuleList can be expanded as the loop runs
   //  through calls to ExtendPartialRuleApplication())
   for (size_t ind = 0; ind < expandableDottedRuleList.size(); ++ind) {
     // rule we are about to extend
@@ -136,7 +136,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
       endPos = absEndPos - 1;
       stackInd = relEndPos;
     }
-    else 
+    else
     {
       endPos = absEndPos;
       stackInd = relEndPos + 1;
@@ -167,7 +167,11 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
 
   dottedRuleCol.Clear(relEndPos+1);
 
+  //damt hiero : if have vw then do not prune here but wait until rescoring with context
+  #ifdef HAVE_VW
+  #else
   outColl.ShrinkToLimit();
+  #endif
 }
 
 // Given a partial rule application ending at startPos-1 and given the sets of
@@ -244,8 +248,8 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
         dottedRuleColl.Add(stackInd, rule);
       }
     }
-  } 
-  else 
+  }
+  else
   {
     // loop over possible expansions of the rule
     PhraseDictionaryNodeSCFG::NonTerminalMap::const_iterator p;

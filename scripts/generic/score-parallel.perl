@@ -215,9 +215,9 @@ if (-e $cocPath)
   close(FHCOC);
 }
 
-$cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
-systemCheck($cmd);
+$cmd = "rm -rf $TMPDIR";
+print STDERR "WARNING, SKIPPING: $cmd\n";
+#systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 

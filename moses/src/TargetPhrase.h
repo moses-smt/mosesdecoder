@@ -56,16 +56,15 @@ protected:
   Phrase const* m_sourcePhrase;
 
   const AlignmentInfo *m_alignmentInfo;
+  // damt_hiero: stroing alignments between words in each rule
+  const AlignmentInfo* m_wordAlignmentInfo;
   Word m_lhsTarget;
 
 public:
-  TargetPhrase();
-  TargetPhrase(std::string out_string);
-  TargetPhrase(const Phrase &);
-  ~TargetPhrase();
-
-  //! used by the unknown word handler- these targets
-  //! don't have a translation score, so wp is the only thing used
+  TargetPhrase(Phrase);
+  TargetPhrase(std::string out_string,Phrase sourcePhrase);
+  TargetPhrase(const Phrase &, Phrase);
+  ~TargetPhrase();  //! don't have a translation score, so wp is the only thing used
   void SetScore(const TranslationSystem* system);
 
   //!Set score for Sentence XML target options
@@ -95,15 +94,21 @@ public:
   void SetScoreChart(const ScoreProducer* translationScoreProducer
                      ,const Scores &scoreVector
                      ,const std::vector<float> &weightT
-                     ,const LMList &languageModels
+                     ,const LMList &languageModelss
                      ,const WordPenaltyProducer* wpProducer);
 
   // used by for unknown word proc in chart decoding
   void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
 
+  /** Adds score produced by a stateless feature before decoding */
+  void AddStatelessScore(const ScoreComponentCollection &score);
 
   // used when creating translations of unknown words:
   void ResetScore();
+
+  //! Damt hiero : used to add score obtained using context information
+  void AddToFullScore(float score);
+
   void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
@@ -153,9 +158,13 @@ public:
   void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
     m_alignmentInfo = alignmentInfo;
   }
+  void SetWordAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
 
   const AlignmentInfo &GetAlignmentInfo() const {
     return *m_alignmentInfo;
+  }
+  const AlignmentInfo &GetWordAlignmentInfo() const{ 
+    return *m_wordAlignmentInfo; 
   }
 
   TO_STRING();

@@ -41,4 +41,20 @@ float ChartTranslationOption::CalcEstimateOfBestScore(
   return estimateOfBestScore;
 }
 
+//!damt hiero : neeed to set estimate of best score when recomputing with context, needs
+void ChartTranslationOption::CalcEstimateOfBestScore()
+{
+  const TargetPhrase * targetPhrase = (*m_targetPhraseCollection->begin());
+  float estimateOfBestScore = targetPhrase->GetFutureScore();
+  for (StackVec::const_iterator p = m_stackVec.begin(); p != m_stackVec.end();
+       ++p) {
+    const HypoList *stack = *p;
+    assert(stack);
+    assert(!stack->empty());
+    const ChartHypothesis &bestHypo = **(stack->begin());
+    estimateOfBestScore += bestHypo.GetTotalScore();
+  }
+  m_estimateOfBestScore = estimateOfBestScore;
+}
+
 }

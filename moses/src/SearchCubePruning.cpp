@@ -41,7 +41,8 @@ SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, 
   :Search(manager)
   ,m_source(source)
   ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_initialTargetPhrase(source.m_initialTargetPhrase)
+  //!damt hiero : source phrase has to be passed to construct target phrase, maybe fix an initial source phrase
+  ,m_initialTargetPhrase(source.m_initialTargetPhrase,source.m_initialSourcePhrase)
   ,m_start(clock())
   ,m_transOptColl(transOptColl)
 {

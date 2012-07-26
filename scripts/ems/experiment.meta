@@ -378,10 +378,20 @@ build-reordering
 	default-name: model/reordering-table
 build-ttable
 	in: extracted-phrases lexical-translation-table
-	out: phrase-translation-table
+	out: phrase-translation-table-nonfiltered
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
-	default-name: model/phrase-table
+	default-name: model/phrase-table-nonfiltered
 	ignore-if: suffix-array
+sigtest-filter
+  in: phrase-translation-table-nonfiltered corpus
+  out: phrase-translation-table
+  pass-unless: use-sigtest-filter
+  default-name: model/phrase-table
+psd-build-model
+  in: phrase-translation-table extracted-phrases psd-corpus GENERAL:psd-config
+  out: psd-output
+  ignore-unless: use-psd
+  default-name: model/psd
 build-generation
 	in: corpus
 	out: generation-table
@@ -402,10 +412,10 @@ build-sparse-lexical
         default-name: model/most-frequent-words
 	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
 create-config
-	in: reordering-table phrase-translation-table generation-table sparse-lexical INTERPOLATED-LM:binlm LM:binlm
+	in: reordering-table phrase-translation-table generation-table sparse-lexical psd-output GENERAL:psd-config INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini psd-output
 	default-name: model/moses.ini
 	error: Unknown option
 binarize-config
@@ -549,7 +559,7 @@ split-reference
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:psd-output GENERAL:psd-config
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings
@@ -653,7 +663,7 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:psd-output GENERAL:psd-config
 	out: filtered-dir
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage

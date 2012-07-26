@@ -104,6 +104,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       throw runtime_error(msg);
     }
   }
+
   Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 
   if (staticData.GetSearchAlgorithm() == ChartDecoding) {

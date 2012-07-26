@@ -62,6 +62,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
     return;
   }
 
+  //FB TODO : Pruning without sentence context : disable or do other estimate
   float score = ChartTranslationOption::CalcEstimateOfBestScore(tpc, stackVec);
 
   // If the rule limit has already been reached then don't add the option

@@ -58,10 +58,18 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+//damt score producer
+
+class CellContextScoreProducer;
+
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
 class TranslationSystem;
+class LeftContextScoreProducer;
+//#ifdef HAVE_VW
+class PSDScoreProducer;
+//#endif
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -99,6 +107,9 @@ protected:
   m_earlyDiscardingThreshold,
   m_translationOptionThreshold,
   m_wordDeletionWeight;
+
+  //Cell context feature function
+  CellContextScoreProducer * m_cellContext;
 
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
@@ -141,6 +152,10 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  LeftContextScoreProducer * m_leftContextScoreProducer;
+//#ifdef HAVE_VW
+  PSDScoreProducer * m_PSDScoreProducer;
+//#endif
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
@@ -201,6 +216,7 @@ protected:
   bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
+  int m_cellContextDecoding; //! use cell context decoding
 
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
@@ -211,7 +227,7 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -236,6 +252,9 @@ protected:
   bool LoadGlobalLexicalModel();
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
+
+  //! load cell context feature
+  bool LoadCellContextScoreProducer();
 
 public:
 
@@ -371,6 +390,9 @@ public:
   bool IsDetailedTranslationReportingEnabled() const {
     return !m_detailedTranslationReportingFilePath.empty();
   }
+  bool IsAlignmentReportingEnabled() const {
+        return !m_alignmentOutputFile.empty();
+  }
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
@@ -432,8 +454,8 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  LMList GetLMList() const { 
-    return m_languageModel; 
+  LMList GetLMList() const {
+    return m_languageModel;
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;
@@ -609,9 +631,25 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
-  
+
   long GetStartTranslationId() const
   { return m_startTranslationId; }
+
+  //! damt hiero access cell context option
+    int GetCellContextOption() const
+    {return m_cellContextDecoding;}
+
+    CellContextScoreProducer *GetCellContextScoreProducer() const
+    {
+        return m_cellContext;
+    }
+
+//#ifdef HAVE_VW
+  PSDScoreProducer *GetPSDScoreProducer() const {
+    return m_PSDScoreProducer;
+  }
+//#endif
+
 };
 
 }

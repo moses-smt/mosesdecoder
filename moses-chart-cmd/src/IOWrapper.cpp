@@ -45,7 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTranslationOption.h"
 #include "ChartHypothesis.h"
-
+#include "CellContextScoreProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -58,7 +58,9 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const FactorMask							&inputFactorUsed
                      , size_t												nBestSize
                      , const std::string							&nBestFilePath
-                     , const std::string							&inputFilePath)
+                     , const std::string							&inputFilePath
+                     //damt hiero : context file path
+                     , const std::string &contextFilePath)
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
@@ -70,6 +72,8 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
+  //damt hiero : input containing context
+  ,m_contextFilePath(contextFilePath)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -77,6 +81,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_inputStream = &std::cin;
   } else {
     m_inputStream = new InputFileStream(inputFilePath);
+  }
+
+  if (m_contextFilePath.empty()) {
+    m_contextStream = &std::cin;
+  } else {
+    m_contextStream = new InputFileStream(contextFilePath);
   }
 
   m_surpressSingleBestOutput = false;
@@ -112,6 +122,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
+  // word alignment reporting
+  if (staticData.IsAlignmentReportingEnabled()) {
+        const std::string &alignFile = staticData.GetAlignmentOutputFile();
+        m_wordAlignmentStream = new std::ofstream(alignFile.c_str());
+        m_wordAlignmentOutputCollector = new Moses::OutputCollector(m_wordAlignmentStream);
+  }
 }
 
 IOWrapper::~IOWrapper()
@@ -119,6 +135,12 @@ IOWrapper::~IOWrapper()
   if (!m_inputFilePath.empty()) {
     delete m_inputStream;
   }
+
+  //damt hiero
+  if (!m_contextFilePath.empty()) {
+    delete m_contextStream;
+  }
+
   if (!m_surpressSingleBestOutput) {
     // outputting n-best to file, rather than stdout. need to close file and delete obj
     delete m_nBestStream;
@@ -129,6 +151,12 @@ IOWrapper::~IOWrapper()
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
+
+  //damt hiero : maybe check for option
+  if(m_wordAlignmentStream != NULL)
+  {delete m_wordAlignmentStream;}
+  if(m_wordAlignmentOutputCollector != NULL)
+  {delete m_wordAlignmentOutputCollector;}
 }
 
 void IOWrapper::ResetTranslationId() {
@@ -137,16 +165,53 @@ void IOWrapper::ResetTranslationId() {
 
 InputType*IOWrapper::GetInput(InputType* inputType)
 {
+  cerr << "GETTING INPUT" << endl;
+
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
       if (x>=m_translationId) m_translationId = x+1;
     } else inputType->SetTranslationId(m_translationId++);
+
+    //damt hiero : also read context file
+    if(!ReadContext(*m_contextStream, inputType))
+    {
+        cerr << "Warning : If using DAMT, no context read"<< endl;
+    }
 
     return inputType;
   } else {
     delete inputType;
     return NULL;
   }
+}
+
+//Damt hiero : read context
+int IOWrapper::ReadContext(std::istream& in, InputType* input)
+{
+    cerr << "READING CONTEXT" << endl;
+
+    string line;
+    if (getline(in, line, '\n').eof())
+    return 0;
+
+    vector<string> words = Tokenize(line, " ");
+    for (size_t i = 0; i < words.size(); i++) {
+    SetPSDContext(Tokenize(words[i], "|"),input);
+    }
+    return 1;
+}
+
+void IOWrapper::SetPSDContext(const std::vector<std::string> &psdFact, InputType* input)
+{
+    cerr << "SETTING PSD CONTEXT" << endl;
+
+    //damt hiero debugging
+    std::vector<std::string> :: const_iterator itr_fact;
+    for(itr_fact = psdFact.begin(); itr_fact != psdFact.end(); itr_fact++)
+    {
+        std::cerr << "Added source factor : " << *itr_fact << std::endl;
+    }
+    input->m_PSDContext.push_back(psdFact);
 }
 
 /***
@@ -287,10 +352,10 @@ void WriteApplicationContext(std::ostream &out,
 
 }  // anonymous namespace
 
-void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+void OutputTranslationOptions(std::ostream &out, std::ostream &alignOut, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
   static ApplicationContext applicationContext;
-
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   // recursive
   if (hypo != NULL) {
     ReconstructApplicationContext(*hypo, sentence, applicationContext);
@@ -303,12 +368,21 @@ void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, co
         << " " << hypo->GetTotalScore() << hypo->GetScoreBreakdown()
         << endl;
   }
-
+  //damt_hiero: Printing out word alignments in the user-specified file
+  AlignVec alignments = hypo->GetCurrTargetPhrase().GetWordAlignmentInfo().GetSortedAlignments();
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it)
+  {
+        const std::pair<size_t,size_t> &alignment = **it;
+        //Word srcWord=hypo->GetCurrTargetPhrase().GetWord(alignment.first);
+        //if (srcWord.IsNonTerminal()) continue;
+        alignOut << alignment.first + hypo->GetCurrSourceRange().GetStartPos()-1 << "-" << alignment.second + hypo->GetCurrSourceRange().GetStartPos()-1 << "  ";
+  }
   const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
-    OutputTranslationOptions(out, prevHypo, sentence, translationId);
+    OutputTranslationOptions(out, alignOut, prevHypo, sentence, translationId);
   }
 }
 
@@ -321,9 +395,11 @@ void IOWrapper::OutputDetailedTranslationReport(
     return;
   }
   std::ostringstream out;
-  OutputTranslationOptions(out, hypo, sentence, translationId);
+  std::ostringstream alignOut;
+  OutputTranslationOptions(out, alignOut, hypo, sentence, translationId);
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
+  m_wordAlignmentOutputCollector->Write(translationId, alignOut.str()+'\n');
 }
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
@@ -474,6 +550,15 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
       }
     }
 
+    //Cell context features
+    CellContextScoreProducer *ccsProducer = StaticData::Instance().GetCellContextScoreProducer();
+    if (ccsProducer != NULL) {
+      out << " " << ccsProducer->GetScoreProducerWeightShortName(0) << ":";
+      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(ccsProducer);
+      for (size_t j = 0; j<scores.size(); ++j) {
+        out << " " << scores[j];
+      }
+    }
 
     // total
     out << " |||" << path.GetTotalScore();

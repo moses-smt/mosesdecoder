@@ -940,6 +940,12 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-ttable') {
 	    &define_training_build_ttable($i);
         }
+  elsif ($DO_STEP[$i] eq 'TRAINING:psd-build-model') {
+      &define_training_psd_model($i);
+        }
+  elsif ($DO_STEP[$i] eq 'TRAINING:sigtest-filter') {
+      &define_training_sigtest_filter($i);
+        }
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
         }
@@ -1717,6 +1723,7 @@ sub define_training_extract_phrases {
 
     my $extract_settings = &get("TRAINING:extract-settings");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
+    $cmd .= " -extract-psd-anot " if &get("TRAINING:use-psd");
 
     &create_step($step_id,$cmd);
 }
@@ -1733,14 +1740,83 @@ sub define_training_build_ttable {
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    if ((defined($word_report) && $word_report eq "yes") ||
-	(defined($word_alignment) && $word_alignment eq "yes")) {
+## PSD always requires the word alignment
+#    if ((defined($word_report) && $word_report eq "yes") ||
+#	(defined($word_alignment) && $word_alignment eq "yes")) {
       $cmd .= "-phrase-word-alignment ";
-    }
+#    }
 
     &create_step($step_id,$cmd);
 }
 
+sub define_training_psd_model {
+  my $step_id = shift;
+  my ($out, $phrase_table, $extract, $src_corpus, $psd_config) = &get_output_and_input($step_id);
+  my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+  my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+
+  die "no psd_config" unless defined($psd_config);
+
+  my $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd";
+  my $cmd = "$psd_extractor $extract.psd.gz $src_corpus $phrase_table.gz $psd_config $out.train.gz $out.index";
+
+  my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+  if ($hierarchical) {
+      my $pt_fix = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd-chart/ReformatRuleTable.pl";
+      $cmd = "zcat $phrase_table.gz | $pt_fix | gzip > $phrase_table.psd.gz";
+      $psd_extractor = &get("GENERAL:moses-src-dir") . "/bin/extract-psd-chart";
+      # TODO: fix .psd.parse.xml problem below, should be .parse.xml
+      $cmd .= " && $psd_extractor $extract.psd.gz $src_corpus $src_corpus.parse.xml $phrase_table.psd.gz $psd_config $out.train.gz $out.index";
+  }
+
+  my $vw = &get("GENERAL:vw-path") . "/bin/vw";
+  die "ERROR: no psd_config" unless defined($psd_config);
+  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5";
+  $cmd .= " && zcat $out.train | $vw $vw_opts --cache_file $out.vwcache -f $out.model";
+
+  &create_step($step_id, $cmd);
+}
+
+sub define_training_sigtest_filter {
+  my $step_id = shift;
+  my ($out, $phrase_table, $corpus) = &get_output_and_input($step_id);
+  my $salm = &get("GENERAL:salm-path");
+  my $salm_bin = "$salm/Bin/Linux/Index/IndexSA.O32";
+  my $src = "$corpus." . &get("GENERAL:input-extension");
+  my $tgt = "$corpus." . &get("GENERAL:output-extension");
+  my $filter = &get("GENERAL:moses-src-dir") . "/contrib/sigtest-filter/filter-pt";
+
+  ### Single threaded version of sigtest directly in experiment.perl with no wrapper
+  # my $cmd = "$salm_bin $src && $salm_bin $tgt";
+  # $cmd .= " && zcat $phrase_table | $filter -e $tgt -f $src -l a+e -n 30 ";
+  # my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+  # if ($hierarchical) {
+  #     $cmd .= "-h ";
+  # }
+  # $cmd .= "> $out";
+
+  my $cores = &get("GENERAL:cores");
+  $cores = 1 if not defined($cores);
+
+  my $cmd = "";
+  $cmd .= &get("GENERAL:moses-src-dir") . "/contrib/sigtest-filter/sigtest-parallel.perl ";
+  $cmd .= "$cores ";
+  $cmd .= "$filter ";
+  $cmd .= '"-l a+e -n 30';
+  my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+  if ($hierarchical) {
+      $cmd .= " -h";
+  }
+  $cmd .= '" ';
+  $cmd .= "$phrase_table ";
+  #$cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
+  $cmd .= "$salm_bin ";
+  $cmd .= "$src ";
+  $cmd .= "$tgt ";
+  $cmd .= "$out ";
+
+  &create_step($step_id, $cmd);
+}
 
 sub define_training_build_reordering {
     my ($step_id) = @_;
@@ -1778,7 +1854,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_output,$psd_config,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1824,6 +1900,16 @@ sub define_training_create_config {
       $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
+    }
+
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    if (&get("TRAINING:use-psd")) {
+      die "ERROR: no psd_config" unless defined($psd_config);
+      die "ERROR: no psd_output" unless defined $psd_output;
+      my $psd_model = "$psd_output.model";
+      my $psd_index = "$psd_output.index";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index -psd-config $psd_config ";
     }
 
     # additional settings for syntax models
@@ -2190,7 +2276,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_output, $psd_config) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2251,6 +2337,15 @@ sub define_tuningevaluation_filter {
         unless $glue_grammar_file;
       $cmd .= "-glue-grammar-file $glue_grammar_file ";
     }
+
+    if (&get("TRAINING:use-psd")) {
+      die "ERROR: psd_index is not defined" unless defined($psd_config);
+      die "ERROR: no psd_output" unless defined $psd_output;
+      my $psd_model = "$psd_output.model";
+      my $psd_index = "$psd_output.index";
+      $cmd .= " -psd-model $psd_model -psd-index $psd_index -psd-config $psd_config ";
+    }
+
     $cmd .= "-lm 0:3:$dir "; # dummy
     $cmd .= "-config $config\n";
     

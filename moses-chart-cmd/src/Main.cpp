@@ -140,6 +140,8 @@ private:
 
 bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source)
 {
+
+  std::cerr << "READING INPUT" << std::endl;
   delete source;
   switch(inputType) {
   case SentenceInput:
@@ -204,30 +206,30 @@ int main(int argc, char* argv[])
       for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
       TRACE_ERR(endl);
     }
-  
+
     IOWrapper::FixPrecision(cout);
     IOWrapper::FixPrecision(cerr);
-  
+
     // load data structures
     Parameter parameter;
     if (!parameter.LoadParam(argc, argv)) {
       return EXIT_FAILURE;
     }
-  
+
     const StaticData &staticData = StaticData::Instance();
     if (!StaticData::LoadDataStatic(&parameter))
       return EXIT_FAILURE;
-  
+
     if (parameter.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
-  
+
     CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
-  
+
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
-  
+
     // check on weights
     vector<float> weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
@@ -243,14 +245,14 @@ int main(int argc, char* argv[])
       TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
       return EXIT_FAILURE;
     }
-  
+
     if (ioWrapper == NULL)
       return EXIT_FAILURE;
-  
+
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
-  
+
     // read each sentence & decode
     InputType *source=0;
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
@@ -265,16 +267,16 @@ int main(int argc, char* argv[])
       delete task;
 #endif
     }
-  
+
 #ifdef WITH_THREADS
     pool.Stop(true);  // flush remaining jobs
 #endif
-  
+
     delete ioWrapper;
-  
+
     IFVERBOSE(1)
     PrintUserTime("End.");
-  
+
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
@@ -296,15 +298,31 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
   FactorMask inputFactorUsed(inputFactorOrder);
 
   // io
-  if (staticData.GetParam("input-file").size() == 1) {
+  if ( (staticData.GetParam("input-file").size() == 1) && (staticData.GetParam("psd-context").size() > 0 ) )
+  {
+      VERBOSE(2,"IO from File" << endl);
+      VERBOSE(2,"Context from File" << endl);
+      string filePath1 = staticData.GetParam("input-file")[0];
+      string filePath2 = staticData.GetParam("psd-context")[0];
+
+      ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
+                              , staticData.GetNBestSize()
+                              , staticData.GetNBestFilePath()
+                              , filePath1
+                              , filePath2);
+  }
+  else if(staticData.GetParam("input-file").size() == 1 && staticData.GetParam("psd-context").size() == 0)
+  {
     VERBOSE(2,"IO from File" << endl);
+    VERBOSE(2,"Context from STDIN" << endl);
     string filePath = staticData.GetParam("input-file")[0];
 
     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
                               , staticData.GetNBestSize()
                               , staticData.GetNBestFilePath()
                               , filePath);
-  } else {
+  }
+  else {
     VERBOSE(1,"IO from STDOUT/STDIN" << endl);
     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
                               , staticData.GetNBestSize()

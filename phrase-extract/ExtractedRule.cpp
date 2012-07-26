@@ -10,15 +10,16 @@
 
 using namespace std;
 
+
 namespace MosesTraining
 {
 
 void ExtractedRule::OutputNTLengths(std::ostream &out) const
 {
-  ostringstream outString;
+  std::ostringstream outString;
   OutputNTLengths(outString);
   out << outString;
-}
+  }
 
 void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
 {

@@ -67,12 +67,19 @@ protected:
   std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::string										m_inputFilePath;
+  std::string m_contextFilePath;
   std::istream									*m_inputStream;
+  //damt hiero
+  std::istream *m_contextStream;
   bool													m_surpressSingleBestOutput;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
+
+  //damt_hiero: to output word-alignments
+  std::ofstream  *m_wordAlignmentStream;
+  Moses::OutputCollector  *m_wordAlignmentOutputCollector;
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -80,7 +87,8 @@ public:
             , const Moses::FactorMask							&inputFactorUsed
             , size_t												nBestSize
             , const std::string							&nBestFilePath
-            , const std::string							&inputFilePath="");
+            , const std::string							&inputFilePath=""
+            , const std::string &contextFilePath="");
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
@@ -92,11 +100,18 @@ public:
 
   void ResetTranslationId();
 
+  //damt hiero
+  int ReadContext(std::istream&, Moses::InputType *inputType);
+
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;
   }
 
   static void FixPrecision(std::ostream &, size_t size=3);
+
+private :
+  void SetPSDContext(const std::vector<std::string> &psdFact, Moses::InputType *inputType);
+
 };
 
 }

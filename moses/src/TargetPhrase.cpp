@@ -40,37 +40,44 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase( std::string out_string)
+TargetPhrase::TargetPhrase( std::string out_string, Phrase sourcePhrase)
   :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_wordAlignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
-
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   CreateFromString(staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
+  m_sourcePhrase = new Phrase(sourcePhrase);
 }
 
-
-TargetPhrase::TargetPhrase()
+TargetPhrase::TargetPhrase(Phrase sourcePhrase)
   :Phrase(ARRAY_SIZE_INCR)
   , m_transScore(0.0)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  //damt-hiero : source phrase created in constructor
+  //, m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_wordAlignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
+    m_sourcePhrase = new Phrase(sourcePhrase);
 }
 
-TargetPhrase::TargetPhrase(const Phrase &phrase)
+TargetPhrase::TargetPhrase(const Phrase &phrase, Phrase sourcePhrase)
   : Phrase(phrase)
   , m_transScore(0.0)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  //damt-hiero : source phrase created in constructor
+  //, m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_wordAlignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
+    m_sourcePhrase = new Phrase(sourcePhrase);
 }
 
 TargetPhrase::~TargetPhrase()
 {
+    delete m_sourcePhrase;
 }
 
 void TargetPhrase::SetScore(const TranslationSystem* system)
@@ -262,6 +269,19 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
+void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
+{
+  std::cerr << "Adding stateless score " << score << std::endl;
+  m_scoreBreakdown.PlusEquals(score);
+  AddToFullScore(score.GetWeightedScore());
+
+}
+
+void TargetPhrase::AddToFullScore(const float score)
+{
+    std::cerr << "Adding to full score " << score << std::endl;
+    m_fullScore += score;
+}
 
 void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
 {
@@ -281,6 +301,7 @@ void TargetPhrase::ResetScore()
   m_fullScore = 0;
   m_scoreBreakdown.ZeroAll();
 }
+
 
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 {
@@ -316,6 +337,7 @@ void MosesShouldUseExceptions(bool value) {
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
   set<pair<size_t,size_t> > alignmentInfo;
+  set<pair<size_t,size_t> > wordAlignmentInfo;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
     util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
     MosesShouldUseExceptions(dash);
@@ -323,11 +345,14 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     MosesShouldUseExceptions(dash);
     size_t targetPos = boost::lexical_cast<size_t>(*dash++);
     MosesShouldUseExceptions(!dash);
-
-    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    if(GetWord(targetPos).IsNonTerminal())
+        alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    else
+        wordAlignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
   }
 
   SetAlignmentInfo(alignmentInfo);
+  SetWordAlignmentInfo(wordAlignmentInfo);
 }
 
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
@@ -335,6 +360,10 @@ void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &a
   m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
 }
 
+void TargetPhrase::SetWordAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+{
+    m_wordAlignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+}
 
 TO_STRING_BODY(TargetPhrase);
 
