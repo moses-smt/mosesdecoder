@@ -6,6 +6,7 @@
 #include <exception>
 #include <stdexcept>
 #include <algorithm>
+#include <set>
 
 using namespace std;
 using namespace boost::bimaps;
@@ -106,6 +107,7 @@ void ExtractorConfig::Load(const string &configFile)
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
+  m_scoreBins = Scan<float>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
 
   m_isLoaded = true;
 }
@@ -137,10 +139,14 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
   vector<size_t>::const_iterator factIt;
   for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
     for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
-      if (spanStart >= i) 
-        fc->AddFeature(BuildContextFeature(*factIt, -i, context[spanStart - i][*factIt]));
-      if (spanEnd + i < context.size())
-        fc->AddFeature(BuildContextFeature(*factIt, i, context[spanEnd + i][*factIt]));
+      string left = "<s>";
+      string right = "</s>"; 
+      if (spanStart >= i)
+        left = context[spanStart - i][*factIt];
+      fc->AddFeature(BuildContextFeature(*factIt, -i, left));
+      if (spanEnd + i < context.size()) 
+        right = context[spanEnd + i][*factIt];
+      fc->AddFeature(BuildContextFeature(*factIt, i, right));
     }
   }
 }
@@ -170,16 +176,40 @@ void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, c
     const AlignmentType &align, FeatureConsumer *fc)
 {
   AlignmentType::const_iterator it;
-  for (it = align.begin(); it != align.end(); it++)
+  set<size_t> srcAligned;
+  set<size_t> tgtAligned;
+
+  for (it = align.begin(); it != align.end(); it++) {
     fc->AddFeature("pair^" + srcPhrase[it->first] + "^" + tgtPhrase[it->second]);
+    srcAligned.insert(it->first);
+    tgtAligned.insert(it->second);
+  }
+
+  for (size_t i = 0; i < srcPhrase.size(); i++) {
+    if (srcAligned.count(i) == 0)
+      fc->AddFeature("pair^" + srcPhrase[i] + "^NULL");
+  }
+
+  for (size_t i = 0; i < tgtPhrase.size(); i++) {
+    if (tgtAligned.count(i) == 0)
+      fc->AddFeature("pair^NULL^" + tgtPhrase[i]);
+  }
 }
 
 void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)
 {
-  vector<size_t>::const_iterator it;
-  const vector<size_t>& scoreIDs = m_config.GetScoreIndexes();
-  for (it = scoreIDs.begin(); it != scoreIDs.end(); it++)
-    fc->AddFeature("sc^" + SPrint<size_t>(*it) + "_" + SPrint((int)log(scores[*it])));
+  vector<size_t>::const_iterator scoreIt;
+  vector<float>::const_iterator binIt;
+  const vector<size_t> &scoreIDs = m_config.GetScoreIndexes();
+  const vector<float> &bins = m_config.GetScoreBins();
+
+  for (scoreIt = scoreIDs.begin(); scoreIt != scoreIDs.end(); scoreIt++) {
+    for (binIt = bins.begin(); binIt != bins.end(); binIt++) {
+      float binnedLog = (int)log(scores[*scoreIt]);
+      if (binnedLog < *binIt || Equals(binnedLog, *binIt))
+        fc->AddFeature("sc^" + SPrint<size_t>(*scoreIt) + "_" + SPrint(*binIt));
+    }
+  }
 }
 
 } // namespace PSD

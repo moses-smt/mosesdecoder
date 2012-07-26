@@ -32,6 +32,7 @@ class ExtractorConfig
     inline bool GetSourceTopic() const    { return m_sourceTopic; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
+    inline const std::vector<float> &GetScoreBins() const { return m_scoreBins; }
 
     inline bool IsLoaded() const { return m_isLoaded; }
 
@@ -42,6 +43,7 @@ class ExtractorConfig
          m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
+    std::vector<float> m_scoreBins;
 
     // internal variables
     bool m_isLoaded;
