@@ -55,8 +55,8 @@ class HypothesisQueue {
     }
   };
 
-  //typedef std::multiset<BleuIndexPair, HypothesisOrderer> HypoQueueType;
-  typedef std::set<BleuIndexPair, HypothesisOrderer> HypoQueueType;
+  typedef std::multiset<BleuIndexPair, HypothesisOrderer> HypoQueueType;
+  //typedef std::set<BleuIndexPair, HypothesisOrderer> HypoQueueType;
   
   HypoQueueType m_queue;
   const size_t m_capacity;

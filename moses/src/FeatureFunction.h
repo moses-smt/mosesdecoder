@@ -23,7 +23,8 @@ public:
     ScoreProducer(description, numScoreComponents) {}
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
-
+  
+  float GetSparseProducerWeight() const { return 1; }	
 };
 
 class StatelessFeatureFunction: public FeatureFunction

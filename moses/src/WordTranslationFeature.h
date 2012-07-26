@@ -22,11 +22,18 @@ namespace Moses
 class WordTranslationFeature : public StatelessFeatureFunction {
 
   typedef std::map< char, short > CharHash;
+  typedef std::vector< std::set<std::string> > DocumentVector;
 	
   struct ThreadLocalStorage
   {
     const Sentence *input;
+    long docid;
+    long topicid;
+    bool use_topicid;
+    std::vector<std::string>* topicid_prob;
+    bool use_topicid_prob;
   };
+
 
 private:
 #ifdef WITH_THREADS
@@ -37,19 +44,21 @@ private:
 
   std::set<std::string> m_vocabSource;
   std::set<std::string> m_vocabTarget;
+  DocumentVector m_vocabDomain;
   FactorType m_factorTypeSource;
   FactorType m_factorTypeTarget;
   bool m_unrestricted;
   bool m_simple;
   bool m_sourceContext;
   bool m_targetContext;
+  bool m_domainTrigger;
   float m_sparseProducerWeight;
   bool m_ignorePunctuation;
   CharHash m_punctuationHash;
   
 public:
 	WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
-			bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation):
+			       bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation, bool domainTrigger):
      StatelessFeatureFunction("wt", ScoreProducer::unlimited),
      m_factorTypeSource(factorTypeSource),
      m_factorTypeTarget(factorTypeTarget),
@@ -57,6 +66,7 @@ public:
      m_simple(simple),
      m_sourceContext(sourceContext),
      m_targetContext(targetContext),
+     m_domainTrigger(domainTrigger),
      m_sparseProducerWeight(1),
      m_ignorePunctuation(ignorePunctuation)
   {
@@ -64,6 +74,7 @@ public:
 		if (m_simple == 1) std::cerr << "using simple word translations.. ";
 		if (m_sourceContext == 1) std::cerr << "using source context.. ";
 		if (m_targetContext == 1) std::cerr << "using target context.. ";
+		if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
 		
 		  // compile a list of punctuation characters
 		  if (m_ignorePunctuation) {

@@ -87,6 +87,10 @@ namespace Moses {
       }
     }
 
+    void TranslationSystem::AddSparseProducer(const FeatureFunction* ff) {
+      m_sparseProducers.push_back(ff);
+    }
+
     void TranslationSystem::ConfigDictionaries() {
       for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
         i != m_decodeGraphs.end(); ++i) {
@@ -178,7 +182,7 @@ namespace Moses {
     std::vector<float> TranslationSystem::GetTranslationWeights(size_t index) const {
     	std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer(index));
     	//VERBOSE(1, "Read weightT from translation sytem.. ");
-    	for (size_t i = 0; i < weights.size(); ++i)
+    	//for (size_t i = 0; i < weights.size(); ++i)
 	  //VERBOSE(1, weights[i] << " ");
 	//VERBOSE(1, std::endl);
     	return weights;

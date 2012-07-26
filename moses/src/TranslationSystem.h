@@ -61,6 +61,9 @@ class TranslationSystem {
       
       //Insert non-core feature function
       void AddFeatureFunction(const FeatureFunction* featureFunction);
+
+      //Insert sparse producer
+      void AddSparseProducer(const FeatureFunction* sparseProducer);
       
       //Called after adding the tables in order to set up the dictionaries
       void ConfigDictionaries();
@@ -78,6 +81,7 @@ class TranslationSystem {
       
       const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const {return m_statefulFFs;}
       const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const {return m_statelessFFs;}
+      const std::vector<const FeatureFunction*>& GetSparseProducers() const {return m_sparseProducers;}
       
       const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
       const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
@@ -115,6 +119,8 @@ class TranslationSystem {
         std::vector<const StatelessFeatureFunction*> m_statelessFFs;
         //All statefull FFs
         std::vector<const StatefulFeatureFunction*> m_statefulFFs;
+	//All sparse producers that have an activated global weight
+	std::vector<const FeatureFunction*> m_sparseProducers;
         
         const WordPenaltyProducer* m_wpProducer;
         const UnknownWordPenaltyProducer* m_unknownWpProducer;

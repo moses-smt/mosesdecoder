@@ -616,6 +616,54 @@ namespace Moses {
     return norm;
   }
 
+  size_t FVector::l1regularize(float lambda) {
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      float value = m_coreFeatures[i];
+      if (value > 0) {
+        m_coreFeatures[i] = max(0.0f, value - lambda);
+      }
+      else {
+        m_coreFeatures[i] = min(0.0f, value + lambda);
+      }
+    }
+
+    size_t numberPruned = size();
+    vector<FName> toErase;
+    for (iterator i = begin(); i != end(); ++i) {
+      float value = i->second;
+      if (value != 0.0f) {
+	if (value > 0) 
+	  value = max(0.0f, value - lambda);
+	else 
+	  value = min(0.0f, value + lambda);
+	
+	if (value != 0.0f) 
+	  i->second = value;
+	else {
+	  toErase.push_back(i->first);
+	  const std::string& fname = (i->first).name();
+	  FName::eraseId(FName::getId(fname));
+	}
+      }
+    }
+    
+    // erase features that have become zero
+    for (size_t i = 0; i < toErase.size(); ++i)
+      m_features.erase(toErase[i]);
+    numberPruned -= size();
+    return numberPruned;
+  }
+
+  void FVector::l2regularize(float lambda)  {
+    for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
+      m_coreFeatures[i] *= (1 - lambda);
+    }
+
+    for (iterator i = begin(); i != end(); ++i) {
+      i->second *= (1 - lambda);            
+    }
+  }
+
   size_t FVector::sparseL1regularize(float lambda) {
     /*for (size_t i = 0; i < m_coreFeatures.size(); ++i) {
       float value = m_coreFeatures[i];

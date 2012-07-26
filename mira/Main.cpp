@@ -123,20 +123,28 @@ int main(int argc, char** argv) {
   float bleu_weight_lm_factor;
   bool scale_all;
   float scale_all_factor;
-  bool l1_regularize, l2_regularize;
+  bool l1_regularize, l2_regularize, l1_reg_sparse, l2_reg_sparse;
   float l1_lambda, l2_lambda;
-  bool most_violated, all_violated, max_bleu_diff, one_against_all;
+  bool most_violated, most_violated_reg, all_violated, max_bleu_diff, max_bleu_diff_reg, one_against_all;
   bool feature_confidence, signed_counts;
   float decay_core, decay_sparse, core_r0, sparse_r0;
-  bool selective, summed, add2hope, skip_hope, skip_model, skip_fear;
+  bool selective, summed, skip_hope, skip_model, skip_fear;
   float bleu_weight_fear_factor, scaling_constant;
   bool hildreth;
   float add2lm;
   bool realBleu, disableBleuFeature;
   bool rescaleSlack;
   bool makePairs;
+  bool debug;
+  bool reg_on_every_mix;
   po::options_description desc("Allowed options");
   desc.add_options()
+    ("freq-reg", po::value<bool>(&reg_on_every_mix)->default_value(false), "Regularize after every weight mixing")
+    ("l1sparse", po::value<bool>(&l1_reg_sparse)->default_value(true), "L1-regularization for sparse weights only")
+    ("l2sparse", po::value<bool>(&l2_reg_sparse)->default_value(true), "L2-regularization for sparse weights only")
+    ("mv-reg", po::value<bool>(&most_violated_reg)->default_value(false), "Regularize most violated constraint")
+    ("mbd-reg", po::value<bool>(&max_bleu_diff_reg)->default_value(false), "Regularize max bleu diff constraint")
+    ("dbg", po::value<bool>(&debug)->default_value(true), "More debug output")
     ("make-pairs", po::value<bool>(&makePairs)->default_value(true), "Make pairs of hypotheses for 1slack")
     ("rescale-slack", po::value<bool>(&rescaleSlack)->default_value(false), "Rescale slack in 1-slack formulation")
     ("disable-bleu-feature", po::value<bool>(&disableBleuFeature)->default_value(false), "Disable the Bleu feature")
@@ -146,7 +154,6 @@ int main(int argc, char** argv) {
     ("skip-hope", po::value<bool>(&skip_hope)->default_value(false), "Sample without hope translations")
     ("skip-model", po::value<bool>(&skip_model)->default_value(false), "Sample without model translations")
     ("skip-fear", po::value<bool>(&skip_fear)->default_value(false), "Sample without fear translations")
-    ("add2hope", po::value<bool>(&add2hope)->default_value(false), "Add 2 hope translations instead of 1")
     ("scaling-constant", po::value<float>(&scaling_constant)->default_value(1.0), "Scale all core values by a constant at beginning of training")
     ("selective", po::value<bool>(&selective)->default_value(false), "Build constraints for every feature")       
     ("summed", po::value<bool>(&summed)->default_value(false), "Sum up all constraints")
@@ -233,7 +240,7 @@ int main(int argc, char** argv) {
     ("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")	       
     ("sample", po::value<bool>(&sample)->default_value(false), "Sample a translation pair from hope/(model)/fear translations") 
     ("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale BLEU by (history of) inverse input length")
-    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(true), "Scale BLEU by (history of) input length")
+    ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(false), "Scale BLEU by (history of) input length")
     ("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by average input length")
     ("scale-by-avg-inverse-length", po::value<bool>(&scaleByAvgInverseLength)->default_value(false), "Scale BLEU by average inverse input length")
     ("scale-by-x", po::value<float>(&scaleByX)->default_value(1), "Scale the BLEU score by value x")
@@ -271,7 +278,9 @@ int main(int argc, char** argv) {
     return 0;
   }
 
+  cerr << "debug: " << debug << endl;
   cerr << "l1-reg: " << l1_regularize << endl;
+  cerr << "l2-reg: " << l2_regularize << endl;
   cerr << "featureCutoff: " << featureCutoff << endl;
   cerr << "featureConfidence: " << feature_confidence << endl;
   
@@ -527,7 +536,7 @@ int main(int argc, char** argv) {
 			shardEnd = order.size();
 			shardSize = shardEnd - shardStart;
 		}
-		VERBOSE(1, "Shard size: " << shardSize << endl);
+		VERBOSE(1, "Rank: " << rank << " Shard size: " << shardSize << endl);
 		VERBOSE(1, "Rank: " << rank << " Shard start: " << shardStart << " Shard end: " << shardEnd << endl);
 		shard.resize(shardSize);
 		copy(order.begin() + shardStart, order.begin() + shardEnd, shard.begin());
@@ -1167,24 +1176,21 @@ int main(int argc, char** argv) {
 				  examples_in_batch++;
 				  
 				  if (sample) {
-				    float bleuHope = -1000;
-				    float bleuFear = 1000;
-				    size_t indexHope = -1;
-				    size_t indexFear = -1;
-				    vector<float> bleuHopeList;
-				    vector<float> bleuFearList;
-				    vector<float> indexHopeList;
-				    vector<float> indexFearList;
-				    
 				    HypothesisQueue queueHope(hope_n);
 				    HypothesisQueue queueFear(fear_n);
 				    
 				    cerr << endl;					    
 				    if (most_violated || all_violated || one_against_all) {
-				      bleuHope = -1000;
-				      bleuFear = 1000;
-				      indexHope = -1;
-				      indexFear = -1;
+				      float bleuHope = -1000;
+				      float bleuFear = 1000;
+				      size_t indexHope = -1;
+				      size_t indexFear = -1;
+
+				      vector<float> bleuHopeList;
+				      vector<float> bleuFearList;
+				      vector<float> indexHopeList;
+				      vector<float> indexFearList;
+
 				      if (most_violated)
 					cerr << "Rank " << rank << ", epoch " << epoch << ", pick pair with most violated constraint" << endl;
 				      else if (all_violated)
@@ -1246,13 +1252,31 @@ int main(int argc, char** argv) {
 				      if (most_violated) {
 					if (currentViolation > 0) {
 					  cerr << "Rank " << rank << ", epoch " << epoch << ", adding pair with violation " << currentViolation << endl;
-					  bleuHopeList.push_back(bleuHope);
-					  bleuFearList.push_back(bleuFear);
-					  indexHopeList.push_back(indexHope);
-					  indexFearList.push_back(indexFear);
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << bleuHope << " (" << indexHope  << "), fear: " << bleuFear << " (" << indexFear << ")" << endl;
+					  bleuScoresHopeSample[batchPosition].push_back(bleuHope);                      
+					  bleuScoresFearSample[batchPosition].push_back(bleuFear);  
+					  featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexHope]);       
+					  featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexFear]);       
+					  float modelScoreHope = modelScores[batchPosition][indexHope];
+					  float modelScoreFear = modelScores[batchPosition][indexFear];
+					  if (most_violated_reg) {
+					    // reduce model score difference by factor ~0.5
+					    float reg = currentViolation/4;
+					    modelScoreHope += abs(reg);
+					    modelScoreFear -= abs(reg);
+					    float newViolation = (bleuHope - bleuFear) - (modelScoreHope - modelScoreFear);
+					    cerr << "Rank " << rank << ", epoch " << epoch << ", regularized violation: " << newViolation << endl;
+					  }
+					  modelScoresHopeSample[batchPosition].push_back(modelScoreHope);           
+					  modelScoresFearSample[batchPosition].push_back(modelScoreFear); 
+
+					  featureValues[batchPosition][indexHope].IncrementSparseHopeFeatures();   
+					  featureValues[batchPosition][indexFear].IncrementSparseFearFeatures();   
 					}
-					else 
+					else {
 					  cerr << "Rank " << rank << ", epoch " << epoch << ", no violated constraint found." << endl;
+					  skip_sample = 1;
+					}
 				      }
 				      else cerr << endl;
 				    }
@@ -1263,7 +1287,8 @@ int main(int argc, char** argv) {
 					queueHope.Push(hope);
 					BleuIndexPair fear(-1*(bleuScores[batchPosition][i]), i);
 					queueFear.Push(fear);
-				      }				      
+				      }		
+				      skip_sample = 0;
 				    }
 				    
 				    cerr << endl;
@@ -1271,23 +1296,35 @@ int main(int argc, char** argv) {
 				    vector<BleuIndexPair> hopeList, fearList;
 				    for (size_t i=0; i<hope_n && !queueHope.Empty(); ++i) hopeList.push_back(queueHope.Pop());
 				    for (size_t i=0; i<fear_n && !queueFear.Empty(); ++i) fearList.push_back(queueFear.Pop());
-				    
 				    for (size_t i=0; i<hopeList.size(); ++i) {
-				      float hopeBleu = hopeList[i].first;
-				      size_t hopeIndex = hopeList[i].second;
+				      float bleuHope = hopeList[i].first;
+				      size_t indexHope = hopeList[i].second;
 				      for (size_t j=0; j<fearList.size(); ++j) {
-					float fearBleu = -1*(fearList[j].first);
-					size_t fearIndex = fearList[j].second;
-					cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << hopeBleu << " (" << hopeIndex  << "), fear: " << fearBleu << " (" << fearIndex << ")" << endl;
-					bleuScoresHopeSample[batchPosition].push_back(hopeBleu);                                     
-					bleuScoresFearSample[batchPosition].push_back(fearBleu);                                       
-					featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][hopeIndex]);       
-					featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][fearIndex]);       
-					modelScoresHopeSample[batchPosition].push_back(modelScores[batchPosition][hopeIndex]);           
-					modelScoresFearSample[batchPosition].push_back(modelScores[batchPosition][fearIndex]); 
+					float bleuFear = -1*(fearList[j].first);
+					size_t indexFear = fearList[j].second;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", hope: " << bleuHope << " (" << indexHope  << "), fear: " << bleuFear << " (" << indexFear << ")" << endl;
+					bleuScoresHopeSample[batchPosition].push_back(bleuHope);                                     
+					bleuScoresFearSample[batchPosition].push_back(bleuFear);                                       
+					featureValuesHopeSample[batchPosition].push_back(featureValues[batchPosition][indexHope]);       
+					featureValuesFearSample[batchPosition].push_back(featureValues[batchPosition][indexFear]);       
+					float modelScoreHope = modelScores[batchPosition][indexHope];
+					float modelScoreFear = modelScores[batchPosition][indexFear];
+					if (max_bleu_diff_reg) {
+					  // reduce model score difference by factor ~0.5
+					  float currentViolation = (bleuHope - bleuFear) - (modelScoreHope - modelScoreFear);
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", current violation: " << currentViolation << endl;
+					  float reg = currentViolation/4;
+					  modelScoreHope += abs(reg);
+					  modelScoreFear -= abs(reg);
+					  float newViolation = (bleuHope - bleuFear) - (modelScoreHope - modelScoreFear);
+					  cerr << "Rank " << rank << ", epoch " << epoch << ", regularized violation: " << newViolation << endl;
+					}
+
+					modelScoresHopeSample[batchPosition].push_back(modelScoreHope);           
+					modelScoresFearSample[batchPosition].push_back(modelScoreFear); 
 					
-					featureValues[batchPosition][hopeIndex].IncrementSparseHopeFeatures();                 
-					featureValues[batchPosition][fearIndex].IncrementSparseFearFeatures();
+					featureValues[batchPosition][indexHope].IncrementSparseHopeFeatures();                 
+					featureValues[batchPosition][indexFear].IncrementSparseFearFeatures();
 				      }
 				    }
 				    if (!makePairs)
@@ -1511,6 +1548,11 @@ int main(int argc, char** argv) {
 				    applyPerFeatureLearningRates(featureValuesHopeSample, featureLearningRates, sparse_r0);
 				    //cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
 				    applyPerFeatureLearningRates(featureValuesFearSample, featureLearningRates, sparse_r0);
+
+				    if (debug) {
+				      cerr << "Rank " << rank << ", epoch " << epoch << ", feature values hope: " << featureValuesHopeSample[0][0] << endl;
+				      cerr << "Rank " << rank << ", epoch " << epoch << ", feature values fear: " << featureValuesFearSample[0][0] << endl;
+				    }
 				  }
 				  else {
 				    applyPerFeatureLearningRates(featureValuesHope, featureLearningRates, sparse_r0);
@@ -1527,6 +1569,11 @@ int main(int argc, char** argv) {
 				      applyLearningRates(featureValuesHopeSample, core_r0, sparse_r0);
 				      //cerr << "Rank " << rank << ", epoch " << epoch << ", feature values after: " << featureValuesHopeSample[0][0] << endl;
 				      applyLearningRates(featureValuesFearSample, core_r0, sparse_r0);
+
+				      if (debug) {
+					cerr << "Rank " << rank << ", epoch " << epoch << ", feature values hope: " << featureValuesHopeSample[0][0] << endl;
+					cerr << "Rank " << rank << ", epoch " << epoch << ", feature values fear: " << featureValuesFearSample[0][0] << endl;
+				      }
                                     }
                                     else {
                                       applyLearningRates(featureValuesHope, core_r0, sparse_r0);
@@ -1643,8 +1690,9 @@ int main(int argc, char** argv) {
 //			sumStillViolatedConstraints += update_status;
 
 				if (update_status == 0) {	 // if weights were updated
-					// apply weight update
-				        //cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
+				  // apply weight update
+				  if (debug) 
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", update: " << weightUpdate << endl;
 					
 					if (feature_confidence) {
 					  // update confidence counts based on weight update
@@ -1709,9 +1757,16 @@ int main(int argc, char** argv) {
 					deleteTranslations(oneBests);
 				}				
 			} // END TRANSLATE AND UPDATE BATCH
-
-			size_t mixing_base = mixingFrequency == 0 ? 0 : shard.size() / mixingFrequency;
-			size_t dumping_base = weightDumpFrequency ==0 ? 0 : shard.size() / weightDumpFrequency;
+			
+			// size of all shards except for the last one
+			size_t generalShardSize;
+			if (trainWithMultipleFolds) 
+			  generalShardSize = order.size()/coresPerFold;
+			else 
+			  generalShardSize = order.size()/size;
+			
+			size_t mixing_base = mixingFrequency == 0 ? 0 : generalShardSize / mixingFrequency;
+			size_t dumping_base = weightDumpFrequency == 0 ? 0 : generalShardSize / weightDumpFrequency;
 			bool mix = evaluateModulo(shardPosition, mixing_base, actualBatchSize);
 
 			// mix weights?
@@ -1768,14 +1823,21 @@ int main(int argc, char** argv) {
 					       << pruned << " features pruned from cumulativeWeights." << endl;
 					}
 					
-					if (weightMixingThisEpoch == mixingFrequency) {
+					if (weightMixingThisEpoch == mixingFrequency || reg_on_every_mix) {
 					  if (l1_regularize) { 
-					    size_t pruned = mixedWeights.SparseL1Regularize(l1_lambda);
+					    size_t pruned;
+					    if (l1_reg_sparse)
+					      pruned = mixedWeights.SparseL1Regularize(l1_lambda);
+					    else
+					      pruned = mixedWeights.L1Regularize(l1_lambda);
 					    cerr << "Rank " << rank << ", epoch " << epoch << ", " 
 					       << "l1-reg. on mixedWeights with lambda=" << l1_lambda << ", pruned: " << pruned << endl;
 					  					  }
 					  if (l2_regularize) {
-					    mixedWeights.SparseL2Regularize(l2_lambda);
+					    if (l2_reg_sparse)
+					      mixedWeights.SparseL2Regularize(l2_lambda);
+					    else 
+					      mixedWeights.L2Regularize(l2_lambda);
 					    cerr << "Rank " << rank << ", epoch " << epoch << ", " 
 						 << "l2-reg. on mixedWeights with lambda=" << l2_lambda << endl;  
 					  }
@@ -1817,114 +1879,115 @@ int main(int argc, char** argv) {
 			  }
 			}
 			else {
-			if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
-			  ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
-			  bool proceed = false;
-			  if (accumulateWeights) {
-			    if (numberOfUpdates > 0) {
-			      tmpAverageWeights.DivideEquals(numberOfUpdates);
-			      proceed = true;
-			    }
-			  } else {
-			    if (numberOfUpdatesThisEpoch > 0) {
+			  if (evaluateModulo(shardPosition, dumping_base, actualBatchSize)) {
+			    cerr << "Rank " << rank << ", epoch " << epoch << ", dump weights.. (pos: " << shardPosition << ", base: " << dumping_base << ")" << endl;
+			    ScoreComponentCollection tmpAverageWeights(cumulativeWeights);
+			    bool proceed = false;
+			    if (accumulateWeights) {
+			      if (numberOfUpdates > 0) {
+				tmpAverageWeights.DivideEquals(numberOfUpdates);
+				proceed = true;
+			      }
+			    } else {
+			      if (numberOfUpdatesThisEpoch > 0) {
 			    	if (sparseNoAverage) // average only core weights
-			    		tmpAverageWeights.CoreDivideEquals(numberOfUpdatesThisEpoch);
+				  tmpAverageWeights.CoreDivideEquals(numberOfUpdatesThisEpoch);
 			    	else if (sparseAverage)
-			    		tmpAverageWeights.DivideEquals(cumulativeWeightsBinary);
+				  tmpAverageWeights.DivideEquals(cumulativeWeightsBinary);
 			    	else
-			    		tmpAverageWeights.DivideEquals(numberOfUpdatesThisEpoch);
+				  tmpAverageWeights.DivideEquals(numberOfUpdatesThisEpoch);
 			    	proceed = true;
+			      }
 			    }
-			  }
-			  
-			  if (proceed) {
+			    
+			    if (proceed) {
 #ifdef MPI_ENABLE
-			    // average across processes
-			    mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
-			    ScoreComponentCollection totalBinary;
-			    if (sparseAverage) {
-			      ScoreComponentCollection binary;
-			      binary.SetToBinaryOf(mosesWeights);
-			      mpi::reduce(world, binary, totalBinary, SCCPlus(), 0);
-			    }
+			      // average across processes
+			      mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
+			      ScoreComponentCollection totalBinary;
+			      if (sparseAverage) {
+				ScoreComponentCollection binary;
+				binary.SetToBinaryOf(mosesWeights);
+				mpi::reduce(world, binary, totalBinary, SCCPlus(), 0);
+			      }
 #endif
 #ifndef MPI_ENABLE
-			    mixedAverageWeights = tmpAverageWeights;
+			      mixedAverageWeights = tmpAverageWeights;
 #endif
-			    if (rank == 0 && !weightDumpStem.empty()) {
-			      // divide by number of processes
-			      if (sparseNoAverage)
+			      if (rank == 0 && !weightDumpStem.empty()) {
+				// divide by number of processes
+				if (sparseNoAverage)
 			    	  mixedAverageWeights.CoreDivideEquals(size); // average only core weights
-			      else if (sparseAverage)
+				else if (sparseAverage)
 			    	  mixedAverageWeights.DivideEquals(totalBinary);
-			      else
+				else
 			    	  mixedAverageWeights.DivideEquals(size);
-
-			      // normalise weights after averaging
-			      if (normaliseWeights) {
-			      	mixedAverageWeights.L1Normalise();
-			      }
-			      
-			      // dump final average weights
-			      ostringstream filename;
-			      if (epoch < 10) {
-			      	filename << weightDumpStem << "_0" << epoch;
-			      } else {
-			      	filename << weightDumpStem << "_" << epoch;
-			      }
-			      
-			      if (weightDumpFrequency > 1) {
-			      	filename << "_" << weightEpochDump;
-			      }
-			      
-/*			      if (accumulateWeights) {
-				  	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
-			      } else {
-				  	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
-			      }*/
-			      
-			      cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
-			      mixedAverageWeights.Save(filename.str());
-			      ++weightEpochDump;
-			      
-			      if (weightEpochDump == weightDumpFrequency) {
-				if (l1_regularize) { 
-				  size_t pruned = mixedAverageWeights.SparseL1Regularize(l1_lambda);
-				  cerr << "Rank " << rank << ", epoch " << epoch << ", " 
-				       << "l1-reg. on mixedAverageWeights with lambda=" << l1_lambda << ", pruned: " << pruned << endl;
-				}
-				if (l2_regularize) {
-				  mixedAverageWeights.SparseL2Regularize(l2_lambda);
-				  cerr << "Rank " << rank << ", epoch " << epoch << ", " 
-				       << "l2-reg. on mixedAverageWeights with lambda=" << l2_lambda << endl;  
+				
+				// normalise weights after averaging
+				if (normaliseWeights) {
+				  mixedAverageWeights.L1Normalise();
 				}
 				
-				if (l1_regularize || l2_regularize) {
-				  filename << "_reg";
-				  cerr << "Dumping regularized mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
-				  mixedAverageWeights.Save(filename.str());
+				// dump final average weights
+				ostringstream filename;
+				if (epoch < 10) {
+				  filename << weightDumpStem << "_0" << epoch;
+				} else {
+				  filename << weightDumpStem << "_" << epoch;
 				}
-			      }										
-
-			      if (weightEpochDump == weightDumpFrequency && printFeatureCounts) {
-			      	// print out all features with counts
-			      	stringstream s1, s2;
-			      	s1 << "sparse_feature_hope_counts" << "_" << epoch;
-			      	s2 << "sparse_feature_fear_counts" << "_" << epoch;
-			      	ofstream sparseFeatureCountsHope(s1.str().c_str());
-			      	ofstream sparseFeatureCountsFear(s2.str().c_str());
-
-			      	mixedAverageWeights.PrintSparseHopeFeatureCounts(sparseFeatureCountsHope);
-			      	mixedAverageWeights.PrintSparseFearFeatureCounts(sparseFeatureCountsFear);
-			      	sparseFeatureCountsHope.close();
-			      	sparseFeatureCountsFear.close();
+				
+				if (weightDumpFrequency > 1) {
+				  filename << "_" << weightEpochDump;
+				}
+			      
+				/*if (accumulateWeights) {
+				  	cerr << "\nMixed average weights (cumulative) during epoch "	<< epoch << ": " << mixedAverageWeights << endl;
+					} else {
+				  	cerr << "\nMixed average weights during epoch " << epoch << ": " << mixedAverageWeights << endl;
+					}*/
+				
+				cerr << "Dumping mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
+				mixedAverageWeights.Save(filename.str());
+				++weightEpochDump;
+				
+				if (weightEpochDump == weightDumpFrequency) {
+				  if (l1_regularize) { 
+				    size_t pruned = mixedAverageWeights.SparseL1Regularize(l1_lambda);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", " 
+					 << "l1-reg. on mixedAverageWeights with lambda=" << l1_lambda << ", pruned: " << pruned << endl;
+				  }
+				  if (l2_regularize) {
+				    mixedAverageWeights.SparseL2Regularize(l2_lambda);
+				    cerr << "Rank " << rank << ", epoch " << epoch << ", " 
+				       << "l2-reg. on mixedAverageWeights with lambda=" << l2_lambda << endl;  
+				  }
+				  
+				  if (l1_regularize || l2_regularize) {
+				    filename << "_reg";
+				    cerr << "Dumping regularized mixed average weights during epoch " << epoch << " to " << filename.str() << endl << endl;
+				    mixedAverageWeights.Save(filename.str());
+				  }
+				}										
+				
+				if (weightEpochDump == weightDumpFrequency && printFeatureCounts) {
+				  // print out all features with counts
+				  stringstream s1, s2;
+				  s1 << "sparse_feature_hope_counts" << "_" << epoch;
+				  s2 << "sparse_feature_fear_counts" << "_" << epoch;
+				  ofstream sparseFeatureCountsHope(s1.str().c_str());
+				  ofstream sparseFeatureCountsFear(s2.str().c_str());
+				  
+				  mixedAverageWeights.PrintSparseHopeFeatureCounts(sparseFeatureCountsHope);
+				  mixedAverageWeights.PrintSparseFearFeatureCounts(sparseFeatureCountsFear);
+				  sparseFeatureCountsHope.close();
+				  sparseFeatureCountsFear.close();
+				}
 			      }
 			    }
-			  }
-			}// end dumping
-			}
-
+			  }// end dumping
+			} // end if dump
 		} // end of shard loop, end of this epoch
+	        cerr << "Rank " << rank << ", epoch " << epoch << ", end of epoch.." << endl;
 
 	        /*if (printNbestWithFeatures && rank == 0 && epoch == 0) {
 		  cerr << "Writing out hope/fear nbest list with features: " << f1 << ", " << f2 << endl;

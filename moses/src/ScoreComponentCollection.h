@@ -371,6 +371,8 @@ public:
   float GetL1Norm() const;
   float GetL2Norm() const;
   float GetLInfNorm() const;
+  size_t L1Regularize(float lambda);
+  void L2Regularize(float lambda);
   size_t SparseL1Regularize(float lambda);
   void SparseL2Regularize(float lambda);
   void Save(const std::string& filename) const;
