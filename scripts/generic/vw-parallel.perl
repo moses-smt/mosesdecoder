@@ -101,7 +101,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
 
   my $fh = $runFiles[$i];
   my $cmd = "zcat $TMPDIR/train.$i.gz ";
-  $cmd .= "| $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id 0 --save_per_pass";
+  $cmd .= "| $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
   print $fh $cmd;
 }
 
