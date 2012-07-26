@@ -1777,10 +1777,12 @@ sub define_training_psd_model {
   my $step_id = shift;
   my ($out, $psd_output) = &get_output_and_input($step_id);
   my $trainfile = "$psd_output.train.gz";
-
-  my $vw = &get("GENERAL:vw-path") . "/bin/vw";
-  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m --exact_adaptive_norm --power_t 0.5";
-  my $cmd .= "zcat $trainfile | $vw $vw_opts --cache_file $out.vwcache -f $out.model";
+  my $cores = &get("GENERAL:cores");
+  my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
+  my $vwpath = &get("GENERAL:vw-path");
+  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m " 
+    . "--exact_adaptive_norm --power_t 0.5";
+  my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $vw_opts";
 
   &create_step($step_id, $cmd);
 }
