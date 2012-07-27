@@ -11,8 +11,8 @@
     </ProjectConfiguration>
   </ItemGroup>
   <PropertyGroup Label="Globals">
-    <ProjectGuid>{88AE90C9-72D2-42ED-8389-770ACDCD4308}</ProjectGuid>
-    <RootNamespace>CreateOnDisk</RootNamespace>
+    <ProjectGuid>{85811FDF-8AD1-4490-A545-B2F51931A18C}</ProjectGuid>
+    <RootNamespace>mosescmd</RootNamespace>
     <Keyword>Win32Proj</Keyword>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
@@ -49,6 +49,7 @@
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\xmlrpc-c\include;C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -57,46 +58,43 @@
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\GnuWin32\lib\zlib.lib;$(SolutionDir)/$(Configuration)/moses.lib;$(SolutionDir)/$(Configuration)/kenlm.lib;$(SolutionDir)/$(Configuration)/OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libxmlrpc_server_abyss.lib;libxmlrpc_server.lib;libxmlrpc_abyss.lib;libxmlrpc.lib;libxmlrpc_util.lib;libxmlrpc_xmlparse.lib;libxmlrpc_xmltok.lib;libxmlrpc++.lib;C:\GnuWin32\lib\zlib.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;$(SolutionDir)$(Configuration)\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>C:\boost\boost_1_47\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\xmlrpc-c\bin\Debug-Static-Win32;C:\boost\boost_1_47\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <ClCompile>
-      <Optimization>MaxSpeed</Optimization>
-      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <AdditionalIncludeDirectories>C:\xmlrpc-c\include;C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
-      <FunctionLevelLinking>true</FunctionLevelLinking>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
-      <AdditionalIncludeDirectories>C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../..;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <AdditionalDependencies>C:\GnuWin32\lib\zlib.lib;$(SolutionDir)/$(Configuration)/moses.lib;$(SolutionDir)/$(Configuration)/kenlm.lib;$(SolutionDir)/$(Configuration)/OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libxmlrpc_server_abyss.lib;libxmlrpc_server.lib;libxmlrpc_abyss.lib;libxmlrpc.lib;libxmlrpc_util.lib;libxmlrpc_xmlparse.lib;libxmlrpc_xmltok.lib;libxmlrpc++.lib;C:\GnuWin32\lib\zlib.lib;$(SolutionDir)$(Configuration)\moses.lib;$(SolutionDir)$(Configuration)\kenlm.lib;$(SolutionDir)$(Configuration)\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <SubSystem>Console</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <RandomizedBaseAddress>false</RandomizedBaseAddress>
+      <DataExecutionPrevention>
+      </DataExecutionPrevention>
       <TargetMachine>MachineX86</TargetMachine>
-      <AdditionalLibraryDirectories>C:\boost\boost_1_47\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>C:\xmlrpc-c\bin\Release-Static-Win32;C:\boost\boost_1_47\lib</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="..\..\OnDiskPt\Main.h" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClCompile Include="..\..\OnDiskPt\Main.cpp" />
+    <ClCompile Include="..\server\mosesserver.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

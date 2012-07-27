@@ -262,13 +262,13 @@ BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
 BitmapContainer::~BitmapContainer()
 {
   // As we have created the square position objects we clean up now.
-  HypothesisQueueItem *item = NULL;
 
   while (!m_queue.empty()) {
-    item = m_queue.top();
-    FREEHYPO(item->GetHypothesis());
-    delete item;
-    m_queue.pop();
+	HypothesisQueueItem *item = m_queue.top();
+	m_queue.pop();
+
+	FREEHYPO( item->GetHypothesis() );
+	delete item;
   }
 
   // Delete all edges.

@@ -96,10 +96,10 @@ rule boost-lib ( name macro : deps * ) {
   #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
   #boost.jam does not handle this correctly.  
   if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt" ] {
-    lib inner_boost_$(name) : $(deps) : <threading>single $(boost-search) <name>boost_$(name) ;
-    lib inner_boost_$(name) : $(deps) : <threading>multi $(boost-search) <name>boost_$(name)-mt ;
+    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name) : : <library>$(deps) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt : : <library>$(deps) ;
   } else {
-    lib inner_boost_$(name) : $(deps) : $(boost-search) <name>boost_$(name) ;
+    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name) : : <library>$(deps) ;
   }
 
   alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) $(boost-include) ;

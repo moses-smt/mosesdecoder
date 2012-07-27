@@ -729,7 +729,7 @@ sub reduce_factors {
             $realfull .= ".gz";
             $reduced =~ s/(\.gz)?$/.gz/;
           }
-          safesystem("ln -s $realfull $reduced")
+          safesystem("ln -s '$realfull' '$reduced'")
             or die "Failed to create symlink $realfull -> $reduced";
           return;
         }
@@ -806,7 +806,7 @@ sub get_vocabulary {
     }
     
     my %VCB;
-    open(VCB,">$vcb") or die "ERROR: Can't write $vcb";
+    open(VCB,">", "$vcb") or die "ERROR: Can't write $vcb";
     print VCB "1\tUNK\t0\n";
     my $id=2;
     foreach (reverse sort @NUM) {

@@ -37,8 +37,10 @@ FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags
 
 FileHandler::~FileHandler()
 {
+#ifndef NO_PIPES
   if( fp_ != 0 )
     pclose(fp_);
+#endif
   if( path_ != FileHandler::kStdInDescriptor &&
       path_ != FileHandler::kStdOutDescriptor )
     delete buffer_;
@@ -51,7 +53,11 @@ fdstreambuf * FileHandler::openCompressedFile(const char * cmd)
   //bool isInput = (flags_ & std::ios::in);
   //open pipe to file with compression/decompression command
   const char * p_type = (flags_ & std::ios::in ? "r" : "w");
+#ifndef NO_PIPES
   fp_ = popen(cmd, p_type);
+#else
+  fp_ = NULL;
+#endif
   if( fp_ == NULL ) {
     //fprintf(stderr, "ERROR:Failed to open compressed file at %s\n", path_.c_str());
     perror("openCompressedFile: ");
@@ -158,6 +164,7 @@ bool FileHandler::getCompressionCmds(const std::string & filepath, std::string &
 
 bool FileHandler::reset()
 {
+#ifndef NO_PIPES
   // move to beginning of file
   if (fp_ != 0) {
     //can't seek on a pipe so reopen
@@ -168,6 +175,7 @@ bool FileHandler::reset()
     //reinitialize
     this->init(buffer_);
   } else
+#endif
     buffer_->pubseekoff(0, std::ios_base::beg); //sets both get and put pointers to beginning of stream
   return true;
 }

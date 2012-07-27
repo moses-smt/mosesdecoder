@@ -156,7 +156,9 @@ if ($fileCount == 1 && !$doSort)
 }
 else
 {
-  $cmd = "zcat $TMPDIR/phrase-table.half.*.gz";
+  my $_is_osx = ($^O eq "darwin");
+  my $_catCmd = $_is_osx?"gunzip -c ":"zcat ";
+  $cmd = $_catCmd."$TMPDIR/phrase-table.half.*.gz";
 
   if ($doSort) {
     $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
