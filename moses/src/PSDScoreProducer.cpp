@@ -178,8 +178,13 @@ void PSDScoreProducer::Normalize2(vector<float> &losses)
     sum += *it;
   }
 
-  for (it = losses.begin(); it != losses.end(); it++) 
-    *it /= sum;
+  if (! Equals(sum, 0)) {
+    for (it = losses.begin(); it != losses.end(); it++)
+      *it /= sum;
+  } else {
+    for (it = losses.begin(); it != losses.end(); it++) 
+      *it = 1 / losses.size();
+  }
 }
 
 void PSDScoreProducer::Normalize3(vector<float> &losses)
