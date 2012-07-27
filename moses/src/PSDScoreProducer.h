@@ -49,6 +49,10 @@ private:
   ScoreComponentCollection ScoreFactory(float score);
   PSD::Translation GetPSDTranslation(const TranslationOption *option);
 
+  void Normalize1(std::vector<float> &losses);
+  void Normalize2(std::vector<float> &losses);
+  void Normalize3(std::vector<float> &losses);
+
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
   PSD::TargetIndexType m_phraseIndex;
   PSD::VWLibraryPredictConsumerFactory	*m_consumerFactory;

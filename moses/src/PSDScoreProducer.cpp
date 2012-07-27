@@ -82,7 +82,6 @@ Translation PSDScoreProducer::GetPSDTranslation(const TranslationOption *option)
 vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<TranslationOption *> &options, const InputType &src)
 {
   vector<ScoreComponentCollection> scores;
-  float sum = 0;
 
   if (options.size() != 0 && ! options[0]->IsOOV()) {
     vector<float> losses(options.size());
@@ -98,27 +97,18 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
         options[0]->GetEndPos(), psdOptions, losses);
     m_consumerFactory->Release(p_consumer);
 
-    vector<float>::iterator lossIt;
+    Normalize1(losses);
+
+    vector<float>::const_iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-      float score = exp(-*lossIt);
-      sum += score;
-      scores.push_back(ScoreFactory(score));
-//      cerr << "VW output: " << *lossIt << endl;
+      float logScore = Equals(*lossIt, 0) ? LOWEST_SCORE : log(*lossIt);
+      scores.push_back(ScoreFactory(logScore));
     }
   } else {
-    for (size_t i = 0; i < options.size(); i++) {
+    for (size_t i = 0; i < options.size(); i++)
       scores.push_back(ScoreFactory(0));
-    }
   }
 
-  // normalize
-  if (sum != 0) {
-    vector<ScoreComponentCollection>::iterator colIt;
-    for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-      colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
-//      cerr << colIt->GetScoreForProducer(this) << endl;
-    }
-  }
   return scores;
 }
 
@@ -155,6 +145,53 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   in.close();
 
   return true;
+}
+
+void PSDScoreProducer::Normalize1(vector<float> &losses)
+{
+  float sum = 0;
+  vector<float>::iterator it;
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it = exp(-*it);
+    sum += *it;
+  }
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it /= sum;
+  }
+}
+
+void PSDScoreProducer::Normalize2(vector<float> &losses)
+{
+  float sum = 0;
+  float minLoss;
+  if (losses.size() > 0)
+    minLoss = -losses[0];
+
+  vector<float>::iterator it;
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it = -*it;
+    minLoss = min(minLoss, *it);
+  }
+
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it -= minLoss;
+    sum += *it;
+  }
+
+  for (it = losses.begin(); it != losses.end(); it++) 
+    *it /= sum;
+}
+
+void PSDScoreProducer::Normalize3(vector<float> &losses)
+{
+  float sum = 0;
+  vector<float>::iterator it;
+  for (it = losses.begin(); it != losses.end(); it++) {
+    *it = 1 / (1 + exp(-*it));
+    sum += *it;
+  }
+  for (it = losses.begin(); it != losses.end(); it++)
+    *it /= sum;
 }
 
 } // namespace Moses
