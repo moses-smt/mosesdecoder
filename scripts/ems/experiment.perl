@@ -1765,9 +1765,10 @@ sub define_training_psd_extract {
 
   my $hierarchical = &get("TRAINING:hierarchical-rule-set");
   if ($hierarchical) {
-      my $pt_fix = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd-chart/ReformatRuleTable.pl";
+      my $pt_fix = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-syntax-features/ReformatRuleTable.pl";
+      my $extractor_bin = &get("GENERAL:moses-src-dir") . "/bin/extract-syntax-features";
       # TODO: fix .psd.parse.xml problem below, should be .parse.xml
-      $cmd = "zcat $phrase_table.gz | $pt_fix | gzip > $phrase_table.psd.gz && $cmd $src_corpus.parse.xml";
+      $cmd = "zcat $phrase_table.gz | $pt_fix | gzip > $phrase_table.psd.gz && $extractor $cores $extractor_bin $extract.psd.gz $src_corpus $phrase_table.psd.gz $psd_config $out $src_corpus.parse.xml";
   }
 
   &create_step($step_id, $cmd);
@@ -1780,8 +1781,7 @@ sub define_training_psd_model {
   my $cores = &get("GENERAL:cores");
   my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
   my $vwpath = &get("GENERAL:vw-path");
-  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m " 
-    . "--exact_adaptive_norm --power_t 0.5";
+  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 -b 22 --csoaa_ldf m ";
   my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $vw_opts";
 
   &create_step($step_id, $cmd);

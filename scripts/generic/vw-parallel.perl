@@ -6,7 +6,7 @@
 # 3rd arg: cache prefix (used with vw --cache_file)
 # 4th arg: model output file (used with vw -f)
 # 5th arg: path to VW
-# vw-parallel.perl 8 train_file vw_cache vw_model /home/fraser/src/vowpal_wabbit/ --passes 10 --csoaa_ldf m --hash all --noconstant --exact_adaptive_norm --power_t 0.5 -q st
+# vw-parallel.perl 8 train_file vw_cache vw_model /home/fraser/src/vowpal_wabbit/ --passes 10 --csoaa_ldf m --hash all --noconstant -b 22 -q st
 
 
 use strict;
