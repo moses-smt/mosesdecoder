@@ -96,7 +96,7 @@ for (my $i = 0; $i < $cores; ++$i)
   my $fh = $runFiles[$i];
   my $hieroarg = "";
   $hieroarg = " $parse " if defined $parse;
-  my $cmd = "$extractor $TMPDIR/psdextract.$i.gz $src_corpus $phrase_table $hieroarg $psd_config $TMPDIR/train.$i $TMPDIR/index.$i";
+  my $cmd = "$extractor $TMPDIR/psdextract.$i.gz $src_corpus $hieroarg $phrase_table $psd_config $TMPDIR/train.$i $TMPDIR/index.$i";
   print $fh $cmd;
 }
 
