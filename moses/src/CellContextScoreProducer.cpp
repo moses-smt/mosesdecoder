@@ -65,10 +65,10 @@ void CellContextScoreProducer::CheckIndex(const std::string &targetRep)
     throw runtime_error("Phrase not in index: " + targetRep);
 }
 
-Translation CellContextScoreProducer::GetPSDTranslation(const string targetRep, const TargetPhrase *tp)
+ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string targetRep, const TargetPhrase *tp)
 {
   VERBOSE(5, "Target Phrase put into translation vector : " << (*tp) << " : " << tp->GetFutureScore() << std::endl);
-  Translation psdOpt;
+  ChartTranslation psdOpt;
 
   // phrase ID
   VERBOSE(6, "LOOKED UP TARGET REP : " << targetRep << endl);
@@ -76,13 +76,22 @@ Translation CellContextScoreProducer::GetPSDTranslation(const string targetRep, 
   psdOpt.m_index = m_ruleIndex.left.find(targetRep)->second;
   VERBOSE(6, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
 
-  // alignment
-  const AlignmentInfo &alignInfo = tp->GetWordAlignmentInfo();
-  VERBOSE(5, "Added alignment Info : " << alignInfo << std::endl);
+  //alignment between terminals and non-terminals
+  // alignment between terminals
+  const AlignmentInfo &alignInfoTerm = tp->GetWordAlignmentInfo();
+  VERBOSE(5, "Added alignment Info : " << alignInfoTerm << std::endl);
   AlignmentInfo::const_iterator it;
-  for (it = alignInfo.begin(); it != alignInfo.end(); it++)
+  for (it = alignInfoTerm.begin(); it != alignInfoTerm.end(); it++)
     //cerr << "Added Alignment : " << (*it) << endl;
-    psdOpt.m_alignment.insert(*it);
+    psdOpt.m_termAlignment.insert(*it);
+
+  //alignment between non-terminals
+  const AlignmentInfo &alignInfoNonTerm = tp->GetAlignmentInfo();
+  VERBOSE(5, "Added alignment Info between non terms : " << alignInfoNonTerm << std::endl);
+  VERBOSE(5, "Added alignment Info between terms : " << alignInfoTerm << std::endl);
+  for (it = alignInfoNonTerm.begin(); it != alignInfoNonTerm.end(); it++)
+    //cerr << "Added Alignment : " << (*it) << endl;
+    psdOpt.m_nonTermAlignment.insert(*it);
 
   // scores
   const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
@@ -127,11 +136,18 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
     vector<ScoreComponentCollection> scores;
     float sum = 0.0;
     float score = 0.0;
+    string span;
+
+    //get span
+    int spanSize = (endSpan-startSpan) + 1;
+    stringstream s;
+    s << spanSize;
+    span = s.str();
 
     if(targetRepresentations->size() > 1)
     {
         vector<float> losses(targetRepresentations->size());
-        vector<Translation> psdOptions;
+        vector<ChartTranslation> psdOptions;
 
         map<string,TargetPhrase*> :: iterator itr_rep;
         vector<std::string>::const_iterator tgtRepIt;
@@ -141,40 +157,17 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
           VERBOSE(6, "CHECKING INDEX FOR : " << *tgtRepIt << endl);
           CheckIndex(*tgtRepIt);
 
-          //WRONG : PUT TARGET PHRASE WHERE IT SHOULD NOT GO
-          //PASS BOTH ??
           psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));
         }
 
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
         VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
         //damt hiero : extract syntax features
-        vector<std::string> syntaxFeats;
-        NonTerminalSet labelSet = source.GetLabelSet(startSpan,endSpan);
-        //check if there is a label for this span
-        std::string noTag = "X";
-        std::string syntFeat;
-        if(labelSet.size() == 0)
-        {
-            syntaxFeats.push_back(noTag);
-            VERBOSE(6, "Added syntax label : " << noTag << endl);
-        }
-        else
-        {
-            NonTerminalSet::const_iterator itr_label;
-            for(itr_label = labelSet.begin(); itr_label != labelSet.end(); itr_label++)
-            {
-                Word label = *itr_label;
-                CHECK(label.IsNonTerminal() == 1);
-                syntFeat = label.GetString(m_srcFactors,0);
-                syntaxFeats.push_back(syntFeat);
-                VERBOSE(6, "Added syntax label : " << syntFeat << endl);
+        vector<string> syntaxFeats = source.GetLabels(startSpan,endSpan);
+        string syntParent = source.GetParent(startSpan,endSpan);
 
-            }
-
-        }
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
-        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntaxFeats,startSpan,endSpan,psdOptions,losses);
+        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntaxFeats,syntParent,span,startSpan,endSpan,psdOptions,losses);
         m_consumerFactory->Release(p_consumer);
 
         vector<float>::iterator lossIt;

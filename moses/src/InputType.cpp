@@ -69,6 +69,18 @@ std::vector <ChartTranslationOption*> InputType::GetXmlChartTranslationOptions()
   return ret;
 }
 
+std::vector<std::string> InputType::GetLabels(size_t startPos, size_t endPos) const
+{
+    std::cerr << "Error : get labels not defined for non tree input type" << std::endl;
+    CHECK(false);
+}
+
+std::string InputType::GetParent(size_t startPos, size_t endPos) const
+{
+    std::cerr << "Error : get parent not defined for non tree input type" << std::endl;
+    CHECK(false);
+}
+
 }
 
 

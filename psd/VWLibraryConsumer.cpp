@@ -11,7 +11,7 @@ using namespace std;
 namespace PSD
 {
 
-const char * VW_INIT_OPTIONS = "-q st --hash all --noconstant --csoaa_ldf s";
+const char * VW_INIT_OPTIONS = "-q st --hash all --noconstant --csoaa_ldf s -b 22 ";
 
 //
 // VWLibraryPredictConsumerFactory

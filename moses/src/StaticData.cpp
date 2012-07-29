@@ -182,7 +182,12 @@ bool StaticData::LoadData(Parameter *parameter)
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
   }
 
+//CHECK SENTENCE CONTEXT
+//CHANGE GET PARAM...
+
 //#ifdef HAVE_VW
+if ( !(m_parameter->GetParam("sentence-cell-context").size() > 0) )
+{
   if (m_parameter->GetParam("psd-model").size() > 0) {
     if (m_parameter->GetParam("psd-index").size() <= 0) {
       UserMessage::Add(string("--psd-index not specified"));
@@ -205,40 +210,35 @@ bool StaticData::LoadData(Parameter *parameter)
       return false;
     }
   }
+}
 //#endif // HAVE_VW
 
  // #ifdef HAVE_VW
  if (m_parameter->GetParam("sentence-cell-context").size() > 0) {
-    if (m_parameter->GetParam("rule-index").size() <= 0) {
-      UserMessage::Add(string("--rule-index not specified"));
+    if (m_parameter->GetParam("psd-model").size() > 0) {
+    if (m_parameter->GetParam("psd-index").size() <= 0) {
+      UserMessage::Add(string("--psd-index not specified"));
       return false;
     }
     if (m_parameter->GetParam("psd-config").size() <= 0) {
       UserMessage::Add(string("psd-config not specified"));
       return false;
     }
-    if (m_parameter->GetParam("weight-lc").size() <= 0) {
-      UserMessage::Add(string("weight-lc not specified"));
+    if (m_parameter->GetParam("weight-psd").size() <= 0) {
+      UserMessage::Add(string("weight-psd not specified"));
       return false;
     }
-    float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-lc")[0]);
+    float CellContextWeight = Scan<float>(m_parameter->GetParam("weight-psd")[0]);
     m_cellContext = new CellContextScoreProducer(m_scoreIndexManager, CellContextWeight);
-    if (! m_cellContext->Initialize(m_parameter->GetParam("lc-model-file")[0],
-      m_parameter->GetParam("rule-index")[0],
+    if (! m_cellContext->Initialize(m_parameter->GetParam("psd-model")[0],
+      m_parameter->GetParam("psd-index")[0],
       m_parameter->GetParam("psd-config")[0])) {
-      UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("rule-index")[0]));
+      UserMessage::Add(string("Failed to load data from " + m_parameter->GetParam("psd-index")[0]));
       return false;
     }
   }
+ }
 // #endif // HAVE_VW
-
-  m_threadCount = 1;
-
-  if (m_parameter->GetParam("left-context-ttable").size() > 0) {
-    float leftContextWeight = Scan<float>(m_parameter->GetParam("weight-left-context")[0]);
-    m_leftContextScoreProducer = new LeftContextScoreProducer(m_scoreIndexManager, leftContextWeight);
-    m_leftContextScoreProducer->LoadScores(m_parameter->GetParam("left-context-ttable")[0]);
-  }
 
   // n-best
   if (m_parameter->GetParam("n-best-list").size() >= 2) {

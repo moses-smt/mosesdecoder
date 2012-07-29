@@ -150,16 +150,7 @@ Parameter::Parameter()
 //  #ifdef HAVE_VW
   AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
   //Weight of cell-context dependent feature
-  AddParam("weight-lc", "wlc", "weight for cell context feature");
-  //File to load cell-context dependent feature;
-  AddParam("lc-model-file", "lcm", "file for cell context feature");
-  AddParam("rule-index", "rli", "file with indexes of targetRepresentations of rules");
-  AddParam("psd-hiero-context", "psdc", "input data with rich factored annotation for PSD");
-  AddParam("psd-hiero-config", "psdf", "PSD configuration file for feature extraction");
-//  #endif
 
-  AddParam("weight-left-context", "wlc", "weight for context-aware phrase scorer");
-  AddParam("left-context-ttable", "lctt", "phrase table for context-aware phrase scorer");
 //#ifdef HAVE_VW
   AddParam("weight-psd", "psd", "weight for phrase sense disambiguation");
   AddParam("psd-model", "psdm", "classifier model for phrase sense disambiguation");

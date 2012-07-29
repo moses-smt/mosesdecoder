@@ -39,7 +39,7 @@ class ExtractorConfig
     inline bool GetSourceTopic() const    { return m_sourceTopic; }
     inline const std::vector<size_t> &GetFactors() const { return m_factors; }
     inline const std::vector<size_t> &GetScoreIndexes() const { return m_scoreIndexes; }
-
+    inline const std::vector<float> &GetScoreBins() const { return m_scoreBins; }
     inline bool IsLoaded() const { return m_isLoaded; }
 
   private:
@@ -47,9 +47,12 @@ class ExtractorConfig
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal,
          m_syntaxParent, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;
+
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
+
+    std::vector<float> m_scoreBins;
 
     // internal variables
     bool m_isLoaded;
@@ -67,6 +70,14 @@ struct Translation
   std::vector<float> m_scores;
 };
 
+struct ChartTranslation
+{
+  size_t m_index;
+  AlignmentType m_termAlignment;
+  AlignmentType m_nonTermAlignment;
+  std::vector<float> m_scores;
+};
+
 // index of possible target spans
 typedef boost::bimaps::bimap<std::string, size_t> TargetIndexType;
 
@@ -75,6 +86,7 @@ class FeatureExtractor
 {
 public:
   FeatureExtractor(const TargetIndexType &targetIndex, const ExtractorConfig &config, bool train);
+
   void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
     size_t spanStart,
@@ -86,9 +98,11 @@ public:
     const ContextType &context,
     const std::string &sourceSide,
     const std::vector<std::string> &parentLabels,
+    const std::string parent,
+    const std::string span,
     size_t spanStart,
     size_t spanEnd,
-    const std::vector<Translation> &translations,
+    const std::vector<ChartTranslation> &translations,
     std::vector<float> &losses);
 
 private:
@@ -97,15 +111,22 @@ private:
   bool m_train;
 
   float GetMaxProb(const std::vector<Translation> &translations);
+  float GetMaxProbChart(const std::vector<ChartTranslation> &translations);
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
-  void GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabels, FeatureConsumer *fc);
+  void GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabels, const std::string parent,
+                              const std::string span, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateSourceTopicFeatures(const std::vector<std::string> &wordSpan, const std::vector<std::string> &sourceTopics, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
       const std::vector<std::string> &tgtPhrase,
       const AlignmentType &align,
+      FeatureConsumer *fc);
+  void GeneratePairedFeaturesChart(const std::vector<std::string> &srcPhrase,
+      const std::vector<std::string> &tgtPhrase,
+      const AlignmentType &termAligns,
+      const AlignmentType &nonTermAligns,
       FeatureConsumer *fc);
   void GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);

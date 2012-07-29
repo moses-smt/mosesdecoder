@@ -43,7 +43,7 @@ class CellContextScoreProducer : public StatelessFeatureFunction
 
 
     void CheckIndex(const std::string &targetRep);
-    PSD::Translation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
+    PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
 
     private :
     PSD::FeatureExtractor *m_extractor;

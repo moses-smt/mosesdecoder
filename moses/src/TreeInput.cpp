@@ -264,12 +264,16 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     const WordsRange &range = labelItem.m_range;
     const string &label = labelItem.m_label;
     AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
+    //damt-hiero : add string representation for syntax features
+    AddChartString(range.GetStartPos() + 1, range.GetEndPos() + 1, label);
   }
 
   // default label
+  string noTag = "NOTAG";
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
       AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      AddChartString(startPos, endPos, noTag);
     }
   }
 
@@ -357,6 +361,39 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
 
   AddChartLabel(startPos, endPos, word, factorOrder);
 }
+
+//damt hiero
+void TreeInput::AddChartString(size_t startPos, size_t endPos, const string &label)
+{
+  m_stringChart[startPos][endPos-startPos].push_back(label);
+}
+
+string TreeInput::GetParent(size_t startPos, size_t endPos)
+{
+    string isRoot = "ISROOT";
+    if(startPos == 0)
+    {
+        if(endPos == (m_sourceChart.front().size() -1) )
+        {
+            return isRoot;
+        }
+        else
+        {
+            if(GetRelLabels(startPos,endPos+1).size() > 1)
+            {return GetRelLabels(startPos,endPos+1)[1];}
+            else
+           {return GetRelLabels(startPos,endPos+1).front();}
+        }
+    }
+    else
+    {
+        if(GetRelLabels(startPos,endPos+1).size() > 1)
+        {return GetRelLabels(startPos,endPos+1)[1];}
+        else
+        {return GetRelLabels(startPos-1,endPos+1).front();}
+    }
+}
+
 
 std::ostream& operator<<(std::ostream &out, const TreeInput &input)
 {

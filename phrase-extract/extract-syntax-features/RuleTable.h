@@ -8,7 +8,7 @@
 #include <map>
 #include <set>
 
-typedef std::map<std::string, std::vector<PSD::Translation> > DictionaryType;
+typedef std::map<std::string, std::vector<PSD::ChartTranslation> > DictionaryType;
 
 class RuleTable
 {
@@ -22,16 +22,18 @@ public:
 
   // get all translations of source phrase, assumes that srcPhrase is known
   // (throws logic_error otherwise)
-  const std::vector<PSD::Translation> &GetTranslations(const std::string &srcPhrase);
+  const std::vector<PSD::ChartTranslation> &GetTranslations(const std::string &srcPhrase);
 
 private:
   DictionaryType m_ttable;
   PSD::TargetIndexType m_targetIndex;
 
-  void AddPhrasePair(const std::string &src, const std::string &tgt,
-      const std::vector<float> &scores, const PSD::AlignmentType &align);
+void AddRulePair(const std::string &src, const std::string &tgt,
+    const std::vector<float> &scores, const PSD::AlignmentType &termAlign,
+    const PSD::AlignmentType &nonTermAlign);
   std::vector<float> GetScores(const std::string &scoreStr);
-  PSD::AlignmentType GetAlignment(const std::string &alignStr, const std::string &targetStr);
+  PSD::AlignmentType GetTermAlignment(const std::string &alignStr, const std::string &targetStr);
+  PSD::AlignmentType GetNonTermAlignment(const std::string &alignStr, const std::string &targetStr, const std::string &sourceStr);
 
   // add phrase to index (if it does not exist yet), return its ID
   size_t AddTargetPhrase(const std::string &phrase);

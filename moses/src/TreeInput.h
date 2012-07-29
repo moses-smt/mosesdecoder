@@ -32,14 +32,30 @@ class TreeInput : public Sentence
 
 protected:
   std::vector<std::vector<NonTerminalSet> > m_sourceChart;
+
+  //damt hiero : need vector instead of set because considering order of non-terminals
+  std::vector<std::vector<std::vector<std::string> > > m_stringChart;
   std::vector <ChartTranslationOption*> m_xmlChartOptionsList;
 
   void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
                      ,const std::vector<FactorType>& factorOrder);
+
   void AddChartLabel(size_t startPos, size_t endPos, const Word &label
                      ,const std::vector<FactorType>& factorOrder);
+
+  //damt hiero
+  void AddChartString(size_t startPos, size_t endPos, const std::string &label);
+
   NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) {
     return m_sourceChart[startPos][endPos - startPos];
+  }
+
+  std::vector<std::string> GetLabels(size_t startPos, size_t endPos) {
+    return m_stringChart[startPos][endPos - startPos];
+  }
+
+  std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) {
+    return m_stringChart[startPos][endPos];
   }
 
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
@@ -64,6 +80,11 @@ public:
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const {
     return m_sourceChart[startPos][endPos - startPos];
   }
+
+  //damt hiero : need labels as vectors of strings
+  std::vector<std::string> GetLabelStrings(size_t startPos, size_t endPos);
+  //damt hiero : get parent in a Chart
+  std::string GetParent(size_t startPos, size_t endPos);
 
   std::vector <ChartTranslationOption*> GetXmlChartTranslationOptions() const {
     return m_xmlChartOptionsList;

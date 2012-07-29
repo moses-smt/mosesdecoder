@@ -75,6 +75,25 @@ size_t GetSizeOfSentence(const string &line)
 	return words.size();
 }
 
+inline int makeSpanInterval(int span)
+{
+    switch(span)
+    {
+        case 1: return 1;
+        case 2: return 2;
+        case 3: return 3;
+        case 4: return 4;
+        case 5: return 4;
+        case 6: return 4;
+        case 7: return 7;
+        case 8: return 7;
+        case 9: return 7;
+        case 10: return 7;
+        default: return 8;
+    }
+
+}
+
 int main(int argc, char**argv)
 {
   if (argc != 8) {
@@ -111,8 +130,10 @@ int main(int argc, char**argv)
   ContextType context;
   vector<float> losses;
   vector<string> syntFeats;
-  vector<Translation> translations;
+  vector<ChartTranslation> translations;
   vector<SyntaxLabel> syntLabels;
+  SyntaxLabel parentLabel("NOTAG",true);
+  string span;
   size_t spanStart = 0;
   size_t spanEnd = 0;
   size_t sentID = 0;
@@ -148,7 +169,7 @@ int main(int argc, char**argv)
       // generate features
       if (hasTranslation) {
         srcSurvived++;
-        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, spanStart, spanEnd, translations, losses);
+        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);
       }
       // set new source phrase, context, translations and losses
       srcPhrase = psdLine.GetSrcPhrase();
@@ -160,6 +181,17 @@ int main(int argc, char**argv)
       syntFeats.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
+      //get span in string rep
+
+
+      int spanInt = (spanEnd - spanStart) + 1;
+
+
+      CHECK( spanInt > 0);
+      stringstream s;
+      s << spanInt;
+      span = s.str();
+
 
         // set new syntax features
         size_t sentSize = GetSizeOfSentence(corpusLine);
@@ -167,10 +199,20 @@ int main(int argc, char**argv)
         //cerr << "Extracting syntactic features..." << parseLineString << endl;
         Moses::InputTreeRep myInputChart = Moses::InputTreeRep(sentSize);
         myInputChart.Read(parseLine);
-        //myInputChart.Print(std::cerr);
+        //cerr << "PRINTING CHART ..." << endl;
+        //myInputChart.Print(sentSize);
 
         //get syntax label associated to span
+        //std::cerr << "Gettting syntax labels : " << spanStart << " : " << spanEnd << std::endl;
         vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
+        //std::cerr << "Gettting parent label : " << spanStart << " : " << spanEnd << std::endl;
+
+        string noTag = "NOTAG";
+        while(!parentLabel.GetString().compare("NOTAG"))
+        {
+            parentLabel = myInputChart.GetParent(spanStart,spanEnd);
+            spanEnd++;
+        }
 
         //iterate over labels and get strings
         //MAYBE INEFFICIENT
@@ -180,8 +222,15 @@ int main(int argc, char**argv)
             SyntaxLabel syntaxLabel = *itr_syn_lab;
             CHECK(syntaxLabel.IsNonTerm() == 1);
             string syntFeat = syntaxLabel.GetString();
-            //std::cerr << "EXTRACTED FEATURE : " << syntFeat << std::endl;
-            syntFeats.push_back(syntFeat);
+
+            bool toRemove = false;
+            if( (syntaxLabels.size() > 1 ) && !(syntFeat.compare( myInputChart.GetNoTag() )) )
+            {toRemove = true;}
+
+            if(toRemove == false)
+            {
+                syntFeats.push_back(syntFeat);
+            }
         }
     }
     bool foundTgt = false;
@@ -204,7 +253,7 @@ int main(int argc, char**argv)
    // generate features for the last source phrase
   if (hasTranslation) {
     srcSurvived++;
-    extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, spanStart, spanEnd, translations, losses);
+    extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);
   }
 
     // output statistics about filtering
