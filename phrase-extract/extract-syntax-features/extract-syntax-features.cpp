@@ -45,7 +45,7 @@ void WritePhraseIndex(const TargetIndexType &index, const string &outFile)
   OutputFileStream out(outFile);
   if (! out.good()) {
     cerr << "error: Failed to open " << outFile << endl;
-    exit(1);
+    CHECK(false);
   }
   TargetIndexType::right_map::const_iterator it; // keys are sorted in the map
   for (it = index.right.begin(); it != index.right.end(); it++)
