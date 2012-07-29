@@ -20,8 +20,9 @@ die "Error in args. Usage: psd-feature-extract-parallel.perl cores extractor psd
 
 $cores = 1 if $cores < 1;
 
-my $TMPDIR="tmp.$$";
-mkdir $TMPDIR;
+my $TMPDIR= dirname($out)."/tmp.$$";
+my $mkdir_cmd = "mkdir -p $TMPDIR";
+`$mkdir_cmd`;
 
 my $fileCount = 0;
 if ($cores <= 1)
@@ -126,9 +127,10 @@ systemCheck("mv $TMPDIR/index.0 $out.index");
 my $catargs = join(" ", map { "$TMPDIR/train.$_" } (0 .. $cores - 1));
 systemCheck("cat $catargs | gzip -c > $out.train.gz");
 
-my $cmd = "rm -rf $TMPDIR \n";
-print STDERR $cmd;
-systemCheck($cmd);
+my $cmd = "rm -rf $TMPDIR";
+print STDERR "WARNING: skipping $cmd\n";
+#print STDERR $cmd, "\n";
+#systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 
