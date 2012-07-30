@@ -38,7 +38,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   size_t spanEnd,
   const vector<Translation> &translations,
   vector<float> &losses,
-  string extraFeature = "")
+  string extraFeature)
 {  
   fc->SetNamespace('s', true);
 
