@@ -61,20 +61,20 @@ void InputTreeRep::PopulateChart(size_t sourceSize)
   }
 }
 
-SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos) const
+SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos, bool &IsBeginChart) const
 {
-
-    bool m_beginChart = false;
+    IsBeginChart = false;
     int endPos = relEndPos - startPos;
     //cerr << "CHART INDEX RELATIVE: " << startPos << " : " << relEndPos << endl;
     //cerr << "CHART INDEX ABOLUTE: " << startPos << " : " << endPos << endl;
     //cerr << "SIZE OF CHART: "<< m_sourceChart.front().size() << endl;
 
     CHECK( !(endPos < 0) );
+
     if(startPos == 0)
     {
-        m_beginChart = true;
-        if(endPos == (m_sourceChart.front().size() -1) )
+        IsBeginChart = true;
+        if(relEndPos == (m_sourceChart.front().size() -1) )
         {
             //cerr << "RETURNING ROOT : " << endPos << endl;
             return SyntaxLabel("ISROOT",true);

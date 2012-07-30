@@ -166,25 +166,32 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         //damt hiero : extract syntax features
         //print chart
         size_t sizeOfSource = source.GetSize();
-        std::cerr << "SIZE OF SOURCE : " << sizeOfSource << std::endl;
-        source.GetInputTreeRep()->Print(sizeOfSource);
+        //std::cerr << "SIZE OF SOURCE : " << sizeOfSource << std::endl;
+        //source.GetInputTreeRep()->Print(sizeOfSource);
 
-        std::cerr << "SIZE OF LABELS" << std::endl;
+        //std::cerr << "GETTING SYNTAX LABELS" << std::endl;
+        bool IsBegin = false;
         vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan,endSpan);
-        SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan);
+        //std::cerr << "GETTING PARENT" << std::endl;
+        SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan,IsBegin);
         vector<string> syntFeats;
 
 
-        std::cerr << "GETTING PARENT LABEL : " << startSpan << " : " << endSpan << std::endl;
+        //std::cerr << "LOOPING THROUGH PARENT : " << startSpan << " : " << endSpan << std::endl;
 
         //damt hiero : TODO : use GetNoTag : also in extract-syntax features
         string noTag = "NOTAG";
+        IsBegin = false;
         while(!parentLabel.GetString().compare("NOTAG"))
         {
             //cerr << "LOOKING FOR PARENT OF : " << parentLabel.GetString() << endl;
-            parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan);
-            if( !(source.GetInputTreeRep()->IsBeginChart()) )
+            parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan,IsBegin);
+            //cerr << "FOUND PARENT : " << parentLabel.GetString() << endl;
+            //cerr << "BEGIN OF CHART : " << IsBegin << endl;
+            if( !(IsBegin ) )
             {startSpan--;}
+            else
+            {endSpan++;}
         }
 
         //iterate over labels and get strings

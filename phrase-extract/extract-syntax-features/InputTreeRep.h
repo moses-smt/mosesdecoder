@@ -73,12 +73,6 @@ typedef std::vector<SyntaxLabel> SyntLabels;
 public:
   std::vector<std::vector<SyntLabels> > m_sourceChart;
   std::string m_noTag;
-  bool m_beginChart;
-
-  bool IsBeginChart() const
-  {
-      return m_beginChart;
-  }
 
   void AddChartLabel(size_t startPos, size_t endPos, SyntaxLabel label);
 
@@ -99,7 +93,7 @@ public:
         return m_noTag;
   }
 
-  SyntaxLabel GetParent(size_t startPos, size_t endPos) const;
+  SyntaxLabel GetParent(size_t startPos, size_t endPos, bool &IsBegin) const;
 
   size_t ProcessXMLTags(std::string &line, std::vector<XMLParseOutputForTrain> &sourceLabelss);
 

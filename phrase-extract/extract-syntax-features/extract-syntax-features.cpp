@@ -206,16 +206,27 @@ int main(int argc, char**argv)
         vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
         //std::cerr << "Gettting parent label : " << spanStart << " : " << spanEnd << std::endl;
 
+        bool IsBegin = false;
         string noTag = "NOTAG";
+        parentLabel = myInputChart.GetParent(spanStart,spanEnd,IsBegin);
+        IsBegin = false;
         while(!parentLabel.GetString().compare("NOTAG"))
         {
             //cerr << "LOOKING FOR PARENT OF : " << parentLabel.GetString() << endl;
-            parentLabel = myInputChart.GetParent(spanStart,spanEnd);
-            spanEnd++;
+            parentLabel = myInputChart.GetParent(spanStart,spanEnd,IsBegin);
+            //cerr << "FOUND PARENT : " << parentLabel.GetString() << endl;
+            //cerr << "BEGIN OF CHART : " << IsBegin << endl;
+            if( !(IsBegin ) )
+            {spanStart--;}
+            else
+            {spanEnd++;}
         }
+
+        //cerr << "FOUND PARENT LABEL : " << parentLabel.GetString() << endl;
 
         //iterate over labels and get strings
         //MAYBE INEFFICIENT
+
         vector<SyntaxLabel>::iterator itr_syn_lab;
         for(itr_syn_lab = syntaxLabels.begin(); itr_syn_lab != syntaxLabels.end(); itr_syn_lab++)
         {
