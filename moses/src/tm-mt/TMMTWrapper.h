@@ -10,6 +10,7 @@
 #define moses_TMMTWrapper_h
 
 #include <fstream>
+#include <string>
 #include "tm-mt/SuffixArray.h"
 #include "tm-mt/Vocabulary.h"
 #include "tm-mt/Match.h"
@@ -24,7 +25,7 @@ class TMMTWrapper
 public:
   TMMTWrapper(const std::string &source, const std::string &target, const std::string &alignment);
 
-  void Extract(const std::string &inputPath);
+  std::string Extract(const std::string &inputPath);
   
 protected:
   // tm-mt

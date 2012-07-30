@@ -1412,6 +1412,7 @@
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
 					WITH_THREADS,
+					IS_XCODE,
 				);
 				HEADER_SEARCH_PATHS = (
 					../..,
@@ -1455,6 +1456,7 @@
 					"_FILE_OFFSET_BITS=64",
 					_LARGE_FILES,
 					WITH_THREADS,
+					IS_XCODE,
 				);
 				HEADER_SEARCH_PATHS = (
 					../..,

@@ -98,18 +98,14 @@ namespace Moses
     
     cerr << "buffer=" << buffer << endl;
     
-    m_tmmtWrapper->Extract(buffer);
-
-    string pt_file = in_file + ".pt.gz";
+    string pt_file = m_tmmtWrapper->Extract(buffer);
 
     // populate with rules for this sentence
     long translationId = inputSentence.GetTranslationId();
 
     PhraseDictionaryNodeSCFG &rootNode = m_collection[translationId];
     FormatType format = MosesFormat;
-    
-    pt_file += ".gz";
-    
+        
     // data from file
     InputFileStream inStream(pt_file);
     

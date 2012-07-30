@@ -44,17 +44,22 @@ namespace tmmt
 
   }
 
-  void TMMTWrapper::Extract(const string &inputPath)
+  string TMMTWrapper::Extract(const string &inputPath)
   {
     const Moses::StaticData &staticData = Moses::StaticData::Instance();
     
     string tmExtractFile = ExtractTM(inputPath);
     
     string cmd = string("perl ");
+#ifdef IS_XCODE
+    cmd += "/Users/hieuhoang/unison/workspace/github/hieuhoang/contrib/tm-mt-integration/create_xml.perl " + tmExtractFile;
+#else
     cmd += staticData.GetBinDirectory() +  "../contrib/tm-mt-integration/create_xml.perl " + tmExtractFile;
+#endif
     cerr << cmd << endl;
-
     system(cmd.c_str());
+    
+    return tmExtractFile + ".pt.gz";
   }
   
   string TMMTWrapper::ExtractTM(const string &inputPath)
