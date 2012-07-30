@@ -29,13 +29,16 @@ namespace Moses
 {
 
 InputType::InputType(long translationId) : m_translationId(translationId), m_initialSourcePhrase(Phrase(0))
-
 {
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
+  //damt hiero chart for extracting syntax features
+  m_parseTree = new InputTreeRep(0);
 }
 
-InputType::~InputType() {}
+InputType::~InputType() {
+delete m_parseTree;
+}
 
 TO_STRING_BODY(InputType);
 
@@ -69,24 +72,6 @@ std::vector <ChartTranslationOption*> InputType::GetXmlChartTranslationOptions()
   return ret;
 }
 
-std::vector<std::string> InputType::GetLabels(size_t startPos, size_t endPos) const
-{
-    std::cerr << "Error : get labels not defined for non tree input type" << std::endl;
-    CHECK(false);
-}
-
-std::vector<std::string> InputType::GetRelLabels(size_t startPos, size_t endPos) const
-{
-    std::cerr << "Error : get rel labels not defined for non tree input type" << std::endl;
-    CHECK(false);
-}
-
-std::string InputType::GetParent(size_t startPos, size_t endPos) const
-{
-    std::cerr << "Error : get parent not defined for non tree input type" << std::endl;
-    CHECK(false);
-}
-
-}
+}//namespace
 
 

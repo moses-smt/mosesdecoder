@@ -7,6 +7,7 @@
 #include "WordsRange.h"
 #include "TranslationOption.h"
 #include "Util.h"
+#include "../../phrase-extract/extract-syntax-features/InputTreeRep.h"
 #include <vector>
 #include <iostream>
 #include <fstream>
@@ -163,11 +164,42 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
         VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
         //damt hiero : extract syntax features
-        vector<string> syntaxFeats = source.GetLabels(startSpan,endSpan);
-        string syntParent = source.GetParent(startSpan,endSpan);
+        vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan,endSpan);
+        SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan);
+        vector<string> syntFeats;
+
+        //std::cerr << "Gettting parent label : " << spanStart << " : " << spanEnd << std::endl;
+
+        //damt hiero : TODO : use GetNoTag : also in extract-syntax features
+        string noTag = "NOTAG";
+        while(!parentLabel.GetString().compare("NOTAG"))
+        {
+            //cerr << "LOOKING FOR PARENT OF : " << parentLabel.GetString() << endl;
+            parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan);
+            endSpan++;
+        }
+
+        //iterate over labels and get strings
+        //MAYBE INEFFICIENT
+        vector<SyntaxLabel>::iterator itr_syn_lab;
+        for(itr_syn_lab = syntaxLabels.begin(); itr_syn_lab != syntaxLabels.end(); itr_syn_lab++)
+        {
+            SyntaxLabel syntaxLabel = *itr_syn_lab;
+            CHECK(syntaxLabel.IsNonTerm() == 1);
+            string syntFeat = syntaxLabel.GetString();
+
+            bool toRemove = false;
+            if( (syntaxLabels.size() > 1 ) && !(syntFeat.compare( source.GetInputTreeRep()->GetNoTag() )) )
+            {toRemove = true;}
+
+            if(toRemove == false)
+            {
+                syntFeats.push_back(syntFeat);
+            }
+        }
 
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
-        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntaxFeats,syntParent,span,startSpan,endSpan,psdOptions,losses);
+        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         m_consumerFactory->Release(p_consumer);
 
         vector<float>::iterator lossIt;

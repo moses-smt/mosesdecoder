@@ -44,7 +44,6 @@ public:
     CHECK(false);
     return *(new NonTerminalSet());
   }
-
 };
 
 }

@@ -21,7 +21,8 @@ namespace Moses
  * \param walls reordering constraint walls specified by xml
  */
 
-void TreeInput::PopulateStringChart(string noTag)
+//TODO : remove
+/*void TreeInput::PopulateStringChart(string noTag)
 {
   for (size_t startPos = 0; startPos < GetSize(); startPos++) {
       //cerr << "startPos" << startPos << endl;
@@ -50,7 +51,7 @@ void TreeInput::PrintStringChart()
     }
     std::cout << std::endl;
   }
-}
+}*/
 
 bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
 {
@@ -256,9 +257,6 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
 
-  //populate the string chart
-  PopulateStringChart("NOTAG");
-
   const StaticData &staticData = StaticData::Instance();
 
   string line;
@@ -280,13 +278,15 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   VERBOSE(7, "TREE INPUT : SENTENCE : " << line << endl);
 
   std::vector<std::string> sentTokens = Tokenize(" ",line);
+
   //damt hiero : when reading sentence, also read in factors, see Read method in Sentence
   Sentence::Read(strme, factorOrder);
 
-  // size input chart
   size_t sourceSize = GetSize();
   m_sourceChart.resize(sourceSize);
-  m_stringChart.resize(sourceSize);
+
+  //construct chart for syntactic features
+  m_parseTree->PopulateChart(sourceSize);
 
   for (size_t pos = 0; pos < sourceSize; ++pos) {
     m_sourceChart[pos].resize(sourceSize - pos);
@@ -300,7 +300,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     const string &label = labelItem.m_label;
     AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
     //damt-hiero : add string representation for syntax features
-    AddChartString(range.GetStartPos() + 1, range.GetEndPos() + 1, label);
+    m_parseTree->AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, SyntaxLabel(label,true));
   }
 
   // default labels
@@ -396,7 +396,7 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
 }
 
 //damt hiero
-void TreeInput::AddChartString(size_t startPos, size_t endPos, const string &label)
+/*void TreeInput::AddChartString(size_t startPos, size_t endPos, const string &label)
 {
   m_stringChart[startPos][endPos-startPos].push_back(label);
 }
@@ -420,12 +420,12 @@ string TreeInput::GetParent(size_t startPos, size_t endPos)
     }
     else
     {
-        if(GetRelLabels(startPos,endPos+1).size() > 1)
-        {return GetRelLabels(startPos,endPos+1)[1];}
+        if(GetRelLabels(startPos-1,endPos+1).size() > 1)
+        {return GetRelLabels(startPos-1,endPos+1)[1];}
         else
         {return GetRelLabels(startPos-1,endPos+1).front();}
     }
-}
+}*/
 
 std::ostream& operator<<(std::ostream &out, const TreeInput &input)
 {

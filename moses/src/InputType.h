@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
 #include "FeatureExtractor.h"
+#include "../phrase-extract/extract-syntax-features/InputTreeRep.h"
 
 namespace Moses
 {
@@ -40,6 +41,7 @@ class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
 class ChartTranslationOption;
+class InputTreeRep;
 
 /** base class for all types of inputs to the decoder,
  *  eg. sentences, confusion networks, lattices and tree
@@ -64,6 +66,7 @@ public:
 
   size_t m_frontSpanCoveredLength;
   PSD::ContextType m_PSDContext;
+  InputTreeRep *m_parseTree;
 
   InputType(long translationId = 0);
 
@@ -87,12 +90,6 @@ public:
   inline bool IsCoveragePossible(const WordsRange& range) const {
     return CanIGetFromAToB(range.GetStartPos(), range.GetEndPos() + 1);
   }
-
-  virtual std::vector<std::string> GetLabels(size_t startPos, size_t endPos) const;
-
-  virtual std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) const;
-
-  virtual std::string GetParent(size_t startPos, size_t endPos) const;
 
   //! In a word lattice, you can't always get from node A to node B
   inline bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const {
@@ -147,6 +144,11 @@ public:
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const = 0;
 
   virtual std::vector <ChartTranslationOption*> GetXmlChartTranslationOptions() const;
+
+  const InputTreeRep * GetInputTreeRep() const
+  {
+      return m_parseTree;
+  }
 
   TO_STRING();
 

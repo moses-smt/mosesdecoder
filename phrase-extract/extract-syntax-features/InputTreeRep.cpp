@@ -3,7 +3,6 @@
 #include "InputTreeRep.h"
 #include "Util.h"
 #include "XmlTree.h"
-#include "FactorCollection.h"
 
 using namespace std;
 
@@ -14,6 +13,14 @@ namespace Moses
  * Process parsed sentence, build data structure
  * to query for getting label for different spans
 */
+
+class InputTreeRep;
+
+WordsRangeForTrain::WordsRangeForTrain(size_t startPos, size_t endPos) :
+m_startPos(startPos),
+m_endPos(endPos)
+{
+}
 
 SyntaxLabel::SyntaxLabel(const std::string &label, bool isNonTerm) :
 m_label(label),
@@ -38,7 +45,23 @@ InputTreeRep::InputTreeRep(size_t sourceSize)
   }
 }
 
-SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos)
+void InputTreeRep::PopulateChart(size_t sourceSize)
+{
+  SyntaxLabel syntNoLabel(GetNoTag(),true);
+  for (size_t startPos = 0; startPos < sourceSize; startPos++) {
+      //cerr << "startPos" << startPos << endl;
+      vector<SyntLabels> internal;
+      for (size_t endPos = startPos; endPos < sourceSize; endPos++) {
+        //cerr << "endPos" << endPos << endl;
+        SyntLabels oneCell;
+        oneCell.push_back(syntNoLabel);
+        internal.push_back(oneCell);
+    }
+    m_sourceChart.push_back(internal);
+  }
+}
+
+SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos) const
 {
     int endPos = relEndPos - startPos;
     //cerr << "CHART INDEX : " << startPos << " : " << endPos << endl;
@@ -202,7 +225,7 @@ size_t InputTreeRep::ProcessXMLTags(string &line, std::vector<XMLParseOutputForT
 
         // specified label
         if (label.length() > 0) {
-          WordsRange range(startPos,endPos-1); // really?
+          WordsRangeForTrain range(startPos,endPos-1); // really?
           XMLParseOutputForTrain item(label, range);
           sourceLabels.push_back(item);
         }
@@ -238,7 +261,7 @@ int InputTreeRep::Read(std::string &line)
   vector<XMLParseOutputForTrain>::const_iterator iterLabel;
   for (iterLabel = sourceLabels.begin(); iterLabel != sourceLabels.end(); ++iterLabel) {
     const XMLParseOutputForTrain &labelItem = *iterLabel;
-    const WordsRange &range = labelItem.m_range;
+    const WordsRangeForTrain &range = labelItem.m_range;
 
     AddChartLabel(range.GetStartPos(), range.GetEndPos(), SyntaxLabel(labelItem.m_label,true));
     //For testing
@@ -269,7 +292,5 @@ void InputTreeRep::Print(size_t size)
     std::cout << std::endl;
   }
 }
-
-
 } // namespace
 

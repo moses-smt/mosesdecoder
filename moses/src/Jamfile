@@ -1,4 +1,4 @@
-alias headers : ../../util//kenutil ..//..//psd//psd : : : <include>. ;
+alias headers : ../../util//kenutil ..//..//psd//psd ..//..//phrase-extract//extract-syntax-features : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
@@ -11,7 +11,7 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
-obj CellContextScoreProducer.o : CellContextScoreProducer.cpp headers : <include>..//..//psd ;
+obj CellContextScoreProducer.o : CellContextScoreProducer.cpp headers : <include>..//..//psd <include>..//..//phrase-extract//extract-syntax-features ;
 
 obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>..//..//psd ;
 

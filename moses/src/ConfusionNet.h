@@ -16,7 +16,7 @@ class TranslationOptionCollection;
 class Sentence;
 class TranslationSystem;
 
-/** An input to the decoder where each position can be 1 of a number of words, 
+/** An input to the decoder where each position can be 1 of a number of words,
  *  each with an associated probability. Compared with a sentence, where each position is a word
  */
 class ConfusionNet : public InputType
@@ -74,6 +74,24 @@ public:
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
     CHECK(false);
     return *(new NonTerminalSet());
+  }
+
+  std::vector<std::string> GetLabels(size_t startPos, size_t endPos) const
+  {
+        std::cerr << "Damt hiero : GetLabels only defined for Tree Input" << std::endl;
+        CHECK(false);
+  }
+
+  std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) const
+  {
+        std::cerr << "Damt hiero : GetRelLabels only defined for Tree Input" << std::endl;
+        CHECK(false);
+  }
+
+  std::string GetParent(size_t startPos, size_t endPos) const
+  {
+        std::cerr << "Damt hiero : GetParent only defined for Tree Input" << std::endl;
+        CHECK(false);
   }
 
 };
