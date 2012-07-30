@@ -20,7 +20,7 @@ lib moses_internal :
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp CellContextScoreProducer.cpp PSDScoreProducer.cpp ]
 CellContextScoreProducer.o PSDScoreProducer.o synlm ThreadPool headers ;
 
-alias moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
+alias moses : PhraseDictionary.cpp moses_internal ..//..//phrase-extract//SyntaxTree.o ..//..//phrase-extract//XmlTree.o CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
 

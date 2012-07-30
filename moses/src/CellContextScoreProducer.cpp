@@ -164,11 +164,18 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
         VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
         //damt hiero : extract syntax features
+        //print chart
+        size_t sizeOfSource = source.GetSize();
+        std::cerr << "SIZE OF SOURCE : " << sizeOfSource << std::endl;
+        source.GetInputTreeRep()->Print(sizeOfSource);
+
+        std::cerr << "SIZE OF LABELS" << std::endl;
         vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan,endSpan);
         SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan);
         vector<string> syntFeats;
 
-        //std::cerr << "Gettting parent label : " << spanStart << " : " << spanEnd << std::endl;
+
+        std::cerr << "GETTING PARENT LABEL : " << startSpan << " : " << endSpan << std::endl;
 
         //damt hiero : TODO : use GetNoTag : also in extract-syntax features
         string noTag = "NOTAG";
@@ -176,7 +183,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         {
             //cerr << "LOOKING FOR PARENT OF : " << parentLabel.GetString() << endl;
             parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan);
-            endSpan++;
+            if( !(source.GetInputTreeRep()->IsBeginChart()) )
+            {startSpan--;}
         }
 
         //iterate over labels and get strings

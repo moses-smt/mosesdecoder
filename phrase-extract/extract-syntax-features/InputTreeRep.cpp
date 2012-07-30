@@ -63,18 +63,25 @@ void InputTreeRep::PopulateChart(size_t sourceSize)
 
 SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos) const
 {
+
+    bool m_beginChart = false;
     int endPos = relEndPos - startPos;
-    //cerr << "CHART INDEX : " << startPos << " : " << endPos << endl;
+    //cerr << "CHART INDEX RELATIVE: " << startPos << " : " << relEndPos << endl;
+    //cerr << "CHART INDEX ABOLUTE: " << startPos << " : " << endPos << endl;
+    //cerr << "SIZE OF CHART: "<< m_sourceChart.front().size() << endl;
 
     CHECK( !(endPos < 0) );
     if(startPos == 0)
     {
+        m_beginChart = true;
         if(endPos == (m_sourceChart.front().size() -1) )
         {
+            //cerr << "RETURNING ROOT : " << endPos << endl;
             return SyntaxLabel("ISROOT",true);
         }
         else
         {
+            //cerr << "INCREMENTING ENDPOS"<< endl;
             if(GetRelLabels(startPos,endPos+1).size() > 1)
             {return GetRelLabels(startPos,endPos+1)[1];}
             else
@@ -84,6 +91,7 @@ SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos) const
     else
     {
         //cerr << "LOOKING AT : " << startPos-1 << " : " << endPos+1 << endl;
+        //cerr << "INCREMENTING START AND END"<< endl;
         if(GetRelLabels(startPos-1,endPos+1).size() > 1)
         {return GetRelLabels(startPos-1,endPos+1)[1];}
         else
@@ -276,20 +284,20 @@ void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, SyntaxLabel lab
   m_sourceChart[startPos][endPos-startPos].push_back(label);
 }
 
-void InputTreeRep::Print(size_t size)
+void InputTreeRep::Print(size_t size) const
 {
   for (size_t startPos = 0; startPos < size ; ++startPos) {
     for (size_t endPos = startPos; endPos < size; ++endPos) {
-      vector<SyntaxLabel> &labelSet = m_sourceChart[startPos][endPos - startPos];
-      vector<SyntaxLabel>::iterator iter;
+      const vector<SyntaxLabel> &labelSet = m_sourceChart[startPos][endPos - startPos];
+      vector<SyntaxLabel>::const_iterator iter;
       for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
         SyntaxLabel sLabel = *iter;
-        std::cout << "[" << startPos <<"," << endPos-startPos << "]="
+        std::cerr << "[" << startPos <<"," << endPos-startPos << "]="
             << sLabel.GetString() << "(" << sLabel.IsNonTerm() << ") ";
         CHECK(sLabel.IsNonTerm());
       }
     }
-    std::cout << std::endl;
+    std::cerr << std::endl;
   }
 }
 } // namespace

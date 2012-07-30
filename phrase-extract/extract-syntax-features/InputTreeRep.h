@@ -4,6 +4,7 @@
 #include <vector>
 #include <vector>
 #include <string>
+#include "InputType.h"
 
 namespace Moses
 {
@@ -72,18 +73,24 @@ typedef std::vector<SyntaxLabel> SyntLabels;
 public:
   std::vector<std::vector<SyntLabels> > m_sourceChart;
   std::string m_noTag;
+  bool m_beginChart;
+
+  bool IsBeginChart() const
+  {
+      return m_beginChart;
+  }
 
   void AddChartLabel(size_t startPos, size_t endPos, SyntaxLabel label);
 
   SyntLabels GetLabels(size_t startPos, size_t endPos) const {
-     //std::cerr << "GETTING LABEL FOR : " << startPos << " : " << endPos - startPos << std::endl;
-    //assert( !(m_sourceChart.size() < startPos) );
-    //assert( !(m_sourceChart[startPos].size() < (endPos - startPos) ) );
+    //std::cerr << "GETTING LABEL FOR : " << startPos << " : " << endPos - startPos << std::endl;
+    CHECK( !(m_sourceChart.size() < startPos) );
+    CHECK( !(m_sourceChart[startPos].size() < (endPos - startPos) ) );
     return m_sourceChart[startPos][endPos - startPos];
   }
 
   SyntLabels GetRelLabels(size_t startPos, size_t endPos) const {
-    //std::cout << "GETTING RELATIVE LABEL FOR : " << startPos << " : " << endPos << std::endl;
+    //std::cerr << "GETTING RELATIVE LABEL FOR : " << startPos << " : " << endPos << std::endl;
     return m_sourceChart[startPos][endPos];
   }
 
@@ -106,7 +113,7 @@ public:
   int Read(std::string &in);
 
   //! Output debugging info to stream out
-  void Print(size_t size);
+  void Print(size_t size) const;
 };
 
 }

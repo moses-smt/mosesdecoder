@@ -237,7 +237,7 @@ int main(int argc, char**argv)
     size_t tgtPhraseID = rtable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
 
     if (foundTgt) {
-      // add correct translation (i.e., set its loss to 0)
+      // addadd correct translation (i.e., set its loss to 0)
       for (size_t i = 0; i < translations.size(); i++) {
         if (translations[i].m_index == tgtPhraseID) {
           losses[i] = 0;

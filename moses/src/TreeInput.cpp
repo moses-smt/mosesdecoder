@@ -267,6 +267,11 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   VERBOSE(7, "TREE INPUT : LINE : " << line << endl);
 
+  //SOLUTION : COPY LINE !!!
+   //construct chart for syntactic features
+  //hack : keep line with xml tags
+  string xmlLine = line;
+
   std::vector<XMLParseOutput> sourceLabels;
   std::vector<XmlOption*> xmlOptionsList;
   ProcessAndStripXMLTags(line, sourceLabels, xmlOptionsList);
@@ -285,8 +290,11 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   size_t sourceSize = GetSize();
   m_sourceChart.resize(sourceSize);
 
-  //construct chart for syntactic features
+  //Read in parse tree
   m_parseTree->PopulateChart(sourceSize);
+  //m_parseTree->Print(sourceSize);
+  m_parseTree->Read(xmlLine);
+  //m_parseTree->Print(sourceSize);
 
   for (size_t pos = 0; pos < sourceSize; ++pos) {
     m_sourceChart[pos].resize(sourceSize - pos);
@@ -299,8 +307,6 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     const WordsRange &range = labelItem.m_range;
     const string &label = labelItem.m_label;
     AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
-    //damt-hiero : add string representation for syntax features
-    m_parseTree->AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, SyntaxLabel(label,true));
   }
 
   // default labels
