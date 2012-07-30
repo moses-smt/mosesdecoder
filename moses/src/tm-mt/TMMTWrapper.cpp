@@ -12,6 +12,7 @@
 #include "tm-mt/Vocabulary.h"
 #include "tm-mt/Match.h"
 #include "Util.h"
+#include "StaticData.h"
 
 using namespace std;
 
@@ -37,8 +38,347 @@ namespace tmmt
     load_target(targetPath, targetAndAlignment);
     load_alignment(alignmentPath, targetAndAlignment);
     
-    //tmmt::SuffixArray suffixArray( m_config[0] );
+    cerr << "creating suffix array" << endl;
+    suffixArray = new tmmt::SuffixArray( sourcePath );
+    cerr << "done creating suffix array" << endl;
 
+  }
+
+  void TMMTWrapper::Extract(const string &inputPath)
+  {
+    const Moses::StaticData &staticData = Moses::StaticData::Instance();
+    
+    string tmExtractFile = ExtractTM(inputPath);
+    
+    string cmd = string("perl ");
+    cmd += staticData.GetBinDirectory() +  "../contrib/tm-mt-integration/create_xml.perl " + tmExtractFile;
+    cerr << cmd << endl;
+
+    system(cmd.c_str());
+  }
+  
+  string TMMTWrapper::ExtractTM(const string &inputPath)
+  {
+    char *outputFileName = tmpnam(NULL);
+    ofstream outputFile(outputFileName);
+ 
+    vector< vector< WORD_ID > > input;
+    load_corpus(inputPath, input);
+    
+    assert(input.size() == 1);
+    size_t sentenceInd = 0;
+    
+		clock_t start_clock = clock();
+		// if (i % 10 == 0) cerr << ".";
+    
+		// establish some basic statistics
+    
+		// int input_length = compute_length( input[i] );
+		int input_length = input[sentenceInd].size();
+		int best_cost = input_length * (100-min_match) / 100 + 1;
+    
+		int match_count = 0; // how many substring matches to be considered
+		//cerr << endl << "sentence " << i << ", length " << input_length << ", best_cost " << best_cost << endl;
+    
+		// find match ranges in suffix array
+		vector< vector< pair< SuffixArray::INDEX, SuffixArray::INDEX > > > match_range;
+		for(size_t start=0;start<input[sentenceInd].size();start++) 
+		{
+			SuffixArray::INDEX prior_first_match = 0;
+			SuffixArray::INDEX prior_last_match = suffixArray->GetSize()-1;
+			vector< string > substring;
+			bool stillMatched = true;
+			vector< pair< SuffixArray::INDEX, SuffixArray::INDEX > > matchedAtThisStart;
+			//cerr << "start: " << start;
+			for(int word=start; stillMatched && word<input[sentenceInd].size(); word++)
+			{
+				substring.push_back( vocabulary.GetWord( input[sentenceInd][word] ) );
+        
+				// only look up, if needed (i.e. no unnecessary short gram lookups)
+        //				if (! word-start+1 <= short_match_max_length( input_length ) )
+				//			{
+				SuffixArray::INDEX first_match, last_match;
+				stillMatched = false;
+				if (suffixArray->FindMatches( substring, first_match, last_match, prior_first_match, prior_last_match ) )
+				{
+					stillMatched = true;
+					matchedAtThisStart.push_back( make_pair( first_match, last_match ) );
+					//cerr << " (" << first_match << "," << last_match << ")";
+					//cerr << " " << ( last_match - first_match + 1 );
+					prior_first_match = first_match;
+					prior_last_match = last_match;
+				}
+        //}
+			}
+			//cerr << endl;
+			match_range.push_back( matchedAtThisStart );
+		}
+    
+		clock_t clock_range = clock();
+    
+		map< int, vector< Match > > sentence_match;
+		map< int, int > sentence_match_word_count;
+    
+		// go through all matches, longest first
+		for(int length = input[sentenceInd].size(); length >= 1; length--)
+		{
+			// do not create matches, if these are handled by the short match function
+			if (length <= short_match_max_length( input_length ) )
+			{
+				continue;
+			}
+      
+			unsigned int count = 0;
+			for(int start = 0; start <= input[sentenceInd].size() - length; start++)
+			{
+				if (match_range[start].size() >= length)
+				{
+					pair< SuffixArray::INDEX, SuffixArray::INDEX > &range = match_range[start][length-1];
+					// cerr << " (" << range.first << "," << range.second << ")";
+					count += range.second - range.first + 1;
+          
+					for(SuffixArray::INDEX i=range.first; i<=range.second; i++)
+					{
+						int position = suffixArray->GetPosition( i );
+            
+						// sentence length mismatch
+						size_t sentence_id = suffixArray->GetSentence( position );
+						int sentence_length = suffixArray->GetSentenceLength( sentence_id );
+						int diff = abs( (int)sentence_length - (int)input_length );
+						// cerr << endl << i << "\tsentence " << sentence_id << ", length " << sentence_length;
+						//if (length <= 2 && input_length>=5 &&
+						//		sentence_match.find( sentence_id ) == sentence_match.end())
+						//	continue;
+            
+						if (diff > best_cost)
+							continue;
+            
+						// compute minimal cost
+						int start_pos = suffixArray->GetWordInSentence( position );
+						int end_pos = start_pos + length-1;
+						// cerr << endl << "\t" << start_pos << "-" << end_pos << " (" << sentence_length << ") vs. " 
+						// << start << "-" << (start+length-1) << " (" << input_length << ")"; 
+						// different number of prior words -> cost is at least diff
+						int min_cost = abs( start - start_pos );
+						
+						// same number of words, but not sent. start -> cost is at least 1 
+						if (start == start_pos && start>0)
+							min_cost++;
+            
+						// different number of remaining words -> cost is at least diff
+						min_cost += abs( ( sentence_length-1 - end_pos ) -
+                            ( input_length-1 - (start+length-1) ) );
+            
+						// same number of words, but not sent. end -> cost is at least 1
+						if ( sentence_length-1 - end_pos ==
+                input_length-1 - (start+length-1)
+                && end_pos != sentence_length-1 )
+							min_cost++;
+            
+						// cerr << " -> min_cost " << min_cost;
+						if (min_cost > best_cost)
+							continue;
+            
+						// valid match
+						match_count++;
+            
+						// compute maximal cost
+						int max_cost = max( start, start_pos )
+            + max( sentence_length-1 - end_pos,
+                  input_length-1 - (start+length-1) );
+						// cerr << ", max_cost " << max_cost;
+						
+						Match m = Match( start, start+length-1, 
+                            start_pos, start_pos+length-1, 
+                            min_cost, max_cost, 0);
+						sentence_match[ sentence_id ].push_back( m );
+						sentence_match_word_count[ sentence_id ] += length;
+            
+						if (max_cost < best_cost)
+						{
+							best_cost = max_cost;
+							if (best_cost == 0) break;
+						}
+						//if (match_count >= MAX_MATCH_COUNT) break;
+					}
+				}
+				// cerr << endl;
+				if (best_cost == 0) break;
+				//if (match_count >= MAX_MATCH_COUNT) break;
+			}
+			// cerr << count << " matches at length " << length << " in " << sentence_match.size() << " tm." << endl;
+      
+			if (best_cost == 0) break;
+			//if (match_count >= MAX_MATCH_COUNT) break;
+		}
+		cerr << match_count << " matches in " << sentence_match.size() << " sentences." << endl;
+    
+		clock_t clock_matches = clock();
+    
+		// consider each sentence for which we have matches
+		int old_best_cost = best_cost;
+		int tm_count_word_match = 0;
+		int tm_count_word_match2 = 0;
+		int pruned_match_count = 0;
+		if (short_match_max_length( input_length ))
+		{
+			init_short_matches( input[sentenceInd] );
+		}
+		vector< int > best_tm;
+		typedef map< int, vector< Match > >::iterator I;
+    
+		clock_t clock_validation_sum = 0;
+    
+		for(I tm=sentence_match.begin(); tm!=sentence_match.end(); tm++)
+		{
+			int tmID = tm->first;
+			int tm_length = suffixArray->GetSentenceLength(tmID);
+			vector< Match > &match = tm->second;
+			add_short_matches( match, source[tmID], input_length, best_cost );
+      
+			//cerr << "match in sentence " << tmID << ": " << match.size() << " [" << tm_length << "]" << endl;
+      
+			// quick look: how many words are matched
+			int words_matched = 0;
+			for(int m=0;m<match.size();m++) {
+        
+				if (match[m].min_cost <= best_cost) // makes no difference
+					words_matched += match[m].input_end - match[m].input_start + 1;
+			}
+			if (max(input_length,tm_length) - words_matched > best_cost)
+			{
+				if (length_filter_flag) continue;
+			}
+			tm_count_word_match++;
+      
+			// prune, check again how many words are matched
+			vector< Match > pruned = prune_matches( match, best_cost );
+			words_matched = 0;
+			for(int p=0;p<pruned.size();p++) {
+				words_matched += pruned[p].input_end - pruned[p].input_start + 1;
+			}
+			if (max(input_length,tm_length) - words_matched > best_cost)
+			{
+				if (length_filter_flag) continue;
+			}
+			tm_count_word_match2++;
+      
+			pruned_match_count += pruned.size();
+			int prior_best_cost = best_cost;
+			int cost;
+      
+			clock_t clock_validation_start = clock();
+			if (! parse_flag ||
+			    pruned.size()>=10) // to prevent worst cases
+			{
+				string path;
+				cost = sed( input[sentenceInd], source[tmID], path, false );
+				if (cost <  best_cost) 
+				{
+					best_cost = cost;
+				}
+			}
+      
+			else
+			{
+				cost = parse_matches( pruned, input_length, tm_length, best_cost );
+				if (prior_best_cost != best_cost)
+				{
+					best_tm.clear();
+				}
+			}
+			clock_validation_sum += clock() - clock_validation_start;
+			if (cost == best_cost)
+			{
+				best_tm.push_back( tmID );
+			}
+		}
+		cerr << "reduced best cost from " << old_best_cost << " to " << best_cost << endl;
+		cerr << "tm considered: " << sentence_match.size()
+    << " word-matched: " << tm_count_word_match 
+    << " word-matched2: " << tm_count_word_match2 
+    << " best: " << best_tm.size() << endl;
+    
+		cerr << "pruned matches: " << ((float)pruned_match_count/(float)tm_count_word_match2) << endl;
+    
+    // create xml and extract files
+    string inputStr, sourceStr;
+    for (size_t pos = 0; pos < input_length; ++pos) {
+      inputStr += vocabulary.GetWord(input[sentenceInd][pos]) + " ";
+    }
+    
+		// do not try to find the best ... report multiple matches
+		if (multiple_flag) {
+			int input_letter_length = compute_length( input[sentenceInd] );
+			for(int si=0; si<best_tm.size(); si++) {
+				int s = best_tm[si];
+				string path;
+				unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
+				// do not report multiple identical sentences, but just their count
+				cout << sentenceInd << " "; // sentence number
+				cout << letter_cost << "/" << input_letter_length << " ";
+				cout << "(" << best_cost <<"/" << input_length <<") ";
+				cout << "||| " << s << " ||| " << path << endl;
+        
+        vector<WORD_ID> &sourceSentence = source[s];
+        vector<SentenceAlignment> &targets = targetAndAlignment[s];
+        create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, path, outputFile);
+        
+			}
+		} // if (multiple_flag)
+    else {
+      
+      // find the best matches according to letter sed
+      string best_path = "";
+      int best_match = -1;
+      int best_letter_cost;
+      if (lsed_flag) {
+        best_letter_cost = compute_length( input[sentenceInd] ) * min_match / 100 + 1;
+        for(int si=0; si<best_tm.size(); si++)
+        {
+          int s = best_tm[si];
+          string path;
+          unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
+          if (letter_cost < best_letter_cost)
+          {
+            best_letter_cost = letter_cost;
+            best_path = path;
+            best_match = s;
+          }
+        }
+      }
+      // if letter sed turned off, just compute path for first match
+      else {
+        if (best_tm.size() > 0) {
+          string path;
+          sed( input[sentenceInd], source[best_tm[0]], path, false );
+          best_path = path;
+          best_match = best_tm[0];
+        }
+      }
+      cerr << "elapsed: " << (1000 * (clock()-start_clock) / CLOCKS_PER_SEC)
+      << " ( range: " << (1000 * (clock_range-start_clock) / CLOCKS_PER_SEC)
+      << " match: " << (1000 * (clock_matches-clock_range) / CLOCKS_PER_SEC)
+      << " tm: " << (1000 * (clock()-clock_matches) / CLOCKS_PER_SEC)
+      << " (validation: " << (1000 * (clock_validation_sum) / CLOCKS_PER_SEC) << ")"
+      << " )" << endl;
+      if (lsed_flag) {
+        cout << best_letter_cost << "/" << compute_length( input[sentenceInd] ) << " (";
+      }
+      cout << best_cost <<"/" << input_length;
+      if (lsed_flag) 	cout << ")";
+      cout << " ||| " << best_match << " ||| " << best_path << endl;
+      
+      // creat xml & extracts
+      vector<WORD_ID> &sourceSentence = source[best_match];
+      vector<SentenceAlignment> &targets = targetAndAlignment[best_match];
+      create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, best_path, outputFile);
+      
+    } // else if (multiple_flag)
+    
+    outputFile.close();
+    
+    return outputFileName;
   }
 
   void TMMTWrapper::load_corpus( const std::string &fileName, vector< vector< WORD_ID > > &corpus )
@@ -692,5 +1032,31 @@ int TMMTWrapper::parse_matches( vector< Match > &match, int input_length, int tm
 	return this_best_cost;
 }
 
+
+void TMMTWrapper::create_extract(int sentenceInd, int cost, const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path, ofstream &outputFile)
+{
+  string sourceStr;
+  for (size_t pos = 0; pos < sourceSentence.size(); ++pos) {
+    WORD_ID wordId = sourceSentence[pos];
+    sourceStr += vocabulary.GetWord(wordId) + " ";
+  }
+    
+  for (size_t targetInd = 0; targetInd < targets.size(); ++targetInd) {
+    const SentenceAlignment &sentenceAlignment = targets[targetInd]; 
+    string targetStr = sentenceAlignment.getTargetString(vocabulary);
+    string alignStr = sentenceAlignment.getAlignmentString();
+    
+    outputFile
+    << sentenceInd << endl
+    << cost << endl
+    << sourceStr << endl 
+    << inputStr << endl
+    << targetStr << endl
+    << alignStr << endl
+    << path << endl
+    << sentenceAlignment.count << endl;
+    
+  }
+}
 
 } // namespace

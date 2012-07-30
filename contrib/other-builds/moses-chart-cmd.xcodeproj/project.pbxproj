@@ -318,6 +318,8 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";
@@ -351,6 +353,8 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";

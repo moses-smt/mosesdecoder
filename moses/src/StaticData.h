@@ -237,6 +237,8 @@ protected:
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
 
+  std::string m_binPath;
+  
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -250,9 +252,7 @@ public:
   }
 
   //! Load data into static instance. This function is required as LoadData() is not const
-  static bool LoadDataStatic(Parameter *parameter) {
-    return s_instance.LoadData(parameter);
-  }
+  static bool LoadDataStatic(Parameter *parameter, const std::string &execPath);
 
   //! Main function to load everything. Also initialize the Parameter object
   bool LoadData(Parameter *parameter);
@@ -612,6 +612,9 @@ public:
   
   long GetStartTranslationId() const
   { return m_startTranslationId; }
+  
+  void SetExecPath(const std::string &path);
+  const std::string &GetBinDirectory() const;
 };
 
 }

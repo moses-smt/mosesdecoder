@@ -9,6 +9,7 @@
 #ifndef moses_TMMTWrapper_h
 #define moses_TMMTWrapper_h
 
+#include <fstream>
 #include "tm-mt/SuffixArray.h"
 #include "tm-mt/Vocabulary.h"
 #include "tm-mt/Match.h"
@@ -20,13 +21,18 @@ class SentenceAlignment;
   
 class TMMTWrapper
 {
+public:
   TMMTWrapper(const std::string &source, const std::string &target, const std::string &alignment);
 
+  void Extract(const std::string &inputPath);
+  
+protected:
   // tm-mt
   tmmt::Vocabulary vocabulary;
   std::vector< std::vector< tmmt::WORD_ID > > source;
   std::vector< std::vector< tmmt::SentenceAlignment > > targetAndAlignment;
-
+  tmmt::SuffixArray *suffixArray;
+  
   // global cache for word pairs
   std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > lsed;
 
@@ -48,6 +54,10 @@ class TMMTWrapper
   void add_short_matches( std::vector< Match > &match, const std::vector< WORD_ID > &tm, int input_length, int best_cost );
   std::vector< Match > prune_matches( const std::vector< Match > &match, int best_cost );
   int parse_matches( std::vector< Match > &match, int input_length, int tm_length, int &best_cost );
+
+  void create_extract(int sentenceInd, int cost, const std::vector< WORD_ID > &sourceSentence, const std::vector<SentenceAlignment> &targets, const std::string &inputStr, const std::string  &path, std::ofstream &outputFile);
+
+  std::string ExtractTM(const std::string &inputPath);
 
 };
 

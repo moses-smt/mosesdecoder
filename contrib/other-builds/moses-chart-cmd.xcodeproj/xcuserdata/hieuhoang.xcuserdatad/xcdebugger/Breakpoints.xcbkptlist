@@ -2,4 +2,90 @@
 <Bucket
    type = "1"
    version = "1.0">
+   <FileBreakpoints>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/RuleTable/PhraseDictionaryTMExtract.cpp"
+         timestampString = "365357343.474587"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "102"
+         endingLineNumber = "102"
+         landmarkName = "PhraseDictionaryTMExtract::InitializeForInput(InputType const&amp; inputSentence)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/RuleTable/PhraseDictionaryTMExtract.cpp"
+         timestampString = "365357999.599945"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "103"
+         endingLineNumber = "103"
+         landmarkName = "PhraseDictionaryTMExtract::InitializeForInput(InputType const&amp; inputSentence)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/tm-mt/TMMTWrapper.cpp"
+         timestampString = "365363440.626962"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "57"
+         endingLineNumber = "57"
+         landmarkName = "TMMTWrapper::Extract(const string &amp;inputPath)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/tm-mt/TMMTWrapper.cpp"
+         timestampString = "365363440.626962"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "51"
+         endingLineNumber = "51"
+         landmarkName = "TMMTWrapper::Extract(const string &amp;inputPath)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/tm-mt/TMMTWrapper.cpp"
+         timestampString = "365363406.186296"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "41"
+         endingLineNumber = "41"
+         landmarkName = "TMMTWrapper::TMMTWrapper(const std::string &amp;sourcePath, const std::string &amp;targetPath, const std::string &amp;alignmentPath)"
+         landmarkType = "5">
+      </FileBreakpoint>
+      <FileBreakpoint
+         shouldBeEnabled = "Yes"
+         ignoreCount = "0"
+         continueAfterRunningActions = "No"
+         isPathRelative = "0"
+         filePath = "/Users/hieuhoang/unison/workspace/github/hieuhoang/moses/src/tm-mt/TMMTWrapper.cpp"
+         timestampString = "365367337.083057"
+         startingColumnNumber = "9223372036854775807"
+         endingColumnNumber = "9223372036854775807"
+         startingLineNumber = "54"
+         endingLineNumber = "54"
+         landmarkName = "TMMTWrapper::Extract(const string &amp;inputPath)"
+         landmarkType = "5">
+      </FileBreakpoint>
+   </FileBreakpoints>
 </Bucket>

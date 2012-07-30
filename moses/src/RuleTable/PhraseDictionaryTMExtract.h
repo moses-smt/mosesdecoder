@@ -25,6 +25,7 @@
 #include "InputType.h"
 #include "NonTerminal.h"
 #include "RuleTable/Trie.h"
+#include "tm-mt/TMMTWrapper.h"
 
 namespace Moses
 {
@@ -90,6 +91,7 @@ namespace Moses
     const WordPenaltyProducer *m_wpProducer;
     const std::vector<float> *m_weight;
     
+    tmmt::TMMTWrapper *m_tmmtWrapper;
 
   };
   

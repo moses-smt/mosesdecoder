@@ -359,7 +359,7 @@ int main(int argc, char** argv)
   
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
-    if (!StaticData::LoadDataStatic(params)) {
+    if (!StaticData::LoadDataStatic(params, argv[0])) {
       exit(1);
     }
   

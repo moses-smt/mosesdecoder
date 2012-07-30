@@ -68,6 +68,8 @@ namespace Moses
     m_config = Tokenize(initStr, ";");
     assert(m_config.size() == 4);
 
+    m_tmmtWrapper = new tmmt::TMMTWrapper(m_config[0], m_config[1], m_config[2]);
+    
     return true;
   }
     
@@ -84,9 +86,6 @@ namespace Moses
     
     tmpnam (buffer);
     string in_file = buffer;
-
-    tmpnam (buffer);
-    string pt_file = buffer;;
     
     ofstream inFile(in_file.c_str());
     
@@ -97,18 +96,12 @@ namespace Moses
     inFile << endl;
     inFile.close();
     
-    string cmd = "perl ~/workspace/github/hieuhoang/contrib/tm-mt-integration/make-pt-from-tm.perl "
-              + in_file + " "
-              + m_config[0] + " "
-              + m_config[1] + " "
-              + m_config[2] + " "
-              + m_config[3] + " "
-              + pt_file;
-    cerr << cmd << endl;
-    system(cmd.c_str());    
+    cerr << "buffer=" << buffer << endl;
     
-    cerr << "TM-MT extraction done\n";
-    
+    m_tmmtWrapper->Extract(buffer);
+
+    string pt_file = in_file + ".pt.gz";
+
     // populate with rules for this sentence
     long translationId = inputSentence.GetTranslationId();
 

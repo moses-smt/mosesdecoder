@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     params->Explain();
     exit(1);
   }
-  if (!StaticData::LoadDataStatic(params)) {
+  if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
   }
 

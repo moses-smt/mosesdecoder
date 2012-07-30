@@ -20,6 +20,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include <string>
 #include "util/check.hh"
 #include "PhraseDictionaryMemory.h"
@@ -93,6 +96,11 @@ StaticData::StaticData()
 
   // memory pools
   Phrase::InitializeMemPool();
+}
+
+bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPath) {
+  s_instance.SetExecPath(execPath);
+  return s_instance.LoadData(parameter);
 }
 
 bool StaticData::LoadData(Parameter *parameter)
@@ -1336,6 +1344,25 @@ void StaticData::ClearTransOptionCache() const {
     TranslationOptionList *transOptList = iterCache->second.first;
     delete transOptList;
   }
+}
+
+void StaticData::SetExecPath(const std::string &path)
+{
+  namespace fs = boost::filesystem;
+  
+  fs::path full_path( fs::initial_path<fs::path>() );
+  
+  full_path = fs::system_complete( fs::path( path ) );
+    
+  //Without file name
+  m_binPath = full_path.parent_path().c_str();
+  cerr << m_binPath << endl;
+
+}
+
+const string &StaticData::GetBinDirectory() const
+{
+  return m_binPath;
 }
 
 }
