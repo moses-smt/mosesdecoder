@@ -70,7 +70,7 @@ ContextType ReadFactoredLine(const string &line, size_t factorCount)
 
 int main(int argc, char**argv)
 {  
-  if (argc != 7) {
+  if (argc < 7) {
     cerr << "error: wrong arguments" << endl;
     cerr << "Usage: extract-psd psd-file corpus phrase-table extractor-config output-train output-index" << endl;
     exit(1);
@@ -91,6 +91,20 @@ int main(int argc, char**argv)
   FeatureExtractor extractor(ttable.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
   WritePhraseIndex(ttable.GetTargetIndex(), argv[6]);
+
+  // parse options 
+  // TODO use some library to do this
+  vector<size_t> toAnnotate;
+  for (int i = 7; i < argc; i++) {
+    string opt = argv[i];
+    if (opt == "--annotate") {
+      if (i + 1 >= argc) {
+        cerr << "No argument given to --annotate" << endl;
+        exit(1);
+      }
+      toAnnotate = Scan<size_t>(Tokenize(argv[++i], ","));
+    }
+  }
 
   // one source phrase can have multiple correct translations
   // these will be on consecutive lines in the input PSD file
@@ -123,14 +137,18 @@ int main(int argc, char**argv)
 
     if (! ttable.SrcExists(psdLine.GetSrcPhrase()))
       continue;
-    
 
     // we have all correct translations of the current phrase
     if (psdLine.GetSrcPhrase() != srcPhrase) {
       // generate features
       if (hasTranslation) {
         srcSurvived++;
-        extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+        
+        if (find(toAnnotate.begin(), toAnnotate.end(), sentID) != toAnnotate.end()) {
+          extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses, "sentnum^" + SPrint(sentID));
+        } else {
+          extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+        }
       }
       
       // set new source phrase, context, translations and losses

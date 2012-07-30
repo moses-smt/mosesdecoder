@@ -37,9 +37,15 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   size_t spanStart,
   size_t spanEnd,
   const vector<Translation> &translations,
-  vector<float> &losses)
+  vector<float> &losses,
+  string extraFeature = "")
 {  
   fc->SetNamespace('s', true);
+
+  // XXX hack
+  if (extraFeature != "")
+    fc->AddFeature(extraFeature);
+
   if (m_config.GetSourceExternal()) GenerateContextFeatures(context, spanStart, spanEnd, fc);
 
   // get words (surface forms) in source phrase

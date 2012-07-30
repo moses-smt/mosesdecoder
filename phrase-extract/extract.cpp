@@ -18,6 +18,7 @@
 #include <map>
 #include <set>
 #include <vector>
+#include <boost/version.hpp>
 
 #include "SafeGetline.h"
 #include "SentenceAlignment.h"
@@ -121,6 +122,7 @@ int main(int argc, char* argv[])
 #ifdef WITH_THREADS
   int thread_count = 1;
 #endif
+  cerr << "Boost version: " << BOOST_LIB_VERSION << endl;
  if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
     #ifdef WITH_THREADS
