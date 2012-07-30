@@ -67,13 +67,12 @@ public:
       std::map<int,std::string>::iterator iter;
       while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
         if (m_outputId) {
-            std::map<int, long>::iterator debugIter = m_translationIds.find(iter->first);
-            if (debugIter != m_translationIds.end()) {
-            	*m_outStream << iter->first << " ";
-              *m_debugStream << debugIter->second << std::flush;
-              m_debugs.erase(debugIter);
+            std::map<int, long>::iterator tidIter = m_translationIds.find(iter->first);
+            if (tidIter != m_translationIds.end()) {
+                *m_outStream << tidIter->second << " ";
+                //*m_debugStream << tidIter->second << " ";
+                m_translationIds.erase(tidIter);
             }
-        	// *m_outStream << iter->first << " ";
         }
         *m_outStream << iter->second << std::flush;
         m_outputs.erase(iter);
