@@ -88,11 +88,11 @@ public:
     return CanIGetFromAToB(range.GetStartPos(), range.GetEndPos() + 1);
   }
 
-  std::vector<std::string> GetLabels(size_t startPos, size_t endPos) const;
+  virtual std::vector<std::string> GetLabels(size_t startPos, size_t endPos) const;
 
-  std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) const;
+  virtual std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) const;
 
-  std::string GetParent(size_t startPos, size_t endPos) const;
+  virtual std::string GetParent(size_t startPos, size_t endPos) const;
 
   //! In a word lattice, you can't always get from node A to node B
   inline bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const {

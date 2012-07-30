@@ -21,6 +21,37 @@ namespace Moses
  * \param walls reordering constraint walls specified by xml
  */
 
+void TreeInput::PopulateStringChart(string noTag)
+{
+  for (size_t startPos = 0; startPos < GetSize(); startPos++) {
+      //cerr << "startPos" << startPos << endl;
+      vector< vector< string > > internal;
+      for (size_t endPos = startPos; endPos < GetSize(); endPos++) {
+        //cerr << "endPos" << endPos << endl;
+        vector<string> oneCell;
+        oneCell.push_back(noTag);
+        internal.push_back(oneCell);
+    }
+    m_stringChart.push_back(internal);
+  }
+}
+
+void TreeInput::PrintStringChart()
+{
+ for (size_t startPos = 0; startPos < GetSize(); ++startPos) {
+    for (size_t endPos = startPos; endPos < GetSize(); ++endPos) {
+      vector<string> labelSet = m_stringChart[startPos][endPos - startPos];
+      vector<string>::iterator iter;
+      for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
+        string sLabel = *iter;
+        std::cout << "[" << startPos <<"," << endPos-startPos << "]="
+            << sLabel;
+      }
+    }
+    std::cout << std::endl;
+  }
+}
+
 bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
 {
   //parse XML markup in translation line
@@ -225,6 +256,9 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 {
 
+  //populate the string chart
+  PopulateStringChart("NOTAG");
+
   const StaticData &staticData = StaticData::Instance();
 
   string line;
@@ -252,6 +286,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // size input chart
   size_t sourceSize = GetSize();
   m_sourceChart.resize(sourceSize);
+  m_stringChart.resize(sourceSize);
 
   for (size_t pos = 0; pos < sourceSize; ++pos) {
     m_sourceChart[pos].resize(sourceSize - pos);
@@ -268,12 +303,10 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     AddChartString(range.GetStartPos() + 1, range.GetEndPos() + 1, label);
   }
 
-  // default label
-  string noTag = "NOTAG";
+  // default labels
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
       AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
-      AddChartString(startPos, endPos, noTag);
     }
   }
 
@@ -393,7 +426,6 @@ string TreeInput::GetParent(size_t startPos, size_t endPos)
         {return GetRelLabels(startPos-1,endPos+1).front();}
     }
 }
-
 
 std::ostream& operator<<(std::ostream &out, const TreeInput &input)
 {

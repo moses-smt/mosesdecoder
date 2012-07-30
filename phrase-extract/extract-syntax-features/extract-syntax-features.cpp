@@ -179,6 +179,7 @@ int main(int argc, char**argv)
       translations = rtable.GetTranslations(srcPhrase);
       losses.clear();
       syntFeats.clear();
+      parentLabel.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
       //get span in string rep
@@ -192,7 +193,6 @@ int main(int argc, char**argv)
       s << spanInt;
       span = s.str();
 
-
         // set new syntax features
         size_t sentSize = GetSizeOfSentence(corpusLine);
 
@@ -203,13 +203,13 @@ int main(int argc, char**argv)
         //myInputChart.Print(sentSize);
 
         //get syntax label associated to span
-        //std::cerr << "Gettting syntax labels : " << spanStart << " : " << spanEnd << std::endl;
         vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
         //std::cerr << "Gettting parent label : " << spanStart << " : " << spanEnd << std::endl;
 
         string noTag = "NOTAG";
         while(!parentLabel.GetString().compare("NOTAG"))
         {
+            //cerr << "LOOKING FOR PARENT OF : " << parentLabel.GetString() << endl;
             parentLabel = myInputChart.GetParent(spanStart,spanEnd);
             spanEnd++;
         }

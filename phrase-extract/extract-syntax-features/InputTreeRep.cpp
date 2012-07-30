@@ -42,6 +42,7 @@ SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos)
 {
     int endPos = relEndPos - startPos;
     //cerr << "CHART INDEX : " << startPos << " : " << endPos << endl;
+
     CHECK( !(endPos < 0) );
     if(startPos == 0)
     {
@@ -60,8 +61,8 @@ SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos)
     else
     {
         //cerr << "LOOKING AT : " << startPos-1 << " : " << endPos+1 << endl;
-        if(GetRelLabels(startPos,endPos+1).size() > 1)
-        {return GetRelLabels(startPos,endPos+1)[1];}
+        if(GetRelLabels(startPos-1,endPos+1).size() > 1)
+        {return GetRelLabels(startPos-1,endPos+1)[1];}
         else
         {return GetRelLabels(startPos-1,endPos+1).front();}
     }
@@ -248,6 +249,7 @@ int InputTreeRep::Read(std::string &line)
 void InputTreeRep::AddChartLabel(size_t startPos, size_t endPos, SyntaxLabel label)
 {
   CHECK(label.IsNonTerm());
+  //std::cerr << "ADDING CHART LABEL : " << label.GetString() << " at : " << startPos << " : "  << endPos - startPos << std::endl;
   m_sourceChart[startPos][endPos-startPos].push_back(label);
 }
 

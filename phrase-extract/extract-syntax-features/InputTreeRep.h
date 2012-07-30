@@ -38,6 +38,11 @@ class SyntaxLabel
 
 	const bool IsNonTerm() const
 	{return m_nonTerm;}
+
+	void clear()
+	{
+	    m_label.erase();
+	}
 };
 
 class InputTreeRep
@@ -59,7 +64,7 @@ public:
   }
 
   SyntLabels GetRelLabels(size_t startPos, size_t endPos) {
-    //std::cerr << "GETTING RELATIVE LABEL FOR : " << startPos << " : " << endPos << std::endl;
+    std::cerr << "GETTING RELATIVE LABEL FOR : " << startPos << " : " << endPos << std::endl;
     return m_sourceChart[startPos][endPos];
   }
 

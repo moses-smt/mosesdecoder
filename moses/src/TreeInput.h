@@ -46,17 +46,12 @@ protected:
   //damt hiero
   void AddChartString(size_t startPos, size_t endPos, const std::string &label);
 
+  void PopulateStringChart(std::string noTag);
+
   NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) {
     return m_sourceChart[startPos][endPos - startPos];
   }
 
-  std::vector<std::string> GetLabels(size_t startPos, size_t endPos) {
-    return m_stringChart[startPos][endPos - startPos];
-  }
-
-  std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) {
-    return m_stringChart[startPos][endPos];
-  }
 
   bool ProcessAndStripXMLTags(std::string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &res);
 
@@ -81,10 +76,19 @@ public:
     return m_sourceChart[startPos][endPos - startPos];
   }
 
-  //damt hiero : need labels as vectors of strings
-  std::vector<std::string> GetLabelStrings(size_t startPos, size_t endPos);
+  std::vector<std::string> GetLabels(size_t startPos, size_t endPos) {
+    PrintStringChart();
+    return m_stringChart[startPos][endPos - startPos];
+  }
+
+  std::vector<std::string> GetRelLabels(size_t startPos, size_t endPos) {
+    return m_stringChart[startPos][endPos];
+  }
+
   //damt hiero : get parent in a Chart
   std::string GetParent(size_t startPos, size_t endPos);
+
+  void PrintStringChart();
 
   std::vector <ChartTranslationOption*> GetXmlChartTranslationOptions() const {
     return m_xmlChartOptionsList;
