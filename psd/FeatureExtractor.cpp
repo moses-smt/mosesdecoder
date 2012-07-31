@@ -134,7 +134,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     //WRONG INDEX !!!
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
-    if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
+    if (m_config.GetTargetInternal()) GenerateInternalFeaturesChart(targetForms, fc, transIt->m_termAlignment);
 
     if (m_config.GetPaired()) GeneratePairedFeaturesChart(sourceForms, targetForms, transIt->m_termAlignment, transIt->m_nonTermAlignment, fc);
 
@@ -143,7 +143,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
 
     if (m_config.GetBinnedScores()) GenerateScoreFeatures(transIt->m_scores, fc);
 
-    if(m_config.GetTargetIndicator()) GenerateIndicatorFeature(targetForms, fc);
+    if(m_config.GetTargetIndicator()) GenerateIndicatorFeatureChart(targetForms, fc, transIt->m_termAlignment);
 
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
@@ -240,11 +240,12 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
   fc->AddFeature("p^" + indicString);
 }
 
-/*void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
+void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
 {
   string parent = "[X]";
   string indicString = "";
   string nonTerm = "[X][X]";
+  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfSpan = span.size();
@@ -254,8 +255,14 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
         found = span[i].find(nonTerm);
         if(found != string::npos)
         {
+            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            ostringstream s1;
+            s1 << newTerm;
+            string sourceAlign =s1.str();
+
             indicString += nonTerm;
-            indicString += ALIGN;
+            indicString += sourceAlign;
+            nonTermCounter++;
         }
         if (indicString.size()>0)
             {indicString += "_";}
@@ -263,7 +270,7 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
     }
   }
   fc->AddFeature("p^" + indicString);
-}*/
+}
 
 
 void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
@@ -276,30 +283,33 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   }
 }
 
-/*void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
+void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
 {
   string parent = "[X]";
-  string nonTerminal = "[X][X]";
+  string nonTerm = "[X][X]";
+  size_t nonTermCounter = 0;
 
   size_t found;
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
-    size_t found = (*it).find(nonTerminal);
+    size_t found = (*it).find(nonTerm);
     if(  (*it).compare(parent) )
     {
-        found = span[i].find(nonTerm);
         if(found != string::npos)
         {
+            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            ostringstream s1;
+            s1 << newTerm;
+            string sourceAlign =s1.str();
 
-            nonTermAlign.lower_bound(KEY);
-            indicString += nonTerm;
-            indicString += ALIGN;
+            fc->AddFeature("w^" + nonTerm + sourceAlign);
+            nonTermCounter++;
         }
         else{
         fc->AddFeature("w^" + *it);}
     }
   }
-}*/
+}
 
 void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc)
 {

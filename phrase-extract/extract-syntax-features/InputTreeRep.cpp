@@ -81,7 +81,7 @@ SyntaxLabel InputTreeRep::GetParent(size_t startPos, size_t relEndPos, bool &IsB
         }
         else
         {
-            //cerr << "INCREMENTING ENDPOS"<< endl;
+            //cerr << "INCREMENTING ENDPOS"<< endl;s
             if(GetRelLabels(startPos,endPos+1).size() > 1)
             {return GetRelLabels(startPos,endPos+1)[1];}
             else

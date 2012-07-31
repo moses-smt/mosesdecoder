@@ -186,8 +186,10 @@ bool StaticData::LoadData(Parameter *parameter)
 //CHANGE GET PARAM...
 
 //#ifdef HAVE_VW
-if ( !(m_parameter->GetParam("sentence-cell-context").size() > 0) )
+if ( (m_parameter->GetParam("sentence-cell-context").size() == 0) )
 {
+  cerr << "ERROR : CALLING PHRASE BASED PSD IN HIERO SYSTEM"<< endl;
+  CHECK(false);
   if (m_parameter->GetParam("psd-model").size() > 0) {
     if (m_parameter->GetParam("psd-index").size() <= 0) {
       UserMessage::Add(string("--psd-index not specified"));

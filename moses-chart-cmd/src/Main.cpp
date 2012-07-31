@@ -195,6 +195,7 @@ static void ShowWeights()
     PrintFeatureWeight(slf[i]);
   }
    if (StaticData::Instance().GetCellContextScoreProducer() != NULL) {
+    //std::cerr << "WEIGHTS FOR CELL CONTEXT SCORE PRODUCER" << std::endl;
     PrintFeatureWeight(StaticData::Instance().GetCellContextScoreProducer());
   }
 }
