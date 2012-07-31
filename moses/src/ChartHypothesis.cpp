@@ -39,7 +39,7 @@ namespace Moses
 ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
 #endif
 
-/** Create a hypothesis from a rule 
+/** Create a hypothesis from a rule
  * \param transOpt wrapper around the rule
  * \param item @todo dunno
  * \param manager reference back to manager
@@ -59,7 +59,7 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
   const std::vector<HypothesisDimension> &childEntries = item.GetHypothesisDimensions();
   m_prevHypos.reserve(childEntries.size());
   std::vector<HypothesisDimension>::const_iterator iter;
-  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter) 
+  for (iter = childEntries.begin(); iter != childEntries.end(); ++iter)
   {
     m_prevHypos.push_back(iter->GetHypothesis());
   }
@@ -100,7 +100,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
       size_t nonTermInd = nonTermIndexMap[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
-    } 
+    }
     else {
       outPhrase.AddWord(word);
     }
@@ -128,14 +128,14 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 {
 	int comp = 0;
 
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) 
+  for (unsigned i = 0; i < m_ffStates.size(); ++i)
 	{
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL) 
+    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL)
       comp = m_ffStates[i] - compare.m_ffStates[i];
-		else 
+		else
       comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
 
-		if (comp != 0) 
+		if (comp != 0)
 			return comp;
   }
 
@@ -159,6 +159,8 @@ void ChartHypothesis::CalcScore()
   // translation models & word penalty
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
+
+  std::cout << << std::endl;
 
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
@@ -264,7 +266,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 {
 
   out << hypo.GetId();
-	
+
 	// recombination
 	if (hypo.GetWinningHypothesis() != NULL &&
 			hypo.GetWinningHypothesis() != &hypo)
