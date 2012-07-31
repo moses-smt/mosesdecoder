@@ -70,7 +70,6 @@ public:
             std::map<int, long>::iterator tidIter = m_translationIds.find(iter->first);
             if (tidIter != m_translationIds.end()) {
                 *m_outStream << tidIter->second << " ";
-                //*m_debugStream << tidIter->second << " ";
                 m_translationIds.erase(tidIter);
             }
         }
