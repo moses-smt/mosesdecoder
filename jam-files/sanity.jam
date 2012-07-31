@@ -4,6 +4,7 @@ import os ;
 import path ;
 import project ;
 import build-system ;
+import version ;
 
 #Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
 rule trim-nl ( str extras * ) {
@@ -243,5 +244,14 @@ rule always-if-changed ( file current : targets * ) {
     for local i in $(targets) {
       always $(i) ;
     }
+  }
+}
+
+if [ option.get "sanity-test" : : "yes" ] {
+  local current_version = [ modules.peek : JAM_VERSION ] ;
+  if ( $(current_version[0]) < 2000 && [ version.check-jam-version 3 1 16 ] ) || [ version.check-jam-version 2011 0 0 ] {
+    EXIT "Sane" : 0 ;
+  } else {
+    EXIT "Bad" : 1 ;
   }
 }
