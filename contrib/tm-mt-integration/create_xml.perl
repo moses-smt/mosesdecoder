@@ -62,10 +62,10 @@ close(RULE_INV);
 `LC_ALL=C sort $inPath.extract | gzip -c > $inPath.extract.sorted.gz`;
 `LC_ALL=C sort $inPath.extract.inv | gzip -c > $inPath.extract.inv.sorted.gz`;
 
-my $lex_file = "/Users/hieuhoang/workspace/experiment/data/tm-mt-integration/in/lex.4";
+my $lex_file = "-";
 
 my $cmd;
-$cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $inPath.extract -lexical-file $lex_file -phrase-translation-table $inPath.pt";
+$cmd = "$RealBin/../../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical -extract-file $inPath.extract -lexical-file $lex_file -score-options \"--NoLex\" -phrase-translation-table $inPath.pt";
 print STDERR "Executing: $cmd \n";
 `$cmd`;
 

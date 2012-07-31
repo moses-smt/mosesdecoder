@@ -310,11 +310,11 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
   return true;
 }
 
-void LexicalTable::load( char *fileName )
+void LexicalTable::load( const string &filePath )
 {
-  cerr << "Loading lexical translation table from " << fileName;
+  cerr << "Loading lexical translation table from " << filePath;
   ifstream inFile;
-  inFile.open(fileName);
+  inFile.open(filePath.c_str());
   if (inFile.fail()) {
     cerr << " - ERROR: could not open file\n";
     exit(1);

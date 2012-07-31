@@ -66,7 +66,7 @@ namespace Moses
    
     cerr << "initStr=" << initStr << endl;
     m_config = Tokenize(initStr, ";");
-    assert(m_config.size() == 4);
+    assert(m_config.size() == 3);
 
     m_tmmtWrapper = new tmmt::TMMTWrapper(m_config[0], m_config[1], m_config[2]);
     
@@ -85,9 +85,9 @@ namespace Moses
     char buffer [L_tmpnam];
     
     tmpnam (buffer);
-    string in_file = buffer;
+    string inFileName = buffer;
     
-    ofstream inFile(in_file.c_str());
+    ofstream inFile(inFileName.c_str());
     
     for (size_t i = 1; i < inputSentence.GetSize() - 1; ++i)
     {
@@ -98,7 +98,7 @@ namespace Moses
     
     cerr << "buffer=" << buffer << endl;
     
-    string pt_file = m_tmmtWrapper->Extract(buffer);
+    string ptFileName = m_tmmtWrapper->Extract(buffer);
 
     // populate with rules for this sentence
     long translationId = inputSentence.GetTranslationId();
@@ -107,7 +107,7 @@ namespace Moses
     FormatType format = MosesFormat;
         
     // data from file
-    InputFileStream inStream(pt_file);
+    InputFileStream inStream(ptFileName);
     
     // copied from class LoaderStandard
     PrintUserTime("Start loading new format pt model");
@@ -137,7 +137,7 @@ namespace Moses
       
       if (tokens.size() != 4 && tokens.size() != 5) {
         stringstream strme;
-        strme << "Syntax error at " << pt_file << ":" << count;
+        strme << "Syntax error at " << ptFileName << ":" << count;
         UserMessage::Add(strme.str());
         abort();
       }
@@ -149,7 +149,7 @@ namespace Moses
       
       bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
       if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-        TRACE_ERR( pt_file << ":" << count << ": pt entry contains empty target, skipping\n");
+        TRACE_ERR( ptFileName << ":" << count << ": pt entry contains empty target, skipping\n");
         continue;
       }
       
@@ -205,8 +205,8 @@ namespace Moses
     // sort and prune each target phrase collection
     SortAndPrune(rootNode);
    
-    remove(pt_file.c_str());
-    remove(in_file.c_str());
+    remove(ptFileName.c_str());
+    remove(inFileName.c_str());
   }
   
   TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode

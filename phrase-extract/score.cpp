@@ -75,7 +75,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, o
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
 double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
 set<string> functionWordList;
-void loadFunctionWords( const char* fileNameFunctionWords );
+void loadFunctionWords( const string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
 void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
@@ -92,11 +92,11 @@ int main(int argc, char* argv[])
     cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS]\n";
     exit(1);
   }
-  char* fileNameExtract = argv[1];
-  char* fileNameLex = argv[2];
-  char* fileNamePhraseTable = argv[3];
+  string fileNameExtract = argv[1];
+  string fileNameLex = argv[2];
+  string fileNamePhraseTable = argv[3];
   string fileNameCountOfCounts;
-  char* fileNameFunctionWords;
+  string fileNameFunctionWords;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
@@ -183,7 +183,7 @@ int main(int argc, char* argv[])
   // output file: phrase translation table
 	ostream *phraseTableFile;
 
-	if (strcmp(fileNamePhraseTable, "-") == 0) {
+	if (fileNamePhraseTable == "-") {
 		phraseTableFile = &cout;
 	}
 	else {
@@ -601,11 +601,11 @@ double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, 
   return unaligned;
 }
 
-void loadFunctionWords( const char *fileName )
+void loadFunctionWords( const string &fileName )
 {
   cerr << "Loading function word list from " << fileName;
   ifstream inFile;
-  inFile.open(fileName);
+  inFile.open(fileName.c_str());
   if (inFile.fail()) {
     cerr << " - ERROR: could not open file\n";
     exit(1);
@@ -649,11 +649,11 @@ double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, 
   return lexScore;
 }
 
-void LexicalTable::load( char *fileName )
+void LexicalTable::load( const string &fileName )
 {
   cerr << "Loading lexical translation table from " << fileName;
   ifstream inFile;
-  inFile.open(fileName);
+  inFile.open(fileName.c_str());
   if (inFile.fail()) {
     cerr << " - ERROR: could not open file\n";
     exit(1);
