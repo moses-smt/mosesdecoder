@@ -25,7 +25,7 @@
 #include "InputType.h"
 #include "NonTerminal.h"
 #include "RuleTable/Trie.h"
-#include "tm-mt/TMMTWrapper.h"
+#include "fuzzy-match/TMMTWrapper.h"
 
 namespace Moses
 {
