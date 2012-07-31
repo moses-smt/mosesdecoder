@@ -121,6 +121,9 @@ my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
+# Train phrase weighting 
+my $__PHRASE_WEIGHTING = 0;
+
 my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
@@ -219,6 +222,7 @@ GetOptions(
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
   "batch-mira-args=s" => \$batch_mira_args,
+  "phrase-weighting" => \$__PHRASE_WEIGHTING,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -308,6 +312,7 @@ Options:
   --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
                                 change MIRA's hyperparameters such as regularization parameter C,
                                 BLEU decay factor, and the number of iterations of MIRA.
+  --phrase-weighting        ... Train using the phrase weighting framework
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -486,6 +491,7 @@ my $sparse_weights_file = undef;
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
 my $prev_init_file = undef;
+my @allnbests;
 
 if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
@@ -703,6 +709,7 @@ while (1) {
   my $score_file        = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
+  $cmd .= " -d" if $__PHRASE_WEIGHTING; # Allow duplicates
   $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
   &submit_or_exec($cmd, "extract.out","extract.err");
 
@@ -775,6 +782,11 @@ while (1) {
   my $pro_file_settings = "--ffile " . join(" --ffile ", split(/,/, $ffiles)) .
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
 
+  push @allnbests, $nbest_file;
+  my $phrase_weight_file_settings = 
+                          "--scfile " .  join(" --scfile ", split(/,/, $scfiles)) .
+                          " --nbest " . join(" --nbest ", @allnbests);
+
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   } else {
@@ -807,6 +819,10 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+  } elsif ($__PHRASE_WEIGHTING) {
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $cmd = "/home/bhaddow/code/mixture-models/main.py $phrase_weight_file_settings";
+    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
   }
@@ -979,7 +995,7 @@ sub get_weights_from_mert {
   my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
   my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
-          || $___BATCH_MIRA) {
+          || $___BATCH_MIRA || $__PHRASE_WEIGHTING) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my @WEIGHT;
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
