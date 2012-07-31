@@ -112,6 +112,7 @@ int main(int argc, char**argv)
   ContextType context;
   vector<float> losses;
   vector<Translation> translations;
+  bool newSentence = false;
   size_t spanStart = 0;
   size_t spanEnd = 0;
   size_t sentID = 0;
@@ -133,6 +134,7 @@ int main(int argc, char**argv)
     while (psdLine.GetSentID() > sentID) {
       getline(corpus, corpusLine);
       sentID++;
+      newSentence = true;
     }
 
     if (! ttable.SrcExists(psdLine.GetSrcPhrase()))
@@ -144,11 +146,12 @@ int main(int argc, char**argv)
       if (hasTranslation) {
         srcSurvived++;
         
-        if (find(toAnnotate.begin(), toAnnotate.end(), sentID) != toAnnotate.end()) {
+        if (! newSentence && find(toAnnotate.begin(), toAnnotate.end(), sentID) != toAnnotate.end()) {
           extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses, "sentnum^" + SPrint(sentID));
         } else {
           extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
         }
+        newSentence = false;
       }
       
       // set new source phrase, context, translations and losses
