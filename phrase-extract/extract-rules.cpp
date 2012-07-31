@@ -60,8 +60,8 @@ class ExtractTask
 private:
   SentenceAlignmentWithSyntax &m_sentence;
   const RuleExtractionOptions &m_options;
-  Moses::OutputFileStream& m_extractCollector;
-  Moses::OutputFileStream& m_extractCollectorInv;
+  Moses::OutputFileStream& m_extractFile;
+  Moses::OutputFileStream& m_extractFileInv;
 
   vector< ExtractedRule > m_extractedRules;
   
@@ -95,11 +95,11 @@ private:
   }
 
 public:
-  ExtractTask(SentenceAlignmentWithSyntax &sentence, const RuleExtractionOptions &options, Moses::OutputFileStream &extractCollector, Moses::OutputFileStream &extractCollectorInv):
+  ExtractTask(SentenceAlignmentWithSyntax &sentence, const RuleExtractionOptions &options, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv):
     m_sentence(sentence),
     m_options(options),
-    m_extractCollector(extractCollector),
-    m_extractCollectorInv(extractCollectorInv) {}
+    m_extractFile(extractFile),
+    m_extractFileInv(extractFileInv) {}
   void Run();
 
 };
@@ -976,8 +976,8 @@ void ExtractTask::writeRulesToFile()
              << rule->count << "\n";
     }
   }
-  m_extractCollector << out.str() << endl;
-  m_extractCollectorInv << outInv.str() << endl;
+  m_extractFile << out.str();
+  m_extractFileInv << outInv.str();
 }
 
 void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection )
