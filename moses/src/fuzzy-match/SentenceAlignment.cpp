@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include "tm-mt/SentenceAlignment.h"
+#include "fuzzy-match/SentenceAlignment.h"
 
 namespace tmmt
 {

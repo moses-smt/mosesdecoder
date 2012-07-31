@@ -7,10 +7,10 @@
 //
 
 #include <iostream>
-#include "tm-mt/TMMTWrapper.h"
-#include "tm-mt/SentenceAlignment.h"
-#include "tm-mt/Vocabulary.h"
-#include "tm-mt/Match.h"
+#include "fuzzy-match/TMMTWrapper.h"
+#include "fuzzy-match/SentenceAlignment.h"
+#include "fuzzy-match/Vocabulary.h"
+#include "fuzzy-match/Match.h"
 #include "Util.h"
 #include "StaticData.h"
 
@@ -52,12 +52,18 @@ namespace tmmt
     
     string cmd = string("perl ");
 #ifdef IS_XCODE
-    cmd += "/Users/hieuhoang/unison/workspace/github/hieuhoang/contrib/tm-mt-integration/create_xml.perl " + tmExtractFile;
+    cmd += "/Users/hieuhoang/unison/workspace/github/hieuhoang/scripts/fuzzy-match/create_xml.perl " + tmExtractFile;
 #else
-    cmd += staticData.GetBinDirectory() +  "../contrib/tm-mt-integration/create_xml.perl " + tmExtractFile;
+    cmd += staticData.GetBinDirectory() +  "/../scripts/fuzzy-match/create_xml.perl " + tmExtractFile;
 #endif
     cerr << cmd << endl;
     system(cmd.c_str());
+    
+    remove(tmExtractFile.c_str());
+    remove((tmExtractFile + ".extract").c_str());
+    remove((tmExtractFile + ".extract.inv").c_str());
+    remove((tmExtractFile + ".extract.sorted.gz").c_str());
+    remove((tmExtractFile + ".extract.inv.sorted.gz").c_str());
     
     return tmExtractFile + ".pt.gz";
   }

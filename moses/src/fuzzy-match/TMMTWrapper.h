@@ -11,9 +11,9 @@
 
 #include <fstream>
 #include <string>
-#include "tm-mt/SuffixArray.h"
-#include "tm-mt/Vocabulary.h"
-#include "tm-mt/Match.h"
+#include "fuzzy-match/SuffixArray.h"
+#include "fuzzy-match/Vocabulary.h"
+#include "fuzzy-match/Match.h"
 
 namespace tmmt 
 {

@@ -11,7 +11,7 @@
 
 #include <sstream>
 #include <vector>
-#include "tm-mt/Vocabulary.h"
+#include "fuzzy-match/Vocabulary.h"
 
 namespace tmmt
 {

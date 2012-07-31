@@ -1,1 +1,0 @@
-lib tm-mt : [ glob *.cpp ] ..//moses_internal ;
