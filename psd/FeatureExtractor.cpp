@@ -244,13 +244,21 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
 {
   string parent = "[X]";
   string indicString = "";
+  string nonTerm = "[X][X]";
 
+  size_t found;
   size_t sizeOfSpan = span.size();
   for (int i=0; i < sizeOfSpan; i++) {
     if( span[i].compare(parent) )
     {
+        found = span[i].find(nonTerm);
+        if(found != string::npos)
+        {
+            indicString += nonTerm;
+            indicString += ALIGN;
+        }
         if (indicString.size()>0)
-            indicString += "_";
+            {indicString += "_";}
         indicString += span[i];
     }
   }
@@ -273,14 +281,19 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
   string parent = "[X]";
   string nonTerminal = "[X][X]";
 
+  size_t found;
   vector<string>::const_iterator it;
   for (it = span.begin(); it != span.end(); it++) {
     size_t found = (*it).find(nonTerminal);
     if(  (*it).compare(parent) )
     {
-        if( found != string::npos )
+        found = span[i].find(nonTerm);
+        if(found != string::npos)
         {
-            nonTerminal+nonTermAlign
+
+            nonTermAlign.lower_bound(KEY);
+            indicString += nonTerm;
+            indicString += ALIGN;
         }
         else{
         fc->AddFeature("w^" + *it);}

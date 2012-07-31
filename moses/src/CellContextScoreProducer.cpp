@@ -251,7 +251,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
 size_t CellContextScoreProducer::GetNumScoreComponents() const
 {
-  return 1; // let's return just P(e|f) for now
+  return 1;
 }
 
 std::string CellContextScoreProducer::GetScoreProducerDescription(unsigned) const
