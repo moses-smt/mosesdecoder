@@ -130,7 +130,8 @@ foreach (@children) {
 	waitpid($_, 0);
 }
 
-kill 1, $masterPid;
+# spanning_tree can live and handle other jobs
+# kill 1, $masterPid;
 
 my $cmd = "rm -rf $TMPDIR $modelFile.*\n";
 print STDERR $cmd;
