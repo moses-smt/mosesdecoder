@@ -240,6 +240,24 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
   fc->AddFeature("p^" + indicString);
 }
 
+/*void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
+{
+  string parent = "[X]";
+  string indicString = "";
+
+  size_t sizeOfSpan = span.size();
+  for (int i=0; i < sizeOfSpan; i++) {
+    if( span[i].compare(parent) )
+    {
+        if (indicString.size()>0)
+            indicString += "_";
+        indicString += span[i];
+    }
+  }
+  fc->AddFeature("p^" + indicString);
+}*/
+
+
 void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
 {
   string parent = "[X]";
@@ -249,6 +267,26 @@ void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, Feat
     fc->AddFeature("w^" + *it);
   }
 }
+
+/*void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span, FeatureConsumer *fc,AlignmentType nonTermAlign)
+{
+  string parent = "[X]";
+  string nonTerminal = "[X][X]";
+
+  vector<string>::const_iterator it;
+  for (it = span.begin(); it != span.end(); it++) {
+    size_t found = (*it).find(nonTerminal);
+    if(  (*it).compare(parent) )
+    {
+        if( found != string::npos )
+        {
+            nonTerminal+nonTermAlign
+        }
+        else{
+        fc->AddFeature("w^" + *it);}
+    }
+  }
+}*/
 
 void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc)
 {

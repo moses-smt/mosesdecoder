@@ -57,6 +57,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartHypothesis.h"
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
+#include "CellContextScoreProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -192,6 +193,9 @@ static void ShowWeights()
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     PrintFeatureWeight(slf[i]);
+  }
+   if (StaticData::Instance().GetCellContextScoreProducer() != NULL) {
+    PrintFeatureWeight(StaticData::Instance().GetCellContextScoreProducer());
   }
 }
 

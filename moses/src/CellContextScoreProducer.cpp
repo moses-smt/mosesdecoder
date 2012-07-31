@@ -136,7 +136,6 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
     vector<ScoreComponentCollection> scores;
     float sum = 0.0;
-    float score = 0.0;
     string span;
 
     //get span
@@ -163,11 +162,6 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
         VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
-        //damt hiero : extract syntax features
-        //print chart
-        size_t sizeOfSource = source.GetSize();
-        //std::cerr << "SIZE OF SOURCE : " << sizeOfSource << std::endl;
-        //source.GetInputTreeRep()->Print(sizeOfSource);
 
         //std::cerr << "GETTING SYNTAX LABELS" << std::endl;
         bool IsBegin = false;
@@ -262,12 +256,12 @@ size_t CellContextScoreProducer::GetNumScoreComponents() const
 
 std::string CellContextScoreProducer::GetScoreProducerDescription(unsigned) const
 {
-  return "CellContext";
+  return "PSD";
 }
 
 std::string CellContextScoreProducer::GetScoreProducerWeightShortName(unsigned) const
 {
-  return "cc";
+  return "psd";
 }
 
 size_t CellContextScoreProducer::GetNumInputScores() const
