@@ -134,7 +134,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     //WRONG INDEX !!!
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
-    if (m_config.GetTargetInternal()) GenerateInternalFeaturesChart(targetForms, fc, transIt->m_termAlignment);
+    if (m_config.GetTargetInternal()) GenerateInternalFeaturesChart(targetForms, fc, transIt->m_nonTermAlignment);
 
     if (m_config.GetPaired()) GeneratePairedFeaturesChart(sourceForms, targetForms, transIt->m_termAlignment, transIt->m_nonTermAlignment, fc);
 
@@ -143,7 +143,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
 
     if (m_config.GetBinnedScores()) GenerateScoreFeatures(transIt->m_scores, fc);
 
-    if(m_config.GetTargetIndicator()) GenerateIndicatorFeatureChart(targetForms, fc, transIt->m_termAlignment);
+    if(m_config.GetTargetIndicator()) GenerateIndicatorFeatureChart(targetForms, fc, transIt->m_nonTermAlignment);
 
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
@@ -260,13 +260,16 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
             s1 << newTerm;
             string sourceAlign =s1.str();
 
+            if (indicString.size()>0)
+             {indicString += "_";}
             indicString += nonTerm;
             indicString += sourceAlign;
             nonTermCounter++;
         }
+        else{
         if (indicString.size()>0)
             {indicString += "_";}
-        indicString += span[i];
+        indicString += span[i];}
     }
   }
   fc->AddFeature("p^" + indicString);
