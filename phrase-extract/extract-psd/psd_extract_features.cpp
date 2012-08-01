@@ -70,7 +70,7 @@ ContextType ReadFactoredLine(const string &line, size_t factorCount)
 
 int main(int argc, char**argv)
 {  
-  if (argc != 7) {
+  if (argc < 7) {
     cerr << "error: wrong arguments" << endl;
     cerr << "Usage: extract-psd psd-file corpus phrase-table extractor-config output-train output-index" << endl;
     exit(1);
@@ -92,12 +92,27 @@ int main(int argc, char**argv)
   VWFileTrainConsumer consumer(argv[5]);
   WritePhraseIndex(ttable.GetTargetIndex(), argv[6]);
 
+  // parse options 
+  // TODO use some library to do this
+  vector<size_t> toAnnotate;
+  for (int i = 7; i < argc; i++) {
+    string opt = argv[i];
+    if (opt == "--annotate") {
+      if (i + 1 >= argc) {
+        cerr << "No argument given to --annotate" << endl;
+        exit(1);
+      }
+      toAnnotate = Scan<size_t>(Tokenize(argv[++i], ","));
+    }
+  }
+
   // one source phrase can have multiple correct translations
   // these will be on consecutive lines in the input PSD file
   string srcPhrase = "";
   ContextType context;
   vector<float> losses;
   vector<Translation> translations;
+  bool newSentence = false;
   size_t spanStart = 0;
   size_t spanEnd = 0;
   size_t sentID = 0;
@@ -119,17 +134,24 @@ int main(int argc, char**argv)
     while (psdLine.GetSentID() > sentID) {
       getline(corpus, corpusLine);
       sentID++;
+      newSentence = true;
     }
 
     if (! ttable.SrcExists(psdLine.GetSrcPhrase()))
       continue;
-    
+
     // we have all correct translations of the current phrase
     if (psdLine.GetSrcPhrase() != srcPhrase || psdLine.GetSpanStart() != spanStart) {
       // generate features
       if (hasTranslation) {
         srcSurvived++;
-        extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+        
+        if (! newSentence && find(toAnnotate.begin(), toAnnotate.end(), sentID) != toAnnotate.end()) {
+          extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses, "sentnum^" + SPrint(sentID));
+        } else {
+          extractor.GenerateFeatures(&consumer, context, spanStart, spanEnd, translations, losses);
+        }
+        newSentence = false;
       }
       
       // set new source phrase, context, translations and losses

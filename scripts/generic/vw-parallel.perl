@@ -6,7 +6,7 @@
 # 3rd arg: cache prefix (used with vw --cache_file)
 # 4th arg: model output file (used with vw -f)
 # 5th arg: path to VW
-# vw-parallel.perl 8 train_file vw_cache vw_model /home/fraser/src/vowpal_wabbit/ --passes 10 --csoaa_ldf m --hash all --noconstant --exact_adaptive_norm --power_t 0.5 -q st
+# vw-parallel.perl 8 train_file vw_cache vw_model /home/fraser/src/vowpal_wabbit/ --passes 10 --csoaa_ldf m --hash all --noconstant -b 22 -q st
 
 
 use strict;
@@ -100,9 +100,16 @@ for (my $i = 0; $i < $numParallel; ++$i)
   my $numStr = NumStr($i);
 
   my $fh = $runFiles[$i];
-  my $cmd = "zcat $TMPDIR/train.$i.gz ";
-  $cmd .= "| $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
-  print $fh $cmd;
+  my $cmd = "zcat $TMPDIR/train.$i.gz | $vwCmd --cache_file $TMPDIR/$cacheFile.$numStr -f $modelFile --node $i --total $numParallel --span_server localhost --unique_id $$ --save_per_pass";
+	if ($i == 0) {
+			# pass through the output from the first piece
+			$cmd .= " |& tee > $TMPDIR/run.$i.sh.log";
+	}
+	else {
+			# save the output of the other pieces
+			$cmd .= " >& $TMPDIR/run.$i.sh.log";
+	}
+  print $fh $cmd, "\n";
 }
 
 # close run script files
@@ -132,9 +139,9 @@ foreach (@children) {
 
 kill 1, $masterPid;
 
-my $cmd = "rm -rf $TMPDIR $modelFile.*\n";
-print STDERR $cmd;
-systemCheck($cmd);
+my $cmd = "rm -rf $TMPDIR $modelFile.*";
+print STDERR "WARNING, SKIPPING: $cmd\n";
+#systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 
@@ -149,7 +156,7 @@ sub RunFork($)
   
   if ($pid == 0)
   { # child
-    print STDERR $cmd;
+    print STDERR $cmd, "\n";
     systemCheck($cmd);
     exit();
   }

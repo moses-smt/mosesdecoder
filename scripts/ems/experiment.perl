@@ -1765,9 +1765,10 @@ sub define_training_psd_extract {
 
   my $hierarchical = &get("TRAINING:hierarchical-rule-set");
   if ($hierarchical) {
-      my $pt_fix = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-psd-chart/ReformatRuleTable.pl";
+      my $pt_fix = &get("GENERAL:moses-src-dir") . "/phrase-extract/extract-syntax-features/ReformatRuleTable.pl";
+      my $extractor_bin = &get("GENERAL:moses-src-dir") . "/bin/extract-syntax-features";
       # TODO: fix .psd.parse.xml problem below, should be .parse.xml
-      $cmd = "zcat $phrase_table.gz | $pt_fix | gzip > $phrase_table.psd.gz && $cmd $src_corpus.parse.xml";
+      $cmd = "zcat $phrase_table.gz | $pt_fix | gzip > $phrase_table.psd.gz && $extractor $cores $extractor_bin $extract.psd.gz $src_corpus $phrase_table.psd.gz $psd_config $out $src_corpus.parse.xml";
   }
 
   &create_step($step_id, $cmd);
@@ -1780,8 +1781,7 @@ sub define_training_psd_model {
   my $cores = &get("GENERAL:cores");
   my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
   my $vwpath = &get("GENERAL:vw-path");
-  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 --csoaa_ldf m " 
-    . "--exact_adaptive_norm --power_t 0.5";
+  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 -b 22 --csoaa_ldf m ";
   my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $vw_opts";
 
   &create_step($step_id, $cmd);
@@ -1864,7 +1864,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_output,$psd_config,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$psd_output,$psd_model,$psd_config,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -1917,9 +1917,9 @@ sub define_training_create_config {
     if (&get("TRAINING:use-psd")) {
       die "ERROR: no psd_config" unless defined($psd_config);
       die "ERROR: no psd_output" unless defined $psd_output;
-      my $psd_model = "$psd_output.model";
+      my $psd_modelfile = "$psd_model.model";
       my $psd_index = "$psd_output.index";
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index -psd-config $psd_config ";
+      $cmd .= " -psd-model $psd_modelfile -psd-index $psd_index -psd-config $psd_config ";
     }
 
     # additional settings for syntax models
@@ -2286,7 +2286,7 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_flag = !defined($set);
 
-    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_output, $psd_config) = &get_output_and_input($step_id);
+    my ($filter_dir,$input,$phrase_translation_table,$reordering_table, $psd_output, $psd_model, $psd_config) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
@@ -2351,9 +2351,9 @@ sub define_tuningevaluation_filter {
     if (&get("TRAINING:use-psd")) {
       die "ERROR: psd_index is not defined" unless defined($psd_config);
       die "ERROR: no psd_output" unless defined $psd_output;
-      my $psd_model = "$psd_output.model";
+      my $psd_modelfile = "$psd_model.model";
       my $psd_index = "$psd_output.index";
-      $cmd .= " -psd-model $psd_model -psd-index $psd_index -psd-config $psd_config ";
+      $cmd .= " -psd-model $psd_modelfile -psd-index $psd_index -psd-config $psd_config ";
     }
 
     $cmd .= "-lm 0:3:$dir "; # dummy

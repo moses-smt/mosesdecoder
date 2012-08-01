@@ -37,9 +37,15 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   size_t spanStart,
   size_t spanEnd,
   const vector<Translation> &translations,
-  vector<float> &losses)
+  vector<float> &losses,
+  string extraFeature)
 {  
   fc->SetNamespace('s', true);
+
+  // XXX hack
+  if (extraFeature != "")
+    fc->AddFeature(extraFeature);
+
   if (m_config.GetSourceExternal()) GenerateContextFeatures(context, spanStart, spanEnd, fc);
 
   // get words (surface forms) in source phrase
@@ -51,6 +57,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
 
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
+  if (m_config.GetPhraseFactor()) GeneratePhraseFactorFeatures(context, spanStart, spanEnd, fc);
   if (m_config.GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
 
 	if (m_config.GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc); 
@@ -103,6 +110,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
   m_binnedScores    = pTree.get<bool>("features.binned-scores", false);
   m_sourceTopic     = pTree.get<bool>("features.source-topic", false);
+  m_phraseFactor    = pTree.get<bool>("features.phrase-factor", false);
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);  
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
@@ -170,6 +178,16 @@ void FeatureExtractor::GenerateBagOfWordsFeatures(const ContextType &context, si
     fc->AddFeature("bow^" + context[i][factorID]);
   for (size_t i = spanEnd + 1; i < context.size(); i++)
     fc->AddFeature("bow^" + context[i][factorID]);
+}
+
+void FeatureExtractor::GeneratePhraseFactorFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc)
+{
+  for (size_t i = spanStart; i <= spanEnd; i++) {
+    vector<size_t>::const_iterator factIt;
+    for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
+      fc->AddFeature("ibow^" + SPrint(*factIt) + "_" + context[i][*factIt]);
+    }
+  }
 }
 
 void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, const vector<string> &tgtPhrase, 
