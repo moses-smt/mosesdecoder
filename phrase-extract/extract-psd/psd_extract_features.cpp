@@ -124,9 +124,8 @@ int main(int argc, char**argv)
     if (! ttable.SrcExists(psdLine.GetSrcPhrase()))
       continue;
     
-
     // we have all correct translations of the current phrase
-    if (psdLine.GetSrcPhrase() != srcPhrase) {
+    if (psdLine.GetSrcPhrase() != srcPhrase || psdLine.GetSpanStart() != spanStart) {
       // generate features
       if (hasTranslation) {
         srcSurvived++;
