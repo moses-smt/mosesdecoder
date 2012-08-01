@@ -160,7 +160,7 @@ void ChartHypothesis::CalcScore()
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
-  std::cerr << "Score breakdown before EVALUTATE : " <<  m_scoreBreakdown << std::endl;
+  //std::cerr << "Score breakdown before EVALUTATE : " <<  m_scoreBreakdown << std::endl;
 
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
