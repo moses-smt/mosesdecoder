@@ -141,7 +141,7 @@ int main(int argc, char**argv)
       continue;
 
     // we have all correct translations of the current phrase
-    if (psdLine.GetSrcPhrase() != srcPhrase || psdLine.GetSpanStart() != spanStart) {
+    if (psdLine.GetSrcPhrase() != srcPhrase || psdLine.GetSrcStart() != spanStart) {
       // generate features
       if (hasTranslation) {
         srcSurvived++;
