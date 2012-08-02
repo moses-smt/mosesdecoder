@@ -99,7 +99,10 @@ ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string target
   const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
   const ScoreComponentCollection &scoreCollection = tp->GetScoreBreakdown();
   psdOpt.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
-
+  for(size_t i=0; i<psdOpt.m_scores.size();i++)
+  {
+      psdOpt.m_scores[i] = exp(psdOpt.m_scores[i]);
+  }
   return psdOpt;
 }
 

@@ -76,6 +76,9 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
       ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
     }
   }
+
+  CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
+  if(ccsp!=NULL){
     //damt hiero : if we use context features then : For each translation option :
         //1. Go through each target phrase and access corresponding source phrase
         //2. Store all targetPhrases for this source phrase
@@ -230,6 +233,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         transOpt.CalcEstimateOfBestScore();
         VERBOSE(3, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
+  }//end of ifs
 //    #endif // HAVE_VW
 
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
@@ -311,8 +315,9 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
 
       //damt hiero : get cell context score producer and add 0 psdscore
       CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
-      CHECK(ccsp != NULL);
-      targetPhrase->AddStatelessScore(ccsp->ScoreFactory(0));
+      if(ccsp != NULL)
+      {CHECK(ccsp != NULL);
+      targetPhrase->AddStatelessScore(ccsp->ScoreFactory(0));}
 
       // chart rule
       m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
