@@ -75,6 +75,9 @@ Translation PSDScoreProducer::GetPSDTranslation(const TranslationOption *option)
   const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
   const ScoreComponentCollection &scoreCollection = option->GetTargetPhrase().GetScoreBreakdown();
   psdOpt.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
+  for (size_t i = 0; i < psdOpt.m_scores.size(); i++) {
+    psdOpt.m_scores[i] = exp(psdOpt.m_scores[i]); // don't take log(log())
+  }
 
   return psdOpt;
 }
