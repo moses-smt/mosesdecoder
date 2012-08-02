@@ -1355,7 +1355,7 @@ void StaticData::SetExecPath(const std::string &path)
   full_path = fs::system_complete( fs::path( path ) );
     
   //Without file name
-  m_binPath = full_path.parent_path().native();
+  m_binPath = full_path.parent_path().string();
   cerr << m_binPath << endl;
 
 }
