@@ -23,12 +23,23 @@ void printHelp(char **argv)
 #ifdef WITH_THREADS
             "\t-threads int      -- number of threads used for conversion\n"
 #endif 
-            "\n";
+            "\n\n"
+            
+            "  For more information see: http://www.statmt.org/moses/...\n"
+            "  and\n\n"
+            "  @article { junczys_mtm_2012,\n"
+            "      author = { Marcin Junczys-Dowmunt },\n"
+            "      title = { Phrasal Rank-Encoding: Exploiting Phrase Redundancy and\n"
+            "                Translational Relations for Phrase Table Compression },\n"
+            "      journal = { The Prague Bulletin of Mathematical Linguistics },\n"
+            "      volume = { 98 },\n"
+            "      year = { 2012 },\n"
+            "      note = { Proceedings of the MT Marathon 2012, Edinburgh },\n"
+            "  }\n\n";
 }
 
 int main(int argc, char** argv)
 {
-  std::cerr << "processLexicalTableCompact by Marcin Junczys-Dowmunt\n";
   
   std::string inFilePath;
   std::string outFilePath("out");
