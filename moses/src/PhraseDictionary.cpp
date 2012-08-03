@@ -28,7 +28,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
+#ifdef HAVE_CMPH
 #include "CompactPT/PhraseDictionaryCompact.h"
+#endif
 #endif
 #include "RuleTable/UTrie.h"
 
@@ -206,8 +208,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     assert(ret);
 
     return dict;    
-
-  } else if (m_implementation == Compact) {                                                                                             
+  } else if (m_implementation == Compact) {
+#ifdef HAVE_CMPH
 #ifndef WIN32
     VERBOSE(2,"Using compact phrase table" << std::endl);                                                                                                                               
                                                                                                                                       
@@ -221,6 +223,10 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     assert(ret);                                                                                                                      
     return pd;                                                                                                                       
 #else
+    CHECK(false);
+#endif
+#else
+    std::cerr << "CMPH library not compile in. Cannot use compact phrase table." << m_implementation << endl;
     CHECK(false);
 #endif
   }  

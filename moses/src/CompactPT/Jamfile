@@ -1,3 +1,4 @@
-lib CompactPT : [ glob *.cpp ] ..//moses_internal cmph/src/libcmph.a
-    : <include>cmph/src 
-    ;
+local with-cmph = [ option.get "with-cmph" ] ;
+lib CompactPT : [ glob *.cpp ] ..//moses_internal $(with-cmph)/src/libcmph.a
+  : <include>$(with-cmph)/src/
+  ;

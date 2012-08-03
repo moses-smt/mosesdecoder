@@ -1,24 +1,23 @@
-// $Id: PhraseDictionaryMemoryHashed.cpp 3908 2011-02-28 11:41:08Z pjwilliams $
-// vim:tabstop=2
-
-/***********************************************************************
-Moses - factored phrase-based language decoder
-Copyright (C) 2006 University of Edinburgh
-
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
-
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
-
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************************/
+// $Id$                                                                                                                               
+// vim:tabstop=2                                                                                                                      
+/***********************************************************************                                                              
+Moses - factored phrase-based language decoder                                                                                        
+Copyright (C) 2006 University of Edinburgh                                                                                            
+                                                                                                                                      
+This library is free software; you can redistribute it and/or                                                                         
+modify it under the terms of the GNU Lesser General Public                                                                            
+License as published by the Free Software Foundation; either                                                                          
+version 2.1 of the License, or (at your option) any later version.                                                                    
+                                                                                                                                      
+This library is distributed in the hope that it will be useful,                                                                       
+but WITHOUT ANY WARRANTY; without even the implied warranty of                                                                        
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU                                                                     
+Lesser General Public License for more details.                                                                                       
+                                                                                                                                      
+You should have received a copy of the GNU Lesser General Public                                                                      
+License along with this library; if not, write to the Free Software                                                                   
+Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA                                                        
+***********************************************************************/  
 
 #include <fstream>
 #include <string>
@@ -56,14 +55,27 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
   m_tableLimit = tableLimit;
   m_languageModels = &languageModels; 
   m_weightWP = weightWP;
-
-  std::string fullFilePath = filePath;
+ 
+  std::string tFilePath = filePath;
+ 
+  if(!FileExists(tFilePath))
+  {
+    if(FileExists(tFilePath + ".minphr"))
+    {
+      tFilePath += ".minphr";
+    }
+    else
+    {
+       std::cerr << "Error: File " + tFilePath + "(.minphr) does not exit." << std::endl;
+       exit(1);
+    }
+  }
 
   m_phraseDecoder = new PhraseDecoder(*this, m_input, m_output, m_feature,
                                   m_numScoreComponent, m_weight, m_weightWP,
                                   m_languageModels);
 
-  std::FILE* pFile = std::fopen(fullFilePath.c_str() , "r");
+  std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
   
   size_t indexSize;
   if(m_inMemory)

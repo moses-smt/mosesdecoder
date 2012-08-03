@@ -201,10 +201,11 @@ protected:
   bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
-  // Weather to load compact phrase table and reordering table into memory
+#ifdef HAVE_CMPH
+  // Whether to load compact phrase table and reordering table into memory
   bool m_minphrMemory;
   bool m_minlexrMemory;
-
+#endif
 
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
@@ -390,6 +391,7 @@ public:
     return m_nBestIncludesAlignment;
   }
   
+#ifdef HAVE_CMPH
   bool UseMinphrInMemory() const {
      return m_minphrMemory;
   }
@@ -397,6 +399,7 @@ public:
   bool UseMinlexrInMemory() const {
      return m_minlexrMemory;
   }
+#endif
   
   size_t GetNumLinkParams() const {
     return m_numLinkParams;

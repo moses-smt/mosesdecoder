@@ -147,9 +147,11 @@ Parameter::Parameter()
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   
+#ifdef HAVE_CMPH
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
-  AddParam("minphr-memory", "Load phrase table in minphr format into memory");   
+  AddParam("minphr-memory", "Load phrase table in minphr format into memory");
+#endif
 }
 
 Parameter::~Parameter()

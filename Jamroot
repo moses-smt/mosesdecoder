@@ -73,6 +73,11 @@ if [ option.get "with-tcmalloc" : : "yes" ] {
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 
+local with-cmph = [ option.get "with-cmph" ] ;
+if $(with-cmph) {
+  requirements += <define>HAVE_CMPH ;
+}
+
 project : default-build
   <threading>multi
   <warnings>on
