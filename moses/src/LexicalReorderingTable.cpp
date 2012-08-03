@@ -8,6 +8,10 @@
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
 
+#ifndef WIN32
+#include "CompactPT/LexicalReorderingTableCompact.h"  
+#endif
+
 namespace Moses
 {
 /*
@@ -47,7 +51,12 @@ void auxAppend(IPhrase& head, const IPhrase& tail)
 
 LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors)
 {
-  //decide use Tree or Memory table
+    //decide use Compact or Tree or Memory table                                                                                                   
+  if(FileExists(filePath+".minlexr")) {                                                                                                                                   
+    //there exists a compact binary version use that
+    VERBOSE(2,"Using compact lexical reordering table" << std::endl);  
+    return new LexicalReorderingTableCompact(filePath+".minlexr", f_factors, e_factors, c_factors);                                              
+  }  
   if(FileExists(filePath+".binlexr.idx")) {
     //there exists a binary version use that
     return new LexicalReorderingTableTree(filePath, f_factors, e_factors, c_factors);

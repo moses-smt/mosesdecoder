@@ -138,6 +138,7 @@ enum PhraseTableImplementation {
   ,Hiero        = 9
   ,ALSuffixArray = 10
   ,TMExtract    = 11
+  ,Compact      = 12
 };
 
 enum InputTypeEnum {

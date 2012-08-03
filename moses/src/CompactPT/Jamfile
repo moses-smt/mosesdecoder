@@ -1,0 +1,3 @@
+lib CompactPT : [ glob *.cpp ] ..//moses_internal cmph/src/libcmph.a
+    : <include>cmph/src 
+    ;
