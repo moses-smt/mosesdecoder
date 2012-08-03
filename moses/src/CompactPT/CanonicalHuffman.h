@@ -217,19 +217,20 @@ class CanonicalHuffman
     size_t Load(std::FILE* pFile)
     {
       size_t start = std::ftell(pFile);
+      size_t read = 0;
       
       size_t size;
-      std::fread(&size, sizeof(size_t), 1, pFile);
+      read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_symbols.resize(size);
-      std::fread(&m_symbols[0], sizeof(Data), size, pFile);
+      read += std::fread(&m_symbols[0], sizeof(Data), size, pFile);
       
-      std::fread(&size, sizeof(size_t), 1, pFile);
+      read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_firstCodes.resize(size);
-      std::fread(&m_firstCodes[0], sizeof(Code), size, pFile);
+      read += std::fread(&m_firstCodes[0], sizeof(Code), size, pFile);
       
-      std::fread(&size, sizeof(size_t), 1, pFile);
+      read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_lengthIndex.resize(size);
-      std::fread(&m_lengthIndex[0], sizeof(size_t), size, pFile);
+      read += std::fread(&m_lengthIndex[0], sizeof(size_t), size, pFile);
       
       return std::ftell(pFile) - start;
     }

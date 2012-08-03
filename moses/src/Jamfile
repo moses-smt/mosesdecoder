@@ -1,4 +1,13 @@
-alias headers : ../../util//kenutil : : : <include>. ;
+local with-cmph = [ option.get "with-cmph" ] ;
+if $(with-cmph) {
+  alias headers : ../../util//kenutil : : : <include>. <include>$(with-cmph)/include ;
+  alias compactpt : CompactPT//CompactPT ;
+}
+else {
+  alias headers : ../../util//kenutil : : : <include>. ;
+  alias compactpt ;
+}
+
 
 alias ThreadPool : ThreadPool.cpp ;
 
@@ -9,14 +18,6 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm : SyntacticLanguageModel.o m : : : <define>HAVE_SYNLM ;
 } else {
   alias synlm ;
-}
-
-local with-cmph = [ option.get "with-cmph" ] ;
-if $(with-cmph) {
-  alias compactpt : CompactPT//CompactPT ;
-}
-else {
-  alias compactpt ;
 }
 
 

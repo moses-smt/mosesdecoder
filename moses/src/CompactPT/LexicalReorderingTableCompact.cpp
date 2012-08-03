@@ -132,8 +132,9 @@ void LexicalReorderingTableCompact::Load(std::string filePath)
   else
     m_hash.LoadIndex(pFile);
   
-  std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, pFile);
-  std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, pFile);
+  size_t read = 0;
+  read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, pFile);
+  read += std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, pFile);
   
   if(m_multipleScoreTrees)
   {

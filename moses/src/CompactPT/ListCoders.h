@@ -140,8 +140,8 @@ class Simple9
     {
       uint length = end - it;
     
-      uint type;
-      uint bitlength;
+      uint type = 0;
+      uint bitlength = 0;
       
       switch(length)
       {
@@ -174,9 +174,9 @@ class Simple9
     {
       uint type = (input >> 28);
       
-      uint bitlen;
-      uint shift;
-      uint mask;
+      uint bitlen = 0;
+      uint shift = 0;
+      uint mask = 0;
       
       switch(type)
       {
@@ -205,9 +205,9 @@ class Simple9
     {
       uint type = (input >> 28);
       
-      uint bitlen;
-      uint shift;
-      uint mask;
+      uint bitlen = 0;
+      uint shift = 0;
+      uint mask = 0;
       
       switch(type)
       {

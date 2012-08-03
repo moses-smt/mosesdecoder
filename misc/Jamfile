@@ -8,8 +8,8 @@ exe queryLexicalTable : queryLexicalTable.cpp ../moses/src//moses ;
 
 local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
-    exe processPhraseTableMin : processPhraseTableMin.cpp ../moses/src//moses ;
-    exe processLexicalTableMin : processLexicalTableMin.cpp ../moses/src//moses ;
+    exe processPhraseTableMin : processPhraseTableMin.cpp ../moses/src//moses : <include>$(with-cmph)/include ;
+    exe processLexicalTableMin : processLexicalTableMin.cpp ../moses/src//moses : <include>$(with-cmph)/include ;
 
     alias programsMin : processPhraseTableMin processLexicalTableMin ;
 }

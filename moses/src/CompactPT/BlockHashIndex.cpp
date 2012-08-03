@@ -237,25 +237,26 @@ size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
   
   size_t beginning = std::ftell(mphf);
 
-  std::fread(&m_orderBits, sizeof(size_t), 1, mphf);
-  std::fread(&m_fingerPrintBits, sizeof(size_t), 1, mphf);
+  size_t read = 0;
+  read += std::fread(&m_orderBits, sizeof(size_t), 1, mphf);
+  read += std::fread(&m_fingerPrintBits, sizeof(size_t), 1, mphf);
   m_fileHandleStart = std::ftell(m_fileHandle);
   
   size_t relIndexPos;
-  std::fread(&relIndexPos, sizeof(size_t), 1, mphf);
+  read += std::fread(&relIndexPos, sizeof(size_t), 1, mphf);
   std::fseek(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
 
   m_landmarks.load(mphf);
 
   size_t seekIndexSize;
-  std::fread(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
+  read += std::fread(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
   m_seekIndex.resize(seekIndexSize);
-  std::fread(&m_seekIndex[0], sizeof(size_t), seekIndexSize, m_fileHandle);
+  read += std::fread(&m_seekIndex[0], sizeof(size_t), seekIndexSize, m_fileHandle);
   m_hashes.resize(seekIndexSize, 0);
   m_clocks.resize(seekIndexSize, 0);
   m_arrays.resize(seekIndexSize, 0);
   
-  std::fread(&m_size, sizeof(size_t), 1, m_fileHandle);
+  read += std::fread(&m_size, sizeof(size_t), 1, m_fileHandle);
 
   size_t end = std::ftell(mphf);
 

@@ -132,11 +132,12 @@ class PackedArray
     {
       size_t a1 = std::ftell(in);
       
-      std::fread(&m_size, sizeof(m_size), 1, in);
-      std::fread(&m_storageSize, sizeof(m_storageSize), 1, in);
+      size_t read = 0;
+      read += std::fread(&m_size, sizeof(m_size), 1, in);
+      read += std::fread(&m_storageSize, sizeof(m_storageSize), 1, in);
       delete [] m_storage;
       m_storage = new D[m_storageSize];
-      std::fread(m_storage, sizeof(D), m_storageSize, in);
+      read += std::fread(m_storage, sizeof(D), m_storageSize, in);
       
       size_t a2 = std::ftell(in);
       return a2 - a1;

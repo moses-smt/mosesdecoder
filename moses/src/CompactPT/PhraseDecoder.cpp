@@ -144,32 +144,33 @@ inline unsigned PhraseDecoder::DecodePREncSymbol2Rank(unsigned encodedSymbol)
 size_t PhraseDecoder::Load(std::FILE* in)
 {
   size_t start = std::ftell(in);
+  size_t read = 0;
   
-  std::fread(&m_coding, sizeof(m_coding), 1, in);
-  std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, in);
-  std::fread(&m_containsAlignmentInfo, sizeof(m_containsAlignmentInfo), 1, in);
-  std::fread(&m_maxRank, sizeof(m_maxRank), 1, in);
-  std::fread(&m_maxPhraseLength, sizeof(m_maxPhraseLength), 1, in);
+  read += std::fread(&m_coding, sizeof(m_coding), 1, in);
+  read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, in);
+  read += std::fread(&m_containsAlignmentInfo, sizeof(m_containsAlignmentInfo), 1, in);
+  read += std::fread(&m_maxRank, sizeof(m_maxRank), 1, in);
+  read += std::fread(&m_maxPhraseLength, sizeof(m_maxPhraseLength), 1, in);
   
   if(m_coding == REnc)
   {
     m_sourceSymbols.load(in);
     
     size_t size;
-    std::fread(&size, sizeof(size_t), 1, in);
+    read += std::fread(&size, sizeof(size_t), 1, in);
     m_lexicalTableIndex.resize(size);
-    std::fread(&m_lexicalTableIndex[0], sizeof(size_t), size, in);
+    read += std::fread(&m_lexicalTableIndex[0], sizeof(size_t), size, in);
     
-    std::fread(&size, sizeof(size_t), 1, in);
+    read += std::fread(&size, sizeof(size_t), 1, in);
     m_lexicalTable.resize(size);
-    std::fread(&m_lexicalTable[0], sizeof(SrcTrg), size, in);
+    read += std::fread(&m_lexicalTable[0], sizeof(SrcTrg), size, in);
   }
   
   m_targetSymbols.load(in);
   
   m_symbolTree = new CanonicalHuffman<unsigned>(in);
   
-  std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, in);
+  read += std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, in);
   if(m_multipleScoreTrees)
   {
     m_scoreTrees.resize(m_numScoreComponent);
