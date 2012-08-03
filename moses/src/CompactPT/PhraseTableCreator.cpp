@@ -26,6 +26,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
     
+bool operator<(const PackedItem &pi1, const PackedItem &pi2)
+{
+  if(pi1.GetLine() < pi2.GetLine())
+      return false;
+  return true;
+}
+    
 std::string PhraseTableCreator::m_phraseStopSymbol = "__SPECIAL_STOP_SYMBOL__";
 std::string PhraseTableCreator::m_separator = " ||| ";
     

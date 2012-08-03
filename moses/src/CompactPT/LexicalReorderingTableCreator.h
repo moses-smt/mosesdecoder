@@ -45,10 +45,6 @@ class LexicalReorderingTableCreator {
     
     BlockHashIndex m_hash;
     
-#ifdef WITH_THREADS    
-    size_t m_threads;
-#endif
-    
     typedef Counter<float> ScoreCounter;
     typedef CanonicalHuffman<float> ScoreTree;  
   
@@ -63,6 +59,10 @@ class LexicalReorderingTableCreator {
     long m_lastFlushedSourceNum;
     std::string m_lastFlushedSourcePhrase;
     std::vector<std::string> m_lastRange;
+    
+#ifdef WITH_THREADS    
+    size_t m_threads;
+#endif
     
     void PrintInfo();
     

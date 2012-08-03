@@ -10,20 +10,19 @@ void printHelp(char **argv) {
             "options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
-            "\t-encoding string  -- Encoding type (PREnc REnc None)\n"
-            "\t-maxrank int      -- Maximum rank for PREnc\n"
             "\t-nscores int      -- number of score components in phrase table\n"
             "\t-alignment-info   -- include alignment info in the binary phrase table\n"
+#ifdef WITH_THREADS
+            "\t-threads int      -- number of threads used for conversion\n"
+#endif 
             "\nadvanced:\n"
+            "\t-encoding string  -- Encoding type (PREnc REnc None)\n"
+            "\t-maxrank int      -- Maximum rank for PREnc\n"
             "\t-landmark int     -- use landmark phrase every 2^n source phrases\n"
             "\t-fingerprint int  -- number of bits used for source phrase fingerprints\n"
             "\t-join-scores      -- single set of Huffman codes for score components\n"
             "\t-quantize int     -- maximum number of scores per score component\n"
-
-#ifdef WITH_THREADS
-            "\t-threads int      -- number of threads used for conversion\n"
-#endif 
-            "\n\n"
+            "\n"
             
             "  For more information see: http://www.statmt.org/moses/...\n"
             "  and\n\n"

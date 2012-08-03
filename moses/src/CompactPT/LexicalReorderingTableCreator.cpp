@@ -31,8 +31,8 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
   , size_t threads
 #endif
   )
-  : m_inPath(inPath), m_outPath(outPath), m_numScoreComponent(numScoreComponent),
-  m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits), 
+  : m_inPath(inPath), m_outPath(outPath), m_orderBits(orderBits),
+  m_fingerPrintBits(fingerPrintBits), m_numScoreComponent(numScoreComponent),
   m_multipleScoreTrees(multipleScoreTrees), m_quantize(quantize),
   m_separator(" ||| "), m_hash(m_orderBits, m_fingerPrintBits),
   m_lastFlushedLine(-1)

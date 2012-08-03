@@ -271,7 +271,7 @@ class BitStream
   public:
     
     BitStream(Container &data)
-    : m_data(data), m_iterator(m_data.begin()),
+    : m_data(data), m_iterator(m_data.begin()), m_currentValue(0),
       m_valueBits(sizeof(typename Container::value_type) * 8),
       m_mask(1), m_bitPos(0) { }
     

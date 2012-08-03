@@ -186,11 +186,7 @@ class PackedItem
     float GetScore() const;
 };
 
-static bool operator<(const PackedItem &pi1, const PackedItem &pi2) {
-  if(pi1.GetLine() < pi2.GetLine())
-      return false;
-  return true;
-}
+bool operator<(const PackedItem &pi1, const PackedItem &pi2);
 
 class PhraseTableCreator
 {

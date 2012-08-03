@@ -15,15 +15,15 @@ void printHelp(char **argv)
             "options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
+#ifdef WITH_THREADS
+            "\t-threads int      -- number of threads used for conversion\n"
+#endif 
             "\nadvanced:\n"
             "\t-landmark int     -- use landmark phrase every 2^n phrases\n"
             "\t-fingerprint int  -- number of bits used for phrase fingerprints\n"
             "\t-join-scores      -- single set of Huffman codes for score components\n"
             "\t-quantize int     -- maximum number of scores per score component\n"
-#ifdef WITH_THREADS
-            "\t-threads int      -- number of threads used for conversion\n"
-#endif 
-            "\n\n"
+            "\n"
             
             "  For more information see: http://www.statmt.org/moses/...\n"
             "  and\n\n"
