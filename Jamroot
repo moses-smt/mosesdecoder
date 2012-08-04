@@ -15,14 +15,14 @@
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
+#Compact phrase table and compact lexical reordering table
+#--with-cmph=/path/to/cmph
+#
 #Thread-caching malloc (optional):
 #--with-tcmalloc
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
-#
-#Compact phrase table and lexical reordering table
-#--with-cmph=/path/to/cmph
 #
 #INSTALLATION
 #--prefix=/path/to/prefix sets the install prefix [default is source root].
