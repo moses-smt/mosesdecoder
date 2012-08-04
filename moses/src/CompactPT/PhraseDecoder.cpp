@@ -301,8 +301,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     
     if(state == Symbol)
     {
-      unsigned symbol = m_symbolTree->NextSymbol(encodedBitStream);
-      
+      unsigned symbol = m_symbolTree->NextSymbol(encodedBitStream);      
       if(symbol == phraseStopSymbol)
       {
         state = Score;
@@ -360,6 +359,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
           if(GetPREncType(symbol) == 1)
           {
             unsigned decodedSymbol = DecodePREncSymbol1(symbol);
+     
             Word word;
             word.CreateFromString(Output, *m_output,
                                   GetTargetSymbol(decodedSymbol), false);
@@ -457,7 +457,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     {
       if(StaticData::Instance().UseAlignmentInfo())
         targetPhrase->SetAlignmentInfo(alignment);
-  
+      
       if(m_coding == PREnc)
       {
         if(!m_maxRank || tpv->size() <= m_maxRank)
