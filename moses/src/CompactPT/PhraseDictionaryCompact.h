@@ -54,7 +54,7 @@ protected:
   typedef std::map<Phrase, TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
   boost::mutex m_sentenceMutex;
-  typedef std::map<size_t, PhraseCache>  SentenceCache;
+  typedef std::map<_opaque_pthread_t*, PhraseCache>  SentenceCache;
 #else
   typedef PhraseCache SentenceCache;
 #endif
