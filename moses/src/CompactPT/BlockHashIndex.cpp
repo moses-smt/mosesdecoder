@@ -20,6 +20,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/  
 
 #include "BlockHashIndex.h"
+#include "CmphStringVectorAdapter.h"
+
+#ifdef HAVE_CMPH
+#include <cmph.h>
+#endif
 
 namespace Moses
 {
@@ -27,39 +32,39 @@ namespace Moses
 BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
                                size_t threadsNum)
 : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
-  m_fileHandle(0), m_fileHandleStart(0), m_algo(CMPH_CHD), m_size(0),
+  m_fileHandle(0), m_fileHandleStart(0), m_size(0),
   m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
-  m_threadPool(threadsNum) {}
-  
-BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
-                               CMPH_ALGO algo, size_t threadsNum)
-: m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
-  m_fileHandle(0), m_fileHandleStart(0), m_algo(algo), m_size(0),
-  m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0),
-  m_threadPool(threadsNum) {}
+  m_threadPool(threadsNum) {
+#ifndef HAVE_CMPH
+    std::cerr << "minphr: CMPH support not compiled in." << std::endl;
+    exit(1);
+#endif    
+  }
 #else
 BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits)
 : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
-  m_fileHandle(0), m_fileHandleStart(0), m_algo(CMPH_CHD), m_size(0),
-  m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0) {}
-
-BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits, CMPH_ALGO algo)
-: m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
-  m_fileHandle(0), m_fileHandleStart(0), m_algo(algo), m_size(0),
-  m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0) {}
+  m_fileHandle(0), m_fileHandleStart(0), m_size(0),
+  m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0) {
+#ifndef HAVE_CMPH
+    std::cerr << "minphr: CMPH support not compiled in." << std::endl;
+    exit(1);
+#endif        
+  }
 #endif
 
 BlockHashIndex::~BlockHashIndex()
 {
-  for(std::vector<cmph_t*>::iterator it = m_hashes.begin();
+#ifdef HAVE_CMPH
+  for(std::vector<void*>::iterator it = m_hashes.begin();
       it != m_hashes.end(); it++)
     if(*it != 0)
-      cmph_destroy(*it);
+      cmph_destroy((cmph_t*)*it);
       
   for(std::vector<PairedPackedArray<>*>::iterator it = m_arrays.begin();
       it != m_arrays.end(); it++)
     if(*it != 0)
       delete *it;
+#endif
 }
 
 size_t BlockHashIndex::GetHash(const char* key)
@@ -91,9 +96,13 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
 {
   if(m_hashes[i] == 0)
     LoadRange(i);
-    
-  size_t idx = cmph_search(m_hashes[i], key, (cmph_uint32) strlen(key));
-  
+
+#ifdef HAVE_CMPH    
+  size_t idx = cmph_search((cmph_t*)m_hashes[i], key, (cmph_uint32) strlen(key));
+#else
+  size_t idx = 0;
+#endif
+
   std::pair<size_t, size_t> orderPrint = m_arrays[i]->Get(idx, m_orderBits, m_fingerPrintBits);
   m_clocks[i] = clock();
   
@@ -140,11 +149,13 @@ void BlockHashIndex::BeginSave(std::FILE * mphf)
 
 void BlockHashIndex::SaveRange(size_t i)
 {
+#ifdef HAVE_CMPH
   if(m_seekIndex.size() <= i)
     m_seekIndex.resize(i+1);
   m_seekIndex[i] = std::ftell(m_fileHandle) - m_fileHandleStart;
-  cmph_dump(m_hashes[i], m_fileHandle);
-  m_arrays[i]->Save(m_fileHandle);  
+  cmph_dump((cmph_t*)m_hashes[i], m_fileHandle);
+  m_arrays[i]->Save(m_fileHandle);
+#endif
 }
 
 void BlockHashIndex::SaveLastRange()
@@ -164,9 +175,10 @@ void BlockHashIndex::SaveLastRange()
 
 void BlockHashIndex::DropRange(size_t i)
 {
+#ifdef HAVE_CMPH
   if(m_hashes[i] != 0)
   {
-    cmph_destroy(m_hashes[i]);
+    cmph_destroy((cmph_t*)m_hashes[i]);
     m_hashes[i] = 0;
   }
   if(m_arrays[i] != 0)
@@ -176,6 +188,7 @@ void BlockHashIndex::DropRange(size_t i)
     m_clocks[i] = 0;
   }
   m_numLoadedRanges--;
+#endif
 }
 
 void BlockHashIndex::DropLastRange()
@@ -265,6 +278,7 @@ size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
 
 void BlockHashIndex::LoadRange(size_t i)
 {
+#ifdef HAVE_CMPH
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_mutex);
 #endif
@@ -274,10 +288,11 @@ void BlockHashIndex::LoadRange(size_t i)
                                         m_fingerPrintBits);
   m_arrays[i]->Load(m_fileHandle);
   
-  m_hashes[i] = hash;
+  m_hashes[i] = (void*)hash;
   m_clocks[i] = clock();
   
   m_numLoadedRanges++;
+#endif
 }
 
 size_t BlockHashIndex::Load(std::string filename)
@@ -325,5 +340,72 @@ void BlockHashIndex::KeepNLastRanges(float ratio, float tolerance)
       DropRange(it->second);
   }
 }
+
+void BlockHashIndex::CalcHash(size_t current, void* source_void)
+{
+#ifdef HAVE_CMPH
+  cmph_io_adapter_t* source = (cmph_io_adapter_t*) source_void;
+  cmph_config_t *config = cmph_config_new(source);
+  cmph_config_set_algo(config, CMPH_CHD);
+            
+  cmph_t* hash = cmph_new(config);
+  
+  PairedPackedArray<> *pv =
+    new PairedPackedArray<>(source->nkeys, m_orderBits, m_fingerPrintBits);
+
+  size_t i = 0;
+  
+  source->rewind(source->data);
+  while(i < source->nkeys)
+  {
+    unsigned keylen;
+    char* key;
+    source->read(source->data, &key, &keylen);
+    std::string temp(key, keylen);
+    
+    size_t fprint = GetFprint(temp.c_str());
+    size_t idx = cmph_search(hash, temp.c_str(),
+                             (cmph_uint32) temp.size());
+
+    pv->Set(idx, i, fprint, m_orderBits, m_fingerPrintBits);
+    i++;
+  }
+  
+  cmph_config_destroy(config);
+  
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
+
+  if(m_hashes.size() <= current)
+  {
+    m_hashes.resize(current + 1, 0);    
+    m_arrays.resize(current + 1, 0);
+    m_clocks.resize(current + 1, 0);
+  }
+  
+  m_hashes[current] = (void*)hash;
+  m_arrays[current] = pv;
+  m_clocks[current] = clock();
+  m_queue.push(-current);  
+#endif
+}
+
+#ifdef HAVE_CMPH 
+void* BlockHashIndex::vectorAdapter(std::vector<std::string>& v)
+{
+  return (void*)CmphVectorAdapter(v);
+}
+      
+void* BlockHashIndex::vectorAdapter(StringVector<unsigned, size_t, std::allocator>& sv)
+{
+  return (void*)CmphStringVectorAdapter(sv);
+}
+
+void* BlockHashIndex::vectorAdapter(StringVector<unsigned, size_t, MmapAllocator>& sv)
+{
+  return (void*)CmphStringVectorAdapter(sv);
+}
+#endif
 
 }

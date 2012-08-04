@@ -1,3 +1,23 @@
+local current = ;
 local with-cmph = [ option.get "with-cmph" ] ;
-lib cmph : : <search>$(with-cmph)/lib ;
-lib CompactPT : [ glob *.cpp ] ..//moses_internal cmph : <include>$(with-cmph)/include ;
+if $(with-cmph) {
+  lib cmph : : <search>$(with-cmph)/lib ;
+  obj BlockHashIndex.o : BlockHashIndex.cpp ..//moses_internal cmph : <include>$(with-cmph)/include ;
+  obj CmphStringVectorAdapter.o : CmphStringVectorAdapter.cpp ..//moses_internal cmph : <include>$(with-cmph)/include ;
+  current += "--with-cmph=$(with-cmph)" ;
+}
+else {
+  obj BlockHashIndex.o : BlockHashIndex.cpp ..//moses_internal ;
+  obj CmphStringVectorAdapter.o : CmphStringVectorAdapter.cpp ..//moses_internal ;
+  alias cmph ;
+}
+
+alias sources : LexicalReorderingTableCompact.cpp LexicalReorderingTableCreator.cpp
+                MurmurHash3.cpp PhraseDecoder.cpp PhraseDictionaryCompact.cpp PhraseTableCreator.cpp ;
+
+lib CompactPT : BlockHashIndex.o CmphStringVectorAdapter.o sources ..//moses_internal cmph ;
+
+path-constant PT-LOG : bin/pt.log ;
+current = $(current:J=" ") ;
+current ?= "" ;
+always-if-changed $(PT-LOG) $(current) : BlockHashIndex.o CmphStringVectorAdapter.o ;

@@ -29,10 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 #include <cstdio>
 
-#include "cmph.h"
 #include "MurmurHash3.h"
 #include "StringVector.h"
-#include "CmphStringVectorAdapter.h"
 #include "PackedArray.h"
 
 #ifdef WITH_THREADS
@@ -52,12 +50,10 @@ class BlockHashIndex
 
     std::FILE* m_fileHandle;
     size_t m_fileHandleStart;
-    
-    CMPH_ALGO m_algo;
-    
+        
     StringVector<unsigned char, unsigned long> m_landmarks;
     
-    std::vector<cmph_t*> m_hashes;
+    std::vector<void*> m_hashes;
     std::vector<clock_t> m_clocks;
     std::vector<PairedPackedArray<>*> m_arrays;
     
@@ -103,11 +99,8 @@ class BlockHashIndex
 #ifdef WITH_THREADS
     BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
                    size_t threadsNum = 2);
-    BlockHashIndex(size_t orderBits, size_t fingerPrintBits, CMPH_ALGO algo,
-                   size_t threadsNum = 2);
 #else
     BlockHashIndex(size_t orderBits, size_t fingerPrintBits);
-    BlockHashIndex(size_t orderBits, size_t fingerPrintBits, CMPH_ALGO algo);
 #endif
 
     ~BlockHashIndex();
@@ -161,57 +154,19 @@ class BlockHashIndex
     template <typename Keys>
     void CalcHash(size_t current, Keys &keys)
     {
-      cmph_io_adapter_t *source = VectorAdapter(keys);
-          
-      cmph_config_t *config = cmph_config_new(source);
-      cmph_config_set_algo(config, m_algo);
-                
-      cmph_t* hash = cmph_new(config);
-      cmph_config_destroy(config);
-      
-      PairedPackedArray<> *pv =
-        new PairedPackedArray<>(keys.size(), m_orderBits, m_fingerPrintBits);
-
-      size_t i = 0;
-      for(typename Keys::iterator it = keys.begin(); it != keys.end(); it++)
-      {
-        std::string temp = *it;
-        size_t fprint = GetFprint(temp.c_str());
-        size_t idx = cmph_search(hash, temp.c_str(),
-                                 (cmph_uint32) temp.size());
-
-        pv->Set(idx, i, fprint, m_orderBits, m_fingerPrintBits);
-        i++;
-      }
-      
-#ifdef WITH_THREADS
-      boost::mutex::scoped_lock lock(m_mutex);
+#ifdef HAVE_CMPH 
+      void* source = vectorAdapter(keys);
+      CalcHash(current, source);    
 #endif
-
-      if(m_hashes.size() <= current)
-      {
-        m_hashes.resize(current + 1, 0);    
-        m_arrays.resize(current + 1, 0);
-        m_clocks.resize(current + 1, 0);
-      }
-      
-      m_hashes[current] = hash;
-      m_arrays[current] = pv;
-      m_clocks[current] = clock();
-      m_queue.push(-current);
     }
 
-    cmph_io_adapter_t* VectorAdapter(std::vector<std::string>& v)
-    {
-      return CmphVectorAdapter(v);
-    }
-      
-    template <typename ValueT, typename PosT, template <typename> class Allocator>
-    cmph_io_adapter_t* VectorAdapter(StringVector<ValueT, PosT, Allocator>& sv)
-    {
-      return CmphStringVectorAdapter(sv);
-    }
-
+    void CalcHash(size_t current, void* source);
+    
+#ifdef HAVE_CMPH 
+    void* vectorAdapter(std::vector<std::string>& v);
+    void* vectorAdapter(StringVector<unsigned, size_t, std::allocator>& sv);
+    void* vectorAdapter(StringVector<unsigned, size_t, MmapAllocator>& sv);
+#endif
 };
 
 }

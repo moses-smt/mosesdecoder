@@ -120,7 +120,8 @@ namespace Moses
             
             if(!m_fixed)
             {
-                ftruncate(m_file_desc, m_map_size);
+                size_t read = 0;
+                read += ftruncate(m_file_desc, m_map_size);
                 m_data_ptr = (char*)mmap(0, m_map_size, PROT_READ|PROT_WRITE, MAP_SHARED,
                                        m_file_desc, 0);
                 return (pointer)m_data_ptr;

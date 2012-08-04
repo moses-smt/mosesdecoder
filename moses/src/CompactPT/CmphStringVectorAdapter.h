@@ -25,11 +25,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cassert>
 #include <cstring>
 
-#include "cmph.h"
+#ifdef HAVE_CMPH
+#include <cmph.h>
+
 #include "StringVector.h"
 
 namespace Moses
 {
+
     typedef struct
     {
         void *vector;
@@ -98,5 +101,6 @@ namespace Moses
     
 }
 
+#endif
 
 #endif

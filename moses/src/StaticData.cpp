@@ -406,12 +406,10 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
   if (m_useConsensusDecoding) m_mbr=true;
-
-#ifdef HAVE_CMPH
+  
   // Compact phrase table and reordering model
   SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
   SetBooleanParameter( &m_minlexrMemory, "minlexr-memory", false );
-#endif
 
   m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
                         Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;

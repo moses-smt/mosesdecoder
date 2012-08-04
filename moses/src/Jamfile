@@ -1,13 +1,4 @@
-local with-cmph = [ option.get "with-cmph" ] ;
-if $(with-cmph) {
-  alias headers : ../../util//kenutil : : : <include>. <include>$(with-cmph)/include ;
-  alias compactpt : CompactPT//CompactPT ;
-}
-else {
-  alias headers : ../../util//kenutil : : : <include>. ;
-  alias compactpt ;
-}
-
+alias headers : ../../util//kenutil : : : <include>. ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
@@ -26,6 +17,6 @@ lib moses_internal :
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp ]
 synlm ThreadPool headers ;
 
-lib moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match headers compactpt ../..//z ../../OnDiskPt//OnDiskPt ../..//boost_filesystem ;
+lib moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser CompactPT//CompactPT LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match headers ../..//z ../../OnDiskPt//OnDiskPt ../..//boost_filesystem ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
