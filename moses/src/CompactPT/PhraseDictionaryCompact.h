@@ -54,7 +54,17 @@ protected:
   typedef std::map<Phrase, TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
   boost::mutex m_sentenceMutex;
-  typedef std::map<_opaque_pthread_t*, PhraseCache>  SentenceCache;
+  std::vector<pthread_t> m_threadStore;
+  
+  size_t findThreadId(pthread_t t) {
+    size_t size = m_threadStore.size();
+    for(size_t i = 0; i < size; i++)
+      if(pthread_equal(t, m_threadStore[i]))
+	return i;
+    return size;
+  }
+
+  typedef std::map<size_t, PhraseCache>  SentenceCache;
 #else
   typedef PhraseCache SentenceCache;
 #endif
@@ -100,7 +110,6 @@ public:
 
   void InitializeForInput(const Moses::InputType&);
   
-  TargetPhraseCollection* RetrieveFromCache(const Phrase &sourcePhrase);
   void CacheForCleanup(const Phrase &source, TargetPhraseCollection* tpc);
   void CleanUp();
 

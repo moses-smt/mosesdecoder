@@ -146,26 +146,12 @@ PhraseDictionaryCompact::~PhraseDictionaryCompact() {
 
 //TO_STRING_BODY(PhraseDictionaryCompact)
 
-TargetPhraseCollection*
-PhraseDictionaryCompact::RetrieveFromCache(const Phrase &sourcePhrase) {
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[pthread_self()]; 
-#else
-  PhraseCache &ref = m_sentenceCache; 
-#endif
-  PhraseCache::iterator it = ref.find(sourcePhrase);
-  if(it != ref.end())
-    return it->second;
-  else
-    return NULL;
-}
-
 void PhraseDictionaryCompact::CacheForCleanup(const Phrase &sourcePhrase,
                                                    TargetPhraseCollection* tpc) {
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_sentenceMutex);
-  m_sentenceCache[pthread_self()].insert(std::make_pair(sourcePhrase, tpc));
+  size_t threadId = findThreadId(pthread_self());
+  m_sentenceCache[threadId].insert(std::make_pair(sourcePhrase, tpc));
 #else
   m_sentenceCache.insert(std::make_pair(sourcePhrase, tpc));
 #endif
@@ -184,7 +170,8 @@ void PhraseDictionaryCompact::CleanUp() {
   
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_sentenceMutex);
-  PhraseCache &ref = m_sentenceCache[pthread_self()]; 
+  size_t threadId = findThreadId(pthread_self());
+  PhraseCache &ref = m_sentenceCache[threadId]; 
 #else
   PhraseCache &ref = m_sentenceCache; 
 #endif
