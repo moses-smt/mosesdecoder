@@ -24,7 +24,7 @@ void printHelp(char **argv) {
             "\t-quantize int     -- maximum number of scores per score component\n"
             "\n"
             
-            "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures\n"
+            "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc5\n"
             "  and\n\n"
             "  @article { junczys_pbml98_2012,\n"
             "      author = { Marcin Junczys-Dowmunt },\n"
