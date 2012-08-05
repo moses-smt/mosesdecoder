@@ -54,13 +54,16 @@ protected:
   typedef std::map<Phrase, TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
   boost::mutex m_sentenceMutex;
-  std::vector<pthread_t> m_threadStore;
+  std::vector<pthread_t> m_threadStorage;
   
   size_t findThreadId(pthread_t t) {
-    size_t size = m_threadStore.size();
+    size_t size = m_threadStorage.size();
     for(size_t i = 0; i < size; i++)
-      if(pthread_equal(t, m_threadStore[i]))
+      if(pthread_equal(t, m_threadStorage[i]))
 	return i;
+      
+    m_threadStorage.resize(size + 1);
+    m_threadStorage[size] = t;
     return size;
   }
 
