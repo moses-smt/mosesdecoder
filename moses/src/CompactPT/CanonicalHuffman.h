@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
 
+#include "ThrowingFwrite.h"
+
 namespace Moses {
 
 template<typename PosType, typename DataType> class Hufftree;
@@ -240,16 +242,16 @@ class CanonicalHuffman
       size_t start = std::ftell(pFile);
       
       size_t size = m_symbols.size();
-      std::fwrite(&size, sizeof(size_t), 1, pFile);
-      std::fwrite(&m_symbols[0], sizeof(Data), size, pFile);
+      ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
+      ThrowingFwrite(&m_symbols[0], sizeof(Data), size, pFile);
       
       size = m_firstCodes.size();
-      std::fwrite(&size, sizeof(size_t), 1, pFile);
-      std::fwrite(&m_firstCodes[0], sizeof(Code), size, pFile);
+      ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
+      ThrowingFwrite(&m_firstCodes[0], sizeof(Code), size, pFile);
       
       size = m_lengthIndex.size();
-      std::fwrite(&size, sizeof(size_t), 1, pFile);
-      std::fwrite(&m_lengthIndex[0], sizeof(size_t), size, pFile);
+      ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
+      ThrowingFwrite(&m_lengthIndex[0], sizeof(size_t), size, pFile);
       
       return std::ftell(pFile) - start;
     }

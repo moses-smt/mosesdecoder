@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdio>
 #include <cassert>
 
+#include "ThrowingFwrite.h"
 #include "ListCoders.h"
 #include "MmapAllocator.h"
 
@@ -219,17 +220,17 @@ class MonotonicVector
         commit();
       
       bool byteSize = 0;
-      byteSize += fwrite(&m_final, sizeof(bool), 1, out) * sizeof(bool);
-      byteSize += fwrite(&m_size, sizeof(size_t), 1, out) * sizeof(size_t);
-      byteSize += fwrite(&m_last, sizeof(PosT), 1, out) * sizeof(PosT);
+      byteSize += ThrowingFwrite(&m_final, sizeof(bool), 1, out) * sizeof(bool);
+      byteSize += ThrowingFwrite(&m_size, sizeof(size_t), 1, out) * sizeof(size_t);
+      byteSize += ThrowingFwrite(&m_last, sizeof(PosT), 1, out) * sizeof(PosT);
       
       size_t size = m_diffs.size();
-      byteSize += fwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
-      byteSize += fwrite(&m_diffs[0], sizeof(unsigned int), size, out) * sizeof(unsigned int);
+      byteSize += ThrowingFwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
+      byteSize += ThrowingFwrite(&m_diffs[0], sizeof(unsigned int), size, out) * sizeof(unsigned int);
       
       size = m_anchors.size();
-      byteSize += fwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
-      byteSize += fwrite(&m_anchors[0], sizeof(NumT), size, out) * sizeof(NumT);
+      byteSize += ThrowingFwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
+      byteSize += ThrowingFwrite(&m_anchors[0], sizeof(NumT), size, out) * sizeof(NumT);
       
       return byteSize;
     }
