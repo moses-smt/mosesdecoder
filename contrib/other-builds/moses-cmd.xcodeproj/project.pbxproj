@@ -326,15 +326,20 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -369,15 +374,20 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
@@ -409,15 +419,20 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
-					"-lflm",
-					"-lmisc",
-					"-loolm",
-					"-ldstruct",
 					"-lz",
 					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PREBINDING = NO;
 				PRODUCT_NAME = "moses-cmd";
