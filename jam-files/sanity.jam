@@ -151,7 +151,7 @@ rule external-lib ( name : search-path * ) {
 }
 
 requirements = ;
-{
+if [ option.get "nosegfault" : "false" : "true" ] = "false" {
   #Boost jam's static clang for Linux is buggy.
   requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
