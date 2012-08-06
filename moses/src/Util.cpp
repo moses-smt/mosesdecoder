@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "Timer.h"
+#include "util/file.hh"
 
 using namespace std;
 
@@ -64,12 +65,8 @@ void CreateTempFile(ofstream  &fileStream, string &filePath)
   ::GetTempFileNameA(GetTempFolder().c_str(), "", 0, buffer);
   filePath = buffer;
 #else
-  char buffer[L_tmpnam];
-  strcpy(buffer, GetTempFolder().c_str());
-  strcat(buffer, PROJECT_NAME);
-  strcat(buffer, "--XXXXXX");
-  mkstemp(buffer);
-  filePath = buffer;
+  util::TempMaker tempFile("moses");
+  tempFile.MakeFile(&filePath);
 #endif
   fileStream.open(filePath.c_str(), ofstream::out | ofstream::app);
 }

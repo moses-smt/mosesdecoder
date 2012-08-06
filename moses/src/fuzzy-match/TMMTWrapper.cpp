@@ -13,6 +13,7 @@
 #include "fuzzy-match/Match.h"
 #include "Util.h"
 #include "StaticData.h"
+#include "util/file.hh"
 
 using namespace std;
 
@@ -70,8 +71,11 @@ namespace tmmt
   
   string TMMTWrapper::ExtractTM(const string &inputPath)
   {
-    char *outputFileName = tmpnam(NULL);
-    ofstream outputFile(outputFileName);
+    string outputFileName;
+    util::TempMaker tempFile("moses");
+    tempFile.MakeFile(&outputFileName);
+
+    ofstream outputFile(outputFileName.c_str());
  
     vector< vector< WORD_ID > > input;
     load_corpus(inputPath, input);

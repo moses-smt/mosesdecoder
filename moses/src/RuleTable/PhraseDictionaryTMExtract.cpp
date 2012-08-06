@@ -33,6 +33,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
+#include "util/file.hh"
 #include "CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 
 using namespace std;
@@ -82,10 +83,9 @@ namespace Moses
     
   void PhraseDictionaryTMExtract::InitializeForInput(InputType const& inputSentence)
   {
-    char buffer [L_tmpnam];
-    
-    tmpnam (buffer);
-    string inFileName = buffer;
+    string inFileName;
+    util::TempMaker tempFile("moses");
+    tempFile.MakeFile(&inFileName);
     
     ofstream inFile(inFileName.c_str());
     
@@ -95,10 +95,8 @@ namespace Moses
     }
     inFile << endl;
     inFile.close();
-    
-    cerr << "buffer=" << buffer << endl;
-    
-    string ptFileName = m_tmmtWrapper->Extract(buffer);
+        
+    string ptFileName = m_tmmtWrapper->Extract(inFileName);
 
     // populate with rules for this sentence
     long translationId = inputSentence.GetTranslationId();
