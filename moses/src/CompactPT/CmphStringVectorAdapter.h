@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 
 #ifdef HAVE_CMPH
-#include <cmph.h>
+#include "cmph.h"
 
 #include "StringVector.h"
 

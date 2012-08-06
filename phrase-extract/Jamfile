@@ -12,7 +12,7 @@ alias trees : SyntaxTree.cpp tables-core.o XmlTree.o : : : <include>. ;
 
 exe extract : tables-core.o SentenceAlignment.o extract.cpp OutputFileStream.cpp InputFileStream ../moses/src//ThreadPool ..//boost_iostreams ;
 
-exe extract-rules : tables-core.o SentenceAlignment.o SyntaxTree.o XmlTree.o SentenceAlignmentWithSyntax.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp OutputFileStream.cpp InputFileStream ../moses/src//ThreadPool ..//boost_iostreams ;
+exe extract-rules : tables-core.o SentenceAlignment.o SyntaxTree.o XmlTree.o SentenceAlignmentWithSyntax.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
 
 exe extract-lex : extract-lex.cpp InputFileStream ;
 
