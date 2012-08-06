@@ -136,7 +136,7 @@ void LexicalReorderingTableCreator::CompressScores()
   }
   threads.join_all();
 #else
-  CompressionTaskReordering* ct = new CompressionTaskReordering(m_scores, *this);
+  CompressionTaskReordering* ct = new CompressionTaskReordering(m_encodedScores, *this);
   (*ct)();
   delete ct;
 #endif
