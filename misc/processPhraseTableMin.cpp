@@ -34,7 +34,9 @@ void printHelp(char **argv) {
             "      volume = { 98 },\n"
             "      year = { 2012 },\n"
             "      note = { Proceedings of the MT Marathon 2012, Edinburgh },\n"
-            "  }\n\n";
+            "  }\n\n"
+            "  Acknowledgments: Part of this research was carried out at and funded by\n"
+            "  the World Intellectual Property Organization (WIPO) in Geneva.\n\n";
 }
 
 
