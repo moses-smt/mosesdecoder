@@ -43,7 +43,9 @@
 # variant=release|debug|profile  builds optimized (default), for debug, or for
 #                                profiling
 #
-# link=static|shared             controls linking (default static)
+# link=static|shared             controls preferred linking (default static)
+# --static                       forces static linking (the default will fall
+#                                back to shared)
 #
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
@@ -51,6 +53,8 @@
 # --notrace                      compiles without TRACE macros
 #
 # --enable-boost-pool            uses Boost pools for the memory SCFG table
+#
+# --without-libsegfault          does not link with libSegFault
 #
 #
 #CONTROLLING THE BUILD
