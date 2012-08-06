@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdio>
 
 #include "PhraseTableCreator.h"
+#include "ThrowingFwrite.h"
 
 namespace Moses
 {
@@ -153,11 +154,11 @@ void PhraseTableCreator::PrintInfo()
 void PhraseTableCreator::Save()
 {
     // Save type of encoding
-    std::fwrite(&m_coding, sizeof(m_coding), 1, m_outFile);
-    std::fwrite(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, m_outFile);
-    std::fwrite(&m_useAlignmentInfo, sizeof(m_useAlignmentInfo), 1, m_outFile);
-    std::fwrite(&m_maxRank, sizeof(m_maxRank), 1, m_outFile);
-    std::fwrite(&m_maxPhraseLength, sizeof(m_maxPhraseLength), 1, m_outFile);
+    ThrowingFwrite(&m_coding, sizeof(m_coding), 1, m_outFile);
+    ThrowingFwrite(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, m_outFile);
+    ThrowingFwrite(&m_useAlignmentInfo, sizeof(m_useAlignmentInfo), 1, m_outFile);
+    ThrowingFwrite(&m_maxRank, sizeof(m_maxRank), 1, m_outFile);
+    ThrowingFwrite(&m_maxPhraseLength, sizeof(m_maxPhraseLength), 1, m_outFile);
     
     if(m_coding == REnc)
     {
@@ -176,11 +177,11 @@ void PhraseTableCreator::Save()
         
         // Save lexical translation table for REnc
         size_t size = m_lexicalTableIndex.size();
-        std::fwrite(&size, sizeof(size_t), 1, m_outFile);
-        std::fwrite(&m_lexicalTableIndex[0], sizeof(size_t), size, m_outFile);
+        ThrowingFwrite(&size, sizeof(size_t), 1, m_outFile);
+        ThrowingFwrite(&m_lexicalTableIndex[0], sizeof(size_t), size, m_outFile);
         size = m_lexicalTable.size();
-        std::fwrite(&size, sizeof(size_t), 1, m_outFile);
-        std::fwrite(&m_lexicalTable[0], sizeof(SrcTrg), size, m_outFile);
+        ThrowingFwrite(&size, sizeof(size_t), 1, m_outFile);
+        ThrowingFwrite(&m_lexicalTable[0], sizeof(SrcTrg), size, m_outFile);
     }
     
     // Save target language symbols
@@ -200,7 +201,7 @@ void PhraseTableCreator::Save()
     
     // Save number of Huffman code sets for scores and
     // save Huffman code sets
-    std::fwrite(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, m_outFile);
+    ThrowingFwrite(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, m_outFile);
     size_t numScoreTrees = m_scoreTrees.size();
     for(size_t i = 0; i < numScoreTrees; i++)
         m_scoreTrees[i]->Save(m_outFile);

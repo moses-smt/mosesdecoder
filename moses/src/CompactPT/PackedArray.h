@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 #include <cstdio>
 
+#include "ThrowingFwrite.h"
+
 namespace Moses
 {
 
@@ -147,9 +149,9 @@ class PackedArray
     {
       size_t a1 = std::ftell(out);
       
-      std::fwrite(&m_size, sizeof(m_size), 1, out);
-      std::fwrite(&m_storageSize, sizeof(m_storageSize), 1, out);
-      std::fwrite(m_storage, sizeof(D), m_storageSize, out);
+      ThrowingFwrite(&m_size, sizeof(m_size), 1, out);
+      ThrowingFwrite(&m_storageSize, sizeof(m_storageSize), 1, out);
+      ThrowingFwrite(m_storage, sizeof(D), m_storageSize, out);
       
       size_t a2 = std::ftell(out);
       return a2 - a1;
