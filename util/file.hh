@@ -94,9 +94,9 @@ class TempMaker {
   public:
     explicit TempMaker(const std::string &prefix);
 
-    int Make() const;
+    int Make(std::string *out_name = NULL) const;
 
-    std::FILE *MakeFile() const;
+    std::FILE *MakeFile(std::string *out_name = NULL) const;
 
   private:
     std::string base_;

@@ -266,16 +266,18 @@ mkstemp_and_unlink(char *tmpl) {
 }
 #endif
 
-int TempMaker::Make() const {
-  std::string copy(base_);
-  copy.push_back(0);
+int TempMaker::Make(std::string *out_name) const {
+  std::string other;
+  if (!out_name) out_name = &other;
+  *out_name = base_;
+  out_name->push_back(0);
   int ret;
-  UTIL_THROW_IF(-1 == (ret = mkstemp_and_unlink(&copy[0])), util::ErrnoException, "Failed to make a temporary based on " << base_);
+  UTIL_THROW_IF(-1 == (ret = mkstemp_and_unlink(&(*out_name)[0])), util::ErrnoException, "Failed to make a temporary based on " << base_);
   return ret;
 }
 
-std::FILE *TempMaker::MakeFile() const {
-  util::scoped_fd file(Make());
+std::FILE *TempMaker::MakeFile(std::string *out_name) const {
+  util::scoped_fd file(Make(out_name));
   return FDOpenOrThrow(file);
 }
 
