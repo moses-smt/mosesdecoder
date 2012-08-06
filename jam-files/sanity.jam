@@ -52,13 +52,21 @@ rule test_library ( name ) {
   constant CLEANING : $(cleaning) ;
 }
 
+requirements = ;
+
+FORCE-STATIC = [ option.get "static" : : "yes" ] ;
+if $(FORCE-STATIC) {
+  requirements += <runtime-link>static ;
+}
+
 #Determine if a library can be compiled statically.  
 rule auto-shared ( name : additional * ) {
-  if [ option.get "static" : : "yes" ] {
+  additional ?= "" ;
+  if [ test_flags $(additional)" -static -l"$(name) ] {
     return ;
   } else {
-    additional ?= "" ;
-    if [ test_flags $(additional)" -static -l"$(name) ] {
+    if $(FORCE-STATIC) {
+      echo "Could not statically link against lib $(name).  Your build will probably fail." ;
       return ;
     } else {
       return "<link>shared" ;
@@ -154,11 +162,10 @@ rule external-lib ( name : search-path * ) {
   local ignored = @($(build-log):E=$(script)) ;
 }
 
-requirements = ;
 #Boost jam's static clang for Linux is buggy.
 requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
-if ! [ option.get "without-libsegfault" : : "yes" ] && ! [ option.get "static" : : "yes" ] {
+if ! [ option.get "without-libsegfault" : : "yes" ] && ! $(FORCE-STATIC) {
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
   if [ test_flags "-lSegFault" ] {
     external-lib SegFault ;
