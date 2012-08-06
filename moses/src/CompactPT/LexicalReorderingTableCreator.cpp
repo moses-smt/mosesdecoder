@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/  
 
 #include "LexicalReorderingTableCreator.h"
+#include "ThrowingFwrite.h"
 
 namespace Moses {
 
@@ -145,8 +146,8 @@ void LexicalReorderingTableCreator::CompressScores()
 
 void LexicalReorderingTableCreator::Save()
 {  
-  std::fwrite(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, m_outFile);
-  std::fwrite(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, m_outFile);
+  ThrowingFwrite(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, m_outFile);
+  ThrowingFwrite(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, m_outFile);
   for(size_t i = 0; i < m_scoreTrees.size(); i++)
     m_scoreTrees[i]->Save(m_outFile);
   

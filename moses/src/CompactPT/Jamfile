@@ -10,9 +10,7 @@ else {
   alias cmph ;
 }
 
-alias sources : BlockHashIndex.cpp CmphStringVectorAdapter.cpp LexicalReorderingTableCompact.cpp
-                LexicalReorderingTableCreator.cpp MurmurHash3.cpp PhraseDecoder.cpp
-                PhraseDictionaryCompact.cpp PhraseTableCreator.cpp ;
+alias sources : [ glob *.cpp ] ;
 
 lib CompactPT : sources ..//moses_internal cmph : $(includes) ;
 

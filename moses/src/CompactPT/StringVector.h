@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/iterator/iterator_facade.hpp>
 
+#include "ThrowingFwrite.h"
 #include "MonotonicVector.h"
 #include "MmapAllocator.h"
 
@@ -265,13 +266,13 @@ class StringVector
     size_t save(std::FILE* out)
     {
       size_t byteSize = 0;
-      byteSize += std::fwrite(&m_sorted, sizeof(bool), 1, out) * sizeof(bool);
+      byteSize += ThrowingFwrite(&m_sorted, sizeof(bool), 1, out) * sizeof(bool);
       
       byteSize += m_positions.save(out);
     
       size_t valSize = size2();
-      byteSize += std::fwrite(&valSize, sizeof(size_t), 1, out) * sizeof(size_t);
-      byteSize += std::fwrite(&m_charArray[0], sizeof(ValueT), valSize, out) * sizeof(ValueT);
+      byteSize += ThrowingFwrite(&valSize, sizeof(size_t), 1, out) * sizeof(size_t);
+      byteSize += ThrowingFwrite(&m_charArray[0], sizeof(ValueT), valSize, out) * sizeof(ValueT);
 
       return byteSize;
     }

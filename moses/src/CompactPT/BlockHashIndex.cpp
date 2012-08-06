@@ -19,6 +19,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA                                                        
 ***********************************************************************/  
 
+#include "ThrowingFwrite.h"
 #include "BlockHashIndex.h"
 #include "CmphStringVectorAdapter.h"
 
@@ -138,13 +139,13 @@ size_t BlockHashIndex::Save(std::string filename)
 void BlockHashIndex::BeginSave(std::FILE * mphf)
 {
   m_fileHandle = mphf;
-  std::fwrite(&m_orderBits, sizeof(size_t), 1, m_fileHandle);
-  std::fwrite(&m_fingerPrintBits, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_orderBits, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_fingerPrintBits, sizeof(size_t), 1, m_fileHandle);
   
   m_fileHandleStart = std::ftell(m_fileHandle);
   
   size_t relIndexPos = 0;
-  std::fwrite(&relIndexPos, sizeof(size_t), 1, m_fileHandle);    
+  ThrowingFwrite(&relIndexPos, sizeof(size_t), 1, m_fileHandle);    
 }
 
 void BlockHashIndex::SaveRange(size_t i)
@@ -219,16 +220,16 @@ size_t BlockHashIndex::FinalizeSave()
   size_t relIndexPos = std::ftell(m_fileHandle) - m_fileHandleStart;
   
   std::fseek(m_fileHandle, m_fileHandleStart, SEEK_SET);
-  std::fwrite(&relIndexPos, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&relIndexPos, sizeof(size_t), 1, m_fileHandle);
   
   std::fseek(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
   m_landmarks.save(m_fileHandle);
   
   size_t seekIndexSize = m_seekIndex.size();
-  std::fwrite(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
-  std::fwrite(&m_seekIndex[0], sizeof(size_t), seekIndexSize, m_fileHandle);
+  ThrowingFwrite(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_seekIndex[0], sizeof(size_t), seekIndexSize, m_fileHandle);
   
-  std::fwrite(&m_size, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_size, sizeof(size_t), 1, m_fileHandle);
   
   size_t fileHandleStop = std::ftell(m_fileHandle);
   return fileHandleStop - m_fileHandleStart + sizeof(m_orderBits)
