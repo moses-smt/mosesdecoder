@@ -406,7 +406,10 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
   if (m_useConsensusDecoding) m_mbr=true;
-
+  
+  // Compact phrase table and reordering model
+  SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
+  SetBooleanParameter( &m_minlexrMemory, "minlexr-memory", false );
 
   m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
                         Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
@@ -1355,7 +1358,7 @@ void StaticData::SetExecPath(const std::string &path)
   full_path = fs::system_complete( fs::path( path ) );
     
   //Without file name
-  m_binPath = full_path.parent_path().c_str();
+  m_binPath = full_path.parent_path().string();
   cerr << m_binPath << endl;
 
 }

@@ -54,11 +54,15 @@ rule test_library ( name ) {
 
 #Determine if a library can be compiled statically.  
 rule auto-shared ( name : additional * ) {
-  additional ?= "" ;
-  if [ test_flags $(additional)" -static -l"$(name) ] {
+  if [ option.get "static" : : "yes" ] {
     return ;
   } else {
-    return "<link>shared" ;
+    additional ?= "" ;
+    if [ test_flags $(additional)" -static -l"$(name) ] {
+      return ;
+    } else {
+      return "<link>shared" ;
+    }
   }
 }
 
@@ -151,10 +155,10 @@ rule external-lib ( name : search-path * ) {
 }
 
 requirements = ;
-{
-  #Boost jam's static clang for Linux is buggy.
-  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
+#Boost jam's static clang for Linux is buggy.
+requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
+if ! [ option.get "without-libsegfault" : : "yes" ] && ! [ option.get "static" : : "yes" ] {
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
   if [ test_flags "-lSegFault" ] {
     external-lib SegFault ;

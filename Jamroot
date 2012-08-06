@@ -15,12 +15,14 @@
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
+#Compact phrase table and compact lexical reordering table
+#--with-cmph=/path/to/cmph
+#
 #Thread-caching malloc (optional):
 #--with-tcmalloc
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
-#
 #
 #INSTALLATION
 #--prefix=/path/to/prefix sets the install prefix [default is source root].
@@ -41,7 +43,9 @@
 # variant=release|debug|profile  builds optimized (default), for debug, or for
 #                                profiling
 #
-# link=static|shared             controls linking (default static)
+# link=static|shared             controls preferred linking (default static)
+# --static                       forces static linking (the default will fall
+#                                back to shared)
 #
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
@@ -49,6 +53,8 @@
 # --notrace                      compiles without TRACE macros
 #
 # --enable-boost-pool            uses Boost pools for the memory SCFG table
+#
+# --without-libsegfault          does not link with libSegFault
 #
 #
 #CONTROLLING THE BUILD
@@ -72,6 +78,10 @@ if [ option.get "with-tcmalloc" : : "yes" ] {
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
+
+if [ option.get "with-cmph" ] {
+  requirements += <define>HAVE_CMPH ;
+}
 
 project : default-build
   <threading>multi

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
+#include "CompactPT/PhraseDictionaryCompact.h"
 #endif
 #include "RuleTable/UTrie.h"
 
@@ -70,7 +71,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 {
   const StaticData& staticData = StaticData::Instance();
   const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray) {
+  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray
+      || implementation == Compact) {
     m_useThreadSafePhraseDictionary = true;
   } else {
     m_useThreadSafePhraseDictionary = false;
@@ -204,8 +206,24 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     assert(ret);
 
     return dict;    
-
-  } else {
+  } else if (m_implementation == Compact) {
+#ifndef WIN32
+    VERBOSE(2,"Using compact phrase table" << std::endl);                                                                                                                               
+                                                                                                                                      
+    PhraseDictionaryCompact* pd  = new PhraseDictionaryCompact(m_numScoreComponent, m_implementation, this);                         
+    bool ret = pd->Load(GetInput(), GetOutput()                                                                                      
+                         , m_filePath                                                                                                 
+                         , m_weight                                                                                                   
+                         , m_tableLimit                                                                                               
+                         , system->GetLanguageModels()                                                                                
+                         , system->GetWeightWordPenalty());                                                                           
+    assert(ret);                                                                                                                      
+    return pd;                                                                                                                       
+#else
+    CHECK(false);
+#endif
+  }  
+  else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
     CHECK(false);
   }
