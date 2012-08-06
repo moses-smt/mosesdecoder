@@ -1,13 +1,9 @@
 #include <iostream>
 #include <string>
 
-#include "Timer.h"
-#include "InputFileStream.h"
 #include "CompactPT/LexicalReorderingTableCreator.h"
 
 using namespace Moses;
-
-Timer timer;
 
 void printHelp(char **argv)
 {

@@ -1,7 +1,6 @@
 #include <iostream>
 #include "TypeDef.h"
 #include "CompactPT/PhraseTableCreator.h"
-#include "CompactPT/CanonicalHuffman.h"
 
 using namespace Moses;
 
