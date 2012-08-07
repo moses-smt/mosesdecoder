@@ -121,7 +121,7 @@ for (my $i = 0; $i < $fileCount; ++$i)
 
   my $fileInd = $i % $numParallel;
   my $fh = $runFiles[$fileInd];
-  my $cmd = "$scoreCmd $TMPDIR/extract.$i.gz $lexFile $TMPDIR/phrase-table.half.$numStr.gz $otherExtractArgs 2> /dev/stderr \n";
+  my $cmd = "$scoreCmd $TMPDIR/extract.$i.gz $lexFile $TMPDIR/phrase-table.half.$numStr.gz $otherExtractArgs 2>> /dev/stderr \n";
   print $fh $cmd;
 }
 
