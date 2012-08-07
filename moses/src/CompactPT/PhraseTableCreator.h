@@ -200,6 +200,9 @@ class PhraseTableCreator
     std::FILE* m_outFile;
     
     size_t m_numScoreComponent;
+    size_t m_sortScoreIndex;
+    size_t m_warnMe;
+    
     Coding m_coding;
     size_t m_orderBits;
     size_t m_fingerPrintBits;
@@ -344,13 +347,15 @@ class PhraseTableCreator
     PhraseTableCreator(std::string inPath,
                        std::string outPath,
                        size_t numScoreComponent = 5,
+                       size_t sortScoreIndex = 2,
                        Coding coding = PREnc,
                        size_t orderBits = 10,
                        size_t fingerPrintBits = 16,
                        bool useAlignmentInfo = false,
                        bool multipleScoreTrees = true,
                        size_t quantize = 0,
-                       size_t maxRank = 100
+                       size_t maxRank = 100,
+                       bool warnMe = true
 #ifdef WITH_THREADS
                        , size_t threads = 2
 #endif

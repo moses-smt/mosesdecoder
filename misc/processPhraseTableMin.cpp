@@ -6,7 +6,7 @@ using namespace Moses;
 
 void printHelp(char **argv) {
   std::cerr << "Usage " << argv[0] << ":\n"
-            "options: \n"
+            "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
             "\t-nscores int      -- number of score components in phrase table\n"
@@ -14,17 +14,19 @@ void printHelp(char **argv) {
 #ifdef WITH_THREADS
             "\t-threads int      -- number of threads used for conversion\n"
 #endif 
-            "\nadvanced:\n"
-            "\t-encoding string  -- Encoding type (PREnc REnc None)\n"
-            "\t-maxrank int      -- Maximum rank for PREnc\n"
-            "\t-landmark int     -- use landmark phrase every 2^n source phrases\n"
-            "\t-fingerprint int  -- number of bits used for source phrase fingerprints\n"
+            "\n  advanced:\n"
+            "\t-encoding string  -- encoding type: PREnc REnc None (default PREnc)\n"
+            "\t-rankscore int    -- score index of P(t|s) (default 2)\n"
+            "\t-maxrank int      -- maximum rank for PREnc (default 100)\n"
+            "\t-landmark int     -- use landmark phrase every 2^n source phrases (default 10)\n"
+            "\t-fingerprint int  -- number of bits used for source phrase fingerprints (default 16)\n"
             "\t-join-scores      -- single set of Huffman codes for score components\n"
             "\t-quantize int     -- maximum number of scores per score component\n"
+            "\t-no-warnings      -- suppress warnings about missing alignment data\n"
             "\n"
             
-            "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc5\n"
-            "  and\n\n"
+            "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc6\n\n"
+            "  If you use this please cite:\n\n"
             "  @article { junczys_pbml98_2012,\n"
             "      author = { Marcin Junczys-Dowmunt },\n"
             "      title = { Phrasal Rank-Encoding: Exploiting Phrase Redundancy and\n"
@@ -36,6 +38,7 @@ void printHelp(char **argv) {
             "  }\n\n"
             "  Acknowledgments: Part of this research was carried out at and funded by\n"
             "  the World Intellectual Property Organization (WIPO) in Geneva.\n\n";
+
 }
 
 
@@ -52,6 +55,9 @@ int main(int argc, char **argv) {
   bool multipleScoreTrees = true;
   size_t quantize = 0;
   size_t maxRank = 100;
+  bool sortScoreIndexSet = false;
+  size_t sortScoreIndex = 2; 
+  bool warnMe = true;
   size_t threads = 1;
   
   if(1 >= argc) {
@@ -89,6 +95,11 @@ int main(int argc, char **argv) {
       ++i;
       numScoreComponent = atoi(argv[i]);
     }
+    else if("-rankscore" == arg && i+1 < argc) {
+      ++i;
+      sortScoreIndex = atoi(argv[i]);
+      sortScoreIndexSet = true;
+    }
     else if("-alignment-info" == arg) {
       useAlignmentInfo = true;
     }
@@ -107,6 +118,9 @@ int main(int argc, char **argv) {
       ++i;
       quantize = atoi(argv[i]);
     }
+    else if("-no-warnings" == arg) {
+      warnMe = false;
+    }
     else if("-threads" == arg && i+1 < argc) {
 #ifdef WITH_THREADS
       ++i;
@@ -123,13 +137,28 @@ int main(int argc, char **argv) {
     }
   }
   
+  if(!sortScoreIndexSet && numScoreComponent != 5 && coding == PhraseTableCreator::PREnc)
+  {
+    std::cerr << "WARNING: You are using a nonstandard number of scores ("
+              << numScoreComponent << ") with PREnc. Set the index of P(t|s) "
+              "with  -rankscore int  if it is not "
+              << sortScoreIndex << "." << std::endl;
+  }
+  
+  if(sortScoreIndex >= numScoreComponent)
+  {
+    std::cerr << "ERROR: -rankscore " << sortScoreIndex << " is out of range (0 ... "
+              << (numScoreComponent-1) << ")" << std::endl;
+    abort();
+  }
+  
   if(outFilePath.rfind(".minphr") != outFilePath.size() - 7)
     outFilePath += ".minphr";
   
-  PhraseTableCreator(inFilePath, outFilePath, numScoreComponent,
+  PhraseTableCreator(inFilePath, outFilePath, numScoreComponent, sortScoreIndex,
                      coding, orderBits, fingerprintBits,
                      useAlignmentInfo, multipleScoreTrees,
-                     quantize, maxRank
+                     quantize, maxRank, warnMe
 #ifdef WITH_THREADS
                      , threads
 #endif                     

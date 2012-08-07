@@ -357,12 +357,22 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
   size_t i = 0;
   
   source->rewind(source->data);
+  
+  std::string lastKey = ""; //m_landmarks.back();
   while(i < source->nkeys)
   {
     unsigned keylen;
     char* key;
     source->read(source->data, &key, &keylen);
     std::string temp(key, keylen);
+    
+    if(lastKey > temp) {
+      std::cerr << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+      std::cerr << "1: " << lastKey << std::endl;
+      std::cerr << "2: " << temp << std::endl;
+      abort();
+    }
+    lastKey = temp;
     
     size_t fprint = GetFprint(temp.c_str());
     size_t idx = cmph_search(hash, temp.c_str(),

@@ -8,21 +8,21 @@ using namespace Moses;
 void printHelp(char **argv)
 {
   std::cerr << "Usage " << argv[0] << ":\n"
-            "options: \n"
+            "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
 #ifdef WITH_THREADS
             "\t-threads int      -- number of threads used for conversion\n"
 #endif 
-            "\nadvanced:\n"
+            "\n  advanced:\n"
             "\t-landmark int     -- use landmark phrase every 2^n phrases\n"
             "\t-fingerprint int  -- number of bits used for phrase fingerprints\n"
             "\t-join-scores      -- single set of Huffman codes for score components\n"
             "\t-quantize int     -- maximum number of scores per score component\n"
             "\n"
             
-            "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc6\n"
-            "  and\n\n"
+            "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc6\n\n"
+            "  If you use this please cite:\n\n"
             "  @article { junczys_pbml98_2012,\n"
             "      author = { Marcin Junczys-Dowmunt },\n"
             "      title = { Phrasal Rank-Encoding: Exploiting Phrase Redundancy and\n"
