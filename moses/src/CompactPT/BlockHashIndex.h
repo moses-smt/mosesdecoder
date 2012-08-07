@@ -140,6 +140,15 @@ class BlockHashIndex
     void AddRange(Keys &keys)
     {
       size_t current = m_landmarks.size();
+      
+      if(m_landmarks.size() && m_landmarks.back().str() >= keys[0])
+      {
+        std::cerr << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+        std::cerr << "1: " << m_landmarks.back().str() << std::endl;
+        std::cerr << "2: " << keys[0] << std::endl;
+        abort();
+      }
+      
       m_landmarks.push_back(keys[0]);
       m_size += keys.size();
       
