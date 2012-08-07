@@ -91,7 +91,11 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   if(m_coding == REnc)
   {
     size_t found = inPath.find_last_of("/\\");
-    std::string path = inPath.substr(0, found);
+    std::string path;
+    if(found != std::string::npos) 
+      path = inPath.substr(0, found);
+    else
+      path = ".";
     LoadLexicalTable(path + "/lex.f2e");
   }
   else if(m_coding == PREnc)
