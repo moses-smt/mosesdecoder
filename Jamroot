@@ -56,6 +56,7 @@
 #
 # --without-libsegfault          does not link with libSegFault
 #
+# --max-kenlm-order              maximum ngram order that kenlm can process (default 6)
 #
 #CONTROLLING THE BUILD
 #-a to build from scratch
@@ -81,6 +82,16 @@ requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 
 if [ option.get "with-cmph" ] {
   requirements += <define>HAVE_CMPH ;
+}
+
+# If you need higher order, change this option
+# Having this limit means that State can be
+# (KENLM_MAX_ORDER - 1) * sizeof(float) bytes instead of
+# sizeof(float*) + (KENLM_MAX_ORDER - 1) * sizeof(float) + malloc overhead
+max-order = [ option.get "max-kenlm-order" : 6 : 6 ] ;
+requirements += <define>KENLM_MAX_ORDER=$(max-order) ;
+if ( $(max-order) != 6 ) {
+   echo "Setting KenLM maximum n-gram order to $(max-order)" ;
 }
 
 project : default-build
