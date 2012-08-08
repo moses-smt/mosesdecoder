@@ -83,9 +83,9 @@ namespace Moses
     
   void PhraseDictionaryTMExtract::InitializeForInput(InputType const& inputSentence)
   {
-    string inFileName;
     util::TempMaker tempFile("moses");
-    tempFile.MakeFile(&inFileName);
+    util::scoped_fd alive;
+    string inFileName(tempFile.Name(alive));
     
     ofstream inFile(inFileName.c_str());
     

@@ -94,9 +94,12 @@ class TempMaker {
   public:
     explicit TempMaker(const std::string &prefix);
 
-    int Make(std::string *out_name = NULL) const;
+    // These will already be unlinked for you.  
+    int Make() const;
+    std::FILE *MakeFile() const;
 
-    std::FILE *MakeFile(std::string *out_name = NULL) const;
+    // This will force you to close the fd instead of leaving it open.  
+    std::string Name(scoped_fd &opened) const;
 
   private:
     std::string base_;

@@ -71,9 +71,9 @@ namespace tmmt
   
   string TMMTWrapper::ExtractTM(const string &inputPath)
   {
-    string outputFileName;
     util::TempMaker tempFile("moses");
-    tempFile.MakeFile(&outputFileName);
+    util::scoped_fd alive;
+    string outputFileName(tempFile.Name(alive));
 
     ofstream outputFile(outputFileName.c_str());
  
