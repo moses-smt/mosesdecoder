@@ -48,6 +48,10 @@
 		1EAC363B14CDC79300DF97C3 /* LoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363214CDC79300DF97C3 /* LoaderHiero.h */; };
 		1EAC363C14CDC79300DF97C3 /* LoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */; };
 		1EAC363D14CDC79300DF97C3 /* LoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363414CDC79300DF97C3 /* LoaderStandard.h */; };
+		1EC32DB315D2D67A00A313B1 /* WordLattice2.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC32DB115D2D67A00A313B1 /* WordLattice2.cpp */; };
+		1EC32DB415D2D67A00A313B1 /* WordLattice2.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC32DB215D2D67A00A313B1 /* WordLattice2.h */; };
+		1EC32DB815D2D90700A313B1 /* ThrowingFwrite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC32DB615D2D90700A313B1 /* ThrowingFwrite.cpp */; };
+		1EC32DB915D2D90700A313B1 /* ThrowingFwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC32DB715D2D90700A313B1 /* ThrowingFwrite.h */; };
 		1EC7374614B977AB00238410 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D314B977AA00238410 /* AlignmentInfo.cpp */; };
 		1EC7374714B977AB00238410 /* AlignmentInfo.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735D414B977AA00238410 /* AlignmentInfo.h */; };
 		1EC7374814B977AB00238410 /* AlignmentInfoCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */; };
@@ -379,6 +383,10 @@
 		1EAC363214CDC79300DF97C3 /* LoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderHiero.h; path = ../../moses/src/RuleTable/LoaderHiero.h; sourceTree = "<group>"; };
 		1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderStandard.cpp; path = ../../moses/src/RuleTable/LoaderStandard.cpp; sourceTree = "<group>"; };
 		1EAC363414CDC79300DF97C3 /* LoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderStandard.h; path = ../../moses/src/RuleTable/LoaderStandard.h; sourceTree = "<group>"; };
+		1EC32DB115D2D67A00A313B1 /* WordLattice2.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordLattice2.cpp; path = ../../moses/src/WordLattice2.cpp; sourceTree = "<group>"; };
+		1EC32DB215D2D67A00A313B1 /* WordLattice2.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordLattice2.h; path = ../../moses/src/WordLattice2.h; sourceTree = "<group>"; };
+		1EC32DB615D2D90700A313B1 /* ThrowingFwrite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThrowingFwrite.cpp; path = ../../moses/src/CompactPT/ThrowingFwrite.cpp; sourceTree = "<group>"; };
+		1EC32DB715D2D90700A313B1 /* ThrowingFwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThrowingFwrite.h; path = ../../moses/src/CompactPT/ThrowingFwrite.h; sourceTree = "<group>"; };
 		1EC735D314B977AA00238410 /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = ../../moses/src/AlignmentInfo.cpp; sourceTree = "<group>"; };
 		1EC735D414B977AA00238410 /* AlignmentInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = AlignmentInfo.h; path = ../../moses/src/AlignmentInfo.h; sourceTree = "<group>"; };
 		1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfoCollection.cpp; path = ../../moses/src/AlignmentInfoCollection.cpp; sourceTree = "<group>"; };
@@ -695,6 +703,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EC32DB115D2D67A00A313B1 /* WordLattice2.cpp */,
+				1EC32DB215D2D67A00A313B1 /* WordLattice2.h */,
 				1E6D9FF015D027680064D436 /* CompactPT */,
 				1ECF13DE15C1A82400EA1DCE /* fuzzy-match */,
 				1EDA803514D19ECD003D2191 /* Scope3Parser */,
@@ -924,6 +934,8 @@
 		1E6D9FF015D027680064D436 /* CompactPT */ = {
 			isa = PBXGroup;
 			children = (
+				1EC32DB615D2D90700A313B1 /* ThrowingFwrite.cpp */,
+				1EC32DB715D2D90700A313B1 /* ThrowingFwrite.h */,
 				1E6D9FBD15D027560064D436 /* BlockHashIndex.cpp */,
 				1E6D9FBE15D027560064D436 /* BlockHashIndex.h */,
 				1E6D9FBF15D027560064D436 /* CanonicalHuffman.h */,
@@ -1293,6 +1305,8 @@
 				1E6D9FEC15D027560064D436 /* PhraseTableCreator.h in Headers */,
 				1E6D9FED15D027560064D436 /* StringVector.h in Headers */,
 				1E6D9FEE15D027560064D436 /* TargetPhraseCollectionCache.h in Headers */,
+				1EC32DB415D2D67A00A313B1 /* WordLattice2.h in Headers */,
+				1EC32DB915D2D90700A313B1 /* ThrowingFwrite.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1492,6 +1506,8 @@
 				1E6D9FE715D027560064D436 /* PhraseDecoder.cpp in Sources */,
 				1E6D9FE915D027560064D436 /* PhraseDictionaryCompact.cpp in Sources */,
 				1E6D9FEB15D027560064D436 /* PhraseTableCreator.cpp in Sources */,
+				1EC32DB315D2D67A00A313B1 /* WordLattice2.cpp in Sources */,
+				1EC32DB815D2D90700A313B1 /* ThrowingFwrite.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
