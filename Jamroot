@@ -31,6 +31,7 @@
 #--includedir=/path/to/prefix/include installs headers.  
 #  Does not install if missing.  No argument defaults to PREFIX/include .
 #--install-scripts=/path/to/scripts copies scripts into a directory.
+#  Does not install if missing.  No argument defaults to PREFIX/scripts .
 #--git appends the git revision to the prefix directory.
 #
 #

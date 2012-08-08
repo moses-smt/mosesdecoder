@@ -3,16 +3,17 @@ import option path ;
 
 build-project training ;
 
+prefix = [ option.get "prefix" ] ;
+if $(prefix) {
+  prefix = [ path.root $(prefix) [ path.pwd ] ] ;
+  location = [ option.get "install-scripts" : : $(prefix)$(GITTAG)/scripts ] ;
+} else {
+  location = [ option.get "install-scripts" ] ;
+}
 
-location = [ option.get "install-scripts" ] ;
 if $(location) {
   location = [ path.root $(location) [ path.pwd ] ] ;
   location = $(location)$(GITTAG) ;
-} else {
-  prefix = [ option.get "prefix" ] ;
-  if $(prefix) {
-     location = $(prefix)$(GITTAG)/scripts ;
-  }
 }
 
 if $(location) {
