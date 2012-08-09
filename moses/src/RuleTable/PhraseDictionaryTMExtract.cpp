@@ -108,7 +108,7 @@ namespace Moses
     InputFileStream inStream(ptFileName);
     
     // copied from class LoaderStandard
-    PrintUserTime("Start loading new format pt model");
+    PrintUserTime("Start loading fuzzy-match phrase model");
     
     const StaticData &staticData = StaticData::Instance();
     const std::string& factorDelimiter = staticData.GetFactorDelimiter();
