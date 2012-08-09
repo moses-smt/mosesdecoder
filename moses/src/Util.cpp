@@ -58,20 +58,6 @@ string GetTempFolder()
 #endif
 }
 
-void CreateTempFile(ofstream  &fileStream, string &filePath)
-{
-#ifdef _WIN32
-  char buffer[BUFSIZ];
-  ::GetTempFileNameA(GetTempFolder().c_str(), "", 0, buffer);
-  filePath = buffer;
-#else
-  util::TempMaker tempFile("moses");
-  tempFile.MakeFile(&filePath);
-#endif
-  fileStream.open(filePath.c_str(), ofstream::out | ofstream::app);
-}
-
-
 const std::string ToLower(const std::string& str)
 {
   std::string lc(str);

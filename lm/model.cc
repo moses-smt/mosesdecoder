@@ -61,7 +61,7 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
     // File counts do not include pruned trigrams that extend to quadgrams etc.   These will be fixed by search_.
     ReadARPACounts(f, counts);
 
-    if (counts.size() > kMaxOrder) UTIL_THROW(FormatLoadException, "This model has order " << counts.size() << ".  Edit lm/max_order.hh, set kMaxOrder to at least this value, and recompile.");
+    if (counts.size() > KENLM_MAX_ORDER) UTIL_THROW(FormatLoadException, "This model has order " << counts.size() << ".  Re-compile, passing a number at least this large to bjam's --max-kenlm-order flag.");
     if (counts.size() < 2) UTIL_THROW(FormatLoadException, "This ngram implementation assumes at least a bigram model.");
     if (config.probing_multiplier <= 1.0) UTIL_THROW(ConfigException, "probing multiplier must be > 1.0");
 
