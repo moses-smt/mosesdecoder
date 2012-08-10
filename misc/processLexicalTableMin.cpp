@@ -1,6 +1,10 @@
 #include <iostream>
 #include <string>
 
+#ifdef WITH_THREADS
+#include <boost/thread/thread.hpp>
+#endif
+
 #include "CompactPT/LexicalReorderingTableCreator.h"
 
 using namespace Moses;
@@ -12,7 +16,7 @@ void printHelp(char **argv)
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
 #ifdef WITH_THREADS
-            "\t-threads int      -- number of threads used for conversion\n"
+            "\t-threads int|all  -- number of threads used for conversion\n"
 #endif 
             "\n  advanced:\n"
             "\t-landmark int     -- use landmark phrase every 2^n phrases\n"
@@ -20,7 +24,6 @@ void printHelp(char **argv)
             "\t-join-scores      -- single set of Huffman codes for score components\n"
             "\t-quantize int     -- maximum number of scores per score component\n"
             "\n"
-            
             "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc6\n\n"
             "  If you use this please cite:\n\n"
             "  @article { junczys_pbml98_2012,\n"
@@ -34,7 +37,6 @@ void printHelp(char **argv)
             "  }\n\n"
             "  Acknowledgments: Part of this research was carried out at and funded by\n"
             "  the World Intellectual Property Organization (WIPO) in Geneva.\n\n";
-
 }
 
 int main(int argc, char** argv)
@@ -94,7 +96,15 @@ int main(int argc, char** argv)
     {
 #ifdef WITH_THREADS
       ++i;
-      threads = atoi(argv[i]);
+      if(std::string(argv[i]) == "all") {
+        threads = boost::thread::hardware_concurrency();
+        if(!threads) {
+          std::cerr << "Could not determine number of hardware threads, setting to 1" << std::endl;
+          threads = 1;
+        }  
+      }
+      else
+        threads = atoi(argv[i]);
 #else
       std::cerr << "Thread support not compiled in" << std::endl;
       exit(1);
