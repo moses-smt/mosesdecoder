@@ -22,7 +22,6 @@
 #include "RuleTable/PhraseDictionaryTMExtract.h"
 #include "InputType.h"
 #include "ChartTranslationOptionList.h"
-#include "CellCollection.h"
 #include "DotChartInMemory.h"
 #include "StaticData.h"
 #include "NonTerminal.h"

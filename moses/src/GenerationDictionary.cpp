@@ -125,7 +125,7 @@ size_t GenerationDictionary::GetNumScoreComponents() const
 
 std::string GenerationDictionary::GetScoreProducerDescription(unsigned) const
 {
-  return "Generation score,file=" + m_filePath;
+  return "GenerationScore,file=" + m_filePath;
 }
 
 std::string GenerationDictionary::GetScoreProducerWeightShortName(unsigned) const

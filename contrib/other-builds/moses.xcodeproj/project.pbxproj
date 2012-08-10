@@ -58,7 +58,6 @@
 		1EC7374B14B977AB00238410 /* BilingualDynSuffixArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735D814B977AA00238410 /* BilingualDynSuffixArray.h */; };
 		1EC7374C14B977AB00238410 /* BitmapContainer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D914B977AA00238410 /* BitmapContainer.cpp */; };
 		1EC7374D14B977AB00238410 /* BitmapContainer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735DA14B977AA00238410 /* BitmapContainer.h */; };
-		1EC7374E14B977AB00238410 /* CellCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735DB14B977AA00238410 /* CellCollection.h */; };
 		1EC7374F14B977AB00238410 /* ChartCell.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735DC14B977AA00238410 /* ChartCell.cpp */; };
 		1EC7375014B977AB00238410 /* ChartCell.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735DD14B977AA00238410 /* ChartCell.h */; };
 		1EC7375114B977AB00238410 /* ChartCellCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735DE14B977AA00238410 /* ChartCellCollection.cpp */; };
@@ -391,7 +390,6 @@
 		1EC735D814B977AA00238410 /* BilingualDynSuffixArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BilingualDynSuffixArray.h; path = ../../moses/src/BilingualDynSuffixArray.h; sourceTree = "<group>"; };
 		1EC735D914B977AA00238410 /* BitmapContainer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BitmapContainer.cpp; path = ../../moses/src/BitmapContainer.cpp; sourceTree = "<group>"; };
 		1EC735DA14B977AA00238410 /* BitmapContainer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BitmapContainer.h; path = ../../moses/src/BitmapContainer.h; sourceTree = "<group>"; };
-		1EC735DB14B977AA00238410 /* CellCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CellCollection.h; path = ../../moses/src/CellCollection.h; sourceTree = "<group>"; };
 		1EC735DC14B977AA00238410 /* ChartCell.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCell.cpp; path = ../../moses/src/ChartCell.cpp; sourceTree = "<group>"; };
 		1EC735DD14B977AA00238410 /* ChartCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartCell.h; path = ../../moses/src/ChartCell.h; sourceTree = "<group>"; };
 		1EC735DE14B977AA00238410 /* ChartCellCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartCellCollection.cpp; path = ../../moses/src/ChartCellCollection.cpp; sourceTree = "<group>"; };
@@ -714,7 +712,6 @@
 				1EC735D814B977AA00238410 /* BilingualDynSuffixArray.h */,
 				1EC735D914B977AA00238410 /* BitmapContainer.cpp */,
 				1EC735DA14B977AA00238410 /* BitmapContainer.h */,
-				1EC735DB14B977AA00238410 /* CellCollection.h */,
 				1EC735DC14B977AA00238410 /* ChartCell.cpp */,
 				1EC735DD14B977AA00238410 /* ChartCell.h */,
 				1EC735DE14B977AA00238410 /* ChartCellCollection.cpp */,
@@ -1119,7 +1116,6 @@
 				1EC7374914B977AB00238410 /* AlignmentInfoCollection.h in Headers */,
 				1EC7374B14B977AB00238410 /* BilingualDynSuffixArray.h in Headers */,
 				1EC7374D14B977AB00238410 /* BitmapContainer.h in Headers */,
-				1EC7374E14B977AB00238410 /* CellCollection.h in Headers */,
 				1EC7375014B977AB00238410 /* ChartCell.h in Headers */,
 				1EC7375214B977AB00238410 /* ChartCellCollection.h in Headers */,
 				1EC7375314B977AB00238410 /* ChartCellLabel.h in Headers */,

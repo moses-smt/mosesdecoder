@@ -31,7 +31,7 @@ LexicalReorderingTableCompact::LexicalReorderingTableCompact(
   : LexicalReorderingTable(f_factors, e_factors, c_factors),
   m_inMemory(StaticData::Instance().UseMinlexrInMemory()),
   m_numScoreComponent(6), m_multipleScoreTrees(true),
-  m_hash(10, 16), m_scoreTrees(1, NULL)
+  m_hash(10, 16), m_scoreTrees(1)
 {
   Load(filePath);
 }
@@ -43,7 +43,7 @@ LexicalReorderingTableCompact::LexicalReorderingTableCompact(
   : LexicalReorderingTable(f_factors, e_factors, c_factors),
   m_inMemory(StaticData::Instance().UseMinlexrInMemory()),
   m_numScoreComponent(6), m_multipleScoreTrees(true),
-  m_hash(10, 16), m_scoreTrees(1, NULL)
+  m_hash(10, 16), m_scoreTrees(1)
 { }
 
 LexicalReorderingTableCompact::~LexicalReorderingTableCompact() {
