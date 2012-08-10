@@ -39,6 +39,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LMList.h"
 #include "TranslationOptionCollection.h"
 #include "DummyScoreProducers.h"
+#include "Timer.h"
+
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
 #include "rule.pb.h"
@@ -48,11 +50,11 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
-  :m_system(system)
+Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
+  :m_lineNumber(lineNumber)
+  ,m_system(system)
   ,m_transOptColl(source.CreateTranslationOptionCollection(system))
   ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
-  ,m_start(clock())
   ,interrupted_flag(0)
   ,m_hypoId(0)
   ,m_source(source)
@@ -66,12 +68,6 @@ Manager::~Manager()
   delete m_search;
 
   m_system->CleanUpAfterSentenceProcessing(m_source);
-
-  clock_t end = clock();
-  float et = (end - m_start);
-  et /= (float)CLOCKS_PER_SEC;
-  VERBOSE(1, "Translation took " << et << " seconds" << endl);
-  VERBOSE(1, "Finished translating" << endl);
 }
 
 /**
@@ -85,20 +81,23 @@ void Manager::ProcessSentence()
 
   // collect translation options for this sentence
   m_system->InitializeBeforeSentenceProcessing(m_source);
+  
+  Timer getOptionsTime;
+  getOptionsTime.start();
   m_transOptColl->CreateTranslationOptions();
+  VERBOSE(1, "Line "<< m_lineNumber << ": Collecting options took " << getOptionsTime << " seconds" << endl);
 
   // some reporting on how long this took
-  clock_t gotOptions = clock();
-  float et = (gotOptions - m_start);
   IFVERBOSE(2) {
-    GetSentenceStats().AddTimeCollectOpts( gotOptions - m_start );
+    // TODO: XXX: Hack: SentenceStats.h currently requires all values to be of type clock_t
+    GetSentenceStats().AddTimeCollectOpts((clock_t) (getOptionsTime.get_elapsed_time() * CLOCKS_PER_SEC));
   }
-  et /= (float)CLOCKS_PER_SEC;
-  VERBOSE(1, "Collecting options took " << et << " seconds" << endl);
 
   // search for best translation with the specified algorithm
+  Timer searchTime;
+  searchTime.start();
   m_search->ProcessSentence();
-  VERBOSE(1, "Search took " << ((clock()-m_start)/(float)CLOCKS_PER_SEC) << " seconds" << endl);
+  VERBOSE(1, "Line " << m_lineNumber << ": Search took " << searchTime << " seconds" << endl);
 }
 
 /**

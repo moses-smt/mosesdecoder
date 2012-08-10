@@ -192,7 +192,8 @@ public:
           staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
+	size_t lineNumber = 0; // TODO: Include sentence request number here?
+        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 

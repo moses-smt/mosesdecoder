@@ -186,6 +186,9 @@ protected:
   void AddDeletedWords(const Hypothesis& hypo);
 
   //hypotheses
+  // TODO: Move away from clock_t in favor of just storing doubles of the number of seconds
+  // since clock seconds aren't reliable in a multi-threaded environment -Jon
+  // (see Manager.cpp for some initial work moving in this direction)
   std::vector<RecombinationInfo> m_recombinationInfos;
   unsigned int m_numHyposCreated;
   unsigned int m_numHyposPruned;
