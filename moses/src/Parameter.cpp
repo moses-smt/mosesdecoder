@@ -344,6 +344,8 @@ bool Parameter::Validate()
     ext.push_back(".gz");
     //prefix tree format
     ext.push_back(".binlexr.idx");
+    //prefix tree format
+    ext.push_back(".minlexr");
     noErrorFlag = FilesExist("distortion-file", 3, ext);
   }
   return noErrorFlag;
