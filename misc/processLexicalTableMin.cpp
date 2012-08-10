@@ -50,7 +50,7 @@ int main(int argc, char** argv)
   size_t quantize = 0;
 
 #ifdef WITH_THREADS
-  size_t threads = 2;
+  size_t threads = 1;
 #endif   
 
   if(1 >= argc)
