@@ -238,7 +238,7 @@ std::string LexicalReorderingTableCreator::CompressEncodedScores(std::string &en
   encodedScoresStream.unsetf(std::ios::skipws);
   
   std::string compressedScores;
-  BitStream<> compressedScoresStream(compressedScores);
+  BitWrapper<> compressedScoresStream(compressedScores);
   
   size_t currScore = 0;
   float score;
@@ -250,7 +250,7 @@ std::string LexicalReorderingTableCreator::CompressEncodedScores(std::string &en
     if(m_quantize)
       score = m_scoreCounters[index]->LowerBound(score);
     
-    compressedScoresStream.PutCode(m_scoreTrees[index]->Encode(score));
+    m_scoreTrees[index]->Put(compressedScoresStream, score);
     encodedScoresStream.read((char*) &score, sizeof(score));
     currScore++;
   }

@@ -142,7 +142,7 @@ class PhraseDecoder
                                                        bool topLevel = false);
     
     TargetPhraseVectorPtr DecodeCollection(TargetPhraseVectorPtr tpv,
-                                           BitStream<> &encodedBitStream,
+                                           BitWrapper<> &encodedBitStream,
                                            const Phrase &sourcePhrase,
                                            bool topLevel);
     

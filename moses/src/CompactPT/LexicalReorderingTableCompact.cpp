@@ -76,9 +76,9 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
     else
       scoresString = m_scoresMapped[index];
       
-    BitStream<> bitStream(scoresString);
+    BitWrapper<> bitStream(scoresString);
     for(size_t i = 0; i < m_numScoreComponent; i++)
-      scores.push_back(m_scoreTrees[m_multipleScoreTrees ? i : 0]->NextSymbol(bitStream));
+      scores.push_back(m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream));
 
     return scores;
   }
