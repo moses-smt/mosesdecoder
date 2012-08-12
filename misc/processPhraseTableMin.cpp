@@ -1,4 +1,9 @@
 #include <iostream>
+
+#ifdef WITH_THREADS
+#include <boost/thread/thread.hpp>
+#endif 
+
 #include "TypeDef.h"
 #include "CompactPT/PhraseTableCreator.h"
 
@@ -12,7 +17,7 @@ void printHelp(char **argv) {
             "\t-nscores int      -- number of score components in phrase table\n"
             "\t-alignment-info   -- include alignment info in the binary phrase table\n"
 #ifdef WITH_THREADS
-            "\t-threads int      -- number of threads used for conversion\n"
+            "\t-threads int|all  -- number of threads used for conversion\n"
 #endif 
             "\n  advanced:\n"
             "\t-encoding string  -- encoding type: PREnc REnc None (default PREnc)\n"
@@ -24,7 +29,6 @@ void printHelp(char **argv) {
             "\t-quantize int     -- maximum number of scores per score component\n"
             "\t-no-warnings      -- suppress warnings about missing alignment data\n"
             "\n"
-            
             "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc6\n\n"
             "  If you use this please cite:\n\n"
             "  @article { junczys_pbml98_2012,\n"
@@ -38,7 +42,6 @@ void printHelp(char **argv) {
             "  }\n\n"
             "  Acknowledgments: Part of this research was carried out at and funded by\n"
             "  the World Intellectual Property Organization (WIPO) in Geneva.\n\n";
-
 }
 
 
@@ -124,14 +127,22 @@ int main(int argc, char **argv) {
     else if("-threads" == arg && i+1 < argc) {
 #ifdef WITH_THREADS
       ++i;
-      threads = atoi(argv[i]);
+      if(std::string(argv[i]) == "all") {
+        threads = boost::thread::hardware_concurrency();
+        if(!threads) {
+          std::cerr << "Could not determine number of hardware threads, setting to 1" << std::endl;
+          threads = 1;
+        }  
+      }
+      else
+        threads = atoi(argv[i]);
 #else
       std::cerr << "Thread support not compiled in" << std::endl;
       exit(1);
 #endif
     }
     else {
-      //somethings wrong... print help
+      //something's wrong... print help
       printHelp(argv);
       return 1;
     }

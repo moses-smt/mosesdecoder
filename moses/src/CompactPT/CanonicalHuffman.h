@@ -3,17 +3,17 @@
 /***********************************************************************                                                              
 Moses - factored phrase-based language decoder                                                                                        
 Copyright (C) 2006 University of Edinburgh                                                                                            
-                                                                                                                                      
+
 This library is free software; you can redistribute it and/or                                                                         
 modify it under the terms of the GNU Lesser General Public                                                                            
 License as published by the Free Software Foundation; either                                                                          
 version 2.1 of the License, or (at your option) any later version.                                                                    
-                                                                                                                                      
+
 This library is distributed in the hope that it will be useful,                                                                       
 but WITHOUT ANY WARRANTY; without even the implied warranty of                                                                        
 MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU                                                                     
 Lesser General Public License for more details.                                                                                       
-                                                                                                                                      
+
 You should have received a copy of the GNU Lesser General Public                                                                      
 License along with this library; if not, write to the Free Software                                                                   
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA                                                        
@@ -31,15 +31,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses {
 
-template<typename PosType, typename DataType> class Hufftree;
-
-template <typename Data, typename Code = size_t>
+template <typename Data>
 class CanonicalHuffman
 {
   private:
-    std::vector<Data> m_symbols;
-    
-    std::vector<Code> m_firstCodes;
+    std::vector<Data> m_symbols;    
+    std::vector<size_t> m_firstCodes;
     std::vector<size_t> m_lengthIndex;
     
     typedef boost::unordered_map<Data, boost::dynamic_bitset<> > EncodeMap;
@@ -110,7 +107,6 @@ class CanonicalHuffman
         lengths[i] = A[i + n];
     }
 
-
     void CalcCodes(std::vector<size_t>& lengths)
     {
       std::vector<size_t> numLength;
@@ -152,16 +148,39 @@ class CanonicalHuffman
       m_symbols.swap(t_symbols);
     }
     
-  public:
-
-    CanonicalHuffman(std::FILE* pFile, bool forEncoding = false)
+    void CreateCodeMap()
     {
-      Load(pFile);
-      
-      if(forEncoding)
-        CreateCodeMap();
+      for(size_t l = 1; l < m_lengthIndex.size(); l++)
+      {
+        size_t intCode = m_firstCodes[l];
+        size_t num = ((l+1 < m_lengthIndex.size()) ? m_lengthIndex[l+1]
+                      : m_symbols.size()) - m_lengthIndex[l];
+        
+        for(size_t i = 0; i < num; i++)
+        {
+          Data data = m_symbols[m_lengthIndex[l] + i];  
+          boost::dynamic_bitset<> bitCode(l, intCode);
+          m_encodeMap[data] = bitCode;  
+          intCode++;
+        }
+      }
     }
     
+    boost::dynamic_bitset<>& Encode(Data data)
+    {
+      assert(forEncoding);
+      return m_encodeMap[data];
+    }
+    
+    template <class BitWrapper>
+    void PutCode(BitWrapper& bitWrapper, boost::dynamic_bitset<>& code)
+    {
+      for(int j = code.size()-1; j >= 0; j--)
+        bitWrapper.Put(code[j]);
+    }
+    
+  public:
+
     template <class Iterator>
     CanonicalHuffman(Iterator begin, Iterator end, bool forEncoding = true)
     {
@@ -173,45 +192,32 @@ class CanonicalHuffman
         CreateCodeMap();
     }
     
-    void CreateCodeMap()
+    CanonicalHuffman(std::FILE* pFile, bool forEncoding = false)
     {
-      for(size_t l = 1; l < m_lengthIndex.size(); l++)
-      {
-        Code code = m_firstCodes[l];
-        size_t num = ((l+1 < m_lengthIndex.size()) ? m_lengthIndex[l+1]
-                      : m_symbols.size()) - m_lengthIndex[l];
+      Load(pFile);
+      
+      if(forEncoding)
+        CreateCodeMap();
+    }
         
-        for(size_t i = 0; i < num; i++)
-        {
-          Data data = m_symbols[m_lengthIndex[l] + i];  
-          boost::dynamic_bitset<> bitCode(l, code);
-          m_encodeMap[data] = bitCode;  
-          code++;
-        }
-      }
+    template <class BitWrapper>
+    void Put(BitWrapper& bitWrapper, Data data)
+    {
+      PutCode(bitWrapper, Encode(data));
     }
     
-    boost::dynamic_bitset<>& Encode(Data data)
+    template <class BitWrapper>
+    Data Read(BitWrapper& bitWrapper)
     {
-      return m_encodeMap[data];
-    }
-    
-    template <class BitStream>
-    Data NextSymbol(BitStream& bitStream)
-    {
-      if(bitStream.RemainingBits())
+      if(bitWrapper.TellFromEnd())
       {
-        Code code = bitStream.GetNext();
-        size_t length = 1;
-        while(code < m_firstCodes[length])
-        {
-          code = 2 * code + bitStream.GetNext();
-          length++;
+        size_t intCode = bitWrapper.Read();
+        size_t len = 1;
+        while(intCode < m_firstCodes[len]) {
+          intCode = 2 * intCode + bitWrapper.Read();
+          len++;
         }
-        
-        size_t symbolIndex = m_lengthIndex[length]
-                             + (code - m_firstCodes[length]);  
-        return m_symbols[symbolIndex];
+        return m_symbols[m_lengthIndex[len] + (intCode - m_firstCodes[len])];
       }   
       return Data();
     }
@@ -228,7 +234,7 @@ class CanonicalHuffman
       
       read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_firstCodes.resize(size);
-      read += std::fread(&m_firstCodes[0], sizeof(Code), size, pFile);
+      read += std::fread(&m_firstCodes[0], sizeof(size_t), size, pFile);
       
       read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_lengthIndex.resize(size);
@@ -247,7 +253,7 @@ class CanonicalHuffman
       
       size = m_firstCodes.size();
       ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
-      ThrowingFwrite(&m_firstCodes[0], sizeof(Code), size, pFile);
+      ThrowingFwrite(&m_firstCodes[0], sizeof(size_t), size, pFile);
       
       size = m_lengthIndex.size();
       ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
@@ -255,11 +261,10 @@ class CanonicalHuffman
       
       return std::ftell(pFile) - start;
     }
-    
 };
 
 template <class Container = std::string>
-class BitStream
+class BitWrapper
 {
   private:
     Container& m_data;
@@ -273,65 +278,65 @@ class BitStream
     
   public:
     
-    BitStream(Container &data)
+    BitWrapper(Container &data)
     : m_data(data), m_iterator(m_data.begin()), m_currentValue(0),
       m_valueBits(sizeof(typename Container::value_type) * 8),
       m_mask(1), m_bitPos(0) { }
     
-    size_t RemainingBits()
+    bool Read()
+    {
+      if(m_bitPos % m_valueBits == 0)
+      {
+        if(m_iterator != m_data.end())
+          m_currentValue = *m_iterator++;
+      }
+      else
+        m_currentValue = m_currentValue >> 1;
+      
+      m_bitPos++;
+      return (m_currentValue & m_mask);
+    }
+    
+    void Put(bool bit) {
+      if(m_bitPos % m_valueBits == 0)
+         m_data.push_back(0);
+        
+      if(bit)
+        m_data[m_data.size()-1] |= m_mask << (m_bitPos % m_valueBits);
+    
+      m_bitPos++;
+    }
+    
+    size_t Tell()
+    {
+      return m_bitPos;
+    }
+    
+    size_t TellFromEnd()
     {
       if(m_data.size() * m_valueBits < m_bitPos)
         return 0;
       return m_data.size() * m_valueBits - m_bitPos;
     }
     
-    void SetLeft(size_t bitPos)
+    void Seek(size_t bitPos)
     {
-      m_bitPos = m_data.size() * m_valueBits - bitPos;
+      m_bitPos = bitPos;
       m_iterator = m_data.begin() + int((m_bitPos-1)/m_valueBits);
       m_currentValue = (*m_iterator) >> ((m_bitPos-1) % m_valueBits);
       m_iterator++;
     }
     
-    bool GetNext()
+    void SeekFromEnd(size_t bitPosFromEnd)
     {
-      if(m_bitPos % m_valueBits == 0)
-      {
-        if(m_iterator != m_data.end())
-        {
-          m_currentValue = *m_iterator++;
-        }
-      }
-      else
-      {
-        m_currentValue = m_currentValue >> 1;
-      } 
-      
-      m_bitPos++;
-      return (m_currentValue & m_mask);
-    }
-    
-    void PutCode(boost::dynamic_bitset<> code)
-    {
-      
-      for(int j = code.size()-1; j >= 0; j--)
-      {    
-        if(m_bitPos % m_valueBits == 0)
-        {
-          m_data.push_back(0);
-        }
-        
-        if(code[j])
-          m_data[m_data.size()-1] |= m_mask << (m_bitPos % m_valueBits);
-      
-        m_bitPos++;
-      }
-      
+      size_t bitPos = m_data.size() * m_valueBits - bitPosFromEnd;
+      Seek(bitPos);
     }
     
     void Reset()
     {
       m_iterator = m_data.begin();
+      m_currentValue = 0;
       m_bitPos = 0;
     }
     

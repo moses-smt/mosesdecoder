@@ -771,8 +771,8 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
   std::stringstream encodedStream(encodedCollection);
   encodedStream.unsetf(std::ios::skipws);
   
-  std::string output;
-  BitStream<> bitstream(output);
+  std::string compressedEncodedCollection;
+  BitWrapper<> bitStream(compressedEncodedCollection);
 
   unsigned symbol;
   float score;
@@ -810,7 +810,7 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
       
       case EncodeSymbol:
         state = (symbol == phraseStopSymbolId) ? ReadScore : ReadSymbol;
-        bitstream.PutCode(m_symbolTree->Encode(symbol));
+        m_symbolTree->Put(bitStream, symbol);
         break;
       case EncodeScore:
         {
@@ -818,17 +818,17 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
           size_t idx = m_multipleScoreTrees ? currScore-1 : 0;
           if(m_quantize)
             score = m_scoreCounters[idx]->LowerBound(score);
-          bitstream.PutCode(m_scoreTrees[idx]->Encode(score));
+          m_scoreTrees[idx]->Put(bitStream, score);
         }
         break;
       case EncodeAlignment:
         state = (alignPoint == alignStopSymbol) ? ReadSymbol : ReadAlignment;
-        bitstream.PutCode(m_alignTree->Encode(alignPoint));
+        m_alignTree->Put(bitStream, alignPoint);
         break;
     }
   }
   
-  return output;
+  return compressedEncodedCollection;
 }
 
 void PhraseTableCreator::AddRankedLine(PackedItem& pi)
