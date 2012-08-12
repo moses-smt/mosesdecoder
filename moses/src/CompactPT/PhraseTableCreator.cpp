@@ -481,14 +481,12 @@ unsigned PhraseTableCreator::EncodeREncSymbol3(unsigned rank)
 
 unsigned PhraseTableCreator::EncodePREncSymbol1(unsigned trgIdx)
 {
-  std::cerr << "Symbol1: " << trgIdx << std::endl;
   assert((~(1 << 31)) > trgIdx);
   return trgIdx;
 }
 
 unsigned PhraseTableCreator::EncodePREncSymbol2(int left, int right, unsigned rank)
 {
-  std::cerr << "Symbol2: " << left << " " << right << " " << rank << std::endl;
   // "left" and "right" must be smaller than 2^5
   // "rank" must be smaller than 2^19  
   left  = left  + 32;
@@ -664,8 +662,6 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
   unsigned encodedSymbol = EncodePREncSymbol1(stopSymbolId);
   os.write((char*)&encodedSymbol, sizeof(encodedSymbol));
   m_symbolCounter.Increase(encodedSymbol);
-  
-  std::cerr << "New" << std::endl;
 }
 
 void PhraseTableCreator::EncodeScores(std::vector<float>& scores, std::ostream& os)
