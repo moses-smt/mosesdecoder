@@ -78,8 +78,6 @@ class VarIntType
       output |= temp;
       it++;
     }
-    
-    
 
   public:
         
@@ -92,8 +90,7 @@ class VarIntType
         it++;
       }
     }
-    
-    
+        
     template <typename InIt, typename OutIt>
     static void Decode(InIt &it, InIt end, OutIt outIt)
     {

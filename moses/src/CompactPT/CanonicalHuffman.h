@@ -168,7 +168,6 @@ class CanonicalHuffman
     
     boost::dynamic_bitset<>& Encode(Data data)
     {
-      assert(forEncoding);
       return m_encodeMap[data];
     }
     
