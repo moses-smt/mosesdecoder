@@ -361,6 +361,8 @@ class PhraseTableCreator
 #endif
                       );
     
+    ~PhraseTableCreator();
+    
     friend class RankingTask;
     friend class EncodingTask;
     friend class CompressionTask;

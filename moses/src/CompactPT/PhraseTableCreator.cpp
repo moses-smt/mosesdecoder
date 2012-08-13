@@ -124,7 +124,17 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   std::cerr << "Done" << std::endl;
   std::fclose(m_outFile);
 }
-    
+
+PhraseTableCreator::~PhraseTableCreator()
+{
+  delete m_symbolTree;
+  delete m_alignTree; 
+  for(size_t i = 0; i < m_scoreTrees.size(); i++) {
+    delete m_scoreTrees[i];
+    delete m_scoreCounters[i];
+  }
+}
+
 void PhraseTableCreator::PrintInfo()
 {
   std::string encodings[3] = {"Huffman", "Huffman + REnc", "Huffman + PREnc"};

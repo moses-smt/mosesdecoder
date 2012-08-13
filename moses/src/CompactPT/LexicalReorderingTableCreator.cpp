@@ -89,6 +89,15 @@ void LexicalReorderingTableCreator::PrintInfo()
   std::cerr << std::endl;
 }
 
+LexicalReorderingTableCreator::~LexicalReorderingTableCreator()
+{
+  for(size_t i = 0; i < m_scoreTrees.size(); i++) {
+    delete m_scoreTrees[i];
+    delete m_scoreCounters[i];
+  }
+}
+
+
 void LexicalReorderingTableCreator::EncodeScores()
 {
   InputFileStream inFile(m_inPath);

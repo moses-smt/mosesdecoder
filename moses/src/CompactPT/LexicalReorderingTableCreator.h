@@ -94,6 +94,8 @@ class LexicalReorderingTableCreator {
 #endif   
                                   );
     
+    ~LexicalReorderingTableCreator();
+    
   friend class EncodingTaskReordering;
   friend class CompressionTaskReordering;
 };
