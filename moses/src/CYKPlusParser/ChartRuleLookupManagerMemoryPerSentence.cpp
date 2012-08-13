@@ -19,7 +19,7 @@
 
 #include "ChartRuleLookupManagerMemoryPerSentence.h"
 
-#include "RuleTable/PhraseDictionaryTMExtract.h"
+#include "RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "InputType.h"
 #include "ChartTranslationOptionList.h"
 #include "DotChartInMemory.h"
@@ -33,7 +33,7 @@ namespace Moses
 ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence(
   const InputType &src,
   const ChartCellCollection &cellColl,
-  const PhraseDictionaryTMExtract &ruleTable)
+  const PhraseDictionaryFuzzyMatch &ruleTable)
   : ChartRuleLookupManagerCYKPlus(src, cellColl)
   , m_ruleTable(ruleTable)
 {

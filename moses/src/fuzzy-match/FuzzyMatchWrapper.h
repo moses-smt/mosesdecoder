@@ -1,13 +1,13 @@
 //
-//  TMMTWrapper.h
+//  FuzzyMatchWrapper.h
 //  moses
 //
 //  Created by Hieu Hoang on 26/07/2012.
 //  Copyright 2012 __MyCompanyName__. All rights reserved.
 //
 
-#ifndef moses_TMMTWrapper_h
-#define moses_TMMTWrapper_h
+#ifndef moses_FuzzyMatchWrapper_h
+#define moses_FuzzyMatchWrapper_h
 
 #include <fstream>
 #include <string>
@@ -20,10 +20,10 @@ namespace tmmt
 class Match;
 class SentenceAlignment;
   
-class TMMTWrapper
+class FuzzyMatchWrapper
 {
 public:
-  TMMTWrapper(const std::string &source, const std::string &target, const std::string &alignment);
+  FuzzyMatchWrapper(const std::string &source, const std::string &target, const std::string &alignment);
 
   std::string Extract(const std::string &inputPath);
   

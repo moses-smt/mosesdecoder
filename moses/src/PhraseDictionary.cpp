@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "RuleTable/PhraseDictionarySCFG.h"
 #include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "RuleTable/PhraseDictionaryTMExtract.h"
+#include "RuleTable/PhraseDictionaryFuzzyMatch.h"
 
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
@@ -192,9 +192,9 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
-  } else if (m_implementation == TMExtract) {
+  } else if (m_implementation == FuzzyMatch) {
     
-    PhraseDictionaryTMExtract *dict = new PhraseDictionaryTMExtract(m_numScoreComponent, this);
+    PhraseDictionaryFuzzyMatch *dict = new PhraseDictionaryFuzzyMatch(m_numScoreComponent, this);
 
     bool ret = dict->Load(GetInput()
                           , GetOutput()

@@ -25,7 +25,7 @@
 #include "InputType.h"
 #include "NonTerminal.h"
 #include "RuleTable/Trie.h"
-#include "fuzzy-match/TMMTWrapper.h"
+#include "fuzzy-match/FuzzyMatchWrapper.h"
 
 namespace Moses
 {
@@ -34,13 +34,13 @@ namespace Moses
   /** Implementation of a SCFG rule table in a trie.  Looking up a rule of
    * length n symbols requires n look-ups to find the TargetPhraseCollection.
    */
-  class PhraseDictionaryTMExtract : public PhraseDictionary
+  class PhraseDictionaryFuzzyMatch : public PhraseDictionary
   {
-    friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryTMExtract&);
+    friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryFuzzyMatch&);
     friend class RuleTableLoader;
     
   public:
-    PhraseDictionaryTMExtract(size_t numScoreComponents,
+    PhraseDictionaryFuzzyMatch(size_t numScoreComponents,
                               PhraseDictionaryFeature* feature);
     bool Load(const std::vector<FactorType> &input
               , const std::vector<FactorType> &output
@@ -91,7 +91,7 @@ namespace Moses
     const WordPenaltyProducer *m_wpProducer;
     const std::vector<float> *m_weight;
     
-    tmmt::TMMTWrapper *m_tmmtWrapper;
+    tmmt::FuzzyMatchWrapper *m_FuzzyMatchWrapper;
 
   };
   

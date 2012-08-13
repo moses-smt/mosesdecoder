@@ -137,7 +137,7 @@ enum PhraseTableImplementation {
   ,SuffixArray	= 8
   ,Hiero        = 9
   ,ALSuffixArray = 10
-  ,TMExtract    = 11
+  ,FuzzyMatch    = 11
   ,Compact      = 12
 };
 
