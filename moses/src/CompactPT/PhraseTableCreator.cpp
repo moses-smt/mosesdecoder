@@ -128,7 +128,8 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
 PhraseTableCreator::~PhraseTableCreator()
 {
   delete m_symbolTree;
-  delete m_alignTree; 
+  if(m_useAlignmentInfo)
+    delete m_alignTree; 
   for(size_t i = 0; i < m_scoreTrees.size(); i++) {
     delete m_scoreTrees[i];
     delete m_scoreCounters[i];
