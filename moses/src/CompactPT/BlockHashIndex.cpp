@@ -95,12 +95,15 @@ size_t BlockHashIndex::GetFprint(const char* key) const
 
 size_t BlockHashIndex::GetHash(size_t i, const char* key)
 {
+#ifdef WITH_THREADS
+  boost::mutex::scoped_lock lock(m_mutex);
+#endif
   if(m_hashes[i] == 0)
     LoadRange(i);
-
 #ifdef HAVE_CMPH    
   size_t idx = cmph_search((cmph_t*)m_hashes[i], key, (cmph_uint32) strlen(key));
 #else
+  assert(0);
   size_t idx = 0;
 #endif
 
@@ -280,9 +283,6 @@ size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
 void BlockHashIndex::LoadRange(size_t i)
 {
 #ifdef HAVE_CMPH
-#ifdef WITH_THREADS
-  boost::mutex::scoped_lock lock(m_mutex);
-#endif
   std::fseek(m_fileHandle, m_fileHandleStart + m_seekIndex[i], SEEK_SET);
   cmph_t* hash = cmph_load(m_fileHandle);
   m_arrays[i] = new PairedPackedArray<>(0, m_orderBits,
@@ -325,9 +325,9 @@ void BlockHashIndex::KeepNLastRanges(float ratio, float tolerance)
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_mutex);
 #endif
-  
   size_t n = m_hashes.size() * ratio;
-  if(m_numLoadedRanges > size_t(n * (1 + tolerance)))
+  size_t max = n * (1 + tolerance);
+  if(m_numLoadedRanges > max)
   {
     typedef std::vector<std::pair<clock_t, size_t> > LastLoaded;
     LastLoaded lastLoaded;
