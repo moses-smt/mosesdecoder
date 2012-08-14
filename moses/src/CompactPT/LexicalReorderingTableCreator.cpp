@@ -72,7 +72,7 @@ void LexicalReorderingTableCreator::PrintInfo()
 {  
   std::cerr << "Used options:" << std::endl;
   std::cerr << "\tText reordering table will be read from: " << m_inPath << std::endl;
-  std::cerr << "\tOuput reordering table will be written to: " << m_outPath << std::endl;
+  std::cerr << "\tOutput reordering table will be written to: " << m_outPath << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tPhrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
   std::cerr << "\tNumber of score components in reordering table: " << m_numScoreComponent << std::endl;    
