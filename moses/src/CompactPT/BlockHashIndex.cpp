@@ -350,7 +350,6 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
   cmph_config_set_algo(config, CMPH_CHD);
             
   cmph_t* hash = cmph_new(config);
-  
   PairedPackedArray<> *pv =
     new PairedPackedArray<>(source->nkeys, m_orderBits, m_fingerPrintBits);
 
@@ -358,14 +357,15 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
   
   source->rewind(source->data);
   
-  std::string lastKey = ""; //m_landmarks.back();
+  std::string lastKey = "";
   while(i < source->nkeys)
   {
     unsigned keylen;
     char* key;
     source->read(source->data, &key, &keylen);
     std::string temp(key, keylen);
-    
+    source->dispose(source->data, key, keylen);
+  
     if(lastKey > temp) {
       std::cerr << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
       std::cerr << "1: " << lastKey << std::endl;
@@ -377,7 +377,7 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
     size_t fprint = GetFprint(temp.c_str());
     size_t idx = cmph_search(hash, temp.c_str(),
                              (cmph_uint32) temp.size());
-
+  
     pv->Set(idx, i, fprint, m_orderBits, m_fingerPrintBits);
     i++;
   }

@@ -142,7 +142,7 @@ void PhraseTableCreator::PrintInfo()
   
   std::cerr << "Used options:" << std::endl;
   std::cerr << "\tText phrase table will be read from: " << m_inPath << std::endl;
-  std::cerr << "\tOuput phrase table will be written to: " << m_outPath << std::endl;
+  std::cerr << "\tOutput phrase table will be written to: " << m_outPath << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tSource phrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
   std::cerr << "\tSelected target phrase encoding: " << encodings[m_coding] << std::endl;
@@ -868,8 +868,9 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
     {
       if(m_rankQueue.size()) {        
         m_lastFlushedSourceNum++;
-        if(m_lastFlushedSourceNum % 100000 == 0)
+        if(m_lastFlushedSourceNum % 100000 == 0) {
           std::cerr << ".";
+        }
         if(m_lastFlushedSourceNum % 5000000 == 0)
         {
           std::cerr << "[" << m_lastFlushedSourceNum << "]" << std::endl;
