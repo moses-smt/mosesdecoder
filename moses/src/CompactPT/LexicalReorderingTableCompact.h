@@ -29,9 +29,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"
 
-#include "CompactPT/BlockHashIndex.h"
-#include "CompactPT/CanonicalHuffman.h"
-#include "CompactPT/StringVector.h"
+#include "BlockHashIndex.h"
+#include "CanonicalHuffman.h"
+#include "StringVector.h"
 
 namespace Moses {
 

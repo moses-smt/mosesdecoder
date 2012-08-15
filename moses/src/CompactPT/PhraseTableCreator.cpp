@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdio>
 
 #include "PhraseTableCreator.h"
+#include "ConsistentPhrases.h"
 #include "ThrowingFwrite.h"
 
 namespace Moses
@@ -607,9 +608,9 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
   std::vector<unsigned> encodedSymbols(t.size());
   std::vector<unsigned> encodedSymbolsLengths(t.size(), 0);
   
-  ConsistantPhrases cp(s.size(), t.size(), a.begin(), a.end());
-  while(cp.Size()) {
-    ConsistantPhrases::Phrase p = cp.Pop();
+  ConsistentPhrases cp(s.size(), t.size(), a);
+  while(!cp.Empty()) {
+    ConsistentPhrases::Phrase p = cp.Pop();
     
     std::stringstream key1;
     key1 << s[p.i];
