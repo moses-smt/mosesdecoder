@@ -1,5 +1,5 @@
 //
-//  TMMTWrapper.cpp
+//  FuzzyMatchWrapper.cpp
 //  moses
 //
 //  Created by Hieu Hoang on 26/07/2012.
@@ -7,7 +7,7 @@
 //
 
 #include <iostream>
-#include "fuzzy-match/TMMTWrapper.h"
+#include "fuzzy-match/FuzzyMatchWrapper.h"
 #include "fuzzy-match/SentenceAlignment.h"
 #include "fuzzy-match/Vocabulary.h"
 #include "fuzzy-match/Match.h"
@@ -31,7 +31,7 @@ namespace tmmt
   map< WORD_ID,vector< int > > single_word_index;
 
 
-  TMMTWrapper::TMMTWrapper(const std::string &sourcePath, const std::string &targetPath, const std::string &alignmentPath)
+  FuzzyMatchWrapper::FuzzyMatchWrapper(const std::string &sourcePath, const std::string &targetPath, const std::string &alignmentPath)
   {
     // create suffix array
     //load_corpus(m_config[0], input);
@@ -45,31 +45,31 @@ namespace tmmt
 
   }
 
-  string TMMTWrapper::Extract(const string &inputPath)
+  string FuzzyMatchWrapper::Extract(const string &inputPath)
   {
     const Moses::StaticData &staticData = Moses::StaticData::Instance();
     
-    string tmExtractFile = ExtractTM(inputPath);
+    string fuzzyMatchFile = ExtractTM(inputPath);
     
     string cmd = string("perl ");
 #ifdef IS_XCODE
-    cmd += "/Users/hieuhoang/unison/workspace/github/hieuhoang/scripts/fuzzy-match/create_xml.perl " + tmExtractFile;
+    cmd += "/Users/hieuhoang/unison/workspace/github/hieuhoang/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
 #else
-    cmd += staticData.GetBinDirectory() +  "/../scripts/fuzzy-match/create_xml.perl " + tmExtractFile;
+    cmd += staticData.GetBinDirectory() +  "/../scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
 #endif
     cerr << cmd << endl;
     system(cmd.c_str());
     
-    remove(tmExtractFile.c_str());
-    remove((tmExtractFile + ".extract").c_str());
-    remove((tmExtractFile + ".extract.inv").c_str());
-    remove((tmExtractFile + ".extract.sorted.gz").c_str());
-    remove((tmExtractFile + ".extract.inv.sorted.gz").c_str());
+    remove(fuzzyMatchFile.c_str());
+    remove((fuzzyMatchFile + ".extract").c_str());
+    remove((fuzzyMatchFile + ".extract.inv").c_str());
+    remove((fuzzyMatchFile + ".extract.sorted.gz").c_str());
+    remove((fuzzyMatchFile + ".extract.inv.sorted.gz").c_str());
     
-    return tmExtractFile + ".pt.gz";
+    return fuzzyMatchFile + ".pt.gz";
   }
   
-  string TMMTWrapper::ExtractTM(const string &inputPath)
+  string FuzzyMatchWrapper::ExtractTM(const string &inputPath)
   {
     util::TempMaker tempFile("moses");
     util::scoped_fd alive;
@@ -396,7 +396,7 @@ namespace tmmt
     return outputFileName;
   }
 
-  void TMMTWrapper::load_corpus( const std::string &fileName, vector< vector< WORD_ID > > &corpus )
+  void FuzzyMatchWrapper::load_corpus( const std::string &fileName, vector< vector< WORD_ID > > &corpus )
   { // source 
     ifstream fileStream;
     fileStream.open(fileName.c_str());
@@ -417,7 +417,7 @@ namespace tmmt
     }
   }
   
-  void TMMTWrapper::load_target(const std::string &fileName, vector< vector< SentenceAlignment > > &corpus)
+  void FuzzyMatchWrapper::load_target(const std::string &fileName, vector< vector< SentenceAlignment > > &corpus)
   { 
     ifstream fileStream;
     fileStream.open(fileName.c_str());
@@ -476,7 +476,7 @@ namespace tmmt
   }
   
   
-  void TMMTWrapper::load_alignment(const std::string &fileName, vector< vector< SentenceAlignment > > &corpus )
+  void FuzzyMatchWrapper::load_alignment(const std::string &fileName, vector< vector< SentenceAlignment > > &corpus )
   { 
     ifstream fileStream;
     fileStream.open(fileName.c_str());
@@ -528,7 +528,7 @@ namespace tmmt
   
 /* Letter string edit distance, e.g. sub 'their' to 'there' costs 2 */
 
-unsigned int TMMTWrapper::letter_sed( WORD_ID aIdx, WORD_ID bIdx )
+unsigned int FuzzyMatchWrapper::letter_sed( WORD_ID aIdx, WORD_ID bIdx )
 {
 	// check if already computed -> lookup in cache
 	pair< WORD_ID, WORD_ID > pIdx = make_pair( aIdx, bIdx );
@@ -582,7 +582,7 @@ unsigned int TMMTWrapper::letter_sed( WORD_ID aIdx, WORD_ID bIdx )
 
 /* string edit distance implementation */
 
-unsigned int TMMTWrapper::sed( const vector< WORD_ID > &a, const vector< WORD_ID > &b, string &best_path, bool use_letter_sed ) {
+unsigned int FuzzyMatchWrapper::sed( const vector< WORD_ID > &a, const vector< WORD_ID > &b, string &best_path, bool use_letter_sed ) {
   
 	// initialize cost and path matrices
 	unsigned int **cost  = (unsigned int**) calloc( sizeof( unsigned int* ), a.size()+1 );
@@ -703,7 +703,7 @@ unsigned int TMMTWrapper::sed( const vector< WORD_ID > &a, const vector< WORD_ID
 /* utlility function: compute length of sentence in characters 
  (spaces do not count) */
 
-unsigned int TMMTWrapper::compute_length( const vector< WORD_ID > &sentence )
+unsigned int FuzzyMatchWrapper::compute_length( const vector< WORD_ID > &sentence )
 {
 	unsigned int length = 0; for( unsigned int i=0; i<sentence.size(); i++ )
 	{
@@ -714,7 +714,7 @@ unsigned int TMMTWrapper::compute_length( const vector< WORD_ID > &sentence )
 
 /* brute force method: compare input to all corpus sentences */
 
-  int TMMTWrapper::basic_fuzzy_match( vector< vector< WORD_ID > > source, 
+  int FuzzyMatchWrapper::basic_fuzzy_match( vector< vector< WORD_ID > > source, 
                       vector< vector< WORD_ID > > input ) 
 {
 	// go through input set...
@@ -775,7 +775,7 @@ unsigned int TMMTWrapper::compute_length( const vector< WORD_ID > &sentence )
  the suffix array, since there are too many matches
  and for longer sentences, at least one 2-gram match must occur */
 
-int TMMTWrapper::short_match_max_length( int input_length )
+int FuzzyMatchWrapper::short_match_max_length( int input_length )
 {
   if ( ! refined_flag ) 
     return 0;
@@ -791,7 +791,7 @@ int TMMTWrapper::short_match_max_length( int input_length )
  (to be used by the next function) 
  (done here, because this has be done only once for an input sentence) */
 
-void TMMTWrapper::init_short_matches( const vector< WORD_ID > &input )
+void FuzzyMatchWrapper::init_short_matches( const vector< WORD_ID > &input )
 {
 	int max_length = short_match_max_length( input.size() );
 	if (max_length == 0)
@@ -813,7 +813,7 @@ void TMMTWrapper::init_short_matches( const vector< WORD_ID > &input )
 
 /* add all short matches to list of matches for a sentence */
 
-void TMMTWrapper::add_short_matches( vector< Match > &match, const vector< WORD_ID > &tm, int input_length, int best_cost )
+void FuzzyMatchWrapper::add_short_matches( vector< Match > &match, const vector< WORD_ID > &tm, int input_length, int best_cost )
 {	
 	int max_length = short_match_max_length( input_length );
 	if (max_length == 0)
@@ -855,7 +855,7 @@ void TMMTWrapper::add_short_matches( vector< Match > &match, const vector< WORD_
 
 /* remove matches that are subsumed by a larger match */
 
-vector< Match > TMMTWrapper::prune_matches( const vector< Match > &match, int best_cost )
+vector< Match > FuzzyMatchWrapper::prune_matches( const vector< Match > &match, int best_cost )
 {
 	//cerr << "\tpruning";
 	vector< Match > pruned;
@@ -894,7 +894,7 @@ vector< Match > TMMTWrapper::prune_matches( const vector< Match > &match, int be
 
 /* A* parsing method to compute string edit distance */
 
-int TMMTWrapper::parse_matches( vector< Match > &match, int input_length, int tm_length, int &best_cost )
+int FuzzyMatchWrapper::parse_matches( vector< Match > &match, int input_length, int tm_length, int &best_cost )
 {	
 	// cerr << "sentence has " << match.size() << " matches, best cost: " << best_cost << ", lengths input: " << input_length << " tm: " << tm_length << endl;
   
@@ -1048,7 +1048,7 @@ int TMMTWrapper::parse_matches( vector< Match > &match, int input_length, int tm
 }
 
 
-void TMMTWrapper::create_extract(int sentenceInd, int cost, const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path, ofstream &outputFile)
+void FuzzyMatchWrapper::create_extract(int sentenceInd, int cost, const vector< WORD_ID > &sourceSentence, const vector<SentenceAlignment> &targets, const string &inputStr, const string  &path, ofstream &outputFile)
 {
   string sourceStr;
   for (size_t pos = 0; pos < sourceSentence.size(); ++pos) {

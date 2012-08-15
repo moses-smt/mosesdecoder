@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdio>
 
 #include "PhraseTableCreator.h"
+#include "ConsistentPhrases.h"
 #include "ThrowingFwrite.h"
 
 namespace Moses
@@ -124,14 +125,25 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   std::cerr << "Done" << std::endl;
   std::fclose(m_outFile);
 }
-    
+
+PhraseTableCreator::~PhraseTableCreator()
+{
+  delete m_symbolTree;
+  if(m_useAlignmentInfo)
+    delete m_alignTree; 
+  for(size_t i = 0; i < m_scoreTrees.size(); i++) {
+    delete m_scoreTrees[i];
+    delete m_scoreCounters[i];
+  }
+}
+
 void PhraseTableCreator::PrintInfo()
 {
   std::string encodings[3] = {"Huffman", "Huffman + REnc", "Huffman + PREnc"};
   
   std::cerr << "Used options:" << std::endl;
   std::cerr << "\tText phrase table will be read from: " << m_inPath << std::endl;
-  std::cerr << "\tOuput phrase table will be written to: " << m_outPath << std::endl;
+  std::cerr << "\tOutput phrase table will be written to: " << m_outPath << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tSource phrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
   std::cerr << "\tSelected target phrase encoding: " << encodings[m_coding] << std::endl;
@@ -595,10 +607,10 @@ void PhraseTableCreator::EncodeTargetPhrasePREnc(std::vector<std::string>& s,
 {
   std::vector<unsigned> encodedSymbols(t.size());
   std::vector<unsigned> encodedSymbolsLengths(t.size(), 0);
-   
-  ConsistantPhrases cp(s.size(), t.size(), a.begin(), a.end());
-  while(cp.Size()) {
-    ConsistantPhrases::Phrase p = cp.Pop();
+  
+  ConsistentPhrases cp(s.size(), t.size(), a);
+  while(!cp.Empty()) {
+    ConsistentPhrases::Phrase p = cp.Pop();
     
     std::stringstream key1;
     key1 << s[p.i];
@@ -771,8 +783,8 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
   std::stringstream encodedStream(encodedCollection);
   encodedStream.unsetf(std::ios::skipws);
   
-  std::string output;
-  BitStream<> bitstream(output);
+  std::string compressedEncodedCollection;
+  BitWrapper<> bitStream(compressedEncodedCollection);
 
   unsigned symbol;
   float score;
@@ -810,7 +822,7 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
       
       case EncodeSymbol:
         state = (symbol == phraseStopSymbolId) ? ReadScore : ReadSymbol;
-        bitstream.PutCode(m_symbolTree->Encode(symbol));
+        m_symbolTree->Put(bitStream, symbol);
         break;
       case EncodeScore:
         {
@@ -818,17 +830,17 @@ std::string PhraseTableCreator::CompressEncodedCollection(std::string encodedCol
           size_t idx = m_multipleScoreTrees ? currScore-1 : 0;
           if(m_quantize)
             score = m_scoreCounters[idx]->LowerBound(score);
-          bitstream.PutCode(m_scoreTrees[idx]->Encode(score));
+          m_scoreTrees[idx]->Put(bitStream, score);
         }
         break;
       case EncodeAlignment:
         state = (alignPoint == alignStopSymbol) ? ReadSymbol : ReadAlignment;
-        bitstream.PutCode(m_alignTree->Encode(alignPoint));
+        m_alignTree->Put(bitStream, alignPoint);
         break;
     }
   }
   
-  return output;
+  return compressedEncodedCollection;
 }
 
 void PhraseTableCreator::AddRankedLine(PackedItem& pi)
@@ -857,8 +869,9 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
     {
       if(m_rankQueue.size()) {        
         m_lastFlushedSourceNum++;
-        if(m_lastFlushedSourceNum % 100000 == 0)
+        if(m_lastFlushedSourceNum % 100000 == 0) {
           std::cerr << ".";
+        }
         if(m_lastFlushedSourceNum % 5000000 == 0)
         {
           std::cerr << "[" << m_lastFlushedSourceNum << "]" << std::endl;

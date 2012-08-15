@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <queue>
 #include <vector>
+#include <set>
 #include <boost/unordered_map.hpp>
 
 #include "InputFileStream.h"
@@ -33,10 +34,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "UserMessage.h"
 #include "Util.h"
 
-#include "CompactPT/BlockHashIndex.h"
-#include "CompactPT/ConsistantPhrases.h"
-#include "CompactPT/StringVector.h"
-#include "CompactPT/CanonicalHuffman.h"
+#include "BlockHashIndex.h"
+#include "StringVector.h"
+#include "CanonicalHuffman.h"
 
 namespace Moses
 {
@@ -360,6 +360,8 @@ class PhraseTableCreator
                        , size_t threads = 2
 #endif
                       );
+    
+    ~PhraseTableCreator();
     
     friend class RankingTask;
     friend class EncodingTask;

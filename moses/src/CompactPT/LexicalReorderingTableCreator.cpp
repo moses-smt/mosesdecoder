@@ -72,7 +72,7 @@ void LexicalReorderingTableCreator::PrintInfo()
 {  
   std::cerr << "Used options:" << std::endl;
   std::cerr << "\tText reordering table will be read from: " << m_inPath << std::endl;
-  std::cerr << "\tOuput reordering table will be written to: " << m_outPath << std::endl;
+  std::cerr << "\tOutput reordering table will be written to: " << m_outPath << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tPhrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
   std::cerr << "\tNumber of score components in reordering table: " << m_numScoreComponent << std::endl;    
@@ -88,6 +88,15 @@ void LexicalReorderingTableCreator::PrintInfo()
 #endif
   std::cerr << std::endl;
 }
+
+LexicalReorderingTableCreator::~LexicalReorderingTableCreator()
+{
+  for(size_t i = 0; i < m_scoreTrees.size(); i++) {
+    delete m_scoreTrees[i];
+    delete m_scoreCounters[i];
+  }
+}
+
 
 void LexicalReorderingTableCreator::EncodeScores()
 {
@@ -238,7 +247,7 @@ std::string LexicalReorderingTableCreator::CompressEncodedScores(std::string &en
   encodedScoresStream.unsetf(std::ios::skipws);
   
   std::string compressedScores;
-  BitStream<> compressedScoresStream(compressedScores);
+  BitWrapper<> compressedScoresStream(compressedScores);
   
   size_t currScore = 0;
   float score;
@@ -250,7 +259,7 @@ std::string LexicalReorderingTableCreator::CompressEncodedScores(std::string &en
     if(m_quantize)
       score = m_scoreCounters[index]->LowerBound(score);
     
-    compressedScoresStream.PutCode(m_scoreTrees[index]->Encode(score));
+    m_scoreTrees[index]->Put(compressedScoresStream, score);
     encodedScoresStream.read((char*) &score, sizeof(score));
     currScore++;
   }

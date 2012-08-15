@@ -25,7 +25,7 @@
 #include <algorithm>
 #include "RuleTable/Loader.h"
 #include "RuleTable/LoaderFactory.h"
-#include "PhraseDictionaryTMExtract.h"
+#include "PhraseDictionaryFuzzyMatch.h"
 #include "FactorCollection.h"
 #include "Word.h"
 #include "Util.h"
@@ -41,7 +41,7 @@ using namespace std;
 namespace Moses
 {
 
-  PhraseDictionaryTMExtract::PhraseDictionaryTMExtract(size_t numScoreComponents,
+  PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(size_t numScoreComponents,
                             PhraseDictionaryFeature* feature)
   : PhraseDictionary(numScoreComponents, feature) 
   {
@@ -49,7 +49,7 @@ namespace Moses
     CHECK(staticData.ThreadCount() == 1);    
   }
 
-  bool PhraseDictionaryTMExtract::Load(const std::vector<FactorType> &input
+  bool PhraseDictionaryFuzzyMatch::Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
             , const std::string &initStr
             , const std::vector<float> &weight
@@ -69,19 +69,19 @@ namespace Moses
     m_config = Tokenize(initStr, ";");
     assert(m_config.size() == 3);
 
-    m_tmmtWrapper = new tmmt::TMMTWrapper(m_config[0], m_config[1], m_config[2]);
+    m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
     
     return true;
   }
     
-  ChartRuleLookupManager *PhraseDictionaryTMExtract::CreateRuleLookupManager(
+  ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
                                                                         const InputType &sentence,
                                                                         const ChartCellCollection &cellCollection)
   {
     return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
   }
     
-  void PhraseDictionaryTMExtract::InitializeForInput(InputType const& inputSentence)
+  void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
   {
     util::TempMaker tempFile("moses");
     util::scoped_fd alive;
@@ -96,7 +96,7 @@ namespace Moses
     inFile << endl;
     inFile.close();
         
-    string ptFileName = m_tmmtWrapper->Extract(inFileName);
+    string ptFileName = m_FuzzyMatchWrapper->Extract(inFileName);
 
     // populate with rules for this sentence
     long translationId = inputSentence.GetTranslationId();
@@ -207,7 +207,7 @@ namespace Moses
     remove(inFileName.c_str());
   }
   
-  TargetPhraseCollection &PhraseDictionaryTMExtract::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
+  TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode
                                                                                   , const Phrase &source
                                                                                   , const TargetPhrase &target
                                                                                   , const Word &sourceLHS)
@@ -216,7 +216,7 @@ namespace Moses
     return currNode.GetOrCreateTargetPhraseCollection();
   }
 
-  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
+  PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetOrCreateNode(PhraseDictionaryNodeSCFG &rootNode
                                                                   , const Phrase &source
                                                                   , const TargetPhrase &target
                                                                   , const Word &sourceLHS)
@@ -257,7 +257,7 @@ namespace Moses
     return *currNode;
   }
 
-  void PhraseDictionaryTMExtract::SortAndPrune(PhraseDictionaryNodeSCFG &rootNode)
+  void PhraseDictionaryFuzzyMatch::SortAndPrune(PhraseDictionaryNodeSCFG &rootNode)
   {
     if (GetTableLimit())
     {
@@ -265,19 +265,19 @@ namespace Moses
     }
   }
   
-  void PhraseDictionaryTMExtract::CleanUp(const InputType &source)
+  void PhraseDictionaryFuzzyMatch::CleanUp(const InputType &source)
   {
     m_collection.erase(source.GetTranslationId());
   }
 
-  const PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetRootNode(const InputType &source) const 
+  const PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) const 
   {
     long transId = source.GetTranslationId();
     std::map<long, PhraseDictionaryNodeSCFG>::const_iterator iter = m_collection.find(transId);
     CHECK(iter != m_collection.end());
     return iter->second; 
   }
-  PhraseDictionaryNodeSCFG &PhraseDictionaryTMExtract::GetRootNode(const InputType &source) 
+  PhraseDictionaryNodeSCFG &PhraseDictionaryFuzzyMatch::GetRootNode(const InputType &source) 
   {
     long transId = source.GetTranslationId();
     std::map<long, PhraseDictionaryNodeSCFG>::iterator iter = m_collection.find(transId);
@@ -285,10 +285,10 @@ namespace Moses
     return iter->second; 
   }
   
-  TO_STRING_BODY(PhraseDictionaryTMExtract);
+  TO_STRING_BODY(PhraseDictionaryFuzzyMatch);
   
   // friend
-  ostream& operator<<(ostream& out, const PhraseDictionaryTMExtract& phraseDict)
+  ostream& operator<<(ostream& out, const PhraseDictionaryFuzzyMatch& phraseDict)
   {
     typedef PhraseDictionaryNodeSCFG::TerminalMap TermMap;
     typedef PhraseDictionaryNodeSCFG::NonTerminalMap NonTermMap;

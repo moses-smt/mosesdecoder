@@ -44,7 +44,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PhraseDictionaryCompact.h"
 #include "StringVector.h"
 #include "CanonicalHuffman.h"
-#include "ConsistantPhrases.h"
 #include "TargetPhraseCollectionCache.h"
 
 namespace Moses
@@ -142,7 +141,7 @@ class PhraseDecoder
                                                        bool topLevel = false);
     
     TargetPhraseVectorPtr DecodeCollection(TargetPhraseVectorPtr tpv,
-                                           BitStream<> &encodedBitStream,
+                                           BitWrapper<> &encodedBitStream,
                                            const Phrase &sourcePhrase,
                                            bool topLevel);
     

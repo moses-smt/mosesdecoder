@@ -19,15 +19,15 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA                                                        
 ***********************************************************************/  
 
-#ifndef moses_ConsistantPhrases_h
-#define moses_ConsistantPhrases_h
+#ifndef moses_ConsistentPhrases_h
+#define moses_ConsistentPhrases_h
 
 #include <set>
 
 namespace Moses
 {
 
-class ConsistantPhrases
+class ConsistentPhrases
 {
   public:
     struct Phrase
@@ -56,10 +56,12 @@ class ConsistantPhrases
     typedef std::set<Phrase, PhraseSorter> PhraseQueue;
     PhraseQueue m_phraseQueue;
     
+    typedef std::pair<unsigned char, unsigned char> AlignPoint;
+    typedef std::set<AlignPoint> Alignment;
+    
   public:
     
-    template <class It>
-    ConsistantPhrases(int mmax, int nmax, It begin, It end)
+    ConsistentPhrases(int mmax, int nmax, Alignment& a)
     {
       for(int i = 0; i < mmax; i++)
       {
@@ -70,7 +72,7 @@ class ConsistantPhrases
             for(int n = 1; n <= nmax-j; n++)
             {
               bool consistant = true;
-              for(It it = begin; it != end; it++)
+              for(Alignment::iterator it = a.begin(); it != a.end(); it++)
               {
                 int ip = it->first;
                 int jp = it->second;
@@ -89,9 +91,9 @@ class ConsistantPhrases
       m_phraseQueue.erase(Phrase(0, mmax, 0, nmax));
     }
     
-    size_t Size()
+    size_t Empty()
     {
-      return m_phraseQueue.size();
+      return !m_phraseQueue.size();
     }
     
     Phrase Pop()

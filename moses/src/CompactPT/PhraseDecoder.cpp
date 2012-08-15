@@ -236,9 +236,9 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &
     else
       encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMapped[sourcePhraseId];
     
-    BitStream<> encodedBitStream(encodedPhraseCollection);
+    BitWrapper<> encodedBitStream(encodedPhraseCollection);
     if(m_coding == PREnc && bitsLeft)
-      encodedBitStream.SetLeft(bitsLeft);
+      encodedBitStream.SeekFromEnd(bitsLeft);
     
     // Decompress and decode target phrase collection
     TargetPhraseVectorPtr decodedPhraseColl =
@@ -251,12 +251,12 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &
 }
   
 TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
-  TargetPhraseVectorPtr tpv, BitStream<> &encodedBitStream,
+  TargetPhraseVectorPtr tpv, BitWrapper<> &encodedBitStream,
   const Phrase &sourcePhrase, bool topLevel)
 {
   
   bool extending = tpv->size();
-  size_t bitsLeft = encodedBitStream.RemainingBits();
+  size_t bitsLeft = encodedBitStream.TellFromEnd();
     
   typedef std::pair<size_t, size_t> AlignPointSizeT;
   
@@ -283,7 +283,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   size_t srcSize = sourcePhrase.GetSize();
   
   TargetPhrase* targetPhrase = NULL;
-  while(encodedBitStream.RemainingBits())
+  while(encodedBitStream.TellFromEnd())
   {
      
     if(state == New)
@@ -301,7 +301,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     
     if(state == Symbol)
     {
-      unsigned symbol = m_symbolTree->NextSymbol(encodedBitStream);      
+      unsigned symbol = m_symbolTree->Read(encodedBitStream);      
       if(symbol == phraseStopSymbol)
       {
         state = Score;
@@ -426,7 +426,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     else if(state == Score)
     {
       size_t idx = m_multipleScoreTrees ? scores.size() : 0;
-      float score = m_scoreTrees[idx]->NextSymbol(encodedBitStream);
+      float score = m_scoreTrees[idx]->Read(encodedBitStream);
       scores.push_back(score);
       
       if(scores.size() == m_numScoreComponent)
@@ -441,7 +441,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     }
     else if(state == Alignment)
     {
-      AlignPoint alignPoint = m_alignTree->NextSymbol(encodedBitStream);
+      AlignPoint alignPoint = m_alignTree->Read(encodedBitStream);
       if(alignPoint == alignStopSymbol)
       {
         state = Add;
@@ -461,13 +461,13 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       if(m_coding == PREnc)
       {
         if(!m_maxRank || tpv->size() <= m_maxRank)
-          bitsLeft = encodedBitStream.RemainingBits();
+          bitsLeft = encodedBitStream.TellFromEnd();
         
         if(!topLevel && m_maxRank && tpv->size() >= m_maxRank)
           break;
       }
       
-      if(encodedBitStream.RemainingBits() <= 8)
+      if(encodedBitStream.TellFromEnd() <= 8)
         break;
       
       state = New;

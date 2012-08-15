@@ -51,23 +51,10 @@ protected:
   PhraseTableImplementation m_implementation;
   bool m_inMemory;
   
-  typedef std::map<Phrase, TargetPhraseCollection*> PhraseCache;
+  typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
   boost::mutex m_sentenceMutex;
-  std::vector<pthread_t> m_threadStorage;
-  
-  size_t findThreadId(pthread_t t) {
-    size_t size = m_threadStorage.size();
-    for(size_t i = 0; i < size; i++)
-      if(pthread_equal(t, m_threadStorage[i]))
-	return i;
-      
-    m_threadStorage.resize(size + 1);
-    m_threadStorage[size] = t;
-    return size;
-  }
-
-  typedef std::map<size_t, PhraseCache>  SentenceCache;
+  typedef std::map<boost::thread::id, PhraseCache> SentenceCache;
 #else
   typedef PhraseCache SentenceCache;
 #endif
@@ -113,8 +100,8 @@ public:
 
   void InitializeForInput(const Moses::InputType&);
   
-  void CacheForCleanup(const Phrase &source, TargetPhraseCollection* tpc);
-  void CleanUp();
+  void CacheForCleanup(TargetPhraseCollection* tpc);
+  void CleanUp(const InputType &source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,

@@ -130,7 +130,7 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
       phraseColl->Add(new TargetPhrase(*it));
     
     // Cache phrase pair for for clean-up or retrieval with PREnc
-    const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(sourcePhrase, phraseColl);
+    const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
     
     return phraseColl;
   }
@@ -146,15 +146,14 @@ PhraseDictionaryCompact::~PhraseDictionaryCompact() {
 
 //TO_STRING_BODY(PhraseDictionaryCompact)
 
-void PhraseDictionaryCompact::CacheForCleanup(const Phrase &sourcePhrase,
-                                                   TargetPhraseCollection* tpc) {
+void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc) {
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_sentenceMutex);
-  size_t threadId = findThreadId(pthread_self());
-  m_sentenceCache[threadId].insert(std::make_pair(sourcePhrase, tpc));
+  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()]; 
 #else
-  m_sentenceCache.insert(std::make_pair(sourcePhrase, tpc));
+  PhraseCache &ref = m_sentenceCache; 
 #endif
+  ref.push_back(tpc);
 }
 
 void PhraseDictionaryCompact::InitializeForInput(const Moses::InputType&) {}
@@ -162,7 +161,7 @@ void PhraseDictionaryCompact::InitializeForInput(const Moses::InputType&) {}
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
                                              const TargetPhrase &targetPhrase) { }
 
-void PhraseDictionaryCompact::CleanUp() {
+void PhraseDictionaryCompact::CleanUp(const InputType &source) {
   if(!m_inMemory)
     m_hash.KeepNLastRanges(0.01, 0.2);
     
@@ -170,14 +169,13 @@ void PhraseDictionaryCompact::CleanUp() {
   
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_sentenceMutex);
-  size_t threadId = findThreadId(pthread_self());
-  PhraseCache &ref = m_sentenceCache[threadId]; 
+  PhraseCache &ref = m_sentenceCache[boost::this_thread::get_id()]; 
 #else
   PhraseCache &ref = m_sentenceCache; 
 #endif
   
   for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) 
-      delete it->second;
+      delete *it;
       
   PhraseCache temp;
   temp.swap(ref);
