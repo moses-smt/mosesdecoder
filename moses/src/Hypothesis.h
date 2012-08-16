@@ -78,7 +78,6 @@ protected:
   bool							m_wordDeleted;
   float							m_totalScore;  /*! score so far */
   float							m_futureScore; /*! estimated future cost to translate rest of sentence */
-  ScoreComponentCollection m_scoreBreakdown; /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   std::vector<const FFState*> m_ffStates;
   const Hypothesis 	*m_winningHypo;
   ArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
@@ -93,6 +92,8 @@ protected:
   Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
 public:
+
+  ScoreComponentCollection m_scoreBreakdown; /*! detailed score break-down by components (for instance language model, word penalty, etc) */
   static ObjectPool<Hypothesis> &GetObjectPool() {
     return s_objectPool;
   }
