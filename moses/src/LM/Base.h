@@ -66,7 +66,7 @@ public:
 
   virtual void InitializeBeforeSentenceProcessing() {}
 
-  virtual void CleanUpAfterSentenceProcessing() {}
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {}
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 

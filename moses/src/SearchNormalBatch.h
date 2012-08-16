@@ -10,6 +10,10 @@ class Manager;
 class InputType;
 class TranslationOptionCollection;
 
+/** Implements the phrase-based stack decoding algorithm (no cube pruning) with a twist...
+ *  Language model requests are batched together, duplicate requests are removed, and requests are sent together.
+ *  Useful for distributed LM where network latency is an issue.
+ */  
 class SearchNormalBatch: public SearchNormal
 {
 protected:

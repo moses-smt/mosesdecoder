@@ -4,6 +4,7 @@ import os ;
 import path ;
 import project ;
 import build-system ;
+import version ;
 
 #Shell with trailing line removed http://lists.boost.org/boost-build/2007/08/17051.php
 rule trim-nl ( str extras * ) {
@@ -51,13 +52,25 @@ rule test_library ( name ) {
   constant CLEANING : $(cleaning) ;
 }
 
+requirements = ;
+
+FORCE-STATIC = [ option.get "static" : : "yes" ] ;
+if $(FORCE-STATIC) {
+  requirements += <runtime-link>static ;
+}
+
 #Determine if a library can be compiled statically.  
 rule auto-shared ( name : additional * ) {
   additional ?= "" ;
   if [ test_flags $(additional)" -static -l"$(name) ] {
     return ;
   } else {
-    return "<link>shared" ;
+    if $(FORCE-STATIC) {
+      echo "Could not statically link against lib $(name).  Your build will probably fail." ;
+      return ;
+    } else {
+      return "<link>shared" ;
+    }
   }
 }
 
@@ -123,6 +136,7 @@ rule boost ( min-version ) {
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
   boost-lib unit_test_framework TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
+  boost-lib filesystem FILE_SYSTEM_DYN_LINK ;
 }
  
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
@@ -148,11 +162,10 @@ rule external-lib ( name : search-path * ) {
   local ignored = @($(build-log):E=$(script)) ;
 }
 
-requirements = ;
-{
-  #Boost jam's static clang for Linux is buggy.
-  requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
+#Boost jam's static clang for Linux is buggy.
+requirements += <cxxflags>$(cxxflags) <cflags>$(cflags) <linkflags>$(ldflags) <os>LINUX,<toolset>clang:<link>shared ;
 
+if ! [ option.get "without-libsegfault" : : "yes" ] && ! $(FORCE-STATIC) {
   #libSegFault prints a stack trace on segfault.  Link against it if available.  
   if [ test_flags "-lSegFault" ] {
     external-lib SegFault ;
@@ -242,5 +255,14 @@ rule always-if-changed ( file current : targets * ) {
     for local i in $(targets) {
       always $(i) ;
     }
+  }
+}
+
+if [ option.get "sanity-test" : : "yes" ] {
+  local current_version = [ modules.peek : JAM_VERSION ] ;
+  if ( $(current_version[0]) < 2000 && [ version.check-jam-version 3 1 16 ] ) || [ version.check-jam-version 2011 0 0 ] {
+    EXIT "Sane" : 0 ;
+  } else {
+    EXIT "Bad" : 1 ;
   }
 }

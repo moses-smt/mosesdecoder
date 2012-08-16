@@ -103,40 +103,40 @@ public:
         gzOutput= initgzOutput;
     } 
     // functions for getting values
-    bool isAllModelsOutputFlag(){
+    bool isAllModelsOutputFlag() const {
         return allModelsOutputFlag;
     }
-    bool isWordModel(){
+    bool isWordModel() const {
         return wordModel;
     }
-    REO_MODEL_TYPE isWordType(){
+    REO_MODEL_TYPE isWordType() const {
         return wordType; 
     } 
-    bool isPhraseModel(){
+    bool isPhraseModel() const {
         return phraseModel;  
     } 
-    REO_MODEL_TYPE isPhraseType(){
+    REO_MODEL_TYPE isPhraseType() const {
         return phraseType;
     }  
-    bool isHierModel(){
+    bool isHierModel() const {
         return hierModel; 
     }
-    REO_MODEL_TYPE isHierType(){
+    REO_MODEL_TYPE isHierType() const {
         return hierType;
     }
-    bool isOrientationFlag(){
+    bool isOrientationFlag() const {
         return orientationFlag;
     }
-    bool isTranslationFlag(){
+    bool isTranslationFlag() const {
         return translationFlag;
     }
-    bool isSentenceIdFlag(){
+    bool isSentenceIdFlag() const {
         return sentenceIdFlag;
     }
-    bool isOnlyOutputSpanInfo(){
+    bool isOnlyOutputSpanInfo() const {
         return onlyOutputSpanInfo;
     } 
-    bool isGzOutput (){
+    bool isGzOutput () const {
         return gzOutput;
    } 
 };

@@ -65,7 +65,7 @@ class LexicalTable
 {
 public:
   std::map< WORD_ID, std::map< WORD_ID, double > > ltable;
-  void load( char[] );
+  void load( const std::string &filePath );
   double permissiveLookup( WORD_ID wordS, WORD_ID wordT ) {
     // cout << endl << vcbS.getWord( wordS ) << "-" << vcbT.getWord( wordT ) << ":";
     if (ltable.find( wordS ) == ltable.end()) return 1.0;

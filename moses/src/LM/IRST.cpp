@@ -251,7 +251,7 @@ bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
 }
 
 
-void LanguageModelIRST::CleanUpAfterSentenceProcessing()
+void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
 {
   const StaticData &staticData = StaticData::Instance();
   static int sentenceCount = 0;
