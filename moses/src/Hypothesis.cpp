@@ -426,7 +426,9 @@ void Hypothesis::PrintHypothesis() const
 //  TRACE_ERR( "\tword penalty " << m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl);
 //  TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
   TRACE_ERR(  "\tunweighted feature scores: " << m_scoreBreakdown << endl);
-  if (m_prevHypo) TRACE_ERR(  "\tparent feature scores: " << m_prevHypo->m_scoreBreakDown << endl);
+  TRACE_ERR(  "\tparent feature scores: " << m_prevHypo->m_scoreBreakDown << endl);
+  ScoreComponentCollection scorediff = m_scoreBreakdown - m_prevHypo->m_scoreBreakDown;
+  TRACE_ERR(  "\tdiff feature scores: " << scorediff << endl);
   //PrintLMScores();
 }
 
