@@ -13,7 +13,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      const std::string &modelType,
                                      const std::string &filePath,
                                      const std::vector<float>& weights)
-  : m_configuration(this, modelType)
+  : m_configuration(this, modelType), m_refCount(new size_t(1)) // MJD: Reference counting
 {
   std::cerr << "Creating lexical reordering...\n";
   std::cerr << "weights: ";
@@ -61,10 +61,30 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
   m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 }
 
+// MJD: Added copy constructor with reference counting
+LexicalReordering::LexicalReordering(const LexicalReordering& l) :
+    StatefulFeatureFunction(l),
+    m_configuration(this, l.m_modelTypeString),
+    m_table(l.m_table),
+    m_modelTypeString(l.m_modelTypeString),
+    m_modelType(l.m_modelType),
+    m_numScoreComponents(l.m_numScoreComponents),
+    m_condition(l.m_condition),
+    m_factorsE(l.m_factorsE), m_factorsF(l.m_factorsF),
+    m_refCount(l.m_refCount)
+{
+  (*m_refCount)++; 
+}
+
+// MJD: Added reference counting
 LexicalReordering::~LexicalReordering()
 {
-  if(m_table)
-    delete m_table;
+  (*m_refCount)--;
+  if(*m_refCount == 0) {
+    if(m_table)
+      delete m_table;
+    delete m_refCount;
+  }
 }
 
 Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const

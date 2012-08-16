@@ -32,6 +32,10 @@ public:
                     const std::string &modelType,
                     const std::string &filePath,
                     const std::vector<float>& weights);
+  
+  // MJD: Added copy constructor 
+  LexicalReordering(const LexicalReordering&);
+  
   virtual ~LexicalReordering();
 
   virtual size_t GetNumScoreComponents() const {
@@ -70,6 +74,9 @@ private:
   bool DecodeDirection(std::string s);
   bool DecodeNumFeatureFunctions(std::string s);
 
+  // MJD: Added reference counting for m_table
+  size_t* m_refCount;
+  
   LexicalReorderingConfiguration m_configuration;
   std::string m_modelTypeString;
   std::vector<std::string> m_modelType;

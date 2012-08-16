@@ -99,12 +99,40 @@ public:
 
     Timer translationTime;
     translationTime.start();
+    
+    //MJD: default id
+    std::string translationSystemId = TranslationSystem::DEFAULT;
+
+    //MJD is it a sentence?
+    if(m_source->GetType() == SentenceInput) {
+      // MJD: Check whether there are dynamic paramters defined in the sentence.
+      SpecOpt specOpt = ((Sentence*) m_source)->GetSpecificOptions();
+      if(specOpt.HasSpecificOptions()) {
+
+	// MJD: create a new StaticData instance for this thread or process
+	// if there where dynamic parameters defined in the sentence.
+#ifdef WITH_THREADS
+	StaticData::CreateThreadInstance();
+#else
+        StaticData::CreateTempInstance();  
+#endif   
+	translationSystemId = specOpt.GetTranslationSystemId();
+	const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(translationSystemId);
+	
+	// MJD: Apply dynamic paramters;
+	const_cast<StaticData&>(StaticData::Instance()).SetTranslationSystemWeights(system, specOpt.GetWeights());  
+	const_cast<StaticData&>(StaticData::Instance()).SetGlobalParameters(specOpt.GetSwitches());
+      }
+    }
+    // MJD: Scope added. Lets manager go out of scope before StaticData is destroyed.
+    {
+    
     // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
     // input sentence
     Sentence sentence();
-    // set translation system
-    const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+    // set translation system  //MJD replace default with predefined ID
+    const TranslationSystem& system = staticData.GetTranslationSystem(translationSystemId);
 
     // execute the translation
     // note: this executes the search, resulting in a search graph
@@ -275,6 +303,16 @@ public:
     manager.CalcDecoderStatistics();
 
     VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
+    // MJD: Let manager go out of scope;
+    }
+    
+    // MJD: Delete the StaticData instance assigned to the thread or process.
+    // Does not do anything if it is the main unmodified instance.
+#ifdef WITH_THREADS
+    StaticData::DeleteThreadInstance();
+#else
+    StaticData::DeleteTempInstance();  
+#endif
   }
 
   ~TranslationTask() {

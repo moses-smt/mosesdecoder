@@ -15,10 +15,12 @@ namespace Moses
 {
 using namespace std;
 
-void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp)
+// MJD: Added default parameter "preserved". See the header file for explanation
+void ScoreIndexManager::AddScoreProducer(const ScoreProducer* sp, bool preserve)
 {
   // Producers must be inserted in the order they are created
-  const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
+  if(!preserve)
+    const_cast<ScoreProducer*>(sp)->CreateScoreBookkeepingID();
   CHECK(m_begins.size() == (sp->GetScoreBookkeepingID()));
 
   m_producers.push_back(sp);

@@ -423,6 +423,41 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
   return "";
 }
 
+
+// MJD: A helper function that make the modification of parameters easier
+void Parameter::Overwrite(const Parameter& p) {
+  for(PARAM_MAP::const_iterator it = p.m_setting.begin(); it != p.m_setting.end(); it++) {
+    m_setting[it->first] = it->second;
+  }
+}
+
+// MJD: A helper function that make the modification of parameters easier
+bool Parameter::LoadAnyParam(int argc, char* argv[])
+{
+  for(PARAM_STRING::const_iterator iterParam = m_description.begin(); iterParam != m_description.end(); iterParam++) {
+    const string paramName = iterParam->first;
+    OverwriteParam("-" + paramName, paramName, argc, argv);
+  }
+
+  for(PARAM_STRING::const_iterator iterParam = m_abbreviation.begin(); iterParam != m_abbreviation.end(); iterParam++) {
+    const string paramName = iterParam->first;
+    const string paramShortName = iterParam->second;
+    OverwriteParam("-" + paramShortName, paramName, argc, argv);
+  }
+  bool noErrorFlag = true;
+  for (int i = 0 ; i < argc ; i++) {
+    if (isOption(argv[i])) {
+      string paramSwitch = (string) argv[i];
+      string paramName = paramSwitch.substr(1);
+      if (m_valid.find(paramName) == m_valid.end()) {
+        UserMessage::Add("illegal switch: " + paramSwitch);
+        noErrorFlag = false;
+      }
+    }
+  }
+  return true;
+}
+
 /** update parameter settings with command line switches
  * \param paramSwitch (potentially short) name of switch
  * \param paramName full name of parameter

@@ -75,6 +75,12 @@ public:
   const std::vector<LexicalReordering*>& GetReorderModels() const {
     return m_reorderingTables;
   }
+  
+  // MJD: Why is this missing in the trunk version?
+  const std::vector<GlobalLexicalModel*>& GetGlobalLexicalModels() const {
+     return m_globalLexicalModels;
+  }
+  
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {
     return m_decodeGraphs;
   }

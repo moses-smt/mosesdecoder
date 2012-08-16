@@ -106,7 +106,8 @@ public:
                             , const std::string &targetFile
                             , const std::string &alignmentsFile);
 
-
+  // MJD: Added copy contructor
+  PhraseDictionaryFeature(const PhraseDictionaryFeature& p);
   virtual ~PhraseDictionaryFeature();
 
   virtual bool ComputeValueInTranslationOption() const;

@@ -79,6 +79,19 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   }
 }
 
+// MJD: Added copy construtor
+PhraseDictionaryFeature::PhraseDictionaryFeature(const PhraseDictionaryFeature& p)
+ : DecodeFeature(p),
+  m_numScoreComponent(p.m_numScoreComponent),
+  m_numInputScores(p.m_numInputScores),
+  m_filePath(p.m_filePath),
+  m_weight(p.m_weight),
+  m_tableLimit(p.m_tableLimit),
+  m_implementation(p.m_implementation),
+  m_targetFile(p.m_targetFile),
+  m_alignmentsFile(p.m_alignmentsFile),
+  m_useThreadSafePhraseDictionary(p.m_useThreadSafePhraseDictionary) {}
+
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
 {
   const StaticData& staticData = StaticData::Instance();

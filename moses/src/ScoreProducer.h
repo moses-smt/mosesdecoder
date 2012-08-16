@@ -27,7 +27,9 @@ private:
   static unsigned int s_globalScoreBookkeepingIdCounter;
   unsigned int m_scoreBookkeepingId;
 
-  ScoreProducer(const ScoreProducer&);  // don't implement
+  // MJD: Commented out in order to allow shallow copying of score producers
+  // since this is called by other copy constructors
+  //ScoreProducer(const ScoreProducer&);  // don't implement
 
 #define UNASSIGNED std::numeric_limits<unsigned int>::max()
 

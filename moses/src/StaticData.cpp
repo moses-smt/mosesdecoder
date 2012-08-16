@@ -76,6 +76,19 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 
 StaticData StaticData::s_instance;
 
+// MJD: This pointer is used to substitute StaticData instances
+// with multi-thread and single-thread compilation
+StaticData* StaticData::s_instance_ptr = &StaticData::s_instance;
+
+// MJD: TODO: Write something meaningful here!
+#ifdef WITH_THREADS
+boost::mutex StaticData::s_threadMutex;
+size_t StaticData::s_threads_num = 0;
+
+pthread_t* StaticData::s_threads = InitArray(MAX_INSTANCES, pthread_t(0));
+StaticData** StaticData::s_instances = InitArray(MAX_INSTANCES, &StaticData::s_instance);
+#endif
+
 StaticData::StaticData()
   :m_numLinkParams(1)
   ,m_fLMsLoaded(false)
@@ -98,6 +111,193 @@ StaticData::StaticData()
   Phrase::InitializeMemPool();
 }
 
+// MJD: Huge copy constructor for StaticData. Performs all necessary shallow
+// and not so shallow copying of all the scoreproducers, translation systems
+// and everything else that was needed. TODO: Add comments inside the function.
+
+StaticData::StaticData(const StaticData& s)
+ : m_numLinkParams(s.m_numLinkParams),
+m_sourceStartPosMattersForRecombination(s.m_sourceStartPosMattersForRecombination),
+m_fLMsLoaded(s.m_fLMsLoaded), m_inputType(s.m_inputType), m_numInputScores(s.m_numInputScores),
+m_detailedTranslationReportingFilePath(s.m_detailedTranslationReportingFilePath),
+m_onlyDistinctNBest(s.m_onlyDistinctNBest), m_factorDelimiter(s.m_factorDelimiter),
+m_isAlwaysCreateDirectTranslationOption(s.m_isAlwaysCreateDirectTranslationOption),
+m_constraints(s.m_constraints), 
+m_inputFactorOrder(s.m_inputFactorOrder), m_outputFactorOrder(s.m_outputFactorOrder),
+m_allWeights(s.m_allWeights), m_beamWidth(s.m_beamWidth),
+m_earlyDiscardingThreshold(s.m_earlyDiscardingThreshold),
+m_translationOptionThreshold(s.m_translationOptionThreshold),
+m_wordDeletionWeight(s.m_wordDeletionWeight),
+m_maxDistortion(s.m_maxDistortion), m_reorderingConstraint(s.m_reorderingConstraint),
+m_maxHypoStackSize(s.m_maxHypoStackSize), m_minHypoStackDiversity(s.m_minHypoStackDiversity),
+m_nBestSize(s.m_nBestSize), m_nBestFactor(s.m_nBestFactor),
+m_maxNoTransOptPerCoverage(s.m_maxNoTransOptPerCoverage), m_maxNoPartTransOpt(s.m_maxNoPartTransOpt),
+m_maxPhraseLength(s.m_maxPhraseLength),
+m_constraintFileName(s.m_constraintFileName), m_nBestFilePath(s.m_nBestFilePath),
+m_dropUnknown(s.m_dropUnknown), m_wordDeletionEnabled(s.m_wordDeletionEnabled),
+m_disableDiscarding(s.m_disableDiscarding), m_printAllDerivations(s.m_printAllDerivations),
+m_recoverPath(s.m_recoverPath), m_outputHypoScore(s.m_outputHypoScore), m_searchAlgorithm(s.m_searchAlgorithm),
+m_verboseLevel(s.m_verboseLevel), m_reportSegmentation(s.m_reportSegmentation),
+m_reportAllFactors(s.m_reportAllFactors), m_reportAllFactorsNBest(s.m_reportAllFactorsNBest), 
+m_UseAlignmentInfo(s.m_UseAlignmentInfo), m_PrintAlignmentInfo(s.m_PrintAlignmentInfo),
+m_PrintAlignmentInfoNbest(s.m_PrintAlignmentInfoNbest),
+m_alignmentOutputFile(s.m_alignmentOutputFile), m_maxNumFactors(s.m_maxNumFactors),
+m_xmlInputType(s.m_xmlInputType), m_mbr(s.m_mbr),
+m_useLatticeMBR(s.m_useLatticeMBR), m_useConsensusDecoding(s.m_useConsensusDecoding),
+m_mbrSize(s.m_mbrSize), m_mbrScale(s.m_mbrScale), m_lmbrPruning(s.m_lmbrPruning),
+m_lmbrThetas(s.m_lmbrThetas), m_useLatticeHypSetForLatticeMBR(s.m_useLatticeHypSetForLatticeMBR),
+m_lmbrPrecision(s.m_lmbrPrecision), m_lmbrPRatio(s.m_lmbrPRatio), m_lmbrMapWeight(s.m_lmbrMapWeight),
+m_lmcache_cleanup_threshold(s.m_lmcache_cleanup_threshold), m_timeout(s.m_timeout),
+m_timeout_threshold(s.m_timeout_threshold), m_useTransOptCache(s.m_useTransOptCache),
+m_transOptCacheMaxSize(s.m_transOptCacheMaxSize),
+m_outputWordGraph(s.m_outputWordGraph), m_outputSearchGraph(s.m_outputSearchGraph),
+m_outputSearchGraphExtended(s.m_outputSearchGraphExtended),
+#ifdef HAVE_PROTOBUF
+m_outputSearchGraphPB(s.m_outputSearchGraphPB),
+#endif
+m_cubePruningPopLimit(s.m_cubePruningPopLimit), m_cubePruningDiversity(s.m_cubePruningDiversity),
+m_ruleLimit(s.m_ruleLimit), m_inputDefaultNonTerminal(s.m_inputDefaultNonTerminal),
+m_sourceLabelOverlap(s.m_sourceLabelOverlap), m_unknownLHS(s.m_unknownLHS),
+m_labeledNBestList(s.m_labeledNBestList), m_nBestIncludesAlignment(s.m_nBestIncludesAlignment),
+m_nBestWipo(s.m_nBestWipo), m_minphrMemory(s.m_minphrMemory), m_minlexrMemory(s.m_minlexrMemory)
+{ 
+  m_parameter = new Parameter(*(s.m_parameter));
+  
+  for(std::vector<DistortionScoreProducer*>::const_iterator it = s.m_distortionScoreProducers.begin(); it != s.m_distortionScoreProducers.end(); it++) {
+    DistortionScoreProducer* dsp = new DistortionScoreProducer(**it);
+    m_distortionScoreProducers.push_back(dsp);
+    m_scoreIndexManager.AddScoreProducer(dsp, true);
+  }
+
+  for(std::vector<WordPenaltyProducer*>::const_iterator it = s.m_wordPenaltyProducers.begin(); it != s.m_wordPenaltyProducers.end(); it++) {
+    WordPenaltyProducer* wpp = new WordPenaltyProducer(**it);
+    m_wordPenaltyProducers.push_back(wpp);
+    m_scoreIndexManager.AddScoreProducer(wpp, true);
+  }
+  
+  m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(*(s.m_unknownWordPenaltyProducer));
+  m_scoreIndexManager.AddScoreProducer(m_unknownWordPenaltyProducer, true);
+  
+  for(std::vector<LexicalReordering*>::const_iterator it = s.m_reorderModels.begin(); it != s.m_reorderModels.end(); it++) {
+    LexicalReordering* lrm = new LexicalReordering(**it);
+    m_reorderModels.push_back(lrm);
+    m_scoreIndexManager.AddScoreProducer(lrm, true);
+  }
+  
+  for (LMList::const_iterator lmIt = s.m_languageModel.begin(); lmIt != s.m_languageModel.end(); ++lmIt) {
+    LanguageModel* lm = (*lmIt)->Duplicate(m_scoreIndexManager);
+    // MJD: BIG PROBLEM HERE!
+    //m_scoreIndexManager.AddScoreProducer(lm, true);
+    m_languageModel.Add(lm);
+  }
+
+  #ifdef HAVE_SYNLM
+  m_syntacticLanguageModel = new SyntacticLanguageModel(*(s.m_syntacticLanguageModel));
+  #endif
+
+  for(std::vector<GenerationDictionary*>::const_iterator it = s.m_generationDictionary.begin(); it != s.m_generationDictionary.end(); it++) {
+    GenerationDictionary* gen = new GenerationDictionary(**it);
+    m_generationDictionary.push_back(gen);
+    m_scoreIndexManager.AddScoreProducer(gen, true);
+  }
+  
+  for(std::vector<PhraseDictionaryFeature*>::const_iterator it = s.m_phraseDictionary.begin(); it != s.m_phraseDictionary.end(); it++) {
+    PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(**it);
+    m_phraseDictionary.push_back(pdf);
+    m_scoreIndexManager.AddScoreProducer(pdf, true);
+  }
+   
+  for (size_t i = 0; i < s.m_decodeGraphs.size(); ++i) {
+    DecodeGraph* oldDecodeGraph = s.m_decodeGraphs[i];
+    DecodeGraph* newDecodeGraph = new DecodeGraph(oldDecodeGraph->GetPosition());
+    
+    const DecodeStep* prev = 0;
+    for (DecodeGraph::const_iterator j = oldDecodeGraph->begin(); j != oldDecodeGraph->end(); ++j) {
+      const DecodeStep* step = *j;
+	
+      if(step->GetPhraseDictionaryFeature())
+        for(std::vector<PhraseDictionaryFeature*>::const_iterator it = m_phraseDictionary.begin(); it != m_phraseDictionary.end(); it++)
+          if(step->GetPhraseDictionaryFeature()->GetScoreBookkeepingID() == (*it)->GetScoreBookkeepingID()) {
+            DecodeStep* newDecodeStep = new DecodeStepTranslation(*it, prev);
+            newDecodeGraph->Add(newDecodeStep);
+          }
+     
+      if(step->GetGenerationDictionaryFeature())
+        for(std::vector<GenerationDictionary*>::const_iterator it = m_generationDictionary.begin(); it != m_generationDictionary.end(); it++)
+          if(step->GetGenerationDictionaryFeature()->GetScoreBookkeepingID() == (*it)->GetScoreBookkeepingID()) {
+            DecodeStep* newDecodeStep = new DecodeStepGeneration(*it, prev);
+            newDecodeGraph->Add(newDecodeStep);
+          }
+     
+      prev = step;
+    }
+    m_decodeGraphs.push_back(newDecodeGraph);
+    m_decodeGraphBackoff.push_back(s.m_decodeGraphBackoff[i]);
+  }
+  
+  m_scoreIndexManager.InitFeatureNames();
+  
+  for(std::map<std::string, TranslationSystem>::const_iterator it = s.m_translationSystems.begin(); it != s.m_translationSystems.end(); it++) {
+    const TranslationSystem& oldSystem = it->second;
+    std::string systemId = oldSystem.GetId();
+    
+    DistortionScoreProducer* dsc;
+    for(std::vector<DistortionScoreProducer*>::const_iterator it = m_distortionScoreProducers.begin(); it != m_distortionScoreProducers.end(); it++)
+      if(oldSystem.GetDistortionProducer()->GetScoreBookkeepingID() == (*it)->GetScoreBookkeepingID())
+        dsc = *it;
+    
+    WordPenaltyProducer* wpp;
+    for(std::vector<WordPenaltyProducer*>::const_iterator it = m_wordPenaltyProducers.begin(); it != m_wordPenaltyProducers.end(); it++)
+      if(oldSystem.GetWordPenaltyProducer()->GetScoreBookkeepingID() == (*it)->GetScoreBookkeepingID())
+        wpp = *it;
+        
+    if(dsc && wpp)
+      m_translationSystems.insert(
+        std::pair<std::string, TranslationSystem>(
+          systemId, TranslationSystem(systemId, wpp, m_unknownWordPenaltyProducer, dsc)));
+      
+    if(m_translationSystems.count(systemId)) {
+      TranslationSystem& system = const_cast<TranslationSystem&>(GetTranslationSystem(systemId));
+      
+      for(size_t i = 0; i < s.m_decodeGraphs.size(); i++)
+        for(size_t j = 0; j < oldSystem.GetDecodeGraphs().size(); j++)
+          if(s.m_decodeGraphs[i] == oldSystem.GetDecodeGraphs()[j])
+            system.AddDecodeGraph(m_decodeGraphs[i], m_decodeGraphBackoff[i]);
+      
+      for(size_t i = 0; i < s.m_reorderModels.size(); i++)
+        for(size_t j = 0; j < oldSystem.GetReorderModels().size(); j++)
+          if(s.m_reorderModels[i] == oldSystem.GetReorderModels()[j])
+            system.AddReorderModel(m_reorderModels[i]);
+            
+      for(size_t i = 0; i < s.m_globalLexicalModels.size(); i++)
+        for(size_t j = 0; j < oldSystem.GetGlobalLexicalModels().size(); j++)
+          if(s.m_globalLexicalModels[i] == oldSystem.GetGlobalLexicalModels()[j])
+            system.AddGlobalLexicalModel(m_globalLexicalModels[i]);
+      
+      for(LMList::const_iterator i = s.m_languageModel.begin(); i != s.m_languageModel.end(); i++)
+        for(LMList::const_iterator j = oldSystem.GetLanguageModels().begin(); j != oldSystem.GetLanguageModels().end(); j++)
+          if(*i == *j) {
+            size_t d = std::distance(s.m_languageModel.begin(), i);
+            LMList::const_iterator k = m_languageModel.begin();
+            while(d-- > 0)
+              k++;
+            system.AddLanguageModel(*k);
+          }
+      
+      system.ConfigDictionaries();
+      
+      #ifdef HAVE_SYNLM
+      
+      if (m_syntacticLanguageModel != NULL)
+        system.AddFeatureFunction(m_syntacticLanguageModel);
+      #endif
+    }
+  }
+  
+  m_maxFactorIdx[0] = s.m_maxFactorIdx[0];
+  m_maxFactorIdx[1] = s.m_maxFactorIdx[1];
+}
+
 bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPath) {
   s_instance.SetExecPath(execPath);
   return s_instance.LoadData(parameter);
@@ -114,6 +314,13 @@ bool StaticData::LoadData(Parameter *parameter)
     m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
   }
 
+  // MJD: Parse the file given with this switch and initialize the given named
+  // parameter sets. They are now available as long as the process runs.
+  if (m_parameter->GetParam("wipo-specopt-file").size() == 1) {
+    std::string wipoSpecOptFilename = m_parameter->GetParam("wipo-specopt-file")[0];
+    SpecOpt::InitializeFromFile(wipoSpecOptFilename);
+  }
+  
   m_parsingAlgorithm = (m_parameter->GetParam("parsing-algorithm").size() > 0) ?
                       (ParsingAlgorithm) Scan<size_t>(m_parameter->GetParam("parsing-algorithm")[0]) : ParseCYKPlus;
 
@@ -658,8 +865,10 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
-
-  //delete m_parameter;
+  
+  // MJD: Was commented out, uncommented it, but do not remember why.
+  // Probably I had a good reason. TODO: Check reason :)
+  delete m_parameter;
 
   // memory pools
   Phrase::FinalizeMemPool();
@@ -1369,6 +1578,304 @@ void StaticData::SetExecPath(const std::string &path)
 const string &StaticData::GetBinDirectory() const
 {
   return m_binPath;
+}
+
+// MJD: This is where the magic happens!
+const WeightInfos StaticData::SetTranslationSystemWeights(const TranslationSystem& system, const WeightInfos& newWeights)
+{
+  WeightInfos oldParams;
+  for(WeightInfos::const_iterator it = newWeights.begin(); it != newWeights.end(); it++) {
+    WeightInfo oldValue = SetTranslationSystemWeight(system, *it);
+    oldParams.push_back(oldValue);
+  }
+  return oldParams;
+}	
+
+// MJD: some more magic!
+WeightInfo StaticData::SetTranslationSystemWeight(const TranslationSystem& system, WeightInfo wi)
+{
+  WeightInfo oldWeight = wi;
+  const unsigned int verbose = 2;
+  VERBOSE(verbose, "Setting weight " << wi.GetDescription() << " for TranslationSystem " << system.GetId() << " to " << wi.value << std::endl);
+      
+  std::vector<const ScoreProducer*> sps;
+  std::vector<const StatefulFeatureFunction*> sff = system.GetStatefulFeatureFunctions();
+  for(size_t i = 0; i < sff.size(); i++) {
+    if(sff[i]->GetScoreProducerWeightShortName() == wi.name)
+      sps.push_back((ScoreProducer*) sff[i]);
+  }
+  std::vector<const StatelessFeatureFunction*> slf = system.GetStatelessFeatureFunctions();
+  for(size_t i = 0; i < slf.size(); i++) {
+    if(slf[i]->GetScoreProducerWeightShortName() == wi.name)
+      sps.push_back((ScoreProducer*) slf[i]);
+  }
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  for(size_t i = 0; i < pds.size(); i++) {
+    if(pds[i]->GetScoreProducerWeightShortName() == wi.name)
+      sps.push_back((ScoreProducer*) pds[i]);
+  }
+  
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for(size_t i = 0; i < gds.size(); i++) {
+    // MJD: Why suddenly a parameter in the new trunk version?
+    if(gds[i]->GetScoreProducerWeightShortName(0) == wi.name)
+      sps.push_back((ScoreProducer*) gds[i]);
+  }
+  
+  if(wi.ffIndex < sps.size()) {
+    
+    const ScoreProducer* sp = sps[wi.ffIndex];
+    size_t weightStart = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(sp->GetScoreBookkeepingID());
+    size_t weightEnd   = StaticData::Instance().GetScoreIndexManager().GetEndIndex(sp->GetScoreBookkeepingID());
+    size_t weightSize = weightEnd - weightStart;
+    
+    while(wi.ffWeightIndex >= weightSize && wi.ffIndex < sps.size()-1) {
+      wi.ffIndex++;
+      wi.ffWeightIndex -= weightSize;
+      
+      sp = sps[wi.ffIndex];
+      weightStart = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(sp->GetScoreBookkeepingID());
+      weightEnd   = StaticData::Instance().GetScoreIndexManager().GetEndIndex(sp->GetScoreBookkeepingID());
+      weightSize  = weightEnd - weightStart;
+      
+      VERBOSE(verbose, "Wrapping around end of weight vector. Setting now weight " << wi.GetDescription()
+	      << " for TranslationSystem " << system.GetId() << " to " << wi.value << std::endl);
+    }
+    
+    if(wi.ffWeightIndex < weightSize) {
+      float prevValue = m_allWeights[weightStart + wi.ffWeightIndex];
+      m_allWeights[weightStart + wi.ffWeightIndex] = wi.value;
+      VERBOSE(verbose, "Set weight for (" << sp->GetScoreBookkeepingID() << "," << sp->GetScoreProducerWeightShortName()
+          << "," << sp->GetScoreProducerDescription() << "," << wi.ffWeightIndex << ") to " << wi.value << std::endl);
+      oldWeight.value = prevValue;
+    }
+    else {
+      VERBOSE(verbose, "Weight index " << wi.ffWeightIndex << " exceeded length of weight vector (" << weightSize << ") for ("
+              << sp->GetScoreBookkeepingID() << "," << sp->GetScoreProducerWeightShortName()
+              << "," << sp->GetScoreProducerDescription() << "). Nothing set." << std::endl);
+      oldWeight.value = MAX_FLOAT;
+    }
+  }
+  else {
+    VERBOSE(verbose, "Feature function index " << wi.ffIndex << " exceeded length of feature function vector ("
+            << sps.size() << ") for type " << wi.name << ". Nothing set." << std::endl);
+    oldWeight.value = MAX_FLOAT;
+  }
+  
+  return oldWeight;
+}
+
+// MJD: even more magic!
+Parameter StaticData::SetGlobalParameters(const Parameter& parameter)
+{
+  ResetUserTime();
+  
+  Parameter prevParameter = *m_parameter;
+  m_parameter->Overwrite(parameter);
+
+  // verbose level
+  m_verboseLevel = 1;
+  if (m_parameter->GetParam("verbose").size() == 1) {
+    m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
+  }
+
+  // to cube or not to cube
+  m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
+                      (SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
+
+  if(m_parameter->GetParam("recover-input-path").size()) {
+    m_recoverPath = Scan<bool>(m_parameter->GetParam("recover-input-path")[0]);
+    if (m_recoverPath && m_inputType == SentenceInput) {
+      TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
+      m_recoverPath = false;
+    }
+  }
+
+  SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );
+
+  //word-to-word alignment
+  SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
+  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
+  SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
+
+  SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
+
+  if (!m_UseAlignmentInfo && m_PrintAlignmentInfo) {
+    TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
+    m_PrintAlignmentInfo=false;
+  }
+  if (!m_UseAlignmentInfo && m_PrintAlignmentInfoNbest) {
+    TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
+    m_PrintAlignmentInfoNbest=false;
+  }
+
+  // n-best
+  if (m_parameter->GetParam("n-best-list").size() >= 2) {
+    m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
+    m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
+    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2 && m_parameter->GetParam("n-best-list")[2]=="distinct");
+  } else if (m_parameter->GetParam("n-best-list").size() == 1) {
+    UserMessage::Add(string("ERROR: wrong format for switch -n-best-list file size"));
+    return prevParameter;
+  } else {
+    m_nBestSize = 0;
+  }
+  if (m_parameter->GetParam("n-best-factor").size() > 0) {
+    m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
+  } else {
+    m_nBestFactor = 20;
+  }
+
+  // include feature names in the n-best list
+  SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
+
+  // include word alignment in the n-best list
+  SetBooleanParameter( &m_nBestIncludesAlignment, "include-alignment-in-n-best", false );
+
+  // printing source phrase spans
+  SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
+
+  // print all factors of output translations
+  SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
+
+  // print all factors of output translations
+  SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
+
+  //
+  if (m_inputType == SentenceInput) {
+    SetBooleanParameter( &m_useTransOptCache, "use-persistent-cache", true );
+    m_transOptCacheMaxSize = (m_parameter->GetParam("persistent-cache-size").size() > 0)
+                             ? Scan<size_t>(m_parameter->GetParam("persistent-cache-size")[0]) : DEFAULT_MAX_TRANS_OPT_CACHE_SIZE;
+  } else {
+    m_useTransOptCache = false;
+  }
+
+  //source word deletion
+  SetBooleanParameter( &m_wordDeletionEnabled, "phrase-drop-allowed", false );
+
+  //Disable discarding
+  SetBooleanParameter(&m_disableDiscarding, "disable-discarding", false);
+
+  //Print All Derivations
+  SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
+
+  // additional output
+  if (m_parameter->isParamSpecified("translation-details")) {
+    const vector<string> &args = m_parameter->GetParam("translation-details");
+    if (args.size() == 1) {
+      m_detailedTranslationReportingFilePath = args[0];
+    } else {
+      UserMessage::Add(string("the translation-details option requires exactly one filename argument"));
+      return prevParameter;
+    }
+  }
+
+  m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
+                    Scan<int>(m_parameter->GetParam("distortion-limit")[0])
+                    : -1;
+  SetBooleanParameter( &m_reorderingConstraint, "monotone-at-punctuation", false );
+
+  // settings for pruning
+  m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
+                       ? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
+  m_minHypoStackDiversity = 0;
+  if (m_parameter->GetParam("stack-diversity").size() > 0) {
+    if (m_maxDistortion > 15) {
+      UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
+      return prevParameter;
+    }
+    if (m_inputType == WordLatticeInput) {
+      UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
+      return prevParameter;
+    }
+    m_minHypoStackDiversity = Scan<size_t>(m_parameter->GetParam("stack-diversity")[0]);
+  }
+
+  m_beamWidth = (m_parameter->GetParam("beam-threshold").size() > 0) ?
+                TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
+                : TransformScore(DEFAULT_BEAM_WIDTH);
+  m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
+                               TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
+                               : TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
+  m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
+                                 TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
+                                 : TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
+
+  m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
+                               ? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
+
+  m_maxNoPartTransOpt = (m_parameter->GetParam("max-partial-trans-opt").size() > 0)
+                        ? Scan<size_t>(m_parameter->GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
+
+  m_maxPhraseLength = (m_parameter->GetParam("max-phrase-length").size() > 0)
+                      ? Scan<size_t>(m_parameter->GetParam("max-phrase-length")[0]) : DEFAULT_MAX_PHRASE_LENGTH;
+
+  m_cubePruningPopLimit = (m_parameter->GetParam("cube-pruning-pop-limit").size() > 0)
+                          ? Scan<size_t>(m_parameter->GetParam("cube-pruning-pop-limit")[0]) : DEFAULT_CUBE_PRUNING_POP_LIMIT;
+
+  m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
+                           ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
+
+  // unknown word processing
+  SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
+
+  // minimum Bayes risk decoding
+  SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
+  m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
+              Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
+  m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
+               Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
+
+  //lattice mbr
+  SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
+  if (m_useLatticeMBR && m_mbr) {
+    cerr << "Error: Cannot use both n-best mbr and lattice mbr together" << endl;
+    exit(1);
+  }
+
+  if (m_useLatticeMBR) m_mbr = true;
+
+  m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
+                  Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
+  m_lmbrThetas = Scan<float>(m_parameter->GetParam("lmbr-thetas"));
+  SetBooleanParameter( &m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
+  m_lmbrPrecision = (m_parameter->GetParam("lmbr-p").size() > 0) ?
+                    Scan<float>(m_parameter->GetParam("lmbr-p")[0]) : 0.8f;
+  m_lmbrPRatio = (m_parameter->GetParam("lmbr-r").size() > 0) ?
+                 Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
+  m_lmbrMapWeight = (m_parameter->GetParam("lmbr-map-weight").size() >0) ?
+                    Scan<float>(m_parameter->GetParam("lmbr-map-weight")[0]) : 0.0f;
+
+  //consensus decoding
+  SetBooleanParameter( &m_useConsensusDecoding, "consensus-decoding", false );
+  if (m_useConsensusDecoding && m_mbr) {
+    cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
+    exit(1);
+  }
+  if (m_useConsensusDecoding) m_mbr=true;
+
+
+  m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
+                        Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
+  m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
+
+
+  m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
+                                Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
+
+  // use of xml in input
+  if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
+  else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
+  else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
+  else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
+  else {
+    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, or ignore");
+    return prevParameter;
+  }
+  
+  //configure the translation systems with these tables
+  return prevParameter;
 }
 
 }

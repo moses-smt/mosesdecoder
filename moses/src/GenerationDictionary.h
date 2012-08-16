@@ -46,10 +46,13 @@ class GenerationDictionary : public Dictionary, public DecodeFeature
 {
   typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:
-  Collection m_collection;
+  // MJD: Changed m_collection to pointer, allows for shallow copy
+  Collection* m_collection;
   // 1st = source
   // 2nd = target
   std::string						m_filePath;
+  // MJD: Reference counting, prevents repeated freeing of shallow copies
+  size_t* m_refCount;
 
 public:
   /** constructor.
@@ -60,6 +63,10 @@ public:
     ScoreIndexManager &scoreIndexManager,
     const std::vector<FactorType> &input,
     const std::vector<FactorType> &output);
+  
+  // MJD: Added copy contructor
+  GenerationDictionary(const GenerationDictionary& g);
+  
   virtual ~GenerationDictionary();
 
   // returns Generate
@@ -78,7 +85,8 @@ public:
   * NOT the number of lines in the generation table
   */
   size_t GetSize() const {
-    return m_collection.size();
+    // MJD: m_collection is now a pointer
+    return m_collection->size();
   }
   /** returns a bag of output words, OutputWordCollection, for a particular input word.
   *	Or NULL if the input word isn't found. The search function used is the WordComparer functor

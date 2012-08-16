@@ -65,6 +65,11 @@ public:
   bool LoadParam(int argc, char* argv[]);
   bool LoadParam(const std::string &filePath);
   void Explain();
+  
+  // MJD: These two functions are used to overwrite data in Parameter objects
+  // with dynamic parameters
+  void Overwrite(const Parameter& p);
+  bool LoadAnyParam(int argc, char* argv[]);
 
   /** return a vector of strings holding the whitespace-delimited values on the ini-file line corresponding to the given parameter name */
   const PARAM_VEC &GetParam(const std::string &paramName) {

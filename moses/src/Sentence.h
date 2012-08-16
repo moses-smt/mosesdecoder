@@ -29,6 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputType.h"
 #include "XmlOption.h"
 
+#include "SpecOpt.h"
+
 namespace Moses
 {
 
@@ -53,6 +55,9 @@ private:
    */
   std::vector <TranslationOption*> m_xmlOptionsList;
   std::vector <bool> m_xmlCoverageMap;
+  
+  // MJD: specopt object
+  SpecOpt m_specificOptions;
 
   NonTerminalSet m_defaultLabelSet;
 
@@ -79,6 +84,11 @@ public:
   //! Calls Phrase::GetSize(). Implements abstract InputType::GetSize()
   size_t GetSize() const {
     return Phrase::GetSize();
+  }
+  
+  // MJD: Returns the SpecOpt object holding dynamically set parameters
+  const SpecOpt& GetSpecificOptions() const {
+    return m_specificOptions;
   }
 
   //! Returns true if there were any XML tags parsed that at least partially covered the range passed

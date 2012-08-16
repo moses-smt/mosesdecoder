@@ -28,7 +28,11 @@ public:
   ScoreIndexManager() : m_last(0) {}
 
   //! new score producer to manage. Producers must be inserted in the order they are created
-  void AddScoreProducer(const ScoreProducer* producer);
+    
+  // MJD: Added default parameter "preserved=false". By default no change in
+  // behaviour. If set to "true" no new ScoreBookkeepingID will be assigned.
+  // This is neccessary for shallow copying scoreproduers of any kind.
+  void AddScoreProducer(const ScoreProducer* producer, bool preserve = false);
   void InitFeatureNames();
 
   //! starting score index for a particular score producer with scoreBookkeepingID

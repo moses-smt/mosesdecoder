@@ -35,10 +35,31 @@ namespace Moses
 {
 GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager,
     const std::vector<FactorType> &input,
-    const std::vector<FactorType> &output)
-  : Dictionary(numFeatures), DecodeFeature(input,output)
+    const std::vector<FactorType> &output) // MJD: m_collection is now pointer
+  : Dictionary(numFeatures), DecodeFeature(input,output), m_collection(new Collection())
 {
   scoreIndexManager.AddScoreProducer(this);
+}
+
+// MJD: Copy constructor with reference counting
+GenerationDictionary::GenerationDictionary(const GenerationDictionary& g)
+  : Dictionary(g), DecodeFeature(g), m_filePath(g.m_filePath), m_refCount(g.m_refCount), m_collection(g.m_collection)
+{
+  (*m_refCount)++;
+} 
+
+// MJD: destructor with reference counting
+GenerationDictionary::~GenerationDictionary()
+{
+  (*m_refCount)--;
+  if(*m_refCount == 0) {
+    Collection::const_iterator iter;
+    for (iter = m_collection->begin() ; iter != m_collection->end() ; ++iter) {
+      delete iter->first;
+    }
+    delete m_collection;
+    delete m_refCount;
+  }
 }
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
@@ -96,9 +117,9 @@ bool GenerationDictionary::Load(const std::string &filePath, FactorDirection dir
     for (size_t i = 0; i < numFeatureValuesInConfig; i++)
       scores[i] = FloorScore(TransformScore(Scan<float>(token[2+i])));
 
-    Collection::iterator iterWord = m_collection.find(inputWord);
-    if (iterWord == m_collection.end()) {
-      m_collection[inputWord][outputWord].Assign(this, scores);
+    Collection::iterator iterWord = m_collection->find(inputWord);
+    if (iterWord == m_collection->end()) {
+      (*m_collection)[inputWord][outputWord].Assign(this, scores);
     } else {
       // source word already in there. delete input word to avoid mem leak
       (iterWord->second)[outputWord].Assign(this, scores);
@@ -108,14 +129,6 @@ bool GenerationDictionary::Load(const std::string &filePath, FactorDirection dir
 
   inFile.Close();
   return true;
-}
-
-GenerationDictionary::~GenerationDictionary()
-{
-  Collection::const_iterator iter;
-  for (iter = m_collection.begin() ; iter != m_collection.end() ; ++iter) {
-    delete iter->first;
-  }
 }
 
 size_t GenerationDictionary::GetNumScoreComponents() const
@@ -138,8 +151,8 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
 {
   const OutputWordCollection *ret;
 
-  Collection::const_iterator iter = m_collection.find(&word);
-  if (iter == m_collection.end()) {
+  Collection::const_iterator iter = m_collection->find(&word);
+  if (iter == m_collection->end()) {
     // can't find source phrase
     ret = NULL;
   } else {

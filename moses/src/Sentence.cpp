@@ -87,6 +87,9 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // remove extra spaces
   line = Trim(line);
 
+  // MJD: Grab and strip dynamically set parameters.
+  m_specificOptions = SpecOpt(line);
+  
   // if sentences is specified as "<seg id=1> ... </seg>", extract id
   meta = ProcessAndStripSGML(line);
   if (meta.find("id") != meta.end()) {
