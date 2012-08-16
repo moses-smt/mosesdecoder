@@ -150,6 +150,13 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
+  
+  // MJD: WIPO-specific parameter: special n-best list format
+  AddParam("wipo-n-best", "use WIPO-specific n-best list format");
+  
+  // MJD: Here you can provide a text file with named parameters, they get
+  // preloaded and can be called with <specOpt name="dummy"/>
+  AddParam("wipo-specopt-file", "initialize WIPO-specific parameters from given file");
 }
 
 Parameter::~Parameter()

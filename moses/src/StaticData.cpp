@@ -407,6 +407,9 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   if (m_useConsensusDecoding) m_mbr=true;
   
+  // MJD: Activate WIPO-specific n-best list format, probably useless for anyone else.
+  SetBooleanParameter( &m_nBestWipo, "wipo-n-best", false );
+  
   // Compact phrase table and reordering model
   SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
   SetBooleanParameter( &m_minlexrMemory, "minlexr-memory", false );

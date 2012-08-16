@@ -201,6 +201,9 @@ protected:
   bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
+  // MJD: Parameter for WIPO-specific n-best list format
+  bool m_nBestWipo;
+  
   // Whether to load compact phrase table and reordering table into memory
   bool m_minphrMemory;
   bool m_minlexrMemory;
@@ -387,6 +390,11 @@ public:
   }
   bool NBestIncludesAlignment() const {
     return m_nBestIncludesAlignment;
+  }
+  
+  // MJD: WIPO-specific n-best list
+  bool UseNBestWipoFormat() const {
+     return m_nBestWipo;
   }
   
   bool UseMinphrInMemory() const {

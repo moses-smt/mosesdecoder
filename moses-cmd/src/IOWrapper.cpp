@@ -369,12 +369,19 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
   bool includeAlignment = staticData.NBestIncludesAlignment();
   bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 
+  // MJD: WIPO-specific n-best list format. Will occurr a few times in here.
+  bool useWipoFormat = staticData.UseNBestWipoFormat();
+  
   TrellisPathList::const_iterator iter;
+  if(useWipoFormat)
+    out << "OUT: " << std::distance(nBestList.begin(), nBestList.end()) << std::endl;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
     const std::vector<const Hypothesis *> &edges = path.GetEdges();
 
     // print the surface factor of the translation
+    if(useWipoFormat)
+      out << "OUT: ";
     out << translationId << " ||| ";
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
