@@ -181,6 +181,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
       abort();
     }
 
+    if (tokens.size() ==  4) {
+      tokens.push_back("1 1"); //dummy rule count for glue rules
+    }
+
     const string &sourcePhraseString = tokens[0]
                , &targetPhraseString = tokens[1]
                , &scoreString        = tokens[2]
