@@ -101,18 +101,16 @@ else {
   }
 }
  
-#Are we linking static binaries against shared boost?
-boost-auto-shared = [ auto-shared "boost_program_options" : $(L-boost-search) ] ;
 #Convenience rule for boost libraries.  Defines library boost_$(name).  
 rule boost-lib ( name macro : deps * ) {
   #Link multi-threaded programs against the -mt version if available.  Old 
   #versions of boost do not have -mt tagged versions of all libraries.   Sadly,
   #boost.jam does not handle this correctly.  
-  if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt-$(boost-lib-version)" ] {
-    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)-$(boost-lib-version) : : <library>$(deps) ;
-    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt-$(boost-lib-version) : : <library>$(deps) ;
+  if [ test_flags $(L-boost-search)" -lboost_"$(name)"-mt$(boost-lib-version)" ] {
+    lib inner_boost_$(name) : : <threading>single $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
+    lib inner_boost_$(name) : : <threading>multi $(boost-search) <name>boost_$(name)-mt$(boost-lib-version) : : <library>$(deps) ;
   } else {
-    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name)-$(boost-lib-version) : : <library>$(deps) ;
+    lib inner_boost_$(name) : : $(boost-search) <name>boost_$(name)$(boost-lib-version) : : <library>$(deps) ;
   }
 
   alias boost_$(name) : inner_boost_$(name) : $(boost-auto-shared) : : <link>shared:<define>BOOST_$(macro) $(boost-include) ;
@@ -130,7 +128,17 @@ rule boost ( min-version ) {
   if $(boost-version) < $(min-version) && $(CLEANING) = no {
     exit You have Boost $(boost-version).  This package requires Boost at least $(min-version) (and preferably newer). : 1 ;
   }
+  # If matching version tags exist, use them.  
   boost-lib-version = [ MATCH "#define BOOST_LIB_VERSION \"([^\"]*)\"" : $(boost-shell[1]) ] ;
+  if [ test_flags $(L-boost-search)" -lboost_program_options-"$(boost-lib-version) ] {
+    boost-lib-version = "-"$(boost-lib-version) ;
+  } else {
+    boost-lib-version = "" ;
+  }
+
+  #Are we linking static binaries against shared boost?
+  boost-auto-shared = [ auto-shared "boost_program_options"$(boost-lib-version) : $(L-boost-search) ] ;
+
   #See tools/build/v2/contrib/boost.jam in a boost distribution for a table of macros to define.   
   boost-lib system SYSTEM_DYN_LINK ;
   boost-lib thread THREAD_DYN_DLL : boost_system ;
