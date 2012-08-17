@@ -1240,10 +1240,10 @@ int main(int argc, char** argv) {
 			  }
 			  
 			  if (proceed) {
+			    ScoreComponentCollection totalBinary;
 #ifdef MPI_ENABLE
 			    // average across processes
 			    mpi::reduce(world, tmpAverageWeights, mixedAverageWeights, SCCPlus(), 0);
-			    ScoreComponentCollection totalBinary;
 			    if (sparseAverage) {
 			      ScoreComponentCollection binary;
 			      binary.SetToBinaryOf(mosesWeights);
