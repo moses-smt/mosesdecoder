@@ -1,0 +1,47 @@
+<html lang="fr">
+<head>
+<style>
+</style>
+<link href="http://ajax.googleapis.com/ajax/libs/jqueryui/1.8/themes/base/jquery-ui.css" rel="stylesheet"
+      type="text/css"/>
+<script src="lib/jquery-1.6.4.js" type="text/javascript"></script>
+<script src="lib/jquery-ui-1.8.16.custom.js" type="text/javascript"></script>
+
+<link rel="stylesheet" href="css/common.css" type="text/css"/>
+<script>
+$(document).ready(function () {    
+	$( "input:submit").button();
+        $( "input:submit").click(function(){
+          $.ajax({
+                url: "Translate",
+                type: "POST",
+                context: document.body,
+                data: {text: $("#input_text").val()}
+                }).done(function(data) { 
+                    $("#output_text").val(data);
+                });
+        })
+                
+
+
+});
+</script>
+<title>Translate FR-EN</title>
+<meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+</head>
+<body>
+<div id="north_tab">
+    <h2>Translate FR-EN</h2>
+</div>
+<div id="south_tab">
+    <textarea id="input_text">
+    </textarea>
+
+    <input id="translate" type="submit" value="Translate">
+
+   	<textarea id="output_text" readonly="readonly">
+    	</textarea>
+</div>
+
+</body>
+</html>

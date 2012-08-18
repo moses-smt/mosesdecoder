@@ -109,6 +109,7 @@ public:
 #ifdef BOOST_HAS_PTHREADS
     pthread_t tid = pthread_self();
 #else
+	typedef void * pthread_t;
     pthread_t tid = 0;
 #endif
     std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;

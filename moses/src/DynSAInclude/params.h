@@ -6,7 +6,7 @@
 #include <set>
 #include <vector>
 #include "util/check.hh"
-#include "file.h"
+#include "FileHandler.h"
 #include "utils.h"
 #include "types.h"
 

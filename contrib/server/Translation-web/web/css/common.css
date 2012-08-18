@@ -1,0 +1,22 @@
+/* 
+    Document   : common
+    Created on : Jul 31, 2012, 11:53:29 AM
+    Author     : ulanov
+    Description:
+        Purpose of the stylesheet follows.
+*/
+
+root { 
+    display: block;
+}
+
+body {font-size:small; font-family: Verdana,Arial,sans-serif;height:auto; width: auto;}
+span {font-size:medium;}
+
+#north_tab {height: 10%; width: 100%; float: top;}
+#south_tab {height: 80%; width: 100%; float: bottom;}
+
+#input_text {height: 50%; width: 30%; margin-right: 10px; float: left;}
+#output_text {height: 50%; width: 30%; margin-right: 10px; float: left;}
+
+#translate {float: left; margin-right: 10px;}

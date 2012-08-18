@@ -43,9 +43,9 @@ void PhraseDictionaryDynSuffixArray::InitializeForInput(const InputType& input)
   CHECK(&input == &input);
 }
 
-void PhraseDictionaryDynSuffixArray::CleanUp()
+void PhraseDictionaryDynSuffixArray::CleanUp(const InputType &source)
 {
-  m_biSA->CleanUp();
+  m_biSA->CleanUp(source);
 }
 
 const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCollection(const Phrase& src) const

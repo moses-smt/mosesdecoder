@@ -1312,7 +1312,7 @@ sub check_if_crashed {
 			     'no such file or directory','unknown option',
 			     'died at','exit code','permission denied',
            'segmentation fault','abort',
-           'can\'t locate') {
+           'can\'t locate', 'unrecognized option') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
 		if (defined($NOT_ERROR{&defined_step_id($i)})) {

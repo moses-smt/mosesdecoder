@@ -151,7 +151,7 @@ int main(int argc, char* argv[])
     params->Explain();
     exit(1);
   }
-  if (!StaticData::LoadDataStatic(params)) {
+  if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
   }
 
@@ -180,7 +180,7 @@ int main(int argc, char* argv[])
     ++lineCount;
     Sentence sentence;
     const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-    Manager manager(*source,staticData.GetSearchAlgorithm(), &system);
+    Manager manager(lineCount, *source, staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();
     TrellisPathList nBestList;
     manager.CalcNBest(nBestSize, nBestList,true);
