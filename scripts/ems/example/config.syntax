@@ -145,7 +145,7 @@ settings = "-interpolate -kndiscount -unk"
 
 # irstlm
 #lm-training = "$moses-script-dir/generic/trainlm-irst.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/lm"
-#settings = ""
+#settings = "-s improved-kneser-ney"
 
 # order of the language model
 order = 5

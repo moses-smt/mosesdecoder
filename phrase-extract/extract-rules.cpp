@@ -120,6 +120,7 @@ int main(int argc, char* argv[])
        << "rule extraction from an aligned parallel corpus\n";
 
   RuleExtractionOptions options;
+  int sentenceOffset = 0;
 #ifdef WITH_THREADS
   int thread_count = 1;
 #endif
@@ -274,6 +275,12 @@ int main(int argc, char* argv[])
                strcmp(argv[i],"--Threads") == 0) {
       thread_count = atoi(argv[++i]);
 #endif
+    } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
+      if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
+        cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
+        exit(1);
+      }
+      sentenceOffset = atoi(argv[++i]);
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -314,7 +321,7 @@ int main(int argc, char* argv[])
 #endif
 
   // loop through all sentence pairs
-  size_t i=0;
+  size_t i=sentenceOffset;
   while(true) {
     i++;
     if (i%1000 == 0) cerr << "." << flush;

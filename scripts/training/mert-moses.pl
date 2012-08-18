@@ -1158,7 +1158,7 @@ sub get_featlist_from_file {
     my ($longname, $feature, $value) = ($1, $2, $3);
     next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
-      if $value !~ /^[+-]?[0-9.e]+$/;
+      if $value !~ /^[+-]?[0-9.\-e]+$/;
     push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
       if !defined $ABBR2FULL{$feature};
     push @names, $feature;
@@ -1195,7 +1195,7 @@ sub get_order_of_scores_from_nbestlist {
       $sparse = 1;
     } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.\-e]+$/) {
       if (!$sparse) {
         # a score found, remember it
         die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"

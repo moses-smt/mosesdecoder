@@ -5,7 +5,7 @@ use Getopt::Long "GetOptions";
 
 my $MAX_LENGTH = 4;
 
-my ($system,$system_alignment,$segmentation,$reference,$dir,$input,$corpus,$ttable,@FACTORED_TTABLE,$score_options,$hierarchical,$output_corpus,$alignment,$biconcor,$input_factors,$input_factor_names,$output_factor_names,$precision_by_coverage,$precision_by_coverage_factor,$coverage_dir);
+my ($system,$system_alignment,$segmentation,$reference,$dir,$input,$corpus,$ttable,@FACTORED_TTABLE,$score_options,$hierarchical,$output_corpus,$alignment,$biconcor,$input_factors,$input_factor_names,$output_factor_names,$precision_by_coverage,$precision_by_coverage_factor,$coverage_dir,$search_graph);
 if (!&GetOptions('system=s' => \$system, # raw output from decoder
 		 'system-alignment=s' => \$system_alignment, # word alignment of system output
                  'reference=s' => \$reference, # tokenized reference
@@ -25,6 +25,7 @@ if (!&GetOptions('system=s' => \$system, # raw output from decoder
                  'alignment-file=s' => \$alignment, # alignment of parallel corpus
 		 'coverage=s' => \$coverage_dir, # already computed coverage, stored in this dir
                  'biconcor=s' => \$biconcor, # binary for bilingual concordancer
+                 'search-graph=s' => \$search_graph, # visualization of search graph
 		 'hierarchical' => \$hierarchical) || # hierarchical model?
     !defined($dir)) {
 	die("ERROR: syntax: analysis.perl -system FILE -reference FILE -dir DIR [-input FILE] [-input-corpus FILE] [-ttable FILE] [-score-options SETTINGS] [-segmentation FILE] [-output-corpus FILE] [-alignment-file FILE] [-biconcor BIN]");	
@@ -130,6 +131,11 @@ if (defined($precision_by_coverage)) {
 # bilingual concordance -- not used by experiment.perl
 if (defined($corpus) && defined($output_corpus) && defined($alignment) && defined($biconcor)) {
   `$biconcor -s $dir/biconcor -c $corpus -t $output_corpus -a $alignment`;
+}
+
+# process search graph for visualization
+if (defined($search_graph)) {
+  &process_search_graph($search_graph);
 }
 
 sub best_matches {
@@ -338,7 +344,7 @@ sub ttable_coverage {
     # handling hierarchical
     $in =~ s/ \[[^ \]]+\]$//; # remove lhs nt
     next if $in =~ /\[[^ \]]+\]\[[^ \]]+\]/; # only consider flat rules
-    $in = &get_factor_phrase($factor,$in) unless !defined($factor) || $factor eq "0"; 
+    $in = &get_factor_phrase($factor,$in) if defined($factor) && $factor eq "0"; 
     $scores = $COLUMN[4] if defined($hierarchical); #scalar @COLUMN == 5;
     my @IN = split(/ /,$in);
     $size = scalar @IN;
@@ -1102,4 +1108,29 @@ sub hs_create_in_span {
     $THIS_SPAN = $$MATRIX[scalar(@{$MATRIX})-1];
     $$RULE{'end_div_in'} = $#{$MATRIX};
     $$THIS_SPAN{'closing'}{$$RULE{'depth'}} = 1;
+}
+
+sub process_search_graph {
+  my ($search_graph_file) = @_;
+  open(OSG,$search_graph) || die("ERROR: could not open search graph file '$search_graph_file'");
+  `mkdir -p $dir/search-graph`;
+  my $last_sentence = -1;
+  while(<OSG>) {
+    /^(\d+) (\d+)\-?\>?(\S*) (.+) :(.*): pC=([\d\-\.]+), c=([\d\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] \<\</ || die("ERROR: buggy search graph line: $_"); 
+    my ($sentence,$id,$recomb,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score) 
+      = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+    chop($alignment) if $alignment;
+    chop($children) if $children;
+    $recomb = 0 unless $recomb;
+    $children = "" unless defined $children;
+    $alignment = "" unless defined $alignment;
+    if ($last_sentence != $sentence) {
+      close(SENTENCE) if $sentence;
+      open(SENTENCE,">$dir/search-graph/graph.$sentence");
+      $last_sentence = $sentence;
+    }
+    print SENTENCE "$id\t$recomb\t$from\t$to\t$output\t$alignment\t$children\t$rule_score\t$heuristic_rule_score\t$hyp_score\n";
+  }
+  close(OSG);
+  close(SENTENCE);
 }

@@ -30,10 +30,13 @@ protected:
 public:
   float pcfgSum;
   float count;
+  size_t sentenceId;
+  std::string domain;
+
   std::vector< std::set<size_t> > alignedToT;
   std::vector< std::set<size_t> > alignedToS;
 
-  void create( char*, int );
+  void create( char*, int, bool );
   void clear();
   bool equals( const PhraseAlignment& );
   bool match( const PhraseAlignment& );

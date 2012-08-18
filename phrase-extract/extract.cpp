@@ -95,6 +95,8 @@ int maxPhraseLength;
 bool orientationFlag = false;
 bool translationFlag = true;
 bool sentenceIdFlag = false; //create extract file with sentence id
+int sentenceOffset = 0;
+bool includeSentenceIdFlag = false; //include sentence id in extract file
 bool onlyOutputSpanInfo = false;
 bool gzOutput = false;
 
@@ -106,7 +108,7 @@ int main(int argc, char* argv[])
         << "phrase extraction from an aligned parallel corpus\n";
 
   if (argc < 6) {
-    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoTTable | --SentenceId]\n";
+    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --IncludeSentenceId | --SentenceOffset n ]\n";
     exit(1);
   }
   char* &fileNameE = argv[1];
@@ -124,6 +126,14 @@ int main(int argc, char* argv[])
       translationFlag = false;
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       sentenceIdFlag = true;  
+    } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
+      includeSentenceIdFlag = true;  
+    } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
+      if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
+        cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
+        exit(1);
+      }
+      sentenceOffset = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       gzOutput = true;  
     } else if(strcmp(argv[i],"--model") == 0) {
@@ -135,7 +145,7 @@ int main(int argc, char* argv[])
       char* modelName = strtok(modelParams, "-");
       char* modelType = strtok(NULL, "-");
 
-      REO_MODEL_TYPE intModelType;
+      // REO_MODEL_TYPE intModelType;
 
       if(strcmp(modelName, "wbe") == 0) {
         wordModel = true;
@@ -217,7 +227,7 @@ int main(int argc, char* argv[])
     extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
-  int i=0;
+  int i = sentenceOffset;
   while(true) {
     i++;
     if (i%10000 == 0) cerr << "." << flush;
@@ -669,9 +679,11 @@ void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, i
   if (orientationFlag)
     extractFileOrientation << orientationInfo;
 
-  if (sentenceIdFlag) {
+  if (sentenceIdFlag)
     extractFileSentenceId << sentence.sentenceID;
-  }
+
+  if (includeSentenceIdFlag)
+    extractFile << " ||| " << sentence.sentenceID;
 
   if (translationFlag) extractFile << "\n";
   if (translationFlag) extractFileInv << "\n";
@@ -708,4 +720,3 @@ void extractBase( SentenceAlignment &sentence )
 }
 
 }
-
