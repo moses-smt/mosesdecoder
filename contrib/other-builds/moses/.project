@@ -1337,6 +1337,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/ChartRuleLookupManagerMemory.h</locationURI>
 		</link>
 		<link>
+			<name>CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</locationURI>
+		</link>
+		<link>
 			<name>CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</locationURI>
@@ -1382,6 +1392,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>DynSAInclude/FileHandler.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/FileHandler.cpp</locationURI>
+		</link>
+		<link>
+			<name>DynSAInclude/FileHandler.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/FileHandler.h</locationURI>
+		</link>
+		<link>
 			<name>DynSAInclude/Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/Jamfile</locationURI>
@@ -1397,24 +1417,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/RandLMFilter.h</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>DynSAInclude/fdstream.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/fdstream.h</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/file.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/file.cpp</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/file.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/file.h</locationURI>
 		</link>
 		<link>
 			<name>DynSAInclude/hash.h</name>
@@ -1677,6 +1682,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryALSuffixArray.h</locationURI>
 		</link>
 		<link>
+			<name>RuleTable/PhraseDictionaryFuzzyMatch.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryFuzzyMatch.cpp</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/PhraseDictionaryFuzzyMatch.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryFuzzyMatch.h</locationURI>
+		</link>
+		<link>
 			<name>RuleTable/PhraseDictionaryNodeSCFG.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryNodeSCFG.cpp</locationURI>
@@ -1832,12 +1847,7 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1</name>
+			<name>CYKPlusParser/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1862,6 +1872,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>RuleTable/bin/gcc-4.6</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>Scope3Parser/bin/darwin-4.2.1</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1882,12 +1897,7 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release</name>
+			<name>CYKPlusParser/bin/gcc-4.6/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1903,6 +1913,11 @@
 		</link>
 		<link>
 			<name>RuleTable/bin/darwin-4.2.1/release</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1927,12 +1942,7 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on</name>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1953,6 +1963,11 @@
 		</link>
 		<link>
 			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1982,12 +1997,7 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static</name>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2018,6 +2028,11 @@
 		</link>
 		<link>
 			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2072,12 +2087,7 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/DotChartOnDisk.o</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2250,6 +2260,11 @@
 			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/UTrieNode.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/UTrieNode.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
@@ -2787,24 +2802,39 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libCYKPlusParser.a</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</name>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerCYKPlus.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerCYKPlus.o</locationURI>
 		</link>
 		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</name>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerMemory.o</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerMemory.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerMemoryPerSentence.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerMemoryPerSentence.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerOnDisk.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartRuleLookupManagerOnDisk.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DotChartInMemory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DotChartInMemory.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DotChartOnDisk.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DotChartOnDisk.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libCYKPlusParser.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libCYKPlusParser.a</locationURI>
 		</link>
 		<link>
 			<name>LM/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/Base.o</name>
@@ -2982,6 +3012,76 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</locationURI>
 		</link>
 		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderCompact.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderCompact.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderFactory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderFactory.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderHiero.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderHiero.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderStandard.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderStandard.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryALSuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryALSuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryFuzzyMatch.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryFuzzyMatch.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryNodeSCFG.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryNodeSCFG.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryOnDisk.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryOnDisk.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionarySCFG.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionarySCFG.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryTMExtract.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryTMExtract.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Trie.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Trie.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrie.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrie.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrieNode.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrieNode.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</locationURI>
+		</link>
+		<link>
 			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</locationURI>
@@ -3020,36 +3120,6 @@
 			<name>bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/file.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/file.o</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/params.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/params.o</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/file.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/file.o</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/params.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/params.o</locationURI>
-		</link>
-		<link>
-			<name>DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
