@@ -241,12 +241,12 @@ m_scoreIndexManager(ScoreIndexManager())
     const TranslationSystem& oldSystem = it->second;
     std::string systemId = oldSystem.GetId();
     
-    DistortionScoreProducer* dsc;
+    DistortionScoreProducer* dsc = 0;
     for(std::vector<DistortionScoreProducer*>::const_iterator it = m_distortionScoreProducers.begin(); it != m_distortionScoreProducers.end(); it++)
       if(oldSystem.GetDistortionProducer()->GetScoreBookkeepingID() == (*it)->GetScoreBookkeepingID())
         dsc = *it;
     
-    WordPenaltyProducer* wpp;
+    WordPenaltyProducer* wpp = 0;
     for(std::vector<WordPenaltyProducer*>::const_iterator it = m_wordPenaltyProducers.begin(); it != m_wordPenaltyProducers.end(); it++)
       if(oldSystem.GetWordPenaltyProducer()->GetScoreBookkeepingID() == (*it)->GetScoreBookkeepingID())
         wpp = *it;
