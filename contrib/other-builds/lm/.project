@@ -327,6 +327,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/trie_sort.hh</locationURI>
 		</link>
 		<link>
+			<name>value.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/value.hh</locationURI>
+		</link>
+		<link>
+			<name>value_build.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/value_build.cc</locationURI>
+		</link>
+		<link>
+			<name>value_build.hh</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/lm/value_build.hh</locationURI>
+		</link>
+		<link>
 			<name>virtual_interface.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/virtual_interface.cc</locationURI>
