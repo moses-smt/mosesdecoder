@@ -8,7 +8,12 @@
 
 namespace Moses
 {
+  
+#ifdef WITH_THREADS
+std::map<boost::thread::id, unsigned int> ScoreProducer::s_globalScoreBookkeepingIdCounterThreadMap;
+#else
 unsigned int ScoreProducer::s_globalScoreBookkeepingIdCounter(0);
+#endif
 
 ScoreProducer::~ScoreProducer() {}
 

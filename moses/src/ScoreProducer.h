@@ -6,6 +6,9 @@
 #include <string>
 #include <limits>
 
+#include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
+
 namespace Moses
 {
 
@@ -24,12 +27,13 @@ class FFState;
 class ScoreProducer
 {
 private:
+#ifdef WITH_THREADS
+  boost::mutex m_mutex;
+  static std::map<boost::thread::id, unsigned int> s_globalScoreBookkeepingIdCounterThreadMap;  
+#else
   static unsigned int s_globalScoreBookkeepingIdCounter;
+#endif
   unsigned int m_scoreBookkeepingId;
-
-  // MJD: Commented out in order to allow shallow copying of score producers
-  // since this is called by other copy constructors
-  //ScoreProducer(const ScoreProducer&);  // don't implement
 
 #define UNASSIGNED std::numeric_limits<unsigned int>::max()
 
@@ -38,14 +42,24 @@ protected:
   // are constructed before they know how many scores they have
   ScoreProducer();
   virtual ~ScoreProducer();
+  
+  //MJD: Implemented to allow shallow and empty copies
+  ScoreProducer(const ScoreProducer& sp) {}
 
 public:
+  
   //! contiguous id
   unsigned int GetScoreBookkeepingID() const {
     return m_scoreBookkeepingId;
   }
-  void CreateScoreBookkeepingID()	{
-    m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;
+  void CreateScoreBookkeepingID() {
+#ifdef WITH_THREADS
+    boost::mutex::scoped_lock lock(m_mutex);
+    unsigned int& counterRef = s_globalScoreBookkeepingIdCounterThreadMap[boost::this_thread::get_id()];
+#else
+    unsigned int& counterRef = s_globalScoreBookkeepingIdCounter;
+#endif
+    m_scoreBookkeepingId = counterRef++;
   }
   //! returns the number of scores that a subclass produces.
   //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc

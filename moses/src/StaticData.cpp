@@ -159,38 +159,38 @@ m_cubePruningPopLimit(s.m_cubePruningPopLimit), m_cubePruningDiversity(s.m_cubeP
 m_ruleLimit(s.m_ruleLimit), m_inputDefaultNonTerminal(s.m_inputDefaultNonTerminal),
 m_sourceLabelOverlap(s.m_sourceLabelOverlap), m_unknownLHS(s.m_unknownLHS),
 m_labeledNBestList(s.m_labeledNBestList), m_nBestIncludesAlignment(s.m_nBestIncludesAlignment),
-m_nBestWipo(s.m_nBestWipo), m_minphrMemory(s.m_minphrMemory), m_minlexrMemory(s.m_minlexrMemory)
-{ 
+m_nBestWipo(s.m_nBestWipo), m_minphrMemory(s.m_minphrMemory), m_minlexrMemory(s.m_minlexrMemory),
+m_scoreIndexManager(ScoreIndexManager())
+{
+  //m_scoreIndexManager.SetPreserve(true);
   m_parameter = new Parameter(*(s.m_parameter));
   
   for(std::vector<DistortionScoreProducer*>::const_iterator it = s.m_distortionScoreProducers.begin(); it != s.m_distortionScoreProducers.end(); it++) {
     DistortionScoreProducer* dsp = new DistortionScoreProducer(**it);
     m_distortionScoreProducers.push_back(dsp);
-    m_scoreIndexManager.AddScoreProducer(dsp, true);
+    m_scoreIndexManager.AddScoreProducer(dsp);
   }
 
   for(std::vector<WordPenaltyProducer*>::const_iterator it = s.m_wordPenaltyProducers.begin(); it != s.m_wordPenaltyProducers.end(); it++) {
     WordPenaltyProducer* wpp = new WordPenaltyProducer(**it);
     m_wordPenaltyProducers.push_back(wpp);
-    m_scoreIndexManager.AddScoreProducer(wpp, true);
+    m_scoreIndexManager.AddScoreProducer(wpp);
   }
   
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer(*(s.m_unknownWordPenaltyProducer));
-  m_scoreIndexManager.AddScoreProducer(m_unknownWordPenaltyProducer, true);
+  m_scoreIndexManager.AddScoreProducer(m_unknownWordPenaltyProducer);
   
   for(std::vector<LexicalReordering*>::const_iterator it = s.m_reorderModels.begin(); it != s.m_reorderModels.end(); it++) {
     LexicalReordering* lrm = new LexicalReordering(**it);
     m_reorderModels.push_back(lrm);
-    m_scoreIndexManager.AddScoreProducer(lrm, true);
+    m_scoreIndexManager.AddScoreProducer(lrm);
   }
   
   for (LMList::const_iterator lmIt = s.m_languageModel.begin(); lmIt != s.m_languageModel.end(); ++lmIt) {
     LanguageModel* lm = (*lmIt)->Duplicate(m_scoreIndexManager);
-    // MJD: BIG PROBLEM HERE!
-    //m_scoreIndexManager.AddScoreProducer(lm, true);
     m_languageModel.Add(lm);
   }
-
+  
   #ifdef HAVE_SYNLM
   m_syntacticLanguageModel = new SyntacticLanguageModel(*(s.m_syntacticLanguageModel));
   #endif
@@ -198,13 +198,13 @@ m_nBestWipo(s.m_nBestWipo), m_minphrMemory(s.m_minphrMemory), m_minlexrMemory(s.
   for(std::vector<GenerationDictionary*>::const_iterator it = s.m_generationDictionary.begin(); it != s.m_generationDictionary.end(); it++) {
     GenerationDictionary* gen = new GenerationDictionary(**it);
     m_generationDictionary.push_back(gen);
-    m_scoreIndexManager.AddScoreProducer(gen, true);
+    m_scoreIndexManager.AddScoreProducer(gen);
   }
   
   for(std::vector<PhraseDictionaryFeature*>::const_iterator it = s.m_phraseDictionary.begin(); it != s.m_phraseDictionary.end(); it++) {
     PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(**it);
     m_phraseDictionary.push_back(pdf);
-    m_scoreIndexManager.AddScoreProducer(pdf, true);
+    m_scoreIndexManager.AddScoreProducer(pdf);
   }
    
   for (size_t i = 0; i < s.m_decodeGraphs.size(); ++i) {
@@ -296,6 +296,7 @@ m_nBestWipo(s.m_nBestWipo), m_minphrMemory(s.m_minphrMemory), m_minlexrMemory(s.
   
   m_maxFactorIdx[0] = s.m_maxFactorIdx[0];
   m_maxFactorIdx[1] = s.m_maxFactorIdx[1];
+  //m_scoreIndexManager.SetPreserve(false);
 }
 
 bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPath) {

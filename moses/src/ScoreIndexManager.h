@@ -28,11 +28,7 @@ public:
   ScoreIndexManager() : m_last(0) {}
 
   //! new score producer to manage. Producers must be inserted in the order they are created
-    
-  // MJD: Added default parameter "preserved=false". By default no change in
-  // behaviour. If set to "true" no new ScoreBookkeepingID will be assigned.
-  // This is neccessary for shallow copying scoreproduers of any kind.
-  void AddScoreProducer(const ScoreProducer* producer, bool preserve = false);
+  void AddScoreProducer(const ScoreProducer* producer);
   void InitFeatureNames();
 
   //! starting score index for a particular score producer with scoreBookkeepingID
@@ -55,8 +51,9 @@ public:
   void SerializeFeatureNamesToPB(hgmert::Hypergraph* hg) const;
 #endif
   void InitWeightVectorFromFile(const std::string& fnam, std::vector<float>* m_allWeights) const;
+  
 private:
-  ScoreIndexManager(const ScoreIndexManager&); // don't implement
+  //ScoreIndexManager(const ScoreIndexManager&); // don't implement
 
   std::vector<size_t> m_begins;
   std::vector<size_t> m_ends;
