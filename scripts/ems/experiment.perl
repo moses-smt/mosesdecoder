@@ -2690,7 +2690,7 @@ sub create_step {
     print STEP "cd $dir\n";
     print STEP "echo 'starting at '`date`' on '`hostname`\n";
     print STEP "mkdir -p $dir/$subdir\n\n";
-    print STEP "$cmd\n\n";
+    print STEP "/usr/bin/time --output=$file.TIME -p $cmd\n\n";
     print STEP "echo 'finished at '`date`\n";
     print STEP "touch $file.DONE\n";
     close(STEP);
