@@ -1583,6 +1583,12 @@ sub get_reordering {
 	my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
 	$cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
 	for my $mtype (keys %REORDERING_MODEL_TYPES) {
+                # * $mtype will be one of wbe, phrase, or hier
+                # * the value stored in $REORDERING_MODEL_TYPES{$mtype} is a concatenation of the "orient"
+                #   attributes such as "msd"
+                # * the "filename" attribute is appended to the filename, but actually serves as the main configuration specification
+                #   for reordering scoring. it holds a string such as "wbe-msd-didirectional-fe"
+                #   which has the more general format type-orient-dir-lang
 		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
 		foreach my $model (@REORDERING_MODELS) {
 			if ($model->{"type"} eq $mtype) {
