@@ -324,7 +324,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
       delete *i;
     options.erase(options.begin()+pfe_filter_limit,options.end());
   }
-//  if (pef_filter_only) return;
+  if (pef_filter_only) return;
 //   std::cerr << "f phrase: " << options.front()->f_phrase << "\n";
   SentIdSet fset;
   fset = find_occurrences(options.front()->f_phrase, f_sa, fsets);
