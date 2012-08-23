@@ -84,7 +84,6 @@ class LexicalReorderingTableCreator {
   public:
     LexicalReorderingTableCreator(std::string inPath,
                                   std::string outPath,
-                                  size_t numScoreComponent = 6,
                                   size_t orderBits = 10,
                                   size_t fingerPrintBits = 16,
                                   bool multipleScoreTrees = true,
