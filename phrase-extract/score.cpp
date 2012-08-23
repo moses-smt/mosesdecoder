@@ -57,6 +57,7 @@ bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool outputNTLengths = false;
+bool singletonFeature = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
@@ -69,9 +70,9 @@ Vocabulary vcbS;
 vector<string> tokenize( const char [] );
 
 void writeCountOfCounts( const string &fileNameCountOfCounts );
-void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
+void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile, bool isSingleton);
 PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile, bool isSingleton );
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
 double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
 set<string> functionWordList;
@@ -89,7 +90,7 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS]\n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] \n";
     exit(1);
   }
   string fileNameExtract = argv[1];
@@ -152,6 +153,9 @@ int main(int argc, char* argv[])
       minCountHierarchical -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
       outputNTLengths = true;
+    } else if (strcmp(argv[i],"--Singleton") == 0) {
+      singletonFeature = true;
+      cerr << "binary singleton feature\n";
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -201,6 +205,7 @@ int main(int argc, char* argv[])
   float lastCount = 0.0f;
   float lastPcfgSum = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
+  bool isSingleton = true;
   int i=0;
   char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
   lastLine[0] = '\0';
@@ -235,16 +240,22 @@ int main(int argc, char* argv[])
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
-      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
+      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
+      
       phrasePairsWithSameF.clear();
+      isSingleton = true;
       lastPhrasePair = NULL;
+    }
+    else
+    {
+      isSingleton = false;
     }
 
     // add phrase pairs to list, it's now the last one
     phrasePairsWithSameF.push_back( phrasePair );
     lastPhrasePair = &phrasePairsWithSameF.back();
   }
-  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
+  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
@@ -278,7 +289,7 @@ void writeCountOfCounts( const string &fileNameCountOfCounts )
 	countOfCountsFile.Close();
 }
 
-void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
+void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile, bool isSingleton )
 {
   if (phrasePair.size() == 0) return;
 
@@ -319,7 +330,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
   for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
   {
     const PhraseAlignmentCollection &group = **iter;
-    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile );
+    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile, isSingleton );
 
   }
   
@@ -437,7 +448,7 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
 
 }
 
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile )
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile, bool isSingleton )
 {
   if (phrasePair.size() == 0) return;
 
@@ -513,6 +524,10 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     phraseTableFile << " " << ( logProbFlag ? negLogProb*log(penalty) : penalty );
   }
 
+  if (singletonFeature) {
+    phraseTableFile << " " << (isSingleton?1:0);
+  }
+  
   // target-side PCFG score
   if (pcfgFlag && !inverseFlag) {
     phraseTableFile << " " << pcfgScore;
