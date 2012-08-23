@@ -205,7 +205,7 @@ template <class setType>
 setType ordered_set_intersect(setType & set_1, setType & set_2)
 {
     setType set_out;
-    std::set_intersection(set_1.begin(), set_1.end(), set_2.begin(), set_2.end(), set_out.begin());
+    std::set_intersection(set_1.begin(), set_1.end(), set_2.begin(), set_2.end(), inserter(set_out,set_out.begin()) );
     return set_out;
 }
 
@@ -324,7 +324,7 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
       delete *i;
     options.erase(options.begin()+pfe_filter_limit,options.end());
   }
-//  if (pef_filter_only) return;
+  if (pef_filter_only) return;
 //   std::cerr << "f phrase: " << options.front()->f_phrase << "\n";
   SentIdSet fset;
   fset = find_occurrences(options.front()->f_phrase, f_sa, fsets);
