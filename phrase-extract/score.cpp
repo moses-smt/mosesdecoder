@@ -550,6 +550,10 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
           int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
           phraseTableFile << sourcePos << "-" << j << " ";
         }
+        else if (wordAlignmentFlag) {
+          int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
+          phraseTableFile << sourcePos << "-" << j << " ";
+        }
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model
