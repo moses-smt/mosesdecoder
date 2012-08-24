@@ -364,7 +364,6 @@ void compute_cooc_stats_and_filter(std::vector<PTEntry*>& options)
 
 void prune_cache(PhraseSetMap & psm) {
   if(max_cache && psm.size() > max_cache) {
-    std::cerr << "Cache: " << psm.size() << std::endl;
     std::vector<clock_t> clocks;
     for(PhraseSetMap::iterator it = psm.begin(); it != psm.end(); it++) 
       clocks.push_back(it->second.second);
