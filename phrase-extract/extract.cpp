@@ -253,7 +253,7 @@ int main(int argc, char* argv[])
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
-	if (sentence.create( englishString, foreignString, alignmentString, i)) {
+	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
    	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileSentenceId);
       task->Run();
       delete task;

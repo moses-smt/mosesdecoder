@@ -1401,6 +1401,8 @@ sub score_phrase_phrase_extract {
     if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CountBinFeature ([\s\d]*\d)/) {
       $COUNT_BIN = $1;
     }
+    my $SINGLETON = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /Singleton/);
+
     my $UNALIGNED_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/);
     my ($UNALIGNED_FW_COUNT,$UNALIGNED_FW_F,$UNALIGNED_FW_E);
     if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty +(\S+) +(\S+)/) {
@@ -1418,6 +1420,7 @@ sub score_phrase_phrase_extract {
     $CORE_SCORE_OPTIONS .= " --LogProb" if $LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NegLogProb" if $NEG_LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
+	$CORE_SCORE_OPTIONS .= " --Singleton" if $SINGLETON;
 
     my $substep = 1;
     my $isParent = 1;

@@ -102,6 +102,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/AlignmentInfoCollection.h</locationURI>
 		</link>
 		<link>
+			<name>ApplicableRuleTrie.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/ApplicableRuleTrie.cpp</locationURI>
+		</link>
+		<link>
+			<name>ApplicableRuleTrie.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/ApplicableRuleTrie.h</locationURI>
+		</link>
+		<link>
 			<name>BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BilingualDynSuffixArray.cpp</locationURI>
@@ -270,6 +280,11 @@
 			<name>ChartTrellisPathList.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ChartTrellisPathList.h</locationURI>
+		</link>
+		<link>
+			<name>CompactPT</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT</locationURI>
 		</link>
 		<link>
 			<name>ConfusionNet.cpp</name>
@@ -442,6 +457,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FloydWarshall.h</locationURI>
 		</link>
 		<link>
+			<name>FuzzyMatchWrapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/FuzzyMatchWrapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>FuzzyMatchWrapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/FuzzyMatchWrapper.h</locationURI>
+		</link>
+		<link>
 			<name>GenerationDictionary.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/GenerationDictionary.cpp</locationURI>
@@ -537,6 +562,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/InputType.h</locationURI>
 		</link>
 		<link>
+			<name>IntermediateVarSpanNode.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/IntermediateVarSpanNode.h</locationURI>
+		</link>
+		<link>
 			<name>Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Jamfile</locationURI>
@@ -607,6 +637,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Manager.h</locationURI>
 		</link>
 		<link>
+			<name>Match.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Match.h</locationURI>
+		</link>
+		<link>
 			<name>NonTerminal.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/NonTerminal.cpp</locationURI>
@@ -660,6 +695,16 @@
 			<name>Parameter.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Parameter.h</locationURI>
+		</link>
+		<link>
+			<name>Parser.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/Parser.cpp</locationURI>
+		</link>
+		<link>
+			<name>Parser.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/Parser.h</locationURI>
 		</link>
 		<link>
 			<name>PartialTranslOptColl.cpp</name>
@@ -809,7 +854,7 @@
 		<link>
 			<name>RuleTable</name>
 			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable</locationURI>
 		</link>
 		<link>
 			<name>SRI.lo</name>
@@ -820,11 +865,6 @@
 			<name>SRI.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SRI.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>ScoreComponentCollection.cpp</name>
@@ -887,6 +927,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SearchNormal.h</locationURI>
 		</link>
 		<link>
+			<name>SearchNormalBatch.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/hieuhoang/moses/src/SearchNormalBatch.cpp</locationURI>
+		</link>
+		<link>
+			<name>SearchNormalBatch.h</name>
+			<type>1</type>
+			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/hieuhoang/moses/src/SearchNormalBatch.h</locationURI>
+		</link>
+		<link>
 			<name>Sentence.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Sentence.cpp</locationURI>
@@ -895,6 +945,21 @@
 			<name>Sentence.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Sentence.h</locationURI>
+		</link>
+		<link>
+			<name>SentenceAlignment.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/SentenceAlignment.cpp</locationURI>
+		</link>
+		<link>
+			<name>SentenceAlignment.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/SentenceAlignment.h</locationURI>
+		</link>
+		<link>
+			<name>SentenceMap.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/SentenceMap.h</locationURI>
 		</link>
 		<link>
 			<name>SentenceStats.cpp</name>
@@ -915,6 +980,26 @@
 			<name>SquareMatrix.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SquareMatrix.h</locationURI>
+		</link>
+		<link>
+			<name>StackLattice.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLattice.h</locationURI>
+		</link>
+		<link>
+			<name>StackLatticeBuilder.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLatticeBuilder.cpp</locationURI>
+		</link>
+		<link>
+			<name>StackLatticeBuilder.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLatticeBuilder.h</locationURI>
+		</link>
+		<link>
+			<name>StackLatticeSearcher.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLatticeSearcher.h</locationURI>
 		</link>
 		<link>
 			<name>StackVec.h</name>
@@ -940,6 +1025,16 @@
 			<name>StaticData.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.o</locationURI>
+		</link>
+		<link>
+			<name>SuffixArray.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/SuffixArray.cpp</locationURI>
+		</link>
+		<link>
+			<name>SuffixArray.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/SuffixArray.h</locationURI>
 		</link>
 		<link>
 			<name>SyntacticLanguageModel.cpp</name>
@@ -1180,6 +1275,31 @@
 			<name>Util.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Util.o</locationURI>
+		</link>
+		<link>
+			<name>VarSpanNode.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/VarSpanNode.h</locationURI>
+		</link>
+		<link>
+			<name>VarSpanTrieBuilder.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/VarSpanTrieBuilder.cpp</locationURI>
+		</link>
+		<link>
+			<name>VarSpanTrieBuilder.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/VarSpanTrieBuilder.h</locationURI>
+		</link>
+		<link>
+			<name>Vocabulary.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Vocabulary.cpp</locationURI>
+		</link>
+		<link>
+			<name>Vocabulary.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Vocabulary.h</locationURI>
 		</link>
 		<link>
 			<name>Word.cpp</name>
@@ -1622,217 +1742,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>RuleTable/Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/Loader.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/Loader.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderCompact.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderCompact.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderCompact.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderCompact.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderFactory.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderFactory.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderFactory.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderFactory.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderHiero.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderHiero.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderHiero.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderHiero.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderStandard.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderStandard.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/LoaderStandard.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/LoaderStandard.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryALSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryALSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryALSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryALSuffixArray.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryFuzzyMatch.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryFuzzyMatch.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryFuzzyMatch.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryFuzzyMatch.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryNodeSCFG.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryNodeSCFG.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryNodeSCFG.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryNodeSCFG.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryOnDisk.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryOnDisk.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryOnDisk.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryOnDisk.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionarySCFG.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionarySCFG.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionarySCFG.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionarySCFG.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/Trie.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/Trie.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/Trie.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/Trie.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/UTrie.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/UTrie.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/UTrie.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/UTrie.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/UTrieNode.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/UTrieNode.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/UTrieNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/UTrieNode.h</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/ApplicableRuleTrie.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/ApplicableRuleTrie.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/ApplicableRuleTrie.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/ApplicableRuleTrie.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/IntermediateVarSpanNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/IntermediateVarSpanNode.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/Parser.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/Parser.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/Parser.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/Parser.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/SentenceMap.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/SentenceMap.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLattice.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLattice.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLatticeBuilder.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLatticeBuilder.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLatticeBuilder.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLatticeBuilder.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLatticeSearcher.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/StackLatticeSearcher.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/VarSpanNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/VarSpanNode.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/VarSpanTrieBuilder.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/VarSpanTrieBuilder.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/VarSpanTrieBuilder.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/VarSpanTrieBuilder.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>bin/darwin-4.2.1</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1867,22 +1782,12 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/lm.log</locationURI>
 		</link>
 		<link>
-			<name>RuleTable/bin/darwin-4.2.1</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>bin/darwin-4.2.1/release</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1912,22 +1817,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>bin/darwin-4.2.1/release/debug-symbols-on</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1962,22 +1857,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>bin/darwin-4.2.1/release/debug-symbols-on/link-static</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2022,32 +1907,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2200,96 +2065,6 @@
 			<name>LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderCompact.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderCompact.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderFactory.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderFactory.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderHiero.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderHiero.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderStandard.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/LoaderStandard.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionaryALSuffixArray.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionaryALSuffixArray.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionaryNodeSCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionaryNodeSCFG.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionaryOnDisk.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionaryOnDisk.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionarySCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/PhraseDictionarySCFG.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/Trie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/Trie.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/UTrie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/UTrie.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/UTrieNode.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/UTrieNode.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/ApplicableRuleTrie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/ApplicableRuleTrie.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/Parser.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/Parser.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/StackLatticeBuilder.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/StackLatticeBuilder.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/VarSpanTrieBuilder.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/threading-multi/VarSpanTrieBuilder.o</locationURI>
 		</link>
 		<link>
 			<name>bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/AlignmentInfo.o</name>
@@ -2767,6 +2542,56 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libmoses_internal.a</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FuzzyMatchWrapper.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FuzzyMatchWrapper.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Parser.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Parser.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SentenceAlignment.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SentenceAlignment.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/StackLatticeBuilder.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/StackLatticeBuilder.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/VarSpanTrieBuilder.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/VarSpanTrieBuilder.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Vocabulary.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Vocabulary.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libScope3Parser.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libScope3Parser.a</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libfuzzy-match.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libfuzzy-match.a</locationURI>
+		</link>
+		<link>
 			<name>CYKPlusParser/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DotChartOnDisk.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/clang-darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DotChartOnDisk.o</locationURI>
@@ -2950,161 +2775,6 @@
 			<name>LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi/libLM.a</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi/libLM.a</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderCompact.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderCompact.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderFactory.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderFactory.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderHiero.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderHiero.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderStandard.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/LoaderStandard.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryALSuffixArray.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryALSuffixArray.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryNodeSCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryNodeSCFG.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryOnDisk.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryOnDisk.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionarySCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/PhraseDictionarySCFG.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/Trie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/Trie.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/UTrie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/UTrie.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/UTrieNode.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/UTrieNode.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderCompact.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderCompact.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderFactory.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderFactory.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderHiero.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderHiero.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderStandard.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LoaderStandard.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryALSuffixArray.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryALSuffixArray.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryFuzzyMatch.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryFuzzyMatch.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryNodeSCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryNodeSCFG.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryOnDisk.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryOnDisk.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionarySCFG.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionarySCFG.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryTMExtract.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryTMExtract.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Trie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Trie.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrie.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrieNode.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/UTrieNode.o</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libRuleTable.a</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/Parser.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/Parser.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/StackLatticeBuilder.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/StackLatticeBuilder.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/VarSpanTrieBuilder.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/VarSpanTrieBuilder.o</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libScope3Parser.a</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libScope3Parser.a</locationURI>
 		</link>
 		<link>
 			<name>bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/file.o</name>

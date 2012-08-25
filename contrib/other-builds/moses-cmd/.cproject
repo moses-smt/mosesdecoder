@@ -40,12 +40,12 @@
 									<listOptionValue builtIn="false" value="boost_filesystem"/>
 								</option>
 								<option id="macosx.cpp.link.option.paths.1615268628" name="Library search path (-L)" superClass="macosx.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/contrib/other-builds/moses/Debug"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/srilm/lib/i686-m64"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/contrib/other-builds/OnDiskPt/Debug"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/contrib/other-builds/lm/Debug"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/contrib/other-builds/util/Debug"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/irstlm/lib"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/moses}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:}/../../srilm/lib/i686-m64"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/OnDiskPt}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/lm}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/util}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:}/../../irstlm/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.412058804" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -61,8 +61,8 @@
 								<option id="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level.1176009559" name="Debug Level" superClass="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1024398579" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/opt/local/include"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/moses/src"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../moses/src"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.491464216" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
