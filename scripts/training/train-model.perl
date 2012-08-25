@@ -770,7 +770,7 @@ sub make_classes {
 }
 
 sub get_vocabulary {
-    return unless $___LEXICAL_WEIGHTING;
+#    return unless $___LEXICAL_WEIGHTING;
     my($corpus,$vcb) = @_;
     print STDERR "(1.2) creating vcb file $vcb @ ".`date`;
     
