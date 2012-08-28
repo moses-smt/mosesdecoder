@@ -488,14 +488,6 @@ int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignme
   for (int sourcePos = 0; sourcePos < alignedToS.size(); ++sourcePos)
   {
     const std::set<size_t> &targetSet = alignedToS[sourcePos];
-    cerr << "size=" << targetSet.size() << " ";
-    std::set<size_t>::const_iterator iter;
-    for (iter = targetSet.begin(); iter != targetSet.end(); ++iter)
-    {
-      size_t targetPos = *iter;
-      cerr << sourcePos << "-" << targetPos << " ";
-    }
-    cerr << endl;
     
     WORD_ID wordId = phraseS[sourcePos];
     const WORD &word = vcbS.getWord(wordId);
