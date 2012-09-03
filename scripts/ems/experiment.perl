@@ -2346,7 +2346,7 @@ sub define_evaluation_decode {
       $report_segmentation = "yes";
     }
     if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
-      $settings .= " -unpruned-search-graph -osg $system_output.graph";
+      $settings .= " -unpruned-search-graph -include-lhs-in-search-graph -osg $system_output.graph";
     }
     if (defined($report_segmentation) && $report_segmentation eq "yes") {
       if ($hierarchical) {

@@ -974,11 +974,16 @@ sub hs_rule_type {
 # compute depth of each node
 sub hs_compute_depth {
     my ($start,$end,$depth,$CHART)  = @_;
+    if (!defined($$CHART{$start}{$end})) {
+      print STDERR "warning: illegal span ($start,$end)\n";
+      return;
+    }
     my $RULE = $$CHART{$start}{$end};
+
     $$RULE{'depth'} = $depth;
     
     for(my $i=0;$i<scalar @{$$RULE{'rule_rhs'}};$i++) {
-	# non-terminals
+	# non-terminals
 	if (defined($$RULE{'alignment'}{$i})) {
 	    my $SUBSPAN = $$RULE{'spans'}[$$RULE{'alignment'}{$i}];
 	    &hs_compute_depth($$SUBSPAN{'from'},$$SUBSPAN{'to'},$depth+1,$CHART);
@@ -989,6 +994,10 @@ sub hs_compute_depth {
 # re-assign depth to as deep as possible
 sub hs_recompute_depth {
     my ($start,$end,$CHART,$max_depth)  = @_;
+    if (!defined($$CHART{$start}{$end})) {
+      print STDERR "warning: illegal span ($start,$end)\n";
+      return 0;
+    }
     my $RULE = $$CHART{$start}{$end};
     
     my $min_sub_depth = $max_depth+1;
@@ -1007,6 +1016,10 @@ sub hs_recompute_depth {
 # get child dependencies for a sentence
 sub hs_get_children {
     my ($start,$end,$CHART)  = @_;
+    if (!defined($$CHART{$start}{$end})) {
+      print STDERR "warning: illegal span ($start,$end)\n";
+      return -1;
+    }
     my $RULE = $$CHART{$start}{$end};
     
     my @CHILDREN = ();
@@ -1017,7 +1030,7 @@ sub hs_get_children {
 	if (defined($$RULE{'alignment'}{$i})) {
 	    my $SUBSPAN = $$RULE{'spans'}[$$RULE{'alignment'}{$i}];
 	    my $child = &hs_get_children($$SUBSPAN{'from'},$$SUBSPAN{'to'},$CHART);
-	    push @CHILDREN, $child;
+	    push @CHILDREN, $child unless $child == -1;
 	}
     }
     return $$RULE{'id'};	
@@ -1026,6 +1039,10 @@ sub hs_get_children {
 # create the span annotation for an output sentence
 sub hs_create_out_span {
     my ($start,$end,$CHART,$MATRIX) = @_;
+    if (!defined($$CHART{$start}{$end})) {
+      print STDERR "warning: illegal span ($start,$end)\n";
+      return;
+    }
     my $RULE = $$CHART{$start}{$end};
     
     my %SPAN;
@@ -1070,6 +1087,10 @@ sub hs_create_out_span {
 # create the span annotation for an input sentence
 sub hs_create_in_span {
     my ($start,$end,$CHART,$MATRIX) = @_;
+    if (!defined($$CHART{$start}{$end})) {
+      print STDERR "warning: illegal span ($start,$end)\n";
+      return;
+    }
     my $RULE = $$CHART{$start}{$end};
     
     my %SPAN;
@@ -1116,9 +1137,9 @@ sub process_search_graph {
   `mkdir -p $dir/search-graph`;
   my $last_sentence = -1;
   while(<OSG>) {
-    /^(\d+) (\d+)\-?\>?(\S*) (.+) :(.*): pC=([\d\-\.]+), c=([\d\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] \<\</ || die("ERROR: buggy search graph line: $_"); 
-    my ($sentence,$id,$recomb,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score) 
-      = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11);
+    /^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): pC=([\de\-\.]+), c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] \<\</ || die("ERROR: buggy search graph line: $_"); 
+    my ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score) 
+      = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
     chop($alignment) if $alignment;
     chop($children) if $children;
     $recomb = 0 unless $recomb;
@@ -1129,7 +1150,7 @@ sub process_search_graph {
       open(SENTENCE,">$dir/search-graph/graph.$sentence");
       $last_sentence = $sentence;
     }
-    print SENTENCE "$id\t$recomb\t$from\t$to\t$output\t$alignment\t$children\t$rule_score\t$heuristic_rule_score\t$hyp_score\n";
+    print SENTENCE "$id\t$recomb\t$from\t$to\t$output\t$alignment\t$children\t$rule_score\t$heuristic_rule_score\t$hyp_score\t$lhs\n";
   }
   close(OSG);
   close(SENTENCE);

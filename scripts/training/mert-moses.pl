@@ -1159,7 +1159,6 @@ sub get_featlist_from_file {
     next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
       if $value !~ /^[+-]?[0-9.\-e]+$/;
-      if $value !~ /^[+-]?[0-9.e-]+$/;
     push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
       if !defined $ABBR2FULL{$feature};
     push @names, $feature;
