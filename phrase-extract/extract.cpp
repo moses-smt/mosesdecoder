@@ -66,41 +66,6 @@ typedef map <int, set<int> > HSentenceVertices;
   void insertVertex(HSentenceVertices &, int, int);
   void insertPhraseVertices(HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &,
                           int, int, int, int);
-<<<<<<< HEAD
-string getOrientString(REO_POS, REO_MODEL_TYPE);
-
-bool ge(int, int);
-bool le(int, int);
-bool lt(int, int);
-
-void extractBase(SentenceAlignment &);
-void extract(SentenceAlignment &);
-void addPhrase(SentenceAlignment &, int, int, int, int, string &);
-bool isAligned (SentenceAlignment &, int, int);
-
-bool allModelsOutputFlag = false;
-
-bool wordModel = false;
-REO_MODEL_TYPE wordType = REO_MSD;
-bool phraseModel = false;
-REO_MODEL_TYPE phraseType = REO_MSD;
-bool hierModel = false;
-REO_MODEL_TYPE hierType = REO_MSD;
-
-
-Moses::OutputFileStream extractFile;
-Moses::OutputFileStream extractFileInv;
-Moses::OutputFileStream extractFileOrientation;
-Moses::OutputFileStream extractFileSentenceId;
-int maxPhraseLength;
-bool orientationFlag = false;
-bool translationFlag = true;
-bool sentenceIdFlag = false; //create extract file with sentence id
-int sentenceOffset = 0;
-bool includeSentenceIdFlag = false; //include sentence id in extract file
-bool onlyOutputSpanInfo = false;
-bool gzOutput = false;
-=======
   string getOrientString(REO_POS, REO_MODEL_TYPE);
 
   bool ge(int, int);
@@ -108,8 +73,7 @@ bool gzOutput = false;
   bool lt(int, int);
 
   bool isAligned (SentenceAlignment &, int, int);
-
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
+  int sentenceOffset = 0;
 
 }
 
@@ -150,14 +114,9 @@ int main(int argc, char* argv[])
   cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
         << "phrase extraction from an aligned parallel corpus\n";
 
-<<<<<<< HEAD
-  if (argc < 6) {
-    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --IncludeSentenceId | --SentenceOffset n ]\n";
-=======
  if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
-    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput ]\n";
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
+    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
     exit(1);
   }
 
@@ -179,19 +138,15 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       options.initTranslationFlag(false);
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
-<<<<<<< HEAD
-      sentenceIdFlag = true;  
+      options.initSentenceIdFlag(true);  
     } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
-      includeSentenceIdFlag = true;  
+      options.initIncludeSentenceIdFlag(true);  
     } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
       if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
         cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
         exit(1);
       }
       sentenceOffset = atoi(argv[++i]);
-=======
-      options.initSentenceIdFlag(true);  
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       options.initGzOutput(true);  
     } else if(strcmp(argv[i],"--model") == 0) {
@@ -758,20 +713,14 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isOrientationFlag())
     outextractstrOrientation << orientationInfo;
 
-<<<<<<< HEAD
-  if (sentenceIdFlag)
-    extractFileSentenceId << sentence.sentenceID;
-
-  if (includeSentenceIdFlag)
-    extractFile << " ||| " << sentence.sentenceID;
-=======
   if (m_options.isSentenceIdFlag()) {
     outextractstrSentenceId << sentence.sentenceID;
   }
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
+  if (m_options.isIncludeSentenceIdFlag()) {
+    outextractstr << " ||| " << sentence.sentenceID;
+  }
 
-
- if (m_options.isTranslationFlag()) outextractstr << "\n";
+  if (m_options.isTranslationFlag()) outextractstr << "\n";
   if (m_options.isTranslationFlag()) outextractstrInv << "\n";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
   if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "\n";

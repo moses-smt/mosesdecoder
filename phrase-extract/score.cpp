@@ -104,12 +104,8 @@ int main(int argc, char* argv[])
   string fileNameLex = argv[2];
   string fileNamePhraseTable = argv[3];
   string fileNameCountOfCounts;
-<<<<<<< HEAD
   char* fileNameFunctionWords = NULL;
   char* fileNameDomain = NULL;
-=======
-  string fileNameFunctionWords;
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {

@@ -44,6 +44,7 @@ class PhraseExtractionOptions {
   bool orientationFlag;
   bool translationFlag;
   bool sentenceIdFlag; //create extract file with sentence id
+  bool includeSentenceIdFlag; //include sentence id in extract file
   bool onlyOutputSpanInfo;
   bool gzOutput;
 
@@ -60,10 +61,9 @@ public:
             orientationFlag(false),
             translationFlag(true),
             sentenceIdFlag(false),
+            includeSentenceIdFlag(false),
             onlyOutputSpanInfo(false),
             gzOutput(false){}
-
-
  
     //functions for initialization of options
     void initAllModelsOutputFlag(const bool initallModelsOutputFlag){
@@ -95,6 +95,9 @@ public:
     }
     void initSentenceIdFlag(const bool initsentenceIdFlag){
         sentenceIdFlag=initsentenceIdFlag;
+    }
+    void initIncludeSentenceIdFlag(const bool initincludeSentenceIdFlag){
+        sentenceIdFlag=initincludeSentenceIdFlag;
     }
     void initOnlyOutputSpanInfo(const bool initonlyOutputSpanInfo){
         onlyOutputSpanInfo= initonlyOutputSpanInfo;
@@ -132,6 +135,9 @@ public:
     }
     bool isSentenceIdFlag() const {
         return sentenceIdFlag;
+    }
+    bool isIncludeSentenceIdFlag() const {
+        return includeSentenceIdFlag;
     }
     bool isOnlyOutputSpanInfo() const {
         return onlyOutputSpanInfo;
