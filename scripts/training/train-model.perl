@@ -782,7 +782,7 @@ sub make_classes {
 }
 
 sub get_vocabulary {
-    return unless $___LEXICAL_WEIGHTING;
+#    return unless $___LEXICAL_WEIGHTING;
     my($corpus,$vcb) = @_;
     print STDERR "(1.2) creating vcb file $vcb @ ".`date`;
     
@@ -1414,8 +1414,9 @@ sub score_phrase_phrase_extract {
     $COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /\-CountBinFeature ([\s\d]*\d)/;
     $DOMAIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(\-+[a-z]*Domain[a-z]+ .+)/i;
     $DOMAIN =~ s/ \-.+//g;
-    print STDERR "SCORE_OPTIONS = $_SCORE_OPTIONS\n";
-    print STDERR "DOMAIN = $DOMAIN\n";
+    my $SINGLETON = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /Singleton/);
+    my $CROSSEDNONTERM = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CrossedNonTerm/);
+
     my $UNALIGNED_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/);
     my ($UNALIGNED_FW_COUNT,$UNALIGNED_FW_F,$UNALIGNED_FW_E);
     if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty +(\S+) +(\S+)/) {
@@ -1433,6 +1434,8 @@ sub score_phrase_phrase_extract {
     $CORE_SCORE_OPTIONS .= " --LogProb" if $LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NegLogProb" if $NEG_LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
+	$CORE_SCORE_OPTIONS .= " --Singleton" if $SINGLETON;
+	$CORE_SCORE_OPTIONS .= " --CrossedNonTerm" if $CROSSEDNONTERM;
 
     my $substep = 1;
     my $isParent = 1;
@@ -1601,6 +1604,12 @@ sub get_reordering {
 	my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
 	$cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
 	for my $mtype (keys %REORDERING_MODEL_TYPES) {
+                # * $mtype will be one of wbe, phrase, or hier
+                # * the value stored in $REORDERING_MODEL_TYPES{$mtype} is a concatenation of the "orient"
+                #   attributes such as "msd"
+                # * the "filename" attribute is appended to the filename, but actually serves as the main configuration specification
+                #   for reordering scoring. it holds a string such as "wbe-msd-didirectional-fe"
+                #   which has the more general format type-orient-dir-lang
 		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
 		foreach my $model (@REORDERING_MODELS) {
 			if ($model->{"type"} eq $mtype) {

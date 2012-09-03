@@ -25,7 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses {
 
 LexicalReorderingTableCreator::LexicalReorderingTableCreator(
-  std::string inPath, std::string outPath, size_t numScoreComponent,
+  std::string inPath, std::string outPath,
   size_t orderBits, size_t fingerPrintBits, bool multipleScoreTrees,
   size_t quantize
 #ifdef WITH_THREADS
@@ -33,21 +33,14 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
 #endif
   )
   : m_inPath(inPath), m_outPath(outPath), m_orderBits(orderBits),
-  m_fingerPrintBits(fingerPrintBits), m_numScoreComponent(numScoreComponent),
+  m_fingerPrintBits(fingerPrintBits), m_numScoreComponent(0),
   m_multipleScoreTrees(multipleScoreTrees), m_quantize(quantize),
   m_separator(" ||| "), m_hash(m_orderBits, m_fingerPrintBits),
   m_lastFlushedLine(-1)
 #ifdef WITH_THREADS  
   , m_threads(threads)
 #endif
-{
-
-  m_scoreCounters.resize(m_multipleScoreTrees ? m_numScoreComponent : 1);
-  for(std::vector<ScoreCounter*>::iterator it = m_scoreCounters.begin();
-      it != m_scoreCounters.end(); it++)
-      *it = new ScoreCounter();
-  m_scoreTrees.resize(m_multipleScoreTrees ? m_numScoreComponent : 1);
-    
+{  
   PrintInfo();
     
   m_outFile = std::fopen(m_outPath.c_str(), "w");
@@ -75,7 +68,6 @@ void LexicalReorderingTableCreator::PrintInfo()
   std::cerr << "\tOutput reordering table will be written to: " << m_outPath << std::endl;
   std::cerr << "\tStep size for source landmark phrases: 2^" << m_orderBits << "=" << (1ul << m_orderBits) << std::endl;
   std::cerr << "\tPhrase fingerprint size: " << m_fingerPrintBits << " bits / P(fp)=" << (float(1)/(1ul << m_fingerPrintBits)) << std::endl;
-  std::cerr << "\tNumber of score components in reordering table: " << m_numScoreComponent << std::endl;    
   std::cerr << "\tSingle Huffman code set for score components: " << (m_multipleScoreTrees ? "no" : "yes") << std::endl;    
   std::cerr << "\tUsing score quantization: ";
   if(m_quantize)
@@ -165,16 +157,35 @@ void LexicalReorderingTableCreator::Save()
 
 std::string LexicalReorderingTableCreator::MakeSourceTargetKey(std::string &source, std::string &target)
 {
-    return source + m_separator + target + m_separator;
+  std::string key = source + m_separator;
+  if(!target.empty())
+    key += target + m_separator;
+  return key;
 }
 
 std::string LexicalReorderingTableCreator::EncodeLine(std::vector<std::string>& tokens)
 {
-  std::string scoresString = tokens[2];
+  std::string scoresString = tokens.back();
   std::stringstream scoresStream;
   
   std::vector<float> scores;
   Tokenize<float>(scores, scoresString);
+  
+  if(!m_numScoreComponent) {
+    m_numScoreComponent = scores.size();
+    m_scoreCounters.resize(m_multipleScoreTrees ? m_numScoreComponent : 1);
+    for(std::vector<ScoreCounter*>::iterator it = m_scoreCounters.begin();
+        it != m_scoreCounters.end(); it++)
+        *it = new ScoreCounter();
+    m_scoreTrees.resize(m_multipleScoreTrees ? m_numScoreComponent : 1);
+  }
+  
+  if(m_numScoreComponent != scores.size()) {
+    std::cerr << "Error: Wrong number of scores detected ("
+      << scores.size() << " != " << m_numScoreComponent << ") :" << std::endl;
+    std::cerr << "Line: " << tokens[0] << " ||| ... ||| " << scoresString << std::endl;
+    abort();  
+  }
   
   size_t c = 0;
   float score;
@@ -339,7 +350,13 @@ void EncodingTaskReordering::operator()()
       
       std::string encodedLine = m_creator.EncodeLine(tokens);
       
-      PackedItem packedItem(lineNum + i, m_creator.MakeSourceTargetKey(tokens[0], tokens[1]),
+      std::string f = tokens[0];
+      
+      std::string e;
+      if(tokens.size() > 2)
+        e = tokens[1];
+      
+      PackedItem packedItem(lineNum + i, m_creator.MakeSourceTargetKey(f, e),
                             encodedLine, i);
       result.push_back(packedItem);
     }

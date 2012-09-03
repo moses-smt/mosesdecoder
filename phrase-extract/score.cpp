@@ -59,6 +59,8 @@ bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
 bool outputNTLengths = false;
+bool singletonFeature = false;
+bool crossedNonTerm = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
@@ -77,14 +79,14 @@ Vocabulary vcbS;
 vector<string> tokenize( const char [] );
 
 void writeCountOfCounts( const string &fileNameCountOfCounts );
-void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile);
-PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair );
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile );
-double computeLexicalTranslation( const PHRASE &, const PHRASE &, PhraseAlignment * );
-double computeUnalignedPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
+void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile, bool isSingleton);
+const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair );
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile, bool isSingleton );
+double computeLexicalTranslation( const PHRASE &, const PHRASE &, const PhraseAlignment & );
+double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
 set<string> functionWordList;
 void loadFunctionWords( const string &fileNameFunctionWords );
-double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, PhraseAlignment * );
+double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
 void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
                       , map<size_t, map<size_t, float> > &targetProb);
@@ -97,7 +99,7 @@ int main(int argc, char* argv[])
        << "scoring methods for extracted rules\n";
 
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--[Sparse]Domain[Indicator|Ratio|Subset|Bin] domain-file [bins]]\n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--[Sparse]Domain[Indicator|Ratio|Subset|Bin] domain-file [bins]] [--Singleton] [--CrossedNonTerm] \n";
     exit(1);
   }
   string fileNameExtract = argv[1];
@@ -177,6 +179,12 @@ int main(int argc, char* argv[])
       minCountHierarchical -= 0.00001; // account for rounding
     } else if (strcmp(argv[i],"--OutputNTLengths") == 0) {
       outputNTLengths = true;
+    } else if (strcmp(argv[i],"--Singleton") == 0) {
+      singletonFeature = true;
+      cerr << "binary singleton feature\n";
+    } else if (strcmp(argv[i],"--CrossedNonTerm") == 0) {
+      crossedNonTerm = true;
+      cerr << "crossed non-term reordering feature\n";
     } else {
       cerr << "ERROR: unknown option " << argv[i] << endl;
       exit(1);
@@ -238,6 +246,7 @@ int main(int argc, char* argv[])
   float lastCount = 0.0f;
   float lastPcfgSum = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
+  bool isSingleton = true;
   int i=0;
   char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
   lastLine[0] = '\0';
@@ -272,16 +281,22 @@ int main(int argc, char* argv[])
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
-      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
+      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
+      
       phrasePairsWithSameF.clear();
+      isSingleton = false;
       lastPhrasePair = NULL;
+    }
+    else
+    {
+      isSingleton = true;
     }
 
     // add phrase pairs to list, it's now the last one
     phrasePairsWithSameF.push_back( phrasePair );
     lastPhrasePair = &phrasePairsWithSameF.back();
   }
-  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile );
+  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
@@ -315,7 +330,7 @@ void writeCountOfCounts( const string &fileNameCountOfCounts )
 	countOfCountsFile.Close();
 }
 
-void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile )
+void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile, bool isSingleton )
 {
   if (phrasePair.size() == 0) return;
 
@@ -356,12 +371,12 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
   for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
   {
     const PhraseAlignmentCollection &group = **iter;
-    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile );
+    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile, isSingleton );
   }
   
 }
 
-PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair )
+const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair )
 {
   float bestAlignmentCount = -1;
   PhraseAlignment* bestAlignment = NULL;
@@ -382,7 +397,7 @@ PhraseAlignment* findBestAlignment(const PhraseAlignmentCollection &phrasePair )
     }
   }    
 
-  return bestAlignment;
+  return *bestAlignment;
 }
 
 
@@ -473,11 +488,65 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
 
 }
 
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile )
+bool calcCrossedNonTerm(int sourcePos, int targetPos, const std::vector< std::set<size_t> > &alignedToS)
+{
+  for (int currSource = 0; currSource < alignedToS.size(); ++currSource)
+  {
+    if (currSource == sourcePos)
+    { // skip
+    }
+    else 
+    {
+      const std::set<size_t> &targetSet = alignedToS[currSource];
+      std::set<size_t>::const_iterator iter;
+      for (iter = targetSet.begin(); iter != targetSet.end(); ++iter)
+      {
+        size_t currTarget = *iter;
+        
+        if ((currSource < sourcePos && currTarget > targetPos)
+            || (currSource > sourcePos && currTarget < targetPos)
+          )
+        {
+          return true;
+        }
+      }
+      
+    }
+  }
+  
+  return false;
+}
+
+int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignment)
+{
+  const std::vector< std::set<size_t> > &alignedToS = bestAlignment.alignedToS;
+  
+  for (int sourcePos = 0; sourcePos < alignedToS.size(); ++sourcePos)
+  {
+    const std::set<size_t> &targetSet = alignedToS[sourcePos];
+    
+    WORD_ID wordId = phraseS[sourcePos];
+    const WORD &word = vcbS.getWord(wordId);
+    bool isNonTerm = isNonTerminal(word);
+    
+    if (isNonTerm)
+    {
+      assert(targetSet.size() == 1);
+      int targetPos = *targetSet.begin();
+      bool ret = calcCrossedNonTerm(sourcePos, targetPos, alignedToS);
+      if (ret)
+        return 1;
+    }
+  }
+  
+  return 0;
+}
+
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile, bool isSingleton )
 {
   if (phrasePair.size() == 0) return;
 
-  PhraseAlignment *bestAlignment = findBestAlignment( phrasePair );
+  const PhraseAlignment &bestAlignment = findBestAlignment( phrasePair );
     
   // compute count
   float count = 0;
@@ -529,17 +598,17 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
 
   // source phrase (unless inverse)
   if (! inverseFlag) {
-    printSourcePhrase(phraseS, phraseT, *bestAlignment, phraseTableFile);
+    printSourcePhrase(phraseS, phraseT, bestAlignment, phraseTableFile);
     phraseTableFile << " ||| ";
   }
 
   // target phrase
-  printTargetPhrase(phraseS, phraseT, *bestAlignment, phraseTableFile);
+  printTargetPhrase(phraseS, phraseT, bestAlignment, phraseTableFile);
   phraseTableFile << " ||| ";
 
   // source phrase (if inverse)
   if (inverseFlag) {
-    printSourcePhrase(phraseS, phraseT, *bestAlignment, phraseTableFile);
+    printSourcePhrase(phraseS, phraseT, bestAlignment, phraseTableFile);
     phraseTableFile << " ||| ";
   }
 
@@ -561,6 +630,14 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     phraseTableFile << " " << maybeLogProb( penalty );
   }
 
+  if (singletonFeature) {
+    phraseTableFile << " " << (isSingleton ? 1 : 0);
+  }
+  
+  if (crossedNonTerm && !inverseFlag) {
+    phraseTableFile << " " << calcCrossedNonTerm(phraseS, bestAlignment);
+  }
+  
   // target-side PCFG score
   if (pcfgFlag && !inverseFlag) {
     phraseTableFile << " " << maybeLogProb( pcfgScore );
@@ -632,22 +709,31 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (! inverseFlag) {
     if (hierarchicalFlag) {
       // always output alignment if hiero style, but only for non-terms
-      assert(phraseT.size() == bestAlignment->alignedToT.size() + 1);
+      assert(phraseT.size() == bestAlignment.alignedToT.size() + 1);
       for(size_t j = 0; j < phraseT.size() - 1; j++) {
         if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
-          if (bestAlignment->alignedToT[ j ].size() != 1) {
+          if (bestAlignment.alignedToT[ j ].size() != 1) {
             cerr << "Error: unequal numbers of non-terminals. Make sure the text does not contain words in square brackets (like [xxx])." << endl;
             phraseTableFile.flush();
-            assert(bestAlignment->alignedToT[ j ].size() == 1);
+            assert(bestAlignment.alignedToT[ j ].size() == 1);
           }
-          int sourcePos = *(bestAlignment->alignedToT[ j ].begin());
+          int sourcePos = *(bestAlignment.alignedToT[ j ].begin());
           phraseTableFile << sourcePos << "-" << j << " ";
+        }
+        else if (wordAlignmentFlag) {
+          const std::set<size_t> &sourceSet = bestAlignment.alignedToT[ j ];
+          std::set<size_t>::const_iterator iter;
+          for (iter = sourceSet.begin(); iter != sourceSet.end(); ++iter)
+          {
+            int sourcePos = *iter;
+            phraseTableFile << sourcePos << "-" << j << " ";            
+          }
         }
       }
     } else if (wordAlignmentFlag) {
       // alignment info in pb model
-      for(size_t j=0; j<bestAlignment->alignedToT.size(); j++) {
-        const set< size_t > &aligned = bestAlignment->alignedToT[j];
+      for(size_t j=0; j<bestAlignment.alignedToT.size(); j++) {
+        const set< size_t > &aligned = bestAlignment.alignedToT[j];
         for (set< size_t >::const_iterator p(aligned.begin()); p != aligned.end(); ++p) {
           phraseTableFile << *p << "-" << j << " ";
         }
@@ -681,13 +767,13 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   phraseTableFile << endl;
 }
 
-double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, PhraseAlignment *alignment )
+double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, const PhraseAlignment &alignment )
 {
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
-    const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
+  for(size_t ti=0; ti<alignment.alignedToT.size(); ti++) {
+    const set< size_t > & srcIndices = alignment.alignedToT[ ti ];
     if (srcIndices.empty()) {
       unaligned *= 2.718;
     }
@@ -695,13 +781,13 @@ double computeUnalignedPenalty( const PHRASE &phraseS, const PHRASE &phraseT, Ph
   return unaligned;
 }
 
-double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, PhraseAlignment *alignment )
+double computeUnalignedFWPenalty( const PHRASE &phraseS, const PHRASE &phraseT, const PhraseAlignment &alignment )
 {
   // unaligned word counter
   double unaligned = 1.0;
   // only checking target words - source words are caught when computing inverse
-  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
-    const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
+  for(size_t ti=0; ti<alignment.alignedToT.size(); ti++) {
+    const set< size_t > & srcIndices = alignment.alignedToT[ ti ];
     if (srcIndices.empty() && functionWordList.find( vcbT.getWord( phraseT[ ti ] ) ) != functionWordList.end()) {
       unaligned *= 2.718;
     }
@@ -734,14 +820,14 @@ void loadFunctionWords( const string &fileName )
   inFile.close();
 }
 
-double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, PhraseAlignment *alignment )
+double computeLexicalTranslation( const PHRASE &phraseS, const PHRASE &phraseT, const PhraseAlignment &alignment )
 {
   // lexical translation probability
   double lexScore = 1.0;
   int null = vcbS.getWordID("NULL");
   // all target words have to be explained
-  for(size_t ti=0; ti<alignment->alignedToT.size(); ti++) {
-    const set< size_t > & srcIndices = alignment->alignedToT[ ti ];
+  for(size_t ti=0; ti<alignment.alignedToT.size(); ti++) {
+    const set< size_t > & srcIndices = alignment.alignedToT[ ti ];
     if (srcIndices.empty()) {
       // explain unaligned word by NULL
       lexScore *= lexTable.permissiveLookup( null, phraseT[ ti ] );
