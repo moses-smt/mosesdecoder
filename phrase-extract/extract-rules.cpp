@@ -116,14 +116,10 @@ int main(int argc, char* argv[])
        << "rule extraction from an aligned parallel corpus\n";
 
   RuleExtractionOptions options;
-<<<<<<< HEAD
   int sentenceOffset = 0;
 #ifdef WITH_THREADS
   int thread_count = 1;
 #endif
-=======
-
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
   if (argc < 5) {
     cerr << "syntax: extract-rules corpus.target corpus.source corpus.align extract ["
 
@@ -267,7 +263,6 @@ int main(int argc, char* argv[])
       options.unpairedExtractFormat = true;
     } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
       options.conditionOnTargetLhs = true;
-<<<<<<< HEAD
 #ifdef WITH_THREADS
     } else if (strcmp(argv[i],"-threads") == 0 || 
                strcmp(argv[i],"--threads") == 0 ||
@@ -280,8 +275,6 @@ int main(int argc, char* argv[])
         exit(1);
       }
       sentenceOffset = atoi(argv[++i]);
-=======
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
