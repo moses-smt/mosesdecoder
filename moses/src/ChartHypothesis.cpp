@@ -272,6 +272,9 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 		out << "->" << hypo.GetWinningHypothesis()->GetId();
 	}
 
+  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
+    out << " " << hypo.GetTargetLHS() << "=>";
+  }
   out << " " << hypo.GetCurrTargetPhrase()
       //<< " " << outPhrase
       << " " << hypo.GetCurrSourceRange();
