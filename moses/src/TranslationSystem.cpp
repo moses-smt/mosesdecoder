@@ -78,10 +78,7 @@ namespace Moses {
 			m_producers.push_back(ff);
 
       if (ff->IsStateless()) {
-        const StatelessFeatureFunction* statelessFF = static_cast<const StatelessFeatureFunction*>(ff);
-        if (!statelessFF->ComputeValueInTranslationOption()) {
-            m_statelessFFs.push_back(statelessFF);
-        }
+        m_statelessFFs.push_back(static_cast<const StatelessFeatureFunction*>(ff));
       } else {
         m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
       }

@@ -299,11 +299,14 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   clock_t t=0; // used to track time
 
   // compute values of stateless feature functions that were not
-  // cached in the translation option-- there is no principled distinction
+  // cached in the translation option
   const vector<const StatelessFeatureFunction*>& sfs =
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i)
-    sfs[i]->Evaluate(*this, &m_currScoreBreakdown);
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    if (!sfs[i]->ComputeValueInTranslationOption()) {
+      sfs[i]->Evaluate(*this, &m_currScoreBreakdown);
+    }
+  }
 
   const vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();

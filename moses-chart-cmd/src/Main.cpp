@@ -187,16 +187,8 @@ static void ShowWeights()
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
   for (size_t i = 0; i < sff.size(); ++i) {
     PrintFeatureWeight(sff[i]);
-  }
-  for (size_t i = 0; i < pds.size(); ++i) {
-    PrintFeatureWeight(pds[i]);
-  }
-  for (size_t i = 0; i < gds.size(); ++i) {
-    PrintFeatureWeight(gds[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
     PrintFeatureWeight(slf[i]);
