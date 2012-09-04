@@ -46,7 +46,7 @@ FFState* SpanLengthFeature::Evaluate(
   return NULL;
 }
   
-static std::vector<int> GetPrevHyposSourceLengths(const ChartHypothesis &chartHypothesis)
+static std::vector<unsigned> GetPrevHyposSourceLengths(const ChartHypothesis &chartHypothesis)
 {
   const std::vector<const ChartHypothesis*>& prevHypos = chartHypothesis.GetPrevHypos();
   std::vector<WordsRange> prevHyposRanges;
@@ -55,10 +55,10 @@ static std::vector<int> GetPrevHyposSourceLengths(const ChartHypothesis &chartHy
     prevHyposRanges.push_back((*iter)->GetCurrSourceRange());
   }
   std::sort(prevHyposRanges.begin(), prevHyposRanges.end());
-  std::vector<int> result;
+  std::vector<unsigned> result;
   result.reserve(prevHypos.size());
   iterate(prevHyposRanges, iter) {
-    result.push_back(static_cast<int>(iter->GetNumWordsCovered()));
+    result.push_back(static_cast<unsigned>(iter->GetNumWordsCovered()));
   }
   return result;
 }
@@ -68,10 +68,10 @@ FFState* SpanLengthFeature::EvaluateChart(
   int /*featureId*/,
   ScoreComponentCollection *accumulator) const
 {
-  std::vector<int> sourceLengths = GetPrevHyposSourceLengths(chartHypothesis);
+  std::vector<unsigned> sourceLengths = GetPrevHyposSourceLengths(chartHypothesis);
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
   for (size_t spanIndex = 0; spanIndex < sourceLengths.size(); ++spanIndex) {
-    float weight = 0.0f;
+    float weight = targetPhrase.GetEstimator().GetSourceLengthProbas(spanIndex, sourceLengths[spanIndex]);
     accumulator->PlusEquals(this, weight);
   }
   return NULL;

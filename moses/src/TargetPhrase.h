@@ -83,7 +83,7 @@ public:
     m_spanLengthEstimator = estimator;
   }
 
-  const SpanLengthEstimator &GetEstimator()
+  const SpanLengthEstimator &GetEstimator() const
   {
      return *m_spanLengthEstimator;
   }
