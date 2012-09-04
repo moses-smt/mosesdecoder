@@ -41,11 +41,11 @@
 								<option id="gnu.cpp.compilermacosx.exe.debug.option.optimization.level.676959181" name="Optimization Level" superClass="gnu.cpp.compilermacosx.exe.debug.option.optimization.level" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level.1484480101" name="Debug Level" superClass="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1556683035" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt"/>
-									<listOptionValue builtIn="false" value="/home/hieu/workspace/github/moses-smt/moses/src"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../moses/src"/>
 									<listOptionValue builtIn="false" value="/opt/local/include"/>
 								</option>
-								<option id="gnu.cpp.compiler.option.preprocessor.def.1052680347" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+								<option id="gnu.cpp.compiler.option.preprocessor.def.1052680347" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1930757481" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
