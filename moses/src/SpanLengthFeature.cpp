@@ -2,6 +2,9 @@
 #include "util/check.hh"
 #include "FFState.h"
 #include "TranslationOption.h"
+#include "WordsRange.h"
+#include "ChartHypothesis.h"
+#include "types.h"
 
 namespace Moses {
   
@@ -42,12 +45,35 @@ FFState* SpanLengthFeature::Evaluate(
 {
   return NULL;
 }
+  
+static std::vector<int> GetPrevHyposSourceLengths(const ChartHypothesis &chartHypothesis)
+{
+  const std::vector<const ChartHypothesis*>& prevHypos = chartHypothesis.GetPrevHypos();
+  std::vector<WordsRange> prevHyposRanges;
+  prevHyposRanges.reserve(prevHypos.size());
+  iterate(prevHypos, iter) {
+    prevHyposRanges.push_back((*iter)->GetCurrSourceRange());
+  }
+  std::sort(prevHyposRanges.begin(), prevHyposRanges.end());
+  std::vector<int> result;
+  result.reserve(prevHypos.size());
+  iterate(prevHyposRanges, iter) {
+    result.push_back(static_cast<int>(iter->GetNumWordsCovered()));
+  }
+  return result;
+}
 
 FFState* SpanLengthFeature::EvaluateChart(
-  const ChartHypothesis &/*char_hypothesis*/,
+  const ChartHypothesis &chartHypothesis,
   int /*featureId*/,
-  ScoreComponentCollection */*accumulator*/) const
+  ScoreComponentCollection *accumulator) const
 {
+  std::vector<int> sourceLengths = GetPrevHyposSourceLengths(chartHypothesis);
+  const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
+  for (size_t spanIndex = 0; spanIndex < sourceLengths.size(); ++spanIndex) {
+    float weight = 0.0f;
+    accumulator->PlusEquals(this, weight);
+  }
   return NULL;
 }
   
