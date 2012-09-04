@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
+#include "SpanLengthFeature.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -77,7 +78,8 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_numLinkParams(1)
+  :m_spanLengthFeature(NULL)
+  ,m_numLinkParams(1)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
@@ -514,6 +516,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	}
 #endif
 	
+  if (!LoadSpanLengthFeature()) return false;
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -607,8 +610,11 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
+    
+    if (m_spanLengthFeature != NULL) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_spanLengthFeature);
+    }
   }
-
 
   m_scoreIndexManager.InitFeatureNames();
 
@@ -656,6 +662,7 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
+  delete m_spanLengthFeature;
 
   //delete m_parameter;
 
@@ -719,6 +726,19 @@ StaticData::~StaticData()
   }
 #endif
 
+bool StaticData::LoadSpanLengthFeature()
+{
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-span-length"));
+  if (weight.size()) {
+    m_spanLengthFeature = new SpanLengthFeature(m_scoreIndexManager, weight);
+    return (m_spanLengthFeature != NULL);
+  } else {
+    m_spanLengthFeature = NULL;
+    return true;
+  }
+  
+}
+  
 bool StaticData::LoadLexicalReorderingModel()
 {
   VERBOSE(1, "Loading lexical distortion models...");
