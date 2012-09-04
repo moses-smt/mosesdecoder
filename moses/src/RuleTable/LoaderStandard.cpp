@@ -189,8 +189,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     const string &sourcePhraseString = tokens[0]
                , &targetPhraseString = tokens[1]
                , &scoreString        = tokens[2]
-               , &alignString        = tokens[3]
-               , &spanLength = tokens[4];
+               , &alignString        = tokens[3];
 
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
@@ -220,19 +219,22 @@ bool RuleTableLoaderStandard::Load(FormatType format
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     //read from rule table
-    TokenizeMultiCharSeparator(spanStrings,spanLength,"||");
-    iterate(spanStrings,itr_string){
-        vector<string> spanString;
-        Tokenize(spanString,*itr_string);
-        map<unsigned,float> tmp;
-        iterate(spanString,itr_span)
-        {
-            unsigned size;
-            float proba;
-            sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
-            tmp.insert(make_pair(size,log(proba)));
-        }
-        spanLengthVector->AddSourceSpanProbas(tmp);
+    if (tokens.size() >= 6) {
+      const std::string &spanLength = tokens[5];
+      TokenizeMultiCharSeparator(spanStrings,spanLength,"||");
+      iterate(spanStrings,itr_string){
+          vector<string> spanString;
+          Tokenize(spanString,*itr_string);
+          map<unsigned,float> tmp;
+          iterate(spanString,itr_span)
+          {
+              unsigned size;
+              float proba;
+              sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
+              tmp.insert(make_pair(size,log(proba)));
+          }
+          spanLengthVector->AddSourceSpanProbas(tmp);
+      }
     }
 
     // create target phrase obj
