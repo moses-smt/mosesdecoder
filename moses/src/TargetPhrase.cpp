@@ -41,7 +41,7 @@ using namespace std;
 namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string)
-  :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+  :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0), m_spanLengthEstimator(NULL)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
@@ -56,6 +56,7 @@ TargetPhrase::TargetPhrase()
   , m_transScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
+  , m_spanLengthEstimator(NULL)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
@@ -65,12 +66,14 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_transScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
+  , m_spanLengthEstimator(NULL)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
 
 TargetPhrase::~TargetPhrase()
 {
+    delete m_spanLengthEstimator;
 }
 
 void TargetPhrase::SetScore(const TranslationSystem* system)

@@ -34,6 +34,8 @@
 #include "UserMessage.h"
 #include "ChartTranslationOptionList.h"
 #include "FactorCollection.h"
+#include "SpanLengthEstimator.h"
+#include "DynSAInclude/types.h"
 
 using namespace std;
 
@@ -171,7 +173,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     vector<string> tokens;
     vector<float> scoreVector;
-    vector<float> spanLenghtVector;
+    vector<string> spanStrings;
+    auto_ptr<SpanLengthEstimator> spanLengthVector(new SpanLengthEstimator());
 
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
@@ -216,10 +219,21 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
-    // span length
-    Tokenize<float>(spanLenghtVector, scoreString);
-
-    //ADD NUMBER OF NON-TERMINALS ???
+    //read from rule table
+    TokenizeMultiCharSeparator(spanStrings,spanLength,"||");
+    iterate(spanStrings,itr_string){
+        vector<string> spanString;
+        Tokenize(spanString,*itr_string);
+        map<unsigned,float> tmp;
+        iterate(spanString,itr_span)
+        {
+            unsigned size;
+            float proba;
+            sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
+            tmp.insert(make_pair(size,proba));
+        }
+        spanLengthVector->AddSourceSpanProbas(tmp);
+    }
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase(Output);
@@ -234,11 +248,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 
-    //FB : span lenght : take log of length score
-    std::transform(spanLenghtVector.begin(),spanLenghtVector.end(),spanLenghtVector.begin(),TransformScore);
-    std::transform(spanLenghtVector.begin(),spanLenghtVector.end(),spanLenghtVector.begin(),FloorScore);
-
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels, wpProducer);
+    targetPhrase->SetEstimator(spanLengthVector.release());
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

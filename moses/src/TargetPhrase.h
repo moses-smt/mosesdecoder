@@ -52,7 +52,7 @@ protected:
   float m_transScore;
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
-  SpanLengthEstimator m_spanLengthEstimator;
+  SpanLengthEstimator * m_spanLengthEstimator;
 
 
   // in case of confusion net, ptr to source phrase
@@ -78,14 +78,14 @@ public:
   void SetScore(const TranslationSystem* system, const Scores &scoreVector);
 
   //! Accessors for span length estimator
-  void SetEstimator(const SpanLengthEstimator &estimator)
+  void SetEstimator(SpanLengthEstimator * estimator)
   {
     m_spanLengthEstimator = estimator;
   }
 
   const SpanLengthEstimator &GetEstimator()
   {
-     return m_spanLengthEstimator;
+     return *m_spanLengthEstimator;
   }
 
 
