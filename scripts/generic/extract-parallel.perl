@@ -91,14 +91,8 @@ for (my $i = 0; $i < $numParallel; ++$i)
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
-<<<<<<< HEAD
-    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs";
-    $cmd .= " --SentenceOffset ".($i*$linesPerSplit);
-    print STDERR $cmd."\n";
-=======
     my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs 2>> /dev/stderr \n";
     print STDERR $cmd;
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
     `$cmd`;
 
     exit();

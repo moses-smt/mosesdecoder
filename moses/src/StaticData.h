@@ -54,6 +54,7 @@ class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseDictionaryFeature;
+class SpanLengthFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
@@ -82,6 +83,7 @@ protected:
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
+  SpanLengthFeature*      m_spanLengthFeature;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
@@ -230,6 +232,7 @@ protected:
   //! load syntactic language model
 	bool LoadSyntacticLanguageModel();
 #endif
+  bool LoadSpanLengthFeature();
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
