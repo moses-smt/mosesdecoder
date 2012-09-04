@@ -26,7 +26,7 @@ float SpanLengthEstimator::GetSourceLengthProbas(unsigned nonTerminal, unsigned 
   {
       return 0.0;
   }
-  CHECK(! (nonTerminal > m_sourceScores.size()) );
+  CHECK(nonTerminal < m_sourceScores.size());
   it=m_sourceScores[nonTerminal].find(spanLength);
   if(it!=m_sourceScores[nonTerminal].end())
     {return (*it).second;}
