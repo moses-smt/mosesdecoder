@@ -230,7 +230,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
             unsigned size;
             float proba;
             sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
-            tmp.insert(make_pair(size,proba));
+            tmp.insert(make_pair(size,log(proba)));
         }
         spanLengthVector->AddSourceSpanProbas(tmp);
     }
