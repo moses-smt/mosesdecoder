@@ -482,8 +482,11 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
       size_t length = iterInner->first;
       float prob = iterInner->second;
 
-      phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
+      //MARIA: change output format to be read in SpanLengthEstimator
+      //phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
+      phraseTableFile << length << "|" << prob << " ";
     }
+    phraseTableFile <<"||";
   }
 
 }
