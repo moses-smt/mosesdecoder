@@ -610,7 +610,10 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
-    m_translationSystems.find(config[0])->second.AddFeatureFunction(m_spanLengthFeature);
+    
+    if (m_spanLengthFeature != NULL) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_spanLengthFeature);
+    }
   }
 
   m_scoreIndexManager.InitFeatureNames();
@@ -726,8 +729,14 @@ StaticData::~StaticData()
 bool StaticData::LoadSpanLengthFeature()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-span-length"));
-  m_spanLengthFeature = new SpanLengthFeature(m_scoreIndexManager, weight);
-  return (m_spanLengthFeature != NULL);
+  if (weight.size()) {
+    m_spanLengthFeature = new SpanLengthFeature(m_scoreIndexManager, weight);
+    return (m_spanLengthFeature != NULL);
+  } else {
+    m_spanLengthFeature = NULL;
+    return true;
+  }
+  
 }
   
 bool StaticData::LoadLexicalReorderingModel()

@@ -174,7 +174,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
-    if (tokens.size() != 4 && tokens.size() != 5) {
+    if (tokens.size() < 4) {
       stringstream strme;
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());

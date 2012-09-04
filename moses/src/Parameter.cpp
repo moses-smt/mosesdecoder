@@ -151,6 +151,8 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
+  AddParam("weight-span-length", "Weight for span length feature");
+  
 }
 
 Parameter::~Parameter()
