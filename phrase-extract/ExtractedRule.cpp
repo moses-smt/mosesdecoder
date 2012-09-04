@@ -30,7 +30,7 @@ void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
 
     //Hack : for dealing with source side only, remove target side info
     //outString << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " ";
-    outString << sourcePos << "=" << spanLengths.first;
+    outString << sourcePos << "=" << spanLengths.first<<" ";
   }
 }
 

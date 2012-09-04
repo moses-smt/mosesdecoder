@@ -482,8 +482,11 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
       size_t length = iterInner->first;
       float prob = iterInner->second;
 
-      phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
+      //MARIA: change output format to be read in SpanLengthEstimator
+      //phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
+      phraseTableFile << length << "|" << prob << " ";
     }
+    phraseTableFile <<"||";
   }
 
 }
@@ -758,9 +761,9 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       // 1st sourcePos, 2nd = length, 3rd = prob
 
       calcNTLengthProb(phrasePair, sourceProb, targetProb);
-      
+      //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
-      outputNTLengthProbs(phraseTableFile, targetProb, "T");
+      //outputNTLengthProbs(phraseTableFile, targetProb, "T");
     }    
   }
   

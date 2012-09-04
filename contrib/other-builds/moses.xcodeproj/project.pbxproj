@@ -9,6 +9,8 @@
 /* Begin PBXBuildFile section */
 		16A5EAFE15F51ABB00C4FC26 /* SpanLengthFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 16A5EAFD15F51ABB00C4FC26 /* SpanLengthFeature.h */; };
 		16A5EB0015F51E6100C4FC26 /* SpanLengthFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 16A5EAFF15F51E6100C4FC26 /* SpanLengthFeature.cpp */; };
+		16D2CCCD15F66C5500281C41 /* SpanLengthEstimator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 16D2CCCB15F66C5500281C41 /* SpanLengthEstimator.cpp */; };
+		16D2CCCE15F66C5500281C41 /* SpanLengthEstimator.h in Headers */ = {isa = PBXBuildFile; fileRef = 16D2CCCC15F66C5500281C41 /* SpanLengthEstimator.h */; };
 		1E0BA41815B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E0BA41615B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.cpp */; };
 		1E0BA41915B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h */; };
 		1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */; };
@@ -343,6 +345,8 @@
 /* Begin PBXFileReference section */
 		16A5EAFD15F51ABB00C4FC26 /* SpanLengthFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpanLengthFeature.h; path = ../../moses/src/SpanLengthFeature.h; sourceTree = "<group>"; };
 		16A5EAFF15F51E6100C4FC26 /* SpanLengthFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpanLengthFeature.cpp; path = ../../moses/src/SpanLengthFeature.cpp; sourceTree = "<group>"; };
+		16D2CCCB15F66C5500281C41 /* SpanLengthEstimator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SpanLengthEstimator.cpp; path = ../../moses/src/SpanLengthEstimator.cpp; sourceTree = "<group>"; };
+		16D2CCCC15F66C5500281C41 /* SpanLengthEstimator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SpanLengthEstimator.h; path = ../../moses/src/SpanLengthEstimator.h; sourceTree = "<group>"; };
 		1E0BA41615B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PhraseDictionaryFuzzyMatch.cpp; path = ../../moses/src/RuleTable/PhraseDictionaryFuzzyMatch.cpp; sourceTree = "<group>"; };
 		1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryFuzzyMatch.h; path = ../../moses/src/RuleTable/PhraseDictionaryFuzzyMatch.h; sourceTree = "<group>"; };
 		1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileHandler.cpp; sourceTree = "<group>"; };
@@ -744,8 +748,10 @@
 				1EC735FA14B977AA00238410 /* ChartTrellisPath.cpp */,
 				1EC735FB14B977AA00238410 /* ChartTrellisPath.h */,
 				1EC735FC14B977AA00238410 /* ChartTrellisPathList.h */,
+				1E6D9FF015D027680064D436 /* CompactPT */,
 				1EC735FD14B977AA00238410 /* ConfusionNet.cpp */,
 				1EC735FE14B977AA00238410 /* ConfusionNet.h */,
+				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
 				1EC735FF14B977AA00238410 /* DecodeFeature.cpp */,
 				1EC7360014B977AA00238410 /* DecodeFeature.h */,
 				1EC7360114B977AA00238410 /* DecodeGraph.cpp */,
@@ -760,6 +766,7 @@
 				1EC7360A14B977AA00238410 /* Dictionary.h */,
 				1EC7361114B977AA00238410 /* DummyScoreProducers.cpp */,
 				1EC7361214B977AA00238410 /* DummyScoreProducers.h */,
+				1EC7361314B977AA00238410 /* DynSAInclude */,
 				1EC7362C14B977AA00238410 /* DynSuffixArray.cpp */,
 				1EC7362D14B977AA00238410 /* DynSuffixArray.h */,
 				1EC7362E14B977AA00238410 /* Factor.cpp */,
@@ -805,6 +812,7 @@
 				1EC7365714B977AA00238410 /* LexicalReorderingState.h */,
 				1EC7365814B977AA00238410 /* LexicalReorderingTable.cpp */,
 				1EC7365914B977AA00238410 /* LexicalReorderingTable.h */,
+				1EC7365B14B977AA00238410 /* LM */,
 				1EC736A914B977AA00238410 /* LMList.cpp */,
 				1EC736AA14B977AA00238410 /* LMList.h */,
 				1EC736AB14B977AA00238410 /* LVoc.cpp */,
@@ -850,6 +858,8 @@
 				1EC736DF14B977AB00238410 /* RuleCubeItem.h */,
 				1EC736E014B977AB00238410 /* RuleCubeQueue.cpp */,
 				1EC736E114B977AB00238410 /* RuleCubeQueue.h */,
+				1EAC362B14CDC76200DF97C3 /* RuleTable */,
+				1EDA803514D19ECD003D2191 /* Scope3Parser */,
 				1EC736EB14B977AB00238410 /* ScoreComponentCollection.cpp */,
 				1EC736EC14B977AB00238410 /* ScoreComponentCollection.h */,
 				1EC736ED14B977AB00238410 /* ScoreIndexManager.cpp */,
@@ -868,6 +878,8 @@
 				1EC736F814B977AB00238410 /* Sentence.h */,
 				1EC736F914B977AB00238410 /* SentenceStats.cpp */,
 				1EC736FA14B977AB00238410 /* SentenceStats.h */,
+				16D2CCCB15F66C5500281C41 /* SpanLengthEstimator.cpp */,
+				16D2CCCC15F66C5500281C41 /* SpanLengthEstimator.h */,
 				16A5EAFF15F51E6100C4FC26 /* SpanLengthFeature.cpp */,
 				16A5EAFD15F51ABB00C4FC26 /* SpanLengthFeature.h */,
 				1EC736FB14B977AB00238410 /* SquareMatrix.cpp */,
@@ -1304,6 +1316,7 @@
 				1E6D9FEE15D027560064D436 /* TargetPhraseCollectionCache.h in Headers */,
 				1EC32DB915D2D90700A313B1 /* ThrowingFwrite.h in Headers */,
 				16A5EAFE15F51ABB00C4FC26 /* SpanLengthFeature.h in Headers */,
+				16D2CCCE15F66C5500281C41 /* SpanLengthEstimator.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1505,6 +1518,7 @@
 				1E6D9FEB15D027560064D436 /* PhraseTableCreator.cpp in Sources */,
 				1EC32DB815D2D90700A313B1 /* ThrowingFwrite.cpp in Sources */,
 				16A5EB0015F51E6100C4FC26 /* SpanLengthFeature.cpp in Sources */,
+				16D2CCCD15F66C5500281C41 /* SpanLengthEstimator.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
