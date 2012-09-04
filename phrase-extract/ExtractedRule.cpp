@@ -27,16 +27,19 @@ void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
   {
     size_t sourcePos = iter->first;
     const std::pair<size_t, size_t> &spanLengths = iter->second;
-    outString << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " "; 
+
+    //Hack : for dealing with source side only, remove target side info
+    //outString << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " ";
+    outString << sourcePos << "=" << spanLengths.first;
   }
 }
 
 std::ostream& operator<<(std::ostream &out, const ExtractedRule &obj)
 {
-  out << obj.source << " ||| " << obj.target << " ||| " 
+  out << obj.source << " ||| " << obj.target << " ||| "
       << obj.alignment << " ||| "
       << obj.alignmentInv << " ||| ";
-  
+
   obj.OutputNTLengths(out);
 
   return out;

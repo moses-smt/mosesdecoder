@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
+#include "SpanLengthEstimator.h"
 
 #include "util/string_piece.hh"
 
@@ -51,6 +52,8 @@ protected:
   float m_transScore;
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
+  SpanLengthEstimator m_spanLengthEstimator;
+
 
   // in case of confusion net, ptr to source phrase
   Phrase const* m_sourcePhrase;
@@ -73,6 +76,17 @@ public:
 
   //! Set score for unknown words with input weights
   void SetScore(const TranslationSystem* system, const Scores &scoreVector);
+
+  //! Accessors for span length estimator
+  void SetEstimator(const SpanLengthEstimator &estimator)
+  {
+    m_spanLengthEstimator = estimator;
+  }
+
+  const SpanLengthEstimator &GetEstimator()
+  {
+     return m_spanLengthEstimator;
+  }
 
 
   /*** Called immediately after creation to initialize scores.
