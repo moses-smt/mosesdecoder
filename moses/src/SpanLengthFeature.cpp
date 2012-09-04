@@ -71,8 +71,8 @@ FFState* SpanLengthFeature::EvaluateChart(
   std::vector<unsigned> sourceLengths = GetPrevHyposSourceLengths(chartHypothesis);
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
   for (size_t spanIndex = 0; spanIndex < sourceLengths.size(); ++spanIndex) {
-    float weight = targetPhrase.GetEstimator().GetSourceLengthProbas(spanIndex, sourceLengths[spanIndex]);
-    accumulator->PlusEquals(this, weight);
+    float prob = targetPhrase.GetEstimator().GetSourceLengthProbas(spanIndex, sourceLengths[spanIndex]);
+    accumulator->PlusEquals(this, prob);
   }
   return NULL;
 }
