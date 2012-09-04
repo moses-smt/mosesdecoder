@@ -4,7 +4,7 @@
 #include "TranslationOption.h"
 #include "WordsRange.h"
 #include "ChartHypothesis.h"
-#include "types.h"
+#include "DynSAInclude/types.h"
 
 namespace Moses {
   
