@@ -107,7 +107,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
  
     //target
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
-    targetPhrase->SetSourcePhrase(sourcePhrase); // TODO(bhaddow): This is a dangling pointer
     targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
 
     scv.clear();
@@ -175,6 +174,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       preSourceNode->Add(targetPhrase.release());
       preSourceString.assign(sourcePhraseString.data(), sourcePhraseString.size());
     }
+    //Now that the source phrase is ready, we give the target phrase a copy
+    targetPhrase->SetSourcePhrase(sourcePhrase);
   }
 
   // sort each target phrase collection
