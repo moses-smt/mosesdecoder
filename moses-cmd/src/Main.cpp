@@ -357,7 +357,6 @@ int main(int argc, char** argv)
     // (stores them as strings, or array of strings)
     Parameter* params = new Parameter();
     if (!params->LoadParam(argc,argv)) {
-      params->Explain();
       exit(1);
     }
   

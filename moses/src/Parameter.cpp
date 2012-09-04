@@ -218,7 +218,9 @@ bool Parameter::LoadParam(int argc, char* argv[])
     PrintCredit();
     Explain();
 
+    cerr << endl;    
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
+    cerr << endl;
     return false;
   } else {
     if (!ReadConfigFile(configPath)) {
