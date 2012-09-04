@@ -758,9 +758,9 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       // 1st sourcePos, 2nd = length, 3rd = prob
 
       calcNTLengthProb(phrasePair, sourceProb, targetProb);
-      
+      //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
-      outputNTLengthProbs(phraseTableFile, targetProb, "T");
+      //outputNTLengthProbs(phraseTableFile, targetProb, "T");
     }    
   }
   
