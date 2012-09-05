@@ -29,8 +29,8 @@ void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
     const std::pair<size_t, size_t> &spanLengths = iter->second;
 
     //Hack : for dealing with source side only, remove target side info
-    //outString << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " ";
-    outString << sourcePos << "=" << spanLengths.first<<" ";
+    outString << sourcePos << "=" << spanLengths.first << "," <<spanLengths.second << " ";
+    //outString << sourcePos << "=" << spanLengths.first<<" ";
   }
 }
 

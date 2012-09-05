@@ -471,12 +471,13 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
 void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
 {
   map<size_t, map<size_t, float> >::const_iterator iterOuter;
-  for (iterOuter = probs.begin(); iterOuter != probs.end(); ++iterOuter)
+  for (iterOuter = probs.begin(); iterOuter != probs.end(); )
   {
     size_t sourcePos = iterOuter->first;
     const map<size_t, float> &inner = iterOuter->second;
     
     map<size_t, float>::const_iterator iterInner;
+   
     for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
     {
       size_t length = iterInner->first;
@@ -484,10 +485,11 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
 
       //MARIA: change output format to be read in SpanLengthEstimator
       //phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
-      phraseTableFile << length << "|" << prob << " ";
+      phraseTableFile << length << "=" << prob << " ";
     }
-    phraseTableFile <<"|| ";
+    if(++iterOuter != probs.end()) phraseTableFile <<"| ";
   }
+   phraseTableFile <<" || ";
 
 }
 
@@ -763,7 +765,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       calcNTLengthProb(phrasePair, sourceProb, targetProb);
       //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
-      //outputNTLengthProbs(phraseTableFile, targetProb, "T");
+      outputNTLengthProbs(phraseTableFile, targetProb, "T");
     }    
   }
   
