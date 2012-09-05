@@ -7,50 +7,31 @@ using namespace std;
 namespace Moses
 {
 
-//Assumes that the scores are passed into order
-void SpanLengthEstimator::AddSourceSpanProbas(map<unsigned,float> sourceProbas)
+void SpanLengthEstimator::AddSourceSpanScore(unsigned sourceSpanLength, float score)
 {
-        m_sourceScores.push_back(sourceProbas);
+  m_sourceScores.insert(make_pair(sourceSpanLength, score));
 }
 
-//Assumes that the scores are passed into order
-void SpanLengthEstimator::AddTargetSpanProbas(map<unsigned,float> targetProbas)
+void SpanLengthEstimator::AddTargetSpanScore(unsigned targetSpanLength, float score)
 {
-    m_targetScores.push_back(targetProbas);
+    m_targetScores.insert(make_pair(targetSpanLength, score));
 }
 
-float SpanLengthEstimator::GetSourceLengthProbas(unsigned nonTerminal, unsigned spanLength) const
+float SpanLengthEstimator::GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const
 {
-  map<unsigned,float>::const_iterator it;
-  if(m_sourceScores.empty())
-  {
-      return 0.0;
-  }
-  CHECK(nonTerminal < m_sourceScores.size());
-  it=m_sourceScores[nonTerminal].find(spanLength);
-  if(it!=m_sourceScores[nonTerminal].end())
-    {return (*it).second;}
-    else
-    {
-      return -1000.0;
-    }
+  return FetchScoreFromMap(m_sourceScores, sourceSpanLength) + FetchScoreFromMap(m_targetScores, targetSpanLength);
 }
 
-float SpanLengthEstimator::GetTargetLengthProbas(unsigned nonTerminal, unsigned spanLength) const
+float SpanLengthEstimator::FetchScoreFromMap(const TLengthToScoreMap &lengthToScoreMap, unsigned spanLength)
 {
-     CHECK(m_targetScores.size() == 0);
-     /*map<unsigned,float>::const_iterator it;
-     if(m_targetScores.empty())
-    {
-        return 0.0;
-    }
-    if(it!=m_targetScores[nonTerminal].end())
-    {return (*it).second;}
-    else
-    {
-      return -1000.0;
-    }*/
+  static const double LARGE_NUMBER = 1000.0;
+  if (lengthToScoreMap.empty())
     return 0.0;
+  TLengthToScoreMap::const_iterator iter = lengthToScoreMap.find(spanLength);
+  if (iter == lengthToScoreMap.end())
+    return -LARGE_NUMBER;
+  else
+    return iter->second;
 }
 
-}
+} // namespace

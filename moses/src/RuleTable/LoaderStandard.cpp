@@ -219,21 +219,23 @@ bool RuleTableLoaderStandard::Load(FormatType format
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     //read from rule table
+    std::vector<SpanLengthEstimator> spanLengthEstimators;
     if (tokens.size() >= 6) {
       const std::string &spanLength = tokens[5];
       TokenizeMultiCharSeparator(spanStrings,spanLength,"||");
-      iterate(spanStrings,itr_string){
-          vector<string> spanString;
-          Tokenize(spanString,*itr_string);
-          map<unsigned,float> tmp;
-          iterate(spanString,itr_span)
-          {
-              unsigned size;
-              float proba;
-              sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
-              tmp.insert(make_pair(size,log(proba)));
-          }
-          spanLengthVector->AddSourceSpanProbas(tmp);
+      iterate(spanStrings,itr_string) {
+        vector<string> spanString;
+        Tokenize(spanString,*itr_string);
+        SpanLengthEstimator estimator;
+        
+        iterate(spanString,itr_span)
+        {
+          unsigned size;
+          float proba;
+          sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
+          estimator.AddSourceSpanScore(size, logf(proba));
+        }
+        spanLengthEstimators.push_back(estimator);
       }
     }
 
@@ -251,7 +253,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels, wpProducer);
-    targetPhrase->SetEstimator(spanLengthVector.release());
+    targetPhrase->SetSpanLengthEstimators(spanLengthEstimators);
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);
