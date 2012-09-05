@@ -160,14 +160,14 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
 void PhraseNode::AddTargetPhrase(const SourcePhrase &sourcePhrase, TargetPhrase *targetPhrase
                                  , OnDiskWrapper &onDiskWrapper, size_t tableLimit
-                                 , const std::vector<float> &counts)
+                                 , const std::vector<float> &counts, const std::string &misc)
 {
-  AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+  AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, misc);
 }
 
 void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
                                  , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
-                                 , size_t tableLimit, const std::vector<float> &counts)
+                                 , size_t tableLimit, const std::vector<float> &counts, const std::string &misc)
 {
   size_t phraseSize = sourcePhrase.GetSize();
   if (pos < phraseSize) {
@@ -185,7 +185,7 @@ void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
       m_currChild = &node;
     }
 
-    node.AddTargetPhrase(pos + 1, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+    node.AddTargetPhrase(pos + 1, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, misc);
   } else {
     // drilled down to the right node
     m_counts = counts;

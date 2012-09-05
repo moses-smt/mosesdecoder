@@ -76,12 +76,13 @@ int main (int argc, char * const argv[])
     //cerr << lineNum << " " << line << endl;
 
     std::vector<float> counts(1);
+    string misc;
     SourcePhrase sourcePhrase;
     TargetPhrase *targetPhrase = new TargetPhrase(numScores);
-    Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, counts);
+    Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, counts, misc);
     assert(counts.size() == onDiskWrapper.GetNumCounts());
 
-    rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+    rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, misc);
   }
 
   rootNode.Save(onDiskWrapper, 0, tableLimit);
@@ -106,7 +107,7 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
   return ret;
 }
 
-void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &count)
+void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &count, std::string &misc)
 {
   size_t scoreInd = 0;
   stringstream miscBuf;
@@ -162,6 +163,11 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
   } // while (tok != NULL)
 
   assert(scoreInd == numScores);
+  
+  misc = miscBuf.str();
+  misc = Moses::Trim(misc);
+  targetPhrase.SetMisc(misc);
+  
   targetPhrase.SortAlign();
 
 } // Tokenize()

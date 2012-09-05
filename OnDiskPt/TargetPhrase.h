@@ -52,6 +52,7 @@ protected:
   AlignType m_align;
 
   std::vector<float>	m_scores;
+  std::string m_misc;
   UINT64 m_filePos;
 
   size_t WriteAlignToMemory(char *mem) const;
@@ -70,6 +71,9 @@ public:
   void Create1AlignFromString(const std::string &align1Str);
   void SetScore(float score, size_t ind);
 
+  void SetMisc(std::string &misc)
+  { m_misc = misc; }
+  
   const AlignType &GetAlign() const {
     return m_align;
   }

@@ -31,7 +31,7 @@ void Tokenize(OnDiskPt::Phrase &phrase
 void Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targetPhrase
               , char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
               , int numScores
-              , std::vector<float> &count);
+              , std::vector<float> &count, std::string &misc);
 
 void InsertTargetNonTerminals(std::vector<std::string> &sourceToks, const std::vector<std::string> &targetToks, const AlignType &alignments);
 void SortAlign(AlignType &alignments);
