@@ -174,6 +174,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
     vector<string> tokens;
     vector<float> scoreVector;
     vector<string> spanStrings;
+    vector<string> spanStringsST;
+    vector<string> spanStringSource;
+    vector<string> spanStringTarget;
     auto_ptr<SpanLengthEstimator> spanLengthVector(new SpanLengthEstimator());
 
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
@@ -222,22 +225,53 @@ bool RuleTableLoaderStandard::Load(FormatType format
     std::vector<SpanLengthEstimator> spanLengthEstimators;
     if (tokens.size() >= 6) {
       const std::string &spanLength = tokens[5];
-      TokenizeMultiCharSeparator(spanStrings,spanLength,"||");
-      iterate(spanStrings,itr_string) {
-        vector<string> spanString;
-        Tokenize(spanString,*itr_string);
-        SpanLengthEstimator estimator;
-        
-        iterate(spanString,itr_span)
-        {
-          unsigned size;
-          float proba;
-          sscanf(itr_span->c_str(), "%u|%f", &size, &proba);
-          estimator.AddSourceSpanScore(size, logf(proba));
+      //source and target side are separated by ||
+      TokenizeMultiCharSeparator(spanStringsST,spanLength,"||");
+      CHECK(spanStringsST.size() == 2);
+
+      //Take scores from source
+      string spanLengthSource = spanStringsST[0];
+      //Take scores form target
+      string spanLengthTarget = spanStringsST[1];
+
+      TokenizeMultiCharSeparator(spanStringSource,spanLengthSource,"|");
+      TokenizeMultiCharSeparator(spanStringTarget,spanLengthTarget,"|");
+
+      //Check that number of non terminals is the same on both sides
+      CHECK(spanStringSource.size() == spanStringTarget.size());
+      vector<string>::iterator itr_source;
+      vector<string>::iterator itr_target;
+      for(
+            itr_source = spanStringSource.begin(), itr_target = spanStringTarget.begin();
+            itr_source != spanStringSource.end(), itr_target != spanStringTarget.end();
+            itr_source++, itr_target++)
+            {
+                vector<string> spanTermSource;
+                vector<string> spanTermTarget;
+                vector<string> :: iterator itr_source_term;
+                vector<string> :: iterator itr_target_term;
+                Tokenize(spanTermSource,*itr_source);
+                Tokenize(spanTermTarget,*itr_target);
+                SpanLengthEstimator estimator;
+                //get source scores
+                iterate(spanTermSource,itr_source_term)
+                {
+                    unsigned size;
+                    float proba;
+                    sscanf(itr_source_term->c_str(), "%u=%f", &size, &proba);
+                    estimator.AddSourceSpanScore(size, logf(proba));
+                }
+                //get target scores
+                iterate(spanStringTarget,itr_target_term)
+                {
+                    unsigned size;
+                    float proba;
+                    sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
+                    estimator.AddTargetSpanScore(size, logf(proba));
+                }
+                spanLengthEstimators.push_back(estimator);
+            }
         }
-        spanLengthEstimators.push_back(estimator);
-      }
-    }
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase(Output);
