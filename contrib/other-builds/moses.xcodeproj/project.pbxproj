@@ -705,13 +705,6 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
-				1E6D9FF015D027680064D436 /* CompactPT */,
-				1ECF13DE15C1A82400EA1DCE /* fuzzy-match */,
-				1EDA803514D19ECD003D2191 /* Scope3Parser */,
-				1EDA803414D19EB8003D2191 /* CYKPlusParser */,
-				1EC7365B14B977AA00238410 /* LM */,
-				1EC7361314B977AA00238410 /* DynSAInclude */,
-				1EAC362B14CDC76200DF97C3 /* RuleTable */,
 				1EC735D314B977AA00238410 /* AlignmentInfo.cpp */,
 				1EC735D414B977AA00238410 /* AlignmentInfo.h */,
 				1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */,
