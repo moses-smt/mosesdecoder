@@ -287,8 +287,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
-					../../randlm/lib,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -298,8 +298,10 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lrandlm",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};
@@ -319,8 +321,8 @@
 				LIBRARY_SEARCH_PATHS = (
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
-					../../randlm/lib,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -330,8 +332,10 @@
 					"-loolm",
 					"-lflm",
 					"-llattice",
-					"-lrandlm",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PRODUCT_NAME = CreateOnDisk;
 			};

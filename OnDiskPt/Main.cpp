@@ -109,6 +109,7 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
 void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
   size_t scoreInd = 0;
+  
 
   // MAIN LOOP
   size_t stage = 0;
@@ -142,14 +143,10 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
         targetPhrase.Create1AlignFromString(tok);
         break;
       }
-      case 4:
-        ++stage;
-        break;
-      case 5: {
+      case 4: {
         // count info. Only store the 2nd one
         float val = Moses::Scan<float>(tok);
         misc[0] = val;
-        ++stage;
         break;
       }
       default:
