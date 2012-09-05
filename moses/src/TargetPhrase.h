@@ -80,9 +80,11 @@ public:
   //! Accessors for span length estimator
   void SetSpanLengthEstimators(const std::vector<SpanLengthEstimator>& estimators);
 
-  float GetScoreBySpanLengths(
+  float GetScoreBySourceSpanLength(
     unsigned nonTerminalIndex,
-    unsigned sourceSpanLength,
+    unsigned sourceSpanLength) const;
+  float GetScoreByTargetSpanLength(
+    unsigned nonTerminalIndex,
     unsigned targetSpanLength) const;
 
 
