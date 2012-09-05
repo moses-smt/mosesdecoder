@@ -17,9 +17,20 @@ void SpanLengthEstimator::AddTargetSpanScore(unsigned targetSpanLength, float sc
     m_targetScores.insert(make_pair(targetSpanLength, score));
 }
 
-float SpanLengthEstimator::GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const
+//Just in case we need the sum of both scores (probably never...)
+//float SpanLengthEstimator::GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const
+//{
+//  return FetchScoreFromMap(m_sourceScores, sourceSpanLength) + FetchScoreFromMap(m_targetScores, targetSpanLength);
+//}
+
+float SpanLengthEstimator::GetScoreBySourceSpanLength(unsigned sourceSpanLength) const
 {
-  return FetchScoreFromMap(m_sourceScores, sourceSpanLength) + FetchScoreFromMap(m_targetScores, targetSpanLength);
+    return FetchScoreFromMap(m_sourceScores, sourceSpanLength);
+}
+
+float SpanLengthEstimator::GetScoreByTargetSpanLength(unsigned targetSpanLength) const
+{
+    return FetchScoreFromMap(m_targetScores, targetSpanLength);
 }
 
 float SpanLengthEstimator::FetchScoreFromMap(const TLengthToScoreMap &lengthToScoreMap, unsigned spanLength)

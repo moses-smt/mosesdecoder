@@ -28,6 +28,8 @@ public:
     const ChartHypothesis& chartHypothesis,
     int featureId,
     ScoreComponentCollection* accumulator) const;
+private:
+  bool m_withTargetLength;
 };
 
 } // namespace Moses

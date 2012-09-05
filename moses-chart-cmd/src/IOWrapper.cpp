@@ -432,9 +432,13 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
     const SpanLengthFeature *spl = StaticData::Instance().GetSpanLengthFeature();
     if(spl != NULL)
-    {
-        out << " SL:" << path.GetScoreBreakdown().GetScoreForProducer(spl);
-
+    { 
+      std::vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(spl);
+      for (size_t i = 0; i < scores.size(); ++i) {
+        out << " " << spl->GetScoreProducerWeightShortName(unsigned(i)) << ": ";
+        out << scores[i];
+      }
+      
     }
 
     // translation components
