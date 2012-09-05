@@ -20,12 +20,12 @@ public:
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
   virtual FFState* Evaluate(
-    const Hypothesis& cur_hypo,
+    const Hypothesis& currentHypothesis,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
   
   virtual FFState* EvaluateChart(
-    const ChartHypothesis& chart_hypothesis,
+    const ChartHypothesis& chartHypothesis,
     int featureId,
     ScoreComponentCollection* accumulator) const;
 };
