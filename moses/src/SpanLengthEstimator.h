@@ -14,9 +14,9 @@ public:
 
   void AddSourceSpanScore(unsigned sourceSpanLength, float score);
   void AddTargetSpanScore(unsigned targetSpanLength, float score);
-  float GetScoreBySourceSpanLengths(unsigned sourceSpanLength) const;
-  float GetScoreByTargetSpanLengths(unsigned targetSpanLength) const;
-  float GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const;
+  float GetScoreBySourceSpanLength(unsigned sourceSpanLength) const;
+  float GetScoreByTargetSpanLength(unsigned targetSpanLength) const;
+  //  float GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const;
 
 private:
   static float FetchScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength);
