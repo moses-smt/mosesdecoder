@@ -552,6 +552,7 @@
 					"\"$(SRCROOT)/../../util/bin/darwin-4.2.1/release/link-static/threading-multi\"",
 					"\"$(SRCROOT)/../../util/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Debug;
@@ -570,6 +571,7 @@
 					"\"$(SRCROOT)/../../util/bin/darwin-4.2.1/release/link-static/threading-multi\"",
 					"\"$(SRCROOT)/../../util/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 				);
+				MACOSX_DEPLOYMENT_TARGET = "";
 				PRODUCT_NAME = "$(TARGET_NAME)";
 			};
 			name = Release;
