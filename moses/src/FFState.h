@@ -14,6 +14,8 @@ class FFState
 {
 public:
   virtual ~FFState();
+  
+  /// should return -1, 0, 1 for (<, ==, >) respectively
   virtual int Compare(const FFState& other) const = 0;
 };
 

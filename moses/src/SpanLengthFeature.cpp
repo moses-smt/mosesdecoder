@@ -9,6 +9,7 @@
 namespace Moses {
   
 SpanLengthFeature::SpanLengthFeature(ScoreIndexManager &scoreIndexManager, const std::vector<float> &weight)
+  : m_withTargetLength(weight.size() > 1)
 {
   scoreIndexManager.AddScoreProducer(this);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weight);
@@ -16,17 +17,24 @@ SpanLengthFeature::SpanLengthFeature(ScoreIndexManager &scoreIndexManager, const
   
 size_t SpanLengthFeature::GetNumScoreComponents() const
 {
-  return 1;
+  return m_withTargetLength ? 2 : 1;
 }
   
-std::string SpanLengthFeature::GetScoreProducerDescription(unsigned) const
+std::string SpanLengthFeature::GetScoreProducerDescription(unsigned id) const
 {
-  return "SpanLength";
+  CHECK(id < 2);
+  if (id == 0)
+    return "SpanLengthSource";
+  else
+    return "SpanLengthTarget";
 }
 
-std::string SpanLengthFeature::GetScoreProducerWeightShortName(unsigned) const
+std::string SpanLengthFeature::GetScoreProducerWeightShortName(unsigned id) const
 {
-  return "SL";
+  if (id == 0)
+    return "SLS";
+  else
+    return "SLT";
 }
 
 size_t SpanLengthFeature::GetNumInputScores() const {
@@ -49,12 +57,12 @@ FFState* SpanLengthFeature::Evaluate(
 class SpanLengthFeatureState : public FFState
 {
 public:
-  SpanLengthFeatureState(int terminalCount)
+  SpanLengthFeatureState(unsigned terminalCount)
   : m_terminalCount(terminalCount)
   {
   }
   
-  int GetTerminalCount() const {
+  unsigned GetTerminalCount() const {
     return m_terminalCount;
   }
   
@@ -67,7 +75,7 @@ public:
     return 0;
   }
 private:
-  int m_terminalCount;
+  unsigned m_terminalCount;
 };
   
 struct SpanInfo {
@@ -87,12 +95,15 @@ static std::vector<SpanInfo> GetSpans(const ChartHypothesis &chartHypothesis, in
   result.reserve(prevHypos.size());
   iterate(prevHypos, iter) {
     WordsRange curRange = (*iter)->GetCurrSourceRange();
-    const SpanLengthFeatureState* state = dynamic_cast<const SpanLengthFeatureState*>((*iter)->GetFFState(featureId));
     SpanInfo spanInfo = {
       curRange.GetNumWordsCovered(),
-      state->GetTerminalCount(),
+      unsigned(-1),
       curRange.GetStartPos()
     };
+    const SpanLengthFeatureState* state = dynamic_cast<const SpanLengthFeatureState*>((*iter)->GetFFState(featureId));
+    if (state != NULL) {
+      spanInfo.TargetSpan = state->GetTerminalCount();
+    }
     result.push_back(spanInfo);
   }
   std::sort(result.begin(), result.end());
@@ -106,13 +117,25 @@ FFState* SpanLengthFeature::EvaluateChart(
 {
   std::vector<SpanInfo> spans = GetSpans(chartHypothesis, featureId);
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
-  int terminalCount = (int)chartHypothesis.GetCurrTargetPhrase().GetSize();
+  std::vector<float> scores(GetNumScoreComponents());
   for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-    float prob = targetPhrase.GetScoreBySpanLengths(spanIndex, spans[spanIndex].SourceSpan, spans[spanIndex].TargetSpan);
-    accumulator->PlusEquals(this, prob);
-    terminalCount += spans[spanIndex].TargetSpan - 1;
+    float score = targetPhrase.GetScoreBySourceSpanLength(spanIndex, spans[spanIndex].SourceSpan);
+    scores[0] += score;
   }
-  return new SpanLengthFeatureState(terminalCount);
+  if (m_withTargetLength) {
+    unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
+    for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
+      terminalCount += spans[spanIndex].TargetSpan;
+      --terminalCount;
+      float score = targetPhrase.GetScoreByTargetSpanLength(spanIndex,spans[spanIndex].TargetSpan);
+      scores[1] += score;
+    }
+    accumulator->PlusEquals(this, scores);
+    return new SpanLengthFeatureState(terminalCount);
+  } else {
+    accumulator->PlusEquals(this, scores);
+    return NULL;
+  }
 }
   
 } // namespace moses
