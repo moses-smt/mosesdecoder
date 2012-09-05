@@ -75,13 +75,13 @@ int main (int argc, char * const argv[])
     if (lineNum%100000 == 0) cerr << lineNum << flush;
     //cerr << lineNum << " " << line << endl;
 
-    std::vector<float> misc(1);
+    std::vector<float> counts(1);
     SourcePhrase sourcePhrase;
     TargetPhrase *targetPhrase = new TargetPhrase(numScores);
-    Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
-    assert(misc.size() == onDiskWrapper.GetNumCounts());
+    Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, counts);
+    assert(counts.size() == onDiskWrapper.GetNumCounts());
 
-    rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, misc);
+    rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
   }
 
   rootNode.Save(onDiskWrapper, 0, tableLimit);
@@ -106,10 +106,10 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
   return ret;
 }
 
-void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
+void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &count)
 {
   size_t scoreInd = 0;
-  
+  stringstream miscBuf;
 
   // MAIN LOOP
   size_t stage = 0;
@@ -122,6 +122,9 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
   char *tok = strtok (line," ");
   while (tok != NULL) {
     if (0 == strcmp(tok, "|||")) {
+      if (stage >= 5) {
+        miscBuf << "|||" << " ";
+      }
       ++stage;
     } else {
       switch (stage) {
@@ -146,11 +149,11 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
       case 4: {
         // count info. Only store the 2nd one
         float val = Moses::Scan<float>(tok);
-        misc[0] = val;
+        count[0] = val;
         break;
       }
       default:
-        assert(false);
+        miscBuf << tok << " ";
         break;
       }
     }
