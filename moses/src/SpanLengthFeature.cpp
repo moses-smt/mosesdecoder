@@ -46,35 +46,73 @@ FFState* SpanLengthFeature::Evaluate(
   return NULL;
 }
   
-static std::vector<unsigned> GetPrevHyposSourceLengths(const ChartHypothesis &chartHypothesis)
+class SpanLengthFeatureState : public FFState
+{
+public:
+  SpanLengthFeatureState(int terminalCount)
+  : m_terminalCount(terminalCount)
+  {
+  }
+  
+  int GetTerminalCount() const {
+    return m_terminalCount;
+  }
+  
+  virtual int Compare(const FFState& other) const {
+    int otherTerminalCount = (dynamic_cast<const SpanLengthFeatureState&>(other)).m_terminalCount;
+    if (m_terminalCount < otherTerminalCount)
+      return -1;
+    if (m_terminalCount > otherTerminalCount)
+      return 1;
+    return 0;
+  }
+private:
+  int m_terminalCount;
+};
+  
+struct SpanInfo {
+  unsigned SourceSpan, TargetSpan;
+  unsigned SourceRangeStart;
+};
+  
+static bool operator<(const SpanInfo& left, const SpanInfo& right)
+{
+  return left.SourceRangeStart < right.SourceRangeStart;
+}
+  
+static std::vector<SpanInfo> GetSpans(const ChartHypothesis &chartHypothesis, int featureId)
 {
   const std::vector<const ChartHypothesis*>& prevHypos = chartHypothesis.GetPrevHypos();
-  std::vector<WordsRange> prevHyposRanges;
-  prevHyposRanges.reserve(prevHypos.size());
-  iterate(prevHypos, iter) {
-    prevHyposRanges.push_back((*iter)->GetCurrSourceRange());
-  }
-  std::sort(prevHyposRanges.begin(), prevHyposRanges.end());
-  std::vector<unsigned> result;
+  std::vector<SpanInfo> result;
   result.reserve(prevHypos.size());
-  iterate(prevHyposRanges, iter) {
-    result.push_back(static_cast<unsigned>(iter->GetNumWordsCovered()));
+  iterate(prevHypos, iter) {
+    WordsRange curRange = (*iter)->GetCurrSourceRange();
+    const SpanLengthFeatureState* state = dynamic_cast<const SpanLengthFeatureState*>((*iter)->GetFFState(featureId));
+    SpanInfo spanInfo = {
+      curRange.GetNumWordsCovered(),
+      state->GetTerminalCount(),
+      curRange.GetStartPos()
+    };
+    result.push_back(spanInfo);
   }
+  std::sort(result.begin(), result.end());
   return result;
 }
 
 FFState* SpanLengthFeature::EvaluateChart(
   const ChartHypothesis &chartHypothesis,
-  int /*featureId*/,
+  int featureId,
   ScoreComponentCollection *accumulator) const
 {
-  std::vector<unsigned> sourceLengths = GetPrevHyposSourceLengths(chartHypothesis);
+  std::vector<SpanInfo> spans = GetSpans(chartHypothesis, featureId);
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
-  for (size_t spanIndex = 0; spanIndex < sourceLengths.size(); ++spanIndex) {
-    float prob = targetPhrase.GetScoreBySpanLengths(spanIndex, sourceLengths[spanIndex], unsigned(-1));
+  int terminalCount = (int)chartHypothesis.GetCurrTargetPhrase().GetSize();
+  for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
+    float prob = targetPhrase.GetScoreBySpanLengths(spanIndex, spans[spanIndex].SourceSpan, spans[spanIndex].TargetSpan);
     accumulator->PlusEquals(this, prob);
+    terminalCount += spans[spanIndex].TargetSpan - 1;
   }
-  return NULL;
+  return new SpanLengthFeatureState(terminalCount);
 }
   
 } // namespace moses
