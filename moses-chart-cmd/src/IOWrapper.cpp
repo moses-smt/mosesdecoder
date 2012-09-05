@@ -433,7 +433,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     const SpanLengthFeature *spl = StaticData::Instance().GetSpanLengthFeature();
     if(spl != NULL)
     {
-        out << " SL:" << path.GetScoreBreakdown().GetScoreForProducer(spl);
+        out << " SL: " << path.GetScoreBreakdown().GetScoreForProducer(spl);
 
     }
 
