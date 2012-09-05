@@ -9,18 +9,18 @@ namespace Moses
 
 class SpanLengthEstimator
 {
-    private :
-    std::vector< std::map< unsigned, float> > m_sourceScores;
-    std::vector< std::map< unsigned, float> > m_targetScores;
-
-    public :
-    //SpanLengthEstimator();
-
-    void AddSourceSpanProbas(std::map< unsigned, float> sourceProbas);
-    void AddTargetSpanProbas(std::map< unsigned, float> targetProbas);
-
-    float GetSourceLengthProbas(unsigned nonTerminal, unsigned spanLength) const;
-    float GetTargetLengthProbas(unsigned nonTerminal, unsigned spanLenth) const;
+public:
+  typedef std::map<unsigned, float> TLengthToScoreMap;
+  
+  void AddSourceSpanScore(unsigned sourceSpanLength, float score);
+  void AddTargetSpanScore(unsigned targetSpanLength, float score);
+  float GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const;
+  
+private:
+  static float FetchScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength);
+  
+  TLengthToScoreMap m_sourceScores;
+  TLengthToScoreMap m_targetScores;
 };
 
 }//namespace
