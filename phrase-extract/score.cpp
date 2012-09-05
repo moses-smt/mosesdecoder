@@ -73,7 +73,7 @@ bool includeSentenceIdFlag = false;
 
 Vocabulary vcbT;
 Vocabulary vcbS;
-  
+
 } // namespace
 
 vector<string> tokenize( const char [] );
@@ -144,7 +144,7 @@ int main(int argc, char* argv[])
       cerr << "using unaligned word penalty\n";
     } else if (strcmp(argv[i],"--UnalignedFunctionWordPenalty") == 0) {
       unalignedFWFlag = true;
-      if (i+1==argc) { 
+      if (i+1==argc) {
         cerr << "ERROR: specify count of count files for Kneser Ney discounting!\n";
         exit(1);
       }
@@ -241,7 +241,7 @@ int main(int argc, char* argv[])
 		}
 		phraseTableFile = outputFile;
 	}
-	
+
   // loop through all extracted phrase translations
   float lastCount = 0.0f;
   float lastPcfgSum = 0.0f;
@@ -282,7 +282,7 @@ int main(int argc, char* argv[])
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
       processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
-      
+
       phrasePairsWithSameF.clear();
       isSingleton = false;
       lastPhrasePair = NULL;
@@ -297,7 +297,7 @@ int main(int argc, char* argv[])
     lastPhrasePair = &phrasePairsWithSameF.back();
   }
   processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
-	
+
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
 		delete phraseTableFile;
@@ -337,21 +337,21 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
   // group phrase pairs based on alignments that matter
   // (i.e. that re-arrange non-terminals)
   PhrasePairGroup phrasePairGroup;
-  
+
   float totalSource = 0;
 
   //cerr << "phrasePair.size() = " << phrasePair.size() << endl;
-  
+
   // loop through phrase pairs
   for(size_t i=0; i<phrasePair.size(); i++) {
     // add to total count
     PhraseAlignment &currPhrasePair = phrasePair[i];
-    
+
     totalSource += phrasePair[i].count;
-    
+
     // check for matches
     //cerr << "phrasePairGroup.size() = " << phrasePairGroup.size() << endl;
-    
+
     PhraseAlignmentCollection phraseAlignColl;
     phraseAlignColl.push_back(&currPhrasePair);
     pair<PhrasePairGroup::iterator, bool> retInsert;
@@ -361,41 +361,41 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
       PhraseAlignmentCollection &existingColl = const_cast<PhraseAlignmentCollection&>(*retInsert.first);
       existingColl.push_back(&currPhrasePair);
     }
-    
+
   }
 
   // output the distinct phrase pairs, one at a time
   const PhrasePairGroup::SortedColl &sortedColl = phrasePairGroup.GetSortedColl();
   PhrasePairGroup::SortedColl::const_iterator iter;
 
-  for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
+  for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter)
   {
     const PhraseAlignmentCollection &group = **iter;
     outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile, isSingleton );
   }
-  
+
 }
 
 const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair )
 {
   float bestAlignmentCount = -1;
   PhraseAlignment* bestAlignment = NULL;
-  
+
   for(size_t i=0; i<phrasePair.size(); i++) {
     size_t alignInd;
-    if (inverseFlag) 
+    if (inverseFlag)
     { // count backwards, so that alignments for ties will be the same for both normal & inverse scores
       alignInd = phrasePair.size() - i - 1;
     }
     else {
       alignInd = i;
     }
-    
+
     if (phrasePair[alignInd]->count > bestAlignmentCount) {
       bestAlignmentCount = phrasePair[alignInd]->count;
       bestAlignment = phrasePair[alignInd];
     }
-  }    
+  }
 
   return *bestAlignment;
 }
@@ -410,7 +410,7 @@ void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
   {
     size_t sourcePos = iterOuter->first;
     const map<size_t, size_t> &inner = iterOuter->second;
-    
+
     map<size_t, size_t>::const_iterator iterInner;
     for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
     {
@@ -431,27 +431,27 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
   map<size_t, size_t> totals;
   // 1st = position in source phrase, 2nd = total counts
   // each source pos should have same count?
-  
+
   vector< PhraseAlignment* >::const_iterator iterOuter;
   for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter)
   {
     const PhraseAlignment &phrasePair = **iterOuter;
     const std::map<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
-    
+
     std::map<size_t, std::pair<size_t, size_t> >::const_iterator iterInner;
     for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner)
     {
       size_t sourcePos = iterInner->first;
       size_t sourceLength = iterInner->second.first;
       size_t targetLength = iterInner->second.second;
-      
+
       sourceLengths[sourcePos][sourceLength]++;
       targetLengths[sourcePos][targetLength]++;
 
       totals[sourcePos]++;
     }
   }
-    
+
   if (totals.size() == 0)
   { // no non-term. Don't bother
     return;
@@ -462,10 +462,10 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
   {
     assert(total == (++totals.begin())->second );
   }
-  
+
   calcNTLengthProb(sourceLengths, total, sourceProb);
   calcNTLengthProb(targetLengths, total, targetProb);
-  
+
 }
 
 void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
@@ -475,7 +475,7 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
   {
     size_t sourcePos = iterOuter->first;
     const map<size_t, float> &inner = iterOuter->second;
-    
+
     map<size_t, float>::const_iterator iterInner;
     for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
     {
@@ -498,14 +498,14 @@ bool calcCrossedNonTerm(int sourcePos, int targetPos, const std::vector< std::se
     if (currSource == sourcePos)
     { // skip
     }
-    else 
+    else
     {
       const std::set<size_t> &targetSet = alignedToS[currSource];
       std::set<size_t>::const_iterator iter;
       for (iter = targetSet.begin(); iter != targetSet.end(); ++iter)
       {
         size_t currTarget = *iter;
-        
+
         if ((currSource < sourcePos && currTarget > targetPos)
             || (currSource > sourcePos && currTarget < targetPos)
           )
@@ -513,25 +513,25 @@ bool calcCrossedNonTerm(int sourcePos, int targetPos, const std::vector< std::se
           return true;
         }
       }
-      
+
     }
   }
-  
+
   return false;
 }
 
 int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignment)
 {
   const std::vector< std::set<size_t> > &alignedToS = bestAlignment.alignedToS;
-  
+
   for (int sourcePos = 0; sourcePos < alignedToS.size(); ++sourcePos)
   {
     const std::set<size_t> &targetSet = alignedToS[sourcePos];
-    
+
     WORD_ID wordId = phraseS[sourcePos];
     const WORD &word = vcbS.getWord(wordId);
     bool isNonTerm = isNonTerminal(word);
-    
+
     if (isNonTerm)
     {
       assert(targetSet.size() == 1);
@@ -541,7 +541,7 @@ int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignme
         return 1;
     }
   }
-  
+
   return 0;
 }
 
@@ -550,7 +550,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (phrasePair.size() == 0) return;
 
   const PhraseAlignment &bestAlignment = findBestAlignment( phrasePair );
-    
+
   // compute count
   float count = 0;
   for(size_t i=0; i<phrasePair.size(); i++) {
@@ -636,11 +636,11 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   if (singletonFeature) {
     phraseTableFile << " " << (isSingleton ? 1 : 0);
   }
-  
+
   if (crossedNonTerm && !inverseFlag) {
     phraseTableFile << " " << calcCrossedNonTerm(phraseS, bestAlignment);
   }
-  
+
   // target-side PCFG score
   if (pcfgFlag && !inverseFlag) {
     phraseTableFile << " " << maybeLogProb( pcfgScore );
@@ -729,7 +729,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
           for (iter = sourceSet.begin(); iter != sourceSet.end(); ++iter)
           {
             int sourcePos = *iter;
-            phraseTableFile << sourcePos << "-" << j << " ";            
+            phraseTableFile << sourcePos << "-" << j << " ";
           }
         }
       }
@@ -745,12 +745,12 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   }
 
   // counts
-  
+
   phraseTableFile << " ||| " << totalCount << " " << count;
-  if (kneserNeyFlag) 
+  if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
-  
-  // nt lengths  
+
+  // nt lengths
   if (outputNTLengths)
   {
     phraseTableFile << " ||| ";
@@ -764,9 +764,9 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
       //outputNTLengthProbs(phraseTableFile, targetProb, "T");
-    }    
+    }
   }
-  
+
   phraseTableFile << endl;
 }
 
@@ -945,13 +945,13 @@ void printTargetPhrase(const PHRASE &phraseS, const PHRASE &phraseT,
 std::pair<PhrasePairGroup::Coll::iterator,bool> PhrasePairGroup::insert ( const PhraseAlignmentCollection& obj )
 {
   std::pair<iterator,bool> ret = m_coll.insert(obj);
-  
+
   if (ret.second)
   { // obj inserted. Also add to sorted vector
     const PhraseAlignmentCollection &insertedObj = *ret.first;
     m_sortedColl.push_back(&insertedObj);
   }
-  
+
   return ret;
 }
 
