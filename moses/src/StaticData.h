@@ -217,7 +217,7 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
   StaticData();
 
   void LoadPhraseBasedParameters();
@@ -245,7 +245,7 @@ protected:
   bool m_continuePartialTranslation;
 
   std::string m_binPath;
-  
+
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -392,7 +392,7 @@ public:
   bool NBestIncludesAlignment() const {
     return m_nBestIncludesAlignment;
   }
-  
+
   bool UseMinphrInMemory() const {
      return m_minphrMemory;
   }
@@ -400,7 +400,7 @@ public:
   bool UseMinlexrInMemory() const {
      return m_minlexrMemory;
   }
-  
+
   size_t GetNumLinkParams() const {
     return m_numLinkParams;
   }
@@ -448,8 +448,8 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
-  LMList GetLMList() const { 
-    return m_languageModel; 
+  LMList GetLMList() const {
+    return m_languageModel;
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;
@@ -629,12 +629,18 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
-  
+
   long GetStartTranslationId() const
   { return m_startTranslationId; }
-  
+
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
+
+  const SpanLengthFeature *GetSpanLengthFeature() const
+  {
+      return m_spanLengthFeature;
+  }
+
 };
 
 }

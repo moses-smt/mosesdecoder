@@ -147,12 +147,12 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
-  
-  // Compact phrase table and reordering table.                                                                                  
-  AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
+
+  // Compact phrase table and reordering table.
+  AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
-  AddParam("weight-span-length", "Weight for span length feature");
-  
+  AddParam("weight-span-length", "SL", "Weight for span length feature");
+
 }
 
 Parameter::~Parameter()
@@ -282,14 +282,14 @@ bool Parameter::Validate()
   PARAM_MAP::const_iterator iterParams;
   for (iterParams = m_setting.begin(); iterParams != m_setting.end(); ++iterParams) {
     const std::string &key = iterParams->first;
-    
+
     if (m_valid.find(key) == m_valid.end())
     {
       UserMessage::Add("Unknown parameter " + key);
       noErrorFlag = false;
     }
   }
-  
+
 
   // required parameters
   if (m_setting["ttable-file"].size() == 0) {

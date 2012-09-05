@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTranslationOption.h"
 #include "ChartHypothesis.h"
+#include "SpanLengthFeature.h"
 
 
 using namespace std;
@@ -428,6 +429,13 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
 
     std::string lastName = "";
+
+    const SpanLengthFeature *spl = StaticData::Instance().GetSpanLengthFeature();
+    if(spl != NULL)
+    {
+        out << "SL : " << path.GetScoreBreakdown().GetScoreForProducer(*spl);
+
+    }
 
     // translation components
     const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
