@@ -45,8 +45,8 @@ Parameter::Parameter()
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
-  AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
   AddParam("input-factors", "list of factors in the input");
+  AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
   AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
@@ -151,6 +151,10 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
+
+  AddParam("cblm-file", "location of the initialization data for cache-based language model");
+  AddParam("weight-cblm", "cblm", "weight for cache-based language model");
+
 }
 
 Parameter::~Parameter()
