@@ -58,6 +58,7 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class CacheBasedLanguageModel;
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
@@ -141,6 +142,7 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  CacheBasedLanguageModel *m_CacheBasedLanguageModel;
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;

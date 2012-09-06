@@ -9,9 +9,10 @@
 namespace Moses
 {
 
-CacheBasedLanguageModel::CacheBasedLanguageModel(ScoreIndexManager &scoreIndexManager)
+CacheBasedLanguageModel::CacheBasedLanguageModel(ScoreIndexManager &scoreIndexManager, const std::vector<float>& weights)
 {
-  scoreIndexManager.AddScoreProducer(this);
+  const_cast<ScoreIndexManager&>  (StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
+  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 }
 
 size_t CacheBasedLanguageModel::GetNumScoreComponents() const

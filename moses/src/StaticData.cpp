@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
+#include "CacheBasedLanguageModel.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -520,6 +521,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadPhraseTables()) return false;
   if (!LoadGlobalLexicalModel()) return false;
   if (!LoadDecodeGraphs()) return false;
+  if (!LoadCacheBasedLanguageModel()) return false;
 
 
   //configure the translation systems with these tables
@@ -609,6 +611,10 @@ bool StaticData::LoadData(Parameter *parameter)
 #endif
   }
 
+ if (m_CacheBasedLanguageModel != NULL) // check if CacheBasedLanguageModel is used
+ {
+   m_translationSystems.find(config[0])->second.AddFeatureFunction(m_CacheBasedLanguageModel);
+ }
 
   m_scoreIndexManager.InitFeatureNames();
 
@@ -656,6 +662,9 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
+
+  // delete Cache-Based Language Model
+  delete m_CacheBasedLanguageModel;
 
   //delete m_parameter;
 
@@ -1110,6 +1119,28 @@ bool StaticData::LoadPhraseTables()
   IFVERBOSE(1)
   PrintUserTime("Finished loading phrase tables");
   return true;
+}
+
+void StaticData::LoadCacheBasedLanguageModel()
+{
+   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-cblm"));
+   const vector<string> &file = m_parameter->GetParam("cblm-file");
+
+   if (weight.size() == 1) // check if feature is used
+   {
+     m_CacheBasedLanguageModel = new CacheBasedLanguageModel(weight); // create the feature
+
+     for(size_t j = 0; j < file.size(); ++j)
+     {
+        m_CacheBasedLanguageModel->Load(file[j]);
+     }
+ 
+     return true;
+   }
+   else
+   {
+     return false;
+   }
 }
 
 void StaticData::LoadNonTerminals()

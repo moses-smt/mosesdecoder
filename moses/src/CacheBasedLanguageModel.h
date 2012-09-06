@@ -14,14 +14,19 @@ class WordsRange;
  */
 class CacheBasedLanguageModel : public StatelessFeatureFunction
 {
+// data structure for the cache;
+// XXX m_cache;
+
 public:
-  CacheBasedLanguageModel(ScoreIndexManager &scoreIndexManager);
+  CacheBasedLanguageModel(ScoreIndexManager &scoreIndexManager, const std::vector<float>& weights);
 
   std::string GetScoreProducerDescription(unsigned) const;
   std::string GetScoreProducerWeightShortName(unsigned) const;
   size_t GetNumScoreComponents() const; 
 
   void Evaluate( const TargetPhrase&, ScoreComponentCollection* ) const;
+
+  void Load(const string file){};
 }
 
 };

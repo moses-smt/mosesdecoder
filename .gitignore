@@ -1,4 +1,6 @@
 *.pyc
+*.Plo
+*.Po
 *.lo
 *.o
 *.so
