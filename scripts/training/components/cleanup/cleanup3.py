@@ -17,8 +17,8 @@ def initialise():
 
     for (l1, l2) in zip(ifh1, ifh2):
       if _short(l1) and _short(l2):
-        print >>ofh1, l1,
-        print >>ofh2, l2,
+        print(l1, end='', file=ofh1)
+        print(l2, end='', file=ofh2)
 
   def _filter_main(config, value):
     limit = config['segment_length']
