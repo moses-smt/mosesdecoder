@@ -23,7 +23,7 @@ protected:
   PHRASE phraseS;
   PHRASE phraseT;
 
-  std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
+  std::map<size_t, std::vector<std::pair<size_t,size_t> > > m_NTLengths;
   
   void createAlignVec(size_t sourceSize, size_t targetSize);
   void addNTLength(const std::string &tok);
@@ -54,8 +54,9 @@ public:
     return phraseT;
   }
   
-  const std::map<size_t, std::pair<size_t, size_t> > &GetNTLengths() const
-  { return m_ntLengths; }
+  const std::map<size_t, std::vector<std::pair<size_t,size_t> > > &GetNTLengths() const
+  { return m_NTLengths; }
+  void addNTLength(const std::map<size_t, std::vector<std::pair<size_t,size_t> > > &length);
 
 };
 

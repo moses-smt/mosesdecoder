@@ -87,7 +87,7 @@ double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlig
 set<string> functionWordList;
 void loadFunctionWords( const string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
+void calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
                       , map<size_t, map<size_t, float> > &targetProb);
 void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
@@ -247,34 +247,34 @@ int main(int argc, char* argv[])
   float lastPcfgSum = 0.0f;
   vector< PhraseAlignment > phrasePairsWithSameF;
   bool isSingleton = true;
-  int i=0;
+  int lineNum=0;
   char line[LINE_MAX_LENGTH],lastLine[LINE_MAX_LENGTH];
   lastLine[0] = '\0';
   PhraseAlignment *lastPhrasePair = NULL;
   while(true) {
     if (extractFileP.eof()) break;
-    if (++i % 100000 == 0) cerr << "." << flush;
+    if (++lineNum % 100000 == 0) cerr << "." << flush;
+    
+    cerr << line << endl;
+    
+    
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extractFileP.eof())	break;
 
-    // identical to last line? just add count
-    if (strcmp(line,lastLine) == 0) {
-      lastPhrasePair->count += lastCount;
-      lastPhrasePair->pcfgSum += lastPcfgSum;
-      continue;
-    }
     strcpy( lastLine, line );
 
     // create new phrase pair
     PhraseAlignment phrasePair;
-    phrasePair.create( line, i, includeSentenceIdFlag );
+    phrasePair.create( line, lineNum, includeSentenceIdFlag );
     lastCount = phrasePair.count;
     lastPcfgSum = phrasePair.pcfgSum;
 
+    
     // only differs in count? just add count
     if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair )) {
       lastPhrasePair->count += phrasePair.count;
       lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
+      lastPhrasePair->addNTLength(phrasePair.GetNTLengths());
       continue;
     }
 
@@ -422,7 +422,7 @@ void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
   }
 }
 
-void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
+void calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
                       , map<size_t, map<size_t, float> > &targetProb)
 {
@@ -436,19 +436,24 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
   for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter)
   {
     const PhraseAlignment &phrasePair = **iterOuter;
-    const std::map<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
+    const std::map<size_t, std::vector<std::pair<size_t, size_t> > > &ntLengths = phrasePair.GetNTLengths();
 
-    std::map<size_t, std::pair<size_t, size_t> >::const_iterator iterInner;
+    std::map<size_t, std::vector<std::pair<size_t,size_t> > >::const_iterator iterInner;
     for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner)
     {
       size_t sourcePos = iterInner->first;
-      size_t sourceLength = iterInner->second.first;
-      size_t targetLength = iterInner->second.second;
+      const std::vector<std::pair<size_t,size_t> > &ntLengths = iterInner->second;
 
-      sourceLengths[sourcePos][sourceLength]++;
-      targetLengths[sourcePos][targetLength]++;
+      for (size_t i = 0; i < ntLengths.size(); ++i) {
+        const std::pair<size_t,size_t> &lenths = ntLengths[i];
+        size_t sourceLength = lenths.first;
+        size_t targetLength = lenths.second;
+      
+        sourceLengths[sourcePos][sourceLength]++;
+        targetLengths[sourcePos][targetLength]++;
 
-      totals[sourcePos]++;
+        totals[sourcePos]++;
+      }
     }
   }
 

@@ -145,10 +145,27 @@ void PhraseAlignment::addNTLength(const std::string &tok)
   vector< size_t > ntLengths;
   Tokenize<size_t>(ntLengths, tokens[1], ",");
   assert(ntLengths.size() == 2);
+  size_t sourceLen = ntLengths[0];
+  size_t targetLen = ntLengths[1];
   
-  m_ntLengths[sourcePos] = std::pair<size_t, size_t>(ntLengths[0], ntLengths[1]);
+  std::vector<std::pair<size_t,size_t> > &ntlengths = m_NTLengths[sourcePos];
+  ntlengths.push_back(std::pair<size_t,size_t>(sourceLen, targetLen));
+    
 }
 
+void PhraseAlignment::addNTLength(const std::map<size_t, std::vector<std::pair<size_t,size_t> > > &length)
+{
+  std::map<size_t, std::vector<std::pair<size_t,size_t> > >::const_iterator iter;
+  for (iter = length.begin(); iter != length.end(); ++iter) {
+    size_t sourcePos = iter->first;
+    const std::vector<std::pair<size_t,size_t> > &vec = iter->second;
+    for (size_t i = 0; i < vec.size(); ++i) {
+      pair<size_t, size_t> lengths = vec[i];
+      m_NTLengths[sourcePos].push_back(lengths);
+    }
+  }
+}
+  
 void PhraseAlignment::createAlignVec(size_t sourceSize, size_t targetSize)
 {
   // in case of no align info. always need align info, even if blank
