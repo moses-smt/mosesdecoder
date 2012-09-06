@@ -15,7 +15,7 @@
 
 
 # Some general things to note:
-#  - Different combination algorithms require different statistics. To be on the safe side, apply train_model.patch to train_model.perl and use the option -phrase-word-alignment for training all models.
+#  - Different combination algorithms require different statistics. To be on the safe side, use the options `-phrase-word-alignment` and `-write-lexical-counts` when training models.
 #  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). sort with LC_ALL=C.
 #  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
 #  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files.
@@ -1233,7 +1233,7 @@ def handle_file(filename,action,fileobj=None,mode='r'):
                 
                 if 'counts' in filename and os.path.exists(os.path.isdir(filename)):
                     sys.stderr.write('For a weighted counts combination, we need statistics that Moses doesn\'t write to disk by default.\n')
-                    sys.stderr.write('Apply train_model.patch to train_model.perl and repeat step 4 of Moses training for all models.\n')
+                    sys.stderr.write('Repeat step 4 of Moses training for all models with the option -write-lexical-counts.\n')
                 
                 exit()
 
@@ -1327,7 +1327,7 @@ class Combine_TMs():
            output_lexical: If defined, also writes combined lexical tables. Writes to output_lexical.e2f and output_lexical.f2e, or output_lexical.counts.e2f in mode 'counts'.
 
            mode: declares the basic mixture-model algorithm. there are currently three options:
-                 'counts': weighted counts (requires some statistics that Moses doesn't produce. Apply train_model.patch to train_model.perl and repeat step 4 of Moses training to obtain them.)
+                 'counts': weighted counts (requires some statistics that Moses doesn't produce. Repeat step 4 of Moses training with the option -write-lexical-counts to obtain them.)
                            Only the standard Moses features are recomputed from weighted counts; additional features are linearly interpolated 
                            (see number_of_features to allow more features, and i_e2f etc. if the standard features are in a non-standard position)
                  'interpolate': linear interpolation

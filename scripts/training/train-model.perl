@@ -23,7 +23,7 @@ $SCRIPTS_ROOTDIR =~ s/\/training$//;
 
 my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE,  $_SORT_COMPRESS, $_SORT_PARALLEL, $_CORPUS,
    $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
-   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
+   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_LEXICAL_COUNTS, $_VERBOSE, $_ALIGNMENT,
    $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
    $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
    $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
@@ -56,6 +56,7 @@ $_HELP = 1
 		       'max-phrase-length=s' => \$_MAX_PHRASE_LENGTH,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
+		       'write-lexical-counts' => \$_LEXICAL_COUNTS,
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
            'sort-buffer-size=s' => \$_SORT_BUFFER_SIZE,
@@ -400,9 +401,11 @@ my $___MAX_PHRASE_LENGTH = "7";
 $___MAX_PHRASE_LENGTH = "10" if $_HIERARCHICAL;
 
 my $___LEXICAL_WEIGHTING = 1;
+my $___LEXICAL_COUNTS = 0;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
+$___LEXICAL_COUNTS = 1 if $_LEXICAL_COUNTS;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
 
 my $___PHRASE_SCORER = "phrase-extract";
@@ -1195,7 +1198,8 @@ sub get_lexical_factored {
 	&get_lexical($___CORPUS.".".$___F,
 		     $___CORPUS.".".$___E,
 		     $___ALIGNMENT_FILE.".".$___ALIGNMENT,
-		     $___LEXICAL_FILE);
+		     $___LEXICAL_FILE, 
+		     $___LEXICAL_COUNTS);
     }
     else {
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
@@ -1212,7 +1216,8 @@ sub get_lexical_factored {
 	    &get_lexical($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			 $___ALIGNMENT_FILE.".".$___ALIGNMENT,
-			 $lexical_file);
+			 $lexical_file, 
+			 $___LEXICAL_COUNTS);
 	}
     }
 }
