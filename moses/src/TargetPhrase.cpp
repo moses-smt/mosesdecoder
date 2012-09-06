@@ -306,28 +306,9 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
   
 void TargetPhrase::SetSpanLengthEstimators(const std::vector<SpanLengthEstimator>& estimators)
 {
-  m_spanLengthEstimators.assign(estimators.begin(), estimators.end());
+  m_spanLengthEstimators.Assign(estimators.begin(), estimators.end());
 }
-  
-float TargetPhrase::GetScoreBySourceSpanLength(
-  unsigned nonTerminalIndex,
-  unsigned sourceSpanLength) const
-{
-  if (m_spanLengthEstimators.empty())
-    return 0.0f;
-  CHECK(m_spanLengthEstimators.size() > size_t(nonTerminalIndex));
-  return m_spanLengthEstimators[nonTerminalIndex].GetScoreBySourceSpanLength(sourceSpanLength);
-}
-  
-float TargetPhrase::GetScoreByTargetSpanLength(
-  unsigned nonTerminalIndex,
-  unsigned targetSpanLength) const
-{
-  if (m_spanLengthEstimators.empty())
-    return 0.0f;
-  CHECK(m_spanLengthEstimators.size() > size_t(nonTerminalIndex));
-  return m_spanLengthEstimators[nonTerminalIndex].GetScoreByTargetSpanLength(targetSpanLength);
-}
+
 
 namespace {
 void MosesShouldUseExceptions(bool value) {

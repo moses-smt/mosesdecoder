@@ -11,7 +11,7 @@ class ScoreComponentCollection;
 
 class SpanLengthFeature : public StatefulFeatureFunction {
 public:
-  SpanLengthFeature(ScoreIndexManager &scoreIndexManager, const std::vector<float> &weight);
+  SpanLengthFeature(ScoreIndexManager &scoreIndexManager, const std::vector<float> &weights);
   virtual size_t GetNumScoreComponents() const;
   virtual std::string GetScoreProducerDescription(unsigned) const;
   virtual std::string GetScoreProducerWeightShortName(unsigned) const;
@@ -28,6 +28,10 @@ public:
     const ChartHypothesis& chartHypothesis,
     int featureId,
     ScoreComponentCollection* accumulator) const;
+  
+  bool WithTargetLength() const {
+    return m_withTargetLength;
+  }
 private:
   bool m_withTargetLength;
 };
