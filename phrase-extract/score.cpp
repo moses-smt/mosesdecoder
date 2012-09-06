@@ -436,7 +436,7 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
   for (iterOuter = phrasePairs.begin(); iterOuter != phrasePairs.end(); ++iterOuter)
   {
     const PhraseAlignment &phrasePair = **iterOuter;
-    const std::map<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
+    const std::multimap<size_t, std::pair<size_t, size_t> > &ntLengths = phrasePair.GetNTLengths();
 
     std::map<size_t, std::pair<size_t, size_t> >::const_iterator iterInner;
     for (iterInner = ntLengths.begin(); iterInner != ntLengths.end(); ++iterInner)
@@ -477,7 +477,7 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
     const map<size_t, float> &inner = iterOuter->second;
 
     map<size_t, float>::const_iterator iterInner;
-   
+
     for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
     {
       size_t length = iterInner->first;
@@ -766,7 +766,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
       outputNTLengthProbs(phraseTableFile, targetProb, "T");
-    }    
+    }
 
   }
 

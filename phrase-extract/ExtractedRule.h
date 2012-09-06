@@ -48,8 +48,8 @@ public:
   float count;
   double pcfgScore;
 
-  std::map<size_t, std::pair<size_t, size_t> > m_ntLengths;
-  
+  std::multimap<size_t, std::pair<size_t, size_t> > m_ntLengths;
+
   ExtractedRule(int sT, int eT, int sS, int eS)
     : source()
     , target()
@@ -64,12 +64,12 @@ public:
     , count(0)
     , pcfgScore(0.0)
   {}
-  
+
   void SetSpanLength(size_t sourcePos, size_t sourceLength, size_t targetLength)
   {
-    m_ntLengths[sourcePos] = std::pair<size_t, size_t>(sourceLength, targetLength);
+    m_ntLengths.insert(std::make_pair(sourcePos,std::pair<size_t, size_t>(sourceLength, targetLength)));
   }
-  
+
   void OutputNTLengths(std::ostream &out) const;
   void OutputNTLengths(std::ostringstream &out) const;
 };

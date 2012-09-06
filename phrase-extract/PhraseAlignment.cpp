@@ -56,7 +56,7 @@ inline void Tokenize(std::vector<std::string> &output
   std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
   // Find first "non-delimiter".
   std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-  
+
   while (std::string::npos != pos || std::string::npos != lastPos) {
     // Found a token, add it to the vector.
     output.push_back(str.substr(lastPos, pos - lastPos));
@@ -132,21 +132,22 @@ void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFla
   }
 }
 
+//REPLACE m_ntLength with
 void PhraseAlignment::addNTLength(const std::string &tok)
 {
   vector< string > tokens;
-  
+
   Tokenize(tokens, tok, "=");
   assert(tokens.size() == 2);
-  
+
   size_t sourcePos = Scan<size_t>(tokens[0]);
   assert(sourcePos < phraseS.size());
-  
+
   vector< size_t > ntLengths;
   Tokenize<size_t>(ntLengths, tokens[1], ",");
   assert(ntLengths.size() == 2);
-  
-  m_ntLengths[sourcePos] = std::pair<size_t, size_t>(ntLengths[0], ntLengths[1]);
+
+  m_ntLengths.insert(std::make_pair(sourcePos,pair<size_t, size_t>(ntLengths[0], ntLengths[1])));
 }
 
 void PhraseAlignment::createAlignVec(size_t sourceSize, size_t targetSize)
@@ -211,13 +212,13 @@ int PhraseAlignment::Compare(const PhraseAlignment &other) const
   if (this == &other) // comparing with itself
     return 0;
 
-  if (GetTarget() != other.GetTarget()) 
+  if (GetTarget() != other.GetTarget())
     return ( GetTarget() < other.GetTarget() ) ? -1 : +1;
 
   if (GetSource() != other.GetSource())
    return ( GetSource() < other.GetSource() ) ? -1 : +1;
 
-  if (!hierarchicalFlag) 
+  if (!hierarchicalFlag)
     return 0;
 
   // loop over all words (note: 0 = left hand side of rule)
@@ -236,7 +237,7 @@ int PhraseAlignment::Compare(const PhraseAlignment &other) const
     }
   }
   return 0;
-  
+
 }
 
 }
