@@ -60,7 +60,8 @@ protected:
 
   UINT64 ReadAlignFromFile(std::fstream &fileTPColl);
   UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
-
+  UINT64 ReadMiscFromFile(std::fstream &fileTPColl);
+  
 public:
   TargetPhrase(size_t numScores);
   TargetPhrase(const 	TargetPhrase &copy);

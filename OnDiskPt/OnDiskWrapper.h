@@ -27,6 +27,7 @@
 namespace OnDiskPt
 {
 const float DEFAULT_COUNT = 66666;
+const int VERSION = 5;
 
 /** Global class with misc information need to create and use the on-disk rule table. 
  * 1 object of this class should be instantiated per rule table.

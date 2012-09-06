@@ -84,9 +84,10 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
 {
   size_t phraseSize = GetSize();
   size_t targetWordSize = onDiskWrapper.GetTargetWordSize();
-
-  size_t memNeeded = sizeof(UINT64)						// num of words
-                     + targetWordSize * phraseSize;	// actual words. lhs as last words
+  
+  size_t memNeeded = sizeof(UINT64)						// store num of words
+                    + targetWordSize * phraseSize;	// actual words. lhs as last word
+                    
   memUsed = 0;
   UINT64 *mem = (UINT64*) malloc(memNeeded);
 
@@ -100,7 +101,7 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
     char *currPtr = (char*)mem + memUsed;
     memUsed += word.WriteToMemory((char*) currPtr);
   }
-
+  
   CHECK(memUsed == memNeeded);
   return (char *) mem;
 }
@@ -130,11 +131,14 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
   // allocate mem
   size_t numScores = onDiskWrapper.GetNumScores()
                      ,numAlign = GetAlign().size();
+  size_t miscSize = m_misc.size();
 
-  size_t memNeeded = sizeof(UINT64); // file pos (phrase id)
-  memNeeded += sizeof(UINT64) + 2 * sizeof(UINT64) * numAlign; // align
-  memNeeded += sizeof(float) * numScores; // scores
-
+  size_t memNeeded = sizeof(UINT64) // file pos (phrase id)
+                  + sizeof(UINT64) + 2 * sizeof(UINT64) * numAlign // align
+                  + sizeof(float) * numScores // scores
+                  + sizeof(UINT64)    // store size of misc string
+                  + miscSize; // store actual string. Without trailing ox0
+                  
   char *mem = (char*) malloc(memNeeded);
   //memset(mem, 0, memNeeded);
 
@@ -149,6 +153,13 @@ char *TargetPhrase::WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t 
 
   // scores
   memUsed += WriteScoresToMemory(mem + memUsed);
+
+  // misc info
+  mem[memUsed] = miscSize;
+  memUsed += sizeof(UINT64);
+  
+  memcpy(mem + memUsed, m_misc.c_str(), miscSize);
+  memUsed += miscSize;
 
   //DebugMem(mem, memNeeded);
   CHECK(memNeeded == memUsed);
@@ -245,6 +256,9 @@ UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPC
   memUsed += ReadScoresFromFile(fileTPColl);
   CHECK((memUsed + filePos) == (UINT64)fileTPColl.tellg());
 
+  memUsed += ReadMiscFromFile(fileTPColl);
+  CHECK((memUsed + filePos) == (UINT64)fileTPColl.tellg());
+
   return memUsed;
 }
 
@@ -302,6 +316,26 @@ UINT64 TargetPhrase::ReadScoresFromFile(std::fstream &fileTPColl)
   std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::TransformScore);
   std::transform(m_scores.begin(),m_scores.end(),m_scores.begin(), Moses::FloorScore);
 
+  return bytesRead;
+}
+
+UINT64 TargetPhrase::ReadMiscFromFile(std::fstream &fileTPColl)
+{
+  UINT64 bytesRead = 0;
+  
+  UINT64 miscSize;
+  fileTPColl.read((char*) &miscSize, sizeof(miscSize));
+  bytesRead += sizeof(miscSize);
+  
+  char *str = (char*) malloc(miscSize + 1);
+  fileTPColl.read(str, miscSize);
+  bytesRead += miscSize;
+  
+  *(str + miscSize + 1) = 0x0;
+  m_misc = string(str);
+  
+  free(str);
+  
   return bytesRead;
 }
 

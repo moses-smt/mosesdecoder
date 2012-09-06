@@ -24,12 +24,13 @@
 #include "util/check.hh"
 #include <string>
 #include "OnDiskWrapper.h"
+#include "moses/src/Util.h"
 
 using namespace std;
 
 namespace OnDiskPt
 {
-
+  
 OnDiskWrapper::OnDiskWrapper()
 {
 }
@@ -47,6 +48,9 @@ bool OnDiskWrapper::BeginLoad(const std::string &filePath)
   if (!m_vocab.Load(*this))
     return false;
 
+  if (GetMisc("Version") != VERSION)
+    return false;
+  
   UINT64 rootFilePos = GetMisc("RootNodeOffset");
   m_rootSourceNode = new PhraseNode(rootFilePos, *this);
 
@@ -163,7 +167,7 @@ void OnDiskWrapper::EndSave()
 
 void OnDiskWrapper::SaveMisc()
 {
-  m_fileMisc << "Version 5" << endl;
+  m_fileMisc << "Version " << VERSION << endl;
   m_fileMisc << "NumSourceFactors " << m_numSourceFactors << endl;
   m_fileMisc << "NumTargetFactors " << m_numTargetFactors << endl;
   m_fileMisc << "NumScores " << m_numScores << endl;
