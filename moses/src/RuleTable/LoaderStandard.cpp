@@ -227,7 +227,11 @@ bool RuleTableLoaderStandard::Load(FormatType format
       const std::string &spanLength = tokens[5];
       //source and target side are separated by ||
       TokenizeMultiCharSeparator(spanStringsST,spanLength,"||");
-      CHECK(spanStringsST.size() == 2);
+      
+      //we consider only source and target information
+      CHECK(spanStringsST.size() < 3);
+
+      if(spanStringsST.size()==2){
 
       //Take scores from source
       string spanLengthSource = spanStringsST[0];
@@ -272,6 +276,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
                 spanLengthEstimators.push_back(estimator);
             }
         }
+      }
+        
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase(Output);

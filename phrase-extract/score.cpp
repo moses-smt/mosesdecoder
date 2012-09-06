@@ -471,13 +471,14 @@ void calcNTLengthProb(const vector< PhraseAlignment* > &phrasePairs
 void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
 {
   map<size_t, map<size_t, float> >::const_iterator iterOuter;
-  for (iterOuter = probs.begin(); iterOuter != probs.end(); )
+  for (iterOuter = probs.begin(); iterOuter != probs.end(); ++iterOuter)
   {
     size_t sourcePos = iterOuter->first;
     const map<size_t, float> &inner = iterOuter->second;
 
     map<size_t, float>::const_iterator iterInner;
 
+    if(iterOuter!=probs.begin()) phraseTableFile <<"| ";
     for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
     {
       size_t length = iterInner->first;
@@ -487,9 +488,9 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
       //phraseTableFile << sourcePos << "|" << prefix << "|" << length << "=" << prob << " ";
       phraseTableFile << length << "=" << prob << " ";
     }
-    if(++iterOuter != probs.end()) phraseTableFile <<"| ";
+
   }
-   phraseTableFile <<" || ";
+   if(!probs.empty()) phraseTableFile <<" || ";
 
 }
 
