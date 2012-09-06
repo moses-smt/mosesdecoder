@@ -10,15 +10,15 @@ def initialise():
     def _short(line):
       n = 0
       for c in line:
-        if c is " ":
+        if c == " ":
           n += 1
-      print(line, n)
-      return n <= limit
+      #print(line, ":", n)
+      return n < limit
 
     for (l1, l2) in zip(ifh1, ifh2):
       if _short(l1) and _short(l2):
-        print(l1, file=ofh1)
-        print(l2, file=ofh2)
+        print(l1, end='', file=ofh1)
+        print(l2, end='', file=ofh2)
 
   def _filter_main(config, value):
     limit = config['segment-length-limit']
@@ -43,17 +43,19 @@ def initialise():
   return cons_function_component(_filter_main)
 
 
-def _test():
+if __name__ == '__main__':
   def _test_main():
     configuration = {
-      'segment-length-limit': 60,
+      'segment-length-limit': 20,
     }
 
     box_eval = { 
-      'tokenised_src_file': '/home/its/tok1',
-      'tokenised_trg_file': '/home/its/tok2',
-      'cleaned_src_file': '/tmp/o1',
-      'cleaned_trg_file': '/tmp/o2',
+      'tokenised_src_file': '/tmp/_cleanup_test_src_input',
+      'tokenised_trg_file': '/tmp/_cleanup_test_trg_input',
+      'cleaned_src_file': '/tmp/_cleanup_test_src_cleaned',
+      'cleaned_trg_file': '/tmp/_cleanup_test_trg_cleaned',
+      'cleaned_src_file_expected': '/tmp/_cleanup_test_src_expected',
+      'cleaned_trg_file_expected': '/tmp/_cleanup_test_trg_expected',
     }
 
     _prep_files(box_eval)
@@ -66,21 +68,33 @@ def _test():
     box = initialise()
     
     run_pipeline(box, box_config, box_eval)
+    _diff(box_eval['cleaned_src_file_expected'], box_eval['cleaned_src_file'])
+    _diff(box_eval['cleaned_trg_file_expected'], box_eval['cleaned_trg_file'])
 
 
   def _cat(filename, content):
     fh = open(filename, "w")
-    print(content, file=fh)
+    for line in content:
+      print(line, file=fh)
     fh.close()
 
+  def _diff(filename1, filename2):
+    import subprocess
+    subprocess.check_output(["diff", filename1, filename2], stderr=subprocess.STDOUT)
+
+  def _line(line_lengths):
+    def _gen_line(tokens):
+      return " ".join(map(lambda n: "tok" + str(n), range(tokens)))
+    return map(_gen_line, line_lengths)
+
   def _prep_files(box_eval):
-    _cat(box_eval['tokenised_src_file'], "line1\nline2\n")
-    _cat(box_eval['tokenised_trg_file'], "line1\nline2\n")
-    _cat(box_eval['cleaned_src_file'], "line1\nline2\n")
-    _cat(box_eval['cleaned_trg_file'], "line1\nline2\n")
+    _cat(box_eval['tokenised_src_file'], _line([10, 20, 30, 40, 17, 21]))
+    _cat(box_eval['tokenised_trg_file'], _line([40, 30, 20, 10, 20, 21]))
+    #expected output:
+    _cat(box_eval['cleaned_src_file_expected'], _line([17]))
+    _cat(box_eval['cleaned_trg_file_expected'], _line([20]))
 
   def _cleanup_files(box_eval):
-    return
     import os
     try:
       for key, filename in box_eval.items():
@@ -89,7 +103,4 @@ def _test():
       pass
 
   _test_main()
-
-if __name__ == '__main__':
-  _test()
 
