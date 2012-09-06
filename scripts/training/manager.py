@@ -1,8 +1,8 @@
 import pypeline.helpers
 
 box_declaration = {
-  'source_box0': 'training.components.cleanup',
-  'source_box1': 'training.components.cleanup'
+  'source_box0': 'training.components.cleanup.cleanup',
+  'source_box1': 'training.components.cleanup.cleanup'
 }
 
 def defwire(src, tgt, name=None):
@@ -20,16 +20,26 @@ wires_definition = [
 ]
 
 configuration = {
-  'segmelt-length-limit': 60,
+  'segment-length-limit': 60,
 }
 
 def main():
-  #for label, klass in box_declaration.iteritems():
-  for label, mod_name in box_declaration.iteritems():
+  #for label, mod_name in box_declaration.iteritems():
+  for label, mod_name in box_declaration.items():
     print(label)
     module = __import__(mod_name, fromlist=['configure', 'initialise'])
     f = getattr(module, 'configure')
-    f(configuration)
+    config = f(configuration)
+
+    f = getattr(module, 'initialise')
+    box = f(config)
+    box({ 
+      'tokenised_src_file': '/home/its/tok1',
+      'tokenised_trg_file': '/home/its/tok2',
+      'cleaned_src_file': '/tmp/o1',
+      'cleaned_trg_file': '/tmp/o2',
+    })
+
 
 main()
 
