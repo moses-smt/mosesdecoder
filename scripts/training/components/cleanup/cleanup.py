@@ -2,7 +2,7 @@ from pypeline.helpers.helpers import cons_function_component
 
 def configure(args):
   result = {}
-  result['segment-length-limit'] = args['segment-length-limit']
+  result['segment_length'] = args['segment_length']
   return result
 
 def initialise():
@@ -21,7 +21,7 @@ def initialise():
         print(l2, end='', file=ofh2)
 
   def _filter_main(config, value):
-    limit = config['segment-length-limit']
+    limit = config['segment_length']
     (ifh1, ifh2, ofh1, ofh2) = (None, None, None, None)
     try:
       ifh1 = open(value['tokenised_src_file'], "r")
@@ -39,14 +39,16 @@ def initialise():
       _safe_close(ofh1)
       _safe_close(ofh2)
     
-  #return _filter_main
   return cons_function_component(_filter_main)
 
 
 if __name__ == '__main__':
+  import os
+  import training.components.shared.test as thelp
+
   def _test_main():
     configuration = {
-      'segment-length-limit': 20,
+      'segment_length': 20,
     }
 
     box_eval = { 
@@ -68,19 +70,9 @@ if __name__ == '__main__':
     box = initialise()
     
     run_pipeline(box, box_config, box_eval)
-    _diff(box_eval['cleaned_src_file_expected'], box_eval['cleaned_src_file'])
-    _diff(box_eval['cleaned_trg_file_expected'], box_eval['cleaned_trg_file'])
+    thelp.diff(box_eval['cleaned_src_file_expected'], box_eval['cleaned_src_file'])
+    thelp.diff(box_eval['cleaned_trg_file_expected'], box_eval['cleaned_trg_file'])
 
-
-  def _cat(filename, content):
-    fh = open(filename, "w")
-    for line in content:
-      print(line, file=fh)
-    fh.close()
-
-  def _diff(filename1, filename2):
-    import subprocess
-    subprocess.check_output(["diff", filename1, filename2], stderr=subprocess.STDOUT)
 
   def _line(line_lengths):
     def _gen_line(tokens):
@@ -88,14 +80,13 @@ if __name__ == '__main__':
     return map(_gen_line, line_lengths)
 
   def _prep_files(box_eval):
-    _cat(box_eval['tokenised_src_file'], _line([10, 20, 30, 40, 17, 21]))
-    _cat(box_eval['tokenised_trg_file'], _line([40, 30, 20, 10, 20, 21]))
+    thelp.cat(box_eval['tokenised_src_file'], _line([10, 20, 30, 40, 17, 21]))
+    thelp.cat(box_eval['tokenised_trg_file'], _line([40, 30, 20, 10, 20, 21]))
     #expected output:
-    _cat(box_eval['cleaned_src_file_expected'], _line([17]))
-    _cat(box_eval['cleaned_trg_file_expected'], _line([20]))
+    thelp.cat(box_eval['cleaned_src_file_expected'], _line([17]))
+    thelp.cat(box_eval['cleaned_trg_file_expected'], _line([20]))
 
   def _cleanup_files(box_eval):
-    import os
     try:
       for key, filename in box_eval.items():
         os.unlink(filename)
