@@ -482,7 +482,7 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
     const map<size_t, float> &inner = iterOuter->second;
 
     map<size_t, float>::const_iterator iterInner;
-  
+
     if(iterOuter!=probs.begin()) phraseTableFile <<"| ";
     for (iterInner = inner.begin(); iterInner != inner.end(); ++iterInner)
     {
@@ -772,7 +772,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
       outputNTLengthProbs(phraseTableFile, targetProb, "T");
-    }    
+    }
 
   }
 

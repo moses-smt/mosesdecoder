@@ -22,7 +22,7 @@ void ExtractedRule::OutputNTLengths(std::ostream &out) const
 
 void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
 {
-  std::map<size_t, std::pair<size_t, size_t> >::const_iterator iter;
+  std::multimap<size_t, std::pair<size_t, size_t> >::const_iterator iter;
   for (iter = m_ntLengths.begin(); iter != m_ntLengths.end(); ++iter)
   {
     size_t sourcePos = iter->first;
@@ -37,6 +37,7 @@ void ExtractedRule::OutputNTLengths(std::ostringstream &outString) const
 std::ostream& operator<<(std::ostream &out, const ExtractedRule &obj)
 {
   out << obj.source << " ||| " << obj.target << " ||| "
+      << obj.alignment << " ||| "
       << obj.alignment << " ||| "
       << obj.alignmentInv << " ||| ";
 

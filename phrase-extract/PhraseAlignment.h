@@ -24,7 +24,7 @@ protected:
   PHRASE phraseT;
 
   std::map<size_t, std::vector<std::pair<size_t,size_t> > > m_NTLengths;
-  
+
   void createAlignVec(size_t sourceSize, size_t targetSize);
   void addNTLength(const std::string &tok);
 public:
@@ -43,7 +43,7 @@ public:
 
 	int Compare(const PhraseAlignment &compare) const;
 	inline bool operator<(const PhraseAlignment &compare) const
-	{ 
+	{
 		return Compare(compare) < 0;
 	}
 
@@ -58,6 +58,7 @@ public:
   { return m_NTLengths; }
   void addNTLength(const std::map<size_t, std::vector<std::pair<size_t,size_t> > > &length);
 
+  
 };
 
 }
