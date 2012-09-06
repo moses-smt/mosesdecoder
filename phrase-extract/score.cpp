@@ -490,7 +490,7 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
     }
 
   }
-   phraseTableFile <<" || ";
+   if(!probs.empty()) phraseTableFile <<" || ";
 
 }
 
