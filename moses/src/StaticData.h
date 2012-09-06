@@ -240,6 +240,7 @@ protected:
   bool LoadDecodeGraphs();
   bool LoadLexicalReorderingModel();
   bool LoadGlobalLexicalModel();
+  bool LoadCacheBasedLanguageModel();
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
 

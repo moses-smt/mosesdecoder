@@ -1121,7 +1121,7 @@ bool StaticData::LoadPhraseTables()
   return true;
 }
 
-void StaticData::LoadCacheBasedLanguageModel()
+bool StaticData::LoadCacheBasedLanguageModel()
 {
    const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-cblm"));
    const vector<string> &file = m_parameter->GetParam("cblm-file");
