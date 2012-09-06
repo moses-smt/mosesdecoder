@@ -44,5 +44,25 @@ float SpanLengthEstimator::FetchScoreFromMap(const TLengthToScoreMap &lengthToSc
   else
     return iter->second;
 }
+  
+float SpanLengthEstimatorCollection::GetScoreBySourceSpanLength(
+  unsigned nonTerminalIndex,
+  unsigned sourceSpanLength) const
+{
+  if (empty())
+    return 0.0f;
+  CHECK(size() > size_t(nonTerminalIndex));
+  return (*this)[nonTerminalIndex].GetScoreBySourceSpanLength(sourceSpanLength);
+}
+  
+float SpanLengthEstimatorCollection::GetScoreByTargetSpanLength(
+  unsigned nonTerminalIndex,
+  unsigned targetSpanLength) const
+{
+  if (empty())
+    return 0.0f;
+  CHECK(size() > size_t(nonTerminalIndex));
+  return (*this)[nonTerminalIndex].GetScoreByTargetSpanLength(targetSpanLength);
+}
 
 } // namespace

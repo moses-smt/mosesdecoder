@@ -24,6 +24,18 @@ private:
   TLengthToScoreMap m_sourceScores;
   TLengthToScoreMap m_targetScores;
 };
+  
+class SpanLengthEstimatorCollection : private std::vector<SpanLengthEstimator>
+{
+  typedef std::vector<SpanLengthEstimator> Base;
+public:
+  template<class Iter>
+  void Assign(Iter begin, Iter end) {
+    Base::assign(begin, end);
+  }
+  float GetScoreBySourceSpanLength(unsigned nonTerminalIndex, unsigned spanLength) const;
+  float GetScoreByTargetSpanLength(unsigned nonTerminalIndex, unsigned spanLength) const;
+};
 
 }//namespace
 #endif

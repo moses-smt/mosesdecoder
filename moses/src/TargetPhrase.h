@@ -52,7 +52,7 @@ protected:
   float m_transScore;
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
-  std::vector<SpanLengthEstimator> m_spanLengthEstimators;
+  SpanLengthEstimatorCollection m_spanLengthEstimators;
 
 
   // in case of confusion net, ptr to source phrase
@@ -79,13 +79,9 @@ public:
 
   //! Accessors for span length estimator
   void SetSpanLengthEstimators(const std::vector<SpanLengthEstimator>& estimators);
-
-  float GetScoreBySourceSpanLength(
-    unsigned nonTerminalIndex,
-    unsigned sourceSpanLength) const;
-  float GetScoreByTargetSpanLength(
-    unsigned nonTerminalIndex,
-    unsigned targetSpanLength) const;
+  inline const SpanLengthEstimatorCollection& GetSpanLengthEstimators() const {
+    return m_spanLengthEstimators;
+  }
 
 
   /*** Called immediately after creation to initialize scores.
