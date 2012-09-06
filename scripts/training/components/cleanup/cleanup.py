@@ -5,7 +5,7 @@ def configure(args):
   result['segment_length'] = args['segment_length']
   return result
 
-def initialise():
+def initialise(config):
   def _filter(limit, ifh1, ofh1, ifh2, ofh2):
     def _short(line):
       n = 0
@@ -20,7 +20,7 @@ def initialise():
         print >>ofh1, l1,
         print >>ofh2, l2,
 
-  def _filter_main(config, value):
+  def _filter_main(value, config):
     limit = config['segment_length']
     (ifh1, ifh2, ofh1, ofh2) = (None, None, None, None)
     try:
@@ -67,9 +67,9 @@ if __name__ == '__main__':
   def _run_test(configuration, box_eval):
     from pypeline.helpers.helpers import run_pipeline
     box_config = configure(configuration)
-    box = initialise()
+    box = initialise(box_config)
     
-    run_pipeline(box, box_config, box_eval)
+    run_pipeline(box, box_eval, box_config)
     thelp.diff(box_eval['cleaned_src_file_expected'], box_eval['cleaned_src_file'])
     thelp.diff(box_eval['cleaned_trg_file_expected'], box_eval['cleaned_trg_file'])
 
