@@ -28,6 +28,10 @@ public:
     const ChartHypothesis& chartHypothesis,
     int featureId,
     ScoreComponentCollection* accumulator) const;
+  
+  bool WithTargetLength() const {
+    return m_withTargetLength;
+  }
 private:
   bool m_withTargetLength;
 };
