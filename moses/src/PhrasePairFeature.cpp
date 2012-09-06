@@ -136,6 +136,6 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
 }
 
 bool PhrasePairFeature::ComputeValueInTranslationOption() const {
-  return false;
+  return true;
 } 
 }

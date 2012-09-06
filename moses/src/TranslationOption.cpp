@@ -148,6 +148,7 @@ void TranslationOption::CalcScore(const TranslationSystem* system)
   allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, oovScore, &m_scoreBreakdown);
 
   size_t phraseSize = GetTargetPhrase().GetSize();
+  
   // future score
   m_futureScore = retFullScore - ngramScore + oovScore
                   + m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize *

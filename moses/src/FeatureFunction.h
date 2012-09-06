@@ -9,11 +9,13 @@ namespace Moses
 {
 
 class TargetPhrase;
+class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
 class FFState;
 class InputType;
 class ScoreComponentCollection;
+class WordsBitmap;
 
 /** base class for all feature functions.
  * @todo is this for pb & hiero too?
@@ -39,18 +41,25 @@ class StatelessFeatureFunction: public FeatureFunction
 public:
   StatelessFeatureFunction(const std::string& description, size_t numScoreComponents) :
     FeatureFunction(description, numScoreComponents) {}
-  //! Evaluate for stateless feature functions. Implement this.
-  virtual void Evaluate(const Hypothesis& cur_hypo,
-  											ScoreComponentCollection* accumulator) const;
+  /**
+    * This should be implemented for features that apply to phrase-based models.
+    * The feature is allowed to access the translation option, source and 
+    * coverage vector, but the last can only be accessed during search.
+    **/
+  virtual void Evaluate(const TranslationOption& translationOption,
+                        const InputType& inputType,
+                        const WordsBitmap& coverageVector,
+  											ScoreComponentCollection* accumulator) const {}
+                        //TODO: Warn if unimplemented
 
   virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
   													 int featureID,
-                             ScoreComponentCollection* accumulator) const;
+                             ScoreComponentCollection* accumulator) const {}
+                        //TODO: Warn if unimplemented
 
-  // If true, this value is expected to be included in the
-  // ScoreBreakdown in the TranslationOption once it has been
-  // constructed.
-  // Default: false
+  //If true, then the feature is evaluated before search begins, and stored in
+  //the TranslationOptionCollection. Note that for PhraseDictionary and 
+  //GenerationDictionary the scores are actually read from the TargetPhrase
   virtual bool ComputeValueInTranslationOption() const;
 
   bool IsStateless() const;

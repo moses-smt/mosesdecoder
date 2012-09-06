@@ -272,7 +272,7 @@ void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
 }
 
 void Hypothesis::EvaluateWith(const StatelessFeatureFunction* slff) {
-  slff->Evaluate(*this, &m_currScoreBreakdown);
+  slff->Evaluate(GetTranslationOption(), GetInput(),  GetWordsBitmap(), &m_currScoreBreakdown);
 }
 
 void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
@@ -295,6 +295,11 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // phrase are also included here
   m_currScoreBreakdown = m_transOpt->GetScoreBreakdown();
 
+  // other stateless features have their scores cached in the 
+  // TranslationOptionsCollection
+  m_manager.getSntTranslationOptions()->InsertPreCalculatedScores
+    (*m_transOpt, &m_currScoreBreakdown);
+
   const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
 
@@ -304,7 +309,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (!sfs[i]->ComputeValueInTranslationOption()) {
-      sfs[i]->Evaluate(*this, &m_currScoreBreakdown);
+      EvaluateWith(sfs[i]);
     }
   }
 

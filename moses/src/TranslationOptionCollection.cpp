@@ -420,6 +420,9 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
+
+  // stateless feature scores
+  PreCalculateScores();
 }
 
 void TranslationOptionCollection::IncorporateDLMScores() {
@@ -706,6 +709,58 @@ void TranslationOptionCollection::CacheLexReordering()
     }
   }
 }
+
+void TranslationOptionCollection::PreCalculateScores() 
+{
+  //Figure out which features need to be precalculated
+  const vector<const StatelessFeatureFunction*>& sfs =
+    m_system->GetStatelessFeatureFunctions();
+  vector<const StatelessFeatureFunction*> precomputedFeatures;
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    if (sfs[i]->ComputeValueInTranslationOption()) {
+      //check that it's not PhraseDictionary or 
+      //GenerationDictionary
+      const string& name = sfs[i]->GetScoreProducerWeightShortName();
+      if (name != "tm" &&  name != "g") {
+        precomputedFeatures.push_back(sfs[i]);
+      }
+    }
+  }
+  //empty coverage vector
+  WordsBitmap coverage(m_source.GetSize());
+
+  //Go through translation options and precompute features
+  for (size_t i = 0; i < m_collection.size(); ++i) {
+    for (size_t j = 0; j < m_collection[i].size(); ++j) {
+      for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
+        const TranslationOption* toption =  m_collection[i][j].Get(k);
+        const TranslationOptionKey key(toption->GetTargetPhrase(),*(toption->GetSourcePhrase()));
+        ScoreComponentCollection& breakdown = m_precalculatedScores[key];
+        for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
+          precomputedFeatures[si]->Evaluate(
+              *toption,
+              m_source,
+              coverage,
+              &breakdown);
+
+        }
+      }
+    }
+  }
+}
+
+void TranslationOptionCollection::InsertPreCalculatedScores
+  (const TranslationOption& translationOption, ScoreComponentCollection* scoreBreakdown) 
+    const
+{
+  const TranslationOptionKey key(translationOption.GetTargetPhrase(),*(translationOption.GetSourcePhrase()));
+  map<TranslationOptionKey,ScoreComponentCollection>::const_iterator scoreIter = 
+    m_precalculatedScores.find(key);
+  if (scoreIter != m_precalculatedScores.end()) {
+    scoreBreakdown->PlusEquals(scoreIter->second);
+  }
+}
+
 //! list of trans opt for a particular span
 TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {
