@@ -1,4 +1,6 @@
-from pypeline.helpers import eval_pipeline, \
+import os
+
+from pypeline.helpers.helpers import eval_pipeline, \
     cons_split_wire, \
     cons_unsplit_wire, \
     cons_dictionary_wire
@@ -39,7 +41,7 @@ def build_components(components, configuration):
     component = init_func(component_config)
 
     # And store
-    pipeline_components['component_id'] = component
+    pipeline_components[component_id] = component
 
   return pipeline_components, pipeline_configuration
 
@@ -48,30 +50,53 @@ def build_components(components, configuration):
 def main(src_lang, trg_lang, src_filename, trg_filename):
   # Global configuration
   configuration = {
-    'moses_installation_dir': ''
+    'moses_installation_dir': os.environ['MOSES_HOME'],
+    'irstlm_installation_dir': os.environ['IRSTLM'],
     'src_lang': src_lang,
     'src_tokenisation_dir': './tokenisation',
     'trg_lang': trg_lang,
     'trg_tokenisation_dir': './tokenisation',
-    'segment-length-limit': 60
+    'segment_length_limit': 60,
+    'irstlm_smoothing_method': 'improved-kneser-ney',
+    'language_model_directory': './language-model'
   }
 
   # The modules to load
   component_modules = {
     'src_tokenizer': 'training.components.tokenizer.src_tokenizer',
     'trg_tokenizer': 'training.components.tokenizer.trg_tokenizer',
+    'cleanup': 'training.components.cleanup.cleanup',
+    'irstlm_build': 'training.components.irstlm_build.irstlm_build'
   }
 
   # Phew, build the required components
   components, component_config = build_components(component_modules, configuration)
 
   # Wire up components
-  tokenisation_component = cons_split_wire() >> (components['src_tokenizer'] ** components['trg_tokenizer'])
+  tokenisation_component = \
+      cons_split_wire() >> \
+      (components['src_tokenizer'] ** components['trg_tokenizer']) >> \
+      cons_unsplit_wire(lambda a, b: {'tokenised_src_filename': a['tokenised_src_filename'],
+                                      'tokenised_trg_filename': b['tokenised_trg_filename']})
+
+  # Cleanup components
+  cleanup_components = \
+      cons_dictionary_wire({'tokenised_src_filename': 'src_filename',
+                            'tokenised_trg_filename': 'trg_filename'}) >> \
+      components['cleanup']
+
+  # IRSTLM Build
+  irstlm_build_components = \
+      cons_dictionary_wire({'tokenised_trg_filename': 'input_filename'}) >> \
+      components['irstlm_build']
+
+  # Build entire pipeline
+  pipeline = tokenisation_component >> (cons_split_wire() >> (cleanup_components ** irstlm_build_components))
   
   # Evaluate the pipeline
   value = {'src_filename': src_filename,
            'trg_filename': trg_filename}
-  print eval_pipeline(tokenisation_component, value, component_config)
+  print eval_pipeline(pipeline, value, component_config)
 
 
 if __name__ == '__main__':

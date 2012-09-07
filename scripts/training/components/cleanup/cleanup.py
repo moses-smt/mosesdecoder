@@ -2,7 +2,7 @@ from pypeline.helpers.helpers import cons_function_component
 
 def configure(args):
   result = {}
-  result['segment_length'] = args['segment_length']
+  result['segment_length'] = args['segment_length_limit']
   return result
 
 def initialise(config):
@@ -20,16 +20,32 @@ def initialise(config):
         print >>ofh1, l1,
         print >>ofh2, l2,
 
+  def _make_cleaned_filename(filename):
+    bits = filename.split(".")
+    bits[-1] = "clean"
+    return ".".join(bits)
+
   def _filter_main(value, config):
     limit = config['segment_length']
     (ifh1, ifh2, ofh1, ofh2) = (None, None, None, None)
     try:
-      ifh1 = open(value['tokenised_src_file'], "r")
-      ifh2 = open(value['tokenised_trg_file'], "r")
-      ofh1 = open(value['cleaned_src_file'], "w")
-      ofh2 = open(value['cleaned_trg_file'], "w")
+      input_src_filename = value['src_filename']
+      input_trg_filename = value['trg_filename']
+
+      print "Cleanup: Cleaning [%s] and [%s]..." % (input_src_filename, input_trg_filename)
+
+      ifh1 = open(input_src_filename, "r")
+      ifh2 = open(input_trg_filename, "r")  
+
+      cleaned_src_filename = _make_cleaned_filename(input_src_filename)
+      cleaned_trg_filename = _make_cleaned_filename(input_trg_filename)
+      ofh1 = open(cleaned_src_filename, "w")
+      ofh2 = open(cleaned_trg_filename, "w")
 
       _filter(limit, ifh1, ofh1, ifh2, ofh2)
+
+      return {'cleaned_src_filename': cleaned_src_filename,
+              'cleaned_trg_filename': cleaned_trg_filename}
     finally:
       def _safe_close(fh):
         if fh is not None:
@@ -48,7 +64,7 @@ if __name__ == '__main__':
 
   def _test_main():
     configuration = {
-      'segment_length': 20,
+      'segment_length_limit': 20,
     }
 
     box_eval = { 

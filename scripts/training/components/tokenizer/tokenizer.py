@@ -6,6 +6,7 @@ class Tokenizer:
     
     @staticmethod
     def batch_tokenise(lang, mosesdir, infilename, workdir):
+        print "Tokenizing [%s]..." % infilename
         if not os.path.exists(workdir):
             os.makedirs(workdir)
         tok = Tokenizer(lang, mosesdir)

@@ -7,7 +7,7 @@ from pypeline.helpers.helpers import cons_function_component
 
 def configure(args):
     config = dict()
-    config['irstlm_install_directory'] = args['irstlm_root']
+    config['irstlm_install_directory'] = args['irstlm_installation_dir']
     config['smoothing_method'] = args['irstlm_smoothing_method']
     config['lm_directory'] = args['language_model_directory']
     return config
