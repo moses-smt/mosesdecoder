@@ -12,8 +12,8 @@ sub systemCheck($);
 sub GetSourcePhrase($);
 sub NumStr($);
 
-#my $EXTRACT_SPLIT_LINES = 5000000;
-my $EXTRACT_SPLIT_LINES = 50000000;
+my $EXTRACT_SPLIT_LINES = 5000000;
+#my $EXTRACT_SPLIT_LINES = 50000000;
 
 print "Started ".localtime() ."\n";
 

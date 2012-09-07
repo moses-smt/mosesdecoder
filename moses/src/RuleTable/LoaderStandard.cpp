@@ -229,9 +229,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
       TokenizeMultiCharSeparator(spanStringsST,spanLength,"||");
       
       //we consider only source and target information
-      CHECK(spanStringsST.size() < 3);
+      //CHECK(spanStringsST.size() =< 3);
 
-      if(spanStringsST.size()==2){
+      if(spanStringsST.size()>=2){
 
       //Take scores from source
       string spanLengthSource = spanStringsST[0];
