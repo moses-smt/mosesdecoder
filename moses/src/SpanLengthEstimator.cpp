@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include "util/check.hh"
+#include "TypeDef.h"
 
 using namespace std;
 namespace Moses
@@ -35,12 +36,11 @@ float SpanLengthEstimator::GetScoreByTargetSpanLength(unsigned targetSpanLength)
 
 float SpanLengthEstimator::FetchScoreFromMap(const TLengthToScoreMap &lengthToScoreMap, unsigned spanLength)
 {
-  static const double LARGE_NUMBER = 1000.0;
   if (lengthToScoreMap.empty())
     return 0.0;
   TLengthToScoreMap::const_iterator iter = lengthToScoreMap.find(spanLength);
   if (iter == lengthToScoreMap.end())
-    return -LARGE_NUMBER;
+    return LOWEST_SCORE;
   else
     return iter->second;
 }
