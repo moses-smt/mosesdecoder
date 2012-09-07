@@ -23,19 +23,12 @@ size_t SpanLengthFeature::GetNumScoreComponents() const
   
 std::string SpanLengthFeature::GetScoreProducerDescription(unsigned id) const
 {
-  CHECK(id < 2);
-  if (id == 0)
-    return "SpanLengthSource";
-  else
-    return "SpanLengthTarget";
+  return "SpanLength";
 }
 
 std::string SpanLengthFeature::GetScoreProducerWeightShortName(unsigned id) const
 {
-  if (id == 0)
-    return "SLS";
-  else
-    return "SLT";
+  return "SL";
 }
 
 size_t SpanLengthFeature::GetNumInputScores() const {
