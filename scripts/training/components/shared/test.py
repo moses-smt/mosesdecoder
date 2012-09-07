@@ -8,6 +8,4 @@ def cat(filename, content):
   fh.close()
 
 def diff(filename1, filename2):
-  diff_output = subprocess.check_output(["diff", filename1, filename2], stderr=subprocess.STDOUT)
-  if diff_output:
-    raise Exception()
+  subprocess.check_output(["diff", filename1, filename2], stderr=subprocess.STDOUT)

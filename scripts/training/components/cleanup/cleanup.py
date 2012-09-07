@@ -63,6 +63,8 @@ if __name__ == '__main__':
   import tempfile
   import training.components.shared.test as thelp
 
+  from pypeline.helpers.helpers import eval_pipeline
+
 
   def _test_main():
     configuration = {'segment_length_limit': 20}
@@ -73,8 +75,6 @@ if __name__ == '__main__':
     box_eval = {
       'src_filename': src_filename[1],
       'trg_filename': trg_filename[1],
-      'cleaned_src_filename': src_filename[1] + ".clean",
-      'cleaned_trg_filename': trg_filename[1] + ".clean",
       'cleaned_src_file_expected': src_filename[1] + ".expected",
       'cleaned_trg_file_expected': trg_filename[1] + ".expected"
     }
@@ -87,13 +87,16 @@ if __name__ == '__main__':
 
 
   def _run_test(configuration, box_eval):
-    from pypeline.helpers.helpers import run_pipeline
     box_config = configure(configuration)
     box = initialise(box_config)
     
-    run_pipeline(box, box_eval, box_config)
-    thelp.diff(box_eval['cleaned_src_file_expected'], box_eval['cleaned_src_filename'])
-    thelp.diff(box_eval['cleaned_trg_file_expected'], box_eval['cleaned_trg_filename'])
+    output = eval_pipeline(box, box_eval, box_config)
+    try:
+      thelp.diff(box_eval['cleaned_src_file_expected'], output['cleaned_src_filename'])
+      thelp.diff(box_eval['cleaned_trg_file_expected'], output['cleaned_trg_filename'])
+    finally:
+      os.unlink(output['cleaned_src_filename'])
+      os.unlink(output['cleaned_trg_filename'])
 
 
   def _line(line_lengths):
