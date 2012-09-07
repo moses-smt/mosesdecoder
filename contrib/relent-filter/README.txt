@@ -55,8 +55,31 @@ The same must be done for the reordering table by replacing <phrase_table_file> 
 
 perl <pruning_scripts>/prunePT.pl -table <reord_table_file> -scores <output_dir>/scores/rel_ent.txt -percentage 70 > <pruned_reord_table_file>
 
-REFERENCES
----------------------------------
+-------RUNNING STEP 2 IN PARALLEL-------
+
+Step 2 requires the forced decoding of the whole set of phrase pairs in the table, so unless you test it on a small corpora, it usually requires large amounts of time to process. 
+Thus, we recommend users to run multiple instances of "<pruning_scripts>/calcPruningScores.pl" in parallel to process different parts of the phrase table. 
+
+To do this, run:
+
+perl <pruning_scripts>/calcPruningScores.pl -moses_ini <moses_ini> -training_s <s_train> -training_t <t_train> -prune_bin <pruning_binaries> -prune_scripts <pruning_scripts> -moses_scripts <path_to_moses>/scripts/training/ -workdir <output_dir> -dec_size 10000 -start 0 -end 100000
+
+The -start and -end tags tell the script to only calculate the results for phrase pairs between 0 and 99999. 
+
+Thus, an example of a shell script to run for the whole phrase table would be:
+
+size=`wc <phrase_table_file> | gawk '{print $1}'`
+phrases_per_process=100000
+
+for i in $(seq 0 $phrases_per_process $size)
+do
+   end=`expr $i + $phrases_per_process`
+   perl <pruning_scripts>/calcPruningScores.pl -moses_ini <moses_ini> -training_s <s_train> -training_t <t_train> -prune_bin <pruning_binaries> -prune_scripts <pruning_scripts> -moses_scripts <path_to_moses>/scripts/training/ -workdir <output_dir>.$i-$end -dec_size 10000 -start $i -end $end
+done
+
+After all processes finish, simply join the partial score files together in the same order.
+
+-------REFERENCES-------
 Ling, W., Graça, J., Trancoso, I., and Black, A. (2012). Entropy-based pruning for phrase-based
 machine translation. In Proceedings of the 2012 
 Joint Conference on Empirical Methods in Natural Language Processing and
