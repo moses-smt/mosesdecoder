@@ -18,11 +18,17 @@ def initialise(config):
     except StopIteration:
       pass
 
-  def _make_cleaned_filename(filename, data_set):
+  def _make_split_filename(filename, data_set):
     bits = filename.split(".")
-    bits.append(bits[-1])
-    bits[-2] = data_set
-    return ".".join(bits)
+    last = bits.pop()
+    lang_code = bits.pop()
+    
+    bits.append(last)
+    bits.append(data_set)
+    bits.append(lang_code)
+
+    new_filename = ".".join(bits)
+    return new_filename
 
   def _splitter_main(value, config):
     (ifh1, ifh2, ofh1, ofh2) = (None, None, None, None)
@@ -40,8 +46,8 @@ def initialise(config):
         ('eval', config['evaluate_size']),
         ('train', -1)
                 ]:
-        output_src_filename = _make_cleaned_filename(input_src_filename, data_set)
-        output_trg_filename = _make_cleaned_filename(input_trg_filename, data_set)
+        output_src_filename = _make_split_filename(input_src_filename, data_set)
+        output_trg_filename = _make_split_filename(input_trg_filename, data_set)
         ofh1 = open(output_src_filename, "w")
         ofh2 = open(output_trg_filename, "w")
 
@@ -73,8 +79,8 @@ if __name__ == '__main__':
 
   def _test_main():
     configuration = {
-      'evaluate_size': 7,
-      'development_size': 13,
+      'evaluation_data_size': 7,
+      'development_data_size': 13,
     }
 
     src_filename = tempfile.mkstemp(suffix = ".src", dir = "/tmp")

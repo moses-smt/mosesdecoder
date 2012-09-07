@@ -9,7 +9,7 @@ def configure(args):
     result['src_lang'] = args['src_lang']
     result['trg_lang'] = args['trg_lang']
     result['moses_installation_dir'] = args['moses_installation_dir']
-    result['mert_working_dir'] = args['mert_working_dir']
+    result['mert_working_dir'] = args['mert_working_directory']
     return result
 
 def initialise(config):

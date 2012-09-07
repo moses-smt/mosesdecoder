@@ -9,8 +9,8 @@ def configure(args):
     result['src_lang'] = args['src_lang']
     result['trg_lang'] = args['trg_lang']
     result['moses_installation_dir'] = args['moses_installation_dir']
-    result['external_bin_dir'] = args['external_bin_dir']
-    result['model_directory'] = args['model_directory']
+    result['external_bin_dir'] = args['giza_installation_dir']
+    result['model_directory'] = args['translation_model_directory']
     return result
 
 def initialise(config):
@@ -58,13 +58,13 @@ if __name__ == '__main__':
     def __test():
         configuration = {'src_lang':'en',
                          'trg_lang':'lt',
-                         'moses_installation_dir':os.path.abspath('../../../../'),
-                         'external_bin_dir':os.path.abspath('../../../../../external-bin'),
-                         'model_directory':'../../../../../model'}
-        values = {'training_data_filename':'../../../../../corpus/cleantrain'}
+                         'moses_installation_dir':os.environ['MOSES_HOME'],
+                         'giza_installation_dir':os.environ['GIZA_HOME'],
+                         'translation_model_directory':'model-dir'}
+        values = {'training_data_filename':'/Users/ianjohnson/work/MTM-2012/corpus/training/cleantrain'}
         from pypeline.helpers.helpers import run_pipeline
         box_config = configure(configuration)
-        box = initialise(configuration)
+        box = initialise(box_config)
         print run_pipeline(box, values, None)
 
     #do some test
