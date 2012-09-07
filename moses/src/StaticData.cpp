@@ -612,7 +612,7 @@ bool StaticData::LoadData(Parameter *parameter)
 
     if (m_CacheBasedLanguageModel != NULL) // check if CacheBasedLanguageModel is used
     {
-       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_CacheBasedLanguageModel);
+       m_translationSystems.find(config[0])->second.AddCacheBasedLanguageModel(m_CacheBasedLanguageModel);
     }
   }
 

@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "DummyScoreProducers.h"
 #include "GlobalLexicalModel.h"
+#include "CacheBasedLanguageModel.h"
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "TranslationSystem.h"
@@ -49,6 +50,7 @@ TranslationSystem::TranslationSystem(const std::string& id,
   if (distortionProducer) {
     AddFeatureFunction(distortionProducer);
   }
+  m_CacheBasedLanguageModel = NULL;
 }
 
 //Insert core 'big' features
@@ -57,7 +59,6 @@ void TranslationSystem::AddLanguageModel(LanguageModel* languageModel)
   m_languageModels.Add(languageModel);
   AddFeatureFunction(languageModel);
 }
-
 
 void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff)
 {
@@ -77,6 +78,12 @@ void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalM
 {
   m_globalLexicalModels.push_back(globalLexicalModel);
   AddFeatureFunction(globalLexicalModel);
+}
+
+void TranslationSystem::AddCacheBasedLanguageModel(CacheBasedLanguageModel* cblm)
+{
+  m_CacheBasedLanguageModel = cblm;
+  AddFeatureFunction(cblm);
 }
 
 
