@@ -2,8 +2,8 @@ from pypeline.helpers.helpers import cons_function_component
 
 def configure(args):
   result = {}
-  result['evaluate_size'] = args['evaluate_size']
-  result['development_size'] = args['development_size']
+  result['evaluate_size'] = args['evaluation_data_size']
+  result['development_size'] = args['development_data_size']
   return result
 
 def initialise(config):
