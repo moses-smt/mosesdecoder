@@ -91,8 +91,12 @@ if __name__ == '__main__':
     box = initialise(box_config)
     
     output = eval_pipeline(box, box_eval, box_config)
-    thelp.diff(box_eval['cleaned_src_file_expected'], output['cleaned_src_filename'])
-    thelp.diff(box_eval['cleaned_trg_file_expected'], output['cleaned_trg_filename'])
+    try:
+      thelp.diff(box_eval['cleaned_src_file_expected'], output['cleaned_src_filename'])
+      thelp.diff(box_eval['cleaned_trg_file_expected'], output['cleaned_trg_filename'])
+    finally:
+      os.unlink(output['cleaned_src_filename'])
+      os.unlink(output['cleaned_trg_filename'])
 
 
   def _line(line_lengths):
