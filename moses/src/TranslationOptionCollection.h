@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TranslationOptionCollection_h
 
 #include <list>
+#include <boost/unordered_map.hpp>
 #include "TypeDef.h"
 #include "TranslationOption.h"
 #include "TranslationOptionList.h"
@@ -70,7 +71,7 @@ protected:
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<Phrase*> m_unksrcs;
   typedef std::pair<Phrase,Phrase> TranslationOptionKey;
-  std::map<TranslationOptionKey,ScoreComponentCollection> m_precalculatedScores;
+  boost::unordered_map<TranslationOptionKey,ScoreComponentCollection> m_precalculatedScores;
 
 
   TranslationOptionCollection(const TranslationSystem* system, InputType const& src, size_t maxNoTransOptPerCoverage,

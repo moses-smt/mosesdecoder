@@ -754,7 +754,7 @@ void TranslationOptionCollection::InsertPreCalculatedScores
     const
 {
   const TranslationOptionKey key(translationOption.GetTargetPhrase(),*(translationOption.GetSourcePhrase()));
-  map<TranslationOptionKey,ScoreComponentCollection>::const_iterator scoreIter = 
+  boost::unordered_map<TranslationOptionKey,ScoreComponentCollection>::const_iterator scoreIter = 
     m_precalculatedScores.find(key);
   if (scoreIter != m_precalculatedScores.end()) {
     scoreBreakdown->PlusEquals(scoreIter->second);
