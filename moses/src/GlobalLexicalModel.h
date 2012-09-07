@@ -74,7 +74,11 @@ public:
 
   void InitializeForInput( Sentence const& in );
 
-  void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
+  void Evaluate(const TranslationOption& translationOption,
+                const InputType& inputType,
+                const WordsBitmap& coverageVector,
+  							ScoreComponentCollection* accumulator) const;
+
 
   void EvaluateChart(
     const ChartHypothesis& cur_hypo,

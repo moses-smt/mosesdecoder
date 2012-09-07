@@ -5,6 +5,7 @@
 #include "Hypothesis.h"
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "TranslationOption.h"
 
 namespace Moses {
 
@@ -30,10 +31,13 @@ bool SourceWordDeletionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void SourceWordDeletionFeature::Evaluate(const Hypothesis& cur_hypo,
-                                         ScoreComponentCollection* accumulator) const
+void SourceWordDeletionFeature::Evaluate(
+            const TranslationOption& translationOption,
+            const InputType& inputType,
+            const WordsBitmap& coverageVector,
+            ScoreComponentCollection* accumulator) const
 {
-	TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
+	TargetPhrase targetPhrase = translationOption.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);

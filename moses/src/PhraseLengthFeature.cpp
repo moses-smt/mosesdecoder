@@ -2,17 +2,21 @@
 #include "PhraseLengthFeature.h"
 #include "Hypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "TranslationOption.h"
 
 namespace Moses {
 
 using namespace std;
 
-void PhraseLengthFeature::Evaluate(const TargetPhrase& targetPhrase,
-                                   ScoreComponentCollection* accumulator) const
+void PhraseLengthFeature::Evaluate(
+              const TranslationOption& translationOption,
+              const InputType& inputType,
+              const WordsBitmap& coverageVector,
+              ScoreComponentCollection* accumulator) const
 {
   // get length of source and target phrase
-  size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
-  size_t targetLength = targetPhrase.GetSize();
+  size_t sourceLength = translationOption.GetTargetPhrase().GetSize();
+  size_t targetLength = translationOption.GetSourcePhrase()->GetSize();
 
   // create feature names
   stringstream nameSource;

@@ -16,8 +16,10 @@ public:
   SparsePhraseDictionaryFeature():
     StatelessFeatureFunction("stm", ScoreProducer::unlimited) {}
 
-  void Evaluate(const TargetPhrase& cur_phrase,
-                ScoreComponentCollection* accumulator) const;
+  void Evaluate(const TranslationOption& translationOption,
+              const InputType& inputType,
+              const WordsBitmap& coverageVector,
+              ScoreComponentCollection* accumulator) const;
   
   void EvaluateChart(
     const ChartHypothesis&,

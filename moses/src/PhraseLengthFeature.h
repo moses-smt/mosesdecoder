@@ -20,7 +20,9 @@ public:
      StatelessFeatureFunction("pl", ScoreProducer::unlimited)
   {}
       
-  void Evaluate(const TargetPhrase& cur_phrase,
+  void Evaluate(const TranslationOption& translationOption,
+                const InputType& inputType,
+                const WordsBitmap& coverageVector,
                 ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(

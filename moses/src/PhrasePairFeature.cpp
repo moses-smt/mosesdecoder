@@ -1,8 +1,10 @@
+#include <boost/algorithm/string.hpp>
+
 #include "AlignmentInfo.h"
 #include "PhrasePairFeature.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
-#include <boost/algorithm/string.hpp>
+#include "TranslationOption.h"
 
 using namespace std;
 
@@ -59,9 +61,14 @@ size_t PhrasePairFeature::GetNumInputScores() const
   m_local->input = &in;
 }
 
-void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const {
-	const TargetPhrase& target = cur_hypo.GetCurrTargetPhrase();
-	const Phrase& source = target.GetSourcePhrase();
+void PhrasePairFeature::Evaluate(
+            const TranslationOption& translationOption,
+            const InputType& inputType,
+            const WordsBitmap& coverageVector,
+            ScoreComponentCollection* accumulator) const 
+{
+	const TargetPhrase& target = translationOption.GetTargetPhrase();
+	const Phrase& source = *(translationOption.GetSourcePhrase());
 /*   const AlignmentInfo& align = cur_hypo.GetAlignmentInfo();
    for (AlignmentInfo::const_iterator i = align.begin(); i != align.end(); ++i) {
     const Factor* sourceFactor = source.GetWord(i->first).GetFactor(m_sourceFactorId);

@@ -48,7 +48,9 @@ public:
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 
   virtual void Evaluate(
-  	const Hypothesis& cur_hypo,
+    const TranslationOption& translationOption,
+    const InputType& inputType,
+    const WordsBitmap& coverageVector,
   	ScoreComponentCollection* accumulator) const;
 
   virtual void EvaluateChart(
