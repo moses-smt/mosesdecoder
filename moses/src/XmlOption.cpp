@@ -150,7 +150,7 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
 bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingConstraint &reorderingConstraint, vector< size_t > &walls, 
-	const std::string& lbrackStr, const std::string& rbrackStr)
+	const std::string& lbrackStr, const std::string& rbrackStr, std::vector<std::string> &dlt_elements)
 {
   //parse XML markup in translation line
 
@@ -288,6 +288,40 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
             return false;
           }
           reorderingConstraint.SetZone( startPos, endPos-1 );
+        }
+
+        else if (tagName == "dlt") {
+          // gets number of trgs in the element
+          int targets_number = 0;
+          string trg_number = ParseXmlTagAttribute(tagContent, "len");
+          targets_number = atoi(trg_number.c_str());
+
+          std::vector dlt_elements;
+
+          string attr_label = "trg";
+          for (int i = 0; i < targets_number; ++i) {
+            // converts the int to a string
+            // string str_i = static_cast<ostringstream*>( &(ostringstream() << Number) )->str();
+            // converts the int to a string using itoa (non standard, might not work)
+            char buf[33];
+            itoa(i,buf,10);
+            string str_i(buf);
+
+            // adds the number to the trg label
+            attr_label = attr_label + str_i;
+            
+            string trg = "";
+            trg = ParseXmlTagAttribute(tagContent, attr_label);
+            if (trg != "") {
+              dlt_elements.push_back(trg);
+            }
+
+            // add to the global static producer
+            TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+            CacheBasedLanguageModel cache_model = trans_sys.GetCacheBasedLanguageModel()
+            cache_model.Insert(dlt_elements);
+          }
+
         }
 
         // default: opening tag that specifies translation options
