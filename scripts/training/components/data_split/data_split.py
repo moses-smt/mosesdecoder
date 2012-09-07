@@ -20,7 +20,8 @@ def initialise(config):
 
   def _make_cleaned_filename(filename, data_set):
     bits = filename.split(".")
-    bits[-1] = data_set
+    bits.append(bits[-1])
+    bits[-2] = data_set
     return ".".join(bits)
 
   def _splitter_main(value, config):
