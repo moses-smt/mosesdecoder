@@ -4,6 +4,10 @@
 #define moses_CacheBasedLanguageModel_h
 
 #include "FeatureFunction.h"
+#include "InputFileStream.h"
+
+typedef std::pair<int, float> decaying_cache_value_t; 
+typedef std::map<std::string, decaying_cache_value_t > decaying_cache_t; 
 
 namespace Moses
 {
@@ -15,10 +19,13 @@ class WordsRange;
 class CacheBasedLanguageModel : public StatelessFeatureFunction
 {
 // data structure for the cache;
-// XXX m_cache;
+// the key is the word and the value is the decaying score
+  decaying_cache_t m_cache;
+
+  float decaying_score(int age);
 
 public:
-  CacheBasedLanguageModel(ScoreIndexManager &scoreIndexManager, const std::vector<float>& weights);
+  CacheBasedLanguageModel(const std::vector<float>& weights);
 
   std::string GetScoreProducerDescription(unsigned) const;
   std::string GetScoreProducerWeightShortName(unsigned) const;
@@ -26,9 +33,13 @@ public:
 
   void Evaluate( const TargetPhrase&, ScoreComponentCollection* ) const;
 
-  void Load(const string file){};
-}
+  void Decay();
+  void Update(std::vector<std::string> words, int age);
+  void Load(const std::string file);
 
+  void PrintCache();
 };
+
+}
 
 #endif
