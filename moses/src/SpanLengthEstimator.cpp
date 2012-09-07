@@ -74,7 +74,7 @@ float SpanLengthEstimatorCollection::GetScoreByTargetSpanLength(
   return (*this)[nonTerminalIndex].GetScoreByTargetSpanLength(targetSpanLength);
 }
 
-float SpanLengthEstimatorCollection::FetchGaussianScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength)
+float SpanLengthEstimator::FetchGaussianScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength)
 {
   
 }
