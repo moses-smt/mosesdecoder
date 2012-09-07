@@ -67,8 +67,8 @@ if __name__ == '__main__':
   def _test_main():
     configuration = {'segment_length_limit': 20}
 
-    src_filename = tempfile.mkstemp(suffix = "src", dir = "/tmp")
-    trg_filename = tempfile.mkstemp(suffix = "trg", dir = "/tmp")
+    src_filename = tempfile.mkstemp(suffix = ".src", dir = "/tmp")
+    trg_filename = tempfile.mkstemp(suffix = ".trg", dir = "/tmp")
 
     box_eval = {
       'src_filename': src_filename[1],
