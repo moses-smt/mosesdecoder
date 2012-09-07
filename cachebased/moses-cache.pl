@@ -46,8 +46,7 @@ sub add_xml_info {
     }
 
     my @phrases = @$info;
-    my @attrs = map { "trg$_=\"" . $phrases[$_-1] . "\"" } (1..scalar(@phrases));
-    my $xml_line = "<dlt len=\"" . scalar(@phrases) . "\" " . join(" ", @attrs) . "/> " . $line;
+    my $xml_line = "<dlt trg=\"" . join("||", @phrases) . "\" /> " . $line;
     return $xml_line;
 }
 
