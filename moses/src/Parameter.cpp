@@ -152,6 +152,7 @@ Parameter::Parameter()
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
   AddParam("weight-span-length", "SL", "Weight for span length feature");
+  AddParam("gaussian-span-length-score", "Use Gaussian pdf to calculate span length probability instead of unsmoothed counts");
 
 }
 

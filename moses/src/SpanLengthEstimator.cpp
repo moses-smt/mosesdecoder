@@ -2,6 +2,7 @@
 #include <vector>
 #include <map>
 #include "util/check.hh"
+#include "StaticData.h"
 
 using namespace std;
 namespace Moses
@@ -25,11 +26,19 @@ void SpanLengthEstimator::AddTargetSpanScore(unsigned targetSpanLength, float sc
 
 float SpanLengthEstimator::GetScoreBySourceSpanLength(unsigned sourceSpanLength) const
 {
+  bool useGaussian = StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0;
+  if (useGaussian)
+    return FetchGaussianScoreFromMap(m_sourceScores, sourceSpanLength);
+  else
     return FetchScoreFromMap(m_sourceScores, sourceSpanLength);
 }
 
 float SpanLengthEstimator::GetScoreByTargetSpanLength(unsigned targetSpanLength) const
 {
+  bool useGaussian = StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0;
+  if (useGaussian)
+    return FetchGaussianScoreFromMap(m_targetScores, targetSpanLength);
+  else
     return FetchScoreFromMap(m_targetScores, targetSpanLength);
 }
 
@@ -63,6 +72,11 @@ float SpanLengthEstimatorCollection::GetScoreByTargetSpanLength(
     return 0.0f;
   CHECK(size() > size_t(nonTerminalIndex));
   return (*this)[nonTerminalIndex].GetScoreByTargetSpanLength(targetSpanLength);
+}
+
+float SpanLengthEstimatorCollection::FetchGaussianScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength)
+{
+  
 }
 
 } // namespace

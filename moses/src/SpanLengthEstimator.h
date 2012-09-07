@@ -20,6 +20,7 @@ public:
 
 private:
   static float FetchScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength);
+  static float FetchGaussianScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength);
 
   TLengthToScoreMap m_sourceScores;
   TLengthToScoreMap m_targetScores;
