@@ -33,37 +33,37 @@ SpanLengthEstimator* CreateAsIsSpanLengthEstimator() {
   return new AsIsSpanEstimator();
 }
   
-  class GaussianSpanLengthEstimator : public SpanLengthEstimator
-  {
-    float m_average, m_averageSquare;
-    float m_logSqrt2Pi;
-    float m_sigma, m_logSigma;
-  public:
-    GaussianSpanLengthEstimator()
-    : m_average(0.0)
-    , m_averageSquare(0.0)
-    , m_logSqrt2Pi(0.5*log(2*acos(-1.0)))
-    , m_sigma(0.0), m_logSigma(0.0)
-    {}
-    
-    virtual void AddSpanScore(unsigned spanLength, float score) {
-      m_average += exp(score) * spanLength;
-      m_averageSquare += exp(score) * spanLength * spanLength;
-    }
-    virtual float GetScoreBySpanLength(unsigned spanLength) const {
-      float t = ((spanLength - m_average) / m_sigma);
-      return -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
-    }
-    virtual void FinishedAdds() {
-      m_sigma = sqrt(m_averageSquare - m_average*m_average);
-      m_logSigma = log(max(1.0f, m_sigma));
-    }
-  };
+class GaussianSpanLengthEstimator : public SpanLengthEstimator
+{
+  float m_average, m_averageSquare;
+  float m_logSqrt2Pi;
+  float m_sigma, m_logSigma;
+public:
+  GaussianSpanLengthEstimator()
+  : m_average(0.0)
+  , m_averageSquare(0.0)
+  , m_logSqrt2Pi(0.5*log(2*acos(-1.0)))
+  , m_sigma(0.0), m_logSigma(0.0)
+  {}
   
-  SpanLengthEstimator* CreateGaussianSpanLengthEstimator()
-  {
-    return new GaussianSpanLengthEstimator();
+  virtual void AddSpanScore(unsigned spanLength, float score) {
+    m_average += exp(score) * spanLength;
+    m_averageSquare += exp(score) * spanLength * spanLength;
   }
+  virtual float GetScoreBySpanLength(unsigned spanLength) const {
+    float t = ((spanLength - m_average) / m_sigma);
+    return -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
+  }
+  virtual void FinishedAdds() {
+    m_sigma = max(1.0f, sqrt(m_averageSquare - m_average*m_average));
+    m_logSigma = log(m_sigma);
+  }
+};
+
+SpanLengthEstimator* CreateGaussianSpanLengthEstimator()
+{
+  return new GaussianSpanLengthEstimator();
+}
   
 float SpanLengthEstimatorCollection::GetScoreBySourceSpanLength(
   unsigned nonTerminalIndex,
