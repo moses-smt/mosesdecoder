@@ -292,44 +292,16 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         }
 
         else if (tagName == "dlt") {
-          // gets number of trgs in the element
-          int targets_number = 0;
-          string trg_number = ParseXmlTagAttribute(tagContent, "len");
-          targets_number = atoi(trg_number.c_str());
-
-          std::vector<std::string> dlt_elements;
-
-          string attr_label = "trg";
-          for (int i = 1; i <= targets_number; ++i) {
-            // converts the int to a string
-            // string str_i = static_cast<ostringstream*>( &(ostringstream() << Number) )->str();
-            // converts the int to a string using itoa (non standard, might not work)
-
-				stringstream strme;
-        	strme << i;
-			  string str_i=strme.str();
-
-//            char buf[33];
-//           itoa(i,buf,10);
-//            string str_i(buf);
-
-            // adds the number to the trg label
-            attr_label = "trg";
-            attr_label = attr_label + str_i;
-            
-            string trg = "";
-            trg = ParseXmlTagAttribute(tagContent, attr_label);
-            if (trg != "") {
-              dlt_elements.push_back(trg);
-            }
+					/*
+						for the dlt tag extract the info about previous phrases (uni-grams or n-grams) from the trg attribute
+						the phrases are separted by ||
+					*/
+          vector<string> dlt_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"trg"), "||");
 					VERBOSE(1,"trg:|" << trg << "| tag:|" << tagContent << "|" << std::endl);
-          }
-
-            // add to the global static producer
-            const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-            CacheBasedLanguageModel* cache_model = trans_sys.GetCacheBasedLanguageModel();
+          // add to the global static producer
+          const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+          CacheBasedLanguageModel* cache_model = trans_sys.GetCacheBasedLanguageModel();
           cache_model->Insert(dlt_elements);
-
         }
 
         // default: opening tag that specifies translation options
