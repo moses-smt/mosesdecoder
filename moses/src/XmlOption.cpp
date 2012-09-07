@@ -297,7 +297,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 						the phrases are separted by ||
 					*/
           vector<string> dlt_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"trg"), "||");
-					VERBOSE(1,"trg:|" << trg << "| tag:|" << tagContent << "|" << std::endl);
+					VERBOSE(1, "tag:|" << tagContent << "|" << std::endl);
           // add to the global static producer
           const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
           CacheBasedLanguageModel* cache_model = trans_sys.GetCacheBasedLanguageModel();
