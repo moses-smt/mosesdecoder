@@ -255,9 +255,6 @@ int main(int argc, char* argv[])
     if (extractFileP.eof()) break;
     if (++lineNum % 100000 == 0) cerr << "." << flush;
     
-    cerr << line << endl;
-    
-    
     SAFE_GETLINE((extractFileP), line, LINE_MAX_LENGTH, '\n', __FILE__);
     if (extractFileP.eof())	break;
 

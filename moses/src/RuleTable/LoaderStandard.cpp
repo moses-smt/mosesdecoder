@@ -233,19 +233,19 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
       if(spanStringsST.size()>=2){
 
-      //Take scores from source
-      string spanLengthSource = spanStringsST[0];
-      //Take scores form target
-      string spanLengthTarget = spanStringsST[1];
+        //Take scores from source
+        string spanLengthSource = spanStringsST[0];
+        //Take scores form target
+        string spanLengthTarget = spanStringsST[1];
 
-      TokenizeMultiCharSeparator(spanStringSource,spanLengthSource,"|");
-      TokenizeMultiCharSeparator(spanStringTarget,spanLengthTarget,"|");
+        TokenizeMultiCharSeparator(spanStringSource,spanLengthSource,"|");
+        TokenizeMultiCharSeparator(spanStringTarget,spanLengthTarget,"|");
 
-      //Check that number of non terminals is the same on both sides
-      CHECK(spanStringSource.size() == spanStringTarget.size());
-      vector<string>::iterator itr_source;
-      vector<string>::iterator itr_target;
-      for(
+        //Check that number of non terminals is the same on both sides
+        CHECK(spanStringSource.size() == spanStringTarget.size());
+        vector<string>::iterator itr_source;
+        vector<string>::iterator itr_target;
+        for(
             itr_source = spanStringSource.begin(), itr_target = spanStringTarget.begin();
             itr_source != spanStringSource.end(), itr_target != spanStringTarget.end();
             itr_source++, itr_target++)
