@@ -37,7 +37,7 @@ void SourceWordDeletionFeature::Evaluate(
             const WordsBitmap& coverageVector,
             ScoreComponentCollection* accumulator) const
 {
-	TargetPhrase targetPhrase = translationOption.GetTargetPhrase();
+	const TargetPhrase& targetPhrase = translationOption.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
@@ -46,7 +46,7 @@ void SourceWordDeletionFeature::Evaluate(
 void SourceWordDeletionFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
 		                   	 	 	 	 	 	 	 	 	 	 	 	ScoreComponentCollection* accumulator) const
 {
-	TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
+	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
