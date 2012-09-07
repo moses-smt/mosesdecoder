@@ -609,12 +609,12 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
-  }
 
- if (m_CacheBasedLanguageModel != NULL) // check if CacheBasedLanguageModel is used
- {
-   m_translationSystems.find(config[0])->second.AddFeatureFunction(m_CacheBasedLanguageModel);
- }
+    if (m_CacheBasedLanguageModel != NULL) // check if CacheBasedLanguageModel is used
+    {
+       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_CacheBasedLanguageModel);
+    }
+  }
 
   m_scoreIndexManager.InitFeatureNames();
 
@@ -1130,17 +1130,16 @@ bool StaticData::LoadCacheBasedLanguageModel()
    {
      m_CacheBasedLanguageModel = new CacheBasedLanguageModel(weight); // create the feature
 
+
      for(size_t j = 0; j < file.size(); ++j)
      {
+			VERBOSE(1,"Loading data from the cache file " << file[j] << endl);
         m_CacheBasedLanguageModel->Load(file[j]);
+			VERBOSE(1,"Actual cache" << endl);
+        m_CacheBasedLanguageModel->PrintCache();
      }
- 
-     return true;
-   }
-   else
-   {
-     return false;
-   }
+   } 
+   return true;
 }
 
 void StaticData::LoadNonTerminals()
