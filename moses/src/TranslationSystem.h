@@ -40,6 +40,7 @@ class WordPenaltyProducer;
 class DistortionScoreProducer;
 class UnknownWordPenaltyProducer;
 class GlobalLexicalModel;
+class CacheBasedLanguageModel;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -59,6 +60,7 @@ public:
   void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
   void AddReorderModel(LexicalReordering* reorderModel);
   void AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel);
+  void AddCacheBasedLanguageModel(CacheBasedLanguageModel* CacheBasedLanguageModel);
 
   //Insert non-core feature function
   void AddFeatureFunction(const FeatureFunction* featureFunction);
@@ -108,6 +110,10 @@ public:
     return m_distortionScoreProducer;
   }
 
+  const CacheBasedLanguageModel* GetCacheBasedLanguageModel() const {
+    return m_CacheBasedLanguageModel;
+  }
+
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
   float GetWeightDistortion() const;
@@ -116,12 +122,7 @@ public:
   void InitializeBeforeSentenceProcessing(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
-
-
   static const  std::string DEFAULT;
-
-
-
 
 private:
   std::string m_id;
@@ -142,6 +143,7 @@ private:
   const WordPenaltyProducer* m_wpProducer;
   const UnknownWordPenaltyProducer* m_unknownWpProducer;
   const DistortionScoreProducer* m_distortionScoreProducer;
+  const CacheBasedLanguageModel* m_CacheBasedLanguageModel;
 };
 
 
