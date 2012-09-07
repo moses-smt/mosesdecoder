@@ -10,7 +10,7 @@
 # The sentences to translate have to be given line-by-line at the standard input. 
 #
 # Example:
-# cat inputfile | perl moses-cache.pl "../bin/moses -f moses.ini -v 2"
+# cat inputfile | perl moses-cache.pl "../bin/moses -f moses.ini"
 #
 #
 
@@ -25,7 +25,7 @@ if ($#ARGV+1 < 1) {
 }
 
 
-IPC::Open3::open3 (\*MOSESIN, \*MOSESOUT, \*MOSESERR, $ARGV[0]);
+IPC::Open3::open3 (\*MOSESIN, \*MOSESOUT, \*MOSESERR, "$ARGV[0] -t");
 
 # remove spaces at begin and end, and newline
 sub trim {
@@ -45,9 +45,9 @@ sub add_xml_info {
 	return $line;
     }
 
-    my @words = @$info;
-    my @attrs = map { "trg$_=\"" . $words[$_-1] . "\"" } (1..scalar(@words));
-    my $xml_line = "<dlt len=\"" . scalar(@words) . "\" " . join(" ", @attrs) . "/> " . $line;
+    my @phrases = @$info;
+    my @attrs = map { "trg$_=\"" . $phrases[$_-1] . "\"" } (1..scalar(@phrases));
+    my $xml_line = "<dlt len=\"" . scalar(@phrases) . "\" " . join(" ", @attrs) . "/> " . $line;
     return $xml_line;
 }
 
@@ -55,9 +55,15 @@ sub add_xml_info {
 # task and produce information to be stored for the next translation task
 # (currently, the list of tokens).
 sub process_output {
-    my ($out, $err) = @_;
-    my @words = split(/ /, $out);
-    return \@words;    
+    my ($out, $translation, $err) = @_;
+    my @words = split(/ /, $translation);
+    return \@words;
+
+    # the following code builds the list of phrases (instead of tokens)
+    # of the translation    
+    #my @phrases = split(/\|[0-9]+-[0-9]+\|/, $out);
+    #@phrases = map { trim($_); } @phrases; 
+    #return \@phrases;    
 }
 
 # The following variable is an opaque pointer containing the data that is
@@ -72,8 +78,10 @@ while (my $line = <STDIN>) {
     my $xml_line = add_xml_info($line, $info);
     print "Next input: $xml_line\n";
     print MOSESIN "$xml_line\n";
-    my $translation = <MOSESOUT>;
-    $translation = trim($translation);
+    my $output = <MOSESOUT>;
+    $output = trim($output);
+    my $translation = $output;
+    $translation =~ s/ \|[0-9]+-[0-9]+\|//g;
     print "Output: $translation\n";
     my $moreinfo = "";
     my $hasmoreinfo = 1;
@@ -84,7 +92,7 @@ while (my $line = <STDIN>) {
 	    $hasmoreinfo = 0;
 	}
     } 
-    $info = process_output($translation, $moreinfo);
+    $info = process_output($output, $translation, $moreinfo);
 }
 
 close MOSESIN;
