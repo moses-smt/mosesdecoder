@@ -1,9 +1,8 @@
-import pypeline.helpers
+from pypeline.helpers import eval_pipeline, \
+    cons_split_wire, \
+    cons_unsplit_wire, \
+    cons_dictionary_wire
 
-box_declaration = {
-  'source_box0': 'training.components.cleanup.cleanup',
-  'source_box1': 'training.components.cleanup.cleanup'
-}
 
 def defwire(src, tgt, name=None):
   return {
@@ -19,27 +18,63 @@ wires_definition = [
   defwire('source_box1', 'target_box2'),
 ]
 
-configuration = {
-  'segment-length-limit': 60,
-}
 
-def main():
-  #for label, mod_name in box_declaration.iteritems():
-  for label, mod_name in box_declaration.items():
-    print(label)
-    module = __import__(mod_name, fromlist=['configure', 'initialise'])
-    f = getattr(module, 'configure')
-    config = f(configuration)
+# Build the pipeline components
+def build_components(components, configuration):
+  pipeline_components = dict()
+  pipeline_configuration = dict()
 
-    f = getattr(module, 'initialise')
-    box = f(config)
-    box({ 
-      'tokenised_src_file': '/home/its/tok1',
-      'tokenised_trg_file': '/home/its/tok2',
-      'cleaned_src_file': '/tmp/o1',
-      'cleaned_trg_file': '/tmp/o2',
-    })
+  for component_id, module_name in components.items():
+    print "Loading [%s] component from [%s]..." % (component_id, module_name)
+
+    module = __import__(module_name, fromlist = ['configure', 'initialise'])
+    
+    # Component builds its own configuration object
+    config_func = getattr(module, 'configure')
+    component_config = config_func(configuration)
+    pipeline_configuration.update(component_config)
+
+    # Now build the component
+    init_func = getattr(module, 'initialise')
+    component = init_func(component_config)
+
+    # And store
+    pipeline_components['component_id'] = component
+
+  return pipeline_components, pipeline_configuration
 
 
-main()
+# Go!
+def main(src_lang, trg_lang, src_filename, trg_filename):
+  # Global configuration
+  configuration = {
+    'moses_installation_dir': ''
+    'src_lang': src_lang,
+    'src_tokenisation_dir': './tokenisation',
+    'trg_lang': trg_lang,
+    'trg_tokenisation_dir': './tokenisation',
+    'segment-length-limit': 60
+  }
 
+  # The modules to load
+  component_modules = {
+    'src_tokenizer': 'training.components.tokenizer.src_tokenizer',
+    'trg_tokenizer': 'training.components.tokenizer.trg_tokenizer',
+  }
+
+  # Phew, build the required components
+  components, component_config = build_components(component_modules, configuration)
+
+  # Wire up components
+  tokenisation_component = cons_split_wire() >> (components['src_tokenizer'] ** components['trg_tokenizer'])
+  
+  # Evaluate the pipeline
+  value = {'src_filename': src_filename,
+           'trg_filename': trg_filename}
+  print eval_pipeline(tokenisation_component, value, component_config)
+
+
+if __name__ == '__main__':
+  import sys
+
+  main(sys.argv[1], sys.argv[2], sys.argv[3], sys.argv[4])
