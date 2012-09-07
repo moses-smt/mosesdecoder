@@ -35,7 +35,7 @@ public:
 
   void Decay();
   void Update(std::vector<std::string> words, int age);
-  inline void Insert(std::vector<std::string> words);
+  void Insert(std::vector<std::string> words);
   void Load(const std::string file);
 
   void PrintCache();

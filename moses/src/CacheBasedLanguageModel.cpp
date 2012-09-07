@@ -95,6 +95,7 @@ void CacheBasedLanguageModel::Insert(std::vector<std::string> words)
 {
 	Decay();
 	Update(words,1);
+	PrintCache();
 }
 
 void CacheBasedLanguageModel::Load(const std::string file)

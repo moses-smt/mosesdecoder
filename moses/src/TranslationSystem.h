@@ -110,7 +110,7 @@ public:
     return m_distortionScoreProducer;
   }
 
-  const CacheBasedLanguageModel* GetCacheBasedLanguageModel() const {
+  CacheBasedLanguageModel* GetCacheBasedLanguageModel() const {
     return m_CacheBasedLanguageModel;
   }
 
@@ -143,7 +143,7 @@ private:
   const WordPenaltyProducer* m_wpProducer;
   const UnknownWordPenaltyProducer* m_unknownWpProducer;
   const DistortionScoreProducer* m_distortionScoreProducer;
-  const CacheBasedLanguageModel* m_CacheBasedLanguageModel;
+  CacheBasedLanguageModel* m_CacheBasedLanguageModel;
 };
 
 
