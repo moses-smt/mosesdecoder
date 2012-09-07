@@ -52,7 +52,8 @@ public:
   }
   virtual float GetScoreBySpanLength(unsigned spanLength) const {
     float t = ((spanLength - m_average) / m_sigma);
-    return -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
+    float ret = -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
+    return ret;
   }
   virtual void FinishedAdds() {
     m_sigma = max(1.0f, sqrt(m_averageSquare - m_average*m_average));
