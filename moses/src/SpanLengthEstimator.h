@@ -10,30 +10,29 @@ namespace Moses
 class SpanLengthEstimator
 {
 public:
-  typedef std::map<unsigned, float> TLengthToScoreMap;
-
-  void AddSourceSpanScore(unsigned sourceSpanLength, float score);
-  void AddTargetSpanScore(unsigned targetSpanLength, float score);
-  float GetScoreBySourceSpanLength(unsigned sourceSpanLength) const;
-  float GetScoreByTargetSpanLength(unsigned targetSpanLength) const;
-  //  float GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const;
-
-private:
-  static float FetchScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength);
-  static float FetchGaussianScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength);
-
-  TLengthToScoreMap m_sourceScores;
-  TLengthToScoreMap m_targetScores;
+  virtual void AddSpanScore(unsigned spanLength, float score) = 0;
+  virtual float GetScoreBySpanLength(unsigned spanLength) const = 0;
+  virtual void FinisedAdds() {}
+  virtual ~SpanLengthEstimator() {}
 };
   
-class SpanLengthEstimatorCollection : private std::vector<SpanLengthEstimator>
+SpanLengthEstimator* CreateAsIsSpanLengthEstimator();
+SpanLengthEstimator* CreateGaussianSpanLengthEstimator();
+  
+class SpanLengthEstimatorCollection
 {
-  typedef std::vector<SpanLengthEstimator> Base;
+  typedef std::vector<SpanLengthEstimator*> TEstimatorList;
+  TEstimatorList m_sourceEstimators, m_targetEstimators;
 public:
   template<class Iter>
-  void Assign(Iter begin, Iter end) {
-    Base::assign(begin, end);
+  void AssignSource(Iter begin, Iter end) {
+    m_sourceEstimators.assign(begin, end);
   }
+  template<class Iter>
+  void AssignTarget(Iter begin, Iter end) {
+    m_targetEstimators.assign(begin, end);
+  }
+  ~SpanLengthEstimatorCollection();
   float GetScoreBySourceSpanLength(unsigned nonTerminalIndex, unsigned spanLength) const;
   float GetScoreByTargetSpanLength(unsigned nonTerminalIndex, unsigned spanLength) const;
 };

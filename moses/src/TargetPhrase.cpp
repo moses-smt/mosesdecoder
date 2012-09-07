@@ -304,9 +304,12 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
   return clone;
 }
   
-void TargetPhrase::SetSpanLengthEstimators(const std::vector<SpanLengthEstimator>& estimators)
+void TargetPhrase::SetSpanLengthEstimators(
+  const std::vector<SpanLengthEstimator*>& sourceEstimators,
+  const std::vector<SpanLengthEstimator*>& targetEstimators)
 {
-  m_spanLengthEstimators.Assign(estimators.begin(), estimators.end());
+  m_spanLengthEstimators.AssignSource(sourceEstimators.begin(), sourceEstimators.end());
+  m_spanLengthEstimators.AssignTarget(targetEstimators.begin(), targetEstimators.end());
 }
 
 

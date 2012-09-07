@@ -119,8 +119,7 @@ FFState* SpanLengthFeature::EvaluateChart(
   if (m_withTargetLength) {
     unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
     for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-      terminalCount += spans[spanIndex].TargetSpan;
-      --terminalCount;
+      terminalCount += spans[spanIndex].TargetSpan - 1;
       scores[1] += spanLengthEstimators.GetScoreByTargetSpanLength(spanIndex, spans[spanIndex].TargetSpan);
     }
     accumulator->PlusEquals(this, scores);

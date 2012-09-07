@@ -9,74 +9,86 @@ using namespace std;
 namespace Moses
 {
 
-void SpanLengthEstimator::AddSourceSpanScore(unsigned sourceSpanLength, float score)
+class AsIsSpanEstimator: public SpanLengthEstimator
 {
-  m_sourceScores.insert(make_pair(sourceSpanLength, score));
+  typedef std::map<unsigned, float> TLengthToScoreMap;
+  TLengthToScoreMap m_scores;
+public:    
+  virtual void AddSpanScore(unsigned spanLength, float score) {
+    m_scores.insert(make_pair(spanLength, score));
+  }
+  virtual float GetScoreBySpanLength(unsigned spanLength) const {
+    // bool useGaussian = StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0;
+    if (m_scores.empty())
+      return 0.0;
+    TLengthToScoreMap::const_iterator iter = m_scores.find(spanLength);
+    if (iter == m_scores.end())
+      return LOWEST_SCORE;
+    else
+      return iter->second;
+  }
+};
+    
+SpanLengthEstimator* CreateAsIsSpanLengthEstimator() {
+  return new AsIsSpanEstimator();
 }
-
-void SpanLengthEstimator::AddTargetSpanScore(unsigned targetSpanLength, float score)
-{
-    m_targetScores.insert(make_pair(targetSpanLength, score));
-}
-
-//Just in case we need the sum of both scores (probably never...)
-//float SpanLengthEstimator::GetScoreBySpanLengths(unsigned sourceSpanLength, unsigned targetSpanLength) const
-//{
-//  return FetchScoreFromMap(m_sourceScores, sourceSpanLength) + FetchScoreFromMap(m_targetScores, targetSpanLength);
-//}
-
-float SpanLengthEstimator::GetScoreBySourceSpanLength(unsigned sourceSpanLength) const
-{
-  bool useGaussian = StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0;
-  if (useGaussian)
-    return FetchGaussianScoreFromMap(m_sourceScores, sourceSpanLength);
-  else
-    return FetchScoreFromMap(m_sourceScores, sourceSpanLength);
-}
-
-float SpanLengthEstimator::GetScoreByTargetSpanLength(unsigned targetSpanLength) const
-{
-  bool useGaussian = StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0;
-  if (useGaussian)
-    return FetchGaussianScoreFromMap(m_targetScores, targetSpanLength);
-  else
-    return FetchScoreFromMap(m_targetScores, targetSpanLength);
-}
-
-float SpanLengthEstimator::FetchScoreFromMap(const TLengthToScoreMap &lengthToScoreMap, unsigned spanLength)
-{
-  if (lengthToScoreMap.empty())
-    return 0.0;
-  TLengthToScoreMap::const_iterator iter = lengthToScoreMap.find(spanLength);
-  if (iter == lengthToScoreMap.end())
-    return LOWEST_SCORE;
-  else
-    return iter->second;
-}
+  
+  class GaussianSpanLengthEstimator : public SpanLengthEstimator
+  {
+    float m_average, m_averageSquare;
+    float m_logSqrt2Pi;
+    float m_sigma, m_logSigma;
+  public:
+    GaussianSpanLengthEstimator()
+    : m_average(0.0)
+    , m_averageSquare(0.0)
+    , m_logSqrt2Pi(0.5*log(2*acos(-1.0)))
+    , m_sigma(0.0), m_logSigma(0.0)
+    {}
+    
+    virtual void AddSpanScore(unsigned spanLength, float score) {
+      m_average += exp(score) * spanLength;
+      m_averageSquare += exp(score) * spanLength * spanLength;
+    }
+    virtual float GetScoreBySpanLength(unsigned spanLength) const {
+      float t = ((spanLength - m_average) / m_sigma);
+      return -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
+    }
+    virtual void FinishedAdds() {
+      m_sigma = sqrt(m_averageSquare - m_average*m_average);
+      m_logSigma = log(max(1.0f, m_sigma));
+    }
+  };
+  
+  SpanLengthEstimator* CreateGaussianSpanLengthEstimator()
+  {
+    return new GaussianSpanLengthEstimator();
+  }
   
 float SpanLengthEstimatorCollection::GetScoreBySourceSpanLength(
   unsigned nonTerminalIndex,
   unsigned sourceSpanLength) const
 {
-  if (empty())
+  if (m_sourceEstimators.empty())
     return 0.0f;
-  CHECK(size() > size_t(nonTerminalIndex));
-  return (*this)[nonTerminalIndex].GetScoreBySourceSpanLength(sourceSpanLength);
+  CHECK(m_sourceEstimators.size() > size_t(nonTerminalIndex));
+  return m_sourceEstimators[nonTerminalIndex]->GetScoreBySpanLength(sourceSpanLength);
 }
   
 float SpanLengthEstimatorCollection::GetScoreByTargetSpanLength(
   unsigned nonTerminalIndex,
   unsigned targetSpanLength) const
 {
-  if (empty())
+  if (m_targetEstimators.empty())
     return 0.0f;
-  CHECK(size() > size_t(nonTerminalIndex));
-  return (*this)[nonTerminalIndex].GetScoreByTargetSpanLength(targetSpanLength);
+  CHECK(m_targetEstimators.size() > size_t(nonTerminalIndex));
+  return m_targetEstimators[nonTerminalIndex]->GetScoreBySpanLength(targetSpanLength);
 }
 
-float SpanLengthEstimator::FetchGaussianScoreFromMap(const TLengthToScoreMap& lengthToScoreMap, unsigned spanLength)
+SpanLengthEstimatorCollection::~SpanLengthEstimatorCollection()
 {
-  
+  RemoveAllInColl(m_targetEstimators);
+  RemoveAllInColl(m_sourceEstimators);
 }
 
 } // namespace

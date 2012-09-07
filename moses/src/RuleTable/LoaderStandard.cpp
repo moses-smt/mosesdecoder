@@ -177,7 +177,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
     vector<string> spanStringsST;
     vector<string> spanStringSource;
     vector<string> spanStringTarget;
-    auto_ptr<SpanLengthEstimator> spanLengthVector(new SpanLengthEstimator());
 
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
@@ -222,8 +221,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     //read from rule table
-    std::vector<SpanLengthEstimator> spanLengthEstimators;
+    std::vector<SpanLengthEstimator*> spanSourceEstimators, spanTargetEstimators;
     if (tokens.size() >= 6) {
+      bool useGaussian = (StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0);
+      
       const std::string &spanLength = tokens[5];
       //source and target side are separated by ||
       TokenizeMultiCharSeparator(spanStringsST,spanLength,"||");
@@ -245,38 +246,42 @@ bool RuleTableLoaderStandard::Load(FormatType format
         CHECK(spanStringSource.size() == spanStringTarget.size());
         vector<string>::iterator itr_source;
         vector<string>::iterator itr_target;
-        for(
-            itr_source = spanStringSource.begin(), itr_target = spanStringTarget.begin();
+        for(itr_source = spanStringSource.begin(), itr_target = spanStringTarget.begin();
             itr_source != spanStringSource.end(), itr_target != spanStringTarget.end();
             itr_source++, itr_target++)
-            {
-                vector<string> spanTermSource;
-                vector<string> spanTermTarget;
-                vector<string> :: iterator itr_source_term;
-                vector<string> :: iterator itr_target_term;
-                Tokenize(spanTermSource,*itr_source);
-                Tokenize(spanTermTarget,*itr_target);
-                SpanLengthEstimator estimator;
-                //get source scores
-                iterate(spanTermSource,itr_source_term)
-                {
-                    unsigned size;
-                    float proba;
-                    sscanf(itr_source_term->c_str(), "%u=%f", &size, &proba);
-                    estimator.AddSourceSpanScore(size, logf(proba));
-                }
-                //get target scores
-                iterate(spanStringTarget,itr_target_term)
-                {
-                    unsigned size;
-                    float proba;
-                    sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
-                    estimator.AddTargetSpanScore(size, logf(proba));
-                }
-                spanLengthEstimators.push_back(estimator);
-            }
+        {
+          vector<string> spanTermSource;
+          vector<string> spanTermTarget;
+          vector<string> :: iterator itr_source_term;
+          vector<string> :: iterator itr_target_term;
+          Tokenize(spanTermSource,*itr_source);
+          Tokenize(spanTermTarget,*itr_target);
+          std::auto_ptr<SpanLengthEstimator> estimatorSource, estimatorTarget;
+          estimatorSource.reset(useGaussian ? CreateGaussianSpanLengthEstimator() : CreateAsIsSpanLengthEstimator());
+          estimatorTarget.reset(useGaussian ? CreateGaussianSpanLengthEstimator() : CreateAsIsSpanLengthEstimator());
+          //get source scores
+          iterate(spanTermSource,itr_source_term)
+          {
+            unsigned size;
+            float proba;
+            sscanf(itr_source_term->c_str(), "%u=%f", &size, &proba);
+            estimatorSource->AddSpanScore(size, logf(proba));
+          }
+          //get target scores
+          iterate(spanStringTarget,itr_target_term)
+          {
+            unsigned size;
+            float proba;
+            sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
+            estimatorTarget->AddSpanScore(size, logf(proba));
+          }
+          estimatorSource->FinisedAdds();
+          estimatorTarget->FinisedAdds();
+          spanSourceEstimators.push_back(estimatorSource.release());
+          spanTargetEstimators.push_back(estimatorTarget.release());
         }
       }
+    }
         
 
     // create target phrase obj
@@ -293,7 +298,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
 
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels, wpProducer);
-    targetPhrase->SetSpanLengthEstimators(spanLengthEstimators);
+    targetPhrase->SetSpanLengthEstimators(spanSourceEstimators, spanTargetEstimators);
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

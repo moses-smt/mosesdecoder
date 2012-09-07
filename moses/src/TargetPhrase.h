@@ -78,7 +78,9 @@ public:
   void SetScore(const TranslationSystem* system, const Scores &scoreVector);
 
   //! Accessors for span length estimator
-  void SetSpanLengthEstimators(const std::vector<SpanLengthEstimator>& estimators);
+  void SetSpanLengthEstimators(
+    const std::vector<SpanLengthEstimator*>& sourceEstimators,
+    const std::vector<SpanLengthEstimator*>& targetEstimators);
   inline const SpanLengthEstimatorCollection& GetSpanLengthEstimators() const {
     return m_spanLengthEstimators;
   }
