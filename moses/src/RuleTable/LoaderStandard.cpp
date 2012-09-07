@@ -275,8 +275,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
             sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
             estimatorTarget->AddSpanScore(size, logf(proba));
           }
-          estimatorSource->FinisedAdds();
-          estimatorTarget->FinisedAdds();
+          estimatorSource->FinishedAdds();
+          estimatorTarget->FinishedAdds();
           spanSourceEstimators.push_back(estimatorSource.release());
           spanTargetEstimators.push_back(estimatorTarget.release());
         }
