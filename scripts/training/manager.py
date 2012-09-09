@@ -7,21 +7,6 @@ from pypeline.helpers.helpers import eval_pipeline, \
     cons_dictionary_wire
 
 
-def defwire(src, tgt, name=None):
-  return {
-    'src': src,
-    'tgt': tgt,
-    'name': name,
-  }
-
-wires_definition = [
-  defwire('source_box0', 'target_box0', 'optional name'),
-  defwire('source_box0', 'target_box1'),
-  defwire('source_box1', 'target_box2'),
-  defwire('source_box1', 'target_box2'),
-]
-
-
 # Build the pipeline components
 def build_components(components, configuration):
   pipeline_components = dict()
@@ -98,14 +83,13 @@ def main(src_lang, trg_lang, src_filename, trg_filename):
   # Cleanup components
   #
   def training_filename_mangler(a, s):
-    print "\n\nARRRRRRRRGH: %s" % a
     fn = a['train_src_filename']
     bn = os.path.basename(fn)
     directory = os.path.dirname(fn)
     bits = bn.split(".")
     bits.pop()
     new_a = ".".join(bits)
-    print "NEW ARRRRRRRRGH: %s\n\n" % new_a
+
     return {'training_data_filename': os.path.join(directory, new_a)}
 
   cleanup_components = \
