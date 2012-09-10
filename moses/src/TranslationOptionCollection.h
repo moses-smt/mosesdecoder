@@ -70,8 +70,7 @@ protected:
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<Phrase*> m_unksrcs;
-  typedef std::pair<Phrase,Phrase> TranslationOptionKey;
-  boost::unordered_map<TranslationOptionKey,ScoreComponentCollection> m_precalculatedScores;
+  boost::unordered_map<TranslationOption,ScoreComponentCollection> m_precalculatedScores;
 
 
   TranslationOptionCollection(const TranslationSystem* system, InputType const& src, size_t maxNoTransOptPerCoverage,
