@@ -35,6 +35,8 @@ def build_components(components, configuration):
 # Go!
 def main(src_lang, trg_lang, src_filename, trg_filename):
   # Global configuration
+  # One day, this configuration shall be constructed from
+  # command line options, or a properties file.
   configuration = {
     'moses_installation_dir': os.environ['MOSES_HOME'],
     'irstlm_installation_dir': os.environ['IRSTLM'],
@@ -53,6 +55,8 @@ def main(src_lang, trg_lang, src_filename, trg_filename):
   }
 
   # The modules to load
+  # In the future, the components shall be specified in some kind
+  # pipeline description file.
   component_modules = {
     'src_tokenizer': 'training.components.tokenizer.src_tokenizer',
     'trg_tokenizer': 'training.components.tokenizer.trg_tokenizer',
@@ -68,6 +72,10 @@ def main(src_lang, trg_lang, src_filename, trg_filename):
 
   #
   # Wire up components
+  # Description of wiring should be, in the future, alongside the component
+  # specification in some kind of confuguration file. Components shall be
+  # declared then used, i.e., bind a component instance to a unique component
+  # identifier, then wire component instances together by identifier.
   #
 
   #
@@ -80,17 +88,22 @@ def main(src_lang, trg_lang, src_filename, trg_filename):
                                       'tokenised_trg_filename': b['tokenised_trg_filename']})
 
   #
+  # A function that clips of the last '.' delimited string
+  #
+  def clip_last_bit(filename):
+    bn = os.path.basename(filename)
+    directory = os.path.dirname(filename)
+    bits = bn.split(".")
+    bits.pop()
+    return os.path.join(directory, ".".join(bits))
+
+  #
   # Cleanup components
   #
   def training_filename_mangler(a, s):
-    fn = a['train_src_filename']
-    bn = os.path.basename(fn)
-    directory = os.path.dirname(fn)
-    bits = bn.split(".")
-    bits.pop()
-    new_a = ".".join(bits)
-
-    return {'training_data_filename': os.path.join(directory, new_a)}
+    return {'training_data_filename': clip_last_bit(a['train_src_filename']),
+            'eval_src_filename': a['eval_src_filename'],
+            'eval_trg_filename': a['eval_trg_filename']}
 
   cleanup_components = \
       cons_dictionary_wire({'tokenised_src_filename': 'src_filename',
@@ -122,13 +135,14 @@ def main(src_lang, trg_lang, src_filename, trg_filename):
   # Build entire pipeline
   #
   pipeline = tokenisation_component >> \
-      (cons_split_wire() >> ((cleanup_components >> model_training_component) ** irstlm_build_components)) >> \
-      cons_unsplit_wire(lambda a, b: {'moses_ini_file': a['moses_ini_file'],
-                                      'eval_src_filename': a['eval_src_filename'],
-                                      'eval_trg_filename': a['eval_trg_filename'],
-                                      'trg_language_model_filename': b['lm_filename'],
-                                      'trg_language_model_order': 5,
-                                      'trg_language_model_type': 9})
+      (cons_split_wire() >> \
+      ((cleanup_components >> model_training_component) ** irstlm_build_components)) >> \
+      cons_unsplit_wire(lambda t, b: {'moses_ini_file': t['moses_ini_file'],
+                                      'development_data_filename': clip_last_bit(t['eval_src_filename']),
+                                      'trg_language_model_filename': b['compiled_lm_filename'],
+                                      'trg_language_model_order': 3,
+                                      'trg_language_model_type': 9}) >> \
+      components['mert']
 
   #
   # Evaluate the pipeline

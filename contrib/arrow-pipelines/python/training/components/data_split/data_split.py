@@ -72,7 +72,7 @@ def initialise(config):
 if __name__ == '__main__':
   import os
   import tempfile
-  import training.components.shared.test as thelp
+  import test.test as thelp
 
   from pypeline.helpers.helpers import eval_pipeline
 

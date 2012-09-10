@@ -60,7 +60,8 @@ def initialise(config):
             if return_code: 
                 raise Exception("IRST language model failed to build: return code = [%d]" % return_code)
         finally:
-            shutil.rmtree(tmp_dir)
+            if os.path.exists(tmp_dir):
+                shutil.rmtree(tmp_dir)
 
         # Compile the LM
         lm_filename = lm_filename + ".gz"
