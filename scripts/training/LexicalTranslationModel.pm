@@ -38,13 +38,13 @@ sub fix_spaces {
 }
 
 sub get_lexical {
-    my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file) = @_;
+    my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file,$write_counts) = @_;
     print STDERR "($alignment_file_f,$alignment_file_e,$lexical_file)\n";
 #    my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
 
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
 
-    if (-e "$lexical_file.f2e" && -e "$lexical_file.e2f") {
+    if (-e "$lexical_file.f2e" && -e "$lexical_file.e2f" && (!$write_counts || -e "$lexical_file.counts.f2e" && -e "$lexical_file.counts.e2f")) {
       print STDERR "  reusing: $lexical_file.f2e and $lexical_file.e2f\n";
       return;
     }
@@ -101,15 +101,27 @@ sub get_lexical {
 
     open(F2E,">$lexical_file.f2e") or die "ERROR: Can't write $lexical_file.f2e";
     open(E2F,">$lexical_file.e2f") or die "ERROR: Can't write $lexical_file.e2f";
+    if ($write_counts) {
+        open(F2E2,">$lexical_file.counts.f2e") or die "ERROR: Can't write $lexical_file.counts.f2e";
+        open(E2F2,">$lexical_file.counts.e2f") or die "ERROR: Can't write $lexical_file.counts.e2f";
+    }
 
     foreach my $f (keys %WORD_TRANSLATION) {
 	foreach my $e (keys %{$WORD_TRANSLATION{$f}}) {
 	    printf F2E "%s %s %.7f\n",$e,$f,$WORD_TRANSLATION{$f}{$e}/$TOTAL_FOREIGN{$f};
 	    printf E2F "%s %s %.7f\n",$f,$e,$WORD_TRANSLATION{$f}{$e}/$TOTAL_ENGLISH{$e};
+	    if ($write_counts) {
+	        printf F2E2 "%s %s %i %i\n",$e,$f,$WORD_TRANSLATION{$f}{$e},$TOTAL_FOREIGN{$f};
+	        printf E2F2 "%s %s %i %i\n",$f,$e,$WORD_TRANSLATION{$f}{$e},$TOTAL_ENGLISH{$e};
+	    }
 	}
     }
     close(E2F);
     close(F2E);
+    if ($write_counts) {
+        close(E2F2);
+        close(F2E2);
+    }
     print STDERR "Saved: $lexical_file.f2e and $lexical_file.e2f\n";
 }
 

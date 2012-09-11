@@ -73,7 +73,7 @@ typedef map <int, set<int> > HSentenceVertices;
   bool lt(int, int);
 
   bool isAligned (SentenceAlignment &, int, int);
-
+  int sentenceOffset = 0;
 
 }
 
@@ -116,7 +116,7 @@ int main(int argc, char* argv[])
 
  if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
-    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput ]\n";
+    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
     exit(1);
   }
 
@@ -139,6 +139,14 @@ int main(int argc, char* argv[])
       options.initTranslationFlag(false);
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       options.initSentenceIdFlag(true);  
+    } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
+      options.initIncludeSentenceIdFlag(true);  
+    } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
+      if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
+        cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
+        exit(1);
+      }
+      sentenceOffset = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       options.initGzOutput(true);  
     } else if(strcmp(argv[i],"--model") == 0) {
@@ -150,7 +158,7 @@ int main(int argc, char* argv[])
       char*  modelName = strtok(modelParams, "-");
       char*  modelType = strtok(NULL, "-");
 
-      REO_MODEL_TYPE intModelType;
+      // REO_MODEL_TYPE intModelType;
 
       if(strcmp(modelName, "wbe") == 0) {
         options.initWordModel(true);
@@ -233,7 +241,7 @@ int main(int argc, char* argv[])
     extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
-  int i=0;
+  int i = sentenceOffset;
   while(true) {
     i++;
     if (i%10000 == 0) cerr << "." << flush;
@@ -253,7 +261,7 @@ int main(int argc, char* argv[])
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
-	if (sentence.create( englishString, foreignString, alignmentString, i)) {
+	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
    	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileSentenceId);
       task->Run();
       delete task;
@@ -708,9 +716,11 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isSentenceIdFlag()) {
     outextractstrSentenceId << sentence.sentenceID;
   }
+  if (m_options.isIncludeSentenceIdFlag()) {
+    outextractstr << " ||| " << sentence.sentenceID;
+  }
 
-
- if (m_options.isTranslationFlag()) outextractstr << "\n";
+  if (m_options.isTranslationFlag()) outextractstr << "\n";
   if (m_options.isTranslationFlag()) outextractstrInv << "\n";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
   if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "\n";
@@ -785,4 +795,3 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
 }
 
 }
-

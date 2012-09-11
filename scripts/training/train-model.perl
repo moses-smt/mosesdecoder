@@ -23,7 +23,7 @@ $SCRIPTS_ROOTDIR =~ s/\/training$//;
 
 my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE,  $_SORT_COMPRESS, $_SORT_PARALLEL, $_CORPUS,
    $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
-   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_VERBOSE, $_ALIGNMENT,
+   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_LEXICAL_COUNTS, $_VERBOSE, $_ALIGNMENT,
    $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
    $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
    $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
@@ -32,12 +32,13 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,$_EXTRACT_OPTIONS,$_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
-   $_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
+   @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
+   $_SPARSE_TRANSLATION_TABLE,
    $_DICTIONARY, $_EPPEX, $IGNORE);
 my $_CORES = 1;
 
@@ -55,6 +56,7 @@ $_HELP = 1
 		       'max-phrase-length=s' => \$_MAX_PHRASE_LENGTH,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
+		       'write-lexical-counts' => \$_LEXICAL_COUNTS,
 		       'model-dir=s' => \$_MODEL_DIR,
 		       'temp-dir=s' => \$_TEMP_DIR,
            'sort-buffer-size=s' => \$_SORT_BUFFER_SIZE,
@@ -109,8 +111,8 @@ $_HELP = 1
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
-		       'extract-options=s' => \$_EXTRACT_OPTIONS,
-		       'score-options=s' => \$_SCORE_OPTIONS,
+		       'extract-options=s' => \@_EXTRACT_OPTIONS,
+		       'score-options=s' => \@_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
 		       'xml' => \$_XML,
@@ -122,8 +124,9 @@ $_HELP = 1
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
 		       'eppex:s' => \$_EPPEX,
-		       'additional-ini=s' => \$_ADDITIONAL_INI, 
+		       'additional-ini=s' => \@_ADDITIONAL_INI, 
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
+		       'sparse-translation-table' => \$_SPARSE_TRANSLATION_TABLE,
 		       'cores=i' => \$_CORES
                );
 
@@ -167,6 +170,16 @@ foreach (@_REORDERING_TABLE) { $_ = File::Spec->rel2abs($_); }
 foreach (@_GENERATION_TABLE) { $_ = File::Spec->rel2abs($_); }
 $_GIZA_E2F = File::Spec->rel2abs($_GIZA_E2F) if defined($_GIZA_E2F);
 $_GIZA_F2E = File::Spec->rel2abs($_GIZA_F2E) if defined($_GIZA_F2E);
+
+my $_SCORE_OPTIONS; # allow multiple switches
+foreach (@_SCORE_OPTIONS) { $_SCORE_OPTIONS .= $_." "; }
+chop($_SCORE_OPTIONS) if $_SCORE_OPTIONS;
+my $_EXTRACT_OPTIONS; # allow multiple switches
+foreach (@_EXTRACT_OPTIONS) { $_EXTRACT_OPTIONS .= $_." "; }
+chop($_EXTRACT_OPTIONS) if $_EXTRACT_OPTIONS;
+my $_ADDITIONAL_INI; # allow multiple switches
+foreach (@_ADDITIONAL_INI) { $_ADDITIONAL_INI .= $_." "; }
+chop($_ADDITIONAL_INI) if $_ADDITIONAL_INI;
 
 $_HIERARCHICAL = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 $_XML = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
@@ -388,9 +401,11 @@ my $___MAX_PHRASE_LENGTH = "7";
 $___MAX_PHRASE_LENGTH = "10" if $_HIERARCHICAL;
 
 my $___LEXICAL_WEIGHTING = 1;
+my $___LEXICAL_COUNTS = 0;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
 $___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
+$___LEXICAL_COUNTS = 1 if $_LEXICAL_COUNTS;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
 
 my $___PHRASE_SCORER = "phrase-extract";
@@ -770,7 +785,7 @@ sub make_classes {
 }
 
 sub get_vocabulary {
-    return unless $___LEXICAL_WEIGHTING;
+#    return unless $___LEXICAL_WEIGHTING;
     my($corpus,$vcb) = @_;
     print STDERR "(1.2) creating vcb file $vcb @ ".`date`;
     
@@ -1183,7 +1198,8 @@ sub get_lexical_factored {
 	&get_lexical($___CORPUS.".".$___F,
 		     $___CORPUS.".".$___E,
 		     $___ALIGNMENT_FILE.".".$___ALIGNMENT,
-		     $___LEXICAL_FILE);
+		     $___LEXICAL_FILE, 
+		     $___LEXICAL_COUNTS);
     }
     else {
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
@@ -1200,7 +1216,8 @@ sub get_lexical_factored {
 	    &get_lexical($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			 $___ALIGNMENT_FILE.".".$___ALIGNMENT,
-			 $lexical_file);
+			 $lexical_file, 
+			 $___LEXICAL_COUNTS);
 	}
     }
 }
@@ -1393,14 +1410,18 @@ sub score_phrase {
 sub score_phrase_phrase_extract {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
-    # remove consolidation options
+    # distinguish between score and consolidation options
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
     my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
-    my $COUNT_BIN = "";
-    if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CountBinFeature ([\s\d]*\d)/) {
-      $COUNT_BIN = $1;
-    }
+    my ($SPARSE_COUNT_BIN,$COUNT_BIN,$DOMAIN) = ("","","");
+    $SPARSE_COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SparseCountBinFeature ([\s\d]*\d)/;
+    $COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /\-CountBinFeature ([\s\d]*\d)/;
+    $DOMAIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(\-+[a-z]*Domain[a-z]+ .+)/i;
+    $DOMAIN =~ s/ \-.+//g;
+    my $SINGLETON = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /Singleton/);
+    my $CROSSEDNONTERM = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CrossedNonTerm/);
+
     my $UNALIGNED_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedPenalty/);
     my ($UNALIGNED_FW_COUNT,$UNALIGNED_FW_F,$UNALIGNED_FW_E);
     if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /UnalignedFunctionWordPenalty +(\S+) +(\S+)/) {
@@ -1418,6 +1439,8 @@ sub score_phrase_phrase_extract {
     $CORE_SCORE_OPTIONS .= " --LogProb" if $LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NegLogProb" if $NEG_LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
+	$CORE_SCORE_OPTIONS .= " --Singleton" if $SINGLETON;
+	$CORE_SCORE_OPTIONS .= " --CrossedNonTerm" if $CROSSEDNONTERM;
 
     my $substep = 1;
     my $isParent = 1;
@@ -1440,6 +1463,7 @@ sub score_phrase_phrase_extract {
 	          $inverse = " --Inverse";
                   $extract_filename = $extract_file.".inv";
               }
+              
 	      my $extract = "$extract_filename.sorted.gz";
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
@@ -1455,6 +1479,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
+        $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
 
 				# sorting
@@ -1500,6 +1525,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
     $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
+    $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     
@@ -1583,6 +1609,12 @@ sub get_reordering {
 	my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
 	$cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
 	for my $mtype (keys %REORDERING_MODEL_TYPES) {
+                # * $mtype will be one of wbe, phrase, or hier
+                # * the value stored in $REORDERING_MODEL_TYPES{$mtype} is a concatenation of the "orient"
+                #   attributes such as "msd"
+                # * the "filename" attribute is appended to the filename, but actually serves as the main configuration specification
+                #   for reordering scoring. it holds a string such as "wbe-msd-didirectional-fe"
+                #   which has the more general format type-orient-dir-lang
 		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
 		foreach my $model (@REORDERING_MODELS) {
 			if ($model->{"type"} eq $mtype) {
@@ -1757,9 +1789,15 @@ sub create_ini {
    $basic_weight_count /= 2 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/;
    $basic_weight_count++ unless defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoPhraseCount/; # phrase count feature
    $basic_weight_count++ if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/; # low count feature
-   if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(CountBinFeature [\s\d]*\d)/) {
+   if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(\-CountBinFeature [\s\d]*\d)/) {
      $basic_weight_count += scalar split(/\s+/,$1);
    }
+   if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /\-+Domain([a-z]+) (\S+)/i) {
+     my ($method,$file) = ($1,$2);
+     my $count = `cut -d\\  -f 2 model/domains.44  | sort | uniq | wc -l`;
+     $basic_weight_count += $count if $method eq "Indicator" || $method eq "Ratio";
+     $basic_weight_count += 2**$count-1 if $method eq "Subset";
+   }     
    $basic_weight_count++ if $_PCFG;
    foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
   	$num_of_ttables++;
@@ -1783,7 +1821,9 @@ sub create_ini {
 
 		}
 		
-    print INI "$phrase_table_impl $ff $basic_weight_count $file\n";
+    print INI "$phrase_table_impl $ff $basic_weight_count $file";
+    print INI " sparse" if defined($_SPARSE_TRANSLATION_TABLE);
+    print INI "\n";
    }
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);

@@ -195,6 +195,7 @@ protected:
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
   bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
+  bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
@@ -560,6 +561,10 @@ public:
 #endif
   bool GetUnprunedSearchGraph() const {
     return m_unprunedSearchGraph;
+  }
+
+  bool GetIncludeLHSInSearchGraph() const {
+    return m_includeLHSInSearchGraph;
   }
 
   XmlInputType GetXmlInputType() const {

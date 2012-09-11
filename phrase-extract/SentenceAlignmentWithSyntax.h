@@ -59,10 +59,10 @@ public:
   virtual ~SentenceAlignmentWithSyntax() {}
 
   bool
-  processTargetSentence(const char *, int);
+  processTargetSentence(const char *, int, bool boundaryRules);
 
   bool
-  processSourceSentence(const char *, int);
+  processSourceSentence(const char *, int, bool boundaryRules);
 };
 
 }

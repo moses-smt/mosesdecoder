@@ -120,6 +120,7 @@ Parameter::Parameter()
   AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
   AddParam("output-search-graph-extended", "osgx", "Output connected hypotheses of search into specified filename, in extended format");
   AddParam("unpruned-search-graph", "usg", "When outputting chart search graph, do not exclude dead ends. Note: stack pruning may have eliminated some hypotheses");
+  AddParam("include-lhs-in-search-graph", "lhssg", "When outputting chart search graph, include the label of the LHS of the rule (useful when using syntax)");
 #ifdef HAVE_PROTOBUF
   AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
 #endif
@@ -217,7 +218,9 @@ bool Parameter::LoadParam(int argc, char* argv[])
     PrintCredit();
     Explain();
 
+    cerr << endl;    
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
+    cerr << endl;
     return false;
   } else {
     if (!ReadConfigFile(configPath)) {

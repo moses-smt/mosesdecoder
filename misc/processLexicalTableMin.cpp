@@ -45,7 +45,6 @@ int main(int argc, char** argv)
   std::string inFilePath;
   std::string outFilePath("out");
   
-  size_t numScoreComponent = 6;
   size_t orderBits = 10;
   size_t fingerPrintBits = 16;
   bool multipleScoreTrees = true;
@@ -122,7 +121,7 @@ int main(int argc, char** argv)
     outFilePath += ".minlexr";
 
   LexicalReorderingTableCreator(
-    inFilePath, outFilePath, numScoreComponent,
+    inFilePath, outFilePath,
     orderBits, fingerPrintBits,
     multipleScoreTrees, quantize
 #ifdef WITH_THREADS
