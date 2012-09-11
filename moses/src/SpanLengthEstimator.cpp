@@ -38,12 +38,14 @@ class GaussianSpanLengthEstimator : public SpanLengthEstimator
   float m_average, m_averageSquare;
   float m_logSqrt2Pi;
   float m_sigma, m_logSigma;
+  float min;
+  unsigned m_ISIk;
 public:
   GaussianSpanLengthEstimator()
   : m_average(0.0)
   , m_averageSquare(0.0)
   , m_logSqrt2Pi(0.5*log(2*acos(-1.0)))
-  , m_sigma(0.0), m_logSigma(0.0)
+  , m_sigma(0.0), m_logSigma(0.0),min(-20*log(10)),m_ISIk(10)
   {}
   
   virtual void AddSpanScore(unsigned spanLength, float score) {
@@ -53,10 +55,13 @@ public:
   virtual float GetScoreBySpanLength(unsigned spanLength) const {
     float t = ((spanLength - m_average) / m_sigma);
     float ret = -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
-    return ret;
+    return max(ret,min);
   }
-  virtual void FinishedAdds() {
-    m_sigma = max(1.0f, sqrt(m_averageSquare - m_average*m_average));
+  //MARIA 
+  //modified variance to match ISI formula; ruleCount is extracted from rule table: tokens[4] -> first count (totalCount)
+  virtual void FinishedAdds(unsigned ruleCount) {
+    //m_sigma = max(1.0f, sqrt(m_averageSquare - m_average*m_average));
+    m_sigma=max(1.0f,sqrt(m_averageSquare - m_average*m_average+m_ISIk/(1+m_ISIk/ruleCount)*m_averageSquare));
     m_logSigma = log(m_sigma);
   }
 };

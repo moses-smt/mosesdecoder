@@ -12,7 +12,7 @@ class SpanLengthEstimator
 public:
   virtual void AddSpanScore(unsigned spanLength, float score) = 0;
   virtual float GetScoreBySpanLength(unsigned spanLength) const = 0;
-  virtual void FinishedAdds() {}
+  virtual void FinishedAdds(unsigned ruleCount) {}
   virtual ~SpanLengthEstimator() {}
 };
   
