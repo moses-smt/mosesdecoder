@@ -36,7 +36,7 @@ class PhraseDictionaryMemory;
 class PhraseDictionaryFeature;
 
 /** One node of the PhraseDictionaryMemory structure
-*/
+ */
 class PhraseDictionaryNode
 {
   typedef std::map<Word, PhraseDictionaryNode> NodeMap;

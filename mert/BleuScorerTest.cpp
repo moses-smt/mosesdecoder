@@ -8,6 +8,8 @@
 #include "Vocabulary.h"
 #include "Util.h"
 
+using namespace MosesTuning;
+
 namespace {
 
 NgramCounts* g_counts = NULL;

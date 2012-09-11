@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+//! Hold info about recombination. Used by SentenceStats class
 struct RecombinationInfo {
   RecombinationInfo() {} //for std::vector
   RecombinationInfo(size_t srcWords, float gProb, float bProb)
@@ -44,7 +45,7 @@ struct RecombinationInfo {
   float betterProb, worseProb;
 };
 
-/***
+/**
  * stats relating to decoder operation on a given sentence
  */
 class SentenceStats
@@ -185,6 +186,9 @@ protected:
   void AddDeletedWords(const Hypothesis& hypo);
 
   //hypotheses
+  // TODO: Move away from clock_t in favor of just storing doubles of the number of seconds
+  // since clock seconds aren't reliable in a multi-threaded environment -Jon
+  // (see Manager.cpp for some initial work moving in this direction)
   std::vector<RecombinationInfo> m_recombinationInfos;
   unsigned int m_numHyposCreated;
   unsigned int m_numHyposPruned;

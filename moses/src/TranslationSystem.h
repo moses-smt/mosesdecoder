@@ -114,7 +114,7 @@ public:
 
   //sentence (and thread) specific initialisationn and cleanup
   void InitializeBeforeSentenceProcessing(const InputType& source) const;
-  void CleanUpAfterSentenceProcessing() const;
+  void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
 
 

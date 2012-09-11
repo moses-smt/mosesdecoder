@@ -208,7 +208,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
-  error: set kMaxOrder to at least this value
+  error: set KENLM_MAX_ORDER to at least this value
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -275,7 +275,11 @@ binarize
 	ignore-unless: script
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
-  error: set kMaxOrder to at least this value
+<<<<<<< HEAD
+	error: set kMaxOrder to at least this value
+=======
+  error: set KENLM_MAX_ORDER to at least this value
+>>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
 
 [TRAINING] single
 consolidate
@@ -283,6 +287,12 @@ consolidate
 	out: corpus
 	default-name: corpus
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
+build-domains
+	in: CORPUS:clean-split-stem
+	out: domains
+	default-name: model/domains
+	ignore-unless: domain-features
+	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
 prepare-data
 	in: corpus
 	out: prepared-data
@@ -338,7 +348,6 @@ build-suffix-array
 	default-name: model/suffix-array
 	ignore-unless: suffix-array
 	error: usage
-
 build-lex-trans
 	in: word-alignment corpus
 	out: lexical-translation-table
@@ -367,7 +376,8 @@ pcfg-score
 extract-phrases
 	in: word-alignment scored-corpus
 	out: extracted-phrases
-	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm
+	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features
+        only-existence-matters: domain-features
 	default-name: model/extract
 	ignore-if: suffix-array
 build-reordering
@@ -377,9 +387,9 @@ build-reordering
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
 build-ttable
-	in: extracted-phrases lexical-translation-table
+	in: extracted-phrases lexical-translation-table domains
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array
 build-generation
@@ -387,7 +397,7 @@ build-generation
 	out: generation-table
 	rerun-on-change: generation-factors generation-type training-options script
 	ignore-unless: generation-factors
-  ignore-if: generation-corpus
+	ignore-if: generation-corpus
 	default-name: model/generation-table
 build-generation-custom
 	in: generation-corpus
@@ -395,8 +405,15 @@ build-generation-custom
 	rerun-on-change: generation-factors generation-type training-options script generation-corpus
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
+build-sparse-lexical
+	in: corpus
+        out: sparse-lexical
+        ignore-unless: sparse-lexical-features
+	rerun-on-change: sparse-lexical-features
+        default-name: model/most-frequent-words
+	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
 create-config
-	in: reordering-table phrase-translation-table generation-table INTERPOLATED-LM:binlm LM:binlm
+	in: reordering-table phrase-translation-table generation-table sparse-lexical domains INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -543,7 +560,7 @@ split-reference
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:domains
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings
@@ -569,7 +586,7 @@ apply-weights
 	in: TRAINING:config weight-config
 	out: config-with-reused-weights
 	ignore-if: use-hiero
-	default-name: tuning/moses.weight-reused.ini
+	default-name: tuning/moses.tuned.ini
 	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
 	error: cannot open
 hiero-tune
@@ -647,7 +664,7 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table
+	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:domains
 	out: filtered-dir
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage
@@ -667,7 +684,7 @@ decode
 	default-name: evaluation/output
 	qsub-script: yes
 	ignore-if: use-hiero
-	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage
+	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage analyze-search-graph
 	error: Translation was not performed correctly
 	not-error: trans: No such file or directory
 hiero-decode
@@ -814,6 +831,7 @@ analysis
 	default-name: evaluation/analysis
 	ignore-if: report-precision-by-coverage
 	ignore-unless: analysis
+  rerun-on-change: analyze-search-graph
 analysis-coverage
 	in: input TRAINING:corpus TRAINING:phrase-translation-table
 	out: analysis-coverage

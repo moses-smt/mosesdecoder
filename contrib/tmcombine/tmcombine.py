@@ -15,7 +15,7 @@
 
 
 # Some general things to note:
-#  - Different combination algorithms require different statistics. To be on the safe side, apply train_model.patch to train_model.perl and use the option -phrase-word-alignment for training all models.
+#  - Different combination algorithms require different statistics. To be on the safe side, use the options `-phrase-word-alignment` and `-write-lexical-counts` when training models.
 #  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). sort with LC_ALL=C.
 #  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
 #  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files.
@@ -153,7 +153,7 @@ class Moses():
                 self.phrase_target[target][i] = 1
 
 
-    def load_reordering_probabilities(self,line,priority,i,store='pairs'):
+    def load_reordering_probabilities(self,line,priority,i,**unused):
         """take single reordering table line and store probablities in internal data structure"""
         
         src = line[0]
@@ -161,10 +161,13 @@ class Moses():
 
         model_probabilities = map(float,line[2].split())
         reordering_probabilities = self.reordering_pairs[src][target]
-                
-        for j,p in enumerate(model_probabilities):
-            reordering_probabilities[j][i] = p
-
+        
+        try:
+            for j,p in enumerate(model_probabilities):
+                reordering_probabilities[j][i] = p
+        except IndexError:
+            sys.stderr.write('\nIndexError: Did you correctly specify the number of reordering features? (--number_of_features N in command line)\n')
+            exit()
 
     def traverse_incrementally(self,table,models,load_lines,store_flag,mode='interpolate',inverted=False,lowmem=False,flags=None):
         """hack-ish way to find common phrase pairs in multiple models in one traversal without storing it all in memory
@@ -217,11 +220,11 @@ class Moses():
         
         a, b, prob = line.split(b' ')
         
-        if side == 'e2f' and not e2f_filter or a in e2f_filter and b in e2f_filter[a]:
+        if side == 'e2f' and (not e2f_filter or a in e2f_filter and b in e2f_filter[a]):
             
             self.word_pairs_e2f[a][b][i] = float(prob)
             
-        elif side == 'f2e' and not f2e_filter or a in f2e_filter and b in f2e_filter[a]:
+        elif side == 'f2e' and (not f2e_filter or a in f2e_filter and b in f2e_filter[a]):
             
             self.word_pairs_f2e[a][b][i] = float(prob)
     
@@ -294,7 +297,7 @@ class Moses():
                 sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment\n')
                 exit()
             
-            self.phrase_pairs[src][target][1] = ['',line[3].lstrip(b'| ')]
+            self.phrase_pairs[src][target][1] = [b'',line[3].lstrip(b'| ')]
    
         else:
             sys.stderr.write('Error: unexpected phrase table format. Are you using a very old/new version of Moses with different formatting?\n')
@@ -419,7 +422,7 @@ class Moses():
         if 0 in features:
             return ''
         
-        features = b' '.join([b'%6g' %(f) for f in features])
+        features = b' '.join([b'%.6g' %(f) for f in features])
         
         line = b"%s ||| %s ||| %s\n" %(src,target,features)
         return line
@@ -1230,7 +1233,7 @@ def handle_file(filename,action,fileobj=None,mode='r'):
                 
                 if 'counts' in filename and os.path.exists(os.path.isdir(filename)):
                     sys.stderr.write('For a weighted counts combination, we need statistics that Moses doesn\'t write to disk by default.\n')
-                    sys.stderr.write('Apply train_model.patch to train_model.perl and repeat step 4 of Moses training for all models.\n')
+                    sys.stderr.write('Repeat step 4 of Moses training for all models with the option -write-lexical-counts.\n')
                 
                 exit()
 
@@ -1324,7 +1327,7 @@ class Combine_TMs():
            output_lexical: If defined, also writes combined lexical tables. Writes to output_lexical.e2f and output_lexical.f2e, or output_lexical.counts.e2f in mode 'counts'.
 
            mode: declares the basic mixture-model algorithm. there are currently three options:
-                 'counts': weighted counts (requires some statistics that Moses doesn't produce. Apply train_model.patch to train_model.perl and repeat step 4 of Moses training to obtain them.)
+                 'counts': weighted counts (requires some statistics that Moses doesn't produce. Repeat step 4 of Moses training with the option -write-lexical-counts to obtain them.)
                            Only the standard Moses features are recomputed from weighted counts; additional features are linearly interpolated 
                            (see number_of_features to allow more features, and i_e2f etc. if the standard features are in a non-standard position)
                  'interpolate': linear interpolation

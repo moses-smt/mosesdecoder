@@ -38,8 +38,8 @@ namespace Moses
 class Phrase;
 
 /** Implementation of single factor LM using IRST's code.
-* This is the default LM for Moses and is available from the same sourceforge repository
-*/
+ * This is available from the same sourceforge repository
+ */
 class LanguageModelIRST : public LanguageModelPointerState
 {
 protected:
@@ -70,7 +70,7 @@ public:
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
 
-  void CleanUpAfterSentenceProcessing();
+  void CleanUpAfterSentenceProcessing(const InputType& source);
   void InitializeBeforeSentenceProcessing();
 
   void set_dictionary_upperbound(int dub) {

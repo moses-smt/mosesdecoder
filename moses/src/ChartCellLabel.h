@@ -28,6 +28,11 @@ namespace Moses
 
 class Word;
 
+/** Contains a range, word (non-terms?) and a vector of hypotheses.
+ * @todo This is probably incompatible with lattice decoding when the word that spans 
+ *   a position (or positions) can vary.
+ * @todo is this to hold sorted hypotheses that are in the queue for creating the next hypos?
+ */
 class ChartCellLabel
 {
  public:

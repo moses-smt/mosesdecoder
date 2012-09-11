@@ -4,6 +4,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 // TODO: This is too long. Consider creating a function for
 // initialization such as Init().
 InterpolatedScorer::InterpolatedScorer(const string& name, const string& config)
@@ -61,6 +65,17 @@ InterpolatedScorer::InterpolatedScorer(const string& name, const string& config)
   }
   cerr <<endl;
 }
+
+bool InterpolatedScorer::useAlignment() const {
+  //cout << "InterpolatedScorer::useAlignment" << endl;
+  for (vector<Scorer*>::const_iterator itsc =  m_scorers.begin(); itsc < m_scorers.end(); itsc++) {
+    if ((*itsc)->useAlignment()) {
+      //cout <<"InterpolatedScorer::useAlignment Returning true"<<endl;
+      return true;
+    }
+  }
+  return false;
+};
 
 void InterpolatedScorer::setScoreData(ScoreData* data)
 {
@@ -152,11 +167,23 @@ void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
   stringstream buff;
+  string align = text;
+  string sentence = "";
+  size_t alignmentData = text.find("|||");
+  //Get sentence and alignment parts
+  if(alignmentData != string::npos) {
+    getNextPound(align,sentence, "|||");
+  }
+
   int i = 0;
-  for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();
-       itsc != m_scorers.end(); ++itsc) {
+  for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin(); itsc != m_scorers.end(); ++itsc) {
     ScoreStats tempEntry;
-    (*itsc)->prepareStats(sid, text, tempEntry);
+    if ((*itsc)->useAlignment()) {
+      (*itsc)->prepareStats(sid, text, tempEntry);
+    }
+    else {
+      (*itsc)->prepareStats(sid, sentence, tempEntry);
+    }
     if (i > 0) buff <<  " ";
     buff << tempEntry;
     i++;
@@ -195,3 +222,6 @@ void InterpolatedScorer::setFilter(const string& filterCommand)
       m_scorers[i]->setFilter(csplit[i]);
     }
 }
+
+}
+

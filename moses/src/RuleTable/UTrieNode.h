@@ -39,6 +39,7 @@ namespace Moses
 
 class RuleTableUTrie;
 
+//! @todo ask phil williams - whats the diff between this and phrasedictionaryNode
 class UTrieNode
 {
  public:

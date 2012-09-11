@@ -51,6 +51,13 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
   //RemoveAllInColl(m_hypos);
 }
 
+/** public function to add hypothesis to this collection. 
+ * Returns false if equiv hypo exists in collection, otherwise returns true.
+ * Takes care of update arc list for n-best list creation.
+ * Will delete hypo is it exist - once this function is call don't delete hypothesis.
+ * \param hypo hypothesis to add
+ * \param manager pointer back to manager
+ */
 bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)
 {
   if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {
@@ -109,6 +116,11 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
   }
 }
 
+/** add hypothesis to stack. Prune if necessary.
+ * Returns false if equiv hypo exists in collection, otherwise returns true, and the iterator that points to the place where the hypo was added
+ * \param hypo hypothesis to add
+ * \param manager pointer back to manager
+ */
 pair<ChartHypothesisCollection::HCType::iterator, bool> ChartHypothesisCollection::Add(ChartHypothesis *hypo, ChartManager &manager)
 {
   std::pair<HCType::iterator, bool> ret = m_hypos.insert(hypo);
@@ -134,12 +146,16 @@ pair<ChartHypothesisCollection::HCType::iterator, bool> ChartHypothesisCollectio
   return ret;
 }
 
-/** Remove hypothesis pointed to by iterator but don't delete the object. */
+/** Remove hypothesis pointed to by iterator but DOES NOT delete the object. 
+ * \param iter iterator to delete
+ */
 void ChartHypothesisCollection::Detach(const HCType::iterator &iter)
 {
   m_hypos.erase(iter);
 }
 
+/** destroy iterator AND hypothesis pointed to by iterator. If in an object pool, takes care of that too
+ */
 void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
 {
   ChartHypothesis *h = *iter;
@@ -161,6 +177,10 @@ void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
   ChartHypothesis::Delete(h);
 }
 
+/** prune number of hypo to a particular number of hypos, specified by m_maxHypoStackSize, according to score
+  * Don't prune of hypos have identical scores on the boundary, so occasionally number of hypo can remain above m_maxHypoStackSize.
+  * \param manager reference back to manager. Used for collecting stats
+ */
 void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
 {
   if (GetSize() > m_maxHypoStackSize) { // ok, if not over the limit
@@ -232,6 +252,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
   }
 }
 
+//! sort hypothses  by descending score. Put these hypos into a vector m_hyposOrdered to be returned by function GetSortedHypotheses()
 void ChartHypothesisCollection::SortHypotheses()
 {
   CHECK(m_hyposOrdered.empty());
@@ -245,6 +266,7 @@ void ChartHypothesisCollection::SortHypotheses()
   }
 }
 
+//! Call CleanupArcList() for each main hypo in collection
 void ChartHypothesisCollection::CleanupArcList()
 {
   HCType::iterator iter;
@@ -254,6 +276,12 @@ void ChartHypothesisCollection::CleanupArcList()
   }
 }
 
+/** Return all hypos, and all hypos in the arclist, in order to create the output searchgraph, ie. the hypergraph. The output is the debug hypo information.
+ * @todo this is a useful function. Make sure it outputs everything required, especially scores.
+ * \param translationId unique, contiguous id for the input sentence
+ * \param outputSearchGraphStream stream to output the info to
+ * \param reachable @todo don't know
+ */
 void ChartHypothesisCollection::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
 {
   HCType::const_iterator iter;

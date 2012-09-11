@@ -33,6 +33,9 @@ namespace OnDiskPt
 {
 class Vocab;
 
+/* A wrapper around a vocab id, and a boolean indicating whther it is a term or non-term.
+ * Factors can be represented by using a vocab string with | character, eg go|VB
+ */
 class Word
 {
   friend std::ostream& operator<<(std::ostream&, const Word&);

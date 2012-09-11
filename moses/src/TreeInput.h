@@ -8,6 +8,7 @@
 
 namespace Moses
 {
+//! @todo what is this?
 class XMLParseOutput
 {
 public:
@@ -20,6 +21,11 @@ public:
   {}
 };
 
+/** An input to the decoder that represent a parse tree.
+ *  Implemented as a sentence with non-terminal labels over certain ranges.
+ *  This representation doesn't necessarily have to form a tree, it's up to the user to make sure it does if they really want a tree.
+ *  @todo Need to rewrite if you want packed forest, or packed forest over lattice - not sure if can inherit from this
+ */
 class TreeInput : public Sentence
 {
   friend std::ostream& operator<<(std::ostream&, const TreeInput&);

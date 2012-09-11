@@ -4,6 +4,10 @@
 #include <vector>
 #include <string>
 
+namespace MosesTuning
+{
+  
+
 class Scorer;
 
 class ScorerFactory
@@ -17,5 +21,7 @@ private:
   ScorerFactory() {}
   ~ScorerFactory() {}
 };
+
+}
 
 #endif  // MERT_SCORER_FACTORY_H_

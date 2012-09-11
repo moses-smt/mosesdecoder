@@ -31,7 +31,7 @@ Dictionary::Dictionary(size_t numScoreComponent)
 
 Dictionary::~Dictionary() {}
 
-void Dictionary::CleanUp() {}
+void Dictionary::CleanUp(const InputType& source) {}
 
 }
 

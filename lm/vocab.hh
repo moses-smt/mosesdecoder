@@ -141,7 +141,9 @@ class ProbingVocabulary : public base::Vocabulary {
 
     WordIndex Insert(const StringPiece &str);
 
-    void FinishedLoading(ProbBackoff *reorder_vocab);
+    template <class Weights> void FinishedLoading(Weights * /*reorder_vocab*/) {
+      InternalFinishedLoading();
+    }
 
     std::size_t UnkCountChangePadding() const { return 0; }
 
@@ -150,6 +152,8 @@ class ProbingVocabulary : public base::Vocabulary {
     void LoadedBinary(bool have_words, int fd, EnumerateVocab *to);
 
   private:
+    void InternalFinishedLoading();
+
     typedef util::ProbingHashTable<ProbingVocabuaryEntry, util::IdentityHash> Lookup;
 
     Lookup lookup_;

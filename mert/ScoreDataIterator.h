@@ -34,6 +34,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "FeatureDataIterator.h"
 
+namespace MosesTuning
+{
+  
+
 typedef std::vector<float> ScoreDataItem;
 
 class ScoreDataIterator :
@@ -61,5 +65,8 @@ class ScoreDataIterator :
     boost::shared_ptr<util::FilePiece> m_in;
     std::vector<ScoreDataItem> m_next;
 };
+
+}
+
 
 #endif  // MERT_SCORE_DATA_ITERATOR_H_

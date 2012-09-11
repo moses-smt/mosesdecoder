@@ -20,6 +20,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "CreateOnDisk", "CreateOnDis
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "kenlm", "kenlm.vcxproj", "{A5402E0B-6ED7-465C-9669-E4124A0CDDCB}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "mosesserver", "mosesserver.vcxproj", "{85811FDF-8AD1-4490-A545-B2F51931A18C}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -46,6 +48,10 @@ Global
 		{A5402E0B-6ED7-465C-9669-E4124A0CDDCB}.Debug|Win32.Build.0 = Debug|Win32
 		{A5402E0B-6ED7-465C-9669-E4124A0CDDCB}.Release|Win32.ActiveCfg = Release|Win32
 		{A5402E0B-6ED7-465C-9669-E4124A0CDDCB}.Release|Win32.Build.0 = Release|Win32
+		{85811FDF-8AD1-4490-A545-B2F51931A18C}.Debug|Win32.ActiveCfg = Debug|Win32
+		{85811FDF-8AD1-4490-A545-B2F51931A18C}.Debug|Win32.Build.0 = Debug|Win32
+		{85811FDF-8AD1-4490-A545-B2F51931A18C}.Release|Win32.ActiveCfg = Release|Win32
+		{85811FDF-8AD1-4490-A545-B2F51931A18C}.Release|Win32.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

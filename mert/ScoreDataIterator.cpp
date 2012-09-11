@@ -26,6 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace util;
 
+namespace MosesTuning
+{
+  
+
 ScoreDataIterator::ScoreDataIterator() {}
 
 ScoreDataIterator::ScoreDataIterator(const string& filename) {
@@ -85,5 +89,7 @@ bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const {
 
 const vector<ScoreDataItem>& ScoreDataIterator::dereference() const {
   return m_next;
+}
+
 }
 

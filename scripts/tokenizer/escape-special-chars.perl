@@ -22,6 +22,6 @@ while(<STDIN>) {
   s/\]/\&#93;/g;   # syntax non-terminal
   
   # restore xml instructions
-  s/\&lt;(\S+) translation="([^\"]+)"&gt; (.+?) &lt;\/(\S+)&gt;/\<$1 translation=\"$2\"> $3 <\/$4>/g;
+  s/\&lt;(\S+) translation=&quot;(.+?)&quot;&gt; (.+?) &lt;\/(\S+)&gt;/\<$1 translation=\"$2\"> $3 <\/$4>/g;
   print $_."\n";
 }

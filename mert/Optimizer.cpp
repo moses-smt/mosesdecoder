@@ -33,6 +33,10 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 } // namespace
 
+namespace MosesTuning
+{
+  
+
 Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& pos, const vector<parameter_t>& start, unsigned int nrandom)
   : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom), m_positive(pos)
 {
@@ -471,4 +475,6 @@ statscore_t RandomOptimizer::TrueRun(Point& P) const
   statscore_t score = GetStatScore(P);
   P.SetScore(score);
   return score;
+}
+
 }

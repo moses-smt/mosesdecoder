@@ -17,7 +17,9 @@ namespace Moses
 {
 class LexicalReorderingState;
 
-//! Factory class for lexical reordering states
+/** Factory class for lexical reordering states
+ *  @todo There's a lot of classes for lexicalized reordering. Perhaps put them in a separate dir
+ */
 class LexicalReorderingConfiguration
 {
 public:
@@ -108,6 +110,7 @@ protected:
   static const ReorderingType L = 1;  // left
 };
 
+//! @todo what is this?
 class BidirectionalReorderingState : public LexicalReorderingState
 {
 private:
@@ -134,6 +137,7 @@ private:
   WordsRange m_prevRange;
   bool m_first;
 public:
+  static bool m_useFirstBackwardScore;
   PhraseBasedReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset);
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, const TranslationOption &topt);
 

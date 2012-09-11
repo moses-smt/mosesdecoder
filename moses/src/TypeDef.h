@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <string>
 
+//! all the typedefs and enums goes here
+
 #ifdef WIN32
 #include <BaseTsd.h>
 #else
@@ -135,6 +137,8 @@ enum PhraseTableImplementation {
   ,SuffixArray	= 8
   ,Hiero        = 9
   ,ALSuffixArray = 10
+  ,FuzzyMatch    = 11
+  ,Compact      = 12
 };
 
 enum InputTypeEnum {
@@ -168,6 +172,7 @@ enum SearchAlgorithm {
   ,CubePruning	= 1
   ,CubeGrowing	= 2
   ,ChartDecoding= 3
+  ,NormalBatch  = 4
 };
 
 enum SourceLabelOverlap {
@@ -179,6 +184,12 @@ enum SourceLabelOverlap {
 enum WordAlignmentSort {
   NoSort = 0
   ,TargetOrder = 1
+};
+
+enum FormatType
+{
+  MosesFormat
+  ,HieroFormat
 };
 
 // typedef

@@ -14,6 +14,9 @@
 
 extern std::vector<std::string> tokenize( const char*);
 
+namespace MosesTraining
+{
+
 typedef std::string WORD;
 typedef unsigned int WORD_ID;
 
@@ -62,5 +65,7 @@ public:
   void load( const std::string& );
   double get( int );
 };
+
+}
 
 #endif

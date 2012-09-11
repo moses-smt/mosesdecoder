@@ -47,8 +47,11 @@ inline float maybeLogProb( float a ) { return logProbFlag ? log(a) : a; }
 char line[LINE_MAX_LENGTH];
 void processFiles( char*, char*, char*, char* );
 void loadCountOfCounts( char* );
+void breakdownCoreAndSparse( string combined, string &core, string &sparse );
 bool getLine( istream &fileP, vector< string > &item );
 vector< string > splitLine();
+vector< int > countBin;
+bool sparseCountBinFeatureFlag = false;
 
 int main(int argc, char* argv[])
 {
@@ -93,6 +96,20 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--LowCountFeature") == 0) {
       lowCountFlag = true;
       cerr << "including the low count feature\n";
+    } else if (strcmp(argv[i],"--CountBinFeature") == 0 ||
+               strcmp(argv[i],"--SparseCountBinFeature") == 0) {
+      if (strcmp(argv[i],"--SparseCountBinFeature") == 0)
+        sparseCountBinFeatureFlag = true;
+      cerr << "include "<< (sparseCountBinFeatureFlag ? "sparse " : "") << "count bin feature:";
+      int prev = 0;
+      while(i+1<argc && argv[i+1][0]>='0' && argv[i+1][0]<='9') {
+        int binCount = atoi(argv[++i]);
+        countBin.push_back( binCount );
+        if (prev+1 == binCount) { cerr << " " << binCount; }
+        else { cerr << " " << (prev+1) << "-" << binCount; }
+        prev = binCount;
+      }
+      cerr << " " << (prev+1) << "+\n";
     } else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
@@ -211,10 +228,13 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     }
 
     // output hierarchical phrase pair (with separated labels)
-    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1];
+    fileConsolidated << itemDirect[0] << " ||| " << itemDirect[1] << " |||";
 
     // SCORES ...
-    fileConsolidated << " |||";
+    string directScores, directSparseScores, indirectScores, indirectSparseScores;
+    breakdownCoreAndSparse( itemDirect[2], directScores, directSparseScores );
+    breakdownCoreAndSparse( itemIndirect[2], indirectScores, indirectSparseScores );
+
     vector<string> directCounts = tokenize(itemDirect[4].c_str());
     vector<string> indirectCounts = tokenize(itemIndirect[4].c_str());
     float countF = atof(directCounts[0].c_str());
@@ -252,12 +272,12 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // prob indirect
     if (!onlyDirectFlag) {
       fileConsolidated << " " << maybeLogProb(adjustedCountEF_indirect/countE);
-      fileConsolidated << " " << itemIndirect[2];
+      fileConsolidated << " " << directScores;
     }
 
     // prob direct
     fileConsolidated << " " << maybeLogProb(adjustedCountEF/countF);
-    fileConsolidated << " " << itemDirect[2];
+    fileConsolidated << " " << indirectScores;
 
     // phrase count feature
     if (phraseCountFlag) {
@@ -267,6 +287,21 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // low count feature
     if (lowCountFlag) {
       fileConsolidated << " " << maybeLogProb(exp(-1.0/countEF));
+    }
+
+    // count bin feature (as a core feature)
+    if (countBin.size()>0 && !sparseCountBinFeatureFlag) {
+      bool foundBin = false;
+      for(size_t i=0; i < countBin.size(); i++) {
+        if (!foundBin && countEF <= countBin[i]) {
+          fileConsolidated << " " << maybeLogProb(2.718);
+          foundBin = true;
+        }
+        else {
+          fileConsolidated << " " << maybeLogProb(1);
+        }
+      }
+      fileConsolidated << " " << maybeLogProb( foundBin ? 1 : 2.718 );   
     }
 
     // alignment
@@ -280,6 +315,35 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
       fileConsolidated << " ||| " << itemDirect[5];
     }
     
+    // count bin feature (as a sparse feature)
+    if (sparseCountBinFeatureFlag || 
+        directSparseScores.compare("") != 0 || 
+        indirectSparseScores.compare("") != 0)
+    {
+      fileConsolidated << " |||";
+      if (directSparseScores.compare("") != 0)
+        fileConsolidated << " " << directSparseScores;
+      if (indirectSparseScores.compare("") != 0)
+        fileConsolidated << " " << indirectSparseScores;
+      if (sparseCountBinFeatureFlag) {
+        bool foundBin = false;
+        for(size_t i=0; i < countBin.size(); i++) {
+          if (!foundBin && countEF <= countBin[i]) {
+            fileConsolidated << " cb_";
+            if (i == 0 && countBin[i] > 1)
+              fileConsolidated << "1_";
+            else if (i > 0 && countBin[i-1]+1 < countBin[i])
+              fileConsolidated << (countBin[i-1]+1) << "_";
+            fileConsolidated << countBin[i] << " 1";
+            foundBin = true;
+          }
+        }
+        if (!foundBin) {
+          fileConsolidated << " cb_max 1";
+        }
+      }
+    }
+
     fileConsolidated << endl;
   }
   fileDirect.Close();
@@ -287,6 +351,22 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
   fileConsolidated.Close();
 }
 
+void breakdownCoreAndSparse( string combined, string &core, string &sparse ) 
+{
+  core = "";
+  sparse = "";
+  vector<string> score = tokenize( combined.c_str() );
+  for(size_t i=0; i<score.size(); i++) {
+    if ((score[i][0] >= '0' && score[i][0] <= '9') || i+1 == score.size()) 
+      core += " " + score[i];
+    else {
+      sparse += " " + score[i];
+      sparse += " " + score[++i];
+    }
+  }
+  if (core.size() > 0 ) core = core.substr(1);
+  if (sparse.size() > 0 ) sparse = sparse.substr(1);
+}
 
 bool getLine( istream &fileP, vector< string > &item )
 {
@@ -305,7 +385,6 @@ bool getLine( istream &fileP, vector< string > &item )
 vector< string > splitLine()
 {
   vector< string > item;
-  bool betweenWords = true;
   int start=0;
   int i=0;
   for(; line[i] != '\0'; i++) {

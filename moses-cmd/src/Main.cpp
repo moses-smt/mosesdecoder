@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Manager.h"
 #include "StaticData.h"
 #include "Util.h"
+#include "Timer.h"
 #include "mbr.h"
 #include "ThreadPool.h"
 #include "TranslationAnalysis.h"
@@ -50,7 +51,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 using namespace Moses;
+using namespace MosesCmd;
 
+namespace MosesCmd
+{
 // output floats with three significant digits
 static const size_t PRECISION = 3;
 
@@ -93,6 +97,8 @@ public:
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 
+    Timer translationTime;
+    translationTime.start();
     // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
     // input sentence
@@ -103,7 +109,7 @@ public:
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
-    Manager manager(*m_source,staticData.GetSearchAlgorithm(), &system);
+    Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();
 
     // output word graph
@@ -267,6 +273,8 @@ public:
       PrintUserTime("Sentence Decoding Time:");
     }
     manager.CalcDecoderStatistics();
+
+    VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
   }
 
   ~TranslationTask() {
@@ -323,6 +331,8 @@ static void ShowWeights()
   }
 }
 
+} //namespace
+
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
 {
@@ -347,14 +357,13 @@ int main(int argc, char** argv)
     // (stores them as strings, or array of strings)
     Parameter* params = new Parameter();
     if (!params->LoadParam(argc,argv)) {
-      params->Explain();
       exit(1);
     }
   
   
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
-    if (!StaticData::LoadDataStatic(params)) {
+    if (!StaticData::LoadDataStatic(params, argv[0])) {
       exit(1);
     }
   
@@ -372,7 +381,7 @@ int main(int argc, char** argv)
     srand(time(NULL));
   
     // set up read/writing class
-    IOWrapper* ioWrapper = GetIODevice(staticData);
+    IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);

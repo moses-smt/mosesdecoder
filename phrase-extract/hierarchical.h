@@ -14,6 +14,9 @@
 #include <set>
 #include <vector>
 
+namespace MosesTraining
+{
+
 // HPhraseVertex represents a point in the alignment matrix
 typedef std::pair <int, int> HPhraseVertex;
 
@@ -29,5 +32,6 @@ typedef std::vector < HPhrase > HPhraseVector;
 // The key of the std::map is the English index and the value is a std::set of the foreign ones
 typedef std::map <int, std::set<int> > HSenteceVertices;
 
+} // namespace
 
 #endif /* HIERARCHICAL_H_ */

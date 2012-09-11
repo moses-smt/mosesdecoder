@@ -17,6 +17,9 @@
 #include "Permutation.h"
 #include "StatisticsBasedScorer.h"
 
+namespace MosesTuning
+{
+  
 /**
   * Permutation
  **/
@@ -60,6 +63,8 @@ private:
 };
 //TODO need to read in floats for scores - necessary for selecting mean reference strategy and for BLEU?
 
+}
 
 #endif //__PERMUTATIONSCORER_H
+
 

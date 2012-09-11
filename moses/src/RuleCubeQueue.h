@@ -31,8 +31,9 @@ namespace Moses
 
 class ChartManager;
 
-// Define an ordering between RuleCube based on their best item scores.  This
-// is used to order items in the priority queue.
+/** Define an ordering between RuleCube based on their best item scores.  This
+ * is used to order items in the priority queue.
+ */
 class RuleCubeOrderer
 {
  public:
@@ -41,6 +42,7 @@ class RuleCubeOrderer
   }
 };
 
+/** @todo how is this used */
 class RuleCubeQueue
 {
  public:

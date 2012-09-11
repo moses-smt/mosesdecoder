@@ -30,6 +30,7 @@ namespace OnDiskPt
 class OnDiskWrapper;
 class SourcePhrase;
 
+/** A node in the source tree trie */
 class PhraseNode
 {
   friend std::ostream& operator<<(std::ostream&, const PhraseNode&);

@@ -6,6 +6,10 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+  
+
 StreamingHypPackEnumerator::StreamingHypPackEnumerator
 (
  vector<std::string> const& featureFiles,
@@ -40,6 +44,7 @@ size_t StreamingHypPackEnumerator::num_dense() const {
 
 void StreamingHypPackEnumerator::prime(){
   m_current_indexes.clear();
+  m_current_featureVectors.clear();
   boost::unordered_set<FeatureDataItem> seen;
   m_primed = true;
   
@@ -57,7 +62,7 @@ void StreamingHypPackEnumerator::prime(){
       exit(1);
     }
     for (size_t j = 0; j < m_featureDataIters[i]->size(); ++j) {
-      FeatureDataItem item = m_featureDataIters[i]->operator[](j);
+      const FeatureDataItem& item = m_featureDataIters[i]->operator[](j);
       // Dedup
       if(seen.find(item)==seen.end()) {
         seen.insert(item);
@@ -73,6 +78,7 @@ void StreamingHypPackEnumerator::prime(){
         }
         // Store item for retrieval
         m_current_indexes.push_back(pair<size_t,size_t>(i,j));
+	m_current_featureVectors.push_back(MiraFeatureVector(item));
       }
     }
   }
@@ -103,6 +109,7 @@ void StreamingHypPackEnumerator::next(){
     ++m_scoreDataIters[i];
   }
   m_sentenceId++;
+  if(m_sentenceId % 100 == 0) cerr << ".";
   if(!finished()) prime();
 }
 
@@ -114,13 +121,12 @@ size_t StreamingHypPackEnumerator::cur_size(){
   return m_current_indexes.size();
 }
 
-const FeatureDataItem& StreamingHypPackEnumerator::featuresAt(size_t index){
+const MiraFeatureVector& StreamingHypPackEnumerator::featuresAt(size_t index){
   if(!m_primed) {
     cerr << "Querying features from an unprimed HypPackEnumerator" << endl;
     exit(1);
   }
-  const pair<size_t,size_t>& pij = m_current_indexes[index];
-  return m_featureDataIters[pij.first]->operator[](pij.second);
+  return m_current_featureVectors[index];
 }
 
 const ScoreDataItem& StreamingHypPackEnumerator::scoresAt(size_t index) {
@@ -132,6 +138,10 @@ const ScoreDataItem& StreamingHypPackEnumerator::scoresAt(size_t index) {
   return m_scoreDataIters[pij.first]->operator[](pij.second);
 }
 
+size_t StreamingHypPackEnumerator::cur_id() {
+  return m_sentenceId;
+}
+
 /* --------- RandomAccessHypPackEnumerator ------------- */
 
 RandomAccessHypPackEnumerator::RandomAccessHypPackEnumerator(vector<string> const& featureFiles,
@@ -141,7 +151,7 @@ RandomAccessHypPackEnumerator::RandomAccessHypPackEnumerator(vector<string> cons
   StreamingHypPackEnumerator train(featureFiles,scoreFiles);
   size_t index=0;
   for(train.reset(); !train.finished(); train.next()) {
-    m_features.push_back(vector<FeatureDataItem>());
+    m_features.push_back(vector<MiraFeatureVector>());
     m_scores.push_back(vector<ScoreDataItem>());
     for(size_t j=0;j<train.cur_size();j++) {
       m_features.back().push_back(train.featuresAt(j));
@@ -174,16 +184,20 @@ size_t RandomAccessHypPackEnumerator::cur_size() {
   assert(m_features[m_indexes[m_cur_index]].size()==m_scores[m_indexes[m_cur_index]].size());
   return m_features[m_indexes[m_cur_index]].size();
 }
-const FeatureDataItem& RandomAccessHypPackEnumerator::featuresAt(size_t i) {
+const MiraFeatureVector& RandomAccessHypPackEnumerator::featuresAt(size_t i) {
   return m_features[m_indexes[m_cur_index]][i];
 }
 const ScoreDataItem& RandomAccessHypPackEnumerator::scoresAt(size_t i) {
   return m_scores[m_indexes[m_cur_index]][i];
 }
 
-  
+size_t RandomAccessHypPackEnumerator::cur_id() {
+  return m_indexes[m_cur_index];
+}  
 // --Emacs trickery--
 // Local Variables:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}

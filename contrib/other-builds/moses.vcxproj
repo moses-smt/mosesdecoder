@@ -13,6 +13,7 @@
   <ItemGroup>
     <ClInclude Include="..\..\moses\src\AlignmentInfo.h" />
     <ClInclude Include="..\..\moses\src\AlignmentInfoCollection.h" />
+    <ClInclude Include="..\..\moses\src\BilingualDynSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\BitmapContainer.h" />
     <ClInclude Include="..\..\moses\src\CellCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartCell.h" />
@@ -22,9 +23,6 @@
     <ClInclude Include="..\..\moses\src\ChartHypothesis.h" />
     <ClInclude Include="..\..\moses\src\ChartHypothesisCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartManager.h" />
-    <ClInclude Include="..\..\moses\src\ChartRuleLookupManager.h" />
-    <ClInclude Include="..\..\moses\src\ChartRuleLookupManagerMemory.h" />
-    <ClInclude Include="..\..\moses\src\ChartRuleLookupManagerOnDisk.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOption.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOptionCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOptionList.h" />
@@ -34,16 +32,24 @@
     <ClInclude Include="..\..\moses\src\ChartTrellisPath.h" />
     <ClInclude Include="..\..\moses\src\ChartTrellisPathList.h" />
     <ClInclude Include="..\..\moses\src\ConfusionNet.h" />
+    <ClInclude Include="..\..\moses\src\CYKPlusParser\ChartRuleLookupManagerCYKPlus.h" />
+    <ClInclude Include="..\..\moses\src\CYKPlusParser\ChartRuleLookupManagerMemory.h" />
+    <ClInclude Include="..\..\moses\src\CYKPlusParser\ChartRuleLookupManagerOnDisk.h" />
+    <ClInclude Include="..\..\moses\src\CYKPlusParser\DotChart.h" />
+    <ClInclude Include="..\..\moses\src\CYKPlusParser\DotChartInMemory.h" />
+    <ClInclude Include="..\..\moses\src\CYKPlusParser\DotChartOnDisk.h" />
     <ClInclude Include="..\..\moses\src\DecodeFeature.h" />
     <ClInclude Include="..\..\moses\src\DecodeGraph.h" />
     <ClInclude Include="..\..\moses\src\DecodeStep.h" />
     <ClInclude Include="..\..\moses\src\DecodeStepGeneration.h" />
     <ClInclude Include="..\..\moses\src\DecodeStepTranslation.h" />
     <ClInclude Include="..\..\moses\src\Dictionary.h" />
-    <ClInclude Include="..\..\moses\src\DotChart.h" />
-    <ClInclude Include="..\..\moses\src\DotChartInMemory.h" />
-    <ClInclude Include="..\..\moses\src\DotChartOnDisk.h" />
     <ClInclude Include="..\..\moses\src\DummyScoreProducers.h" />
+    <ClInclude Include="..\..\moses\src\DynSAInclude\file.h" />
+    <ClInclude Include="..\..\moses\src\DynSAInclude\FileHandler.h" />
+    <ClInclude Include="..\..\moses\src\DynSAInclude\onlineRLM.h" />
+    <ClInclude Include="..\..\moses\src\DynSAInclude\quantizer.h" />
+    <ClInclude Include="..\..\moses\src\DynSAInclude\vocab.h" />
     <ClInclude Include="..\..\moses\src\DynSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\Factor.h" />
     <ClInclude Include="..\..\moses\src\FactorCollection.h" />
@@ -73,6 +79,7 @@
     <ClInclude Include="..\..\moses\src\LM\Joint.h" />
     <ClInclude Include="..\..\moses\src\LM\Ken.h" />
     <ClInclude Include="..\..\moses\src\LM\MultiFactor.h" />
+    <ClInclude Include="..\..\moses\src\LM\ORLM.h" />
     <ClInclude Include="..\..\moses\src\LM\SingleFactor.h" />
     <ClInclude Include="..\..\moses\src\LVoc.h" />
     <ClInclude Include="..\..\moses\src\Manager.h" />
@@ -85,13 +92,9 @@
     <ClInclude Include="..\..\moses\src\PDTAimp.h" />
     <ClInclude Include="..\..\moses\src\Phrase.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionary.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionaryALSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryDynSuffixArray.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryMemory.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryNode.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionaryNodeSCFG.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionaryOnDisk.h" />
-    <ClInclude Include="..\..\moses\src\PhraseDictionarySCFG.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryTree.h" />
     <ClInclude Include="..\..\moses\src\PhraseDictionaryTreeAdaptor.h" />
     <ClInclude Include="..\..\moses\src\PrefixTree.h" />
@@ -106,13 +109,29 @@
     <ClInclude Include="..\..\moses\src\RuleTable\LoaderFactory.h" />
     <ClInclude Include="..\..\moses\src\RuleTable\LoaderHiero.h" />
     <ClInclude Include="..\..\moses\src\RuleTable\LoaderStandard.h" />
+    <ClInclude Include="..\..\moses\src\RuleTable\PhraseDictionaryALSuffixArray.h" />
+    <ClInclude Include="..\..\moses\src\RuleTable\PhraseDictionaryNodeSCFG.h" />
+    <ClInclude Include="..\..\moses\src\RuleTable\PhraseDictionaryOnDisk.h" />
+    <ClInclude Include="..\..\moses\src\RuleTable\PhraseDictionarySCFG.h" />
     <ClInclude Include="..\..\moses\src\RuleTable\Trie.h" />
+    <ClInclude Include="..\..\moses\src\RuleTable\UTrie.h" />
+    <ClInclude Include="..\..\moses\src\RuleTable\UTrieNode.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\ApplicableRuleTrie.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\IntermediateVarSpanNode.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\Parser.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\SentenceMap.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\StackLattice.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\StackLatticeBuilder.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\StackLatticeSearcher.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\VarSpanNode.h" />
+    <ClInclude Include="..\..\moses\src\Scope3Parser\VarSpanTrieBuilder.h" />
     <ClInclude Include="..\..\moses\src\ScoreComponentCollection.h" />
     <ClInclude Include="..\..\moses\src\ScoreIndexManager.h" />
     <ClInclude Include="..\..\moses\src\ScoreProducer.h" />
     <ClInclude Include="..\..\moses\src\Search.h" />
     <ClInclude Include="..\..\moses\src\SearchCubePruning.h" />
     <ClInclude Include="..\..\moses\src\SearchNormal.h" />
+    <ClInclude Include="..\..\moses\src\SearchNormalBatch.h" />
     <ClInclude Include="..\..\moses\src\Sentence.h" />
     <ClInclude Include="..\..\moses\src\SentenceStats.h" />
     <ClInclude Include="..\..\moses\src\SquareMatrix.h" />
@@ -144,15 +163,13 @@
   <ItemGroup>
     <ClCompile Include="..\..\moses\src\AlignmentInfo.cpp" />
     <ClCompile Include="..\..\moses\src\AlignmentInfoCollection.cpp" />
+    <ClCompile Include="..\..\moses\src\BilingualDynSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\BitmapContainer.cpp" />
     <ClCompile Include="..\..\moses\src\ChartCell.cpp" />
     <ClCompile Include="..\..\moses\src\ChartCellCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartHypothesis.cpp" />
     <ClCompile Include="..\..\moses\src\ChartHypothesisCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartManager.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartRuleLookupManager.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartRuleLookupManagerMemory.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartRuleLookupManagerOnDisk.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOption.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOptionCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOptionList.cpp" />
@@ -161,16 +178,20 @@
     <ClCompile Include="..\..\moses\src\ChartTrellisNode.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTrellisPath.cpp" />
     <ClCompile Include="..\..\moses\src\ConfusionNet.cpp" />
+    <ClCompile Include="..\..\moses\src\CYKPlusParser\ChartRuleLookupManagerCYKPlus.cpp" />
+    <ClCompile Include="..\..\moses\src\CYKPlusParser\ChartRuleLookupManagerMemory.cpp" />
+    <ClCompile Include="..\..\moses\src\CYKPlusParser\ChartRuleLookupManagerOnDisk.cpp" />
+    <ClCompile Include="..\..\moses\src\CYKPlusParser\DotChartInMemory.cpp" />
+    <ClCompile Include="..\..\moses\src\CYKPlusParser\DotChartOnDisk.cpp" />
     <ClCompile Include="..\..\moses\src\DecodeFeature.cpp" />
     <ClCompile Include="..\..\moses\src\DecodeGraph.cpp" />
     <ClCompile Include="..\..\moses\src\DecodeStep.cpp" />
     <ClCompile Include="..\..\moses\src\DecodeStepGeneration.cpp" />
     <ClCompile Include="..\..\moses\src\DecodeStepTranslation.cpp" />
     <ClCompile Include="..\..\moses\src\Dictionary.cpp" />
-    <ClCompile Include="..\..\moses\src\DotChart.cpp" />
-    <ClCompile Include="..\..\moses\src\DotChartInMemory.cpp" />
-    <ClCompile Include="..\..\moses\src\DotChartOnDisk.cpp" />
     <ClCompile Include="..\..\moses\src\DummyScoreProducers.cpp" />
+    <ClCompile Include="..\..\moses\src\DynSAInclude\FileHandler.cpp" />
+    <ClCompile Include="..\..\moses\src\DynSAInclude\vocab.cpp" />
     <ClCompile Include="..\..\moses\src\DynSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\Factor.cpp" />
     <ClCompile Include="..\..\moses\src\FactorCollection.cpp" />
@@ -198,6 +219,7 @@
     <ClCompile Include="..\..\moses\src\LM\Joint.cpp" />
     <ClCompile Include="..\..\moses\src\LM\Ken.cpp" />
     <ClCompile Include="..\..\moses\src\LM\MultiFactor.cpp" />
+    <ClCompile Include="..\..\moses\src\LM\ORLM.cpp" />
     <ClCompile Include="..\..\moses\src\LM\SingleFactor.cpp" />
     <ClCompile Include="..\..\moses\src\LVoc.cpp" />
     <ClCompile Include="..\..\moses\src\Manager.cpp" />
@@ -207,13 +229,9 @@
     <ClCompile Include="..\..\moses\src\PCNTools.cpp" />
     <ClCompile Include="..\..\moses\src\Phrase.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionary.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionaryALSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryDynSuffixArray.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryMemory.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryNode.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionaryNodeSCFG.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionaryOnDisk.cpp" />
-    <ClCompile Include="..\..\moses\src\PhraseDictionarySCFG.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryTree.cpp" />
     <ClCompile Include="..\..\moses\src\PhraseDictionaryTreeAdaptor.cpp" />
     <ClCompile Include="..\..\moses\src\PrefixTreeMap.cpp" />
@@ -226,13 +244,24 @@
     <ClCompile Include="..\..\moses\src\RuleTable\LoaderFactory.cpp" />
     <ClCompile Include="..\..\moses\src\RuleTable\LoaderHiero.cpp" />
     <ClCompile Include="..\..\moses\src\RuleTable\LoaderStandard.cpp" />
+    <ClCompile Include="..\..\moses\src\RuleTable\PhraseDictionaryALSuffixArray.cpp" />
+    <ClCompile Include="..\..\moses\src\RuleTable\PhraseDictionaryNodeSCFG.cpp" />
+    <ClCompile Include="..\..\moses\src\RuleTable\PhraseDictionaryOnDisk.cpp" />
+    <ClCompile Include="..\..\moses\src\RuleTable\PhraseDictionarySCFG.cpp" />
     <ClCompile Include="..\..\moses\src\RuleTable\Trie.cpp" />
+    <ClCompile Include="..\..\moses\src\RuleTable\UTrie.cpp" />
+    <ClCompile Include="..\..\moses\src\RuleTable\UTrieNode.cpp" />
+    <ClCompile Include="..\..\moses\src\Scope3Parser\ApplicableRuleTrie.cpp" />
+    <ClCompile Include="..\..\moses\src\Scope3Parser\Parser.cpp" />
+    <ClCompile Include="..\..\moses\src\Scope3Parser\StackLatticeBuilder.cpp" />
+    <ClCompile Include="..\..\moses\src\Scope3Parser\VarSpanTrieBuilder.cpp" />
     <ClCompile Include="..\..\moses\src\ScoreComponentCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ScoreIndexManager.cpp" />
     <ClCompile Include="..\..\moses\src\ScoreProducer.cpp" />
     <ClCompile Include="..\..\moses\src\Search.cpp" />
     <ClCompile Include="..\..\moses\src\SearchCubePruning.cpp" />
     <ClCompile Include="..\..\moses\src\SearchNormal.cpp" />
+    <ClCompile Include="..\..\moses\src\SearchNormalBatch.cpp" />
     <ClCompile Include="..\..\moses\src\Sentence.cpp" />
     <ClCompile Include="..\..\moses\src\SentenceStats.cpp" />
     <ClCompile Include="..\..\moses\src\SquareMatrix.cpp" />
@@ -257,6 +286,9 @@
     <ClCompile Include="..\..\moses\src\WordsBitmap.cpp" />
     <ClCompile Include="..\..\moses\src\WordsRange.cpp" />
     <ClCompile Include="..\..\moses\src\XmlOption.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="..\..\util\file.hh" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{8122157A-0DE5-44FF-8E5B-024ED6ACE7AF}</ProjectGuid>
@@ -289,17 +321,17 @@
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\boost\boost_1_47;$(IncludePath)</IncludePath>
-    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\boost\boost_1_47;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\boost\boost_1_47;C:\GnuWin32\include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\boost\boost_1_47;C:\GnuWin32\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;_DEBUG;_CONSOLE;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>
@@ -314,9 +346,9 @@
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
-      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
-      <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <AdditionalIncludeDirectories>C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <PrecompiledHeader>
       </PrecompiledHeader>
       <WarningLevel>Level3</WarningLevel>

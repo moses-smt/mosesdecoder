@@ -10,14 +10,17 @@
 #include "Types.h"
 #include "ScoreData.h"
 
-class PreProcessFilter;
-class ScoreStats;
-
 namespace mert {
 
 class Vocabulary;
 
 } // namespace mert
+
+namespace MosesTuning
+{
+  
+class PreProcessFilter;
+class ScoreStats;
 
 enum ScorerRegularisationStrategy {REG_NONE, REG_AVERAGE, REG_MINIMUM};
 
@@ -99,6 +102,15 @@ class Scorer
   virtual void setScoreData(ScoreData* data) {
     m_score_data = data;
   }
+
+  /**
+   * The scorer returns if it uses the reference alignment data
+   * for permutation distance scores
+   **/
+  virtual bool useAlignment() const {
+    //cout << "Scorer::useAlignment returning false " << endl;
+    return false;
+  };
 
   /**
    * Set the factors, which should be used for this metric
@@ -193,5 +205,6 @@ namespace {
   
 } // namespace
 
+}
 
 #endif // MERT_SCORER_H_

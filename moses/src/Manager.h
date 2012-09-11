@@ -24,7 +24,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 #include <list>
-#include <ctime>
 #include "InputType.h"
 #include "Hypothesis.h"
 #include "StaticData.h"
@@ -59,7 +58,7 @@ struct SearchGraphNode {
 
 };
 
-/** The Manager class implements a stack decoding algorithm.
+/** The Manager class implements a stack decoding algorithm for phrase-based decoding
  * Hypotheses are organized in stacks. One stack contains all hypothesis that have
  * the same number of foreign words translated.  The data structure for hypothesis
  * stacks is the class HypothesisStack. The data structure for a hypothesis
@@ -101,7 +100,6 @@ protected:
   Search *m_search;
 
   HypothesisStack* actual_hypoStack; /**actual (full expanded) stack of hypotheses*/
-  clock_t m_start; /**< starting time, used for logging */
   size_t interrupted_flag;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   int m_hypoId; //used to number the hypos as they are created.
@@ -115,8 +113,9 @@ protected:
 
 
 public:
+  size_t m_lineNumber;
   InputType const& m_source; /**< source sentence to be translated */
-  Manager(InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system);
+  Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
   const TranslationSystem* GetTranslationSystem() {

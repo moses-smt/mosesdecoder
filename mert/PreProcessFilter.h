@@ -3,6 +3,10 @@
 
 #include <string>
 
+namespace MosesTuning
+{
+  
+
 class ofdstream;
 class ifdstream;
 
@@ -21,5 +25,7 @@ private:
     ofdstream* m_toFilter;
     ifdstream* m_fromFilter;
 };
+
+}
 
 #endif  // MERT_PREPROCESSFILTER_H_

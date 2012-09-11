@@ -15,6 +15,10 @@
 #include <vector>
 #include <boost/spirit/home/support/detail/lexer/runtime_error.hpp>
 
+namespace MosesTuning
+{
+  
+
 /**
  * Abstract base class for scorers that work by using sentence level
  * statistics eg. permutation distance metrics **/
@@ -79,5 +83,6 @@ protected:
 };
 
 
+}
 
 #endif

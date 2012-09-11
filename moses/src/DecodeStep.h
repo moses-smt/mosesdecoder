@@ -39,7 +39,7 @@ class FactorCollection;
 class InputType;
 class TranslationSystem;
 
-/*! Specification for a decoding step.
+/** Specification for a decoding step.
  * The factored translation model consists of Translation and Generation
  * steps, which consult a Dictionary of phrase translations or word
  * generations. This class implements the specification for one of these
