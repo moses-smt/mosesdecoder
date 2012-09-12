@@ -21,5 +21,5 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
                 vector[string]& wa)
 
 cdef extern from 'Util.h' namespace 'Moses':
-    cdef vector[string] Tokenize(string& text, string& delimiters)
+    cdef vector[string] Tokenize(char* text, char* delimiters)
 

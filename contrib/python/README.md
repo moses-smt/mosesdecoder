@@ -2,14 +2,11 @@
 
 The idea is to have some of Moses' internals exposed to Python (inspired by pycdec).
 
----
 ## What's been interfaced?
 
 * Binary phrase table:
 
         Moses::PhraseDictionaryTree.h
-
----
 
 ## Building
 1.  Compile the cython code
