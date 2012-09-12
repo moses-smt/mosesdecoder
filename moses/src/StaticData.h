@@ -55,6 +55,7 @@ class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseDictionaryFeature;
 class SpanLengthFeature;
+class CrossingFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
@@ -84,6 +85,7 @@ protected:
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   SpanLengthFeature*      m_spanLengthFeature;
+  CrossingFeature*        m_crossingFeature;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
@@ -233,6 +235,7 @@ protected:
 	bool LoadSyntacticLanguageModel();
 #endif
   bool LoadSpanLengthFeature();
+  bool LoadCrossingFeature();
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
@@ -637,9 +640,9 @@ public:
   const std::string &GetBinDirectory() const;
 
   const SpanLengthFeature *GetSpanLengthFeature() const
-  {
-      return m_spanLengthFeature;
-  }
+  { return m_spanLengthFeature; }
+  const CrossingFeature *GetCrossingFeature() const
+  { return m_crossingFeature; }
 
 };
 

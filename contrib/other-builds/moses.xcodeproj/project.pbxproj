@@ -15,6 +15,8 @@
 		1E0BA41915B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h */; };
 		1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */; };
 		1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1D823F15AC29BB00FE42E9 /* FileHandler.h */; };
+		1E3393E31600C560001A4DF4 /* CrossingFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3393E11600C55F001A4DF4 /* CrossingFeature.cpp */; };
+		1E3393E41600C560001A4DF4 /* CrossingFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3393E21600C560001A4DF4 /* CrossingFeature.h */; };
 		1E619EA115B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E619E9F15B8713600C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp */; };
 		1E619EA215B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E619EA015B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h */; };
 		1E6D9FD615D027560064D436 /* BlockHashIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D9FBD15D027560064D436 /* BlockHashIndex.cpp */; };
@@ -22,7 +24,6 @@
 		1E6D9FD815D027560064D436 /* CanonicalHuffman.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6D9FBF15D027560064D436 /* CanonicalHuffman.h */; };
 		1E6D9FD915D027560064D436 /* CmphStringVectorAdapter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D9FC015D027560064D436 /* CmphStringVectorAdapter.cpp */; };
 		1E6D9FDA15D027560064D436 /* CmphStringVectorAdapter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6D9FC115D027560064D436 /* CmphStringVectorAdapter.h */; };
-		1E6D9FDB15D027560064D436 /* ConsistantPhrases.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6D9FC215D027560064D436 /* ConsistantPhrases.h */; };
 		1E6D9FDD15D027560064D436 /* LexicalReorderingTableCompact.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D9FC415D027560064D436 /* LexicalReorderingTableCompact.cpp */; };
 		1E6D9FDE15D027560064D436 /* LexicalReorderingTableCompact.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E6D9FC515D027560064D436 /* LexicalReorderingTableCompact.h */; };
 		1E6D9FDF15D027560064D436 /* LexicalReorderingTableCreator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D9FC615D027560064D436 /* LexicalReorderingTableCreator.cpp */; };
@@ -351,6 +352,8 @@
 		1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryFuzzyMatch.h; path = ../../moses/src/RuleTable/PhraseDictionaryFuzzyMatch.h; sourceTree = "<group>"; };
 		1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileHandler.cpp; sourceTree = "<group>"; };
 		1E1D823F15AC29BB00FE42E9 /* FileHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHandler.h; sourceTree = "<group>"; };
+		1E3393E11600C55F001A4DF4 /* CrossingFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CrossingFeature.cpp; path = ../../moses/src/CrossingFeature.cpp; sourceTree = "<group>"; };
+		1E3393E21600C560001A4DF4 /* CrossingFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CrossingFeature.h; path = ../../moses/src/CrossingFeature.h; sourceTree = "<group>"; };
 		1E619E9F15B8713600C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemoryPerSentence.cpp; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp; sourceTree = "<group>"; };
 		1E619EA015B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemoryPerSentence.h; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h; sourceTree = "<group>"; };
 		1E6D9FBD15D027560064D436 /* BlockHashIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlockHashIndex.cpp; path = ../../moses/src/CompactPT/BlockHashIndex.cpp; sourceTree = "<group>"; };
@@ -358,7 +361,6 @@
 		1E6D9FBF15D027560064D436 /* CanonicalHuffman.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CanonicalHuffman.h; path = ../../moses/src/CompactPT/CanonicalHuffman.h; sourceTree = "<group>"; };
 		1E6D9FC015D027560064D436 /* CmphStringVectorAdapter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CmphStringVectorAdapter.cpp; path = ../../moses/src/CompactPT/CmphStringVectorAdapter.cpp; sourceTree = "<group>"; };
 		1E6D9FC115D027560064D436 /* CmphStringVectorAdapter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CmphStringVectorAdapter.h; path = ../../moses/src/CompactPT/CmphStringVectorAdapter.h; sourceTree = "<group>"; };
-		1E6D9FC215D027560064D436 /* ConsistantPhrases.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ConsistantPhrases.h; path = ../../moses/src/CompactPT/ConsistantPhrases.h; sourceTree = "<group>"; };
 		1E6D9FC415D027560064D436 /* LexicalReorderingTableCompact.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingTableCompact.cpp; path = ../../moses/src/CompactPT/LexicalReorderingTableCompact.cpp; sourceTree = "<group>"; };
 		1E6D9FC515D027560064D436 /* LexicalReorderingTableCompact.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LexicalReorderingTableCompact.h; path = ../../moses/src/CompactPT/LexicalReorderingTableCompact.h; sourceTree = "<group>"; };
 		1E6D9FC615D027560064D436 /* LexicalReorderingTableCreator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LexicalReorderingTableCreator.cpp; path = ../../moses/src/CompactPT/LexicalReorderingTableCreator.cpp; sourceTree = "<group>"; };
@@ -705,6 +707,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1E3393E11600C55F001A4DF4 /* CrossingFeature.cpp */,
+				1E3393E21600C560001A4DF4 /* CrossingFeature.h */,
 				1EC735D314B977AA00238410 /* AlignmentInfo.cpp */,
 				1EC735D414B977AA00238410 /* AlignmentInfo.h */,
 				1EC735D514B977AA00238410 /* AlignmentInfoCollection.cpp */,
@@ -944,7 +948,6 @@
 				1E6D9FBF15D027560064D436 /* CanonicalHuffman.h */,
 				1E6D9FC015D027560064D436 /* CmphStringVectorAdapter.cpp */,
 				1E6D9FC115D027560064D436 /* CmphStringVectorAdapter.h */,
-				1E6D9FC215D027560064D436 /* ConsistantPhrases.h */,
 				1E6D9FC415D027560064D436 /* LexicalReorderingTableCompact.cpp */,
 				1E6D9FC515D027560064D436 /* LexicalReorderingTableCompact.h */,
 				1E6D9FC615D027560064D436 /* LexicalReorderingTableCreator.cpp */,
@@ -1294,7 +1297,6 @@
 				1E6D9FD715D027560064D436 /* BlockHashIndex.h in Headers */,
 				1E6D9FD815D027560064D436 /* CanonicalHuffman.h in Headers */,
 				1E6D9FDA15D027560064D436 /* CmphStringVectorAdapter.h in Headers */,
-				1E6D9FDB15D027560064D436 /* ConsistantPhrases.h in Headers */,
 				1E6D9FDE15D027560064D436 /* LexicalReorderingTableCompact.h in Headers */,
 				1E6D9FE015D027560064D436 /* LexicalReorderingTableCreator.h in Headers */,
 				1E6D9FE115D027560064D436 /* ListCoders.h in Headers */,
@@ -1310,6 +1312,7 @@
 				1EC32DB915D2D90700A313B1 /* ThrowingFwrite.h in Headers */,
 				16A5EAFE15F51ABB00C4FC26 /* SpanLengthFeature.h in Headers */,
 				16D2CCCE15F66C5500281C41 /* SpanLengthEstimator.h in Headers */,
+				1E3393E41600C560001A4DF4 /* CrossingFeature.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1512,6 +1515,7 @@
 				1EC32DB815D2D90700A313B1 /* ThrowingFwrite.cpp in Sources */,
 				16A5EB0015F51E6100C4FC26 /* SpanLengthFeature.cpp in Sources */,
 				16D2CCCD15F66C5500281C41 /* SpanLengthEstimator.cpp in Sources */,
+				1E3393E31600C560001A4DF4 /* CrossingFeature.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -151,8 +151,12 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
-  AddParam("weight-span-length", "SL", "Weight for span length feature");
+  
+  AddParam("weight-span-length", "SL", "Weight for span length feature. Set this to activate it, if it is empty, feature will not be used");
   AddParam("gaussian-span-length-score", "Use Gaussian pdf to calculate span length probability instead of unsmoothed counts");
+
+  AddParam("weight-crossing", "CR", "weight for non-term crossing feature. Set this to activate it, if it is empty, feature will not be used");
+  AddParam("crossing-file", "Data file for crossing feature. Line format: [span-length] [non-term] [is-crossing] [probability]");
 
 }
 
