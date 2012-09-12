@@ -97,7 +97,7 @@ public:
         sentenceIdFlag=initsentenceIdFlag;
     }
     void initIncludeSentenceIdFlag(const bool initincludeSentenceIdFlag){
-        sentenceIdFlag=initincludeSentenceIdFlag;
+        includeSentenceIdFlag=initincludeSentenceIdFlag;
     }
     void initOnlyOutputSpanInfo(const bool initonlyOutputSpanInfo){
         onlyOutputSpanInfo= initonlyOutputSpanInfo;
