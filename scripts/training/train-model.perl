@@ -1794,7 +1794,7 @@ sub create_ini {
    }
    if (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /\-+Domain([a-z]+) (\S+)/i) {
      my ($method,$file) = ($1,$2);
-     my $count = `cut -d\\  -f 2 model/domains.44  | sort | uniq | wc -l`;
+     my $count = `cut -d\\  -f 2 $file | sort | uniq | wc -l`;
      $basic_weight_count += $count if $method eq "Indicator" || $method eq "Ratio";
      $basic_weight_count += 2**$count-1 if $method eq "Subset";
    }     
