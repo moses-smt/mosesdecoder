@@ -58,7 +58,7 @@ cdef QueryResult get_query_result(StringTgtCand& cand, wa = None):
     cdef tuple scores = tuple([cand.second[i] for i in range(cand.second.size())])
     return QueryResult(words, scores, wa)
 
-cdef class PhraseTable:
+cdef class BinaryPhraseTable:
     '''This class encapsulates a Moses::PhraseDictionaryTree for operations over
     binary phrase tables.'''
 

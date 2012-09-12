@@ -1,4 +1,4 @@
-from binpt import PhraseTable
+from binpt import BinaryPhraseTable
 from binpt import QueryResult
 
 import sys
@@ -13,7 +13,7 @@ wa = len(sys.argv) == 4
 
 print >> sys.stderr, "-ttable %s -nscores %d -alignment-info %s\n" %(pt_file, nscores, str(wa))
 
-pt = PhraseTable(pt_file, nscores, wa)
+pt = BinaryPhraseTable(pt_file, nscores, wa)
 for line in sys.stdin:
     f = line.strip()
     matches = pt.query(f)
