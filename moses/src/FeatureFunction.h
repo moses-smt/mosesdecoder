@@ -49,13 +49,11 @@ public:
   virtual void Evaluate(const TranslationOption& translationOption,
                         const InputType& inputType,
                         const WordsBitmap& coverageVector,
-  											ScoreComponentCollection* accumulator) const {}
-                        //TODO: Warn if unimplemented
+  											ScoreComponentCollection* accumulator) const = 0;
 
   virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
   													 int featureID,
-                             ScoreComponentCollection* accumulator) const {}
-                        //TODO: Warn if unimplemented
+                             ScoreComponentCollection* accumulator) const  = 0;
 
   //If true, then the feature is evaluated before search begins, and stored in
   //the TranslationOptionCollection. Note that for PhraseDictionary and 

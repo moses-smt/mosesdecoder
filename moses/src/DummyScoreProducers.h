@@ -70,6 +70,23 @@ public:
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 
   virtual bool ComputeValueInTranslationOption() const;
+  void Evaluate(  const TranslationOption& translationOption,
+                  const InputType& inputType,
+                  const WordsBitmap& coverageVector,
+  								ScoreComponentCollection* accumulator) const 
+  {
+    //don't expect this to be called
+    throw std::runtime_error("Not implemented");
+  }
+
+  void EvaluateChart(
+    const ChartHypothesis& cur_hypo,
+    int featureID,
+    ScoreComponentCollection* accumulator) const
+  {
+    //Nor this.
+    throw std::runtime_error("Not implemented");
+  }
 
 };
 

@@ -88,8 +88,10 @@ public:
   	return new DummyState();
   }
 
-  void Evaluate(const Hypothesis& cur_hypo,
-  		          ScoreComponentCollection* accumulator) const;
+  void Evaluate(const TranslationOption& translationOption,
+                        const InputType& inputType,
+                        const WordsBitmap& coverageVector,
+  											ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(const ChartHypothesis& cur_hypo,
   								   int featureID,

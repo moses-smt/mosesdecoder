@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <memory>
 #include <list>
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -133,6 +134,23 @@ public:
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();
   size_t GetDictIndex() const;
+
+  //Usual feature function methods are not implemented
+  virtual void Evaluate(const TranslationOption& translationOption,
+                        const InputType& inputType,
+                        const WordsBitmap& coverageVector,
+  											ScoreComponentCollection* accumulator) const 
+  {
+    throw std::runtime_error("Not implemented");
+  }
+
+  virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
+  													 int featureID,
+                             ScoreComponentCollection* accumulator) const 
+  {
+    throw std::runtime_error("Not implemented");
+  }
+
 
 protected:
   size_t m_dictIndex;

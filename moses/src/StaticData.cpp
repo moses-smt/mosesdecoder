@@ -1108,7 +1108,8 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
 
     const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    GlobalLexicalModelUnlimited* glmu = new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, context);
+    throw runtime_error("GlobalLexicalModelUnlimited should be reimplemented as a stateful feature");
+    GlobalLexicalModelUnlimited* glmu = NULL; // new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, context);
     m_globalLexicalModelsUnlimited.push_back(glmu);
     if (restricted) {
       cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;

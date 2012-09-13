@@ -1,11 +1,12 @@
 #include <sstream>
+#include <boost/algorithm/string.hpp>
 #include "WordTranslationFeature.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
-#include <boost/algorithm/string.hpp>
+#include "TranslationOption.h"
 
 namespace Moses {
 
@@ -52,10 +53,14 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
   m_local->input = &in;
 }
 
-void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const
+void WordTranslationFeature::Evaluate
+                     (const TranslationOption& translationOption,
+                      const InputType& inputType,
+                      const WordsBitmap& coverageVector,
+                      ScoreComponentCollection* accumulator) const
 {
   const Sentence& input = *(m_local->input);
-  const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+  const TargetPhrase& targetPhrase = translationOption.GetTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
 
   // process aligned words
@@ -100,7 +105,7 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
     	accumulator->SparsePlusEquals(featureName.str(), 1);
     }
     if (m_sourceContext) {
-    	size_t globalSourceIndex = cur_hypo.GetCurrSourceWordsRange().GetStartPos() + sourceIndex;
+    	size_t globalSourceIndex = translationOption.GetStartPos() + sourceIndex;
     	if (globalSourceIndex == 0) {
     		// add <s> trigger feature for source
     		stringstream feature;
@@ -148,6 +153,8 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
     	}
     }
     if (m_targetContext) {
+      throw runtime_error("Can't use target words outside current translation option in a stateless feature");
+      /*
     	size_t globalTargetIndex = cur_hypo.GetCurrTargetWordsRange().GetStartPos() + targetIndex;
     	if (globalTargetIndex == 0) {
     		// add <s> trigger feature for source
@@ -185,7 +192,7 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
     			feature << targetWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);
     		}
-    	}
+    	}*/
     }
   }
 }
