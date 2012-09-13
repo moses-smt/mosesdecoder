@@ -50,6 +50,7 @@ protected:
 
   PhraseTableImplementation m_implementation;
   bool m_inMemory;
+  bool m_useAlignmentInfo;
   
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS
@@ -75,11 +76,14 @@ protected:
 
 public:
   PhraseDictionaryCompact(size_t numScoreComponent,
-                               PhraseTableImplementation implementation,
-                               PhraseDictionaryFeature* feature)
+                          PhraseTableImplementation implementation,
+                          PhraseDictionaryFeature* feature,
+                          bool inMemory = StaticData::Instance().UseMinphrInMemory(),
+                          bool useAlignmentInfo = StaticData::Instance().UseAlignmentInfo())
     : PhraseDictionary(numScoreComponent, feature),
       m_implementation(implementation),
-      m_inMemory(StaticData::Instance().UseMinphrInMemory()),
+      m_inMemory(inMemory),
+      m_useAlignmentInfo(useAlignmentInfo),
       m_hash(10, 16),
       m_phraseDecoder(0)
   {}
@@ -95,7 +99,8 @@ public:
             , float weightWP);
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
-
+  TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
+  
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
 
   void InitializeForInput(const Moses::InputType&);
