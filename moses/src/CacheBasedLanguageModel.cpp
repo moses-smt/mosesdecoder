@@ -85,6 +85,7 @@ void CacheBasedLanguageModel::Update(std::vector<std::string> words, int age)
 {
 	for (size_t j=0; j<words.size(); j++)
 	{
+		VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << std::endl);
 		decaying_cache_value_t p (age,decaying_score(age));
 		std::pair<std::string, decaying_cache_value_t> e (words[j],p);
 		m_cache.insert(e);

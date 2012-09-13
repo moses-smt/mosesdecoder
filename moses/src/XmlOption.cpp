@@ -37,18 +37,19 @@ using namespace std;
 
 string ParseXmlTagAttribute(const string& tag,const string& attributeName)
 {
+  string ValueDelimiter = "\"";
   /*TODO deal with unescaping \"*/
-  string tagOpen = attributeName + "=\"";
+  string tagOpen = attributeName + "=" + ValueDelimiter;
   size_t contentsStart = tag.find(tagOpen);
   if (contentsStart == string::npos) return "";
   contentsStart += tagOpen.size();
-  size_t contentsEnd = tag.find_first_of('"',contentsStart+1);
+  size_t contentsEnd = tag.find_first_of(ValueDelimiter,contentsStart+1);
   if (contentsEnd == string::npos) {
     TRACE_ERR("Malformed XML attribute: "<< tag);
     return "";
   }
   size_t possibleEnd;
-  while (tag.at(contentsEnd-1) == '\\' && (possibleEnd = tag.find_first_of('"',contentsEnd+1)) != string::npos) {
+  while (tag.at(contentsEnd-1) == '\\' && (possibleEnd = tag.find_first_of(ValueDelimiter,contentsEnd+1)) != string::npos) {
     contentsEnd = possibleEnd;
   }
   return tag.substr(contentsStart,contentsEnd-contentsStart);
@@ -296,8 +297,8 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 	for the dlt tag extract the info about previous phrases (uni-grams or n-grams) from the trg attribute
 	the phrases are separted by ||
 	*/
+	  VERBOSE(2, "tag:|" << tagContent << "|" << std::endl);
           vector<string> dlt_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"trg"), "||");
-					VERBOSE(1, "tag:|" << tagContent << "|" << std::endl);
           // add to the global static producer
           const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
           CacheBasedLanguageModel* cache_model = trans_sys.GetCacheBasedLanguageModel();
