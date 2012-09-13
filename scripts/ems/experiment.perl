@@ -1639,7 +1639,7 @@ sub write_mira_config {
     $tune_filtered_ini_start =  $expt_dir."/".$tune_filtered_ini_start.".start";
     if ($start_weights) {
 	# apply start weights to filtered ini file, and pass the new ini to mira
-        system("$Bin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start");
+        system("$RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start");
     } 
     
     # mira config file
@@ -1900,7 +1900,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$sparse_phrase_table,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
@@ -2321,7 +2321,7 @@ sub define_tuningevaluation_filter {
     my $input_filter;
     $input_filter = &get("EVALUATION:$set:input-filter") unless $tuning_flag;
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
-    print "filter: $input_filter \n";
+    #print "filter: $input_filter \n";
     $input_filter = $input unless $input_filter;
     
     # additional settings
@@ -2401,7 +2401,7 @@ sub define_tuningevaluation_filter {
     }
 
     # copy moses.ini into specified file location
-    $cmd .= "\ncp $filter_dir/moses.ini $filter_config\n";
+    $cmd .= "\ncp $filter_dir/moses.ini $config\n";
  
     &create_step($step_id,$cmd);
 }
