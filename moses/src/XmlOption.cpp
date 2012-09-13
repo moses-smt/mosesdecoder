@@ -292,16 +292,19 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
         }
 
         else if (tagName == "dlt") {
-					/*
-						for the dlt tag extract the info about previous phrases (uni-grams or n-grams) from the trg attribute
-						the phrases are separted by ||
-					*/
+	/*
+	for the dlt tag extract the info about previous phrases (uni-grams or n-grams) from the trg attribute
+	the phrases are separted by ||
+	*/
           vector<string> dlt_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"trg"), "||");
 					VERBOSE(1, "tag:|" << tagContent << "|" << std::endl);
           // add to the global static producer
           const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
           CacheBasedLanguageModel* cache_model = trans_sys.GetCacheBasedLanguageModel();
-          cache_model->Insert(dlt_elements);
+          if (cache_model != NULL)
+          {
+            cache_model->Insert(dlt_elements);
+          }
         }
 
         // default: opening tag that specifies translation options

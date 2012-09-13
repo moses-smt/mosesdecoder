@@ -664,7 +664,10 @@ StaticData::~StaticData()
   delete m_unknownWordPenaltyProducer;
 
   // delete Cache-Based Language Model
-  delete m_CacheBasedLanguageModel;
+  if (m_CacheBasedLanguageModel != NULL) // check if CacheBasedLanguageModel is used
+  {
+    delete m_CacheBasedLanguageModel;
+  }
 
   //delete m_parameter;
 
@@ -1133,11 +1136,15 @@ bool StaticData::LoadCacheBasedLanguageModel()
 
      for(size_t j = 0; j < file.size(); ++j)
      {
-			VERBOSE(1,"Loading data from the cache file " << file[j] << endl);
+	VERBOSE(1,"Loading data from the cache file " << file[j] << endl);
         m_CacheBasedLanguageModel->Load(file[j]);
-			VERBOSE(1,"Actual cache" << endl);
+	VERBOSE(1,"Actual cache" << endl);
         m_CacheBasedLanguageModel->PrintCache();
      }
+   }
+   else
+   {
+     m_CacheBasedLanguageModel = NULL;
    } 
    return true;
 }
