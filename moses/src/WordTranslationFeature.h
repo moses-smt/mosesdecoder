@@ -93,8 +93,9 @@ public:
                         const WordsBitmap& coverageVector,
   											ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartHypothesis& cur_hypo,
-  								   int featureID,
+  void EvaluateChart(const TargetPhrase& targetPhrase,
+                     const InputType& inputType,
+                     const WordsRange& sourceSpan,
                      ScoreComponentCollection* accumulator) const;
 
   // basic properties

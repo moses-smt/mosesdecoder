@@ -71,10 +71,10 @@ class PhrasePairFeature: public StatelessFeatureFunction {
                 const WordsBitmap& coverageVector,
                 ScoreComponentCollection* accumulator) const;
 
-    void EvaluateChart(
-      const ChartHypothesis&,
-      int /* featureID */,
-      ScoreComponentCollection*) const {
+    void EvaluateChart(const TargetPhrase& targetPhrase,
+                       const InputType& inputType,
+                       const WordsRange& sourceSpan,
+                       ScoreComponentCollection*) const {
   		CHECK(0); // feature function not valid in chart decoder
   	}
 

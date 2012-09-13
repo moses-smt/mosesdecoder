@@ -43,10 +43,12 @@ void SourceWordDeletionFeature::Evaluate(
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
 
-void SourceWordDeletionFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
-		                   	 	 	 	 	 	 	 	 	 	 	 	ScoreComponentCollection* accumulator) const
+void SourceWordDeletionFeature::EvaluateChart(
+            const TargetPhrase& targetPhrase,
+            const InputType& inputType,
+            const WordsRange& sourceSpan,
+		 	 	 	 	ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);

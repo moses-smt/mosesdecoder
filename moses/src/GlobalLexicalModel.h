@@ -81,8 +81,9 @@ public:
 
 
   void EvaluateChart(
-    const ChartHypothesis& cur_hypo,
-    int featureID,
+    const TargetPhrase& targetPhrase,
+    const InputType& inputType,
+    const WordsRange& sourceSpan,
     ScoreComponentCollection* accumulator) const
   {
   	std::cerr << "EvaluateChart not implemented." << std::endl;

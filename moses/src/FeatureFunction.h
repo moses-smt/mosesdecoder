@@ -16,6 +16,7 @@ class FFState;
 class InputType;
 class ScoreComponentCollection;
 class WordsBitmap;
+class WordsRange;
 
 /** base class for all feature functions.
  * @todo is this for pb & hiero too?
@@ -51,8 +52,9 @@ public:
                         const WordsBitmap& coverageVector,
   											ScoreComponentCollection* accumulator) const = 0;
 
-  virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
-  													 int featureID,
+  virtual void EvaluateChart(const TargetPhrase& targetPhrase,
+                             const InputType& inputType,
+                             const WordsRange& sourceSpan,
                              ScoreComponentCollection* accumulator) const  = 0;
 
   //If true, then the feature is evaluated before search begins, and stored in

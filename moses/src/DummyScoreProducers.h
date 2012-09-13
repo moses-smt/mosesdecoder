@@ -29,8 +29,8 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   virtual FFState* EvaluateChart(
-    const ChartHypothesis&,
-    int /* featureID */,
+    const ChartHypothesis& /* cur_hypo */,
+    int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection*) const {
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
@@ -54,11 +54,16 @@ public:
   	ScoreComponentCollection* accumulator) const;
 
   virtual void EvaluateChart(
-    const ChartHypothesis&,
-    int /* featureID */,
-    ScoreComponentCollection*) const {
-		// needs to be implemented but does nothing
-	}
+    const TargetPhrase& targetPhrase,
+    const InputType& inputType,
+    const WordsRange& sourceSpan,
+    ScoreComponentCollection* accumulator) const 
+    {
+      //required but does nothing.
+    }
+
+
+
 };
 
 /** unknown word penalty */
@@ -79,8 +84,9 @@ public:
   }
 
   void EvaluateChart(
-    const ChartHypothesis& cur_hypo,
-    int featureID,
+    const TargetPhrase& targetPhrase,
+    const InputType& inputType,
+    const WordsRange& sourceSpan,
     ScoreComponentCollection* accumulator) const
   {
     //do nothing - not a real feature

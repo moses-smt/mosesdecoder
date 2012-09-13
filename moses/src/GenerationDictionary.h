@@ -98,8 +98,9 @@ public:
     throw std::runtime_error("GenerationDictionary::Evaluate() Not implemented");
   }
 
-  virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
-  													 int featureID,
+  virtual void EvaluateChart(const TargetPhrase& targetPhrase,
+                             const InputType& inputType,
+                             const WordsRange& sourceSpan,
                              ScoreComponentCollection* accumulator) const 
   {
     throw std::runtime_error("GenerationDictionary.Evaluate() Not implemented");

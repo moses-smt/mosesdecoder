@@ -35,9 +35,10 @@ public:
   								ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(
-    const ChartHypothesis& cur_hypo,
-    int featureID,
-    ScoreComponentCollection* accumulator) const;
+      const TargetPhrase& targetPhrase,
+      const InputType& inputType,
+      const WordsRange& sourceSpan,
+      ScoreComponentCollection* accumulator) const;
 
   void ComputeFeatures(const TargetPhrase& targetPhrase,
 		           	   ScoreComponentCollection* accumulator,

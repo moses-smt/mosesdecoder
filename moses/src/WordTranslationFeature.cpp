@@ -197,11 +197,13 @@ void WordTranslationFeature::Evaluate
   }
 }
 
-void WordTranslationFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
-    																			 ScoreComponentCollection* accumulator) const
+void WordTranslationFeature::EvaluateChart(
+            const TargetPhrase& targetPhrase,
+            const InputType& inputType,
+            const WordsRange& sourceSpan,
+    				ScoreComponentCollection* accumulator) const
 {
   //const Sentence& input = *(m_local->input);
-  const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
   const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 
