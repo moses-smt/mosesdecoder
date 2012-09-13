@@ -324,13 +324,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_useTransOptCache = false;
   }
 
-  SetBooleanParameter( &m_enableOnlineCommand, "enable-online-command", false );
-  if (m_enableOnlineCommand == true) {
-    VERBOSE(1,"Online commands are enabled.\n");
-    VERBOSE(1,"Cache for translation options is disabled.\n");
-    m_useTransOptCache = false;
-  }
-
   std::cerr << "transOptCache: " << m_useTransOptCache << std::endl;
   std::cerr << "transOptCache max size: " << m_transOptCacheMaxSize << std::endl;
 
