@@ -66,6 +66,8 @@ bool CrossingFeature::LoadDataFile(const std::string &dataPath)
     ++lineNum;
   }
   
+  assert(lineNum == m_data.size());
+         
   return true;
   
 }
