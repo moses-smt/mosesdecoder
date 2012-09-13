@@ -122,7 +122,7 @@ $_HELP = 1
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
            'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES,
-		       'eppex:s' => \$_EPPEX
+		       'eppex:s' => \$_EPPEX,
            'additional-ini=s' => \$_ADDITIONAL_INI,
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
            'cores=i' => \$_CORES
