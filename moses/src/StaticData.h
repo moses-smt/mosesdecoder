@@ -104,7 +104,7 @@ protected:
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
-  bool m_useFutureDistortionCost;
+  bool m_useEarlyDistortionCost;
   size_t
   m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
   , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
@@ -340,8 +340,8 @@ public:
   bool UseEarlyDiscarding() const {
     return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
   }
-  bool UseFutureDistortionCost() const {
-    return m_useFutureDistortionCost;
+  bool UseEarlyDistortionCost() const {
+    return m_useEarlyDistortionCost;
   }
   float GetTranslationOptionThreshold() const {
     return m_translationOptionThreshold;

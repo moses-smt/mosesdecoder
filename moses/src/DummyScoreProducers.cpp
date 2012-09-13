@@ -61,7 +61,7 @@ std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) c
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
     const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
-  if(!StaticData::Instance().UseFutureDistortionCost()) {
+  if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
   }
   else {
