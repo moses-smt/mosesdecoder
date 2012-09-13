@@ -85,7 +85,6 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
     // Keep source phrase index on disk
     indexSize = m_hash.LoadIndex(pFile);
 
-  
   size_t coderSize = m_phraseDecoder->Load(pFile);
   
   size_t phraseSize;
@@ -136,7 +135,18 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
   }
   else
     return NULL;
-  
+}
+
+TargetPhraseVectorPtr
+PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase) const {
+
+  // There is no souch source phrase if source phrase is longer than longest
+  // observed source phrase during compilation 
+  if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
+    return TargetPhraseVectorPtr();
+
+  // Retrieve target phrase collection from phrase table
+  return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true);
 }
 
 PhraseDictionaryCompact::~PhraseDictionaryCompact() {
