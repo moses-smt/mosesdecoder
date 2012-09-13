@@ -100,6 +100,8 @@ public:
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "wt"; }
 	size_t GetNumInputScores() const { return 0; }
+
+  bool ComputeValueInTranslationOption() const {return true;}
 	
 	void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
 	float GetSparseProducerWeight() const { return m_sparseProducerWeight; }

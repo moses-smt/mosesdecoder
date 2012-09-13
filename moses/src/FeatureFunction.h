@@ -87,7 +87,7 @@ public:
 
   virtual FFState* EvaluateChart(
     const ChartHypothesis& /* cur_hypo */,
-    int /* featureID */,
+    int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const = 0;
 
   //! return the state associated with the empty hypothesis for a given sentence

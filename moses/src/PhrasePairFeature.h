@@ -78,8 +78,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
   		CHECK(0); // feature function not valid in chart decoder
   	}
 
-    //NB: Should really precompute this feature, but don't have
-    //good hooks to do this.
     bool ComputeValueInTranslationOption() const;
     
     std::string GetScoreProducerWeightShortName(unsigned) const;
