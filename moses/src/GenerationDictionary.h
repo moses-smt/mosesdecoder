@@ -95,14 +95,14 @@ public:
                         const WordsBitmap& coverageVector,
   											ScoreComponentCollection* accumulator) const 
   {
-    throw std::runtime_error("Not implemented");
+    throw std::runtime_error("GenerationDictionary::Evaluate() Not implemented");
   }
 
   virtual void EvaluateChart(const ChartHypothesis& cur_hypo,
   													 int featureID,
                              ScoreComponentCollection* accumulator) const 
   {
-    throw std::runtime_error("Not implemented");
+    throw std::runtime_error("GenerationDictionary.Evaluate() Not implemented");
   }
 
 

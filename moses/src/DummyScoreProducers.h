@@ -75,8 +75,7 @@ public:
                   const WordsBitmap& coverageVector,
   								ScoreComponentCollection* accumulator) const 
   {
-    //don't expect this to be called
-    throw std::runtime_error("Not implemented");
+    //do nothing - not a real feature
   }
 
   void EvaluateChart(
@@ -84,8 +83,7 @@ public:
     int featureID,
     ScoreComponentCollection* accumulator) const
   {
-    //Nor this.
-    throw std::runtime_error("Not implemented");
+    //do nothing - not a real feature
   }
 
 };
