@@ -25,6 +25,7 @@
 #include "tables-core.h"
 
 using namespace std;
+using namespace MosesTraining;
 
 int main(int argc, char* argv[])
 {

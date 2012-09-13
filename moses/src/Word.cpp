@@ -93,7 +93,9 @@ void Word::CreateFromString(FactorDirection direction
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   vector<string> wordVec;
-  Tokenize(wordVec, str, "|");
+  const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  TokenizeMultiCharSeparator(wordVec, str, factorDelimiter);
+  //Tokenize(wordVec, str, "|");
   CHECK(wordVec.size() <= factorOrder.size());
 
   const Factor *factor;

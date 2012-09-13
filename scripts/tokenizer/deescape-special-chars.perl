@@ -3,7 +3,8 @@
 use strict;
 
 while(<STDIN>) {
-  s/\&bar;/\|/g;   # factor separator
+  s/\&bar;/\|/g;   # factor separator (legacy)
+  s/\&#124;/\|/g;  # factor separator
   s/\&lt;/\</g;    # xml
   s/\&gt;/\>/g;    # xml
   s/\&bra;/\[/g;   # syntax non-terminal (legacy)

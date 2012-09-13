@@ -15,6 +15,9 @@
 
 #include "ScoreStats.h"
 
+namespace MosesTuning
+{
+  
 const char SCORES_TXT_BEGIN[] = "SCORES_TXT_BEGIN_0";
 const char SCORES_TXT_END[] = "SCORES_TXT_END_0";
 const char SCORES_BIN_BEGIN[] = "SCORES_BIN_BEGIN_0";
@@ -82,5 +85,7 @@ public:
 
   bool check_consistency() const;
 };
+
+}
 
 #endif  // MERT_SCORE_ARRAY_H_

@@ -24,6 +24,9 @@
 #include <string>
 #include <vector>
 
+namespace MosesTraining
+{
+
 class SentenceAlignment
 {
 public:
@@ -35,12 +38,16 @@ public:
 
   virtual ~SentenceAlignment();
 
-  virtual bool processTargetSentence(const char *, int);
+  virtual bool processTargetSentence(const char *, int, bool boundaryRules);
 
-  virtual bool processSourceSentence(const char *, int);
+  virtual bool processSourceSentence(const char *, int, bool boundaryRules);
 
   bool create(char targetString[], char sourceString[],
-              char alignmentString[], int sentenceID);
+              char alignmentString[], int sentenceID, bool boundaryRules);
+  
 };
+
+}
+
 
 #endif

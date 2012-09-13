@@ -24,12 +24,7 @@
 namespace Moses
 {
 
-enum FormatType
-{
-  MosesFormat
-  ,HieroFormat
-};
-
+//! Loader to load Moses-formatted SCFG rules from a text file
 class RuleTableLoaderStandard : public RuleTableLoader
 {
 protected:

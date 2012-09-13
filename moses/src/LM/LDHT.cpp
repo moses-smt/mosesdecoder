@@ -7,6 +7,7 @@
 #include "../FFState.h"
 #include "../TypeDef.h"
 #include "../Hypothesis.h"
+#include "../StaticData.h"
 
 #include <LDHT/Client.h>
 #include <LDHT/ClientLocal.h>
@@ -19,14 +20,43 @@ namespace Moses {
 
 struct LDHTLMState : public FFState {
   LDHT::NewNgram gram_fingerprints;
+  bool finalised;
+  std::vector<int> request_tags;
+
+  LDHTLMState(): finalised(false) {
+  }
+
+  void setFinalised() {
+    this->finalised = true;
+  }
+
+  void appendRequestTag(int tag) {
+    this->request_tags.push_back(tag);
+  }
+
+  void clearRequestTags() {
+    this->request_tags.clear();
+  }
+
+  std::vector<int>::iterator requestTagsBegin() {
+    return this->request_tags.begin();
+  }
+
+  std::vector<int>::iterator requestTagsEnd() {
+    return this->request_tags.end();
+  }
 
   int Compare(const FFState& uncast_other) const {
     const LDHTLMState &other = static_cast<const LDHTLMState&>(uncast_other);
+    //if (!this->finalised)
+    //    return -1;
+
     return gram_fingerprints.compareMoses(other.gram_fingerprints);
   }
 
   void copyFrom(const LDHTLMState& other) {
     gram_fingerprints.copyFrom(other.gram_fingerprints);
+    finalised = false;
   }
 };
 
@@ -40,7 +70,7 @@ public:
                       LanguageModelLDHT& copyFrom);
     std::string GetScoreProducerDescription(unsigned) const {
       std::ostringstream oss;
-      oss << "LM_" << LDHT::NewNgram::k_max_order << "gram";
+      oss << "DLM_" << LDHT::NewNgram::k_max_order << "gram";
       return oss.str();
     }
     LDHT::Client* getClientUnsafe() const;
@@ -57,6 +87,10 @@ public:
                            float& fullScore,
                            float& ngramScore,
                            std::size_t& oovCount) const;
+    virtual void CalcScoreFromCache(const Phrase& phrase,
+                                    float& fullScore,
+                                    float& ngramScore,
+                                    std::size_t& oovCount) const;
     FFState* Evaluate(const Hypothesis& hypo,
                       const FFState* input_state,
                       ScoreComponentCollection* score_output) const;
@@ -64,10 +98,19 @@ public:
                            int featureID,
                            ScoreComponentCollection* accumulator) const;
 
+    virtual void IssueRequestsFor(Hypothesis& hypo,
+                                  const FFState* input_state);
+    float calcScoreFromState(LDHTLMState* hypo) const;
+    void sync();
+    void SetFFStateIdx(int state_idx);
+
 protected:
     boost::thread_specific_ptr<LDHT::Client> m_client;
     std::string m_configPath;
     FactorType m_factorType;
+    int m_state_idx;
+    int m_calc_score_count;
+    uint64_t m_start_tick;
 
 };
 
@@ -83,6 +126,7 @@ LanguageModelLDHT::LanguageModelLDHT() : LanguageModel(), m_client(NULL) {
 
 LanguageModelLDHT::LanguageModelLDHT(ScoreIndexManager& manager,
                                      LanguageModelLDHT& copyFrom) {
+    m_calc_score_count = 0;
     //m_client = copyFrom.m_client;
     m_factorType = copyFrom.m_factorType;
     m_configPath = copyFrom.m_configPath;
@@ -99,7 +143,7 @@ LanguageModelLDHT::LanguageModelLDHT(const std::string& path,
 
 LanguageModelLDHT::~LanguageModelLDHT() {
     // TODO(wilson): should cleanup for each individual thread.
-    delete getClientSafe();
+    //delete getClientSafe();
 }
 
 LanguageModel* LanguageModelLDHT::Duplicate(
@@ -131,8 +175,8 @@ LDHT::Client* LanguageModelLDHT::initTSSClient() {
             LDHT::FactoryCollection::createDefaultFactoryCollection();
 
     LDHT::Client* client;
-    client = new LDHT::ClientLocal();
-    //client = new LDHT::Client();
+    //client = new LDHT::ClientLocal();
+    client = new LDHT::Client();
     client->fromXmlFiles(*factory_collection,
                            ldht_config_path,
                            ldhtlm_config_path);
@@ -141,9 +185,26 @@ LDHT::Client* LanguageModelLDHT::initTSSClient() {
 
 void LanguageModelLDHT::InitializeBeforeSentenceProcessing() {
     getClientSafe()->clearCache();
+    m_start_tick = LDHT::Util::rdtsc();
 }
 
 void LanguageModelLDHT::CleanUpAfterSentenceProcessing() {
+    LDHT::Client* client = getClientSafe();
+
+    std::cerr << "LDHT sentence stats:" << std::endl;
+    std::cerr << "  ngrams submitted: " << client->getNumNgramsSubmitted() << std::endl
+              << "  ngrams requested: " << client->getNumNgramsRequested() << std::endl
+              << "  ngrams not found: " << client->getKeyNotFoundCount() << std::endl
+              << "        cache hits: " << client->getCacheHitCount() << std::endl
+              << "        inferences: " << client->getInferenceCount() << std::endl
+              << "      pcnt latency: " << (float)client->getLatencyTicks() / (float)(LDHT::Util::rdtsc() - m_start_tick) * 100.0 << std::endl;
+    m_start_tick = 0;
+    client->resetLatencyTicks();
+    client->resetNumNgramsSubmitted();
+    client->resetNumNgramsRequested();
+    client->resetInferenceCount();
+    client->resetCacheHitCount();
+    client->resetKeyNotFoundCount();
 }
 
 const FFState* LanguageModelLDHT::EmptyHypothesisState(
@@ -159,6 +220,46 @@ void LanguageModelLDHT::CalcScore(const Phrase& phrase,
                                   float& fullScore,
                                   float& ngramScore,
                                   std::size_t& oovCount) const {
+    const_cast<LanguageModelLDHT*>(this)->m_calc_score_count++;
+    if (m_calc_score_count > 10000) {
+        const_cast<LanguageModelLDHT*>(this)->m_calc_score_count = 0;
+        const_cast<LanguageModelLDHT*>(this)->sync();
+    }
+
+    // TODO(wilson): handle nonterminal words.
+    LDHT::Client* client = getClientUnsafe();
+    // Score the first order - 1 words of the phrase.
+    int order = LDHT::NewNgram::k_max_order;
+    int prefix_start = 0;
+    int prefix_end = std::min(phrase.GetSize(), static_cast<size_t>(order - 1));
+    LDHT::NewNgram ngram;
+    for (int word_idx = prefix_start; word_idx < prefix_end; ++word_idx) {
+        ngram.appendGram(phrase.GetWord(word_idx)
+                .GetFactor(m_factorType)->GetString().c_str());
+        client->requestNgram(ngram);
+    }
+    // Now score all subsequent ngrams to end of phrase.
+    int internal_start = prefix_end;
+    int internal_end = phrase.GetSize();
+    for (int word_idx = internal_start; word_idx < internal_end; ++word_idx) {
+        ngram.appendGram(phrase.GetWord(word_idx)
+                .GetFactor(m_factorType)->GetString().c_str());
+        client->requestNgram(ngram);
+    }
+
+    fullScore = 0;
+    ngramScore = 0;
+    oovCount = 0;
+}
+
+void LanguageModelLDHT::CalcScoreFromCache(const Phrase& phrase,
+                                           float& fullScore,
+                                           float& ngramScore,
+                                           std::size_t& oovCount) const {
+    // Issue requests for phrase internal ngrams.
+    // Sync if necessary. (or autosync).
+    const_cast<LanguageModelLDHT*>(this)->sync();
+
     // TODO(wilson): handle nonterminal words.
     LDHT::Client* client = getClientUnsafe();
     // Score the first order - 1 words of the phrase.
@@ -183,7 +284,7 @@ void LanguageModelLDHT::CalcScore(const Phrase& phrase,
     }
 
     // Wait for resposes from the servers.
-    client->awaitResponses();
+    //client->awaitResponses();
 
     // Calculate the full phrase score, and the internal score.
     fullScore = 0.0;
@@ -203,10 +304,8 @@ void LanguageModelLDHT::CalcScore(const Phrase& phrase,
     oovCount = 0;
 }
 
-FFState* LanguageModelLDHT::Evaluate(
-        const Hypothesis& hypo,
-        const FFState* input_state,
-        ScoreComponentCollection* score_output) const {
+void LanguageModelLDHT::IssueRequestsFor(Hypothesis& hypo,
+                                         const FFState* input_state) {
     // TODO(wilson): handle nonterminal words.
     LDHT::Client* client = getClientUnsafe();
 
@@ -236,11 +335,10 @@ FFState* LanguageModelLDHT::Evaluate(
     int overlap_end = std::min(phrase_end, phrase_start + order - 1);
     int word_idx = overlap_start;
     LDHT::NewNgram& ngram = new_state->gram_fingerprints;
-    std::deque<int> request_tags;
     for (; word_idx < overlap_end; ++word_idx) {
         ngram.appendGram(
                 hypo.GetFactor(word_idx, m_factorType)->GetString().c_str());
-        request_tags.push_back(client->requestNgram(ngram));
+        new_state->appendRequestTag(client->requestNgram(ngram));
     }
     // No need to score phrase internal ngrams, but keep track of them
     // in the state (which in this case is the NewNgram containing the
@@ -253,22 +351,37 @@ FFState* LanguageModelLDHT::Evaluate(
     // with the end of sentence marker on it.
     if (hypo.IsSourceCompleted()) {
         ngram.appendGram(EOS_);
-        request_tags.push_back(client->requestNgram(ngram));
+        //request_tags.push_back(client->requestNgram(ngram));
+        new_state->appendRequestTag(client->requestNgram(ngram));
     }
-    // Await responses from the server.
-    client->awaitResponses();
+    hypo.SetFFState(m_state_idx, new_state);
+}
 
-    // Calculate scores given the request tags.
-    float score = 0;
-    while (!request_tags.empty()) {
-        score += client->getNgramScore(request_tags.front());
-        request_tags.pop_front();
-    }
+void LanguageModelLDHT::sync() {
+    m_calc_score_count = 0;
+    getClientUnsafe()->awaitResponses();
+}
 
+void LanguageModelLDHT::SetFFStateIdx(int state_idx) {
+    m_state_idx = state_idx;
+}
+
+FFState* LanguageModelLDHT::Evaluate(
+        const Hypothesis& hypo,
+        const FFState* input_state_ignored,
+        ScoreComponentCollection* score_output) const {
+    // Input state is the state from the previous hypothesis, which
+    // we are not interested in. The requests for this hypo should
+    // already have been issued via IssueRequestsFor() and the LM then
+    // synced and all responses processed, and the tags placed in our
+    // FFState of hypo.
+    LDHTLMState* state = const_cast<LDHTLMState*>(static_cast<const LDHTLMState*>(hypo.GetFFState(m_state_idx)));
+
+    float score = calcScoreFromState(state);
     score = FloorScore(TransformLMScore(score));
     score_output->PlusEquals(this, score);
 
-    return new_state;
+    return state;
 }
 
 FFState* LanguageModelLDHT::EvaluateChart(
@@ -276,6 +389,20 @@ FFState* LanguageModelLDHT::EvaluateChart(
         int featureID,
         ScoreComponentCollection* accumulator) const {
     return NULL;
+}
+
+float LanguageModelLDHT::calcScoreFromState(LDHTLMState* state) const {
+    float score = 0.0;
+    std::vector<int>::iterator tag_iter;
+    LDHT::Client* client = getClientUnsafe();
+    for (tag_iter = state->requestTagsBegin();
+         tag_iter != state->requestTagsEnd();
+         ++tag_iter) {
+        score += client->getNgramScore(*tag_iter);
+    }
+    state->clearRequestTags();
+    state->setFinalised();
+    return score;
 }
 
 }  // namespace Moses.

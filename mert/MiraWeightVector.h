@@ -11,8 +11,13 @@
 #define MERT_MIRA_WEIGHT_VECTOR_H
 
 #include <vector>
+#include <iostream>
 
 #include "MiraFeatureVector.h"
+
+namespace MosesTuning
+{
+  
 
 class AvgWeightVector;
 
@@ -59,6 +64,8 @@ public:
 
   friend class AvgWeightVector;
 
+  friend std::ostream& operator<<(std::ostream& o, const MiraWeightVector& e);
+
 private:
   /**
    * Updates a weight and lazily updates its total
@@ -102,3 +109,5 @@ private:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}

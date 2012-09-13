@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+using namespace MosesChartCmd;
 
 /**
   * Translates a sentence.
@@ -214,7 +215,7 @@ int main(int argc, char* argv[])
     }
   
     const StaticData &staticData = StaticData::Instance();
-    if (!StaticData::LoadDataStatic(&parameter))
+    if (!StaticData::LoadDataStatic(&parameter, argv[0]))
       return EXIT_FAILURE;
   
     if (parameter.isParamSpecified("show-weights")) {
@@ -225,7 +226,7 @@ int main(int argc, char* argv[])
     CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
   
     // set up read/writing class
-    IOWrapper *ioWrapper = GetIODevice(staticData);
+    IOWrapper *ioWrapper = GetIOWrapper(staticData);
   
     // check on weights
     vector<float> weights = staticData.GetAllWeights();
@@ -287,7 +288,7 @@ int main(int argc, char* argv[])
 #endif
 }
 
-IOWrapper *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()

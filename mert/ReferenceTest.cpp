@@ -3,6 +3,8 @@
 #define BOOST_TEST_MODULE MertReference
 #include <boost/test/unit_test.hpp>
 
+using namespace MosesTuning;
+
 BOOST_AUTO_TEST_CASE(refernece_count) {
   Reference ref;
   BOOST_CHECK(ref.get_counts() != NULL);

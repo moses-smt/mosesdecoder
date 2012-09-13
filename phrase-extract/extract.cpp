@@ -1,6 +1,7 @@
 /*
  * extract.cpp
- *
+ *	Modified by: Rohit Gupta CDAC, Mumbai, India
+ *	on July 15, 2012 to implement parallel processing
  *      Modified by: Nadi Tomeh - LIMSI/CNRS
  *      Machine Translation Marathon 2010, Dublin
  */
@@ -13,7 +14,7 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <cstring>
-
+#include <sstream>
 #include <map>
 #include <set>
 #include <vector>
@@ -23,10 +24,16 @@
 #include "tables-core.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
+#include "PhraseExtractionOptions.h"
 
 using namespace std;
+using namespace MosesTraining;
 
-#define LINE_MAX_LENGTH 500000
+namespace MosesTraining {
+
+
+const long int LINE_MAX_LENGTH = 500000 ;
+
 
 // HPhraseVertex represents a point in the alignment matrix
 typedef pair <int, int> HPhraseVertex;
@@ -42,127 +49,149 @@ typedef vector < HPhrase > HPhraseVector;
 // The key of the map is the English index and the value is a set of the source ones
 typedef map <int, set<int> > HSentenceVertices;
 
-enum REO_MODEL_TYPE {REO_MSD, REO_MSLR, REO_MONO};
-enum REO_POS {LEFT, RIGHT, DLEFT, DRIGHT, UNKNOWN};
-
-REO_POS getOrientWordModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
+  REO_POS getOrientWordModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
                            int, int, int, int, int, int, int,
                            bool (*)(int, int), bool (*)(int, int));
-REO_POS getOrientPhraseModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
+  REO_POS getOrientPhraseModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
                              int, int, int, int, int, int, int,
                              bool (*)(int, int), bool (*)(int, int),
                              const HSentenceVertices &, const HSentenceVertices &);
-REO_POS getOrientHierModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
+  REO_POS getOrientHierModel(SentenceAlignment &, REO_MODEL_TYPE, bool, bool,
                            int, int, int, int, int, int, int,
                            bool (*)(int, int), bool (*)(int, int),
                            const HSentenceVertices &, const HSentenceVertices &,
                            const HSentenceVertices &, const HSentenceVertices &,
                            REO_POS);
 
-void insertVertex(HSentenceVertices &, int, int);
-void insertPhraseVertices(HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &,
+  void insertVertex(HSentenceVertices &, int, int);
+  void insertPhraseVertices(HSentenceVertices &, HSentenceVertices &, HSentenceVertices &, HSentenceVertices &,
                           int, int, int, int);
-string getOrientString(REO_POS, REO_MODEL_TYPE);
+  string getOrientString(REO_POS, REO_MODEL_TYPE);
 
-bool ge(int, int);
-bool le(int, int);
-bool lt(int, int);
+  bool ge(int, int);
+  bool le(int, int);
+  bool lt(int, int);
 
-void extractBase(SentenceAlignment &);
-void extract(SentenceAlignment &);
-void addPhrase(SentenceAlignment &, int, int, int, int, string &);
-bool isAligned (SentenceAlignment &, int, int);
+  bool isAligned (SentenceAlignment &, int, int);
+  int sentenceOffset = 0;
 
-bool allModelsOutputFlag = false;
+}
 
-bool wordModel = false;
-REO_MODEL_TYPE wordType = REO_MSD;
-bool phraseModel = false;
-REO_MODEL_TYPE phraseType = REO_MSD;
-bool hierModel = false;
-REO_MODEL_TYPE hierType = REO_MSD;
+namespace MosesTraining{
 
-
-Moses::OutputFileStream extractFile;
-Moses::OutputFileStream extractFileInv;
-Moses::OutputFileStream extractFileOrientation;
-Moses::OutputFileStream extractFileSentenceId;
-int maxPhraseLength;
-bool orientationFlag = false;
-bool translationFlag = true;
-bool sentenceIdFlag = false; //create extract file with sentence id
-bool onlyOutputSpanInfo = false;
-bool gzOutput = false;
+class ExtractTask 
+{
+public:
+  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation,Moses::OutputFileStream &extractFileSentenceId  ):
+    m_sentence(sentence),
+    m_options(initoptions),
+    m_extractFile(extractFile),
+    m_extractFileInv(extractFileInv),
+    m_extractFileOrientation(extractFileOrientation),
+    m_extractFileSentenceId(extractFileSentenceId) {}
+void Run();
+private:
+  vector< string > m_extractedPhrases;
+  vector< string > m_extractedPhrasesInv;
+  vector< string > m_extractedPhrasesOri;
+  vector< string > m_extractedPhrasesSid;
+  void extractBase(SentenceAlignment &);
+  void extract(SentenceAlignment &);
+  void addPhrase(SentenceAlignment &, int, int, int, int, string &);
+  void writePhrasesToFile();
+  
+  SentenceAlignment &m_sentence;
+  const PhraseExtractionOptions &m_options;
+  Moses::OutputFileStream &m_extractFile;
+  Moses::OutputFileStream &m_extractFileInv;
+  Moses::OutputFileStream &m_extractFileOrientation;
+  Moses::OutputFileStream &m_extractFileSentenceId;
+};
+}
 
 int main(int argc, char* argv[])
 {
   cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
         << "phrase extraction from an aligned parallel corpus\n";
 
-  if (argc < 6) {
-    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] | --OnlyOutputSpanInfo | --NoTTable | --SentenceId]\n";
+ if (argc < 6) {
+    cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
+    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
     exit(1);
   }
-  char* &fileNameE = argv[1];
-  char* &fileNameF = argv[2];
-  char* &fileNameA = argv[3];
-  string fileNameExtract = string(argv[4]);
-  maxPhraseLength = atoi(argv[5]);
+
+  Moses::OutputFileStream extractFile;
+  Moses::OutputFileStream extractFileInv;
+  Moses::OutputFileStream extractFileOrientation;
+  Moses::OutputFileStream extractFileSentenceId;
+  const char* const &fileNameE = argv[1];
+  const char* const &fileNameF = argv[2];
+  const char* const &fileNameA = argv[3];
+  const string fileNameExtract = string(argv[4]);
+  PhraseExtractionOptions options(atoi(argv[5]));
 
   for(int i=6; i<argc; i++) {
     if (strcmp(argv[i],"--OnlyOutputSpanInfo") == 0) {
-      onlyOutputSpanInfo = true;
+      options.initOnlyOutputSpanInfo(true);
     } else if (strcmp(argv[i],"orientation") == 0 || strcmp(argv[i],"--Orientation") == 0) {
-      orientationFlag = true;
+      options.initOrientationFlag(true);
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
-      translationFlag = false;
+      options.initTranslationFlag(false);
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
-      sentenceIdFlag = true;  
+      options.initSentenceIdFlag(true);  
+    } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
+      options.initIncludeSentenceIdFlag(true);  
+    } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
+      if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
+        cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
+        exit(1);
+      }
+      sentenceOffset = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
-      gzOutput = true;  
+      options.initGzOutput(true);  
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
         exit(1);
       }
-      char* modelParams = argv[++i];
-      char* modelName = strtok(modelParams, "-");
-      char* modelType = strtok(NULL, "-");
+      char*  modelParams = argv[++i];
+      char*  modelName = strtok(modelParams, "-");
+      char*  modelType = strtok(NULL, "-");
 
-      REO_MODEL_TYPE intModelType;
+      // REO_MODEL_TYPE intModelType;
 
       if(strcmp(modelName, "wbe") == 0) {
-        wordModel = true;
+        options.initWordModel(true);
         if(strcmp(modelType, "msd") == 0)
-          wordType = REO_MSD;
+          options.initWordType(REO_MSD);
         else if(strcmp(modelType, "mslr") == 0)
-          wordType = REO_MSLR;
+          options.initWordType(REO_MSLR);
         else if(strcmp(modelType, "mono") == 0 || strcmp(modelType, "monotonicity") == 0)
-          wordType = REO_MONO;
+          options.initWordType(REO_MONO);
         else {
           cerr << "extract: syntax error, unknown reordering model type: " << modelType << endl;
           exit(1);
         }
       } else if(strcmp(modelName, "phrase") == 0) {
-        phraseModel = true;
+        options.initPhraseModel(true);
         if(strcmp(modelType, "msd") == 0)
-          phraseType = REO_MSD;
+          options.initPhraseType(REO_MSD);
         else if(strcmp(modelType, "mslr") == 0)
-          phraseType = REO_MSLR;
+          options.initPhraseType(REO_MSLR);
         else if(strcmp(modelType, "mono") == 0 || strcmp(modelType, "monotonicity") == 0)
-          phraseType = REO_MONO;
+          options.initPhraseType(REO_MONO);
         else {
           cerr << "extract: syntax error, unknown reordering model type: " << modelType << endl;
           exit(1);
         }
       } else if(strcmp(modelName, "hier") == 0) {
-        hierModel = true;
+        options.initHierModel(true);
         if(strcmp(modelType, "msd") == 0)
-          hierType = REO_MSD;
+          options.initHierType(REO_MSD);
         else if(strcmp(modelType, "mslr") == 0)
-          hierType = REO_MSLR;
+          options.initHierType(REO_MSLR);
         else if(strcmp(modelType, "mono") == 0 || strcmp(modelType, "monotonicity") == 0)
-          hierType = REO_MONO;
+          options.initHierType(REO_MONO);
         else {
           cerr << "extract: syntax error, unknown reordering model type: " << modelType << endl;
           exit(1);
@@ -172,7 +201,8 @@ int main(int argc, char* argv[])
         exit(1);
       }
 
-      allModelsOutputFlag = true;
+      options.initAllModelsOutputFlag(true);
+
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
       exit(1);
@@ -181,9 +211,9 @@ int main(int argc, char* argv[])
 
   // default reordering model if no model selected
   // allows for the old syntax to be used
-  if(orientationFlag && !allModelsOutputFlag) {
-    wordModel = true;
-    wordType = REO_MSD;
+  if(options.isOrientationFlag() && !options.isAllModelsOutputFlag()) {
+    options.initWordModel(true);
+    options.initWordType(REO_MSD);
   }
 
   // open input files
@@ -196,22 +226,22 @@ int main(int argc, char* argv[])
   istream *aFileP = &aFile;
 
   // open output files
-  if (translationFlag) {
-    string fileNameExtractInv = fileNameExtract + ".inv" + (gzOutput?".gz":"");
-    extractFile.Open( (fileNameExtract + (gzOutput?".gz":"")).c_str());
+  if (options.isTranslationFlag()) {
+    string fileNameExtractInv = fileNameExtract + ".inv" + (options.isGzOutput()?".gz":"");
+    extractFile.Open( (fileNameExtract + (options.isGzOutput()?".gz":"")).c_str());
     extractFileInv.Open(fileNameExtractInv.c_str());
   }
-  if (orientationFlag) {
-    string fileNameExtractOrientation = fileNameExtract + ".o" + (gzOutput?".gz":"");
+  if (options.isOrientationFlag()) {
+    string fileNameExtractOrientation = fileNameExtract + ".o" + (options.isGzOutput()?".gz":"");
     extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
 
-  if (sentenceIdFlag) {
-    string fileNameExtractSentenceId = fileNameExtract + ".sid" + (gzOutput?".gz":"");
+  if (options.isSentenceIdFlag()) {
+    string fileNameExtractSentenceId = fileNameExtract + ".sid" + (options.isGzOutput()?".gz":"");
     extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
-  int i=0;
+  int i = sentenceOffset;
   while(true) {
     i++;
     if (i%10000 == 0) cerr << "." << flush;
@@ -223,37 +253,56 @@ int main(int argc, char* argv[])
     SAFE_GETLINE((*fFileP), foreignString, LINE_MAX_LENGTH, '\n', __FILE__);
     SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
     SentenceAlignment sentence;
-    // cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
+	// cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
-    if (onlyOutputSpanInfo) {
+    if (options.isOnlyOutputSpanInfo()) {
       cout << "LOG: SRC: " << foreignString << endl;
       cout << "LOG: TGT: " << englishString << endl;
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
+	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
+   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileSentenceId);
+      task->Run();
+      delete task;
 
-    if (sentence.create( englishString, foreignString, alignmentString, i)) {
-      extract(sentence);
     }
-    if (onlyOutputSpanInfo) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
+    if (options.isOnlyOutputSpanInfo()) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
+
   eFile.Close();
   fFile.Close();
   aFile.Close();
+
   //az: only close if we actually opened it
-  if (!onlyOutputSpanInfo) {
-    if (translationFlag) {
+  if (!options.isOnlyOutputSpanInfo()) {
+    if (options.isTranslationFlag()) {
       extractFile.Close();
       extractFileInv.Close();
+      
     }
-    if (orientationFlag) extractFileOrientation.Close();
-    if (sentenceIdFlag) {
+    if (options.isOrientationFlag()){ 
+	extractFileOrientation.Close();
+	}
+    if (options.isSentenceIdFlag()) {
       extractFileSentenceId.Close();
     }
   }
 }
 
-void extract(SentenceAlignment &sentence)
+namespace MosesTraining
+{
+void ExtractTask::Run() {
+  extract(m_sentence);
+  writePhrasesToFile();
+  m_extractedPhrases.clear();
+  m_extractedPhrasesInv.clear();
+  m_extractedPhrasesOri.clear();
+  m_extractedPhrasesSid.clear();
+
+}
+
+void ExtractTask::extract(SentenceAlignment &sentence)
 {
   int countE = sentence.target.size();
   int countF = sentence.source.size();
@@ -272,14 +321,14 @@ void extract(SentenceAlignment &sentence)
 
   HSentenceVertices::const_iterator it;
 
-  bool relaxLimit = hierModel;
-  bool buildExtraStructure = phraseModel || hierModel;
+  bool relaxLimit = m_options.isHierModel();
+  bool buildExtraStructure = m_options.isPhraseModel() || m_options.isHierModel();
 
   // check alignments for target phrase startE...endE
   // loop over extracted phrases which are compatible with the word-alignments
   for(int startE=0; startE<countE; startE++) {
     for(int endE=startE;
-        (endE<countE && (relaxLimit || endE<startE+maxPhraseLength));
+        (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
         endE++) {
 
       int minF = 9999;
@@ -299,7 +348,7 @@ void extract(SentenceAlignment &sentence)
       }
 
       if (maxF >= 0 && // aligned to any source words at all
-          (relaxLimit || maxF-minF < maxPhraseLength)) { // source phrase within limits
+          (relaxLimit || maxF-minF < m_options.maxPhraseLength)) { // source phrase within limits
 
         // check if source words are aligned to out of bound target words
         bool out_of_bounds = false;
@@ -314,17 +363,17 @@ void extract(SentenceAlignment &sentence)
           // start point of source phrase may retreat over unaligned
           for(int startF=minF;
               (startF>=0 &&
-               (relaxLimit || startF>maxF-maxPhraseLength) && // within length limit
+               (relaxLimit || startF>maxF-m_options.maxPhraseLength) && // within length limit
                (startF==minF || sentence.alignedCountS[startF]==0)); // unaligned
               startF--)
             // end point of source phrase may advance over unaligned
             for(int endF=maxF;
                 (endF<countF &&
-                 (relaxLimit || endF<startF+maxPhraseLength) && // within length limit
+                 (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
                  (endF==maxF || sentence.alignedCountS[endF]==0)); // unaligned
                 endF++) { // at this point we have extracted a phrase
               if(buildExtraStructure) { // phrase || hier
-                if(endE-startE < maxPhraseLength && endF-startF < maxPhraseLength) { // within limit
+                if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit
                   inboundPhrases.push_back(HPhrase(HPhraseVertex(startF,startE),
                                                    HPhraseVertex(endF,endE)));
                   insertPhraseVertices(inTopLeft, inTopRight, inBottomLeft, inBottomRight,
@@ -334,16 +383,16 @@ void extract(SentenceAlignment &sentence)
                                        startF, startE, endF, endE);
               } else {
                 string orientationInfo = "";
-                if(wordModel) {
+                if(m_options.isWordModel()) {
                   REO_POS wordPrevOrient, wordNextOrient;
                   bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
                   bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
                   bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
                   bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
-                  wordPrevOrient = getOrientWordModel(sentence, wordType, connectedLeftTopP, connectedRightTopP, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
-                  wordNextOrient = getOrientWordModel(sentence, wordType, connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
-                  orientationInfo += getOrientString(wordPrevOrient, wordType) + " " + getOrientString(wordNextOrient, wordType);
-                  if(allModelsOutputFlag)
+                  wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopP, connectedRightTopP, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
+                  wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
+                  orientationInfo += getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
+                  if(m_options.isAllModelsOutputFlag())
                     " | | ";
                 }
                 addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
@@ -369,38 +418,38 @@ void extract(SentenceAlignment &sentence)
       bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
       bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
 
-      if(wordModel) {
-        wordPrevOrient = getOrientWordModel(sentence, wordType,
+      if(m_options.isWordModel()) {
+        wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(),
                                             connectedLeftTopP, connectedRightTopP,
                                             startF, endF, startE, endE, countF, 0, 1,
                                             &ge, &lt);
-        wordNextOrient = getOrientWordModel(sentence, wordType,
+        wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(),
                                             connectedLeftTopN, connectedRightTopN,
                                             endF, startF, endE, startE, 0, countF, -1,
                                             &lt, &ge);
       }
-      if (phraseModel) {
-        phrasePrevOrient = getOrientPhraseModel(sentence, phraseType,
+      if (m_options.isPhraseModel()) {
+        phrasePrevOrient = getOrientPhraseModel(sentence, m_options.isPhraseType(),
                                                 connectedLeftTopP, connectedRightTopP,
                                                 startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft);
-        phraseNextOrient = getOrientPhraseModel(sentence, phraseType,
+        phraseNextOrient = getOrientPhraseModel(sentence, m_options.isPhraseType(),
                                                 connectedLeftTopN, connectedRightTopN,
                                                 endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight);
       } else {
         phrasePrevOrient = phraseNextOrient = UNKNOWN;
       }
-      if(hierModel) {
-        hierPrevOrient = getOrientHierModel(sentence, hierType,
+      if(m_options.isHierModel()) {
+        hierPrevOrient = getOrientHierModel(sentence, m_options.isHierType(),
                                             connectedLeftTopP, connectedRightTopP,
                                             startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft, outBottomRight, outBottomLeft, phrasePrevOrient);
-        hierNextOrient = getOrientHierModel(sentence, hierType,
+        hierNextOrient = getOrientHierModel(sentence, m_options.isHierType(),
                                             connectedLeftTopN, connectedRightTopN,
                                             endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight, outBottomLeft, outBottomRight, phraseNextOrient);
       }
 
-      orientationInfo = ((wordModel)? getOrientString(wordPrevOrient, wordType) + " " + getOrientString(wordNextOrient, wordType) : "") + " | " +
-                        ((phraseModel)? getOrientString(phrasePrevOrient, phraseType) + " " + getOrientString(phraseNextOrient, phraseType) : "") + " | " +
-                        ((hierModel)? getOrientString(hierPrevOrient, hierType) + " " + getOrientString(hierNextOrient, hierType) : "");
+      orientationInfo = ((m_options.isWordModel())? getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType()) : "") + " | " +
+                        ((m_options.isPhraseModel())? getOrientString(phrasePrevOrient, m_options.isPhraseType()) + " " + getOrientString(phraseNextOrient, m_options.isPhraseType()) : "") + " | " +
+                        ((m_options.isHierModel())? getOrientString(hierPrevOrient, m_options.isHierType()) + " " + getOrientString(hierNextOrient, m_options.isHierType()) : "");
 
       addPhrase(sentence, startE, endE, startF, endF, orientationInfo);
     }
@@ -608,92 +657,141 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
   return "";
 }
 
-void addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
+void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
 {
   // source
-  // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n";
+  //   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n";
+  	ostringstream outextractstr;
+  	ostringstream outextractstrInv;
+  	ostringstream outextractstrOrientation;
+  	ostringstream outextractstrSentenceId;
 
-  if (onlyOutputSpanInfo) {
+  if (m_options.isOnlyOutputSpanInfo()) {
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
     return;
   }
 
-  for(int fi=startF; fi<=endF; fi++) {
-    if (translationFlag) extractFile << sentence.source[fi] << " ";
-    if (orientationFlag) extractFileOrientation << sentence.source[fi] << " ";
-    if (sentenceIdFlag) extractFileSentenceId << sentence.source[fi] << " ";
+for(int fi=startF; fi<=endF; fi++) {
+    if (m_options.isTranslationFlag()) outextractstr << sentence.source[fi] << " ";
+    if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
+    if (m_options.isSentenceIdFlag()) outextractstrSentenceId << sentence.source[fi] << " ";
   }
-  if (translationFlag) extractFile << "||| ";
-  if (orientationFlag) extractFileOrientation << "||| ";
-  if (sentenceIdFlag) extractFileSentenceId << "||| ";
+  if (m_options.isTranslationFlag()) outextractstr << "||| ";
+  if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
+  if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "||| ";
 
   // target
   for(int ei=startE; ei<=endE; ei++) {
-    if (translationFlag) extractFile << sentence.target[ei] << " ";
-    if (translationFlag) extractFileInv << sentence.target[ei] << " ";
-    if (orientationFlag) extractFileOrientation << sentence.target[ei] << " ";
-    if (sentenceIdFlag) extractFileSentenceId << sentence.target[ei] << " ";
+    if (m_options.isTranslationFlag()) outextractstr << sentence.target[ei] << " ";
+    if (m_options.isTranslationFlag()) outextractstrInv << sentence.target[ei] << " ";
+    if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.target[ei] << " ";
+    if (m_options.isSentenceIdFlag()) outextractstrSentenceId << sentence.target[ei] << " ";
   }
-  if (translationFlag) extractFile << "|||";
-  if (translationFlag) extractFileInv << "||| ";
-  if (orientationFlag) extractFileOrientation << "||| ";
-  if (sentenceIdFlag) extractFileSentenceId << "||| ";
+  if (m_options.isTranslationFlag()) outextractstr << "|||";
+  if (m_options.isTranslationFlag()) outextractstrInv << "||| ";
+  if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
+  if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "||| ";
 
   // source (for inverse)
-  if (translationFlag) {
-    for(int fi=startF; fi<=endF; fi++)
-      extractFileInv << sentence.source[fi] << " ";
-    extractFileInv << "|||";
-  }
 
+ if (m_options.isTranslationFlag()) {
+    for(int fi=startF; fi<=endF; fi++)
+      outextractstrInv << sentence.source[fi] << " ";
+    outextractstrInv << "|||";
+  }
   // alignment
-  if (translationFlag) {
+ if (m_options.isTranslationFlag()) {
     for(int ei=startE; ei<=endE; ei++) {
-      for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
+      for(unsigned int i=0; i<sentence.alignedToT[ei].size(); i++) {
         int fi = sentence.alignedToT[ei][i];
-        extractFile << " " << fi-startF << "-" << ei-startE;
-        extractFileInv << " " << ei-startE << "-" << fi-startF;
+        outextractstr << " " << fi-startF << "-" << ei-startE;
+        outextractstrInv << " " << ei-startE << "-" << fi-startF;
       }
     }
   }
 
-  if (orientationFlag)
-    extractFileOrientation << orientationInfo;
+  if (m_options.isOrientationFlag())
+    outextractstrOrientation << orientationInfo;
 
-  if (sentenceIdFlag) {
-    extractFileSentenceId << sentence.sentenceID;
+  if (m_options.isSentenceIdFlag()) {
+    outextractstrSentenceId << sentence.sentenceID;
+  }
+  if (m_options.isIncludeSentenceIdFlag()) {
+    outextractstr << " ||| " << sentence.sentenceID;
   }
 
-  if (translationFlag) extractFile << "\n";
-  if (translationFlag) extractFileInv << "\n";
-  if (orientationFlag) extractFileOrientation << "\n";
-  if (sentenceIdFlag) extractFileSentenceId << "\n";
+  if (m_options.isTranslationFlag()) outextractstr << "\n";
+  if (m_options.isTranslationFlag()) outextractstrInv << "\n";
+  if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
+  if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "\n";
+
+
+    m_extractedPhrases.push_back(outextractstr.str());
+    m_extractedPhrasesInv.push_back(outextractstrInv.str());
+    m_extractedPhrasesOri.push_back(outextractstrOrientation.str());
+    m_extractedPhrasesSid.push_back(outextractstrSentenceId.str());
+}
+
+
+void ExtractTask::writePhrasesToFile(){
+
+    ostringstream outextractFile;
+    ostringstream outextractFileInv;
+    ostringstream outextractFileOrientation;
+    ostringstream outextractFileSentenceId;
+
+    for(vector<string>::const_iterator phrase=m_extractedPhrases.begin();phrase!=m_extractedPhrases.end();phrase++){
+        outextractFile<<phrase->data();
+    }
+    for(vector<string>::const_iterator phrase=m_extractedPhrasesInv.begin();phrase!=m_extractedPhrasesInv.end();phrase++){
+        outextractFileInv<<phrase->data();
+    }
+    for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin();phrase!=m_extractedPhrasesOri.end();phrase++){
+        outextractFileOrientation<<phrase->data();
+    }
+    for(vector<string>::const_iterator phrase=m_extractedPhrasesSid.begin();phrase!=m_extractedPhrasesSid.end();phrase++){
+        outextractFileSentenceId<<phrase->data();
+    }
+
+      m_extractFile << outextractFile.str();
+      m_extractFileInv  << outextractFileInv.str();
+      m_extractFileOrientation << outextractFileOrientation.str();
+      m_extractFileSentenceId << outextractFileSentenceId.str();
 }
 
 // if proper conditioning, we need the number of times a source phrase occured
-void extractBase( SentenceAlignment &sentence )
+
+void ExtractTask::extractBase( SentenceAlignment &sentence )
 {
+    ostringstream outextractFile;
+    ostringstream outextractFileInv;
+
   int countF = sentence.source.size();
   for(int startF=0; startF<countF; startF++) {
     for(int endF=startF;
-        (endF<countF && endF<startF+maxPhraseLength);
+        (endF<countF && endF<startF+m_options.maxPhraseLength);
         endF++) {
       for(int fi=startF; fi<=endF; fi++) {
-        extractFile << sentence.source[fi] << " ";
-      }
-      extractFile << "|||" << endl;
+         outextractFile << sentence.source[fi] << " ";
+	}
+      outextractFile << "|||" << endl;
     }
   }
 
   int countE = sentence.target.size();
   for(int startE=0; startE<countE; startE++) {
     for(int endE=startE;
-        (endE<countE && endE<startE+maxPhraseLength);
+        (endE<countE && endE<startE+m_options.maxPhraseLength);
         endE++) {
       for(int ei=startE; ei<=endE; ei++) {
-        extractFileInv << sentence.target[ei] << " ";
+        outextractFileInv << sentence.target[ei] << " ";
       }
-      extractFileInv << "|||" << endl;
+      outextractFileInv << "|||" << endl;
     }
   }
+    m_extractFile << outextractFile.str();
+    m_extractFileInv << outextractFileInv.str();
+
+}
+
 }

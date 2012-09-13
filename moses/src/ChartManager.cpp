@@ -38,6 +38,10 @@ namespace Moses
 {
 extern bool g_debug;
 
+/* constructor. Initialize everything prior to decoding a particular sentence.
+ * \param source the sentence to be decoded
+ * \param system which particular set of models to use.
+ */
 ChartManager::ChartManager(InputType const& source, const TranslationSystem* system)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
@@ -60,7 +64,7 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
 
 ChartManager::~ChartManager()
 {
-  m_system->CleanUpAfterSentenceProcessing();
+  m_system->CleanUpAfterSentenceProcessing(m_source);
 
   RemoveAllInColl(m_ruleLookupManagers);
 
@@ -71,6 +75,7 @@ ChartManager::~ChartManager()
 
 }
 
+//! decode the sentence. This contains the main laps. Basically, the CKY++ algorithm
 void ChartManager::ProcessSentence()
 {
   VERBOSE(1,"Translating: " << m_source << endl);
@@ -125,6 +130,10 @@ void ChartManager::ProcessSentence()
   }
 }
 
+/** add specific translation options and hypotheses according to the XML override translation scheme.
+ *  Doesn't seem to do anything about walls and zones.
+ *  @todo check walls & zones. Check that the implementation doesn't leak, xml options sometimes does if you're not careful
+ */
 void ChartManager::AddXmlChartOptions() {
   const std::vector <ChartTranslationOption*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
@@ -146,6 +155,7 @@ void ChartManager::AddXmlChartOptions() {
   }
 }
 
+//! get best complete translation from the top chart cell.
 const ChartHypothesis *ChartManager::GetBestHypothesis() const
 {
   size_t size = m_source.GetSize();
@@ -159,6 +169,12 @@ const ChartHypothesis *ChartManager::GetBestHypothesis() const
   }
 }
 
+  /** Calculate the n-best paths through the output hypergraph.
+   * Return the list of paths with the variable ret
+   * \param count how may paths to return
+   * \param ret return argument
+   * \param onlyDistinct whether to check for distinct output sentence or not (default - don't check, just return top n-paths)
+   */
 void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct) const
 {
   size_t size = m_source.GetSize();
@@ -239,10 +255,6 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
       }
     }
   }
-}
-
-void ChartManager::CalcDecoderStatistics() const
-{
 }
 
 void ChartManager::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const

@@ -13,7 +13,7 @@
 namespace TranslationAnalysis
 {
 
-/***
+/**
  * print details about the translation represented in hypothesis to
  * os.  Included information: phrase alignment, words dropped, scores
  */

@@ -7,6 +7,9 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		1E890C71159D1B260031F9F3 /* value_build.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1E890C6E159D1B260031F9F3 /* value_build.cc */; };
+		1E890C72159D1B260031F9F3 /* value_build.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E890C6F159D1B260031F9F3 /* value_build.hh */; };
+		1E890C73159D1B260031F9F3 /* value.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1E890C70159D1B260031F9F3 /* value.hh */; };
 		1EBA44AD14B97E22003CC0EA /* bhiksha.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA442B14B97E22003CC0EA /* bhiksha.cc */; };
 		1EBA44AE14B97E22003CC0EA /* bhiksha.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA442C14B97E22003CC0EA /* bhiksha.hh */; };
 		1EBA44D414B97E22003CC0EA /* binary_format.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA447D14B97E22003CC0EA /* binary_format.cc */; };
@@ -93,6 +96,9 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXFileReference section */
+		1E890C6E159D1B260031F9F3 /* value_build.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = value_build.cc; path = ../../lm/value_build.cc; sourceTree = "<group>"; };
+		1E890C6F159D1B260031F9F3 /* value_build.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = value_build.hh; path = ../../lm/value_build.hh; sourceTree = "<group>"; };
+		1E890C70159D1B260031F9F3 /* value.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = value.hh; path = ../../lm/value.hh; sourceTree = "<group>"; };
 		1EBA442B14B97E22003CC0EA /* bhiksha.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = bhiksha.cc; path = ../../lm/bhiksha.cc; sourceTree = "<group>"; };
 		1EBA442C14B97E22003CC0EA /* bhiksha.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = bhiksha.hh; path = ../../lm/bhiksha.hh; sourceTree = "<group>"; };
 		1EBA447D14B97E22003CC0EA /* binary_format.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = binary_format.cc; path = ../../lm/binary_format.cc; sourceTree = "<group>"; };
@@ -196,6 +202,9 @@
 		1EBA44FB14B97E6A003CC0EA /* lm */ = {
 			isa = PBXGroup;
 			children = (
+				1E890C6E159D1B260031F9F3 /* value_build.cc */,
+				1E890C6F159D1B260031F9F3 /* value_build.hh */,
+				1E890C70159D1B260031F9F3 /* value.hh */,
 				1EBA442B14B97E22003CC0EA /* bhiksha.cc */,
 				1EBA442C14B97E22003CC0EA /* bhiksha.hh */,
 				1EBA447D14B97E22003CC0EA /* binary_format.cc */,
@@ -366,6 +375,8 @@
 				1EBA459E14B97E92003CC0EA /* sorted_uniform.hh in Headers */,
 				1EBA459F14B97E92003CC0EA /* string_piece.hh in Headers */,
 				1EBA45A114B97E92003CC0EA /* tokenize_piece.hh in Headers */,
+				1E890C72159D1B260031F9F3 /* value_build.hh in Headers */,
+				1E890C73159D1B260031F9F3 /* value.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -464,6 +475,7 @@
 				1EBA459814B97E92003CC0EA /* probing_hash_table_test.cc in Sources */,
 				1EBA459D14B97E92003CC0EA /* sorted_uniform_test.cc in Sources */,
 				1EBA45A014B97E92003CC0EA /* tokenize_piece_test.cc in Sources */,
+				1E890C71159D1B260031F9F3 /* value_build.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -527,6 +539,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = "KENLM_MAX_ORDER=7";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../lm/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
@@ -544,6 +557,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = "KENLM_MAX_ORDER=7";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../lm/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",

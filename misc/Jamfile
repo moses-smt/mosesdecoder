@@ -6,4 +6,15 @@ exe queryPhraseTable : queryPhraseTable.cpp ../moses/src//moses ;
 
 exe queryLexicalTable : queryLexicalTable.cpp ../moses/src//moses ; 
 
-alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable ;
+local with-cmph = [ option.get "with-cmph" ] ;
+if $(with-cmph) {
+    exe processPhraseTableMin : processPhraseTableMin.cpp ../moses/src//moses ;
+    exe processLexicalTableMin : processLexicalTableMin.cpp ../moses/src//moses ;
+
+    alias programsMin : processPhraseTableMin processLexicalTableMin ;
+}
+else {
+    alias programsMin ;
+}
+
+alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin ;

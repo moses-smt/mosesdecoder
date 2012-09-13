@@ -30,7 +30,7 @@ class TargetPhrase;
 class TargetPhraseCollection;
 class Word;
 
-/*** Implementation of RuleTableTrie.  A RuleTableUTrie is designed to store
+/** Implementation of RuleTableTrie.  A RuleTableUTrie is designed to store
  * string-to-tree SCFG grammars only (i.e. rules can have distinct labels on
  * the target side, but only a generic non-terminal on the source side).
  * A key is the source RHS (one symbol per edge) of a rule and a mapped value

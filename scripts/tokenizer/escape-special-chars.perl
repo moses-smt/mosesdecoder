@@ -13,7 +13,7 @@ while(<STDIN>) {
 
   # special characters in moses
   s/\&/\&amp;/g;   # escape escape
-  s/\|/\&bar;/g;   # factor separator
+  s/\|/\&#124;/g;  # factor separator
   s/\</\&lt;/g;    # xml
   s/\>/\&gt;/g;    # xml
   s/\'/\&apos;/g;  # xml
@@ -22,6 +22,6 @@ while(<STDIN>) {
   s/\]/\&#93;/g;   # syntax non-terminal
   
   # restore xml instructions
-  s/\&lt;(\S+) translation="([^\"]+)"&gt; (.+?) &lt;\/(\S+)&gt;/\<$1 translation=\"$2\"> $3 <\/$4>/g;
+  s/\&lt;(\S+) translation=&quot;(.+?)&quot;&gt; (.+?) &lt;\/(\S+)&gt;/\<$1 translation=\"$2\"> $3 <\/$4>/g;
   print $_."\n";
 }

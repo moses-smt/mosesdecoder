@@ -5,6 +5,9 @@
 #include <zlib.h>
 #include <cstring>
 
+/** wrapper around gzip input stream. Unknown parentage
+ *  @todo replace with boost version - output stream already uses it
+ */
 class gzfilebuf : public std::streambuf
 {
 public:

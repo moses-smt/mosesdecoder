@@ -22,6 +22,8 @@ class Phrase;
 class Hypothesis;
 class InputType;
 
+/** implementation of lexical reordering (Tilman ...) for phrase-based decoding
+ */
 class LexicalReordering : public StatefulFeatureFunction
 {
 public:

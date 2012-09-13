@@ -16,6 +16,10 @@
 #include <vector>
 #include "Types.h"
 
+namespace MosesTuning
+{
+  
+
 // Minimal sparse vector
 class SparseVector {
 public:
@@ -120,8 +124,8 @@ public:
   friend std::ostream& operator<<(std::ostream& o, const FeatureStats& e);
 };
 
-//ADEED_BY_TS
 bool operator==(const FeatureStats& f1, const FeatureStats& f2);
-//END_ADDED
+
+}
 
 #endif  // MERT_FEATURE_STATS_H_

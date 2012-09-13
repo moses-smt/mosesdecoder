@@ -6,6 +6,10 @@
 #include <vector>
 #include "Types.h"
 
+namespace MosesTuning
+{
+  
+
 class FeatureStats;
 class Optimizer;
 
@@ -99,5 +103,7 @@ public:
   statscore_t GetScore() const { return m_score; }
   void SetScore(statscore_t score) { m_score = score; }
 };
+
+}
 
 #endif  // MERT_POINT_H

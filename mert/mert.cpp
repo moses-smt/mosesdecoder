@@ -28,6 +28,7 @@
 #include "../moses/src/ThreadPool.h"
 
 using namespace std;
+using namespace MosesTuning;
 
 namespace {
 

@@ -7,6 +7,8 @@
 
 #include <boost/scoped_ptr.hpp>
 
+using namespace MosesTuning;
+
 //very basic test of sharding
 BOOST_AUTO_TEST_CASE(shard_basic) {
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));

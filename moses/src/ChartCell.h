@@ -40,10 +40,12 @@
 namespace Moses
 {
 class ChartTranslationOptionList;
-class ChartTranslationOptionCollection;
 class ChartCellCollection;
 class ChartManager;
 
+/** 1 cell in chart decoder.
+ *  Doesn't directly hold hypotheses. Each cell contain a map of ChartHypothesisCollection that have different constituent labels
+ */
 class ChartCell
 {
   friend std::ostream& operator<<(std::ostream&, const ChartCell&);
@@ -76,7 +78,7 @@ public:
   void ProcessSentence(const ChartTranslationOptionList &transOptList
                        ,const ChartCellCollection &allChartCells);
 
-  /** Get all hypotheses in the cell that have the specified constituent label */
+  //! Get all hypotheses in the cell that have the specified constituent label
   const HypoList *GetSortedHypotheses(const Word &constituentLabel) const
   {
     MapType::const_iterator p = m_hypoColl.find(constituentLabel);
@@ -90,11 +92,13 @@ public:
 
   const ChartHypothesis *GetBestHypothesis() const;
 
+  //! @todo what is a m_sourceWordLabel?
   const ChartCellLabel &GetSourceWordLabel() const {
     CHECK(m_coverage.GetNumWordsCovered() == 1);
     return *m_sourceWordLabel;
   }
 
+  //! @todo what is a m_sourceWordLabel?
   const ChartCellLabelSet &GetTargetLabelSet() const {
     return m_targetLabelSet;
   }

@@ -28,10 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-
-/** Abstract class from which PhraseDictionary and GenerationDictionary
-	* are inherited.
-*/
+class InputType;
+  
+/** Abstract class from which PhraseDictionary and GenerationDictionary are inherited.
+ */
 class Dictionary
 {
 protected:
@@ -49,7 +49,7 @@ public:
   virtual DecodeType GetDecodeType() const = 0;
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUp();
+  virtual void CleanUp(const InputType& source);
 };
 
 }

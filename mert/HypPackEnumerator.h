@@ -16,6 +16,11 @@
 
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
+#include "MiraFeatureVector.h"
+
+namespace MosesTuning
+{
+  
 
 // Start with these abstract classes
 
@@ -27,9 +32,10 @@ public:
   virtual bool finished() = 0;
   virtual void next() = 0;
 
+  virtual std::size_t cur_id() = 0;
   virtual std::size_t cur_size() = 0;
   virtual std::size_t num_dense() const = 0;
-  virtual const FeatureDataItem& featuresAt(std::size_t i) = 0;
+  virtual const MiraFeatureVector& featuresAt(std::size_t i) = 0;
   virtual const ScoreDataItem& scoresAt(std::size_t i) = 0;
 };
 
@@ -46,8 +52,9 @@ public:
   virtual bool finished();
   virtual void next();
 
+  virtual std::size_t cur_id();
   virtual std::size_t cur_size();
-  virtual const FeatureDataItem& featuresAt(std::size_t i);
+  virtual const MiraFeatureVector& featuresAt(std::size_t i);
   virtual const ScoreDataItem& scoresAt(std::size_t i);
 
 private:
@@ -62,6 +69,7 @@ private:
   std::vector<FeatureDataIterator>  m_featureDataIters;
   std::vector<ScoreDataIterator>    m_scoreDataIters;
   std::vector<std::pair<std::size_t,std::size_t> > m_current_indexes;
+  std::vector<MiraFeatureVector>    m_current_featureVectors;
 };
 
 // Instantiation that reads into memory
@@ -79,8 +87,9 @@ public:
   virtual bool finished();
   virtual void next();
 
+  virtual std::size_t cur_id();
   virtual std::size_t cur_size();
-  virtual const FeatureDataItem& featuresAt(std::size_t i);
+  virtual const MiraFeatureVector& featuresAt(std::size_t i);
   virtual const ScoreDataItem& scoresAt(std::size_t i);
 
 private:
@@ -88,9 +97,11 @@ private:
   std::size_t m_cur_index;
   std::size_t m_num_dense;
   std::vector<std::size_t> m_indexes;
-  std::vector<std::vector<FeatureDataItem> > m_features;
+  std::vector<std::vector<MiraFeatureVector> > m_features;
   std::vector<std::vector<ScoreDataItem> > m_scores;
 };
+
+}
 
 #endif // MERT_HYP_PACK_COLLECTION_H
 

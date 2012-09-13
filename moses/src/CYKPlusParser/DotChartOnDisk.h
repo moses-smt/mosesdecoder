@@ -29,9 +29,11 @@ namespace OnDiskPt
 class PhraseNode;
 }
 
-
 namespace Moses
 {
+
+/** @todo what is this?
+ */
 class DottedRuleOnDisk : public DottedRule
 {
  public:

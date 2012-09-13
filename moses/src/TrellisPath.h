@@ -36,7 +36,8 @@ class TrellisPathList;
 
 /** Encapsulate the set of hypotheses/arcs that goes from decoding 1 phrase to all the source phrases
  *	to reach a final translation. For the best translation, this consist of all hypotheses, for the other
- *	n-best paths, the node on the path can consist of hypotheses or arcs
+ *	n-best paths, the node on the path can consist of hypotheses or arcs.
+ *  Used by phrase-based decoding
  */
 class TrellisPath
 {

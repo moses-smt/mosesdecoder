@@ -25,6 +25,10 @@
 
 namespace Moses
 {
+/** Costructor
+ \param input the input sentence
+ \param manager reference back to the manager
+ */
 ChartCellCollection::ChartCellCollection(const InputType &input, ChartManager &manager)
   :m_hypoStackColl(input.GetSize())
 {

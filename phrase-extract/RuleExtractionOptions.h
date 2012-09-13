@@ -21,6 +21,9 @@
 #ifndef RULEEXTRACTIONOPTIONS_H_INCLUDED_
 #define RULEEXTRACTIONOPTIONS_H_INCLUDED_
 
+namespace MosesTraining
+{
+
 struct RuleExtractionOptions {
 public:
   int maxSpan;
@@ -50,6 +53,7 @@ public:
   bool gzOutput;
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
+  bool boundaryRules;
   
   RuleExtractionOptions()
     : maxSpan(10)
@@ -82,7 +86,10 @@ public:
     , gzOutput(false)
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)
+    , boundaryRules(false)
   {}
 };
+
+}
 
 #endif

@@ -28,7 +28,7 @@
 namespace Moses
 {
 
-// order by descending score
+//! functor to compare (chart) hypotheses by (descending) score
 class ChartHypothesisScoreOrderer
 {
 public:
@@ -37,6 +37,9 @@ public:
   }
 };
 
+/** functor to compare (chart) hypotheses by feature function states.
+ *  If 2 hypos are equal, according to this functor, then they can be recombined.
+ */
 class ChartHypothesisRecombinationOrderer
 {
 public:
@@ -57,7 +60,9 @@ public:
   }
 };
 
-// 1 of these for each target LHS in each cell
+/** Contains a set of unique hypos that have the same HS non-term.
+  * ie. 1 of these for each target LHS in each cell
+  */
 class ChartHypothesisCollection
 {
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesisCollection&);
@@ -72,9 +77,6 @@ protected:
   size_t m_maxHypoStackSize; /**< maximum number of hypothesis allowed in this stack */
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
 
-  /** add hypothesis to stack. Prune if necessary.
-   * Returns false if equiv hypo exists in collection, otherwise returns true
-   */
   std::pair<HCType::iterator, bool> Add(ChartHypothesis *hypo, ChartManager &manager);
 
 public:
@@ -92,9 +94,7 @@ public:
   ~ChartHypothesisCollection();
   bool AddHypothesis(ChartHypothesis *hypo, ChartManager &manager);
 
-  //! remove hypothesis pointed to by iterator but don't delete the object
   void Detach(const HCType::iterator &iter);
-  /** destroy Hypothesis pointed to by iterator (object pool version) */
   void Remove(const HCType::iterator &iter);
 
   void PruneToSize(ChartManager &manager);
@@ -109,10 +109,12 @@ public:
   void SortHypotheses();
   void CleanupArcList();
 
+  //! return vector of hypothesis that has been sorted by score
   const HypoList &GetSortedHypotheses() const {
     return m_hyposOrdered;
   }
 
+  //! return the best total score of all hypos in this collection
   float GetBestScore() const { return m_bestScore; }
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;

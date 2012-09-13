@@ -11,7 +11,7 @@ class Phrase;
 class ScoreColl;
 class ScoreComponentCollection;
 
-//! List of language models
+//! List of language models and function to calc scores from each LM, given a phrase
 class LMList
 {
 protected:
@@ -42,6 +42,22 @@ public:
   ~LMList();
 
   void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore,  ScoreComponentCollection* breakdown) const;
+  void InitializeBeforeSentenceProcessing() {
+    std::list<LanguageModel*>::iterator lm_iter;
+    for (lm_iter = m_coll.begin();
+         lm_iter != m_coll.end();
+         ++lm_iter) {
+        (*lm_iter)->InitializeBeforeSentenceProcessing();
+    }
+  }
+  void CleanUpAfterSentenceProcessing(const InputType& source) {
+    std::list<LanguageModel*>::iterator lm_iter;
+    for (lm_iter = m_coll.begin();
+         lm_iter != m_coll.end();
+         ++lm_iter) {
+        (*lm_iter)->CleanUpAfterSentenceProcessing(source);
+    }
+  }
 
   void Add(LanguageModel *lm);
 

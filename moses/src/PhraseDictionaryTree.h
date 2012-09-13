@@ -33,6 +33,9 @@ class PDTimp;
 
 typedef PrefixTreeF<LabelId,OFF_T> PTF;
 
+/** A phrase table for phrase-based decoding that is held on disk, rather than in memory
+ *  Wrapper around a PDTimp class
+ */
 class PhraseDictionaryTree : public Dictionary
 {
   PDTimp *imp; //implementation

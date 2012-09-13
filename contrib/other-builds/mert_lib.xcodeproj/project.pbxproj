@@ -1,0 +1,621 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E2CCFB915939E5D00D858D1 /* BleuScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF3A15939E5D00D858D1 /* BleuScorer.cpp */; };
+		1E2CCFBA15939E5D00D858D1 /* BleuScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF3B15939E5D00D858D1 /* BleuScorer.h */; };
+		1E2CCFBC15939E5D00D858D1 /* CderScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF3D15939E5D00D858D1 /* CderScorer.cpp */; };
+		1E2CCFBD15939E5D00D858D1 /* CderScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF3E15939E5D00D858D1 /* CderScorer.h */; };
+		1E2CCFBE15939E5D00D858D1 /* Data.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF3F15939E5D00D858D1 /* Data.cpp */; };
+		1E2CCFBF15939E5D00D858D1 /* Data.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF4015939E5D00D858D1 /* Data.h */; };
+		1E2CCFC315939E5D00D858D1 /* Fdstream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5115939E5D00D858D1 /* Fdstream.h */; };
+		1E2CCFC415939E5D00D858D1 /* FeatureArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5215939E5D00D858D1 /* FeatureArray.cpp */; };
+		1E2CCFC515939E5D00D858D1 /* FeatureArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5315939E5D00D858D1 /* FeatureArray.h */; };
+		1E2CCFC615939E5D00D858D1 /* FeatureData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5415939E5D00D858D1 /* FeatureData.cpp */; };
+		1E2CCFC715939E5D00D858D1 /* FeatureData.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5515939E5D00D858D1 /* FeatureData.h */; };
+		1E2CCFC815939E5D00D858D1 /* FeatureDataIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5615939E5D00D858D1 /* FeatureDataIterator.cpp */; };
+		1E2CCFC915939E5D00D858D1 /* FeatureDataIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5715939E5D00D858D1 /* FeatureDataIterator.h */; };
+		1E2CCFCB15939E5D00D858D1 /* FeatureStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5915939E5D00D858D1 /* FeatureStats.cpp */; };
+		1E2CCFCC15939E5D00D858D1 /* FeatureStats.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5A15939E5D00D858D1 /* FeatureStats.h */; };
+		1E2CCFCD15939E5D00D858D1 /* FileStream.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5B15939E5D00D858D1 /* FileStream.cpp */; };
+		1E2CCFCE15939E5D00D858D1 /* FileStream.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5C15939E5D00D858D1 /* FileStream.h */; };
+		1E2CCFCF15939E5D00D858D1 /* GzFileBuf.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5D15939E5D00D858D1 /* GzFileBuf.cpp */; };
+		1E2CCFD015939E5D00D858D1 /* GzFileBuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF5E15939E5D00D858D1 /* GzFileBuf.h */; };
+		1E2CCFD115939E5D00D858D1 /* HypPackEnumerator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF5F15939E5D00D858D1 /* HypPackEnumerator.cpp */; };
+		1E2CCFD215939E5D00D858D1 /* HypPackEnumerator.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6015939E5D00D858D1 /* HypPackEnumerator.h */; };
+		1E2CCFD315939E5D00D858D1 /* InterpolatedScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF6115939E5D00D858D1 /* InterpolatedScorer.cpp */; };
+		1E2CCFD415939E5D00D858D1 /* InterpolatedScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6215939E5D00D858D1 /* InterpolatedScorer.h */; };
+		1E2CCFD715939E5D00D858D1 /* MergeScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF6515939E5D00D858D1 /* MergeScorer.cpp */; };
+		1E2CCFD815939E5D00D858D1 /* MergeScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6615939E5D00D858D1 /* MergeScorer.h */; };
+		1E2CCFD915939E5D00D858D1 /* mert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF6715939E5D00D858D1 /* mert.cpp */; };
+		1E2CCFDA15939E5D00D858D1 /* MiraFeatureVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF6815939E5D00D858D1 /* MiraFeatureVector.cpp */; };
+		1E2CCFDB15939E5D00D858D1 /* MiraFeatureVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6915939E5D00D858D1 /* MiraFeatureVector.h */; };
+		1E2CCFDC15939E5D00D858D1 /* MiraWeightVector.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF6A15939E5D00D858D1 /* MiraWeightVector.cpp */; };
+		1E2CCFDD15939E5D00D858D1 /* MiraWeightVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6B15939E5D00D858D1 /* MiraWeightVector.h */; };
+		1E2CCFDE15939E5D00D858D1 /* Ngram.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6C15939E5D00D858D1 /* Ngram.h */; };
+		1E2CCFE015939E5D00D858D1 /* Optimizer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF6E15939E5D00D858D1 /* Optimizer.cpp */; };
+		1E2CCFE115939E5D00D858D1 /* Optimizer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF6F15939E5D00D858D1 /* Optimizer.h */; };
+		1E2CCFE215939E5D00D858D1 /* OptimizerFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF7015939E5D00D858D1 /* OptimizerFactory.cpp */; };
+		1E2CCFE315939E5D00D858D1 /* OptimizerFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7115939E5D00D858D1 /* OptimizerFactory.h */; };
+		1E2CCFE515939E5D00D858D1 /* PerScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF7315939E5D00D858D1 /* PerScorer.cpp */; };
+		1E2CCFE615939E5D00D858D1 /* PerScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7415939E5D00D858D1 /* PerScorer.h */; };
+		1E2CCFE715939E5D00D858D1 /* Point.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF7515939E5D00D858D1 /* Point.cpp */; };
+		1E2CCFE815939E5D00D858D1 /* Point.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7615939E5D00D858D1 /* Point.h */; };
+		1E2CCFEA15939E5D00D858D1 /* PreProcessFilter.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF7815939E5D00D858D1 /* PreProcessFilter.cpp */; };
+		1E2CCFEB15939E5D00D858D1 /* PreProcessFilter.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7915939E5D00D858D1 /* PreProcessFilter.h */; };
+		1E2CCFED15939E5D00D858D1 /* Reference.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7B15939E5D00D858D1 /* Reference.h */; };
+		1E2CCFEF15939E5D00D858D1 /* ScopedVector.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7D15939E5D00D858D1 /* ScopedVector.h */; };
+		1E2CCFF015939E5D00D858D1 /* ScoreArray.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF7E15939E5D00D858D1 /* ScoreArray.cpp */; };
+		1E2CCFF115939E5D00D858D1 /* ScoreArray.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF7F15939E5D00D858D1 /* ScoreArray.h */; };
+		1E2CCFF215939E5D00D858D1 /* ScoreData.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8015939E5D00D858D1 /* ScoreData.cpp */; };
+		1E2CCFF315939E5D00D858D1 /* ScoreData.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8115939E5D00D858D1 /* ScoreData.h */; };
+		1E2CCFF415939E5D00D858D1 /* ScoreDataIterator.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8215939E5D00D858D1 /* ScoreDataIterator.cpp */; };
+		1E2CCFF515939E5D00D858D1 /* ScoreDataIterator.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8315939E5D00D858D1 /* ScoreDataIterator.h */; };
+		1E2CCFF615939E5D00D858D1 /* Scorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8415939E5D00D858D1 /* Scorer.cpp */; };
+		1E2CCFF715939E5D00D858D1 /* Scorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8515939E5D00D858D1 /* Scorer.h */; };
+		1E2CCFF815939E5D00D858D1 /* ScorerFactory.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8615939E5D00D858D1 /* ScorerFactory.cpp */; };
+		1E2CCFF915939E5D00D858D1 /* ScorerFactory.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8715939E5D00D858D1 /* ScorerFactory.h */; };
+		1E2CCFFA15939E5D00D858D1 /* ScoreStats.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8815939E5D00D858D1 /* ScoreStats.cpp */; };
+		1E2CCFFB15939E5D00D858D1 /* ScoreStats.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8915939E5D00D858D1 /* ScoreStats.h */; };
+		1E2CCFFC15939E5D00D858D1 /* SemposOverlapping.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8A15939E5D00D858D1 /* SemposOverlapping.cpp */; };
+		1E2CCFFD15939E5D00D858D1 /* SemposOverlapping.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8B15939E5D00D858D1 /* SemposOverlapping.h */; };
+		1E2CCFFE15939E5D00D858D1 /* SemposScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF8C15939E5D00D858D1 /* SemposScorer.cpp */; };
+		1E2CCFFF15939E5D00D858D1 /* SemposScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8D15939E5D00D858D1 /* SemposScorer.h */; };
+		1E2CD00015939E5D00D858D1 /* Singleton.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF8E15939E5D00D858D1 /* Singleton.h */; };
+		1E2CD00215939E5D00D858D1 /* alignmentStruct.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9115939E5D00D858D1 /* alignmentStruct.cpp */; };
+		1E2CD00315939E5D00D858D1 /* alignmentStruct.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9215939E5D00D858D1 /* alignmentStruct.h */; };
+		1E2CD00415939E5D00D858D1 /* bestShiftStruct.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9315939E5D00D858D1 /* bestShiftStruct.h */; };
+		1E2CD00515939E5D00D858D1 /* hashMap.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9415939E5D00D858D1 /* hashMap.cpp */; };
+		1E2CD00615939E5D00D858D1 /* hashMap.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9515939E5D00D858D1 /* hashMap.h */; };
+		1E2CD00715939E5D00D858D1 /* hashMapInfos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9615939E5D00D858D1 /* hashMapInfos.cpp */; };
+		1E2CD00815939E5D00D858D1 /* hashMapInfos.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9715939E5D00D858D1 /* hashMapInfos.h */; };
+		1E2CD00915939E5D00D858D1 /* hashMapStringInfos.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9815939E5D00D858D1 /* hashMapStringInfos.cpp */; };
+		1E2CD00A15939E5D00D858D1 /* hashMapStringInfos.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9915939E5D00D858D1 /* hashMapStringInfos.h */; };
+		1E2CD00B15939E5D00D858D1 /* infosHasher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9A15939E5D00D858D1 /* infosHasher.cpp */; };
+		1E2CD00C15939E5D00D858D1 /* infosHasher.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9B15939E5D00D858D1 /* infosHasher.h */; };
+		1E2CD00D15939E5D00D858D1 /* stringHasher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9C15939E5D00D858D1 /* stringHasher.cpp */; };
+		1E2CD00E15939E5D00D858D1 /* stringHasher.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9D15939E5D00D858D1 /* stringHasher.h */; };
+		1E2CD00F15939E5D00D858D1 /* stringInfosHasher.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCF9E15939E5D00D858D1 /* stringInfosHasher.cpp */; };
+		1E2CD01015939E5D00D858D1 /* stringInfosHasher.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCF9F15939E5D00D858D1 /* stringInfosHasher.h */; };
+		1E2CD01115939E5D00D858D1 /* terAlignment.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFA015939E5D00D858D1 /* terAlignment.cpp */; };
+		1E2CD01215939E5D00D858D1 /* terAlignment.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFA115939E5D00D858D1 /* terAlignment.h */; };
+		1E2CD01315939E5D00D858D1 /* tercalc.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFA215939E5D00D858D1 /* tercalc.cpp */; };
+		1E2CD01415939E5D00D858D1 /* tercalc.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFA315939E5D00D858D1 /* tercalc.h */; };
+		1E2CD01515939E5D00D858D1 /* terShift.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFA415939E5D00D858D1 /* terShift.cpp */; };
+		1E2CD01615939E5D00D858D1 /* terShift.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFA515939E5D00D858D1 /* terShift.h */; };
+		1E2CD01715939E5D00D858D1 /* tools.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFA615939E5D00D858D1 /* tools.cpp */; };
+		1E2CD01815939E5D00D858D1 /* tools.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFA715939E5D00D858D1 /* tools.h */; };
+		1E2CD01915939E5D00D858D1 /* TerScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFA815939E5D00D858D1 /* TerScorer.cpp */; };
+		1E2CD01A15939E5D00D858D1 /* TerScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFA915939E5D00D858D1 /* TerScorer.h */; };
+		1E2CD01C15939E5D00D858D1 /* Timer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFAE15939E5D00D858D1 /* Timer.cpp */; };
+		1E2CD01D15939E5D00D858D1 /* Timer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFAF15939E5D00D858D1 /* Timer.h */; };
+		1E2CD01F15939E5D00D858D1 /* Types.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFB215939E5D00D858D1 /* Types.h */; };
+		1E2CD02015939E5D00D858D1 /* Util.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFB315939E5D00D858D1 /* Util.cpp */; };
+		1E2CD02115939E5D00D858D1 /* Util.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFB415939E5D00D858D1 /* Util.h */; };
+		1E2CD02315939E5D00D858D1 /* Vocabulary.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2CCFB615939E5D00D858D1 /* Vocabulary.cpp */; };
+		1E2CD02415939E5D00D858D1 /* Vocabulary.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E2CCFB715939E5D00D858D1 /* Vocabulary.h */; };
+		1E39621B1594CFD1006FE978 /* PermutationScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3962191594CFD1006FE978 /* PermutationScorer.cpp */; };
+		1E3962201594CFF9006FE978 /* Permutation.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E39621E1594CFF9006FE978 /* Permutation.cpp */; };
+		1E3962211594CFF9006FE978 /* Permutation.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E39621F1594CFF9006FE978 /* Permutation.h */; };
+		1E3962231594D0FF006FE978 /* SentenceLevelScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */; };
+		1E3962251594D12C006FE978 /* SentenceLevelScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3962241594D12C006FE978 /* SentenceLevelScorer.h */; };
+		1E43CA3415973474000E29D3 /* PermutationScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E43CA3315973474000E29D3 /* PermutationScorer.h */; };
+		1E689F21159A529C00DD995A /* ThreadPool.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E689F1F159A529C00DD995A /* ThreadPool.cpp */; };
+		1E689F22159A529C00DD995A /* ThreadPool.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E689F20159A529C00DD995A /* ThreadPool.h */; };
+		1EE52B561596B3E4006DC938 /* StatisticsBasedScorer.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EE52B551596B3E4006DC938 /* StatisticsBasedScorer.h */; };
+		1EE52B591596B3FC006DC938 /* StatisticsBasedScorer.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EE52B581596B3FC006DC938 /* StatisticsBasedScorer.cpp */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		1E2CCF3315939E2D00D858D1 /* libmert_lib.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libmert_lib.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E2CCF3A15939E5D00D858D1 /* BleuScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BleuScorer.cpp; path = ../../mert/BleuScorer.cpp; sourceTree = "<group>"; };
+		1E2CCF3B15939E5D00D858D1 /* BleuScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = BleuScorer.h; path = ../../mert/BleuScorer.h; sourceTree = "<group>"; };
+		1E2CCF3D15939E5D00D858D1 /* CderScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = CderScorer.cpp; path = ../../mert/CderScorer.cpp; sourceTree = "<group>"; };
+		1E2CCF3E15939E5D00D858D1 /* CderScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = CderScorer.h; path = ../../mert/CderScorer.h; sourceTree = "<group>"; };
+		1E2CCF3F15939E5D00D858D1 /* Data.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Data.cpp; path = ../../mert/Data.cpp; sourceTree = "<group>"; };
+		1E2CCF4015939E5D00D858D1 /* Data.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Data.h; path = ../../mert/Data.h; sourceTree = "<group>"; };
+		1E2CCF5115939E5D00D858D1 /* Fdstream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Fdstream.h; path = ../../mert/Fdstream.h; sourceTree = "<group>"; };
+		1E2CCF5215939E5D00D858D1 /* FeatureArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureArray.cpp; path = ../../mert/FeatureArray.cpp; sourceTree = "<group>"; };
+		1E2CCF5315939E5D00D858D1 /* FeatureArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureArray.h; path = ../../mert/FeatureArray.h; sourceTree = "<group>"; };
+		1E2CCF5415939E5D00D858D1 /* FeatureData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureData.cpp; path = ../../mert/FeatureData.cpp; sourceTree = "<group>"; };
+		1E2CCF5515939E5D00D858D1 /* FeatureData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureData.h; path = ../../mert/FeatureData.h; sourceTree = "<group>"; };
+		1E2CCF5615939E5D00D858D1 /* FeatureDataIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureDataIterator.cpp; path = ../../mert/FeatureDataIterator.cpp; sourceTree = "<group>"; };
+		1E2CCF5715939E5D00D858D1 /* FeatureDataIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureDataIterator.h; path = ../../mert/FeatureDataIterator.h; sourceTree = "<group>"; };
+		1E2CCF5915939E5D00D858D1 /* FeatureStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FeatureStats.cpp; path = ../../mert/FeatureStats.cpp; sourceTree = "<group>"; };
+		1E2CCF5A15939E5D00D858D1 /* FeatureStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FeatureStats.h; path = ../../mert/FeatureStats.h; sourceTree = "<group>"; };
+		1E2CCF5B15939E5D00D858D1 /* FileStream.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = FileStream.cpp; path = ../../mert/FileStream.cpp; sourceTree = "<group>"; };
+		1E2CCF5C15939E5D00D858D1 /* FileStream.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = FileStream.h; path = ../../mert/FileStream.h; sourceTree = "<group>"; };
+		1E2CCF5D15939E5D00D858D1 /* GzFileBuf.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GzFileBuf.cpp; path = ../../mert/GzFileBuf.cpp; sourceTree = "<group>"; };
+		1E2CCF5E15939E5D00D858D1 /* GzFileBuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GzFileBuf.h; path = ../../mert/GzFileBuf.h; sourceTree = "<group>"; };
+		1E2CCF5F15939E5D00D858D1 /* HypPackEnumerator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = HypPackEnumerator.cpp; path = ../../mert/HypPackEnumerator.cpp; sourceTree = "<group>"; };
+		1E2CCF6015939E5D00D858D1 /* HypPackEnumerator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = HypPackEnumerator.h; path = ../../mert/HypPackEnumerator.h; sourceTree = "<group>"; };
+		1E2CCF6115939E5D00D858D1 /* InterpolatedScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = InterpolatedScorer.cpp; path = ../../mert/InterpolatedScorer.cpp; sourceTree = "<group>"; };
+		1E2CCF6215939E5D00D858D1 /* InterpolatedScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = InterpolatedScorer.h; path = ../../mert/InterpolatedScorer.h; sourceTree = "<group>"; };
+		1E2CCF6515939E5D00D858D1 /* MergeScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MergeScorer.cpp; path = ../../mert/MergeScorer.cpp; sourceTree = "<group>"; };
+		1E2CCF6615939E5D00D858D1 /* MergeScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MergeScorer.h; path = ../../mert/MergeScorer.h; sourceTree = "<group>"; };
+		1E2CCF6715939E5D00D858D1 /* mert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mert.cpp; path = ../../mert/mert.cpp; sourceTree = "<group>"; };
+		1E2CCF6815939E5D00D858D1 /* MiraFeatureVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MiraFeatureVector.cpp; path = ../../mert/MiraFeatureVector.cpp; sourceTree = "<group>"; };
+		1E2CCF6915939E5D00D858D1 /* MiraFeatureVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MiraFeatureVector.h; path = ../../mert/MiraFeatureVector.h; sourceTree = "<group>"; };
+		1E2CCF6A15939E5D00D858D1 /* MiraWeightVector.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = MiraWeightVector.cpp; path = ../../mert/MiraWeightVector.cpp; sourceTree = "<group>"; };
+		1E2CCF6B15939E5D00D858D1 /* MiraWeightVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = MiraWeightVector.h; path = ../../mert/MiraWeightVector.h; sourceTree = "<group>"; };
+		1E2CCF6C15939E5D00D858D1 /* Ngram.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Ngram.h; path = ../../mert/Ngram.h; sourceTree = "<group>"; };
+		1E2CCF6E15939E5D00D858D1 /* Optimizer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Optimizer.cpp; path = ../../mert/Optimizer.cpp; sourceTree = "<group>"; };
+		1E2CCF6F15939E5D00D858D1 /* Optimizer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Optimizer.h; path = ../../mert/Optimizer.h; sourceTree = "<group>"; };
+		1E2CCF7015939E5D00D858D1 /* OptimizerFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = OptimizerFactory.cpp; path = ../../mert/OptimizerFactory.cpp; sourceTree = "<group>"; };
+		1E2CCF7115939E5D00D858D1 /* OptimizerFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = OptimizerFactory.h; path = ../../mert/OptimizerFactory.h; sourceTree = "<group>"; };
+		1E2CCF7315939E5D00D858D1 /* PerScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PerScorer.cpp; path = ../../mert/PerScorer.cpp; sourceTree = "<group>"; };
+		1E2CCF7415939E5D00D858D1 /* PerScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PerScorer.h; path = ../../mert/PerScorer.h; sourceTree = "<group>"; };
+		1E2CCF7515939E5D00D858D1 /* Point.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Point.cpp; path = ../../mert/Point.cpp; sourceTree = "<group>"; };
+		1E2CCF7615939E5D00D858D1 /* Point.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Point.h; path = ../../mert/Point.h; sourceTree = "<group>"; };
+		1E2CCF7815939E5D00D858D1 /* PreProcessFilter.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PreProcessFilter.cpp; path = ../../mert/PreProcessFilter.cpp; sourceTree = "<group>"; };
+		1E2CCF7915939E5D00D858D1 /* PreProcessFilter.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PreProcessFilter.h; path = ../../mert/PreProcessFilter.h; sourceTree = "<group>"; };
+		1E2CCF7B15939E5D00D858D1 /* Reference.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Reference.h; path = ../../mert/Reference.h; sourceTree = "<group>"; };
+		1E2CCF7D15939E5D00D858D1 /* ScopedVector.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScopedVector.h; path = ../../mert/ScopedVector.h; sourceTree = "<group>"; };
+		1E2CCF7E15939E5D00D858D1 /* ScoreArray.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreArray.cpp; path = ../../mert/ScoreArray.cpp; sourceTree = "<group>"; };
+		1E2CCF7F15939E5D00D858D1 /* ScoreArray.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreArray.h; path = ../../mert/ScoreArray.h; sourceTree = "<group>"; };
+		1E2CCF8015939E5D00D858D1 /* ScoreData.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreData.cpp; path = ../../mert/ScoreData.cpp; sourceTree = "<group>"; };
+		1E2CCF8115939E5D00D858D1 /* ScoreData.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreData.h; path = ../../mert/ScoreData.h; sourceTree = "<group>"; };
+		1E2CCF8215939E5D00D858D1 /* ScoreDataIterator.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreDataIterator.cpp; path = ../../mert/ScoreDataIterator.cpp; sourceTree = "<group>"; };
+		1E2CCF8315939E5D00D858D1 /* ScoreDataIterator.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreDataIterator.h; path = ../../mert/ScoreDataIterator.h; sourceTree = "<group>"; };
+		1E2CCF8415939E5D00D858D1 /* Scorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Scorer.cpp; path = ../../mert/Scorer.cpp; sourceTree = "<group>"; };
+		1E2CCF8515939E5D00D858D1 /* Scorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Scorer.h; path = ../../mert/Scorer.h; sourceTree = "<group>"; };
+		1E2CCF8615939E5D00D858D1 /* ScorerFactory.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScorerFactory.cpp; path = ../../mert/ScorerFactory.cpp; sourceTree = "<group>"; };
+		1E2CCF8715939E5D00D858D1 /* ScorerFactory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScorerFactory.h; path = ../../mert/ScorerFactory.h; sourceTree = "<group>"; };
+		1E2CCF8815939E5D00D858D1 /* ScoreStats.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ScoreStats.cpp; path = ../../mert/ScoreStats.cpp; sourceTree = "<group>"; };
+		1E2CCF8915939E5D00D858D1 /* ScoreStats.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ScoreStats.h; path = ../../mert/ScoreStats.h; sourceTree = "<group>"; };
+		1E2CCF8A15939E5D00D858D1 /* SemposOverlapping.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SemposOverlapping.cpp; path = ../../mert/SemposOverlapping.cpp; sourceTree = "<group>"; };
+		1E2CCF8B15939E5D00D858D1 /* SemposOverlapping.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SemposOverlapping.h; path = ../../mert/SemposOverlapping.h; sourceTree = "<group>"; };
+		1E2CCF8C15939E5D00D858D1 /* SemposScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SemposScorer.cpp; path = ../../mert/SemposScorer.cpp; sourceTree = "<group>"; };
+		1E2CCF8D15939E5D00D858D1 /* SemposScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SemposScorer.h; path = ../../mert/SemposScorer.h; sourceTree = "<group>"; };
+		1E2CCF8E15939E5D00D858D1 /* Singleton.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Singleton.h; path = ../../mert/Singleton.h; sourceTree = "<group>"; };
+		1E2CCF9115939E5D00D858D1 /* alignmentStruct.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = alignmentStruct.cpp; sourceTree = "<group>"; };
+		1E2CCF9215939E5D00D858D1 /* alignmentStruct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = alignmentStruct.h; sourceTree = "<group>"; };
+		1E2CCF9315939E5D00D858D1 /* bestShiftStruct.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = bestShiftStruct.h; sourceTree = "<group>"; };
+		1E2CCF9415939E5D00D858D1 /* hashMap.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hashMap.cpp; sourceTree = "<group>"; };
+		1E2CCF9515939E5D00D858D1 /* hashMap.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hashMap.h; sourceTree = "<group>"; };
+		1E2CCF9615939E5D00D858D1 /* hashMapInfos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hashMapInfos.cpp; sourceTree = "<group>"; };
+		1E2CCF9715939E5D00D858D1 /* hashMapInfos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hashMapInfos.h; sourceTree = "<group>"; };
+		1E2CCF9815939E5D00D858D1 /* hashMapStringInfos.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = hashMapStringInfos.cpp; sourceTree = "<group>"; };
+		1E2CCF9915939E5D00D858D1 /* hashMapStringInfos.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = hashMapStringInfos.h; sourceTree = "<group>"; };
+		1E2CCF9A15939E5D00D858D1 /* infosHasher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = infosHasher.cpp; sourceTree = "<group>"; };
+		1E2CCF9B15939E5D00D858D1 /* infosHasher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = infosHasher.h; sourceTree = "<group>"; };
+		1E2CCF9C15939E5D00D858D1 /* stringHasher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringHasher.cpp; sourceTree = "<group>"; };
+		1E2CCF9D15939E5D00D858D1 /* stringHasher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringHasher.h; sourceTree = "<group>"; };
+		1E2CCF9E15939E5D00D858D1 /* stringInfosHasher.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = stringInfosHasher.cpp; sourceTree = "<group>"; };
+		1E2CCF9F15939E5D00D858D1 /* stringInfosHasher.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = stringInfosHasher.h; sourceTree = "<group>"; };
+		1E2CCFA015939E5D00D858D1 /* terAlignment.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = terAlignment.cpp; sourceTree = "<group>"; };
+		1E2CCFA115939E5D00D858D1 /* terAlignment.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = terAlignment.h; sourceTree = "<group>"; };
+		1E2CCFA215939E5D00D858D1 /* tercalc.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tercalc.cpp; sourceTree = "<group>"; };
+		1E2CCFA315939E5D00D858D1 /* tercalc.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tercalc.h; sourceTree = "<group>"; };
+		1E2CCFA415939E5D00D858D1 /* terShift.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = terShift.cpp; sourceTree = "<group>"; };
+		1E2CCFA515939E5D00D858D1 /* terShift.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = terShift.h; sourceTree = "<group>"; };
+		1E2CCFA615939E5D00D858D1 /* tools.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = tools.cpp; sourceTree = "<group>"; };
+		1E2CCFA715939E5D00D858D1 /* tools.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = tools.h; sourceTree = "<group>"; };
+		1E2CCFA815939E5D00D858D1 /* TerScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TerScorer.cpp; path = ../../mert/TerScorer.cpp; sourceTree = "<group>"; };
+		1E2CCFA915939E5D00D858D1 /* TerScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TerScorer.h; path = ../../mert/TerScorer.h; sourceTree = "<group>"; };
+		1E2CCFAE15939E5D00D858D1 /* Timer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Timer.cpp; path = ../../mert/Timer.cpp; sourceTree = "<group>"; };
+		1E2CCFAF15939E5D00D858D1 /* Timer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Timer.h; path = ../../mert/Timer.h; sourceTree = "<group>"; };
+		1E2CCFB215939E5D00D858D1 /* Types.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Types.h; path = ../../mert/Types.h; sourceTree = "<group>"; };
+		1E2CCFB315939E5D00D858D1 /* Util.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Util.cpp; path = ../../mert/Util.cpp; sourceTree = "<group>"; };
+		1E2CCFB415939E5D00D858D1 /* Util.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Util.h; path = ../../mert/Util.h; sourceTree = "<group>"; };
+		1E2CCFB615939E5D00D858D1 /* Vocabulary.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Vocabulary.cpp; path = ../../mert/Vocabulary.cpp; sourceTree = "<group>"; };
+		1E2CCFB715939E5D00D858D1 /* Vocabulary.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Vocabulary.h; path = ../../mert/Vocabulary.h; sourceTree = "<group>"; };
+		1E3962191594CFD1006FE978 /* PermutationScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = PermutationScorer.cpp; path = ../../mert/PermutationScorer.cpp; sourceTree = "<group>"; };
+		1E39621E1594CFF9006FE978 /* Permutation.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Permutation.cpp; path = ../../mert/Permutation.cpp; sourceTree = "<group>"; };
+		1E39621F1594CFF9006FE978 /* Permutation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Permutation.h; path = ../../mert/Permutation.h; sourceTree = "<group>"; };
+		1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SentenceLevelScorer.cpp; path = ../../mert/SentenceLevelScorer.cpp; sourceTree = "<group>"; };
+		1E3962241594D12C006FE978 /* SentenceLevelScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SentenceLevelScorer.h; path = ../../mert/SentenceLevelScorer.h; sourceTree = "<group>"; };
+		1E43CA3315973474000E29D3 /* PermutationScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PermutationScorer.h; path = ../../mert/PermutationScorer.h; sourceTree = "<group>"; };
+		1E689F1F159A529C00DD995A /* ThreadPool.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThreadPool.cpp; path = ../../moses/src/ThreadPool.cpp; sourceTree = "<group>"; };
+		1E689F20159A529C00DD995A /* ThreadPool.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThreadPool.h; path = ../../moses/src/ThreadPool.h; sourceTree = "<group>"; };
+		1EE52B551596B3E4006DC938 /* StatisticsBasedScorer.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StatisticsBasedScorer.h; path = ../../mert/StatisticsBasedScorer.h; sourceTree = "<group>"; };
+		1EE52B581596B3FC006DC938 /* StatisticsBasedScorer.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = StatisticsBasedScorer.cpp; path = ../../mert/StatisticsBasedScorer.cpp; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1E2CCF3015939E2D00D858D1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1E2CCF2815939E2D00D858D1 = {
+			isa = PBXGroup;
+			children = (
+				1E689F1F159A529C00DD995A /* ThreadPool.cpp */,
+				1E689F20159A529C00DD995A /* ThreadPool.h */,
+				1EE52B581596B3FC006DC938 /* StatisticsBasedScorer.cpp */,
+				1EE52B551596B3E4006DC938 /* StatisticsBasedScorer.h */,
+				1E3962241594D12C006FE978 /* SentenceLevelScorer.h */,
+				1E3962221594D0FF006FE978 /* SentenceLevelScorer.cpp */,
+				1E39621E1594CFF9006FE978 /* Permutation.cpp */,
+				1E39621F1594CFF9006FE978 /* Permutation.h */,
+				1E3962191594CFD1006FE978 /* PermutationScorer.cpp */,
+				1E43CA3315973474000E29D3 /* PermutationScorer.h */,
+				1E2CCF3A15939E5D00D858D1 /* BleuScorer.cpp */,
+				1E2CCF3B15939E5D00D858D1 /* BleuScorer.h */,
+				1E2CCF3D15939E5D00D858D1 /* CderScorer.cpp */,
+				1E2CCF3E15939E5D00D858D1 /* CderScorer.h */,
+				1E2CCF3F15939E5D00D858D1 /* Data.cpp */,
+				1E2CCF4015939E5D00D858D1 /* Data.h */,
+				1E2CCF5115939E5D00D858D1 /* Fdstream.h */,
+				1E2CCF5215939E5D00D858D1 /* FeatureArray.cpp */,
+				1E2CCF5315939E5D00D858D1 /* FeatureArray.h */,
+				1E2CCF5415939E5D00D858D1 /* FeatureData.cpp */,
+				1E2CCF5515939E5D00D858D1 /* FeatureData.h */,
+				1E2CCF5615939E5D00D858D1 /* FeatureDataIterator.cpp */,
+				1E2CCF5715939E5D00D858D1 /* FeatureDataIterator.h */,
+				1E2CCF5915939E5D00D858D1 /* FeatureStats.cpp */,
+				1E2CCF5A15939E5D00D858D1 /* FeatureStats.h */,
+				1E2CCF5B15939E5D00D858D1 /* FileStream.cpp */,
+				1E2CCF5C15939E5D00D858D1 /* FileStream.h */,
+				1E2CCF5D15939E5D00D858D1 /* GzFileBuf.cpp */,
+				1E2CCF5E15939E5D00D858D1 /* GzFileBuf.h */,
+				1E2CCF5F15939E5D00D858D1 /* HypPackEnumerator.cpp */,
+				1E2CCF6015939E5D00D858D1 /* HypPackEnumerator.h */,
+				1E2CCF6115939E5D00D858D1 /* InterpolatedScorer.cpp */,
+				1E2CCF6215939E5D00D858D1 /* InterpolatedScorer.h */,
+				1E2CCF6515939E5D00D858D1 /* MergeScorer.cpp */,
+				1E2CCF6615939E5D00D858D1 /* MergeScorer.h */,
+				1E2CCF6715939E5D00D858D1 /* mert.cpp */,
+				1E2CCF6815939E5D00D858D1 /* MiraFeatureVector.cpp */,
+				1E2CCF6915939E5D00D858D1 /* MiraFeatureVector.h */,
+				1E2CCF6A15939E5D00D858D1 /* MiraWeightVector.cpp */,
+				1E2CCF6B15939E5D00D858D1 /* MiraWeightVector.h */,
+				1E2CCF6C15939E5D00D858D1 /* Ngram.h */,
+				1E2CCF6E15939E5D00D858D1 /* Optimizer.cpp */,
+				1E2CCF6F15939E5D00D858D1 /* Optimizer.h */,
+				1E2CCF7015939E5D00D858D1 /* OptimizerFactory.cpp */,
+				1E2CCF7115939E5D00D858D1 /* OptimizerFactory.h */,
+				1E2CCF7315939E5D00D858D1 /* PerScorer.cpp */,
+				1E2CCF7415939E5D00D858D1 /* PerScorer.h */,
+				1E2CCF7515939E5D00D858D1 /* Point.cpp */,
+				1E2CCF7615939E5D00D858D1 /* Point.h */,
+				1E2CCF7815939E5D00D858D1 /* PreProcessFilter.cpp */,
+				1E2CCF7915939E5D00D858D1 /* PreProcessFilter.h */,
+				1E2CCF7B15939E5D00D858D1 /* Reference.h */,
+				1E2CCF7D15939E5D00D858D1 /* ScopedVector.h */,
+				1E2CCF7E15939E5D00D858D1 /* ScoreArray.cpp */,
+				1E2CCF7F15939E5D00D858D1 /* ScoreArray.h */,
+				1E2CCF8015939E5D00D858D1 /* ScoreData.cpp */,
+				1E2CCF8115939E5D00D858D1 /* ScoreData.h */,
+				1E2CCF8215939E5D00D858D1 /* ScoreDataIterator.cpp */,
+				1E2CCF8315939E5D00D858D1 /* ScoreDataIterator.h */,
+				1E2CCF8415939E5D00D858D1 /* Scorer.cpp */,
+				1E2CCF8515939E5D00D858D1 /* Scorer.h */,
+				1E2CCF8615939E5D00D858D1 /* ScorerFactory.cpp */,
+				1E2CCF8715939E5D00D858D1 /* ScorerFactory.h */,
+				1E2CCF8815939E5D00D858D1 /* ScoreStats.cpp */,
+				1E2CCF8915939E5D00D858D1 /* ScoreStats.h */,
+				1E2CCF8A15939E5D00D858D1 /* SemposOverlapping.cpp */,
+				1E2CCF8B15939E5D00D858D1 /* SemposOverlapping.h */,
+				1E2CCF8C15939E5D00D858D1 /* SemposScorer.cpp */,
+				1E2CCF8D15939E5D00D858D1 /* SemposScorer.h */,
+				1E2CCF8E15939E5D00D858D1 /* Singleton.h */,
+				1E2CCF9015939E5D00D858D1 /* TER */,
+				1E2CCFA815939E5D00D858D1 /* TerScorer.cpp */,
+				1E2CCFA915939E5D00D858D1 /* TerScorer.h */,
+				1E2CCFAE15939E5D00D858D1 /* Timer.cpp */,
+				1E2CCFAF15939E5D00D858D1 /* Timer.h */,
+				1E2CCFB215939E5D00D858D1 /* Types.h */,
+				1E2CCFB315939E5D00D858D1 /* Util.cpp */,
+				1E2CCFB415939E5D00D858D1 /* Util.h */,
+				1E2CCFB615939E5D00D858D1 /* Vocabulary.cpp */,
+				1E2CCFB715939E5D00D858D1 /* Vocabulary.h */,
+				1E2CCF3415939E2D00D858D1 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1E2CCF3415939E2D00D858D1 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E2CCF3315939E2D00D858D1 /* libmert_lib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E2CCF9015939E5D00D858D1 /* TER */ = {
+			isa = PBXGroup;
+			children = (
+				1E2CCF9115939E5D00D858D1 /* alignmentStruct.cpp */,
+				1E2CCF9215939E5D00D858D1 /* alignmentStruct.h */,
+				1E2CCF9315939E5D00D858D1 /* bestShiftStruct.h */,
+				1E2CCF9415939E5D00D858D1 /* hashMap.cpp */,
+				1E2CCF9515939E5D00D858D1 /* hashMap.h */,
+				1E2CCF9615939E5D00D858D1 /* hashMapInfos.cpp */,
+				1E2CCF9715939E5D00D858D1 /* hashMapInfos.h */,
+				1E2CCF9815939E5D00D858D1 /* hashMapStringInfos.cpp */,
+				1E2CCF9915939E5D00D858D1 /* hashMapStringInfos.h */,
+				1E2CCF9A15939E5D00D858D1 /* infosHasher.cpp */,
+				1E2CCF9B15939E5D00D858D1 /* infosHasher.h */,
+				1E2CCF9C15939E5D00D858D1 /* stringHasher.cpp */,
+				1E2CCF9D15939E5D00D858D1 /* stringHasher.h */,
+				1E2CCF9E15939E5D00D858D1 /* stringInfosHasher.cpp */,
+				1E2CCF9F15939E5D00D858D1 /* stringInfosHasher.h */,
+				1E2CCFA015939E5D00D858D1 /* terAlignment.cpp */,
+				1E2CCFA115939E5D00D858D1 /* terAlignment.h */,
+				1E2CCFA215939E5D00D858D1 /* tercalc.cpp */,
+				1E2CCFA315939E5D00D858D1 /* tercalc.h */,
+				1E2CCFA415939E5D00D858D1 /* terShift.cpp */,
+				1E2CCFA515939E5D00D858D1 /* terShift.h */,
+				1E2CCFA615939E5D00D858D1 /* tools.cpp */,
+				1E2CCFA715939E5D00D858D1 /* tools.h */,
+			);
+			name = TER;
+			path = ../../mert/TER;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXHeadersBuildPhase section */
+		1E2CCF3115939E2D00D858D1 /* Headers */ = {
+			isa = PBXHeadersBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E2CCFBA15939E5D00D858D1 /* BleuScorer.h in Headers */,
+				1E2CCFBD15939E5D00D858D1 /* CderScorer.h in Headers */,
+				1E2CCFBF15939E5D00D858D1 /* Data.h in Headers */,
+				1E2CCFC315939E5D00D858D1 /* Fdstream.h in Headers */,
+				1E2CCFC515939E5D00D858D1 /* FeatureArray.h in Headers */,
+				1E2CCFC715939E5D00D858D1 /* FeatureData.h in Headers */,
+				1E2CCFC915939E5D00D858D1 /* FeatureDataIterator.h in Headers */,
+				1E2CCFCC15939E5D00D858D1 /* FeatureStats.h in Headers */,
+				1E2CCFCE15939E5D00D858D1 /* FileStream.h in Headers */,
+				1E2CCFD015939E5D00D858D1 /* GzFileBuf.h in Headers */,
+				1E2CCFD215939E5D00D858D1 /* HypPackEnumerator.h in Headers */,
+				1E2CCFD415939E5D00D858D1 /* InterpolatedScorer.h in Headers */,
+				1E2CCFD815939E5D00D858D1 /* MergeScorer.h in Headers */,
+				1E2CCFDB15939E5D00D858D1 /* MiraFeatureVector.h in Headers */,
+				1E2CCFDD15939E5D00D858D1 /* MiraWeightVector.h in Headers */,
+				1E2CCFDE15939E5D00D858D1 /* Ngram.h in Headers */,
+				1E2CCFE115939E5D00D858D1 /* Optimizer.h in Headers */,
+				1E2CCFE315939E5D00D858D1 /* OptimizerFactory.h in Headers */,
+				1E2CCFE615939E5D00D858D1 /* PerScorer.h in Headers */,
+				1E2CCFE815939E5D00D858D1 /* Point.h in Headers */,
+				1E2CCFEB15939E5D00D858D1 /* PreProcessFilter.h in Headers */,
+				1E2CCFED15939E5D00D858D1 /* Reference.h in Headers */,
+				1E2CCFEF15939E5D00D858D1 /* ScopedVector.h in Headers */,
+				1E2CCFF115939E5D00D858D1 /* ScoreArray.h in Headers */,
+				1E2CCFF315939E5D00D858D1 /* ScoreData.h in Headers */,
+				1E2CCFF515939E5D00D858D1 /* ScoreDataIterator.h in Headers */,
+				1E2CCFF715939E5D00D858D1 /* Scorer.h in Headers */,
+				1E2CCFF915939E5D00D858D1 /* ScorerFactory.h in Headers */,
+				1E2CCFFB15939E5D00D858D1 /* ScoreStats.h in Headers */,
+				1E2CCFFD15939E5D00D858D1 /* SemposOverlapping.h in Headers */,
+				1E2CCFFF15939E5D00D858D1 /* SemposScorer.h in Headers */,
+				1E2CD00015939E5D00D858D1 /* Singleton.h in Headers */,
+				1E2CD00315939E5D00D858D1 /* alignmentStruct.h in Headers */,
+				1E2CD00415939E5D00D858D1 /* bestShiftStruct.h in Headers */,
+				1E2CD00615939E5D00D858D1 /* hashMap.h in Headers */,
+				1E2CD00815939E5D00D858D1 /* hashMapInfos.h in Headers */,
+				1E2CD00A15939E5D00D858D1 /* hashMapStringInfos.h in Headers */,
+				1E2CD00C15939E5D00D858D1 /* infosHasher.h in Headers */,
+				1E2CD00E15939E5D00D858D1 /* stringHasher.h in Headers */,
+				1E2CD01015939E5D00D858D1 /* stringInfosHasher.h in Headers */,
+				1E2CD01215939E5D00D858D1 /* terAlignment.h in Headers */,
+				1E2CD01415939E5D00D858D1 /* tercalc.h in Headers */,
+				1E2CD01615939E5D00D858D1 /* terShift.h in Headers */,
+				1E2CD01815939E5D00D858D1 /* tools.h in Headers */,
+				1E2CD01A15939E5D00D858D1 /* TerScorer.h in Headers */,
+				1E2CD01D15939E5D00D858D1 /* Timer.h in Headers */,
+				1E2CD01F15939E5D00D858D1 /* Types.h in Headers */,
+				1E2CD02115939E5D00D858D1 /* Util.h in Headers */,
+				1E2CD02415939E5D00D858D1 /* Vocabulary.h in Headers */,
+				1E3962211594CFF9006FE978 /* Permutation.h in Headers */,
+				1E3962251594D12C006FE978 /* SentenceLevelScorer.h in Headers */,
+				1EE52B561596B3E4006DC938 /* StatisticsBasedScorer.h in Headers */,
+				1E43CA3415973474000E29D3 /* PermutationScorer.h in Headers */,
+				1E689F22159A529C00DD995A /* ThreadPool.h in Headers */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXHeadersBuildPhase section */
+
+/* Begin PBXNativeTarget section */
+		1E2CCF3215939E2D00D858D1 /* mert_lib */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E2CCF3715939E2D00D858D1 /* Build configuration list for PBXNativeTarget "mert_lib" */;
+			buildPhases = (
+				1E2CCF2F15939E2D00D858D1 /* Sources */,
+				1E2CCF3015939E2D00D858D1 /* Frameworks */,
+				1E2CCF3115939E2D00D858D1 /* Headers */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = mert_lib;
+			productName = mert_lib;
+			productReference = 1E2CCF3315939E2D00D858D1 /* libmert_lib.a */;
+			productType = "com.apple.product-type.library.static";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1E2CCF2A15939E2D00D858D1 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1E2CCF2D15939E2D00D858D1 /* Build configuration list for PBXProject "mert_lib" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1E2CCF2815939E2D00D858D1;
+			productRefGroup = 1E2CCF3415939E2D00D858D1 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				1E2CCF3215939E2D00D858D1 /* mert_lib */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1E2CCF2F15939E2D00D858D1 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E2CCFB915939E5D00D858D1 /* BleuScorer.cpp in Sources */,
+				1E2CCFBC15939E5D00D858D1 /* CderScorer.cpp in Sources */,
+				1E2CCFBE15939E5D00D858D1 /* Data.cpp in Sources */,
+				1E2CCFC415939E5D00D858D1 /* FeatureArray.cpp in Sources */,
+				1E2CCFC615939E5D00D858D1 /* FeatureData.cpp in Sources */,
+				1E2CCFC815939E5D00D858D1 /* FeatureDataIterator.cpp in Sources */,
+				1E2CCFCB15939E5D00D858D1 /* FeatureStats.cpp in Sources */,
+				1E2CCFCD15939E5D00D858D1 /* FileStream.cpp in Sources */,
+				1E2CCFCF15939E5D00D858D1 /* GzFileBuf.cpp in Sources */,
+				1E2CCFD115939E5D00D858D1 /* HypPackEnumerator.cpp in Sources */,
+				1E2CCFD315939E5D00D858D1 /* InterpolatedScorer.cpp in Sources */,
+				1E2CCFD715939E5D00D858D1 /* MergeScorer.cpp in Sources */,
+				1E2CCFD915939E5D00D858D1 /* mert.cpp in Sources */,
+				1E2CCFDA15939E5D00D858D1 /* MiraFeatureVector.cpp in Sources */,
+				1E2CCFDC15939E5D00D858D1 /* MiraWeightVector.cpp in Sources */,
+				1E2CCFE015939E5D00D858D1 /* Optimizer.cpp in Sources */,
+				1E2CCFE215939E5D00D858D1 /* OptimizerFactory.cpp in Sources */,
+				1E2CCFE515939E5D00D858D1 /* PerScorer.cpp in Sources */,
+				1E2CCFE715939E5D00D858D1 /* Point.cpp in Sources */,
+				1E2CCFEA15939E5D00D858D1 /* PreProcessFilter.cpp in Sources */,
+				1E2CCFF015939E5D00D858D1 /* ScoreArray.cpp in Sources */,
+				1E2CCFF215939E5D00D858D1 /* ScoreData.cpp in Sources */,
+				1E2CCFF415939E5D00D858D1 /* ScoreDataIterator.cpp in Sources */,
+				1E2CCFF615939E5D00D858D1 /* Scorer.cpp in Sources */,
+				1E2CCFF815939E5D00D858D1 /* ScorerFactory.cpp in Sources */,
+				1E2CCFFA15939E5D00D858D1 /* ScoreStats.cpp in Sources */,
+				1E2CCFFC15939E5D00D858D1 /* SemposOverlapping.cpp in Sources */,
+				1E2CCFFE15939E5D00D858D1 /* SemposScorer.cpp in Sources */,
+				1E2CD00215939E5D00D858D1 /* alignmentStruct.cpp in Sources */,
+				1E2CD00515939E5D00D858D1 /* hashMap.cpp in Sources */,
+				1E2CD00715939E5D00D858D1 /* hashMapInfos.cpp in Sources */,
+				1E2CD00915939E5D00D858D1 /* hashMapStringInfos.cpp in Sources */,
+				1E2CD00B15939E5D00D858D1 /* infosHasher.cpp in Sources */,
+				1E2CD00D15939E5D00D858D1 /* stringHasher.cpp in Sources */,
+				1E2CD00F15939E5D00D858D1 /* stringInfosHasher.cpp in Sources */,
+				1E2CD01115939E5D00D858D1 /* terAlignment.cpp in Sources */,
+				1E2CD01315939E5D00D858D1 /* tercalc.cpp in Sources */,
+				1E2CD01515939E5D00D858D1 /* terShift.cpp in Sources */,
+				1E2CD01715939E5D00D858D1 /* tools.cpp in Sources */,
+				1E2CD01915939E5D00D858D1 /* TerScorer.cpp in Sources */,
+				1E2CD01C15939E5D00D858D1 /* Timer.cpp in Sources */,
+				1E2CD02015939E5D00D858D1 /* Util.cpp in Sources */,
+				1E2CD02315939E5D00D858D1 /* Vocabulary.cpp in Sources */,
+				1E39621B1594CFD1006FE978 /* PermutationScorer.cpp in Sources */,
+				1E3962201594CFF9006FE978 /* Permutation.cpp in Sources */,
+				1E3962231594D0FF006FE978 /* SentenceLevelScorer.cpp in Sources */,
+				1EE52B591596B3FC006DC938 /* StatisticsBasedScorer.cpp in Sources */,
+				1E689F21159A529C00DD995A /* ThreadPool.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1E2CCF3515939E2D00D858D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1E2CCF3615939E2D00D858D1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1E2CCF3815939E2D00D858D1 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				"GCC_PREPROCESSOR_DEFINITIONS[arch=*]" = (
+					"DEBUG=1",
+					"$(inherited)",
+					WITH_THREADS,
+				);
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1E2CCF3915939E2D00D858D1 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = WITH_THREADS;
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E2CCF2D15939E2D00D858D1 /* Build configuration list for PBXProject "mert_lib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E2CCF3515939E2D00D858D1 /* Debug */,
+				1E2CCF3615939E2D00D858D1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E2CCF3715939E2D00D858D1 /* Build configuration list for PBXNativeTarget "mert_lib" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E2CCF3815939E2D00D858D1 /* Debug */,
+				1E2CCF3915939E2D00D858D1 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1E2CCF2A15939E2D00D858D1 /* Project object */;
+}

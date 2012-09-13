@@ -51,6 +51,7 @@ typedef std::priority_queue< HypothesisQueueItem*, std::vector< HypothesisQueueI
 // Hypothesis Priority Queue Code
 ////////////////////////////////////////////////////////////////////////////////
 
+//! 1 item in the priority queue for stack decoding (phrase-based)
 class HypothesisQueueItem
 {
 private:
@@ -91,7 +92,7 @@ public:
   }
 };
 
-// Allows to compare two HypothesisQueueItem objects by the corresponding scores.
+//! Allows comparison of two HypothesisQueueItem objects by the corresponding scores.
 class QueueItemOrderer
 {
 public:

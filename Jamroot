@@ -15,12 +15,14 @@
 #Note that, like language models, this is the --prefix where the library was
 #installed, not some executable within the library.  
 #
+#Compact phrase table and compact lexical reordering table
+#--with-cmph=/path/to/cmph
+#
 #Thread-caching malloc (optional):
 #--with-tcmalloc
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
-#
 #
 #INSTALLATION
 #--prefix=/path/to/prefix sets the install prefix [default is source root].
@@ -29,6 +31,7 @@
 #--includedir=/path/to/prefix/include installs headers.  
 #  Does not install if missing.  No argument defaults to PREFIX/include .
 #--install-scripts=/path/to/scripts copies scripts into a directory.
+#  Does not install if missing.  No argument defaults to PREFIX/scripts .
 #--git appends the git revision to the prefix directory.
 #
 #
@@ -41,7 +44,9 @@
 # variant=release|debug|profile  builds optimized (default), for debug, or for
 #                                profiling
 #
-# link=static|shared             controls linking (default static)
+# link=static|shared             controls preferred linking (default static)
+# --static                       forces static linking (the default will fall
+#                                back to shared)
 #
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
@@ -50,6 +55,9 @@
 #
 # --enable-boost-pool            uses Boost pools for the memory SCFG table
 #
+# --without-libsegfault          does not link with libSegFault
+#
+# --max-kenlm-order              maximum ngram order that kenlm can process (default 6)
 #
 #CONTROLLING THE BUILD
 #-a to build from scratch
@@ -73,6 +81,10 @@ if [ option.get "with-tcmalloc" : : "yes" ] {
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
 requirements += [ option.get "enable-boost-pool" : : <define>USE_BOOST_POOL ] ;
 
+if [ option.get "with-cmph" ] {
+  requirements += <define>HAVE_CMPH ;
+}
+
 project : default-build
   <threading>multi
   <warnings>on
@@ -89,21 +101,12 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-project lm ; 
-build-project util ;
-#Trigger instllation into legacy paths.  
-build-project mert ;
-build-project moses-cmd/src ;
-build-project moses-chart-cmd/src ;
-#Scripts have their own binaries.
-build-project scripts ;
-#Regression tests (only does anything if --with-regtest is passed)
-build-project regression-testing ;
+build-projects util lm mert moses-cmd/src moses-chart-cmd/src scripts regression-testing contrib/relent-filter/src ;
 
-alias programs : lm//query lm//build_binary moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor ;
+alias programs : lm//query lm//build_binary lm//kenlm_max_order moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor contrib/relent-filter/src//calcDivergence ;
 
 install-bin-libs programs ;
-install-headers headers-base : [ glob-tree *.h *.hh : jam-files dist bin lib include kenlm moses ] : . ;
+install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
 install-headers headers-moses : moses/src//headers-to-install : moses/src ;
 
 alias install : prefix-bin prefix-lib headers-base headers-moses ;

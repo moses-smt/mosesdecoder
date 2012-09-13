@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-//! A square array of floats to store future costs
+//! A square array of floats to store future costs in the phrase-based decoder
 class SquareMatrix
 {
   friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);

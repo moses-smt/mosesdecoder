@@ -21,28 +21,12 @@ class Vocabulary {
   virtual ~Vocabulary() {}
 
   /** Returns the assiged id for given "token". */
-  int Encode(const std::string& token) {
-    iterator it = m_vocab.find(token);
-    int encoded_token;
-    if (it == m_vocab.end()) {
-      // Add an new entry to the vocaburary.
-      encoded_token = static_cast<int>(m_vocab.size());
-      m_vocab[token] = encoded_token;
-    } else {
-      encoded_token = it->second;
-    }
-    return encoded_token;
-  }
+  int Encode(const std::string& token);
 
   /**
    * Return true iff the specified "str" is found in the container.
    */
-  bool Lookup(const std::string&str , int* v) const {
-    const_iterator it = m_vocab.find(str);
-    if (it == m_vocab.end()) return false;
-    *v = it->second;
-    return true;
-  }
+  bool Lookup(const std::string&str , int* v) const;
 
   void clear() { m_vocab.clear(); }
 
@@ -62,6 +46,7 @@ class Vocabulary {
 
  private:
   std::map<std::string, int> m_vocab;
+  
 };
 
 class VocabularyFactory {

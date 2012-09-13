@@ -11,6 +11,8 @@
 
 namespace Moses {
 
+/** @todo ask Abbey Levenberg
+ */
 class SAPhrase
 {
 public:
@@ -29,6 +31,8 @@ public:
   { return words < phr2.words; }
 };
 
+/** @todo ask Abbey Levenberg
+ */
 class PhrasePair
 {
 public:
@@ -45,6 +49,8 @@ public:
 	{ return m_endTarget - m_startTarget + 1; }
 };
 	
+/** @todo ask Abbey Levenberg
+ */
 class SentenceAlignment 
 {
 public:
@@ -77,6 +83,8 @@ private:
   const std::vector<float>& m_weights;
 };
 	
+/** @todo ask Abbey Levenberg
+ */
 class BilingualDynSuffixArray {
 public: 
 	BilingualDynSuffixArray();
@@ -85,8 +93,12 @@ public:
 		const std::vector<FactorType>& outputTactors,
 		std::string source, std::string target, std::string alignments, 
 		const std::vector<float> &weight);
+	bool LoadTM( const std::vector<FactorType>& inputFactors,
+            const std::vector<FactorType>& outputTactors,
+            std::string source, std::string target, std::string alignments, 
+            const std::vector<float> &weight);
 	void GetTargetPhrasesByLexicalWeight(const Phrase& src, std::vector< std::pair<Scores, TargetPhrase*> >& target) const;
-	void CleanUp();
+	void CleanUp(const InputType& source);
   void addSntPair(string& source, string& target, string& alignment);
 private:
 	DynSuffixArray* m_srcSA;

@@ -48,13 +48,13 @@
 # Original version by Philipp Koehn
 
 use strict;
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use File::Basename;
 use File::Path;
 use File::Spec;
 use Cwd;
 
-my $SCRIPTS_ROOTDIR = $Bin;
+my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
@@ -335,7 +335,7 @@ $moses_parallel_cmd = File::Spec->catfile($SCRIPTS_ROOTDIR, "generic", "moses-pa
   if !defined $moses_parallel_cmd;
 
 if (!defined $mertdir) {
-  $mertdir = File::Spec->catfile(File::Basename::dirname($SCRIPTS_ROOTDIR), "dist", "bin");
+  $mertdir = File::Spec->catfile(File::Basename::dirname($SCRIPTS_ROOTDIR), "bin");
   die "mertdir does not exist: $mertdir" if ! -x $mertdir;
   print STDERR "Assuming --mertdir=$mertdir\n";
 }
@@ -1158,7 +1158,7 @@ sub get_featlist_from_file {
     my ($longname, $feature, $value) = ($1, $2, $3);
     next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
-      if $value !~ /^[+-]?[0-9.e]+$/;
+      if $value !~ /^[+-]?[0-9.\-e]+$/;
     push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
       if !defined $ABBR2FULL{$feature};
     push @names, $feature;
@@ -1195,7 +1195,7 @@ sub get_order_of_scores_from_nbestlist {
       $sparse = 1;
     } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.\-e]+$/) {
       if (!$sparse) {
         # a score found, remember it
         die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"

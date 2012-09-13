@@ -68,13 +68,56 @@ bool BilingualDynSuffixArray::Load(
   CacheFreqWords();
 	return true;
 }
+  
+bool BilingualDynSuffixArray::LoadTM(
+                                   const std::vector<FactorType>& inputFactors,
+                                   const std::vector<FactorType>& outputFactors,
+                                   std::string source, std::string target, std::string alignments, 
+                                   const std::vector<float> &weight)
+{
+  m_inputFactors = inputFactors;
+  m_outputFactors = outputFactors;
+  
+  m_scoreCmp = new ScoresComp(weight);
+  InputFileStream sourceStrme(source);
+  InputFileStream targetStrme(target);
+
+  cerr << "Loading target corpus...\n";	
+  LoadCorpus(targetStrme, m_outputFactors,*m_trgCorpus, m_trgSntBreaks, m_trgVocab);
+  
+  cerr << "Loading source corpus...\n";	
+  LoadCorpus(sourceStrme, m_inputFactors, *m_srcCorpus, m_srcSntBreaks, m_srcVocab);
+  
+  CHECK(m_srcSntBreaks.size() == m_trgSntBreaks.size());
+  
+  // build suffix arrays and auxilliary arrays
+  cerr << "Building Source Suffix Array...\n"; 
+  m_srcSA = new DynSuffixArray(m_srcCorpus); 
+  if(!m_srcSA) return false;
+  cerr << "Building Target Suffix Array...\n"; 
+  //m_trgSA = new DynSuffixArray(m_trgCorpus); 
+  //if(!m_trgSA) return false;
+  cerr << "\t(Skipped. Not used)\n";
+  
+  InputFileStream alignStrme(alignments);
+  cerr << "Loading Alignment File...\n"; 
+  LoadRawAlignments(alignStrme);
+  //LoadAlignments(alignStrme);
+  cerr << "Building frequent word cache...\n";
+  CacheFreqWords();
+  return true;
+  
+}
 
 int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align) 
 {
 	// stores the alignments in the raw file format 
 	std::string line;
 	std::vector<int> vtmp;
+  int lineNum = 1;
 	while(getline(align, line)) {
+    if (lineNum % 10000 == 0)
+      cerr << lineNum;
 		Utils::splitToInt(line, vtmp, "- ");
 		CHECK(vtmp.size() % 2 == 0);
 		std::vector<short> vAlgn;	// store as short ints for memory
@@ -83,6 +126,7 @@ int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align)
             vAlgn.push_back(short(*itr));
         }
 		m_rawAlignments.push_back(vAlgn);
+    ++lineNum;
 	}
 	return m_rawAlignments.size();
 }
@@ -170,7 +214,7 @@ bool BilingualDynSuffixArray::ExtractPhrases(const int& sntIndex, const int& wor
 	return curSnt.Extract(m_maxPhraseLength, phrasePairs, leftIdx, rightIdx); // extract all phrase Alignments in sentence
 }
 
-void BilingualDynSuffixArray::CleanUp() 
+void BilingualDynSuffixArray::CleanUp(const InputType& source) 
 {
 	//m_wordPairCache.clear();
 }
@@ -461,7 +505,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   Phrase sphrase(ARRAY_SIZE_INCR);
   sphrase.CreateFromString(m_inputFactors, source, factorDelimiter);
   m_srcVocab->MakeOpen();
-  wordID_t sIDs[sphrase.GetSize()];
+  std::vector<wordID_t> sIDs(sphrase.GetSize());
   // store words in vocabulary and corpus
   for(int i = sphrase.GetSize()-1; i >= 0; --i) {
     sIDs[i] = m_srcVocab->GetWordID(sphrase.GetWord(i));  // get vocab id backwards
@@ -476,7 +520,7 @@ void BilingualDynSuffixArray::addSntPair(string& source, string& target, string&
   Phrase tphrase(ARRAY_SIZE_INCR);
   tphrase.CreateFromString(m_outputFactors, target, factorDelimiter);
   m_trgVocab->MakeOpen();
-  wordID_t tIDs[tphrase.GetSize()];
+  std::vector<wordID_t> tIDs(tphrase.GetSize());
   for(int i = tphrase.GetSize()-1; i >= 0; --i) {
     tIDs[i] = m_trgVocab->GetWordID(tphrase.GetWord(i));  // get vocab id
   }

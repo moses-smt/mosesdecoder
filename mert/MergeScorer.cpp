@@ -14,6 +14,10 @@
 using namespace std;
 using namespace TERCpp;
 
+namespace MosesTuning
+{
+  
+
 MergeScorer::MergeScorer(const string& config)
     : StatisticsBasedScorer("MERGE", config) {}
 
@@ -121,3 +125,6 @@ float MergeScorer::calculateScore(const std::vector< int >& comps) const
   }
   return result;
 }
+
+}
+

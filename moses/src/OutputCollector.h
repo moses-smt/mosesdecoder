@@ -37,8 +37,8 @@
 namespace Moses
 {
 /**
-  * Makes sure output goes in the correct order.
-  **/
+* Makes sure output goes in the correct order when multi-threading
+**/
 class OutputCollector
 {
 public:
@@ -62,9 +62,9 @@ public:
       std::map<int,std::string>::iterator iter;
       while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
         *m_outStream << iter->second << std::flush;
-        m_outputs.erase(iter);
         ++m_nextOutput;
         std::map<int,std::string>::iterator debugIter = m_debugs.find(iter->first);
+		m_outputs.erase(iter);
         if (debugIter != m_debugs.end()) {
           *m_debugStream << debugIter->second << std::flush;
           m_debugs.erase(debugIter);
