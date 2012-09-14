@@ -1,5 +1,5 @@
 from binpt import BinaryPhraseTable
-from binpt import QueryResult
+#from binpt import QueryResult
 
 import sys
 
@@ -12,7 +12,7 @@ nscores = int(sys.argv[2])
 wa = len(sys.argv) == 4
 
 pt = BinaryPhraseTable(pt_file, nscores, wa)
-print >> sys.stderr, "-ttable %s -nscores %d -alignment-info %s -delimiter '%s'\n" %(pt.path, pt.nscores, str(pt.wa), pt.delimiter)
+print >> sys.stderr, "-ttable %s -nscores %d -alignment-info %s -delimiter '%s'\n" %(pt.path, pt.nscores, str(pt.wa), pt.delimiters)
 
 for line in sys.stdin:
     f = line.strip()
@@ -26,6 +26,6 @@ for line in sys.stdin:
         if e.wa:
             print e.wa # string
     '''
-        
- 
+            
+     
 
