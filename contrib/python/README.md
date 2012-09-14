@@ -12,12 +12,12 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 1.  Build the python extension
 
-        python setup.py build_ext -i
+        python setup.py build_ext -i [--with-cmph]
 
 3.  Check the example code
 
-        echo '! " and "' | python example.py bin-ptable-stem 5 1
-        echo "casa" | python example.py bin-ptable-stem 5
+        echo "casa" | python example.py examples/phrase-table 5 1
+        echo "essa casa" | python example.py examples/phrase-table 5 1
 
 ## Changing the code
 

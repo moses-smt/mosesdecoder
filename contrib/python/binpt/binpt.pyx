@@ -1,5 +1,6 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
+import os
 
 cdef bytes as_str(data):
     if isinstance(data, bytes):
@@ -78,6 +79,9 @@ cdef class BinaryPhraseTable(object):
         Moses::PhraseDictionaryTree also needs to be aware of the number of scores (usually 5),
         and whether or not there is word-alignment info in the table (usually not).
         One can also specify the token delimiter, for Moses::Tokenize(text, delimiter), which is one space by default.'''
+
+        if not BinaryPhraseTable.isValidBinaryTable(path, wa):
+            raise ValueError, "'%s' doesn't seem a valid binary table." % path
         self._path = path
         self._nscores = nscores
         self._wa = wa
@@ -88,6 +92,23 @@ cdef class BinaryPhraseTable(object):
 
     def __dealloc__(self):
         del self.__tree
+
+    @staticmethod
+    def isValidBinaryTable(stem, bint wa = False):
+        '''This sanity check was added to the constructor, but you can access it from outside this class
+        to determine whether or not you are providing a valid stem to BinaryPhraseTable.'''
+        if wa:
+            return os.path.isfile(stem + ".binphr.idx") \
+                and os.path.isfile(stem + ".binphr.srctree.wa") \
+                and os.path.isfile(stem + ".binphr.srcvoc") \
+                and os.path.isfile(stem + ".binphr.tgtdata.wa") \
+                and os.path.isfile(stem + ".binphr.tgtvoc")
+        else:
+            return os.path.isfile(stem + ".binphr.idx") \
+                and os.path.isfile(stem + ".binphr.srctree") \
+                and os.path.isfile(stem + ".binphr.srcvoc") \
+                and os.path.isfile(stem + ".binphr.tgtdata") \
+                and os.path.isfile(stem + ".binphr.tgtvoc")
 
     @property
     def path(self):

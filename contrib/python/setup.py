@@ -1,9 +1,15 @@
 from distutils.core import setup
 from distutils.extension import Extension
 import os
+import sys
 
-#### Check if you agree with these settings
-with_cmph = True
+available_switches = ['--with-cmph']
+with_cmph = False
+
+while sys.argv[-1] in available_switches:
+    switch = sys.argv.pop()
+    if switch == '--with-cmph':
+        with_cmph = True
 
 
 #### From here you probably don't need to change anything
