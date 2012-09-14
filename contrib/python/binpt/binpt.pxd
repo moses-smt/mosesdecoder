@@ -13,7 +13,7 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
         PhraseDictionaryTree(unsigned nscores)
         void UseWordAlignment(bint use)
         bint UseWordAlignment()
-        int Read(char* path)
+        int Read(string& path)
         void GetTargetCandidates(vector[string]& fs, 
                 vector[StringTgtCand]& rv)
         void GetTargetCandidates(vector[string]& fs, 
@@ -21,5 +21,5 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
                 vector[string]& wa)
 
 cdef extern from 'Util.h' namespace 'Moses':
-    cdef vector[string] Tokenize(char* text, char* delimiters)
+    cdef vector[string] Tokenize(string& text, string& delimiters)
 
