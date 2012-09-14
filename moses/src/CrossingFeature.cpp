@@ -35,13 +35,13 @@ bool CrossingFeatureData::operator<(const CrossingFeatureData &compare) const
 CrossingFeature::CrossingFeature(ScoreIndexManager &scoreIndexManager
                                 , const std::vector<float> &weights
                                 , const std::string &dataPath)
-  : m_withTargetLength(weights.size() > 1)
 {
   CHECK(weights.size() == 1 || weights.size() == 2);
   scoreIndexManager.AddScoreProducer(this);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
   
-  LoadDataFile(dataPath);
+  bool ret = LoadDataFile(dataPath);
+  CHECK(ret);
 }
   
 bool CrossingFeature::LoadDataFile(const std::string &dataPath)
@@ -74,7 +74,7 @@ bool CrossingFeature::LoadDataFile(const std::string &dataPath)
 
 size_t CrossingFeature::GetNumScoreComponents() const
 {
-  return m_withTargetLength ? 2 : 1;
+  return 1;
 }
   
 std::string CrossingFeature::GetScoreProducerDescription(unsigned id) const
@@ -172,18 +172,15 @@ FFState* CrossingFeature::EvaluateChart(
   for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
     scores[0] += spanLengthEstimators.GetScoreBySourceSpanLength(spanIndex, spans[spanIndex].SourceSpan);
   }
-  if (m_withTargetLength) {
-    unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
-    for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-      terminalCount += spans[spanIndex].TargetSpan - 1;
-      scores[1] += spanLengthEstimators.GetScoreByTargetSpanLength(spanIndex, spans[spanIndex].TargetSpan);
-    }
-    accumulator->PlusEquals(this, scores);
-    return new CrossingFeatureState(terminalCount);
-  } else {
-    accumulator->PlusEquals(this, scores);
-    return NULL;
+
+  unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
+  for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
+    terminalCount += spans[spanIndex].TargetSpan - 1;
+    scores[1] += spanLengthEstimators.GetScoreByTargetSpanLength(spanIndex, spans[spanIndex].TargetSpan);
   }
+  accumulator->PlusEquals(this, scores);
+  return new CrossingFeatureState(terminalCount);
+
 }
   
 } // namespace moses
