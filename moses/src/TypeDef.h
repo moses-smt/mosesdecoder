@@ -137,6 +137,8 @@ enum PhraseTableImplementation {
   ,SuffixArray	= 8
   ,Hiero        = 9
   ,ALSuffixArray = 10
+  ,FuzzyMatch    = 11
+  ,Compact      = 12
 };
 
 enum InputTypeEnum {
@@ -182,6 +184,12 @@ enum SourceLabelOverlap {
 enum WordAlignmentSort {
   NoSort = 0
   ,TargetOrder = 1
+};
+
+enum FormatType
+{
+  MosesFormat
+  ,HieroFormat
 };
 
 // typedef

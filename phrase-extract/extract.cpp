@@ -24,9 +24,8 @@
 #include "tables-core.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
-#include "../moses/src/ThreadPool.h"
-#include "../moses/src/OutputCollector.h"
 #include "PhraseExtractionOptions.h"
+
 using namespace std;
 using namespace MosesTraining;
 
@@ -74,29 +73,22 @@ typedef map <int, set<int> > HSentenceVertices;
   bool lt(int, int);
 
   bool isAligned (SentenceAlignment &, int, int);
-
+  int sentenceOffset = 0;
 
 }
+
 namespace MosesTraining{
-class ExtractTask : public Moses::Task{
-        private:
-        size_t m_id;
-        SentenceAlignment *m_sentence;
-        PhraseExtractionOptions &m_options;
-        Moses::OutputCollector* m_extractCollector;
-        Moses::OutputCollector* m_extractCollectorInv;
-        Moses::OutputCollector* m_extractCollectorOrientation;
-        Moses::OutputCollector* m_extractCollectorSentenceId;
+
+class ExtractTask 
+{
 public:
-  ExtractTask(size_t id, SentenceAlignment *sentence,PhraseExtractionOptions &initoptions, Moses::OutputCollector *extractCollector, Moses::OutputCollector *extractCollectorInv,Moses::OutputCollector *extractCollectorOrientation,Moses::OutputCollector* extractCollectorSentenceId  ):
-    m_id(id),
+  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation,Moses::OutputFileStream &extractFileSentenceId  ):
     m_sentence(sentence),
     m_options(initoptions),
-    m_extractCollector(extractCollector),
-    m_extractCollectorInv(extractCollectorInv),
-    m_extractCollectorOrientation(extractCollectorOrientation),
-    m_extractCollectorSentenceId(extractCollectorSentenceId) {}
-  ~ExtractTask() { delete m_sentence; }
+    m_extractFile(extractFile),
+    m_extractFileInv(extractFileInv),
+    m_extractFileOrientation(extractFileOrientation),
+    m_extractFileSentenceId(extractFileSentenceId) {}
 void Run();
 private:
   vector< string > m_extractedPhrases;
@@ -108,6 +100,12 @@ private:
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
   void writePhrasesToFile();
   
+  SentenceAlignment &m_sentence;
+  const PhraseExtractionOptions &m_options;
+  Moses::OutputFileStream &m_extractFile;
+  Moses::OutputFileStream &m_extractFileInv;
+  Moses::OutputFileStream &m_extractFileOrientation;
+  Moses::OutputFileStream &m_extractFileSentenceId;
 };
 }
 
@@ -116,16 +114,9 @@ int main(int argc, char* argv[])
   cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
         << "phrase extraction from an aligned parallel corpus\n";
 
-#ifdef WITH_THREADS
-  int thread_count = 1;
-#endif
  if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
-    #ifdef WITH_THREADS
-
-    cerr<< "| --threads NUM ";
-    #endif
-    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput ]\n";
+    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
     exit(1);
   }
 
@@ -148,6 +139,14 @@ int main(int argc, char* argv[])
       options.initTranslationFlag(false);
     } else if (strcmp(argv[i], "--SentenceId") == 0) {
       options.initSentenceIdFlag(true);  
+    } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
+      options.initIncludeSentenceIdFlag(true);  
+    } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
+      if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
+        cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;
+        exit(1);
+      }
+      sentenceOffset = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       options.initGzOutput(true);  
     } else if(strcmp(argv[i],"--model") == 0) {
@@ -159,7 +158,7 @@ int main(int argc, char* argv[])
       char*  modelName = strtok(modelParams, "-");
       char*  modelType = strtok(NULL, "-");
 
-      REO_MODEL_TYPE intModelType;
+      // REO_MODEL_TYPE intModelType;
 
       if(strcmp(modelName, "wbe") == 0) {
         options.initWordModel(true);
@@ -203,19 +202,6 @@ int main(int argc, char* argv[])
       }
 
       options.initAllModelsOutputFlag(true);
- #ifdef WITH_THREADS
-    }else if (strcmp(argv[i],"-threads") == 0 ||
-               strcmp(argv[i],"--threads") == 0 ||
-               strcmp(argv[i],"--Threads") == 0) {
-        if(argc>(i+1))thread_count = atoi(argv[++i]);
-        else {cerr<<"extract: syntax error, NUM is missing for --threads NUM option"<<endl;
-        exit(1);
-        }
-        if(thread_count==0){
-                cerr<<"extract: error, NUM is missing for --threads NUM option or --threads 0 is given"<<endl;
-                exit(1);
-        }
-     #endif
 
     } else {
       cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
@@ -255,18 +241,7 @@ int main(int argc, char* argv[])
     extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
   }
 
-
-    Moses::OutputCollector* extractCollector = new Moses::OutputCollector(&extractFile);//r
-    Moses::OutputCollector* extractCollectorInv = new Moses::OutputCollector(&extractFileInv);//r
-    Moses::OutputCollector* extractCollectorOrientation = new Moses::OutputCollector(&extractFileOrientation);//r
-    Moses::OutputCollector* extractCollectorSentenceId = new Moses::OutputCollector(&extractFileSentenceId); //r
-#ifdef WITH_THREADS
-  // set up thread pool
-     Moses::ThreadPool pool(thread_count);
-     pool.SetQueueLimit(1000);
-#endif
-
-  int i=0;
+  int i = sentenceOffset;
   while(true) {
     i++;
     if (i%10000 == 0) cerr << "." << flush;
@@ -277,7 +252,7 @@ int main(int argc, char* argv[])
     if (eFileP->eof()) break;
     SAFE_GETLINE((*fFileP), foreignString, LINE_MAX_LENGTH, '\n', __FILE__);
     SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
-    SentenceAlignment *sentence=new SentenceAlignment;
+    SentenceAlignment sentence;
 	// cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
     if (options.isOnlyOutputSpanInfo()) {
@@ -286,37 +261,19 @@ int main(int argc, char* argv[])
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
-	if (sentence->create( englishString, foreignString, alignmentString, i)) {
-   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractCollector , extractCollectorInv, extractCollectorOrientation, extractCollectorSentenceId);
-#ifdef WITH_THREADS
-      if (thread_count == 1) {
-        task->Run();
-        delete task;
-      }
-      else {
-        pool.Submit(task);
-      }
-#else
+	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
+   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileSentenceId);
       task->Run();
       delete task;
-#endif
 
     }
     if (options.isOnlyOutputSpanInfo()) cout << "LOG: PHRASES_END:" << endl; //az: mark end of phrases
   }
 
-#ifdef WITH_THREADS
-  // wait for all threads to finish
-  pool.Stop(true);
-#endif
-
   eFile.Close();
   fFile.Close();
   aFile.Close();
-      delete extractCollector;
-      delete extractCollectorInv;
-      delete extractCollectorOrientation;
-      delete extractCollectorSentenceId;
+
   //az: only close if we actually opened it
   if (!options.isOnlyOutputSpanInfo()) {
     if (options.isTranslationFlag()) {
@@ -336,7 +293,7 @@ int main(int argc, char* argv[])
 namespace MosesTraining
 {
 void ExtractTask::Run() {
-  extract(*m_sentence);
+  extract(m_sentence);
   writePhrasesToFile();
   m_extractedPhrases.clear();
   m_extractedPhrasesInv.clear();
@@ -759,9 +716,11 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isSentenceIdFlag()) {
     outextractstrSentenceId << sentence.sentenceID;
   }
+  if (m_options.isIncludeSentenceIdFlag()) {
+    outextractstr << " ||| " << sentence.sentenceID;
+  }
 
-
- if (m_options.isTranslationFlag()) outextractstr << "\n";
+  if (m_options.isTranslationFlag()) outextractstr << "\n";
   if (m_options.isTranslationFlag()) outextractstrInv << "\n";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
   if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "\n";
@@ -794,10 +753,10 @@ void ExtractTask::writePhrasesToFile(){
         outextractFileSentenceId<<phrase->data();
     }
 
-      m_extractCollector->Write(m_id, outextractFile.str());
-      m_extractCollectorInv->Write(m_id,outextractFileInv.str());
-      m_extractCollectorOrientation->Write(m_id,outextractFileOrientation.str());
-      m_extractCollectorSentenceId->Write(m_id,outextractFileSentenceId.str());
+      m_extractFile << outextractFile.str();
+      m_extractFileInv  << outextractFileInv.str();
+      m_extractFileOrientation << outextractFileOrientation.str();
+      m_extractFileSentenceId << outextractFileSentenceId.str();
 }
 
 // if proper conditioning, we need the number of times a source phrase occured
@@ -830,10 +789,9 @@ void ExtractTask::extractBase( SentenceAlignment &sentence )
       outextractFileInv << "|||" << endl;
     }
   }
-    m_extractCollector->Write(m_id, outextractFile.str());
-    m_extractCollectorInv->Write(m_id,outextractFileInv.str());
+    m_extractFile << outextractFile.str();
+    m_extractFileInv << outextractFileInv.str();
 
 }
 
 }
-

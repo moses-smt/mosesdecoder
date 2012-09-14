@@ -22,7 +22,6 @@
 
 #include "ChartCell.h"
 #include "WordsRange.h"
-#include "CellCollection.h"
 
 namespace Moses
 {
@@ -31,7 +30,7 @@ class ChartManager;
 
 /** Hold all the chart cells for 1 input sentence. A variable of this type is held by the ChartManager
  */
-class ChartCellCollection : public CellCollection
+class ChartCellCollection
 {
 public:
   typedef std::vector<ChartCell*> InnerCollType;

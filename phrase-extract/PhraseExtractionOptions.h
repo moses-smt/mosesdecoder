@@ -44,6 +44,7 @@ class PhraseExtractionOptions {
   bool orientationFlag;
   bool translationFlag;
   bool sentenceIdFlag; //create extract file with sentence id
+  bool includeSentenceIdFlag; //include sentence id in extract file
   bool onlyOutputSpanInfo;
   bool gzOutput;
 
@@ -60,10 +61,9 @@ public:
             orientationFlag(false),
             translationFlag(true),
             sentenceIdFlag(false),
+            includeSentenceIdFlag(false),
             onlyOutputSpanInfo(false),
             gzOutput(false){}
-
-
  
     //functions for initialization of options
     void initAllModelsOutputFlag(const bool initallModelsOutputFlag){
@@ -96,6 +96,9 @@ public:
     void initSentenceIdFlag(const bool initsentenceIdFlag){
         sentenceIdFlag=initsentenceIdFlag;
     }
+    void initIncludeSentenceIdFlag(const bool initincludeSentenceIdFlag){
+        includeSentenceIdFlag=initincludeSentenceIdFlag;
+    }
     void initOnlyOutputSpanInfo(const bool initonlyOutputSpanInfo){
         onlyOutputSpanInfo= initonlyOutputSpanInfo;
     } 
@@ -103,40 +106,43 @@ public:
         gzOutput= initgzOutput;
     } 
     // functions for getting values
-    bool isAllModelsOutputFlag(){
+    bool isAllModelsOutputFlag() const {
         return allModelsOutputFlag;
     }
-    bool isWordModel(){
+    bool isWordModel() const {
         return wordModel;
     }
-    REO_MODEL_TYPE isWordType(){
+    REO_MODEL_TYPE isWordType() const {
         return wordType; 
     } 
-    bool isPhraseModel(){
+    bool isPhraseModel() const {
         return phraseModel;  
     } 
-    REO_MODEL_TYPE isPhraseType(){
+    REO_MODEL_TYPE isPhraseType() const {
         return phraseType;
     }  
-    bool isHierModel(){
+    bool isHierModel() const {
         return hierModel; 
     }
-    REO_MODEL_TYPE isHierType(){
+    REO_MODEL_TYPE isHierType() const {
         return hierType;
     }
-    bool isOrientationFlag(){
+    bool isOrientationFlag() const {
         return orientationFlag;
     }
-    bool isTranslationFlag(){
+    bool isTranslationFlag() const {
         return translationFlag;
     }
-    bool isSentenceIdFlag(){
+    bool isSentenceIdFlag() const {
         return sentenceIdFlag;
     }
-    bool isOnlyOutputSpanInfo(){
+    bool isIncludeSentenceIdFlag() const {
+        return includeSentenceIdFlag;
+    }
+    bool isOnlyOutputSpanInfo() const {
         return onlyOutputSpanInfo;
     } 
-    bool isGzOutput (){
+    bool isGzOutput () const {
         return gzOutput;
    } 
 };

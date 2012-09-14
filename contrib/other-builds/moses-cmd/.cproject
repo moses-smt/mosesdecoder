@@ -25,17 +25,27 @@
 							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug.84059290" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug">
 								<option id="macosx.cpp.link.option.libs.1641794848" name="Libraries (-l)" superClass="macosx.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="moses"/>
+									<listOptionValue builtIn="false" value="rt"/>
+									<listOptionValue builtIn="false" value="misc"/>
+									<listOptionValue builtIn="false" value="dstruct"/>
+									<listOptionValue builtIn="false" value="oolm"/>
+									<listOptionValue builtIn="false" value="flm"/>
+									<listOptionValue builtIn="false" value="lattice"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="irstlm"/>
+									<listOptionValue builtIn="false" value="z"/>
+									<listOptionValue builtIn="false" value="boost_system"/>
+									<listOptionValue builtIn="false" value="boost_filesystem"/>
 								</option>
 								<option id="macosx.cpp.link.option.paths.1615268628" name="Library search path (-L)" superClass="macosx.cpp.link.option.paths" valueType="libPaths">
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/workspace/github/moses-smt/contrib/other-builds/moses/Debug"/>
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/workspace/github/moses-smt/contrib/other-builds/OnDiskPt/Debug"/>
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/workspace/github/moses-smt/contrib/other-builds/lm/Debug"/>
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/workspace/github/moses-smt/contrib/other-builds/util/Debug"/>
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/workspace/github/moses-smt/irstlm/lib"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/moses}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:}/../../srilm/lib/i686-m64"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/OnDiskPt}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/lm}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:/util}/Debug"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:}/../../irstlm/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.412058804" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
@@ -51,8 +61,11 @@
 								<option id="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level.1176009559" name="Debug Level" superClass="gnu.cpp.compiler.macosx.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1024398579" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/opt/local/include"/>
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/unison/workspace/github/moses-smt/moses/src"/>
-									<listOptionValue builtIn="false" value="/Users/hieuhoang/unison/workspace/github/moses-smt"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../moses/src"/>
+									<listOptionValue builtIn="false" value="${workspace_loc}/../../"/>
+								</option>
+								<option id="gnu.cpp.compiler.option.preprocessor.def.491464216" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
+									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.240921565" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
@@ -122,12 +135,13 @@
 	<storageModule moduleId="refreshScope" versionNumber="1">
 		<resource resourceType="PROJECT" workspacePath="/moses-cmd"/>
 	</storageModule>
+	<storageModule moduleId="org.eclipse.cdt.make.core.buildtargets"/>
 	<storageModule moduleId="scannerConfiguration">
 		<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId=""/>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.341255150;cdt.managedbuild.config.gnu.macosx.exe.debug.341255150.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.debug.1201400609;cdt.managedbuild.tool.gnu.c.compiler.input.2031799877">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.1916112479;cdt.managedbuild.config.macosx.exe.release.1916112479.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.release.759110223;cdt.managedbuild.tool.gnu.c.compiler.input.1452105399">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
-		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.1916112479;cdt.managedbuild.config.macosx.exe.release.1916112479.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.release.759110223;cdt.managedbuild.tool.gnu.c.compiler.input.1452105399">
+		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.gnu.macosx.exe.debug.341255150;cdt.managedbuild.config.gnu.macosx.exe.debug.341255150.;cdt.managedbuild.tool.gnu.c.compiler.macosx.exe.debug.1201400609;cdt.managedbuild.tool.gnu.c.compiler.input.2031799877">
 			<autodiscovery enabled="true" problemReportingEnabled="true" selectedProfileId="org.eclipse.cdt.managedbuilder.core.GCCManagedMakePerProjectProfileC"/>
 		</scannerConfigBuildInfo>
 		<scannerConfigBuildInfo instanceId="cdt.managedbuild.config.macosx.exe.release.1916112479;cdt.managedbuild.config.macosx.exe.release.1916112479.;cdt.managedbuild.tool.gnu.cpp.compiler.macosx.exe.release.1219375865;cdt.managedbuild.tool.gnu.cpp.compiler.input.604224475">

@@ -322,8 +322,6 @@ void RemoveAllInColl(COLL &coll)
 
 //! x-platform reference to temp folder
 std::string GetTempFolder();
-//! Create temp file and return output stream and full file path as arguments
-void CreateTempFile(std::ofstream  &fileStream, std::string &filePath);
 //! MD5 hash of a file
 std::string GetMD5Hash(const std::string &filePath);
 

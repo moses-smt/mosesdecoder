@@ -308,6 +308,7 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -318,6 +319,9 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";
@@ -341,6 +345,7 @@
 					../../irstlm/lib,
 					../../srilm/lib/macosx,
 					/opt/local/lib,
+					../../cmph/lib,
 				);
 				OTHER_LDFLAGS = (
 					"-lz",
@@ -351,6 +356,9 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
+					"-lboost_filesystem-mt",
+					"-lboost_system-mt",
+					"-lcmph",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";

@@ -1,0 +1,304 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1EF3D68A15D02AEF00969478 /* processPhraseTableMin.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF3D68915D02AEF00969478 /* processPhraseTableMin.cpp */; };
+		1EF3D6A415D02B6400969478 /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EF3D69915D02B4400969478 /* libmoses.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1EF3D69815D02B4400969478 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF3D69415D02B4400969478 /* moses.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1EF3D6A515D02B6B00969478 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF3D69415D02B4400969478 /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1E6D9FFD15D02A8D0064D436 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1E6D9FFF15D02A8D0064D436 /* processPhraseTableMin */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = processPhraseTableMin; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EF3D68915D02AEF00969478 /* processPhraseTableMin.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = processPhraseTableMin.cpp; path = ../../misc/processPhraseTableMin.cpp; sourceTree = "<group>"; };
+		1EF3D69415D02B4400969478 /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = moses.xcodeproj; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1E6D9FFC15D02A8D0064D436 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EF3D6A415D02B6400969478 /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1E6D9FF415D02A8C0064D436 = {
+			isa = PBXGroup;
+			children = (
+				1EF3D68915D02AEF00969478 /* processPhraseTableMin.cpp */,
+				1E6DA00015D02A8D0064D436 /* Products */,
+				1EF3D69415D02B4400969478 /* moses.xcodeproj */,
+			);
+			sourceTree = "<group>";
+		};
+		1E6DA00015D02A8D0064D436 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E6D9FFF15D02A8D0064D436 /* processPhraseTableMin */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EF3D69515D02B4400969478 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EF3D69915D02B4400969478 /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1E6D9FFE15D02A8D0064D436 /* processPhraseTableMin */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E6DA00915D02A8D0064D436 /* Build configuration list for PBXNativeTarget "processPhraseTableMin" */;
+			buildPhases = (
+				1E6D9FFB15D02A8D0064D436 /* Sources */,
+				1E6D9FFC15D02A8D0064D436 /* Frameworks */,
+				1E6D9FFD15D02A8D0064D436 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1EF3D6A615D02B6B00969478 /* PBXTargetDependency */,
+			);
+			name = processPhraseTableMin;
+			productName = processPhraseTableMin;
+			productReference = 1E6D9FFF15D02A8D0064D436 /* processPhraseTableMin */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1E6D9FF615D02A8C0064D436 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1E6D9FF915D02A8C0064D436 /* Build configuration list for PBXProject "processPhraseTableMin" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1E6D9FF415D02A8C0064D436;
+			productRefGroup = 1E6DA00015D02A8D0064D436 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1EF3D69515D02B4400969478 /* Products */;
+					ProjectRef = 1EF3D69415D02B4400969478 /* moses.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				1E6D9FFE15D02A8D0064D436 /* processPhraseTableMin */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1EF3D69915D02B4400969478 /* libmoses.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmoses.a;
+			remoteRef = 1EF3D69815D02B4400969478 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1E6D9FFB15D02A8D0064D436 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EF3D68A15D02AEF00969478 /* processPhraseTableMin.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1EF3D6A615D02B6B00969478 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 1EF3D6A515D02B6B00969478 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1E6DA00715D02A8D0064D436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1E6DA00815D02A8D0064D436 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				LIBRARY_SEARCH_PATHS = "";
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1E6DA00A15D02A8D0064D436 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = WITH_THREADS;
+				HEADER_SEARCH_PATHS = (
+					../../,
+					../../irstlm/include,
+					/opt/local/include,
+					../../moses/src,
+					../../cmph/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					../../irstlm/lib,
+					../../srilm/lib/macosx,
+					../../randlm/lib,
+					/opt/local/lib,
+					../../cmph/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
+					"-lrandlm",
+					"-lboost_thread-mt",
+					"-lcmph",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1E6DA00B15D02A8D0064D436 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = WITH_THREADS;
+				HEADER_SEARCH_PATHS = (
+					../../,
+					../../irstlm/include,
+					/opt/local/include,
+					../../moses/src,
+					../../cmph/include,
+				);
+				LIBRARY_SEARCH_PATHS = (
+					../../irstlm/lib,
+					../../srilm/lib/macosx,
+					../../randlm/lib,
+					/opt/local/lib,
+					../../cmph/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
+					"-lrandlm",
+					"-lboost_thread-mt",
+					"-lcmph",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E6D9FF915D02A8C0064D436 /* Build configuration list for PBXProject "processPhraseTableMin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E6DA00715D02A8D0064D436 /* Debug */,
+				1E6DA00815D02A8D0064D436 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1E6DA00915D02A8D0064D436 /* Build configuration list for PBXNativeTarget "processPhraseTableMin" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E6DA00A15D02A8D0064D436 /* Debug */,
+				1E6DA00B15D02A8D0064D436 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1E6D9FF615D02A8C0064D436 /* Project object */;
+}

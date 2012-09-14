@@ -24,8 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "RuleTable/PhraseDictionarySCFG.h"
 #include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "RuleTable/PhraseDictionaryFuzzyMatch.h"
+
 #ifndef WIN32
 #include "PhraseDictionaryDynSuffixArray.h"
+#include "CompactPT/PhraseDictionaryCompact.h"
 #endif
 #include "RuleTable/UTrie.h"
 
@@ -68,7 +71,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 {
   const StaticData& staticData = StaticData::Instance();
   const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray) {
+  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray
+      || implementation == Compact) {
     m_useThreadSafePhraseDictionary = true;
   } else {
     m_useThreadSafePhraseDictionary = false;
@@ -115,7 +119,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     if (m_implementation == Hiero) {
       VERBOSE(2,"using Hiero format phrase tables" << std::endl);
     } else {
-      VERBOSE(2,"using New Format phrase tables" << std::endl);
+      VERBOSE(2,"using Moses-formatted SCFG phrase tables" << std::endl);
     }
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
@@ -188,7 +192,38 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
-  } else {
+  } else if (m_implementation == FuzzyMatch) {
+    
+    PhraseDictionaryFuzzyMatch *dict = new PhraseDictionaryFuzzyMatch(m_numScoreComponent, this);
+
+    bool ret = dict->Load(GetInput()
+                          , GetOutput()
+                          , m_filePath
+                          , m_weight
+                          , m_tableLimit
+                          , system->GetLanguageModels()
+                          , system->GetWordPenaltyProducer());
+    assert(ret);
+
+    return dict;    
+  } else if (m_implementation == Compact) {
+#ifndef WIN32
+    VERBOSE(2,"Using compact phrase table" << std::endl);                                                                                                                               
+                                                                                                                                      
+    PhraseDictionaryCompact* pd  = new PhraseDictionaryCompact(m_numScoreComponent, m_implementation, this);                         
+    bool ret = pd->Load(GetInput(), GetOutput()                                                                                      
+                         , m_filePath                                                                                                 
+                         , m_weight                                                                                                   
+                         , m_tableLimit                                                                                               
+                         , system->GetLanguageModels()                                                                                
+                         , system->GetWeightWordPenalty());                                                                           
+    assert(ret);                                                                                                                      
+    return pd;                                                                                                                       
+#else
+    CHECK(false);
+#endif
+  }  
+  else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
     CHECK(false);
   }
