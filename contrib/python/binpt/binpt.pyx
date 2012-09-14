@@ -56,7 +56,7 @@ cdef class QueryResult(object):
     def __repr__(self):
         return repr((repr(self._words), repr(self._scores), repr(self._wa)))
 
-cdef QueryResult get_query_result(StringTgtCand& cand, wa = None):
+cdef QueryResult get_query_result(StringTgtCand& cand, object wa = None):
     '''Converts a StringTgtCandidate (c++ object) and possibly a word-alignment info (string)
     to a QueryResult (python object).'''
     cdef tuple words = tuple([cand.first[i].c_str() for i in range(cand.first.size())])
@@ -71,24 +71,24 @@ cdef class BinaryPhraseTable(object):
     cdef bytes _path
     cdef unsigned _nscores
     cdef bint _wa
-    cdef bytes _delimiter
+    cdef bytes _delimiters
 
-    def __cinit__(self, char* path, unsigned nscores = 5, bint wa = False, delimiter = ' '):
+    def __cinit__(self, bytes path, unsigned nscores = 5, bint wa = False, delimiters = ' \t'):
         '''It requies a path to binary phrase table (stem of the table, e.g europarl.fr-en 
         is the stem for europar.fr-en.binphr.*).
         Moses::PhraseDictionaryTree also needs to be aware of the number of scores (usually 5),
         and whether or not there is word-alignment info in the table (usually not).
-        One can also specify the token delimiter, for Moses::Tokenize(text, delimiter), which is one space by default.'''
+        One can also specify the token delimiters, for Moses::Tokenize(text, delimiters), which is space or tab by default.'''
 
         if not BinaryPhraseTable.isValidBinaryTable(path, wa):
             raise ValueError, "'%s' doesn't seem a valid binary table." % path
         self._path = path
         self._nscores = nscores
         self._wa = wa
-        self._delimiter = delimiter
+        self._delimiters = delimiters
         self.__tree = new PhraseDictionaryTree(nscores)
         self.__tree.UseWordAlignment(wa)
-        self.__tree.Read(path)
+        self.__tree.Read(string(path))
 
     def __dealloc__(self):
         del self.__tree
@@ -123,17 +123,17 @@ cdef class BinaryPhraseTable(object):
         return self._wa
 
     @property
-    def delimiter(self):
-        return self._delimiter
+    def delimiters(self):
+        return self._delimiters
 
-    def query(self, char* line):
+    def query(self, line):
         '''Queries the phrase table and returns a list of matches.
         Each match is a QueryResult.'''
         cdef bytes text = as_str(line)
-        cdef vector[string] fphrase = Tokenize(text, self.delimiter)
+        cdef vector[string] fphrase = Tokenize(string(text), string(self._delimiters))
         cdef vector[StringTgtCand]* rv = new vector[StringTgtCand]()
-        cdef vector[string]* wa
-        cdef list phrases
+        cdef vector[string]* wa = NULL
+        
         if not self.__tree.UseWordAlignment():
             self.__tree.GetTargetCandidates(fphrase, rv[0])
             phrases = [get_query_result(rv[0][i]) for i in range(rv.size())]
