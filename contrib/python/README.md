@@ -1,6 +1,6 @@
 # Python interface to Moses
 
-The idea is to have some of Moses' internals exposed to Python (inspired by pycdec).
+The idea is to have some of Moses' internals exposed to Python (inspired on pycdec).
 
 ## What's been interfaced?
 
@@ -9,11 +9,8 @@ The idea is to have some of Moses' internals exposed to Python (inspired by pycd
         Moses::PhraseDictionaryTree.h
 
 ## Building
-1.  Compile the cython code
 
-        cython --cplus binpt/binpt.pyx
-
-2.  Build the python extension
+1.  Build the python extension
 
         python setup.py build_ext -i
 
@@ -21,3 +18,11 @@ The idea is to have some of Moses' internals exposed to Python (inspired by pycd
 
         echo '! " and "' | python example.py bin-ptable-stem 5 1
         echo "casa" | python example.py bin-ptable-stem 5
+
+## Changing the code
+
+If you want to add your changes you are going to have to recompile the cython code.
+
+1.  Compile the cython code (use Cython 0.16): this will generate binpt/binpt.cpp
+
+        cython --cplus binpt/binpt.pyx
