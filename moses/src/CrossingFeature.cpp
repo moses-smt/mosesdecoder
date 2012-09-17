@@ -82,7 +82,7 @@ bool CrossingFeature::LoadDataFile(const std::string &dataPath)
 
 size_t CrossingFeature::GetNumScoreComponents() const
 {
-  return m_withTargetLength ? 2 : 1;
+  return 1;
 }
   
 std::string CrossingFeature::GetScoreProducerDescription(unsigned id) const
@@ -168,6 +168,27 @@ static std::vector<SpanInfo> GetSpans(const ChartHypothesis &chartHypothesis, in
   return result;
 }
 
+bool IsCrossing(const TargetPhrase& targetPhrase)
+{
+  const AlignmentInfo::NonTermIndexMap &noTermIndex = targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
+  
+  int prevSourceInd = -1;
+  for (size_t targetPos = 0; targetPos < targetPhrase.GetSize(); ++targetPos)
+  {
+    const Word &word = targetPhrase.GetWord(targetPos);
+    if (word.IsNonTerminal())
+    {
+      size_t sourceInd = noTermIndex[targetPos];
+      if (sourceInd < prevSourceInd)
+        return true;
+      
+      prevSourceInd = sourceInd;
+    }
+  }
+  
+  return false;  
+}
+
 FFState* CrossingFeature::EvaluateChart(
   const ChartHypothesis &chartHypothesis,
   int featureId,
@@ -175,23 +196,35 @@ FFState* CrossingFeature::EvaluateChart(
 {
   std::vector<SpanInfo> spans = GetSpans(chartHypothesis, featureId);
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
-  const SpanLengthEstimatorCollection& spanLengthEstimators = targetPhrase.GetSpanLengthEstimators();
-  std::vector<float> scores(GetNumScoreComponents());
+  float score = 0;
+
+  cerr << chartHypothesis.GetOutputPhrase() << endl;
+  cerr << targetPhrase.GetTargetLHS() << endl;
+
+  // calc number of words in output phrase
+  unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
   for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-    scores[0] += spanLengthEstimators.GetScoreBySourceSpanLength(spanIndex, spans[spanIndex].SourceSpan);
+    terminalCount += spans[spanIndex].TargetSpan - 1;
   }
-  if (m_withTargetLength) {
-    unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
-    for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-      terminalCount += spans[spanIndex].TargetSpan - 1;
-      scores[1] += spanLengthEstimators.GetScoreByTargetSpanLength(spanIndex, spans[spanIndex].TargetSpan);
-    }
-    accumulator->PlusEquals(this, scores);
-    return new CrossingFeatureState(terminalCount);
-  } else {
-    accumulator->PlusEquals(this, scores);
-    return NULL;
+  
+  // lookup score
+  bool isCrossing = IsCrossing(targetPhrase);
+  
+  map<CrossingFeatureData, float>::const_iterator iter;
+  CrossingFeatureData key(terminalCount, targetPhrase.GetTargetLHS(), isCrossing);
+  iter = m_data.find(key);
+  if (iter == m_data.end())
+  { // novel entry. Hardcode
+    score = isCrossing ? 0.1 : 0.9;
   }
+  else
+  {
+    score = iter->second;
+  }
+  score = FloorScore(TransformScore(score));
+  
+  accumulator->PlusEquals(this, score);
+  return new CrossingFeatureState(terminalCount);
 }
   
 } // namespace moses

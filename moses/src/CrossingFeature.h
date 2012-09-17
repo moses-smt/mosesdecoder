@@ -44,12 +44,8 @@ public:
     int featureId,
     ScoreComponentCollection* accumulator) const;
   
-  bool WithTargetLength() const {
-    return m_withTargetLength;
-  }
 
 protected:
-  bool m_withTargetLength;
   std::string m_dataPath;
   std::map<CrossingFeatureData, float> m_data;
 
