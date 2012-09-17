@@ -4,22 +4,29 @@
 #include "TranslationOption.h"
 #include "WordsRange.h"
 #include "ChartHypothesis.h"
-#include "DynSAInclude/types.h"
 #include "InputFileStream.h"
 #include "UserMessage.h"
-#include "Util.h"
+#include "DynSAInclude/types.h"
 
 using namespace std;
 
 namespace Moses {
-  
+
 CrossingFeatureData::CrossingFeatureData(const std::vector<std::string> &toks)
 {
+  const StaticData &staticData = StaticData::Instance();
+  
   m_length  = Scan<int>(toks[0]);
-  m_nonTerm = toks[1];
+  m_nonTerm.CreateFromString(Output, staticData.GetOutputFactorOrder(), toks[1], true);
   m_isCrossing = Scan<bool>(toks[2]);
   
 }
+
+CrossingFeatureData::CrossingFeatureData(size_t length, const Word &lhs, bool isCrossing)
+:m_length(length)
+,m_nonTerm(lhs)
+,m_isCrossing(isCrossing)
+{}
 
 bool CrossingFeatureData::operator<(const CrossingFeatureData &compare) const
 {
@@ -32,9 +39,10 @@ bool CrossingFeatureData::operator<(const CrossingFeatureData &compare) const
   return false;
 }
 
+////////////////////////////////////////////////////////////////
 CrossingFeature::CrossingFeature(ScoreIndexManager &scoreIndexManager
-                                , const std::vector<float> &weights
-                                , const std::string &dataPath)
+                                 , const std::vector<float> &weights
+                                 , const std::string &dataPath)
 {
   CHECK(weights.size() == 1 || weights.size() == 2);
   scoreIndexManager.AddScoreProducer(this);
@@ -43,7 +51,7 @@ CrossingFeature::CrossingFeature(ScoreIndexManager &scoreIndexManager
   bool ret = LoadDataFile(dataPath);
   CHECK(ret);
 }
-  
+
 bool CrossingFeature::LoadDataFile(const std::string &dataPath)
 {
   InputFileStream inFile(dataPath);
@@ -59,7 +67,7 @@ bool CrossingFeature::LoadDataFile(const std::string &dataPath)
     vector<string> toks;
     Tokenize(toks, line);
     assert(toks.size() == 4);
-     
+    
     CrossingFeatureData data(toks);
     m_data[data] = Scan<float>(toks[3]);
     
@@ -67,14 +75,14 @@ bool CrossingFeature::LoadDataFile(const std::string &dataPath)
   }
   
   assert(lineNum == m_data.size());
-         
+  
   return true;
   
 }
 
 size_t CrossingFeature::GetNumScoreComponents() const
 {
-  return 1;
+  return m_withTargetLength ? 2 : 1;
 }
   
 std::string CrossingFeature::GetScoreProducerDescription(unsigned id) const
@@ -172,15 +180,18 @@ FFState* CrossingFeature::EvaluateChart(
   for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
     scores[0] += spanLengthEstimators.GetScoreBySourceSpanLength(spanIndex, spans[spanIndex].SourceSpan);
   }
-
-  unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
-  for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-    terminalCount += spans[spanIndex].TargetSpan - 1;
-    scores[1] += spanLengthEstimators.GetScoreByTargetSpanLength(spanIndex, spans[spanIndex].TargetSpan);
+  if (m_withTargetLength) {
+    unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
+    for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
+      terminalCount += spans[spanIndex].TargetSpan - 1;
+      scores[1] += spanLengthEstimators.GetScoreByTargetSpanLength(spanIndex, spans[spanIndex].TargetSpan);
+    }
+    accumulator->PlusEquals(this, scores);
+    return new CrossingFeatureState(terminalCount);
+  } else {
+    accumulator->PlusEquals(this, scores);
+    return NULL;
   }
-  accumulator->PlusEquals(this, scores);
-  return new CrossingFeatureState(terminalCount);
-
 }
   
 } // namespace moses

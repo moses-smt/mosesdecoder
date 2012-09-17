@@ -1,7 +1,8 @@
-#pragma once
+#ifndef moses_CrossingFeature_h
+#define moses_CrossingFeature_h
 
-#include <map>
 #include "FeatureFunction.h"
+#include "Word.h"
 
 namespace Moses {
   
@@ -13,12 +14,13 @@ class CrossingFeatureData
 {
 public:
   CrossingFeatureData(const std::vector<std::string> &toks);
-
+  CrossingFeatureData(size_t length, const Word &lhs, bool isCrossing);
+  
   bool operator<(const CrossingFeatureData &compare) const;
-
+  
 protected:
   int m_length;
-  std::string m_nonTerm;
+  Word m_nonTerm;
   bool m_isCrossing;
 };
 
@@ -42,13 +44,19 @@ public:
     int featureId,
     ScoreComponentCollection* accumulator) const;
   
-private:
-  
+  bool WithTargetLength() const {
+    return m_withTargetLength;
+  }
+
+protected:
+  bool m_withTargetLength;
   std::string m_dataPath;
   std::map<CrossingFeatureData, float> m_data;
-  
+
   bool LoadDataFile(const std::string &dataPath);
+
 };
 
 } // namespace Moses
 
+#endif
