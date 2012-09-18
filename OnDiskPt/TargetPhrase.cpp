@@ -266,13 +266,13 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   delete lhs;
   
   // set source phrase
-  Moses::Phrase *mosesSP = new Moses::Phrase(Moses::Input);
+  Moses::Phrase mosesSP(Moses::Input);
   for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
     Moses::Word *mosesWord = sp->GetWord(pos).ConvertToMoses(Moses::Input, inputFactors, vocab);
-    mosesSP->AddWord(*mosesWord);
+    mosesSP.AddWord(*mosesWord);
     delete mosesWord;
   }
-  ret->SetSourcePhrase(*mosesSP);
+  ret->SetSourcePhrase(mosesSP);
   
   return ret;
 }
