@@ -160,14 +160,14 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
 void PhraseNode::AddTargetPhrase(const SourcePhrase &sourcePhrase, TargetPhrase *targetPhrase
                                  , OnDiskWrapper &onDiskWrapper, size_t tableLimit
-                                 , const std::vector<float> &counts, OnDiskPt::Phrase *spShort)
+                                 , const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort)
 {
   AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, spShort);
 }
 
 void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
                                  , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
-                                 , size_t tableLimit, const std::vector<float> &counts, OnDiskPt::Phrase *spShort)
+                                 , size_t tableLimit, const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort)
 {	
   size_t phraseSize = sourcePhrase.GetSize();
   if (pos < phraseSize) {

@@ -38,20 +38,20 @@ void Tokenize(OnDiskPt::Phrase &phrase
 
     if (splitPos == string::npos) {
       // lhs - only 1 word
-      Word *word = new Word();
+      WordPtr word (new Word());
       word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
       phrase.AddWord(word);
     } else {
       // source & target non-terms
       if (addSourceNonTerm) {
-        Word *word = new Word();
+        WordPtr word( new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);
       }
 
       wordStr = token.substr(splitPos, tokSize - splitPos);
       if (addTargetNonTerm) {
-        Word *word = new Word();
+        WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);
       }
@@ -59,7 +59,7 @@ void Tokenize(OnDiskPt::Phrase &phrase
     }
   } else {
     // term
-    Word *word = new Word();
+    WordPtr word(new Word());
     word->CreateFromString(token, onDiskWrapper.GetVocab());
     phrase.AddWord(word);
   }

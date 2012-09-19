@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <boost/shared_ptr.hpp>
 #include "Vocab.h"
 
 namespace Moses
@@ -81,5 +82,7 @@ public:
   bool operator==(const Word &compare) const;
 
 };
+
+typedef boost::shared_ptr<Word> WordPtr;
 }
 
