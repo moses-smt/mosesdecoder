@@ -98,6 +98,7 @@ Parameter::Parameter()
   AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
   AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
   AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+  AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
   AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
   AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
@@ -151,8 +152,12 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
-  AddParam("weight-span-length", "SL", "Weight for span length feature");
+  
+  AddParam("weight-span-length", "SL", "Weight for span length feature. Set this to activate it, if it is empty, feature will not be used");
   AddParam("gaussian-span-length-score", "Use Gaussian pdf to calculate span length probability instead of unsmoothed counts");
+
+  AddParam("weight-crossing", "CR", "weight for non-term crossing feature. Set this to activate it, if it is empty, feature will not be used");
+  AddParam("crossing-file", "Data file for crossing feature. Line format: [span-length] [non-term] [is-crossing] [probability]");
 
 }
 

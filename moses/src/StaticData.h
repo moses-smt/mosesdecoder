@@ -55,6 +55,7 @@ class LexicalReordering;
 class GlobalLexicalModel;
 class PhraseDictionaryFeature;
 class SpanLengthFeature;
+class CrossingFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
@@ -84,6 +85,7 @@ protected:
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   SpanLengthFeature*      m_spanLengthFeature;
+  CrossingFeature*        m_crossingFeature;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
@@ -102,12 +104,14 @@ protected:
   m_translationOptionThreshold,
   m_wordDeletionWeight;
 
+  
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
   // do it differently from old pharaoh
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
+  bool m_useEarlyDistortionCost;
   size_t
   m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
   , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
@@ -233,6 +237,7 @@ protected:
 	bool LoadSyntacticLanguageModel();
 #endif
   bool LoadSpanLengthFeature();
+  bool LoadCrossingFeature();
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
@@ -338,6 +343,9 @@ public:
   }
   bool UseEarlyDiscarding() const {
     return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
+  }
+  bool UseEarlyDistortionCost() const {
+    return m_useEarlyDistortionCost;
   }
   float GetTranslationOptionThreshold() const {
     return m_translationOptionThreshold;
@@ -637,9 +645,9 @@ public:
   const std::string &GetBinDirectory() const;
 
   const SpanLengthFeature *GetSpanLengthFeature() const
-  {
-      return m_spanLengthFeature;
-  }
+  { return m_spanLengthFeature; }
+  const CrossingFeature *GetCrossingFeature() const
+  { return m_crossingFeature; }
 
 };
 

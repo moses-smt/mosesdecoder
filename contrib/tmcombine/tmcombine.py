@@ -362,6 +362,11 @@ class Moses():
         
         # information specific to Moses model: alignment info and comment section with target and source counts
         alignment,comments = self.phrase_pairs[src][target][1]
+        if alignment:
+            extra_space = b' '
+        else:
+            extra_space = b''
+
         if mode == 'counts':
             i_e2f = flags['i_e2f']
             i_f2e = flags['i_f2e']
@@ -376,8 +381,7 @@ class Moses():
             origin_features = b' '.join([b'%.4f' %(f) for f in origin_features]) + ' '
         else:
             origin_features = b''
-
-        line = b"%s ||| %s ||| %s 2.718 %s||| %s ||| %s\n" %(src,target,features,origin_features,alignment,comments)
+        line = b"%s ||| %s ||| %s 2.718 %s||| %s%s||| %s\n" %(src,target,features,origin_features,alignment,extra_space,comments)
         return line
         
         

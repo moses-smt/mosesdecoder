@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
 #include "SpanLengthFeature.h"
+#include "CrossingFeature.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -79,6 +80,7 @@ StaticData StaticData::s_instance;
 
 StaticData::StaticData()
   :m_spanLengthFeature(NULL)
+  ,m_crossingFeature(NULL)
   ,m_numLinkParams(1)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
@@ -370,6 +372,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter(&m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
 
+  // early distortion cost
+  SetBooleanParameter( &m_useEarlyDistortionCost, "early-distortion-cost", false );
+
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
@@ -517,6 +522,7 @@ bool StaticData::LoadData(Parameter *parameter)
 #endif
 	
   if (!LoadSpanLengthFeature()) return false;
+  if (!LoadCrossingFeature()) return false;
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -614,6 +620,11 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_spanLengthFeature != NULL) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_spanLengthFeature);
     }
+
+    if (m_crossingFeature != NULL) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_crossingFeature);
+    }
+
   }
 
   m_scoreIndexManager.InitFeatureNames();
@@ -663,6 +674,7 @@ StaticData::~StaticData()
   // small score producers
   delete m_unknownWordPenaltyProducer;
   delete m_spanLengthFeature;
+  delete m_crossingFeature;
 
   //delete m_parameter;
 
@@ -738,7 +750,21 @@ bool StaticData::LoadSpanLengthFeature()
   }
   
 }
+
+bool StaticData::LoadCrossingFeature()
+{
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-crossing"));
+  if (weight.size()) {
+    const string &dataPath = m_parameter->GetParam("crossing-file")[0];
+    m_crossingFeature = new CrossingFeature(m_scoreIndexManager, weight, dataPath);
+    return (m_crossingFeature != NULL);
+  } else {
+    m_crossingFeature = NULL;
+    return true;
+  }
   
+}
+
 bool StaticData::LoadLexicalReorderingModel()
 {
   VERBOSE(1, "Loading lexical distortion models...");
