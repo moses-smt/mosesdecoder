@@ -272,7 +272,7 @@ void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
 }
 
 void Hypothesis::EvaluateWith(const StatelessFeatureFunction* slff) {
-  slff->Evaluate(GetTranslationOption(), GetInput(),  GetWordsBitmap(), &m_currScoreBreakdown);
+  slff->Evaluate(PhraseBasedFeatureContext(this), &m_currScoreBreakdown);
 }
 
 void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {

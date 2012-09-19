@@ -47,20 +47,12 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     return true;
 }
 
-  void WordTranslationFeature::InitializeForInput( Sentence const& in )
-{
-  m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
-}
-
 void WordTranslationFeature::Evaluate
-                     (const TranslationOption& translationOption,
-                      const InputType& inputType,
-                      const WordsBitmap& coverageVector,
+                     (const PhraseBasedFeatureContext& context,
                       ScoreComponentCollection* accumulator) const
 {
-  const Sentence& input = *(m_local->input);
-  const TargetPhrase& targetPhrase = translationOption.GetTargetPhrase();
+  const Sentence& input = static_cast<const Sentence&>(context.GetSource());
+  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
 
   // process aligned words
@@ -105,7 +97,7 @@ void WordTranslationFeature::Evaluate
     	accumulator->SparsePlusEquals(featureName.str(), 1);
     }
     if (m_sourceContext) {
-    	size_t globalSourceIndex = translationOption.GetStartPos() + sourceIndex;
+    	size_t globalSourceIndex = context.GetTranslationOption().GetStartPos() + sourceIndex;
     	if (globalSourceIndex == 0) {
     		// add <s> trigger feature for source
     		stringstream feature;

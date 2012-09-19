@@ -123,8 +123,6 @@ namespace Moses {
 	  ((PhrasePairFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
 	else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm")
 	  ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
-        else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "wt")
-	  ((WordTranslationFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
       }
       
       LMList::const_iterator iterLM;

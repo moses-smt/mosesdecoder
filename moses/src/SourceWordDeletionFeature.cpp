@@ -32,12 +32,10 @@ bool SourceWordDeletionFeature::Load(const std::string &filePath)
 }
 
 void SourceWordDeletionFeature::Evaluate(
-            const TranslationOption& translationOption,
-            const InputType& inputType,
-            const WordsBitmap& coverageVector,
+            const PhraseBasedFeatureContext& context,
             ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = translationOption.GetTargetPhrase();
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);

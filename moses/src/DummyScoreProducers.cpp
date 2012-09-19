@@ -97,12 +97,10 @@ std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 }
 
 void WordPenaltyProducer::Evaluate(
-    const TranslationOption& translationOption,
-    const InputType& inputType,
-    const WordsBitmap& coverageVector,
+    const PhraseBasedFeatureContext& context,
     ScoreComponentCollection* out) const
 {
-	const TargetPhrase& tp = translationOption.GetTargetPhrase();
+	const TargetPhrase& tp = context.GetTargetPhrase();
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 

@@ -159,12 +159,10 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
 }
 
   void GlobalLexicalModel::Evaluate
-               (const TranslationOption& translationOption,
-                const InputType& inputType,
-                const WordsBitmap& coverageVector,
+               (const PhraseBasedFeatureContext& context,
   							ScoreComponentCollection* accumulator) const
 {
   accumulator->PlusEquals( this,  
-      GetFromCacheOrScorePhrase(translationOption.GetTargetPhrase()) );
+      GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
 }

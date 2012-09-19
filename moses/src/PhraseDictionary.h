@@ -136,9 +136,7 @@ public:
   size_t GetDictIndex() const;
 
   //Usual feature function methods are not implemented
-  virtual void Evaluate(const TranslationOption& translationOption,
-                        const InputType& inputType,
-                        const WordsBitmap& coverageVector,
+  virtual void Evaluate(const PhraseBasedFeatureContext& context,
   											ScoreComponentCollection* accumulator) const 
   {
     throw std::runtime_error("PhraseDictionary.Evaluate() Not implemented");

@@ -62,13 +62,11 @@ size_t PhrasePairFeature::GetNumInputScores() const
 }
 
 void PhrasePairFeature::Evaluate(
-            const TranslationOption& translationOption,
-            const InputType& inputType,
-            const WordsBitmap& coverageVector,
+            const PhraseBasedFeatureContext& context,
             ScoreComponentCollection* accumulator) const 
 {
-	const TargetPhrase& target = translationOption.GetTargetPhrase();
-	const Phrase& source = *(translationOption.GetSourcePhrase());
+	const TargetPhrase& target = context.GetTargetPhrase();
+	const Phrase& source = *(context.GetTranslationOption().GetSourcePhrase());
 /*   const AlignmentInfo& align = cur_hypo.GetAlignmentInfo();
    for (AlignmentInfo::const_iterator i = align.begin(); i != align.end(); ++i) {
     const Factor* sourceFactor = source.GetWord(i->first).GetFactor(m_sourceFactorId);

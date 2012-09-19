@@ -24,19 +24,8 @@ class WordTranslationFeature : public StatelessFeatureFunction {
   typedef std::map< char, short > CharHash;
   typedef std::vector< std::set<std::string> > DocumentVector;
 	
-  struct ThreadLocalStorage
-  {
-    const Sentence *input;
-  };
-
 
 private:
-#ifdef WITH_THREADS
-  boost::thread_specific_ptr<ThreadLocalStorage> m_local;
-#else
-  std::auto_ptr<ThreadLocalStorage> m_local;
-#endif
-
   std::set<std::string> m_vocabSource;
   std::set<std::string> m_vocabTarget;
   FactorType m_factorTypeSource;
@@ -80,18 +69,14 @@ public:
       
 	bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
-	void InitializeForInput( Sentence const& in );
 
-//  void Evaluate(const TargetPhrase& cur_phrase, ScoreComponentCollection* accumulator) const;
 
   const FFState* EmptyHypothesisState(const InputType &) const {
   	return new DummyState();
   }
 
-  void Evaluate(const TranslationOption& translationOption,
-                        const InputType& inputType,
-                        const WordsBitmap& coverageVector,
-  											ScoreComponentCollection* accumulator) const;
+  void Evaluate( const PhraseBasedFeatureContext& context,                       
+									ScoreComponentCollection* accumulator) const;
 
   void EvaluateChart(const TargetPhrase& targetPhrase,
                      const InputType& inputType,

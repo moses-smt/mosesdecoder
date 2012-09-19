@@ -48,9 +48,7 @@ public:
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 
   virtual void Evaluate(
-    const TranslationOption& translationOption,
-    const InputType& inputType,
-    const WordsBitmap& coverageVector,
+    const PhraseBasedFeatureContext& context,
   	ScoreComponentCollection* accumulator) const;
 
   virtual void EvaluateChart(
@@ -75,9 +73,7 @@ public:
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 
   virtual bool ComputeValueInTranslationOption() const;
-  void Evaluate(  const TranslationOption& translationOption,
-                  const InputType& inputType,
-                  const WordsBitmap& coverageVector,
+  void Evaluate(  const PhraseBasedFeatureContext& context,
   								ScoreComponentCollection* accumulator) const 
   {
     //do nothing - not a real feature

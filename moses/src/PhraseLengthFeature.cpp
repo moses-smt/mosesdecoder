@@ -9,14 +9,12 @@ namespace Moses {
 using namespace std;
 
 void PhraseLengthFeature::Evaluate(
-              const TranslationOption& translationOption,
-              const InputType& inputType,
-              const WordsBitmap& coverageVector,
+              const PhraseBasedFeatureContext& context,
               ScoreComponentCollection* accumulator) const
 {
   // get length of source and target phrase
-  size_t sourceLength = translationOption.GetTargetPhrase().GetSize();
-  size_t targetLength = translationOption.GetSourcePhrase()->GetSize();
+  size_t sourceLength = context.GetTargetPhrase().GetSize();
+  size_t targetLength = context.GetTranslationOption().GetSourcePhrase()->GetSize();
 
   // create feature names
   stringstream nameSource;

@@ -737,9 +737,7 @@ void TranslationOptionCollection::PreCalculateScores()
         ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
         for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
           precomputedFeatures[si]->Evaluate(
-              *toption,
-              m_source,
-              coverage,
+              PhraseBasedFeatureContext(*toption, m_source),
               &breakdown);
 
         }
