@@ -73,7 +73,9 @@ protected:
   ,*m_outputWordGraphStream,*m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::ofstream *m_alignmentOutputStream;
-  bool													m_surpressSingleBestOutput;
+  bool	m_surpressSingleBestOutput;
+//  bool	m_passthrough;
+//  bool	m_passthrough_in_n_best;
 
   void Initialization(const std::vector<Moses::FactorType>	&inputFactorOrder
                       , const std::vector<Moses::FactorType>			&outputFactorOrder
@@ -133,6 +135,7 @@ void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*transla
                     bool reportSegmentation, bool reportAllFactors, std::ostream& out);
 void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool reportSegmentation, bool reportAllFactors, std::ostream &out);
 void OutputInput(std::ostream& os, const Moses::Hypothesis* hypo);
+void OutputPassthroughInformation(std::ostream& os, const Moses::Hypothesis* hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo, const Moses::Hypothesis *hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
 

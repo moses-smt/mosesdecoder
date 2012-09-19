@@ -148,6 +148,8 @@ Parameter::Parameter()
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("async-output", "output translations as soon as possible. 0=sorted output (default), 1=unsorted output");
   AddParam("print-id", "prefix translations with id. Default if false");
+  AddParam("print-passthrough", "output the sgml tag <passthrough> without any computation on that. Default is false");
+  AddParam("print-passthrough-in-n-best", "output the sgml tag <passthrough> without any computation on that in each entry of the n-best-list. Default is false");
 }
 
 Parameter::~Parameter()

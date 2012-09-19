@@ -136,6 +136,19 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
     }
   }
 
+  // setting passThrough flag 
+//  m_passthrough = false;
+//  m_passthrough_in_n_best = false;
+//  if (staticData.isParamSpecified("print-passthrough")) {
+//    m_passthrough = true;
+//  }
+//  if (staticData.isParamSpecified("print-passthrough-in-n-best")) {
+//    m_passthrough_in_n_best = true;
+//  }
+
+//  VERBOSE(1, "print-passthrough flag is set to " << m_passthrough << std::endl);
+//  VERBOSE(1, "print-passthrough-in-n-best flag is set to " << m_passthrough_in_n_best << std::endl);
+
   // wordgraph output
   if (staticData.GetOutputWordGraph()) {
     string fileName = staticData.GetParam("output-word-graph")[0];
@@ -218,6 +231,12 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
     out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
 	<< "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
   }
+}
+
+void OutputPassthroughInformation(std::ostream &out, const Hypothesis *hypo)
+{
+  std::string passthrough = hypo->GetManager().GetSource().GetPassthroughInformation();
+  out << passthrough;
 }
 
 void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
@@ -338,11 +357,16 @@ void OutputInput(std::ostream& os, const Hypothesis* hypo)
     if (inp_phrases[i]) os << *inp_phrases[i];
 }
 
-void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, bool reportSegmentation, bool reportAllFactors)
+void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors)
 {
   if (hypo != NULL) {
     VERBOSE(1,"BEST TRANSLATION: " << *hypo << endl);
     VERBOSE(3,"Best path: ");
+//    if (m_passthrough)
+    if (StaticData::Instance().IsPassthroughEnabled())
+    {
+      OutputPassthroughInformation(cout, hypo);
+    }
     Backtrack(hypo);
     VERBOSE(3,"0" << std::endl);
     if (!m_surpressSingleBestOutput) {
@@ -376,6 +400,11 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
     // print the surface factor of the translation
     out << translationId << " ||| ";
+    if (staticData.IsPassthroughInNBestEnabled())
+    {
+      OutputPassthroughInformation(out, edges[edges.size() - 1]);
+    }
+
     for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
       const Hypothesis &edge = *edges[currEdge];
       OutputSurface(out, edge, outputFactorOrder, reportSegmentation, reportAllFactors);

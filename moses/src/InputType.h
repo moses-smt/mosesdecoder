@@ -50,7 +50,7 @@ protected:
   bool m_hasMetaData;
   long m_segId;
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
-
+  std::string m_passthrough;
 public:
 
   // used in -continue-partial-translation
@@ -70,6 +70,13 @@ public:
   void SetTranslationId(long translationId) {
     m_translationId = translationId;
   }
+  std::string GetPassthroughInformation() const {
+    return m_passthrough;
+  }
+  void SetPassthroughInformation(std::string &passthrough) {
+    m_passthrough = passthrough;
+  }
+
   //! returns the number of words moved
   virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 

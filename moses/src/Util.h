@@ -343,6 +343,8 @@ void ResetUserTime();
 void PrintUserTime(const std::string &message);
 double GetUserTime();
 
+std::string PassthroughSGML(std::string &line, const std::string tagName,const std::string& lbrackStr="<", const std::string& rbrackStr=">");
+
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 

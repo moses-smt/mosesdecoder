@@ -157,6 +157,9 @@ public:
             OutputInput(out, bestHypo);
             out << "||| ";
           }
+          if (staticData.IsPassthroughEnabled()) {
+            OutputPassthroughInformation(out, bestHypo);
+	  }
           OutputBestSurface(
             out,
             bestHypo,

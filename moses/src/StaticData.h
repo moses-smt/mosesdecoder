@@ -149,6 +149,8 @@ protected:
   bool m_UseAlignmentInfo;
   bool m_PrintAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
+  bool m_PrintPassthroughInformation;
+  bool m_PrintPassthroughInformationInNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -261,6 +263,10 @@ public:
     return m_parameter->GetParam(paramName);
   }
 
+  const bool isParamSpecified(const std::string &paramName) const {
+    return m_parameter->isParamSpecified(paramName);
+  }
+
   const std::vector<FactorType> &GetInputFactorOrder() const {
     return m_inputFactorOrder;
   }
@@ -316,6 +322,12 @@ public:
   }
   size_t IsPathRecoveryEnabled() const {
     return m_recoverPath;
+  }
+  bool IsPassthroughEnabled() const {
+    return m_PrintPassthroughInformation;
+  }
+  bool IsPassthroughInNBestEnabled() const {
+    return m_PrintPassthroughInformationInNBest;
   }
   int GetMaxDistortion() const {
     return m_maxDistortion;

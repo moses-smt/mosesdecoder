@@ -122,6 +122,43 @@ double GetUserTime()
   return g_timer.get_elapsed_time();
 }
 
+std::string PassthroughSGML(std::string &line, const std::string tagName, const std::string& lbrackStr, const std::string& rbrackStr)
+{
+  string lbrack = lbrackStr; // = "<";
+  string rbrack = rbrackStr; // = ">";
+
+  std::string meta = "";
+
+  std::string lline = ToLower(line);
+  size_t open = lline.find(lbrack+tagName);
+  //check whether the tag exists; if not return the empty string
+  if (open == std::string::npos) return meta;
+
+  size_t close = lline.find(rbrack, open);
+  //check whether the tag is closed with '/>'; if not return the empty string
+  if (close == std::string::npos)
+  {
+    TRACE_ERR("PassthroughSGML error: the <passthrough info/> tag does not end properly\n");
+    return meta;
+  }
+  // extract the tag
+  std::string tmp = line.substr(open, close - open + 1);
+  meta = line.substr(open, close - open + 1);
+
+  // strip the tag from the line
+  line = line.substr(0, open) + line.substr(close + 1, std::string::npos);
+
+  TRACE_ERR("The input contains a <passthrough info/> tag:" << meta << std::endl);
+
+  lline = ToLower(line);
+  open = lline.find(lbrack+tagName);
+  if (open != std::string::npos)
+  {
+    TRACE_ERR("PassthroughSGML error: there are two <passthrough> tags\n");
+  }
+  return meta;
+}
+
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
 {
   std::map<std::string, std::string> meta;

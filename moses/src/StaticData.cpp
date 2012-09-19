@@ -153,6 +153,8 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
   SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
+  SetBooleanParameter( &m_PrintPassthroughInformation, "print-passthrough", false );
+  SetBooleanParameter( &m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false );
 
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
