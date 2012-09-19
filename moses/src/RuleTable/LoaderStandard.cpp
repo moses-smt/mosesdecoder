@@ -221,13 +221,14 @@ bool RuleTableLoaderStandard::Load(FormatType format
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     //MARIA
-    //get rule count tokens[4] -> first is totalCount, second is distinctCount (based on alignments? for kneserNey flag)
+    //get rule counts tokens[4] -> count(t) assume that extract was run with  --NoFractionalCounting flag
     const std::string &ruleCount = tokens[4];
     vector<string> countStrings;
-    unsigned totalCountRule;
+    unsigned ruleTotalCount;
     TokenizeMultiCharSeparator(countStrings,ruleCount," ");
     if(countStrings.size()>=1)
-      sscanf(countStrings[0].c_str(), "%u", &totalCountRule);   
+      sscanf(countStrings[0].c_str(), "%u", &ruleTotalCount);   
+    ruleTotalCount=floor(ruleTotalCount*scoreVector[0]+0.5);
 
     //read from rule table
     std::vector<SpanLengthEstimator*> spanSourceEstimators, spanTargetEstimators;
@@ -284,8 +285,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
             sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
             estimatorTarget->AddSpanScore(size, logf(proba));
           }
-          estimatorSource->FinishedAdds(totalCountRule);
-          estimatorTarget->FinishedAdds(totalCountRule);
+          estimatorSource->FinishedAdds(ruleTotalCount);
+          estimatorTarget->FinishedAdds(ruleTotalCount);
           spanSourceEstimators.push_back(estimatorSource.release());
           spanTargetEstimators.push_back(estimatorTarget.release());
         }
