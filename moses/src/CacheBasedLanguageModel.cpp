@@ -1,4 +1,4 @@
-// $Id$
+
 
 #include <utility>
 #include "util/check.hh"
@@ -85,16 +85,17 @@ void CacheBasedLanguageModel::Update(std::vector<std::string> words, int age)
 {
 	for (size_t j=0; j<words.size(); j++)
 	{
-		VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << std::endl);
+		VERBOSE(3,"CacheBasedLanguageModel::Update   word[" << j << "]:"<< words[j] << " age:" << age << " decaying_score(age):" << decaying_score(age) << std::endl);
 		decaying_cache_value_t p (age,decaying_score(age));
 		std::pair<std::string, decaying_cache_value_t> e (words[j],p);
-		m_cache.insert(e);
+		m_cache.erase(words[j]); //always erase the element (do nothing if the entry does not exist)
+		m_cache.insert(e); //insert the entry
 	}
 }
 
 void CacheBasedLanguageModel::Insert(std::vector<std::string> words)
 {
-	Decay();
+	Decay(); 
 	Update(words,1);
 	PrintCache();
 }

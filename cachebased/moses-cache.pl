@@ -25,6 +25,7 @@ if ($#ARGV+1 < 1) {
 }
 
 
+#    print STDERR "CMD: $ARGV[0] -t\n";
 IPC::Open3::open3 (\*MOSESIN, \*MOSESOUT, \*MOSESERR, "$ARGV[0] -t");
 
 # remove spaces at begin and end, and newline
@@ -75,9 +76,10 @@ my $info;
 while (my $line = <STDIN>) {
     $line = trim($line);
     my $xml_line = add_xml_info($line, $info);
-    print "Next input: $xml_line\n";
+#   print STDERR "Next input: $xml_line\n";
     print MOSESIN "$xml_line\n";
     my $output = <MOSESOUT>;
+#   print STDERR "Get output: $output\n";
     $output = trim($output);
     my $translation = $output;
     $translation =~ s/ \|[0-9]+-[0-9]+\|//g;
