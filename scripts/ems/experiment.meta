@@ -275,12 +275,7 @@ binarize
 	ignore-unless: script
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
-<<<<<<< HEAD
 	error: set kMaxOrder to at least this value
-=======
-  error: set KENLM_MAX_ORDER to at least this value
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
-
 [TRAINING] single
 consolidate
 	in: CORPUS:clean-split-stem
