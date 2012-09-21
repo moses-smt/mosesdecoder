@@ -80,6 +80,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
   }
 
   m_translationOptionList.ApplyThreshold();
+  PreCalculateScores();
 }
 
 //! special handling of ONE unknown words.
@@ -172,6 +173,42 @@ void ChartTranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceW
       m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
     }
   }
+}
+
+void ChartTranslationOptionCollection::PreCalculateScores() 
+{
+  for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
+    const ChartTranslationOption& cto = m_translationOptionList.Get(i);
+    for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
+     j != cto.GetTargetPhraseCollection().end(); ++j) {
+      const TargetPhrase* targetPhrase = *j;
+      if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
+        ChartBasedFeatureContext context(*targetPhrase,m_source);
+        const vector<const StatelessFeatureFunction*>& sfs =
+          m_system->GetStatelessFeatureFunctions();
+        ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
+        for (size_t k = 0; k < sfs.size(); ++k) {
+          if (!sfs[k]->ComputeValueInTranslationTable()) {
+            sfs[k]->EvaluateChart(context,&breakdown);
+          }
+        }
+      }
+    }
+  }
+}
+
+void ChartTranslationOptionCollection::InsertPreCalculatedScores(
+    const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const 
+{
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter = 
+    m_precalculatedScores.find(targetPhrase);
+  if (scoreIter != m_precalculatedScores.end()) {
+    scoreBreakdown->PlusEquals(scoreIter->second);
+  } else {
+    TRACE_ERR("ERROR: " << targetPhrase << " missing from precalculation cache" << endl);
+    assert(0);  
+  }
+
 }
 
 }  // namespace

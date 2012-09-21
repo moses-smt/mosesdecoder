@@ -170,6 +170,7 @@ public:
 };
 
 
+//XXX: This doesn't look at the alignment. Is this correct?
 inline size_t hash_value(const TranslationOption& translationOption) {
   size_t  seed = 0;
   boost::hash_combine(seed, translationOption.GetTargetPhrase());

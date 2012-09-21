@@ -102,6 +102,7 @@ public:
     throw std::logic_error("GenerationDictionary.Evaluate() Not implemented");
   }
 
+  virtual bool ComputeValueInTranslationTable() const {return true;}
 
 };
 

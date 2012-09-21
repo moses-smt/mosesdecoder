@@ -717,13 +717,9 @@ void TranslationOptionCollection::PreCalculateScores()
     m_system->GetStatelessFeatureFunctions();
   vector<const StatelessFeatureFunction*> precomputedFeatures;
   for (unsigned i = 0; i < sfs.size(); ++i) {
-    if (sfs[i]->ComputeValueInTranslationOption()) {
-      //check that it's not PhraseDictionary or 
-      //GenerationDictionary
-      const string& name = sfs[i]->GetScoreProducerWeightShortName();
-      if (name != "tm" &&  name != "g") {
-        precomputedFeatures.push_back(sfs[i]);
-      }
+    if (sfs[i]->ComputeValueInTranslationOption() && 
+        !sfs[i]->ComputeValueInTranslationTable()) {
+      precomputedFeatures.push_back(sfs[i]);
     }
   }
   //empty coverage vector
@@ -735,11 +731,9 @@ void TranslationOptionCollection::PreCalculateScores()
       for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
         const TranslationOption* toption =  m_collection[i][j].Get(k);
         ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
+        PhraseBasedFeatureContext context(*toption, m_source);
         for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
-          precomputedFeatures[si]->Evaluate(
-              PhraseBasedFeatureContext(*toption, m_source),
-              &breakdown);
-
+          precomputedFeatures[si]->Evaluate(context, &breakdown);
         }
       }
     }

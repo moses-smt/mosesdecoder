@@ -107,9 +107,12 @@ public:
                              ScoreComponentCollection* accumulator) const  = 0;
 
   //If true, then the feature is evaluated before search begins, and stored in
-  //the TranslationOptionCollection. Note that for PhraseDictionary and 
-  //GenerationDictionary the scores are actually read from the TargetPhrase
+  //the TranslationOptionCollection.
   virtual bool ComputeValueInTranslationOption() const;
+
+  //!If true, the feature is stored in the ttable, so gets copied into the 
+  //TargetPhrase and does not need cached in the TranslationOption
+  virtual bool ComputeValueInTranslationTable() const {return false;}
 
   bool IsStateless() const;
 };

@@ -102,6 +102,11 @@ public:
 
   //! contigious hypo id for each input sentence. For debugging purposes
   unsigned GetNextHypoId() { return m_hypothesisId++; }
+
+  const ChartTranslationOptionCollection& GetTranslationOptionCollection()  const
+  {
+    return m_transOptColl;
+  }
 };
 
 }

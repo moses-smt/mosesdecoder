@@ -20,6 +20,7 @@
 
 #pragma once
 
+#include <boost/unordered_map.hpp>
 #include <vector>
 #include "InputType.h"
 #include "DecodeGraph.h"
@@ -55,8 +56,14 @@ protected:
   std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
   StackVec m_emptyStackVec;
 
+  //! Some features should be calculated prior to search
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection> m_precalculatedScores;
+
   //! special handling of ONE unknown words.
   virtual void ProcessOneUnknownWord(const Word &, const WordsRange &);
+
+  //! Pre-calculate most stateless feature values
+  void PreCalculateScores();
 
 public:
   ChartTranslationOptionCollection(InputType const& source
@@ -71,6 +78,11 @@ public:
   }
 
   void Clear() { m_translationOptionList.Clear(); }
+
+  //! Access the pre-calculated values
+  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
+      ScoreComponentCollection* scoreBreakdown) const;
+  
 
 };
 

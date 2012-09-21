@@ -148,6 +148,8 @@ public:
     throw std::logic_error("PhraseDictionary.EvaluateChart() Not implemented");
   }
 
+  virtual bool ComputeValueInTranslationTable() const {return true;}
+
 
 protected:
   size_t m_dictIndex;

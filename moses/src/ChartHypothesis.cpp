@@ -162,6 +162,10 @@ void ChartHypothesis::CalcScore()
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
+  //Add pre-computed features
+  m_manager.GetTranslationOptionCollection().InsertPreCalculatedScores
+    (GetCurrTargetPhrase(), &m_scoreBreakdown);
+
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
   const std::vector<const StatelessFeatureFunction*>& sfs =
@@ -173,7 +177,7 @@ void ChartHypothesis::CalcScore()
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
-		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+    m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }

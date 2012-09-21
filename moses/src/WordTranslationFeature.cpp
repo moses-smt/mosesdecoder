@@ -335,6 +335,7 @@ void WordTranslationFeature::EvaluateChart(
     	}
     }*/
   }
+
 }
 
 }
