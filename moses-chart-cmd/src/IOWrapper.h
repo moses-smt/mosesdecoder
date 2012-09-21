@@ -64,11 +64,10 @@ protected:
   const std::vector<Moses::FactorType>	&m_inputFactorOrder;
   const std::vector<Moses::FactorType>	&m_outputFactorOrder;
   const Moses::FactorMask								&m_inputFactorUsed;
-  std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
+  std::ostream 									*m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::string										m_inputFilePath;
   std::istream									*m_inputStream;
-  bool													m_surpressSingleBestOutput;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;

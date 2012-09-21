@@ -62,7 +62,6 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
-  ,m_nBestStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
   ,m_inputFilePath(inputFilePath)
@@ -79,21 +78,19 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_inputStream = new InputFileStream(inputFilePath);
   }
 
-  m_surpressSingleBestOutput = false;
+  bool suppressSingleBestOutput = false;
 
   if (nBestSize > 0) {
     if (nBestFilePath == "-") {
-      m_nBestStream = &std::cout;
-      m_surpressSingleBestOutput = true;
+      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
+      suppressSingleBestOutput = true;
     } else {
-      std::ofstream *nBestFile = new std::ofstream;
-      m_nBestStream = nBestFile;
-      nBestFile->open(nBestFilePath.c_str());
+      m_nBestOutputCollector = new Moses::OutputCollector(new std::ofstream(nBestFilePath.c_str()));
+      m_nBestOutputCollector->HoldOutputStream();
     }
-    m_nBestOutputCollector = new Moses::OutputCollector(m_nBestStream);
   }
 
-  if (!m_surpressSingleBestOutput) {
+  if (!suppressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
@@ -118,10 +115,6 @@ IOWrapper::~IOWrapper()
 {
   if (!m_inputFilePath.empty()) {
     delete m_inputStream;
-  }
-  if (!m_surpressSingleBestOutput) {
-    // outputting n-best to file, rather than stdout. need to close file and delete obj
-    delete m_nBestStream;
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
@@ -328,6 +321,8 @@ void IOWrapper::OutputDetailedTranslationReport(
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
+  if (!m_singleBestOutputCollector)
+    return;
   std::ostringstream out;
   IOWrapper::FixPrecision(out);
   if (hypo != NULL) {
@@ -339,23 +334,21 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << hypo->GetTotalScore() << " ";
     }
-
-    if (!m_surpressSingleBestOutput) {
-      if (StaticData::Instance().IsPathRecoveryEnabled()) {
-        out << "||| ";
-      }
-      Phrase outPhrase(ARRAY_SIZE_INCR);
-      hypo->CreateOutputPhrase(outPhrase);
-
-      // delete 1st & last
-      CHECK(outPhrase.GetSize() >= 2);
-      outPhrase.RemoveWord(0);
-      outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-
-      const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-      string output = outPhrase.GetStringRep(outputFactorOrder);
-      out << output << endl;
+    
+    if (StaticData::Instance().IsPathRecoveryEnabled()) {
+      out << "||| ";
     }
+    Phrase outPhrase(ARRAY_SIZE_INCR);
+    hypo->CreateOutputPhrase(outPhrase);
+    
+    // delete 1st & last
+    CHECK(outPhrase.GetSize() >= 2);
+    outPhrase.RemoveWord(0);
+    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+    
+    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+    string output = outPhrase.GetStringRep(outputFactorOrder);
+    out << output << endl;
   } else {
     VERBOSE(1, "NO BEST TRANSLATION" << endl);
 
@@ -365,10 +358,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
 
     out << endl;
   }
-
-  if (m_singleBestOutputCollector) {
-    m_singleBestOutputCollector->Write(translationId, out.str());
-  }
+  m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
 void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const ChartHypothesis *bestHypo, const TranslationSystem* system, long translationId)
@@ -376,7 +366,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
   std::ostringstream out;
 
   // Check if we're writing to std::cout.
-  if (m_surpressSingleBestOutput) {
+  if (m_nBestOutputCollector->OutputIsCout()) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
     IOWrapper::FixPrecision(out);
