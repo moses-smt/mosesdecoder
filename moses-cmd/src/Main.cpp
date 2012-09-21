@@ -80,13 +80,15 @@ public:
                   OutputCollector* latticeSamplesCollector,
                   OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                   OutputCollector* detailedTranslationCollector,
-                  OutputCollector* alignmentInfoCollector ) :
+                  OutputCollector* alignmentInfoCollector,
+                  OutputCollector* unknownsCollector) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
     m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
     m_detailedTranslationCollector(detailedTranslationCollector),
-    m_alignmentInfoCollector(alignmentInfoCollector) {}
+    m_alignmentInfoCollector(alignmentInfoCollector),
+    m_unknownsCollector(unknownsCollector) {}
 
 	/** Translate one sentence
    * gets called by main function implemented at end of this source file */
@@ -268,6 +270,17 @@ public:
       m_detailedTranslationCollector->Write(m_lineNumber,out.str());
     }
 
+    //list of unknown words
+    if (m_unknownsCollector) {
+      const vector<Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
+      ostringstream out;
+      for (size_t i = 0; i < unknowns.size(); ++i) {
+        out << *(unknowns[i]);
+      }
+      out << endl;
+      m_unknownsCollector->Write(m_lineNumber, out.str());
+    }
+
     // report additional statistics
     IFVERBOSE(2) {
       PrintUserTime("Sentence Decoding Time:");
@@ -291,6 +304,7 @@ private:
   OutputCollector* m_searchGraphCollector;
   OutputCollector* m_detailedTranslationCollector;
   OutputCollector* m_alignmentInfoCollector;
+  OutputCollector* m_unknownsCollector;
   std::ofstream *m_alignmentStream;
 
 
@@ -472,6 +486,18 @@ int main(int argc, char** argv)
     if (!staticData.GetAlignmentOutputFile().empty()) {
       alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
     }
+
+    //initialise stream for unknown (oov) words
+    auto_ptr<OutputCollector> unknownsCollector;
+    auto_ptr<ofstream> unknownsStream;
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      unknownsStream.reset(new ofstream(staticData.GetOutputUnknownsFile().c_str()));
+      if (!unknownsStream->good()) {
+        TRACE_ERR("Unable to open " << staticData.GetOutputUnknownsFile() << " for unknowns");
+        exit(1);
+      }
+      unknownsCollector.reset(new OutputCollector(unknownsStream.get()));
+    }
   
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
@@ -492,7 +518,8 @@ int main(int argc, char** argv)
                             wordGraphCollector.get(),
                             searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
-                            alignmentInfoCollector.get() );
+                            alignmentInfoCollector.get(),
+                            unknownsCollector.get() );
       // execute task
 #ifdef WITH_THREADS
     pool.Submit(task);

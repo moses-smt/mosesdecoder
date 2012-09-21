@@ -148,6 +148,7 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
+  AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
   
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          

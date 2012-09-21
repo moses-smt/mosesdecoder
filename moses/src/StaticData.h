@@ -198,6 +198,7 @@ protected:
 #endif
   bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
   bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
+  std::string m_outputUnknownsFile; //! output unknowns in this file
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
@@ -564,6 +565,10 @@ public:
     return m_outputSearchGraphPB;
   }
 #endif
+  const std::string& GetOutputUnknownsFile() const {
+    return m_outputUnknownsFile;
+  }
+
   bool GetUnprunedSearchGraph() const {
     return m_unprunedSearchGraph;
   }

@@ -241,6 +241,16 @@ bool StaticData::LoadData(Parameter *parameter)
 #endif
   SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", false );
   SetBooleanParameter( &m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
+  
+  if (m_parameter->isParamSpecified("output-unknowns")) {
+
+    if (m_parameter->GetParam("output-unknowns").size() == 1) {
+      m_outputUnknownsFile =Scan<string>(m_parameter->GetParam("output-unknowns")[0]); 
+    } else {
+      UserMessage::Add(string("need to specify exactly one file name for unknowns"));
+      return false;
+    }
+  }
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
