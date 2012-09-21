@@ -53,3 +53,8 @@ scripts/training/train-model.perl
 dist
 bin
 previous.sh
+*.xcodeproj/xcuserdata
+contrib/other-builds/*.xcodeproj/project.xcworkspace/
+contrib/other-builds/*.xcodeproj/xcuserdata/
+*/*.xcodeproj/project.xcworkspace
+*/*.xcodeproj/xcuserdata
