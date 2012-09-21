@@ -57,7 +57,7 @@ protected:
   StackVec m_emptyStackVec;
 
   //! Some features should be calculated prior to search
-  boost::unordered_map<TargetPhrase,ScoreComponentCollection> m_precalculatedScores;
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection, RuleHash, RuleComparator> m_precalculatedScores;
 
   //! special handling of ONE unknown words.
   virtual void ProcessOneUnknownWord(const Word &, const WordsRange &);

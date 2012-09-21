@@ -172,6 +172,30 @@ public:
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 
+/**
+ * Hasher that looks at source and target phrase.
+ **/
+struct RuleHash 
+{
+  inline size_t operator()(const TargetPhrase& targetPhrase) const
+  {
+    size_t seed = 0;
+    boost::hash_combine(seed, targetPhrase);
+    boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
+    return seed;
+  }
+};
+
+struct RuleComparator
+{
+  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const
+  {
+    return lhs.Compare(rhs) == 0 &&
+      lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0;
+  }
+
+};
+
 }
 
 #endif
