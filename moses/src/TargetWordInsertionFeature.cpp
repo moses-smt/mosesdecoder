@@ -42,12 +42,11 @@ void TargetWordInsertionFeature::Evaluate(
 }
 
 void TargetWordInsertionFeature::EvaluateChart(
-            const TargetPhrase& targetPhrase,
-            const InputType& inputType,
-            const WordsRange& sourceSpan,
+            const ChartBasedFeatureContext& context,
 						ScoreComponentCollection* accumulator) const
 {
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }

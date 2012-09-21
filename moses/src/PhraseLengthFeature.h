@@ -1,6 +1,7 @@
 #ifndef moses_PhraseLengthFeature_h
 #define moses_PhraseLengthFeature_h
 
+#include <stdexcept>
 #include <string>
 #include <map>
 
@@ -23,11 +24,9 @@ public:
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const TargetPhrase& targetPhrase,
-                     const InputType& inputType,
-                     const WordsRange& sourceSpan,
+  void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection*) const {
-		CHECK(0); // feature function not valid in chart decoder
+    throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
 	}
 
   // basic properties

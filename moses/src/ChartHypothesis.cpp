@@ -168,8 +168,7 @@ void ChartHypothesis::CalcScore()
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i)
   	if (sfs[i]->ComputeValueInTranslationOption() == false)
-  		sfs[i]->EvaluateChart(GetCurrTargetPhrase(),
-        GetManager().GetSource(),GetCurrSourceRange(),&m_scoreBreakdown);
+  		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();

@@ -139,15 +139,13 @@ public:
   virtual void Evaluate(const PhraseBasedFeatureContext& context,
   											ScoreComponentCollection* accumulator) const 
   {
-    throw std::runtime_error("PhraseDictionary.Evaluate() Not implemented");
+    throw std::logic_error("PhraseDictionary.Evaluate() Not implemented");
   }
 
-  virtual void EvaluateChart(const TargetPhrase& targetPhrase,
-                             const InputType& inputType,
-                             const WordsRange& sourceSpan,
+  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
                              ScoreComponentCollection* accumulator) const 
   {
-    throw std::runtime_error("PhraseDictionary.EvaluateChart() Not implemented");
+    throw std::logic_error("PhraseDictionary.EvaluateChart() Not implemented");
   }
 
 

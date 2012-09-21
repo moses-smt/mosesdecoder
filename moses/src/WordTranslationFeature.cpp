@@ -190,12 +190,11 @@ void WordTranslationFeature::Evaluate
 }
 
 void WordTranslationFeature::EvaluateChart(
-            const TargetPhrase& targetPhrase,
-            const InputType& inputType,
-            const WordsRange& sourceSpan,
+            const ChartBasedFeatureContext& context,
     				ScoreComponentCollection* accumulator) const
 {
   //const Sentence& input = *(m_local->input);
+  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
   const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 

@@ -55,12 +55,6 @@ size_t PhrasePairFeature::GetNumInputScores() const
     return true;
 }
 
-  void PhrasePairFeature::InitializeForInput( Sentence const& in )
-{
-  m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
-}
-
 void PhrasePairFeature::Evaluate(
             const PhraseBasedFeatureContext& context,
             ScoreComponentCollection* accumulator) const 
@@ -98,7 +92,7 @@ void PhrasePairFeature::Evaluate(
 	   accumulator->SparsePlusEquals(namestr.str(),1);	   
    }
    if (m_sourceContext) {
-	   const Sentence& input = *(m_local->input);
+	   const Sentence& input = static_cast<const Sentence&>(context.GetSource());
 
 	   // range over source words to get context
 	   for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {

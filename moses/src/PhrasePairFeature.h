@@ -1,13 +1,11 @@
 #ifndef moses_PhrasePairFeature_h
 #define moses_PhrasePairFeature_h
 
+#include <stdexcept>
+
 #include "Factor.h"
 #include "FeatureFunction.h"
 #include "Sentence.h"
-
-#ifdef WITH_THREADS
-#include <boost/thread/tss.hpp>
-#endif
 
 namespace Moses {
 
@@ -19,18 +17,8 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 	typedef std::map< char, short > CharHash;
 	typedef std::vector< std::set<std::string> > DocumentVector;
 	
-	struct ThreadLocalStorage
-	{
-	  const Sentence *input;
-	};
 	
 	private:
-#ifdef WITH_THREADS
-	  boost::thread_specific_ptr<ThreadLocalStorage> m_local;
-#else
-	  std::auto_ptr<ThreadLocalStorage> m_local;
-#endif
-
 	  std::set<std::string> m_vocabSource;
 	  //std::set<std::string> m_vocabTarget;
 	  FactorType m_sourceFactorId;
@@ -66,15 +54,12 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 		  }		  
 	  }
 
-    void Evaluate(
-                const PhraseBasedFeatureContext& context,
-                ScoreComponentCollection* accumulator) const;
+    void Evaluate(const PhraseBasedFeatureContext& context,
+                  ScoreComponentCollection* accumulator) const;
 
-    void EvaluateChart(const TargetPhrase& targetPhrase,
-                       const InputType& inputType,
-                       const WordsRange& sourceSpan,
+    void EvaluateChart(const ChartBasedFeatureContext& context,
                        ScoreComponentCollection*) const {
-  		CHECK(0); // feature function not valid in chart decoder
+      throw std::logic_error("PhrasePairFeature not valid in chart decoder");
   	}
 
     bool ComputeValueInTranslationOption() const;
@@ -84,8 +69,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 
-    void InitializeForInput( Sentence const& in );
-    
     void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
     float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 };

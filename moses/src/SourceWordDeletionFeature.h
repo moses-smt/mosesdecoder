@@ -32,9 +32,7 @@ public:
   void Evaluate(const PhraseBasedFeatureContext& context, 
               ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const TargetPhrase& targetPhrase,
-                     const InputType& inputType,
-                     const WordsRange& sourceSpan,
+  void EvaluateChart(const ChartBasedFeatureContext& context,
   		               ScoreComponentCollection* accumulator) const;
 
   void ComputeFeatures(const TargetPhrase& targetPhrase, 

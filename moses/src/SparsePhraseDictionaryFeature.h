@@ -1,6 +1,8 @@
 #ifndef moses_SparsePhraseFeature_h
 #define moses_SparsePhraseFeature_h
 
+#include <stdexcept>
+
 #include "FactorCollection.h"
 #include "FeatureFunction.h"
 
@@ -20,11 +22,9 @@ public:
               ScoreComponentCollection* accumulator) const;
   
   void EvaluateChart(
-    const TargetPhrase& targetPhrase,
-    const InputType& inputType,
-    const WordsRange& sourceSpan,
+    const ChartBasedFeatureContext& context,
     ScoreComponentCollection*) const {
-		CHECK(0); // feature function not valid in chart decoder
+    throw std::logic_error("SparsePhraseDictionaryFeature not valid in chart decoder");
 	}
 
   // basic properties

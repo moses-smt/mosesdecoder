@@ -79,9 +79,7 @@ public:
 
 
   void EvaluateChart(
-    const TargetPhrase& targetPhrase,
-    const InputType& inputType,
-    const WordsRange& sourceSpan,
+    const ChartBasedFeatureContext& context,
     ScoreComponentCollection* accumulator) const
   {
   	std::cerr << "EvaluateChart not implemented." << std::endl;

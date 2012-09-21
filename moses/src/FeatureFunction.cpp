@@ -2,6 +2,8 @@
 
 #include "util/check.hh"
 
+#include "ChartHypothesis.h"
+#include "ChartManager.h"
 #include "FeatureFunction.h"
 #include "Hypothesis.h"
 #include "Manager.h"
@@ -43,6 +45,30 @@ const WordsBitmap& PhraseBasedFeatureContext::GetWordsBitmap() const
     throw std::logic_error("Coverage vector not available during pre-calculation");
   } 
   return m_hypothesis->GetWordsBitmap();
+}
+
+
+ChartBasedFeatureContext::ChartBasedFeatureContext
+                        (const ChartHypothesis* hypothesis):
+  m_hypothesis(hypothesis),
+  m_targetPhrase(hypothesis->GetCurrTargetPhrase()),
+  m_source(hypothesis->GetManager().GetSource()) {}
+
+ChartBasedFeatureContext::ChartBasedFeatureContext(
+                         const TargetPhrase& targetPhrase,
+                         const InputType& source):
+  m_hypothesis(NULL),
+  m_targetPhrase(targetPhrase),
+  m_source(source) {}
+
+const InputType& ChartBasedFeatureContext::GetSource() const
+{
+  return m_source;
+}
+
+const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
+{
+  return m_targetPhrase;
 }
 
 

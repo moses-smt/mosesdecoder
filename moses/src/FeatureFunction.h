@@ -18,11 +18,13 @@ class ScoreComponentCollection;
 class WordsBitmap;
 class WordsRange;
 
+
 /**
   * Contains all that a feature function can access without affecting recombination.
   * For stateless features, this is all that it can access. Currently this is not
   * used for stateful features, as it would need to be retro-fitted to the LM feature.
   * TODO: Expose source segmentation,lattice path.
+  * XXX Don't add anything to the context that would break recombination XXX
  **/
 class PhraseBasedFeatureContext
 {
@@ -43,6 +45,30 @@ public:
   const WordsBitmap& GetWordsBitmap() const;
 
 };
+
+/**
+ * Same as PhraseBasedFeatureContext, but for chart-based Moses.
+ **/
+class ChartBasedFeatureContext
+{
+  //The context either has a hypothesis (during search) or a 
+  //TargetPhrase and source sentence (during pre-calculation)
+  //TODO: should the context also include some info on where the TargetPhrase
+  //is anchored (assuming it's lexicalised), which is available at pre-calc?
+  const ChartHypothesis* m_hypothesis;
+  const TargetPhrase& m_targetPhrase;
+  const InputType& m_source;
+
+public:
+  ChartBasedFeatureContext(const ChartHypothesis* hypothesis);
+  ChartBasedFeatureContext(const TargetPhrase& targetPhrase,
+                           const InputType& source);
+
+  const InputType& GetSource() const;
+  const TargetPhrase& GetTargetPhrase() const;
+
+};
+
 
 /** base class for all feature functions.
  * @todo is this for pb & hiero too?
@@ -70,15 +96,14 @@ public:
     FeatureFunction(description, numScoreComponents) {}
   /**
     * This should be implemented for features that apply to phrase-based models.
-    * The feature is allowed to access the translation option, source and 
-    * coverage vector, but the last can only be accessed during search.
     **/
   virtual void Evaluate(const PhraseBasedFeatureContext& context,
   											ScoreComponentCollection* accumulator) const = 0;
 
-  virtual void EvaluateChart(const TargetPhrase& targetPhrase,
-                             const InputType& inputType,
-                             const WordsRange& sourceSpan,
+  /**
+    * Same for chart-based features.
+    **/
+  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
                              ScoreComponentCollection* accumulator) const  = 0;
 
   //If true, then the feature is evaluated before search begins, and stored in

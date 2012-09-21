@@ -42,14 +42,12 @@ void SourceWordDeletionFeature::Evaluate(
 }
 
 void SourceWordDeletionFeature::EvaluateChart(
-            const TargetPhrase& targetPhrase,
-            const InputType& inputType,
-            const WordsRange& sourceSpan,
+            const ChartBasedFeatureContext& context,
 		 	 	 	 	ScoreComponentCollection* accumulator) const
 {
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
-	ComputeFeatures(targetPhrase, accumulator, alignment);
+	ComputeFeatures(context.GetTargetPhrase(), accumulator, alignment);
 }
 
 void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,

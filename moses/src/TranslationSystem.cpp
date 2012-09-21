@@ -119,10 +119,10 @@ namespace Moses {
       //for(size_t i=0;i<m_statefulFFs.size();++i) {
       //}
       for(size_t i=0;i<m_statelessFFs.size();++i) {
-    	if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "pp")
-	  ((PhrasePairFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
-	else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm")
-	  ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+        if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm") 
+        {
+	        ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+        }
       }
       
       LMList::const_iterator iterLM;

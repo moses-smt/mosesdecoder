@@ -52,9 +52,7 @@ public:
   	ScoreComponentCollection* accumulator) const;
 
   virtual void EvaluateChart(
-    const TargetPhrase& targetPhrase,
-    const InputType& inputType,
-    const WordsRange& sourceSpan,
+    const ChartBasedFeatureContext& context,
     ScoreComponentCollection* accumulator) const 
     {
       //required but does nothing.
@@ -80,9 +78,7 @@ public:
   }
 
   void EvaluateChart(
-    const TargetPhrase& targetPhrase,
-    const InputType& inputType,
-    const WordsRange& sourceSpan,
+    const ChartBasedFeatureContext& context,
     ScoreComponentCollection* accumulator) const
   {
     //do nothing - not a real feature
