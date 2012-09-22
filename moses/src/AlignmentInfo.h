@@ -21,6 +21,7 @@
 
 #include <ostream>
 #include <set>
+#include <map>
 #include <vector>
 
 namespace Moses
@@ -33,26 +34,17 @@ class AlignmentInfoCollection;
  */
 class AlignmentInfo
 {
-  typedef std::set<std::pair<size_t,size_t> > CollType;
+  typedef std::multimap<size_t,size_t> CollType;
 
   friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
   friend class AlignmentInfoCollection;
 
  public:
-  typedef std::vector<size_t> NonTermIndexMap;
   typedef CollType::const_iterator const_iterator;
 
   const_iterator begin() const { return m_collection.begin(); }
   const_iterator end() const { return m_collection.end(); }
-
-  /** Provides a map from target-side to source-side non-terminal indices.
-    * The target-side index should be the rule symbol index (counting terminals).
-    * The index returned is the rule non-terminal index (ignoring terminals).
-   */
-  const NonTermIndexMap &GetNonTermIndexMap() const {
-    return m_nonTermIndexMap;
-  }
 
   size_t GetSize() const { return m_collection.size(); }
 
@@ -61,15 +53,12 @@ class AlignmentInfo
  private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs)
-    : m_collection(pairs)
+    : m_collection(pairs.begin(), pairs.end())
   {
-    BuildNonTermIndexMap();
   }
 
-  void BuildNonTermIndexMap();
 
   CollType m_collection;
-  NonTermIndexMap m_nonTermIndexMap;
 };
 
 /** Define an arbitrary strict weak ordering between AlignmentInfo objects
@@ -82,4 +71,9 @@ struct AlignmentInfoOrderer
   }
 };
 
+}
+
+class StringPiece;
+namespace Moses {
+  std::set< std::pair<size_t, size_t> > ParseAlignmentFromString(const StringPiece &str);
 }

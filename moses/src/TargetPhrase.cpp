@@ -43,6 +43,7 @@ namespace Moses
 TargetPhrase::TargetPhrase( std::string out_string)
   :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_nonTermIndexMap(NULL)
 {
 
   //ACAT
@@ -57,6 +58,7 @@ TargetPhrase::TargetPhrase()
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_nonTermIndexMap(NULL)
 {
 }
 
@@ -66,11 +68,13 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_nonTermIndexMap(NULL)
 {
 }
 
 TargetPhrase::~TargetPhrase()
 {
+  delete m_nonTermIndexMap;
 }
 
 void TargetPhrase::SetScore(const TranslationSystem* system)
@@ -304,35 +308,19 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
   return clone;
 }
 
-namespace {
-void MosesShouldUseExceptions(bool value) {
-  if (!value) {
-    std::cerr << "Could not parse alignment info" << std::endl;
-    abort();
-  }
-}
-} // namespace
-
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
-  set<pair<size_t,size_t> > alignmentInfo;
-  for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
-    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
-    MosesShouldUseExceptions(dash);
-    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(dash);
-    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(!dash);
-
-    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
-  }
-
-  SetAlignmentInfo(alignmentInfo);
+  SetAlignmentInfo(ParseAlignmentFromString(alignString));
 }
 
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
 {
   m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+  size_t cntNonTerm = 0;
+  for (AlignmentInfo::const_iterator iter = m_alignmentInfo->begin(); iter != m_alignmentInfo->end(); ++iter) {
+    if (GetWord(iter->second).IsNonTerminal())
+      SetNonTermIndex(iter->second, cntNonTerm++);
+  }
 }
 
 
