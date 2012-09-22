@@ -11,11 +11,13 @@ if [ option.get "with-synlm" : no : yes ] = yes
   alias synlm ;
 }
 
+#required for clock_gettime.  Threads already have rt.  
+lib rt : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 
 lib moses_internal :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp ]
-synlm ThreadPool headers ;
+synlm ThreadPool headers rt ;
 
 lib moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser CompactPT//CompactPT LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match headers ../..//z ../../OnDiskPt//OnDiskPt ../..//boost_filesystem ;
 
