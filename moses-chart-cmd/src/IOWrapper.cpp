@@ -230,7 +230,7 @@ namespace {
             prevHypo, &targetSideLengths[it->second]);
         sourceSideLengths[it->first] = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
         CHECK(prevHypo->GetCurrSourceRange().GetStartPos() - hypo->GetCurrSourceRange().GetStartPos()
-          == std::accumulate(sourceSideLengths.begin(), sourceSideLengths.begin() + it->first, 0));
+          == (int)std::accumulate(sourceSideLengths.begin(), sourceSideLengths.begin() + it->first, 0));
       } else {
         alignmentsPerSourceNonTerm[it->first].push_back(WordAlignment::value_type(0, 0));
       }
