@@ -220,7 +220,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
-    unsigned ruleTotalCount;
+    unsigned ruleTotalCount = 0;
     if (tokens.size() >= 5) {
       //MARIA
       //get rule counts tokens[4] -> count(t) assume that extract was run with  --NoFractionalCounting flag
