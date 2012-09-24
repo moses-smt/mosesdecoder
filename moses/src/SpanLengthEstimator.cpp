@@ -17,6 +17,7 @@ public:
   virtual void AddSpanScore(unsigned spanLength, float score) {
     m_scores.insert(make_pair(spanLength, score));
   }
+  
   virtual float GetScoreBySpanLength(unsigned spanLength) const {
     // bool useGaussian = StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0;
     if (m_scores.empty())
@@ -52,6 +53,12 @@ public:
     m_average += exp(score) * spanLength;
     m_averageSquare += exp(score) * spanLength * spanLength;
   }
+
+  virtual void AddSpanScore_ISI(unsigned count, float sum_len, float sum_square_len){
+    m_average = sum_len / count;
+    m_averageSquare = sum_square_len /count;
+  }
+  
   virtual float GetScoreBySpanLength(unsigned spanLength) const {
     float t = ((spanLength - m_average) / m_sigma);
     float ret = -m_logSqrt2Pi - m_logSigma - 0.5 * t * t;
