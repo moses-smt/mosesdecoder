@@ -63,7 +63,7 @@ requirements = ;
 
 FORCE-STATIC = [ option.get "static" : : "yes" ] ;
 if $(FORCE-STATIC) {
-  requirements += <runtime-link>static ;
+  requirements += <link>static <runtime-link>static ;
 }
 
 #Determine if a library can be compiled statically.  
@@ -152,7 +152,7 @@ rule boost ( min-version ) {
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
   boost-lib unit_test_framework TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
-  boost-lib filesystem FILE_SYSTEM_DYN_LINK : boost_system ;
+  boost-lib filesystem FILE_SYSTEM_DYN_LINK ;
 }
  
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.
@@ -282,3 +282,5 @@ if [ option.get "sanity-test" : : "yes" ] {
     EXIT "Bad" : 1 ;
   }
 }
+
+use-project /top : . ;
