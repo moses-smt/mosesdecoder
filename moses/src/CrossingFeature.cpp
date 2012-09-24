@@ -198,9 +198,6 @@ FFState* CrossingFeature::EvaluateChart(
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
   float score = 0;
 
-  cerr << chartHypothesis.GetOutputPhrase() << endl;
-  cerr << targetPhrase.GetTargetLHS() << endl;
-
   // calc number of words in output phrase
   unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
   for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {

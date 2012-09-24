@@ -181,7 +181,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
     //Span Length branch : extended rule table to take span length into account, one more field
-    if (tokens.size() != 5 && tokens.size() != 6) {
+    if (tokens.size() < 4) {
       stringstream strme;
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());
@@ -220,15 +220,19 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
-    //MARIA
-    //get rule counts tokens[4] -> count(t) assume that extract was run with  --NoFractionalCounting flag
-    const std::string &ruleCount = tokens[4];
-    vector<string> countStrings;
+
     unsigned ruleTotalCount = 1;
-    TokenizeMultiCharSeparator(countStrings,ruleCount," ");
-    if(countStrings.size()>=1)
-      sscanf(countStrings[0].c_str(), "%u", &ruleTotalCount);   
-    ruleTotalCount=floor(ruleTotalCount*scoreVector[0]+0.5);
+    if (tokens.size() >= 5) {
+      //MARIA
+      //get rule counts tokens[4] -> count(t) assume that extract was run with  --NoFractionalCounting flag
+      const std::string &ruleCount = tokens[4];
+      vector<string> countStrings;
+
+      TokenizeMultiCharSeparator(countStrings,ruleCount," ");
+      if(countStrings.size()>=1)
+        sscanf(countStrings[0].c_str(), "%u", &ruleTotalCount);   
+      ruleTotalCount=floor(ruleTotalCount*scoreVector[0]+0.5);      
+    }
 
     //read from rule table
     std::vector<SpanLengthEstimator*> spanSourceEstimators, spanTargetEstimators;
