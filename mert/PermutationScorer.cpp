@@ -8,6 +8,7 @@ namespace MosesTuning
   
 
 const int PermutationScorer::SCORE_PRECISION = 5;
+const int PermutationScorer::SCORE_MULTFACT = 100000; // 100000=10^SCORE_PRECISION
 
 PermutationScorer::PermutationScorer(const string &distanceMetric, const string &config)
   :StatisticsBasedScorer(distanceMetric,config)
@@ -145,12 +146,15 @@ int PermutationScorer::getNumberWords (const string& text) const
 
 void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
 {
-  //cout << "*******prepareStats" ;
-  //cout << text << endl;
-  //cout << sid << endl;
-  //cout << "Reference0align:" << endl;
-  //m_referencePerms[0][sid].dump();
-
+  //bool debug= (verboselevel()>3); // TODO: fix verboselevel()
+  bool debug=false; 
+  if (debug) {
+    cout << "*******prepareStats" ;
+    cout << text << endl;
+    cout << sid << endl;
+    cout << "Reference0align:" << endl;
+    m_referencePerms[0][sid].dump();
+  }
 
   string sentence = "";
   string align = text;
@@ -169,7 +173,25 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
   float distanceValue;
 
   //need to create permutations for each nbest line
-  string standardFormat = Permutation::convertMosesToStandard(align);
+  //here we check if the alignments extracted from the nbest are phrase-based or word-based, in which case no conversion is needed
+  bool isWordAlignment=true;
+  string alignCopy = align;
+  string align1;
+  getNextPound(alignCopy,align1," ");
+  if (align1.length() > 0) {
+    size_t phraseDelimeter = align1.find("=");
+    if(phraseDelimeter!= string::npos)
+      isWordAlignment=false;
+  }
+  string standardFormat = align;
+  if(!isWordAlignment)
+    standardFormat= Permutation::convertMosesToStandard(align);
+
+  if (debug) {
+    cerr << "Nbest alignment:  " << align << endl;
+    cerr << "-->std alignment: " << standardFormat << endl;
+  }
+
   Permutation perm(standardFormat, m_sourceLengths[sid],translationLength);
   //perm.dump();
 
@@ -201,9 +223,10 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
   }
 
   //SCOREROUT eg: 0.04546
+  distanceValue*=SCORE_MULTFACT; //SCOREROUT eg: 4546 to transform float into integer
   ostringstream tempStream;
   tempStream.precision(SCORE_PRECISION);
-  tempStream << distanceValue;
+  tempStream << distanceValue << " 1"; //use for final normalization over the amount of test sentences
   string str = tempStream.str();
   entry.set(str);
 
@@ -214,8 +237,8 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
 statscore_t PermutationScorer::calculateScore(const vector<int>& comps) const
 {
   //cerr << "*******PermutationScorer::calculateScore" ;
-  //cerr << " " << comps[0] << endl;
-  return comps[0];
+  //cerr << " " << comps[0]/comps[1] << endl;
+  return (((statscore_t) comps[0]) / comps[1]) / SCORE_MULTFACT;
 }
 
 }
