@@ -199,6 +199,13 @@ void OutputSurface(std::ostream &out, const ChartHypothesis *hypo, const std::ve
 namespace {
   typedef std::vector< std::pair<size_t, size_t> > WordAlignment;
   
+  bool IsUnknownWord(const Word& word) {
+    const Factor* factor = word[MAX_NUM_FACTORS - 1];
+    if (factor == NULL)
+      return false;
+    return factor->GetString() == UNKNOWN_FACTOR;
+  }
+  
   WordAlignment GetWordAlignment(const Moses::ChartHypothesis *hypo, size_t *targetWordsCount)
   {
     const Moses::TargetPhrase& targetPhrase = hypo->GetCurrTargetPhrase();
@@ -243,6 +250,9 @@ namespace {
       {
         result.push_back(make_pair(sourceOffset + it2->first, targetOffset + it2->second));
       }
+    }
+    if (result.empty() && targetPhrase.GetSize() == 1 && hypo->GetCurrSourceRange().GetNumWordsCovered() == 1 && IsUnknownWord(targetPhrase.GetWord(0))) {
+      result.push_back(WordAlignment::value_type(0, 0));
     }
     return result;
   }
@@ -399,6 +409,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
+  
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
