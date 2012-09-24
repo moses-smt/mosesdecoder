@@ -55,6 +55,7 @@ public:
   }
 
   virtual void AddSpanScore_ISI(unsigned count, float sum_len, float sum_square_len){
+    CHECK(count>0);
     m_average = sum_len / count;
     m_averageSquare = sum_square_len /count;
   }
@@ -68,6 +69,7 @@ public:
   //modified variance to match ISI formula; ruleCount is extracted from rule table: tokens[4] -> first count (totalCount)
   virtual void FinishedAdds(unsigned ruleCount) {
     //m_sigma = max(1.0f, sqrt(m_averageSquare - m_average*m_average));
+    CHECK(ruleCount > 0);
     m_sigma=max(1.0f,sqrt(m_averageSquare - m_average*m_average+m_ISIk/(1+m_ISIk/ruleCount)*m_averageSquare));
     m_logSigma = log(m_sigma);
   }
