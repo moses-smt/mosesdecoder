@@ -272,12 +272,16 @@ int main(int argc, char* argv[])
     lastPcfgSum = phrasePair.pcfgSum;
 
     // only differs in count? just add count
-    if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair )) {
+    if (lastPhrasePair != NULL 
+	&& lastPhrasePair->equals( phrasePair )
+	&& (!domainFlag
+	    || domain->getDomainOfSentence( lastPhrasePair->sentenceId )
+	    == domain->getDomainOfSentence( phrasePair.sentenceId ) )) {
       lastPhrasePair->count += phrasePair.count;
       lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
       continue;
     }
-
+    
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
