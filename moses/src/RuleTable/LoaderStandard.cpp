@@ -181,7 +181,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
     //Span Length branch : extended rule table to take span length into account, one more field
-    if (tokens.size() < 4) {
+    if (tokens.size() < 4){
       stringstream strme;
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());
@@ -220,7 +220,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Phrase sourcePhrase( 0);
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
-    unsigned ruleTotalCount = 0;
+
+    unsigned ruleTotalCount = 1;
     if (tokens.size() >= 5) {
       //MARIA
       //get rule counts tokens[4] -> count(t) assume that extract was run with  --NoFractionalCounting flag
@@ -237,61 +238,91 @@ bool RuleTableLoaderStandard::Load(FormatType format
     std::vector<SpanLengthEstimator*> spanSourceEstimators, spanTargetEstimators;
     if (tokens.size() >= 6) {
       bool useGaussian = (StaticData::Instance().GetParam("gaussian-span-length-score").size() > 0);
-      
+      bool useISIFormat = (StaticData::Instance().GetParam("isi-format-for-span-length").size() > 0);
+     
       const std::string &spanLength = tokens[5];
-      //source and target side are separated by ||
-      TokenizeMultiCharSeparator(spanStringsST,spanLength,"||");
+
+      //use ISI format for span_length information in rule table
+      // rule_count | sum_NT1(len) | sum_NT1(len^2) || rule_count | sum_NT2(len) | sum_NT2(len^2) ...
+      if (useISIFormat == true ){
+	vector<string> spanStatisticsSource; 
+	vector<string>::iterator itr_statistics;
+	unsigned count = 1;
+	float sum_len=0.0f, sum_square_len=0.0f;
+	
+	TokenizeMultiCharSeparator(spanStatisticsSource,spanLength,"||");
+	for(itr_statistics = spanStatisticsSource.begin(); itr_statistics != spanStatisticsSource.end(); itr_statistics++){
+	  vector<string> gaussParam;
+	  TokenizeMultiCharSeparator(gaussParam,*itr_statistics,"|");
+	  if(gaussParam.size()<3) continue;
+	  sscanf(gaussParam[0].c_str(),"%u", &count);
+	  sscanf(gaussParam[1].c_str(),"%f", &sum_len);
+	  sscanf(gaussParam[2].c_str(),"%f", &sum_square_len);
+	  
+	  std::auto_ptr<SpanLengthEstimator> estimatorSource;
+	  estimatorSource.reset(CreateGaussianSpanLengthEstimator());
+	  estimatorSource->AddSpanScore_ISI(count,sum_len,sum_square_len);
+	  estimatorSource->FinishedAdds(count);
+	  spanSourceEstimators.push_back(estimatorSource.release());
+	}
+	
+      }
+      // use (len=score) format for span_length information in rule table
+      else{
+
+        //source and target side are separated by ||
+        TokenizeMultiCharSeparator(spanStringsST,spanLength,"||");
       
-      //we consider only source and target information
-      //CHECK(spanStringsST.size() =< 3);
+        //we consider only source and target information
+      
+        if(spanStringsST.size()>=2){
 
-      if(spanStringsST.size()>=2){
+          //Take scores from source
+          string spanLengthSource = spanStringsST[0];
+          //Take scores form target
+          string spanLengthTarget = spanStringsST[1];
 
-        //Take scores from source
-        string spanLengthSource = spanStringsST[0];
-        //Take scores form target
-        string spanLengthTarget = spanStringsST[1];
+          TokenizeMultiCharSeparator(spanStringSource,spanLengthSource,"|");
+          TokenizeMultiCharSeparator(spanStringTarget,spanLengthTarget,"|");
 
-        TokenizeMultiCharSeparator(spanStringSource,spanLengthSource,"|");
-        TokenizeMultiCharSeparator(spanStringTarget,spanLengthTarget,"|");
-
-        //Check that number of non terminals is the same on both sides
-        CHECK(spanStringSource.size() == spanStringTarget.size());
-        vector<string>::iterator itr_source;
-        vector<string>::iterator itr_target;
-        for(itr_source = spanStringSource.begin(), itr_target = spanStringTarget.begin();
-            itr_source != spanStringSource.end(), itr_target != spanStringTarget.end();
-            itr_source++, itr_target++)
-        {
-          vector<string> spanTermSource;
-          vector<string> spanTermTarget;
-          vector<string> :: iterator itr_source_term;
-          vector<string> :: iterator itr_target_term;
-          Tokenize(spanTermSource,*itr_source);
-          Tokenize(spanTermTarget,*itr_target);
-          std::auto_ptr<SpanLengthEstimator> estimatorSource, estimatorTarget;
-          estimatorSource.reset(useGaussian ? CreateGaussianSpanLengthEstimator() : CreateAsIsSpanLengthEstimator());
-          estimatorTarget.reset(useGaussian ? CreateGaussianSpanLengthEstimator() : CreateAsIsSpanLengthEstimator());
-          //get source scores
-          iterate(spanTermSource,itr_source_term)
+          //Check that number of non terminals is the same on both sides
+          CHECK(spanStringSource.size() == spanStringTarget.size());
+          vector<string>::iterator itr_source;
+          vector<string>::iterator itr_target;
+          for(itr_source = spanStringSource.begin(), itr_target = spanStringTarget.begin();
+              itr_source != spanStringSource.end(), itr_target != spanStringTarget.end();
+              itr_source++, itr_target++)
           {
-            unsigned size;
-            float proba;
-            sscanf(itr_source_term->c_str(), "%u=%f", &size, &proba);
-            estimatorSource->AddSpanScore(size, logf(proba));
+            vector<string> spanTermSource;
+            vector<string> spanTermTarget;
+            vector<string> :: iterator itr_source_term;
+            vector<string> :: iterator itr_target_term;
+            Tokenize(spanTermSource,*itr_source);
+            Tokenize(spanTermTarget,*itr_target);
+            std::auto_ptr<SpanLengthEstimator> estimatorSource, estimatorTarget;
+            estimatorSource.reset(useGaussian ? CreateGaussianSpanLengthEstimator() : CreateAsIsSpanLengthEstimator());
+            estimatorTarget.reset(useGaussian ? CreateGaussianSpanLengthEstimator() : CreateAsIsSpanLengthEstimator());
+            //get source scores
+            iterate(spanTermSource,itr_source_term)
+            {
+              unsigned size;
+              float proba;
+              sscanf(itr_source_term->c_str(), "%u=%f", &size, &proba);
+              estimatorSource->AddSpanScore(size, logf(proba));
+            }
+            //get target scores
+            iterate(spanStringTarget,itr_target_term)
+            {
+              unsigned size;
+              float proba;
+              sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
+              estimatorTarget->AddSpanScore(size, logf(proba));
+            }
+            estimatorSource->FinishedAdds(ruleTotalCount);
+            estimatorTarget->FinishedAdds(ruleTotalCount);
+            spanSourceEstimators.push_back(estimatorSource.release());
+            spanTargetEstimators.push_back(estimatorTarget.release());
           }
-          //get target scores
-          iterate(spanStringTarget,itr_target_term)
-          {
-            unsigned size;
-            float proba;
-            sscanf(itr_target_term->c_str(), "%u=%f", &size, &proba);
-            estimatorTarget->AddSpanScore(size, logf(proba));
-          }
-          estimatorSource->FinishedAdds(ruleTotalCount);
-          estimatorTarget->FinishedAdds(ruleTotalCount);
-          spanSourceEstimators.push_back(estimatorSource.release());
-          spanTargetEstimators.push_back(estimatorTarget.release());
         }
       }
     }

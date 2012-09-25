@@ -155,6 +155,7 @@ Parameter::Parameter()
   
   AddParam("weight-span-length", "SL", "Weight for span length feature. Set this to activate it, if it is empty, feature will not be used");
   AddParam("gaussian-span-length-score", "Use Gaussian pdf to calculate span length probability instead of unsmoothed counts");
+  AddParam("isi-format-for-span-length","Read parameters for Gaussian pdf in ISI format (count,sum(len),sum(len^2))");
 
   AddParam("weight-crossing", "CR", "weight for non-term crossing feature. Set this to activate it, if it is empty, feature will not be used");
   AddParam("crossing-file", "Data file for crossing feature. Line format: [span-length] [non-term] [is-crossing] [probability]");
