@@ -13,7 +13,8 @@
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
-$|=1;
+
+$|=1; # disable output buffering
 use FindBin qw($RealBin);
 use strict;
 use Time::HiRes;
@@ -27,11 +28,12 @@ my $QUIET = 0;
 my $HELP = 0;
 my $AGGRESSIVE = 0;
 my $SKIP_XML = 0;
+my $SKIP_ALL_XML = 0;
 my $TIMING = 0;
 my $NUM_THREADS = 1;
 my $NUM_SENTENCES_PER_THREAD = 2000;
 
-while (@ARGV) 
+while (@ARGV)
 {
 	$_ = shift;
 	/^-b$/ && ($| = 1, next);
@@ -39,6 +41,7 @@ while (@ARGV)
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
 	/^-x$/ && ($SKIP_XML = 1, next);
+	/^-X$/ && ($SKIP_ALL_XML = 1, next);
 	/^-a$/ && ($AGGRESSIVE = 1, next);
 	/^-time$/ && ($TIMING = 1, next);
 	/^-threads$/ && ($NUM_THREADS = int(shift), next);
@@ -53,21 +56,26 @@ if ($TIMING)
 }
 
 # print help message
-if ($HELP) 
+if ($HELP)
 {
 	print "Usage ./tokenizer.perl (-l [en|de|...]) (-threads 4) < textfile > tokenizedfile\n";
         print "Options:\n";
         print "  -q     ... quiet.\n";
         print "  -a     ... aggressive hyphen splitting.\n";
         print "  -b     ... disable Perl buffering.\n";
+        print "  -x     ... keep tags intact.\n";
+        print "  -X     ... keep all tags intact.\n";
         print "  -time  ... enable processing time calculation.\n";
 	exit;
 }
 
-if (!$QUIET) 
+if (!$QUIET)
 {
 	print STDERR "Tokenizer Version 1.1\n";
 	print STDERR "Language: $language\n";
+    if ($SKIP_ALL_XML) {
+        print STDERR "Skip all XML: $SKIP_ALL_XML\n";
+    }
 	print STDERR "Number of threads: $NUM_THREADS\n";
 }
 
@@ -85,7 +93,7 @@ my $count_sentences = 0;
 
 if ($NUM_THREADS > 1)
 {# multi-threading tokenization
-    while(<STDIN>) 
+    while(<STDIN>)
     {
         $count_sentences = $count_sentences + 1;
         push(@batch_sentences, $_);
@@ -145,14 +153,15 @@ if ($NUM_THREADS > 1)
 }
 else
 {# single thread only
-    while(<STDIN>) 
+    while(<STDIN>)
     {
-        if (($SKIP_XML && /^<.+>$/) || /^\s*$/) 
+        $count_sentences = $count_sentences + 1;
+        if (($SKIP_XML && /^<.+>$/) || /^\s*$/)
         {
             #don't try to tokenize XML/HTML tag lines
             print $_;
         }
-        else 
+        else
         {
             print &tokenize($_);
         }
@@ -178,7 +187,7 @@ sub tokenize_batch
     my(@tokenized_list) = ();
     foreach (@text_list)
     {
-        if (($SKIP_XML && /^<.+>$/) || /^\s*$/) 
+        if (($SKIP_XML && /^<.+>$/) || /^\s*$/)
         {
             #don't try to tokenize XML/HTML tag lines
             push(@tokenized_list, $_);
@@ -194,28 +203,68 @@ sub tokenize_batch
 # the actual tokenize function which tokenizes one input string
 # input: one string
 # return: the tokenized string for the input string
-sub tokenize 
+sub tokenize
 {
     my($text) = @_;
     chomp($text);
     $text = " $text ";
-    
+
     # remove ASCII junk
     $text =~ s/\s+/ /g;
     $text =~ s/[\000-\037]//g;
+
+    my @tags = ();
+    my @tagoffsets = ();
+    if ($SKIP_ALL_XML)
+    {
+        # spaces around tags
+        while ($text =~ /\P{IsSpace}<[^>]+>/ || $text =~ /<[^>]+>\P{IsSpace}/)
+        {
+            $text =~ s/(\P{IsSpace})(<[^>]*>)/$1 $2/g;
+            $text =~ s/(<[^>]*>)(\P{IsSpace})/$1 $2/g;
+        }
+
+        # protect inner-tag spaces
+        while ($text =~ /<[^>]*\p{IsSpace}[^>]*>/)
+        {
+            $text =~ s/(<[^>]*)\p{IsSpace}([^>]*>)/$1TAGSPACE$2/g;
+        }
+
+        # stash away the tags for protection, remember offsets
+        # since we only introduce new spaces offsets are given a number of nonspace
+        # chars in the string prior to the tag
+        my @words = split(/\s/,$text);
+        $text = "";
+        for (my $i=0;$i<(scalar(@words));$i++)
+        {
+            my $word = $words[$i];
+            if ($word =~ /^<[^>]+>$/)
+            {
+                $word =~ s/TAGSPACE/ /g;
+                push(@tags, $word);
+                my $nonspacechars = $text;
+                $nonspacechars =~ s/\p{IsSpace}//g;
+                push(@tagoffsets, length($nonspacechars));
+            }
+            else
+            {
+                $text .= $word." ";
+            }
+        }
+    }
 
     # seperate out all "other" special characters
     $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 
     # aggressive hyphen splitting
-    if ($AGGRESSIVE) 
+    if ($AGGRESSIVE)
     {
         $text =~ s/([\p{IsAlnum}])\-([\p{IsAlnum}])/$1 \@-\@ $2/g;
     }
 
     #multi-dots stay together
     $text =~ s/\.([\.]+)/ DOTMULTI$1/g;
-    while($text =~ /DOTMULTI\./) 
+    while($text =~ /DOTMULTI\./)
     {
         $text =~ s/DOTMULTI\.([^\.])/DOTDOTMULTI $1/g;
         $text =~ s/DOTMULTI\./DOTDOTMULTI/g;
@@ -226,14 +275,14 @@ sub tokenize
     # separate , pre and post number
     $text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
     $text =~ s/([^\p{IsN}])[,]([\p{IsN}])/$1 , $2/g;
-	      
-    # turn `into '
+
+    # turn ` into '
     $text =~ s/\`/\'/g;
-	
+
     #turn '' into "
     $text =~ s/\'\'/ \" /g;
 
-    if ($language eq "en") 
+    if ($language eq "en")
     {
         #split contractions right
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
@@ -242,44 +291,44 @@ sub tokenize
         $text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1 '$2/g;
         #special case for "1990's"
         $text =~ s/([\p{IsN}])[']([s])/$1 '$2/g;
-    } 
-    elsif (($language eq "fr") or ($language eq "it")) 
+    }
+    elsif (($language eq "fr") or ($language eq "it"))
     {
-        #split contractions left	
+        #split contractions left
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([^\p{IsAlpha}])[']([\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1' $2/g;
-    } 
-    else 
+    }
+    else
     {
         $text =~ s/\'/ \' /g;
     }
-	
+
     #word token method
     my @words = split(/\s/,$text);
     $text = "";
-    for (my $i=0;$i<(scalar(@words));$i++) 
+    for (my $i=0;$i<(scalar(@words));$i++)
     {
         my $word = $words[$i];
-        if ( $word =~ /^(\S+)\.$/) 
+        if ( $word =~ /^(\S+)\.$/)
         {
             my $pre = $1;
-            if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/))) 
+            if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/)))
             {
                 #no change
-			} 
-            elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/))) 
+			}
+            elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/)))
             {
                 #no change
-            } 
-            else 
+            }
+            else
             {
                 $word = $pre." .";
             }
         }
         $text .= $word." ";
-    }		
+    }
 
     # clean up extraneous spaces
     $text =~ s/ +/ /g;
@@ -287,13 +336,58 @@ sub tokenize
     $text =~ s/ $//g;
 
     #restore multi-dots
-    while($text =~ /DOTDOTMULTI/) 
+    while($text =~ /DOTDOTMULTI/)
     {
         $text =~ s/DOTDOTMULTI/DOTMULTI./g;
     }
     $text =~ s/DOTMULTI/./g;
 
-    #escape special chars
+    if ($SKIP_ALL_XML && scalar(@tags)>0)
+    {
+        # re-insert tags
+        my @words = split(/\s/,$text);
+        $text = "";
+        my $notagtext = "";
+        my $tagidx = 0;
+        for (my $i=0; $i<(scalar(@words)); $i++)
+        {
+            my $word = $words[$i];
+            if ($tagidx < scalar(@tagoffsets)) {
+                my $nonspacechars = $notagtext;
+                $nonspacechars =~ s/\p{IsSpace}//g;
+                $nonspacechars =~ s/@\P{IsSpace}@/-/g;
+                while ($tagidx < scalar(@tagoffsets) &&
+                       length($nonspacechars) == $tagoffsets[$tagidx])
+                {
+                    $text .= $tags[$tagidx]." ";
+                    $tagidx++;
+                }
+            }
+            $text .= escape_special_chars($word)." ";
+            $notagtext .= $word;
+        }
+        # append possible tags at the end of the line
+        my $nonspacechars = $notagtext;
+        $nonspacechars =~ s/@\P{IsSpace}@/-/g;
+        while ($tagidx < scalar(@tagoffsets) &&
+               length($nonspacechars) == $tagoffsets[$tagidx])
+        {
+            $text .= $tags[$tagidx]." ";
+            $tagidx++;
+        }
+    } else {
+        $text = escape_special_chars($text);
+    }
+
+    #ensure final line break
+    $text .= "\n" unless $text =~ /\n$/;
+
+    return $text;
+}
+
+sub escape_special_chars
+{
+    my($text) = @_;
     $text =~ s/\&/\&amp;/g;   # escape escape
     $text =~ s/\|/\&#124;/g;  # factor separator
     $text =~ s/\</\&lt;/g;    # xml
@@ -302,41 +396,37 @@ sub tokenize
     $text =~ s/\"/\&quot;/g;  # xml
     $text =~ s/\[/\&#91;/g;   # syntax non-terminal
     $text =~ s/\]/\&#93;/g;   # syntax non-terminal
-
-    #ensure final line break
-    $text .= "\n" unless $text =~ /\n$/;
-
     return $text;
 }
 
-sub load_prefixes 
+sub load_prefixes
 {
     my ($language, $PREFIX_REF) = @_;
-	
+
     my $prefixfile = "$mydir/nonbreaking_prefix.$language";
-	
+
     #default back to English if we don't have a language-specific prefix file
-    if (!(-e $prefixfile)) 
+    if (!(-e $prefixfile))
     {
         $prefixfile = "$mydir/nonbreaking_prefix.en";
         print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
         die ("ERROR: No abbreviations files found in $mydir\n") unless (-e $prefixfile);
     }
-	
-    if (-e "$prefixfile") 
+
+    if (-e "$prefixfile")
     {
         open(PREFIX, "<:utf8", "$prefixfile");
-        while (<PREFIX>) 
+        while (<PREFIX>)
         {
             my $item = $_;
             chomp($item);
-            if (($item) && (substr($item,0,1) ne "#")) 
+            if (($item) && (substr($item,0,1) ne "#"))
             {
-                if ($item =~ /(.*)[\s]+(\#NUMERIC_ONLY\#)/) 
+                if ($item =~ /(.*)[\s]+(\#NUMERIC_ONLY\#)/)
                 {
                     $PREFIX_REF->{$1} = 2;
-                } 
-                else 
+                }
+                else
                 {
                     $PREFIX_REF->{$item} = 1;
                 }
@@ -345,4 +435,3 @@ sub load_prefixes
         close(PREFIX);
     }
 }
-
