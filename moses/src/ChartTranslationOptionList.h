@@ -19,7 +19,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #pragma once
 
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "StackVec.h"
 
 #include <vector>
@@ -37,7 +37,7 @@ class ChartTranslationOptionList
   ChartTranslationOptionList(size_t);
   ~ChartTranslationOptionList();
 
-  const ChartTranslationOption &Get(size_t i) const { return *m_collection[i]; }
+  const ChartTranslationOptions &Get(size_t i) const { return *m_collection[i]; }
 
   //! number of translation options
   size_t GetSize() const { return m_size; }
@@ -50,12 +50,12 @@ class ChartTranslationOptionList
   void ApplyThreshold();
 
  private:
-  typedef std::vector<ChartTranslationOption*> CollType;
+  typedef std::vector<ChartTranslationOptions*> CollType;
 
   struct ScoreThresholdPred
   {
     ScoreThresholdPred(float threshold) : m_thresholdScore(threshold) {}
-    bool operator()(const ChartTranslationOption *option)
+    bool operator()(const ChartTranslationOptions *option)
     {
       return option->GetEstimateOfBestScore() >= m_thresholdScore;
     }

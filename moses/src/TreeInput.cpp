@@ -288,7 +288,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       TargetPhraseCollection *tpc = new TargetPhraseCollection;
       tpc->Add(targetPhrase);
 
-      ChartTranslationOption *transOpt = new ChartTranslationOption(*tpc, emptyStackVec, *range, 0.0f);
+      ChartTranslationOptions *transOpt = new ChartTranslationOptions(*tpc, emptyStackVec, *range, 0.0f);
       m_xmlChartOptionsList.push_back(transOpt);
 
       //TODO: needed to handle exclusive

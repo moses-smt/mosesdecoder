@@ -33,7 +33,7 @@ namespace Moses
 /** Similar to a DottedRule, but contains a direct reference to a list
  * of translations and provdes an estimate of the best score. For a specific range in the input sentence
  */
-class ChartTranslationOption
+class ChartTranslationOptions
 {
  public:
   /** Constructor
@@ -42,7 +42,7 @@ class ChartTranslationOption
       \param wordsRange the range in the source sentence this translation option covers
       \param score @todo dunno
    */
-  ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
+  ChartTranslationOptions(const TargetPhraseCollection &targetPhraseColl,
                          const StackVec &stackVec,
                          const WordsRange &wordsRange,
                          float score)
@@ -52,7 +52,7 @@ class ChartTranslationOption
       , m_estimateOfBestScore(score) 
   {}
 
-  ~ChartTranslationOption() {}
+  ~ChartTranslationOptions() {}
 
   static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
                                        const StackVec &);

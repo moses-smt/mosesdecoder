@@ -27,7 +27,7 @@
 #include "WordsRange.h"
 #include "Util.h"
 #include "StaticData.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartManager.h"
 
@@ -96,7 +96,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
 
   // add all trans opt into queue. using only 1st child node.
   for (size_t i = 0; i < transOptList.GetSize(); ++i) {
-    const ChartTranslationOption &transOpt = transOptList.Get(i);
+    const ChartTranslationOptions &transOpt = transOptList.Get(i);
     RuleCube *ruleCube = new RuleCube(transOpt, allChartCells, m_manager);
     queue.Add(ruleCube);
   }
