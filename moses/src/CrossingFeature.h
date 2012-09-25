@@ -50,6 +50,7 @@ protected:
   std::map<CrossingFeatureData, float> m_data;
 
   bool LoadDataFile(const std::string &dataPath);
+  float IsCrossing(const TargetPhrase& targetPhrase) const;
 
 };
 
