@@ -177,14 +177,22 @@ bool IsCrossingBool(const TargetPhrase& targetPhrase, size_t targetPos)
   for (size_t currPos = 0; currPos < targetPhrase.GetSize(); ++currPos)
   {
     const Word &word = targetPhrase.GetWord(currPos);
-    if (word.IsNonTerminal())
+    
+    if (currPos == targetPos)
+    { // do nothing
+    }
+    else if (word.IsNonTerminal())
     {
       size_t currSourceInd = nonTermIndex[currPos];
-      if (currPos == targetPos)
-      { // do nothing
-      }
-      else if  (currPos < targetPos && currSourceInd < thisSourceInd)
+      if  (currPos < targetPos && currSourceInd > thisSourceInd)
         return true;      
+      else if  (currPos > targetPos && currSourceInd < thisSourceInd)
+        return true;      
+      
+    }
+    else
+    { // terminal. TODO
+      
     }
   }
   
@@ -194,28 +202,30 @@ bool IsCrossingBool(const TargetPhrase& targetPhrase, size_t targetPos)
 float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase) const
 {
   float score = 0;
-  
+
+  map<CrossingFeatureData, float>::const_iterator iter;
+
   for (size_t targetPos = 0; targetPos < targetPhrase.GetSize(); ++targetPos)
   {
     const Word &word = targetPhrase.GetWord(targetPos);
-    if (word.IsNonTerminal() && IsCrossingBool(targetPhrase, targetPos))
+    if (word.IsNonTerminal()) 
     {
+      bool isCrossing = IsCrossingBool(targetPhrase, targetPos);
 
+      CrossingFeatureData key(456456, word, isCrossing);
+      iter = m_data.find(key);
+      if (iter == m_data.end())
+      { // novel entry. Hardcode
+        score += FloorScore(log10(isCrossing ? 0.1 : 0.9));
+      }
+      else
+      {
+        score += FloorScore(log10(iter->second));
+      }
     }
   }
   
-  map<CrossingFeatureData, float>::const_iterator iter;
-  CrossingFeatureData key(terminalCount, targetPhrase.GetTargetLHS(), isCrossing);
-  iter = m_data.find(key);
-  if (iter == m_data.end())
-  { // novel entry. Hardcode
-    score = isCrossing ? 0.1 : 0.9;
-  }
-  else
-  {
-    score = iter->second;
-  }
-
+  return -score;
 }
   
 FFState* CrossingFeature::EvaluateChart(
