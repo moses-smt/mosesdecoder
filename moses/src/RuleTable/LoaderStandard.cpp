@@ -181,7 +181,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     TokenizeMultiCharSeparator(tokens, *line , "|||" );
 
     //Span Length branch : extended rule table to take span length into account, one more field
-    if (tokens.size() != 5 && tokens.size() != 6){
+    if (tokens.size() < 4){
       stringstream strme;
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());
