@@ -19,13 +19,11 @@
 
 #pragma once
 
-#include "HypoList.h"
-
 #include <vector>
 
 namespace Moses
 {
 
-typedef std::vector<const HypoList *> StackVec;
+typedef std::vector<const void *> StackVec;
 
 }
