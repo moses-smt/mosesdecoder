@@ -111,63 +111,7 @@ FFState* CrossingFeature::Evaluate(
 {
   return NULL;
 }
-  
-class CrossingFeatureState : public FFState
-{
-public:
-  CrossingFeatureState(unsigned terminalCount)
-  : m_terminalCount(terminalCount)
-  {
-  }
-  
-  unsigned GetTerminalCount() const {
-    return m_terminalCount;
-  }
-  
-  virtual int Compare(const FFState& other) const {
-    int otherTerminalCount = (dynamic_cast<const CrossingFeatureState&>(other)).m_terminalCount;
-    if (m_terminalCount < otherTerminalCount)
-      return -1;
-    if (m_terminalCount > otherTerminalCount)
-      return 1;
-    return 0;
-  }
-private:
-  unsigned m_terminalCount;
-};
-  
-struct SpanInfo {
-  unsigned SourceSpan, TargetSpan;
-  unsigned SourceRangeStart;
-};
-  
-static bool operator<(const SpanInfo& left, const SpanInfo& right)
-{
-  return left.SourceRangeStart < right.SourceRangeStart;
-}
-  
-static std::vector<SpanInfo> GetSpans(const ChartHypothesis &chartHypothesis, int featureId)
-{
-  const std::vector<const ChartHypothesis*>& prevHypos = chartHypothesis.GetPrevHypos();
-  std::vector<SpanInfo> result;
-  result.reserve(prevHypos.size());
-  iterate(prevHypos, iter) {
-    WordsRange curRange = (*iter)->GetCurrSourceRange();
-    SpanInfo spanInfo = {
-      curRange.GetNumWordsCovered(),
-      unsigned(-1),
-      curRange.GetStartPos()
-    };
-    const CrossingFeatureState* state = dynamic_cast<const CrossingFeatureState*>((*iter)->GetFFState(featureId));
-    if (state != NULL) {
-      spanInfo.TargetSpan = state->GetTerminalCount();
-    }
-    result.push_back(spanInfo);
-  }
-  std::sort(result.begin(), result.end());
-  return result;
-}
-
+    
 bool IsCrossingBool(const TargetPhrase& targetPhrase, size_t targetPos)
 {
   const AlignmentInfo::NonTermIndexMap &nonTermIndex = targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
@@ -199,9 +143,11 @@ bool IsCrossingBool(const TargetPhrase& targetPhrase, size_t targetPos)
   return false;  
 }
 
-float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase) const
+float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase, const ChartHypothesis &chartHypothesis) const
 {
   float score = 0;
+
+  const AlignmentInfo::NonTermIndexMap &nonTermIndex = targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
 
   map<CrossingFeatureData, float>::const_iterator iter;
 
@@ -212,7 +158,11 @@ float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase) const
     {
       bool isCrossing = IsCrossingBool(targetPhrase, targetPos);
 
-      CrossingFeatureData key(456456, word, isCrossing);
+      int thisSourceInd = nonTermIndex[targetPos];
+      const ChartHypothesis &child = *chartHypothesis.GetPrevHypo(thisSourceInd);
+      size_t sourceSpan = child.GetCurrSourceRange().GetNumWordsCovered();
+      
+      CrossingFeatureData key(sourceSpan, word, isCrossing);
       iter = m_data.find(key);
       if (iter == m_data.end())
       { // novel entry. Hardcode
@@ -233,21 +183,14 @@ FFState* CrossingFeature::EvaluateChart(
   int featureId,
   ScoreComponentCollection *accumulator) const
 {
-  std::vector<SpanInfo> spans = GetSpans(chartHypothesis, featureId);
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
-
-  // calc number of words in output phrase
-  unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
-  for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-    terminalCount += spans[spanIndex].TargetSpan - 1;
-  }
   
   // lookup score
-  float score = IsCrossing(targetPhrase);  
+  float score = IsCrossing(targetPhrase, chartHypothesis);  
   score = FloorScore(TransformScore(score));
   
   accumulator->PlusEquals(this, score);
-  return new CrossingFeatureState(terminalCount);
+  return NULL;
 }
   
 } // namespace moses
