@@ -69,6 +69,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
+  ,m_alignmentOutputCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -109,6 +110,15 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
+  
+  if (staticData.PrintAlignmentInfo()) {
+    if (staticData.GetAlignmentOutputFile().empty()) {
+      m_alignmentOutputCollector = new Moses::OutputCollector(&std::cout);
+    } else {
+      m_alignmentOutputCollector = new Moses::OutputCollector(new std::ofstream(staticData.GetAlignmentOutputFile().c_str()));
+      m_alignmentOutputCollector->HoldOutputStream();
+    }
+  }
 }
 
 IOWrapper::~IOWrapper()
@@ -122,6 +132,7 @@ IOWrapper::~IOWrapper()
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
+  delete m_alignmentOutputCollector;
 }
 
 void IOWrapper::ResetTranslationId() {
@@ -183,6 +194,86 @@ void OutputSurface(std::ostream &out, const ChartHypothesis *hypo, const std::ve
       OutputSurface(out, prevHypo, outputFactorOrder, reportSegmentation, reportAllFactors);
     }
   }
+}
+  
+namespace {
+  typedef std::vector< std::pair<size_t, size_t> > WordAlignment;
+  
+  bool IsUnknownWord(const Word& word) {
+    const Factor* factor = word[MAX_NUM_FACTORS - 1];
+    if (factor == NULL)
+      return false;
+    return factor->GetString() == UNKNOWN_FACTOR;
+  }
+  
+  WordAlignment GetWordAlignment(const Moses::ChartHypothesis *hypo, size_t *targetWordsCount)
+  {
+    const Moses::TargetPhrase& targetPhrase = hypo->GetCurrTargetPhrase();
+    const AlignmentInfo& phraseAlignmentInfo = targetPhrase.GetAlignmentInfo();
+    size_t sourceSize = 0;
+    for (AlignmentInfo::const_iterator it = phraseAlignmentInfo.begin();
+         it != phraseAlignmentInfo.end(); ++it)
+    {
+      sourceSize = std::max(sourceSize, it->first + 1);
+    }
+    std::vector<size_t> sourceSideLengths(sourceSize, 1);
+    std::vector<size_t> targetSideLengths(targetPhrase.GetSize(), 1);
+    std::vector<WordAlignment> alignmentsPerSourceNonTerm(sourceSize);
+    size_t prevHypoIndex = 0;
+    for (AlignmentInfo::const_iterator it = phraseAlignmentInfo.begin();
+         it != phraseAlignmentInfo.end(); ++it)
+    {
+      if (targetPhrase.GetWord(it->second).IsNonTerminal()) {
+        const Moses::ChartHypothesis *prevHypo = hypo->GetPrevHypo(prevHypoIndex);
+        ++prevHypoIndex;
+        alignmentsPerSourceNonTerm[it->first] = GetWordAlignment(
+            prevHypo, &targetSideLengths[it->second]);
+        sourceSideLengths[it->first] = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
+        CHECK(prevHypo->GetCurrSourceRange().GetStartPos() - hypo->GetCurrSourceRange().GetStartPos()
+          == (int)std::accumulate(sourceSideLengths.begin(), sourceSideLengths.begin() + it->first, 0));
+      } else {
+        alignmentsPerSourceNonTerm[it->first].push_back(WordAlignment::value_type(0, 0));
+      }
+    }
+    if (targetWordsCount != NULL) {
+      *targetWordsCount = std::accumulate(targetSideLengths.begin(), targetSideLengths.end(), 0);
+    }
+    // isn't valid since there may be unaligned words: CHECK(hypo->GetCurrSourceRange().GetNumWordsCovered() == std::accumulate(sourceSideLengths.begin(), sourceSideLengths.end(), 0));
+    WordAlignment result;
+    for (AlignmentInfo::const_iterator it = phraseAlignmentInfo.begin();
+         it != phraseAlignmentInfo.end(); ++it)
+    {
+      size_t sourceOffset = std::accumulate(sourceSideLengths.begin(), sourceSideLengths.begin() + it->first, 0);
+      size_t targetOffset = std::accumulate(targetSideLengths.begin(), targetSideLengths.begin() + it->second, 0);
+      for (WordAlignment::const_iterator it2 = alignmentsPerSourceNonTerm[it->first].begin();
+           it2 != alignmentsPerSourceNonTerm[it->first].end(); ++it2)
+      {
+        result.push_back(make_pair(sourceOffset + it2->first, targetOffset + it2->second));
+      }
+    }
+    if (result.empty() && targetPhrase.GetSize() == 1 && hypo->GetCurrSourceRange().GetNumWordsCovered() == 1 && IsUnknownWord(targetPhrase.GetWord(0))) {
+      result.push_back(WordAlignment::value_type(0, 0));
+    }
+    return result;
+  }
+}
+
+  
+void IOWrapper::OutputAlignment(const Moses::ChartHypothesis *hypo, long translationId)
+{
+  if (m_alignmentOutputCollector == NULL)
+    return;
+  WordAlignment alignment = GetWordAlignment(hypo, NULL);
+  std::ostringstream out;
+  for (WordAlignment::const_iterator it = alignment.begin();
+       it != alignment.end(); ++it)
+  {
+    if (it != alignment.begin())
+      out << " ";
+    out << it->first << "-" << it->second;
+  }
+  out << std::endl;
+  m_alignmentOutputCollector->Write(static_cast<int>(translationId), out.str());
 }
 
 void IOWrapper::Backtrack(const ChartHypothesis *hypo)
@@ -318,6 +409,7 @@ void IOWrapper::OutputDetailedTranslationReport(
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
+  
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
