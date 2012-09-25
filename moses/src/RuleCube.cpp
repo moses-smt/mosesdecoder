@@ -22,7 +22,6 @@
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
 #include "ChartTranslationOption.h"
-#include "ChartTranslationOptionCollection.h"
 #include "RuleCube.h"
 #include "RuleCubeQueue.h"
 #include "StaticData.h"

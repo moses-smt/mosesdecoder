@@ -21,7 +21,6 @@
 
 #include <algorithm>
 #include "ChartCell.h"
-#include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "RuleCubeQueue.h"
 #include "RuleCube.h"
