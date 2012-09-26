@@ -235,42 +235,21 @@ rule add-post-hook ( names * ) {
   post-hooks += $(names) ;
 }
 
-
-#Backend for writing content to files after build completes.
-post-files = ;
-post-contents = ;
-rule save-post-build ( ok ? ) {
-  if $(ok) {
-    while $(post-files) {
-      local ignored = @($(post-files[1]):E=$(post-contents[1])) ;
-      post-files = $(post-files[2-]) ;
-      post-contents = $(post-contents[2-]) ;
-    }
-  }
-}
-add-post-hook save-post-build ;
-
-#Queue content to be written to file when build completes successfully.  
-rule add-post-write ( name content ) {
-  post-files += $(name) ;
-  post-contents += $(content) ;
+import feature : feature ;
+feature options-to-write : : free ;
+import toolset : flags ;
+flags write-options OPTIONS-TO-WRITE <options-to-write> ;
+actions write-options {
+  echo "$(OPTIONS-TO-WRITE)" > $(<) ;
 }
 
-#Compare contents of file with current.  If they're different, force the targets to rebuild then overwrite the file.  
-rule always-if-changed ( file current : targets * ) {
-  local previous = inconsistent ;
-  if [ path.exists $(file) ] {
-    previous = [ _shell "cat $(file)" ] ;
-  }
-  if $(current) != $(previous) {
-    #Write inconsistent while the build is running
-    if [ path.exists $(file) ] {
-      local ignored = @($(file):E=inconsistent) ;
-    }
-    add-post-write $(file) $(current) ;
-    for local i in $(targets) {
-      always $(i) ;
-    }
+#Compare contents of file with current.  If they're different, write to the 
+#file.  This file can then be used with <dependency>$(file) to force
+#recompilation.
+rule update-if-changed ( file current ) {
+  if ( ! [ path.exists $(file) ] ) || ( [ _shell "cat $(file)" ] != $(current) ) {
+    make $(file) : : $(__name__).write-options : <options-to-write>$(current) ;
+    always $(file) ;
   }
 }
 
