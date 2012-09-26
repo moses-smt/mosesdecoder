@@ -17,7 +17,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 
 #include "ChartHypothesis.h"
 
@@ -26,7 +26,7 @@
 namespace Moses
 {
 
-float ChartTranslationOption::CalcEstimateOfBestScore(
+float ChartTranslationOptions::CalcEstimateOfBestScore(
     const TargetPhraseCollection &tpc,
     const StackVec &stackVec)
 {

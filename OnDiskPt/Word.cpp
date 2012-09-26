@@ -23,6 +23,9 @@
 #include "../moses/src/Word.h"
 #include "Word.h"
 
+#include "util/tokenize_piece.hh"
+#include "util/exception.hh"
+
 using namespace std;
 
 namespace OnDiskPt
@@ -94,23 +97,21 @@ size_t Word::ReadFromFile(std::fstream &file)
   return memUsed;
 }
 
-Moses::Word *Word::ConvertToMoses(Moses::FactorDirection direction
-                                  , const std::vector<Moses::FactorType> &outputFactorsVec
-                                  , const Vocab &vocab) const
-{
+void Word::ConvertToMoses(
+    const std::vector<Moses::FactorType> &outputFactorsVec, 
+    const Vocab &vocab,
+    Moses::Word &overwrite) const {
   Moses::FactorCollection &factorColl = Moses::FactorCollection::Instance();
-  Moses::Word *ret = new Moses::Word(m_isNonTerminal);
+  overwrite = Moses::Word(m_isNonTerminal);
 
-  const string &str = vocab.GetString(m_vocabId);
-  vector<string> toks = Moses::Tokenize(str, "|");
-  for (size_t ind = 0; ind < toks.size(); ++ind) {
-    Moses::FactorType factorType = outputFactorsVec[ind];
-    const Moses::Factor *factor = factorColl.AddFactor(direction, factorType, toks[ind]);
-    ret->SetFactor(factorType, factor);
+  // TODO: this conversion should have been done at load time.  
+  util::TokenIter<util::SingleCharacter> tok(vocab.GetString(m_vocabId), '|');
+
+  for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
+    UTIL_THROW_IF(!tok, util::Exception, "Too few factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
+    overwrite.SetFactor(*t, factorColl.AddFactor(*tok));
   }
-
-  return ret;
-
+  UTIL_THROW_IF(tok, util::Exception, "Too many factors in \"" << vocab.GetString(m_vocabId) << "\"; was expecting " << outputFactorsVec.size());
 }
 
 int Word::Compare(const Word &compare) const

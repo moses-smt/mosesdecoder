@@ -23,13 +23,13 @@
 
 #include <vector>
 #include "ChartCell.h"
-#include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "InputType.h"
 #include "WordsRange.h"
 #include "SentenceStats.h"
 #include "TranslationSystem.h"
 #include "ChartRuleLookupManager.h"
+#include "ChartTranslationOptionList.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -53,15 +53,22 @@ private:
   static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
                                  const ChartTrellisNode &,
                                  ChartTrellisDetourQueue &);
+  void CreateTranslationOptionsForRange(const WordsRange &wordsRange);
+  void ProcessOneUnknownWord(const Word &sourceWord, const WordsRange &range);
 
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
-  ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   std::auto_ptr<SentenceStats> m_sentenceStats;
   const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
   std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
+
+  ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
+  std::vector<Phrase*> m_unksrcs;
+  std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
+  std::vector <DecodeGraph*> m_decodeGraphList;
+  StackVec m_emptyStackVec;
 
 public:
   ChartManager(InputType const& source, const TranslationSystem* system);

@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "PhraseDictionary.h"
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "ChartHypothesis.h"
 
 

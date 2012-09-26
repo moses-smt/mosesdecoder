@@ -29,7 +29,7 @@
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "LMList.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "FFState.h"
 
 namespace Moses
@@ -44,7 +44,7 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
  * \param item @todo dunno
  * \param manager reference back to manager
  */
-ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
+ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
   :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))

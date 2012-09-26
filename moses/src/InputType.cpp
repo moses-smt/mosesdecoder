@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdlib>
 
 #include "InputType.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 
 namespace Moses
 {
@@ -61,10 +61,10 @@ bool InputType::CanIGetFromAToB(size_t /*start*/, size_t /*end*/) const
   return true;
 }
 
-std::vector <ChartTranslationOption*> InputType::GetXmlChartTranslationOptions() const
+std::vector <ChartTranslationOptions*> InputType::GetXmlChartTranslationOptions() const
 {
   // default. return nothing
-  std::vector <ChartTranslationOption*> ret;
+  std::vector <ChartTranslationOptions*> ret;
   return ret;
 }
   

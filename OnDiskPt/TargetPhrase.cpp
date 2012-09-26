@@ -207,9 +207,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   --phraseSize;
 
   for (size_t pos = 0; pos < phraseSize; ++pos) {
-    Moses::Word *mosesWord = GetWord(pos).ConvertToMoses(Moses::Output, outputFactors, vocab);
-    ret->AddWord(*mosesWord);
-    delete mosesWord;
+    GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
   }
 
   // scores
@@ -223,9 +221,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   }
   ret->SetAlignmentInfo(alignmentInfo);
 
-  Moses::Word *lhs = GetWord(GetSize() - 1).ConvertToMoses(Moses::Output, outputFactors, vocab);
-  ret->SetTargetLHS(*lhs);
-  delete lhs;
+  GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, ret->MutableTargetLHS());
 
   return ret;
 }
