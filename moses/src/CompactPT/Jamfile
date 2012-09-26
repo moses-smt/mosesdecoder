@@ -1,10 +1,10 @@
-local current = ;
+local current = "" ;
 local includes = ;
 local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
   lib cmph : : <search>$(with-cmph)/lib ;
   includes += <include>$(with-cmph)/include ;
-  current += "--with-cmph=$(with-cmph)" ;
+  current = "--with-cmph=$(with-cmph)" ;
 }
 else {
   alias cmph ;
@@ -12,9 +12,7 @@ else {
 
 alias sources : [ glob *.cpp ] ;
 
-lib CompactPT : sources ..//moses_internal cmph : $(includes) ;
-
 path-constant PT-LOG : bin/pt.log ;
-current = $(current:J=" ") ;
-current ?= "" ;
-always-if-changed $(PT-LOG) $(current) : sources ;
+update-if-changed $(PT-LOG) $(current) ;
+
+lib CompactPT : sources ..//moses_internal cmph : $(includes) <dependency>$(PT-LOG) ;
