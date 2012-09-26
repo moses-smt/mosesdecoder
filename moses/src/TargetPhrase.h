@@ -149,6 +149,9 @@ public:
   void SetTargetLHS(const Word &lhs) {
     m_lhsTarget = lhs;
   }
+  Word &MutableTargetLHS() {
+    return m_lhsTarget;
+  }
   const Word &GetTargetLHS() const {
     return m_lhsTarget;
   }
