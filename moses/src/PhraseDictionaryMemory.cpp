@@ -164,18 +164,19 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
 
-    // Reuse source if possible.  Otherwise, create node for it.  
+    //TODO: Would be better to reuse source phrases, but ownership has to be 
+    //consistent across phrase table implementations
+    sourcePhrase.Clear();
+    sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
+    //Now that the source phrase is ready, we give the target phrase a copy
+    targetPhrase->SetSourcePhrase(sourcePhrase);
     if (preSourceString == sourcePhraseString && preSourceNode) {
       preSourceNode->Add(targetPhrase.release());
     } else {
-      sourcePhrase.Clear();
-      sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
       preSourceNode = CreateTargetPhraseCollection(sourcePhrase);
       preSourceNode->Add(targetPhrase.release());
       preSourceString.assign(sourcePhraseString.data(), sourcePhraseString.size());
     }
-    //Now that the source phrase is ready, we give the target phrase a copy
-    targetPhrase->SetSourcePhrase(sourcePhrase);
   }
 
   // sort each target phrase collection

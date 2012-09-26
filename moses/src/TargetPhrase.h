@@ -135,8 +135,7 @@ public:
 		return m_scoreBreakdown;
 	}
 
-	//! TODO - why is this needed and is it set correctly by every phrase dictionary class ? should be set in constructor
-	// NOTE: this is not set correctly for unbinarized phrase tables
+  //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
 	void SetSourcePhrase(const Phrase&  p) 
 	{
 		m_sourcePhrase=p;

@@ -481,11 +481,15 @@ void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system,
   const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ )
   	if (sff[i]->GetScoreProducerWeightShortName() != "bl")
-  		OutputFeatureScores( out, path, sff[i], lastName );
+      OutputFeatureScores( out, path, sff[i], lastName );
 
   const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
-    OutputFeatureScores( out, path, slf[i], lastName );
+    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
+          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
+          slf[i]->GetScoreProducerWeightShortName() != "I" &&
+          slf[i]->GetScoreProducerWeightShortName() != "g")
+      OutputFeatureScores( out, path, slf[i], lastName );
 }
 
 void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const FeatureFunction *ff, std::string &lastName )

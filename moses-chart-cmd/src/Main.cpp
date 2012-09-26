@@ -191,7 +191,9 @@ static void ShowWeights()
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    PrintFeatureWeight(slf[i]);
+    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
+  	  PrintFeatureWeight(slf[i]);
+    }
   }
 }
 
