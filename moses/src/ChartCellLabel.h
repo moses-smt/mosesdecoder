@@ -45,7 +45,7 @@ class ChartCellLabel
 
   const WordsRange &GetCoverage() const { return m_coverage; }
   const Word &GetLabel() const { return m_label; }
-  const HypoList *GetStack() const { return m_stack; }
+  const void *GetStack() const { return m_stack; }
 
   bool operator<(const ChartCellLabel &other) const
   {
@@ -60,7 +60,7 @@ class ChartCellLabel
  private:
   const WordsRange &m_coverage;
   const Word &m_label;
-  const HypoList *m_stack;
+  const void *m_stack;
 };
 
 }
