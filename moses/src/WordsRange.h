@@ -26,6 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 
+#ifdef WIN32
+#undef max
+#endif
+
 namespace Moses
 {
 
@@ -78,10 +82,10 @@ public:
     CHECK(!Overlap(x));
 
     if (x.m_endPos < m_startPos) {
-      return m_startPos - x.m_endPos;
+      return m_startPos - x.m_endPos - 1;
     }
 
-    return x.m_startPos - m_endPos;
+    return x.m_startPos - m_endPos - 1;
   }
 
 

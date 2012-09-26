@@ -66,15 +66,15 @@ protected:
   const std::vector<Moses::FactorType>	&m_inputFactorOrder;
   const std::vector<Moses::FactorType>	&m_outputFactorOrder;
   const Moses::FactorMask								&m_inputFactorUsed;
-  std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
+  std::ostream 									*m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::string										m_inputFilePath;
   std::istream									*m_inputStream;
-  bool													m_surpressSingleBestOutput;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
+  Moses::OutputCollector                *m_alignmentOutputCollector;
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -91,6 +91,7 @@ public:
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
   void OutputSparseFeatureScores(std::ostream& out, const Moses::ChartTrellisPath &path, const Moses::FeatureFunction *ff, std::string &lastName);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void OutputAlignment(const Moses::ChartHypothesis *hypo, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
   void ResetTranslationId();

@@ -86,6 +86,8 @@ $CORPUS = "$DIR/aligned.truecased" if (-e "$DIR/aligned.truecased");
 &train_recase_model() if $FIRST_STEP <= 10 && $LAST_STEP >= 3;
 &cleanup()            if $LAST_STEP == 11;
 
+exit(0);
+
 ### subs ###
 
 sub truecase {

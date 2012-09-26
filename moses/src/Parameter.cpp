@@ -133,6 +133,7 @@ Parameter::Parameter()
   AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
   AddParam("output-search-graph-extended", "osgx", "Output connected hypotheses of search into specified filename, in extended format");
   AddParam("unpruned-search-graph", "usg", "When outputting chart search graph, do not exclude dead ends. Note: stack pruning may have eliminated some hypotheses");
+  AddParam("include-lhs-in-search-graph", "lhssg", "When outputting chart search graph, include the label of the LHS of the rule (useful when using syntax)");
 #ifdef HAVE_PROTOBUF
   AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
 #endif
@@ -182,6 +183,11 @@ Parameter::Parameter()
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("text-type", "should be one of dev/devtest/test, used for domain adaptation features");
+  AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
+  
+  // Compact phrase table and reordering table.                                                                                  
+  AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
+  AddParam("minphr-memory", "Load phrase table in minphr format into memory");
 }
 
 Parameter::~Parameter()
@@ -250,7 +256,9 @@ bool Parameter::LoadParam(int argc, char* argv[])
     PrintCredit();
     Explain();
 
+    cerr << endl;    
     UserMessage::Add("No configuration file was specified.  Use -config or -f");
+    cerr << endl;
     return false;
   } else {
     if (!ReadConfigFile(configPath)) {
@@ -377,6 +385,8 @@ bool Parameter::Validate()
     ext.push_back(".gz");
     //prefix tree format
     ext.push_back(".binlexr.idx");
+    //prefix tree format
+    ext.push_back(".minlexr");
     noErrorFlag = FilesExist("distortion-file", 3, ext);
   }
   return noErrorFlag;

@@ -405,6 +405,9 @@
 /* Begin PBXProject section */
 		1EE8C2E01476A48E002496F2 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = 1EE8C2E31476A48E002496F2 /* Build configuration list for PBXProject "lm" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -539,6 +542,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = "KENLM_MAX_ORDER=7";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../lm/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
@@ -556,6 +560,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				EXECUTABLE_PREFIX = lib;
+				GCC_PREPROCESSOR_DEFINITIONS = "KENLM_MAX_ORDER=7";
 				LIBRARY_SEARCH_PATHS = (
 					"$(inherited)",
 					"\"$(SRCROOT)/../../lm/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",

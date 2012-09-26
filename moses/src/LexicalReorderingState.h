@@ -151,6 +151,7 @@ private:
   WordsRange m_prevRange;
   bool m_first;
 public:
+  static bool m_useFirstBackwardScore;
   PhraseBasedReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset);
   PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, const TranslationOption &topt);
 

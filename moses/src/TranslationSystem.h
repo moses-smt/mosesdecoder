@@ -91,7 +91,7 @@ class TranslationSystem {
       
       //sentence (and thread) specific initialisationn and cleanup
       void InitializeBeforeSentenceProcessing(const InputType& source) const;
-      void CleanUpAfterSentenceProcessing() const;
+      void CleanUpAfterSentenceProcessing(const InputType& source) const;
       
 			const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
 

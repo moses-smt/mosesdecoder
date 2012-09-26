@@ -46,12 +46,12 @@ public:
         (*lm_iter)->InitializeBeforeSentenceProcessing();
     }
   }
-  void CleanUpAfterSentenceProcessing() {
+  void CleanUpAfterSentenceProcessing(const InputType& source) {
     std::list<LanguageModel*>::iterator lm_iter;
     for (lm_iter = m_coll.begin();
          lm_iter != m_coll.end();
          ++lm_iter) {
-        (*lm_iter)->CleanUpAfterSentenceProcessing();
+        (*lm_iter)->CleanUpAfterSentenceProcessing(source);
     }
   }
 

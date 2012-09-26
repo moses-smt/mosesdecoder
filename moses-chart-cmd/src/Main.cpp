@@ -103,6 +103,10 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
     }
+    
+    if (staticData.PrintAlignmentInfo()) {
+      m_ioWrapper.OutputAlignment(bestHypo, lineNumber);
+    }
 
     // n-best
     size_t nBestSize = staticData.GetNBestSize();
@@ -217,7 +221,7 @@ int main(int argc, char* argv[])
     }
 
     const StaticData &staticData = StaticData::Instance();
-    if (!StaticData::LoadDataStatic(&parameter))
+    if (!StaticData::LoadDataStatic(&parameter, argv[0]))
       return EXIT_FAILURE;
 
     if (parameter.isParamSpecified("show-weights")) {

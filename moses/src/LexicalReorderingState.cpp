@@ -173,6 +173,8 @@ int LexicalReorderingState::ComparePrevScores(const Scores *other) const
   return 0;
 }
 
+bool PhraseBasedReorderingState::m_useFirstBackwardScore = true;
+
 PhraseBasedReorderingState::PhraseBasedReorderingState(const PhraseBasedReorderingState *prev, const TranslationOption &topt)
   : LexicalReorderingState(prev, topt), m_prevRange(topt.GetSourceWordsRange()), m_first(false) {}
 
@@ -210,17 +212,18 @@ LexicalReorderingState* PhraseBasedReorderingState::Expand(const TranslationOpti
   if (m_direction == LexicalReorderingConfiguration::Forward && m_first) {
     ClearScores(scores);
   } else {
-    if (modelType == LexicalReorderingConfiguration::MSD) {
-      reoType = GetOrientationTypeMSD(currWordsRange);
-    } else if (modelType == LexicalReorderingConfiguration::MSLR) {
-      reoType = GetOrientationTypeMSLR(currWordsRange);
-    } else if (modelType == LexicalReorderingConfiguration::Monotonic) {
-      reoType = GetOrientationTypeMonotonic(currWordsRange);
-    } else {
-      reoType = GetOrientationTypeLeftRight(currWordsRange);
+    if (!m_first || m_useFirstBackwardScore){
+      if (modelType == LexicalReorderingConfiguration::MSD) {
+        reoType = GetOrientationTypeMSD(currWordsRange);
+      } else if (modelType == LexicalReorderingConfiguration::MSLR) {
+        reoType = GetOrientationTypeMSLR(currWordsRange);
+      } else if (modelType == LexicalReorderingConfiguration::Monotonic) {
+        reoType = GetOrientationTypeMonotonic(currWordsRange);
+      } else {
+        reoType = GetOrientationTypeLeftRight(currWordsRange);
+      }
+      CopyScores(scores, topt, reoType);
     }
-
-    CopyScores(scores, topt, reoType);
   }
 
   return new PhraseBasedReorderingState(this, topt);

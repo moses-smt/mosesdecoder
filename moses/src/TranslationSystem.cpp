@@ -133,25 +133,25 @@ namespace Moses {
       }
     }
     
-     void TranslationSystem::CleanUpAfterSentenceProcessing() const {
+     void TranslationSystem::CleanUpAfterSentenceProcessing(const InputType& source) const {
         
         for(size_t i=0;i<m_phraseDictionaries.size();++i)
         {
           PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionaries[i];
           PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
-          phraseDictionary->CleanUp();
+          phraseDictionary->CleanUp(source);
 
         }
   
         for(size_t i=0;i<m_generationDictionaries.size();++i)
-            m_generationDictionaries[i]->CleanUp();
+            m_generationDictionaries[i]->CleanUp(source);
   
         //something LMs could do after each sentence 
         LMList::const_iterator iterLM;
         for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
         {
           LanguageModel &languageModel = **iterLM;
-          languageModel.CleanUpAfterSentenceProcessing();
+          languageModel.CleanUpAfterSentenceProcessing(source);
         }
      }
     

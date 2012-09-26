@@ -40,7 +40,7 @@ class LexicalTable
 {
 public:
   map< WORD_ID, map< WORD_ID, double > > ltable;
-  void load( char[] );
+  void load( const string &);
 };
 
 }
@@ -310,11 +310,11 @@ bool PhraseAlignment::equals( const PhraseAlignment& other )
   return true;
 }
 
-void LexicalTable::load( char *fileName )
+void LexicalTable::load( const string &filePath )
 {
-  cerr << "Loading lexical translation table from " << fileName;
+  cerr << "Loading lexical translation table from " << filePath;
   ifstream inFile;
-  inFile.open(fileName);
+  inFile.open(filePath.c_str());
   if (inFile.fail()) {
     cerr << " - ERROR: could not open file\n";
     exit(1);
@@ -332,7 +332,7 @@ void LexicalTable::load( char *fileName )
 
     vector<string> token = tokenize( line );
     if (token.size() != 3) {
-      cerr << "line " << i << " in " << fileName << " has wrong number of tokens, skipping:\n" <<
+      cerr << "line " << i << " in " << filePath << " has wrong number of tokens, skipping:\n" <<
            token.size() << " " << token[0] << " " << line << endl;
       continue;
     }

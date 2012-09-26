@@ -32,29 +32,30 @@ for (my $i = 8; $i < $#ARGV + 1; ++$i)
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
+my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
-mkdir $TMPDIR;
+$cmd = "mkdir -p $TMPDIR";
+`$cmd`;
 
-my $totalLines = int(`cat '$align' | wc -l`);
+my $totalLines = int(`cat $align | wc -l`);
 my $linesPerSplit = int($totalLines / $numParallel) + 1;
 
 print "total=$totalLines line-per-split=$linesPerSplit \n";
 
 my @children;
 my $pid;
-my $cmd;
 
 if ($numParallel > 1)
 {
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 '$target' '$TMPDIR/target.'";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $target $TMPDIR/target.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 	
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 '$source' '$TMPDIR/source.'";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $source $TMPDIR/source.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 
-	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 '$align' '$TMPDIR/align.'";
+	$cmd = "$splitCmd -d -l $linesPerSplit -a 5 $align $TMPDIR/align.";
 	$pid = RunFork($cmd);
 	push(@children, $pid);
 	
@@ -68,15 +69,15 @@ else
 {
   my $numStr = NumStr(0);
 
-  $cmd = "ln -s '$target' '$TMPDIR/target.$numStr'";
+  $cmd = "ln -s $target $TMPDIR/target.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
-  $cmd = "ln -s '$source' '$TMPDIR/source.$numStr'";
+  $cmd = "ln -s $source $TMPDIR/source.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 
-  $cmd = "ln -s '$align' '$TMPDIR/align.$numStr'";
+  $cmd = "ln -s $align $TMPDIR/align.$numStr";
 	print STDERR "Executing: $cmd \n";
 	`$cmd`;
 }
@@ -90,7 +91,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
-    my $cmd = "'$extractCmd' '$TMPDIR/target.$numStr' '$TMPDIR/source.$numStr' '$TMPDIR/align.$numStr' '$TMPDIR/extract.$numStr' $otherExtractArgs \n";
+    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
     print STDERR $cmd;
     `$cmd`;
 
@@ -115,14 +116,14 @@ my $catOCmd = $catCmd;
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
-		$catCmd .= "'$TMPDIR/extract.$numStr.gz' ";
-		$catInvCmd .= "'$TMPDIR/extract.$numStr.inv.gz' ";
-		$catOCmd .= "'$TMPDIR/extract.$numStr.o.gz' ";
+		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
+		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
+		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
 }
 
-$catCmd .= " | LC_ALL=C $sortCmd -T '$TMPDIR' | gzip -c > '$extract.sorted.gz' \n";
-$catInvCmd .= " | LC_ALL=C $sortCmd -T '$TMPDIR' | gzip -c > '$extract.inv.sorted.gz' \n";
-$catOCmd .= " | LC_ALL=C $sortCmd -T '$TMPDIR' | gzip -c > '$extract.o.sorted.gz' \n";
+$catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";
+$catInvCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.inv.sorted.gz \n";
+$catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n";
 
 
 @children = ();
@@ -136,7 +137,7 @@ if ($makeTTable)
 }
 
 my $numStr = NumStr(0);
-if (-e "'$TMPDIR/extract.$numStr.o.gz'")
+if (-e "$TMPDIR/extract.$numStr.o.gz")
 {
 	$pid = RunFork($catOCmd);
 	push(@children, $pid);
@@ -148,7 +149,7 @@ foreach (@children) {
 }
 
 # delete temporary files
-$cmd = "rm -rf '$TMPDIR' \n";
+$cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;
 `$cmd`;
 

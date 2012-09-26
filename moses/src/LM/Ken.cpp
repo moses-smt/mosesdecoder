@@ -284,7 +284,9 @@ class LanguageModelChartStateKenLM : public FFState {
 template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+  const TargetPhrase &target = hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+        target.GetAlignmentInfo().GetNonTermIndexMap();
 
   const size_t size = hypo.GetCurrTargetPhrase().GetSize();
   size_t phrasePos = 0;

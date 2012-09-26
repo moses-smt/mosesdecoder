@@ -3,7 +3,6 @@
 
 #include "lm/blank.hh"
 #include "lm/config.hh"
-#include "lm/max_order.hh"
 #include "lm/model_type.hh"
 #include "util/bit_packing.hh"
 
@@ -217,7 +216,7 @@ class SeparatelyQuantize {
     const Bins &LongestTable() const { return longest_; }
 
   private:
-    Bins tables_[kMaxOrder - 1][2];
+    Bins tables_[KENLM_MAX_ORDER - 1][2];
 
     Bins longest_;
 

@@ -6,6 +6,7 @@ use strict;
 # * target word insertion
 # * source word deletion
 # * word translation
+# * phrase length
 
 my ($corpus,$input_extension,$output_extension,$outfile_prefix,$specification) = @ARGV;
 my $ini = "";
@@ -44,6 +45,10 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
     else {
       die("ERROR: Unknown parameter specification in '$feature_spec'\n");
     }
+  }
+  elsif ($SPEC[0] eq 'phrase-length') {
+    $ini .= "[phrase-length-feature]\ntrue\n\n";
+    $report .= "pl\n";
   }
   else {
     die("ERROR: Unknown feature type '$SPEC[0]' in specification '$feature_spec'\nfull spec: '$specification'\n");

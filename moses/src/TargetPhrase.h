@@ -62,7 +62,6 @@ public:
   TargetPhrase();
   TargetPhrase(std::string out_string);
   TargetPhrase(const Phrase &targetPhrase);
-  ~TargetPhrase();
 
   //! used by the unknown word handler- these targets
   //! don't have a translation score, so wp is the only thing used
@@ -150,6 +149,10 @@ public:
 	const Word &GetTargetLHS() const
 	{ return m_lhsTarget; }
 	
+  Word &MutableTargetLHS() {
+    return m_lhsTarget;
+  }
+
   void SetAlignmentInfo(const StringPiece &alignString);
   void SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase);
   void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);

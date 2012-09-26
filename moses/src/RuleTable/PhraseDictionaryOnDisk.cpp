@@ -43,6 +43,8 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
                                   , const LMList& languageModels
                                   , const WordPenaltyProducer* wpProducer)
 {
+  PrintUserTime("Start loading binary SCFG phrase table. ");
+
   m_languageModels = &(languageModels);
   m_wpProducer = wpProducer;
   m_filePath = filePath;
