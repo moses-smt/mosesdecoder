@@ -145,7 +145,7 @@ bool IsCrossingBool(const TargetPhrase& targetPhrase, size_t targetPos)
 
 float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase, const ChartHypothesis &chartHypothesis) const
 {
-  float score = 0;
+  float prob = 1;
 
   const AlignmentInfo::NonTermIndexMap &nonTermIndex = targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
 
@@ -166,16 +166,16 @@ float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase, const ChartH
       iter = m_data.find(key);
       if (iter == m_data.end())
       { // novel entry. Hardcode
-        score += FloorScore(log10(isCrossing ? 0.1 : 0.9));
+        prob *= isCrossing ? 0.1 : 0.9;
       }
       else
       {
-        score += FloorScore(log10(iter->second));
+        prob *= iter->second;
       }
     }
   }
   
-  return -score;
+  return prob;
 }
   
 FFState* CrossingFeature::EvaluateChart(
@@ -187,7 +187,7 @@ FFState* CrossingFeature::EvaluateChart(
   
   // lookup score
   float score = IsCrossing(targetPhrase, chartHypothesis);  
-  score = FloorScore(TransformScore(score));
+  score = - FloorScore(UntransformLMScore(TransformScore(score)));
   
   accumulator->PlusEquals(this, score);
   return NULL;
