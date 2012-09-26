@@ -145,8 +145,23 @@ bool IsCrossingBool(const TargetPhrase& targetPhrase, size_t targetPos)
 
 float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase, const ChartHypothesis &chartHypothesis) const
 {
-  float prob = 1;
+  float score = 0;
 
+  if (chartHypothesis.GetCurrSourceRange().GetStartPos() == 0)
+    return score;
+  
+  if (chartHypothesis.GetCurrSourceRange() == WordsRange(1,5))
+  {
+    stringstream strme;
+    strme << chartHypothesis.GetOutputPhrase();
+    string str = strme.str();
+    if (str == "they at least claim . ")
+    {
+      cerr << chartHypothesis.GetOutputPhrase() << endl
+            << chartHypothesis.GetCurrTargetPhrase() << endl;
+    }
+  }
+  
   const AlignmentInfo::NonTermIndexMap &nonTermIndex = targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
 
   map<CrossingFeatureData, float>::const_iterator iter;
@@ -166,16 +181,16 @@ float CrossingFeature::IsCrossing(const TargetPhrase& targetPhrase, const ChartH
       iter = m_data.find(key);
       if (iter == m_data.end())
       { // novel entry. Hardcode
-        prob *= isCrossing ? 0.1 : 0.9;
+        score += log10(isCrossing ? 0.1 : 0.9);
       }
       else
       {
-        prob *= iter->second;
+        score += log10(iter->second);
       }
     }
   }
   
-  return prob;
+  return score;
 }
   
 FFState* CrossingFeature::EvaluateChart(
@@ -187,7 +202,7 @@ FFState* CrossingFeature::EvaluateChart(
   
   // lookup score
   float score = IsCrossing(targetPhrase, chartHypothesis);  
-  score = - FloorScore(UntransformLMScore(TransformScore(score)));
+  score = - FloorScore(score);
   
   accumulator->PlusEquals(this, score);
   return NULL;
