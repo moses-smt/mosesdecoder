@@ -51,10 +51,7 @@ void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   node = &dottedRule;
   while (rank > 0) {
     if (node->IsNonTerminal()) {
-      const ChartCellLabel &cellLabel = node->GetChartCellLabel();
-      const HypoList *stack = cellLabel.GetStack();
-      assert(stack);
-      m_stackVec[--rank] = stack;
+      m_stackVec[--rank] = node->GetChartCellLabel().GetStack();
     }
     node = node->GetPrev();
   }
