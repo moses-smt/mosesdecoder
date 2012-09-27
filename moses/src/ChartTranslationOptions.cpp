@@ -21,7 +21,7 @@
 
 #include "ChartHypothesis.h"
 
-#include "HypoList.h"
+#include "ChartCellLabel.h"
 
 namespace Moses
 {
@@ -34,7 +34,7 @@ float ChartTranslationOptions::CalcEstimateOfBestScore(
   float estimateOfBestScore = targetPhrase.GetFutureScore();
   for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
        ++p) {
-    const HypoList *stack = static_cast<const HypoList*>(*p);
+    const HypoList *stack = static_cast<const HypoList*>((*p)->GetStack());
     assert(stack);
     assert(!stack->empty());
     const ChartHypothesis &bestHypo = **(stack->begin());

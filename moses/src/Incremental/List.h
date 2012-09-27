@@ -10,8 +10,8 @@ class List {
 
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordRange &ignored);
 
-    // TODO: consider implenting these.  
-    void Clear() {}
+    void Process(ChartCellLabelSet &out);
+
     void ShrinkToLimit() const {}
     void ApplyThreshold() const {}
 

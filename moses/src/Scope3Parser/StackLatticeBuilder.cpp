@@ -81,8 +81,8 @@ void StackLatticeBuilder::Build(
         for (std::vector<Word>::const_iterator p = labelVec.begin();
              p != labelVec.end(); ++p) {
           const Word &label = *p;
-          const HypoList *stack = chartCell.GetSortedHypotheses(label);
-          stackVec.push_back(stack);
+          const ChartCellLabel *stack = chartCell.GetTargetLabelSet().Find(label);
+          stackVec.push_back(chartCell.GetTargetLabelSet().Find(label));
           *q++ = *q || static_cast<bool>(stack);
         }
       }

@@ -37,7 +37,7 @@ class ChartCellLabel
 {
  public:
   ChartCellLabel(const WordsRange &coverage, const Word &label,
-                 const HypoList *stack=NULL)
+                 const void *stack=NULL)
     : m_coverage(coverage)
     , m_label(label)
     , m_stack(stack)

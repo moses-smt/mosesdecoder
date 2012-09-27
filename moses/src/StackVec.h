@@ -24,6 +24,8 @@
 namespace Moses
 {
 
-typedef std::vector<const void *> StackVec;
+class ChartCellLabel;
+
+typedef std::vector<const ChartCellLabel*> StackVec;
 
 }
