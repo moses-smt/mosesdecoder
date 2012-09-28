@@ -38,6 +38,7 @@
 #ifndef LM_LEFT__
 #define LM_LEFT__
 
+#include "lm/max_order.hh"
 #include "lm/state.hh"
 #include "lm/return.hh"
 
