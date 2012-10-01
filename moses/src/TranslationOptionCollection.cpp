@@ -667,6 +667,11 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
   return out;
 }
 
+const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() const 
+{
+  return m_unksrcs;
+}
+
 void TranslationOptionCollection::CacheLexReordering()
 {
   const vector<LexicalReordering*> &lexReorderingModels = m_system->GetReorderModels();

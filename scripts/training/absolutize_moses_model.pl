@@ -42,6 +42,12 @@ while (<$inih>) {
 
 			$_ = "$type $b $c $d $abs_src $abs_tgt $abs_align\n";
 		}
+                elsif ( $type eq '12' ) {
+		  $abs = ensure_absolute($fn, $ini);
+		  die "File not found or empty: $fn (searched for $abs.minphr)"
+		    if ! -s $abs.".minphr"; # accept compact binarized ttables
+		  $_ = "$type $b $c $d $abs\n";                    
+                }
 		else {
 		  $abs = ensure_absolute($fn, $ini);
 		  die "File not found or empty: $fn (searched for $abs or $abs.binphr.idx)"
@@ -61,8 +67,8 @@ while (<$inih>) {
       chomp;
       my ($a, $b, $c, $fn) = split / /;
       $abs = ensure_absolute($fn, $ini);
-      die "File not found or empty: $fn (searched for $abs or $abs.binlexr.idx)"
-        if ! -s $abs && ! -s $abs.".binlexr.idx"; # accept binarized lexro models
+      die "File not found or empty: $fn (searched for $abs or $abs.binlexr.idx or $abs.minlexr)"
+        if ! -s $abs && ! -s $abs.".binlexr.idx" && ! -s $abs.".minlexr"; # accept binarized and compact lexro models
       $_ = "$a $b $c $abs\n";
     }
   }
@@ -92,7 +98,7 @@ sub ensure_absolute {
   my $target = shift;
   my $originfile = shift;
 
-  my $cwd = `pawd`;
+  my $cwd = `pawd 2> /dev/null`;
   $cwd = `pwd` if ! defined $cwd; # not everyone has pawd!
   die "Failed to absolutize $target. Failing to get cwd!" if ! defined $cwd;
   chomp $cwd;

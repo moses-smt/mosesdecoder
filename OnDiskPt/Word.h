@@ -70,9 +70,10 @@ public:
     m_vocabId = vocabId;
   }
 
-  Moses::Word *ConvertToMoses(Moses::FactorDirection direction
-                              , const std::vector<Moses::FactorType> &outputFactorsVec
-                              , const Vocab &vocab) const;
+  void ConvertToMoses(
+    const std::vector<Moses::FactorType> &outputFactorsVec,
+    const Vocab &vocab,
+    Moses::Word &overwrite) const;
 
 	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 

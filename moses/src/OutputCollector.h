@@ -43,8 +43,31 @@ class OutputCollector
 {
 public:
   OutputCollector(std::ostream* outStream= &std::cout, std::ostream* debugStream=&std::cerr) :
-    m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream)  {}
-
+    m_nextOutput(0),m_outStream(outStream),m_debugStream(debugStream),
+    m_isHoldingOutputStream(false), m_isHoldingDebugStream(false) {}
+  
+  ~OutputCollector()
+  {
+    if (m_isHoldingOutputStream)
+      delete m_outStream;
+    if (m_isHoldingDebugStream)
+      delete m_debugStream;
+  }
+  
+  void HoldOutputStream()
+  {
+    m_isHoldingOutputStream = true;
+  }
+  
+  void HoldDebugStream()
+  {
+    m_isHoldingDebugStream = true;
+  }
+  
+  bool OutputIsCout() const
+  {
+    return (m_outStream == std::cout);
+  }
 
   /**
     * Write or cache the output, as appropriate.
@@ -62,9 +85,9 @@ public:
       std::map<int,std::string>::iterator iter;
       while ((iter = m_outputs.find(m_nextOutput)) != m_outputs.end()) {
         *m_outStream << iter->second << std::flush;
-        m_outputs.erase(iter);
         ++m_nextOutput;
         std::map<int,std::string>::iterator debugIter = m_debugs.find(iter->first);
+		m_outputs.erase(iter);
         if (debugIter != m_debugs.end()) {
           *m_debugStream << debugIter->second << std::flush;
           m_debugs.erase(debugIter);
@@ -82,6 +105,8 @@ private:
   int m_nextOutput;
   std::ostream* m_outStream;
   std::ostream* m_debugStream;
+  bool m_isHoldingOutputStream;
+  bool m_isHoldingDebugStream;
 #ifdef WITH_THREADS
   boost::mutex m_mutex;
 #endif

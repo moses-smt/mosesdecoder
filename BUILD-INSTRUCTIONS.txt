@@ -73,7 +73,7 @@ you're ready to install packages in non-standard paths:
 
 #For Boost:
 ./bootstrap.sh
-./b2 --prefix=$PREFIX --libdir=$PREFIX/lib64 --layout=tagged link=static,shared threading=multi install
+./b2 --prefix=$PREFIX --libdir=$LIBDIR --layout=tagged link=static,shared threading=multi,single install
 
 --------------------------------------------------------------------------
 

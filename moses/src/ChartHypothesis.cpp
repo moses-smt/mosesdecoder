@@ -29,7 +29,7 @@
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "LMList.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "FFState.h"
 
 namespace Moses
@@ -44,7 +44,7 @@ ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300
  * \param item @todo dunno
  * \param manager reference back to manager
  */
-ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
+ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
   :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
@@ -90,14 +90,11 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = nonTermIndexMap[pos];
+      size_t nonTermInd = GetCurrTargetPhrase().GetNonTermIndex(pos);
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
@@ -272,6 +269,9 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 		out << "->" << hypo.GetWinningHypothesis()->GetId();
 	}
 
+  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
+    out << " " << hypo.GetTargetLHS() << "=>";
+  }
   out << " " << hypo.GetCurrTargetPhrase()
       //<< " " << outPhrase
       << " " << hypo.GetCurrSourceRange();

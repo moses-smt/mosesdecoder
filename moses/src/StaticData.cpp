@@ -20,6 +20,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <boost/filesystem/operations.hpp>
+#include <boost/filesystem/path.hpp>
+
 #include <string>
 #include "util/check.hh"
 #include "PhraseDictionaryMemory.h"
@@ -93,6 +96,11 @@ StaticData::StaticData()
 
   // memory pools
   Phrase::InitializeMemPool();
+}
+
+bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPath) {
+  s_instance.SetExecPath(execPath);
+  return s_instance.LoadData(parameter);
 }
 
 bool StaticData::LoadData(Parameter *parameter)
@@ -231,7 +239,18 @@ bool StaticData::LoadData(Parameter *parameter)
   } else
     m_outputSearchGraphPB = false;
 #endif
-  SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", true );
+  SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", false );
+  SetBooleanParameter( &m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
+  
+  if (m_parameter->isParamSpecified("output-unknowns")) {
+
+    if (m_parameter->GetParam("output-unknowns").size() == 1) {
+      m_outputUnknownsFile =Scan<string>(m_parameter->GetParam("output-unknowns")[0]); 
+    } else {
+      UserMessage::Add(string("need to specify exactly one file name for unknowns"));
+      return false;
+    }
+  }
 
   // include feature names in the n-best list
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
@@ -359,6 +378,9 @@ bool StaticData::LoadData(Parameter *parameter)
 
   SetBooleanParameter(&m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
 
+  // early distortion cost
+  SetBooleanParameter( &m_useEarlyDistortionCost, "early-distortion-cost", false );
+
   // unknown word processing
   SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
 
@@ -398,7 +420,10 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
   if (m_useConsensusDecoding) m_mbr=true;
-
+  
+  // Compact phrase table and reordering model
+  SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
+  SetBooleanParameter( &m_minlexrMemory, "minlexr-memory", false );
 
   m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
                         Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
@@ -1336,6 +1361,25 @@ void StaticData::ClearTransOptionCache() const {
     TranslationOptionList *transOptList = iterCache->second.first;
     delete transOptList;
   }
+}
+
+void StaticData::SetExecPath(const std::string &path)
+{
+  namespace fs = boost::filesystem;
+  
+  fs::path full_path( fs::initial_path<fs::path>() );
+  
+  full_path = fs::system_complete( fs::path( path ) );
+    
+  //Without file name
+  m_binPath = full_path.parent_path().string();
+  cerr << m_binPath << endl;
+
+}
+
+const string &StaticData::GetBinDirectory() const
+{
+  return m_binPath;
 }
 
 }

@@ -32,10 +32,10 @@ using namespace std;
 namespace MosesTraining
 {
 
-bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID)
+bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID, bool boundaryRules)
 {
   if (!m_options.targetSyntax) {
-    return SentenceAlignment::processTargetSentence(targetString, sentenceID);
+    return SentenceAlignment::processTargetSentence(targetString, sentenceID, boundaryRules);
   }
 
   string targetStringCPP(targetString);
@@ -52,10 +52,10 @@ bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetStrin
   return true;
 }
 
-bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID)
+bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID, bool boundaryRules)
 {
   if (!m_options.sourceSyntax) {
-    return SentenceAlignment::processSourceSentence(sourceString, sentenceID);
+    return SentenceAlignment::processSourceSentence(sourceString, sentenceID, boundaryRules);
   }
 
   string sourceStringCPP(sourceString);

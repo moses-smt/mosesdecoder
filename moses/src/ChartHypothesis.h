@@ -25,7 +25,7 @@
 #include "WordsRange.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "ObjectPool.h"
 
 namespace Moses
@@ -91,7 +91,7 @@ public:
   }
 #endif
 
-  ChartHypothesis(const ChartTranslationOption &, const RuleCubeItem &item,
+  ChartHypothesis(const ChartTranslationOptions &, const RuleCubeItem &item,
                   ChartManager &manager);
 
   ~ChartHypothesis();

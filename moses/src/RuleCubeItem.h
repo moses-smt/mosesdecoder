@@ -29,7 +29,7 @@ namespace Moses
 class ChartCellCollection;
 class ChartHypothesis;
 class ChartManager;
-class ChartTranslationOption;
+class ChartTranslationOptions;
 class TargetPhrase;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
@@ -110,7 +110,7 @@ std::size_t hash_value(const HypothesisDimension &);
 class RuleCubeItem
 {
  public:
-  RuleCubeItem(const ChartTranslationOption &, const ChartCellCollection &);
+  RuleCubeItem(const ChartTranslationOptions &, const ChartCellCollection &);
   RuleCubeItem(const RuleCubeItem &, int);
   ~RuleCubeItem();
 
@@ -126,7 +126,7 @@ class RuleCubeItem
 
   void EstimateScore();
 
-  void CreateHypothesis(const ChartTranslationOption &, ChartManager &);
+  void CreateHypothesis(const ChartTranslationOptions &, ChartManager &);
 
   ChartHypothesis *ReleaseHypothesis();
 

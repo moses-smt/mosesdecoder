@@ -21,6 +21,8 @@ my $lmPath;
 my $cores = 2;
 my $irstPath;
 my $tempPath = "tmp";
+my $p = 1;
+my $s;
 my $temp;
 
 GetOptions("order=s"  => \$order,
@@ -29,6 +31,8 @@ GetOptions("order=s"  => \$order,
            "cores=s"  => \$cores,
            "irst-dir=s"  => \$irstPath,
            "temp-dir=s"  => \$tempPath,
+           "p=i" => \$p,   # irstlm parameter: delete singletons
+           "s=s" => \$s, # irstlm parameter: smoothing method
 	   "interpolate!" => \$temp,  #ignore
 	   "kndiscount!" => \$temp    #ignore
 	   ) or exit 1;
@@ -56,7 +60,9 @@ else
 print STDERR "EXECUTING $cmd\n";
 `$cmd`;
 
-$cmd = "IRSTLM=$irstPath/.. $irstPath/build-lm.sh -t $tempPath/stat4 -i \"gunzip -c $tempPath/monolingual.setagged.gz\" -n $order -p -o $tempPath/iarpa.gz -k $cores";
+$cmd = "IRSTLM=$irstPath/.. $irstPath/build-lm.sh -t $tempPath/stat4 -i \"gunzip -c $tempPath/monolingual.setagged.gz\" -n $order -o $tempPath/iarpa.gz -k $cores";
+$cmd .= " -p" if $p;
+$cmd .= " -s $s" if defined($s);
 print STDERR "EXECUTING $cmd\n";
 `$cmd`;
 

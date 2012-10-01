@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TargetPhrase_h
 
 #include <vector>
+#include <map>
 #include "TypeDef.h"
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
@@ -56,6 +57,10 @@ protected:
   Phrase const* m_sourcePhrase;
 
   const AlignmentInfo *m_alignmentInfo;
+  
+  typedef std::map<size_t, size_t> NonTermIndexMap;
+  NonTermIndexMap* m_nonTermIndexMap;
+  
   Word m_lhsTarget;
 
 public:
@@ -144,6 +149,9 @@ public:
   void SetTargetLHS(const Word &lhs) {
     m_lhsTarget = lhs;
   }
+  Word &MutableTargetLHS() {
+    return m_lhsTarget;
+  }
   const Word &GetTargetLHS() const {
     return m_lhsTarget;
   }
@@ -153,12 +161,27 @@ public:
   void SetAlignmentInfo(const AlignmentInfo *alignmentInfo) {
     m_alignmentInfo = alignmentInfo;
   }
+  
+  size_t GetNonTermIndex(size_t position) const {
+    if (m_nonTermIndexMap == NULL)
+      return NOT_FOUND;
+    NonTermIndexMap::const_iterator it = m_nonTermIndexMap->find(position);
+    if (it == m_nonTermIndexMap->end())
+      return NOT_FOUND;
+    return it->second;
+  }
 
   const AlignmentInfo &GetAlignmentInfo() const {
     return *m_alignmentInfo;
   }
 
   TO_STRING();
+private:
+  void SetNonTermIndex(size_t position, size_t index) {
+    if (!m_nonTermIndexMap)
+      m_nonTermIndexMap = new NonTermIndexMap;
+    m_nonTermIndexMap->insert(NonTermIndexMap::value_type(position, index));
+  }
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);

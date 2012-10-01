@@ -155,7 +155,10 @@ void Data::loadNBest(const string &file)
       string temp;
       getNextPound(line, temp, "|||"); //fourth field sentence score
       if (line.length() > 0) {
-        getNextPound(line, alignment, "|||"); //fourth field only there if alignment scorer
+        getNextPound(line, alignment, "|||"); //fifth field (if present) is either phrase or word alignment
+	if (line.length() > 0) {
+	  getNextPound(line, alignment, "|||"); //sixth field (if present) is word alignment 
+	}
       }
     }
     //TODO check alignment exists if scorers need it

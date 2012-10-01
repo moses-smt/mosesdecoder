@@ -100,12 +100,14 @@ protected:
   m_translationOptionThreshold,
   m_wordDeletionWeight;
 
+  
   // PhraseTrans, Generation & LanguageModelScore has multiple weights.
   int				m_maxDistortion;
   // do it differently from old pharaoh
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
+  bool m_useEarlyDistortionCost;
   size_t
   m_maxHypoStackSize //! hypothesis-stack size that triggers pruning
   , m_minHypoStackDiversity //! minimum number of hypothesis in stack for each source word coverage
@@ -195,12 +197,17 @@ protected:
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
   bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
+  bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
+  std::string m_outputUnknownsFile; //! output unknowns in this file
 
   size_t m_cubePruningPopLimit;
   size_t m_cubePruningDiversity;
   bool m_cubePruningLazyScoring;
   size_t m_ruleLimit;
 
+  // Whether to load compact phrase table and reordering table into memory
+  bool m_minphrMemory;
+  bool m_minlexrMemory;
 
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
@@ -237,6 +244,8 @@ protected:
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
 
+  std::string m_binPath;
+  
 public:
 
   bool IsAlwaysCreateDirectTranslationOption() const {
@@ -249,19 +258,8 @@ public:
     return s_instance;
   }
 
-  /** delete current static instance and replace with another.
-  	* Used by gui front end
-  	*/
-#ifdef WIN32
-  static void Reset() {
-    s_instance = StaticData();
-  }
-#endif
-
   //! Load data into static instance. This function is required as LoadData() is not const
-  static bool LoadDataStatic(Parameter *parameter) {
-    return s_instance.LoadData(parameter);
-  }
+  static bool LoadDataStatic(Parameter *parameter, const std::string &execPath);
 
   //! Main function to load everything. Also initialize the Parameter object
   bool LoadData(Parameter *parameter);
@@ -341,6 +339,9 @@ public:
   bool UseEarlyDiscarding() const {
     return m_earlyDiscardingThreshold != -std::numeric_limits<float>::infinity();
   }
+  bool UseEarlyDistortionCost() const {
+    return m_useEarlyDistortionCost;
+  }
   float GetTranslationOptionThreshold() const {
     return m_translationOptionThreshold;
   }
@@ -394,6 +395,15 @@ public:
   bool NBestIncludesAlignment() const {
     return m_nBestIncludesAlignment;
   }
+  
+  bool UseMinphrInMemory() const {
+     return m_minphrMemory;
+  }
+
+  bool UseMinlexrInMemory() const {
+     return m_minlexrMemory;
+  }
+  
   size_t GetNumLinkParams() const {
     return m_numLinkParams;
   }
@@ -555,8 +565,16 @@ public:
     return m_outputSearchGraphPB;
   }
 #endif
+  const std::string& GetOutputUnknownsFile() const {
+    return m_outputUnknownsFile;
+  }
+
   bool GetUnprunedSearchGraph() const {
     return m_unprunedSearchGraph;
+  }
+
+  bool GetIncludeLHSInSearchGraph() const {
+    return m_includeLHSInSearchGraph;
   }
 
   XmlInputType GetXmlInputType() const {
@@ -621,6 +639,9 @@ public:
   
   long GetStartTranslationId() const
   { return m_startTranslationId; }
+  
+  void SetExecPath(const std::string &path);
+  const std::string &GetBinDirectory() const;
 };
 
 }

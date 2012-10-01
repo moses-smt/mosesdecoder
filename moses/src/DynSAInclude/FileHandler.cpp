@@ -1,4 +1,10 @@
 #include "FileHandler.h"
+#include <stdio.h>
+
+#ifdef WIN32
+#define popen(A, B) _popen(A, B)
+#define pclose(A) _pclose(A)
+#endif
 
 namespace Moses
 {
@@ -17,7 +23,7 @@ const std::string FileHandler::kBzip2Command = "bzip2 -f";
 const std::string FileHandler::kBunzip2Command = "bunzip2 -f";
 
 FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags, bool /* checkExists */)
-  : std::fstream(NULL), path_(path), flags_(flags), buffer_(NULL), fp_(NULL)
+  : std::fstream((const char*) NULL), path_(path), flags_(flags), buffer_(NULL), fp_(NULL)
 {
   if( !(flags^(std::ios::in|std::ios::out)) ) {
     fprintf(stderr, "ERROR: FileHandler does not support bidirectional files (%s).\n", path_.c_str());
@@ -31,8 +37,10 @@ FileHandler::FileHandler(const std::string & path, std::ios_base::openmode flags
 
 FileHandler::~FileHandler()
 {
+#ifndef NO_PIPES
   if( fp_ != 0 )
     pclose(fp_);
+#endif
   if( path_ != FileHandler::kStdInDescriptor &&
       path_ != FileHandler::kStdOutDescriptor )
     delete buffer_;
@@ -45,7 +53,11 @@ fdstreambuf * FileHandler::openCompressedFile(const char * cmd)
   //bool isInput = (flags_ & std::ios::in);
   //open pipe to file with compression/decompression command
   const char * p_type = (flags_ & std::ios::in ? "r" : "w");
+#ifndef NO_PIPES
   fp_ = popen(cmd, p_type);
+#else
+  fp_ = NULL;
+#endif
   if( fp_ == NULL ) {
     //fprintf(stderr, "ERROR:Failed to open compressed file at %s\n", path_.c_str());
     perror("openCompressedFile: ");
@@ -152,6 +164,7 @@ bool FileHandler::getCompressionCmds(const std::string & filepath, std::string &
 
 bool FileHandler::reset()
 {
+#ifndef NO_PIPES
   // move to beginning of file
   if (fp_ != 0) {
     //can't seek on a pipe so reopen
@@ -162,6 +175,7 @@ bool FileHandler::reset()
     //reinitialize
     this->init(buffer_);
   } else
+#endif
     buffer_->pubseekoff(0, std::ios_base::beg); //sets both get and put pointers to beginning of stream
   return true;
 }

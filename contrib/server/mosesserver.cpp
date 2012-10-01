@@ -192,7 +192,8 @@ public:
           staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-        Manager manager(sentence,staticData.GetSearchAlgorithm(), &system);
+	size_t lineNumber = 0; // TODO: Include sentence request number here?
+        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 
@@ -367,7 +368,7 @@ int main(int argc, char** argv)
     params->Explain();
     exit(1);
   }
-  if (!StaticData::LoadDataStatic(params)) {
+  if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
   }
 

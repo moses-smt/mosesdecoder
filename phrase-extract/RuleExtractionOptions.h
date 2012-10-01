@@ -53,6 +53,7 @@ public:
   bool gzOutput;
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
+  bool boundaryRules;
   
   RuleExtractionOptions()
     : maxSpan(10)
@@ -85,6 +86,7 @@ public:
     , gzOutput(false)
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)
+    , boundaryRules(false)
   {}
 };
 

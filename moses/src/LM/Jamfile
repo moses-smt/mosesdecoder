@@ -7,6 +7,25 @@
 
 import option path ;
 
+#This is a kludge to force rebuilding if different --with options are passed. 
+#Could have used features like <srilm>on but getting these to apply only to
+#linking was ugly and it still didn't trigger an install (since the install
+#path doesn't encode features).  It stores a file lm.log with the previous
+#options and forces a rebuild if the current options differ.  
+local current = ;
+for local i in srilm irstlm randlm {
+  local optval = [ option.get "with-$(i)" ] ;
+  if $(optval) {
+    current += "--with-$(i)=$(optval)" ;
+  }
+}
+current = $(current:J=" ") ;
+current ?= "" ;
+
+path-constant LM-LOG : bin/lm.log ;
+update-if-changed $(LM-LOG) $(current) ;
+
+
 local dependencies = ;
 
 #IRSTLM
@@ -69,28 +88,9 @@ if $(with-ldhtlm) {
 obj ORLM.o : ORLM.cpp ..//headers ../DynSAInclude//dynsa : : : <include>../DynSAInclude ;
 
 #The factory needs the macros LM_IRST etc to know which ones to use.  
-obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclude ;
+obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclude <dependency>$(LM-LOG) ;
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
 lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
   ../../../lm//kenlm ..//headers $(dependencies) ;
-
-#Everything below is a kludge to force rebuilding if different --with options
-#are passed.  Could have used features like <srilm>on but getting these to
-#apply only to linking was ugly and it still didn't trigger an install (since
-#the install path doesn't encode features).  It stores a file lm.log with the
-#previous options and forces a rebuild if the current options differ.  
-path-constant LM-LOG : bin/lm.log ;
-
-local current = ;
-for local i in srilm irstlm randlm {
-  local optval = [ option.get "with-$(i)" ] ;
-  if $(optval) {
-    current += "--with-$(i)=$(optval)" ;
-  }
-}
-current = $(current:J=" ") ;
-current ?= "" ;
-
-always-if-changed $(LM-LOG) $(current) : Factory.o LM ;

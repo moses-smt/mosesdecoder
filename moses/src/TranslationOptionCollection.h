@@ -96,6 +96,9 @@ protected:
 
   //! implemented by inherited class, called by this class
   virtual void ProcessUnknownWord(size_t sourcePos)=0;
+
+    
+
   void CacheLexReordering();
 
 public:
@@ -105,6 +108,9 @@ public:
   const InputType& GetSource() const {
     return m_source;
   }
+
+  //!List of unknowns (OOVs)
+  const std::vector<Phrase*>& GetUnknownSources() const;
 
   //! get length/size of source input
   size_t GetSize() const {
