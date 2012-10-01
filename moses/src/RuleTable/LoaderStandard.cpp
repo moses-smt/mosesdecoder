@@ -221,9 +221,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString, sourcePhrase);
     targetPhrase->SetTargetLHS(targetLHS);
-    targetPhrase->SetRuleCount(ruleCountString, scoreVector);
+    
+    if (tokens.size() == 5) {
+      targetPhrase->SetRuleCount(ruleCountString, scoreVector);
+    }
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
-
+    
     // component score, for n-best output
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);

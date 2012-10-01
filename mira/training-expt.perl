@@ -65,10 +65,11 @@ my $train_script = "$name-train";
 my $job_name = "$name-t";
 my $hours = &param("train.hours",48);
 
-# Check if a weight file with core weights was given
-my $core_weight_file = &param("core.weightfile");
+# check if we are tuning a meta feature
+my $tuneMetaFeature = &param("general.tune-meta-feature", 0);
+print STDERR "Tuning meta feature.. \n" if $tuneMetaFeature; 
 
-# Check if a weight file with core weights was given                                                                                       
+# Check if a weight file with start weights was given 
 my $start_weight_file = &param("start.weightfile");
 
 #required training parameters
@@ -106,6 +107,177 @@ else {
     }
 }
 
+# check if we want to continue an interrupted experiment
+my $continue_expt = &param("general.continue-expt", 0); # number of experiment to continue
+my $continue_epoch = 0;
+if ($continue_expt > 0) {
+    die "ERROR: Continuing an experiment is not defined for tuning meta features.. \n\n" if ($tuneMetaFeature);
+    $continue_epoch = &param_required("general.continue-epoch", 0);
+    my $continue_weights = &param_required("general.continue-weights", 0);
+    open(CONT_WEIGHTS, $continue_weights);
+    my ($wp_weight, @pm_weights, $lm_weight, $lm2_weight, $d_weight, @lr_weights, %extra_weights);
+    my $num_core_weights = 0;
+    my $num_extra_weights = 0;
+    while(<CONT_WEIGHTS>) {
+        chomp;
+	my ($name,$value) = split;
+        next if ($name =~ /^!Unknown/);
+	next if ($name =~ /^BleuScore/);
+        next if ($name eq "DEFAULT_");
+	if ($name eq "WordPenalty") {
+	    $wp_weight = $value;
+	    $num_core_weights += 1;
+	} elsif ($name =~ /^PhraseModel/) {
+	    push @pm_weights,$value;
+	    $num_core_weights += 1;
+	} elsif ($name =~ /^LM\:2/) {
+	    $lm2_weight = $value;
+	    $num_core_weights += 1;
+	}  
+	elsif ($name =~ /^LM/) {
+	    $lm_weight = $value;
+	    $num_core_weights += 1;
+	} elsif ($name eq "Distortion") {
+	    $d_weight = $value;
+	    $num_core_weights += 1;
+	} elsif ($name =~ /^LexicalReordering/) {
+	    push @lr_weights,$value;
+	    $num_core_weights += 1;
+	} else {
+	    $extra_weights{$name} = $value;
+	    $num_extra_weights += 1;	    
+        }
+    }
+    close CONT_WEIGHTS;
+    print STDERR "num core weights to continue: $num_core_weights\n";
+    print STDERR "num extra weights to continue: $num_extra_weights\n";
+
+    # write sparse weights to separate file
+    my $sparse_weights = $working_dir."/sparseWeights.expt".$continue_expt;
+    if ($num_extra_weights > 0) {
+	open(SPARSE, ">$sparse_weights");
+	foreach my $name (sort keys %extra_weights) {
+	    next if ($name eq "core");
+	    next if ($name eq "DEFAULT_");
+	    
+	    # write only non-zero feature weights to file
+	    if ($extra_weights{$name}) {
+		print SPARSE "$name $extra_weights{$name}\n";
+	    } 
+	}
+	close SPARSE;
+    }
+
+    # write new ini files with these weights
+    if ($jackknife) {
+	my @new_ini_files;
+	for (my $i=0; $i<=$#moses_ini_files_folds; $i++) {
+	    my $ini_continue = $moses_ini_files_folds[$i].".continue".$continue_expt;
+	    open(OLDINI, $moses_ini_files_folds[$i]);
+	    open(NEWINI, ">$ini_continue");
+	    while(<OLDINI>) {
+		if (/weight-l/) {
+		    print NEWINI "[weight-l]\n";
+		    print NEWINI $lm_weight;
+		    print NEWINI "\n";
+		    
+		    if (defined $lm2_weight) {
+			readline(OLDINI);
+			print NEWINI $lm2_weight;
+			print NEWINI "\n";
+		    }
+		
+		    readline(OLDINI);
+		} elsif (/weight-t/) {
+		    print NEWINI "[weight-t]\n";
+		    foreach my $pm_weight (@pm_weights) {
+			print NEWINI $pm_weight;
+			print NEWINI "\n";
+			readline(OLDINI);
+		    }
+		} elsif (/weight-d/) {
+		    print NEWINI "[weight-d]\n";
+		    print NEWINI $d_weight;
+		    print NEWINI "\n";
+		    readline(OLDINI);
+		    foreach my $lr_weight (@lr_weights) {
+			print NEWINI $lr_weight;
+			print NEWINI "\n";
+			readline(OLDINI);
+		    }
+		} elsif (/weight-w/) {
+		    print NEWINI "[weight-w]\n";
+		    print NEWINI $wp_weight;
+		    print NEWINI "\n";
+		    readline(OLDINI);
+		} else {
+		    print NEWINI;
+		}
+	    }
+	    if ($num_extra_weights > 0) {
+		print NEWINI "\n[weight-file]\n$sparse_weights\n";
+	    }
+	    close OLDINI;
+	    close NEWINI;	    
+
+	    print STDERR "new ini file: ".$ini_continue."\n";
+	    $moses_ini_files_folds[$i] = $ini_continue;
+	}
+    }
+    else {
+	my $ini_continue = $moses_ini_file.".continue".$continue_expt;
+	open(OLDINI, $moses_ini_file);
+	open(NEWINI, ">$ini_continue");
+	while(<OLDINI>) {
+	    if (/weight-l/) {
+		print NEWINI "[weight-l]\n";
+		print NEWINI $lm_weight;
+		print NEWINI "\n";
+		
+		if (defined $lm2_weight) {
+		    readline(OLDINI);
+		    print NEWINI $lm2_weight;
+		    print NEWINI "\n";
+		}
+		
+		readline(OLDINI);
+	    } elsif (/weight-t/) {
+		print NEWINI "[weight-t]\n";
+		foreach my $pm_weight (@pm_weights) {
+		    print NEWINI $pm_weight;
+		    print NEWINI "\n";
+		    readline(OLDINI);
+		}
+	    } elsif (/weight-d/) {
+		print NEWINI "[weight-d]\n";
+		print NEWINI $d_weight;
+		print NEWINI "\n";
+		readline(OLDINI);
+		foreach my $lr_weight (@lr_weights) {
+		    print NEWINI $lr_weight;
+		    print NEWINI "\n";
+		    readline(OLDINI);
+		}
+	    } elsif (/weight-w/) {
+		print NEWINI "[weight-w]\n";
+		print NEWINI $wp_weight;
+		print NEWINI "\n";
+		readline(OLDINI);
+	    } 
+	    else {
+		print NEWINI;
+	    }
+	}
+	if ($num_extra_weights > 0) {
+	    print NEWINI "\n[weight-file]\n$sparse_weights\n";
+	}
+	close OLDINI;
+	close NEWINI;
+	print STDERR "new ini file: ".$ini_continue."\n";
+	$moses_ini_file = $ini_continue;
+    }
+}
+
 my $trainer_exe = &param_required("train.trainer");
 &check_exists("Training executable", $trainer_exe);
 #my $weights_file = &param_required("train.weights-file");
@@ -116,7 +288,6 @@ my $epochs = &param("train.epochs", 2);
 my $learner = &param("train.learner", "mira");
 my $batch = &param("train.batch", 1);
 my $extra_args = &param("train.extra-args");
-my $continue_from_epoch = &param("train.continue-from-epoch", 0);
 my $by_node = &param("train.by-node",0);
 my $slots = &param("train.slots",8);
 my $jobs = &param("train.jobs",8);
@@ -270,7 +441,9 @@ else {
     }
     print TRAIN "\\\n";
 }
-
+if ($continue_epoch > 0) {
+    print TRAIN "--continue-epoch $continue_epoch \\\n";
+}
 if ($burn_in) {
     print TRAIN "--burn-in 1 \\\n";
     print TRAIN "--burn-in-input-file $burn_in_input_file \\\n";
@@ -291,9 +464,6 @@ if ($burn_in) {
 #}
 if (defined $start_weight_file) {
     print TRAIN "--start-weights $start_weight_file \\\n"; 
-}
-elsif (defined $core_weight_file) {
-    print TRAIN "--core-weights $core_weight_file \\\n";
 }
 print TRAIN "-l $learner \\\n";
 print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
@@ -332,11 +502,12 @@ die "Failed to submit training job" unless $train_job_id;
 
 #wait for the next weights file to appear, or the training job to end
 my $train_iteration = -1;
-
-# optionally continue from a later epoch (if $continue_from_epoch > 0)
-if ($continue_from_epoch > 0) {
-    $train_iteration = $continue_from_epoch - 1;
-    print STDERR "Continuing training from epoch $continue_from_epoch, with weights from ini file $moses_ini_file.\n";  
+if ($continue_epoch > 0) {
+    $train_iteration += ($continue_epoch*$weight_dump_frequency);
+    print STDERR "Start from training iteration ".$train_iteration." instead of -1.\n";
+}
+else {
+    print STDERR "Start from training iteration ".$train_iteration."\n";
 }
 
 while(1) {
@@ -348,6 +519,9 @@ while(1) {
 	exit(0);
     }
     
+    #my $epoch = 1 + int $train_iteration / $weight_dump_frequency;
+    $epoch = int $train_iteration / $weight_dump_frequency;
+    $epoch_slice = $train_iteration % $weight_dump_frequency;
     if ($weight_dump_frequency == 1) {
 	if ($train_iteration < 10) {
 	    $new_weight_file .= "0".$train_iteration;
@@ -356,10 +530,7 @@ while(1) {
 	    $new_weight_file .= $train_iteration;
 	}
     } else {
-        #my $epoch = 1 + int $train_iteration / $weight_dump_frequency;
-        $epoch = int $train_iteration / $weight_dump_frequency;
-	$epoch_slice = $train_iteration % $weight_dump_frequency;
-        if ($epoch < 10) {
+	if ($epoch < 10) {
 	    $new_weight_file .= "0".$epoch."_".$epoch_slice;
 	}
 	else {
@@ -367,6 +538,7 @@ while(1) {
 	}	
     }
     
+    print STDERR "Current epoch: ".$epoch."\n";
     my $expected_num_files = $epoch*$weight_dump_frequency;
     if ($wait_for_bleu) {
 	print STDERR "Expected number of BLEU files: $expected_num_files \n";
@@ -509,6 +681,8 @@ sub createTestScriptAndSubmit {
     my $readExtraWeights = 0;
     my %extra_weights;
     my $abs_weights = 0;
+    my $metaFeature_wt_weight = 0;
+    my $metaFeature_pp_weight = 0; 
     while(<WEIGHTS>) {
         chomp;
 	my ($name,$value) = split;
@@ -542,7 +716,17 @@ sub createTestScriptAndSubmit {
               push @lexicalreordering_weights,$value;
 	      $abs_weights += abs($value);
 	      $readCoreWeights += 1;
-            } else {
+            } elsif ($name =~ /^MetaFeature_wt/) { 
+		$metaFeature_wt_weight = $value;
+		$abs_weights += abs($value);
+		$readCoreWeights += 1;
+	    }
+	    elsif ($name =~ /^MetaFeature_pp/) { 
+		$metaFeature_pp_weight = $value;
+		$abs_weights += abs($value);
+		$readCoreWeights += 1;
+	    }
+	    else {
               $extra_weights{$name} = $value;
 	      $readExtraWeights += 1;
             }
@@ -552,59 +736,6 @@ sub createTestScriptAndSubmit {
     
     print STDERR "Number of core weights read: ".$readCoreWeights."\n";
     print STDERR "Number of extra weights read: ".$readExtraWeights."\n";
-    
-    # If there is a core weight file, we have to load the core weights from that file (NOTE: this is not necessary if the core weights are also printed to the weights file)
-#    if (defined $core_weight_file) {
-#	@phrasemodel_weights = ();
-#	@lexicalreordering_weights = ();
-#	$readCoreWeights = 0;
-#	if (! (open CORE_WEIGHTS, "$core_weight_file")) {
-#	    die "Unable to open core weights file $core_weight_file\n";
-#	}
-#	print "Reading core weights from file..\n";
-#	while(<CORE_WEIGHTS>) {
-#	    chomp;
-#	    my ($name,$value) = split;
-#	    next if ($name =~ /^!Unknown/);
-#	    next if ($name =~ /^BleuScore/);
-#	    if ($name eq "DEFAULT_") {
-#		$default_weight = $value;
-#	    } 
-#	    else {
-#		if ($name eq "WordPenalty") {
-#		    $wordpenalty_weight = $value;
-#		    $abs_weights += abs($value);
-#		    $readCoreWeights += 1;
-#		} elsif ($name =~ /^PhraseModel/) {
-#		    push @phrasemodel_weights,$value;
-#		    $abs_weights += abs($value);
-#		    $readCoreWeights += 1;
-#		} elsif ($name =~ /^LM\:2/) {
-#		    $lm2_weight = $value;
-#		    $abs_weights += abs($value);
-#		    $readCoreWeights += 1;
-#		}  
-#		elsif ($name =~ /^LM/) {
-#		    $lm_weight = $value;
-#		    $abs_weights += abs($value);
-#		    $readCoreWeights += 1;
-#		} elsif ($name eq "Distortion") {
-#		    $distortion_weight = $value;
-#		    $abs_weights += abs($value);
-#		    $readCoreWeights += 1;
-#		} elsif ($name =~ /^LexicalReordering/) {
-#		    push @lexicalreordering_weights,$value;	      
-#		    $abs_weights += abs($value);
-#		    $readCoreWeights += 1;
-#		} else {
-#		    # there should be no extra weights in the core weights file
-#		    print "weight not matched: $name:$value\n";
-#		}
-#	    }
-#	}
-#	close CORE_WEIGHTS;
-#	print "Number of core weights read: ".$readCoreWeights."\n";
-#    }
           
     # Create new ini file (changing format: expt1-devtest.00_2.ini instead of expt1-devtest.3.ini)
     # my $new_ini_file = $working_dir."/".$test_script.".".$train_iteration.$suffix.".ini";
@@ -647,12 +778,24 @@ sub createTestScriptAndSubmit {
                 print NEWINI "\n";
                 readline(OLDINI);
             }
-        } elsif (/weight-w/) {
+        } elsif (/weight-wt/) {
+	    print NEWINI "[weight-wt]\n";
+	    print NEWINI $metaFeature_wt_weight/$abs_weights;
+	    print NEWINI "\n";
+	    readline(OLDINI);
+	} elsif (/weight-pp/) {
+	    print NEWINI "[weight-pp]\n";
+	    print NEWINI $metaFeature_pp_weight/$abs_weights;
+	    print NEWINI "\n";
+	    readline(OLDINI);
+	}
+	elsif (/weight-w/) {
             print NEWINI "[weight-w]\n";
             print NEWINI ($wordpenalty_weight/$abs_weights);
             print NEWINI "\n";
             readline(OLDINI);
-        } else {
+        } 
+	else {
             print NEWINI;
         }
     }
@@ -662,7 +805,7 @@ sub createTestScriptAndSubmit {
 
     # if there are any non-core weights, write them to a weights file (normalized)
     my $extra_weight_file = undef;
-    if (%extra_weights) {
+    if (%extra_weights && !$tuneMetaFeature) {
       $extra_weight_file = "$new_weight_file.sparse.scaled";
       if (! (open EXTRAWEIGHT,">$extra_weight_file")) {
         print "Warning: unable to create extra weights file $extra_weight_file";
@@ -688,9 +831,11 @@ sub createTestScriptAndSubmit {
     }
 
     # add specification of sparse weight file to ini
-    print NEWINI "\n[weight-file] \n";
-    print NEWINI "$extra_weight_file \n";
-    close NEWINI;
+    if (!$tuneMetaFeature) {
+	print NEWINI "\n[weight-file] \n";
+	print NEWINI "$extra_weight_file \n";
+	close NEWINI;
+    }
     
     print TEST "#!/bin/sh\n";
     print TEST "#\$ -N $job_name\n";

@@ -102,7 +102,6 @@ void WordPenaltyProducer::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCol
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 
-
 std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "u";
@@ -112,6 +111,11 @@ std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned
 bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
 {
   return true;
+}
+
+std::string MetaFeatureProducer::GetScoreProducerWeightShortName(unsigned) const
+{
+  return "m"+m_shortName;
 }
 
 }

@@ -148,7 +148,12 @@ public:
 
 	size_t GetNumberWeights(const ScoreProducer* sp);
 
-  //! add the score in rhs
+	void CoreAssign(const ScoreComponentCollection& rhs)
+        {
+	  m_scores.coreAssign(rhs.m_scores);
+	}
+
+	//! add the score in rhs
 	void PlusEquals(const ScoreComponentCollection& rhs)
 	{
 	  m_scores += rhs.m_scores;
@@ -165,7 +170,7 @@ public:
 		m_scores += scores;
 	}
 
-  //! subtract the score in rhs
+	//! subtract the score in rhs
 	void MinusEquals(const ScoreComponentCollection& rhs)
 	{
 	  m_scores -= rhs.m_scores;

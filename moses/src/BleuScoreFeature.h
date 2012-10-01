@@ -55,6 +55,7 @@ public:
 	                                 StatefulFeatureFunction("BleuScore",1),
 	                                 m_enabled(true),
 	                                 m_sentence_bleu(true),
+					 m_simple_history_bleu(false),
 	                                 m_count_history(BleuScoreState::bleu_order),
 	                                 m_match_history(BleuScoreState::bleu_order),
 	                                 m_source_length_history(0),
@@ -93,7 +94,7 @@ public:
     void PrintRefLength(const std::vector<size_t>& ref_ids);
     void SetBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-    		float scaleByX, float historySmoothing, size_t scheme);
+			   float scaleByX, float historySmoothing, size_t scheme, bool simpleHistoryBleu);
 
     void GetNgramMatchCounts(Phrase&,
                              const NGrams&,
@@ -135,6 +136,7 @@ public:
 private:
     bool m_enabled;
     bool m_sentence_bleu;
+    bool m_simple_history_bleu;
 
     // counts for pseudo-document
     std::vector< float > m_count_history;

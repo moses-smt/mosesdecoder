@@ -86,7 +86,6 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
   const Sentence& input = *(m_local->input);
   const long docid = m_local->docid;
   const long topicid = m_local->topicid;
-  const vector<string>* topicid_prob = m_local->topicid_prob;
   const bool use_topicid = m_local->use_topicid;
   const bool use_topicid_prob = m_local->use_topicid_prob;
   const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
@@ -136,10 +135,9 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
     if (m_domainTrigger && !m_sourceContext) {          
       if (use_topicid || use_topicid_prob) {
 	// use topicid as trigger
-	stringstream feature;
-	feature << "wt_";
-
 	if(use_topicid) {
+	  stringstream feature;
+	  feature << "wt_";
 	  if (topicid == -1) 
 	    feature << "unk";
 	  else 
@@ -153,21 +151,25 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
 	}
 	else {
 	  // use topic probabilities
-	  if (atol((*topicid_prob)[0].c_str()) == -1) {
-	    feature << "unk_";
+	  const vector<string> &topicid_prob = *(m_local->topicid_prob);
+	  if (atol(topicid_prob[0].c_str()) == -1) {
+	    stringstream feature;
+	    feature << "wt_unk_";
 	    feature << sourceWord;
 	    feature << "~";
 	    feature << targetWord;
 	    accumulator->SparsePlusEquals(feature.str(), 1);
 	  }
 	  else {
-	    for (size_t i=0; i < topicid_prob->size(); i+=2) {
-	      feature << (*topicid_prob)[i];
+	    for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
+	      stringstream feature;
+	      feature << "wt_";
+	      feature << topicid_prob[i];
 	      feature << "_";
 	      feature << sourceWord;
 	      feature << "~";
 	      feature << targetWord;
-	      accumulator->SparsePlusEquals(feature.str(), atof((*topicid_prob)[i+1].c_str()));
+	      accumulator->SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
 	    }
 	  }
 	}

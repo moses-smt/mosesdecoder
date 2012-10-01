@@ -47,7 +47,7 @@ protected:
   long m_translationId; 	//< contiguous Id
   long m_documentId;
   long m_topicId;
-  std::vector<std::string> *m_topicIdAndProb;
+  std::vector<std::string> m_topicIdAndProb;
   bool m_useTopicId;
   bool m_useTopicIdAndProb;
   bool m_hasMetaData;
@@ -86,10 +86,10 @@ public:
   void SetTopicId(long topicId) {
     m_topicId = topicId;
   }
-  std::vector<std::string>* GetTopicIdAndProb() const {
-    return m_topicIdAndProb;
+  const std::vector<std::string>* GetTopicIdAndProb() const {
+    return &m_topicIdAndProb;
   }
-  void SetTopicIdAndProb(std::vector<std::string>* topicIdAndProb) {
+  void SetTopicIdAndProb(std::vector<std::string> topicIdAndProb) {
     m_topicIdAndProb = topicIdAndProb;
   }
   bool GetUseTopicId() const {

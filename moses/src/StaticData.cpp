@@ -798,6 +798,8 @@ bool StaticData::LoadData(Parameter *parameter)
       if (weight != 1) {
 	tmpTS->AddSparseProducer(m_wordTranslationFeatures[i]);
 	cerr << "wt sparse producer weight: " << weight << endl;
+	if (m_mira) 
+	  m_metaFeatureProducer = new MetaFeatureProducer("wt");
       }
     }
     
@@ -807,6 +809,8 @@ bool StaticData::LoadData(Parameter *parameter)
       if (weight != 1) {
 	tmpTS->AddSparseProducer(m_phrasePairFeatures[i]);
 	cerr << "pp sparse producer weight: " << weight << endl;
+	if (m_mira)
+	  m_metaFeatureProducer = new MetaFeatureProducer("pp");
       }
     }
     

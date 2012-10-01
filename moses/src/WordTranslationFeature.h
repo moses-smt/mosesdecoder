@@ -30,7 +30,7 @@ class WordTranslationFeature : public StatelessFeatureFunction {
     long docid;
     long topicid;
     bool use_topicid;
-    std::vector<std::string>* topicid_prob;
+    const std::vector<std::string> *topicid_prob;
     bool use_topicid_prob;
   };
 

@@ -25,6 +25,8 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 	  long docid;
 	  long topicid;
 	  bool use_topicid;
+	  const std::vector<std::string> *topicid_prob;
+	  bool use_topicid_prob;
 	};
 	
 	private:

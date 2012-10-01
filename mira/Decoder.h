@@ -115,7 +115,7 @@ class MosesDecoder {
     size_t getShortestReferenceIndex(size_t ref_id);
     void setBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
     		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-    		float scaleByX, float historySmoothing, size_t scheme);
+		float scaleByX, float historySmoothing, size_t scheme, bool simpleHistoryBleu);
     void setAvgInputLength (float l) { m_bleuScoreFeature->SetAvgInputLength(l); }
     Moses::ScoreComponentCollection getWeights();
     void setWeights(const Moses::ScoreComponentCollection& weights);

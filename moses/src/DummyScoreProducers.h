@@ -71,6 +71,26 @@ public:
 
 };
 
+class MetaFeatureProducer : public StatelessFeatureFunction
+{
+ public:
+ MetaFeatureProducer(std::string shortName) : StatelessFeatureFunction("MetaFeature_"+shortName,1), m_shortName(shortName) {}
+
+  std::string m_shortName;
+  
+  std::string GetScoreProducerWeightShortName(unsigned) const;
+
+  virtual void Evaluate(const Hypothesis& cur_hypo,
+			ScoreComponentCollection* accumulator) const {
+  }
+
+  virtual void EvaluateChart(const ChartHypothesis&,
+			     int /* featureID */,
+			     ScoreComponentCollection*) const {
+    // needs to be implemented but does nothing                                                                 
+  }
+};
+
 }
 
 #endif

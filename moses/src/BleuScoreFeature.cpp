@@ -82,9 +82,10 @@ void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 
 void BleuScoreFeature::SetBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
 		bool scaleByInverseLength, bool scaleByAvgInverseLength,
-		float scaleByX, float historySmoothing, size_t scheme) {
+					 float scaleByX, float historySmoothing, size_t scheme, bool simpleHistoryBleu) {
 	m_enabled = !disable;
 	m_sentence_bleu = sentenceBleu;
+	m_simple_history_bleu = simpleHistoryBleu;
 	m_scale_by_input_length = scaleByInputLength;
 	m_scale_by_avg_input_length = scaleByAvgInputLength;
 	m_scale_by_inverse_length = scaleByInverseLength;
@@ -611,32 +612,32 @@ FFState* BleuScoreFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int fe
  */
 float BleuScoreFeature::CalculateBleu(Phrase translation) const
 {
-	if (translation.GetSize() == 0)
-	  return 0.0;
+  if (translation.GetSize() == 0)
+    return 0.0;
 	
-	Phrase normTranslation = translation;
-    // remove start and end symbol for chart decoding
-    if (m_cur_source_length != m_cur_norm_source_length) {
-      WordsRange* range = new WordsRange(1, translation.GetSize()-2);
-      normTranslation = translation.GetSubString(*range);
-    }
-    
-    // get ngram matches for translation
-    BleuScoreState* state = new BleuScoreState();
-    GetClippedNgramMatchesAndCounts(normTranslation,
+  Phrase normTranslation = translation;
+  // remove start and end symbol for chart decoding
+  if (m_cur_source_length != m_cur_norm_source_length) {
+    WordsRange* range = new WordsRange(1, translation.GetSize()-2);
+    normTranslation = translation.GetSubString(*range);
+  }
+  
+  // get ngram matches for translation
+  BleuScoreState* state = new BleuScoreState();
+  GetClippedNgramMatchesAndCounts(normTranslation,
                         m_cur_ref_ngrams,
                         state->m_ngram_counts,
                         state->m_ngram_matches,
                         0); // number of words in previous states
 
-    // set state variables
-    state->m_words = normTranslation;
-    state->m_source_length = m_cur_norm_source_length;
-    state->m_target_length = normTranslation.GetSize();
-    state->m_scaled_ref_length = m_cur_ref_length;
-
-    // Calculate bleu.
-    return CalculateBleu(state);
+  // set state variables
+  state->m_words = normTranslation;
+  state->m_source_length = m_cur_norm_source_length;
+  state->m_target_length = normTranslation.GetSize();
+  state->m_scaled_ref_length = m_cur_ref_length;
+  
+  // Calculate bleu.
+  return CalculateBleu(state);
 }
 
 /*
@@ -645,12 +646,12 @@ float BleuScoreFeature::CalculateBleu(Phrase translation) const
 float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
   if (!state->m_ngram_counts[0]) return 0;
   if (!state->m_ngram_matches[0]) return 0;      	// if we have no unigram matches, score should be 0
-
+  
   float precision = 1.0;
   float smooth = 1;
   float smoothed_count, smoothed_matches;
   
-  if (m_sentence_bleu) {
+  if (m_sentence_bleu || m_simple_history_bleu) {
     // Calculate geometric mean of modified ngram precisions
     // BLEU = BP * exp(SUM_1_4 1/4 * log p_n)
     // 		= BP * 4th root(PRODUCT_1_4 p_n)
@@ -684,7 +685,12 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
       		break;
       	}
 
-        precision *= smoothed_matches / smoothed_count;
+	if (m_simple_history_bleu) {
+	  smoothed_matches += m_match_history[i];
+	  smoothed_count += m_count_history[i];
+	}
+
+        precision *= smoothed_matches/smoothed_count;
       }
     }
 
@@ -697,31 +703,40 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     // where
     // c: length of the candidate translation
     // r: effective reference length (sum of best match lengths for each candidate sentence)
-  	if (state->m_target_length < state->m_scaled_ref_length) {
-  		float smoothed_target_length = m_target_length_history + state->m_target_length;
-  		float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
-  		precision *= exp(1 - (smoothed_ref_length/ smoothed_target_length));
-  	}
-
-  	//cerr << "precision: " << precision << endl;
-
-  	// Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
-  	// B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
-  	// where c(e;) is a vector of reference length, ngram counts and ngram matches
-  	if (m_scale_by_input_length) {
-  		precision *= m_cur_norm_source_length;
-  	}
-  	else if (m_scale_by_avg_input_length) {
-  		precision *= m_avg_input_length;
-  	}
-  	else if (m_scale_by_inverse_length) {
-  		precision *= (100/m_cur_norm_source_length);
-  	}
-  	else if (m_scale_by_avg_inverse_length) {
-  		precision *= (100/m_avg_input_length);
-  	}
-
-  	return precision * m_scale_by_x;
+    if (m_simple_history_bleu) {
+      if ((m_target_length_history + state->m_target_length) < (m_ref_length_history + state->m_scaled_ref_length)) {
+	float smoothed_target_length = m_target_length_history + state->m_target_length;
+	float smoothed_ref_length = m_ref_length_history + state->m_scaled_ref_length;
+	precision *= exp(1 - (smoothed_ref_length/smoothed_target_length));
+      }
+    }
+    else {
+      if (state->m_target_length < state->m_scaled_ref_length) {
+	float target_length = state->m_target_length;
+	float ref_length = state->m_scaled_ref_length;
+	precision *= exp(1 - (ref_length/target_length));
+      }
+    }
+    
+    //cerr << "precision: " << precision << endl;
+    
+    // Approximate bleu score as of Chiang/Resnik is scaled by the size of the input:
+    // B(e;f,{r_k}) = (O_f + |f|) * BLEU(O + c(e;{r_k}))
+    // where c(e;) is a vector of reference length, ngram counts and ngram matches
+    if (m_scale_by_input_length) {
+      precision *= m_cur_norm_source_length;
+    }
+    else if (m_scale_by_avg_input_length) {
+      precision *= m_avg_input_length;
+    }
+    else if (m_scale_by_inverse_length) {
+      precision *= (100/m_cur_norm_source_length);
+    }
+    else if (m_scale_by_avg_inverse_length) {
+      precision *= (100/m_avg_input_length);
+    }
+    
+    return precision * m_scale_by_x;
   }
   else {
     // Revised history BLEU: compute Bleu in the context of the pseudo-document
@@ -733,26 +748,26 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
       if (state->m_ngram_counts[i]) {
       	smoothed_matches = m_match_history[i] + state->m_ngram_matches[i] + 0.1;
       	smoothed_count = m_count_history[i] + state->m_ngram_counts[i] + 0.1;
-      	precision *= smoothed_matches / smoothed_count;
+      	precision *= smoothed_matches/smoothed_count;
       }
     }
-
+    
     // take geometric mean
     precision = pow(precision, (float)1/4);
 
     // Apply brevity penalty if applicable.
-    if (m_target_length_history + state->m_target_length < m_ref_length_history + state->m_scaled_ref_length)
-  	  precision *= exp(1 - (m_ref_length_history + state->m_scaled_ref_length/m_target_length_history + state->m_target_length));
+    if ((m_target_length_history + state->m_target_length) < (m_ref_length_history + state->m_scaled_ref_length))
+      precision *= exp(1 - ((m_ref_length_history + state->m_scaled_ref_length)/(m_target_length_history + state->m_target_length)));
 
-    //cerr << "\nprecision: " << precision << endl;
+    cerr << "precision: " << precision << endl;
 
     // **BLEU score of pseudo-document**
     float precision_pd = 1.0;
     if (m_target_length_history > 0) {
-    	for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
-	  if (m_count_history[i] != 0)
-	    precision_pd *= (m_match_history[i] + 0.1)/(m_count_history[i] + 0.1);
-
+      for (size_t i = 0; i < BleuScoreState::bleu_order; i++)
+	if (m_count_history[i] != 0)
+	  precision_pd *= (m_match_history[i] + 0.1)/(m_count_history[i] + 0.1);
+      
       // take geometric mean
       precision_pd = pow(precision_pd, (float)1/4);
 
@@ -764,7 +779,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
       precision_pd = 0;
     // **end BLEU of pseudo-document**
 
-    //cerr << "precision pd: " << precision_pd << endl;
+    cerr << "precision pd: " << precision_pd << endl;
 
     float sentence_impact;
     if (m_target_length_history > 0) 
@@ -772,7 +787,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const {
     else
       sentence_impact = precision;
 
-    //cerr << "sentence impact: " << sentence_impact << endl;
+    cerr << "sentence impact: " << sentence_impact << endl;
     return sentence_impact * m_scale_by_x;
   }
 }

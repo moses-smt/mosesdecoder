@@ -210,6 +210,7 @@ namespace Moses {
     void capMin(FValue minValue);
 
     void sparsePlusEquals(const FVector& rhs);
+    void coreAssign(const FVector& rhs);
     
     void incrementSparseHopeFeatures();
     void incrementSparseFearFeatures();

@@ -85,6 +85,8 @@ size_t PhrasePairFeature::GetNumInputScores() const
   m_local->docid = in.GetDocumentId();
   m_local->topicid = in.GetTopicId();
   m_local->use_topicid = in.GetUseTopicId();
+  m_local->topicid_prob = in.GetTopicIdAndProb();
+  m_local->use_topicid_prob = in.GetUseTopicIdAndProb();
 }
 
 void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const {
@@ -93,6 +95,7 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
   const long docid = m_local->docid;
   const long topicid = m_local->topicid;
   const bool use_topicid = m_local->use_topicid;
+  const bool use_topicid_prob = m_local->use_topicid_prob;
 /*   const AlignmentInfo& align = cur_hypo.GetAlignmentInfo();
    for (AlignmentInfo::const_iterator i = align.begin(); i != align.end(); ++i) {
     const Factor* sourceFactor = source.GetWord(i->first).GetFactor(m_sourceFactorId);
@@ -140,17 +143,40 @@ void PhrasePairFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentColle
        pair << targetFactor->GetString();
      }
 
-     if (use_topicid) {
-       // use topicid as trigger
-       ostringstream namestr;
-       namestr << "pp_"; 
-       if (topicid == -1) 
-	 namestr << "unk";
-       else 
-	 namestr << topicid;
-       namestr << "_";
-       namestr << pair.str();	
-       accumulator->SparsePlusEquals(namestr.str(),1);
+     if (use_topicid || use_topicid_prob) {
+       // use topicid as trigger                                                                                           
+       if(use_topicid) {
+	 stringstream feature;
+	 feature << "pp_";
+	 if (topicid == -1)
+	   feature << "unk";
+	 else
+	   feature << topicid;
+
+	 feature << "_";
+	 feature << pair.str();
+	 accumulator->SparsePlusEquals(feature.str(), 1);
+       }
+       else {
+	 // use topic probabilities                                                                                        
+	 const vector<string> &topicid_prob = *(m_local->topicid_prob);
+	 if (atol(topicid_prob[0].c_str()) == -1) {
+	   stringstream feature;
+	   feature << "pp_unk_";
+	   feature << pair.str();
+	   accumulator->SparsePlusEquals(feature.str(), 1);
+	 }
+	 else {
+	   for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
+	     stringstream feature;
+	     feature << "pp_";
+	     feature << topicid_prob[i];
+	     feature << "_";
+	     feature << pair.str();
+	     accumulator->SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
+	   }
+	 }
+       }
      }
      else {
        // range over domain trigger words

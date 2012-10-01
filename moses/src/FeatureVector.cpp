@@ -345,6 +345,12 @@ namespace Moses {
 	  set(i->first, get(i->first) + i->second);
   }
   
+  // assign only core features                                                                                    
+  void FVector::coreAssign(const FVector& rhs) {
+    for (size_t i = 0; i < rhs.m_coreFeatures.size(); ++i)
+      m_coreFeatures[i] = rhs.m_coreFeatures[i];
+  }
+  
   void FVector::incrementSparseHopeFeatures() {
     for (const_iterator i = cbegin(); i != cend(); ++i) 
       FName::incrementHopeId((i->first).name());

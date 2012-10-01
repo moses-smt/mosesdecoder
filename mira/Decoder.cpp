@@ -163,8 +163,8 @@ namespace Mira {
     	const Moses::TrellisPath &path = **iter;
     	featureValues.push_back(path.GetScoreBreakdown());
     	float bleuScore, dynBleuScore, realBleuScore;
-    	dynBleuScore = getBleuScore(featureValues.back());  
-    	realBleuScore = m_bleuScoreFeature->CalculateBleu(path.GetTargetPhrase());
+	if (realBleu) realBleuScore = m_bleuScoreFeature->CalculateBleu(path.GetTargetPhrase());
+	else dynBleuScore = getBleuScore(featureValues.back());  
     	bleuScore = realBleu ? realBleuScore : dynBleuScore; 
     	bleuScores.push_back(bleuScore);	
 
@@ -385,10 +385,10 @@ namespace Mira {
 
   void MosesDecoder::setBleuParameters(bool disable, bool sentenceBleu, bool scaleByInputLength, bool scaleByAvgInputLength,
 		  bool scaleByInverseLength, bool scaleByAvgInverseLength,
-		  float scaleByX, float historySmoothing, size_t scheme) {
+				       float scaleByX, float historySmoothing, size_t scheme, bool simpleHistoryBleu) {
 	  m_bleuScoreFeature->SetBleuParameters(disable, sentenceBleu, scaleByInputLength, scaleByAvgInputLength,
 			  scaleByInverseLength, scaleByAvgInverseLength,
-			  scaleByX, historySmoothing, scheme);
+			  scaleByX, historySmoothing, scheme, simpleHistoryBleu);
   }
 } 
 

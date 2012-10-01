@@ -133,20 +133,6 @@ namespace Mira {
     		 float learning_rate,
     		 size_t rank,
     		 size_t epoch);
-     size_t updateWeightsRankModel(Moses::ScoreComponentCollection& weightUpdate,
-    		 const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
-    		 const std::vector<std::vector<float> >& bleuScores,
-    		 const std::vector<std::vector<float> >& modelScores,
-    		 float learning_rate,
-    		 size_t rank,
-    		 size_t epoch);
-     size_t updateWeightsRankModelSummed(Moses::ScoreComponentCollection& weightUpdate,
-				   const std::vector<std::vector<Moses::ScoreComponentCollection> >& featureValues,
-				   const std::vector<std::vector<float> >& bleuScores,
-				   const std::vector<std::vector<float> >& modelScores,
-				   float learning_rate,
-				   size_t rank,
-				   size_t epoch);
 
      void setSlack(float slack) {
     	 m_slack = slack;

@@ -39,6 +39,7 @@ class GenerationDictionary;
 class WordPenaltyProducer;
 class DistortionScoreProducer;
 class UnknownWordPenaltyProducer;
+class MetaFeatureProducer;
 class GlobalLexicalModel;
 
 /**

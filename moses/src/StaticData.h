@@ -67,6 +67,7 @@ class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class MetaScoreProducer;
 class TargetBigramFeature;
 class TargetNgramFeature;
 #ifdef HAVE_SYNLM
@@ -159,6 +160,7 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  MetaFeatureProducer *m_metaFeatureProducer;
   BleuScoreFeature* m_bleuScoreFeature;
   bool m_reportSegmentation;
   bool m_reportAllFactors;
@@ -492,6 +494,9 @@ public:
   DistortionScoreProducer* GetDistortionScoreProducer() const {
     assert(m_distortionScoreProducers.size() >= 1);
     return m_distortionScoreProducers[0];
+  }
+  MetaFeatureProducer* GetMetaFeatureProducer() const {
+    return m_metaFeatureProducer;
   }
   std::vector<LexicalReordering*> GetLexicalReorderModels() const {
     return m_reorderModels;
