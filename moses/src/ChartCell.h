@@ -48,9 +48,19 @@ class ChartCellBase {
   public:
     ChartCellBase(size_t startPos, size_t endPos);
 
+    virtual ~ChartCellBase();
+
+    //! @todo what is a m_sourceWordLabel?
+    const ChartCellLabelSet &GetTargetLabelSet() const {
+      return m_targetLabelSet;
+    }
+
+    const WordsRange &GetCoverage() const {
+      return m_coverage;
+    }
+
   protected:
     WordsRange m_coverage;
-    boost::scoped_ptr<ChartCellLabel> m_sourceWordLabel;
     ChartCellLabelSet m_targetLabelSet;
 };
 
@@ -96,17 +106,6 @@ public:
   void PruneToSize();
 
   const ChartHypothesis *GetBestHypothesis() const;
-
-  //! @todo what is a m_sourceWordLabel?
-  const ChartCellLabel &GetSourceWordLabel() const {
-    CHECK(m_coverage.GetNumWordsCovered() == 1);
-    return *m_sourceWordLabel;
-  }
-
-  //! @todo what is a m_sourceWordLabel?
-  const ChartCellLabelSet &GetTargetLabelSet() const {
-    return m_targetLabelSet;
-  }
 
   void CleanupArcList();
 

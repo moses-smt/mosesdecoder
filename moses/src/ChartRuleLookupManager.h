@@ -56,7 +56,7 @@ public:
   }
 
   const ChartCellLabel &GetSourceAt(size_t at) const {
-    return m_cellCollection.Get(WordsRange(at, at)).GetSourceWordLabel();
+    return m_cellCollection.GetSourceWordLabel(at);
   }
 
   /** abstract function. Return a vector of translation options for given a range in the input sentence

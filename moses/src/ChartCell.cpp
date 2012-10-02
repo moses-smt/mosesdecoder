@@ -41,6 +41,8 @@ ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
   m_coverage(startPos, endPos),
   m_targetLabelSet(m_coverage) {}
 
+ChartCellBase::~ChartCellBase() {}
+
 /** Constructor
  * \param startPos endPos range of this cell
  * \param manager pointer back to the manager 
@@ -49,11 +51,9 @@ ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   ChartCellBase(startPos, endPos), m_manager(manager) {
   const StaticData &staticData = StaticData::Instance();
   m_nBestIsEnabled = staticData.IsNBestEnabled();
-  if (startPos == endPos) {
-    const Word &sourceWord = manager.GetSource().GetWord(startPos);
-    m_sourceWordLabel.reset(new ChartCellLabel(m_coverage, sourceWord));
-  }
 }
+
+ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell. 
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
