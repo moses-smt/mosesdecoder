@@ -51,9 +51,12 @@ public:
     return m_sentence;
   }
   
-  //! all the chart cells
-  const ChartCellCollection &GetCellCollection() const {
-    return m_cellCollection;
+  const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
+    return m_cellCollection.Get(WordsRange(begin, end)).GetTargetLabelSet();
+  }
+
+  const ChartCellLabel &GetSourceAt(size_t at) const {
+    return m_cellCollection.Get(WordsRange(at, at)).GetSourceWordLabel();
   }
 
   /** abstract function. Return a vector of translation options for given a range in the input sentence

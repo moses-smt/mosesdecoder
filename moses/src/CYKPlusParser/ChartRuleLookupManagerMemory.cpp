@@ -76,7 +76,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
   
-  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+  const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
   // loop through the rules
   // (note that expandableDottedRuleList can be expanded as the loop runs 
@@ -185,8 +185,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
     GetSentence().GetLabelSet(startPos, endPos);
 
   // target non-terminal labels for the remainder
-  const ChartCellLabelSet &targetNonTerms =
-    GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+  const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
 
   // note where it was found in the prefix tree of the rule dictionary
   const PhraseDictionaryNodeSCFG &node = prevDottedRule.GetLastNode();

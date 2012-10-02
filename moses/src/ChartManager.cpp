@@ -385,9 +385,6 @@ void ChartManager::ProcessOneUnknownWord(const Word &sourceWord, const WordsRang
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
   vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
   
-  const ChartCell &chartCell = m_hypoStackColl.Get(range);
-  const ChartCellLabel &sourceWordLabel = chartCell.GetSourceWordLabel();
-  
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface

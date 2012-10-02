@@ -95,7 +95,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const DottedRuleStackOnDisk::SavedNodeColl &savedNodeColl = expandableDottedRuleList.GetSavedNodeColl();
   //cerr << "savedNodeColl=" << savedNodeColl.size() << " ";
 
-  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+  const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
   for (size_t ind = 0; ind < (savedNodeColl.size()) ; ++ind) {
     const SavedNodeOnDisk &savedNode = *savedNodeColl[ind];
@@ -142,7 +142,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // get target nonterminals in this span from chart
     const ChartCellLabelSet &chartNonTermSet =
-      GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+      GetTargetLabelSet(startPos, endPos);
 
     //const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
     //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
