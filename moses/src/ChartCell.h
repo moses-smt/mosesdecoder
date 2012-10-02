@@ -33,6 +33,7 @@
 #include "RuleCube.h"
 #include "ChartCellLabelSet.h"
 
+#include <boost/scoped_ptr.hpp>
 #include <boost/functional/hash.hpp>
 #include <boost/unordered_map.hpp>
 #include <boost/version.hpp>
@@ -43,11 +44,20 @@ class ChartTranslationOptionList;
 class ChartCellCollection;
 class ChartManager;
 
+class ChartCellBase {
+  public:
+    ChartCellBase(size_t startPos, size_t endPos);
+
+  protected:
+    WordsRange m_coverage;
+    boost::scoped_ptr<ChartCellLabel> m_sourceWordLabel;
+    ChartCellLabelSet m_targetLabelSet;
+};
+
 /** 1 cell in chart decoder.
  *  Doesn't directly hold hypotheses. Each cell contain a map of ChartHypothesisCollection that have different constituent labels
  */
-class ChartCell
-{
+class ChartCell : public ChartCellBase {
   friend std::ostream& operator<<(std::ostream&, const ChartCell&);
 public:
 #if defined(BOOST_VERSION) && (BOOST_VERSION >= 104200)
@@ -62,11 +72,6 @@ public:
 
 protected:
   MapType m_hypoColl;
-
-  WordsRange m_coverage;
-
-  ChartCellLabel *m_sourceWordLabel;
-  ChartCellLabelSet m_targetLabelSet;
 
   bool m_nBestIsEnabled; /**< flag to determine whether to keep track of old arcs */
   ChartManager &m_manager;

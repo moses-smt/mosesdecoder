@@ -37,27 +37,22 @@ namespace Moses
 {
 extern bool g_debug;
 
+ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
+  m_coverage(startPos, endPos),
+  m_targetLabelSet(m_coverage) {}
+
 /** Constructor
  * \param startPos endPos range of this cell
  * \param manager pointer back to the manager 
  */
-ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager)
-  :m_coverage(startPos, endPos)
-  ,m_sourceWordLabel(NULL)
-  ,m_targetLabelSet(m_coverage)
-  ,m_manager(manager)
-{
+ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
+  ChartCellBase(startPos, endPos), m_manager(manager) {
   const StaticData &staticData = StaticData::Instance();
   m_nBestIsEnabled = staticData.IsNBestEnabled();
   if (startPos == endPos) {
     const Word &sourceWord = manager.GetSource().GetWord(startPos);
-    m_sourceWordLabel = new ChartCellLabel(m_coverage, sourceWord);
+    m_sourceWordLabel.reset(new ChartCellLabel(m_coverage, sourceWord));
   }
-}
-
-ChartCell::~ChartCell()
-{
-  delete m_sourceWordLabel;
 }
 
 /** Add the given hypothesis to the cell. 
