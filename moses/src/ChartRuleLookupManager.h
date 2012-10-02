@@ -40,7 +40,7 @@ class ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManager(const InputType &sentence,
-                         const ChartCellCollection &cellColl)
+                         const ChartCellCollectionBase &cellColl)
     : m_sentence(sentence)
     , m_cellCollection(cellColl) {}
 
@@ -52,7 +52,7 @@ public:
   }
   
   const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
-    return m_cellCollection.Get(WordsRange(begin, end)).GetTargetLabelSet();
+    return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
   }
 
   const ChartCellLabel &GetSourceAt(size_t at) const {
@@ -74,7 +74,7 @@ private:
   ChartRuleLookupManager &operator=(const ChartRuleLookupManager &);
 
   const InputType &m_sentence;
-  const ChartCellCollection &m_cellCollection;
+  const ChartCellCollectionBase &m_cellCollection;
 };
 
 }  // namespace Moses
