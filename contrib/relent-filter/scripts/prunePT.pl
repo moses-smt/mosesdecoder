@@ -7,8 +7,8 @@ my $threshold = -1;
 use Getopt::Long;
 $_HELP = 1 if (@ARGV < 1 or !GetOptions ("table=s" => \$table, #table to filter
 "scores=s" => \$scores_file, #scores of each phrase pair, should have same size as the table to filter
-"percentage=i" => \$percentage, # percentage of phrase table to remain
-"threshold=i" => \$threshold)); # threshold (score < threshold equals prune entry)
+"percentage=f" => \$percentage, # percentage of phrase table to remain
+"threshold=f" => \$threshold)); # threshold (score < threshold equals prune entry)
 
 # help message if arguments are not correct
 if ($_HELP) {
