@@ -25,11 +25,14 @@
 namespace OnDiskPt
 {
 
+/** A source phrase. No extension of a norm Phrase class because source phrases are saved as tries.
+ */
 class SourcePhrase: public Phrase
 {
 protected:
 
 public:
 };
+
 
 }

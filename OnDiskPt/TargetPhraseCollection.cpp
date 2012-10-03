@@ -156,9 +156,8 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   fstream &fileTP = onDiskWrapper.GetFileTargetInd();
     
   size_t numScores = onDiskWrapper.GetNumScores();
-  size_t numTargetFactors = onDiskWrapper.GetNumTargetFactors();
-  size_t numSourceFactors = onDiskWrapper.GetNumSourceFactors();
     
+
   UINT64 numPhrases;
 
   UINT64 currFilePos = filePos;
@@ -172,8 +171,9 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
  
   for (size_t ind = 0; ind < numPhrases; ++ind) {
     TargetPhrase *tp = new TargetPhrase(numScores);    
+
     UINT64 sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
-    tp->ReadFromFile(fileTP, numTargetFactors, numSourceFactors);
+    tp->ReadFromFile(fileTP);
 
     currFilePos += sizeOtherInfo;
 

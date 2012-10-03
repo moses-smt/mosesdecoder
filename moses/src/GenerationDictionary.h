@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <list>
 #include <map>
+#include <stdexcept>
 #include <vector>
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
@@ -87,6 +88,22 @@ public:
 	*/
 	const OutputWordCollection *FindWord(const Word &word) const;
 	virtual bool ComputeValueInTranslationOption() const;
+
+  //Usual feature function methods are not implemented
+  virtual void Evaluate(const PhraseBasedFeatureContext& context,
+  											ScoreComponentCollection* accumulator) const 
+  {
+    throw std::logic_error("GenerationDictionary::Evaluate() Not implemented");
+  }
+
+  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
+                             ScoreComponentCollection* accumulator) const 
+  {
+    throw std::logic_error("GenerationDictionary.Evaluate() Not implemented");
+  }
+
+  virtual bool ComputeValueInTranslationTable() const {return true;}
+
 };
 
 

@@ -1,3 +1,0 @@
-exe symal : symal.cpp cmd.c ;
-
-install dist : symal : <location>. ;

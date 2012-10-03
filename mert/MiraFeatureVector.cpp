@@ -1,8 +1,13 @@
 #include <cmath>
+#include <iomanip>
 
 #include "MiraFeatureVector.h"
 
 using namespace std;
+
+namespace MosesTuning
+{
+  
 
 MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   : m_dense(vec.dense)
@@ -10,6 +15,8 @@ MiraFeatureVector::MiraFeatureVector(const FeatureDataItem& vec)
   vector<size_t> sparseFeats = vec.sparse.feats();
   bool bFirst = true;
   size_t lastFeat = 0;
+  m_sparseFeats.reserve(sparseFeats.size());
+  m_sparseVals.reserve(sparseFeats.size());
   for(size_t i=0;i<sparseFeats.size();i++)
   {
     size_t feat = m_dense.size() + sparseFeats[i];
@@ -58,14 +65,14 @@ ValType MiraFeatureVector::val(size_t index) const {
   if(index < m_dense.size())
     return m_dense[index];
   else
-    return m_sparseVals[index];
+    return m_sparseVals[index-m_dense.size()];
 }
 
 size_t MiraFeatureVector::feat(size_t index) const {
   if(index < m_dense.size())
     return index;
   else
-    return m_sparseFeats[index];
+    return m_sparseFeats[index-m_dense.size()];
 }
 
 size_t MiraFeatureVector::size() const {
@@ -139,8 +146,20 @@ MiraFeatureVector operator-(const MiraFeatureVector& a, const MiraFeatureVector&
   return MiraFeatureVector(dense,sparseFeats,sparseVals);
 }
 
+ostream& operator<<(ostream& o, const MiraFeatureVector& e)
+{
+  for(size_t i=0;i<e.size();i++) {
+    if(i>0) o << " ";
+    o << e.feat(i) << ":" << e.val(i);
+  }
+  return o;
+}
+
 // --Emacs trickery--
 // Local Variables:
 // mode:c++
 // c-basic-offset:2
 // End:
+
+}
+

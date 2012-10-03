@@ -70,10 +70,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
 {
 }
 
-TargetPhrase::~TargetPhrase()
-{
-}
-
 void TargetPhrase::SetScore(const TranslationSystem* system)
 {
   // used when creating translations of unknown words:
@@ -289,7 +285,6 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
   return clone;
 }
-
 namespace {
 void MosesShouldUseExceptions(bool value) {
   if (!value) {
@@ -298,6 +293,7 @@ void MosesShouldUseExceptions(bool value) {
   }
 }
 } // namespace
+
 
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
@@ -315,6 +311,8 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 
   SetAlignmentInfo(alignmentInfo);
 }
+
+
 
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase)
 {
@@ -341,8 +339,9 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sour
 
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
 {
-  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+    m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
 }
+
 
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo, int* indicator)
 {

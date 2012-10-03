@@ -9,6 +9,9 @@
 namespace Moses
 {
 
+/** Implementation of a phrase table using the biconcor suffix array.
+ *  Wrapper around a BilingualDynSuffixArray object
+ */
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary
 {
 public:
@@ -26,7 +29,7 @@ public:
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
   void InitializeForInput(const InputType& i);
-  void CleanUp();
+  void CleanUp(const InputType &source);
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollection&);

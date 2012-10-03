@@ -29,7 +29,7 @@
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "LMList.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "FFState.h"
 
 using namespace std;
@@ -41,8 +41,12 @@ namespace Moses
 ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
 #endif
 
-/** Create a hypothesis from a rule */
-ChartHypothesis::ChartHypothesis(const ChartTranslationOption &transOpt,
+/** Create a hypothesis from a rule 
+ * \param transOpt wrapper around the rule
+ * \param item @todo dunno
+ * \param manager reference back to manager
+ */
+ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
                                  const RuleCubeItem &item,
                                  ChartManager &manager)
   :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
@@ -84,18 +88,15 @@ ChartHypothesis::~ChartHypothesis()
 }
 
 /** Create full output phrase that is contained in the hypothesis (and its children)
- * \param outPhrase full output phrase
+ * \param outPhrase full output phrase as return argument
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = nonTermIndexMap[pos];
+      size_t nonTermInd = GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
@@ -116,14 +117,15 @@ Phrase ChartHypothesis::GetOutputPhrase() const
 /** check, if two hypothesis can be recombined.
     this is actually a sorting function that allows us to
     keep an ordered list of hypotheses. This makes recombination
-    much quicker.
+    much quicker. Returns one of 3 possible values:
+      -1 = this < compare
+      +1 = this > compare
+      0	= this ==compare
+ \param compare the other hypo to compare to
 */
 int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
 {
 	int comp = 0;
-  // -1 = this < compare
-  // +1 = this > compare
-  // 0	= this ==compare
 
   for (unsigned i = 0; i < m_ffStates.size(); ++i) 
 	{
@@ -139,6 +141,9 @@ int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
   return 0;
 }
 
+/** calculate total score
+  * @todo this should be in ScoreBreakdown
+ */
 void ChartHypothesis::CalcScore()
 {
   // total scores from prev hypos
@@ -154,18 +159,21 @@ void ChartHypothesis::CalcScore()
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
+  //Add pre-computed features
+  m_manager.InsertPreCalculatedScores(GetCurrTargetPhrase(), &m_scoreBreakdown);
+
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
   const std::vector<const StatelessFeatureFunction*>& sfs =
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i)
   	if (sfs[i]->ComputeValueInTranslationOption() == false)
-  		sfs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+  		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
-		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
+    m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }
@@ -263,6 +271,9 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
 		out << "->" << hypo.GetWinningHypothesis()->GetId();
 	}
 
+  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
+    out << " " << hypo.GetTargetLHS() << "=>";
+  }
   out << " " << hypo.GetCurrTargetPhrase()
       //<< " " << outPhrase
       << " " << hypo.GetCurrSourceRange();

@@ -66,6 +66,8 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
                                   , const LMList &languageModels
                                   , float weightWP)
 {
+  const_cast<LMList&>(languageModels).InitializeBeforeSentenceProcessing();
+
   const StaticData &staticData = StaticData::Instance();
 
   m_tableLimit = tableLimit;
@@ -105,7 +107,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
  
     //target
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
-    targetPhrase->SetSourcePhrase(sourcePhrase); // TODO(bhaddow): This is a dangling pointer
     targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
 
     scv.clear();
@@ -163,12 +164,15 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
 
-    // Reuse source if possible.  Otherwise, create node for it.  
+    //TODO: Would be better to reuse source phrases, but ownership has to be 
+    //consistent across phrase table implementations
+    sourcePhrase.Clear();
+    sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
+    //Now that the source phrase is ready, we give the target phrase a copy
+    targetPhrase->SetSourcePhrase(sourcePhrase);
     if (preSourceString == sourcePhraseString && preSourceNode) {
       preSourceNode->Add(targetPhrase.release());
     } else {
-      sourcePhrase.Clear();
-      sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
       preSourceNode = CreateTargetPhraseCollection(sourcePhrase);
       preSourceNode->Add(targetPhrase.release());
       preSourceString.assign(sourcePhraseString.data(), sourcePhraseString.size());
@@ -178,6 +182,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
   // sort each target phrase collection
   m_collection.Sort(m_tableLimit);
 
+  /* // TODO ASK OLIVER WHY THIS IS NEEDED
+  const_cast<LMList&>(languageModels).CleanUpAfterSentenceProcessing();
+  */
+  
   return true;
 }
 

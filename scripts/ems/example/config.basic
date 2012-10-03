@@ -19,10 +19,13 @@ pair-extension = fr-en
 moses-src-dir = /home/pkoehn/moses
 #
 # moses binaries
-moses-bin-dir = $moses-src-dir/dist/bin
+moses-bin-dir = $moses-src-dir/bin
 #
 # moses scripts
 moses-script-dir = $moses-src-dir/scripts
+#
+# directory where GIZA++/MGIZA programs resides
+external-bin-dir = /Users/hieuhoang/workspace/bin/training-tools
 #
 # srilm
 srilm-dir = $moses-src-dir/srilm/bin/i686
@@ -138,7 +141,7 @@ settings = "-interpolate -kndiscount -unk"
 
 # irstlm
 #lm-training = "$moses-script-dir/generic/trainlm-irst.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/lm"
-#settings = ""
+#settings = "-s improved-kneser-ney"
 
 # order of the language model
 order = 5

@@ -38,9 +38,11 @@ class Factor;
 class PhraseDictionary;
 class TranslationOptionCollection;
 class TranslationSystem;
-class ChartTranslationOption;
+class ChartTranslationOptions;
   
-//! base class for sentences and confusion networks
+/** base class for all types of inputs to the decoder,
+ *  eg. sentences, confusion networks, lattices and tree 
+ */
 class InputType
 {
 protected:
@@ -173,7 +175,7 @@ public:
 
   virtual const NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) const = 0;
 
-  virtual std::vector <ChartTranslationOption*> GetXmlChartTranslationOptions() const;
+  virtual std::vector <ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
   TO_STRING();
 

@@ -513,19 +513,7 @@ size_t MiraOptimiser::updateWeightsHopeFearSelective(
 	  nonZeroFeatures.push_back(f);
 	}
       }
-      // 1 + 2 
-      /*for (FVector::iterator i = features.begin(); i != features.end(); ++i) {
-	if (i->second != 0.0) {
-	  ++n_sparse;
-	  ScoreComponentCollection f;
-          f.Assign((i->first).name(), i->second);
-	  nonZeroFeatures.push_back(f);
-	  cerr << "Rank " << rank << ", epoch " << epoch << ", f: " << f << endl;
-	}
-      }
-      cerr << "Rank " << rank << ", epoch " << epoch << ", non-zero features: " << nonZeroFeatures.size() << endl;*/
 
-      // 3 
       vector<ScoreComponentCollection> nonZeroFeaturesHope;
       vector<ScoreComponentCollection> nonZeroFeaturesFear;
       for (FVector::iterator i = features.begin(); i != features.end(); ++i) {
@@ -545,22 +533,6 @@ size_t MiraOptimiser::updateWeightsHopeFearSelective(
         }
       }
 
-      //1
-      /*float n = n_core + n_sparse;
-      for (size_t i=0; i<n; ++i)
-	lossMinusModelScoreDiffs.push_back(diff/n);
-      
-      //2 
-      float diff_10 = diff * 0.1;
-      float diff_90 = diff * 0.9;
-      cerr << "Rank " << rank << ", epoch " << epoch << ", core diff: " << diff_10/n_core << endl;
-      cerr << "Rank " << rank << ", epoch " << epoch << ", sparse diff: " << diff_90/n_sparse << endl;
-      for (size_t i=0; i<n_core; ++i) 
-	lossMinusModelScoreDiffs.push_back(diff_10/n_core);
-      for (size_t i=0; i<n_sparse; ++i) 
-      lossMinusModelScoreDiffs.push_back(diff_90/n_sparse);*/
-
-      // 3 
       float n = n_core + n_sparse_hope + n_sparse_fear;
       for (size_t i=0; i<n_core; ++i)
         lossMinusModelScoreDiffs.push_back(diff/n);      

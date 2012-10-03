@@ -77,7 +77,7 @@ int main (int argc, char * const argv[])
     std::vector<float> misc(1);
     SourcePhrase sourcePhrase;
     TargetPhrase *targetPhrase = new TargetPhrase(numScores);
-    OnDiskPt::Phrase *spShort = Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
+    OnDiskPt::PhrasePtr spShort = Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
     assert(misc.size() == onDiskWrapper.GetNumCounts());
 
     rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, misc, spShort);
@@ -105,7 +105,7 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
   return ret;
 }
 
-OnDiskPt::Phrase *Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
+OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
   size_t scoreInd = 0;
 
@@ -118,14 +118,14 @@ OnDiskPt::Phrase *Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhras
    4 = count
    */
   char *tok = strtok (line," ");
-  OnDiskPt::Phrase *out = new Phrase();
+  OnDiskPt::PhrasePtr out(new Phrase());
   while (tok != NULL) {
     if (0 == strcmp(tok, "|||")) {
       ++stage;
     } else {
       switch (stage) {
       case 0: {
-    	Word *w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
+    	WordPtr w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
     	if (w != NULL)
     	  out->AddWord(w);
     	
@@ -184,7 +184,7 @@ OnDiskPt::Phrase *Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhras
   return out;
 } // Tokenize()
 
-OnDiskPt::Word *Tokenize(OnDiskPt::Phrase &phrase
+OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
               , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
               , OnDiskPt::OnDiskWrapper &onDiskWrapper)
 {
@@ -198,7 +198,7 @@ OnDiskPt::Word *Tokenize(OnDiskPt::Phrase &phrase
     nonTerm = comStr == 0;
   }
 
-  OnDiskPt::Word *out = NULL;
+  OnDiskPt::WordPtr out;
   if (nonTerm) {
     // non-term
     size_t splitPos		= token.find_first_of("[", 2);
@@ -206,20 +206,20 @@ OnDiskPt::Word *Tokenize(OnDiskPt::Phrase &phrase
 
     if (splitPos == string::npos) {
       // lhs - only 1 word
-      Word *word = new Word();
+      WordPtr word(new Word());
       word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
       phrase.AddWord(word);
     } else {
       // source & target non-terms
       if (addSourceNonTerm) {
-        Word *word = new Word();
+        WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);        
       }
 
       wordStr = token.substr(splitPos, tokSize - splitPos);
       if (addTargetNonTerm) {
-        Word *word = new Word();
+        WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);
         out = word;
@@ -228,7 +228,7 @@ OnDiskPt::Word *Tokenize(OnDiskPt::Phrase &phrase
     }
   } else {
     // term
-    Word *word = new Word();
+    WordPtr word(new Word());
     word->CreateFromString(token, onDiskWrapper.GetVocab());
     phrase.AddWord(word);
     out = word;

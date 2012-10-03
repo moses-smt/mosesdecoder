@@ -30,7 +30,7 @@ namespace Moses {
 
 class LanguageModel;
 
-// This will also load.  
+//! This will also load. Returns a templated KenLM class
 LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy);
 
 } // namespace Moses

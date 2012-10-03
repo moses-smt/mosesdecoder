@@ -2,6 +2,7 @@
 #include "GlobalLexicalModel.h"
 #include "StaticData.h"
 #include "InputFileStream.h"
+#include "TranslationOption.h"
 #include "UserMessage.h"
 
 using namespace std;
@@ -157,8 +158,11 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
   return score;
 }
 
-void GlobalLexicalModel::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
+  void GlobalLexicalModel::Evaluate
+               (const PhraseBasedFeatureContext& context,
+  							ScoreComponentCollection* accumulator) const
 {
-  accumulator->PlusEquals( this, GetFromCacheOrScorePhrase( targetPhrase ) );
+  accumulator->PlusEquals( this,  
+      GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
 }

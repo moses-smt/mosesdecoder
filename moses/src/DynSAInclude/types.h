@@ -7,10 +7,16 @@
 #include <vector>
 #include <typeinfo>
 #include <stdint.h>
+
+#ifdef WIN32
+#define iterate(c, i) for(decltype(c.begin()) i = c.begin(); i != c.end(); ++i)
+#define piterate(c, i) for(decltype(c->begin()) i = c->begin(); i != c->end(); ++i)
+#define riterate(c, i) for(decltype(c.rbegin()) i = c.rbegin(); i != c.rend(); ++i)
+#else
 #define iterate(c, i) for(__typeof__(c.begin()) i = c.begin(); i != c.end(); ++i)
 #define piterate(c, i) for(__typeof__(c->begin()) i = c->begin(); i != c->end(); ++i)
 #define riterate(c, i) for(__typeof__(c.rbegin()) i = c.rbegin(); i != c.rend(); ++i)
-
+#endif
 
 #define THREADED false
 #define THREAD_MAX 2

@@ -1,10 +1,12 @@
 #include <sstream>
+#include <boost/algorithm/string.hpp>
 #include "WordTranslationFeature.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "TranslationOption.h"
 #include <boost/algorithm/string.hpp>
 
 namespace Moses {
@@ -70,25 +72,12 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
   return true;
 }
 
-  void WordTranslationFeature::InitializeForInput( Sentence const& in )
+void WordTranslationFeature::Evaluate
+                     (const PhraseBasedFeatureContext& context,
+                      ScoreComponentCollection* accumulator) const
 {
-  m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
-  m_local->docid = in.GetDocumentId();
-  m_local->topicid = in.GetTopicId();
-  m_local->topicid_prob = in.GetTopicIdAndProb();
-  m_local->use_topicid = in.GetUseTopicId();
-  m_local->use_topicid_prob = in.GetUseTopicIdAndProb();
-}
-
-void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* accumulator) const
-{
-  const Sentence& input = *(m_local->input);
-  const long docid = m_local->docid;
-  const long topicid = m_local->topicid;
-  const bool use_topicid = m_local->use_topicid;
-  const bool use_topicid_prob = m_local->use_topicid_prob;
-  const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+  const Sentence& input = static_cast<const Sentence&>(context.GetSource());
+  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
   const AlignmentInfo &alignment = targetPhrase.GetAlignmentInfo();
 
   // process aligned words
@@ -115,27 +104,28 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
     }
 
     if (!m_unrestricted) {
-    	if (m_vocabSource.find(sourceWord) == m_vocabSource.end())
-    		sourceWord = "OTHER";
-    	if (m_vocabTarget.find(targetWord) == m_vocabTarget.end())
-    		targetWord = "OTHER";
+      if (m_vocabSource.find(sourceWord) == m_vocabSource.end())
+	sourceWord = "OTHER";
+      if (m_vocabTarget.find(targetWord) == m_vocabTarget.end())
+	targetWord = "OTHER";
     }
 
     if (m_simple) {
-    	// construct feature name
-    	stringstream featureName;
-    	featureName << "wt_";
-    	//featureName << ((sourceExists||m_unrestricted) ? sourceWord : "OTHER");
-    	featureName << sourceWord;
-    	featureName << "~";
-    	//featureName << ((targetExists||m_unrestricted) ? targetWord : "OTHER");
-    	featureName << targetWord;
-    	accumulator->SparsePlusEquals(featureName.str(), 1);
+      // construct feature name
+      stringstream featureName;
+      featureName << "wt_";
+      featureName << sourceWord;
+      featureName << "~";
+      featureName << targetWord;
+      accumulator->SparsePlusEquals(featureName.str(), 1);
     }
-    if (m_domainTrigger && !m_sourceContext) {          
+    if (m_domainTrigger && !m_sourceContext) {  
+      const bool use_topicid = input.GetUseTopicId();
+      const bool use_topicid_prob = input.GetUseTopicIdAndProb();        
       if (use_topicid || use_topicid_prob) {
-	// use topicid as trigger
 	if(use_topicid) {
+	  // use topicid as trigger
+	  const long topicid = input.GetTopicId();
 	  stringstream feature;
 	  feature << "wt_";
 	  if (topicid == -1) 
@@ -151,7 +141,7 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
 	}
 	else {
 	  // use topic probabilities
-	  const vector<string> &topicid_prob = *(m_local->topicid_prob);
+	  const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
 	  if (atol(topicid_prob[0].c_str()) == -1) {
 	    stringstream feature;
 	    feature << "wt_unk_";
@@ -173,29 +163,10 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
 	    }
 	  }
 	}
-
-	// general feature
-	/*stringstream feature;
-	feature << "wt_";
-	feature << sourceWord;
-	feature << "~";
-	feature << targetWord;
-	accumulator->SparsePlusEquals(feature.str(), 1);
-
-	if (topicid != -1) {
-	  // topic-specific feature
-	  stringstream feature;
-	  feature << "wt_";
-	  feature << topicid;
-	  feature << "_";
-	  feature << sourceWord;
-	  feature << "~";
-	  feature << targetWord;
-	  accumulator->SparsePlusEquals(feature.str(), 1);
-	  }*/
       }
       else {
-	// range over domain trigger words
+	// range over domain trigger words (keywords)
+	const long docid = input.GetDocumentId();
 	for (set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
 	  string sourceTrigger = *p;
 	  stringstream feature;
@@ -210,68 +181,71 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
       }
     }
     if (m_sourceContext) {
-    	size_t globalSourceIndex = cur_hypo.GetCurrSourceWordsRange().GetStartPos() + sourceIndex;
-    	if (!m_domainTrigger && globalSourceIndex == 0) {
-    		// add <s> trigger feature for source
-    		stringstream feature;
-    		feature << "wt_";
-    		feature << "<s>,";
-    		feature << sourceWord;
-    		feature << "~";
-    		feature << targetWord;
-    		accumulator->SparsePlusEquals(feature.str(), 1);
-    	}
-
-    	// range over source words to get context
-    	for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
-    		if (contextIndex == globalSourceIndex) continue;
-    		string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
-    		if (m_ignorePunctuation) {
-		  // check if trigger is punctuation
-		  char firstChar = sourceTrigger.at(0);
-		  CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
-		  if(charIterator != m_punctuationHash.end())
-		    continue;
-    		}
-
-    		bool sourceTriggerExists = false;
-    		if (m_domainTrigger)
-		  sourceTriggerExists = m_vocabDomain[docid].find( sourceTrigger ) != m_vocabDomain[docid].end();
-		else if (!m_unrestricted)
-		  sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
-		
-		if (m_domainTrigger) {
-		  if (sourceTriggerExists) {
-		    stringstream feature;
-		    feature << "wt_";
-		    feature << sourceTrigger;
-		    feature << "_";
-		    feature << sourceWord;
-		    feature << "~";
-		    feature << targetWord;
-		    accumulator->SparsePlusEquals(feature.str(), 1);
-		  }
-		}
-		else if (m_unrestricted || sourceTriggerExists) {
-		  stringstream feature;
-		  feature << "wt_";
-		  if (contextIndex < globalSourceIndex) {
-		    feature << sourceTrigger;
-		    feature << ",";
-		    feature << sourceWord;
-		  }
-		  else {
-		    feature << sourceWord;
-		    feature << ",";
-		    feature << sourceTrigger;
-		  }
-		  feature << "~";
-		  feature << targetWord;
-		  accumulator->SparsePlusEquals(feature.str(), 1);
-    		}
-    	}
+      size_t globalSourceIndex = context.GetTranslationOption().GetStartPos() + sourceIndex;
+      if (!m_domainTrigger && globalSourceIndex == 0) {
+	// add <s> trigger feature for source
+	stringstream feature;
+	feature << "wt_";
+	feature << "<s>,";
+	feature << sourceWord;
+	feature << "~";
+	feature << targetWord;
+	accumulator->SparsePlusEquals(feature.str(), 1);
+      }
+      
+      // range over source words to get context
+      for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
+	if (contextIndex == globalSourceIndex) continue;
+	string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
+	if (m_ignorePunctuation) {
+	  // check if trigger is punctuation
+	  char firstChar = sourceTrigger.at(0);
+	  CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
+	  if(charIterator != m_punctuationHash.end())
+	    continue;
+	}
+	
+	const long docid = input.GetDocumentId();
+	bool sourceTriggerExists = false;
+	if (m_domainTrigger)
+	  sourceTriggerExists = m_vocabDomain[docid].find( sourceTrigger ) != m_vocabDomain[docid].end();
+	else if (!m_unrestricted)
+	  sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+	
+	if (m_domainTrigger) {
+	  if (sourceTriggerExists) {
+	    stringstream feature;
+	    feature << "wt_";
+	    feature << sourceTrigger;
+	    feature << "_";
+	    feature << sourceWord;
+	    feature << "~";
+	    feature << targetWord;
+	    accumulator->SparsePlusEquals(feature.str(), 1);
+	  }
+	}
+	else if (m_unrestricted || sourceTriggerExists) {
+	  stringstream feature;
+	  feature << "wt_";
+	  if (contextIndex < globalSourceIndex) {
+	    feature << sourceTrigger;
+	    feature << ",";
+	    feature << sourceWord;
+	  }
+	  else {
+	    feature << sourceWord;
+	    feature << ",";
+	    feature << sourceTrigger;
+	  }
+	  feature << "~";
+	  feature << targetWord;
+	  accumulator->SparsePlusEquals(feature.str(), 1);
+	}
+      }
     }
     if (m_targetContext) {
+      throw runtime_error("Can't use target words outside current translation option in a stateless feature");
+      /*
     	size_t globalTargetIndex = cur_hypo.GetCurrTargetWordsRange().GetStartPos() + targetIndex;
     	if (globalTargetIndex == 0) {
     		// add <s> trigger feature for source
@@ -309,16 +283,16 @@ void WordTranslationFeature::Evaluate(const Hypothesis& cur_hypo, ScoreComponent
     			feature << targetWord;
     			accumulator->SparsePlusEquals(feature.str(), 1);
     		}
-    	}
+    	}*/
     }
   }
 }
 
-void WordTranslationFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureID,
-    																			 ScoreComponentCollection* accumulator) const
+void WordTranslationFeature::EvaluateChart(
+            const ChartBasedFeatureContext& context,
+    				ScoreComponentCollection* accumulator) const
 {
-  //const Sentence& input = *(m_local->input);
-  const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+  const TargetPhrase& targetPhrase = context.GetTargetPhrase();
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
   const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 
@@ -459,6 +433,7 @@ void WordTranslationFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
     	}
     }*/
   }
+
 }
 
 }

@@ -258,6 +258,32 @@ void Hypothesis::ResetScore()
   m_futureScore = m_totalScore = 0.0f;
 }
 
+void Hypothesis::IncorporateTransOptScores() {
+  m_currScoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+}
+
+void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
+                              int state_idx) {
+  m_ffStates[state_idx] = sfff->Evaluate(
+      *this,
+      m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
+      &m_currScoreBreakdown);
+            
+}
+
+void Hypothesis::EvaluateWith(const StatelessFeatureFunction* slff) {
+  slff->Evaluate(PhraseBasedFeatureContext(this), &m_currScoreBreakdown);
+}
+
+void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
+  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
+}
+
+void Hypothesis::CalculateFinalScore() {
+  m_totalScore = GetScoreBreakdown().InnerProduct(
+        StaticData::Instance().GetAllWeights()) + m_futureScore;
+}
+
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
@@ -269,15 +295,23 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // phrase are also included here
   m_currScoreBreakdown = m_transOpt->GetScoreBreakdown();
 
+  // other stateless features have their scores cached in the 
+  // TranslationOptionsCollection
+  m_manager.getSntTranslationOptions()->InsertPreCalculatedScores
+    (*m_transOpt, &m_currScoreBreakdown);
+
   const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
 
   // compute values of stateless feature functions that were not
-  // cached in the translation option-- there is no principled distinction
+  // cached in the translation option
   const vector<const StatelessFeatureFunction*>& sfs =
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
-  for (unsigned i = 0; i < sfs.size(); ++i)
-    sfs[i]->Evaluate(*this, &m_currScoreBreakdown);
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    if (!sfs[i]->ComputeValueInTranslationOption()) {
+      EvaluateWith(sfs[i]);
+    }
+  }
 
   const vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();

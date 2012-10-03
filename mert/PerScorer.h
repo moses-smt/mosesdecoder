@@ -5,7 +5,11 @@
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
+
+namespace MosesTuning
+{
+  
 
 class ScoreStats;
 
@@ -35,5 +39,7 @@ private:
   std::vector<std::size_t> m_ref_lengths;
   std::vector<std::multiset<int> > m_ref_tokens;
 };
+
+}
 
 #endif  // MERT_PER_SCORER_H_

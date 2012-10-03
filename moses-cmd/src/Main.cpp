@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Manager.h"
 #include "StaticData.h"
 #include "Util.h"
+#include "Timer.h"
 #include "mbr.h"
 #include "ThreadPool.h"
 #include "TranslationAnalysis.h"
@@ -50,7 +51,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 using namespace Moses;
+using namespace MosesCmd;
 
+namespace MosesCmd
+{
 // output floats with three significant digits
 static const size_t PRECISION = 3;
 
@@ -76,23 +80,27 @@ public:
                   OutputCollector* latticeSamplesCollector,
                   OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                   OutputCollector* detailedTranslationCollector,
-                  OutputCollector* alignmentInfoCollector ) :
+                  OutputCollector* alignmentInfoCollector,
+                  OutputCollector* unknownsCollector) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
     m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
     m_detailedTranslationCollector(detailedTranslationCollector),
-    m_alignmentInfoCollector(alignmentInfoCollector) {}
+    m_alignmentInfoCollector(alignmentInfoCollector),
+    m_unknownsCollector(unknownsCollector) {}
 
 	/** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
 
     // report thread number
-#ifdef BOOST_HAS_PTHREADS
+#if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 
+    Timer translationTime;
+    translationTime.start();
     // shorthand for "global data"
     const StaticData &staticData = StaticData::Instance();
     // input sentence
@@ -104,7 +112,7 @@ public:
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
     if ((*m_source).GetSize() == 0) return;
-    Manager manager(*m_source,staticData.GetSearchAlgorithm(), &system);
+    Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();
 
     // output word graph
@@ -263,11 +271,24 @@ public:
       m_detailedTranslationCollector->Write(m_lineNumber,out.str());
     }
 
+    //list of unknown words
+    if (m_unknownsCollector) {
+      const vector<Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
+      ostringstream out;
+      for (size_t i = 0; i < unknowns.size(); ++i) {
+        out << *(unknowns[i]);
+      }
+      out << endl;
+      m_unknownsCollector->Write(m_lineNumber, out.str());
+    }
+
     // report additional statistics
     IFVERBOSE(2) {
       PrintUserTime("Sentence Decoding Time:");
     }
     manager.CalcDecoderStatistics();
+
+    VERBOSE(1, "Line " << m_lineNumber << ": Translation took " << translationTime << " seconds total" << endl);
   }
 
   ~TranslationTask() {
@@ -284,6 +305,7 @@ private:
   OutputCollector* m_searchGraphCollector;
   OutputCollector* m_detailedTranslationCollector;
   OutputCollector* m_alignmentInfoCollector;
+  OutputCollector* m_unknownsCollector;
   std::ofstream *m_alignmentStream;
 
 
@@ -316,21 +338,17 @@ static void ShowWeights()
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
   for (size_t i = 0; i < sff.size(); ++i) {
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-  	PrintFeatureWeight(slf[i]);
-  }
-  for (size_t i = 0; i < pds.size(); ++i) {
-    PrintFeatureWeight(pds[i]);
-  }
-  for (size_t i = 0; i < gds.size(); ++i) {
-    PrintFeatureWeight(gds[i]);
+    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
+  	  PrintFeatureWeight(slf[i]);
+    }
   }
 }
+
+} //namespace
 
 /** main function of the command line version of the decoder **/
 int main(int argc, char** argv)
@@ -356,14 +374,13 @@ int main(int argc, char** argv)
     // (stores them as strings, or array of strings)
     Parameter* params = new Parameter();
     if (!params->LoadParam(argc,argv)) {
-      params->Explain();
       exit(1);
     }
 
 
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
-    if (!StaticData::LoadDataStatic(params)) {
+    if (!StaticData::LoadDataStatic(params, argv[0])) {
       exit(1);
     }
 
@@ -381,7 +398,7 @@ int main(int argc, char** argv)
     srand(time(NULL));
 
     // set up read/writing class
-    IOWrapper* ioWrapper = GetIODevice(staticData);
+    IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
@@ -464,6 +481,18 @@ int main(int argc, char** argv)
     if (!staticData.GetAlignmentOutputFile().empty()) {
       alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
     }
+
+    //initialise stream for unknown (oov) words
+    auto_ptr<OutputCollector> unknownsCollector;
+    auto_ptr<ofstream> unknownsStream;
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      unknownsStream.reset(new ofstream(staticData.GetOutputUnknownsFile().c_str()));
+      if (!unknownsStream->good()) {
+        TRACE_ERR("Unable to open " << staticData.GetOutputUnknownsFile() << " for unknowns");
+        exit(1);
+      }
+      unknownsCollector.reset(new OutputCollector(unknownsStream.get()));
+    }
   
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
@@ -484,7 +513,8 @@ int main(int argc, char** argv)
                             wordGraphCollector.get(),
                             searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
-                            alignmentInfoCollector.get() );
+                            alignmentInfoCollector.get(),
+                            unknownsCollector.get() );
       // execute task
 #ifdef WITH_THREADS
     pool.Submit(task);

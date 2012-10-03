@@ -147,6 +147,7 @@ int main(int argc, char** argv) {
     ("mv-reg", po::value<bool>(&most_violated_reg)->default_value(false), "Regularize most violated constraint")
     ("dbg", po::value<bool>(&debug)->default_value(true), "More debug output")
     ("make-pairs", po::value<bool>(&makePairs)->default_value(true), "Make pairs of hypotheses for 1slack")
+    ("debug", po::value<bool>(&debug)->default_value(true), "More debug output")
     ("rescale-slack", po::value<bool>(&rescaleSlack)->default_value(false), "Rescale slack in 1-slack formulation")
     ("disable-bleu-feature", po::value<bool>(&disableBleuFeature)->default_value(false), "Disable the Bleu feature")
     ("real-bleu", po::value<bool>(&realBleu)->default_value(false), "Compute real sentence Bleu on complete translations")
@@ -177,9 +178,6 @@ int main(int argc, char** argv) {
     ("boost", po::value<bool>(&boost)->default_value(false), "Apply boosting factor to updates on misranked candidates")
     ("config,f", po::value<string>(&mosesConfigFile), "Moses ini-file")
     ("configs-folds", po::value<vector<string> >(&mosesConfigFilesFolds), "Moses ini-files, one for each fold")
-    //("core-weights", po::value<string>(&coreWeightFile)->default_value(""), "Weight file containing the core weights (already tuned, have to be non-zero)")
-    ("decay-core", po::value<float>(&decay_core)->default_value(0.001), "Decay factor for updating core feature learning rates")
-    ("decay-sparse", po::value<float>(&decay_sparse)->default_value(0.001), "Decay factor for updating sparse feature learning rates")
     ("debug-model", po::value<bool>(&debug_model)->default_value(false), "Get best model translation for debugging purposes")
     ("decode-hope", po::value<bool>(&decode_hope)->default_value(false), "Decode dev input set according to hope objective")
     ("decode-fear", po::value<bool>(&decode_fear)->default_value(false), "Decode dev input set according to fear objective")
@@ -189,7 +187,6 @@ int main(int argc, char** argv) {
     ("distinct-nbest", po::value<bool>(&distinctNbest)->default_value(true), "Use n-best list with distinct translations in inference step")
     ("dump-mixed-weights", po::value<bool>(&dumpMixedWeights)->default_value(false), "Dump mixed weights instead of averaged weights")
     ("epochs,e", po::value<size_t>(&epochs)->default_value(10), "Number of epochs")
-    ("feature-confidence", po::value<bool>(&feature_confidence)->default_value(false), "Use feature weight confidence in weight updates")
     ("feature-cutoff", po::value<int>(&featureCutoff)->default_value(-1), "Feature cutoff as additional regularization for sparse features")
     ("fear-n", po::value<int>(&fear_n)->default_value(1), "Number of fear translations used")
     ("help", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
@@ -213,9 +210,6 @@ int main(int argc, char** argv) {
     ("mixing-frequency", po::value<size_t>(&mixingFrequency)->default_value(1), "How often per epoch to mix weights, when using mpi")
     ("model-hope-fear", po::value<bool>(&model_hope_fear)->default_value(false), "Use model, hope and fear translations for optimisation")
     ("moses-src", po::value<string>(&moses_src)->default_value(""), "Moses source directory")
-    ("most-violated", po::value<bool>(&most_violated)->default_value(false), "Pick pair of hypo and hope that violates constraint the most")
-    ("all-violated", po::value<bool>(&all_violated)->default_value(false), "Pair all hypos with hope translation that violate constraint")
-    ("one-against-all", po::value<bool>(&one_against_all)->default_value(false), "Pick best Bleu as hope and all others are fear")
     ("nbest,n", po::value<size_t>(&n)->default_value(1), "Number of translations in n-best list")
     ("normalise-weights", po::value<bool>(&normaliseWeights)->default_value(false), "Whether to normalise the updated weights before passing them to the decoder")
     ("normalise-margin", po::value<bool>(&normaliseMargin)->default_value(false), "Normalise the margin: squash between 0 and 1")
@@ -229,6 +223,7 @@ int main(int argc, char** argv) {
     ("reference-files,r", po::value<vector<string> >(&referenceFiles), "Reference translation files for training")
     ("reference-files-folds", po::value<vector<string> >(&referenceFilesFolds), "Reference translation files for training, one for each fold")
     ("kbest", po::value<bool>(&kbest)->default_value(false), "Select hope/fear pairs from a list of nbest translations")
+      
     ("scale-by-inverse-length", po::value<bool>(&scaleByInverseLength)->default_value(false), "Scale BLEU by (history of) inverse input length")
     ("scale-by-input-length", po::value<bool>(&scaleByInputLength)->default_value(false), "Scale BLEU by (history of) input length")
     ("scale-by-avg-input-length", po::value<bool>(&scaleByAvgInputLength)->default_value(false), "Scale BLEU by average input length")
@@ -244,12 +239,10 @@ int main(int argc, char** argv) {
     ("scale-update-precision", po::value<bool>(&scale_update_precision)->default_value(0), "Scale update by precision of oracle")
     ("sentence-level-bleu", po::value<bool>(&sentenceBleu)->default_value(true), "Use a sentences level Bleu scoring function")
     ("shuffle", po::value<bool>(&shuffle)->default_value(false), "Shuffle input sentences before processing")
-    ("signed-counts", po::value<bool>(&signed_counts)->default_value(false), "Use signed counts for feature learning rates")
     ("sigmoid-param", po::value<float>(&sigmoidParam)->default_value(1), "y=sigmoidParam is the axis that this sigmoid approaches")
     ("slack", po::value<float>(&slack)->default_value(0.01), "Use slack in optimiser")
     ("sparse-average", po::value<bool>(&sparseAverage)->default_value(false), "Average weights by the number of processes")
     ("sparse-no-average", po::value<bool>(&sparseNoAverage)->default_value(false), "Don't average sparse weights, just sum")
-    //("start-weights", po::value<string>(&startWeightFile)->default_value(""), "Weight file containing start weights")
     ("stop-weights", po::value<bool>(&weightConvergence)->default_value(true), "Stop when weights converge")
     ("verbosity,v", po::value<int>(&verbosity)->default_value(0), "Verbosity level")
     ("weight-dump-frequency", po::value<size_t>(&weightDumpFrequency)->default_value(1), "How often per epoch to dump weights (mpi)")
@@ -401,9 +394,9 @@ int main(int argc, char** argv) {
   }
 
   // initialise Moses
-  // add initial Bleu weight and references to initialize Bleu feature
+  // add references to initialize Bleu feature
   boost::trim(decoder_settings);
-  decoder_settings += " -mira -distinct-nbest -weight-bl 1 -references";
+  decoder_settings += " -mira -distinct-nbest -references";
   if (trainWithMultipleFolds) {
     decoder_settings += " ";
     decoder_settings += referenceFilesFolds[myFold];
@@ -1560,7 +1553,6 @@ int main(int argc, char** argv) {
 	// broadcast summed confidence counts
 	//mpi::broadcast(world, mixedConfidenceCounts, 0);
 	//confidenceCounts = mixedConfidenceCounts;
-	
 #endif
 #ifndef MPI_ENABLE
 	//cerr << "\nRank " << rank << ", no mixing, weights: " << mosesWeights << endl;
@@ -1678,6 +1670,7 @@ int main(int argc, char** argv) {
 		  size_t pruned = mixedAverageWeights.SparseL1Regularize(l1_lambda);
 		  cerr << "Rank " << rank << ", epoch " << epoch << ", "
 		       << "l1-reg. on mixedAverageWeights with lambda=" << l1_lambda << ", pruned: " << pruned << endl;
+
 		}
 		if (l2_regularize) {
 		  mixedAverageWeights.SparseL2Regularize(l2_lambda);

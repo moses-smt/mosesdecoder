@@ -73,7 +73,13 @@ private:
   static IndexPair GetIndexes(const ScoreProducer* sp) 
   {
     ScoreIndexMap::const_iterator indexIter = s_scoreIndexes.find(sp);
-    CHECK(indexIter != s_scoreIndexes.end());
+    if (indexIter == s_scoreIndexes.end()) {
+      std::cerr << "ERROR: ScoreProducer: " << sp->GetScoreProducerDescription() <<
+        " not registered with ScoreIndexMap" << std::endl;
+      std::cerr << "You must call ScoreComponentCollection.RegisterScoreProducer() " <<
+        " for every ScoreProducer" << std::endl;
+      abort();
+    }
     return indexIter->second;
   }
 

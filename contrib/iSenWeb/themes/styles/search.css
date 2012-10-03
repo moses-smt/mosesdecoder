@@ -1,0 +1,31 @@
+/* TOP SEARCH */
+#ts{position:relative;float: right; font-size:10px;}
+/* query form */
+.fc,.aca,.qb,.rqb{background:url(/MosesServer-cgi/themes/images/search/s.png) no-repeat}
+.fc{position:relative;width:415px;height:33px;padding:2px 0 2px 2px;background-position:-3px -3px}
+.fc input{font-family:Arial,sans-serif;border:none}
+.qc{position:relative;float:left;width:325px;padding:3px 2px;border-right:1px solid #6a8aae}
+.q{width:294px;height:23px;padding:3px 0 0 2px;*margin:-1px 0;font-size:1.6em;background:transparent;*border:1px solid #fff;outline:none}
+.aca{position:absolute;right:2px;top:3px;width:26px;height:0;padding-top:26px;overflow:hidden;text-indent:-9999em;background-position:-415px -3px;cursor:pointer}
+.qb{width:81px;height:33px;padding:0 0 2px 1px;*padding:2px 0 0 1px;margin:0;_margin-left:-3px;font-weight:bold;font-size:1.4em;word-spacing:4px;color:#fff;background-position:right -50px;background-color:transparent;cursor:pointer}
+.no-suggest .q{width:320px}
+/* BOTTOM SEARCH */
+#bs{margin:15px 0 20px;font-size:10px;}
+#bs .q{width:320px}
+input.rqb{position:absolute;right:-110px;top:2px;width:102px;height:32px;padding-top:32px;overflow:hidden;text-indent:-9999em;background-color:transparent;background-position:left -50px;cursor:pointer}
+
+
+/* suggest */
+.sw{font-size:1.4em;border:1px solid #8cbbdd}
+.sw table{background:#fff;border-collapse:collapse}
+.remindtt75,.jstxlan{padding-left: .2em;font-size: 14px;height: 23px;line-height: 23px;}
+.remindtt752{padding:.2em;color:#808080;font-size:14px}
+.jstxlan{color:#808080;font-size:13px;cursor:pointer; float:right}
+.jstxhuitiaoyou{margin:-1px 0;border-top:1px solid #dbeffe;background:#eaf1fd}
+.aa_highlight{color:#fff;background:#3971bf}
+/* MODULES */
+.pm{display:none;width:70px;border:1px solid;font-size:13px;border-color:#8cbbdd;background:#fff}
+.pm ul{padding:0;margin:0;list-style:none}
+.pm a{display:block;padding:4px 3px;text-decoration:none;zoom:1}
+.pm a:hover{color:#fff;background:#3971bf}
+.pm .sl{height:0;margin:0 1px;*margin-top:-10px;font-size:0;border-bottom:1px solid #8cbbdd}

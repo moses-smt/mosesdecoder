@@ -31,7 +31,6 @@ class InputType;
  * each output word from _all_ the input words. The intuition behind this
  * feature is that it uses context words for disambiguation
  */
-
 class GlobalLexicalModel : public StatelessFeatureFunction
 {
   typedef std::map< const Word*, std::map< const Word*, float, WordComparer >, WordComparer > DoubleHash;
@@ -75,11 +74,12 @@ public:
 
   void InitializeForInput( Sentence const& in );
 
-  void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
+  void Evaluate(const PhraseBasedFeatureContext& context,
+  							ScoreComponentCollection* accumulator) const;
+
 
   void EvaluateChart(
-    const ChartHypothesis& cur_hypo,
-    int featureID,
+    const ChartBasedFeatureContext& context,
     ScoreComponentCollection* accumulator) const
   {
   	std::cerr << "EvaluateChart not implemented." << std::endl;

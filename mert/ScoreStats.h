@@ -16,6 +16,10 @@
 
 #include "Types.h"
 
+namespace MosesTuning
+{
+  
+
 class ScoreStats
 {
 private:
@@ -90,8 +94,8 @@ public:
   friend std::ostream& operator<<(std::ostream& o, const ScoreStats& e);
 };
 
-//ADDED_BY_TS
 bool operator==(const ScoreStats& s1, const ScoreStats& s2);
-//END_ADDED
+
+}
 
 #endif  // MERT_SCORE_STATS_H_

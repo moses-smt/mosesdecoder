@@ -43,7 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "PhraseDictionary.h"
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "ChartHypothesis.h"
 
 #include <boost/algorithm/string.hpp>
@@ -52,6 +52,9 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+
+namespace MosesChartCmd
+{
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , const std::vector<FactorType>	&outputFactorOrder
@@ -62,7 +65,6 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
-  ,m_nBestStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
   ,m_inputFilePath(inputFilePath)
@@ -70,6 +72,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
+  ,m_alignmentOutputCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -79,21 +82,19 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_inputStream = new InputFileStream(inputFilePath);
   }
 
-  m_surpressSingleBestOutput = false;
+  bool suppressSingleBestOutput = false;
 
   if (nBestSize > 0) {
     if (nBestFilePath == "-") {
-      m_nBestStream = &std::cout;
-      m_surpressSingleBestOutput = true;
+      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
+      suppressSingleBestOutput = true;
     } else {
-      std::ofstream *nBestFile = new std::ofstream;
-      m_nBestStream = nBestFile;
-      nBestFile->open(nBestFilePath.c_str());
+      m_nBestOutputCollector = new Moses::OutputCollector(new std::ofstream(nBestFilePath.c_str()));
+      m_nBestOutputCollector->HoldOutputStream();
     }
-    m_nBestOutputCollector = new Moses::OutputCollector(m_nBestStream);
   }
 
-  if (!m_surpressSingleBestOutput) {
+  if (!suppressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
@@ -112,6 +113,15 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
+  
+  if (staticData.PrintAlignmentInfo()) {
+    if (staticData.GetAlignmentOutputFile().empty()) {
+      m_alignmentOutputCollector = new Moses::OutputCollector(&std::cout);
+    } else {
+      m_alignmentOutputCollector = new Moses::OutputCollector(new std::ofstream(staticData.GetAlignmentOutputFile().c_str()));
+      m_alignmentOutputCollector->HoldOutputStream();
+    }
+  }
 }
 
 IOWrapper::~IOWrapper()
@@ -119,16 +129,13 @@ IOWrapper::~IOWrapper()
   if (!m_inputFilePath.empty()) {
     delete m_inputStream;
   }
-  if (!m_surpressSingleBestOutput) {
-    // outputting n-best to file, rather than stdout. need to close file and delete obj
-    delete m_nBestStream;
-  }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
+  delete m_alignmentOutputCollector;
 }
 
 void IOWrapper::ResetTranslationId() {
@@ -191,6 +198,86 @@ void OutputSurface(std::ostream &out, const ChartHypothesis *hypo, const std::ve
       OutputSurface(out, prevHypo, outputFactorOrder, reportSegmentation, reportAllFactors);
     }
   }
+}
+  
+namespace {
+  typedef std::vector< std::pair<size_t, size_t> > WordAlignment;
+  
+  bool IsUnknownWord(const Word& word) {
+    const Factor* factor = word[MAX_NUM_FACTORS - 1];
+    if (factor == NULL)
+      return false;
+    return factor->GetString() == UNKNOWN_FACTOR;
+  }
+  
+  WordAlignment GetWordAlignment(const Moses::ChartHypothesis *hypo, size_t *targetWordsCount)
+  {
+    const Moses::TargetPhrase& targetPhrase = hypo->GetCurrTargetPhrase();
+    const AlignmentInfo& phraseAlignmentInfo = targetPhrase.GetAlignmentInfo();
+    size_t sourceSize = 0;
+    for (AlignmentInfo::const_iterator it = phraseAlignmentInfo.begin();
+         it != phraseAlignmentInfo.end(); ++it)
+    {
+      sourceSize = std::max(sourceSize, it->first + 1);
+    }
+    std::vector<size_t> sourceSideLengths(sourceSize, 1);
+    std::vector<size_t> targetSideLengths(targetPhrase.GetSize(), 1);
+    std::vector<WordAlignment> alignmentsPerSourceNonTerm(sourceSize);
+    size_t prevHypoIndex = 0;
+    for (AlignmentInfo::const_iterator it = phraseAlignmentInfo.begin();
+         it != phraseAlignmentInfo.end(); ++it)
+    {
+      if (targetPhrase.GetWord(it->second).IsNonTerminal()) {
+        const Moses::ChartHypothesis *prevHypo = hypo->GetPrevHypo(prevHypoIndex);
+        ++prevHypoIndex;
+        alignmentsPerSourceNonTerm[it->first] = GetWordAlignment(
+            prevHypo, &targetSideLengths[it->second]);
+        sourceSideLengths[it->first] = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
+        CHECK(prevHypo->GetCurrSourceRange().GetStartPos() - hypo->GetCurrSourceRange().GetStartPos()
+          == (int)std::accumulate(sourceSideLengths.begin(), sourceSideLengths.begin() + it->first, 0));
+      } else {
+        alignmentsPerSourceNonTerm[it->first].push_back(WordAlignment::value_type(0, 0));
+      }
+    }
+    if (targetWordsCount != NULL) {
+      *targetWordsCount = std::accumulate(targetSideLengths.begin(), targetSideLengths.end(), 0);
+    }
+    // isn't valid since there may be unaligned words: CHECK(hypo->GetCurrSourceRange().GetNumWordsCovered() == std::accumulate(sourceSideLengths.begin(), sourceSideLengths.end(), 0));
+    WordAlignment result;
+    for (AlignmentInfo::const_iterator it = phraseAlignmentInfo.begin();
+         it != phraseAlignmentInfo.end(); ++it)
+    {
+      size_t sourceOffset = std::accumulate(sourceSideLengths.begin(), sourceSideLengths.begin() + it->first, 0);
+      size_t targetOffset = std::accumulate(targetSideLengths.begin(), targetSideLengths.begin() + it->second, 0);
+      for (WordAlignment::const_iterator it2 = alignmentsPerSourceNonTerm[it->first].begin();
+           it2 != alignmentsPerSourceNonTerm[it->first].end(); ++it2)
+      {
+        result.push_back(make_pair(sourceOffset + it2->first, targetOffset + it2->second));
+      }
+    }
+    if (result.empty() && targetPhrase.GetSize() == 1 && hypo->GetCurrSourceRange().GetNumWordsCovered() == 1 && IsUnknownWord(targetPhrase.GetWord(0))) {
+      result.push_back(WordAlignment::value_type(0, 0));
+    }
+    return result;
+  }
+}
+
+  
+void IOWrapper::OutputAlignment(const Moses::ChartHypothesis *hypo, long translationId)
+{
+  if (m_alignmentOutputCollector == NULL)
+    return;
+  WordAlignment alignment = GetWordAlignment(hypo, NULL);
+  std::ostringstream out;
+  for (WordAlignment::const_iterator it = alignment.begin();
+       it != alignment.end(); ++it)
+  {
+    if (it != alignment.begin())
+      out << " ";
+    out << it->first << "-" << it->second;
+  }
+  out << std::endl;
+  m_alignmentOutputCollector->Write(static_cast<int>(translationId), out.str());
 }
 
 void IOWrapper::Backtrack(const ChartHypothesis *hypo)
@@ -326,9 +413,12 @@ void IOWrapper::OutputDetailedTranslationReport(
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
+  
 
 void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
 {
+  if (!m_singleBestOutputCollector)
+    return;
   std::ostringstream out;
   IOWrapper::FixPrecision(out);
   if (hypo != NULL) {
@@ -340,23 +430,21 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << hypo->GetTotalScore() << " ";
     }
-
-    if (!m_surpressSingleBestOutput) {
-      if (StaticData::Instance().IsPathRecoveryEnabled()) {
-        out << "||| ";
-      }
-      Phrase outPhrase(ARRAY_SIZE_INCR);
-      hypo->CreateOutputPhrase(outPhrase);
-
-      // delete 1st & last
-      CHECK(outPhrase.GetSize() >= 2);
-      outPhrase.RemoveWord(0);
-      outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-
-      const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-      string output = outPhrase.GetStringRep(outputFactorOrder);
-      out << output << endl;
+    
+    if (StaticData::Instance().IsPathRecoveryEnabled()) {
+      out << "||| ";
     }
+    Phrase outPhrase(ARRAY_SIZE_INCR);
+    hypo->CreateOutputPhrase(outPhrase);
+    
+    // delete 1st & last
+    CHECK(outPhrase.GetSize() >= 2);
+    outPhrase.RemoveWord(0);
+    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+    
+    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+    string output = outPhrase.GetStringRep(outputFactorOrder);
+    out << output << endl;
   } else {
     VERBOSE(1, "NO BEST TRANSLATION" << endl);
 
@@ -366,10 +454,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
 
     out << endl;
   }
-
-  if (m_singleBestOutputCollector) {
-    m_singleBestOutputCollector->Write(translationId, out.str());
-  }
+  m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
 void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const ChartHypothesis *bestHypo, const TranslationSystem* system, long translationId)
@@ -377,7 +462,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
   std::ostringstream out;
 
   // Check if we're writing to std::cout.
-  if (m_surpressSingleBestOutput) {
+  if (m_nBestOutputCollector->OutputIsCout()) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
     IOWrapper::FixPrecision(out);
@@ -549,3 +634,6 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
   stream.setf(std::ios::fixed);
   stream.precision(size);
 }
+
+}
+

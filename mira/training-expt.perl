@@ -284,19 +284,19 @@ my $trainer_exe = &param_required("train.trainer");
 #&check_exists("weights file ", $weights_file);
 
 #optional training parameters
-my $epochs = &param("train.epochs", 2);
+my $epochs = &param("train.epochs");
 my $learner = &param("train.learner", "mira");
-my $batch = &param("train.batch", 1);
+my $batch = &param("train.batch", 1); # don't print this param twice (when printing training file)
 my $extra_args = &param("train.extra-args");
-my $by_node = &param("train.by-node",0);
+my $by_node = &param("train.by-node");
 my $slots = &param("train.slots",8);
 my $jobs = &param("train.jobs",8);
-my $mixing_frequency = &param("train.mixing-frequency",0);
-my $weight_dump_frequency = &param("train.weight-dump-frequency",0);
-my $burn_in = &param("train.burn-in",0);
+my $mixing_frequency = &param("train.mixing-frequency", 1); # don't print this param twice
+my $weight_dump_frequency = &param("train.weight-dump-frequency", 1); # don't print this param twice
+my $burn_in = &param("train.burn-in");
 my $burn_in_input_file = &param("train.burn-in-input-file");
 my $burn_in_reference_files = &param("train.burn-in-reference-files");
-my $skipTrain = &param("train.skip", 0);
+my $skipTrain = &param("train.skip");
 my $train_decoder_settings = &param("train.decoder-settings", "");
 if (!$train_decoder_settings) {
     $train_decoder_settings = $general_decoder_settings;
@@ -341,7 +341,7 @@ else {
     my @result = split(/\s/, $result);
     my $inputSize = $result[0];
     my $shardSize = $inputSize / $jobs;
-    if ($mixing_frequency != 0) {
+    if ($mixing_frequency) {
 	if ($shardSize < $mixing_frequency) {
 	    $mixing_frequency = int($shardSize);
 	    if ($mixing_frequency == 0) {
@@ -403,101 +403,98 @@ if (ref($reference_files) eq 'ARRAY') {
 my $arr_refs = \@refs;
 
 if (!$skipTrain) {
-#write the script
-open TRAIN, ">$train_script_file" or die "Unable to open \"$train_script_file\" for writing";
+    #write the script
+    open TRAIN, ">$train_script_file" or die "Unable to open \"$train_script_file\" for writing";
 
-&header(*TRAIN,$job_name,$working_dir,$slots,$jobs,$hours,$vmem,$train_out,$train_err);
-if ($jobs == 1) {
-    print TRAIN "$trainer_exe ";
-}
-else {
-    if ($by_node) {
-	print TRAIN "mpirun -np $jobs --bynode $trainer_exe \\\n";
+    &header(*TRAIN,$job_name,$working_dir,$slots,$jobs,$hours,$vmem,$train_out,$train_err);
+    if ($jobs == 1) {
+	print TRAIN "$trainer_exe ";
     }
     else {
-	print TRAIN "mpirun -np \$NSLOTS $trainer_exe \\\n";
+	if ($by_node) {
+	    print TRAIN "mpirun -np $jobs --bynode $trainer_exe \\\n";
+	}
+	else {
+	    print TRAIN "mpirun -np \$NSLOTS $trainer_exe \\\n";
+	}
     }
-}
-
-if ($jackknife) {
-    foreach my $ini (@moses_ini_files_folds) {
-	print TRAIN "--configs-folds $ini ";
+    
+    if ($jackknife) {
+	foreach my $ini (@moses_ini_files_folds) {
+	    print TRAIN "--configs-folds $ini ";
+	}
+	print TRAIN "\\\n";
+	foreach my $in (@input_files_folds) {
+	    print TRAIN "--input-files-folds $in ";
+	}
+	print TRAIN "\\\n";
+	for my $ref (@reference_files_folds) {
+	    print TRAIN "--reference-files-folds $ref ";
+	}
+	print TRAIN "\\\n";
     }
-    print TRAIN "\\\n";
-    foreach my $in (@input_files_folds) {
-	print TRAIN "--input-files-folds $in ";
+    else {
+	print TRAIN "-f $moses_ini_file \\\n";
+	print TRAIN "-i $input_file \\\n";
+	for my $ref (@refs) {
+	    print TRAIN "-r $ref ";
+	}
+	print TRAIN "\\\n";
     }
-    print TRAIN "\\\n";
-    for my $ref (@reference_files_folds) {
-        print TRAIN "--reference-files-folds $ref ";
+    if ($continue_epoch > 0) {
+	print TRAIN "--continue-epoch $continue_epoch \\\n";
     }
-    print TRAIN "\\\n";
-}
-else {
-    print TRAIN "-f $moses_ini_file \\\n";
-    print TRAIN "-i $input_file \\\n";
-    for my $ref (@refs) {
-	print TRAIN "-r $ref ";
+    if ($burn_in) {
+	print TRAIN "--burn-in 1 \\\n";
+	print TRAIN "--burn-in-input-file $burn_in_input_file \\\n";
+	my @burnin_refs;
+	if (ref($burn_in_reference_files) eq 'ARRAY') {
+	    @burnin_refs = @$burn_in_reference_files;
+	} else {
+	    @burnin_refs = glob $burn_in_reference_files . "*"; # TODO:
+	}
+	for my $burnin_ref (@burnin_refs) {
+	    &check_exists("burn-in ref file",  $burnin_ref);
+	    print TRAIN "--burn-in-reference-files $burnin_ref ";
+	}
+	print TRAIN "\\\n";
     }
-    print TRAIN "\\\n";
-}
-if ($continue_epoch > 0) {
-    print TRAIN "--continue-epoch $continue_epoch \\\n";
-}
-if ($burn_in) {
-    print TRAIN "--burn-in 1 \\\n";
-    print TRAIN "--burn-in-input-file $burn_in_input_file \\\n";
-    my @burnin_refs;
-    if (ref($burn_in_reference_files) eq 'ARRAY') {
-	@burnin_refs = @$burn_in_reference_files;
-    } else {
-	@burnin_refs = glob $burn_in_reference_files . "*"; # TODO:
-    }
-    for my $burnin_ref (@burnin_refs) {
-	&check_exists("burn-in ref file",  $burnin_ref);
-	print TRAIN "--burn-in-reference-files $burnin_ref ";
-    }
-    print TRAIN "\\\n";
-}
 #if ($weights_file) {
 #    print TRAIN "-w $weights_file \\\n";
 #}
-if (defined $start_weight_file) {
-    print TRAIN "--start-weights $start_weight_file \\\n"; 
-}
-print TRAIN "-l $learner \\\n";
-print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
-print TRAIN "--mixing-frequency $mixing_frequency \\\n";
-if ($weight_dump_frequency != -1) {
-    print TRAIN "--weight-dump-frequency $weight_dump_frequency \\\n";
-}
-print TRAIN "--epochs $epochs \\\n";
-print TRAIN "-b $batch \\\n";
-print TRAIN "--decoder-settings \"$train_decoder_settings\" \\\n";
-print TRAIN $extra_args;
-print TRAIN "\n";
-if ($jobs == 1) {
-    print TRAIN "echo \"mira finished.\"\n";
-}
-else {
-    print TRAIN "echo \"mpirun finished.\"\n";
-}
-close TRAIN;
-
-if (! $execute) {
-    print STDERR "Written train file: $train_script_file\n";
-    exit 0;
-}
-
-#submit the training job
-if ($have_sge) {
-    $train_job_id = &submit_job_sge($train_script_file);
+    if (defined $start_weight_file) {
+	print TRAIN "--start-weights $start_weight_file \\\n"; 
+    }
+    print TRAIN "-l $learner \\\n";
+    print TRAIN "--weight-dump-stem $weight_file_stem \\\n";
+    print TRAIN "--mixing-frequency $mixing_frequency \\\n" if ($extra_args !~ /--mixing-frequency /);
+    print TRAIN "--weight-dump-frequency $weight_dump_frequency \\\n" if ($extra_args !~ /--weight-dump-frequency /);
+    print TRAIN "--epochs $epochs \\\n" if $epochs;
+    print TRAIN "--batch-size $batch \\\n" if ($extra_args !~ /--batch-size / && $extra_args !~ /-b /);
+    print TRAIN $extra_args." \\\n";
+    print TRAIN "--decoder-settings \"$train_decoder_settings\" \\\n";
+    if ($jobs == 1) {
+	print TRAIN "echo \"mira finished.\"\n";
+    }
+    else {
+	print TRAIN "echo \"mpirun finished.\"\n";
+    }
+    close TRAIN;
     
-} else {
-  $train_job_id = &submit_job_no_sge($train_script_file, $train_out,$train_err);
-}
-
-die "Failed to submit training job" unless $train_job_id;
+    if (! $execute) {
+	print STDERR "Written train file: $train_script_file\n";
+	exit 0;
+    }
+    
+    #submit the training job
+    if ($have_sge) {
+	$train_job_id = &submit_job_sge($train_script_file);
+	
+    } else {
+	$train_job_id = &submit_job_no_sge($train_script_file, $train_out,$train_err);
+    }
+    
+    die "Failed to submit training job" unless $train_job_id;
 }
 
 #wait for the next weights file to appear, or the training job to end
@@ -883,7 +880,7 @@ sub param {
     my $value = $config->param($key);
     $value = $default if !$value;
     # Empty arguments get interpreted as arrays
-    $value = "" if (ref($value) eq 'ARRAY' && scalar(@$value) == 0);
+    $value = 0 if (ref($value) eq 'ARRAY' && scalar(@$value) == 0);
     return $value;
 }
 

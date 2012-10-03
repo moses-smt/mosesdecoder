@@ -35,6 +35,7 @@ class LMList;
 class RuleTableTrie;
 class WordPenaltyProducer;
 
+//! @todo ask phil williams
 class RuleTableLoaderCompact : public RuleTableLoader
 {
  public:

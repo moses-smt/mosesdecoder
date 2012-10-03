@@ -50,7 +50,7 @@ TargetPhrase::~TargetPhrase()
 {
 }
 
-void TargetPhrase::SetLHS(Word *lhs)
+void TargetPhrase::SetLHS(WordPtr lhs)
 {
   AddWord(lhs);
 }
@@ -99,7 +99,7 @@ char *TargetPhrase::WriteToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed)
   size_t phraseSize = GetSize();
   size_t targetWordSize = onDiskWrapper.GetTargetWordSize();
   
-  const Phrase* sp = GetSourcePhrase();
+  const PhrasePtr sp = GetSourcePhrase();
   size_t spSize = sp->GetSize();
   size_t sourceWordSize = onDiskWrapper.GetSourceWordSize();
   
@@ -240,9 +240,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   --phraseSize;
 
   for (size_t pos = 0; pos < phraseSize; ++pos) {
-    Moses::Word *mosesWord = GetWord(pos).ConvertToMoses(Moses::Output, outputFactors, vocab);
-    ret->AddWord(*mosesWord);
-    delete mosesWord;
+    GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
   }
 
   // scores
@@ -252,7 +250,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   int indicator[m_align.size()];
   int index = 0;
   std::set<std::pair<size_t, size_t> > alignmentInfo;
-  const Phrase* sp = GetSourcePhrase(); 
+  const PhrasePtr sp = GetSourcePhrase(); 
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const std::pair<size_t, size_t> &entry = m_align[ind];
     alignmentInfo.insert(entry);
@@ -261,18 +259,14 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   }
   ret->SetAlignmentInfo(alignmentInfo, indicator);
 
-  Moses::Word *lhs = GetWord(GetSize() - 1).ConvertToMoses(Moses::Output, outputFactors, vocab);
-  ret->SetTargetLHS(*lhs);
-  delete lhs;
+  GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, ret->MutableTargetLHS());
   
   // set source phrase
-  Moses::Phrase *mosesSP = new Moses::Phrase(Moses::Input);
+  Moses::Phrase mosesSP(Moses::Input);
   for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
-    Moses::Word *mosesWord = sp->GetWord(pos).ConvertToMoses(Moses::Input, inputFactors, vocab);
-    mosesSP->AddWord(*mosesWord);
-    delete mosesWord;
+    sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
   }
-  ret->SetSourcePhrase(*mosesSP);
+  ret->SetSourcePhrase(mosesSP);
   
   return ret;
 }
@@ -295,7 +289,7 @@ UINT64 TargetPhrase::ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPC
   return memUsed;
 }
 
-UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors, size_t numSourceFactors)
+UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP)
 {
   UINT64 bytesRead = 0;
 
@@ -306,8 +300,8 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors, size_
   bytesRead += sizeof(UINT64);
 
   for (size_t ind = 0; ind < numWords; ++ind) {
-    Word *word = new Word();
-    bytesRead += word->ReadFromFile(fileTP, numFactors);
+    WordPtr word(new Word());
+    bytesRead += word->ReadFromFile(fileTP);
     AddWord(word);
   }
   
@@ -316,10 +310,10 @@ UINT64 TargetPhrase::ReadFromFile(std::fstream &fileTP, size_t numFactors, size_
   fileTP.read((char*) &numSourceWords, sizeof(UINT64));
   bytesRead += sizeof(UINT64);
 
-  SourcePhrase *sp = new SourcePhrase();
+  PhrasePtr sp(new SourcePhrase());
   for (size_t ind = 0; ind < numSourceWords; ++ind) {
-    Word *word = new Word();
-    bytesRead += word->ReadFromFile(fileTP, numSourceFactors);
+    WordPtr word( new Word());
+    bytesRead += word->ReadFromFile(fileTP);
     sp->AddWord(word);
   }
   SetSourcePhrase(sp);

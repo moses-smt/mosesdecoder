@@ -1,0 +1,338 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 46;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E1D826915AC641600FE42E9 /* extractor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1D825915AC63ED00FE42E9 /* extractor.cpp */; };
+		1E1D826A15AC642B00FE42E9 /* libmert_lib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E2B6B141593A6F30028137E /* libmert_lib.a */; };
+		1E2B6ADE1593A5500028137E /* mert.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E2B6ADD1593A5500028137E /* mert.cpp */; };
+		1E2B6B1F1593CA8A0028137E /* libmert_lib.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E2B6B141593A6F30028137E /* libmert_lib.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1E2B6B131593A6F30028137E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E2B6B0F1593A6F30028137E /* mert_lib.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 1E2CCF3315939E2D00D858D1;
+			remoteInfo = mert_lib;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		1E1D825D15AC640800FE42E9 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+		1EB0AF031593A2180007E2A4 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1E1D825915AC63ED00FE42E9 /* extractor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = extractor.cpp; path = ../../mert/extractor.cpp; sourceTree = "<group>"; };
+		1E1D825F15AC640800FE42E9 /* extractor */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = extractor; sourceTree = BUILT_PRODUCTS_DIR; };
+		1E2B6ADD1593A5500028137E /* mert.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = mert.cpp; path = ../../mert/mert.cpp; sourceTree = "<group>"; };
+		1E2B6B0F1593A6F30028137E /* mert_lib.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = mert_lib.xcodeproj; sourceTree = "<group>"; };
+		1EB0AF051593A2180007E2A4 /* mert */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mert; sourceTree = BUILT_PRODUCTS_DIR; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1E1D825C15AC640800FE42E9 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E1D826A15AC642B00FE42E9 /* libmert_lib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1EB0AF021593A2180007E2A4 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E2B6B1F1593CA8A0028137E /* libmert_lib.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		1E2B6B101593A6F30028137E /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E2B6B141593A6F30028137E /* libmert_lib.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EB0AEFA1593A2180007E2A4 = {
+			isa = PBXGroup;
+			children = (
+				1E2B6B0F1593A6F30028137E /* mert_lib.xcodeproj */,
+				1E2B6ADD1593A5500028137E /* mert.cpp */,
+				1E1D825915AC63ED00FE42E9 /* extractor.cpp */,
+				1EB0AF061593A2180007E2A4 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		1EB0AF061593A2180007E2A4 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EB0AF051593A2180007E2A4 /* mert */,
+				1E1D825F15AC640800FE42E9 /* extractor */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1E1D825E15AC640800FE42E9 /* extractor */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1E1D826615AC640800FE42E9 /* Build configuration list for PBXNativeTarget "extractor" */;
+			buildPhases = (
+				1E1D825B15AC640800FE42E9 /* Sources */,
+				1E1D825C15AC640800FE42E9 /* Frameworks */,
+				1E1D825D15AC640800FE42E9 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = extractor;
+			productName = extractor;
+			productReference = 1E1D825F15AC640800FE42E9 /* extractor */;
+			productType = "com.apple.product-type.tool";
+		};
+		1EB0AF041593A2180007E2A4 /* mert */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1EB0AF0F1593A2180007E2A4 /* Build configuration list for PBXNativeTarget "mert" */;
+			buildPhases = (
+				1EB0AF011593A2180007E2A4 /* Sources */,
+				1EB0AF021593A2180007E2A4 /* Frameworks */,
+				1EB0AF031593A2180007E2A4 /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = mert;
+			productName = mert;
+			productReference = 1EB0AF051593A2180007E2A4 /* mert */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		1EB0AEFC1593A2180007E2A4 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1EB0AEFF1593A2180007E2A4 /* Build configuration list for PBXProject "mert" */;
+			compatibilityVersion = "Xcode 3.2";
+			developmentRegion = English;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				en,
+			);
+			mainGroup = 1EB0AEFA1593A2180007E2A4;
+			productRefGroup = 1EB0AF061593A2180007E2A4 /* Products */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1E2B6B101593A6F30028137E /* Products */;
+					ProjectRef = 1E2B6B0F1593A6F30028137E /* mert_lib.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				1EB0AF041593A2180007E2A4 /* mert */,
+				1E1D825E15AC640800FE42E9 /* extractor */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1E2B6B141593A6F30028137E /* libmert_lib.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmert_lib.a;
+			remoteRef = 1E2B6B131593A6F30028137E /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1E1D825B15AC640800FE42E9 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E1D826915AC641600FE42E9 /* extractor.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		1EB0AF011593A2180007E2A4 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E2B6ADE1593A5500028137E /* mert.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		1E1D826715AC640800FE42E9 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1E1D826815AC640800FE42E9 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+		1EB0AF0D1593A2180007E2A4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = NO;
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+				);
+				GCC_SYMBOLS_PRIVATE_EXTERN = NO;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				ONLY_ACTIVE_ARCH = YES;
+				OTHER_LDFLAGS = "-lz";
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		1EB0AF0E1593A2180007E2A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_ENABLE_OBJC_EXCEPTIONS = YES;
+				GCC_VERSION = com.apple.compilers.llvm.clang.1_0;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_MISSING_PROTOTYPES = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 10.7;
+				OTHER_LDFLAGS = "-lz";
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		1EB0AF101593A2180007E2A4 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"DEBUG=1",
+					"$(inherited)",
+					WITH_THREADS,
+				);
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /opt/local/lib/;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_thread-mt",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		1EB0AF111593A2180007E2A4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				GCC_PREPROCESSOR_DEFINITIONS = WITH_THREADS;
+				HEADER_SEARCH_PATHS = (
+					../..,
+					/opt/local/include,
+				);
+				LIBRARY_SEARCH_PATHS = /opt/local/lib/;
+				OTHER_LDFLAGS = (
+					"-lz",
+					"-lboost_thread-mt",
+				);
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1E1D826615AC640800FE42E9 /* Build configuration list for PBXNativeTarget "extractor" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1E1D826715AC640800FE42E9 /* Debug */,
+				1E1D826815AC640800FE42E9 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1EB0AEFF1593A2180007E2A4 /* Build configuration list for PBXProject "mert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1EB0AF0D1593A2180007E2A4 /* Debug */,
+				1EB0AF0E1593A2180007E2A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1EB0AF0F1593A2180007E2A4 /* Build configuration list for PBXNativeTarget "mert" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1EB0AF101593A2180007E2A4 /* Debug */,
+				1EB0AF111593A2180007E2A4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 1EB0AEFC1593A2180007E2A4 /* Project object */;
+}

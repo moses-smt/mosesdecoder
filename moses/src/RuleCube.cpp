@@ -21,8 +21,7 @@
 
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
-#include "ChartTranslationOption.h"
-#include "ChartTranslationOptionCollection.h"
+#include "ChartTranslationOptions.h"
 #include "RuleCube.h"
 #include "RuleCubeQueue.h"
 #include "StaticData.h"
@@ -35,7 +34,7 @@ namespace Moses
 {
 
 // initialise the RuleCube by creating the top-left corner item
-RuleCube::RuleCube(const ChartTranslationOption &transOpt,
+RuleCube::RuleCube(const ChartTranslationOptions &transOpt,
                    const ChartCellCollection &allChartCells,
                    ChartManager &manager)
   : m_transOpt(transOpt)

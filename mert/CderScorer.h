@@ -4,7 +4,11 @@
 #include <string>
 #include <vector>
 #include "Types.h"
-#include "Scorer.h"
+#include "StatisticsBasedScorer.h"
+
+namespace MosesTuning
+{
+  
 
 /**
  * CderScorer class can compute both CDER and WER metric.
@@ -37,5 +41,7 @@ class CderScorer: public StatisticsBasedScorer {
   CderScorer(const CderScorer&);
   CderScorer& operator=(const CderScorer&);
 };
+
+}
 
 #endif  // MERT_CDER_SCORER_H_

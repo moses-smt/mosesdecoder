@@ -10,14 +10,14 @@
 
 use strict;
 
-use FindBin qw($Bin);
+use FindBin qw($RealBin);
 use Getopt::Long;
 
 my $SCRIPTS_ROOTDIR;
 if (defined($ENV{"SCRIPTS_ROOTDIR"})) {
     $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"};
 } else {
-    $SCRIPTS_ROOTDIR = $Bin;
+    $SCRIPTS_ROOTDIR = $RealBin;
     if ($SCRIPTS_ROOTDIR eq '') {
         $SCRIPTS_ROOTDIR = dirname(__FILE__);
     }

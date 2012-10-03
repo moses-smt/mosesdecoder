@@ -88,7 +88,7 @@ class TranslationSystem {
       const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
       const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
       
-      const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries()[index]; }
+      const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries().at(index); }
       
       float GetWeightWordPenalty() const;
       float GetWeightUnknownWordPenalty() const;
@@ -97,10 +97,9 @@ class TranslationSystem {
       
       //sentence (and thread) specific initialisationn and cleanup
       void InitializeBeforeSentenceProcessing(const InputType& source) const;
-      void CleanUpAfterSentenceProcessing() const;
+      void CleanUpAfterSentenceProcessing(const InputType& source) const;
       
-			const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
-
+      const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
         
       static const  std::string DEFAULT;
         
@@ -127,7 +126,7 @@ class TranslationSystem {
         const UnknownWordPenaltyProducer* m_unknownWpProducer;
         const DistortionScoreProducer* m_distortionScoreProducer;
 	
-				std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
+	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
 
 };
 

@@ -6,9 +6,10 @@ namespace Moses
 
 
 void SparsePhraseDictionaryFeature::Evaluate(
-  const TargetPhrase& ,
-  ScoreComponentCollection* ) const
+            const PhraseBasedFeatureContext& context,
+            ScoreComponentCollection* accumulator) const
 {
+  //not used
 }
 
 

@@ -22,14 +22,15 @@
 #pragma once
 
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "ChartCell.h"
-#include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "InputType.h"
 #include "WordsRange.h"
 #include "SentenceStats.h"
 #include "TranslationSystem.h"
 #include "ChartRuleLookupManager.h"
+#include "ChartTranslationOptionList.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -42,6 +43,8 @@ class ChartTrellisNode;
 class ChartTrellisPath;
 class ChartTrellisPathList;
 
+/** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
+ */
 class ChartManager
 {
 private:
@@ -51,15 +54,28 @@ private:
   static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
                                  const ChartTrellisNode &,
                                  ChartTrellisDetourQueue &);
+  void CreateTranslationOptionsForRange(const WordsRange &wordsRange);
+  void ProcessOneUnknownWord(const Word &sourceWord, const WordsRange &range);
 
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
-  ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   std::auto_ptr<SentenceStats> m_sentenceStats;
   const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
   std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
+
+  ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
+  std::vector<Phrase*> m_unksrcs;
+  std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
+  std::vector <DecodeGraph*> m_decodeGraphList;
+  StackVec m_emptyStackVec;
+
+  //! Some features should be calculated prior to search
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection, RuleHash, RuleComparator> m_precalculatedScores;
+
+  //! Pre-calculate most stateless feature values
+  void PreCalculateScores();
 
 public:
   ChartManager(InputType const& source, const TranslationSystem* system);
@@ -67,30 +83,44 @@ public:
   void ProcessSentence();
   void AddXmlChartOptions();
   const ChartHypothesis *GetBestHypothesis() const;
-  void CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDistinct=0) const;
+  void CalcNBest(size_t count, ChartTrellisPathList &ret, bool onlyDistinct=0) const;
 
   void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
 	void FindReachableHypotheses( const ChartHypothesis *hypo, std::map<unsigned,bool> &reachable ) const; /* auxilliary function for GetSearchGraph */
 
+  //! the input sentence being decoded
   const InputType& GetSource() const {
     return m_source;
   }
+  
+  //! which particular set of models is in use
   const TranslationSystem* GetTranslationSystem() const {
     return m_system;
   }
 
+  //! debug data collected when decoding sentence
   SentenceStats& GetSentenceStats() const {
     return *m_sentenceStats;
   }
+  
   /***
    * to be called after processing a sentence (which may consist of more than just calling ProcessSentence() )
+   * currently an empty function
    */
-  void CalcDecoderStatistics() const;
+  void CalcDecoderStatistics() const
+  { }
+  
   void ResetSentenceStats(const InputType& source) {
     m_sentenceStats = std::auto_ptr<SentenceStats>(new SentenceStats(source));
   }
 
+  //! contigious hypo id for each input sentence. For debugging purposes
   unsigned GetNextHypoId() { return m_hypothesisId++; }
+
+  //! Access the pre-calculated values
+  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
+      ScoreComponentCollection* scoreBreakdown) const;
+
 };
 
 }

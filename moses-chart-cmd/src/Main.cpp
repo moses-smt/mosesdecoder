@@ -60,6 +60,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 using namespace std;
 using namespace Moses;
+using namespace MosesChartCmd;
 
 /**
   * Translates a sentence.
@@ -101,6 +102,10 @@ public:
     if (staticData.IsDetailedTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
+    }
+    
+    if (staticData.PrintAlignmentInfo()) {
+      m_ioWrapper.OutputAlignment(bestHypo, lineNumber);
     }
 
     // n-best
@@ -186,19 +191,13 @@ static void ShowWeights()
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
   for (size_t i = 0; i < sff.size(); ++i) {
     PrintFeatureWeight(sff[i]);
   }
-  for (size_t i = 0; i < pds.size(); ++i) {
-    PrintFeatureWeight(pds[i]);
-  }
-  for (size_t i = 0; i < gds.size(); ++i) {
-    PrintFeatureWeight(gds[i]);
-  }
   for (size_t i = 0; i < slf.size(); ++i) {
-    PrintFeatureWeight(slf[i]);
+    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
+  	  PrintFeatureWeight(slf[i]);
+    }
   }
 }
 
@@ -222,7 +221,7 @@ int main(int argc, char* argv[])
     }
 
     const StaticData &staticData = StaticData::Instance();
-    if (!StaticData::LoadDataStatic(&parameter))
+    if (!StaticData::LoadDataStatic(&parameter, argv[0]))
       return EXIT_FAILURE;
 
     if (parameter.isParamSpecified("show-weights")) {
@@ -233,8 +232,8 @@ int main(int argc, char* argv[])
     CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
 
     // set up read/writing class
-    IOWrapper *ioWrapper = GetIODevice(staticData);
-
+    IOWrapper *ioWrapper = GetIOWrapper(staticData);
+  
     // check on weights
     const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
@@ -287,7 +286,7 @@ int main(int argc, char* argv[])
 #endif
 }
 
-IOWrapper *GetIODevice(const StaticData &staticData)
+IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()

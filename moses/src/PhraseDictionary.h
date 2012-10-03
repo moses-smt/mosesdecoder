@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <memory>
 #include <list>
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -105,7 +106,7 @@ public:
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-			    , size_t dictIndex
+                            , size_t dictIndex
                             , size_t tableLimit
                             , const std::string &targetFile
                             , const std::string &alignmentsFile);
@@ -133,6 +134,22 @@ public:
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();
   size_t GetDictIndex() const;
+
+  //Usual feature function methods are not implemented
+  virtual void Evaluate(const PhraseBasedFeatureContext& context,
+  											ScoreComponentCollection* accumulator) const 
+  {
+    throw std::logic_error("PhraseDictionary.Evaluate() Not implemented");
+  }
+
+  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
+                             ScoreComponentCollection* accumulator) const 
+  {
+    throw std::logic_error("PhraseDictionary.EvaluateChart() Not implemented");
+  }
+
+  virtual bool ComputeValueInTranslationTable() const {return true;}
+
 
 protected:
   size_t m_dictIndex;

@@ -5,6 +5,7 @@
 #include "Hypothesis.h"
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "TranslationOption.h"
 
 namespace Moses {
 
@@ -30,21 +31,22 @@ bool TargetWordInsertionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void TargetWordInsertionFeature::Evaluate(const Hypothesis& cur_hypo,
-                                          ScoreComponentCollection* accumulator) const
+void TargetWordInsertionFeature::Evaluate(
+                      const PhraseBasedFeatureContext& context,
+                      ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
 
-void TargetWordInsertionFeature::EvaluateChart(const ChartHypothesis& cur_hypo,
-											   int featureID,
-											   ScoreComponentCollection* accumulator) const
+void TargetWordInsertionFeature::EvaluateChart(
+            const ChartBasedFeatureContext& context,
+						ScoreComponentCollection* accumulator) const
 {
-	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }

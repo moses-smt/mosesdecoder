@@ -69,7 +69,7 @@ namespace Mira {
 		  cerr << "Loading static data failed, exit." << endl;
 		  exit(1);
 	  }
-	  StaticData::LoadDataStatic(params);
+	  StaticData::LoadDataStatic(params, "mira");
 	  for (int i = 0; i < BASE_ARGC; ++i) {
 		  delete[] mosesargv[i];
 	  }
@@ -139,7 +139,7 @@ namespace Mira {
   														const TranslationSystem& system,
   														string filename) {
   	// run the decoder
-    m_manager = new Moses::Manager(*m_sentence, search, &system);
+    m_manager = new Moses::Manager(0,*m_sentence, search, &system);
     m_manager->ProcessSentence();
     TrellisPathList nBestList;
     m_manager->CalcNBest(nBestSize, nBestList, distinct);
@@ -153,7 +153,7 @@ namespace Mira {
     		throw runtime_error(msg.str());
     	}
     	// TODO: handle sentence id (for now always 0)
-    	OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
+    	//OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
     	out.close();
     }
 
@@ -300,7 +300,7 @@ namespace Mira {
     }
     else {
     	// run the decoder
-      m_manager = new Moses::Manager(*m_sentence, staticData.GetSearchAlgorithm(), &system);
+      m_manager = new Moses::Manager(0,*m_sentence, staticData.GetSearchAlgorithm(), &system);
       m_manager->ProcessSentence();
       TrellisPathList nBestList;
       m_manager->CalcNBest(nBestSize, nBestList, distinctNbest);
@@ -313,11 +313,11 @@ namespace Mira {
     			throw runtime_error(msg.str());
     		}
     		// TODO: handle sentence id (for now always 0)
-    		OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
+    		//OutputNBest(out, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), 0, false);
     		out.close();
       }
       else {
-	OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid, false);
+	//OutputNBest(streamOut, nBestList, StaticData::Instance().GetOutputFactorOrder(),m_manager->GetTranslationSystem(), sentenceid, false);
     	  streamOut.flush();
       }
     }

@@ -26,6 +26,8 @@ inline double Exp(double x)
   return exp(x);
 }
 
+/** implementation of the binary phrase table for the phrase-based decoder. Used by PhraseDictionaryTreeAdaptor
+ */
 class PDTAimp
 {
   // only these classes are allowed to instantiate this class
@@ -137,8 +139,9 @@ protected:
       return 0;
     }
 
+    //TODO: Multiple models broken here
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weights = system.GetTranslationWeights(m_obj->GetDictIndex());
+    std::vector<float> weights = StaticData::Instance().GetWeights(m_obj->GetFeature());
     float weightWP = system.GetWeightWordPenalty();
 
     std::vector<TargetPhrase> tCands;
@@ -372,7 +375,7 @@ protected:
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weightT = system.GetTranslationWeights(m_obj->GetDictIndex());
+    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj->GetFeature());
     float weightWP = system.GetWeightWordPenalty();
 
     while(!stack.empty()) {

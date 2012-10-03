@@ -24,14 +24,18 @@ my $source = $ARGV[5]; # 2nd arg of extract argument
 my $align = $ARGV[6]; # 3rd arg of extract argument
 my $extract = $ARGV[7]; # 4th arg of extract argument
 
+my $makeTTable = 1; # whether to build the ttable extract files
 my $otherExtractArgs= "";
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
+  $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
+my $cmd;
 my $TMPDIR=dirname($extract)  ."/tmp.$$";
-mkdir $TMPDIR;
+$cmd = "mkdir -p $TMPDIR";
+`$cmd`;
 
 my $totalLines = int(`cat $align | wc -l`);
 my $linesPerSplit = int($totalLines / $numParallel) + 1;
@@ -40,7 +44,6 @@ print "total=$totalLines line-per-split=$linesPerSplit \n";
 
 my @children;
 my $pid;
-my $cmd;
 
 if ($numParallel > 1)
 {
@@ -88,7 +91,7 @@ for (my $i = 0; $i < $numParallel; ++$i)
   if ($pid == 0)
   { # child
     my $numStr = NumStr($i);
-    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs \n";
+    my $cmd = "$extractCmd $TMPDIR/target.$numStr $TMPDIR/source.$numStr $TMPDIR/align.$numStr $TMPDIR/extract.$numStr $otherExtractArgs --SentenceOffset ".($i*$linesPerSplit)." 2>> /dev/stderr \n";
     print STDERR $cmd;
     `$cmd`;
 
@@ -106,9 +109,10 @@ foreach (@children) {
 }
 
 # merge
-my $catCmd = "zcat ";
-my $catInvCmd = "zcat ";
-my $catOCmd = "zcat ";
+my $is_osx = ($^O eq "darwin");
+my $catCmd = $is_osx?"gunzip -c ":"zcat ";
+my $catInvCmd = $catCmd;
+my $catOCmd = $catCmd;
 for (my $i = 0; $i < $numParallel; ++$i)
 {
 		my $numStr = NumStr($i);
@@ -123,11 +127,14 @@ $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n
 
 
 @children = ();
-$pid = RunFork($catCmd);
-push(@children, $pid);
+if ($makeTTable)
+{
+  $pid = RunFork($catCmd);
+  push(@children, $pid);
 
-$pid = RunFork($catInvCmd);
-push(@children, $pid);
+  $pid = RunFork($catInvCmd);
+  push(@children, $pid);
+}
 
 my $numStr = NumStr(0);
 if (-e "$TMPDIR/extract.$numStr.o.gz")

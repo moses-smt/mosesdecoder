@@ -5,6 +5,10 @@
 #include <string>
 #include <stdint.h>
 
+namespace MosesTuning
+{
+  
+
 class Timer
 {
  private:
@@ -101,5 +105,8 @@ inline std::ostream& operator<<(std::ostream& os, const Timer& t) {
   }
   return os;
 }
+
+}
+
 
 #endif  // MERT_TIMER_H_

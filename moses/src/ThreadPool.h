@@ -41,13 +41,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 /**
   * Classes to implement a ThreadPool.
-  **/
-
+**/
 namespace Moses {
 
-/**
-* A task to be executed by the ThreadPool
-**/
+/** A task to be executed by the ThreadPool
+ */
 class Task
 {
 public:
@@ -111,6 +109,7 @@ public:
 #ifdef BOOST_HAS_PTHREADS
     pthread_t tid = pthread_self();
 #else
+	typedef void * pthread_t;
     pthread_t tid = 0;
 #endif
     std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;

@@ -8,6 +8,9 @@
 
 using namespace std;
 
+namespace MosesTuning
+{
+
 vector<unsigned> Point::m_opt_indices;
 
 unsigned Point::m_dim = 0;
@@ -156,3 +159,6 @@ void Point::GetAllWeights(vector<parameter_t>& w) const
     }
   }
 }
+
+}
+

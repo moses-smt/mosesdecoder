@@ -41,7 +41,7 @@ namespace Moses
 /** Outputting debugging/verbose information to stderr.
  * Use TRACE_ENABLE flag to redirect tracing output into oblivion
  * so that you can output your own ad-hoc debugging info.
- * However, if you use stderr diretly, please delete calls to it once
+ * However, if you use stderr directly, please delete calls to it once
  * you finished debugging so that it won't clutter up.
  * Also use TRACE_ENABLE to turn off output of any debugging info
  * when compiling for a gui front-end so that running gui won't generate
@@ -322,8 +322,6 @@ void RemoveAllInColl(COLL &coll)
 
 //! x-platform reference to temp folder
 std::string GetTempFolder();
-//! Create temp file and return output stream and full file path as arguments
-void CreateTempFile(std::ofstream  &fileStream, std::string &filePath);
 //! MD5 hash of a file
 std::string GetMD5Hash(const std::string &filePath);
 

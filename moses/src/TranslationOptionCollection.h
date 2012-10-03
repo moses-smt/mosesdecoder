@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TranslationOptionCollection_h
 
 #include <list>
+#include <boost/unordered_map.hpp>
 #include "TypeDef.h"
 #include "TranslationOption.h"
 #include "TranslationOptionList.h"
@@ -42,7 +43,8 @@ class InputType;
 class LMList;
 class FactorMask;
 class Word;
-
+class DecodeGraph;
+  
 /** Contains all phrase translations applicable to current input type (a sentence or confusion network).
  * A key insight into efficient decoding is that various input
  * conditions (trelliss, factored input, normal text, xml markup)
@@ -53,12 +55,9 @@ class Word;
  * depends on the input condition, but they all are presented to
  * decoding algorithm in the same form, using this class.
  *
- * This class cannot, and should not be instantiated directly. Instantiate 1 of the inherited
+ * This is a abstract class, and cannot be instantiated directly. Instantiate 1 of the inherited
  * classes instead, for a particular input type
  **/
-
-class DecodeGraph;
-
 class TranslationOptionCollection
 {
   friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
@@ -71,6 +70,7 @@ protected:
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<Phrase*> m_unksrcs;
+  boost::unordered_map<TranslationOption,ScoreComponentCollection> m_precalculatedScores;
 
 
   TranslationOptionCollection(const TranslationSystem* system, InputType const& src, size_t maxNoTransOptPerCoverage,
@@ -82,6 +82,9 @@ protected:
   void ProcessUnknownWord();
   //! special handling of ONE unknown words.
   virtual void ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t length = 1, const Scores *inputScores = NULL);
+
+  void IncorporateDLMScores();
+
   //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
   void Prune();
 
@@ -95,7 +98,13 @@ protected:
 
   //! implemented by inherited class, called by this class
   virtual void ProcessUnknownWord(size_t sourcePos)=0;
+
+    
+
   void CacheLexReordering();
+
+  //! Pre-calculate most stateless feature values
+  void PreCalculateScores();
 
 public:
   virtual ~TranslationOptionCollection();
@@ -104,6 +113,9 @@ public:
   const InputType& GetSource() const {
     return m_source;
   }
+
+  //!List of unknowns (OOVs)
+  const std::vector<Phrase*>& GetUnknownSources() const;
 
   //! get length/size of source input
   size_t GetSize() const {
@@ -135,6 +147,10 @@ public:
   const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
+
+  //! Access these pre-calculated values
+  void InsertPreCalculatedScores(const TranslationOption& translationOption,
+      ScoreComponentCollection* scoreBreakdown) const;
 
   TO_STRING();
 };

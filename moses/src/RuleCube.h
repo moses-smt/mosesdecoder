@@ -37,10 +37,11 @@ namespace Moses
 
 class ChartCellCollection;
 class ChartManager;
-class ChartTranslationOption;
+class ChartTranslationOptions;
 
-// Define an ordering between RuleCubeItems based on their scores.  This
-// is used to order items in the cube's priority queue.
+/** Define an ordering between RuleCubeItems based on their scores.
+ * This is used to order items in the cube's priority queue.
+ */
 class RuleCubeItemScoreOrderer
 {
  public:
@@ -49,9 +50,10 @@ class RuleCubeItemScoreOrderer
   }
 };
 
-// Define an ordering between RuleCubeItems based on their positions in the
-// cube.  This is used to record which positions in the cube have been covered
-// during search.
+/** Define an ordering between RuleCubeItems based on their positions in the
+ * cube.  This is used to record which positions in the cube have been covered
+ * during search.
+ */
 class RuleCubeItemPositionOrderer
 {
  public:
@@ -60,6 +62,8 @@ class RuleCubeItemPositionOrderer
   }
 };
 
+/** @todo what is this?
+ */
 class RuleCubeItemHasher
 {
  public:
@@ -71,6 +75,8 @@ class RuleCubeItemHasher
   }
 };
 
+/** @todo what is this?
+ */
 class RuleCubeItemEqualityPred
 {
  public:
@@ -80,10 +86,12 @@ class RuleCubeItemEqualityPred
   }
 };
 
+/** @todo what is this?
+ */
 class RuleCube
 {
  public:
-  RuleCube(const ChartTranslationOption &, const ChartCellCollection &,
+  RuleCube(const ChartTranslationOptions &, const ChartCellCollection &,
            ChartManager &);
 
   ~RuleCube();
@@ -98,7 +106,7 @@ class RuleCube
 
   bool IsEmpty() const { return m_queue.empty(); }
 
-  const ChartTranslationOption &GetTranslationOption() const {
+  const ChartTranslationOptions &GetTranslationOption() const {
     return m_transOpt;
   }
 
@@ -123,7 +131,7 @@ class RuleCube
   void CreateNeighbors(const RuleCubeItem &, ChartManager &);
   void CreateNeighbor(const RuleCubeItem &, int, ChartManager &);
 
-  const ChartTranslationOption &m_transOpt;
+  const ChartTranslationOptions &m_transOpt;
   ItemSet m_covered;
   Queue m_queue;
 };

@@ -13,7 +13,7 @@ sub GetSourcePhrase($);
 sub NumStr($);
 
 #my $EXTRACT_SPLIT_LINES = 5000000;
-my $EXTRACT_SPLIT_LINES = 1000000;
+my $EXTRACT_SPLIT_LINES = 50000000;
 
 print "Started ".localtime() ."\n";
 
@@ -121,7 +121,8 @@ for (my $i = 0; $i < $fileCount; ++$i)
 
   my $fileInd = $i % $numParallel;
   my $fh = $runFiles[$fileInd];
-  my $cmd = "$scoreCmd $TMPDIR/extract.$i.gz $lexFile $TMPDIR/phrase-table.half.$numStr.gz $otherExtractArgs\n";
+  my $cmd = "$scoreCmd $TMPDIR/extract.$i.gz $lexFile $TMPDIR/phrase-table.half.$numStr.gz $otherExtractArgs 2>> /dev/stderr \n";
+  print STDERR $cmd;
   print $fh $cmd;
 }
 
@@ -156,7 +157,7 @@ if ($fileCount == 1 && !$doSort)
 }
 else
 {
-  $cmd = "zcat $TMPDIR/phrase-table.half.*.gz";
+  $cmd = "gunzip -c $TMPDIR/phrase-table.half.*.gz 2>> /dev/stderr";
 
   if ($doSort) {
     $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";

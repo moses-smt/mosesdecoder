@@ -5,6 +5,7 @@
 #include "Hypothesis.h"
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
+#include "TranslationOption.h"
 
 namespace Moses {
 
@@ -30,22 +31,23 @@ bool SourceWordDeletionFeature::Load(const std::string &filePath)
   return true;
 }
 
-void SourceWordDeletionFeature::Evaluate(const Hypothesis& cur_hypo,
-                                         ScoreComponentCollection* accumulator) const
+void SourceWordDeletionFeature::Evaluate(
+            const PhraseBasedFeatureContext& context,
+            ScoreComponentCollection* accumulator) const
 {
-	TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
 
-void SourceWordDeletionFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
-		                   	 	 	 	 	 	 	 	 	 	 	 	ScoreComponentCollection* accumulator) const
+void SourceWordDeletionFeature::EvaluateChart(
+            const ChartBasedFeatureContext& context,
+		 	 	 	 	ScoreComponentCollection* accumulator) const
 {
-	TargetPhrase targetPhrase = cur_hypo.GetCurrTargetPhrase();
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignmentInfo();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
-	ComputeFeatures(targetPhrase, accumulator, alignment);
+	ComputeFeatures(context.GetTargetPhrase(), accumulator, alignment);
 }
 
 void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,

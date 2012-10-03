@@ -5,10 +5,11 @@
 #include <cmath>
 #include "types.h"
 #include "utils.h"
-#include "file.h"
+#include "FileHandler.h"
 using namespace Moses;
 typedef uint64_t P;   // largest input range is 2^64
 
+//! @todo ask abby2
 template <typename T>
 class HashBase {
   protected:
@@ -38,6 +39,8 @@ class HashBase {
       fin->read((char*)&H_, sizeof(H_));
     }
 };
+
+//! @todo ask abby2
 template <typename T>
 class UnivHash_linear: public HashBase<T> {
   public:
@@ -64,12 +67,12 @@ class UnivHash_linear: public HashBase<T> {
     void freeSeeds(); 
 };
 
-/* UnivHash_noPrimes:
+/** UnivHash_noPrimes:
  * From Dietzfelbinger 2008
  * p = input domain range = 2^l
  * m = output range = 2^k
  * # of hash function = 2^(l-1)
-*/
+ */
 template <typename T>
 class UnivHash_noPrimes: public HashBase<T> {
   public:
@@ -96,6 +99,7 @@ class UnivHash_noPrimes: public HashBase<T> {
     void freeSeeds() {delete[] a_;}
 };
 
+//! @todo ask abby2
 template <typename T>
 class Hash_shiftAddXOR: public HashBase<T> {
   public:
@@ -113,6 +117,7 @@ class Hash_shiftAddXOR: public HashBase<T> {
     void freeSeeds() {delete[] v_;}
 };
 
+//! @todo ask abby2
 template <typename T>
 class UnivHash_tableXOR: public HashBase<T> {
   public:

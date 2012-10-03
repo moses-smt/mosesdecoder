@@ -14,6 +14,9 @@ class Manager;
 class InputType;
 class TranslationOptionCollection;
 
+/** Functions and variables you need to decoder an input using the phrase-based decoder (NO cube-pruning)
+ *  Instantiated by the Manager class
+ */
 class SearchNormal: public Search
 {
 protected:
@@ -29,7 +32,7 @@ protected:
   // functions for creating hypotheses
   void ProcessOneHypothesis(const Hypothesis &hypothesis);
   void ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);
-  void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
+  virtual void ExpandHypothesis(const Hypothesis &hypothesis,const TranslationOption &transOpt, float expectedScore);
 
 public:
   SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);

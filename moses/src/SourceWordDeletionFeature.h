@@ -29,11 +29,10 @@ public:
   }
       
   bool Load(const std::string &filePath);
-  void Evaluate(const Hypothesis& cur_hypo,
-                ScoreComponentCollection* accumulator) const;
+  void Evaluate(const PhraseBasedFeatureContext& context, 
+              ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartHypothesis& cur_hypo,
-  		               int featureId,
+  void EvaluateChart(const ChartBasedFeatureContext& context,
   		               ScoreComponentCollection* accumulator) const;
 
   void ComputeFeatures(const TargetPhrase& targetPhrase, 

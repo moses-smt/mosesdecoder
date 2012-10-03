@@ -31,6 +31,8 @@ namespace Moses
 
 struct VarSpanNode;
 
+/** @todo what is this?
+ */
 struct ApplicableRuleTrie
 {
  public:

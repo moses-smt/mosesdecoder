@@ -78,10 +78,7 @@ namespace Moses {
 			m_producers.push_back(ff);
 
       if (ff->IsStateless()) {
-        const StatelessFeatureFunction* statelessFF = static_cast<const StatelessFeatureFunction*>(ff);
-        if (!statelessFF->ComputeValueInTranslationOption()) {
-            m_statelessFFs.push_back(statelessFF);
-        }
+        m_statelessFFs.push_back(static_cast<const StatelessFeatureFunction*>(ff));
       } else {
         m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
       }
@@ -126,12 +123,10 @@ namespace Moses {
       //for(size_t i=0;i<m_statefulFFs.size();++i) {
       //}
       for(size_t i=0;i<m_statelessFFs.size();++i) {
-    	if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "pp")
-	  ((PhrasePairFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
-	else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm")
-	  ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
-        else if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "wt")
-	  ((WordTranslationFeature*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+        if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm") 
+        {
+	        ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
+        }
       }
       
       LMList::const_iterator iterLM;
@@ -142,25 +137,25 @@ namespace Moses {
       }
     }
     
-     void TranslationSystem::CleanUpAfterSentenceProcessing() const {
+     void TranslationSystem::CleanUpAfterSentenceProcessing(const InputType& source) const {
         
         for(size_t i=0;i<m_phraseDictionaries.size();++i)
         {
           PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionaries[i];
           PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
-          phraseDictionary->CleanUp();
+          phraseDictionary->CleanUp(source);
 
         }
   
         for(size_t i=0;i<m_generationDictionaries.size();++i)
-            m_generationDictionaries[i]->CleanUp();
+            m_generationDictionaries[i]->CleanUp(source);
   
         //something LMs could do after each sentence 
         LMList::const_iterator iterLM;
         for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
         {
           LanguageModel &languageModel = **iterLM;
-          languageModel.CleanUpAfterSentenceProcessing();
+          languageModel.CleanUpAfterSentenceProcessing(source);
         }
      }
     
@@ -180,11 +175,7 @@ namespace Moses {
     }
 
     std::vector<float> TranslationSystem::GetTranslationWeights(size_t index) const {
-    	std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer(index));
-    	//VERBOSE(1, "Read weightT from translation sytem.. ");
-    	//for (size_t i = 0; i < weights.size(); ++i)
-	  //VERBOSE(1, weights[i] << " ");
-	//VERBOSE(1, std::endl);
-    	return weights;
+      std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer(index));
+      return weights;
     }
 };

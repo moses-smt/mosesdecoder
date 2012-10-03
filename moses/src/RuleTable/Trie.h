@@ -37,6 +37,7 @@ class WordPenaltyProducer;
 
 /*** Implementation of a SCFG rule table in a trie.  Looking up a rule of
  * length n symbols requires n look-ups to find the TargetPhraseCollection.
+ * @todo why need this and PhraseDictionarySCFG?
  */
 class RuleTableTrie : public PhraseDictionary
 {

@@ -29,6 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace std;
 using namespace util;
 
+namespace MosesTuning
+{
+  
+
 int ParseInt(const StringPiece& str ) {
   char* errIndex;
   //could wrap?
@@ -130,3 +134,6 @@ bool FeatureDataIterator::equal(const FeatureDataIterator& rhs) const {
 const vector<FeatureDataItem>& FeatureDataIterator::dereference() const {
   return m_next;
 }
+
+}
+

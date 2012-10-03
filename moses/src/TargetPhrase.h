@@ -62,7 +62,6 @@ public:
   TargetPhrase();
   TargetPhrase(std::string out_string);
   TargetPhrase(const Phrase &targetPhrase);
-  ~TargetPhrase();
 
   //! used by the unknown word handler- these targets
   //! don't have a translation score, so wp is the only thing used
@@ -127,13 +126,15 @@ public:
   inline float GetFutureScore() const {
     return m_fullScore;
   }
+  inline void SetFutureScore(float fullScore) {
+    m_fullScore = fullScore;
+  }
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
 	}
 
-	//! TODO - why is this needed and is it set correctly by every phrase dictionary class ? should be set in constructor
-	// NOTE: this is not set correctly for unbinarized phrase tables
+  //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
 	void SetSourcePhrase(const Phrase&  p) 
 	{
 		m_sourcePhrase=p;
@@ -148,6 +149,10 @@ public:
 	const Word &GetTargetLHS() const
 	{ return m_lhsTarget; }
 	
+  Word &MutableTargetLHS() {
+    return m_lhsTarget;
+  }
+
   void SetAlignmentInfo(const StringPiece &alignString);
   void SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase);
   void SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo);
@@ -168,6 +173,30 @@ public:
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
+
+/**
+ * Hasher that looks at source and target phrase.
+ **/
+struct RuleHash 
+{
+  inline size_t operator()(const TargetPhrase& targetPhrase) const
+  {
+    size_t seed = 0;
+    boost::hash_combine(seed, targetPhrase);
+    boost::hash_combine(seed, targetPhrase.GetSourcePhrase());
+    return seed;
+  }
+};
+
+struct RuleComparator
+{
+  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const
+  {
+    return lhs.Compare(rhs) == 0 &&
+      lhs.GetSourcePhrase().Compare(rhs.GetSourcePhrase()) == 0;
+  }
+
+};
 
 }
 

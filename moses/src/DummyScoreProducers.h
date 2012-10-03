@@ -29,8 +29,8 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   virtual FFState* EvaluateChart(
-    const ChartHypothesis&,
-    int /* featureID */,
+    const ChartHypothesis& /* cur_hypo */,
+    int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection*) const {
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
@@ -38,7 +38,7 @@ public:
 };
 
 /** Doesn't do anything but provide a key into the global
- * score array to store the word penalty in.
+ *  score array to store the word penalty in.
  */
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
@@ -48,15 +48,18 @@ public:
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 
   virtual void Evaluate(
-  	const Hypothesis& cur_hypo,
+    const PhraseBasedFeatureContext& context,
   	ScoreComponentCollection* accumulator) const;
 
   virtual void EvaluateChart(
-    const ChartHypothesis&,
-    int /* featureID */,
-    ScoreComponentCollection*) const {
-		// needs to be implemented but does nothing
-	}
+    const ChartBasedFeatureContext& context,
+    ScoreComponentCollection* accumulator) const 
+    {
+      //required but does nothing.
+    }
+
+
+
 };
 
 /** unknown word penalty */
@@ -68,6 +71,18 @@ public:
 	std::string GetScoreProducerWeightShortName(unsigned) const;
 
   virtual bool ComputeValueInTranslationOption() const;
+  void Evaluate(  const PhraseBasedFeatureContext& context,
+  								ScoreComponentCollection* accumulator) const 
+  {
+    //do nothing - not a real feature
+  }
+
+  void EvaluateChart(
+    const ChartBasedFeatureContext& context,
+    ScoreComponentCollection* accumulator) const
+  {
+    //do nothing - not a real feature
+  }
 
 };
 
@@ -80,14 +95,14 @@ class MetaFeatureProducer : public StatelessFeatureFunction
   
   std::string GetScoreProducerWeightShortName(unsigned) const;
 
-  virtual void Evaluate(const Hypothesis& cur_hypo,
-			ScoreComponentCollection* accumulator) const {
+  void Evaluate(const PhraseBasedFeatureContext& context,
+		ScoreComponentCollection* accumulator) const {
+    //do nothing - not a real feature
   }
 
-  virtual void EvaluateChart(const ChartHypothesis&,
-			     int /* featureID */,
-			     ScoreComponentCollection*) const {
-    // needs to be implemented but does nothing                                                                 
+  void EvaluateChart(const ChartBasedFeatureContext& context,
+		     ScoreComponentCollection*) const {
+    //do nothing - not a real feature
   }
 };
 

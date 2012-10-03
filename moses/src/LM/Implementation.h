@@ -42,6 +42,7 @@ class FactorCollection;
 class Factor;
 class Phrase;
 
+//! to be returned from LM functions
 struct LMResult {
   // log probability
   float score;
@@ -120,7 +121,7 @@ public:
 
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
   virtual void InitializeBeforeSentenceProcessing() {};
-  virtual void CleanUpAfterSentenceProcessing() {};
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {};
 };
 
 class LMRefCount : public LanguageModel {
@@ -135,8 +136,8 @@ class LMRefCount : public LanguageModel {
       m_impl->InitializeBeforeSentenceProcessing();
     }
 
-    void CleanUpAfterSentenceProcessing() {
-      m_impl->CleanUpAfterSentenceProcessing();
+    void CleanUpAfterSentenceProcessing(const InputType& source) {
+      m_impl->CleanUpAfterSentenceProcessing(source);
     }
 
     const FFState* EmptyHypothesisState(const InputType &/*input*/) const {

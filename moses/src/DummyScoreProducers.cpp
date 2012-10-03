@@ -47,28 +47,45 @@ std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) c
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
     const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
-  const int USE_OLD = 1;
-  if (USE_OLD) {
+  if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
   }
+  else {
+    /* Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
+       Definitions: 
+       S   : current source range
+       S'  : last translated source phrase range
+       S'' : longest fully-translated initial segment
+    */
 
-  // Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
+    int prefixEndPos = (int)FirstGap-1;
+    if((int)FirstGap==-1)
+    prefixEndPos = -1;
 
-  int prefixEndPos = FirstGap-1;
-  if ((int) curr.GetStartPos() == prefixEndPos+1) {
-    return 0;
+    // case1: S is adjacent to S'' => return 0
+    if ((int) curr.GetStartPos() == prefixEndPos+1) {
+    IFVERBOSE(4) std::cerr<< "MQ07disto:case1" << std::endl;
+      return 0;
+    }
+
+    // case2: S is to the left of S' => return 2(length(S))
+    if ((int) curr.GetEndPos() < (int) prev.GetEndPos()) {
+    IFVERBOSE(4) std::cerr<< "MQ07disto:case2" << std::endl;
+      return (float) -2*(int)curr.GetNumWordsCovered();
+    }
+
+    // case3: S' is a subsequence of S'' => return 2(nbWordBetween(S,S'')+length(S))
+    if ((int) prev.GetEndPos() <= prefixEndPos) {
+    IFVERBOSE(4) std::cerr<< "MQ07disto:case3" << std::endl;
+      int z = (int)curr.GetStartPos()-prefixEndPos - 1;
+      return (float) -2*(z + (int)curr.GetNumWordsCovered());
+    }
+
+    // case4: otherwise => return 2(nbWordBetween(S,S')+length(S))
+    IFVERBOSE(4) std::cerr<< "MQ07disto:case4" << std::endl;
+    return (float) -2*((int)curr.GetNumWordsBetween(prev) + (int)curr.GetNumWordsCovered());
+    
   }
-
-  if ((int) curr.GetEndPos() < (int) prev.GetEndPos()) {
-    return (float) -2*curr.GetNumWordsCovered();
-  }
-
-  if ((int) prev.GetEndPos() <= prefixEndPos) {
-    int z = curr.GetStartPos()-prefixEndPos;
-    return (float) -2*(z + curr.GetNumWordsCovered());
-  }
-
-  return (float) -2*(curr.GetNumWordsBetween(prev) + curr.GetNumWordsCovered());
 }
 
 
@@ -86,7 +103,7 @@ FFState* DistortionScoreProducer::Evaluate(
   out->PlusEquals(this, distortionScore);
   DistortionState_traditional* res = new DistortionState_traditional(
     hypo.GetCurrSourceWordsRange(),
-    hypo.GetPrevHypo()->GetWordsBitmap().GetFirstGapPos());
+    hypo.GetWordsBitmap().GetFirstGapPos());
   return res;
 }
 
@@ -96,9 +113,11 @@ std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
   return "w";
 }
 
-void WordPenaltyProducer::Evaluate(const Hypothesis& cur_hypo, ScoreComponentCollection* out) const
+void WordPenaltyProducer::Evaluate(
+    const PhraseBasedFeatureContext& context,
+    ScoreComponentCollection* out) const
 {
-	const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
+	const TargetPhrase& tp = context.GetTargetPhrase();
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 

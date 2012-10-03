@@ -405,6 +405,9 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   VERBOSE(2,"Translation Option Collection\n " << *this << endl);
 
+  // Incorporate distributed lm scores.
+  IncorporateDLMScores();
+
   ProcessUnknownWord();
 
   // Prune
@@ -417,6 +420,75 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
+
+  // stateless feature scores
+  PreCalculateScores();
+}
+
+void TranslationOptionCollection::IncorporateDLMScores() {
+    // Build list of dlms.
+    const vector<const StatefulFeatureFunction*>& ffs =
+           m_system->GetStatefulFeatureFunctions();
+    std::map<int, LanguageModel*> dlm_ffs;
+    for (unsigned i = 0; i < ffs.size(); ++i) {
+        if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") {
+            dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
+            dlm_ffs[i]->SetFFStateIdx(i);
+        }
+    }
+
+    // Don't need to do anything if we don't have any distributed
+    // language models.
+    if (dlm_ffs.size() == 0) {
+        return;
+    }
+
+    // Iterate over all translation options in the collection.
+    std::vector< std::vector< TranslationOptionList > >::iterator start_iter; 
+    for (start_iter = m_collection.begin();
+         start_iter != m_collection.end();
+         ++start_iter) {
+        std::vector< TranslationOptionList >::iterator end_iter;
+        for (end_iter = (*start_iter).begin();
+             end_iter != (*start_iter).end();
+             ++end_iter) {
+            std::vector< TranslationOption* >::iterator option_iter;
+            for (option_iter = (*end_iter).begin();
+                 option_iter != (*end_iter).end();
+                 ++option_iter) {
+
+                // Get a handle on the current translation option.
+                TranslationOption* option = *option_iter;
+
+                std::map<int, LanguageModel*>::iterator dlm_iter;
+                for (dlm_iter = dlm_ffs.begin();
+                     dlm_iter != dlm_ffs.end();
+                     ++dlm_iter) {
+                    LanguageModel* dlm = (*dlm_iter).second;
+
+
+                    float full_score;
+                    float ngram_score;
+                    size_t oov_count;
+                    TargetPhrase& phrase =
+                        const_cast<TargetPhrase&>(option->GetTargetPhrase());
+                    dlm->CalcScoreFromCache(phrase,
+                                            full_score,
+                                            ngram_score,
+                                            oov_count);
+                    ScoreComponentCollection& option_scores = 
+                        const_cast<ScoreComponentCollection&>(option->GetScoreBreakdown());
+                    option_scores.Assign(dlm, ngram_score);
+                    ScoreComponentCollection& phrase_scores =
+                        const_cast<ScoreComponentCollection&>(phrase.GetScoreBreakdown());
+                    phrase_scores.Assign(dlm, ngram_score);
+
+                    float weighted_score = full_score * dlm->GetWeight();
+                    phrase.SetFutureScore(phrase.GetFutureScore() + weighted_score);
+                }
+            }
+        }
+    }
 }
 
 void TranslationOptionCollection::Sort()
@@ -605,6 +677,11 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
   return out;
 }
 
+const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() const 
+{
+  return m_unksrcs;
+}
+
 void TranslationOptionCollection::CacheLexReordering()
 {
   const vector<LexicalReordering*> &lexReorderingModels = m_system->GetReorderModels();
@@ -637,6 +714,51 @@ void TranslationOptionCollection::CacheLexReordering()
     }
   }
 }
+
+void TranslationOptionCollection::PreCalculateScores() 
+{
+  //Figure out which features need to be precalculated
+  const vector<const StatelessFeatureFunction*>& sfs =
+    m_system->GetStatelessFeatureFunctions();
+  vector<const StatelessFeatureFunction*> precomputedFeatures;
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    if (sfs[i]->ComputeValueInTranslationOption() && 
+        !sfs[i]->ComputeValueInTranslationTable()) {
+      precomputedFeatures.push_back(sfs[i]);
+    }
+  }
+  //empty coverage vector
+  WordsBitmap coverage(m_source.GetSize());
+
+  //Go through translation options and precompute features
+  for (size_t i = 0; i < m_collection.size(); ++i) {
+    for (size_t j = 0; j < m_collection[i].size(); ++j) {
+      for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
+        const TranslationOption* toption =  m_collection[i][j].Get(k);
+        ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
+        PhraseBasedFeatureContext context(*toption, m_source);
+        for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
+          precomputedFeatures[si]->Evaluate(context, &breakdown);
+        }
+      }
+    }
+  }
+}
+
+void TranslationOptionCollection::InsertPreCalculatedScores
+  (const TranslationOption& translationOption, ScoreComponentCollection* scoreBreakdown) 
+    const
+{
+  boost::unordered_map<TranslationOption,ScoreComponentCollection>::const_iterator scoreIter = 
+    m_precalculatedScores.find(translationOption);
+  if (scoreIter != m_precalculatedScores.end()) {
+    scoreBreakdown->PlusEquals(scoreIter->second);
+  } else {
+    TRACE_ERR("ERROR: " << translationOption << " missing from precalculation cache" << endl);
+    assert(0);  
+  }
+}
+
 //! list of trans opt for a particular span
 TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {

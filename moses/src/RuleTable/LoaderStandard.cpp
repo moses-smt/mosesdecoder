@@ -150,7 +150,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
                                 , const WordPenaltyProducer* wpProducer
                                 , RuleTableTrie &ruleTable)
 {
-  PrintUserTime("Start loading new format pt model");
+  PrintUserTime(string("Start loading text SCFG phrase table. ") + (format==MosesFormat?"Moses ":"Hiero ") + " format");
 
   const StaticData &staticData = StaticData::Instance();
   const std::string& factorDelimiter = staticData.GetFactorDelimiter();
@@ -179,6 +179,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());
       abort();
+    }
+
+    if (tokens.size() ==  4) {
+      tokens.push_back("1 1"); //dummy rule count for glue rules
     }
 
     const string &sourcePhraseString = tokens[0]

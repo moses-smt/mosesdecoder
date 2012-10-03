@@ -1,6 +1,8 @@
 #ifndef moses_SparsePhraseFeature_h
 #define moses_SparsePhraseFeature_h
 
+#include <stdexcept>
+
 #include "FactorCollection.h"
 #include "FeatureFunction.h"
 
@@ -16,14 +18,13 @@ public:
   SparsePhraseDictionaryFeature():
     StatelessFeatureFunction("stm", ScoreProducer::unlimited) {}
 
-  void Evaluate(const TargetPhrase& cur_phrase,
-                ScoreComponentCollection* accumulator) const;
+  void Evaluate(const PhraseBasedFeatureContext& context,
+              ScoreComponentCollection* accumulator) const;
   
   void EvaluateChart(
-    const ChartHypothesis&,
-    int /* featureID */,
+    const ChartBasedFeatureContext& context,
     ScoreComponentCollection*) const {
-		CHECK(0); // feature function not valid in chart decoder
+    throw std::logic_error("SparsePhraseDictionaryFeature not valid in chart decoder");
 	}
 
   // basic properties
