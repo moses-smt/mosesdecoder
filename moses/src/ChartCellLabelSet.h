@@ -73,6 +73,10 @@ class ChartCellLabelSet
     return p == m_map.end() ? 0 : &(p->second);
   }
 
+  const void *&FindOrInsert(const Word &w) {
+    return m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w))).first->second.MutableStack();
+  }
+
  private:
   const WordsRange &m_coverage;
   MapType m_map;

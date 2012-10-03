@@ -50,17 +50,14 @@ class ChartCellBase {
 
     virtual ~ChartCellBase();
 
-    //! @todo what is a m_sourceWordLabel?
-    const ChartCellLabelSet &GetTargetLabelSet() const {
-      return m_targetLabelSet;
-    }
+    const ChartCellLabelSet &GetTargetLabelSet() const { return m_targetLabelSet; }
 
-    const WordsRange &GetCoverage() const {
-      return m_coverage;
-    }
+    ChartCellLabelSet &MutableTargetLabelSet() { return m_targetLabelSet; }
+
+    const WordsRange &GetCoverage() const { return m_coverage; }
 
   protected:
-    WordsRange m_coverage;
+    const WordsRange m_coverage;
     ChartCellLabelSet m_targetLabelSet;
 };
 

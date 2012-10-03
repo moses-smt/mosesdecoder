@@ -1,26 +1,29 @@
 #pragma once
 
+#include "ChartParserCallback.h"
+#include "StackVec.h"
+#include "Incremental/Owner.h"
+
 namespace Moses {
 namespace Incremental {
 
+class TargetPhraseCollection;
+class WordsRange;
+class ChartCellLabelSet;
+
 // Replacement for ChartTranslationOptionList
-class List {
+// TODO: implement count and score thresholding.  
+class List : public ChartParserCallback {
   public:
-    List();
+    explicit List(ChartCellBase &fill) : fill_(fill) {}
 
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordRange &ignored);
 
-    void Process(ChartCellLabelSet &out);
-
-    void ShrinkToLimit() const {}
-    void ApplyThreshold() const {}
-
   private:
-    size_t limit_;
+    ChartCellLabelSet &fill_;
 
-    float threshold_;
-
-    search::Vertex  
+    boost::object_pool<search::Vertex> &vertex_pool_;
+    boost::object_pool<search::Edge> &edge_pool_;
 };
 
 } // namespace Incremental

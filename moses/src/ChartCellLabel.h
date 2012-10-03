@@ -46,6 +46,7 @@ class ChartCellLabel
   const WordsRange &GetCoverage() const { return m_coverage; }
   const Word &GetLabel() const { return m_label; }
   const void *GetStack() const { return m_stack; }
+  const void *&MutableStack() { return m_stack; }
 
   bool operator<(const ChartCellLabel &other) const
   {
