@@ -21,7 +21,7 @@
 
 #include "RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "InputType.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "DotChartInMemory.h"
 #include "StaticData.h"
 #include "NonTerminal.h"
@@ -65,7 +65,7 @@ ChartRuleLookupManagerMemoryPerSentence::~ChartRuleLookupManagerMemoryPerSentenc
 
 void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();

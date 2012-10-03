@@ -24,7 +24,7 @@
 #include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "../../OnDiskPt/TargetPhraseCollection.h"
 
 using namespace std;
@@ -81,7 +81,7 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();

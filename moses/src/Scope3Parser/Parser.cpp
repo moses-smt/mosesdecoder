@@ -39,7 +39,7 @@ namespace Moses
 
 void Scope3Parser::GetChartRuleCollection(
     const WordsRange &range,
-    ChartTranslationOptionList &outColl)
+    ChartParserCallback &outColl)
 {
   const size_t start = range.GetStartPos();
   const size_t end = range.GetEndPos();

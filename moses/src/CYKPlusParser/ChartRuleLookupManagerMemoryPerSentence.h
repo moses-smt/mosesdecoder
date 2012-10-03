@@ -37,7 +37,7 @@
 namespace Moses
 {
 
-class ChartTranslationOptionList;
+class ChartParserCallback;
 class DottedRuleColl;
 class WordsRange;
 
@@ -53,7 +53,7 @@ class ChartRuleLookupManagerMemoryPerSentence : public ChartRuleLookupManagerCYK
 
   virtual void GetChartRuleCollection(
     const WordsRange &range,
-    ChartTranslationOptionList &outColl);
+    ChartParserCallback &outColl);
 
  private:
   void ExtendPartialRuleApplication(

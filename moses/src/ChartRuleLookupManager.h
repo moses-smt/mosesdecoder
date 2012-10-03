@@ -27,7 +27,7 @@
 namespace Moses
 {
 
-class ChartTranslationOptionList;
+class ChartParserCallback;
 class WordsRange;
 
 /** Defines an interface for looking up rules in a rule table.  Concrete
@@ -65,7 +65,7 @@ public:
    */
   virtual void GetChartRuleCollection(
     const WordsRange &range,
-    ChartTranslationOptionList &outColl) = 0;
+    ChartParserCallback &outColl) = 0;
 
 private:
   //! Non-copyable: copy constructor and assignment operator not implemented.
