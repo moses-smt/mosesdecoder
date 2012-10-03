@@ -45,7 +45,6 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
-class ChartTranslationOptionList;
 class ChartCellCollection;
 class TranslationSystem;
 class ChartRuleLookupManager;
