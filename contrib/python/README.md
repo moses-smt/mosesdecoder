@@ -10,9 +10,15 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 ## Building
 
-1.  Build the python extension
+1.  Build the python extension: 
 
-        python setup.py build_ext -i [--with-cmph]
+    You need to compile Moses with link=shared and (for while) without SRILM (for some reason SRILM prevents the compiler from generating libLM.so)
+
+        ./bjam --libdir=path cxxflags=-fPIC link=shared
+
+    Then you can build the extension (in case you used --libdir=path above, use --moses-lib=path below) 
+
+        python setup.py build_ext -i [--with-cmph] [--moses-lib=path]
 
 3.  Check the example code
 

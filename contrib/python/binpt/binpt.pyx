@@ -49,11 +49,11 @@ cdef class QueryResult(object):
         return self._wa
 
     @staticmethod
-    def desc(x, y, keys = lambda r: r.scores[0]):
-        '''Returns the sign of keys(y) - keys(x).
+    def desc(x, y, key = lambda r: r.scores[0]):
+        '''Returns the sign of key(y) - key(x).
         Can only be used if scores is not an empty vector as
         keys defaults to scores[0]'''
-        return fsign(keys(y) - keys(x))
+        return fsign(key(y) - key(x))
 
     def __str__(self):
         '''Returns a string such as: <words> ||| <scores> [||| word-alignment info]'''
@@ -138,7 +138,7 @@ cdef class BinaryPhraseTable(object):
     def delimiters(self):
         return self._delimiters
 
-    def query(self, line, cmp = None, top = 0):
+    def query(self, line, cmp = None, key = lambda x: x.scores[0], top = 0):
         '''Queries the phrase table and returns a list of matches.
         Each match is a QueryResult.
         If 'cmp' is defined the return list is sorted.
