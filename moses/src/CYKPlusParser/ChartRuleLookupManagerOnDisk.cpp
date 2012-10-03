@@ -268,8 +268,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
     }
   } // for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
 
-  outColl.ShrinkToLimit();
-
   //cerr << numDerivations << " ";
 }
 

@@ -46,7 +46,6 @@ class ChartTranslationOptionList : public ChartParserCallback {
            const WordsRange &);
 
   void Clear();
-  void ShrinkToLimit();
   void ApplyThreshold();
 
  private:
