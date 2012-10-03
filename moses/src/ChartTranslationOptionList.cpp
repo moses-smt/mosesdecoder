@@ -98,8 +98,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
-void ChartTranslationOptionList::ShrinkToLimit()
-{
+void ChartTranslationOptionList::ApplyThreshold() {
   if (m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
     // without being pruned.
@@ -112,10 +111,7 @@ void ChartTranslationOptionList::ShrinkToLimit()
                      ChartTranslationOptionOrderer());
     m_size = m_ruleLimit;
   }
-}
 
-void ChartTranslationOptionList::ApplyThreshold()
-{
   // keep only those over best + threshold
 
   float scoreThreshold = -std::numeric_limits<float>::infinity();

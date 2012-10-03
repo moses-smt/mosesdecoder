@@ -165,8 +165,6 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   }
 
   dottedRuleCol.Clear(relEndPos+1);
-
-  outColl.ShrinkToLimit();
 }
 
 // Given a partial rule application ending at startPos-1 and given the sets of

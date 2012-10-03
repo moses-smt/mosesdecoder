@@ -1059,7 +1059,7 @@ sub execute_steps {
 		    $DO{$i}++;
 		    print "\texecuting $step via qsub ($active active)\n";
 		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
-		    `qsub $qsub_args -e $step.STDERR -o $step.STDOUT $step`;
+		    `qsub $qsub_args -S /bin/bash -e $step.STDERR -o $step.STDOUT $step`;
 		}
 
 		# execute in fork

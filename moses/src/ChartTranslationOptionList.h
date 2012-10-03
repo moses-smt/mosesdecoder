@@ -46,7 +46,6 @@ class ChartTranslationOptionList
            const WordsRange &);
 
   void Clear();
-  void ShrinkToLimit();
   void ApplyThreshold();
 
  private:
