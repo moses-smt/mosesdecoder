@@ -6,6 +6,7 @@ use Getopt::Long "GetOptions";
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
+$|=1; # disable output buffering
 
 # apply switches
 my $MODEL;
