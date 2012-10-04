@@ -38,6 +38,7 @@ struct Options {
       , maxScope(3)
       , minimal(false)
       , pcfg(false)
+      , sentenceOffset(0)
       , unpairedExtractFormat(false) {}
 
   // Positional options
@@ -57,6 +58,7 @@ struct Options {
   int maxScope;
   bool minimal;
   bool pcfg;
+  int sentenceOffset;
   bool unpairedExtractFormat;
   std::string unknownWordFile;
 };
