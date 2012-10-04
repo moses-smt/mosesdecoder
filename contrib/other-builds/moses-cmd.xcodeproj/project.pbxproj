@@ -337,7 +337,6 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
-					"-lboost_filesystem-mt",
 					"-lboost_system-mt",
 					"-lcmph",
 				);
@@ -385,7 +384,6 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
-					"-lboost_filesystem-mt",
 					"-lboost_system-mt",
 					"-lcmph",
 				);
@@ -430,7 +428,6 @@
 					"-lflm",
 					"-llattice",
 					"-lboost_thread-mt",
-					"-lboost_filesystem-mt",
 					"-lboost_system-mt",
 					"-lcmph",
 				);
