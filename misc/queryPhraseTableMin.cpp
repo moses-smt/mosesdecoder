@@ -22,11 +22,19 @@ int main(int argc, char **argv)
   bool useAlignments = false;
   bool reportCounts = false;
 
+  std::string paramSource;
+  bool single = false;
+  
   for(int i = 1; i < argc; i++) {
     if(!strcmp(argv[i], "-n")) {
       if(i + 1 == argc)
         usage();
       nscores = atoi(argv[++i]);
+    } else if(!strcmp(argv[i], "-s")) {
+      if(i + 1 == argc)
+        usage();
+      paramSource = argv[++i];
+      single = true;
     } else if(!strcmp(argv[i], "-t")) {
       if(i + 1 == argc)
         usage();
@@ -49,15 +57,30 @@ int main(int argc, char **argv)
   
   LMList lmList;
   
+  Parameter *parameter = new Parameter();
+  const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
+  
+  const_cast<StaticData&>(StaticData::Instance()).LoadData(parameter);
+
+  
   PhraseDictionaryFeature pdf(Compact, nscores, nscores, input, output, ttable, weight, 0, "", "");
   PhraseDictionaryCompact pdc(nscores, Compact, &pdf, false, useAlignments);
   bool ret = pdc.Load(input, output, ttable, weight, 0, lmList, 0);                                                                           
   assert(ret);
   
   std::string line;
-  while(getline(std::cin, line)) {
+  while(single || getline(std::cin, line)) {
+    
+    std::string sourceString = line;
+    if(single)
+      sourceString = paramSource;
+    
     Phrase sourcePhrase(0);
-    sourcePhrase.CreateFromString(input, line, "||dummy_string||");
+    sourcePhrase.CreateFromString(input, sourceString, "||dummy_string||");
     
     TargetPhraseVectorPtr decodedPhraseColl
       = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
@@ -74,7 +97,8 @@ int main(int argc, char **argv)
           if(useAlignments)
             std::cout << " " << tp.GetAlignmentInfo() << "|||"; 
           
-          for(size_t i = 0; i < tp.GetScoreBreakdown().size(); i++)
+          size_t offset = tp.GetScoreBreakdown().size() - nscores;
+          for(size_t i = offset; i < tp.GetScoreBreakdown().size(); i++)
             std::cout << " " << exp(tp.GetScoreBreakdown()[i]);
           std::cout << std::endl;
         }
@@ -83,6 +107,9 @@ int main(int argc, char **argv)
       std::cout << sourcePhrase << 0 << std::endl;
     
     std::cout.flush();
+    
+    if(single)
+      return 0;
   }
 }
 
@@ -92,6 +119,7 @@ void usage()
             "-n <nscores>      number of scores in phrase table (default: 5)\n"
             "-c                only report counts of entries\n"
             "-a                binary phrase table contains alignments\n"
-            "-t <ttable>       phrase table\n";
+            "-t <ttable>       phrase table\n"
+            "-s <string>       query single source phrase string\n";
   exit(1);
 }
