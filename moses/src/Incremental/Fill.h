@@ -4,6 +4,9 @@
 #include "StackVec.h"
 #include "Incremental/Owner.h"
 
+#include "search/context.hh"
+#include "search/edge_queue.hh"
+
 namespace Moses {
 namespace Incremental {
 
@@ -13,16 +16,17 @@ class ChartCellLabelSet;
 
 // Replacement for ChartTranslationOptionList
 // TODO: implement count and score thresholding.  
-class List : public ChartParserCallback {
+template <class Model> class Fill : public ChartParserCallback {
   public:
-    explicit List(ChartCellBase &fill) : fill_(fill) {}
-
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordRange &ignored);
 
+    void Search();
+    
   private:
-    ChartCellLabelSet &fill_;
+    search::Context<Model> &context_;
 
-    boost::object_pool<search::Vertex> &vertex_pool_;
+    search::EdgeQueue edges_;
+
     boost::object_pool<search::Edge> &edge_pool_;
 };
 

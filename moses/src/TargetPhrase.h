@@ -118,10 +118,10 @@ public:
   void WriteToRulePB(hgmert::Rule* pb) const;
 #endif
 
-  /*  inline float GetTranslationScore() const
-    {
-      return m_transScore;
-    }*/
+  inline float GetTranslationScore() const {
+    return m_transScore;
+  }
+
   /***
    * return the estimated score resulting from our being added to a sentence
    * (it's an estimate because we don't have full n-gram info for the language model
