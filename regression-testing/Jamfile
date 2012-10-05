@@ -13,10 +13,10 @@ if $(with-regtest) {
 if $(with-regtest) {
   test-dir = $(with-regtest)/tests ;
 
-  rule reg_test ( name : tests * : program : action ) {
+  rule reg_test ( name : tests * : programs * : action ) {
     alias $(name) : $(tests:D=).passed ;
     for test in $(tests) {
-      make $(test:D=).passed : $(program) : $(action) ;
+      make $(test:D=).passed : $(programs) : $(action) ;
       alias $(test) : $(test:D=).passed ;
     }
   }
@@ -43,11 +43,11 @@ if $(with-regtest) {
   }
   reg_test extractrules : [ glob $(test-dir)/extract-rules.* : $(with-regtest)/extract-rules.hierarchical ] : ../phrase-extract//extract-rules : @reg_test_extractrules ;
 
-  
+  pwd = [ path.pwd ] ;
   actions reg_test_mert {
-    $(TOP)/regression-testing/run-test-mert.perl --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+    $(TOP)/regression-testing/run-test-mert.perl --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) --bin-dir=$(pwd)/$(>:D) && touch $(<)
   }
-  reg_test mert : [ glob $(test-dir)/mert.* ] : ../mert//mert : @reg_test_mert ;
+  reg_test mert : [ glob $(test-dir)/mert.* ] : ../mert//mert ../mert//extractor : @reg_test_mert ;
 
    alias all : phrase chart mert score extract extractrules ;
 }
