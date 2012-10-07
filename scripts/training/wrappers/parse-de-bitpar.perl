@@ -9,6 +9,9 @@ use File::Temp qw/tempfile/;
 my $BITPAR = "/exports/home/s0565741/work/bin/bitpar";
 my $TMPDIR = "tmp";
 
+my $SCRIPTS_ROOT_DIR = "$RealBin/../..";
+my $DEESCAPE = "$SCRIPTS_ROOT_DIR/tokenizer/deescape-special-chars.perl";
+
 my $DEBUG = 0;
 my $BASIC = 0;
 my $OLD_BITPAR = 0;
@@ -27,11 +30,11 @@ my ($scriptname, $directories) = fileparse($0);
 my ($TMP, $tmpfile) = tempfile("$scriptname-XXXXXXXXXX", DIR=>$TMPDIR, UNLINK=>1);
 if ($OLD_BITPAR)
 {
-  open(INPUT,"iconv -c -f UTF-8 -t iso-8859-1 |");
+  open(INPUT,"$DEESCAPE | iconv -c -f UTF-8 -t iso-8859-1 |");
 }
 else
 {
-  open (INPUT,"cat |");
+  open (INPUT,"$DEESCAPE |");
 }
 while(<INPUT>)
 {
@@ -162,7 +165,12 @@ sub is_aux_label {
 sub escape {
     my ($text) = @_;
     $text =~ s/&/&amp;/g;
+    $text =~ s/\|/&#124;/g;
     $text =~ s/</&lt;/g;
     $text =~ s/>/&gt;/g;
+    $text =~ s/'/&apos;/g;
+    $text =~ s/"/&quot;/g;
+    $text =~ s/\[/&#91;/g;
+    $text =~ s/\]/&#93;/g;
     return $text;
 }
