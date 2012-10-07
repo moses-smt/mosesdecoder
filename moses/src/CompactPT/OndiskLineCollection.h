@@ -114,6 +114,7 @@ class OndiskLineCollection
               it != buffer.end(); it++)
             byteSize += ThrowingFwrite(it->c_str(), sizeof(char), it->size(), out)
                         * sizeof(char);
+          buffer.clear();
         }
       }
       for(std::vector<std::string>::iterator it = buffer.begin();
