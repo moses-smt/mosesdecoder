@@ -132,12 +132,13 @@ class MonotonicVector
     
     void commit()
     {
-      assert(m_final != true);
-      Simple9::Encode(m_tempDiffs.begin(), m_tempDiffs.end(),
-                      std::back_inserter(m_diffs));
-      m_size += m_tempDiffs.size();
-      m_tempDiffs.clear();
-      m_final = true;
+      if(m_final != true) {
+        Simple9::Encode(m_tempDiffs.begin(), m_tempDiffs.end(),
+                        std::back_inserter(m_diffs));
+        m_size += m_tempDiffs.size();
+        m_tempDiffs.clear();
+        m_final = true;
+      }
     }
     
     size_t usage()

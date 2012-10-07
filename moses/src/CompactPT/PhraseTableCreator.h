@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 
 #include "BlockHashIndex.h"
-#include "StringVector.h"
+#include "OndiskLineCollection.h"
 #include "CanonicalHuffman.h"
 
 namespace Moses
@@ -252,11 +252,9 @@ class PhraseTableCreator
     std::vector<size_t> m_lexicalTableIndex;
     std::vector<SrcTrg> m_lexicalTable;
     
-    StringVector<unsigned char, unsigned long, MmapAllocator>
-    m_encodedTargetPhrases;
+    OndiskLineCollection m_encodedTargetPhrases;
         
-    StringVector<unsigned char, unsigned long, MmapAllocator>
-    m_compressedTargetPhrases;
+    OndiskLineCollection m_compressedTargetPhrases;
     
     boost::unordered_map<std::string, unsigned> m_targetSymbolsMap;
     boost::unordered_map<std::string, unsigned> m_sourceSymbolsMap;
@@ -410,13 +408,12 @@ class CompressionTask
     static boost::mutex m_mutex;
 #endif
     static size_t m_collectionNum;
-    StringVector<unsigned char, unsigned long, MmapAllocator>&
-    m_encodedCollections;
+    OndiskLineCollection& m_encodedCollections;
     PhraseTableCreator& m_creator;
     
   public:
-    CompressionTask(StringVector<unsigned char, unsigned long, MmapAllocator>&
-                    encodedCollections, PhraseTableCreator& creator);
+    CompressionTask(OndiskLineCollection& encodedCollections,
+                    PhraseTableCreator& creator);
     void operator()();
 };
 

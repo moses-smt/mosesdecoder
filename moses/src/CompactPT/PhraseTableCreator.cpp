@@ -230,7 +230,7 @@ void PhraseTableCreator::Save()
     m_alignTree->Save(m_outFile);
   
   // Save compressed target phrase collections 
-  m_compressedTargetPhrases.save(m_outFile);
+  m_compressedTargetPhrases.Save(m_outFile);
 }
     
 void PhraseTableCreator::LoadLexicalTable(std::string filePath)
@@ -940,7 +940,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
           targetPhraseCollection << *it;
         
         m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));    
-        m_encodedTargetPhrases.push_back(targetPhraseCollection.str());
+        m_encodedTargetPhrases.PushBack(targetPhraseCollection.str());
         
         m_lastFlushedSourceNum++;
         if(m_lastFlushedSourceNum % 100000 == 0)
@@ -982,7 +982,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
         m_lastCollection.begin(); it != m_lastCollection.end(); it++)
         targetPhraseCollection << *it;
           
-      m_encodedTargetPhrases.push_back(targetPhraseCollection.str());
+      m_encodedTargetPhrases.PushBack(targetPhraseCollection.str());
       m_lastCollection.clear();
     }
       
@@ -1019,7 +1019,7 @@ void PhraseTableCreator::FlushCompressedQueue(bool force)
       m_queue.pop();
       m_lastFlushedLine++;
           
-      m_compressedTargetPhrases.push_back(pi.GetTrg());
+      m_compressedTargetPhrases.PushBack(pi.GetTrg());
       
       if((pi.GetLine()+1) % 100000 == 0)
         std::cerr << ".";
@@ -1225,25 +1225,27 @@ size_t CompressionTask::m_collectionNum = 0;
 boost::mutex CompressionTask::m_mutex;
 #endif
 
-CompressionTask::CompressionTask(StringVector<unsigned char, unsigned long,
-                              MmapAllocator>& encodedCollections,
+CompressionTask::CompressionTask(OndiskLineCollection& encodedCollections,
                               PhraseTableCreator& creator)
   : m_encodedCollections(encodedCollections), m_creator(creator) {}
   
 void CompressionTask::operator()()
 {
   size_t collectionNum;
+  std::string collection;
+  
   {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
     collectionNum = m_collectionNum;
+    if(collectionNum < m_encodedCollections.Size())
+      collection = m_encodedCollections.GetNext();
     m_collectionNum++;
   }
   
-  while(collectionNum < m_encodedCollections.size())
+  while(collectionNum < m_encodedCollections.Size())
   {
-    std::string collection = m_encodedCollections[collectionNum];
     std::string compressedCollection
       = m_creator.CompressEncodedCollection(collection);
 
@@ -1257,6 +1259,8 @@ void CompressionTask::operator()()
     m_creator.FlushCompressedQueue();
     
     collectionNum = m_collectionNum;  
+    if(collectionNum < m_encodedCollections.Size())
+      collection = m_encodedCollections.GetNext();
     m_collectionNum++;    
   }
 }

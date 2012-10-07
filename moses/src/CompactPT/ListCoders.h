@@ -255,6 +255,7 @@ class Simple9
           buffer[lastpos] = *(i + lastpos);
           
           uint reqbit = ceil(log(buffer[lastpos]+1)/log2);
+          reqbit = (reqbit == 0) ? 1 : reqbit;
           assert(reqbit <= 28);
           
           uint bit = 28/floor(28/reqbit);
