@@ -3,6 +3,9 @@
 #include "search/edge.hh"
 
 namespace Moses {
+
+class TargetPhrase;
+
 namespace Incremental {
 
 class Edge : public search::Edge {
