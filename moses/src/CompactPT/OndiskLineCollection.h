@@ -79,7 +79,6 @@ class OndiskLineCollection
     void PushBack(std::string s)
     {
       size_t pos = std::ftell(m_filePtr);
-      std::cerr << m_currPos << " : " << pos << std::endl;
       m_positions.push_back(pos);
       ThrowingFwrite(s.c_str(), sizeof(char), s.size(), m_filePtr);
       m_currPos++;
