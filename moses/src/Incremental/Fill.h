@@ -23,16 +23,17 @@ class WordsRange;
 class ChartCellLabelSet;
 
 namespace Incremental {
+class Owner;
 
 // Replacement for ChartTranslationOptionList
 // TODO: implement count and score thresholding.  
 template <class Model> class Fill : public ChartParserCallback {
   public:
-    Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, boost::object_pool<Edge> &edge_pool);
+    Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, Owner &owner);
 
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
-    void Search();
+    void Search(ChartCellLabelSet &out);
     
   private:
     lm::WordIndex Convert(const Word &word) const ;
@@ -41,9 +42,10 @@ template <class Model> class Fill : public ChartParserCallback {
 
     const std::vector<lm::WordIndex> &vocab_mapping_;
 
+    Owner &owner_;
+
     search::EdgeQueue edges_;
 
-    boost::object_pool<Edge> &edge_pool_;
 };
 
 } // namespace Incremental

@@ -46,11 +46,15 @@ class ChartCellLabelSet
 
  public:
   typedef MapType::const_iterator const_iterator;
+  typedef MapType::iterator iterator;
 
   ChartCellLabelSet(const WordsRange &coverage) : m_coverage(coverage) {}
 
   const_iterator begin() const { return m_map.begin(); }
   const_iterator end() const { return m_map.end(); }
+  
+  iterator mutable_begin() { return m_map.begin(); }
+  iterator mutable_end() { return m_map.end(); }
 
   void AddWord(const Word &w)
   {
@@ -58,9 +62,11 @@ class ChartCellLabelSet
   }
 
   // Stack is a HypoList or whatever the search algorithm uses.  
-  void AddConstituent(const Word &w, const void *stack)
+  void AddConstituent(const Word &w, const HypoList *stack)
   {
-    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, stack)));
+    ChartCellLabel::Stack s;
+    s.cube = stack;
+    m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w, s)));
   }
 
   bool Empty() const { return m_map.empty(); }
@@ -73,7 +79,7 @@ class ChartCellLabelSet
     return p == m_map.end() ? 0 : &(p->second);
   }
 
-  const void *&FindOrInsert(const Word &w) {
+  ChartCellLabel::Stack &FindOrInsert(const Word &w) {
     return m_map.insert(std::make_pair(w, ChartCellLabel(m_coverage, w))).first->second.MutableStack();
   }
 

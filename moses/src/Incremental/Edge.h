@@ -12,6 +12,8 @@ class Edge : public search::Edge {
   public:
     explicit Edge(const TargetPhrase &origin) : origin_(origin) {}
 
+    const TargetPhrase &GetMoses() const { return origin_; }
+
   private:
     const TargetPhrase &origin_;
 };
