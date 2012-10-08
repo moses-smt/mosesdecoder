@@ -376,6 +376,7 @@ void PhraseTableCreator::CalcHuffmanCodes()
        
   m_symbolTree = new SymbolTree(m_symbolCounter.Begin(),
                                 m_symbolCounter.End());      
+  m_symbolCounter.Clear();
   
   std::vector<ScoreTree*>::iterator treeIt = m_scoreTrees.begin();
   for(std::vector<ScoreCounter*>::iterator it = m_scoreCounters.begin();
@@ -388,6 +389,10 @@ void PhraseTableCreator::CalcHuffmanCodes()
         << " scores" << std::endl;
     
     *treeIt = new ScoreTree((*it)->Begin(), (*it)->End());
+    
+    if(not m_quantize)
+      (*it)->Clear();
+      
     treeIt++;
   }
   
@@ -396,6 +401,7 @@ void PhraseTableCreator::CalcHuffmanCodes()
     std::cerr << "\tCreating Huffman codes for " << m_alignCounter.Size()
         << " alignment points" << std::endl;
     m_alignTree = new AlignTree(m_alignCounter.Begin(), m_alignCounter.End());
+    m_alignCounter.Clear();
   }
   std::cerr << std::endl;
 }

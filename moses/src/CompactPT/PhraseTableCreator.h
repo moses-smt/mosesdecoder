@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <vector>
 #include <set>
+#include <map>
 #include <boost/unordered_map.hpp>
 
 #include "InputFileStream.h"

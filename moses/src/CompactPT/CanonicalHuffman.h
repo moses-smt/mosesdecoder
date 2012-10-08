@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
+#include <map>
 
 #include "ThrowingFwrite.h"
 
@@ -39,7 +40,8 @@ class CanonicalHuffman
     std::vector<size_t> m_firstCodes;
     std::vector<size_t> m_lengthIndex;
     
-    typedef boost::unordered_map<Data, boost::dynamic_bitset<> > EncodeMap;
+    typedef boost::unordered_map<Data, std::pair<unsigned short, size_t> > EncodeMap;
+    //typedef boost::unordered_map<Data, boost::dynamic_bitset<> > EncodeMap;
     EncodeMap m_encodeMap;
     
     struct MinHeapSorter {
@@ -152,31 +154,32 @@ class CanonicalHuffman
     {
       for(size_t l = 1; l < m_lengthIndex.size(); l++)
       {
-        size_t intCode = m_firstCodes[l];
+        //size_t intCode = m_firstCodes[l];
         size_t num = ((l+1 < m_lengthIndex.size()) ? m_lengthIndex[l+1]
                       : m_symbols.size()) - m_lengthIndex[l];
         
         for(size_t i = 0; i < num; i++)
         {
           Data data = m_symbols[m_lengthIndex[l] + i];  
-          boost::dynamic_bitset<> bitCode(l, intCode);
-          m_encodeMap[data] = bitCode;  
-          intCode++;
+          m_encodeMap[data] = std::make_pair(l, i);
+          //boost::dynamic_bitset<> bitCode(l, intCode);
+          //m_encodeMap[data] = bitCode;  
+          //intCode++;
         }
       }
     }
     
-    boost::dynamic_bitset<>& Encode(Data data)
-    {
-      return m_encodeMap[data];
-    }
+    //boost::dynamic_bitset<>& Encode(Data data)
+    //{
+    //  return m_encodeMap[data];
+    //}
     
-    template <class BitWrapper>
-    void PutCode(BitWrapper& bitWrapper, boost::dynamic_bitset<>& code)
-    {
-      for(int j = code.size()-1; j >= 0; j--)
-        bitWrapper.Put(code[j]);
-    }
+    //template <class BitWrapper>
+    //void PutCode(BitWrapper& bitWrapper, boost::dynamic_bitset<>& code)
+    //{
+    //  for(int j = code.size()-1; j >= 0; j--)
+    //    bitWrapper.Put(code[j]);
+    //}
     
   public:
 
@@ -202,7 +205,14 @@ class CanonicalHuffman
     template <class BitWrapper>
     void Put(BitWrapper& bitWrapper, Data data)
     {
-      PutCode(bitWrapper, Encode(data));
+      //PutCode(bitWrapper, Encode(data));
+      unsigned short l = m_encodeMap[data].first;
+      size_t i = m_encodeMap[data].second;
+      
+      size_t intCode = m_firstCodes[l] + i;
+      
+      for(int j = l-1; j >= 0; j--)
+        bitWrapper.Put((intCode >> j) & 1);
     }
     
     template <class BitWrapper>
