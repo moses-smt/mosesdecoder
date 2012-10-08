@@ -116,6 +116,8 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   std::cerr << "Intermezzo: Calculating Huffman code sets" << std::endl;
   CalcHuffmanCodes();
   
+  m_encodedTargetPhrases.Rewind();
+  
   // 2nd pass
   std::cerr << "Pass " << cur_pass << "/" << all_passes << ": Compressing target phrases" << std::endl;
   CompressTargetPhrases();
@@ -1011,7 +1013,7 @@ void PhraseTableCreator::AddCompressedCollection(PackedItem& pi)
 
 void PhraseTableCreator::FlushCompressedQueue(bool force)
 {
-  if(force || m_queue.size() > 10000)
+  if(force || m_queue.size() > 20000)
   {
     while(!m_queue.empty() && m_lastFlushedLine + 1 == m_queue.top().GetLine())
     {
@@ -1222,7 +1224,8 @@ void EncodingTask::operator()()
 
 size_t CompressionTask::m_collectionNum = 0;
 #ifdef WITH_THREADS
-boost::mutex CompressionTask::m_mutex;
+boost::mutex CompressionTask::m_mutexIn;
+boost::mutex CompressionTask::m_mutexOut;
 #endif
 
 CompressionTask::CompressionTask(OndiskLineCollection& encodedCollections,
@@ -1231,37 +1234,47 @@ CompressionTask::CompressionTask(OndiskLineCollection& encodedCollections,
   
 void CompressionTask::operator()()
 {
+  size_t bufferMax = 100;
   size_t collectionNum;
-  std::string collection;
+  std::vector<std::string> buffer;
   
   {
 #ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
+    boost::mutex::scoped_lock lock(m_mutexIn);
 #endif
     collectionNum = m_collectionNum;
-    if(collectionNum < m_encodedCollections.Size())
-      collection = m_encodedCollections.GetNext();
-    m_collectionNum++;
+    while(m_encodedCollections.HasNext() && buffer.size() < bufferMax) {
+      buffer.push_back(m_encodedCollections.GetNext());
+      m_collectionNum++;
+    }
   }
   
-  while(collectionNum < m_encodedCollections.Size())
+  while(buffer.size())
   {
-    std::string compressedCollection
-      = m_creator.CompressEncodedCollection(collection);
+    for(std::vector<std::string>::iterator it = buffer.begin(); it != buffer.end(); it++) {
+      std::string compressedCollection
+        = m_creator.CompressEncodedCollection(*it);
 
-    std::string dummy;
-    PackedItem packedItem(collectionNum, dummy, compressedCollection, 0);
+      std::string dummy;
+      PackedItem packedItem(collectionNum++, dummy, compressedCollection, 0);
 
 #ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
+      boost::mutex::scoped_lock lock(m_mutexOut);
 #endif
-    m_creator.AddCompressedCollection(packedItem);
-    m_creator.FlushCompressedQueue();
+      m_creator.AddCompressedCollection(packedItem);
+      m_creator.FlushCompressedQueue();
+    }
     
-    collectionNum = m_collectionNum;  
-    if(collectionNum < m_encodedCollections.Size())
-      collection = m_encodedCollections.GetNext();
-    m_collectionNum++;    
+    buffer.clear();
+    
+#ifdef WITH_THREADS
+    boost::mutex::scoped_lock lock(m_mutexIn);
+#endif
+    collectionNum = m_collectionNum;
+    while(m_encodedCollections.HasNext() && buffer.size() < bufferMax) {
+      buffer.push_back(m_encodedCollections.GetNext());
+      m_collectionNum++;
+    }
   }
 }
 

@@ -96,7 +96,8 @@ class OndiskLineCollection
       bool sorted = false;
       byteSize += ThrowingFwrite(&sorted, sizeof(bool), 1, out) * sizeof(bool);
       
-      byteSize += m_positions.save(out);
+      size_t test = m_positions.save(out);
+      byteSize += test;
     
       byteSize += ThrowingFwrite(&m_totalSize, sizeof(size_t), 1, out) * sizeof(size_t);
       
@@ -117,11 +118,11 @@ class OndiskLineCollection
           buffer.clear();
         }
       }
+      
       for(std::vector<std::string>::iterator it = buffer.begin();
           it != buffer.end(); it++)
         byteSize += ThrowingFwrite(it->c_str(), sizeof(char), it->size(), out)
                     * sizeof(char);
-        
       return byteSize;
     }
 };

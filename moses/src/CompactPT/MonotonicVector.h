@@ -220,7 +220,7 @@ class MonotonicVector
       if(!m_final)
         commit();
       
-      bool byteSize = 0;
+      size_t byteSize = 0;
       byteSize += ThrowingFwrite(&m_final, sizeof(bool), 1, out) * sizeof(bool);
       byteSize += ThrowingFwrite(&m_size, sizeof(size_t), 1, out) * sizeof(size_t);
       byteSize += ThrowingFwrite(&m_last, sizeof(PosT), 1, out) * sizeof(PosT);

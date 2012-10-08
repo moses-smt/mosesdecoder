@@ -405,7 +405,8 @@ class CompressionTask
 {
   private:
 #ifdef WITH_THREADS
-    static boost::mutex m_mutex;
+    static boost::mutex m_mutexIn;
+    static boost::mutex m_mutexOut;
 #endif
     static size_t m_collectionNum;
     OndiskLineCollection& m_encodedCollections;
