@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <vector>
 
+#include "util/usage.hh"
+
 #ifdef WIN32
 // Include Visual Leak Detector
 //#include <vld.h>
@@ -536,6 +538,8 @@ int main(int argc, char** argv)
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  IFVERBOSE(1) util::PrintUsage(std::cerr);
 
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)

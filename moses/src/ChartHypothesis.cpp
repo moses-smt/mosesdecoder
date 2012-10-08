@@ -92,6 +92,7 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
+
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {

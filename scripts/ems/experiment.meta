@@ -361,13 +361,13 @@ pcfg-extract
   default-name: model/pcfg
   ignore-unless: use-pcfg-feature
   rerun-on-change: use-pcfg-feature
-  template: $moses-script-dir/training/phrase-extract/pcfg-extract/pcfg-extract < IN.$output-extension > OUT.$output-extension
+  template: $moses-bin-dir/pcfg-extract < IN.$output-extension > OUT.$output-extension
 pcfg-score
   in: parse-relaxed-corpus pcfg
   out: scored-corpus
   default-name: model/scored-corpus
   pass-unless: use-pcfg-feature
-  template: ln -s IN.$input-extension OUT.$input-extension ; $moses-script-dir/training/phrase-extract/pcfg-score/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
+  template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
 extract-phrases
 	in: word-alignment scored-corpus
 	out: extracted-phrases

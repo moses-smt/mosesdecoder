@@ -58,6 +58,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
 
+#include "util/usage.hh"
+
 using namespace std;
 using namespace Moses;
 using namespace MosesChartCmd;
@@ -102,10 +104,6 @@ public:
     if (staticData.IsDetailedTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
-    }
-    
-    if (staticData.PrintAlignmentInfo()) {
-      m_ioWrapper.OutputAlignment(bestHypo, lineNumber);
     }
 
     // n-best
@@ -277,6 +275,8 @@ int main(int argc, char* argv[])
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  IFVERBOSE(1) util::PrintUsage(std::cerr);
 
 #ifdef HACK_EXIT
   //This avoids that detructors are called (it can take a long time)

@@ -285,6 +285,7 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 
   return clone;
 }
+
 namespace {
 void MosesShouldUseExceptions(bool value) {
   if (!value) {
@@ -293,7 +294,6 @@ void MosesShouldUseExceptions(bool value) {
   }
 }
 } // namespace
-
 
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {

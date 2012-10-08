@@ -395,11 +395,11 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
   // loop over rule
   for (size_t phrasePos = 0, wordPos = 0;
-       phrasePos < target.GetSize();
+       phrasePos < hypo.GetCurrTargetPhrase().GetSize();
        phrasePos++)
   {
     // consult rule for either word or non-terminal
-    const Word &word = target.GetWord(phrasePos);
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
 
     // regular word
     if (!word.IsNonTerminal())
