@@ -322,10 +322,10 @@ namespace tmmt
 				string path;
 				unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
 				// do not report multiple identical sentences, but just their count
-				cout << sentenceInd << " "; // sentence number
-				cout << letter_cost << "/" << input_letter_length << " ";
-				cout << "(" << best_cost <<"/" << input_length <<") ";
-				cout << "||| " << s << " ||| " << path << endl;
+				//cout << sentenceInd << " "; // sentence number
+				//cout << letter_cost << "/" << input_letter_length << " ";
+				//cout << "(" << best_cost <<"/" << input_length <<") ";
+				//cout << "||| " << s << " ||| " << path << endl;
         
         vector<WORD_ID> &sourceSentence = source[s];
         vector<SentenceAlignment> &targets = targetAndAlignment[s];
@@ -370,11 +370,13 @@ namespace tmmt
       << " (validation: " << (1000 * (clock_validation_sum) / CLOCKS_PER_SEC) << ")"
       << " )" << endl;
       if (lsed_flag) {
-        cout << best_letter_cost << "/" << compute_length( input[sentenceInd] ) << " (";
+        //cout << best_letter_cost << "/" << compute_length( input[sentenceInd] ) << " (";
       }
-      cout << best_cost <<"/" << input_length;
-      if (lsed_flag) 	cout << ")";
-      cout << " ||| " << best_match << " ||| " << best_path << endl;
+      //cout << best_cost <<"/" << input_length;
+      if (lsed_flag) {
+        //cout << ")";
+      }
+      //cout << " ||| " << best_match << " ||| " << best_path << endl;
       
       if (best_match == -1) {
         CHECK(source.size());
@@ -763,7 +765,7 @@ unsigned int FuzzyMatchWrapper::compute_length( const vector< WORD_ID > &sentenc
 				best_match = s;
 			}
 		}
-		cout << best_cost << " ||| " << best_match << " ||| " << best_path << endl;
+		//cout << best_cost << " ||| " << best_match << " ||| " << best_path << endl;
 	}
 }
 
