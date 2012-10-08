@@ -47,7 +47,7 @@ if $(with-regtest) {
   actions reg_test_mert {
     $(TOP)/regression-testing/run-test-mert.perl --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) --bin-dir=$(pwd)/$(>:D) && touch $(<)
   }
-  reg_test mert : [ glob $(test-dir)/mert.* ] : ../mert//mert ../mert//extractor : @reg_test_mert ;
+  reg_test mert : [ glob $(test-dir)/mert.* ] : ../mert//mert ../mert//extractor ../mert//pro : @reg_test_mert ;
 
    alias all : phrase chart mert score extract extractrules ;
 }
