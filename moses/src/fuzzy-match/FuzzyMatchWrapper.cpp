@@ -376,6 +376,11 @@ namespace tmmt
       if (lsed_flag) 	cout << ")";
       cout << " ||| " << best_match << " ||| " << best_path << endl;
       
+      if (best_match == -1) {
+        CHECK(source.size());
+        best_match = 0;
+      }
+      
       // creat xml & extracts
       vector<WORD_ID> &sourceSentence = source[best_match];
       vector<SentenceAlignment> &targets = targetAndAlignment[best_match];
