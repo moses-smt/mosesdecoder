@@ -25,7 +25,7 @@ class FuzzyMatchWrapper
 public:
   FuzzyMatchWrapper(const std::string &source, const std::string &target, const std::string &alignment);
 
-  std::string Extract(const std::string &inputPath);
+  std::string Extract(const std::string &dirNameStr);
   
 protected:
   // tm-mt

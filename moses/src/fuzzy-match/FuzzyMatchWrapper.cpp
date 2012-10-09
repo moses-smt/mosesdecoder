@@ -45,37 +45,29 @@ namespace tmmt
 
   }
 
-  string FuzzyMatchWrapper::Extract(const string &inputPath)
+  string FuzzyMatchWrapper::Extract(const string &dirNameStr)
   {
     const Moses::StaticData &staticData = Moses::StaticData::Instance();
     
-    string fuzzyMatchFile = ExtractTM(inputPath);
+    string fuzzyMatchFile = ExtractTM(dirNameStr);
     
     string cmd = string("perl ");
 #ifdef IS_XCODE
-    cmd += "/Users/hieuhoang/unison/workspace/github/hieuhoang/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
+    cmd += "/Users/hieuhoang/unison/workspace/github/moses-smt/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
 #else
     cmd += staticData.GetBinDirectory() +  "/../scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
 #endif
     cerr << cmd << endl;
     system(cmd.c_str());
-    
-    remove(fuzzyMatchFile.c_str());
-    remove((fuzzyMatchFile + ".extract").c_str());
-    remove((fuzzyMatchFile + ".extract.inv").c_str());
-    remove((fuzzyMatchFile + ".extract.sorted.gz").c_str());
-    remove((fuzzyMatchFile + ".extract.inv.sorted.gz").c_str());
-    
+        
     return fuzzyMatchFile + ".pt.gz";
   }
   
-  string FuzzyMatchWrapper::ExtractTM(const string &inputPath)
+  string FuzzyMatchWrapper::ExtractTM(const string &dirNameStr)
   {
-    util::TempMaker tempFile("moses");
-    util::scoped_fd alive;
-    string outputFileName(tempFile.Name(alive));
-
-    ofstream outputFile(outputFileName.c_str());
+    string inputPath = dirNameStr + "/in";    
+    string fuzzyMatchFile = dirNameStr + "/fuzzyMatchFile";
+    ofstream fuzzyMatchStream(fuzzyMatchFile.c_str());
  
     vector< vector< WORD_ID > > input;
     load_corpus(inputPath, input);
@@ -330,14 +322,14 @@ namespace tmmt
 				string path;
 				unsigned int letter_cost = sed( input[sentenceInd], source[s], path, true );
 				// do not report multiple identical sentences, but just their count
-				cout << sentenceInd << " "; // sentence number
-				cout << letter_cost << "/" << input_letter_length << " ";
-				cout << "(" << best_cost <<"/" << input_length <<") ";
-				cout << "||| " << s << " ||| " << path << endl;
+				//cout << sentenceInd << " "; // sentence number
+				//cout << letter_cost << "/" << input_letter_length << " ";
+				//cout << "(" << best_cost <<"/" << input_length <<") ";
+				//cout << "||| " << s << " ||| " << path << endl;
         
         vector<WORD_ID> &sourceSentence = source[s];
         vector<SentenceAlignment> &targets = targetAndAlignment[s];
-        create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, path, outputFile);
+        create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, path, fuzzyMatchStream);
         
 			}
 		} // if (multiple_flag)
@@ -378,22 +370,29 @@ namespace tmmt
       << " (validation: " << (1000 * (clock_validation_sum) / CLOCKS_PER_SEC) << ")"
       << " )" << endl;
       if (lsed_flag) {
-        cout << best_letter_cost << "/" << compute_length( input[sentenceInd] ) << " (";
+        //cout << best_letter_cost << "/" << compute_length( input[sentenceInd] ) << " (";
       }
-      cout << best_cost <<"/" << input_length;
-      if (lsed_flag) 	cout << ")";
-      cout << " ||| " << best_match << " ||| " << best_path << endl;
+      //cout << best_cost <<"/" << input_length;
+      if (lsed_flag) {
+        //cout << ")";
+      }
+      //cout << " ||| " << best_match << " ||| " << best_path << endl;
+      
+      if (best_match == -1) {
+        CHECK(source.size());
+        best_match = 0;
+      }
       
       // creat xml & extracts
       vector<WORD_ID> &sourceSentence = source[best_match];
       vector<SentenceAlignment> &targets = targetAndAlignment[best_match];
-      create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, best_path, outputFile);
+      create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, best_path, fuzzyMatchStream);
       
     } // else if (multiple_flag)
     
-    outputFile.close();
+    fuzzyMatchStream.close();
     
-    return outputFileName;
+    return fuzzyMatchFile;
   }
 
   void FuzzyMatchWrapper::load_corpus( const std::string &fileName, vector< vector< WORD_ID > > &corpus )
@@ -766,7 +765,7 @@ unsigned int FuzzyMatchWrapper::compute_length( const vector< WORD_ID > &sentenc
 				best_match = s;
 			}
 		}
-		cout << best_cost << " ||| " << best_match << " ||| " << best_path << endl;
+		//cout << best_cost << " ||| " << best_match << " ||| " << best_path << endl;
 	}
 }
 
