@@ -72,7 +72,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   const StaticData& staticData = StaticData::Instance();
   const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray
-      || implementation == Compact || implementation == FuzzyMatch) {
+      || implementation == Compact || implementation == OnDisk) {
     m_useThreadSafePhraseDictionary = true;
   } else {
     m_useThreadSafePhraseDictionary = false;

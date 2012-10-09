@@ -28,7 +28,6 @@ namespace tmmt
   int multiple_flag = false;
   int multiple_slack = 0;
   int multiple_max = 100;
-  map< WORD_ID,vector< int > > single_word_index;
 
 
   FuzzyMatchWrapper::FuzzyMatchWrapper(const std::string &sourcePath, const std::string &targetPath, const std::string &alignmentPath)
