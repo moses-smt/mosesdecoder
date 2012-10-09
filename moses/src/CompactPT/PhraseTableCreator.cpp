@@ -64,10 +64,10 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   #ifdef WITH_THREADS
     m_threads(threads),
     m_srcHash(m_orderBits, m_fingerPrintBits, 1),
-    m_rnkHash(m_orderBits, m_fingerPrintBits, m_threads),
+    m_rnkHash(10, 20, m_threads),
   #else
     m_srcHash(m_orderBits, m_fingerPrintBits),
-    m_rnkHash(m_orderBits, m_fingerPrintBits),
+    m_rnkHash(10, 20),
   #endif
     m_maxPhraseLength(0),
     m_lastFlushedLine(-1), m_lastFlushedSourceNum(0),
