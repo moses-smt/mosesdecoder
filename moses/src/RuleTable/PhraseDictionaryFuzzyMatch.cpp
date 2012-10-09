@@ -143,7 +143,7 @@ namespace Moses
 
   void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
   {
-    char dirName[] = "/tmp/moses.XXXXX";
+    char dirName[] = "/tmp/moses.XXXXXX";
     char *temp = mkdtemp(dirName);
     CHECK(temp);
     string dirNameStr(dirName);

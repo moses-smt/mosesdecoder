@@ -51,9 +51,11 @@ namespace tmmt
     
     string fuzzyMatchFile = ExtractTM(dirNameStr);
     
-    string cmd = string("perl ");
+    string cmd("perl ");
 #ifdef IS_XCODE
     cmd += "/Users/hieuhoang/unison/workspace/github/moses-smt/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
+#elif IS_ECLIPSE
+    cmd += "/home/hieu/workspace/github/moses-smt/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
 #else
     cmd += staticData.GetBinDirectory() +  "/../scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
 #endif
