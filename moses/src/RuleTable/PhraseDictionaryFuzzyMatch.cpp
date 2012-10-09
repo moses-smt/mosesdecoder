@@ -54,7 +54,7 @@ namespace Moses
   : PhraseDictionary(numScoreComponents, feature) 
   {
     const StaticData &staticData = StaticData::Instance();
-    CHECK(staticData.ThreadCount() == 1);    
+    //CHECK(staticData.ThreadCount() == 1);
   }
 
   bool PhraseDictionaryFuzzyMatch::Load(const std::vector<FactorType> &input
