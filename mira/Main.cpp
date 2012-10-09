@@ -1628,6 +1628,8 @@ int main(int argc, char** argv) {
 #endif
 #ifndef MPI_ENABLE
 	    mixedAverageWeights = tmpAverageWeights;
+      //FIXME: What do to for non-mpi version
+	    ScoreComponentCollection totalBinary;
 #endif
 	    if (rank == 0 && !weightDumpStem.empty()) {
 	      // divide by number of processes
