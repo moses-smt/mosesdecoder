@@ -34,6 +34,15 @@ protected:
   std::vector< std::vector< tmmt::SentenceAlignment > > targetAndAlignment;
   tmmt::SuffixArray *suffixArray;
   std::map< WORD_ID,std::vector< int > > single_word_index;
+  int basic_flag;
+  int lsed_flag;
+  int refined_flag;
+  int length_filter_flag;
+  int parse_flag;
+  int min_match;
+  int multiple_flag;
+  int multiple_slack;
+  int multiple_max;
 
   
   // global cache for word pairs
