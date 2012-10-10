@@ -19,19 +19,17 @@ using namespace std;
 
 namespace tmmt 
 {
-  int basic_flag = false;
-  int lsed_flag = true;
-  int refined_flag = true;
-  int length_filter_flag = true;
-  int parse_flag = true;
-  int min_match = 70;
-  int multiple_flag = false;
-  int multiple_slack = 0;
-  int multiple_max = 100;
-  map< WORD_ID,vector< int > > single_word_index;
-
 
   FuzzyMatchWrapper::FuzzyMatchWrapper(const std::string &sourcePath, const std::string &targetPath, const std::string &alignmentPath)
+  :basic_flag(false)
+  ,lsed_flag(true)
+  ,refined_flag(true)
+  ,length_filter_flag(true)
+  ,parse_flag(true)
+  ,min_match(70)
+  ,multiple_flag(false)
+  ,multiple_slack(0)
+  ,multiple_max(100)
   {
     // create suffix array
     //load_corpus(m_config[0], input);

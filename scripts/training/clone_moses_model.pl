@@ -66,7 +66,19 @@ while (<INI>) {
 
 			$_ = "$a $b $c $d ./sa.src.$cnt{$section}$src_suffix ./sa.tgt.$cnt{$section}$tgt_suffix ./sa.align.$cnt{$section}$align_suffix\n";
 		}
-		else {
+    elsif ( $a eq '1' ) {
+      # handle binarized phrase tables
+      $fn = ensure_relative_from_origin(fixpath($fn));
+      foreach my $suf (qw( idx srctree srcvoc tgtdata tgtvoc )) {
+        my $fullname = "$fn.binphr.$suf";
+        if (-f $fullname) {
+          clone_file_or_die($fullname, "./$section.$cnt{$section}.binphr.$suf");
+        } else {
+          die "Binary format specified but file $fullname not found!\n";
+        }
+      }
+      $_ = "$a $b $c $d ./$section.$cnt{$section}\n";
+    } else {
 		  $fn = fixpath($fn);
 		  $fn = ensure_relative_from_origin($fn, $ini);
 		  $fn = ensure_exists_or_gzipped_exists($fn);
