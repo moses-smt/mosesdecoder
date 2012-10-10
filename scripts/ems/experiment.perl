@@ -1057,9 +1057,11 @@ sub execute_steps {
 		# cluster job submission
 		if ($CLUSTER && ! &is_qsub_script($i)) {
 		    $DO{$i}++;
+		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);		    
 		    print "\texecuting $step via qsub ($active active)\n";
-		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
-		    `qsub $qsub_args -S /bin/bash -e $step.STDERR -o $step.STDOUT $step`;
+		    my $qsub_command="qsub $qsub_args -S /bin/bash -e $step.STDERR -o $step.STDOUT $step";
+		    print "\t$qsub_command\n" if $VERBOSE;
+		    `$qsub_command`;
 		}
 
 		# execute in fork
