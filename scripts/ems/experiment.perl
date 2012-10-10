@@ -1111,6 +1111,7 @@ sub execute_steps {
 sub get_qsub_args {
     my ($step) = @_;
     my $qsub_args = &get("$step:qsub-settings");
+    $qsub_args = &get("GENERAL:qsub-settings") unless defined($qsub_args);
     $qsub_args = "" unless defined($qsub_args);
     my $memory = &get("$step:qsub-memory");
     $qsub_args .= " -pe memory $memory" if defined($memory);
