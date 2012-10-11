@@ -29,7 +29,7 @@ ldflags = [ os.environ "LDFLAGS" ] ;
 #Run g++ with empty main and these arguments to see if it passes.  
 rule test_flags ( flags * ) {
   flags = $(cxxflags) $(ldflags) $(flags) ;
-  local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o /dev/null >/dev/null 2>/dev/null\"" ;
+  local cmd = "bash -c \"g++ "$(flags:J=" ")" -x c++ - <<<'int main() {}' -o $(TOP)/dummy >/dev/null 2>/dev/null && rm $(TOP)/dummy 2>/dev/null\"" ;
   local ret = [ SHELL $(cmd) : exit-status ] ;
   if --debug-configuration in [ modules.peek : ARGV ] {
     echo $(cmd) ;
@@ -152,7 +152,6 @@ rule boost ( min-version ) {
   boost-lib program_options PROGRAM_OPTIONS_DYN_LINK ;
   boost-lib unit_test_framework TEST_DYN_LINK ;
   boost-lib iostreams IOSTREAMS_DYN_LINK ;
-  boost-lib filesystem FILE_SYSTEM_DYN_LINK : boost_system ;
 }
  
 #Link normally to a library, but sometimes static isn't installed so fall back to dynamic.

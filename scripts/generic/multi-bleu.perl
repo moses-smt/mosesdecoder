@@ -25,6 +25,7 @@ while(-e "$stem$ref") {
     $ref++;
 }
 &add_to_ref($stem,\@REF) if -e $stem;
+die("ERROR: could not find reference file $stem") unless scalar @REF;
 
 sub add_to_ref {
     my ($file,$REF) = @_;

@@ -76,12 +76,14 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
   // exactly like same fn in hypothesis, but use trellis nodes instead of prevHypos pointer
   Phrase ret(ARRAY_SIZE_INCR);
 
-  const TargetPhrase &currTargetPhrase = m_hypo.GetCurrTargetPhrase();
+  const Phrase &currTargetPhrase = m_hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    m_hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {
     const Word &word = currTargetPhrase.GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = currTargetPhrase.GetNonTermIndex(pos);
+      size_t nonTermInd = nonTermIndexMap[pos];
       const ChartTrellisNode &childNode = GetChild(nonTermInd);
       Phrase childPhrase = childNode.GetOutputPhrase();
       ret.Append(childPhrase);

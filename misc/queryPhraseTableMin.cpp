@@ -49,6 +49,16 @@ int main(int argc, char **argv)
   
   LMList lmList;
   
+  Parameter *parameter = new Parameter();
+  const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
+  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
+  
+  const_cast<StaticData&>(StaticData::Instance()).LoadData(parameter);
+
+  
   PhraseDictionaryFeature pdf(Compact, nscores, nscores, input, output, ttable, weight, 0, "", "");
   PhraseDictionaryCompact pdc(nscores, Compact, &pdf, false, useAlignments);
   bool ret = pdc.Load(input, output, ttable, weight, 0, lmList, 0);                                                                           
@@ -74,7 +84,8 @@ int main(int argc, char **argv)
           if(useAlignments)
             std::cout << " " << tp.GetAlignmentInfo() << "|||"; 
           
-          for(size_t i = 0; i < tp.GetScoreBreakdown().size(); i++)
+          size_t offset = tp.GetScoreBreakdown().size() - nscores;
+          for(size_t i = offset; i < tp.GetScoreBreakdown().size(); i++)
             std::cout << " " << exp(tp.GetScoreBreakdown()[i]);
           std::cout << std::endl;
         }

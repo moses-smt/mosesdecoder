@@ -135,8 +135,6 @@
 		1EC737A814B977AB00238410 /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7363F14B977AA00238410 /* GlobalLexicalModel.cpp */; };
 		1EC737A914B977AB00238410 /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364014B977AA00238410 /* GlobalLexicalModel.h */; };
 		1EC737AA14B977AB00238410 /* gzfilebuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364114B977AA00238410 /* gzfilebuf.h */; };
-		1EC737AB14B977AB00238410 /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7364214B977AA00238410 /* hash.cpp */; };
-		1EC737AC14B977AB00238410 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364314B977AA00238410 /* hash.h */; };
 		1EC737AD14B977AB00238410 /* Hypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7364514B977AA00238410 /* Hypothesis.cpp */; };
 		1EC737AE14B977AB00238410 /* Hypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364614B977AA00238410 /* Hypothesis.h */; };
 		1EC737AF14B977AB00238410 /* HypothesisStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7364714B977AA00238410 /* HypothesisStack.cpp */; };
@@ -465,8 +463,6 @@
 		1EC7363F14B977AA00238410 /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = ../../moses/src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
 		1EC7364014B977AA00238410 /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = ../../moses/src/GlobalLexicalModel.h; sourceTree = "<group>"; };
 		1EC7364114B977AA00238410 /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gzfilebuf.h; path = ../../moses/src/gzfilebuf.h; sourceTree = "<group>"; };
-		1EC7364214B977AA00238410 /* hash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hash.cpp; path = ../../moses/src/hash.cpp; sourceTree = "<group>"; };
-		1EC7364314B977AA00238410 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = ../../moses/src/hash.h; sourceTree = "<group>"; };
 		1EC7364414B977AA00238410 /* hypergraph.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = hypergraph.proto; path = ../../moses/src/hypergraph.proto; sourceTree = "<group>"; };
 		1EC7364514B977AA00238410 /* Hypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Hypothesis.cpp; path = ../../moses/src/Hypothesis.cpp; sourceTree = "<group>"; };
 		1EC7364614B977AA00238410 /* Hypothesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hypothesis.h; path = ../../moses/src/Hypothesis.h; sourceTree = "<group>"; };
@@ -772,8 +768,6 @@
 				1EC7363F14B977AA00238410 /* GlobalLexicalModel.cpp */,
 				1EC7364014B977AA00238410 /* GlobalLexicalModel.h */,
 				1EC7364114B977AA00238410 /* gzfilebuf.h */,
-				1EC7364214B977AA00238410 /* hash.cpp */,
-				1EC7364314B977AA00238410 /* hash.h */,
 				1EC7364414B977AA00238410 /* hypergraph.proto */,
 				1EF8F2C3159A61970047B613 /* HypoList.h */,
 				1EC7364514B977AA00238410 /* Hypothesis.cpp */,
@@ -1155,7 +1149,6 @@
 				1EC737A714B977AB00238410 /* GenerationDictionary.h in Headers */,
 				1EC737A914B977AB00238410 /* GlobalLexicalModel.h in Headers */,
 				1EC737AA14B977AB00238410 /* gzfilebuf.h in Headers */,
-				1EC737AC14B977AB00238410 /* hash.h in Headers */,
 				1EC737AE14B977AB00238410 /* Hypothesis.h in Headers */,
 				1EC737B014B977AB00238410 /* HypothesisStack.h in Headers */,
 				1EC737B214B977AB00238410 /* HypothesisStackCubePruning.h in Headers */,
@@ -1378,7 +1371,6 @@
 				1EC737A414B977AB00238410 /* FloydWarshall.cpp in Sources */,
 				1EC737A614B977AB00238410 /* GenerationDictionary.cpp in Sources */,
 				1EC737A814B977AB00238410 /* GlobalLexicalModel.cpp in Sources */,
-				1EC737AB14B977AB00238410 /* hash.cpp in Sources */,
 				1EC737AD14B977AB00238410 /* Hypothesis.cpp in Sources */,
 				1EC737AF14B977AB00238410 /* HypothesisStack.cpp in Sources */,
 				1EC737B114B977AB00238410 /* HypothesisStackCubePruning.cpp in Sources */,

@@ -20,9 +20,6 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <boost/filesystem/operations.hpp>
-#include <boost/filesystem/path.hpp>
-
 #include <string>
 #include "util/check.hh"
 #include "PhraseDictionaryMemory.h"
@@ -1365,16 +1362,24 @@ void StaticData::ClearTransOptionCache() const {
 
 void StaticData::SetExecPath(const std::string &path)
 {
-  namespace fs = boost::filesystem;
+  /*
+   namespace fs = boost::filesystem;
+   
+   fs::path full_path( fs::initial_path<fs::path>() );
+   
+   full_path = fs::system_complete( fs::path( path ) );
+   
+   //Without file name
+   m_binPath = full_path.parent_path().string();
+   */
   
-  fs::path full_path( fs::initial_path<fs::path>() );
-  
-  full_path = fs::system_complete( fs::path( path ) );
-    
-  //Without file name
-  m_binPath = full_path.parent_path().string();
+  // NOT TESTED
+  size_t pos = path.rfind("/");
+  if (pos !=  string::npos)
+  {
+    m_binPath = path.substr(0, pos); 
+  }
   cerr << m_binPath << endl;
-
 }
 
 const string &StaticData::GetBinDirectory() const
