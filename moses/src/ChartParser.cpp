@@ -128,7 +128,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   }
 }
 
-ChartParser::ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollection &cells) : 
+ChartParser::ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollectionBase &cells) : 
   m_unknown(system),
   m_decodeGraphList(system.GetDecodeGraphs()),
   m_source(source) {

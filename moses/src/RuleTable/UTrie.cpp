@@ -78,7 +78,7 @@ UTrieNode &RuleTableUTrie::GetOrCreateNode(const Phrase &source,
 
 ChartRuleLookupManager *RuleTableUTrie::CreateRuleLookupManager(
   const InputType &sentence,
-  const ChartCellCollection &cellCollection)
+  const ChartCellCollectionBase &cellCollection)
 {
   // FIXME This should be a parameter to CreateRuleLookupManager
   size_t maxChartSpan = 0;

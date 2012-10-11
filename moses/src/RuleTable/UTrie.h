@@ -50,7 +50,7 @@ class RuleTableUTrie : public RuleTableTrie
   const UTrieNode &GetRootNode() const { return m_root; }
 
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType &,
-                                                  const ChartCellCollection &);
+                                                  const ChartCellCollectionBase &);
 
  private:
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(

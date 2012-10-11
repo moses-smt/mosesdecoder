@@ -91,7 +91,7 @@ void PhraseDictionaryOnDisk::LoadTargetLookup()
 
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const InputType &sentence,
-  const ChartCellCollection &cellCollection)
+  const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
                                           m_dbWrapper, m_languageModels,

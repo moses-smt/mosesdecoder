@@ -84,7 +84,7 @@ namespace Moses
     
   ChartRuleLookupManager *PhraseDictionaryFuzzyMatch::CreateRuleLookupManager(
                                                                         const InputType &sentence,
-                                                                        const ChartCellCollection &cellCollection)
+                                                                        const ChartCellCollectionBase &cellCollection)
   {
     return new ChartRuleLookupManagerMemoryPerSentence(sentence, cellCollection, *this);
   }

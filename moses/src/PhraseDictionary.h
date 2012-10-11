@@ -45,7 +45,7 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
-class ChartCellCollection;
+class ChartCellCollectionBase;
 class TranslationSystem;
 class ChartRuleLookupManager;
 
@@ -78,7 +78,7 @@ public:
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollection &) = 0;
+    const ChartCellCollectionBase &) = 0;
 
 protected:
   size_t m_tableLimit;

@@ -34,7 +34,7 @@ class ChartParserCallback;
 class ChartRuleLookupManager;
 class InputType;
 class TranslationSystem;
-class ChartCellCollection;
+class ChartCellCollectionBase;
 class Word;
 class Phrase;
 class TargetPhraseCollection;
@@ -56,7 +56,7 @@ class ChartParserUnknown {
 
 class ChartParser {
   public:
-    ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollection &cells);
+    ChartParser(const InputType &source, const TranslationSystem &system, ChartCellCollectionBase &cells);
     ~ChartParser();
 
     void Create(const WordsRange &range, ChartParserCallback &to);

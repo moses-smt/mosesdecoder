@@ -45,7 +45,7 @@ class PhraseDictionarySCFG : public RuleTableTrie
 
   ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollection &);
+    const ChartCellCollectionBase &);
 
   TO_STRING();
 

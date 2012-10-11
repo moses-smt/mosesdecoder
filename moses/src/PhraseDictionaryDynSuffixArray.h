@@ -32,7 +32,7 @@ public:
   void CleanUp(const InputType &source);
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
-  ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollection&);
+  ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);
 private:
   BilingualDynSuffixArray *m_biSA;
   std::vector<float> m_weight;
