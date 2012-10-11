@@ -153,11 +153,9 @@ ChartParser::~ChartParser() {
   RemoveAllInColl(m_ruleLookupManagers);
 }
 
-void ChartParser::Create(const WordsRange &wordsRange, ChartTranslationOptionList &to) {
+void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) {
   assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
-  
-  to.Clear();
-  
+   
   std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
   std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
   for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
@@ -172,14 +170,12 @@ void ChartParser::Create(const WordsRange &wordsRange, ChartTranslationOptionLis
   
   if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
     bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-    if (to.GetSize() == 0 || alwaysCreateDirectTranslationOption) {
+    if (to.Empty() || alwaysCreateDirectTranslationOption) {
       // create unknown words for 1 word coverage where we don't have any trans options
       const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
       m_unknown.Process(sourceWord, wordsRange, to);
     }
-  }
-  
-  to.ApplyThreshold();
+  }  
 }
 
 /* constructor. Initialize everything prior to decoding a particular sentence.
@@ -229,7 +225,9 @@ void ChartManager::ProcessSentence()
       WordsRange range(startPos, endPos);
 
       // create trans opt
+      m_translationOptionList.Clear();
       m_parser.Create(range, m_translationOptionList);
+      m_translationOptionList.ApplyThreshold();
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);

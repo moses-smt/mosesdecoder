@@ -61,7 +61,7 @@ class ChartParser {
     ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollection &cells);
     ~ChartParser();
 
-    void Create(const WordsRange &range, ChartTranslationOptionList &to);
+    void Create(const WordsRange &range, ChartParserCallback &to);
 
   private:
     ChartParserUnknown m_unknown;

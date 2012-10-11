@@ -33,6 +33,8 @@ template <class Model> class Fill : public ChartParserCallback {
 
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
+    bool Empty() const { return edges_.Empty(); }
+
     void Search(ChartCellLabelSet &out);
     
   private:

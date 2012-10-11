@@ -12,6 +12,8 @@ class ChartParserCallback {
     virtual ~ChartParserCallback() {}
 
     virtual void Add(const TargetPhraseCollection &, const StackVec &, const WordsRange &) = 0;
+
+    virtual bool Empty() const = 0;
 };
 
 } // namespace Moses
