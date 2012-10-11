@@ -56,13 +56,12 @@ struct AlignmentInfoFixture {
 
 BOOST_FIXTURE_TEST_CASE(comparator, AlignmentInfoFixture)
 {
-  AlignmentInfoComparator comp;
-  BOOST_CHECK(comp(*ai1,*ai2));
-  BOOST_CHECK(comp(*ai1,*ai1));
-  BOOST_CHECK(comp(*ai2,*ai2));
-  BOOST_CHECK(comp(*ai3,*ai3));
-  BOOST_CHECK(!comp(*ai2,*ai3));
-  BOOST_CHECK(!comp(*ai1,*ai3));
+  BOOST_CHECK(*ai1 == *ai2);
+  BOOST_CHECK(*ai1 == *ai1);
+  BOOST_CHECK(*ai2 == *ai2);
+  BOOST_CHECK(*ai3 == *ai3);
+  BOOST_CHECK(!(*ai2 == *ai3));
+  BOOST_CHECK(!(*ai1 == *ai3));
 }
 
 BOOST_FIXTURE_TEST_CASE(hasher, AlignmentInfoFixture)

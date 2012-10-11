@@ -39,7 +39,6 @@ class AlignmentInfo
 {
   friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
-  friend struct AlignmentInfoComparator;
   friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
 
@@ -73,6 +72,13 @@ class AlignmentInfo
   size_t GetSize() const { return m_collection.size(); }
 
   std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+
+  bool operator==(const AlignmentInfo& rhs) const 
+  {
+    return m_collection == rhs.m_collection &&
+           m_terminalCollection == rhs.m_terminalCollection &&
+           m_nonTermIndexMap == rhs.m_nonTermIndexMap;
+  }
   
  private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
@@ -119,18 +125,6 @@ struct AlignmentInfoOrderer
   }
 };
 
-/**
-  * Equality functoid
-  **/
-struct AlignmentInfoComparator
-{
-  inline bool operator()(const AlignmentInfo &a, const AlignmentInfo &b) const {
-    return a.m_collection == b.m_collection &&
-           a.m_terminalCollection == b.m_terminalCollection &&
-           a.m_nonTermIndexMap == b.m_nonTermIndexMap;
-  }
-};
-
 /** 
  * Hashing functoid
  **/
@@ -146,5 +140,10 @@ struct AlignmentInfoHasher
   }
 
 };
+
+inline size_t hash_value(const AlignmentInfo& a) {
+  static AlignmentInfoHasher hasher;
+  return hasher(a);
+}
 
 }
