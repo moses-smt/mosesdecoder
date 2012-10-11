@@ -93,9 +93,7 @@ public:
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
-    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber,
-                               staticData.GetReportSegmentation(),
-                               staticData.GetReportAllFactors());
+    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber);
     IFVERBOSE(2) {
       PrintUserTime("Best Hypothesis Generation Time:");
     }

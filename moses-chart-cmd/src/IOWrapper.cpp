@@ -198,7 +198,7 @@ void IOWrapper::Backtrack(const ChartHypothesis *hypo)
   }
 }
 
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool /* reportSegmentation */, bool /* reportAllFactors */)
+void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/)
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
@@ -320,7 +320,7 @@ void IOWrapper::OutputDetailedTranslationReport(
 }
   
 
-void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
+void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
   if (!m_singleBestOutputCollector)
     return;
