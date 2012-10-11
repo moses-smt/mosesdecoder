@@ -42,6 +42,20 @@ class ChartTrellisNode;
 class ChartTrellisPath;
 class ChartTrellisPathList;
 
+class ChartUnknownWord {
+  public:
+    ChartUnknownWord(const TranslationSystem &system);
+    ~ChartUnknownWord();
+
+    void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
+
+  private:
+    const TranslationSystem &m_system;
+    std::vector<Phrase*> m_unksrcs;
+    std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
+    StackVec m_emptyStackVec;
+};
+
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
 class ChartManager
@@ -54,7 +68,6 @@ private:
                                  const ChartTrellisNode &,
                                  ChartTrellisDetourQueue &);
   void CreateTranslationOptionsForRange(const WordsRange &wordsRange);
-  void ProcessOneUnknownWord(const Word &sourceWord, const WordsRange &range);
 
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
@@ -65,10 +78,9 @@ private:
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
 
   ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
-  std::vector<Phrase*> m_unksrcs;
-  std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
   std::vector <DecodeGraph*> m_decodeGraphList;
-  StackVec m_emptyStackVec;
+
+  ChartUnknownWord m_unknown;
 
 public:
   ChartManager(InputType const& source, const TranslationSystem* system);

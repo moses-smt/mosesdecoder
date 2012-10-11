@@ -39,6 +39,101 @@ namespace Moses
 {
 extern bool g_debug;
 
+ChartUnknownWord::ChartUnknownWord(const TranslationSystem &system) : m_system(system) {}
+
+ChartUnknownWord::~ChartUnknownWord() {
+  RemoveAllInColl(m_unksrcs);
+  RemoveAllInColl(m_cacheTargetPhraseCollection);
+}
+
+void ChartUnknownWord::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to) {
+  // unknown word, add as trans opt
+  const StaticData &staticData = StaticData::Instance();
+  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system.GetUnknownWordPenaltyProducer();
+  vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
+  
+  size_t isDigit = 0;
+  if (staticData.GetDropUnknown()) {
+    const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+    const string &s = f->GetString();
+    isDigit = s.find_first_of("0123456789");
+    if (isDigit == string::npos)
+      isDigit = 0;
+    else
+      isDigit = 1;
+    // modify the starting bitmap
+  }
+  
+  Phrase* unksrc = new Phrase(1);
+  unksrc->AddWord() = sourceWord;
+  m_unksrcs.push_back(unksrc);
+  
+  //TranslationOption *transOpt;
+  if (! staticData.GetDropUnknown() || isDigit) {
+    // loop
+    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
+    UnknownLHSList::const_iterator iterLHS;
+    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
+      const string &targetLHSStr = iterLHS->first;
+      float prob = iterLHS->second;
+      
+      // lhs
+      //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
+      Word targetLHS(true);
+      
+      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      CHECK(targetLHS.GetFactor(0) != NULL);
+      
+      // add to dictionary
+      TargetPhrase *targetPhrase = new TargetPhrase(Output);
+      TargetPhraseCollection *tpc = new TargetPhraseCollection;
+      tpc->Add(targetPhrase);
+      
+      m_cacheTargetPhraseCollection.push_back(tpc);
+      Word &targetWord = targetPhrase->AddWord();
+      targetWord.CreateUnknownWord(sourceWord);
+      
+      // scores
+      vector<float> unknownScore(1, FloorScore(TransformScore(prob)));
+      
+      //targetPhrase->SetScore();
+      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->SetScore(m_system.GetWordPenaltyProducer(), wordPenaltyScore);
+      targetPhrase->SetSourcePhrase(unksrc);
+      targetPhrase->SetTargetLHS(targetLHS);
+      
+      // chart rule
+      to.Add(*tpc, m_emptyStackVec, range);
+    } // for (iterLHS
+  } else {
+    // drop source word. create blank trans opt
+    vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
+    
+    TargetPhrase *targetPhrase = new TargetPhrase(Output);
+    TargetPhraseCollection *tpc = new TargetPhraseCollection;
+    tpc->Add(targetPhrase);
+    // loop
+    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
+    UnknownLHSList::const_iterator iterLHS;
+    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
+      const string &targetLHSStr = iterLHS->first;
+      //float prob = iterLHS->second;
+      
+      Word targetLHS(true);
+      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
+      CHECK(targetLHS.GetFactor(0) != NULL);
+      
+      m_cacheTargetPhraseCollection.push_back(tpc);
+      targetPhrase->SetSourcePhrase(unksrc);
+      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
+      targetPhrase->SetTargetLHS(targetLHS);
+      
+      // chart rule
+      to.Add(*tpc, m_emptyStackVec, range);
+    }
+  }
+}
+
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
@@ -51,7 +146,7 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
   ,m_hypothesisId(0)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
   ,m_decodeGraphList(system->GetDecodeGraphs())
-
+  ,m_unknown(*system)
 {
   m_system->InitializeBeforeSentenceProcessing(source);
   const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();
@@ -70,9 +165,6 @@ ChartManager::~ChartManager()
   m_system->CleanUpAfterSentenceProcessing(m_source);
 
   RemoveAllInColl(m_ruleLookupManagers);
-
-  RemoveAllInColl(m_unksrcs);
-  RemoveAllInColl(m_cacheTargetPhraseCollection);
 
   clock_t end = clock();
   float et = (end - m_start);
@@ -370,101 +462,12 @@ void ChartManager::CreateTranslationOptionsForRange(const WordsRange &wordsRange
     if (m_translationOptionList.GetSize() == 0 || alwaysCreateDirectTranslationOption) {
       // create unknown words for 1 word coverage where we don't have any trans options
       const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
-      ProcessOneUnknownWord(sourceWord, wordsRange);
+      m_unknown.Process(sourceWord, wordsRange, m_translationOptionList);
     }
   }
   
   m_translationOptionList.ApplyThreshold();
 }
   
-//! special handling of ONE unknown words.
-void ChartManager::ProcessOneUnknownWord(const Word &sourceWord, const WordsRange &range)
-{
-  // unknown word, add as trans opt
-  const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
-  
-  size_t isDigit = 0;
-  if (staticData.GetDropUnknown()) {
-    const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-    const string &s = f->GetString();
-    isDigit = s.find_first_of("0123456789");
-    if (isDigit == string::npos)
-      isDigit = 0;
-    else
-      isDigit = 1;
-    // modify the starting bitmap
-  }
-  
-  Phrase* m_unksrc = new Phrase(1);
-  m_unksrc->AddWord() = sourceWord;
-  m_unksrcs.push_back(m_unksrc);
-  
-  //TranslationOption *transOpt;
-  if (! staticData.GetDropUnknown() || isDigit) {
-    // loop
-    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
-    UnknownLHSList::const_iterator iterLHS;
-    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
-      const string &targetLHSStr = iterLHS->first;
-      float prob = iterLHS->second;
-      
-      // lhs
-      //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
-      Word targetLHS(true);
-      
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
-      
-      // add to dictionary
-      TargetPhrase *targetPhrase = new TargetPhrase(Output);
-      TargetPhraseCollection *tpc = new TargetPhraseCollection;
-      tpc->Add(targetPhrase);
-      
-      m_cacheTargetPhraseCollection.push_back(tpc);
-      Word &targetWord = targetPhrase->AddWord();
-      targetWord.CreateUnknownWord(sourceWord);
-      
-      // scores
-      vector<float> unknownScore(1, FloorScore(TransformScore(prob)));
-      
-      //targetPhrase->SetScore();
-      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetScore(m_system->GetWordPenaltyProducer(), wordPenaltyScore);
-      targetPhrase->SetSourcePhrase(m_unksrc);
-      targetPhrase->SetTargetLHS(targetLHS);
-      
-      // chart rule
-      m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
-    } // for (iterLHS
-  } else {
-    // drop source word. create blank trans opt
-    vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
-    
-    TargetPhrase *targetPhrase = new TargetPhrase(Output);
-    TargetPhraseCollection *tpc = new TargetPhraseCollection;
-    tpc->Add(targetPhrase);
-    // loop
-    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
-    UnknownLHSList::const_iterator iterLHS;
-    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
-      const string &targetLHSStr = iterLHS->first;
-      //float prob = iterLHS->second;
-      
-      Word targetLHS(true);
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
-      
-      m_cacheTargetPhraseCollection.push_back(tpc);
-      targetPhrase->SetSourcePhrase(m_unksrc);
-      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetTargetLHS(targetLHS);
-      
-      // chart rule
-      m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
-    }
-  }
-}
   
 } // namespace Moses
