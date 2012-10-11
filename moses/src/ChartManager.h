@@ -42,10 +42,10 @@ class ChartTrellisNode;
 class ChartTrellisPath;
 class ChartTrellisPathList;
 
-class ChartUnknownWord {
+class ChartParserUnknown {
   public:
-    ChartUnknownWord(const TranslationSystem &system);
-    ~ChartUnknownWord();
+    ChartParserUnknown(const TranslationSystem &system);
+    ~ChartParserUnknown();
 
     void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
 
@@ -54,6 +54,20 @@ class ChartUnknownWord {
     std::vector<Phrase*> m_unksrcs;
     std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
     StackVec m_emptyStackVec;
+};
+
+class ChartParser {
+  public:
+    ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollection &cells);
+    ~ChartParser();
+
+    void Create(const WordsRange &range, ChartTranslationOptionList &to);
+
+  private:
+    ChartParserUnknown m_unknown;
+    std::vector <DecodeGraph*> m_decodeGraphList;
+    std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
+    InputType const& m_source; /**< source sentence to be translated */
 };
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
@@ -67,20 +81,17 @@ private:
   static void CreateDeviantPaths(boost::shared_ptr<const ChartTrellisPath>,
                                  const ChartTrellisNode &,
                                  ChartTrellisDetourQueue &);
-  void CreateTranslationOptionsForRange(const WordsRange &wordsRange);
 
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
-  std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
 
-  ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
-  std::vector <DecodeGraph*> m_decodeGraphList;
+  ChartParser m_parser;
 
-  ChartUnknownWord m_unknown;
+  ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
 
 public:
   ChartManager(InputType const& source, const TranslationSystem* system);

@@ -39,14 +39,14 @@ namespace Moses
 {
 extern bool g_debug;
 
-ChartUnknownWord::ChartUnknownWord(const TranslationSystem &system) : m_system(system) {}
+ChartParserUnknown::ChartParserUnknown(const TranslationSystem &system) : m_system(system) {}
 
-ChartUnknownWord::~ChartUnknownWord() {
+ChartParserUnknown::~ChartParserUnknown() {
   RemoveAllInColl(m_unksrcs);
   RemoveAllInColl(m_cacheTargetPhraseCollection);
 }
 
-void ChartUnknownWord::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to) {
+void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to) {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system.GetUnknownWordPenaltyProducer();
@@ -134,6 +134,54 @@ void ChartUnknownWord::Process(const Word &sourceWord, const WordsRange &range, 
   }
 }
 
+ChartParser::ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollection &cells) : 
+  m_unknown(system),
+  m_decodeGraphList(system.GetDecodeGraphs()),
+  m_source(source) {
+  const std::vector<PhraseDictionaryFeature*> &dictionaries = system.GetPhraseDictionaries();
+  m_ruleLookupManagers.reserve(dictionaries.size());
+  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
+       p != dictionaries.end(); ++p) {
+    PhraseDictionaryFeature *pdf = *p;
+    const PhraseDictionary *dict = pdf->GetDictionary();
+    PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
+    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, cells));
+  }
+}
+
+ChartParser::~ChartParser() {
+  RemoveAllInColl(m_ruleLookupManagers);
+}
+
+void ChartParser::Create(const WordsRange &wordsRange, ChartTranslationOptionList &to) {
+  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
+  
+  to.Clear();
+  
+  std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
+  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
+  for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
+    const DecodeGraph &decodeGraph = **iterDecodeGraph;
+    assert(decodeGraph.GetSize() == 1);
+    ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
+    size_t maxSpan = decodeGraph.GetMaxChartSpan();
+    if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
+      ruleLookupManager.GetChartRuleCollection(wordsRange, to);
+    }
+  }
+  
+  if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
+    bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+    if (to.GetSize() == 0 || alwaysCreateDirectTranslationOption) {
+      // create unknown words for 1 word coverage where we don't have any trans options
+      const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
+      m_unknown.Process(sourceWord, wordsRange, to);
+    }
+  }
+  
+  to.ApplyThreshold();
+}
+
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.
@@ -144,27 +192,15 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
   ,m_system(system)
   ,m_start(clock())
   ,m_hypothesisId(0)
+  ,m_parser(source, *system, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
-  ,m_decodeGraphList(system->GetDecodeGraphs())
-  ,m_unknown(*system)
 {
   m_system->InitializeBeforeSentenceProcessing(source);
-  const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();
-  m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
-       p != dictionaries.end(); ++p) {
-    PhraseDictionaryFeature *pdf = *p;
-    const PhraseDictionary *dict = pdf->GetDictionary();
-    PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, m_hypoStackColl));
-  }
 }
 
 ChartManager::~ChartManager()
 {
   m_system->CleanUpAfterSentenceProcessing(m_source);
-
-  RemoveAllInColl(m_ruleLookupManagers);
 
   clock_t end = clock();
   float et = (end - m_start);
@@ -193,7 +229,7 @@ void ChartManager::ProcessSentence()
       WordsRange range(startPos, endPos);
 
       // create trans opt
-      CreateTranslationOptionsForRange(range);
+      m_parser.Create(range, m_translationOptionList);
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -439,35 +475,6 @@ void ChartManager::CreateDeviantPaths(
   }
 }
 
-void ChartManager::CreateTranslationOptionsForRange(const WordsRange &wordsRange)
-{
-  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
-  
-  m_translationOptionList.Clear();
-  
-  std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
-  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
-  for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
-    const DecodeGraph &decodeGraph = **iterDecodeGraph;
-    assert(decodeGraph.GetSize() == 1);
-    ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
-    size_t maxSpan = decodeGraph.GetMaxChartSpan();
-    if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
-    }
-  }
-  
-  if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
-    bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-    if (m_translationOptionList.GetSize() == 0 || alwaysCreateDirectTranslationOption) {
-      // create unknown words for 1 word coverage where we don't have any trans options
-      const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
-      m_unknown.Process(sourceWord, wordsRange, m_translationOptionList);
-    }
-  }
-  
-  m_translationOptionList.ApplyThreshold();
-}
   
   
 } // namespace Moses
