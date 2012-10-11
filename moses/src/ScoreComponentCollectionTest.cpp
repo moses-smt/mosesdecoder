@@ -30,21 +30,29 @@ using namespace std;
 
 BOOST_AUTO_TEST_SUITE(scc)
 
-class MockSingleFeature : public StatelessFeatureFunction {
+class MockStatelessFeatureFunction : public StatelessFeatureFunction {
   public:
-    MockSingleFeature(): StatelessFeatureFunction("MockSingle",1) {}
+    MockStatelessFeatureFunction(const string& desc, size_t n) :
+      StatelessFeatureFunction(desc,n) {}
+    virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
+    virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
+};
+
+class MockSingleFeature : public MockStatelessFeatureFunction {
+  public:
+    MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1) {}
     std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
 };
 
-class MockMultiFeature : public StatelessFeatureFunction {
+class MockMultiFeature : public MockStatelessFeatureFunction {
   public:
-    MockMultiFeature(): StatelessFeatureFunction("MockMulti", 5) {}
+    MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5) {}
     std::string GetScoreProducerWeightShortName(unsigned) const {return "mf";}
 };
 
-class MockSparseFeature : public StatelessFeatureFunction {
+class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
-    MockSparseFeature(): StatelessFeatureFunction("MockSparse", ScoreProducer::unlimited) {}
+    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", ScoreProducer::unlimited) {}
     std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
 };
 

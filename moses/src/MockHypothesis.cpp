@@ -38,7 +38,7 @@ MockHypothesisGuard::MockHypothesisGuard(
 : m_emptyTarget(),
   m_sentence(),
   m_system("mock",&m_wp,&m_uwp,&m_dist),
-  m_manager(m_sentence,Normal,&m_system)
+  m_manager(0,m_sentence,Normal,&m_system)
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
 
