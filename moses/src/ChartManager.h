@@ -28,8 +28,8 @@
 #include "WordsRange.h"
 #include "SentenceStats.h"
 #include "TranslationSystem.h"
-#include "ChartRuleLookupManager.h"
 #include "ChartTranslationOptionList.h"
+#include "ChartParser.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -41,34 +41,6 @@ class ChartTrellisDetourQueue;
 class ChartTrellisNode;
 class ChartTrellisPath;
 class ChartTrellisPathList;
-
-class ChartParserUnknown {
-  public:
-    ChartParserUnknown(const TranslationSystem &system);
-    ~ChartParserUnknown();
-
-    void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
-
-  private:
-    const TranslationSystem &m_system;
-    std::vector<Phrase*> m_unksrcs;
-    std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
-    StackVec m_emptyStackVec;
-};
-
-class ChartParser {
-  public:
-    ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollection &cells);
-    ~ChartParser();
-
-    void Create(const WordsRange &range, ChartParserCallback &to);
-
-  private:
-    ChartParserUnknown m_unknown;
-    std::vector <DecodeGraph*> m_decodeGraphList;
-    std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
-    InputType const& m_source; /**< source sentence to be translated */
-};
 
 /** Holds everything you need to decode 1 sentence with the hierachical/syntax decoder
  */
