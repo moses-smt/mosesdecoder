@@ -60,7 +60,6 @@ class ChartCellCollectionBase {
       return m_source[at];
     }
 
-  protected:
     // There's nothing mutable in ChartCellLabel base, so no public method.  
     ChartCellBase &MutableBase(const WordsRange &coverage) {
       return *m_cells[coverage.GetStartPos()][coverage.GetEndPos() - coverage.GetStartPos()];

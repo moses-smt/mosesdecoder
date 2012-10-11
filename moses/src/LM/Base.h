@@ -30,6 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
+namespace Incremental { class Manager; }
+
 class FactorCollection;
 class Factor;
 class Phrase;
@@ -97,7 +99,7 @@ public:
   }
 
   // KenLM only (others throw an exception): call incremental search with the model and mapping.
-  virtual void IncrementalCallback() const;
+  virtual void IncrementalCallback(Incremental::Manager &manager) const;
 };
 
 }

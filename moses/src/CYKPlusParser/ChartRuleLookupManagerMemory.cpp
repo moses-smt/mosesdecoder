@@ -32,7 +32,7 @@ namespace Moses
 
 ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   const InputType &src,
-  const ChartCellCollection &cellColl,
+  const ChartCellCollectionBase &cellColl,
   const PhraseDictionarySCFG &ruleTable)
   : ChartRuleLookupManagerCYKPlus(src, cellColl)
   , m_ruleTable(ruleTable)

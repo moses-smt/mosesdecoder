@@ -1,1 +1,1 @@
-lib Incremental : Fill.cpp ../../../lazy/search//search ..//moses_internal ;
+lib Incremental : [ glob *.cpp ] ../../../lazy/search//search ..//moses_internal ;

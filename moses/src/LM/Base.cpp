@@ -65,7 +65,7 @@ float LanguageModel::GetOOVWeight() const {
   return StaticData::Instance().GetAllWeights()[lmIndex+1];
 }
 
-void LanguageModel::IncrementalCallback() const {
+void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {
   UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
 }
 

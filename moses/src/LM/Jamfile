@@ -93,4 +93,4 @@ obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclu
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
 lib LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
-  ../../../lazy/lm//kenlm ..//headers $(dependencies) ;
+  ../../../lazy/lm//kenlm ..//headers ../Incremental//Incremental $(dependencies) ;

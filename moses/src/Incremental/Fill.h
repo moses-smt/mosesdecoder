@@ -47,7 +47,6 @@ template <class Model> class Fill : public ChartParserCallback {
     Owner &owner_;
 
     search::EdgeQueue edges_;
-
 };
 
 } // namespace Incremental

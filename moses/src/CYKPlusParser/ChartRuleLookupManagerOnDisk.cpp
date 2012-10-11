@@ -34,7 +34,7 @@ namespace Moses
 
 ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const InputType &sentence,
-  const ChartCellCollection &cellColl,
+  const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const LMList *languageModels,

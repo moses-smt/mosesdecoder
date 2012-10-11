@@ -38,7 +38,7 @@ namespace Moses
 {
 
 class InputType;
-class ChartCellCollection;
+class ChartCellCollectionBase;
 class ChartHypothesisCollection;
 class WordsRange;
 
@@ -48,7 +48,7 @@ class Scope3Parser : public ChartRuleLookupManager
 {
  public:
   Scope3Parser(const InputType &sentence,
-               const ChartCellCollection &cellColl,
+               const ChartCellCollectionBase &cellColl,
                const RuleTableUTrie &ruleTable,
                size_t maxChartSpan)
       : ChartRuleLookupManager(sentence, cellColl)

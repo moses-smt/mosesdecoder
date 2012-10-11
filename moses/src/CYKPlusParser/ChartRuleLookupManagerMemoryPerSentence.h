@@ -46,7 +46,7 @@ class ChartRuleLookupManagerMemoryPerSentence : public ChartRuleLookupManagerCYK
 {
  public:
   ChartRuleLookupManagerMemoryPerSentence(const InputType &sentence,
-                               const ChartCellCollection &cellColl,
+                               const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryFuzzyMatch &ruleTable);
 
   ~ChartRuleLookupManagerMemoryPerSentence();

@@ -37,7 +37,7 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
 {
  public:
   ChartRuleLookupManagerCYKPlus(const InputType &sentence,
-                                const ChartCellCollection &cellColl)
+                                const ChartCellCollectionBase &cellColl)
     : ChartRuleLookupManager(sentence, cellColl) {}
 
  protected:

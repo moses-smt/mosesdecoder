@@ -46,7 +46,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
 {
  public:
   ChartRuleLookupManagerMemory(const InputType &sentence,
-                               const ChartCellCollection &cellColl,
+                               const ChartCellCollectionBase &cellColl,
                                const PhraseDictionarySCFG &ruleTable);
 
   ~ChartRuleLookupManagerMemory();
