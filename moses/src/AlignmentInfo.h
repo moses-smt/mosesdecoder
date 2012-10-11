@@ -25,6 +25,8 @@
 #include <vector>
 #include <cstdlib>
 
+#include <boost/functional/hash.hpp>
+
 namespace Moses
 {
 
@@ -37,6 +39,8 @@ class AlignmentInfo
 {
   friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
+  friend struct AlignmentInfoComparator;
+  friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
 
  public:
@@ -113,6 +117,34 @@ struct AlignmentInfoOrderer
 	  return a.m_terminalCollection < b.m_terminalCollection;
     return a.m_collection < b.m_collection;
   }
+};
+
+/**
+  * Equality functoid
+  **/
+struct AlignmentInfoComparator
+{
+  inline bool operator()(const AlignmentInfo &a, const AlignmentInfo &b) const {
+    return a.m_collection == b.m_collection &&
+           a.m_terminalCollection == b.m_terminalCollection &&
+           a.m_nonTermIndexMap == b.m_nonTermIndexMap;
+  }
+};
+
+/** 
+ * Hashing functoid
+ **/
+struct AlignmentInfoHasher
+{
+  size_t operator()(const AlignmentInfo& a) const
+  {
+    size_t seed = 0;
+    boost::hash_combine(seed,a.m_collection);
+    boost::hash_combine(seed,a.m_terminalCollection);
+    boost::hash_combine(seed,a.m_nonTermIndexMap);
+    return seed;
+  }
+
 };
 
 }
