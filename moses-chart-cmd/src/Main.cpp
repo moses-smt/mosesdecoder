@@ -91,7 +91,7 @@ public:
       Incremental::Manager manager(*m_source, system);
       manager.ProcessSentence();
       if (m_ioWrapper.ExposeSingleBest()) {
-        m_ioWrapper.ExposeSingleBest()->Write(lineNumber, manager.String());
+        m_ioWrapper.ExposeSingleBest()->Write(lineNumber, manager.String() + '\n');
       }
       return;
     }
