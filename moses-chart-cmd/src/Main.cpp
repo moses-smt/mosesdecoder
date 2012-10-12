@@ -233,7 +233,7 @@ int main(int argc, char* argv[])
       exit(0);
     }
   
-    CHECK(staticData.GetSearchAlgorithm() == ChartDecoding || staticData.GetSearchAlgorithm() == ChartIncremental);
+    CHECK(staticData.IsChart());
   
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);

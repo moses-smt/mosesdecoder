@@ -451,6 +451,9 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
+  bool IsChart() const {
+    return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
+  }
   LMList GetLMList() const { 
     return m_languageModel; 
   }
