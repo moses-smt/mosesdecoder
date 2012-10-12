@@ -48,13 +48,13 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
         words.push_back(Convert(word));
       }
     }
-    float additive = phrase.GetTranslationScore() + word_multiplier * static_cast<float>(phrase.GetSize() - nts.size());
     Edge &edge = *owner_.EdgePool().construct(phrase);
-    edge.InitRule().Init(context_, additive, words, bos);
+    float score = phrase.GetTranslationScore() + word_multiplier * static_cast<float>(phrase.GetSize() - nts.size());
+    score += edge.InitRule().Init(context_, words, bos);
     for (std::vector<const search::Vertex*>::const_iterator i(non_terminals.begin()); i != non_terminals.end(); ++i) {
       edge.Add(**i);
     }
-    edges_.AddEdge(edge);
+    edges_.AddEdge(edge, score);
   }
 }
 
@@ -64,10 +64,10 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
   Edge &edge = *owner_.EdgePool().construct(phrase);
+  edge.InitRule().Init(context_, words, false);
   // This includes the phrase OOV penalty and WordPenalty.  
   // Appears to be a bug that this does not include language model.  
-  edge.InitRule().Init(context_, phrase.GetFutureScore(), words, false);
-  edges_.AddEdge(edge);
+  edges_.AddEdge(edge, phrase.GetFutureScore());
 }
 
 namespace {
