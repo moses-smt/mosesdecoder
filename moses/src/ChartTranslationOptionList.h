@@ -45,6 +45,8 @@ class ChartTranslationOptionList : public ChartParserCallback {
   void Add(const TargetPhraseCollection &, const StackVec &,
            const WordsRange &);
 
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+
   bool Empty() const { return m_size == 0; }
 
   void Clear();

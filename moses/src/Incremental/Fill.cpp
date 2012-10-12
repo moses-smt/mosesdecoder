@@ -20,7 +20,7 @@ template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const 
   : context_(context), vocab_mapping_(vocab_mapping), owner_(owner), edges_(context.PopLimit()) {}
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
-  float word_multiplier = -0.434294482 * context_.GetWeights().WordPenalty();
+  const float word_multiplier = -0.434294482 * context_.GetWeights().WordPenalty();
   std::vector<const search::Vertex*> non_terminals;
   for (StackVec::const_iterator i = nts.begin(); i != nts.end(); ++i) {
     non_terminals.push_back((*i)->GetStack().incr);
@@ -56,6 +56,18 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     }
     edges_.AddEdge(edge);
   }
+}
+
+template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &, const WordsRange &) {
+  std::vector<lm::WordIndex> words;
+  CHECK(phrase.GetSize() <= 1);
+  if (phrase.GetSize())
+    words.push_back(Convert(phrase.GetWord(0)));
+  Edge &edge = *owner_.EdgePool().construct(phrase);
+  // This includes the phrase OOV penalty and WordPenalty.  
+  // Appears to be a bug that this does not include language model.  
+  edge.InitRule().Init(context_, phrase.GetFutureScore(), words, false);
+  edges_.AddEdge(edge);
 }
 
 namespace {

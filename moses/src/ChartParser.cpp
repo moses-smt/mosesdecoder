@@ -80,10 +80,6 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       
       // add to dictionary
       TargetPhrase *targetPhrase = new TargetPhrase(Output);
-      TargetPhraseCollection *tpc = new TargetPhraseCollection;
-      tpc->Add(targetPhrase);
-      
-      m_cacheTargetPhraseCollection.push_back(tpc);
       Word &targetWord = targetPhrase->AddWord();
       targetWord.CreateUnknownWord(sourceWord);
       
@@ -97,15 +93,13 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetTargetLHS(targetLHS);
       
       // chart rule
-      to.Add(*tpc, m_emptyStackVec, range);
+      to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     } // for (iterLHS
   } else {
     // drop source word. create blank trans opt
     vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
     
     TargetPhrase *targetPhrase = new TargetPhrase(Output);
-    TargetPhraseCollection *tpc = new TargetPhraseCollection;
-    tpc->Add(targetPhrase);
     // loop
     const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
     UnknownLHSList::const_iterator iterLHS;
@@ -117,13 +111,12 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
       CHECK(targetLHS.GetFactor(0) != NULL);
       
-      m_cacheTargetPhraseCollection.push_back(tpc);
       targetPhrase->SetSourcePhrase(unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
       
       // chart rule
-      to.Add(*tpc, m_emptyStackVec, range);
+      to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     }
   }
 }

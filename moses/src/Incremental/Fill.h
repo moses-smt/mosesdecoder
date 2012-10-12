@@ -9,6 +9,7 @@
 
 #include <boost/pool/object_pool.hpp>
 
+#include <list>
 #include <vector>
 
 namespace search {
@@ -21,6 +22,7 @@ class WordsRange;
 class TargetPhraseCollection;
 class WordsRange;
 class ChartCellLabelSet;
+class TargetPhrase;
 
 namespace Incremental {
 class Owner;
@@ -32,6 +34,8 @@ template <class Model> class Fill : public ChartParserCallback {
     Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, Owner &owner);
 
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
+
+    void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
 
     bool Empty() const { return edges_.Empty(); }
 
