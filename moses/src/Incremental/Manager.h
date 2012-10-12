@@ -21,12 +21,16 @@ class Manager {
     
     void ProcessSentence();
 
+    const std::string &String() const { return output_; }
+
   private:
     const InputType &source_;
     const TranslationSystem &system_;
     ChartCellCollectionBase cells_;
     ChartParser parser_;
     Owner owner_;
+
+    std::string output_;
 };
 } // namespace Incremental
 } // namespace Moses

@@ -173,6 +173,7 @@ enum SearchAlgorithm {
   ,CubeGrowing	= 2
   ,ChartDecoding= 3
   ,NormalBatch  = 4
+  ,ChartIncremental = 5
 };
 
 enum SourceLabelOverlap {

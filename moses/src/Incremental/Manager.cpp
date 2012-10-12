@@ -1,5 +1,6 @@
 #include "Incremental/Manager.h"
 
+#include "Incremental/Edge.h"
 #include "Incremental/Fill.h"
 
 #include "ChartCell.h"
@@ -40,7 +41,7 @@ template <class Model> void Manager::LMCallback(const Model &model, const std::v
       abstract.GetWeight(), 
       abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0, 
       system_.GetWeightWordPenalty());
-  search::Config config(weights, StaticData::GetCubePruningPopLimit());
+  search::Config config(weights, StaticData::Instance().GetCubePruningPopLimit());
   search::Context<Model> context(config, model);
 
   size_t size = source_.GetSize();
@@ -49,16 +50,56 @@ template <class Model> void Manager::LMCallback(const Model &model, const std::v
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
       Fill<Model> filler(context, words, owner_);
-      parser_.Create(WordsRange(startPos, endPos), filler);
+      parser_.Create(range, filler);
       filler.Search(cells_.MutableBase(range).MutableTargetLabelSet());
     }
   }
 }
 
+template void Manager::LMCallback<lm::ngram::ProbingModel>(const lm::ngram::ProbingModel &model, const std::vector<lm::WordIndex> &words);
+template void Manager::LMCallback<lm::ngram::RestProbingModel>(const lm::ngram::RestProbingModel &model, const std::vector<lm::WordIndex> &words);
+template void Manager::LMCallback<lm::ngram::TrieModel>(const lm::ngram::TrieModel &model, const std::vector<lm::WordIndex> &words);
+template void Manager::LMCallback<lm::ngram::QuantTrieModel>(const lm::ngram::QuantTrieModel &model, const std::vector<lm::WordIndex> &words);
+template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::ArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
+template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
+
+namespace {
+
+void ConstructString(const search::Final &final, std::ostringstream &stream) {
+  const TargetPhrase &phrase = static_cast<const Edge&>(final.From()).GetMoses();
+  size_t child = 0;
+  for (std::size_t i = 0; i < phrase.GetSize(); ++i) {
+    const Word &word = phrase.GetWord(i);
+    if (word.IsNonTerminal()) {
+      ConstructString(*final.Children()[child++], stream);
+    } else {
+      stream << word[0]->GetString() << ' ';
+    }
+  }
+}
+
+} // namespace
+
 void Manager::ProcessSentence() {
   const LMList &lms = system_.GetLanguageModels();
   UTIL_THROW_IF(lms.size() != 1, util::Exception, "Incremental search only supports one language model.");
   (*lms.begin())->IncrementalCallback(*this);
+
+  const ChartCellLabelSet &labels = cells_.GetBase(WordsRange(0, source_.GetSize() - 1)).GetTargetLabelSet();
+  const search::Final *best = NULL;
+  for (ChartCellLabelSet::const_iterator i = labels.begin(); i != labels.end(); ++i) {
+    const search::Final *child = i->second.GetStack().incr->BestChild();
+    if (child && (!best || (child->Bound() > best->Bound()))) {
+      best = child;
+    }
+  }
+  if (!best) {
+    output_.clear();
+    return;
+  }
+  std::ostringstream stream;
+  ConstructString(*best, stream);
+  output_ = stream.str();
 }
 
 } // namespace Incremental

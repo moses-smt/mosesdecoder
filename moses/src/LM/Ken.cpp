@@ -88,7 +88,7 @@ template <class Model> class LanguageModelKen : public LanguageModel {
 
     FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 
-    void IncrementalCallback(Incremental::Manager &manager) {
+    void IncrementalCallback(Incremental::Manager &manager) const {
       manager.LMCallback(*m_ngram, m_lmIdLookup);
     }
 

@@ -57,6 +57,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartHypothesis.h"
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
+#include "Incremental/Manager.h"
 
 #include "util/usage.hh"
 
@@ -85,6 +86,15 @@ public:
     const size_t lineNumber = m_source->GetTranslationId();
 
     VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
+
+    if (staticData.GetSearchAlgorithm() == ChartIncremental) {
+      Incremental::Manager manager(*m_source, system);
+      manager.ProcessSentence();
+      if (m_ioWrapper.ExposeSingleBest()) {
+        m_ioWrapper.ExposeSingleBest()->Write(lineNumber, manager.String());
+      }
+      return;
+    }
 
     ChartManager manager(*m_source, &system);
     manager.ProcessSentence();

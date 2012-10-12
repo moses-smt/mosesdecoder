@@ -43,7 +43,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     for (; i < phrase.GetSize(); ++i) {
       const Word &word = phrase.GetWord(i);
       if (word.IsNonTerminal()) {
-        words.push_back(search::Rule::kNonTerminal);
+        words.push_back(search::kNonTerminal);
       } else {
         words.push_back(Convert(word));
       }
@@ -102,8 +102,12 @@ template <class Model> lm::WordIndex Fill<Model>::Convert(const Word &word) cons
   return (factor >= vocab_mapping_.size() ? 0 : vocab_mapping_[factor]);
 }
 
-template class Fill<lm::ngram::RestProbingModel>;
 template class Fill<lm::ngram::ProbingModel>;
+template class Fill<lm::ngram::RestProbingModel>;
+template class Fill<lm::ngram::TrieModel>;
+template class Fill<lm::ngram::QuantTrieModel>;
+template class Fill<lm::ngram::ArrayTrieModel>;
+template class Fill<lm::ngram::QuantArrayTrieModel>;
 
 } // namespace Incremental
 } // namespace Moses
