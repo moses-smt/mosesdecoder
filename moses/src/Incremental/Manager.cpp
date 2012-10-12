@@ -11,6 +11,8 @@
 #include "search/config.hh"
 #include "search/weights.hh"
 
+#include <boost/lexical_cast.hpp>
+
 namespace Moses {
 namespace Incremental {
 
@@ -70,6 +72,9 @@ void BestString(const ChartCellLabelSet &labels, std::string &out) {
   out.erase(0, 4);
   // </s>
   out.erase(out.size() - 5);
+  // Hack: include model score
+  out += " ||| ";
+  out += boost::lexical_cast<std::string>(best->Bound());
 }
 
 } // namespace
