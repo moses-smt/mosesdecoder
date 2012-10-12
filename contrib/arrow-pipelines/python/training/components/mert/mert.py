@@ -59,7 +59,7 @@ def initialise(config):
         
         return {'moses_ini_file':new_mosesini}
 
-    return cons_function_component(process)
+    return process
 
 if __name__ == '__main__':
 

@@ -82,7 +82,7 @@ def initialise(config):
 
         return output
 
-    return cons_function_component(process)
+    return process
 
 
 if __name__ == '__main__':

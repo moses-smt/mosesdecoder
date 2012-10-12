@@ -66,7 +66,7 @@ def initialise(config):
       _safe_close(ofh1)
       _safe_close(ofh2)
     
-  return cons_function_component(_splitter_main)
+  return _splitter_main
 
 
 if __name__ == '__main__':

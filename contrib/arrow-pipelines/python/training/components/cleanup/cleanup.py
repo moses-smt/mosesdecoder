@@ -55,7 +55,7 @@ def initialise(config):
       _safe_close(ofh1)
       _safe_close(ofh2)
     
-  return cons_function_component(_filter_main)
+  return _filter_main
 
 
 if __name__ == '__main__':

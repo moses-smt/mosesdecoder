@@ -24,7 +24,7 @@ def initialise(config):
             config['trg_tokenisation_dir'])
         return {'tokenised_trg_filename':outfilename}
 
-    return cons_function_component(process)
+    return process
 
 if __name__ == '__main__':
 

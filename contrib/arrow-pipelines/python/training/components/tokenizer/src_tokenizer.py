@@ -24,7 +24,7 @@ def initialise(config):
             config['src_tokenisation_dir'])
         return {'tokenised_src_filename':outfilename}
 
-    return cons_function_component(process)
+    return process
 
 if __name__ == '__main__':
 
