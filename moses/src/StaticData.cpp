@@ -118,7 +118,7 @@ bool StaticData::LoadData(Parameter *parameter)
   m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
                       (SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
 
-  if (m_searchAlgorithm == ChartDecoding)
+  if (m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental)
     LoadChartDecodingParameters();
   else
     LoadPhraseBasedParameters();
@@ -544,7 +544,7 @@ bool StaticData::LoadData(Parameter *parameter)
     return false;
   }
 
-  if (m_searchAlgorithm == ChartDecoding) {
+  if (m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental) {
     //insert some null distortion score producers
     m_distortionScoreProducers.assign(tsConfig.size(), NULL);
   } else {
@@ -1255,7 +1255,7 @@ bool StaticData::LoadDecodeGraphs()
     CHECK(decodeStep);
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (m_searchAlgorithm == ChartDecoding) {
+      if (m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
       } else {
