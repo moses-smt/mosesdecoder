@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Edge.h"
 #include "search/vertex.hh"
 
 #include <boost/pool/object_pool.hpp>

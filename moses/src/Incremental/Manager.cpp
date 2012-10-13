@@ -1,6 +1,5 @@
 #include "Incremental/Manager.h"
 
-#include "Incremental/Edge.h"
 #include "Incremental/Fill.h"
 
 #include "ChartCell.h"
@@ -40,7 +39,7 @@ Manager::~Manager() {
 namespace {
 
 void ConstructString(const search::Final &final, std::ostringstream &stream) {
-  const TargetPhrase &phrase = static_cast<const Edge&>(final.From()).GetMoses();
+  const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(final.GetNote().vp);
   size_t child = 0;
   for (std::size_t i = 0; i < phrase.GetSize(); ++i) {
     const Word &word = phrase.GetWord(i);

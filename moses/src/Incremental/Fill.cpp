@@ -1,6 +1,5 @@
 #include "Incremental/Fill.h"
 
-#include "Incremental/Edge.h"
 #include "Incremental/Owner.h"
 #include "ChartCellLabel.h"
 #include "ChartCellLabelSet.h"
@@ -10,6 +9,7 @@
 
 #include "lm/model.hh"
 #include "search/context.hh"
+#include "search/note.hh"
 #include "search/vertex.hh"
 #include "search/vertex_generator.hh"
 
@@ -23,8 +23,8 @@ template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const 
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
   const unsigned char arity = nts.size();
-  
   CHECK(arity <= search::kMaxArity);
+
   search::PartialVertex vertices[search::kMaxArity];
   float below_score = 0.0;
   for (unsigned int i = 0; i < nts.size(); ++i) {
@@ -60,9 +60,11 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     search::PartialEdge &edge = edges_.InitializeEdge();
     memcpy(edge.nt, vertices, arity * sizeof(search::PartialVertex));
     edge.score = phrase.GetFutureScore() + below_score;
+    search::ScoreRule(context_, words, bos, edge.between);
 
-    edge.InitRule().Init(context_, words, bos);
-   // edges_.AddEdge(edge, phrase.GetFutureScore());
+    search::Note note;
+    note.vp = &phrase;
+    edges_.AddEdge(arity, note);
   }
 }
 
@@ -71,11 +73,14 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   CHECK(phrase.GetSize() <= 1);
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
-  Edge &edge = *owner_.EdgePool().construct(phrase);
-  float score = phrase.GetFutureScore();
+
+  search::PartialEdge &edge = edges_.InitializeEdge();
   // Appears to be a bug that this does not include language model.  
-  score += edge.InitRule().Init(context_, words, false);
-  edges_.AddEdge(edge, score);
+  edge.score = phrase.GetFutureScore() + search::ScoreRule(context_, words, false, edge.between);
+
+  search::Note note;
+  note.vp = &phrase;
+  edges_.AddEdge(0, note);
 }
 
 namespace {
@@ -85,12 +90,12 @@ class HypothesisCallback {
     HypothesisCallback(search::ContextBase &context, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool)
       : context_(context), out_(out), vertex_pool_(vertex_pool) {}
 
-    void NewHypothesis(const search::PartialEdge &partial, const search::Edge &from) {
-      search::VertexGenerator *&entry = out_.FindOrInsert(static_cast<const Edge&>(from).GetMoses().GetTargetLHS()).incr_generator;
+    void NewHypothesis(const search::PartialEdge &partial, search::Note note) {
+      search::VertexGenerator *&entry = out_.FindOrInsert(static_cast<const TargetPhrase *>(note.vp)->GetTargetLHS()).incr_generator;
       if (!entry) {
         entry = generator_pool_.construct(context_, *vertex_pool_.construct());
       }
-      entry->NewHypothesis(partial, from);
+      entry->NewHypothesis(partial, note);
     }
 
     void FinishedSearch() {

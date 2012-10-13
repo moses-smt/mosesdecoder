@@ -2,7 +2,6 @@
 
 #include "ChartParserCallback.h"
 #include "StackVec.h"
-#include "Incremental/Edge.h"
 
 #include "lm/word_index.hh"
 #include "search/edge_queue.hh"
