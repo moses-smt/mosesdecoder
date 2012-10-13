@@ -209,7 +209,7 @@ class StringVector
     uint64_t loadCharArray(std::vector<ValueT, std::allocator<ValueT> >& c,
                        std::FILE* in, bool map = false)
     {
-      // Can only be read into memory. Mapping not possible with std:allocator.
+      // Can only be read into memory. Mapping not possible with std::allocator.
       assert(map == false);
       
       uint64_t byteSize = 0;

@@ -84,7 +84,7 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
   else
     // Keep source phrase index on disk
     indexSize = m_hash.LoadIndex(pFile);
-
+    
   uint64_t coderSize = m_phraseDecoder->Load(pFile);
   
   uint64_t phraseSize;

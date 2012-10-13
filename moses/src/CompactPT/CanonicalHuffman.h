@@ -41,7 +41,6 @@ class CanonicalHuffman
     std::vector<uint64_t> m_lengthIndex;
     
     typedef boost::unordered_map<Data, std::pair<uint16_t, uint64_t> > EncodeMap;
-    //typedef boost::unordered_map<Data, boost::dynamic_bitset<> > EncodeMap;
     EncodeMap m_encodeMap;
     
     struct MinHeapSorter {
@@ -235,7 +234,7 @@ class CanonicalHuffman
       return ftello(pFile) - start;
     }
     
-    size_t Save(std::FILE* pFile)
+    uint64_t Save(std::FILE* pFile)
     {
       uint64_t start = ftello(pFile);
       

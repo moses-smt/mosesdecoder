@@ -158,7 +158,10 @@ void BlockHashIndex::SaveRange(size_t i)
     m_seekIndex.resize(i+1);
   m_seekIndex[i] = ftello(m_fileHandle) - m_fileHandleStart;
   cmph_dump((cmph_t*)m_hashes[i], m_fileHandle);
+  uint64_t cmph_off = ftello(m_fileHandle) - m_fileHandleStart;
   m_arrays[i]->Save(m_fileHandle);
+  uint64_t pack_off = ftello(m_fileHandle) - m_fileHandleStart;
+  std::cerr << i << ": " << m_seekIndex[i] << " " << cmph_off - m_seekIndex[i] << " " << pack_off - cmph_off << std::endl;
 #endif
 }
 
@@ -226,7 +229,8 @@ uint64_t BlockHashIndex::FinalizeSave()
   ThrowingFwrite(&relIndexPos, sizeof(uint64_t), 1, m_fileHandle);
   
   fseeko(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
-  m_landmarks.save(m_fileHandle);
+  uint64_t land = m_landmarks.save(m_fileHandle);
+  std::cerr << "land: " << land << std::endl;
   
   uint64_t seekIndexSize = m_seekIndex.size();
   ThrowingFwrite(&seekIndexSize, sizeof(uint64_t), 1, m_fileHandle);
@@ -235,6 +239,7 @@ uint64_t BlockHashIndex::FinalizeSave()
   ThrowingFwrite(&m_size, sizeof(uint64_t), 1, m_fileHandle);
   
   uint64_t fileHandleStop = ftello(m_fileHandle);
+  std::cerr << "end: " << fileHandleStop << std::endl;
   return fileHandleStop - m_fileHandleStart + sizeof(m_orderBits)
     + sizeof(m_fingerPrintBits);
 }
@@ -254,16 +259,24 @@ uint64_t BlockHashIndex::LoadIndex(std::FILE* mphf)
   
   uint64_t beginning = ftello(mphf);
 
+  std::cerr << "beg: " << beginning << std::endl;
+
   uint64_t read = 0;
   read += std::fread(&m_orderBits, sizeof(uint64_t), 1, mphf);
   read += std::fread(&m_fingerPrintBits, sizeof(uint64_t), 1, mphf);
   m_fileHandleStart = ftello(m_fileHandle);
-  
+
+  std::cerr << "m_fileHandleStart: " << m_fileHandleStart << std::endl;
+
   uint64_t relIndexPos;
   read += std::fread(&relIndexPos, sizeof(uint64_t), 1, mphf);
   fseeko(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
 
+  std::cerr << "relIndexPos: " << relIndexPos << std::endl;
+
   m_landmarks.load(mphf);
+
+  std::cerr << "m_landmarks: " << ftello(mphf) << std::endl;
 
   uint64_t seekIndexSize;
   read += std::fread(&seekIndexSize, sizeof(uint64_t), 1, m_fileHandle);
@@ -272,10 +285,14 @@ uint64_t BlockHashIndex::LoadIndex(std::FILE* mphf)
   m_hashes.resize(seekIndexSize, 0);
   m_clocks.resize(seekIndexSize, 0);
   m_arrays.resize(seekIndexSize, 0);
-  
+
+  std::cerr << "seekIndexSize: " << seekIndexSize << std::endl;
+
   read += std::fread(&m_size, sizeof(uint64_t), 1, m_fileHandle);
 
   uint64_t end = ftello(mphf);
+
+  std::cerr << "end: " << end << std::endl;
 
   return end - beginning;  
 }
