@@ -62,10 +62,10 @@ class PhraseDecoder
         
     enum Coding { None, REnc, PREnc } m_coding;
     
-    size_t m_numScoreComponent;
+    uint64_t m_numScoreComponent;
     bool m_containsAlignmentInfo;
-    size_t m_maxRank;
-    size_t m_maxPhraseLength;
+    uint64_t m_maxRank;
+    uint64_t m_maxPhraseLength;
     
     boost::unordered_map<std::string, uint32_t> m_sourceSymbolsMap;
     StringVector<unsigned char, uint32_t, std::allocator> m_sourceSymbols;

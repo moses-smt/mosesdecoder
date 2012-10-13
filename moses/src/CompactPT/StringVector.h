@@ -271,7 +271,7 @@ class StringVector
       
       byteSize += m_positions.save(out);
     
-      size_t valSize = size2();
+      uint64_t valSize = size2();
       byteSize += ThrowingFwrite(&valSize, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
       byteSize += ThrowingFwrite(&m_charArray[0], sizeof(ValueT), valSize, out) * sizeof(ValueT);
 
