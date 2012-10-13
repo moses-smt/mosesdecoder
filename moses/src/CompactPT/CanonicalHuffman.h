@@ -134,7 +134,7 @@ class CanonicalHuffman
       std::vector<Data> t_symbols;
       t_symbols.resize(lengths.size());
       
-      std::vector<size_t> nextCode = m_firstCodes;
+      std::vector<uint64_t> nextCode = m_firstCodes;
       for(size_t i = 0; i < lengths.size(); i++)
       {    
         Data data = m_symbols[i];

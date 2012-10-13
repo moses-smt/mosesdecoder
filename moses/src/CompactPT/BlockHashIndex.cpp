@@ -248,7 +248,7 @@ uint64_t BlockHashIndex::Save(std::FILE * mphf)
   return FinalizeSave();
 }
 
-size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
+uint64_t BlockHashIndex::LoadIndex(std::FILE* mphf)
 {
   m_fileHandle = mphf;
   
