@@ -174,6 +174,9 @@ void PhraseTableCreator::PrintInfo()
 
 void PhraseTableCreator::Save()
 {
+  
+  std::cerr << ftello(m_outFile) << std::endl;
+  
   // Save type of encoding
   ThrowingFwrite(&m_coding, sizeof(m_coding), 1, m_outFile);
   ThrowingFwrite(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, m_outFile);
@@ -230,6 +233,8 @@ void PhraseTableCreator::Save()
   // Save Huffman codes for alignments
   if(m_useAlignmentInfo)
     m_alignTree->Save(m_outFile);
+  
+  std::cerr << ftello(m_outFile) << std::endl;
   
   // Save compressed target phrase collections 
   m_compressedTargetPhrases.Save(m_outFile);
