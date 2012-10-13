@@ -146,15 +146,11 @@ uint64_t PhraseDecoder::Load(std::FILE* in)
   uint64_t start = ftello(in);
   uint64_t read = 0;
   
-  std::cerr << start << std::endl;
-  
   read += std::fread(&m_coding, sizeof(m_coding), 1, in);
   read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, in);
   read += std::fread(&m_containsAlignmentInfo, sizeof(m_containsAlignmentInfo), 1, in);
   read += std::fread(&m_maxRank, sizeof(m_maxRank), 1, in);
   read += std::fread(&m_maxPhraseLength, sizeof(m_maxPhraseLength), 1, in);
-  
-  std::cerr << ftello(in) << std::endl;
   
   if(m_coding == REnc)
   {
@@ -171,17 +167,8 @@ uint64_t PhraseDecoder::Load(std::FILE* in)
   }
   
   m_targetSymbols.load(in);
-
-  std::cerr << "trgsym: " << ftello(in) << std::endl;
-  
   m_symbolTree = new CanonicalHuffman<uint32_t>(in);
-
-  std::cerr << "hufsym: " << ftello(in) << std::endl;
-  
   read += std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1, in);
-
-  std::cerr << ftello(in) << std::endl;
-
   if(m_multipleScoreTrees)
   {
     m_scoreTrees.resize(m_numScoreComponent);
@@ -194,12 +181,8 @@ uint64_t PhraseDecoder::Load(std::FILE* in)
     m_scoreTrees[0] = new CanonicalHuffman<float>(in);
   }
 
-  std::cerr << "hufscore: " << ftello(in) << std::endl;
-
   if(m_containsAlignmentInfo)
     m_alignTree = new CanonicalHuffman<AlignPoint>(in);
-
-  std::cerr << ftello(in) << std::endl;
   
   uint64_t end = ftello(in);
   return end - start;

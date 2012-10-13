@@ -226,6 +226,7 @@ uint64_t BlockHashIndex::FinalizeSave()
   ThrowingFwrite(&relIndexPos, sizeof(uint64_t), 1, m_fileHandle);
   
   fseeko(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
+  m_landmarks.save(m_fileHandle);
   
   uint64_t seekIndexSize = m_seekIndex.size();
   ThrowingFwrite(&seekIndexSize, sizeof(uint64_t), 1, m_fileHandle);
