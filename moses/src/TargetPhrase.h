@@ -48,7 +48,6 @@ class TargetPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
-  float m_transScore;
   float m_fullScore;
   ScoreComponentCollection m_scoreBreakdown;
 
@@ -112,10 +111,6 @@ public:
 #ifdef HAVE_PROTOBUF
   void WriteToRulePB(hgmert::Rule* pb) const;
 #endif
-
-  inline float GetTranslationScore() const {
-    return m_transScore;
-  }
 
   /***
    * return the estimated score resulting from our being added to a sentence
