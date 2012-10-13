@@ -22,14 +22,21 @@ template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const 
   : context_(context), vocab_mapping_(vocab_mapping), owner_(owner), edges_(context.PopLimit()) {}
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
-  std::vector<const search::Vertex*> non_terminals;
-  for (StackVec::const_iterator i = nts.begin(); i != nts.end(); ++i) {
-    non_terminals.push_back((*i)->GetStack().incr);
+  const unsigned char arity = nts.size();
+  
+  CHECK(arity <= search::kMaxArity);
+  search::PartialVertex vertices[search::kMaxArity];
+  float below_score = 0.0;
+  for (unsigned int i = 0; i < nts.size(); ++i) {
+    vertices[i] = nts[i]->GetStack().incr->RootPartial();
+    if (vertices[i].Empty()) return;
+    below_score += vertices[i].Bound();
   }
 
+  std::vector<lm::WordIndex> words;
   for (TargetPhraseCollection::const_iterator i(targets.begin()); i != targets.end(); ++i) {
+    words.clear();
     const TargetPhrase &phrase = **i;
-    std::vector<lm::WordIndex> words;
     size_t i = 0;
     bool bos = false;
     if (phrase.GetSize() && !phrase.GetWord(0).IsNonTerminal()) {
@@ -49,12 +56,13 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
         words.push_back(Convert(word));
       }
     }
-    Edge &edge = *owner_.EdgePool().construct(phrase);
+
+    search::PartialEdge &edge = edges_.InitializeEdge();
+    memcpy(edge.nt, vertices, arity * sizeof(search::PartialVertex));
+    edge.score = phrase.GetFutureScore() + below_score;
+
     edge.InitRule().Init(context_, words, bos);
-    for (std::vector<const search::Vertex*>::const_iterator i(non_terminals.begin()); i != non_terminals.end(); ++i) {
-      edge.Add(**i);
-    }
-    edges_.AddEdge(edge, phrase.GetFutureScore());
+   // edges_.AddEdge(edge, phrase.GetFutureScore());
   }
 }
 
