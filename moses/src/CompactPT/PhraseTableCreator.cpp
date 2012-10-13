@@ -186,32 +186,32 @@ void PhraseTableCreator::Save()
     // Save source language symbols for REnc
     std::vector<std::string> temp1;
     temp1.resize(m_sourceSymbolsMap.size());
-    for(boost::unordered_map<std::string, unsigned>::iterator it
+    for(boost::unordered_map<std::string, uint32_t>::iterator it
         = m_sourceSymbolsMap.begin(); it != m_sourceSymbolsMap.end(); it++)
         temp1[it->second] = it->first;
     std::sort(temp1.begin(), temp1.end());
-    StringVector<unsigned char, unsigned, std::allocator> sourceSymbols;
+    StringVector<unsigned char, uint32_t, std::allocator> sourceSymbols;
     for(std::vector<std::string>::iterator it = temp1.begin();
         it != temp1.end(); it++)
         sourceSymbols.push_back(*it);
     sourceSymbols.save(m_outFile);
         
     // Save lexical translation table for REnc
-    size_t size = m_lexicalTableIndex.size();
-    ThrowingFwrite(&size, sizeof(size_t), 1, m_outFile);
-    ThrowingFwrite(&m_lexicalTableIndex[0], sizeof(size_t), size, m_outFile);
+    uint64_t size = m_lexicalTableIndex.size();
+    ThrowingFwrite(&size, sizeof(uint64_t), 1, m_outFile);
+    ThrowingFwrite(&m_lexicalTableIndex[0], sizeof(uint64_t), size, m_outFile);
     size = m_lexicalTable.size();
-    ThrowingFwrite(&size, sizeof(size_t), 1, m_outFile);
+    ThrowingFwrite(&size, sizeof(uint64_t), 1, m_outFile);
     ThrowingFwrite(&m_lexicalTable[0], sizeof(SrcTrg), size, m_outFile);
   }
     
   // Save target language symbols
   std::vector<std::string> temp2;
   temp2.resize(m_targetSymbolsMap.size());
-  for(boost::unordered_map<std::string, unsigned>::iterator it
+  for(boost::unordered_map<std::string, uint32_t>::iterator it
     = m_targetSymbolsMap.begin(); it != m_targetSymbolsMap.end(); it++)
     temp2[it->second] = it->first;
-  StringVector<unsigned char, unsigned, std::allocator> targetSymbols;
+  StringVector<unsigned char, uint32_t, std::allocator> targetSymbols;
   for(std::vector<std::string>::iterator it = temp2.begin();
     it != temp2.end(); it++)
     targetSymbols.push_back(*it);

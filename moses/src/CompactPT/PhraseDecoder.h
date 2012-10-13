@@ -71,7 +71,7 @@ class PhraseDecoder
     StringVector<unsigned char, uint32_t, std::allocator> m_sourceSymbols;
     StringVector<unsigned char, uint32_t, std::allocator> m_targetSymbols;
     
-    std::vector<uint32_t> m_lexicalTableIndex;
+    std::vector<uint64_t> m_lexicalTableIndex;
     std::vector<SrcTrg> m_lexicalTable;
     
     CanonicalHuffman<uint32_t>* m_symbolTree;
