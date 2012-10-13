@@ -32,6 +32,9 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     if (vertices[i].Empty()) return;
     below_score += vertices[i].Bound();
   }
+  for (unsigned int i = nts.size(); i < 2; ++i) {
+    vertices[i] = search::kBlankPartialVertex;
+  }
 
   std::vector<lm::WordIndex> words;
   for (TargetPhraseCollection::const_iterator i(targets.begin()); i != targets.end(); ++i) {
@@ -58,7 +61,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     }
 
     search::PartialEdge &edge = edges_.InitializeEdge();
-    memcpy(edge.nt, vertices, arity * sizeof(search::PartialVertex));
+    memcpy(edge.nt, vertices, search::kMaxArity * sizeof(search::PartialVertex));
     edge.score = phrase.GetFutureScore() + below_score;
     search::ScoreRule(context_, words, bos, edge.between);
 
@@ -77,6 +80,10 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   search::PartialEdge &edge = edges_.InitializeEdge();
   // Appears to be a bug that this does not include language model.  
   edge.score = phrase.GetFutureScore() + search::ScoreRule(context_, words, false, edge.between);
+
+  for (unsigned int i = 0; i < 2; ++i) {
+    edge.nt[i] = search::kBlankPartialVertex;
+  }
 
   search::Note note;
   note.vp = &phrase;
