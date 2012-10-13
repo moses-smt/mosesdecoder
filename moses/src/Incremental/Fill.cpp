@@ -13,6 +13,8 @@
 #include "search/vertex.hh"
 #include "search/vertex_generator.hh"
 
+#include <math.h>
+
 namespace Moses {
 namespace Incremental {
 
@@ -20,7 +22,6 @@ template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const 
   : context_(context), vocab_mapping_(vocab_mapping), owner_(owner), edges_(context.PopLimit()) {}
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
-  const float word_multiplier = -0.434294482 * context_.GetWeights().WordPenalty();
   std::vector<const search::Vertex*> non_terminals;
   for (StackVec::const_iterator i = nts.begin(); i != nts.end(); ++i) {
     non_terminals.push_back((*i)->GetStack().incr);
@@ -49,12 +50,11 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
       }
     }
     Edge &edge = *owner_.EdgePool().construct(phrase);
-    float score = phrase.GetTranslationScore() + word_multiplier * static_cast<float>(phrase.GetSize() - nts.size());
-    score += edge.InitRule().Init(context_, words, bos);
+    edge.InitRule().Init(context_, words, bos);
     for (std::vector<const search::Vertex*>::const_iterator i(non_terminals.begin()); i != non_terminals.end(); ++i) {
       edge.Add(**i);
     }
-    edges_.AddEdge(edge, score);
+    edges_.AddEdge(edge, phrase.GetFutureScore());
   }
 }
 
@@ -64,10 +64,10 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
   Edge &edge = *owner_.EdgePool().construct(phrase);
-  edge.InitRule().Init(context_, words, false);
-  // This includes the phrase OOV penalty and WordPenalty.  
+  float score = phrase.GetFutureScore();
   // Appears to be a bug that this does not include language model.  
-  edges_.AddEdge(edge, phrase.GetFutureScore());
+  score += edge.InitRule().Init(context_, words, false);
+  edges_.AddEdge(edge, score);
 }
 
 namespace {
