@@ -35,10 +35,10 @@ namespace Moses
 class OndiskLineCollection
 {
   private:
-    MonotonicVector<unsigned long, unsigned int> m_positions;  
+    MonotonicVector<uint64_t, uint32_t> m_positions;  
     std::FILE* m_filePtr;
-    size_t m_currPos;
-    size_t m_totalSize;
+    uint64_t m_currPos;
+    uint64_t m_totalSize;
     
   public:
     OndiskLineCollection()
@@ -78,30 +78,29 @@ class OndiskLineCollection
     
     void PushBack(std::string s)
     {
-      size_t pos = std::ftell(m_filePtr);
+      uint64_t pos = ftello(m_filePtr);
       m_positions.push_back(pos);
       size_t length = s.size();
-      //ThorwingFwrite(&length, sizeof(size_t), 1, m_filePtr);
       ThrowingFwrite(s.c_str(), sizeof(char), length, m_filePtr);
       m_currPos++;
       m_totalSize += sizeof(length) + s.size();
     }
     
-    size_t Size()
+    uint64_t Size()
     {
       return m_positions.size();
     }
     
-    size_t Save(std::FILE* out)
+    uint64_t Save(std::FILE* out)
     {
-      size_t byteSize = 0;
+      uint64_t byteSize = 0;
       bool sorted = false;
       byteSize += ThrowingFwrite(&sorted, sizeof(bool), 1, out) * sizeof(bool);
       
-      size_t test = m_positions.save(out);
+      uint64_t test = m_positions.save(out);
       byteSize += test;
     
-      byteSize += ThrowingFwrite(&m_totalSize, sizeof(size_t), 1, out) * sizeof(size_t);
+      byteSize += ThrowingFwrite(&m_totalSize, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
       
       Rewind();
       
