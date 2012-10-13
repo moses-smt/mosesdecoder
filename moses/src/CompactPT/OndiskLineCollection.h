@@ -80,9 +80,11 @@ class OndiskLineCollection
     {
       size_t pos = std::ftell(m_filePtr);
       m_positions.push_back(pos);
-      ThrowingFwrite(s.c_str(), sizeof(char), s.size(), m_filePtr);
+      size_t length = s.size();
+      //ThorwingFwrite(&length, sizeof(size_t), 1, m_filePtr);
+      ThrowingFwrite(s.c_str(), sizeof(char), length, m_filePtr);
       m_currPos++;
-      m_totalSize += s.size();
+      m_totalSize += sizeof(length) + s.size();
     }
     
     size_t Size()

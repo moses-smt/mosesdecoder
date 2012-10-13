@@ -45,21 +45,21 @@ class BlockHashIndex
   private:
     std::priority_queue<int> m_queue;
     
-    size_t m_orderBits;
-    size_t m_fingerPrintBits;
+    uint64_t m_orderBits;
+    uint64_t m_fingerPrintBits;
 
     std::FILE* m_fileHandle;
-    size_t m_fileHandleStart;
+    uint64_t m_fileHandleStart;
         
-    StringVector<unsigned char, unsigned long> m_landmarks;
+    StringVector<unsigned char, uint64_t> m_landmarks;
     
     std::vector<void*> m_hashes;
     std::vector<clock_t> m_clocks;
     std::vector<PairedPackedArray<>*> m_arrays;
     
-    std::vector<size_t> m_seekIndex;
+    std::vector<uint64_t> m_seekIndex;
+    uint64_t m_size;
     
-    size_t m_size;
     int m_lastSaved;
     int m_lastDropped;
     size_t m_numLoadedRanges;
@@ -92,8 +92,8 @@ class BlockHashIndex
     };
 #endif
     
-    size_t GetFprint(const char* key) const;
-    size_t GetHash(size_t i, const char* key);
+    uint64_t GetFprint(const char* key) const;
+    uint64_t GetHash(size_t i, const char* key);
         
   public:
 #ifdef WITH_THREADS
@@ -105,16 +105,16 @@ class BlockHashIndex
 
     ~BlockHashIndex();
         
-    size_t GetHash(const char* key);
-    size_t GetHash(std::string key);
+    uint64_t GetHash(const char* key);
+    uint64_t GetHash(std::string key);
     
-    size_t operator[](std::string key);
-    size_t operator[](char* key);
+    uint64_t operator[](std::string key);
+    uint64_t operator[](char* key);
     
     void BeginSave(std::FILE* mphf);
     void SaveRange(size_t i);
     void SaveLastRange();
-    size_t FinalizeSave();
+    uint64_t FinalizeSave();
 
 #ifdef WITH_THREADS
     void WaitAll();
@@ -123,16 +123,16 @@ class BlockHashIndex
     void DropRange(size_t i);
     void DropLastRange();
     
-    size_t LoadIndex(std::FILE* mphf);
+    uint64_t LoadIndex(std::FILE* mphf);
     void LoadRange(size_t i);
     
-    size_t Save(std::string filename);
-    size_t Save(std::FILE * mphf);
+    uint64_t Save(std::string filename);
+    uint64_t Save(std::FILE * mphf);
     
-    size_t Load(std::string filename);
-    size_t Load(std::FILE * mphf);
+    uint64_t Load(std::string filename);
+    uint64_t Load(std::FILE * mphf);
     
-    size_t GetSize() const;
+    uint64_t GetSize() const;
     
     void KeepNLastRanges(float ratio = 0.1, float tolerance = 0.1);
     
@@ -173,8 +173,8 @@ class BlockHashIndex
     
 #ifdef HAVE_CMPH 
     void* vectorAdapter(std::vector<std::string>& v);
-    void* vectorAdapter(StringVector<unsigned, size_t, std::allocator>& sv);
-    void* vectorAdapter(StringVector<unsigned, size_t, MmapAllocator>& sv);
+    void* vectorAdapter(StringVector<unsigned, uint64_t, std::allocator>& sv);
+    void* vectorAdapter(StringVector<unsigned, uint64_t, MmapAllocator>& sv);
 #endif
 };
 
