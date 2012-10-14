@@ -83,7 +83,7 @@ class OndiskLineCollection
       size_t length = s.size();
       ThrowingFwrite(s.c_str(), sizeof(char), length, m_filePtr);
       m_currPos++;
-      m_totalSize += sizeof(length) + s.size();
+      m_totalSize += s.size();
     }
     
     uint64_t Size()
