@@ -43,16 +43,13 @@ bool RuleTableTrie::Load(const std::vector<FactorType> &input,
   m_filePath = filePath;
   m_tableLimit = tableLimit;
 
-  // data from file
-  InputFileStream inFile(filePath);
-
   std::auto_ptr<Moses::RuleTableLoader> loader =
       Moses::RuleTableLoaderFactory::Create(filePath);
   if (!loader.get())
   {
     return false;
   }
-  bool ret = loader->Load(input, output, inFile, weight, tableLimit,
+  bool ret = loader->Load(input, output, filePath, weight, tableLimit,
                           languageModels, wpProducer, *this);
   return ret;
 }
