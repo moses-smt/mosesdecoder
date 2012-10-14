@@ -41,8 +41,8 @@ using namespace std;
 
 namespace Moses
 {
-TargetPhrase::TargetPhrase(std::string out_string)
-  :Phrase(0),m_transScore(0.0),  m_fullScore(0.0), m_sourcePhrase(0)
+TargetPhrase::TargetPhrase( std::string out_string)
+  :Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
@@ -54,7 +54,6 @@ TargetPhrase::TargetPhrase(std::string out_string)
 
 TargetPhrase::TargetPhrase()
   :Phrase(ARRAY_SIZE_INCR)
-  , m_transScore(0.0)
   , m_fullScore(0.0)
   ,m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -63,7 +62,6 @@ TargetPhrase::TargetPhrase()
 
 TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
-  , m_transScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
@@ -73,7 +71,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
 void TargetPhrase::SetScore(const TranslationSystem* system)
 {
   // used when creating translations of unknown words:
-  m_transScore = 0;
   m_fullScore = - system->GetWeightWordPenalty();
 }
 
@@ -138,7 +135,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
   CHECK(weightT.size() == scoreVector.size());
   // calc average score if non-best
 
-  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
+  float transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
   m_scoreBreakdown.PlusEquals(sparseScoreVector);
 
@@ -178,8 +175,8 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
     }
   }
 
-  m_fullScore = m_transScore + totalFullScore + totalOOVScore
-                - (this->GetSize() * weightWP);	 // word penalty	  
+  m_fullScore = transScore + totalFullScore + totalOOVScore
+                - (this->GetSize() * weightWP);	 // word penalty
 }
 
 void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
@@ -191,7 +188,6 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
   CHECK(weightT.size() == scoreVector.size());
   
   // calc average score if non-best
-  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
@@ -241,7 +237,6 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 {
   // used when creating translations of unknown words (chart decoding)
   m_scoreBreakdown.Assign(producer, scoreVector);
-  m_transScore = 0;
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
@@ -255,7 +250,6 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
      addition to the usual phrase translation scaling factors) the input
      weight factor as last element
   */
-  m_transScore = m_scoreBreakdown.PartialInnerProduct(translationScoreProducer, weightT);
 }
 
 void TargetPhrase::ResetScore()
@@ -353,7 +347,7 @@ TO_STRING_BODY(TargetPhrase);
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp) << ":" << tp.GetAlignmentInfo();
-  os << ": pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
+  os << ": c=" << tp.m_fullScore;
 
   return os;
 }

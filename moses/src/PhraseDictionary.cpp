@@ -77,7 +77,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_sparsePhraseDictionaryFeature(spdf)
 {
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
-      implementation==Compact) {
+      implementation==Compact || implementation == OnDisk) {
     m_useThreadSafePhraseDictionary = true;
     if (implementation == SuffixArray) {
       cerr << "Warning: implementation holds chached weights!" << endl;
