@@ -32,16 +32,17 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     if (vertices[i].Empty()) return;
     below_score += vertices[i].Bound();
   }
-  for (unsigned int i = nts.size(); i < 2; ++i) {
-    vertices[i] = search::kBlankPartialVertex;
-  }
 
   std::vector<lm::WordIndex> words;
   for (TargetPhraseCollection::const_iterator i(targets.begin()); i != targets.end(); ++i) {
     words.clear();
     const TargetPhrase &phrase = **i;
+    const AlignmentInfo::NonTermIndexMap &align = phrase.GetAlignmentInfo().GetNonTermIndexMap();
+    search::PartialEdge &edge = edges_.InitializeEdge();
+
     size_t i = 0;
     bool bos = false;
+    unsigned char nt = 0;
     if (phrase.GetSize() && !phrase.GetWord(0).IsNonTerminal()) {
       lm::WordIndex index = Convert(phrase.GetWord(0));
       if (context_.LanguageModel().GetVocabulary().BeginSentence() == index) {
@@ -54,14 +55,14 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     for (; i < phrase.GetSize(); ++i) {
       const Word &word = phrase.GetWord(i);
       if (word.IsNonTerminal()) {
+        edge.nt[nt++] = vertices[align[i]];
         words.push_back(search::kNonTerminal);
       } else {
         words.push_back(Convert(word));
       }
     }
+    for (; nt < 2; ++nt) edge.nt[nt] = search::kBlankPartialVertex;
 
-    search::PartialEdge &edge = edges_.InitializeEdge();
-    memcpy(edge.nt, vertices, search::kMaxArity * sizeof(search::PartialVertex));
     edge.score = phrase.GetFutureScore() + below_score;
     search::ScoreRule(context_, words, bos, edge.between);
 
