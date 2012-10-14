@@ -24,6 +24,7 @@
 #include <iterator>
 #include <algorithm>
 #include <sys/stat.h>
+#include <stdlib.h>
 #include "RuleTable/Trie.h"
 #include "FactorCollection.h"
 #include "Word.h"
@@ -34,6 +35,8 @@
 #include "UserMessage.h"
 #include "ChartTranslationOptionList.h"
 #include "FactorCollection.h"
+#include "util/string_piece.hh"
+#include "util/tokenize_piece.hh"
 
 using namespace std;
 
@@ -159,6 +162,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
   string lineOrig;
   size_t count = 0;
 
+  vector<float> scoreVector;
   while(getline(inStream, lineOrig)) {
     const string *line;
     if (format == HieroFormat) { // reformat line
@@ -168,23 +172,19 @@ bool RuleTableLoaderStandard::Load(FormatType format
     { // do nothing to format of line
       line = &lineOrig;
     }
+
+    util::TokenIter<util::MultiCharacter> pipes(*line, "|||");
+    StringPiece sourcePhraseString(*pipes);
+    StringPiece targetPhraseString(*++pipes);
+    StringPiece scoreString(*++pipes);
+    StringPiece alignString(*++pipes);
     
-    vector<string> tokens;
-    vector<float> scoreVector;
-
-    TokenizeMultiCharSeparator(tokens, *line , "|||" );
-
-    if (tokens.size() != 4 && tokens.size() != 5) {
+    if (++pipes && ++pipes) {
       stringstream strme;
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());
       abort();
     }
-
-    const string &sourcePhraseString = tokens[0]
-               , &targetPhraseString = tokens[1]
-               , &scoreString        = tokens[2]
-               , &alignString        = tokens[3];
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
@@ -192,7 +192,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
       continue;
     }
 
-    Tokenize<float>(scoreVector, scoreString);
+    scoreVector.clear();
+    for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
+      char *err_ind;
+      scoreVector.push_back(strtod(s->data(), &err_ind));
+      UTIL_THROW_IF(err_ind == s->data(), util::Exception, "Bad score " << *s << " on line " << count);
+    }
     const size_t numScoreComponents = ruleTable.GetFeature()->GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       stringstream strme;
@@ -201,7 +206,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
       UserMessage::Add(strme.str());
       abort();
     }
-    CHECK(scoreVector.size() == numScoreComponents);
 
     // parse source & find pt node
 
