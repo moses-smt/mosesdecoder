@@ -15,7 +15,7 @@ namespace Moses {
   
 bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
           const std::vector<FactorType> &output,
-          std::istream &inStream,
+          const std::string &inFile,
           const std::vector<float> &weight,
           size_t tableLimit,
           const LMList &languageModels,
@@ -24,7 +24,7 @@ bool RuleTableLoaderHiero::Load(const std::vector<FactorType> &input,
 {
   bool ret = RuleTableLoaderStandard::Load(HieroFormat
               ,input, output
-              ,inStream, weight
+              ,inFile, weight
               ,tableLimit, languageModels
               ,wpProducer, ruleTable);
   return ret;

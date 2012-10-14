@@ -160,13 +160,15 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
 
 void Phrase::CreateFromStringNewFormat(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
-                                       , const std::string &phraseString
+                                       , const StringPiece &phraseString
                                        , const std::string & /*factorDelimiter */
                                        , Word &lhs)
 {
   // parse
-  vector<string> annotatedWordVector;
-  Tokenize(annotatedWordVector, phraseString);
+  vector<StringPiece> annotatedWordVector;
+  for (util::TokenIter<util::AnyCharacter, true> it(phraseString, "\t "); it; ++it) {
+    annotatedWordVector.push_back(*it);
+  }
   // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
   //		to
   // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
@@ -174,7 +176,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   m_words.reserve(annotatedWordVector.size()-1);
 
   for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++) {
-    string &annotatedWord = annotatedWordVector[phrasePos];
+    StringPiece &annotatedWord = annotatedWordVector[phrasePos];
     bool isNonTerminal;
     if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]") {
       // non-term
@@ -197,7 +199,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   }
 
   // lhs
-  string &annotatedWord = annotatedWordVector.back();
+  StringPiece &annotatedWord = annotatedWordVector.back();
   CHECK(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
   annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
 
