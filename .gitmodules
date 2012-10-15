@@ -1,6 +1,3 @@
 [submodule "regression-testing/tests"]
 	path = regression-testing/tests
 	url = git@github.com:moses-smt/moses-regression-tests.git
-[submodule "lazy"]
-	path = lazy
-	url = git@github.com:kpu/lazy

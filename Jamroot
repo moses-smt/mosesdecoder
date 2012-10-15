@@ -101,9 +101,9 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lazy mert moses-cmd/src moses-chart-cmd/src scripts regression-testing contrib/relent-filter/src ;
+build-projects lm util search mert moses-cmd/src moses-chart-cmd/src scripts regression-testing contrib/relent-filter/src ;
 
-alias programs : lazy/lm//programs moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor contrib/relent-filter/src//calcDivergence ;
+alias programs : lm//programs moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor contrib/relent-filter/src//calcDivergence ;
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
