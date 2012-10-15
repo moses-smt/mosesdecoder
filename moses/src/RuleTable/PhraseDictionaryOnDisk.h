@@ -82,7 +82,7 @@ public:
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollection &);
+    const ChartCellCollectionBase &);
 };
 
 }  // namespace Moses

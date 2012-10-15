@@ -24,7 +24,7 @@
 #include "../../../OnDiskPt/OnDiskWrapper.h"
 
 #include "ChartRuleLookupManagerCYKPlus.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "DotChartOnDisk.h"
 #include "InputType.h"
 #include "RuleTable/PhraseDictionaryOnDisk.h"
@@ -37,7 +37,7 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
 {
  public:
   ChartRuleLookupManagerOnDisk(const InputType &sentence,
-                               const ChartCellCollection &cellColl,
+                               const ChartCellCollectionBase &cellColl,
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,
                                const LMList *languageModels,
@@ -49,7 +49,7 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
   ~ChartRuleLookupManagerOnDisk();
 
   virtual void GetChartRuleCollection(const WordsRange &range,
-                                      ChartTranslationOptionList &outColl);
+                                      ChartParserCallback &outColl);
 
  private:
   const PhraseDictionaryOnDisk &m_dictionary;

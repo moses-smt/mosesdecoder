@@ -92,6 +92,8 @@ public:
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
 
+  Moses::OutputCollector *ExposeSingleBest() { return m_singleBestOutputCollector; }
+
   void ResetTranslationId();
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {

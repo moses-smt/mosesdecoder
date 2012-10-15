@@ -110,7 +110,7 @@ public:
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollection &)
+    const ChartCellCollectionBase &)
   {
     assert(false);
     return 0;

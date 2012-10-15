@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "Phrase.h"
 #include "StaticData.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -52,6 +53,10 @@ float LanguageModel::GetOOVWeight() const {
   } else {
     return 0;
   }
+}
+
+void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {
+  UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
 }
 
 } // namespace Moses

@@ -39,7 +39,7 @@ Sentence::Sentence()
   , InputType()
 {
   const StaticData& staticData = StaticData::Instance();
-  if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+  if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
 }
@@ -126,7 +126,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   }
   Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 
-  if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+  if (staticData.IsChart()) {
     InitStartEndWord();
   }
 

@@ -27,7 +27,7 @@
 namespace Moses
 {
 
-class ChartTranslationOptionList;
+class ChartParserCallback;
 class WordsRange;
 
 /** Defines an interface for looking up rules in a rule table.  Concrete
@@ -40,7 +40,7 @@ class ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManager(const InputType &sentence,
-                         const ChartCellCollection &cellColl)
+                         const ChartCellCollectionBase &cellColl)
     : m_sentence(sentence)
     , m_cellCollection(cellColl) {}
 
@@ -51,9 +51,12 @@ public:
     return m_sentence;
   }
   
-  //! all the chart cells
-  const ChartCellCollection &GetCellCollection() const {
-    return m_cellCollection;
+  const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
+    return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
+  }
+
+  const ChartCellLabel &GetSourceAt(size_t at) const {
+    return m_cellCollection.GetSourceWordLabel(at);
   }
 
   /** abstract function. Return a vector of translation options for given a range in the input sentence
@@ -62,7 +65,7 @@ public:
    */
   virtual void GetChartRuleCollection(
     const WordsRange &range,
-    ChartTranslationOptionList &outColl) = 0;
+    ChartParserCallback &outColl) = 0;
 
 private:
   //! Non-copyable: copy constructor and assignment operator not implemented.
@@ -71,7 +74,7 @@ private:
   ChartRuleLookupManager &operator=(const ChartRuleLookupManager &);
 
   const InputType &m_sentence;
-  const ChartCellCollection &m_cellCollection;
+  const ChartCellCollectionBase &m_cellCollection;
 };
 
 }  // namespace Moses

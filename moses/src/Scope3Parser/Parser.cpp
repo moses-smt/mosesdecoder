@@ -39,7 +39,7 @@ namespace Moses
 
 void Scope3Parser::GetChartRuleCollection(
     const WordsRange &range,
-    ChartTranslationOptionList &outColl)
+    ChartParserCallback &outColl)
 {
   const size_t start = range.GetStartPos();
   const size_t end = range.GetEndPos();
@@ -61,7 +61,7 @@ void Scope3Parser::GetChartRuleCollection(
     } else {  // Rule has at least one non-terminal.
       varSpanNode.CalculateRanges(start, end, m_ranges);
       m_latticeBuilder.Build(start, end, ruleNode, varSpanNode, m_ranges,
-                             this->GetCellCollection(), m_lattice,
+                             *this, m_lattice,
                              m_quickCheckTable);
       StackLatticeSearcher<MatchCallback> searcher(m_lattice, m_ranges);
       UTrieNode::LabelMap::const_iterator p = labelMap.begin();

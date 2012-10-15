@@ -59,13 +59,10 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
   
   string grammarFile = GetFilePath() + "/grammar.out." + SPrint(translationId) + ".gz";
   
-  // data from file
-  InputFileStream inFile(grammarFile);
-
   std::auto_ptr<RuleTableLoader> loader =
   RuleTableLoaderFactory::Create(grammarFile);
   std::vector<float> weightT = StaticData::Instance().GetWeights(GetFeature());
-  bool ret = loader->Load(*m_input, *m_output, inFile, weightT, m_tableLimit,
+  bool ret = loader->Load(*m_input, *m_output, grammarFile, weightT, m_tableLimit,
                           *m_languageModels, m_wpProducer, *this);
   
   CHECK(ret);

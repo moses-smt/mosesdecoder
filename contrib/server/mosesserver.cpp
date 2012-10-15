@@ -175,8 +175,7 @@ public:
     stringstream out, graphInfo, transCollOpts;
     map<string, xmlrpc_c::value> retData;
 
-    SearchAlgorithm searchAlgorithm = staticData.GetSearchAlgorithm();
-    if (searchAlgorithm == ChartDecoding) {
+    if (staticData.IsChart()) {
        TreeInput tinput; 
         const vector<FactorType> &inputFactorOrder =
           staticData.GetInputFactorOrder();

@@ -73,7 +73,7 @@ public:
 
   void CreateFromStringNewFormat(FactorDirection direction
                                  , const std::vector<FactorType> &factorOrder
-                                 , const std::string &phraseString
+                                 , const StringPiece &phraseString
                                  , const std::string &factorDelimiter
                                  , Word &lhs);
 

@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Factor.h"
 #include "Util.h"
+#include "util/string_piece.hh"
 
 namespace Moses
 {
@@ -133,7 +134,7 @@ public:
 
   void CreateFromString(FactorDirection direction
                         , const std::vector<FactorType> &factorOrder
-                        , const std::string &str
+                        , const StringPiece &str
                         , bool isNonTerminal);
 
   void CreateUnknownWord(const Word &sourceWord);

@@ -23,6 +23,8 @@
 #include "Word.h"
 #include "WordsRange.h"
 
+namespace search { class Vertex; class VertexGenerator; }
+
 namespace Moses
 {
 
@@ -36,8 +38,15 @@ class Word;
 class ChartCellLabel
 {
  public:
+  union Stack {
+    const HypoList *cube; // cube pruning
+    const search::Vertex *incr; // incremental search after filling.  
+    search::VertexGenerator *incr_generator; // incremental search during filling.  
+  };
+
+
   ChartCellLabel(const WordsRange &coverage, const Word &label,
-                 const HypoList *stack=NULL)
+                 Stack stack=Stack())
     : m_coverage(coverage)
     , m_label(label)
     , m_stack(stack)
@@ -45,7 +54,8 @@ class ChartCellLabel
 
   const WordsRange &GetCoverage() const { return m_coverage; }
   const Word &GetLabel() const { return m_label; }
-  const HypoList *GetStack() const { return m_stack; }
+  Stack GetStack() const { return m_stack; }
+  Stack &MutableStack() { return m_stack; }
 
   bool operator<(const ChartCellLabel &other) const
   {
@@ -60,7 +70,7 @@ class ChartCellLabel
  private:
   const WordsRange &m_coverage;
   const Word &m_label;
-  const HypoList *m_stack;
+  Stack m_stack;
 };
 
 }

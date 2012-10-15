@@ -98,6 +98,14 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
+void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) {
+  TargetPhraseCollection *tpc = new TargetPhraseCollection();
+  tpc->Add(&phrase);
+  waste_memory.push_back(tpc);
+  StackVec empty;
+  Add(*tpc, empty, range);
+}
+
 void ChartTranslationOptionList::ApplyThreshold() {
   if (m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2

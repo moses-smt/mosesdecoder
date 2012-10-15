@@ -37,7 +37,7 @@ class StackLatticeBuilder
 
   void Build(int, int, const UTrieNode &, const VarSpanNode &,
              const std::vector<VarSpanNode::NonTermRange> &,
-             const ChartCellCollection &, StackLattice &,
+             const ChartRuleLookupManager &, StackLattice &,
              std::vector<std::vector<bool> > &);
 };
 

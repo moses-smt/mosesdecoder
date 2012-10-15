@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #pragma once
 
 #include "ChartTranslationOptions.h"
+#include "ChartParserCallback.h"
 #include "StackVec.h"
 
 #include <vector>
@@ -31,8 +32,7 @@ class TargetPhraseCollection;
 class WordsRange;
 
 //! a vector of translations options for a specific range, in a specific sentence
-class ChartTranslationOptionList
-{
+class ChartTranslationOptionList : public ChartParserCallback {
  public:
   ChartTranslationOptionList(size_t);
   ~ChartTranslationOptionList();
@@ -45,17 +45,19 @@ class ChartTranslationOptionList
   void Add(const TargetPhraseCollection &, const StackVec &,
            const WordsRange &);
 
+  void AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range);
+
+  bool Empty() const { return m_size == 0; }
+
   void Clear();
   void ApplyThreshold();
 
  private:
   typedef std::vector<ChartTranslationOptions*> CollType;
 
-  struct ScoreThresholdPred
-  {
+  struct ScoreThresholdPred {
     ScoreThresholdPred(float threshold) : m_thresholdScore(threshold) {}
-    bool operator()(const ChartTranslationOptions *option)
-    {
+    bool operator()(const ChartTranslationOptions *option)  {
       return option->GetEstimateOfBestScore() >= m_thresholdScore;
     }
     float m_thresholdScore;

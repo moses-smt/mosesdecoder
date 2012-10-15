@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "StaticData.h"
 #include "ChartHypothesis.h"
+#include "Incremental/Manager.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -86,6 +87,10 @@ template <class Model> class LanguageModelKen : public LanguageModel {
     FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
     FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+
+    void IncrementalCallback(Incremental::Manager &manager) const {
+      manager.LMCallback(*m_ngram, m_lmIdLookup);
+    }
 
   private:
     LanguageModelKen(const LanguageModelKen<Model> &copy_from);

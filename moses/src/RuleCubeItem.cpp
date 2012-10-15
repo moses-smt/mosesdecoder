@@ -96,7 +96,7 @@ void RuleCubeItem::CreateHypothesisDimensions(const StackVec &stackVec)
 {
   for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
        ++p) {
-    const HypoList *stack = *p;
+    const HypoList *stack = (*p)->GetStack().cube;
     assert(stack);
 
     // there have to be hypothesis with the desired non-terminal

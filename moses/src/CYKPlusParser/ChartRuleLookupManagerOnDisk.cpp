@@ -24,7 +24,7 @@
 #include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "../../OnDiskPt/TargetPhraseCollection.h"
 
 using namespace std;
@@ -34,7 +34,7 @@ namespace Moses
 
 ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const InputType &sentence,
-  const ChartCellCollection &cellColl,
+  const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const LMList *languageModels,
@@ -79,7 +79,7 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
@@ -94,7 +94,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const DottedRuleStackOnDisk::SavedNodeColl &savedNodeColl = expandableDottedRuleList.GetSavedNodeColl();
   //cerr << "savedNodeColl=" << savedNodeColl.size() << " ";
 
-  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+  const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
   for (size_t ind = 0; ind < (savedNodeColl.size()) ; ++ind) {
     const SavedNodeOnDisk &savedNode = *savedNodeColl[ind];
@@ -141,7 +141,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // get target nonterminals in this span from chart
     const ChartCellLabelSet &chartNonTermSet =
-      GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+      GetTargetLabelSet(startPos, endPos);
 
     //const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
     //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();

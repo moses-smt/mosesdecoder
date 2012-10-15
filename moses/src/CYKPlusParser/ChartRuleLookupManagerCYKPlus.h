@@ -37,7 +37,7 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
 {
  public:
   ChartRuleLookupManagerCYKPlus(const InputType &sentence,
-                                const ChartCellCollection &cellColl)
+                                const ChartCellCollectionBase &cellColl)
     : ChartRuleLookupManager(sentence, cellColl) {}
 
  protected:
@@ -45,7 +45,7 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
     const DottedRule &dottedRule,
     const TargetPhraseCollection &tpc,
     const WordsRange &range,
-    ChartTranslationOptionList &outColl);
+    ChartParserCallback &outColl);
 
   StackVec m_stackVec;
 };

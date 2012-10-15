@@ -79,7 +79,7 @@ void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* n
   // need to implement --
 }
 
-ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollection&)
+ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
 {
   CHECK(false);
   return 0;

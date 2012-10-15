@@ -54,13 +54,14 @@ namespace Moses
     
     ChartRuleLookupManager *CreateRuleLookupManager(
                                                     const InputType &,
-                                                    const ChartCellCollection &);
+                                                    const ChartCellCollectionBase &);
     void InitializeForInput(InputType const& inputSentence);
     void CleanUp(const InputType& source);
     
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const
     {
       assert(false);
+      return NULL;
     }
     virtual DecodeType GetDecodeType() const
     {

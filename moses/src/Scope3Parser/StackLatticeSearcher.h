@@ -62,7 +62,7 @@ class StackLatticeSearcher
     const std::vector<StackVec> &spanVec = m_lattice[offset][index];
 
     for (size_t j = minSpan; j <= maxSpan; ++j) {
-      const HypoList *stack = spanVec[j][(*m_labels)[index]];
+      const ChartCellLabel *stack = spanVec[j][(*m_labels)[index]];
       if (!stack) {
         continue;
       }

@@ -21,7 +21,7 @@
 
 #include "RuleTable/PhraseDictionarySCFG.h"
 #include "InputType.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "DotChartInMemory.h"
 #include "StaticData.h"
 #include "NonTerminal.h"
@@ -34,7 +34,7 @@ void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   const DottedRule &dottedRule,
   const TargetPhraseCollection &tpc,
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
   // Determine the rule's rank.
   size_t rank = 0;
@@ -51,10 +51,7 @@ void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   node = &dottedRule;
   while (rank > 0) {
     if (node->IsNonTerminal()) {
-      const ChartCellLabel &cellLabel = node->GetChartCellLabel();
-      const HypoList *stack = cellLabel.GetStack();
-      assert(stack);
-      m_stackVec[--rank] = stack;
+      m_stackVec[--rank] = &node->GetChartCellLabel();
     }
     node = node->GetPrev();
   }
