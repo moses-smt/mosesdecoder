@@ -89,13 +89,16 @@ template <class Model> void Manager::LMCallback(const Model &model, const std::v
   search::Context<Model> context(config, model);
 
   size_t size = source_.GetSize();
+
+  boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
+
   for (size_t width = 1; width <= size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
       size_t endPos = startPos + width - 1;
       WordsRange range(startPos, endPos);
-      Fill<Model> filler(context, words, owner_);
+      Fill<Model> filler(context, words);
       parser_.Create(range, filler);
-      filler.Search(cells_.MutableBase(range).MutableTargetLabelSet());
+      filler.Search(cells_.MutableBase(range).MutableTargetLabelSet(), vertex_pool);
     }
   }
   BestString(cells_.GetBase(WordsRange(0, source_.GetSize() - 1)).GetTargetLabelSet(), output_);

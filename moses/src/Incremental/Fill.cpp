@@ -1,6 +1,5 @@
 #include "Incremental/Fill.h"
 
-#include "Incremental/Owner.h"
 #include "ChartCellLabel.h"
 #include "ChartCellLabelSet.h"
 #include "TargetPhraseCollection.h"
@@ -18,8 +17,8 @@
 namespace Moses {
 namespace Incremental {
 
-template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, Owner &owner) 
-  : context_(context), vocab_mapping_(vocab_mapping), owner_(owner), edges_(context.PopLimit()) {}
+template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping) 
+  : context_(context), vocab_mapping_(vocab_mapping), edges_(context.PopLimit()) {}
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
   const unsigned char arity = nts.size();
@@ -124,8 +123,8 @@ class HypothesisCallback {
 };
 } // namespace
 
-template <class Model> void Fill<Model>::Search(ChartCellLabelSet &out) {
-  HypothesisCallback callback(context_, out, owner_.VertexPool());
+template <class Model> void Fill<Model>::Search(ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool) {
+  HypothesisCallback callback(context_, out, vertex_pool);
   edges_.Search(context_, callback);
 }
 

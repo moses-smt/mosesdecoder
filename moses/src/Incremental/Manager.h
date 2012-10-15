@@ -4,7 +4,6 @@
 
 #include "ChartCellCollection.h"
 #include "ChartParser.h"
-#include "Incremental/Owner.h"
 
 namespace Moses {
 class InputType;
@@ -28,7 +27,6 @@ class Manager {
     const TranslationSystem &system_;
     ChartCellCollectionBase cells_;
     ChartParser parser_;
-    Owner owner_;
 
     std::string output_;
 };

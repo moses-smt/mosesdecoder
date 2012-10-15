@@ -13,6 +13,7 @@
 
 namespace search {
 template <class Model> class Context;
+class Vertex;
 } // namespace search
 
 namespace Moses {
@@ -24,13 +25,12 @@ class ChartCellLabelSet;
 class TargetPhrase;
 
 namespace Incremental {
-class Owner;
 
 // Replacement for ChartTranslationOptionList
 // TODO: implement count and score thresholding.  
 template <class Model> class Fill : public ChartParserCallback {
   public:
-    Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping, Owner &owner);
+    Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping);
 
     void Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &ignored);
 
@@ -38,7 +38,7 @@ template <class Model> class Fill : public ChartParserCallback {
 
     bool Empty() const { return edges_.Empty(); }
 
-    void Search(ChartCellLabelSet &out);
+    void Search(ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool);
     
   private:
     lm::WordIndex Convert(const Word &word) const ;
@@ -46,8 +46,6 @@ template <class Model> class Fill : public ChartParserCallback {
     search::Context<Model> &context_;
 
     const std::vector<lm::WordIndex> &vocab_mapping_;
-
-    Owner &owner_;
 
     search::EdgeQueue edges_;
 };
