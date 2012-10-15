@@ -112,6 +112,10 @@ public:
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
       m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
     }
+    
+    if (staticData.PrintAlignmentInfo()) {
+      m_ioWrapper.OutputAlignment(bestHypo, lineNumber);
+    }
 
     // n-best
     size_t nBestSize = staticData.GetNBestSize();

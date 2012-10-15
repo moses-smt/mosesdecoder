@@ -300,7 +300,7 @@ class LanguageModelChartStateKenLM : public FFState {
 template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+  const TargetPhrase &targetPhrase = hypo.GetCurrTargetPhrase();
 
   const size_t size = hypo.GetCurrTargetPhrase().GetSize();
   size_t phrasePos = 0;
@@ -313,7 +313,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
       phrasePos++;
     } else if (word.IsNonTerminal()) {
       // Non-terminal is first so we can copy instead of rescoring.  
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(targetPhrase.GetNonTermIndex(phrasePos));
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
       ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
       phrasePos++;
@@ -323,7 +323,8 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   for (; phrasePos < size; phrasePos++) {
     const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
     if (word.IsNonTerminal()) {
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      size_t nonTermIndex = targetPhrase.GetNonTermIndex(phrasePos);
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
       ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
     } else {

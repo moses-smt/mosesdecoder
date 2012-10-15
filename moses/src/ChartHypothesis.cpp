@@ -90,14 +90,11 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = nonTermIndexMap[pos];
+      size_t nonTermInd = GetCurrTargetPhrase().GetNonTermIndex(pos);
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
