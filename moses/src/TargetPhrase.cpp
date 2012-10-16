@@ -34,7 +34,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
-#include <boost/algorithm/string.hpp>
 
 
 using namespace std;
@@ -310,10 +309,7 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase)
 {
-  std::vector<std::string> alignPoints;
-  boost::split(alignPoints, alignString, boost::is_any_of("\t "));
-  int indicator[alignPoints.size()];
-  int index = 0;
+  std::vector<int> indicator;
 	
   set<pair<size_t,size_t> > alignmentInfo;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
@@ -325,10 +321,10 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sour
     MosesShouldUseExceptions(!dash);
 
     alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
-    indicator[index++] = sourcePhrase.GetWord(sourcePos).IsNonTerminal() ? 1: 0;
+    indicator.push_back(sourcePhrase.GetWord(sourcePos).IsNonTerminal() ? 1: 0);
   }
 
-  SetAlignmentInfo(alignmentInfo, indicator);
+  SetAlignmentInfo(alignmentInfo, &indicator[0]);
 }
 
 void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
@@ -352,11 +348,24 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   return os;
 }
 
-void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, std::vector<float> &scoreVector) {
-  std::vector<std::string> tokens;
-  boost::split(tokens, ruleCountString, boost::is_any_of("\t "));
+namespace {
+// Not a general function.  Assumes str has something sane like a space or newline after it.  
+float ParseOrThrow(StringPiece str) {
+  char *end;
+  float ret = strtod(str.data(), &end);
+  UTIL_THROW_IF(end == str.data(), util::Exception, "Could not parse " << str << " into a float.");
+  return ret;
+}
+} // namespace
+
+void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, const std::vector<float> &scoreVector) {
+  StringPiece tokens[3];
+  size_t token_count = 0;
+  for (util::TokenIter<util::AnyCharacter,true> tokenize(ruleCountString, " \t"); tokenize && token_count < 3; ++tokenize, ++token_count) {
+    tokens[token_count] = *tokenize;
+  }
   
-  if (tokens.size() == 2) {
+  if (token_count == 2) {
     // TODO: if no third column is provided, do we have to take smoothing into account (consolidate.cpp)? 
     // infer rule counts from target counts
     float targetCount = 0, sourceCount = 0;
@@ -365,20 +374,19 @@ void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, std::vector<
     if (scoreVector.size() >= 5) {
       p_f_given_e = scoreVector[0];
       p_e_given_f = scoreVector[2];
-    }
-    else {
-      if (scoreVector.size() >= 1 ) p_f_given_e = scoreVector[0];
+    } else {
+ //     if (scoreVector.size() >= 1 ) p_f_given_e = scoreVector[0];
 //      std::cerr << "Warning: possibly wrong format of phrase translation scores, number of scores: " << scoreVector.size() << endl;
     }
     
-    targetCount = Scan<float>(tokens[0]);
-    sourceCount = Scan<float>(tokens[1]);
+    targetCount = ParseOrThrow(tokens[0]);
+    sourceCount = ParseOrThrow(tokens[1]);
     float ruleCount = p_f_given_e * targetCount;
     //float ruleCount2 = p_e_given_f * sourceCount; // could use this to double-check the counts
     m_ruleCount = floor(ruleCount + 0.5);
   }
-  else if (tokens.size() == 3) {
-    m_ruleCount = Scan<float>(tokens[2]);
+  else if (token_count == 3) {
+    m_ruleCount = ParseOrThrow(tokens[2]);
   }
 }
 
