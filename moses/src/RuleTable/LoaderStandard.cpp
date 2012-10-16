@@ -189,7 +189,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
     StringPiece targetPhraseString(*++pipes);
     StringPiece scoreString(*++pipes);
     StringPiece alignString(*++pipes);
-    StringPiece ruleCountString(*++pipes);
+    StringPiece ruleCountString("1 1");
+    if (++pipes) {
+      ruleCountString = StringPiece(*pipes);
+    }
     
     if (++pipes) {
       stringstream strme;
