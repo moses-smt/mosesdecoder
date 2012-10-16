@@ -126,8 +126,6 @@ class PartialVertex {
     unsigned int index_;
 };
 
-extern PartialVertex kBlankPartialVertex;
-
 class Vertex {
   public:
     Vertex() {}

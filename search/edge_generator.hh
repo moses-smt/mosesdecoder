@@ -3,11 +3,8 @@
 
 #include "search/edge.hh"
 #include "search/note.hh"
+#include "search/types.hh"
 
-#include <boost/pool/pool.hpp>
-#include <boost/unordered_map.hpp>
-
-#include <functional>
 #include <queue>
 
 namespace lm {
@@ -19,18 +16,11 @@ class ChartState;
 namespace search {
 
 template <class Model> class Context;
-
-class VertexGenerator;
-
-struct PartialEdgePointerLess : std::binary_function<const PartialEdge *, const PartialEdge *, bool> {
-  bool operator()(const PartialEdge *first, const PartialEdge *second) const {
-    return *first < *second;
-  }
-};
+class PartialEdgePool;
 
 class EdgeGenerator {
   public:
-    EdgeGenerator(PartialEdge &root, unsigned char arity, Note note);
+    EdgeGenerator(PartialEdge root, Note note);
 
     Score TopScore() const {
       return top_score_;
@@ -41,15 +31,15 @@ class EdgeGenerator {
     }
 
     // Pop.  If there's a complete hypothesis, return it.  Otherwise return NULL.  
-    template <class Model> PartialEdge *Pop(Context<Model> &context, boost::pool<> &partial_edge_pool);
+    template <class Model> PartialEdge Pop(Context<Model> &context, PartialEdgePool &partial_edge_pool);
 
   private:
     Score top_score_;
 
-    unsigned char arity_;
-
-    typedef std::priority_queue<PartialEdge*, std::vector<PartialEdge*>, PartialEdgePointerLess> Generate;
+    typedef std::priority_queue<PartialEdge> Generate;
     Generate generate_;
+
+    Arity arity_;
 
     Note note_;
 };

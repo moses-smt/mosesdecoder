@@ -24,7 +24,7 @@ class VertexGenerator {
   public:
     VertexGenerator(ContextBase &context, Vertex &gen);
 
-    void NewHypothesis(const PartialEdge &partial, Note note);
+    void NewHypothesis(PartialEdge partial, Note note);
 
     void FinishedSearch() {
       root_.under->SortAndSet(context_, NULL);
@@ -43,7 +43,7 @@ class VertexGenerator {
 
     Trie &FindOrInsert(Trie &node, uint64_t added, const lm::ngram::ChartState &state, unsigned char left, bool left_full, unsigned char right, bool right_full);
 
-    Final *CompleteTransition(Trie &node, const lm::ngram::ChartState &state, Note note, const PartialEdge &partial);
+    Final *CompleteTransition(Trie &node, const lm::ngram::ChartState &state, Note note, PartialEdge partial);
 
     ContextBase &context_;
 

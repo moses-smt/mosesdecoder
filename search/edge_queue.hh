@@ -16,15 +16,14 @@ template <class Model> class Context;
 
 class EdgeQueue {
   public:
-    explicit EdgeQueue(unsigned int pop_limit_hint);
+    EdgeQueue() {}
 
-    PartialEdge &InitializeEdge() {
-      return *take_;
+    PartialEdge AllocateEdge(Arity arity) {
+      return partial_edge_pool_.Allocate(arity);
     }
 
-    void AddEdge(unsigned char arity, Note note) {
-      generate_.push(edge_pool_.construct(*take_, arity, note));
-      take_ = static_cast<PartialEdge*>(partial_edge_pool_.malloc());
+    void AddEdge(PartialEdge edge, Note note) {
+      generate_.push(edge_pool_.construct(edge, note));
     }
 
     bool Empty() const { return generate_.empty(); }
@@ -38,9 +37,9 @@ class EdgeQueue {
       while (to_pop > 0 && !generate_.empty()) {
         EdgeGenerator *top = generate_.top();
         generate_.pop();
-        PartialEdge *ret = top->Pop(context, partial_edge_pool_);
-        if (ret) {
-          output.NewHypothesis(*ret, top->GetNote());
+        PartialEdge ret(top->Pop(context, partial_edge_pool_));
+        if (ret.Valid()) {
+          output.NewHypothesis(ret, top->GetNote());
           --to_pop;
           if (top->TopScore() != -kScoreInf) {
             generate_.push(top);
@@ -64,9 +63,7 @@ class EdgeQueue {
     typedef std::priority_queue<EdgeGenerator*, std::vector<EdgeGenerator*>, LessByTopScore> Generate;
     Generate generate_;
 
-    boost::pool<> partial_edge_pool_;
-
-    PartialEdge *take_;
+    PartialEdgePool partial_edge_pool_;
 };
 
 } // namespace search

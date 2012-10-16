@@ -9,6 +9,7 @@
 #include "lm/model.hh"
 #include "search/context.hh"
 #include "search/note.hh"
+#include "search/rule.hh"
 #include "search/vertex.hh"
 #include "search/vertex_generator.hh"
 
@@ -18,11 +19,10 @@ namespace Moses {
 namespace Incremental {
 
 template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const std::vector<lm::WordIndex> &vocab_mapping) 
-  : context_(context), vocab_mapping_(vocab_mapping), edges_(context.PopLimit()) {}
+  : context_(context), vocab_mapping_(vocab_mapping) {}
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
-  const unsigned char arity = nts.size();
-  CHECK(arity <= search::kMaxArity);
+  CHECK(nts.size() <= search::kMaxArity);
 
   search::PartialVertex vertices[search::kMaxArity];
   float below_score = 0.0;
@@ -37,11 +37,11 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     words.clear();
     const TargetPhrase &phrase = **i;
     const AlignmentInfo::NonTermIndexMap &align = phrase.GetAlignmentInfo().GetNonTermIndexMap();
-    search::PartialEdge &edge = edges_.InitializeEdge();
+    search::PartialEdge edge(edges_.AllocateEdge(nts.size()));
 
     size_t i = 0;
     bool bos = false;
-    unsigned char nt = 0;
+    search::PartialVertex *nt = edge.NT();
     if (phrase.GetSize() && !phrase.GetWord(0).IsNonTerminal()) {
       lm::WordIndex index = Convert(phrase.GetWord(0));
       if (context_.LanguageModel().GetVocabulary().BeginSentence() == index) {
@@ -54,20 +54,19 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     for (; i < phrase.GetSize(); ++i) {
       const Word &word = phrase.GetWord(i);
       if (word.IsNonTerminal()) {
-        edge.nt[nt++] = vertices[align[i]];
+        *(nt++) = vertices[align[i]];
         words.push_back(search::kNonTerminal);
       } else {
         words.push_back(Convert(word));
       }
     }
-    for (; nt < 2; ++nt) edge.nt[nt] = search::kBlankPartialVertex;
 
-    edge.score = phrase.GetFutureScore() + below_score;
-    search::ScoreRule(context_, words, bos, edge.between);
+    edge.SetScore(phrase.GetFutureScore() + below_score);
+    search::ScoreRule(context_, words, bos, edge.Between());
 
     search::Note note;
     note.vp = &phrase;
-    edges_.AddEdge(arity, note);
+    edges_.AddEdge(edge, note);
   }
 }
 
@@ -77,17 +76,13 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
   if (phrase.GetSize())
     words.push_back(Convert(phrase.GetWord(0)));
 
-  search::PartialEdge &edge = edges_.InitializeEdge();
-  // Appears to be a bug that this does not include language model.  
-  edge.score = phrase.GetFutureScore() + search::ScoreRule(context_, words, false, edge.between);
-
-  for (unsigned int i = 0; i < 2; ++i) {
-    edge.nt[i] = search::kBlankPartialVertex;
-  }
+  search::PartialEdge edge(edges_.AllocateEdge(0));
+  // Appears to be a bug that FutureScore does not already include language model.  
+  edge.SetScore(phrase.GetFutureScore() + search::ScoreRule(context_, words, false, edge.Between()));
 
   search::Note note;
   note.vp = &phrase;
-  edges_.AddEdge(0, note);
+  edges_.AddEdge(edge, note);
 }
 
 namespace {
@@ -97,7 +92,7 @@ class HypothesisCallback {
     HypothesisCallback(search::ContextBase &context, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool)
       : context_(context), out_(out), vertex_pool_(vertex_pool) {}
 
-    void NewHypothesis(const search::PartialEdge &partial, search::Note note) {
+    void NewHypothesis(search::PartialEdge partial, search::Note note) {
       search::VertexGenerator *&entry = out_.FindOrInsert(static_cast<const TargetPhrase *>(note.vp)->GetTargetLHS()).incr_generator;
       if (!entry) {
         entry = generator_pool_.construct(context_, *vertex_pool_.construct());

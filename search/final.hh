@@ -11,16 +11,13 @@ namespace search {
 
 class Final {
   public:
-    typedef boost::array<const Final*, search::kMaxArity> ChildArray;
-
-    void Reset(Score bound, Note note, const Final &left, const Final &right) {
+    const Final **Reset(Score bound, Note note) {
       bound_ = bound;
       note_ = note;
-      children_[0] = &left;
-      children_[1] = &right;
+      return children_;
     }
 
-    const ChildArray &Children() const { return children_; }
+    const Final *const *Children() const { return children_; }
 
     Note GetNote() const { return note_; }
 
@@ -31,7 +28,7 @@ class Final {
 
     Note note_;
 
-    ChildArray children_;
+    const Final *children_[2];
 };
 
 } // namespace search

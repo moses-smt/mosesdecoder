@@ -14,18 +14,28 @@ VertexGenerator::VertexGenerator(ContextBase &context, Vertex &gen) : context_(c
 }
 
 namespace {
+
 const uint64_t kCompleteAdd = static_cast<uint64_t>(-1);
+
+void FillFinal(PartialEdge partial, Note note, Final &out) {
+  const Final **final_out = out.Reset(partial.GetScore(), note);
+  const PartialVertex *part = partial.NT();
+  const PartialVertex *const part_end_loop = part + partial.GetArity();
+  for (; part != part_end_loop; ++part, ++final_out) {
+    *final_out = &part->End();
+  }
+}
+
 } // namespace
 
-void VertexGenerator::NewHypothesis(const PartialEdge &partial, Note note) {
+void VertexGenerator::NewHypothesis(PartialEdge partial, Note note) {
   const lm::ngram::ChartState &state = partial.CompletedState();
   std::pair<Existing::iterator, bool> got(existing_.insert(std::pair<uint64_t, Final*>(hash_value(state), NULL)));
   if (!got.second) {
     // Found it already.  
     Final &exists = *got.first->second;
-    if (exists.Bound() < partial.score) {
-      exists.Reset(partial.score, note, partial.nt[0].End(), partial.nt[1].End());
-    }
+    if (exists.Bound() < partial.GetScore())
+      FillFinal(partial, note, exists);
     return;
   }
   unsigned char left = 0, right = 0;
@@ -70,12 +80,12 @@ VertexGenerator::Trie &VertexGenerator::FindOrInsert(VertexGenerator::Trie &node
   return next;
 }
 
-Final *VertexGenerator::CompleteTransition(VertexGenerator::Trie &starter, const lm::ngram::ChartState &state, Note note, const PartialEdge &partial) {
+Final *VertexGenerator::CompleteTransition(VertexGenerator::Trie &starter, const lm::ngram::ChartState &state, Note note, PartialEdge partial) {
   VertexNode &node = *starter.under;
   assert(node.State().left.full == state.left.full);
   assert(!node.End());
   Final *final = context_.NewFinal();
-  final->Reset(partial.score, note, partial.nt[0].End(), partial.nt[1].End());
+  FillFinal(partial, note, *final);
   node.SetEnd(final);
   return final;
 }

@@ -39,10 +39,4 @@ void VertexNode::SortAndSet(ContextBase &context, VertexNode **parent_ptr) {
   bound_ = extend_.front()->Bound();
 }
 
-namespace {
-VertexNode kBlankVertexNode;
-} // namespace
-
-PartialVertex kBlankPartialVertex(kBlankVertexNode);
-
 } // namespace search
