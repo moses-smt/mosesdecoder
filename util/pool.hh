@@ -1,18 +1,16 @@
 // Very simple pool.  It can only allocate memory.  And all of the memory it
 // allocates must be freed at the same time.  
 
-#ifndef SEARCH_POOL__
-#define SEARCH_POOL__
-
-#include <boost/noncopyable.hpp>
+#ifndef UTIL_POOL__
+#define UTIL_POOL__
 
 #include <vector>
 
 #include <stdint.h>
 
-namespace search {
+namespace util {
 
-class Pool : boost::noncopyable {
+class Pool {
   public:
     Pool();
 
@@ -36,8 +34,12 @@ class Pool : boost::noncopyable {
     std::vector<void *> free_list_;
 
     uint8_t *current_, *current_end_;
+
+    // no copying
+    Pool(const Pool &);
+    Pool &operator=(const Pool &);
 }; 
 
-} // namespace lm
+} // namespace util
 
-#endif // SEARCH_POOL__
+#endif // UTIL_POOL__

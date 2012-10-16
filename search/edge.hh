@@ -2,9 +2,9 @@
 #define SEARCH_EDGE__
 
 #include "lm/state.hh"
-#include "search/pool.hh"
 #include "search/types.hh"
 #include "search/vertex.hh"
+#include "util/pool.hh"
 
 #include <functional>
 
@@ -69,7 +69,7 @@ class PartialEdgePool {
     }
 
   private:
-    Pool pool_;
+    util::Pool pool_;
 };
 
 

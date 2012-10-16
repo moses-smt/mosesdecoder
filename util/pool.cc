@@ -1,8 +1,8 @@
-#include "search/pool.hh"
+#include "util/pool.hh"
 
 #include <stdlib.h>
 
-namespace search {
+namespace util {
 
 Pool::Pool() {
   current_ = NULL;
@@ -32,4 +32,4 @@ void *Pool::More(std::size_t size) {
   return ret;
 }
 
-} // namespace search
+} // namespace util
