@@ -97,7 +97,7 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, P
 
   if (split) {
     // We have an alternate.  
-    top.SetScore(top_nt[victim].Bound() - old_bound);
+    top.SetScore(top.GetScore() + top_nt[victim].Bound() - old_bound);
     // TODO: dedupe?  
     generate_.push(top);
   } else {
