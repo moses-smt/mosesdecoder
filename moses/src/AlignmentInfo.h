@@ -19,9 +19,13 @@
 
 #pragma once
 
+#include <iostream>
 #include <ostream>
 #include <set>
 #include <vector>
+#include <cstdlib>
+
+#include <boost/functional/hash.hpp>
 
 namespace Moses
 {
@@ -33,14 +37,15 @@ class AlignmentInfoCollection;
  */
 class AlignmentInfo
 {
-  typedef std::set<std::pair<size_t,size_t> > CollType;
-
   friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
+  friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
 
  public:
+  typedef std::set<std::pair<size_t,size_t> > CollType;
   typedef std::vector<size_t> NonTermIndexMap;
+  typedef std::vector<size_t> TermIndexMap;
   typedef CollType::const_iterator const_iterator;
 
   const_iterator begin() const { return m_collection.begin(); }
@@ -53,10 +58,27 @@ class AlignmentInfo
   const NonTermIndexMap &GetNonTermIndexMap() const {
     return m_nonTermIndexMap;
   }
-
+  
+  // only used for hierarchical models, contains terminal alignments
+  const CollType &GetTerminalAlignments() const {
+    return m_terminalCollection;
+  }
+  
+  // for phrase-based models, this contains all alignments, for hierarchical models only the NT alignments
+  const CollType &GetAlignments() const {
+    return m_collection;
+  }
+  
   size_t GetSize() const { return m_collection.size(); }
 
   std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+
+  bool operator==(const AlignmentInfo& rhs) const 
+  {
+    return m_collection == rhs.m_collection &&
+           m_terminalCollection == rhs.m_terminalCollection &&
+           m_nonTermIndexMap == rhs.m_nonTermIndexMap;
+  }
   
  private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
@@ -65,10 +87,29 @@ class AlignmentInfo
   {
     BuildNonTermIndexMap();
   }
-
+  
+  // use this for hierarchical models
+  explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs, int* indicator)
+  { 
+	// split alignment set in terminals and non-terminals
+	std::set<std::pair<size_t,size_t> > terminalSet;
+	std::set<std::pair<size_t,size_t> > nonTerminalSet;
+	std::set<std::pair<size_t,size_t> >::iterator iter;
+	for (iter = pairs.begin(); iter != pairs.end(); ++iter) {
+		if (*indicator == 1) nonTerminalSet.insert(*iter);
+		else terminalSet.insert(*iter);
+		indicator++;
+	}
+	m_collection = nonTerminalSet;
+	m_terminalCollection = terminalSet;
+	
+	BuildNonTermIndexMap();
+  }
+  
   void BuildNonTermIndexMap();
 
   CollType m_collection;
+  CollType m_terminalCollection;
   NonTermIndexMap m_nonTermIndexMap;
 };
 
@@ -78,8 +119,31 @@ class AlignmentInfo
 struct AlignmentInfoOrderer
 {
   bool operator()(const AlignmentInfo &a, const AlignmentInfo &b) const {
+	if (a.m_collection == b.m_collection)
+	  return a.m_terminalCollection < b.m_terminalCollection;
     return a.m_collection < b.m_collection;
   }
 };
+
+/** 
+ * Hashing functoid
+ **/
+struct AlignmentInfoHasher
+{
+  size_t operator()(const AlignmentInfo& a) const
+  {
+    size_t seed = 0;
+    boost::hash_combine(seed,a.m_collection);
+    boost::hash_combine(seed,a.m_terminalCollection);
+    boost::hash_combine(seed,a.m_nonTermIndexMap);
+    return seed;
+  }
+
+};
+
+inline size_t hash_value(const AlignmentInfo& a) {
+  static AlignmentInfoHasher hasher;
+  return hasher(a);
+}
 
 }

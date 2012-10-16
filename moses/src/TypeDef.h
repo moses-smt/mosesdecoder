@@ -201,7 +201,6 @@ typedef std::vector<std::string> WordAlignments;
 
 typedef std::vector<FactorType> FactorList;
 
-typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
 }

@@ -46,6 +46,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartTranslationOptions.h"
 #include "ChartHypothesis.h"
 
+#include <boost/algorithm/string.hpp>
+#include "FeatureVector.h"
+
 
 using namespace std;
 using namespace Moses;
@@ -141,6 +144,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
     return NULL;
   }
 }
+
 
 /***
  * print surface factor only for the given phrase
@@ -400,7 +404,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // print the surface factor of the translation
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-    out << " |||";
+    out << " ||| ";
 
     // print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
@@ -417,26 +421,29 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
       }
     }
 
-
     std::string lastName = "";
+
+    // output stateful sparse features
+    const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
+    for( size_t i=0; i<sff.size(); i++ )
+    	if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
+    		OutputSparseFeatureScores( out, path, sff[i], lastName );
 
     // translation components
     const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
     if (pds.size() > 0) {
-
       for( size_t i=0; i<pds.size(); i++ ) {
-	size_t pd_numinputscore = pds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
-
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+      	size_t pd_numinputscore = pds[i]->GetNumInputScores();
+      	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+      	for (size_t j = 0; j<scores.size(); ++j){
+      		if (labeledOutput && (i == 0) ){
+      			if ((j == 0) || (j == pd_numinputscore)){
+      				lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+      				out << " " << lastName << ":";
+      			}
+      		}
+      		out << " " << scores[j];
+      	}
       }
     }
 
@@ -448,26 +455,33 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // generation
     const vector<GenerationDictionary*>& gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
-
       for( size_t i=0; i<gds.size(); i++ ) {
-	size_t pd_numinputscore = gds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
-
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+      	size_t pd_numinputscore = gds[i]->GetNumInputScores();
+      	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+      	for (size_t j = 0; j<scores.size(); ++j){
+      		if (labeledOutput && (i == 0) ){
+      			if ((j == 0) || (j == pd_numinputscore)){
+      				lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+      				out << " " << lastName << ":";
+      			}
+      		}
+      		out << " " << scores[j];
+      	}
       }
     }
 
+    // output stateless sparse features
+    lastName = "";
+
+    const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
+    for( size_t i=0; i<slf.size(); i++ ) {
+      if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+	OutputSparseFeatureScores( out, path, slf[i], lastName );
+      }
+    }
 
     // total
-    out << " |||" << path.GetTotalScore();
+    out << " ||| " << path.GetTotalScore();
 
     /*
     if (includeAlignment) {
@@ -496,6 +510,32 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
   CHECK(m_nBestOutputCollector);
   m_nBestOutputCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputSparseFeatureScores( std::ostream& out, const ChartTrellisPath &path, const FeatureFunction *ff, std::string &lastName )
+{
+  const StaticData &staticData = StaticData::Instance();
+  bool labeledOutput = staticData.IsLabeledNBestList();
+  const FVector scores = path.GetScoreBreakdown().GetVectorForProducer( ff );
+
+  // report weighted aggregate
+  if (! ff->GetSparseFeatureReporting()) {
+  	const FVector &weights = staticData.GetAllWeights().GetScoresVector();
+  	if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
+  		out << " " << ff->GetScoreProducerWeightShortName() << ":";
+    out << " " << scores.inner_product(weights);
+  }
+
+  // report each feature
+  else {
+  	for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+  		if (i->second != 0) { // do not report zero-valued features
+  			if (labeledOutput)
+  				out << " " << i->first << ":";
+        out << " " << i->second;
+      }
+    }
+  }
 }
 
 void IOWrapper::FixPrecision(std::ostream &stream, size_t size)

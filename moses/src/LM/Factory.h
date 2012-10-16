@@ -11,22 +11,19 @@ namespace Moses
 {
 
 class LanguageModel;
-class ScoreIndexManager;
 
-namespace LanguageModelFactory
-{
+namespace LanguageModelFactory {
 
-/**
- * creates a language model that will use the appropriate
- * language model toolkit as its underlying implementation
- */
-LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
-                                   , const std::vector<FactorType> &factorTypes
-                                   , size_t nGramOrder
-                                   , const std::string &languageModelFile
-                                   , ScoreIndexManager &scoreIndexManager
-                                   , int dub);
-
+	/**
+	 * creates a language model that will use the appropriate
+   * language model toolkit as its underlying implementation
+	 */
+	 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
+																		, const std::vector<FactorType> &factorTypes     
+																		, size_t nGramOrder
+																		, const std::string &languageModelFile
+																		, int dub);
+	 
 };
 
 }

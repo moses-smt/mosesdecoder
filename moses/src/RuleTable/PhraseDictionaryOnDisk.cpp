@@ -38,7 +38,7 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
                                   , const std::vector<FactorType> &output
                                   , const std::string &filePath
-                                  , const std::vector<float> &weight
+				  , const std::vector<float> &weight
                                   , size_t tableLimit
                                   , const LMList& languageModels
                                   , const WordPenaltyProducer* wpProducer)
@@ -52,8 +52,6 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
   m_inputFactorsVec		= input;
   m_outputFactorsVec	= output;
 
-  m_weight = weight;
-
   LoadTargetLookup();
 
   if (!m_dbWrapper.BeginLoad(filePath))
@@ -66,6 +64,8 @@ bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
 
   return true;
 }
+
+// PhraseDictionary impl
 
 //! find list of translations that can translates src. Only for phrase input
 const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const Phrase& /* src */) const
@@ -96,8 +96,7 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
                                           m_dbWrapper, m_languageModels,
                                           m_wpProducer, m_inputFactorsVec,
-                                          m_outputFactorsVec, m_weight,
-                                          m_filePath);
+                                          m_outputFactorsVec, m_filePath);
 }
 
 }

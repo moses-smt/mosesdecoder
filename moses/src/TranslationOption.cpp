@@ -40,18 +40,8 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const InputType &inputType)
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange(wordsRange)
-{
-  // set score
-  m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
-
-  if (inputType.GetType() == SentenceInput) {
-    Phrase phrase = inputType.GetSubString(wordsRange);
-    m_sourcePhrase = new Phrase(phrase);
-  } else {
-    // TODO lex reordering with confusion network
-    m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
-  }
-}
+  , m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
+{}
 
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
@@ -63,38 +53,16 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
   , m_futureScore(0)
 {
   if (up) {
-    const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
-    vector<float> score(1);
-    score[0] = FloorScore(-numeric_limits<float>::infinity());
-    m_scoreBreakdown.Assign(scoreProducer, score);
-  }
-
-  if (inputType.GetType() == SentenceInput) {
-    Phrase phrase = inputType.GetSubString(wordsRange);
-    m_sourcePhrase = new Phrase(phrase);
-  } else {
-    // TODO lex reordering with confusion network
-    m_sourcePhrase = new Phrase(*targetPhrase.GetSourcePhrase());
-    //the target phrase from a confusion network/lattice has input scores that we want to keep
-    m_scoreBreakdown.PlusEquals(targetPhrase.GetScoreBreakdown());
-
-  }
+		const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
+		vector<float> score(1);
+		score[0] = FloorScore(-numeric_limits<float>::infinity());
+		m_scoreBreakdown.Assign(scoreProducer, score);
+	}
 }
-
-TranslationOption::TranslationOption(const TranslationOption &copy)
-  : m_targetPhrase(copy.m_targetPhrase)
-//, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(ARRAY_SIZE_INCR) : new Phrase(*copy.m_sourcePhrase))
-  , m_sourceWordsRange(copy.m_sourceWordsRange)
-  , m_futureScore(copy.m_futureScore)
-  , m_scoreBreakdown(copy.m_scoreBreakdown)
-  , m_cachedScores(copy.m_cachedScores)
-{}
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
   : m_targetPhrase(copy.m_targetPhrase)
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourcePhrase( (copy.m_sourcePhrase == NULL) ? new Phrase(ARRAY_SIZE_INCR) : new Phrase(*copy.m_sourcePhrase))
   , m_sourceWordsRange(sourceWordsRange)
   , m_futureScore(copy.m_futureScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
@@ -144,6 +112,7 @@ void TranslationOption::CalcScore(const TranslationSystem* system)
   allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, oovScore, &m_scoreBreakdown);
 
   size_t phraseSize = GetTargetPhrase().GetSize();
+  
   // future score
   m_futureScore = retFullScore - ngramScore + oovScore
                   + m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize *
@@ -164,7 +133,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
 
 void TranslationOption::CacheScores(const ScoreProducer &producer, const Scores &score)
 {
-  m_cachedScores[&producer] = new Scores(score);
+  m_cachedScores[&producer] = score;
 }
 
 }

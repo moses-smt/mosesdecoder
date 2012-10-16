@@ -39,7 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    $_SPARSE_TRANSLATION_TABLE,
-   $_DICTIONARY, $_EPPEX, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $IGNORE);
 my $_CORES = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -123,6 +123,7 @@ $_HELP = 1
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
+           'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES,
 		       'eppex:s' => \$_EPPEX,
 		       'additional-ini=s' => \@_ADDITIONAL_INI, 
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 

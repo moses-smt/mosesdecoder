@@ -1,20 +1,38 @@
 // $Id$
 
 #include <iostream>
-#include <typeinfo>
+#include <sstream>
+
+#include "ScoreComponentCollection.h"
 #include "ScoreProducer.h"
-#include "StaticData.h"
-#include "ScoreIndexManager.h"
+
+using namespace std;
 
 namespace Moses
 {
-unsigned int ScoreProducer::s_globalScoreBookkeepingIdCounter(0);
 
-ScoreProducer::~ScoreProducer() {}
+multiset<string> ScoreProducer::description_counts;
+const size_t ScoreProducer::unlimited = -1;
 
-ScoreProducer::ScoreProducer()
+ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComponents)
+  : m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {
-  m_scoreBookkeepingId = UNASSIGNED;
+  description_counts.insert(description);
+  size_t count = description_counts.count(description);
+  ostringstream dstream;
+  dstream << description;
+  if (count > 1) 
+  {
+    dstream << ":" << count;
+  }
+  m_description = dstream.str();
+  if (numScoreComponents != unlimited)
+  {
+    ScoreComponentCollection::RegisterScoreProducer(this);
+  }
+}
+
+ScoreProducer::~ScoreProducer() {
 }
 
 }

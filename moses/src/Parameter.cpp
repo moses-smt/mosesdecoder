@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Parameter.h"
 #include "Util.h"
 #include "InputFileStream.h"
+#include "StaticData.h"
 #include "UserMessage.h"
 
 using namespace std;
@@ -41,11 +42,14 @@ Parameter::Parameter()
   AddParam("config", "f", "location of the configuration file");
   AddParam("continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam("decoding-graph-backoff", "dpb", "only use subsequent decoding paths for unknown spans of given length");
+  AddParam("dlm-model", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
+  AddParam("distinct-nbest", "only distinct translations in nbest list");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
+  AddParam("glm-feature", "discriminatively trained global lexical translation feature, sparse producer");
   AddParam("input-factors", "list of factors in the input");
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
@@ -76,33 +80,41 @@ Parameter::Parameter()
   AddParam("stack", "s", "maximum stack size for histogram pruning");
   AddParam("stack-diversity", "sd", "minimum number of hypothesis of each coverage in stack (default 0)");
   AddParam("threads","th", "number of threads to use in decoding (defaults to single-threaded)");
-  AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
-  AddParam("ttable-file", "location and properties of the translation tables");
-  AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
-  AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
-  AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
-  AddParam("verbose", "v", "verbosity level of the logging");
-  AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+	AddParam("translation-details", "T", "for each best hypothesis, report translation details to the given file");
+	AddParam("ttable-file", "location and properties of the translation tables");
+	AddParam("ttable-limit", "ttl", "maximum number of translation table entries per input phrase");
+	AddParam("translation-option-threshold", "tot", "threshold for translation options relative to best for input phrase");
+	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
+	AddParam("verbose", "v", "verbosity level of the logging");
+  AddParam("references", "Reference file(s) - used for bleu score feature");
+  AddParam("weight-bl", "bl", "weight for bleu score feature");
+	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
+	AddParam("weight-dlm", "dlm", "weight for discriminative LM feature function (on top of sparse weights)");
   AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
-  AddParam("weight-generation", "g", "weight(s) for generation components");
-  AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
-  AddParam("weight-l", "lm", "weight(s) for language models");
-  AddParam("weight-lex", "lex", "weight for global lexical model");
-  AddParam("weight-t", "tm", "weights for translation model components");
-  AddParam("weight-w", "w", "weight for word penalty");
-  AddParam("weight-u", "u", "weight for unknown word penalty");
-  AddParam("weight-e", "e", "weight for word deletion");
-  AddParam("output-factors", "list if factors in the output");
-  AddParam("cache-path", "?");
-  AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
-  AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
-  AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
-  AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
-  AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
-  AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
+	AddParam("weight-generation", "g", "weight(s) for generation components");
+	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
+	AddParam("weight-l", "lm", "weight(s) for language models");
+	AddParam("weight-lex", "lex", "weight for global lexical model");
+	AddParam("weight-glm", "glm", "weight for global lexical feature, sparse producer");
+	AddParam("weight-wt", "wt", "weight for word translation feature");
+	AddParam("weight-pp", "pp", "weight for phrase pair feature");
+	AddParam("weight-pb", "pb", "weight for phrase boundary feature");
+	AddParam("weight-t", "tm", "weights for translation model components");
+	AddParam("weight-w", "w", "weight for word penalty");
+	AddParam("weight-u", "u", "weight for unknown word penalty");
+	AddParam("weight-e", "e", "weight for word deletion"); 
+  AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
+	AddParam("output-factors", "list if factors in the output");
+	AddParam("cache-path", "?");
+	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
+	AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
+	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
+ 	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
+	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
-  AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
+ 	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
   AddParam("lminimum-bayes-risk", "lmbr", "use lattice miminum Bayes risk to determine best translation");
+  AddParam("mira", "do mira training");
   AddParam("consensus-decoding", "con", "use consensus decoding (De Nero et. al. 2009)");
   AddParam("mbr-size", "number of translation candidates considered in MBR decoding (default 200)");
   AddParam("mbr-scale", "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
@@ -125,8 +137,30 @@ Parameter::Parameter()
 #ifdef HAVE_PROTOBUF
   AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
 #endif
-  AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
-  AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
+	AddParam("cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
+	AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
+	AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
+	AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
+	AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
+	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are taken from the phrase table if any. Default is false");
+	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
+	AddParam("description", "Source language, target language, description");
+	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
+	AddParam("non-terminals", "list of non-term symbols, space separated");
+	AddParam("rule-limit", "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
+	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
+  AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
+  AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
+  AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
+  AddParam("phrase-length-feature", "Count features for source length, target length, both of each phrase");
+  AddParam("target-word-insertion-feature", "Count feature for each unaligned target word");
+  AddParam("source-word-deletion-feature", "Count feature for each unaligned source word");
+  AddParam("word-translation-feature", "Count feature for word translation according to word alignment");
+  AddParam("report-sparse-features", "Indicate which sparse feature functions should report detailed scores in n-best, instead of aggregate");
   AddParam("cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
   AddParam("parsing-algorithm", "Which parsing algorithm to use. 0=CYK+, 1=scope-3. (default = 0)");
   AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing, 4=stack with batched lm requests (default = 0)");
@@ -148,6 +182,7 @@ Parameter::Parameter()
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
+  AddParam("text-type", "should be one of dev/devtest/test, used for domain adaptation features");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
   
   // Compact phrase table and reordering table.                                                                                  
@@ -172,6 +207,7 @@ void Parameter::AddParam(const string &paramName, const string &abbrevName, cons
   m_valid[paramName] = true;
   m_valid[abbrevName] = true;
   m_abbreviation[paramName] = abbrevName;
+	m_fullname[abbrevName] = paramName;
   m_description[paramName] = description;
 }
 
@@ -606,6 +642,30 @@ void Parameter::PrintCredit()
   cerr <<  endl << endl;
 }
 
+/** update parameter settings with command line switches
+ * \param paramName full name of parameter
+ * \param values inew values for paramName */
+void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
+{
+	VERBOSE(2,"Overwriting parameter " << paramName);
+	
+	m_setting[paramName]; // defines the parameter, important for boolean switches
+	if (m_setting[paramName].size() > 1){
+		VERBOSE(2," (the parameter had " << m_setting[paramName].size() << " previous values)");
+		CHECK(m_setting[paramName].size() == values.size());
+	}else{
+		VERBOSE(2," (the parameter does not have previous values)");
+		m_setting[paramName].resize(values.size());
+	}
+	VERBOSE(2," with the following values:");
+	int i=0;
+	for (PARAM_VEC::iterator iter = values.begin(); iter != values.end() ; iter++, i++){
+		m_setting[paramName][i] = *iter;
+		VERBOSE(2, " " << *iter);
+	}
+	VERBOSE(2, std::endl);
+}
+	
 }
 
 

@@ -73,14 +73,7 @@ void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGra
 
 void LMList::Add(LanguageModel *lm)
 {
-  m_coll.push_back(lm);
-
-  const ScoreIndexManager &scoreMgr = StaticData::Instance().GetScoreIndexManager();
-  size_t startInd = scoreMgr.GetBeginIndex(lm->GetScoreBookkeepingID())
-                    ,endInd		= scoreMgr.GetEndIndex(lm->GetScoreBookkeepingID()) - 1;
-
-  m_minInd = min(m_minInd, startInd);
-  m_maxInd = max(m_maxInd, endInd);
+	m_coll.push_back(lm);
 }
 
 }

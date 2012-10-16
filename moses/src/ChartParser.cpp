@@ -89,7 +89,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       //targetPhrase->SetScore();
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetScore(m_system.GetWordPenaltyProducer(), wordPenaltyScore);
-      targetPhrase->SetSourcePhrase(unksrc);
+      targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       
       // chart rule
@@ -111,7 +111,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
       CHECK(targetLHS.GetFactor(0) != NULL);
       
-      targetPhrase->SetSourcePhrase(unksrc);
+      targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
       

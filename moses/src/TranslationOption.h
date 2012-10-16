@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <map>
 #include <vector>
+#include <boost/functional/hash.hpp>
 #include "WordsBitmap.h"
 #include "WordsRange.h"
 #include "Phrase.h"
@@ -63,7 +64,6 @@ class TranslationOption
 protected:
 
   TargetPhrase 							m_targetPhrase; /*< output phrase when using this translation option */
-  Phrase				      *m_sourcePhrase; /*< input phrase translated by this */
   const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
@@ -73,7 +73,7 @@ protected:
   //! possible to estimate, it is included here.
   ScoreComponentCollection	m_scoreBreakdown;
 
-  typedef std::map<const ScoreProducer *, const Scores *> _ScoreCacheMap;
+  typedef std::map<const ScoreProducer *, Scores> _ScoreCacheMap;
   _ScoreCacheMap m_cachedScores;
 
 public:
@@ -86,17 +86,10 @@ public:
                     , const TargetPhrase &targetPhrase
                     , const InputType &inputType
                     , const UnknownWordPenaltyProducer* uwpProducer);
-  /** copy constructor */
-  TranslationOption(const TranslationOption &copy);
 
   /** copy constructor, but change words range. used by caching */
   TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange);
 
-  ~TranslationOption() {
-    delete m_sourcePhrase;
-    for(_ScoreCacheMap::const_iterator it = m_cachedScores.begin(); it != m_cachedScores.end(); ++it)
-      delete it->second;
-  }
 
   /** returns true if all feature types in featuresToCheck are compatible between the two phrases */
   bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
@@ -116,7 +109,7 @@ public:
 
   /** returns source phrase */
   const Phrase *GetSourcePhrase() const {
-    return m_sourcePhrase;
+    return &(m_targetPhrase.GetSourcePhrase());
   }
 
   /** whether source span overlaps with those of a hypothesis */
@@ -158,7 +151,7 @@ public:
     if(it == m_cachedScores.end())
       return NULL;
     else
-      return it->second;
+      return &(it->second);
   }
 
   /** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
@@ -167,7 +160,25 @@ public:
   void CacheScores(const ScoreProducer &scoreProducer, const Scores &score);
 
   TO_STRING();
+	
+	bool operator== (const TranslationOption &rhs) const
+	{
+    return m_sourceWordsRange == rhs.m_sourceWordsRange &&
+      m_targetPhrase == rhs.m_targetPhrase;
+	}
+
 };
+
+
+//XXX: This doesn't look at the alignment. Is this correct?
+inline size_t hash_value(const TranslationOption& translationOption) {
+  size_t  seed = 0;
+  boost::hash_combine(seed, translationOption.GetTargetPhrase());
+  boost::hash_combine(seed, translationOption.GetStartPos());
+  boost::hash_combine(seed, translationOption.GetEndPos());
+  return seed;
+}
+
 
 }
 

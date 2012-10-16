@@ -87,6 +87,8 @@ public:
 
     VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
 
+    if ((*m_source).GetSize() == 0) return;
+
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
       Incremental::Manager manager(*m_source, system);
       manager.ProcessSentence();
@@ -169,18 +171,25 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
   }
   return (source ? true : false);
 }
-
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
-
-  size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
-  size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
-  for (size_t i = weightStart; i < weightEnd; ++i) {
-    cout << ff->GetScoreProducerDescription(i-weightStart) <<  " " << ff->GetScoreProducerWeightShortName(i-weightStart) << " "
-         << StaticData::Instance().GetAllWeights()[i] << endl;
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    for (size_t i = 0; i < numScoreComps; ++i) 
+      cout << ff->GetScoreProducerDescription() <<  " "
+           << ff->GetScoreProducerWeightShortName() << " "
+           << values[i] << endl;
+  }
+  else {
+  	if (ff->GetSparseProducerWeight() == 1)
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " sparse" << endl;
+  	else
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
   }
 }
-
 
 static void ShowWeights()
 {
@@ -189,19 +198,13 @@ static void ShowWeights()
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
   for (size_t i = 0; i < sff.size(); ++i) {
     PrintFeatureWeight(sff[i]);
   }
-  for (size_t i = 0; i < pds.size(); ++i) {
-    PrintFeatureWeight(pds[i]);
-  }
-  for (size_t i = 0; i < gds.size(); ++i) {
-    PrintFeatureWeight(gds[i]);
-  }
   for (size_t i = 0; i < slf.size(); ++i) {
-    PrintFeatureWeight(slf[i]);
+    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
+  	  PrintFeatureWeight(slf[i]);
+    }
   }
 }
 
@@ -214,20 +217,20 @@ int main(int argc, char* argv[])
       for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
       TRACE_ERR(endl);
     }
-  
+
     IOWrapper::FixPrecision(cout);
     IOWrapper::FixPrecision(cerr);
-  
+
     // load data structures
     Parameter parameter;
     if (!parameter.LoadParam(argc, argv)) {
       return EXIT_FAILURE;
     }
-  
+
     const StaticData &staticData = StaticData::Instance();
     if (!StaticData::LoadDataStatic(&parameter, argv[0]))
       return EXIT_FAILURE;
-  
+
     if (parameter.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
@@ -239,24 +242,16 @@ int main(int argc, char* argv[])
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
   
     // check on weights
-    vector<float> weights = staticData.GetAllWeights();
+    const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
-      TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-      TRACE_ERR("The global weight vector looks like this:");
-      for (size_t j=0; j<weights.size(); j++) {
-        TRACE_ERR(" " << weights[j]);
-      }
+      TRACE_ERR("The global weight vector looks like this: ");
+      TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
-    // every score must have a weight!  check that here:
-    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-      TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-      return EXIT_FAILURE;
-    }
-  
+
     if (ioWrapper == NULL)
       return EXIT_FAILURE;
-  
+
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif

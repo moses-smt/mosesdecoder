@@ -118,9 +118,10 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
       os << "\tdropped=" << *dwi << std::endl;
     }
   }
-  os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
-  StaticData::Instance().GetScoreIndexManager().PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
-  os << std::endl;
+	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
+  os << translationPath.back()->GetScoreBreakdown();
+  os << " weighted(TODO)";
+	os << std::endl;
 }
 
 }

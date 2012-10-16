@@ -48,32 +48,41 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
   return GetTargetPhraseCollection(src.GetSubString(range));
 }
 
+size_t PhraseDictionary::GetDictIndex() const 
+{ 
+  return m_feature->GetDictIndex(); 
+}
+
 PhraseDictionaryFeature::PhraseDictionaryFeature
 (PhraseTableImplementation implementation
+ , SparsePhraseDictionaryFeature* spdf
  , size_t numScoreComponent
  , unsigned numInputScores
  , const std::vector<FactorType> &input
  , const std::vector<FactorType> &output
  , const std::string &filePath
  , const std::vector<float> &weight
+ , size_t dictIndex
  , size_t tableLimit
  , const std::string &targetFile  // default param
  , const std::string &alignmentsFile) // default param
-  :DecodeFeature(input,output)
-  ,   m_numScoreComponent(numScoreComponent),
+  :DecodeFeature("PhraseModel",numScoreComponent,input,output),
+  m_dictIndex(dictIndex),
   m_numInputScores(numInputScores),
   m_filePath(filePath),
-  m_weight(weight),
   m_tableLimit(tableLimit),
   m_implementation(implementation),
   m_targetFile(targetFile),
-  m_alignmentsFile(alignmentsFile)
+  m_alignmentsFile(alignmentsFile),
+  m_sparsePhraseDictionaryFeature(spdf)
 {
-  const StaticData& staticData = StaticData::Instance();
-  const_cast<ScoreIndexManager&>(staticData.GetScoreIndexManager()).AddScoreProducer(this);
-  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray
-      || implementation == Compact || implementation == OnDisk) {
+  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
+      implementation==Compact || implementation == OnDisk) {
     m_useThreadSafePhraseDictionary = true;
+    if (implementation == SuffixArray) {
+      cerr << "Warning: implementation holds chached weights!" << endl;
+      exit(1);
+    }
   } else {
     m_useThreadSafePhraseDictionary = false;
   }
@@ -82,6 +91,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
 {
   const StaticData& staticData = StaticData::Instance();
+  std::vector<float> weightT = staticData.GetWeights(this);
+  
   if (m_implementation == Memory) {
     // memory phrase table
     VERBOSE(2,"using standard phrase tables" << std::endl);
@@ -94,21 +105,21 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
       CHECK(false);
     }
 
-    PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(m_numScoreComponent,this);
+    PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(GetNumScoreComponents(),this);
     bool ret = pdm->Load(GetInput(), GetOutput()
                          , m_filePath
-                         , m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWeightWordPenalty());
     CHECK(ret);
     return pdm;
   } else if (m_implementation == Binary) {
-    PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, m_numInputScores,this);
+    PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(GetNumScoreComponents(), m_numInputScores,this);
     bool ret = pdta->Load(                    GetInput()
                , GetOutput()
                , m_filePath
-               , m_weight
+               , weightT
                , m_tableLimit
                , system->GetLanguageModels()
                , system->GetWeightWordPenalty());
@@ -128,32 +139,34 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 
     RuleTableTrie *dict;
     if (staticData.GetParsingAlgorithm() == ParseScope3) {
-      dict = new RuleTableUTrie(m_numScoreComponent, this);
+      dict = new RuleTableUTrie(GetNumScoreComponents(), this);
     } else {
-      dict = new PhraseDictionarySCFG(m_numScoreComponent, this);
+      dict = new PhraseDictionarySCFG(GetNumScoreComponents(), this);
     }
     bool ret = dict->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         , m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
-    assert(ret);
+    CHECK(ret);
     return dict;
   } else if (m_implementation == ALSuffixArray) {
     // memory phrase table
+    cerr << "Warning: Implementation holds cached weights!" << endl;
+    exit(1);
     VERBOSE(2,"using Hiero format phrase tables" << std::endl);
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
       VERBOSE(2,"Using gzipped file" << std::endl);
     }
     
-    PhraseDictionaryALSuffixArray* pdm  = new PhraseDictionaryALSuffixArray(m_numScoreComponent,this);
+    PhraseDictionaryALSuffixArray* pdm  = new PhraseDictionaryALSuffixArray(GetNumScoreComponents(),this);
     bool ret = pdm->Load(GetInput()
                          , GetOutput()
                          , m_filePath
-                         , m_weight
+                         , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
                          , system->GetWordPenaltyProducer());
@@ -161,28 +174,30 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     return pdm;
   } else if (m_implementation == OnDisk) {
 
-    PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(m_numScoreComponent, this);
+    PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(GetNumScoreComponents(), this);
     bool ret = pdta->Load(GetInput()
                           , GetOutput()
                           , m_filePath
-                          , m_weight
+                          , weightT
                           , m_tableLimit
                           , system->GetLanguageModels()
                           , system->GetWordPenaltyProducer());
     CHECK(ret);
     return pdta;
   } else if (m_implementation == SuffixArray) {
+    cerr << "Warning: Implementation holds cached weights!" << endl;
+    exit(1);
 #ifndef WIN32
-    PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(m_numScoreComponent, this);
+    PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(GetNumScoreComponents(), this);
     if(!(pd->Load(
            GetInput()
            ,GetOutput()
            ,m_filePath
            ,m_targetFile
-           , m_alignmentsFile
-           , m_weight, m_tableLimit
-           , system->GetLanguageModels()
-           , system->GetWeightWordPenalty()))) {
+           ,m_alignmentsFile
+           ,weightT, m_tableLimit
+           ,system->GetLanguageModels()
+	   ,system->GetWeightWordPenalty()))) {
       std::cerr << "FAILED TO LOAD\n" << endl;
       delete pd;
       pd = NULL;
@@ -194,30 +209,30 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #endif
   } else if (m_implementation == FuzzyMatch) {
     
-    PhraseDictionaryFuzzyMatch *dict = new PhraseDictionaryFuzzyMatch(m_numScoreComponent, this);
+    PhraseDictionaryFuzzyMatch *dict = new PhraseDictionaryFuzzyMatch(GetNumScoreComponents(), this);
 
     bool ret = dict->Load(GetInput()
                           , GetOutput()
                           , m_filePath
-                          , m_weight
+                          , weightT
                           , m_tableLimit
                           , system->GetLanguageModels()
                           , system->GetWordPenaltyProducer());
-    assert(ret);
+    CHECK(ret);
 
     return dict;    
   } else if (m_implementation == Compact) {
 #ifndef WIN32
     VERBOSE(2,"Using compact phrase table" << std::endl);                                                                                                                               
                                                                                                                                       
-    PhraseDictionaryCompact* pd  = new PhraseDictionaryCompact(m_numScoreComponent, m_implementation, this);                         
+    PhraseDictionaryCompact* pd  = new PhraseDictionaryCompact(GetNumScoreComponents(), m_implementation, this);                         
     bool ret = pd->Load(GetInput(), GetOutput()                                                                                      
                          , m_filePath                                                                                                 
-                         , m_weight                                                                                                   
+                         , weightT                                                                                                  
                          , m_tableLimit                                                                                               
                          , system->GetLanguageModels()                                                                                
                          , system->GetWeightWordPenalty());                                                                           
-    assert(ret);                                                                                                                      
+    CHECK(ret);                                                                                                                      
     return pd;                                                                                                                       
 #else
     CHECK(false);
@@ -272,20 +287,22 @@ const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const
   return dict;
 }
 
+PhraseDictionary* PhraseDictionaryFeature::GetDictionary()
+{
+  PhraseDictionary* dict;
+  if (m_useThreadSafePhraseDictionary) {
+    dict = m_threadSafePhraseDictionary.get();
+  } else {
+    dict = m_threadUnsafePhraseDictionary.get();
+  }
+  CHECK(dict);
+  return dict;
+}
 
 
 PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 
-
-std::string PhraseDictionaryFeature::GetScoreProducerDescription(unsigned idx) const
-{
-  if (idx < GetNumInputScores()){
-    return "InputScore";
-  }else{
-    return "PhraseModel";
-  }
-}
 
 std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned idx) const
 {
@@ -296,10 +313,6 @@ std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned id
   }
 }
 
-size_t PhraseDictionaryFeature::GetNumScoreComponents() const
-{
-  return m_numScoreComponent;
-}
 
 size_t PhraseDictionaryFeature::GetNumInputScores() const
 {
@@ -314,6 +327,11 @@ bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const
 const PhraseDictionaryFeature* PhraseDictionary::GetFeature() const
 {
   return m_feature;
+}
+
+size_t PhraseDictionaryFeature::GetDictIndex() const 
+{
+  return m_dictIndex;
 }
 
 }

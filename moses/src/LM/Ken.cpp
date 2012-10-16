@@ -62,9 +62,9 @@ struct KenLMState : public FFState {
  */
 template <class Model> class LanguageModelKen : public LanguageModel {
   public:
-    LanguageModelKen(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy);
+    LanguageModelKen(const std::string &file, FactorType factorType, bool lazy);
 
-    LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const;
+    LanguageModel *Duplicate() const;
 
     bool Useable(const Phrase &phrase) const {
       return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
@@ -93,7 +93,7 @@ template <class Model> class LanguageModelKen : public LanguageModel {
     }
 
   private:
-    LanguageModelKen(ScoreIndexManager &manager, const LanguageModelKen<Model> &copy_from);
+    LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
     lm::WordIndex TranslateID(const Word &word) const {
       std::size_t factor = word.GetFactor(m_factorType)->GetId();
@@ -143,7 +143,7 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy) : m_factorType(factorType) {
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &file, FactorType factorType, bool lazy) : m_factorType(factorType) {
   lm::ngram::Config config;
   IFVERBOSE(1) {
     config.messages = &std::cerr;
@@ -158,20 +158,18 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   m_ngram.reset(new Model(file.c_str(), config));
 
   m_beginSentenceFactor = collection.AddFactor(BOS_);
-  Init(manager);
 }
 
-template <class Model> LanguageModel *LanguageModelKen<Model>::Duplicate(ScoreIndexManager &manager) const {
-  return new LanguageModelKen<Model>(manager, *this);
+template <class Model> LanguageModel *LanguageModelKen<Model>::Duplicate() const {
+  return new LanguageModelKen<Model>(*this);
 }
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(ScoreIndexManager &manager, const LanguageModelKen<Model> &copy_from) :
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from) :
     m_ngram(copy_from.m_ngram),
     // TODO: don't copy this.  
     m_lmIdLookup(copy_from.m_lmIdLookup),
     m_factorType(copy_from.m_factorType),
     m_beginSentenceFactor(copy_from.m_beginSentenceFactor) {
-  Init(manager);
 }
 
 template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
@@ -300,7 +298,9 @@ class LanguageModelChartStateKenLM : public FFState {
 template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap = hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+  const TargetPhrase &target = hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+        target.GetAlignmentInfo().GetNonTermIndexMap();
 
   const size_t size = hypo.GetCurrTargetPhrase().GetSize();
   size_t phrasePos = 0;
@@ -337,29 +337,29 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
 } // namespace
 
-LanguageModel *ConstructKenLM(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy) {
+LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy) {
   try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
       switch(model_type) {
         case lm::ngram::PROBING:
-          return new LanguageModelKen<lm::ngram::ProbingModel>(file, manager, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::ProbingModel>(file,  factorType, lazy);
         case lm::ngram::REST_PROBING:
-          return new LanguageModelKen<lm::ngram::RestProbingModel>(file, manager, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::RestProbingModel>(file, factorType, lazy);
         case lm::ngram::TRIE:
-          return new LanguageModelKen<lm::ngram::TrieModel>(file, manager, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::TrieModel>(file, factorType, lazy);
         case lm::ngram::QUANT_TRIE:
-          return new LanguageModelKen<lm::ngram::QuantTrieModel>(file, manager, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::QuantTrieModel>(file, factorType, lazy);
         case lm::ngram::ARRAY_TRIE:
-          return new LanguageModelKen<lm::ngram::ArrayTrieModel>(file, manager, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::ArrayTrieModel>(file, factorType, lazy);
         case lm::ngram::QUANT_ARRAY_TRIE:
-          return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(file, manager, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(file, factorType, lazy);
         default:
           std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
           abort();
       }
     } else {
-      return new LanguageModelKen<lm::ngram::ProbingModel>(file, manager, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::ProbingModel>(file, factorType, lazy);
     }
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;

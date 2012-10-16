@@ -50,11 +50,11 @@
 #
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
-#
 # --notrace                      compiles without TRACE macros
 #
 # --enable-boost-pool            uses Boost pools for the memory SCFG table
 #
+# --enable-mpi                   switch on mpi
 # --without-libsegfault          does not link with libSegFault
 #
 # --max-kenlm-order              maximum ngram order that kenlm can process (default 6)
@@ -76,6 +76,17 @@ external-lib z ;
 if [ option.get "with-tcmalloc" : : "yes" ] {
   external-lib tcmalloc ;
   requirements += <library>tcmalloc ;
+}
+
+if [ option.get "enable-mpi" : : "yes" ] {
+  import mpi ;
+  using mpi ;
+  external-lib boost_mpi ;
+  external-lib boost_serialization ;
+  requirements += <define>MPI_ENABLE ;
+  requirements += <library>mpi ;
+  requirements += <library>boost_mpi ;
+  requirements += <library>boost_serialization ;
 }
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
@@ -101,9 +112,9 @@ project : requirements
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects lm util search mert moses-cmd/src moses-chart-cmd/src scripts regression-testing contrib/relent-filter/src ;
+build-projects lm util search moses/src mert moses-cmd/src moses-chart-cmd/src mira scripts regression-testing  ;
 
-alias programs : lm//programs moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor contrib/relent-filter/src//calcDivergence ;
+alias programs : lm//programs moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor mira//mira  ;
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;

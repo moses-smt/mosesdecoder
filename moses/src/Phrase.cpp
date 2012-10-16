@@ -99,6 +99,20 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
   return retPhrase;
 }
 
+Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType) const
+{
+	Phrase retPhrase(wordsRange.GetNumWordsCovered());
+
+	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
+	{
+		const Factor* f = GetFactor(currPos, factorType);
+		Word &word = retPhrase.AddWord();
+		word.SetFactor(factorType, f);
+	}
+
+	return retPhrase;
+}
+
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
 {
   stringstream strme;

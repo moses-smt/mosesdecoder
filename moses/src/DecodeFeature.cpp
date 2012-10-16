@@ -30,10 +30,10 @@ using namespace std;
 namespace Moses
 {
 
-DecodeFeature::DecodeFeature(const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
+DecodeFeature::DecodeFeature(const std::string& description, size_t numScoreComponents, const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
+  StatelessFeatureFunction(description,numScoreComponents),
   m_input(input), m_output(output)
 {
-
   m_inputFactors = FactorMask(input);
   m_outputFactors = FactorMask(output);
   VERBOSE(2,"DecodeFeature: input=" << m_inputFactors << "  output=" << m_outputFactors << std::endl);

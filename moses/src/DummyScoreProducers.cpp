@@ -38,20 +38,6 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
            NOT_FOUND);
 }
 
-DistortionScoreProducer::DistortionScoreProducer(ScoreIndexManager &scoreIndexManager)
-{
-  scoreIndexManager.AddScoreProducer(this);
-}
-
-size_t DistortionScoreProducer::GetNumScoreComponents() const
-{
-  return 1;
-}
-
-std::string DistortionScoreProducer::GetScoreProducerDescription(unsigned) const
-{
-  return "Distortion";
-}
 
 std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) const
 {
@@ -102,10 +88,6 @@ float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
   }
 }
 
-size_t DistortionScoreProducer::GetNumInputScores() const
-{
-  return 0;
-}
 
 FFState* DistortionScoreProducer::Evaluate(
   const Hypothesis& hypo,
@@ -126,49 +108,17 @@ FFState* DistortionScoreProducer::Evaluate(
 }
 
 
-WordPenaltyProducer::WordPenaltyProducer(ScoreIndexManager &scoreIndexManager)
-{
-  scoreIndexManager.AddScoreProducer(this);
-}
-
-size_t WordPenaltyProducer::GetNumScoreComponents() const
-{
-  return 1;
-}
-
-std::string WordPenaltyProducer::GetScoreProducerDescription(unsigned) const
-{
-  return "WordPenalty";
-}
-
 std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
 {
   return "w";
 }
 
-size_t WordPenaltyProducer::GetNumInputScores() const
+void WordPenaltyProducer::Evaluate(
+    const PhraseBasedFeatureContext& context,
+    ScoreComponentCollection* out) const
 {
-  return 0;
-}
-
-void WordPenaltyProducer::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
-{
+	const TargetPhrase& tp = context.GetTargetPhrase();
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
-}
-
-UnknownWordPenaltyProducer::UnknownWordPenaltyProducer(ScoreIndexManager &scoreIndexManager)
-{
-  scoreIndexManager.AddScoreProducer(this);
-}
-
-size_t UnknownWordPenaltyProducer::GetNumScoreComponents() const
-{
-  return 1;
-}
-
-std::string UnknownWordPenaltyProducer::GetScoreProducerDescription(unsigned) const
-{
-  return "!UnknownWordPenalty";
 }
 
 std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
@@ -176,14 +126,15 @@ std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned
   return "u";
 }
 
-size_t UnknownWordPenaltyProducer::GetNumInputScores() const
-{
-  return 0;
-}
 
 bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
 {
   return true;
+}
+
+std::string MetaFeatureProducer::GetScoreProducerWeightShortName(unsigned) const
+{
+  return "m"+m_shortName;
 }
 
 }

@@ -35,7 +35,6 @@ namespace Incremental { class Manager; }
 class FactorCollection;
 class Factor;
 class Phrase;
-class ScoreIndexManager;
 
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction {
@@ -43,7 +42,6 @@ protected:
   LanguageModel();
 
   // This can't be in the constructor for virual function dispatch reasons
-  void Init(ScoreIndexManager &scoreIndexManager);
 
   bool m_enableOOVFeature;
   
@@ -51,10 +49,7 @@ public:
   virtual ~LanguageModel();
 
   // Make another feature without copying the underlying model data.  
-  virtual LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const = 0;
-
-  //! see ScoreProducer.h
-  std::size_t GetNumScoreComponents() const;
+  virtual LanguageModel *Duplicate() const = 0;
 
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
