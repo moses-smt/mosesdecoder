@@ -96,6 +96,11 @@ public:
 	: m_scores(rhs.m_scores)
 	{}
 
+  ScoreComponentCollection& operator=( const ScoreComponentCollection& rhs ) {
+    m_scores = rhs.m_scores;
+    return *this;
+  }
+
   /**
     * Register a ScoreProducer with a fixed number of scores, so that it can 
     * be allocated space in the dense part of the feature vector.

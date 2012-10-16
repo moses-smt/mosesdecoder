@@ -125,6 +125,12 @@ namespace Moses {
     /** Empty feature vector */
     FVector(size_t coreFeatures = 0);
 
+    FVector& operator=( const FVector& rhs ) {
+      m_features = rhs.m_features;
+      m_coreFeatures = rhs.m_coreFeatures;
+      return *this;
+    }
+
     /* 
      * Change the number of core features
     **/
