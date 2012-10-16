@@ -176,14 +176,14 @@ def main(src_lang, trg_lang, src_filename, trg_filename):
   # Evaluate the pipeline
   #
   logger.info("Evaluating pipeline with input [%s]..." % value)
-  future_value = eval_pipeline(executor, pipeline, value, component_config)
+  new_value = eval_pipeline(executor, pipeline, value, component_config)
 
   #
   # Wait for all components to finish
   #
   executor.shutdown(True)
   
-  logger.info("Pipeline evaluated to %s" % future_value.result())
+  logger.info("Pipeline evaluated to %s" % new_value)
 
 
 if __name__ == '__main__':
