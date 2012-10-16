@@ -33,10 +33,9 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   }
 
   std::vector<lm::WordIndex> words;
-  for (TargetPhraseCollection::const_iterator i(targets.begin()); i != targets.end(); ++i) {
+  for (TargetPhraseCollection::const_iterator iter(targets.begin()); iter != targets.end(); ++iter) {
     words.clear();
-    const TargetPhrase &phrase = **i;
-    const AlignmentInfo::NonTermIndexMap &align = phrase.GetAlignmentInfo().GetNonTermIndexMap();
+    const TargetPhrase &phrase = **iter;
     search::PartialEdge &edge = edges_.InitializeEdge();
 
     size_t i = 0;
@@ -54,7 +53,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
     for (; i < phrase.GetSize(); ++i) {
       const Word &word = phrase.GetWord(i);
       if (word.IsNonTerminal()) {
-        edge.nt[nt++] = vertices[align[i]];
+        edge.nt[nt++] = vertices[phrase.GetNonTermIndex(i)];
         words.push_back(search::kNonTerminal);
       } else {
         words.push_back(Convert(word));

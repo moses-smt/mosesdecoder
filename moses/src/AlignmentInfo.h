@@ -21,7 +21,6 @@
 
 #include <ostream>
 #include <set>
-#include <map>
 #include <vector>
 
 namespace Moses
@@ -34,7 +33,7 @@ class AlignmentInfoCollection;
  */
 class AlignmentInfo
 {
-  typedef std::multimap<size_t,size_t> CollType;
+    typedef std::set< std::pair<size_t,size_t> > CollType;
 
   friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
