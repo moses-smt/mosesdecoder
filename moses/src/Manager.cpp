@@ -638,7 +638,7 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
   // special case: initial hypothesis
   if ( searchNode.hypo->GetId() == 0 ) {
     outputSearchGraphStream << " hyp=0 stack=0";
-    if (!extendedFormat) {
+    if (extendedFormat) {
       outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore;
     }
     outputSearchGraphStream << endl;
@@ -667,33 +667,31 @@ void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
   }
 
   // output in extended format
+//  if (searchNode.recombinationHypo != NULL)
+//    outputSearchGraphStream << " hyp=" << searchNode.recombinationHypo->GetId();
+//  else
+  outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
+
+  outputSearchGraphStream << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
+                          << " back=" << prevHypo->GetId()
+                          << " score=" << searchNode.hypo->GetScore()
+                          << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
+
   if (searchNode.recombinationHypo != NULL)
-    outputSearchGraphStream << " hyp=" << searchNode.recombinationHypo->GetId();
-  else
-    outputSearchGraphStream << " hyp=" << searchNode.hypo->GetId();
+    outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
 
-    outputSearchGraphStream << " stack=" << searchNode.hypo->GetWordsBitmap().GetNumWordsCovered()
-                            << " back=" << prevHypo->GetId()
-                            << " score=" << searchNode.hypo->GetScore()
-                            << " transition=" << (searchNode.hypo->GetScore() - prevHypo->GetScore());
-
-    if (searchNode.recombinationHypo != NULL)
-      outputSearchGraphStream << " recombined=" << searchNode.recombinationHypo->GetId();
-
-    outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
+  outputSearchGraphStream << " forward=" << searchNode.forward	<< " fscore=" << searchNode.fscore
                             << " covered=" << searchNode.hypo->GetCurrSourceWordsRange().GetStartPos()
                             << "-" << searchNode.hypo->GetCurrSourceWordsRange().GetEndPos();
 
   // Modified so that -osgx is a superset of -osg (GST Oct 2011)
   ScoreComponentCollection scoreBreakdown = searchNode.hypo->GetScoreBreakdown();
   scoreBreakdown.MinusEquals( prevHypo->GetScoreBreakdown() );
-  outputSearchGraphStream << " scores=[ ";
-  StaticData::Instance().GetScoreIndexManager().PrintLabeledScores( outputSearchGraphStream, scoreBreakdown );
-  outputSearchGraphStream << " ]";
-                            
+  //outputSearchGraphStream << " scores = [ " << StaticData::Instance().GetAllWeights();
+  outputSearchGraphStream << " scores=\"" << scoreBreakdown << "\"";                            
 
-  outputSearchGraphStream << " out=" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
-		  searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
+  outputSearchGraphStream << " out=\"" << searchNode.hypo->GetSourcePhraseStringRep() << "|" <<
+    searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\"" << endl;
 //  outputSearchGraphStream << " out=" << searchNode.hypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << endl;
 }
 

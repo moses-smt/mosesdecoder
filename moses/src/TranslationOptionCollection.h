@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_TranslationOptionCollection_h
 
 #include <list>
+#include <boost/unordered_map.hpp>
 #include "TypeDef.h"
 #include "TranslationOption.h"
 #include "TranslationOptionList.h"
@@ -69,6 +70,7 @@ protected:
   const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   std::vector<Phrase*> m_unksrcs;
+  boost::unordered_map<TranslationOption,ScoreComponentCollection> m_precalculatedScores;
 
 
   TranslationOptionCollection(const TranslationSystem* system, InputType const& src, size_t maxNoTransOptPerCoverage,
@@ -100,6 +102,9 @@ protected:
     
 
   void CacheLexReordering();
+
+  //! Pre-calculate most stateless feature values
+  void PreCalculateScores();
 
 public:
   virtual ~TranslationOptionCollection();
@@ -142,6 +147,10 @@ public:
   const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
+
+  //! Access these pre-calculated values
+  void InsertPreCalculatedScores(const TranslationOption& translationOption,
+      ScoreComponentCollection* scoreBreakdown) const;
 
   TO_STRING();
 };

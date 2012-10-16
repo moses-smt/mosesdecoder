@@ -18,6 +18,8 @@ const int kBleuNgramOrder = 4;
 class NgramCounts;
 class Reference;  
 
+using namespace std;
+
 /**
  * Bleu scoring
  */
@@ -32,6 +34,9 @@ public:
 
   explicit BleuScorer(const std::string& config = "");
   ~BleuScorer();
+  
+  static vector<float> ScoreNbestList(string scoreFile, string featureFile);
+  static float sentenceLevelBleuPlusOne(const vector<float>& stats);
 
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);

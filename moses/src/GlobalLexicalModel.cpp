@@ -2,6 +2,7 @@
 #include "GlobalLexicalModel.h"
 #include "StaticData.h"
 #include "InputFileStream.h"
+#include "TranslationOption.h"
 #include "UserMessage.h"
 
 using namespace std;
@@ -9,17 +10,11 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
-                                       const float weight,
                                        const vector< FactorType >& inFactors,
                                        const vector< FactorType >& outFactors)
+  : StatelessFeatureFunction("GlobalLexicalModel",1)
 {
   std::cerr << "Creating global lexical model...\n";
-
-  // register as score producer
-  const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-  std::vector< float > weights;
-  weights.push_back( weight );
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 
   // load model
   LoadData( filePath, inFactors, outFactors );
@@ -163,9 +158,11 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
   return score;
 }
 
-void GlobalLexicalModel::Evaluate(const TargetPhrase& targetPhrase, ScoreComponentCollection* accumulator) const
+  void GlobalLexicalModel::Evaluate
+               (const PhraseBasedFeatureContext& context,
+  							ScoreComponentCollection* accumulator) const
 {
-  accumulator->PlusEquals( this, GetFromCacheOrScorePhrase( targetPhrase ) );
+  accumulator->PlusEquals( this,  
+      GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
-
 }

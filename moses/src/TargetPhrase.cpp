@@ -29,12 +29,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LM/Base.h"
 #include "StaticData.h"
-#include "ScoreIndexManager.h"
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
 #include "DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
+#include <boost/algorithm/string.hpp>
+
 
 using namespace std;
 
@@ -54,7 +55,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
 TargetPhrase::TargetPhrase()
   :Phrase(ARRAY_SIZE_INCR)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  ,m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
@@ -64,10 +65,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-{
-}
-
-TargetPhrase::~TargetPhrase()
 {
 }
 
@@ -90,32 +87,23 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::SetScore(float score)
 {
-  //we use an existing score producer to figure out information for score setting (number of scores and weights)
-  //TODO: is this a good idea?
-  // Assume the default system.
-  const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-  const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
+	//we use an existing score producer to figure out information for score setting (number of scores and weights)
+	//TODO: is this a good idea?
+    // Assume the default system.
+    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+	const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
+	
+	vector<float> weights = StaticData::Instance().GetWeights(prod);
 
-  //get the weight list
-  unsigned int id = prod->GetScoreBookkeepingID();
+	
+	//find out how many items are in the score vector for this producer	
+	size_t numScores = prod->GetNumScoreComponents();
 
-  const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
-
-  size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
-  size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
-
-  vector<float> weights;
-
-  std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
-
-  //find out how many items are in the score vector for this producer
-  size_t numScores = prod->GetNumScoreComponents();
-
-  //divide up the score among all of the score vectors
-  vector <float> scoreVector(numScores,score/numScores);
-
-  //Now we have what we need to call the full SetScore method
-  SetScore(prod,scoreVector,weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
+	//divide up the score among all of the score vectors
+	vector <float> scoreVector(numScores,score/numScores);
+	
+	//Now we have what we need to call the full SetScore method
+	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, system.GetWeightWordPenalty(), system.GetLanguageModels());
 }
 
 /**
@@ -124,28 +112,23 @@ void TargetPhrase::SetScore(float score)
  */
 void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &scoreVector)
 {
-  //we use an existing score producer to figure out information for score setting (number of scores and weights)
+	//we use an existing score producer to figure out information for score setting (number of scores and weights)
 
-  const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
+    const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
 
-  //get the weight list
-  unsigned int id = prod->GetScoreBookkeepingID();
-  const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
-  size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
-  size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
-  vector<float> weights;
-  std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
+	vector<float> weights = StaticData::Instance().GetWeights(prod);
+	
+	//expand the input weight vector
+	CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
+	Scores sizedScoreVector = scoreVector;
+	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-  //expand the input weight vector
-  CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
-  Scores sizedScoreVector = scoreVector;
-  sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
-
-  SetScore(prod,sizedScoreVector,weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
+	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
                             const Scores &scoreVector,
+                            const ScoreComponentCollection &sparseScoreVector,
                             const vector<float> &weightT,
                             float weightWP, const LMList &languageModels)
 {
@@ -154,6 +137,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
 
   float transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
+  m_scoreBreakdown.PlusEquals(sparseScoreVector);
 
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;
@@ -201,9 +185,8 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
                                  ,const LMList &languageModels
                                  ,const WordPenaltyProducer* wpProducer)
 {
-
   CHECK(weightT.size() == scoreVector.size());
-
+  
   // calc average score if non-best
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
@@ -267,7 +250,6 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
      addition to the usual phrase translation scaling factors) the input
      weight factor as last element
   */
-
 }
 
 void TargetPhrase::ResetScore()
@@ -324,11 +306,41 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
   SetAlignmentInfo(alignmentInfo);
 }
 
-void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+
+
+void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase)
 {
-  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+  std::vector<std::string> alignPoints;
+  boost::split(alignPoints, alignString, boost::is_any_of("\t "));
+  int indicator[alignPoints.size()];
+  int index = 0;
+	
+  set<pair<size_t,size_t> > alignmentInfo;
+  for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
+    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
+    MosesShouldUseExceptions(dash);
+    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(dash);
+    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(!dash);
+
+    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    indicator[index++] = sourcePhrase.GetWord(sourcePos).IsNonTerminal() ? 1: 0;
+  }
+
+  SetAlignmentInfo(alignmentInfo, indicator);
 }
 
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+{
+    m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+}
+
+
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo, int* indicator)
+{
+  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo, indicator);
+}
 
 TO_STRING_BODY(TargetPhrase);
 
@@ -338,6 +350,36 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   os << ": c=" << tp.m_fullScore;
 
   return os;
+}
+
+void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, std::vector<float> &scoreVector) {
+  std::vector<std::string> tokens;
+  boost::split(tokens, ruleCountString, boost::is_any_of("\t "));
+  
+  if (tokens.size() == 2) {
+    // TODO: if no third column is provided, do we have to take smoothing into account (consolidate.cpp)? 
+    // infer rule counts from target counts
+    float targetCount = 0, sourceCount = 0;
+    float p_f_given_e = 0, p_e_given_f = 0;
+    p_f_given_e = scoreVector[0];
+    if (scoreVector.size() >= 5) {
+      p_f_given_e = scoreVector[0];
+      p_e_given_f = scoreVector[2];
+    }
+    else {
+      if (scoreVector.size() >= 1 ) p_f_given_e = scoreVector[0];
+//      std::cerr << "Warning: possibly wrong format of phrase translation scores, number of scores: " << scoreVector.size() << endl;
+    }
+    
+    targetCount = Scan<float>(tokens[0]);
+    sourceCount = Scan<float>(tokens[1]);
+    float ruleCount = p_f_given_e * targetCount;
+    //float ruleCount2 = p_e_given_f * sourceCount; // could use this to double-check the counts
+    m_ruleCount = floor(ruleCount + 0.5);
+  }
+  else if (tokens.size() == 3) {
+    m_ruleCount = Scan<float>(tokens[2]);
+  }
 }
 
 }

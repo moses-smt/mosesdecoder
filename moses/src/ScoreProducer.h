@@ -3,54 +3,48 @@
 #ifndef moses_ScoreProducer_h
 #define moses_ScoreProducer_h
 
+#include <set>
 #include <string>
-#include <limits>
+#include <vector>
+
+#include "FeatureVector.h"
 
 namespace Moses
 {
 
-class Hypothesis;
-class ScoreComponentCollection;
-class ScoreIndexManager;
-class FFState;
-
-/** to keep track of the various things that can produce a score,
- * we use this evil implementation-inheritance to give them each
- * a unique, sequential (read: good for vector indices) ID
- *
+ /*
  * @note do not confuse this with a producer/consumer pattern.
  * this is not a producer in that sense.
  */
 class ScoreProducer
 {
 private:
-  static unsigned int s_globalScoreBookkeepingIdCounter;
-  unsigned int m_scoreBookkeepingId;
-
-  ScoreProducer(const ScoreProducer&);  // don't implement
-
-#define UNASSIGNED std::numeric_limits<unsigned int>::max()
-
+  std::string m_description;
+  bool m_reportSparseFeatures;
+  size_t m_numScoreComponents;
+  //In case there's multiple producers with the same description
+  static std::multiset<std::string> description_counts;
+	ScoreProducer(const ScoreProducer&);  // don't implement
+	
 protected:
-  // it would be nice to force registration here, but some Producer objects
-  // are constructed before they know how many scores they have
-  ScoreProducer();
-  virtual ~ScoreProducer();
+	ScoreProducer(const std::string& description, size_t numScoreComponents);
+	virtual ~ScoreProducer();
 
 public:
-  //! contiguous id
-  unsigned int GetScoreBookkeepingID() const {
-    return m_scoreBookkeepingId;
-  }
-  void CreateScoreBookkeepingID()	{
-    m_scoreBookkeepingId = s_globalScoreBookkeepingIdCounter++;
-  }
-  //! returns the number of scores that a subclass produces.
-  //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
-  virtual size_t GetNumScoreComponents() const = 0;
 
-  //! returns a string description of this producer
-  virtual std::string GetScoreProducerDescription(unsigned idx=0) const = 0;
+  static const size_t unlimited;
+
+  static void ResetDescriptionCounts() {
+    description_counts.clear();
+  }
+
+	//! returns the number of scores that a subclass produces.
+	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
+  //! sparse features returned unlimited
+	size_t GetNumScoreComponents() const {return m_numScoreComponents;}
+
+	//! returns a string description of this producer
+	const std::string& GetScoreProducerDescription() const {return m_description;}
 
   //! returns the weight parameter name of this producer (used in n-best list)
   virtual std::string GetScoreProducerWeightShortName(unsigned idx=0) const = 0;
@@ -60,8 +54,12 @@ public:
     return 0;
   };
 
-  virtual bool IsStateless() const = 0;
+	virtual bool IsStateless() const = 0;
 
+  void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }
+  bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; } 
+
+  virtual float GetSparseProducerWeight() const { return 1; }
 };
 
 

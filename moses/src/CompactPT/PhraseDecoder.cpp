@@ -292,7 +292,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       tpv->push_back(TargetPhrase(Output));
       targetPhrase = &tpv->back();
       
-      targetPhrase->SetSourcePhrase(&sourcePhrase);
+      targetPhrase->SetSourcePhrase(sourcePhrase);
       alignment.clear();
       scores.clear();
         
@@ -431,7 +431,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
-        targetPhrase->SetScore(m_feature, scores, *m_weight, m_weightWP, *m_languageModels);
+        targetPhrase->SetScore(m_feature, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
         
         if(m_containsAlignmentInfo)
           state = Alignment;

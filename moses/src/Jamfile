@@ -21,9 +21,14 @@ if $(have-clock[2]) = 0 {
 
 lib moses_internal :
 #All cpp files except those listed
-[ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp ]
+[ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp *Test.cpp Mock*.cpp ]
 synlm ThreadPool headers rt ;
 
 lib moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser CompactPT//CompactPT LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match Incremental//Incremental headers ../..//z ../../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
+
+import testing ;
+
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp ]  moses moses_internal CYKPlusParser//CYKPlusParser CompactPT//CompactPT LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match headers ../..//z ../../OnDiskPt//OnDiskPt ../..//boost_unit_test_framework ;
+

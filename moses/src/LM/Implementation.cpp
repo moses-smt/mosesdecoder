@@ -231,8 +231,8 @@ private:
   {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-      target.GetAlignmentInfo().GetNonTermIndexMap();
-
+          target.GetAlignmentInfo().GetNonTermIndexMap();
+    
     // loop over the rule that is being applied
     for (size_t pos = 0; pos < target.GetSize(); ++pos) {
       const Word &word = target.GetWord(pos);
@@ -283,10 +283,11 @@ private:
     }
     // construct suffix analogous to prefix
     else {
+      const TargetPhrase& target = hypo.GetCurrTargetPhrase();
       const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-        hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
-      for (int pos = (int) hypo.GetCurrTargetPhrase().GetSize() - 1; pos >= 0 ; --pos) {
-        const Word &word = hypo.GetCurrTargetPhrase().GetWord(pos);
+            target.GetAlignmentInfo().GetNonTermIndexMap();
+      for (int pos = (int) target.GetSize() - 1; pos >= 0 ; --pos) {
+        const Word &word = target.GetWord(pos);
 
         if (word.IsNonTerminal()) {
           size_t nonTermInd = nonTermIndexMap[pos];
@@ -388,8 +389,9 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   float finalizedScore = 0.0; // finalized, has sufficient context
 
   // get index map for underlying hypotheses
+  const TargetPhrase &target = hypo.GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+      hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
   // loop over rule
   for (size_t phrasePos = 0, wordPos = 0;

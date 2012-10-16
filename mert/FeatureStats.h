@@ -31,11 +31,13 @@ public:
   FeatureStatsType get(std::size_t id) const;
   void set(const std::string& name, FeatureStatsType value);
   void clear();
+  void load(const std::string& file);
   std::size_t size() const { return m_fvector.size(); }
    
   void write(std::ostream& out, const std::string& sep = " ") const;
 
   SparseVector& operator-=(const SparseVector& rhs);
+  FeatureStatsType inner_product(const SparseVector& rhs) const;
 
   // Added by cherryc
   std::vector<std::size_t> feats() const;
@@ -52,6 +54,7 @@ private:
 };
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs);
+FeatureStatsType inner_product(const SparseVector& lhs, const SparseVector& rhs);
 
 class FeatureStats
 {
@@ -66,7 +69,6 @@ private:
 public:
   FeatureStats();
   explicit FeatureStats(const std::size_t size);
-  explicit FeatureStats(std::string &theString);
 
   ~FeatureStats();
 
@@ -97,7 +99,7 @@ public:
 
   const SparseVector& getSparse() const { return m_map; }
 
-  void set(std::string &theString);
+  void set(std::string &theString, const SparseVector& sparseWeights);
 
   inline std::size_t bytes() const { return GetArraySizeWithBytes(); }
 
@@ -114,8 +116,7 @@ public:
   void savebin(std::ostream* os);
   void savetxt();
 
-  void loadtxt(const std::string &file);
-  void loadtxt(std::istream* is);
+  void loadtxt(std::istream* is, const SparseVector& sparseWeights);
   void loadbin(std::istream* is);
 
   /**

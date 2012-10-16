@@ -71,7 +71,8 @@ class RuleTableLoaderCompact : public RuleTableLoader
                          std::vector<size_t> &);
 
   void LoadAlignmentSection(LineReader &,
-                            std::vector<const AlignmentInfo *> &);
+                            std::vector<const AlignmentInfo *> &,
+                            std::vector<Phrase> &);
 
   bool LoadRuleSection(LineReader &,
                        const std::vector<Word> &,

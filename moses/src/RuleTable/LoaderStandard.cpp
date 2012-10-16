@@ -189,8 +189,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
     StringPiece targetPhraseString(*++pipes);
     StringPiece scoreString(*++pipes);
     StringPiece alignString(*++pipes);
+    StringPiece ruleCountString("1 1");
+    if (++pipes) {
+      ruleCountString = StringPiece(*pipes);
+    }
     
-    if (++pipes && ++pipes) {
+    if (++pipes) {
       stringstream strme;
       strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
       UserMessage::Add(strme.str());
@@ -230,12 +234,15 @@ bool RuleTableLoaderStandard::Load(FormatType format
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase(Output);
     targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
+    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // rest of target phrase
-    targetPhrase->SetAlignmentInfo(alignString);
+    targetPhrase->SetAlignmentInfo(alignString, sourcePhrase);
     targetPhrase->SetTargetLHS(targetLHS);
+    
+    targetPhrase->SetRuleCount(ruleCountString, scoreVector);
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
-
+    
     // component score, for n-best output
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);

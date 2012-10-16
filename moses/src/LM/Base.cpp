@@ -33,36 +33,26 @@ using namespace std;
 
 namespace Moses {
 
-LanguageModel::LanguageModel() {
+LanguageModel::LanguageModel() : 
+  StatefulFeatureFunction("LM", StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1 ) {
   m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
 }
 
-void LanguageModel::Init(ScoreIndexManager &scoreIndexManager) {
-  scoreIndexManager.AddScoreProducer(this);
-}
 
 LanguageModel::~LanguageModel() {}
 
-// don't inline virtual funcs...
-size_t LanguageModel::GetNumScoreComponents() const {
-  if (m_enableOOVFeature) {
-    return 2;
-  } else {
-    return 1;
-  }
-}
-
 float LanguageModel::GetWeight() const {
-  size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
-                   GetBeginIndex(GetScoreBookkeepingID());
-  return StaticData::Instance().GetAllWeights()[lmIndex];
+  //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[0];
+  return StaticData::Instance().GetWeights(this)[0];
 }
 
 float LanguageModel::GetOOVWeight() const {
-  if (!m_enableOOVFeature) return 0;
-  size_t lmIndex = StaticData::Instance().GetScoreIndexManager().
-                   GetBeginIndex(GetScoreBookkeepingID());
-  return StaticData::Instance().GetAllWeights()[lmIndex+1];
+  if (m_enableOOVFeature) {
+    //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[1];
+	return StaticData::Instance().GetWeights(this)[1];
+  } else {
+    return 0;
+  }
 }
 
 void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {

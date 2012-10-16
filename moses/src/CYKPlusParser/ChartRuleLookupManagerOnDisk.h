@@ -44,7 +44,6 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
                                const WordPenaltyProducer *wpProducer,
                                const std::vector<FactorType> &inputFactorsVec,
                                const std::vector<FactorType> &outputFactorsVec,
-                               const std::vector<float> &weight,
                                const std::string &filePath);
 
   ~ChartRuleLookupManagerOnDisk();
@@ -59,7 +58,6 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
   const WordPenaltyProducer *m_wpProducer;
   const std::vector<FactorType> &m_inputFactorsVec;
   const std::vector<FactorType> &m_outputFactorsVec;
-  const std::vector<float> &m_weight;
   const std::string &m_filePath;
   std::vector<DottedRuleStackOnDisk*> m_expandableDottedRuleListVec;
   std::map<UINT64, const TargetPhraseCollection*> m_cache;
