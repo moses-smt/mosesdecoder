@@ -106,7 +106,7 @@ void BleuScoreFeature::LoadReferences(const std::vector< std::vector< std::strin
 			const string& ref = refs[file_id][sent_id];
 			vector<string> refTokens  = Tokenize(ref);
 			if (file_id == 0)
-				m_refs[sent_id] = pair<vector<size_t>,NGrams>();
+				m_refs[sent_id] = RefValue(); 
 			pair<vector<size_t>,NGrams>& ref_pair = m_refs[sent_id];
 			(ref_pair.first).push_back(refTokens.size());
 			for (size_t order = 1; order <= BleuScoreState::bleu_order; order++) {

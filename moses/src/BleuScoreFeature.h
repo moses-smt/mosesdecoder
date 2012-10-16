@@ -43,12 +43,23 @@ private:
 
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state);
 
+typedef boost::unordered_map< Phrase, size_t > NGrams;
+
+class RefValue : public  std::pair<std::vector<size_t>,NGrams>
+{
+public:
+  RefValue& operator=( const RefValue& rhs ) {
+    first = rhs.first;
+    second = rhs.second;
+    return *this;
+  }
+};
+
 
 class BleuScoreFeature : public StatefulFeatureFunction {
 public:
 
-  typedef boost::unordered_map< Phrase, size_t > NGrams;
-  typedef boost::unordered_map<size_t, std::pair<std::vector<size_t>,NGrams> > RefCounts;
+  typedef boost::unordered_map<size_t, RefValue > RefCounts;
   typedef boost::unordered_map<size_t, NGrams> Matches;
 
 	BleuScoreFeature():
