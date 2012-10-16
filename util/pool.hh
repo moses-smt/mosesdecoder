@@ -16,7 +16,7 @@ class Pool {
 
     ~Pool();
 
-    void *Allocate(size_t size) {
+    void *Allocate(std::size_t size) {
       void *ret = current_;
       current_ += size;
       if (current_ < current_end_) {
@@ -29,7 +29,7 @@ class Pool {
     void FreeAll();
 
   private:
-    void *More(size_t size);
+    void *More(std::size_t size);
 
     std::vector<void *> free_list_;
 
