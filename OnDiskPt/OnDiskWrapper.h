@@ -50,6 +50,8 @@ protected:
   bool LoadMisc();
 
 public:
+  static int VERSION_NUM = 5;
+
   OnDiskWrapper();
   ~OnDiskWrapper();
 
