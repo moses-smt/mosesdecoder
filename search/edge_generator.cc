@@ -16,14 +16,9 @@ EdgeGenerator::EdgeGenerator(PartialEdge root, Note note) : top_score_(root.GetS
 
 namespace {
 
-template <class Model> void FastScore(const Context<Model> &context, Arity victim, Arity before_idx, Arity incomplete, const PartialEdge previous, PartialEdge update) {
+template <class Model> void FastScore(const Context<Model> &context, Arity victim, Arity before_idx, Arity incomplete, const PartialVertex &previous_vertex, PartialEdge update) {
   lm::ngram::ChartState *between = update.Between();
-  const lm::ngram::ChartState *previous_between = previous.Between();
-  const search::PartialVertex &previous_vertex = previous.NT()[victim];
-
   lm::ngram::ChartState *before = &between[before_idx], *after = &between[before_idx + 1];
-  // copy [0, after] 
-  memcpy(between, previous_between, sizeof(lm::ngram::ChartState) * (before_idx + 2));
 
   float adjustment = 0.0;
   const lm::ngram::ChartState &previous_reveal = previous_vertex.State();
@@ -43,13 +38,12 @@ template <class Model> void FastScore(const Context<Model> &context, Arity victi
       adjustment += lm::ngram::Subsume(context.LanguageModel(), before->left, before->right, after->left, after->right, update_reveal.left.length);
     }
     before->right = after->right;
-    // Copy the others shifted one down, covering after.  
-    memcpy(after, previous_between + before_idx + 2, sizeof(lm::ngram::ChartState) * (incomplete + 1 - before_idx - 2));
-  } else {
-    // Copy [after + 1, incomplete]
-    memcpy(after + 1, previous_between + before_idx + 2, sizeof(lm::ngram::ChartState) * (incomplete + 1 - before_idx - 2));
+    // Shift the others shifted one down, covering after.  
+    for (lm::ngram::ChartState *cover = after; cover < between + incomplete; ++cover) {
+      *cover = *(cover + 1);
+    }
   }
-  update.SetScore(previous.GetScore() + adjustment * context.GetWeights().LM());
+  update.SetScore(update.GetScore() + adjustment * context.GetWeights().LM());
 }
 
 } // namespace
@@ -62,9 +56,10 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, P
 
   Arity victim = 0;
   Arity victim_completed;
-  Arity completed = 0;
+  Arity incomplete;
   // Select victim or return if complete.   
   {
+    Arity completed = 0;
     unsigned char lowest_length = 255;
     for (Arity i = 0; i != arity_; ++i) {
       if (top_nt[i].Complete()) {
@@ -80,30 +75,30 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, P
       top_score_ = generate_.empty() ? -kScoreInf : generate_.top().GetScore();
       return top;
     }
+    incomplete = arity_ - completed;
   }
 
-  float old_bound = top_nt[victim].Bound();
-  PartialEdge continuation = partial_edge_pool.Allocate(arity_);
-  PartialVertex *continuation_nt = continuation.NT();
-  // The alternate's score will change because the nt changes.
-  bool split = top_nt[victim].Split(continuation_nt[victim]);
-  // top is now the alternate.  
+  PartialVertex old_value(top_nt[victim]);
+  PartialVertex alternate_changed;
+  if (top_nt[victim].Split(alternate_changed)) {
+    PartialEdge alternate = partial_edge_pool.Allocate(arity_, incomplete + 1);
+    alternate.SetScore(top.GetScore() + alternate_changed.Bound() - old_value.Bound());
 
-  for (Arity i = 0; i < victim; ++i) continuation_nt[i] = top_nt[i];
-  for (Arity i = victim + 1; i < arity_; ++i) continuation_nt[i] = top_nt[i];
-  FastScore(context, victim, victim - victim_completed, arity_ - completed, top, continuation);
-  // TODO: dedupe?  
-  generate_.push(continuation);
+    PartialVertex *alternate_nt = alternate.NT();
+    for (Arity i = 0; i < victim; ++i) alternate_nt[i] = top_nt[i];
+    alternate_nt[victim] = alternate_changed;
+    for (Arity i = victim + 1; i < arity_; ++i) alternate_nt[i] = top_nt[i];
 
-  if (split) {
-    // We have an alternate.  
-    top.SetScore(top.GetScore() + top_nt[victim].Bound() - old_bound);
+    memcpy(alternate.Between(), top.Between(), sizeof(lm::ngram::ChartState) * (incomplete + 1));
+
     // TODO: dedupe?  
-    generate_.push(top);
-  } else {
-    // TODO should free top here. 
-    // Better would be changing Split.  
+    generate_.push(alternate);
   }
+
+  // top is now the continuation.
+  FastScore(context, victim, victim - victim_completed, incomplete, old_value, top);
+  // TODO: dedupe?  
+  generate_.push(top);
 
   top_score_ = generate_.top().GetScore();
   // Invalid indicates no new hypothesis generated.  

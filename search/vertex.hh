@@ -105,16 +105,20 @@ class PartialVertex {
       return index_ + 1 < back_->Size();
     }
 
-    // Split into continuation and alternative, rendering this the alternative.
-    bool Split(PartialVertex &continuation) {
+    // Split into continuation and alternative, rendering this the continuation.
+    bool Split(PartialVertex &alternative) {
       assert(!Complete());
-      continuation.back_ = &((*back_)[index_]);
-      continuation.index_ = 0;
+      bool ret;
       if (index_ + 1 < back_->Size()) {
-        ++index_;
-        return true;
+        alternative.index_ = index_ + 1;
+        alternative.back_ = back_;
+        ret = true;
+      } else {
+        ret = false;
       }
-      return false;
+      back_ = &((*back_)[index_]);
+      index_ = 0;
+      return ret;
     }
 
     const Final &End() const {
@@ -140,7 +144,6 @@ class Vertex {
         PartialVertex continuation;
         while (!top.Complete()) {
           top.Split(continuation);
-          top = continuation;
         }
         return &top.End();
       }

@@ -62,10 +62,14 @@ class PartialEdge {
 
 class PartialEdgePool {
   public:
-    PartialEdge Allocate(Arity arity) {
+    PartialEdge Allocate(Arity arity, Arity chart_states) {
       return PartialEdge(
-          pool_.Allocate(sizeof(Score) + sizeof(Arity) + arity * sizeof(PartialVertex) + (arity + 1) * sizeof(lm::ngram::ChartState)),
+          pool_.Allocate(sizeof(Score) + sizeof(Arity) + arity * sizeof(PartialVertex) + chart_states * sizeof(lm::ngram::ChartState)),
           arity);
+    }
+
+    PartialEdge Allocate(Arity arity) {
+      return Allocate(arity, arity + 1);
     }
 
   private:
