@@ -192,11 +192,11 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++) {
     StringPiece &annotatedWord = annotatedWordVector[phrasePos];
     bool isNonTerminal;
-    if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]") {
+    if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
       // non-term
       isNonTerminal = true;
 
-      size_t nextPos = annotatedWord.find("[", 1);
+      size_t nextPos = annotatedWord.find('[', 1);
       CHECK(nextPos != string::npos);
 
       if (direction == Input)
@@ -213,12 +213,11 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   }
 
   // lhs
-  StringPiece &annotatedWord = annotatedWordVector.back();
-  CHECK(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
-  annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
+  const StringPiece &annotatedWord = annotatedWordVector.back();
+  CHECK(annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']');
 
-  lhs.CreateFromString(direction, factorOrder, annotatedWord, true);
-  CHECK(lhs.IsNonTerminal());
+  lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+  assert(lhs.IsNonTerminal());
 }
 
 int Phrase::Compare(const Phrase &other) const
