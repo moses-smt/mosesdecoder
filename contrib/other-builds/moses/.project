@@ -102,6 +102,11 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/AlignmentInfoCollection.h</locationURI>
 		</link>
 		<link>
+			<name>AlignmentInfoTest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/AlignmentInfoTest.cpp</locationURI>
+		</link>
+		<link>
 			<name>BilingualDynSuffixArray.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/BilingualDynSuffixArray.cpp</locationURI>
@@ -120,6 +125,26 @@
 			<name>BitmapContainer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/BitmapContainer.h</locationURI>
+		</link>
+		<link>
+			<name>BleuScoreFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>BleuScoreFeature.cpp~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.cpp~</locationURI>
+		</link>
+		<link>
+			<name>BleuScoreFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.h</locationURI>
+		</link>
+		<link>
+			<name>BleuScoreFeature.h~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.h~</locationURI>
 		</link>
 		<link>
 			<name>CYKPlusParser</name>
@@ -185,6 +210,21 @@
 			<name>ChartManager.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/ChartManager.h</locationURI>
+		</link>
+		<link>
+			<name>ChartParser.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ChartParser.cpp</locationURI>
+		</link>
+		<link>
+			<name>ChartParser.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ChartParser.h</locationURI>
+		</link>
+		<link>
+			<name>ChartParserCallback.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ChartParserCallback.h</locationURI>
 		</link>
 		<link>
 			<name>ChartRuleLookupManager.h</name>
@@ -407,6 +447,26 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/FeatureFunction.h</locationURI>
 		</link>
 		<link>
+			<name>FeatureVector.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVector.cpp</locationURI>
+		</link>
+		<link>
+			<name>FeatureVector.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVector.h</locationURI>
+		</link>
+		<link>
+			<name>FeatureVector.h~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVector.h~</locationURI>
+		</link>
+		<link>
+			<name>FeatureVectorTest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVectorTest.cpp</locationURI>
+		</link>
+		<link>
 			<name>File.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/File.cpp</locationURI>
@@ -452,6 +512,16 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/GlobalLexicalModel.h</locationURI>
 		</link>
 		<link>
+			<name>GlobalLexicalModelUnlimited.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/GlobalLexicalModelUnlimited.cpp</locationURI>
+		</link>
+		<link>
+			<name>GlobalLexicalModelUnlimited.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/GlobalLexicalModelUnlimited.h</locationURI>
+		</link>
+		<link>
 			<name>HypoList.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/HypoList.h</locationURI>
@@ -495,6 +565,11 @@
 			<name>HypothesisStackNormal.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/HypothesisStackNormal.h</locationURI>
+		</link>
+		<link>
+			<name>Incremental</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>InputFileStream.cpp</name>
@@ -577,6 +652,11 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
+			<name>Makefile.am</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Makefile.am</locationURI>
+		</link>
+		<link>
 			<name>Manager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/Manager.cpp</locationURI>
@@ -585,6 +665,21 @@
 			<name>Manager.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/Manager.h</locationURI>
+		</link>
+		<link>
+			<name>MockHypothesis.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/MockHypothesis.cpp</locationURI>
+		</link>
+		<link>
+			<name>MockHypothesis.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/MockHypothesis.h</locationURI>
+		</link>
+		<link>
+			<name>MosesTest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/MosesTest.cpp</locationURI>
 		</link>
 		<link>
 			<name>NonTerminal.cpp</name>
@@ -652,6 +747,16 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/Phrase.h</locationURI>
 		</link>
 		<link>
+			<name>PhraseBoundaryFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/PhraseBoundaryFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhraseBoundaryFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/PhraseBoundaryFeature.h</locationURI>
+		</link>
+		<link>
 			<name>PhraseDictionary.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/PhraseDictionary.cpp</locationURI>
@@ -710,6 +815,26 @@
 			<name>PhraseDictionaryTreeAdaptor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/PhraseDictionaryTreeAdaptor.h</locationURI>
+		</link>
+		<link>
+			<name>PhraseLengthFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/PhraseLengthFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhraseLengthFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/PhraseLengthFeature.h</locationURI>
+		</link>
+		<link>
+			<name>PhrasePairFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/PhrasePairFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhrasePairFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/PhrasePairFeature.h</locationURI>
 		</link>
 		<link>
 			<name>PrefixTree.h</name>
@@ -792,19 +917,24 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/ScoreComponentCollection.cpp</locationURI>
 		</link>
 		<link>
+			<name>ScoreComponentCollection.cpp~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollection.cpp~</locationURI>
+		</link>
+		<link>
 			<name>ScoreComponentCollection.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/ScoreComponentCollection.h</locationURI>
 		</link>
 		<link>
-			<name>ScoreIndexManager.cpp</name>
+			<name>ScoreComponentCollection.h~</name>
 			<type>1</type>
-			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/ScoreIndexManager.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollection.h~</locationURI>
 		</link>
 		<link>
-			<name>ScoreIndexManager.h</name>
+			<name>ScoreComponentCollectionTest.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/ScoreIndexManager.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollectionTest.cpp</locationURI>
 		</link>
 		<link>
 			<name>ScoreProducer.cpp</name>
@@ -877,6 +1007,26 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/SentenceStats.h</locationURI>
 		</link>
 		<link>
+			<name>SourceWordDeletionFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SourceWordDeletionFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>SourceWordDeletionFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SourceWordDeletionFeature.h</locationURI>
+		</link>
+		<link>
+			<name>SparsePhraseDictionaryFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SparsePhraseDictionaryFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>SparsePhraseDictionaryFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/SparsePhraseDictionaryFeature.h</locationURI>
+		</link>
+		<link>
 			<name>SquareMatrix.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/SquareMatrix.cpp</locationURI>
@@ -897,9 +1047,19 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/StaticData.cpp</locationURI>
 		</link>
 		<link>
+			<name>StaticData.cpp~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.cpp~</locationURI>
+		</link>
+		<link>
 			<name>StaticData.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/StaticData.h</locationURI>
+		</link>
+		<link>
+			<name>StaticData.h~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.h~</locationURI>
 		</link>
 		<link>
 			<name>SyntacticLanguageModel.cpp</name>
@@ -922,6 +1082,31 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/SyntacticLanguageModelState.h</locationURI>
 		</link>
 		<link>
+			<name>TargetBigramFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetBigramFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>TargetBigramFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetBigramFeature.h</locationURI>
+		</link>
+		<link>
+			<name>TargetBigramFeatureTest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetBigramFeatureTest.cpp</locationURI>
+		</link>
+		<link>
+			<name>TargetNgramFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetNgramFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>TargetNgramFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetNgramFeature.h</locationURI>
+		</link>
+		<link>
 			<name>TargetPhrase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/TargetPhrase.cpp</locationURI>
@@ -940,6 +1125,16 @@
 			<name>TargetPhraseCollection.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/TargetPhraseCollection.h</locationURI>
+		</link>
+		<link>
+			<name>TargetWordInsertionFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetWordInsertionFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>TargetWordInsertionFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/TargetWordInsertionFeature.h</locationURI>
 		</link>
 		<link>
 			<name>Terminal.h</name>
@@ -1110,6 +1305,16 @@
 			<name>WordLattice.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/WordLattice.h</locationURI>
+		</link>
+		<link>
+			<name>WordTranslationFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/WordTranslationFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>WordTranslationFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/WordTranslationFeature.h</locationURI>
 		</link>
 		<link>
 			<name>WordsBitmap.cpp</name>
@@ -1467,6 +1672,36 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/DynSAInclude/vocab.h</locationURI>
 		</link>
 		<link>
+			<name>Incremental/Fill.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/Fill.cpp</locationURI>
+		</link>
+		<link>
+			<name>Incremental/Fill.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/Fill.h</locationURI>
+		</link>
+		<link>
+			<name>Incremental/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>Incremental/Manager.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/Manager.cpp</locationURI>
+		</link>
+		<link>
+			<name>Incremental/Manager.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/Manager.h</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>LM/Base.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/LM/Base.cpp</locationURI>
@@ -1702,6 +1937,11 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/RuleTable/PhraseDictionaryOnDisk.cpp</locationURI>
 		</link>
 		<link>
+			<name>RuleTable/PhraseDictionaryOnDisk.cpp~</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryOnDisk.cpp~</locationURI>
+		</link>
+		<link>
 			<name>RuleTable/PhraseDictionaryOnDisk.h</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/RuleTable/PhraseDictionaryOnDisk.h</locationURI>
@@ -1912,6 +2152,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Incremental/bin/gcc-4.6</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>LM/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1962,6 +2207,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Incremental/bin/gcc-4.6/release</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>LM/bin/gcc-4.6/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2003,6 +2253,11 @@
 		</link>
 		<link>
 			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2052,6 +2307,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2072,6 +2332,586 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/AlignmentInfo.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/AlignmentInfo.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/AlignmentInfoCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/AlignmentInfoCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/AlignmentInfoTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/AlignmentInfoTest.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/BilingualDynSuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/BilingualDynSuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/BitmapContainer.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/BitmapContainer.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/BleuScoreFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/BleuScoreFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartCell.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartCell.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartCellCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartCellCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartHypothesis.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartHypothesis.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartHypothesisCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartHypothesisCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartManager.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartManager.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartParser.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartParser.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTranslationOptionList.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTranslationOptionList.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTranslationOptions.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTranslationOptions.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisDetour.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisDetour.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisDetourQueue.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisDetourQueue.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisNode.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisNode.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisPath.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartTrellisPath.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ConfusionNet.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ConfusionNet.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeGraph.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeGraph.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeStep.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeStep.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeStepGeneration.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeStepGeneration.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeStepTranslation.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DecodeStepTranslation.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Dictionary.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Dictionary.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DummyScoreProducers.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DummyScoreProducers.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DynSuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FFState.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FFState.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Factor.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Factor.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FactorCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FactorCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FactorTypeSet.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FactorTypeSet.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FeatureFunction.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FeatureFunction.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FeatureVector.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FeatureVector.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FeatureVectorTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FeatureVectorTest.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/File.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/File.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/FloydWarshall.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/FloydWarshall.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/GenerationDictionary.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/GenerationDictionary.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/GlobalLexicalModel.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/GlobalLexicalModel.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/GlobalLexicalModelUnlimited.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/GlobalLexicalModelUnlimited.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Hypothesis.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Hypothesis.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/HypothesisStack.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/HypothesisStack.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/HypothesisStackCubePruning.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/HypothesisStackCubePruning.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/HypothesisStackNormal.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/HypothesisStackNormal.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/InputFileStream.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/InputFileStream.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/InputType.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/InputType.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/LMList.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/LMList.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/LVoc.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/LVoc.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReordering.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReordering.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingState.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingState.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingTable.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingTable.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Manager.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Manager.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/MockHypothesis.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/MockHypothesis.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/MosesTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/MosesTest.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/NonTerminal.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/NonTerminal.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PCNTools.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PCNTools.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Parameter.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Parameter.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PartialTranslOptColl.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PartialTranslOptColl.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Phrase.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Phrase.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseBoundaryFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseBoundaryFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionary.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionary.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryDynSuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryDynSuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryMemory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryMemory.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryNode.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryNode.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryTree.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryTree.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryTreeAdaptor.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryTreeAdaptor.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseLengthFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseLengthFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PhrasePairFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PhrasePairFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/PrefixTreeMap.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/PrefixTreeMap.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ReorderingConstraint.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ReorderingConstraint.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ReorderingStack.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ReorderingStack.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/RuleCube.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/RuleCube.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/RuleCubeItem.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/RuleCubeItem.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/RuleCubeQueue.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/RuleCubeQueue.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ScoreComponentCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ScoreComponentCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ScoreComponentCollectionTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ScoreComponentCollectionTest.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ScoreProducer.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ScoreProducer.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Search.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Search.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SearchCubePruning.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SearchCubePruning.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SearchNormal.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SearchNormal.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SearchNormalBatch.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SearchNormalBatch.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Sentence.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Sentence.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SentenceStats.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SentenceStats.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SourceWordDeletionFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SourceWordDeletionFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SparsePhraseDictionaryFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SparsePhraseDictionaryFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/SquareMatrix.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/SquareMatrix.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/StaticData.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/StaticData.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TargetBigramFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TargetBigramFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TargetBigramFeatureTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TargetBigramFeatureTest.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TargetNgramFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TargetNgramFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TargetPhrase.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TargetPhrase.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TargetPhraseCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TargetPhraseCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TargetWordInsertionFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TargetWordInsertionFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/ThreadPool.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/ThreadPool.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Timer.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Timer.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOption.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOption.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionCollectionConfusionNet.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionCollectionConfusionNet.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionCollectionText.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionCollectionText.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionList.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationOptionList.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationSystem.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TranslationSystem.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TreeInput.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TreeInput.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TrellisPath.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TrellisPath.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/TrellisPathCollection.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/TrellisPathCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/UserMessage.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/UserMessage.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Util.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Util.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/Word.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/Word.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/WordLattice.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/WordLattice.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/WordTranslationFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/WordTranslationFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/WordsBitmap.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/WordsBitmap.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/WordsRange.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/WordsRange.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/XmlOption.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/XmlOption.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/libmoses.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/libmoses.a</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/libmoses_internal.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/libmoses_internal.a</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/moses_test</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/moses_test</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/moses_test.passed</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/moses_test.passed</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2082,9 +2922,94 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerCYKPlus.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerCYKPlus.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerMemory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerMemory.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerMemoryPerSentence.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerMemoryPerSentence.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerOnDisk.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/ChartRuleLookupManagerOnDisk.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/DotChartInMemory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/DotChartInMemory.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/DotChartOnDisk.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/DotChartOnDisk.o</locationURI>
+		</link>
+		<link>
+			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/libCYKPlusParser.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/libCYKPlusParser.a</locationURI>
+		</link>
+		<link>
 			<name>CYKPlusParser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/BlockHashIndex.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/BlockHashIndex.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/CmphStringVectorAdapter.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/CmphStringVectorAdapter.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingTableCompact.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingTableCompact.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingTableCreator.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/LexicalReorderingTableCreator.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/MurmurHash3.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/MurmurHash3.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDecoder.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDecoder.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryCompact.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryCompact.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseTableCreator.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseTableCreator.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/ThrowingFwrite.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/ThrowingFwrite.o</locationURI>
+		</link>
+		<link>
+			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/libCompactPT.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/libCompactPT.a</locationURI>
 		</link>
 		<link>
 			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
@@ -2092,9 +3017,104 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/libdynsa.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/libdynsa.a</locationURI>
+		</link>
+		<link>
 			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/Fill.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/Fill.o</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/Manager.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/Manager.o</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/libIncremental.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/libIncremental.a</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Base.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Base.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Factory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Factory.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/IRST.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/IRST.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Implementation.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Implementation.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Joint.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Joint.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Ken.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Ken.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/MultiFactor.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/MultiFactor.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/ORLM.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/ORLM.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/ParallelBackoff.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/ParallelBackoff.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Remote.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/Remote.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/SRI.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/SRI.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/SingleFactor.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/SingleFactor.o</locationURI>
+		</link>
+		<link>
+			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/libLM.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/libLM.a</locationURI>
 		</link>
 		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
@@ -2102,9 +3122,99 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderCompact.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderCompact.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderFactory.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderFactory.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderHiero.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderHiero.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderStandard.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/LoaderStandard.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryALSuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryALSuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryFuzzyMatch.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryFuzzyMatch.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryNodeSCFG.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryNodeSCFG.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryOnDisk.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionaryOnDisk.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionarySCFG.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/PhraseDictionarySCFG.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/Trie.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/Trie.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/UTrie.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/UTrie.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/UTrieNode.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/UTrieNode.o</locationURI>
+		</link>
+		<link>
+			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/libRuleTable.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/libRuleTable.a</locationURI>
+		</link>
+		<link>
 			<name>RuleTable/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/ApplicableRuleTrie.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/ApplicableRuleTrie.o</locationURI>
+		</link>
+		<link>
+			<name>Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/Parser.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/Parser.o</locationURI>
+		</link>
+		<link>
+			<name>Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/StackLatticeBuilder.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/StackLatticeBuilder.o</locationURI>
+		</link>
+		<link>
+			<name>Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/VarSpanTrieBuilder.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/VarSpanTrieBuilder.o</locationURI>
+		</link>
+		<link>
+			<name>Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/libScope3Parser.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/libScope3Parser.a</locationURI>
 		</link>
 		<link>
 			<name>Scope3Parser/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
@@ -2587,6 +3697,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/libmoses_internal.a</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/FileHandler.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/FileHandler.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/params.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/params.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/vocab.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/vocab.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/AlignmentInfo.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/AlignmentInfo.o</locationURI>
@@ -2595,6 +3720,11 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/AlignmentInfoCollection.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/AlignmentInfoCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/AlignmentInfoTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/AlignmentInfoTest.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ApplicableRuleTrie.o</name>
@@ -2610,6 +3740,11 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/BitmapContainer.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/BitmapContainer.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/BleuScoreFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/BleuScoreFeature.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartCell.o</name>
@@ -2635,6 +3770,11 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartManager.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartManager.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartParser.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartParser.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ChartTranslationOption.o</name>
@@ -2752,6 +3892,16 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FeatureFunction.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FeatureVector.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FeatureVector.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FeatureVectorTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/FeatureVectorTest.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/File.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/File.o</locationURI>
@@ -2775,6 +3925,11 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/GlobalLexicalModel.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/GlobalLexicalModel.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/GlobalLexicalModelUnlimited.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/GlobalLexicalModelUnlimited.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Hypothesis.o</name>
@@ -2837,6 +3992,16 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Manager.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/MockHypothesis.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/MockHypothesis.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/MosesTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/MosesTest.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/NonTerminal.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/NonTerminal.o</locationURI>
@@ -2867,6 +4032,11 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Phrase.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseBoundaryFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseBoundaryFeature.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionary.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionary.o</locationURI>
@@ -2895,6 +4065,16 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryTreeAdaptor.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryTreeAdaptor.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseLengthFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseLengthFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhrasePairFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhrasePairFeature.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PrefixTreeMap.o</name>
@@ -2930,6 +4110,11 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ScoreComponentCollection.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ScoreComponentCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ScoreComponentCollectionTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ScoreComponentCollectionTest.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ScoreIndexManager.o</name>
@@ -2977,6 +4162,16 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SentenceStats.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SourceWordDeletionFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SourceWordDeletionFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SparsePhraseDictionaryFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SparsePhraseDictionaryFeature.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SquareMatrix.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SquareMatrix.o</locationURI>
@@ -2997,6 +4192,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/SuffixArray.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetBigramFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetBigramFeature.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetBigramFeatureTest.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetBigramFeatureTest.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetNgramFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetNgramFeature.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetPhrase.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetPhrase.o</locationURI>
@@ -3005,6 +4215,11 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetPhraseCollection.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetPhraseCollection.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetWordInsertionFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TargetWordInsertionFeature.o</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ThreadPool.o</name>
@@ -3092,6 +4307,11 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/WordLattice.o</locationURI>
 		</link>
 		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/WordTranslationFeature.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/WordTranslationFeature.o</locationURI>
+		</link>
+		<link>
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/WordsBitmap.o</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/WordsBitmap.o</locationURI>
@@ -3130,6 +4350,41 @@
 			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libmoses_internal.a</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libmoses_internal.a</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/moses_test</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/moses_test</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/moses_test.passed</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/moses_test.passed</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/FuzzyMatchWrapper.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/FuzzyMatchWrapper.o</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/SentenceAlignment.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/SentenceAlignment.o</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/SuffixArray.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/SuffixArray.o</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/Vocabulary.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/Vocabulary.o</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/libfuzzy-match.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/libfuzzy-match.a</locationURI>
 		</link>
 		<link>
 			<name>fuzzy-match/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
@@ -3222,6 +4477,21 @@
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libCompactPT.a</locationURI>
 		</link>
 		<link>
+			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/FileHandler.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/FileHandler.o</locationURI>
+		</link>
+		<link>
+			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/params.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/params.o</locationURI>
+		</link>
+		<link>
+			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/vocab.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/DynSAInclude/vocab.o</locationURI>
+		</link>
+		<link>
 			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -3230,6 +4500,21 @@
 			<name>DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</name>
 			<type>1</type>
 			<locationURI>PARENT-1-ECLIPSE_HOME/workspace/github/moses-smt/moses/src/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Fill.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Fill.o</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Manager.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Manager.o</locationURI>
+		</link>
+		<link>
+			<name>Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libIncremental.a</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Incremental/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libIncremental.a</locationURI>
 		</link>
 		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Base.o</name>
