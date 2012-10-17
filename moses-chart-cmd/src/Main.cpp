@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <exception>
 #include <fstream>
 #include "Main.h"
+#include "DummyScoreProducers.h"
 #include "FactorCollection.h"
 #include "Manager.h"
 #include "Phrase.h"
@@ -196,16 +197,47 @@ static void ShowWeights()
   cout.precision(6);
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  for (size_t i = 0; i < sff.size(); ++i) {
-    PrintFeatureWeight(sff[i]);
+  //This has to match the order in the nbest list
+
+  //LMs
+  const LMList& lml = system.GetLanguageModels();
+  LMList::const_iterator lmi = lml.begin();
+  for (; lmi != lml.end(); ++lmi) {
+    PrintFeatureWeight(*lmi);
   }
-  for (size_t i = 0; i < slf.size(); ++i) {
-    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
-  	  PrintFeatureWeight(slf[i]);
+
+  //sparse stateful ffs
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ ) {
+    if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+      PrintFeatureWeight(sff[i]);
     }
   }
+
+  // translation components - phrase dicts
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  for( size_t i=0; i<pds.size(); i++ ) {
+    PrintFeatureWeight(pds[i]);
+  }
+
+  //word penalty
+  PrintFeatureWeight(system.GetWordPenaltyProducer());
+
+  //generation dicts
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for( size_t i=0; i<gds.size(); i++ ) {
+    PrintFeatureWeight(gds[i]);
+  }
+
+  //sparse stateless ffs
+  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ ) {
+    if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+      PrintFeatureWeight(slf[i]);
+    }
+  }
+
+
 }
 
 
