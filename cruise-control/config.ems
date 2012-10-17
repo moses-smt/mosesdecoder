@@ -33,10 +33,10 @@ toy-data = $moses-script-dir/ems/example/data
 ### basic tools
 #
 # moses decoder
-decoder = $moses-src-dir/dist/bin/moses
+decoder = $moses-src-dir/bin/moses
 
 # conversion of phrase table into binary on-disk format
-ttable-binarizer = $moses-src-dir/dist/bin/processPhraseTable
+ttable-binarizer = $moses-src-dir/bin/processPhraseTable
 
 # conversion of rule table into binary on-disk format
 #ttable-binarizer = "$moses-src-dir/CreateOnDisk/src/CreateOnDiskPt 1 1 5 100 2"
