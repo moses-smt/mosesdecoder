@@ -63,16 +63,16 @@ int main(int argc, char **argv)
     } else {
       for(uint i = 0; i < tgtcands.size(); i++) {
         std::cout << line << " |||";
-        for(uint j = 0; j < tgtcands[i].first.size(); j++)
-          std::cout << ' ' << *tgtcands[i].first[j];
+        for(uint j = 0; j < tgtcands[i].tokens.size(); j++)
+          std::cout << ' ' << *tgtcands[i].tokens[j];
         std::cout << " |||";
 
         if(useAlignments) {
           std::cout << " " << wordAlignment[i] << " |||";
         }
 
-        for(uint j = 0; j < tgtcands[i].second.size(); j++)
-          std::cout << ' ' << tgtcands[i].second[j];
+        for(uint j = 0; j < tgtcands[i].scores.size(); j++)
+          std::cout << ' ' << tgtcands[i].scores[j];
         std::cout << '\n';
       }
       std::cout << '\n';

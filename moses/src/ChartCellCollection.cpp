@@ -23,37 +23,32 @@
 #include "InputType.h"
 #include "WordsRange.h"
 
-namespace Moses
-{
+namespace Moses {
+
+ChartCellCollectionBase::~ChartCellCollectionBase() {
+  m_source.clear();
+  for (std::vector<std::vector<ChartCellBase*> >::iterator i = m_cells.begin(); i != m_cells.end(); ++i) 
+    RemoveAllInColl(*i);
+}
+
+class CubeCellFactory {
+  public:
+    explicit CubeCellFactory(ChartManager &manager) : m_manager(manager) {}
+
+    ChartCell *operator()(size_t start, size_t end) const {
+      return new ChartCell(start, end, m_manager);
+    }
+
+  private:
+    ChartManager &m_manager;
+};
+
 /** Costructor
  \param input the input sentence
  \param manager reference back to the manager
  */
 ChartCellCollection::ChartCellCollection(const InputType &input, ChartManager &manager)
-  :m_hypoStackColl(input.GetSize())
-{
-  size_t size = input.GetSize();
-  for (size_t startPos = 0; startPos < size; ++startPos) {
-    InnerCollType &inner = m_hypoStackColl[startPos];
-    inner.resize(size - startPos);
-
-    size_t ind = 0;
-    for (size_t endPos = startPos ; endPos < size; ++endPos) {
-      ChartCell *cell = new ChartCell(startPos, endPos, manager);
-      inner[ind] = cell;
-      ++ind;
-    }
-  }
-}
-
-ChartCellCollection::~ChartCellCollection()
-{
-  OuterCollType::iterator iter;
-  for (iter = m_hypoStackColl.begin(); iter != m_hypoStackColl.end(); ++iter) {
-    InnerCollType &inner = *iter;
-    RemoveAllInColl(inner);
-  }
-}
+  :ChartCellCollectionBase(input, CubeCellFactory(manager)) {}
 
 } // namespace
 

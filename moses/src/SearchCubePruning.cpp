@@ -145,7 +145,7 @@ void SearchCubePruning::ProcessSentence()
     stackNo++;
   }
 
-  PrintBitmapContainerGraph();
+  //PrintBitmapContainerGraph();
 
   // some more logging
   IFVERBOSE(2) {

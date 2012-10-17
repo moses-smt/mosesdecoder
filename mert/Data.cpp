@@ -21,25 +21,24 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
 
-Data::Data()
-  : m_scorer(NULL),
-    m_num_scores(0),
-    m_sparse_flag(false),
-    m_score_data(),
-    m_feature_data() {}
-
-Data::Data(Scorer* scorer)
+Data::Data(Scorer* scorer, const string& sparse_weights_file)
     : m_scorer(scorer),
       m_score_type(m_scorer->getName()),
       m_num_scores(0),
-      m_sparse_flag(false),
       m_score_data(new ScoreData(m_scorer)),
       m_feature_data(new FeatureData)
 {
   TRACE_ERR("Data::m_score_type " << m_score_type << endl);
   TRACE_ERR("Data::Scorer type from Scorer: " << m_scorer->getName() << endl);
+  if (sparse_weights_file.size()) {
+    m_sparse_weights.load(sparse_weights_file);
+    ostringstream msg;
+    msg << "Data::sparse_weights {";
+    m_sparse_weights.write(msg,"=");
+    msg << "}";
+    TRACE_ERR(msg.str() << std::endl);
+  }
 }
 
 //ADDED BY TS
@@ -126,10 +125,8 @@ void Data::removeDuplicates() {
 //END_ADDED
 
 void Data::load(const std::string &featfile, const std::string &scorefile) {
-  m_feature_data->load(featfile);
+  m_feature_data->load(featfile, m_sparse_weights);
   m_score_data->load(scorefile);
-  if (m_feature_data->hasSparseFeatures())
-    m_sparse_flag = true;
 }
 
 void Data::loadNBest(const string &file)
@@ -155,7 +152,10 @@ void Data::loadNBest(const string &file)
       string temp;
       getNextPound(line, temp, "|||"); //fourth field sentence score
       if (line.length() > 0) {
-        getNextPound(line, alignment, "|||"); //fourth field only there if alignment scorer
+        getNextPound(line, alignment, "|||"); //fifth field (if present) is either phrase or word alignment
+	if (line.length() > 0) {
+	  getNextPound(line, alignment, "|||"); //sixth field (if present) is word alignment 
+	}
       }
     }
     //TODO check alignment exists if scorers need it
@@ -233,16 +233,9 @@ void Data::AddFeatures(const string& str,
       string name = substr;
       getNextPound(buf, substr);
       feature_entry.addSparse(name, atof(substr.c_str()));
-      m_sparse_flag = true;
     }
   }
   m_feature_data->add(feature_entry, sentence_index);
-}
-
-// TODO
-void Data::mergeSparseFeatures() {
-  cerr << "ERROR: sparse features can only be trained with pairwise ranked optimizer (PRO), not traditional MERT\n";
-  exit(1);
 }
 
 void Data::createShards(size_t shard_count, float shard_size, const string& scorerconfig,
@@ -279,7 +272,6 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
     shards.push_back(Data(scorer));
     shards.back().m_score_type = m_score_type;
     shards.back().m_num_scores = m_num_scores;
-    shards.back().m_sparse_flag = m_sparse_flag;
     for (size_t i = 0; i < shard_contents.size(); ++i) {
       shards.back().m_feature_data->add(m_feature_data->get(shard_contents[i]));
       shards.back().m_score_data->add(m_score_data->get(shard_contents[i]));

@@ -23,6 +23,11 @@
 
 #include <set>
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#include <boost/thread/locks.hpp>
+#endif
+
 namespace Moses
 {
 
@@ -41,6 +46,7 @@ class AlignmentInfoCollection
     * one is inserted.
    */
   const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &);
+  const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &, int* indicator);
 
   //! Returns a pointer to an empty AlignmentInfo object.
   const AlignmentInfo &GetEmptyAlignmentInfo() const;
@@ -52,6 +58,12 @@ class AlignmentInfoCollection
   AlignmentInfoCollection();
 
   static AlignmentInfoCollection s_instance;
+
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
+  
   AlignmentInfoSet m_collection;
   const AlignmentInfo *m_emptyAlignmentInfo;
 };

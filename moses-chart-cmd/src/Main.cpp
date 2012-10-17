@@ -40,6 +40,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <exception>
 #include <fstream>
 #include "Main.h"
+#include "DummyScoreProducers.h"
 #include "FactorCollection.h"
 #include "Manager.h"
 #include "Phrase.h"
@@ -57,6 +58,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "ChartHypothesis.h"
 #include "ChartTrellisPath.h"
 #include "ChartTrellisPathList.h"
+#include "Incremental/Manager.h"
+
+#include "util/usage.hh"
 
 using namespace std;
 using namespace Moses;
@@ -84,6 +88,17 @@ public:
 
     VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
 
+    if ((*m_source).GetSize() == 0) return;
+
+    if (staticData.GetSearchAlgorithm() == ChartIncremental) {
+      Incremental::Manager manager(*m_source, system);
+      manager.ProcessSentence();
+      if (m_ioWrapper.ExposeSingleBest()) {
+        m_ioWrapper.ExposeSingleBest()->Write(lineNumber, manager.String() + '\n');
+      }
+      return;
+    }
+
     ChartManager manager(*m_source, &system);
     manager.ProcessSentence();
 
@@ -91,9 +106,7 @@ public:
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
-    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber,
-                               staticData.GetReportSegmentation(),
-                               staticData.GetReportAllFactors());
+    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber);
     IFVERBOSE(2) {
       PrintUserTime("Best Hypothesis Generation Time:");
     }
@@ -159,40 +172,72 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
   }
   return (source ? true : false);
 }
-
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
-
-  size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
-  size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
-  for (size_t i = weightStart; i < weightEnd; ++i) {
-    cout << ff->GetScoreProducerDescription(i-weightStart) <<  " " << ff->GetScoreProducerWeightShortName(i-weightStart) << " "
-         << StaticData::Instance().GetAllWeights()[i] << endl;
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    for (size_t i = 0; i < numScoreComps; ++i) 
+      cout << ff->GetScoreProducerDescription() <<  " "
+           << ff->GetScoreProducerWeightShortName() << " "
+           << values[i] << endl;
+  }
+  else {
+  	if (ff->GetSparseProducerWeight() == 1)
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " sparse" << endl;
+  	else
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
   }
 }
-
 
 static void ShowWeights()
 {
   cout.precision(6);
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
-  for (size_t i = 0; i < sff.size(); ++i) {
-    PrintFeatureWeight(sff[i]);
+  //This has to match the order in the nbest list
+
+  //LMs
+  const LMList& lml = system.GetLanguageModels();
+  LMList::const_iterator lmi = lml.begin();
+  for (; lmi != lml.end(); ++lmi) {
+    PrintFeatureWeight(*lmi);
   }
-  for (size_t i = 0; i < pds.size(); ++i) {
+
+  //sparse stateful ffs
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ ) {
+    if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+      PrintFeatureWeight(sff[i]);
+    }
+  }
+
+  // translation components - phrase dicts
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  for( size_t i=0; i<pds.size(); i++ ) {
     PrintFeatureWeight(pds[i]);
   }
-  for (size_t i = 0; i < gds.size(); ++i) {
+
+  //word penalty
+  PrintFeatureWeight(system.GetWordPenaltyProducer());
+
+  //generation dicts
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for( size_t i=0; i<gds.size(); i++ ) {
     PrintFeatureWeight(gds[i]);
   }
-  for (size_t i = 0; i < slf.size(); ++i) {
-    PrintFeatureWeight(slf[i]);
+
+  //sparse stateless ffs
+  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ ) {
+    if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+      PrintFeatureWeight(slf[i]);
+    }
   }
+
+
 }
 
 
@@ -204,49 +249,41 @@ int main(int argc, char* argv[])
       for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
       TRACE_ERR(endl);
     }
-  
+
     IOWrapper::FixPrecision(cout);
     IOWrapper::FixPrecision(cerr);
-  
+
     // load data structures
     Parameter parameter;
     if (!parameter.LoadParam(argc, argv)) {
       return EXIT_FAILURE;
     }
-  
+
     const StaticData &staticData = StaticData::Instance();
     if (!StaticData::LoadDataStatic(&parameter, argv[0]))
       return EXIT_FAILURE;
-  
+
     if (parameter.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
   
-    CHECK(staticData.GetSearchAlgorithm() == ChartDecoding);
+    CHECK(staticData.IsChart());
   
     // set up read/writing class
     IOWrapper *ioWrapper = GetIOWrapper(staticData);
   
     // check on weights
-    vector<float> weights = staticData.GetAllWeights();
+    const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
-      TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-      TRACE_ERR("The global weight vector looks like this:");
-      for (size_t j=0; j<weights.size(); j++) {
-        TRACE_ERR(" " << weights[j]);
-      }
+      TRACE_ERR("The global weight vector looks like this: ");
+      TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
-    // every score must have a weight!  check that here:
-    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-      TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-      return EXIT_FAILURE;
-    }
-  
+
     if (ioWrapper == NULL)
       return EXIT_FAILURE;
-  
+
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
 #endif
@@ -279,6 +316,8 @@ int main(int argc, char* argv[])
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  IFVERBOSE(1) util::PrintUsage(std::cerr);
 
 #ifdef HACK_EXIT
   //This avoids that detructors are called (it can take a long time)

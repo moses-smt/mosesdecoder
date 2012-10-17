@@ -10,6 +10,8 @@
 
 #include <fstream>
 #include <cmath>
+#include <stdexcept>
+
 #include <boost/functional/hash.hpp>
 
 #include "Util.h"
@@ -65,26 +67,53 @@ void SparseVector::clear() {
   m_fvector.clear();
 }
 
-SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
-  //All the elements that have values in *this
-  for (fvector_t::iterator i = m_fvector.begin(); i != m_fvector.end(); ++i) {
-    m_fvector[i->first] = i->second - rhs.get(i->first);
+void SparseVector::load(const string& file) {
+  ifstream in(file.c_str());
+  if (!in) {
+    throw runtime_error("Failed to open sparse weights file: " + file);
   }
+  string line;
+  while(getline(in,line)) {
+    if (line[0] == '#') continue;
+    istringstream linestream(line);
+    string name;
+    float value;
+    linestream >> name;
+    linestream >> value;
+    set(name,value);
+  }
+}
 
-  //Any elements in rhs, that have no value in *this
+SparseVector& SparseVector::operator-=(const SparseVector& rhs) {
+
   for (fvector_t::const_iterator i = rhs.m_fvector.begin();
       i != rhs.m_fvector.end(); ++i) {
-    if (m_fvector.find(i->first) == m_fvector.end()) {
-      m_fvector[i->first] = -(i->second);
-    }
+    m_fvector[i->first] =  get(i->first) - (i->second);
   }
   return *this;
+}
+
+FeatureStatsType SparseVector::inner_product(const SparseVector& rhs) const {
+  FeatureStatsType product = 0.0;
+  for (fvector_t::const_iterator i = m_fvector.begin();
+    i != m_fvector.end(); ++i) {
+    product += ((i->second) * (rhs.get(i->first)));
+  }
+  return product;
 }
 
 SparseVector operator-(const SparseVector& lhs, const SparseVector& rhs) {
   SparseVector res(lhs);
   res -= rhs;
   return res;
+}
+
+FeatureStatsType inner_product(const SparseVector& lhs, const SparseVector& rhs) {
+    if (lhs.size() >= rhs.size()) {
+      return rhs.inner_product(lhs);
+    } else {
+      return lhs.inner_product(rhs);
+    }
 }
 
 std::vector<std::size_t> SparseVector::feats() const {
@@ -123,7 +152,6 @@ std::size_t hash_value(SparseVector const& item) {
   return hasher(item.m_fvector);
 }
 
-
 FeatureStats::FeatureStats()
     : m_available_size(kAvailableSize), m_entries(0),
       m_array(new FeatureStatsType[m_available_size]) {}
@@ -133,12 +161,6 @@ FeatureStats::FeatureStats(const size_t size)
       m_array(new FeatureStatsType[m_available_size])
 {
   memset(m_array, 0, GetArraySizeWithBytes());
-}
-
-FeatureStats::FeatureStats(string &theString)
-    : m_available_size(0), m_entries(0), m_array(NULL)
-{
-  set(theString);
 }
 
 FeatureStats::~FeatureStats()
@@ -190,7 +212,7 @@ void FeatureStats::addSparse(const string& name, FeatureStatsType v)
   m_map.set(name,v);
 }
 
-void FeatureStats::set(string &theString)
+void FeatureStats::set(string &theString, const SparseVector& sparseWeights )
 {
   string substring, stringBuf;
   reset();
@@ -207,6 +229,26 @@ void FeatureStats::set(string &theString)
       addSparse(substring.substr(0,separator), atof(substring.substr(separator+1).c_str()) );
     }
   }
+
+  if (sparseWeights.size()) {
+    //Merge the sparse features
+    FeatureStatsType merged = inner_product(sparseWeights, m_map);
+    add(merged);
+    /*
+    cerr << "Merged ";
+    sparseWeights.write(cerr,"=");
+    cerr << " and ";
+    map_.write(cerr,"=");
+    cerr << " to give " <<  merged << endl;
+    */
+    m_map.clear();
+  }
+  /*
+  cerr << "FS: ";
+  for (size_t i = 0; i < entries_; ++i) {
+    cerr << array_[i] << " ";
+  }
+  cerr << endl;*/
 }
 
 void FeatureStats::loadbin(istream* is)
@@ -215,22 +257,11 @@ void FeatureStats::loadbin(istream* is)
            static_cast<streamsize>(GetArraySizeWithBytes()));
 }
 
-void FeatureStats::loadtxt(istream* is)
+void FeatureStats::loadtxt(istream* is, const SparseVector& sparseWeights)
 {
   string line;
   getline(*is, line);
-  set(line);
-}
-
-void FeatureStats::loadtxt(const string &file)
-{
-  ifstream ifs(file.c_str(), ios::in);
-  if (!ifs) {
-    cerr << "Failed to open " << file << endl;
-    exit(1);
-  }
-  istream* is = &ifs;
-  loadtxt(is);
+  set(line, sparseWeights);
 }
 
 void FeatureStats::savetxt(const string &file)

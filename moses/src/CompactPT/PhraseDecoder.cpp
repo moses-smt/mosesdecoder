@@ -292,7 +292,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       tpv->push_back(TargetPhrase(Output));
       targetPhrase = &tpv->back();
       
-      targetPhrase->SetSourcePhrase(&sourcePhrase);
+      targetPhrase->SetSourcePhrase(sourcePhrase);
       alignment.clear();
       scores.clear();
         
@@ -327,7 +327,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
               return TargetPhraseVectorPtr();  
             
             wordString = GetTargetSymbol(GetTranslation(sourceWords[srcPos], rank));
-            if(StaticData::Instance().UseAlignmentInfo())
+            if(m_phraseDictionary.m_useAlignmentInfo)
             {
               size_t trgPos = targetPhrase->GetSize();
               alignment.insert(AlignPoint(srcPos, trgPos));
@@ -342,7 +342,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
               return TargetPhraseVectorPtr();  
                             
             wordString = GetTargetSymbol(GetTranslation(sourceWords[srcPos], rank));   
-            if(StaticData::Instance().UseAlignmentInfo())
+            if(m_phraseDictionary.m_useAlignmentInfo)
             {
               size_t trgPos = srcPos;
               alignment.insert(AlignPoint(srcPos, trgPos));
@@ -398,7 +398,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             {
               // insert the subphrase into the main target phrase
               TargetPhrase& subTp = subTpv->at(rank);
-              if(StaticData::Instance().UseAlignmentInfo())
+              if(m_phraseDictionary.m_useAlignmentInfo)
               {
                 // reconstruct the alignment data based on the alignment of the subphrase
                 for(AlignmentInfo::const_iterator it = subTp.GetAlignmentInfo().begin();
@@ -431,7 +431,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
-        targetPhrase->SetScore(m_feature, scores, *m_weight, m_weightWP, *m_languageModels);
+        targetPhrase->SetScore(m_feature, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
         
         if(m_containsAlignmentInfo)
           state = Alignment;
@@ -448,14 +448,14 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       }
       else
       {
-        if(StaticData::Instance().UseAlignmentInfo())  
+        if(m_phraseDictionary.m_useAlignmentInfo)  
           alignment.insert(AlignPointSizeT(alignPoint));
       }
     }
     
     if(state == Add)
     {
-      if(StaticData::Instance().UseAlignmentInfo())
+      if(m_phraseDictionary.m_useAlignmentInfo)
         targetPhrase->SetAlignmentInfo(alignment);
       
       if(m_coding == PREnc)

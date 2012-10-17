@@ -41,6 +41,8 @@ class LanguageModelMultiFactor : public LanguageModelImplementation
 protected:
   FactorMask m_factorTypes;
 
+	LanguageModelMultiFactor(){}
+	
 public:
   virtual bool Load(const std::string &filePath
                     , const std::vector<FactorType> &factorTypes
@@ -50,8 +52,7 @@ public:
     return MultiFactor;
   }
 
-  std::string GetScoreProducerDescription(unsigned) const;
-  bool Useable(const Phrase &phrase) const;
+	bool Useable(const Phrase &phrase) const;	
 };
 
 }

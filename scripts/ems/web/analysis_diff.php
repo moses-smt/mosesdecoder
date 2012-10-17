@@ -116,8 +116,10 @@ function precision_by_coverage_diff() {
     $log_info[$log_count]["length"] -= $item[3];
   }
 
+
   print "<h4>By log<sub>2</sub>-count in the training corpus</h4>";
   precision_by_coverage_diff_graph("byCoverage",$log_info,$log_info_new,$total,$img_width,SORT_NUMERIC);
+  precision_by_coverage_diff_matrix();
 
   // load factored data
   $d = dir("$dir/evaluation/$set.analysis.".get_precision_analysis_version($dir,$set,$id));
@@ -290,6 +292,244 @@ function precision_by_word_diff($type) {
   print "</table>\n";
 }
 
+function precision_by_coverage_diff_matrix() {
+  global $id,$id2;
+  print "<h4>Impact of Change in Coverage</h4>";
+  print "Coverage in run $id is the x-axis, change in coverage in run $id2 is the y-axis. Size of box reflects how many output words are produced, yellow is the number of correct translations, green indicates increase, green decrease. The bleu rectangle below each box indicates number of words dropped, and increase (cyan) or decrease (purple).<p>(";
+  $scale = 30;
+  for($i=1; $i<=5; $i++) {
+    $size = (int)(sqrt($i*$scale));
+    $name = "size-$i";
+    print "<canvas id=\"$name\" width=\"$size\" height=\"$size\"></canvas><script language=\"javascript\">
+var canvas = document.getElementById(\"$name\");
+var ctx = canvas.getContext(\"2d\");
+ctx.fillStyle = \"rgb(0,0,0)\";
+ctx.fillRect (0, 0, $size, $size);
+</script> = $i word";
+    if ($i>1) { print "s"; }
+    if ($i<5) { print ", "; }
+  }
+  print ")<p>";
+  # get base data
+  $data = file(get_current_analysis_filename("precision","precision-by-input-word"));
+  $word = array(); $class = array();
+  for($i=0;$i<count($data);$i++) {
+    $line = rtrim($data[$i]);
+    $item = split("\t",$line);
+    $surface = $item[5];
+    $word[$surface] = array();
+    $word[$surface]["precision"] = $item[0]; # number of precise translations
+    $word[$surface]["delete"] = $item[1];    # number of deleted 
+    $word[$surface]["total"] = $item[2];     # number of all translations
+    $word[$surface]["coverage"] = $item[4];  # count in training corpus
+    if ($item[4] == 0) { $log_count = -1; }
+    else { $log_count = (int) (log($item[4])/log(2)); }
+    $word[$surface]["log_count"] = $log_count;
+    if (!array_key_exists($log_count,$class)) { $class[$log_count] = array(); }
+    $class[$log_count][] = $surface;
+  }
+
+  # init matrix
+  $matrix = array();
+  $max_base_log_count = -1;
+  $min_alt_log_count = 99;
+  $max_alt_log_count = -1;
+  foreach(array_keys($class) as $log_count) {
+    $matrix[$log_count] = array();
+    if ($log_count > $max_base_log_count) { $max_base_log_count = $log_count; }
+  }
+
+  # get alternative data
+  $data = file(get_current_analysis_filename2("precision","precision-by-input-word"));
+  for($i=0;$i<count($data);$i++) {
+    $line = rtrim($data[$i]);
+    $item = split("\t",$line);
+    $surface = $item[5];
+    if ($item[4] == 0) { $alt = -1; }
+    else { $alt = (int) (log($item[4])/log(2)); }
+
+    $base = -1;
+    if (array_key_exists($surface,$word)) {
+      $base = $word[$surface]["log_count"];
+    }
+
+    $alt -= $base;
+    if ($alt > $max_alt_log_count) { $max_alt_log_count = $alt; }
+    if ($alt < $min_alt_log_count) { $min_alt_log_count = $alt; }
+
+    if (!array_key_exists($alt,$matrix[$base])) {
+      $matrix[$base][$alt] = array();
+      $matrix[$base][$alt]["precision1"] = 0;
+      $matrix[$base][$alt]["delete1"] = 0;
+      $matrix[$base][$alt]["total1"] = 0;
+      $matrix[$base][$alt]["coverage1"] = 0;
+      $matrix[$base][$alt]["precision2"] = 0;
+      $matrix[$base][$alt]["delete2"] = 0;
+      $matrix[$base][$alt]["total2"] = 0;
+      $matrix[$base][$alt]["coverage2"] = 0;
+    }
+    # ignore mismatches in source words due to tokenization / casing
+    if (array_key_exists($surface,$word)) { 
+      $matrix[$base][$alt]["precision1"] += $word[$surface]["precision"];
+      $matrix[$base][$alt]["delete1"]    += $word[$surface]["delete"];
+      $matrix[$base][$alt]["total1"]     += $word[$surface]["total"];
+      $matrix[$base][$alt]["coverage1"]  += $word[$surface]["count"];
+      $matrix[$base][$alt]["precision2"] += $item[0];
+      $matrix[$base][$alt]["delete2"]    += $item[1];
+      $matrix[$base][$alt]["total2"]     += $item[2];
+      $matrix[$base][$alt]["coverage2"]  += $item[4];
+    }
+  }
+
+  # make table
+  print "<table border=1 cellspacing=0 cellpadding=0><tr><td>&nbsp;</td>";
+  for($base=-1;$base<=$max_base_log_count;$base++) {
+    print "<td align=center>$base</td>";
+  }
+  print "<td></td></tr>";
+  for($alt=$max_alt_log_count;$alt>=$min_alt_log_count;$alt--) {
+    print "<tr><td>$alt</td>";
+    for($base=-1;$base<=$max_base_log_count;$base++) {
+      print "<td align=center valign=center>";
+      if (array_key_exists($base,$matrix) &&
+	  array_key_exists($alt,$matrix[$base])) {
+	#print $matrix[$base][$alt]["precision1"]."->".
+	#    $matrix[$base][$alt]["precision2"]."<br>";
+	#print $matrix[$base][$alt]["delete1"]."->".
+	#    $matrix[$base][$alt]["delete2"]."<br>";
+	#print $matrix[$base][$alt]["total1"]."->".
+	#    $matrix[$base][$alt]["total2"]."<br>";
+	$scale = 30;
+	$total = $matrix[$base][$alt]["total1"];
+	if ($matrix[$base][$alt]["total2"] > $total) {
+	  $total = $matrix[$base][$alt]["total2"];
+	}
+	$total = (int)(sqrt($total*$scale));
+	if ($total>0) {
+	  $prec1  = $matrix[$base][$alt]["precision1"]*$scale;
+	  $prec2  = $matrix[$base][$alt]["precision2"]*$scale;
+	  if ($prec1 > $prec2) {
+	    $prec_base = (int)(sqrt($prec1));
+	    $prec_imp = (int)(sqrt($prec1-$prec2));
+	    $prec_color = "255,100,100";
+	  }
+	  else {	    
+	    $prec_base = (int)(sqrt($prec2));
+	    $prec_imp = (int)(sqrt($prec2-$prec1));
+	    $prec_color = "100,255,100";
+	  }
+	  $prec_base_top = (int)(($total-$prec_base)/2);
+	  $prec_imp_top = (int)(($total-$prec_imp)/2);
+	
+	  $del1 = $matrix[$base][$alt]["delete1"]*$scale;
+	  $del2 = $matrix[$base][$alt]["delete2"]*$scale;
+	  if ($del1 > $del2) {
+	    $del_base = $del1;
+	    $del_imp = $del1-$del2;
+	    $del_color = "150,100,255";
+	  }
+	  else {	    
+	    $del_base = $del2;
+	    $del_imp = $del2-$del1;
+	    $del_color = "100,200,200";
+	  }
+	  $del_base_height = (int)($del_base/$total);
+	  $del_imp_height = (int)($del_imp/$total);
+
+	  $name = "matrix-$base-$alt";
+	  #print "$total/$prec1/$prec2 -> $prec_base/$prec_imp<br>";
+	  print "<a href=\"javascript:generic_show_diff('CoverageMatrixDetails','base=$base&alt=$alt')\">";
+	  print "<canvas id=\"$name\" width=\"$total\" height=\"".($total+$del_base_height+$del_imp_height)."\"></canvas></a>";
+	  print "<script language=\"javascript\">
+var canvas = document.getElementById(\"$name\");
+var ctx = canvas.getContext(\"2d\");
+ctx.fillStyle = \"rgb(200,200,200)\";
+ctx.fillRect (0, 0, $total, $total);
+ctx.fillStyle = \"rgb(200,200,0)\";
+ctx.fillRect ($prec_base_top, $prec_base_top, $prec_base, $prec_base);
+ctx.fillStyle = \"rgb($prec_color)\";
+ctx.fillRect ($prec_imp_top, $prec_imp_top, $prec_imp, $prec_imp);
+ctx.fillStyle = \"rgb(100,100,255)\";
+ctx.fillRect (0, $total, $total, $del_base_height);
+ctx.fillStyle = \"rgb($del_color)\";
+ctx.fillRect (0, ".($total+$del_base_height).", $total, $del_imp_height);
+</script>";
+	}
+      }
+      print "</td>";
+    }
+    print "<td>$alt</td></tr>";
+  }
+  print "<tr><td></td>";
+  for($base=-1;$base<=$max_base_log_count;$base++) {
+    print "<td align=center>$base</td>";
+  }
+  print "<td></td></tr></table><div id=\"CoverageMatrixDetails\"></div>";
+}
+
+function precision_by_coverage_diff_matrix_details() {
+  $alt = $_GET["alt"];
+  $base = $_GET["base"];
+    
+  $impact_total = 0;
+  $data = file(get_current_analysis_filename("precision","precision-by-input-word"));
+  $word = array(); $class = array();
+  for($i=0;$i<count($data);$i++) {
+    $line = rtrim($data[$i]);
+    $item = split("\t",$line);
+    if ($item[4] == 0) { $log_count = -1; }
+    else { $log_count = (int) (log($item[4])/log(2)); }
+    if ($log_count == $base) {
+      $surface = $item[5];
+      $word[$surface] = array();
+      $word[$surface]["precision"] = $item[0]; # number of precise translations
+      $word[$surface]["delete"] = $item[1];    # number of deleted 
+      $word[$surface]["total"] = $item[2];     # number of all translations
+      $word[$surface]["coverage"] = $item[4];  # count in training corpus
+    }
+    $impact_total += $item[2];
+  }
+
+  print "<table border=1><tr><td align=center>&nbsp;</td><td align=center colspan=3>Precision</td><td align=center colspan=2>Precision Impact</td><td align=center colspan=3>Delete</td><td align=center colspan=2>Delete Impact</td></tr>\n";
+
+  # get alternative data
+  $data = file(get_current_analysis_filename2("precision","precision-by-input-word"));
+  for($i=0;$i<count($data);$i++) {
+    $line = rtrim($data[$i]);
+    $item = split("\t",$line);
+    if ($item[4] == 0) { $log_count = -1; }
+    else { $log_count = (int) (log($item[4])/log(2)); }
+    $surface = $item[5];
+    if ($log_count-$base == $alt && array_key_exists($surface,$word)) {
+      $precision = $item[0]; # number of precise translations
+      $delete = $item[1];    # number of deleted 
+      $total = $item[3];     # number of all translations + deletions
+      $coverage = $item[4];  # count in training corpus
+      $surface = $item[5];
+      $out = sprintf("%07d", (1-($precision-$word[$surface]["precision"])/$impact_total)*1000000);
+      $out .= "\t<tr><td align=cente>$surface</td>";
+      $out .= sprintf("<td align=right>%.1f%s</td><td align=right>%+.1f%s</td><td align=right><font size=-1>%+.1f/%d</font></td>",
+	     $precision/$total*100,"%",
+	     ($precision-$word[$surface]["precision"])/$total*100,"%",
+	     $precision-$word[$surface]["precision"],$total);
+      $out .= sprintf("<td align=right>%+.2f%s</td><td align=right><font size=-1>%+.1f/%d</font></td>",
+	     ($precision-$word[$surface]["precision"])/$impact_total*100,"%",
+	     $precision-$word[$surface]["precision"],$impact_total);
+      $out .= sprintf("<td align=right>%.1f%s</td><td align=right>%+.1f%s</td><td align=right><font size=-1>%+.1f/%d</font></td>",
+	     $delete/$total*100,"%",
+	     ($delete-$word[$surface]["delete"])/$total*100,"%",
+	     $delete-$word[$surface]["delete"],$total);
+       $out .= sprintf("<td align=right>%+.2f%s</td><td align=right><font size=-1>%+.1f/%d</font></td>",
+	     ($delete-$word[$surface]["delete"])/$impact_total*100,"%",
+	     $delete-$word[$surface]["delete"],$impact_total);
+      $out .= "</tr>";
+      $all_out[] = $out;
+    }
+  }
+  sort($all_out);
+  foreach($all_out as $out) { $o = explode("\t",$out); print $o[1]; }  
+  print "</table>";
+}
 
 function precision_by_coverage_diff_graph($name,$log_info,$log_info_new,$total,$img_width,$sort_type) {
   $keys = array_keys($log_info);
@@ -502,12 +742,22 @@ function bleu_diff() {
   print "</font><BR>\n";
 
   bleu_diff_annotation();
+  print "<font size=-1>";
+  print "<A HREF=\"javascript:diff('bleu','" . $_GET['sort'] . "',5+$count)\">more</A> ";
+  print "</font><BR>\n";
 }
 
 function bleu_diff_annotation() {
   global $set,$id,$id2,$dir;
 
-  // load data
+  // load input
+  $input_annotation = file(get_analysis_filename($dir,$set,$id,"coverage","input-annotation"));
+  for($i=0;$i<count($input_annotation);$i++) {
+    $item = split("\t",$input_annotation[$i]);
+    $input[$i] = $item[0];
+  }
+
+  // load translations
   for($idx=0;$idx<2;$idx++) {
     $data = file(get_analysis_filename($dir,$set,$idx?$id2:$id,"basic","bleu-annotation"));
     for($i=0;$i<count($data);$i++) {
@@ -575,6 +825,7 @@ function bleu_diff_annotation() {
   // display
   for($i=0;$i<$count && $i<count($annotation);$i++) {
      $line = $annotation[$i]; 
+     print "<font size=-2>[src]</font> ".$input[$line["id"]]."<br>";
 
      $word_with_score1 = split(" ",$line["system1"]);
      $word_with_score0 = split(" ",$line["system0"]);

@@ -15,15 +15,13 @@ class ScoreComponentCollection;
 class LMList
 {
 protected:
-  typedef std::list < LanguageModel* > CollType;
-  CollType m_coll;
-
-  size_t m_minInd, m_maxInd;
-
+	typedef std::list < LanguageModel* > CollType;
+	CollType m_coll; 
+	
 public:
-  typedef CollType::iterator iterator;
-  typedef CollType::const_iterator const_iterator;
-  //! iterators
+	typedef CollType::iterator iterator;
+	typedef CollType::const_iterator const_iterator;
+	//! iterators
   const_iterator begin() const {
     return m_coll.begin();
   }
@@ -34,14 +32,12 @@ public:
     return m_coll.size();
   }
 
-  LMList()
-    :m_minInd(std::numeric_limits<size_t>::max())
-    ,m_maxInd(0)
-  {}
-  void CleanUp();
-  ~LMList();
-
-  void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore,  ScoreComponentCollection* breakdown) const;
+	LMList()
+	{}
+    void CleanUp();
+	~LMList();
+	
+	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore, ScoreComponentCollection* breakdown) const;
   void InitializeBeforeSentenceProcessing() {
     std::list<LanguageModel*>::iterator lm_iter;
     for (lm_iter = m_coll.begin();
@@ -59,14 +55,8 @@ public:
     }
   }
 
-  void Add(LanguageModel *lm);
+	void Add(LanguageModel *lm);
 
-  size_t GetMinIndex() const {
-    return m_minInd;
-  }
-  size_t GetMaxIndex() const {
-    return m_maxInd;
-  }
 
 };
 

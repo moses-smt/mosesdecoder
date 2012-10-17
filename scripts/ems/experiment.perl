@@ -961,7 +961,13 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TUNING:factorize-input') {
             &define_tuningevaluation_factorize($i);
         }	
+	elsif ($DO_STEP[$i] eq 'TUNING:factorize-input-devtest') {
+            &define_tuningevaluation_factorize($i);
+        }
  	elsif ($DO_STEP[$i] eq 'TUNING:filter') {
+	    &define_tuningevaluation_filter(undef,$i);
+	}
+	elsif ($DO_STEP[$i] eq 'TUNING:filter-devtest') {
 	    &define_tuningevaluation_filter(undef,$i);
 	}
  	elsif ($DO_STEP[$i] eq 'TUNING:tune') {
@@ -1034,9 +1040,9 @@ sub execute_steps {
 		  delete($DO{$i});
       $repeat_if_passed = 1;
     }
-	}
+  }
 
-	print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
+  print "number of steps doable or running: ".(scalar keys %DO)." at ".`date`;
   foreach my $step (keys %DO) { print "\t".($DO{$step}==2?"running: ":"doable: ").$DO_STEP[$step]."\n"; }
 	return unless scalar keys %DO;
 	
@@ -1057,9 +1063,11 @@ sub execute_steps {
 		# cluster job submission
 		if ($CLUSTER && ! &is_qsub_script($i)) {
 		    $DO{$i}++;
+		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);		    
 		    print "\texecuting $step via qsub ($active active)\n";
-		    my $qsub_args = &get_qsub_args($DO_STEP[$i]);
-		    `qsub $qsub_args -e $step.STDERR -o $step.STDOUT $step`;
+		    my $qsub_command="qsub $qsub_args -S /bin/bash -e $step.STDERR -o $step.STDOUT $step";
+		    print "\t$qsub_command\n" if $VERBOSE;
+		    `$qsub_command`;
 		}
 
 		# execute in fork
@@ -1111,6 +1119,7 @@ sub execute_steps {
 sub get_qsub_args {
     my ($step) = @_;
     my $qsub_args = &get("$step:qsub-settings");
+    $qsub_args = &get("GENERAL:qsub-settings") unless defined($qsub_args);
     $qsub_args = "" unless defined($qsub_args);
     my $memory = &get("$step:qsub-memory");
     $qsub_args .= " -pe memory $memory" if defined($memory);
@@ -1138,8 +1147,6 @@ sub write_info {
     my $step = $DO_STEP[$i];
     my $module_set = $step; $module_set =~ s/:[^:]+$//;
     
-
-
     open(INFO,">".&versionize(&step_file($i)).".INFO") or die "Cannot open: $!";
     my %VALUE = &get_parameters_relevant_for_re_use($i);
     foreach my $parameter (keys %VALUE) {
@@ -1566,40 +1573,239 @@ sub factorize_one_language {
 sub define_tuning_tune {
     my ($step_id) = @_;
     my $dir = &check_and_get("GENERAL:working-dir");
-    
-    my ($tuned_config,
-	$config,$input,$reference) = &get_output_and_input($step_id);
     my $tuning_script = &check_and_get("TUNING:tuning-script");
-    my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
-    my $nbest_size = &check_and_get("TUNING:nbest");
-    my $lambda = &backoff_and_get("TUNING:lambda");
-    my $tune_continue = &backoff_and_get("TUNING:continue");
-    my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
-    my $jobs = &backoff_and_get("TUNING:jobs");
-    my $decoder = &check_backoff_and_get("TUNING:decoder");
-
-    my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
-    $decoder_settings = "" unless $decoder_settings;
-    $decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
-
-    my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
-    $tuning_settings = "" unless $tuning_settings;
-
-    my $cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
-    $cmd .= " --lambdas \"$lambda\"" if $lambda;
-    $cmd .= " --continue" if $tune_continue;
-    $cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
-
-    my $qsub_args = &get_qsub_args("TUNING");
-    $cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
-    $cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
+    my $use_mira = &backoff_and_get("TUNING:use-mira", 0);
     
-    my $tuning_dir = $tuned_config;
-    $tuning_dir =~ s/\/[^\/]+$//;
-    $cmd .= "\nmkdir -p $tuning_dir";
+    # the last 3 variables are only used for mira tuning 
+    my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest) = &get_output_and_input($step_id); 
+
+    my $cmd = "";
+    if ($use_mira) {
+	my $addTags = &backoff_and_get("TUNING:add-tags");
+	my $use_jackknife = &backoff_and_get("TUNING:use-jackknife");
+	if ($addTags && !$use_jackknife) {
+	    my $input_with_tags = $input.".".$VERSION.".tags";
+	    `$addTags < $input > $input_with_tags`;
+	    $input = $input_with_tags;
+	}
+
+	my $addTagsDevtest = &backoff_and_get("TUNING:add-tags-devtest");
+	if ($addTagsDevtest) {
+	    my $input_devtest_with_tags = $input_devtest.".".$VERSION.".tags";
+	    `$addTagsDevtest < $input_devtest > $input_devtest_with_tags`;
+	    $input_devtest = $input_devtest_with_tags;
+	}
+
+	my $experiment_dir = "$dir/tuning/tmp.$VERSION";
+	system("mkdir -p $experiment_dir");
+
+	my $mira_config = "$experiment_dir/mira-config.$VERSION.";
+	my $mira_config_log = $mira_config."log";
+	$mira_config .= "cfg";
+	
+       	write_mira_config($mira_config,$experiment_dir,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest);
+	#$cmd = "$tuning_script -config $mira_config -exec >& $mira_config_log";
+	# we want error messages in top-level log file
+	$cmd = "$tuning_script -config $mira_config -exec ";
+
+	# write script to select the best set of weights after training for the specified number of epochs --> 
+	# cp to tuning/tmp.?/moses.ini
+	my $script_filename = "$experiment_dir/selectBestWeights.";
+	my $script_filename_log = $script_filename."log";
+	$script_filename .= "perl";
+	my $weight_output_file = "$experiment_dir/moses.ini";
+	write_selectBestMiraWeights($experiment_dir, $script_filename, $weight_output_file);
+	$cmd .= "\n$script_filename >& $script_filename_log";
+    }
+    else {
+	my $scripts = &check_backoff_and_get("TUNING:moses-script-dir");
+	my $nbest_size = &check_and_get("TUNING:nbest");
+	my $lambda = &backoff_and_get("TUNING:lambda");
+	my $tune_continue = &backoff_and_get("TUNING:continue");
+	my $skip_decoder = &backoff_and_get("TUNING:skip-decoder");
+	my $tune_inputtype = &backoff_and_get("TUNING:inputtype");
+	my $jobs = &backoff_and_get("TUNING:jobs");
+	my $decoder = &check_backoff_and_get("TUNING:decoder");
+
+	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
+	$decoder_settings = "" unless $decoder_settings;
+	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
+	
+	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
+	$tuning_settings = "" unless $tuning_settings;
+
+	$cmd = "$tuning_script $input $reference $decoder $config --nbest $nbest_size --working-dir $dir/tuning/tmp.$VERSION  --decoder-flags \"$decoder_settings\" --rootdir $scripts $tuning_settings --no-filter-phrase-table";
+	$cmd .= " --lambdas \"$lambda\"" if $lambda;
+	$cmd .= " --continue" if $tune_continue;
+	$cmd .= " --skip-decoder" if $skip_decoder;
+	$cmd .= " --inputtype $tune_inputtype" if $tune_inputtype;
+    
+	my $qsub_args = &get_qsub_args("TUNING");
+	$cmd .= " --queue-flags=\"$qsub_args\"" if ($CLUSTER && $qsub_args);
+	$cmd .= " --jobs $jobs" if $CLUSTER && $jobs;
+	my $tuning_dir = $tuned_config;
+	$tuning_dir =~ s/\/[^\/]+$//;
+	$cmd .= "\nmkdir -p $tuning_dir";
+    }
+    
     $cmd .= "\ncp $dir/tuning/tmp.$VERSION/moses.ini $tuned_config";
 
     &create_step($step_id,$cmd);
+}
+
+sub write_mira_config {
+    my ($config_filename,$expt_dir,$tune_filtered_ini,$input,$reference,$devtest_filtered_ini,$input_devtest,$reference_devtest) = @_;  
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+    my $mira_src_dir = &backoff_and_get("GENERAL:mira-src-dir");
+    my $tuning_decoder_settings = &check_and_get("TUNING:decoder-settings");
+    my $start_weights = &backoff_and_get("TUNING:start-weight-config");
+    my $tuning_settings = &check_and_get("TUNING:tuning-settings");
+    my $jobs = 10; # this overwrites the default in training-expt.perl
+    if ($tuning_settings =~ /^(.*)--jobs (\d+)(.*)$/) {
+	$jobs = $2;
+	$tuning_settings = $1.$3;
+	$tuning_settings =~ s/ +/ /;
+	$tuning_settings =~ s/^ //;
+	$tuning_settings =~ s/ $//;
+    }
+    my $use_jackknife = &backoff_and_get("TUNING:use-jackknife");
+
+    # are we tuning a meta feature?
+    my $tune_meta_feature = &backoff_and_get("TUNING:tune-meta-feature"); 
+
+    my $tune_filtered_ini_start;
+    if (!$use_jackknife) {
+	$tune_filtered_ini =~ /.*\/([A-Za-z0-9\.\-\_]*)$/;
+	$tune_filtered_ini_start = $1;
+	$tune_filtered_ini_start =  $expt_dir."/".$tune_filtered_ini_start.".start";
+	if ($start_weights) {
+	    # apply start weights to filtered ini file, and pass the new ini to mira
+	    print "DEBUG: $RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start \n";
+	    system("$RealBin/support/reuse-weights.perl $start_weights < $tune_filtered_ini > $tune_filtered_ini_start");
+	} 
+    }
+
+    # do we want to continue an interrupted experiment?
+    my $continue_expt = &backoff_and_get("TUNING:continue-expt");
+    my $continue_epoch = &backoff_and_get("TUNING:continue-epoch");
+    my $continue_weights = &backoff_and_get("TUNING:continue-weights");    
+
+    # mira config file
+    open(CFG, ">$config_filename");
+    print CFG "[general] \n";
+    print CFG "name=expt \n";
+    print CFG "fold=0 \n";
+    print CFG "mpienv=openmpi_fillup_mark2 \n";
+    if ($mira_src_dir) {
+	print CFG "moses-home=".$mira_src_dir."\n";
+    }
+    else {
+	print CFG "moses-home=".$moses_src_dir."\n";
+    }
+    print CFG "working-dir=".$expt_dir."\n";
+    if ($continue_expt && $continue_expt > 0) {
+	print CFG "continue-expt=".$continue_expt."\n";
+	print CFG "continue-epoch=".$continue_epoch."\n";
+	print CFG "continue-weights=".$continue_weights."\n";
+    }
+    print CFG "tune-meta-feature=1 \n" if ($tune_meta_feature);
+    print CFG "jackknife=1 \n" if ($use_jackknife);
+    print CFG "wait-for-bleu=1 \n\n";
+    #print CFG "decoder-settings=".$tuning_decoder_settings."\n\n";   
+    print CFG "[train] \n";
+    print CFG "trainer=\${moses-home}/bin/mira \n";
+    if ($use_jackknife) {
+	print CFG "input-files-folds=";
+	for my $i (0..9) {
+	    my $addTags = &backoff_and_get("TUNING:add-tags");
+	    if ($addTags) {
+		my $input_with_tags = $input.".".$VERSION.".tags";
+		`$addTags.only$i < $input.only$i > $input_with_tags.only$i`;
+
+		print CFG $input_with_tags.".only$i, " if $i<9;
+		print CFG $input_with_tags.".only$i" if $i==9;
+	    }
+	    else {
+		print CFG $input.".only$i, " if $i<9;
+		print CFG $input.".only$i" if $i==9;	    
+	    }
+	}
+	print CFG "\n";
+	print CFG "reference-files-folds=";
+	for my $i (0..9) {
+	    print CFG $reference.".only$i, " if $i<9;
+	    print CFG $reference.".only$i" if $i==9;
+	}
+	print CFG "\n";
+	print CFG "moses-ini-files-folds=";
+	for my $i (0..9) {
+	    print CFG $start_weights.".wo$i, " if $i<9;
+	    print CFG $start_weights.".wo$i" if $i==9;
+	}
+	print CFG "\n";
+    }
+    else {
+	print CFG "input-file=".$input."\n";
+	print CFG "reference-files=".$reference."\n";
+	if ($start_weights) {
+	    print CFG "moses-ini-file=".$tune_filtered_ini_start."\n";
+	}
+	else {
+	    print CFG "moses-ini-file=".$tune_filtered_ini."\n";
+	}
+    }
+    print CFG "decoder-settings=".$tuning_decoder_settings." -text-type \"dev\"\n";    
+    print CFG "hours=48 \n"; 
+    print CFG "jobs=$jobs \n";
+    print CFG "extra-args=".$tuning_settings."\n\n";   
+    print CFG "[devtest] \n";
+    if (&get("TRAINING:hierarchical-rule-set")) {
+	print CFG "moses=\${moses-home}/bin/moses_chart \n";
+    }
+    else {
+	print CFG "moses=\${moses-home}/bin/moses \n";
+    }
+    # use multi-bleu to select the best set of weights
+    print CFG "bleu=\${moses-home}/scripts/generic/multi-bleu.perl \n";
+    print CFG "input-file=".$input_devtest."\n";
+    print CFG "reference-file=".$reference_devtest."\n";
+    print CFG "moses-ini-file=".$devtest_filtered_ini."\n";
+    print CFG "decoder-settings=".$tuning_decoder_settings." -text-type \"devtest\"\n";   
+    print CFG "hours=12 \nextra-args= \nskip-dev=1 \nskip-devtest=0 \nskip-submit=0 \n";
+    close(CFG);
+}
+
+sub write_selectBestMiraWeights {
+    my ($expt_dir, $script_filename, $weight_out_file) = @_;
+    open(SCR, ">$script_filename");
+
+    print SCR "#!/usr/bin/perl -w \nuse strict; \n\n";
+    print SCR "my \@devtest_bleu = glob(\"$expt_dir/*_devtest.bleu\"); \# expt_00_0_devtest.bleu \n";
+    print SCR "if (scalar(\@devtest_bleu) == 0) { \n";
+    print SCR "\tprint STDERR \"ERROR: no bleu files globbed, cannot find best weights.\\n\"; \n";
+    print SCR "\texit(1); \n";
+    print SCR "} \n\n";
+    print SCR "my (\$best_weights, \$best_id); \n";
+    print SCR "my \$best_bleu = -1; \n";
+    print SCR "my \$best_ratio = 0; \n";
+    print SCR "foreach my \$bleu_file (\@devtest_bleu) { \n";
+    print SCR "\t\$bleu_file =~ /_([\\d_]+)_devtest.bleu/; \n";
+    print SCR "\tmy \$id = \$1; \n";
+    print SCR "\topen(BLEU, \$bleu_file); \n";
+    print SCR "\tmy \$bleu = <BLEU>; \n";
+    print SCR "\t\$bleu =~ /BLEU = ([\\d\\.]+), .*ratio=([\\d\\.]+), /; \n";
+    print SCR "\tif (\$1 > \$best_bleu || (\$1 == \$best_bleu && (abs(1-\$2) < abs(1-\$best_ratio)))) { \n";
+    print SCR "\t\t\$best_bleu = \$1; \n";
+    print SCR "\t\t\$best_ratio = \$2; \n";
+    print SCR "\t\t# expt1-devtest.00_0.ini (incl. path to sparse weights) \n";
+    print SCR "\t\t(\$best_weights) = glob(\"$expt_dir/*devtest.\$id.ini\"); \n";
+    print SCR "\t} \n";
+    print SCR "} \n\n";
+    print SCR "print STDERR \"Best weights according to BLEU on devtest set: \$best_weights \\n\"; \n";
+    print SCR "system(\"cp \$best_weights $weight_out_file\"); \n\n";
+    
+    close(SCR);
+    system("chmod u+x $script_filename");
 }
 
 sub define_training_prepare_data {
@@ -1803,7 +2009,8 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM) = &get_output_and_input($step_id);
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,$sparse_phrase_table,@LM)
+			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
 
@@ -2232,9 +2439,9 @@ sub define_tuningevaluation_filter {
     my $input_filter;
     $input_filter = &get("EVALUATION:$set:input-filter") unless $tuning_flag;
     $input_filter = &get("TUNING:input-filter") if $tuning_flag;
+    #print "filter: $input_filter \n";
     $input_filter = $input unless $input_filter;
-
-    # additional settings
+    
     my $settings = &backoff_and_get("EVALUATION:$set:filter-settings") unless $tuning_flag;
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
@@ -2244,22 +2451,22 @@ sub define_tuningevaluation_filter {
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
-		# get model, and whether suffix array is used. Determines the pt implementation.
+    # get model, and whether suffix array is used. Determines the pt implementation.
     my $sa_exec_dir = &get("TRAINING:suffix-array");
 
-		my ($ptImpl, $numFF);
-		if ($hierarchical) {
-		  if ($sa_exec_dir) {
-				$ptImpl = 10;  # suffix array
-				$numFF = 7;
-			}
-			else {
-				$ptImpl = 6; # in-mem SCFG
-			}
-		}
-		else {
-			$ptImpl = 0; # phrase-based
-		}
+    my ($ptImpl, $numFF);
+    if ($hierarchical) {
+	if ($sa_exec_dir) {
+	    $ptImpl = 10;  # suffix array
+	    $numFF = 7;
+	}
+	else {
+	    $ptImpl = 6; # in-mem SCFG
+	}
+    }
+    else {
+	$ptImpl = 0; # phrase-based
+    }
 
     # config file specified?
     my ($config,$cmd,$delete_config);
@@ -2301,23 +2508,26 @@ sub define_tuningevaluation_filter {
     }
 
     # filter command
-		if ($sa_exec_dir) {
-			# suffix array
-			$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
-			
-			my $escaped_filter_dir = $filter_dir;
-			$escaped_filter_dir =~ s/\//\\\\\//g;
-			$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
-		}
-		else {
-		  # normal phrase table
-	    $cmd .= "$scripts/training/filter-model-given-input.pl";
-  	  $cmd .= " $filter_dir $config $input_filter $settings\n";
-		}
-		
+    if ($sa_exec_dir) {
+	# suffix array
+	$cmd .= "$scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $sa_exec_dir $phrase_translation_table $input_filter $filter_dir \n";
+	
+	my $escaped_filter_dir = $filter_dir;
+	$escaped_filter_dir =~ s/\//\\\\\//g;
+	$cmd .= "cat $config | sed s/10\\ 0\\ 0\\ 7.*/10\\ 0\\ 0\\ 7\\ $escaped_filter_dir/g > $filter_dir/moses.ini \n";
+    }
+    else {
+	# normal phrase table
+	$cmd .= "$scripts/training/filter-model-given-input.pl";
+	$cmd .= " $filter_dir $config $input_filter $settings\n";
+    }
+    
     # clean-up
     $cmd .= "rm $config" if $delete_config;
 
+    # copy moses.ini into specified file location
+    $cmd .= "\ncp $filter_dir/moses.ini $config\n";
+ 
     &create_step($step_id,$cmd);
 }
 
@@ -2357,6 +2567,13 @@ sub define_evaluation_decode {
       }
     }
 
+    my $addTags = &backoff_and_get("EVALUATION:$set:add-tags");
+    if ($addTags) {
+	my $input_with_tags = $input.".".$VERSION.".tags";
+	`$addTags < $input > $input_with_tags`;
+	$input = $input_with_tags;
+    }
+
     # create command
     my $cmd;
     my $nbest_size;
@@ -2383,6 +2600,7 @@ sub define_evaluation_decode {
 	$cmd = "$decoder $settings -v 0 -f $config < $input > $system_output";
 	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
+    $cmd .= " -text-type \"test\"";
 
     &create_step($step_id,$cmd);
 }

@@ -29,19 +29,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GenerationDictionary.h"
 #include "LM/Base.h"
 #include "StaticData.h"
-#include "ScoreIndexManager.h"
 #include "LMList.h"
 #include "ScoreComponentCollection.h"
 #include "Util.h"
 #include "DummyScoreProducers.h"
 #include "AlignmentInfoCollection.h"
 
+
 using namespace std;
 
 namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string)
-  :Phrase(0),m_transScore(0.0), m_fullScore(0.0), m_sourcePhrase(0)
+  :Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
@@ -53,30 +53,23 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
 TargetPhrase::TargetPhrase()
   :Phrase(ARRAY_SIZE_INCR)
-  , m_transScore(0.0)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  ,m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
 
 TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
-  , m_transScore(0.0)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
   , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
 
-TargetPhrase::~TargetPhrase()
-{
-}
-
 void TargetPhrase::SetScore(const TranslationSystem* system)
 {
   // used when creating translations of unknown words:
-  m_transScore = 0;
   m_fullScore = - system->GetWeightWordPenalty();
 }
 
@@ -93,32 +86,23 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::SetScore(float score)
 {
-  //we use an existing score producer to figure out information for score setting (number of scores and weights)
-  //TODO: is this a good idea?
-  // Assume the default system.
-  const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-  const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
+	//we use an existing score producer to figure out information for score setting (number of scores and weights)
+	//TODO: is this a good idea?
+    // Assume the default system.
+    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
+	const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
+	
+	vector<float> weights = StaticData::Instance().GetWeights(prod);
 
-  //get the weight list
-  unsigned int id = prod->GetScoreBookkeepingID();
+	
+	//find out how many items are in the score vector for this producer	
+	size_t numScores = prod->GetNumScoreComponents();
 
-  const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
-
-  size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
-  size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
-
-  vector<float> weights;
-
-  std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
-
-  //find out how many items are in the score vector for this producer
-  size_t numScores = prod->GetNumScoreComponents();
-
-  //divide up the score among all of the score vectors
-  vector <float> scoreVector(numScores,score/numScores);
-
-  //Now we have what we need to call the full SetScore method
-  SetScore(prod,scoreVector,weights,system.GetWeightWordPenalty(),system.GetLanguageModels());
+	//divide up the score among all of the score vectors
+	vector <float> scoreVector(numScores,score/numScores);
+	
+	//Now we have what we need to call the full SetScore method
+	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, system.GetWeightWordPenalty(), system.GetLanguageModels());
 }
 
 /**
@@ -127,36 +111,32 @@ void TargetPhrase::SetScore(float score)
  */
 void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &scoreVector)
 {
-  //we use an existing score producer to figure out information for score setting (number of scores and weights)
+	//we use an existing score producer to figure out information for score setting (number of scores and weights)
 
-  const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
+    const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
 
-  //get the weight list
-  unsigned int id = prod->GetScoreBookkeepingID();
-  const vector<float> &allWeights = StaticData::Instance().GetAllWeights();
-  size_t beginIndex = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(id);
-  size_t endIndex = StaticData::Instance().GetScoreIndexManager().GetEndIndex(id);
-  vector<float> weights;
-  std::copy(allWeights.begin() +beginIndex, allWeights.begin() + endIndex,std::back_inserter(weights));
+	vector<float> weights = StaticData::Instance().GetWeights(prod);
+	
+	//expand the input weight vector
+	CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
+	Scores sizedScoreVector = scoreVector;
+	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-  //expand the input weight vector
-  CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
-  Scores sizedScoreVector = scoreVector;
-  sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
-
-  SetScore(prod,sizedScoreVector,weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
+	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
                             const Scores &scoreVector,
+                            const ScoreComponentCollection &sparseScoreVector,
                             const vector<float> &weightT,
                             float weightWP, const LMList &languageModels)
 {
   CHECK(weightT.size() == scoreVector.size());
   // calc average score if non-best
 
-  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
+  float transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
+  m_scoreBreakdown.PlusEquals(sparseScoreVector);
 
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;
@@ -194,7 +174,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
     }
   }
 
-  m_fullScore = m_transScore + totalFullScore + totalOOVScore
+  m_fullScore = transScore + totalFullScore + totalOOVScore
                 - (this->GetSize() * weightWP);	 // word penalty
 }
 
@@ -204,11 +184,9 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
                                  ,const LMList &languageModels
                                  ,const WordPenaltyProducer* wpProducer)
 {
-
   CHECK(weightT.size() == scoreVector.size());
-
+  
   // calc average score if non-best
-  m_transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
   // Replicated from TranslationOptions.cpp
@@ -258,7 +236,6 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 {
   // used when creating translations of unknown words (chart decoding)
   m_scoreBreakdown.Assign(producer, scoreVector);
-  m_transScore = 0;
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
@@ -272,8 +249,6 @@ void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, con
      addition to the usual phrase translation scaling factors) the input
      weight factor as last element
   */
-
-  m_transScore = m_scoreBreakdown.PartialInnerProduct(translationScoreProducer, weightT);
 }
 
 void TargetPhrase::ResetScore()
@@ -330,20 +305,81 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
   SetAlignmentInfo(alignmentInfo);
 }
 
-void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+
+
+void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase)
 {
-  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+  std::vector<int> indicator;
+	
+  set<pair<size_t,size_t> > alignmentInfo;
+  for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
+    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
+    MosesShouldUseExceptions(dash);
+    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(dash);
+    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
+    MosesShouldUseExceptions(!dash);
+
+    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    indicator.push_back(sourcePhrase.GetWord(sourcePos).IsNonTerminal() ? 1: 0);
+  }
+
+  SetAlignmentInfo(alignmentInfo, &indicator[0]);
 }
 
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+{
+    m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+}
+
+
+void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo, int* indicator)
+{
+  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo, indicator);
+}
 
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
   os << static_cast<const Phrase&>(tp) << ":" << tp.GetAlignmentInfo();
-  os << ": pC=" << tp.m_transScore << ", c=" << tp.m_fullScore;
+  os << ": c=" << tp.m_fullScore;
 
   return os;
+}
+
+namespace {
+// Not a general function.  Assumes str has something sane like a space or newline after it.  
+float ParseOrThrow(StringPiece str) {
+  char *end;
+  float ret = strtod(str.data(), &end);
+  UTIL_THROW_IF(end == str.data(), util::Exception, "Could not parse " << str << " into a float.");
+  return ret;
+}
+} // namespace
+
+void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, float p_f_given_e) {
+  StringPiece tokens[3];
+  size_t token_count = 0;
+  for (util::TokenIter<util::AnyCharacter,true> tokenize(ruleCountString, " \t"); tokenize && token_count < 3; ++tokenize, ++token_count) {
+    tokens[token_count] = *tokenize;
+  }
+  
+  if (token_count == 2) {
+    // TODO: if no third column is provided, do we have to take smoothing into account (consolidate.cpp)? 
+    // infer rule counts from target counts
+    float targetCount = ParseOrThrow(tokens[0]);
+    float ruleCount = p_f_given_e * targetCount;
+    //float ruleCount2 = p_e_given_f * sourceCount; // could use this to double-check the counts
+    m_ruleCount = floor(ruleCount + 0.5);
+  }
+  else if (token_count == 3) {
+    m_ruleCount = ParseOrThrow(tokens[2]);
+  } else if (token_count == 1) {
+    //glue rule
+    m_ruleCount = ParseOrThrow(tokens[0]);
+  }
+
 }
 
 }

@@ -19,8 +19,7 @@
 
 #include "StackLatticeBuilder.h"
 
-#include "ChartCell.h"
-#include "ChartCellCollection.h"
+#include "ChartRuleLookupManager.h"
 #include "RuleTable/UTrieNode.h"
 #include "Scope3Parser/StackLattice.h"
 #include "Scope3Parser/VarSpanNode.h"
@@ -34,7 +33,7 @@ void StackLatticeBuilder::Build(
     const UTrieNode &ruleNode,
     const VarSpanNode &varSpanNode,
     const std::vector<VarSpanNode::NonTermRange> &ranges,
-    const ChartCellCollection &chartCellColl,
+    const ChartRuleLookupManager &manager,
     StackLattice &lattice,
     std::vector<std::vector<bool> > &checkTable)
 {
@@ -75,13 +74,11 @@ void StackLatticeBuilder::Build(
         StackVec &stackVec = lattice[offset][index][span];
         stackVec.clear();
         stackVec.reserve(labelVec.size());
-        const WordsRange range(start+offset, start+offset+span-1);
-        const ChartCell &chartCell = chartCellColl.Get(range);
         std::vector<bool>::iterator q = checkTable[index].begin();
         for (std::vector<Word>::const_iterator p = labelVec.begin();
              p != labelVec.end(); ++p) {
           const Word &label = *p;
-          const HypoList *stack = chartCell.GetSortedHypotheses(label);
+          const ChartCellLabel *stack = manager.GetTargetLabelSet(start+offset, start+offset+span-1).Find(label);
           stackVec.push_back(stack);
           *q++ = *q || static_cast<bool>(stack);
         }

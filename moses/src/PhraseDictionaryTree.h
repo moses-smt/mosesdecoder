@@ -33,6 +33,17 @@ class PDTimp;
 
 typedef PrefixTreeF<LabelId,OFF_T> PTF;
 
+//typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
+struct StringTgtCand
+{
+  typedef std::vector<std::string const*> Tokens;
+  Tokens tokens;
+  Scores scores;
+  Tokens fnames;
+  std::vector<FValue> fvalues;
+
+};
+
 /** A phrase table for phrase-based decoding that is held on disk, rather than in memory
  *  Wrapper around a PDTimp class
  */
@@ -83,6 +94,7 @@ public:
   // get the target candidates for a given phrase
   void GetTargetCandidates(const std::vector<std::string>& src,
                            std::vector<StringTgtCand>& rv) const;
+                           
 
   // get the target candidates for a given phrase
   void GetTargetCandidates(const std::vector<std::string>& src,

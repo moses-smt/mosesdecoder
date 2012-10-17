@@ -30,7 +30,7 @@ protected:
 public:
   float pcfgSum;
   float count;
-  size_t sentenceId;
+  int sentenceId;
   std::string domain;
 
   std::vector< std::set<size_t> > alignedToT;

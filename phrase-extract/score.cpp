@@ -26,6 +26,7 @@
 #include <assert.h>
 #include <cstring>
 #include <set>
+#include <algorithm>
 
 #include "SafeGetline.h"
 #include "tables-core.h"
@@ -272,12 +273,16 @@ int main(int argc, char* argv[])
     lastPcfgSum = phrasePair.pcfgSum;
 
     // only differs in count? just add count
-    if (lastPhrasePair != NULL && lastPhrasePair->equals( phrasePair )) {
+    if (lastPhrasePair != NULL 
+	&& lastPhrasePair->equals( phrasePair )
+	&& (!domainFlag
+	    || domain->getDomainOfSentence( lastPhrasePair->sentenceId )
+	    == domain->getDomainOfSentence( phrasePair.sentenceId ) )) {
       lastPhrasePair->count += phrasePair.count;
       lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
       continue;
     }
-
+    
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
@@ -708,8 +713,10 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   // alignment info for non-terminals
   if (! inverseFlag) {
     if (hierarchicalFlag) {
-      // always output alignment if hiero style, but only for non-terms
+      // always output alignment if hiero style, but only for non-terms 
+      // (eh: output all alignments, needed for some feature functions) 
       assert(phraseT.size() == bestAlignment.alignedToT.size() + 1);
+      std::vector<std::string> alignment;
       for(size_t j = 0; j < phraseT.size() - 1; j++) {
         if (isNonTerminal(vcbT.getWord( phraseT[j] ))) {
           if (bestAlignment.alignedToT[ j ].size() != 1) {
@@ -718,19 +725,27 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
             assert(bestAlignment.alignedToT[ j ].size() == 1);
           }
           int sourcePos = *(bestAlignment.alignedToT[ j ].begin());
-          phraseTableFile << sourcePos << "-" << j << " ";
-        }
-        else if (wordAlignmentFlag) {
-          const std::set<size_t> &sourceSet = bestAlignment.alignedToT[ j ];
-          std::set<size_t>::const_iterator iter;
-          for (iter = sourceSet.begin(); iter != sourceSet.end(); ++iter)
-          {
-            int sourcePos = *iter;
-            phraseTableFile << sourcePos << "-" << j << " ";            
-          }
-        }
-      }
-    } else if (wordAlignmentFlag) {
+          //phraseTableFile << sourcePos << "-" << j << " ";
+          std::stringstream point;
+          point << sourcePos << "-" << j;
+          alignment.push_back(point.str());
+        } else {
+          set<size_t>::iterator setIter;
+          for(setIter = (bestAlignment.alignedToT[j]).begin(); setIter != (bestAlignment.alignedToT[j]).end(); setIter++) {
+            int sourcePos = *setIter;
+            //phraseTableFile << sourcePos << "-" << j << " ";
+            std::stringstream point;
+            point << sourcePos << "-" << j;
+            alignment.push_back(point.str());
+           }
+         }
+       }
+       // now print all alignments, sorted by source index
+       sort(alignment.begin(), alignment.end());
+       for (size_t i = 0; i < alignment.size(); ++i) {
+          phraseTableFile << alignment[i] << " ";
+       }
+     } else if (wordAlignmentFlag) {
       // alignment info in pb model
       for(size_t j=0; j<bestAlignment.alignedToT.size(); j++) {
         const set< size_t > &aligned = bestAlignment.alignedToT[j];
@@ -740,6 +755,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
       }
     }
   }
+
 
   // counts
   

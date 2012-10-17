@@ -61,7 +61,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     TargetPhrase *targetPhrase = itr->second;
     //std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-    targetPhrase->SetScore(m_feature, scoreVector, m_weight, m_weightWP, *m_languageModels);
+    targetPhrase->SetScore(m_feature, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels);
     //cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
     ret->Add(targetPhrase);
   }
@@ -79,7 +79,7 @@ void PhraseDictionaryDynSuffixArray::deleteSnt(unsigned /* idx */, unsigned /* n
   // need to implement --
 }
 
-ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollection&)
+ChartRuleLookupManager *PhraseDictionaryDynSuffixArray::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
 {
   CHECK(false);
   return 0;

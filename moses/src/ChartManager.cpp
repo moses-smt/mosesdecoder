@@ -23,6 +23,7 @@
 #include "ChartManager.h"
 #include "ChartCell.h"
 #include "ChartHypothesis.h"
+#include "ChartTranslationOptions.h"
 #include "ChartTrellisDetourQueue.h"
 #include "ChartTrellisNode.h"
 #include "ChartTrellisPath.h"
@@ -30,6 +31,7 @@
 #include "StaticData.h"
 #include "DecodeStep.h"
 #include "TreeInput.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 using namespace Moses;
@@ -45,28 +47,17 @@ extern bool g_debug;
 ChartManager::ChartManager(InputType const& source, const TranslationSystem* system)
   :m_source(source)
   ,m_hypoStackColl(source, *this)
-  ,m_transOptColl(source, system, m_hypoStackColl, m_ruleLookupManagers)
   ,m_system(system)
   ,m_start(clock())
   ,m_hypothesisId(0)
+  ,m_parser(source, *system, m_hypoStackColl)
+  ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
 {
-  m_system->InitializeBeforeSentenceProcessing(source);
-  const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();
-  m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
-       p != dictionaries.end(); ++p) {
-    PhraseDictionaryFeature *pdf = *p;
-    const PhraseDictionary *dict = pdf->GetDictionary();
-    PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, m_hypoStackColl));
-  }
 }
 
 ChartManager::~ChartManager()
 {
   m_system->CleanUpAfterSentenceProcessing(m_source);
-
-  RemoveAllInColl(m_ruleLookupManagers);
 
   clock_t end = clock();
   float et = (end - m_start);
@@ -95,14 +86,16 @@ void ChartManager::ProcessSentence()
       WordsRange range(startPos, endPos);
 
       // create trans opt
-      m_transOptColl.CreateTranslationOptionsForRange(range);
+      m_translationOptionList.Clear();
+      m_parser.Create(range, m_translationOptionList);
+      m_translationOptionList.ApplyThreshold();
+      PreCalculateScores();
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
 
-      cell.ProcessSentence(m_transOptColl.GetTranslationOptionList()
-                           ,m_hypoStackColl);
-      m_transOptColl.Clear();
+      cell.ProcessSentence(m_translationOptionList, m_hypoStackColl);
+      m_translationOptionList.Clear();
       cell.PruneToSize();
       cell.CleanupArcList();
       cell.SortHypotheses();
@@ -135,13 +128,13 @@ void ChartManager::ProcessSentence()
  *  @todo check walls & zones. Check that the implementation doesn't leak, xml options sometimes does if you're not careful
  */
 void ChartManager::AddXmlChartOptions() {
-  const std::vector <ChartTranslationOption*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
+  const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
   if (xmlChartOptionsList.size() == 0) return;
 
-  for(std::vector<ChartTranslationOption*>::const_iterator i = xmlChartOptionsList.begin();
+  for(std::vector<ChartTranslationOptions*>::const_iterator i = xmlChartOptionsList.begin();
       i != xmlChartOptionsList.end(); ++i) {
-    ChartTranslationOption* opt = *i;
+    ChartTranslationOptions* opt = *i;
 
     Moses::Scores wordPenaltyScore(1, -0.434294482); // TODO what is this number?
     opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((ScoreProducer*)m_system->GetWordPenaltyProducer(), wordPenaltyScore);
@@ -192,21 +185,16 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(*hypo));
 
   // Add it to the n-best list.
-  ret.Add(basePath);
   if (count == 1) {
+	ret.Add(basePath);
     return;
-  }
-
-  // Record the output phrase if distinct translations are required.
-  set<Phrase> distinctHyps;
-  if (onlyDistinct) {
-    distinctHyps.insert(basePath->GetOutputPhrase());
   }
 
   // Set a limit on the number of detours to pop.  If the n-best list is
   // restricted to distinct translations then this limit should be bigger
   // than n.  The n-best factor determines how much bigger the limit should be.
-  const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+  const StaticData &staticData = StaticData::Instance();
+  const size_t nBestFactor = staticData.GetNBestFactor();
   size_t popLimit;
   if (!onlyDistinct) {
     popLimit = count-1;
@@ -222,36 +210,48 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   // contain no more than popLimit items.
   ChartTrellisDetourQueue contenders(popLimit);
 
-  // Create a ChartTrellisDetour for each single-point deviation from basePath
-  // and add them to the queue.
-  CreateDeviantPaths(basePath, contenders);
-
+  // Get all complete translations
+  Word *w = new Word();
+  //w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "TOP", true);
+  w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "S", true);
+  const HypoList topHypos = *(lastCell.GetSortedHypotheses(*w));
+  
+  // Create a ChartTrellisDetour for each complete translation and add it to the queue
+  for (size_t i=0; i<topHypos.size(); ++i) {
+	  const ChartHypothesis &hypo = *(topHypos[i]);
+	  boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(hypo));
+	  ChartTrellisDetour *detour = new ChartTrellisDetour(basePath, basePath->GetFinalNode(), hypo);
+	  contenders.Push(detour);
+  }
+ 	
+  // Record the output phrase if distinct translations are required.
+  set<Phrase> distinctHyps;
+  
   // MAIN loop
-  for (size_t i = 0;
-       ret.GetSize() < count && !contenders.Empty() && i < popLimit;
-       ++i) {
+  for (size_t i = 0; ret.GetSize() < count && !contenders.Empty() && i < popLimit; ++i) {
     // Get the best detour from the queue.
     std::auto_ptr<const ChartTrellisDetour> detour(contenders.Pop());
     CHECK(detour.get());
 
     // Create a full base path from the chosen detour.
-    basePath.reset(new ChartTrellisPath(*detour));
-
+    //basePath.reset(new ChartTrellisPath(*detour));
+    boost::shared_ptr<ChartTrellisPath> path(new ChartTrellisPath(*detour));
+    
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
-    CHECK(basePath->GetDeviationPoint());
-    CreateDeviantPaths(basePath, *(basePath->GetDeviationPoint()), contenders);
+    CHECK(path->GetDeviationPoint());
+    CreateDeviantPaths(path, *(path->GetDeviationPoint()), contenders);
 
     // If the n-best list is allowed to contain duplicate translations (at the
     // surface level) then add the new path unconditionally, otherwise check
     // whether the translation has seen before.
     if (!onlyDistinct) {
-      ret.Add(basePath);
+      ret.Add(path);
     } else {
-      Phrase tgtPhrase = basePath->GetOutputPhrase();
+      Phrase tgtPhrase = path->GetOutputPhrase();
       if (distinctHyps.insert(tgtPhrase).second) {
-        ret.Add(basePath);
+        ret.Add(path);
       }
     }
   }
@@ -342,4 +342,42 @@ void ChartManager::CreateDeviantPaths(
   }
 }
 
+  
+void ChartManager::PreCalculateScores() 
+{
+  for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
+    const ChartTranslationOptions& cto = m_translationOptionList.Get(i);
+    for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
+     j != cto.GetTargetPhraseCollection().end(); ++j) {
+      const TargetPhrase* targetPhrase = *j;
+      if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
+        ChartBasedFeatureContext context(*targetPhrase,m_source);
+        const vector<const StatelessFeatureFunction*>& sfs =
+          m_system->GetStatelessFeatureFunctions();
+        ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
+        for (size_t k = 0; k < sfs.size(); ++k) {
+          if (!sfs[k]->ComputeValueInTranslationTable()) {
+            sfs[k]->EvaluateChart(context,&breakdown);
+          }
+        }
+      }
+    }
+  }
+}
+
+void ChartManager::InsertPreCalculatedScores(
+    const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const 
+{
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter = 
+    m_precalculatedScores.find(targetPhrase);
+  if (scoreIter != m_precalculatedScores.end()) {
+    scoreBreakdown->PlusEquals(scoreIter->second);
+  } else {
+    TRACE_ERR("ERROR: " << targetPhrase << " missing from precalculation cache" << endl);
+    assert(0);  
+  }
+
+}
+
+  
 } // namespace Moses

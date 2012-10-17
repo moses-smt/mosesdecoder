@@ -19,8 +19,7 @@
 
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
-#include "ChartTranslationOption.h"
-#include "ChartTranslationOptionCollection.h"
+#include "ChartTranslationOptions.h"
 #include "RuleCubeItem.h"
 #include "RuleCubeQueue.h"
 #include "WordsRange.h"
@@ -37,7 +36,7 @@ std::size_t hash_value(const HypothesisDimension &dimension)
   return hasher(dimension.GetHypothesis());
 }
 
-RuleCubeItem::RuleCubeItem(const ChartTranslationOption &transOpt,
+RuleCubeItem::RuleCubeItem(const ChartTranslationOptions &transOpt,
                            const ChartCellCollection &/*allChartCells*/)
   : m_translationDimension(0,
                            transOpt.GetTargetPhraseCollection().GetCollection())
@@ -75,7 +74,7 @@ void RuleCubeItem::EstimateScore()
   }
 }
 
-void RuleCubeItem::CreateHypothesis(const ChartTranslationOption &transOpt,
+void RuleCubeItem::CreateHypothesis(const ChartTranslationOptions &transOpt,
                                     ChartManager &manager)
 {
   m_hypothesis = new ChartHypothesis(transOpt, *this, manager);
@@ -97,7 +96,7 @@ void RuleCubeItem::CreateHypothesisDimensions(const StackVec &stackVec)
 {
   for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
        ++p) {
-    const HypoList *stack = *p;
+    const HypoList *stack = (*p)->GetStack().cube;
     assert(stack);
 
     // there have to be hypothesis with the desired non-terminal

@@ -11,6 +11,8 @@
 		1E0BA41915B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h */; };
 		1E1D824015AC29BB00FE42E9 /* FileHandler.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */; };
 		1E1D824115AC29BB00FE42E9 /* FileHandler.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E1D823F15AC29BB00FE42E9 /* FileHandler.h */; };
+		1E365EEA16120F4600BA335B /* ChartTranslationOptions.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E365EE816120F4600BA335B /* ChartTranslationOptions.cpp */; };
+		1E365EEB16120F4600BA335B /* ChartTranslationOptions.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E365EE916120F4600BA335B /* ChartTranslationOptions.h */; };
 		1E619EA115B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E619E9F15B8713600C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp */; };
 		1E619EA215B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E619EA015B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h */; };
 		1E6D9FD615D027560064D436 /* BlockHashIndex.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E6D9FBD15D027560064D436 /* BlockHashIndex.cpp */; };
@@ -71,10 +73,6 @@
 		1EC7375914B977AB00238410 /* ChartManager.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735E614B977AA00238410 /* ChartManager.cpp */; };
 		1EC7375A14B977AB00238410 /* ChartManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735E714B977AA00238410 /* ChartManager.h */; };
 		1EC7375C14B977AB00238410 /* ChartRuleLookupManager.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735E914B977AA00238410 /* ChartRuleLookupManager.h */; };
-		1EC7376114B977AB00238410 /* ChartTranslationOption.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735EE14B977AA00238410 /* ChartTranslationOption.cpp */; };
-		1EC7376214B977AB00238410 /* ChartTranslationOption.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735EF14B977AA00238410 /* ChartTranslationOption.h */; };
-		1EC7376314B977AB00238410 /* ChartTranslationOptionCollection.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735F014B977AA00238410 /* ChartTranslationOptionCollection.cpp */; };
-		1EC7376414B977AB00238410 /* ChartTranslationOptionCollection.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735F114B977AA00238410 /* ChartTranslationOptionCollection.h */; };
 		1EC7376514B977AB00238410 /* ChartTranslationOptionList.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735F214B977AA00238410 /* ChartTranslationOptionList.cpp */; };
 		1EC7376614B977AB00238410 /* ChartTranslationOptionList.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC735F314B977AA00238410 /* ChartTranslationOptionList.h */; };
 		1EC7376714B977AB00238410 /* ChartTrellisDetour.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735F414B977AA00238410 /* ChartTrellisDetour.cpp */; };
@@ -137,8 +135,6 @@
 		1EC737A814B977AB00238410 /* GlobalLexicalModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7363F14B977AA00238410 /* GlobalLexicalModel.cpp */; };
 		1EC737A914B977AB00238410 /* GlobalLexicalModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364014B977AA00238410 /* GlobalLexicalModel.h */; };
 		1EC737AA14B977AB00238410 /* gzfilebuf.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364114B977AA00238410 /* gzfilebuf.h */; };
-		1EC737AB14B977AB00238410 /* hash.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7364214B977AA00238410 /* hash.cpp */; };
-		1EC737AC14B977AB00238410 /* hash.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364314B977AA00238410 /* hash.h */; };
 		1EC737AD14B977AB00238410 /* Hypothesis.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7364514B977AA00238410 /* Hypothesis.cpp */; };
 		1EC737AE14B977AB00238410 /* Hypothesis.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC7364614B977AA00238410 /* Hypothesis.h */; };
 		1EC737AF14B977AB00238410 /* HypothesisStack.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC7364714B977AA00238410 /* HypothesisStack.cpp */; };
@@ -343,6 +339,8 @@
 		1E0BA41715B70E5F00AC70E1 /* PhraseDictionaryFuzzyMatch.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = PhraseDictionaryFuzzyMatch.h; path = ../../moses/src/RuleTable/PhraseDictionaryFuzzyMatch.h; sourceTree = "<group>"; };
 		1E1D823E15AC29BB00FE42E9 /* FileHandler.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = FileHandler.cpp; sourceTree = "<group>"; };
 		1E1D823F15AC29BB00FE42E9 /* FileHandler.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = FileHandler.h; sourceTree = "<group>"; };
+		1E365EE816120F4600BA335B /* ChartTranslationOptions.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptions.cpp; path = ../../moses/src/ChartTranslationOptions.cpp; sourceTree = "<group>"; };
+		1E365EE916120F4600BA335B /* ChartTranslationOptions.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptions.h; path = ../../moses/src/ChartTranslationOptions.h; sourceTree = "<group>"; };
 		1E619E9F15B8713600C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartRuleLookupManagerMemoryPerSentence.cpp; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp; sourceTree = "<group>"; };
 		1E619EA015B8713700C2D7A7 /* ChartRuleLookupManagerMemoryPerSentence.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManagerMemoryPerSentence.h; path = ../../moses/src/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h; sourceTree = "<group>"; };
 		1E6D9FBD15D027560064D436 /* BlockHashIndex.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = BlockHashIndex.cpp; path = ../../moses/src/CompactPT/BlockHashIndex.cpp; sourceTree = "<group>"; };
@@ -403,10 +401,6 @@
 		1EC735E614B977AA00238410 /* ChartManager.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartManager.cpp; path = ../../moses/src/ChartManager.cpp; sourceTree = "<group>"; };
 		1EC735E714B977AA00238410 /* ChartManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartManager.h; path = ../../moses/src/ChartManager.h; sourceTree = "<group>"; };
 		1EC735E914B977AA00238410 /* ChartRuleLookupManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartRuleLookupManager.h; path = ../../moses/src/ChartRuleLookupManager.h; sourceTree = "<group>"; };
-		1EC735EE14B977AA00238410 /* ChartTranslationOption.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOption.cpp; path = ../../moses/src/ChartTranslationOption.cpp; sourceTree = "<group>"; };
-		1EC735EF14B977AA00238410 /* ChartTranslationOption.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOption.h; path = ../../moses/src/ChartTranslationOption.h; sourceTree = "<group>"; };
-		1EC735F014B977AA00238410 /* ChartTranslationOptionCollection.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionCollection.cpp; path = ../../moses/src/ChartTranslationOptionCollection.cpp; sourceTree = "<group>"; };
-		1EC735F114B977AA00238410 /* ChartTranslationOptionCollection.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionCollection.h; path = ../../moses/src/ChartTranslationOptionCollection.h; sourceTree = "<group>"; };
 		1EC735F214B977AA00238410 /* ChartTranslationOptionList.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTranslationOptionList.cpp; path = ../../moses/src/ChartTranslationOptionList.cpp; sourceTree = "<group>"; };
 		1EC735F314B977AA00238410 /* ChartTranslationOptionList.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ChartTranslationOptionList.h; path = ../../moses/src/ChartTranslationOptionList.h; sourceTree = "<group>"; };
 		1EC735F414B977AA00238410 /* ChartTrellisDetour.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ChartTrellisDetour.cpp; path = ../../moses/src/ChartTrellisDetour.cpp; sourceTree = "<group>"; };
@@ -469,8 +463,6 @@
 		1EC7363F14B977AA00238410 /* GlobalLexicalModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = GlobalLexicalModel.cpp; path = ../../moses/src/GlobalLexicalModel.cpp; sourceTree = "<group>"; };
 		1EC7364014B977AA00238410 /* GlobalLexicalModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = GlobalLexicalModel.h; path = ../../moses/src/GlobalLexicalModel.h; sourceTree = "<group>"; };
 		1EC7364114B977AA00238410 /* gzfilebuf.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = gzfilebuf.h; path = ../../moses/src/gzfilebuf.h; sourceTree = "<group>"; };
-		1EC7364214B977AA00238410 /* hash.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = hash.cpp; path = ../../moses/src/hash.cpp; sourceTree = "<group>"; };
-		1EC7364314B977AA00238410 /* hash.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = hash.h; path = ../../moses/src/hash.h; sourceTree = "<group>"; };
 		1EC7364414B977AA00238410 /* hypergraph.proto */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = hypergraph.proto; path = ../../moses/src/hypergraph.proto; sourceTree = "<group>"; };
 		1EC7364514B977AA00238410 /* Hypothesis.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = Hypothesis.cpp; path = ../../moses/src/Hypothesis.cpp; sourceTree = "<group>"; };
 		1EC7364614B977AA00238410 /* Hypothesis.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = Hypothesis.h; path = ../../moses/src/Hypothesis.h; sourceTree = "<group>"; };
@@ -725,10 +717,8 @@
 				1EC735E614B977AA00238410 /* ChartManager.cpp */,
 				1EC735E714B977AA00238410 /* ChartManager.h */,
 				1EC735E914B977AA00238410 /* ChartRuleLookupManager.h */,
-				1EC735EE14B977AA00238410 /* ChartTranslationOption.cpp */,
-				1EC735EF14B977AA00238410 /* ChartTranslationOption.h */,
-				1EC735F014B977AA00238410 /* ChartTranslationOptionCollection.cpp */,
-				1EC735F114B977AA00238410 /* ChartTranslationOptionCollection.h */,
+				1E365EE816120F4600BA335B /* ChartTranslationOptions.cpp */,
+				1E365EE916120F4600BA335B /* ChartTranslationOptions.h */,
 				1EC735F214B977AA00238410 /* ChartTranslationOptionList.cpp */,
 				1EC735F314B977AA00238410 /* ChartTranslationOptionList.h */,
 				1EC735F414B977AA00238410 /* ChartTrellisDetour.cpp */,
@@ -778,8 +768,6 @@
 				1EC7363F14B977AA00238410 /* GlobalLexicalModel.cpp */,
 				1EC7364014B977AA00238410 /* GlobalLexicalModel.h */,
 				1EC7364114B977AA00238410 /* gzfilebuf.h */,
-				1EC7364214B977AA00238410 /* hash.cpp */,
-				1EC7364314B977AA00238410 /* hash.h */,
 				1EC7364414B977AA00238410 /* hypergraph.proto */,
 				1EF8F2C3159A61970047B613 /* HypoList.h */,
 				1EC7364514B977AA00238410 /* Hypothesis.cpp */,
@@ -1124,8 +1112,6 @@
 				1EC7375814B977AB00238410 /* ChartHypothesisCollection.h in Headers */,
 				1EC7375A14B977AB00238410 /* ChartManager.h in Headers */,
 				1EC7375C14B977AB00238410 /* ChartRuleLookupManager.h in Headers */,
-				1EC7376214B977AB00238410 /* ChartTranslationOption.h in Headers */,
-				1EC7376414B977AB00238410 /* ChartTranslationOptionCollection.h in Headers */,
 				1EC7376614B977AB00238410 /* ChartTranslationOptionList.h in Headers */,
 				1EC7376814B977AB00238410 /* ChartTrellisDetour.h in Headers */,
 				1EC7376A14B977AB00238410 /* ChartTrellisDetourQueue.h in Headers */,
@@ -1163,7 +1149,6 @@
 				1EC737A714B977AB00238410 /* GenerationDictionary.h in Headers */,
 				1EC737A914B977AB00238410 /* GlobalLexicalModel.h in Headers */,
 				1EC737AA14B977AB00238410 /* gzfilebuf.h in Headers */,
-				1EC737AC14B977AB00238410 /* hash.h in Headers */,
 				1EC737AE14B977AB00238410 /* Hypothesis.h in Headers */,
 				1EC737B014B977AB00238410 /* HypothesisStack.h in Headers */,
 				1EC737B214B977AB00238410 /* HypothesisStackCubePruning.h in Headers */,
@@ -1296,6 +1281,7 @@
 				1E6D9FED15D027560064D436 /* StringVector.h in Headers */,
 				1E6D9FEE15D027560064D436 /* TargetPhraseCollectionCache.h in Headers */,
 				1EC32DB915D2D90700A313B1 /* ThrowingFwrite.h in Headers */,
+				1E365EEB16120F4600BA335B /* ChartTranslationOptions.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1325,7 +1311,7 @@
 		08FB7793FE84155DC02AAC07 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0410;
+				LastUpgradeCheck = 0420;
 			};
 			buildConfigurationList = 1DEB91EF08733DB70010E9CD /* Build configuration list for PBXProject "moses" */;
 			compatibilityVersion = "Xcode 3.2";
@@ -1360,8 +1346,6 @@
 				1EC7375514B977AB00238410 /* ChartHypothesis.cpp in Sources */,
 				1EC7375714B977AB00238410 /* ChartHypothesisCollection.cpp in Sources */,
 				1EC7375914B977AB00238410 /* ChartManager.cpp in Sources */,
-				1EC7376114B977AB00238410 /* ChartTranslationOption.cpp in Sources */,
-				1EC7376314B977AB00238410 /* ChartTranslationOptionCollection.cpp in Sources */,
 				1EC7376514B977AB00238410 /* ChartTranslationOptionList.cpp in Sources */,
 				1EC7376714B977AB00238410 /* ChartTrellisDetour.cpp in Sources */,
 				1EC7376914B977AB00238410 /* ChartTrellisDetourQueue.cpp in Sources */,
@@ -1387,7 +1371,6 @@
 				1EC737A414B977AB00238410 /* FloydWarshall.cpp in Sources */,
 				1EC737A614B977AB00238410 /* GenerationDictionary.cpp in Sources */,
 				1EC737A814B977AB00238410 /* GlobalLexicalModel.cpp in Sources */,
-				1EC737AB14B977AB00238410 /* hash.cpp in Sources */,
 				1EC737AD14B977AB00238410 /* Hypothesis.cpp in Sources */,
 				1EC737AF14B977AB00238410 /* HypothesisStack.cpp in Sources */,
 				1EC737B114B977AB00238410 /* HypothesisStackCubePruning.cpp in Sources */,
@@ -1496,6 +1479,7 @@
 				1E6D9FE915D027560064D436 /* PhraseDictionaryCompact.cpp in Sources */,
 				1E6D9FEB15D027560064D436 /* PhraseTableCreator.cpp in Sources */,
 				1EC32DB815D2D90700A313B1 /* ThrowingFwrite.cpp in Sources */,
+				1E365EEA16120F4600BA335B /* ChartTranslationOptions.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

@@ -13,7 +13,7 @@
 #endif
 
 #ifndef HAVE_BOOST
-//#define HAVE_BOOST
+#define HAVE_BOOST
 #endif
 
 #ifndef HAVE_THREADS

@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <boost/shared_ptr.hpp>
 #include "Vocab.h"
 
 namespace Moses
@@ -70,9 +71,10 @@ public:
     m_vocabId = vocabId;
   }
 
-  Moses::Word *ConvertToMoses(Moses::FactorDirection direction
-                              , const std::vector<Moses::FactorType> &outputFactorsVec
-                              , const Vocab &vocab) const;
+  void ConvertToMoses(
+    const std::vector<Moses::FactorType> &outputFactorsVec,
+    const Vocab &vocab,
+    Moses::Word &overwrite) const;
 
 	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
@@ -81,5 +83,7 @@ public:
   bool operator==(const Word &compare) const;
 
 };
+
+typedef boost::shared_ptr<Word> WordPtr;
 }
 

@@ -71,11 +71,11 @@ print "extension is $ext\n";
 
 if ($ext eq "gz")
 {
-    $cmd = "$irstPath/compile-lm $tempPath/iarpa.gz --text yes /dev/stdout | gzip -c > $lmPath";
+    $cmd = "$irstPath/compile-lm --text $tempPath/iarpa.gz /dev/stdout | gzip -c > $lmPath";
 }
 else
 {
-    $cmd = "$irstPath/compile-lm $tempPath/iarpa.gz --text yes $lmPath";
+    $cmd = "$irstPath/compile-lm --text $tempPath/iarpa.gz $lmPath";
 }
 
 print STDERR "EXECUTING $cmd\n";

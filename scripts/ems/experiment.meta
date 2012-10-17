@@ -275,12 +275,7 @@ binarize
 	ignore-unless: script
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
-<<<<<<< HEAD
 	error: set kMaxOrder to at least this value
-=======
-  error: set KENLM_MAX_ORDER to at least this value
->>>>>>> b317522563feb4ca7ff978a0de661ec2189934ea
-
 [TRAINING] single
 consolidate
 	in: CORPUS:clean-split-stem
@@ -366,13 +361,13 @@ pcfg-extract
   default-name: model/pcfg
   ignore-unless: use-pcfg-feature
   rerun-on-change: use-pcfg-feature
-  template: $moses-script-dir/training/phrase-extract/pcfg-extract/pcfg-extract < IN.$output-extension > OUT.$output-extension
+  template: $moses-bin-dir/pcfg-extract < IN.$output-extension > OUT.$output-extension
 pcfg-score
   in: parse-relaxed-corpus pcfg
   out: scored-corpus
   default-name: model/scored-corpus
   pass-unless: use-pcfg-feature
-  template: ln -s IN.$input-extension OUT.$input-extension ; $moses-script-dir/training/phrase-extract/pcfg-score/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
+  template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
 extract-phrases
 	in: word-alignment scored-corpus
 	out: extracted-phrases
@@ -413,7 +408,7 @@ build-sparse-lexical
         default-name: model/most-frequent-words
 	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
 create-config
-	in: reordering-table phrase-translation-table generation-table sparse-lexical domains INTERPOLATED-LM:binlm LM:binlm
+	in: reordering-table phrase-translation-table generation-table sparse-lexical domains sparse-phrase-translation-table INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -477,11 +472,24 @@ input-from-sgm
 	out: raw-input
 	default-name: tuning/input.txt
 	template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
+input-devtest-from-sgm
+        in: input-devtest-sgm
+        out: raw-input-devtest
+        default-name: tuning/input.devtest.txt
+	ignore-unless: use-mira
+        template: $moses-script-dir/ems/support/input-from-sgm.perl < IN > OUT
 tokenize-input
 	in: raw-input
 	out: tokenized-input
 	default-name: tuning/input.tok
 	pass-unless: input-tokenizer
+	template: $input-tokenizer < IN > OUT
+tokenize-input-devtest
+	in: raw-input-devtest
+	out: tokenized-input-devtest
+	default-name: tuning/input.devtest.tok
+	pass-unless: input-tokenizer
+	ignore-unless: use-mira
 	template: $input-tokenizer < IN > OUT
 parse-input
 	in: tokenized-input
@@ -489,11 +497,25 @@ parse-input
 	default-name: tuning/input.parsed
 	pass-unless: input-parser
 	template: $input-parser < IN > OUT
+parse-input-devtest
+	in: tokenized-input-devtest
+	out: parsed-input-devtest
+	default-name: tuning/input.devtest.parsed
+	pass-unless: input-parser
+	ignore-unless: use-mira	
+	template: $input-parser < IN > OUT
 parse-relax-input
 	in: parsed-input
 	out: parse-relaxed-input
 	default-name: tuning/input.parse-relaxed
 	pass-unless: input-parse-relaxer
+        template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
+parse-relax-input-devtest
+	in: parsed-input-devtest
+	out: parse-relaxed-input-devtest
+	default-name: tuning/input.devtest.parse-relaxed
+	pass-unless: input-parse-relaxer
+	ignore-unless: use-mira
         template: $input-parse-relaxer < IN.$input-extension > OUT.$input-extension
 factorize-input
 	in: parse-relaxed-input
@@ -503,32 +525,70 @@ factorize-input
 	pass-unless: TRAINING:input-factors
 	error: can't open
 	error: incompatible number of words in factor
+factorize-input-devtest
+	in: parse-relaxed-input-devtest
+	out: factorized-input-devtest
+	default-name: tuning/input.devtest.factorized
+	rerun-on-change: TRAINING:input-factors
+	pass-unless: TRAINING:input-factors
+	ignore-unless: use-mira
+	error: can't open
+	error: incompatible number of words in factor
 lowercase-input
 	in: factorized-input
-	out: cased-input
+	out: truecased-input
 	default-name: tuning/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
+lowercase-input-devtest
+	in: factorized-input-devtest
+	out: truecased-input-devtest
+	default-name: tuning/input.devtest.lc
+	pass-unless: input-lowercaser
+	ignore-unless: use-mira
+	ignore-if: input-truecaser
+	template: $input-lowercaser < IN > OUT
 truecase-input
 	in: factorized-input TRUECASER:truecase-model
-	out: cased-input
+	out: truecased-input
 	rerun-on-change: input-truecaser
 	default-name: tuning/input.tc
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
+truecase-input-devtest
+	in: factorized-input-devtest TRUECASER:truecase-model
+	out: truecased-input-devtest
+	rerun-on-change: input-truecaser
+	default-name: tuning/input.devtest.tc
+	ignore-unless: AND input-truecaser use-mira
+        template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
-	in: cased-input SPLITTER:splitter-model
+	in: truecased-input SPLITTER:splitter-model
 	out: input
 	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
+	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
+split-input-devtest
+	in: truecased-input-devtest SPLITTER:splitter-model
+	out: input-devtest
+	rerun-on-change: input-splitter
+	default-name: tuning/input.devtest.split
+	pass-unless: input-splitter
+	ignore-unless: use-mira
 	template: $input-splitter -model IN1.$input-extension $input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
 	default-name: tuning/reference.txt
 	template: $moses-script-dir/ems/support/reference-from-sgm.perl IN IN1 OUT
+reference-devtest-from-sgm
+        in: reference-devtest-sgm input-devtest-sgm
+        out: raw-reference-devtest
+        default-name: tuning/reference.devtest.txt
+	ignore-unless: use-mira
+        template: $moses-script-dir/ems/support/reference-from-sgm.perl IN IN1 OUT
 tokenize-reference
 	in: raw-reference
 	out: tokenized-reference
@@ -536,27 +596,60 @@ tokenize-reference
 	pass-unless: output-tokenizer
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-tokenizer < IN > OUT
+tokenize-reference-devtest
+	in: raw-reference-devtest
+	out: tokenized-reference-devtest
+	default-name: tuning/reference.devtest.tok
+	pass-unless: output-tokenizer
+	ignore-unless: use-mira
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-tokenizer < IN > OUT
 lowercase-reference
 	in: tokenized-reference
-	out: cased-reference
+	out: truecased-reference
 	default-name: tuning/reference.lc
 	pass-unless: output-lowercaser
 	ignore-if: output-truecaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
+lowercase-reference-devtest
+	in: tokenized-reference-devtest
+	out: truecased-reference-devtest
+	default-name: tuning/reference.devtest.lc
+	pass-unless: output-lowercaser
+	ignore-if: output-truecaser
+	ignore-unless: use-mira
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-lowercaser < IN > OUT	
 truecase-reference
 	in: tokenized-reference TRUECASER:truecase-model
-	out: cased-reference
+	out: truecased-reference
 	rerun-on-change: output-truecaser
 	default-name: tuning/reference.tc
 	ignore-unless: output-truecaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
         template: $output-truecaser -model IN1.$output-extension < IN > OUT
+truecase-reference-devtest
+	in: tokenized-reference-devtest TRUECASER:truecase-model
+	out: truecased-reference-devtest
+	rerun-on-change: output-truecaser
+	default-name: tuning/reference.devtest.tc
+	ignore-unless: AND output-truecaser use-mira
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+        template: $output-truecaser -model IN1.$output-extension < IN > OUT
 split-reference
-	in: cased-reference SPLITTER:splitter-model
+	in: truecased-reference SPLITTER:splitter-model
 	out: reference
 	default-name: tuning/reference.split
 	pass-unless: output-splitter
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-splitter -model IN1.$output-extension < IN > OUT
+split-reference-devtest
+	in: truecased-reference-devtest SPLITTER:splitter-model
+	out: reference-devtest
+	default-name: tuning/reference.devtest.split
+	pass-unless: output-splitter
+	ignore-unless: use-mira
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
@@ -567,6 +660,14 @@ filter
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
 	error: already exists. Please delete
+filter-devtest
+	in: input-devtest TRAINING:phrase-translation-table TRAINING:reordering-table
+	out: filtered-dir-devtest
+	default-name: tuning/filtered.devtest
+ 	rerun-on-change: filter-settings
+	pass-if: TRAINING:binarize-all
+	ignore-unless: use-mira	
+	error: already exists. Please delete
 apply-filter
 	in: TRAINING:config filtered-dir
 	out: filtered-config
@@ -574,8 +675,15 @@ apply-filter
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+apply-filter-devtest
+	in: TRAINING:config filtered-dir-devtest
+	out: filtered-config-devtest
+	default-name: tuning/moses.filtered.devtest.ini
+	pass-if: TRAINING:binarize-all
+  ignore-unless: use-mira
+	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 tune
-	in: filtered-config input reference
+	in: filtered-config input reference filtered-config-devtest input-devtest reference-devtest
 	out: weight-config
 	ignore-if: use-hiero
 	qsub-script: yes
@@ -645,20 +753,20 @@ factorize-input
 	error: incompatible number of words in factor
 lowercase-input
 	in: factorized-input
-	out: cased-input
+	out: truecased-input
 	default-name: evaluation/input.lc
 	pass-unless: input-lowercaser
 	ignore-if: input-truecaser
 	template: $input-lowercaser < IN > OUT
 truecase-input
 	in: factorized-input TRUECASER:truecase-model
-	out: cased-input
+	out: truecased-input
 	default-name: evaluation/input.tc
 	rerun-on-change: input-truecaser
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
-	in: cased-input SPLITTER:splitter-model
+	in: truecased-input SPLITTER:splitter-model
 	out: input
 	default-name: evaluation/input.split
 	pass-unless: input-splitter

@@ -59,33 +59,36 @@ protected:
   void InitScore();
 
 public:
+	TrellisPath(); // not implemented
+	
+	//! create path OF pure hypo
+	TrellisPath(const Hypothesis *hypo);
+		
+	/** create path from another path, deviate at edgeIndex by using arc instead, 
+		* which may change other hypo back from there
+		*/
+	TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc);
 
-  TrellisPath(); // not implemented
+	//! get score for this path throught trellis
+	inline float GetTotalScore() const { return m_totalScore; }
 
-  //! create path OF pure hypo
-  TrellisPath(const Hypothesis *hypo);
+	/** list of each hypo/arcs in path. For anything other than the best hypo, it is not possible just to follow the
+		* m_prevHypo variable in the hypothesis object
+		*/
+	inline const std::vector<const Hypothesis *> &GetEdges() const
+	{
+		return m_path;
+	}
 
-  /** create path from another path, deviate at edgeIndex by using arc instead,
-  	* which may change other hypo back from there
-  	*/
-  TrellisPath(const TrellisPath &copy, size_t edgeIndex, const Hypothesis *arc);
-
-  //! get score for this path throught trellis
-  inline float GetTotalScore() const {
-    return m_totalScore;
-  }
-
-  /** list of each hypo/arcs in path. For anything other than the best hypo, it is not possible just to follow the
-  	* m_prevHypo variable in the hypothesis object
-  	*/
-  inline const std::vector<const Hypothesis *> &GetEdges() const {
-    return m_path;
-  }
-
-  //! create a set of next best paths by wiggling 1 of the node at a time.
-  void CreateDeviantPaths(TrellisPathCollection &pathColl) const;
-
-  //! create a list of next best paths by wiggling 1 of the node at a time.
+	inline size_t GetSize() const
+	{
+		return m_path.size();
+	}
+	
+	//! create a set of next best paths by wiggling 1 of the node at a time. 
+	void CreateDeviantPaths(TrellisPathCollection &pathColl) const;
+  
+  //! create a list of next best paths by wiggling 1 of the node at a time. 
   void CreateDeviantPaths(TrellisPathList &pathColl) const;
 
   inline const ScoreComponentCollection &GetScoreBreakdown() const {

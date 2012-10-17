@@ -96,11 +96,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/IOWrapper.h</locationURI>
 		</link>
 		<link>
-			<name>IOWrapper.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/IOWrapper.o</locationURI>
-		</link>
-		<link>
 			<name>Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Jamfile</locationURI>
@@ -116,21 +111,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBR.h</locationURI>
 		</link>
 		<link>
-			<name>LatticeMBR.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBR.o</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBRGrid.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBRGrid.cpp</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBRGrid.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBRGrid.o</locationURI>
-		</link>
-		<link>
 			<name>Main.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Main.cpp</locationURI>
@@ -139,11 +119,6 @@
 			<name>Main.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Main.h</locationURI>
-		</link>
-		<link>
-			<name>Main.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Main.o</locationURI>
 		</link>
 		<link>
 			<name>TranslationAnalysis.cpp</name>
@@ -156,19 +131,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/TranslationAnalysis.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationAnalysis.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/TranslationAnalysis.o</locationURI>
-		</link>
-		<link>
-			<name>libkenlm.dylib</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/libkenlm.dylib</locationURI>
-		</link>
-		<link>
-			<name>libkenutil.dylib</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/libkenutil.dylib</locationURI>
+			<name>bin</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>lmbrgrid</name>
@@ -186,14 +151,79 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.h</locationURI>
 		</link>
 		<link>
-			<name>mbr.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.o</locationURI>
-		</link>
-		<link>
 			<name>moses</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/moses</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/IOWrapper.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/IOWrapper.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LatticeMBR.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LatticeMBR.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LatticeMBRGrid.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LatticeMBRGrid.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Main.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Main.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionary.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionary.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TranslationAnalysis.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/TranslationAnalysis.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/lmbrgrid</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/lmbrgrid</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/mbr.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/mbr.o</locationURI>
+		</link>
+		<link>
+			<name>bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/moses</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/moses</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

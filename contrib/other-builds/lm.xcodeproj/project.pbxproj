@@ -83,6 +83,8 @@
 		1EBA459F14B97E92003CC0EA /* string_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA455914B97E92003CC0EA /* string_piece.hh */; };
 		1EBA45A014B97E92003CC0EA /* tokenize_piece_test.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EBA455A14B97E92003CC0EA /* tokenize_piece_test.cc */; };
 		1EBA45A114B97E92003CC0EA /* tokenize_piece.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EBA455B14B97E92003CC0EA /* tokenize_piece.hh */; };
+		1EC2B30916233A8C00614D71 /* usage.cc in Sources */ = {isa = PBXBuildFile; fileRef = 1EC2B30716233A8C00614D71 /* usage.cc */; };
+		1EC2B30A16233A8C00614D71 /* usage.hh in Headers */ = {isa = PBXBuildFile; fileRef = 1EC2B30816233A8C00614D71 /* usage.hh */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -185,6 +187,8 @@
 		1EBA455A14B97E92003CC0EA /* tokenize_piece_test.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = tokenize_piece_test.cc; path = ../../util/tokenize_piece_test.cc; sourceTree = "<group>"; };
 		1EBA455B14B97E92003CC0EA /* tokenize_piece.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = tokenize_piece.hh; path = ../../util/tokenize_piece.hh; sourceTree = "<group>"; };
 		1EBA455C14B97E92003CC0EA /* util.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = util.xcodeproj; path = ../../util/util.xcodeproj; sourceTree = "<group>"; };
+		1EC2B30716233A8C00614D71 /* usage.cc */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = usage.cc; path = ../../util/usage.cc; sourceTree = "<group>"; };
+		1EC2B30816233A8C00614D71 /* usage.hh */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.h; name = usage.hh; path = ../../util/usage.hh; sourceTree = "<group>"; };
 		1EE8C2E91476A48E002496F2 /* liblm.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = liblm.a; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
 
@@ -261,6 +265,8 @@
 		1EBA44FC14B97E81003CC0EA /* util */ = {
 			isa = PBXGroup;
 			children = (
+				1EC2B30716233A8C00614D71 /* usage.cc */,
+				1EC2B30816233A8C00614D71 /* usage.hh */,
 				1EBA453614B97E92003CC0EA /* bit_packing_test.cc */,
 				1EBA453714B97E92003CC0EA /* bit_packing.cc */,
 				1EBA453814B97E92003CC0EA /* bit_packing.hh */,
@@ -377,6 +383,7 @@
 				1EBA45A114B97E92003CC0EA /* tokenize_piece.hh in Headers */,
 				1E890C72159D1B260031F9F3 /* value_build.hh in Headers */,
 				1E890C73159D1B260031F9F3 /* value.hh in Headers */,
+				1EC2B30A16233A8C00614D71 /* usage.hh in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -405,6 +412,9 @@
 /* Begin PBXProject section */
 		1EE8C2E01476A48E002496F2 /* Project object */ = {
 			isa = PBXProject;
+			attributes = {
+				LastUpgradeCheck = 0420;
+			};
 			buildConfigurationList = 1EE8C2E31476A48E002496F2 /* Build configuration list for PBXProject "lm" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
@@ -476,6 +486,7 @@
 				1EBA459D14B97E92003CC0EA /* sorted_uniform_test.cc in Sources */,
 				1EBA45A014B97E92003CC0EA /* tokenize_piece_test.cc in Sources */,
 				1E890C71159D1B260031F9F3 /* value_build.cc in Sources */,
+				1EC2B30916233A8C00614D71 /* usage.cc in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

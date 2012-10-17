@@ -1,5 +1,6 @@
 // $Id$
 // vim:tabstop=2
+#include "FeatureVector.h"
 #include "PhraseDictionaryTree.h"
 #include <map>
 #include "util/check.hh"
@@ -8,6 +9,7 @@
 #include <fstream>
 #include <string>
 #include <vector>
+
 
 namespace Moses
 {
@@ -28,6 +30,11 @@ class TgtCand
   IPhrase e;
   Scores sc;
   std::string m_alignment;
+  IPhrase fnames;
+  std::vector<FValue> fvalues;
+
+  static const float SPARSE_FLAG;
+
 public:
   TgtCand() {}
 
@@ -46,23 +53,37 @@ public:
 
   void writeBin(FILE* f) const {
     fWriteVector(f,e);
-    fWriteVector(f,sc);
+    //This is a bit ugly, but if there is a sparse vector, add
+    //an extra score with value 100. Can the last score be 100?
+    //Probably not, since scores are probabilities and phrase penalty.
+    if (fnames.size()) {
+      Scores sc_copy(sc);
+      sc_copy.push_back(SPARSE_FLAG);
+      fWriteVector(f,sc_copy);
+      fWriteVector(f,fnames);
+      fWriteVector(f,fvalues);
+    } else {
+      fWriteVector(f,sc);
+    }
   }
 
   void readBin(FILE* f) {
     fReadVector(f,e);
     fReadVector(f,sc);
+    if (sc.back() == 100) {
+      sc.pop_back();
+      fReadVector(f,fnames);
+      fReadVector(f,fvalues);
+    }
   }
 
   void writeBinWithAlignment(FILE* f) const {
-    fWriteVector(f,e);
-    fWriteVector(f,sc);
+    writeBin(f);
     fWriteString(f, m_alignment.c_str(), m_alignment.size());
   }
 
   void readBinWithAlignment(FILE* f) {
-    fReadVector(f,e);
-    fReadVector(f,sc);
+    readBin(f);
     fReadString(f, m_alignment);
   }
 
@@ -75,7 +96,23 @@ public:
   const std::string& GetAlignment() const {
     return m_alignment;
   }
+
+  const IPhrase& GetFeatureNames() const {
+    return fnames;
+  }
+
+  const std::vector<FValue> GetFeatureValues() const {
+    return fvalues;
+  }
+
+  void SetFeatures(const IPhrase& names, const std::vector<FValue>& values) {
+    CHECK(names.size() == values.size());
+    fnames = names;
+    fvalues = values;
+  }
 };
+
+const float TgtCand::SPARSE_FLAG = 100;
 
 
 class TgtCands : public std::vector<TgtCand>
@@ -214,29 +251,23 @@ public:
   void PrintTgtCand(const TgtCands& tcands,std::ostream& out) const;
 
   // convert target candidates from internal data structure to the external one
-  void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& rv) const {
-    for(TgtCands::const_iterator i=tcands.begin(); i!=tcands.end(); ++i) {
-      const IPhrase& iphrase=i->GetPhrase();
-      std::vector<std::string const*> vs;
-      vs.reserve(iphrase.size());
-      for(size_t j=0; j<iphrase.size(); ++j)
-        vs.push_back(&tv->symbol(iphrase[j]));
-      rv.push_back(StringTgtCand(vs,i->GetScores()));
-    }
-  }
-
-  // convert target candidates from internal data structure to the external one
   void ConvertTgtCand(const TgtCands& tcands,std::vector<StringTgtCand>& rv,
-                      std::vector<std::string>& wa) const {
+                      std::vector<std::string>* wa) const {
     for(TgtCands::const_iterator i=tcands.begin(); i!=tcands.end(); ++i) {
+      rv.push_back(StringTgtCand());
       const IPhrase& iphrase=i->GetPhrase();
 
-      std::vector<std::string const*> vs;
-      vs.reserve(iphrase.size());
-      for(size_t j=0; j<iphrase.size(); ++j)
-        vs.push_back(&tv->symbol(iphrase[j]));
-      rv.push_back(StringTgtCand(vs,i->GetScores()));
-      wa.push_back(i->GetAlignment());
+      rv.back().tokens.reserve(iphrase.size());
+      for(size_t j=0; j<iphrase.size(); ++j) {
+        rv.back().tokens.push_back(&tv->symbol(iphrase[j]));
+      }
+      rv.back().scores = i->GetScores();
+      const IPhrase& fnames = i->GetFeatureNames();
+      for (size_t j = 0; j < fnames.size(); ++j) {
+        rv.back().fnames.push_back(&tv->symbol(fnames[j]));
+      }
+      rv.back().fvalues = i->GetFeatureValues();
+      if (wa) wa->push_back(i->GetAlignment());
     }
   }
 
@@ -387,6 +418,7 @@ void PhraseDictionaryTree::FreeMemory() const
   imp->FreeMemory();
 }
 
+
 void PhraseDictionaryTree::
 GetTargetCandidates(const std::vector<std::string>& src,
                     std::vector<StringTgtCand>& rv) const
@@ -399,7 +431,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 
   TgtCands tgtCands;
   imp->GetTargetCandidates(f,tgtCands);
-  imp->ConvertTgtCand(tgtCands,rv);
+  imp->ConvertTgtCand(tgtCands,rv,NULL);
 }
 
 void PhraseDictionaryTree::
@@ -415,7 +447,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 
   TgtCands tgtCands;
   imp->GetTargetCandidates(f,tgtCands);
-  imp->ConvertTgtCand(tgtCands,rv,wa);
+  imp->ConvertTgtCand(tgtCands,rv,&wa);
 }
 
 
@@ -493,6 +525,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
                                                ,&scoreString				= tokens[2];
     const std::string empty;
     const std::string &alignmentString = PrintWordAlignment() ? tokens[3] : empty;
+    const std::string sparseFeatureString = tokens.size() > 5 ? tokens[5] : empty;
     IPhrase f,e;
     Scores sc;
 
@@ -529,6 +562,21 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
         TRACE_ERR("ERROR: source phrase already inserted (A)!\nline(" << lnc << "): '"
                   <<line<<"'\nf: "<<f<<"\n");
         abort();
+      }
+    }
+
+    IPhrase fnames;
+    std::vector<FValue> fvalues;
+    if (!sparseFeatureString.empty()) {
+      std::vector<std::string> sparseTokens = Tokenize(sparseFeatureString);
+      if (sparseTokens.size() % 2 != 0) {
+        TRACE_ERR("ERROR: incorrectly formatted sparse feature string: " << 
+          sparseFeatureString << std::endl);
+        abort();  
+      }
+      for (size_t i = 0; i < sparseTokens.size(); i+=2) {
+        fnames.push_back(imp->tv->add(sparseTokens[i]));
+        fvalues.push_back(Scan<FValue>(sparseTokens[i+1]));
       }
     }
 
@@ -571,6 +619,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     }
     tgtCands.push_back(TgtCand(e,sc, alignmentString));
     CHECK(currFirstWord!=InvalidLabelId);
+    tgtCands.back().SetFeatures(fnames, fvalues);
   }
   if (PrintWordAlignment())
     tgtCands.writeBinWithAlignment(ot);
@@ -648,7 +697,7 @@ GetTargetCandidates(PrefixPtr p,
 {
   TgtCands tcands;
   imp->GetTargetCandidates(p,tcands);
-  imp->ConvertTgtCand(tcands,rv);
+  imp->ConvertTgtCand(tcands,rv,NULL);
 }
 
 void PhraseDictionaryTree::
@@ -658,7 +707,7 @@ GetTargetCandidates(PrefixPtr p,
 {
   TgtCands tcands;
   imp->GetTargetCandidates(p,tcands);
-  imp->ConvertTgtCand(tcands,rv,wa);
+  imp->ConvertTgtCand(tcands,rv,&wa);
 }
 
 std::string PhraseDictionaryTree::GetScoreProducerDescription(unsigned) const

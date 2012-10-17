@@ -98,7 +98,7 @@ sub ensure_absolute {
   my $target = shift;
   my $originfile = shift;
 
-  my $cwd = `pawd`;
+  my $cwd = `pawd 2> /dev/null`;
   $cwd = `pwd` if ! defined $cwd; # not everyone has pawd!
   die "Failed to absolutize $target. Failing to get cwd!" if ! defined $cwd;
   chomp $cwd;

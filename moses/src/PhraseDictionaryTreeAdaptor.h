@@ -64,7 +64,7 @@ public:
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollection &) {
+    const ChartCellCollectionBase &) {
     CHECK(false);
     return 0;
   }

@@ -90,7 +90,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
 
 ChartRuleLookupManager *PhraseDictionarySCFG::CreateRuleLookupManager(
   const InputType &sentence,
-  const ChartCellCollection &cellCollection)
+  const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerMemory(sentence, cellCollection, *this);
 }

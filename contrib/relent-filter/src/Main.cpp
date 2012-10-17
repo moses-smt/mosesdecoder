@@ -83,7 +83,7 @@ public:
   void Run() {
 
     // report thread number
-#ifdef BOOST_HAS_PTHREADS
+#if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 

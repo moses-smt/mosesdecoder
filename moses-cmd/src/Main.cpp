@@ -28,6 +28,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <vector>
 
+#include "util/usage.hh"
+
 #ifdef WIN32
 // Include Visual Leak Detector
 //#include <vld.h>
@@ -80,20 +82,22 @@ public:
                   OutputCollector* latticeSamplesCollector,
                   OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                   OutputCollector* detailedTranslationCollector,
-                  OutputCollector* alignmentInfoCollector ) :
+                  OutputCollector* alignmentInfoCollector,
+                  OutputCollector* unknownsCollector) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
     m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
     m_detailedTranslationCollector(detailedTranslationCollector),
-    m_alignmentInfoCollector(alignmentInfoCollector) {}
+    m_alignmentInfoCollector(alignmentInfoCollector),
+    m_unknownsCollector(unknownsCollector) {}
 
 	/** Translate one sentence
    * gets called by main function implemented at end of this source file */
   void Run() {
 
     // report thread number
-#ifdef BOOST_HAS_PTHREADS
+#if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
     TRACE_ERR("Translating line " << m_lineNumber << "  in thread id " << pthread_self() << std::endl);
 #endif
 
@@ -109,6 +113,7 @@ public:
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
+    if ((*m_source).GetSize() == 0) return;
     Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();
 
@@ -268,6 +273,17 @@ public:
       m_detailedTranslationCollector->Write(m_lineNumber,out.str());
     }
 
+    //list of unknown words
+    if (m_unknownsCollector) {
+      const vector<Phrase*>& unknowns = manager.getSntTranslationOptions()->GetUnknownSources();
+      ostringstream out;
+      for (size_t i = 0; i < unknowns.size(); ++i) {
+        out << *(unknowns[i]);
+      }
+      out << endl;
+      m_unknownsCollector->Write(m_lineNumber, out.str());
+    }
+
     // report additional statistics
     IFVERBOSE(2) {
       PrintUserTime("Sentence Decoding Time:");
@@ -291,6 +307,7 @@ private:
   OutputCollector* m_searchGraphCollector;
   OutputCollector* m_detailedTranslationCollector;
   OutputCollector* m_alignmentInfoCollector;
+  OutputCollector* m_unknownsCollector;
   std::ofstream *m_alignmentStream;
 
 
@@ -298,15 +315,23 @@ private:
 
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
-
-  size_t weightStart  = StaticData::Instance().GetScoreIndexManager().GetBeginIndex(ff->GetScoreBookkeepingID());
-  size_t weightEnd  = StaticData::Instance().GetScoreIndexManager().GetEndIndex(ff->GetScoreBookkeepingID());
-  for (size_t i = weightStart; i < weightEnd; ++i) {
-    cout << ff->GetScoreProducerDescription(i-weightStart) <<  " " << ff->GetScoreProducerWeightShortName(i-weightStart) << " "
-         << StaticData::Instance().GetAllWeights()[i] << endl;
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    for (size_t i = 0; i < numScoreComps; ++i) 
+      cout << ff->GetScoreProducerDescription() <<  " "
+           << ff->GetScoreProducerWeightShortName() << " "
+           << values[i] << endl;
+  }
+  else {
+  	if (ff->GetSparseProducerWeight() == 1)
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " sparse" <<  endl;
+  	else
+  		cout << ff->GetScoreProducerDescription() << " " <<
+  		ff->GetScoreProducerWeightShortName() << " " << ff->GetSparseProducerWeight() << endl;
   }
 }
-
 
 static void ShowWeights()
 {
@@ -315,19 +340,13 @@ static void ShowWeights()
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
   for (size_t i = 0; i < sff.size(); ++i) {
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    PrintFeatureWeight(slf[i]);
-  }
-  for (size_t i = 0; i < pds.size(); ++i) {
-    PrintFeatureWeight(pds[i]);
-  }
-  for (size_t i = 0; i < gds.size(); ++i) {
-    PrintFeatureWeight(gds[i]);
+    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
+  	  PrintFeatureWeight(slf[i]);
+    }
   }
 }
 
@@ -341,68 +360,60 @@ int main(int argc, char** argv)
 #ifdef HAVE_PROTOBUF
     GOOGLE_PROTOBUF_VERIFY_VERSION;
 #endif
-  
+
     // echo command line, if verbose
     IFVERBOSE(1) {
       TRACE_ERR("command: ");
       for(int i=0; i<argc; ++i) TRACE_ERR(argv[i]<<" ");
       TRACE_ERR(endl);
     }
-  
+
     // set number of significant decimals in output
     fix(cout,PRECISION);
     fix(cerr,PRECISION);
-  
+
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
     Parameter* params = new Parameter();
     if (!params->LoadParam(argc,argv)) {
       exit(1);
     }
-  
-  
+
+
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
     if (!StaticData::LoadDataStatic(params, argv[0])) {
       exit(1);
     }
-  
+
     // setting "-show-weights" -> just dump out weights and exit
     if (params->isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
-  
+
     // shorthand for accessing information in StaticData
     const StaticData& staticData = StaticData::Instance();
-  
-  
+
+
     //initialise random numbers
     srand(time(NULL));
-  
+
     // set up read/writing class
     IOWrapper* ioWrapper = GetIOWrapper(staticData);
     if (!ioWrapper) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);
     }
-  
+
     // check on weights
-    vector<float> weights = staticData.GetAllWeights();
+    const ScoreComponentCollection& weights = staticData.GetAllWeights();
     IFVERBOSE(2) {
-      TRACE_ERR("The score component vector looks like this:\n" << staticData.GetScoreIndexManager());
-      TRACE_ERR("The global weight vector looks like this:");
-      for (size_t j=0; j<weights.size(); j++) {
-        TRACE_ERR(" " << weights[j]);
-      }
+      TRACE_ERR("The global weight vector looks like this: ");
+      TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
-    // every score must have a weight!  check that here:
-    if(weights.size() != staticData.GetScoreIndexManager().GetTotalNumberOfScores()) {
-      TRACE_ERR("ERROR: " << staticData.GetScoreIndexManager().GetTotalNumberOfScores() << " score components, but " << weights.size() << " weights defined" << std::endl);
-      exit(1);
-    }
-  
+
     // initialize output streams
     // note: we can't just write to STDOUT or files
     // because multithreading may return sentences in shuffled order
@@ -472,6 +483,18 @@ int main(int argc, char** argv)
     if (!staticData.GetAlignmentOutputFile().empty()) {
       alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
     }
+
+    //initialise stream for unknown (oov) words
+    auto_ptr<OutputCollector> unknownsCollector;
+    auto_ptr<ofstream> unknownsStream;
+    if (!staticData.GetOutputUnknownsFile().empty()) {
+      unknownsStream.reset(new ofstream(staticData.GetOutputUnknownsFile().c_str()));
+      if (!unknownsStream->good()) {
+        TRACE_ERR("Unable to open " << staticData.GetOutputUnknownsFile() << " for unknowns");
+        exit(1);
+      }
+      unknownsCollector.reset(new OutputCollector(unknownsStream.get()));
+    }
   
 #ifdef WITH_THREADS
     ThreadPool pool(staticData.ThreadCount());
@@ -492,7 +515,8 @@ int main(int argc, char** argv)
                             wordGraphCollector.get(),
                             searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
-                            alignmentInfoCollector.get() );
+                            alignmentInfoCollector.get(),
+                            unknownsCollector.get() );
       // execute task
 #ifdef WITH_THREADS
     pool.Submit(task);
@@ -514,6 +538,8 @@ int main(int argc, char** argv)
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;
   }
+
+  IFVERBOSE(1) util::PrintUsage(std::cerr);
 
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)

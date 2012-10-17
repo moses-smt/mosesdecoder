@@ -27,6 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "Util.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -38,7 +39,7 @@ Sentence::Sentence()
   , InputType()
 {
   const StaticData& staticData = StaticData::Instance();
-  if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+  if (staticData.IsChart()) {
     m_defaultLabelSet.insert(StaticData::Instance().GetInputDefaultNonTerminal());
   }
 }
@@ -92,6 +93,25 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   if (meta.find("id") != meta.end()) {
     this->SetTranslationId(atol(meta["id"].c_str()));
   }
+  if (meta.find("docid") != meta.end()) {
+    this->SetDocumentId(atol(meta["docid"].c_str()));
+    this->SetUseTopicId(false);
+    this->SetUseTopicIdAndProb(false);
+  }
+  if (meta.find("topic") != meta.end()) {
+    vector<string> topic_params;
+    boost::split(topic_params, meta["topic"], boost::is_any_of("\t "));
+    if (topic_params.size() == 1) {
+      this->SetTopicId(atol(topic_params[0].c_str()));
+      this->SetUseTopicId(true);
+      this->SetUseTopicIdAndProb(false);
+    }
+    else {
+      this->SetTopicIdAndProb(topic_params);
+      this->SetUseTopicId(false);
+      this->SetUseTopicIdAndProb(true);
+    }
+  }
 
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
@@ -106,7 +126,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   }
   Phrase::CreateFromString(factorOrder, line, factorDelimiter);
 
-  if (staticData.GetSearchAlgorithm() == ChartDecoding) {
+  if (staticData.IsChart()) {
     InitStartEndWord();
   }
 
@@ -180,7 +200,7 @@ Sentence::CreateTranslationOptionCollection(const TranslationSystem* system) con
 }
 void Sentence::Print(std::ostream& out) const
 {
-  out<<*static_cast<Phrase const*>(this)<<"\n";
+  out<<*static_cast<Phrase const*>(this);
 }
 
 
