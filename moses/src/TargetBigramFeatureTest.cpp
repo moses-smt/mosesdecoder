@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdio>
 #include <cstdlib>
 #include <string>
+#include <unistd.h>
 
 #include <boost/test/unit_test.hpp>
 
@@ -51,9 +52,12 @@ class VocabFileFixture {
     template<class I>
     VocabFileFixture(I begin, I end) 
     {
-      filename = string(tmpnam(NULL));
-      ofstream out(filename.c_str());
-      BOOST_CHECK(out);
+      char name[] = "TargetBigramXXXXXX";
+      int fd = mkstemp(name);
+      BOOST_CHECK(fd != -1);
+      BOOST_CHECK(!close(fd));
+      filename = name;
+      ofstream out(name);
       for (I i = begin; i != end; ++i) 
       {
         out << *i << endl;
