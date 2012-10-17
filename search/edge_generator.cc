@@ -4,15 +4,10 @@
 #include "lm/partial.hh"
 #include "search/context.hh"
 #include "search/vertex.hh"
-#include "search/vertex_generator.hh"
 
 #include <numeric>
 
 namespace search {
-
-EdgeGenerator::EdgeGenerator(PartialEdge root, Note note) : top_score_(root.GetScore()), arity_(root.GetArity()), note_(note) {
-  generate_.push(root);
-}
 
 namespace {
 
@@ -48,11 +43,12 @@ template <class Model> void FastScore(const Context<Model> &context, Arity victi
 
 } // namespace
 
-template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, PartialEdgePool &partial_edge_pool) {
+template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
   assert(!generate_.empty());
   PartialEdge top = generate_.top();
   generate_.pop();
-  PartialVertex *top_nt = top.NT();
+  PartialVertex *const top_nt = top.NT();
+  const Arity arity = top.GetArity();
 
   Arity victim = 0;
   Arity victim_completed;
@@ -61,7 +57,7 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, P
   {
     Arity completed = 0;
     unsigned char lowest_length = 255;
-    for (Arity i = 0; i != arity_; ++i) {
+    for (Arity i = 0; i != arity; ++i) {
       if (top_nt[i].Complete()) {
         ++completed;
       } else if (top_nt[i].Length() < lowest_length) {
@@ -71,23 +67,23 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, P
       }
     }
     if (lowest_length == 255) {
-      // Now top.between[0] is the full edge state.  
-      top_score_ = generate_.empty() ? -kScoreInf : generate_.top().GetScore();
       return top;
     }
-    incomplete = arity_ - completed;
+    incomplete = arity - completed;
   }
 
   PartialVertex old_value(top_nt[victim]);
   PartialVertex alternate_changed;
   if (top_nt[victim].Split(alternate_changed)) {
-    PartialEdge alternate = partial_edge_pool.Allocate(arity_, incomplete + 1);
+    PartialEdge alternate = partial_edge_pool_.Allocate(arity, incomplete + 1);
     alternate.SetScore(top.GetScore() + alternate_changed.Bound() - old_value.Bound());
+
+    alternate.SetNote(top.GetNote());
 
     PartialVertex *alternate_nt = alternate.NT();
     for (Arity i = 0; i < victim; ++i) alternate_nt[i] = top_nt[i];
     alternate_nt[victim] = alternate_changed;
-    for (Arity i = victim + 1; i < arity_; ++i) alternate_nt[i] = top_nt[i];
+    for (Arity i = victim + 1; i < arity; ++i) alternate_nt[i] = top_nt[i];
 
     memcpy(alternate.Between(), top.Between(), sizeof(lm::ngram::ChartState) * (incomplete + 1));
 
@@ -100,16 +96,15 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context, P
   // TODO: dedupe?  
   generate_.push(top);
 
-  top_score_ = generate_.top().GetScore();
   // Invalid indicates no new hypothesis generated.  
   return PartialEdge();
 }
 
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::RestProbingModel> &context, PartialEdgePool &partial_edge_pool);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::ProbingModel> &context, PartialEdgePool &partial_edge_pool);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::TrieModel> &context, PartialEdgePool &partial_edge_pool);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::QuantTrieModel> &context, PartialEdgePool &partial_edge_pool);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::ArrayTrieModel> &context, PartialEdgePool &partial_edge_pool);
-template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::QuantArrayTrieModel> &context, PartialEdgePool &partial_edge_pool);
+template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::RestProbingModel> &context);
+template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::ProbingModel> &context);
+template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::TrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::QuantTrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::ArrayTrieModel> &context);
+template PartialEdge EdgeGenerator::Pop(Context<lm::ngram::QuantArrayTrieModel> &context);
 
 } // namespace search

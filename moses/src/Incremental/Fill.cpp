@@ -66,7 +66,9 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
 
     search::Note note;
     note.vp = &phrase;
-    edges_.AddEdge(edge, note);
+    edge.SetNote(note);
+
+    edges_.AddEdge(edge);
   }
 }
 
@@ -82,7 +84,9 @@ template <class Model> void Fill<Model>::AddPhraseOOV(TargetPhrase &phrase, std:
 
   search::Note note;
   note.vp = &phrase;
-  edges_.AddEdge(edge, note);
+  edge.SetNote(note);
+
+  edges_.AddEdge(edge);
 }
 
 namespace {
@@ -92,12 +96,12 @@ class HypothesisCallback {
     HypothesisCallback(search::ContextBase &context, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool)
       : context_(context), out_(out), vertex_pool_(vertex_pool) {}
 
-    void NewHypothesis(search::PartialEdge partial, search::Note note) {
-      search::VertexGenerator *&entry = out_.FindOrInsert(static_cast<const TargetPhrase *>(note.vp)->GetTargetLHS()).incr_generator;
+    void NewHypothesis(search::PartialEdge partial) {
+      search::VertexGenerator *&entry = out_.FindOrInsert(static_cast<const TargetPhrase *>(partial.GetNote().vp)->GetTargetLHS()).incr_generator;
       if (!entry) {
         entry = generator_pool_.construct(context_, *vertex_pool_.construct());
       }
-      entry->NewHypothesis(partial, note);
+      entry->NewHypothesis(partial);
     }
 
     void FinishedSearch() {

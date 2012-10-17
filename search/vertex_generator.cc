@@ -17,8 +17,8 @@ namespace {
 
 const uint64_t kCompleteAdd = static_cast<uint64_t>(-1);
 
-void FillFinal(PartialEdge partial, Note note, Final &out) {
-  const Final **final_out = out.Reset(partial.GetScore(), note);
+void FillFinal(PartialEdge partial, Final &out) {
+  const Final **final_out = out.Reset(partial.GetScore(), partial.GetNote());
   const PartialVertex *part = partial.NT();
   const PartialVertex *const part_end_loop = part + partial.GetArity();
   for (; part != part_end_loop; ++part, ++final_out) {
@@ -28,14 +28,14 @@ void FillFinal(PartialEdge partial, Note note, Final &out) {
 
 } // namespace
 
-void VertexGenerator::NewHypothesis(PartialEdge partial, Note note) {
+void VertexGenerator::NewHypothesis(PartialEdge partial) {
   const lm::ngram::ChartState &state = partial.CompletedState();
   std::pair<Existing::iterator, bool> got(existing_.insert(std::pair<uint64_t, Final*>(hash_value(state), NULL)));
   if (!got.second) {
     // Found it already.  
     Final &exists = *got.first->second;
     if (exists.Bound() < partial.GetScore())
-      FillFinal(partial, note, exists);
+      FillFinal(partial, exists);
     return;
   }
   unsigned char left = 0, right = 0;
@@ -62,7 +62,7 @@ void VertexGenerator::NewHypothesis(PartialEdge partial, Note note) {
   }
 
   node = &FindOrInsert(*node, kCompleteAdd - state.left.full, state, state.left.length, true, state.right.length, true);
-  got.first->second = CompleteTransition(*node, state, note, partial);
+  got.first->second = CompleteTransition(*node, state, partial);
 }
 
 VertexGenerator::Trie &VertexGenerator::FindOrInsert(VertexGenerator::Trie &node, uint64_t added, const lm::ngram::ChartState &state, unsigned char left, bool left_full, unsigned char right, bool right_full) {
@@ -80,12 +80,12 @@ VertexGenerator::Trie &VertexGenerator::FindOrInsert(VertexGenerator::Trie &node
   return next;
 }
 
-Final *VertexGenerator::CompleteTransition(VertexGenerator::Trie &starter, const lm::ngram::ChartState &state, Note note, PartialEdge partial) {
+Final *VertexGenerator::CompleteTransition(VertexGenerator::Trie &starter, const lm::ngram::ChartState &state, PartialEdge partial) {
   VertexNode &node = *starter.under;
   assert(node.State().left.full == state.left.full);
   assert(!node.End());
   Final *final = context_.NewFinal();
-  FillFinal(partial, note, *final);
+  FillFinal(partial, *final);
   node.SetEnd(final);
   return final;
 }

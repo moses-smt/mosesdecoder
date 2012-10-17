@@ -4,7 +4,7 @@
 #include "StackVec.h"
 
 #include "lm/word_index.hh"
-#include "search/edge_queue.hh"
+#include "search/edge_generator.hh"
 
 #include <boost/pool/object_pool.hpp>
 
@@ -47,7 +47,7 @@ template <class Model> class Fill : public ChartParserCallback {
 
     const std::vector<lm::WordIndex> &vocab_mapping_;
 
-    search::EdgeQueue edges_;
+    search::EdgeGenerator edges_;
 };
 
 } // namespace Incremental

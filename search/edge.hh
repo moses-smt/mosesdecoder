@@ -33,25 +33,34 @@ class PartialEdge {
       return *reinterpret_cast<const Arity*>(base_ + sizeof(Score));
     }
 
+    Note GetNote() const {
+      return *reinterpret_cast<const Note*>(base_ + sizeof(Score) + sizeof(Arity));
+    }
+    void SetNote(Note to) {
+      *reinterpret_cast<Note*>(base_ + sizeof(Score) + sizeof(Arity)) = to;
+    }
+
     // Non-terminals
     const PartialVertex *NT() const {
-      return reinterpret_cast<const PartialVertex*>(base_ + sizeof(Score) + sizeof(Arity));
+      return reinterpret_cast<const PartialVertex*>(base_ + kHeaderSize);
     }
     PartialVertex *NT() {
-      return reinterpret_cast<PartialVertex*>(base_ + sizeof(Score) + sizeof(Arity));
+      return reinterpret_cast<PartialVertex*>(base_ + kHeaderSize);
     }
 
     const lm::ngram::ChartState &CompletedState() const {
       return *Between();
     }
     const lm::ngram::ChartState *Between() const {
-      return reinterpret_cast<const lm::ngram::ChartState*>(base_ + sizeof(Score) + sizeof(Arity) + GetArity() * sizeof(PartialVertex));
+      return reinterpret_cast<const lm::ngram::ChartState*>(base_ + kHeaderSize + GetArity() * sizeof(PartialVertex));
     }
     lm::ngram::ChartState *Between() {
-      return reinterpret_cast<lm::ngram::ChartState*>(base_ + sizeof(Score) + sizeof(Arity) + GetArity() * sizeof(PartialVertex));
+      return reinterpret_cast<lm::ngram::ChartState*>(base_ + kHeaderSize + GetArity() * sizeof(PartialVertex));
     }
 
   private:
+    static const std::size_t kHeaderSize = sizeof(Score) + sizeof(Arity) + sizeof(Note);
+
     friend class PartialEdgePool;
     PartialEdge(void *base, Arity arity) : base_(static_cast<uint8_t*>(base)) {
       *reinterpret_cast<Arity*>(base_ + sizeof(Score)) = arity;
@@ -64,7 +73,7 @@ class PartialEdgePool {
   public:
     PartialEdge Allocate(Arity arity, Arity chart_states) {
       return PartialEdge(
-          pool_.Allocate(sizeof(Score) + sizeof(Arity) + arity * sizeof(PartialVertex) + chart_states * sizeof(lm::ngram::ChartState)),
+          pool_.Allocate(PartialEdge::kHeaderSize + arity * sizeof(PartialVertex) + chart_states * sizeof(lm::ngram::ChartState)),
           arity);
     }
 

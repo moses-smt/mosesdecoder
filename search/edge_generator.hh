@@ -16,32 +16,41 @@ class ChartState;
 namespace search {
 
 template <class Model> class Context;
-class PartialEdgePool;
 
 class EdgeGenerator {
   public:
-    EdgeGenerator(PartialEdge root, Note note);
+    EdgeGenerator() {}
 
-    Score TopScore() const {
-      return top_score_;
+    PartialEdge AllocateEdge(Arity arity) {
+      return partial_edge_pool_.Allocate(arity);
     }
 
-    Note GetNote() const {
-      return note_;
+    void AddEdge(PartialEdge edge) {
+      generate_.push(edge);
     }
 
-    // Pop.  If there's a complete hypothesis, return it.  Otherwise return NULL.  
-    template <class Model> PartialEdge Pop(Context<Model> &context, PartialEdgePool &partial_edge_pool);
+    bool Empty() const { return generate_.empty(); }
+
+    // Pop.  If there's a complete hypothesis, return it.  Otherwise return an invalid PartialEdge.
+    template <class Model> PartialEdge Pop(Context<Model> &context);
+
+    template <class Model, class Output> void Search(Context<Model> &context, Output &output) {
+      unsigned to_pop = context.PopLimit();
+      while (to_pop > 0 && !generate_.empty()) {
+        PartialEdge got(Pop(context));
+        if (got.Valid()) {
+          output.NewHypothesis(got);
+          --to_pop;
+        }
+      }
+      output.FinishedSearch();
+    }
 
   private:
-    Score top_score_;
+    PartialEdgePool partial_edge_pool_;
 
     typedef std::priority_queue<PartialEdge> Generate;
     Generate generate_;
-
-    Arity arity_;
-
-    Note note_;
 };
 
 } // namespace search
