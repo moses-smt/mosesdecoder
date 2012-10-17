@@ -38,6 +38,7 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
 // Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS
+
 #if BOOST_VERSION < 104200
   FactorFriend to_ins;
   to_ins.in.m_string.assign(factorString.data(), factorString.size());
@@ -57,9 +58,16 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
   FactorFriend to_ins;
   to_ins.in.m_string.assign(factorString.data(), factorString.size());
 #endif // BOOST_VERSION
+
 #else // WITH_THREADS
+
+#if BOOST_VERSION >= 104200
+  Set::const_iterator i = m_set.find(factorString, HashFactor(), EqualsFactor());
+  if (i != m_set.end()) return &i->in;
+#endif
   FactorFriend to_ins;
   to_ins.in.m_string.assign(factorString.data(), factorString.size());
+
 #endif // WITH_THREADS
   to_ins.in.m_id = m_factorId;
   std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));
