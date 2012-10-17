@@ -387,7 +387,11 @@ void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, const std::v
   }
   else if (token_count == 3) {
     m_ruleCount = ParseOrThrow(tokens[2]);
+  } else if (token_count == 1) {
+    //glue rule
+    m_ruleCount = ParseOrThrow(tokens[0]);
   }
+
 }
 
 }
