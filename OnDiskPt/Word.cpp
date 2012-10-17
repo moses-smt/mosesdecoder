@@ -86,15 +86,14 @@ size_t Word::ReadFromMemory(const char *mem)
 
 size_t Word::ReadFromFile(std::fstream &file)
 {
-  size_t memAlloc = sizeof(UINT64) + sizeof(char);
-  char *mem = (char*) malloc(memAlloc);
+  const size_t memAlloc = sizeof(UINT64) + sizeof(char);
+  char mem[sizeof(UINT64) + sizeof(char)];
   file.read(mem, memAlloc);
 
   size_t memUsed = ReadFromMemory(mem);
   CHECK(memAlloc == memUsed);
-  free(mem);
 
-  return memUsed;
+  return memAlloc;
 }
 
 void Word::ConvertToMoses(
