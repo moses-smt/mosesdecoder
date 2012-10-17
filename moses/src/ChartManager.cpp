@@ -53,7 +53,6 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
   ,m_parser(source, *system, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
 {
-  m_system->InitializeBeforeSentenceProcessing(source);
 }
 
 ChartManager::~ChartManager()

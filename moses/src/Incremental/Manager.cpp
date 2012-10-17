@@ -29,7 +29,6 @@ Manager::Manager(const InputType &source, const TranslationSystem &system) :
   cells_(source, ChartCellBaseFactory()),
   parser_(source, system, cells_) {
 
-  system.InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager() {
