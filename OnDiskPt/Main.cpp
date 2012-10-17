@@ -44,7 +44,10 @@ int main (int argc, char * const argv[])
   Moses::ResetUserTime();
   Moses::PrintUserTime("Starting");
 
-  assert(argc == 8);
+  if (argc != 8) {
+    std::cerr << "Usage: " << argv[0] << " numSourceFactors numTargetFactors numScores tableLimit inputPath outputPath" << std::endl;
+    return 1;
+  }
 
   int numSourceFactors	= Moses::Scan<int>(argv[1])
      , numTargetFactors	= Moses::Scan<int>(argv[2])
