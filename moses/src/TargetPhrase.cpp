@@ -358,7 +358,7 @@ float ParseOrThrow(StringPiece str) {
 }
 } // namespace
 
-void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, const std::vector<float> &scoreVector) {
+void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, float p_f_given_e) {
   StringPiece tokens[3];
   size_t token_count = 0;
   for (util::TokenIter<util::AnyCharacter,true> tokenize(ruleCountString, " \t"); tokenize && token_count < 3; ++tokenize, ++token_count) {
@@ -368,19 +368,7 @@ void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, const std::v
   if (token_count == 2) {
     // TODO: if no third column is provided, do we have to take smoothing into account (consolidate.cpp)? 
     // infer rule counts from target counts
-    float targetCount = 0, sourceCount = 0;
-    float p_f_given_e = 0, p_e_given_f = 0;
-    p_f_given_e = scoreVector[0];
-    if (scoreVector.size() >= 5) {
-      p_f_given_e = scoreVector[0];
-      p_e_given_f = scoreVector[2];
-    } else {
- //     if (scoreVector.size() >= 1 ) p_f_given_e = scoreVector[0];
-//      std::cerr << "Warning: possibly wrong format of phrase translation scores, number of scores: " << scoreVector.size() << endl;
-    }
-    
-    targetCount = ParseOrThrow(tokens[0]);
-    sourceCount = ParseOrThrow(tokens[1]);
+    float targetCount = ParseOrThrow(tokens[0]);
     float ruleCount = p_f_given_e * targetCount;
     //float ruleCount2 = p_e_given_f * sourceCount; // could use this to double-check the counts
     m_ruleCount = floor(ruleCount + 0.5);

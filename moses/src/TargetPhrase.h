@@ -159,7 +159,7 @@ public:
 	const AlignmentInfo &GetAlignmentInfo() const
 	{ return *m_alignmentInfo; }
 	
-	void SetRuleCount(const StringPiece &ruleCountString, const std::vector<float> &scoreVector);
+	void SetRuleCount(const StringPiece &ruleCountString, float p_f_given_e);
 	size_t GetRuleCount() const { return m_ruleCount; }
 
   TO_STRING();

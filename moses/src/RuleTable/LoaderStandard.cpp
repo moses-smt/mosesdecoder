@@ -238,7 +238,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->SetAlignmentInfo(alignString, sourcePhrase);
     targetPhrase->SetTargetLHS(targetLHS);
     
-    targetPhrase->SetRuleCount(ruleCountString, scoreVector);
+    targetPhrase->SetRuleCount(ruleCountString, scoreVector[0]);
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
     
     // component score, for n-best output
