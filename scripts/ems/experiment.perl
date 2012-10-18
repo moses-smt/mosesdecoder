@@ -2012,7 +2012,7 @@ sub define_training_build_custom_generation {
 sub define_training_create_config {
     my ($step_id) = @_;
 
-    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,$sparse_phrase_table,@LM)
+    my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
 			= &get_output_and_input($step_id);
 
     my $cmd = &get_training_setting(9);
