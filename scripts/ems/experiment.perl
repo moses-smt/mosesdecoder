@@ -1241,6 +1241,9 @@ sub get_parameters_relevant_for_re_use {
     #my $module_set = $step; $module_set =~ s/:[^:]+$//;
     my ($module,$set,$dummy) = &deconstruct_name($step);
     foreach my $parameter (@{$RERUN_ON_CHANGE{&defined_step($step)}}) {
+       #if ($parameter =~ /\//) {
+       # TODO: handle scripts that need to be checked for time stamps
+       #}
 	my $value = &backoff_and_get_array(&extend_local_name($module,$set,$parameter));
         $value = join(" ",@{$value}) if ref($value) eq 'ARRAY';
 	$VALUE{$parameter} = $value if $value;

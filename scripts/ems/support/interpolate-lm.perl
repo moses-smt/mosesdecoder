@@ -12,13 +12,14 @@ binmode(STDERR, ":utf8");
 
 my $SRILM = "/home/pkoehn/moses/srilm/bin/i686-m64";
 my $TEMPDIR = "/tmp";
-my ($TUNING,$LM,$NAME,$GROUP);
+my ($TUNING,$LM,$NAME,$GROUP,$CONTINUE);
 
 die("interpolate-lm.perl --tuning set --name out-lm --lm lm0,lm1,lm2,lm3 [--srilm srilm-dir --tempdir tempdir --group \"0,1 2,3\"]")
     unless &GetOptions('tuning=s' => => \$TUNING,
 		       'name=s' => \$NAME,
 		       'srilm=s' => \$SRILM,
 		       'tempdir=s' => \$TEMPDIR,
+           'continue' => \$CONTINUE,
            'group=s' => \$GROUP,
 		       'lm=s' => \$LM);
 
@@ -97,7 +98,7 @@ foreach my $subgroup (split(/ /,$GROUP)) {
   my $name = $NAME.".group-".chr(97+($g++));
   push @SUB_NAME,$name;
   print STDERR "\n=== BUILDING SUB LM $name from\n\t".join("\n\t",@SUB_LM)."\n===\n\n";
-  &interpolate($name, @SUB_LM);
+  &interpolate($name, @SUB_LM) unless $CONTINUE && -e $name;
 }
 for(my $lm_i=0; $lm_i < scalar(@LM); $lm_i++) {
   next if defined($ALREADY{$lm_i});
