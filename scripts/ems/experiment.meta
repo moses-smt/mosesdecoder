@@ -408,7 +408,7 @@ build-sparse-lexical
         default-name: model/most-frequent-words
 	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
 create-config
-	in: reordering-table phrase-translation-table generation-table sparse-lexical domains sparse-phrase-translation-table INTERPOLATED-LM:binlm LM:binlm 
+	in: reordering-table phrase-translation-table generation-table sparse-lexical domains INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini

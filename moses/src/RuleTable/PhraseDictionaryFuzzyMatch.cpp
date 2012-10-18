@@ -71,7 +71,7 @@ namespace Moses
     m_input		= &input;
     m_output	= &output;
     
-    m_weight = &weight;
+    m_weight = new vector<float>(weight);
    
     cerr << "initStr=" << initStr << endl;
     m_config = Tokenize(initStr, ";");

@@ -371,6 +371,14 @@ score-settings = "--GoodTuring"
 #
 #include-word-alignment-in-rules = yes
 
+### sparse lexical features
+#
+#sparse-lexical-features = "target-word-insertion top 50, source-word-deletion top 50, word-translation top 50 50, phrase-length"
+
+### domain adaptation settings
+# options: sparse, any of: indicator, subset, ratio
+#domain-features = "subset" 
+
 ### if phrase table training should be skipped,
 # point to phrase translation table
 #
