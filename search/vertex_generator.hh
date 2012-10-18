@@ -24,7 +24,7 @@ class VertexGenerator {
     void NewHypothesis(PartialEdge partial) {
       const lm::ngram::ChartState &state = partial.CompletedState();
       std::pair<Existing::iterator, bool> ret(existing_.insert(std::make_pair(hash_value(state), partial)));
-      if (ret.second && ret.first->second < partial) {
+      if (!ret.second && ret.first->second < partial) {
         ret.first->second = partial;
       }
     }
