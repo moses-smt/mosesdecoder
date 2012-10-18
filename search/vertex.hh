@@ -26,7 +26,6 @@ class VertexNode {
       state_.left.length = 0;
       state_.right.length = 0;
       right_full_ = false;
-      bound_ = -kScoreInf;
       end_ = NULL;
     }
 
