@@ -41,6 +41,8 @@ public:
   Phrase()
   {}
 
+  virtual ~Phrase() {}
+
   void AddWord(WordPtr word);
   void AddWord(WordPtr word, size_t pos);
 

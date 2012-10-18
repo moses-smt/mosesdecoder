@@ -41,7 +41,7 @@ class Word
 {
   friend std::ostream& operator<<(std::ostream&, const Word&);
 
-protected:
+private:
   bool m_isNonTerminal;
   UINT64 m_vocabId;
 
@@ -76,7 +76,7 @@ public:
     const Vocab &vocab,
     Moses::Word &overwrite) const;
 
-	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+	void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
   int Compare(const Word &compare) const;
   bool operator<(const Word &compare) const;
