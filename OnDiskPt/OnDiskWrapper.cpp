@@ -30,6 +30,8 @@ using namespace std;
 namespace OnDiskPt
 {
 
+int OnDiskWrapper::VERSION_NUM = 5;
+
 OnDiskWrapper::OnDiskWrapper()
 {
 }
@@ -163,7 +165,7 @@ void OnDiskWrapper::EndSave()
 
 void OnDiskWrapper::SaveMisc()
 {
-  m_fileMisc << "Version 4" << endl;
+  m_fileMisc << "Version " << VERSION_NUM << endl;
   m_fileMisc << "NumSourceFactors " << m_numSourceFactors << endl;
   m_fileMisc << "NumTargetFactors " << m_numTargetFactors << endl;
   m_fileMisc << "NumScores " << m_numScores << endl;

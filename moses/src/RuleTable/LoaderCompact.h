@@ -41,7 +41,7 @@ class RuleTableLoaderCompact : public RuleTableLoader
  public:
   bool Load(const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
-            std::istream &inStream,
+            const std::string &inFile,
             const std::vector<float> &weight,
             size_t tableLimit,
             const LMList &languageModels,
@@ -71,7 +71,8 @@ class RuleTableLoaderCompact : public RuleTableLoader
                          std::vector<size_t> &);
 
   void LoadAlignmentSection(LineReader &,
-                            std::vector<const AlignmentInfo *> &);
+                            std::vector<const AlignmentInfo *> &,
+                            std::vector<Phrase> &);
 
   bool LoadRuleSection(LineReader &,
                        const std::vector<Word> &,

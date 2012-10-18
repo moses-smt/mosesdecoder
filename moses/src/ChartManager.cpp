@@ -23,6 +23,7 @@
 #include "ChartManager.h"
 #include "ChartCell.h"
 #include "ChartHypothesis.h"
+#include "ChartTranslationOptions.h"
 #include "ChartTrellisDetourQueue.h"
 #include "ChartTrellisNode.h"
 #include "ChartTrellisPath.h"
@@ -49,30 +50,14 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
   ,m_system(system)
   ,m_start(clock())
   ,m_hypothesisId(0)
+  ,m_parser(source, *system, m_hypoStackColl)
   ,m_translationOptionList(StaticData::Instance().GetRuleLimit())
-  ,m_decodeGraphList(system->GetDecodeGraphs())
-
 {
-  m_system->InitializeBeforeSentenceProcessing(source);
-  const std::vector<PhraseDictionaryFeature*> &dictionaries = m_system->GetPhraseDictionaries();
-  m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
-       p != dictionaries.end(); ++p) {
-    PhraseDictionaryFeature *pdf = *p;
-    const PhraseDictionary *dict = pdf->GetDictionary();
-    PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
-    m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, m_hypoStackColl));
-  }
 }
 
 ChartManager::~ChartManager()
 {
   m_system->CleanUpAfterSentenceProcessing(m_source);
-
-  RemoveAllInColl(m_ruleLookupManagers);
-
-  RemoveAllInColl(m_unksrcs);
-  RemoveAllInColl(m_cacheTargetPhraseCollection);
 
   clock_t end = clock();
   float et = (end - m_start);
@@ -101,7 +86,10 @@ void ChartManager::ProcessSentence()
       WordsRange range(startPos, endPos);
 
       // create trans opt
-      CreateTranslationOptionsForRange(range);
+      m_translationOptionList.Clear();
+      m_parser.Create(range, m_translationOptionList);
+      m_translationOptionList.ApplyThreshold();
+      PreCalculateScores();
 
       // decode
       ChartCell &cell = m_hypoStackColl.Get(range);
@@ -197,21 +185,16 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(*hypo));
 
   // Add it to the n-best list.
-  ret.Add(basePath);
   if (count == 1) {
+	ret.Add(basePath);
     return;
-  }
-
-  // Record the output phrase if distinct translations are required.
-  set<Phrase> distinctHyps;
-  if (onlyDistinct) {
-    distinctHyps.insert(basePath->GetOutputPhrase());
   }
 
   // Set a limit on the number of detours to pop.  If the n-best list is
   // restricted to distinct translations then this limit should be bigger
   // than n.  The n-best factor determines how much bigger the limit should be.
-  const size_t nBestFactor = StaticData::Instance().GetNBestFactor();
+  const StaticData &staticData = StaticData::Instance();
+  const size_t nBestFactor = staticData.GetNBestFactor();
   size_t popLimit;
   if (!onlyDistinct) {
     popLimit = count-1;
@@ -227,36 +210,48 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   // contain no more than popLimit items.
   ChartTrellisDetourQueue contenders(popLimit);
 
-  // Create a ChartTrellisDetour for each single-point deviation from basePath
-  // and add them to the queue.
-  CreateDeviantPaths(basePath, contenders);
-
+  // Get all complete translations
+  Word *w = new Word();
+  //w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "TOP", true);
+  w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "S", true);
+  const HypoList topHypos = *(lastCell.GetSortedHypotheses(*w));
+  
+  // Create a ChartTrellisDetour for each complete translation and add it to the queue
+  for (size_t i=0; i<topHypos.size(); ++i) {
+	  const ChartHypothesis &hypo = *(topHypos[i]);
+	  boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(hypo));
+	  ChartTrellisDetour *detour = new ChartTrellisDetour(basePath, basePath->GetFinalNode(), hypo);
+	  contenders.Push(detour);
+  }
+ 	
+  // Record the output phrase if distinct translations are required.
+  set<Phrase> distinctHyps;
+  
   // MAIN loop
-  for (size_t i = 0;
-       ret.GetSize() < count && !contenders.Empty() && i < popLimit;
-       ++i) {
+  for (size_t i = 0; ret.GetSize() < count && !contenders.Empty() && i < popLimit; ++i) {
     // Get the best detour from the queue.
     std::auto_ptr<const ChartTrellisDetour> detour(contenders.Pop());
     CHECK(detour.get());
 
     // Create a full base path from the chosen detour.
-    basePath.reset(new ChartTrellisPath(*detour));
-
+    //basePath.reset(new ChartTrellisPath(*detour));
+    boost::shared_ptr<ChartTrellisPath> path(new ChartTrellisPath(*detour));
+    
     // Generate new detours from this base path and add them to the queue of
     // contenders.  The new detours deviate from the base path by a single
     // replacement along the previous detour sub-path.
-    CHECK(basePath->GetDeviationPoint());
-    CreateDeviantPaths(basePath, *(basePath->GetDeviationPoint()), contenders);
+    CHECK(path->GetDeviationPoint());
+    CreateDeviantPaths(path, *(path->GetDeviationPoint()), contenders);
 
     // If the n-best list is allowed to contain duplicate translations (at the
     // surface level) then add the new path unconditionally, otherwise check
     // whether the translation has seen before.
     if (!onlyDistinct) {
-      ret.Add(basePath);
+      ret.Add(path);
     } else {
-      Phrase tgtPhrase = basePath->GetOutputPhrase();
+      Phrase tgtPhrase = path->GetOutputPhrase();
       if (distinctHyps.insert(tgtPhrase).second) {
-        ret.Add(basePath);
+        ret.Add(path);
       }
     }
   }
@@ -347,127 +342,42 @@ void ChartManager::CreateDeviantPaths(
   }
 }
 
-void ChartManager::CreateTranslationOptionsForRange(const WordsRange &wordsRange)
+  
+void ChartManager::PreCalculateScores() 
 {
-  assert(m_decodeGraphList.size() == m_ruleLookupManagers.size());
-  
-  m_translationOptionList.Clear();
-  
-  std::vector <DecodeGraph*>::const_iterator iterDecodeGraph;
-  std::vector <ChartRuleLookupManager*>::const_iterator iterRuleLookupManagers = m_ruleLookupManagers.begin();
-  for (iterDecodeGraph = m_decodeGraphList.begin(); iterDecodeGraph != m_decodeGraphList.end(); ++iterDecodeGraph, ++iterRuleLookupManagers) {
-    const DecodeGraph &decodeGraph = **iterDecodeGraph;
-    assert(decodeGraph.GetSize() == 1);
-    ChartRuleLookupManager &ruleLookupManager = **iterRuleLookupManagers;
-    size_t maxSpan = decodeGraph.GetMaxChartSpan();
-    if (maxSpan == 0 || wordsRange.GetNumWordsCovered() <= maxSpan) {
-      ruleLookupManager.GetChartRuleCollection(wordsRange, m_translationOptionList);
+  for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
+    const ChartTranslationOptions& cto = m_translationOptionList.Get(i);
+    for (TargetPhraseCollection::const_iterator j  = cto.GetTargetPhraseCollection().begin();
+     j != cto.GetTargetPhraseCollection().end(); ++j) {
+      const TargetPhrase* targetPhrase = *j;
+      if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
+        ChartBasedFeatureContext context(*targetPhrase,m_source);
+        const vector<const StatelessFeatureFunction*>& sfs =
+          m_system->GetStatelessFeatureFunctions();
+        ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
+        for (size_t k = 0; k < sfs.size(); ++k) {
+          if (!sfs[k]->ComputeValueInTranslationTable()) {
+            sfs[k]->EvaluateChart(context,&breakdown);
+          }
+        }
+      }
     }
   }
-  
-  if (wordsRange.GetNumWordsCovered() == 1 && wordsRange.GetStartPos() != 0 && wordsRange.GetStartPos() != m_source.GetSize()-1) {
-    bool alwaysCreateDirectTranslationOption = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
-    if (m_translationOptionList.GetSize() == 0 || alwaysCreateDirectTranslationOption) {
-      // create unknown words for 1 word coverage where we don't have any trans options
-      const Word &sourceWord = m_source.GetWord(wordsRange.GetStartPos());
-      ProcessOneUnknownWord(sourceWord, wordsRange);
-    }
-  }
-  
-  m_translationOptionList.ApplyThreshold();
 }
-  
-//! special handling of ONE unknown words.
-void ChartManager::ProcessOneUnknownWord(const Word &sourceWord, const WordsRange &range)
+
+void ChartManager::InsertPreCalculatedScores(
+    const TargetPhrase& targetPhrase, ScoreComponentCollection* scoreBreakdown) const 
 {
-  // unknown word, add as trans opt
-  const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system->GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
-  
-  const ChartCell &chartCell = m_hypoStackColl.Get(range);
-  const ChartCellLabel &sourceWordLabel = chartCell.GetSourceWordLabel();
-  
-  size_t isDigit = 0;
-  if (staticData.GetDropUnknown()) {
-    const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-    const string &s = f->GetString();
-    isDigit = s.find_first_of("0123456789");
-    if (isDigit == string::npos)
-      isDigit = 0;
-    else
-      isDigit = 1;
-    // modify the starting bitmap
-  }
-  
-  Phrase* m_unksrc = new Phrase(1);
-  m_unksrc->AddWord() = sourceWord;
-  m_unksrcs.push_back(m_unksrc);
-  
-  //TranslationOption *transOpt;
-  if (! staticData.GetDropUnknown() || isDigit) {
-    // loop
-    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
-    UnknownLHSList::const_iterator iterLHS;
-    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
-      const string &targetLHSStr = iterLHS->first;
-      float prob = iterLHS->second;
-      
-      // lhs
-      //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
-      Word targetLHS(true);
-      
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
-      
-      // add to dictionary
-      TargetPhrase *targetPhrase = new TargetPhrase(Output);
-      TargetPhraseCollection *tpc = new TargetPhraseCollection;
-      tpc->Add(targetPhrase);
-      
-      m_cacheTargetPhraseCollection.push_back(tpc);
-      Word &targetWord = targetPhrase->AddWord();
-      targetWord.CreateUnknownWord(sourceWord);
-      
-      // scores
-      vector<float> unknownScore(1, FloorScore(TransformScore(prob)));
-      
-      //targetPhrase->SetScore();
-      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetScore(m_system->GetWordPenaltyProducer(), wordPenaltyScore);
-      targetPhrase->SetSourcePhrase(m_unksrc);
-      targetPhrase->SetTargetLHS(targetLHS);
-      
-      // chart rule
-      m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
-    } // for (iterLHS
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection>::const_iterator scoreIter = 
+    m_precalculatedScores.find(targetPhrase);
+  if (scoreIter != m_precalculatedScores.end()) {
+    scoreBreakdown->PlusEquals(scoreIter->second);
   } else {
-    // drop source word. create blank trans opt
-    vector<float> unknownScore(1, FloorScore(-numeric_limits<float>::infinity()));
-    
-    TargetPhrase *targetPhrase = new TargetPhrase(Output);
-    TargetPhraseCollection *tpc = new TargetPhraseCollection;
-    tpc->Add(targetPhrase);
-    // loop
-    const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
-    UnknownLHSList::const_iterator iterLHS;
-    for (iterLHS = lhsList.begin(); iterLHS != lhsList.end(); ++iterLHS) {
-      const string &targetLHSStr = iterLHS->first;
-      //float prob = iterLHS->second;
-      
-      Word targetLHS(true);
-      targetLHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetLHSStr, true);
-      CHECK(targetLHS.GetFactor(0) != NULL);
-      
-      m_cacheTargetPhraseCollection.push_back(tpc);
-      targetPhrase->SetSourcePhrase(m_unksrc);
-      targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetTargetLHS(targetLHS);
-      
-      // chart rule
-      m_translationOptionList.Add(*tpc, m_emptyStackVec, range);
-    }
+    TRACE_ERR("ERROR: " << targetPhrase << " missing from precalculation cache" << endl);
+    assert(0);  
   }
+
 }
+
   
 } // namespace Moses

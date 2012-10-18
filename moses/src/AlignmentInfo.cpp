@@ -21,13 +21,29 @@
 #include "AlignmentInfo.h"
 #include "TypeDef.h"
 #include "StaticData.h"
-#include "util/tokenize_piece.hh"
-#include "util/string_piece.hh"
-#include <boost/lexical_cast.hpp>
-#include "Util.h"
 
 namespace Moses
 {
+
+void AlignmentInfo::BuildNonTermIndexMap()
+{
+  if (m_collection.empty()) {
+    return;
+  }
+  const_iterator p = begin();
+  size_t maxIndex = p->second;
+  for (++p;  p != end(); ++p) {
+    if (p->second > maxIndex) {
+      maxIndex = p->second;
+    }
+  }
+  m_nonTermIndexMap.resize(maxIndex+1, NOT_FOUND);
+  size_t i = 0;
+  for (p = begin(); p != end(); ++p) {
+    m_nonTermIndexMap[p->second] = i++;
+  }
+            
+}
 
 bool compare_target(const std::pair<size_t,size_t> *a, const std::pair<size_t,size_t> *b) {
   if(a->second < b->second)  return true;
@@ -76,32 +92,4 @@ std::ostream& operator<<(std::ostream &out, const AlignmentInfo &alignmentInfo)
   return out;
 }
 
-namespace {
-  void MosesShouldUseExceptions(bool value) {
-    if (!value) {
-      std::cerr << "Could not parse alignment info" << std::endl;
-      abort();
-    }
-  }
-} // namespace
-
-  
-std::set< std::pair<size_t, size_t> > ParseAlignmentFromString(const StringPiece &str)
-{
-  using std::set;
-  using std::pair;
-  set<pair<size_t,size_t> > alignmentInfo;
-  for (util::TokenIter<util::AnyCharacter, true> token(str, util::AnyCharacter(" \t")); token; ++token) {
-    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
-    MosesShouldUseExceptions(dash);
-    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(dash);
-    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(!dash);
-    
-    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
-  }
-  return alignmentInfo;
-}
-  
 }

@@ -23,7 +23,6 @@ class FeatureData
 private:
   std::size_t m_num_features;
   std::string m_features;
-  bool m_sparse_flag;
   std::map<std::string, std::size_t> m_feature_name_to_index; // map from name to index of features
   std::map<std::size_t, std::string> m_index_to_feature_name; // map from index to name of features
   featdata_t m_array;
@@ -36,14 +35,15 @@ public:
 
   void clear() { m_array.clear(); }
 
-  bool hasSparseFeatures() const { return m_sparse_flag; }
-
   FeatureArray get(const std::string& idx) {
     return m_array.at(getIndex(idx));
   }
-
-  FeatureArray& get(std::size_t idx) { return m_array.at(idx); }
-  const FeatureArray& get(std::size_t idx) const { return m_array.at(idx); }
+  FeatureArray& get(size_t idx) {
+    return m_array.at(idx);
+  }
+  const FeatureArray& get(size_t idx) const {
+    return m_array.at(idx);
+  }
 
   inline bool exists(const std::string& sent_idx) const {
     return exists(getIndex(sent_idx));
@@ -76,8 +76,8 @@ public:
   void save(std::ostream* os, bool bin=false);
   void save(bool bin=false);
 
-  void load(std::istream* is);
-  void load(const std::string &file);
+  void load(std::istream* is, const SparseVector& sparseWeights);
+  void load(const std::string &file, const SparseVector& sparseWeights);
 
   bool check_consistency() const;
 

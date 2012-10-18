@@ -225,12 +225,12 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
   //SCOREROUT eg: 0.04546
   distanceValue*=SCORE_MULTFACT; //SCOREROUT eg: 4546 to transform float into integer
   ostringstream tempStream;
-  tempStream.precision(SCORE_PRECISION);
-  tempStream << distanceValue << " 1"; //use for final normalization over the amount of test sentences
+  tempStream.precision(0);	// decimal precision not needed as score was multiplied per SCORE_MULTFACT
+  tempStream << std::fixed << distanceValue << " 1"; //use for final normalization over the amount of test sentences
   string str = tempStream.str();
   entry.set(str);
 
-  //cout << tempStream.str();
+//cout << distanceValue << "=" << distanceValue << " (str:" << tempStream.str() << ")" << endl;
 }
 
 //Will just be final score

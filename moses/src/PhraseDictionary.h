@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <memory>
 #include <list>
+#include <stdexcept>
 #include <vector>
 #include <string>
 
@@ -45,12 +46,12 @@ namespace Moses
 class StaticData;
 class InputType;
 class WordsRange;
-class ChartTranslationOptionList;
-class ChartCellCollection;
+class ChartCellCollectionBase;
 class TranslationSystem;
 class ChartRuleLookupManager;
 
 class PhraseDictionaryFeature;
+class SparsePhraseDictionaryFeature;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -68,6 +69,7 @@ public:
     return Translate;
   }
   const PhraseDictionaryFeature* GetFeature() const;
+  size_t GetDictIndex() const;
 
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
@@ -79,7 +81,7 @@ public:
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
-    const ChartCellCollection &) = 0;
+    const ChartCellCollectionBase &) = 0;
 
 protected:
   size_t m_tableLimit;
@@ -96,12 +98,14 @@ class PhraseDictionaryFeature :  public DecodeFeature
 
 public:
   PhraseDictionaryFeature(  PhraseTableImplementation implementation
+                            , SparsePhraseDictionaryFeature* spdf
                             , size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
+                            , size_t dictIndex
                             , size_t tableLimit
                             , const std::string &targetFile
                             , const std::string &alignmentsFile);
@@ -111,12 +115,13 @@ public:
 
   virtual bool ComputeValueInTranslationOption() const;
 
-  std::string GetScoreProducerDescription(unsigned) const;
   std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
 
-  size_t GetNumScoreComponents() const;
-
   size_t GetNumInputScores() const;
+
+  SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
+    return m_sparsePhraseDictionaryFeature;
+  }
 
   //Initialises the dictionary (may involve loading from file)
   void InitDictionary(const TranslationSystem* system);
@@ -126,15 +131,34 @@ public:
 
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
+  PhraseDictionary* GetDictionary();
+  size_t GetDictIndex() const;
+
+  //Usual feature function methods are not implemented
+  virtual void Evaluate(const PhraseBasedFeatureContext& context,
+  											ScoreComponentCollection* accumulator) const 
+  {
+    throw std::logic_error("PhraseDictionary.Evaluate() Not implemented");
+  }
+
+  virtual void EvaluateChart(const ChartBasedFeatureContext& context,
+                             ScoreComponentCollection* accumulator) const 
+  {
+    throw std::logic_error("PhraseDictionary.EvaluateChart() Not implemented");
+  }
+
+  virtual bool ComputeValueInTranslationTable() const {return true;}
+
+
+protected:
+  size_t m_dictIndex;
 
 private:
   /** Load the appropriate phrase table */
   PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
 
-  size_t m_numScoreComponent;
   unsigned m_numInputScores;
   std::string m_filePath;
-  std::vector<float> m_weight;
   size_t m_tableLimit;
   //We instantiate either the the thread-safe or non-thread-safe dictionary,
   //but not both. The thread-safe one can be instantiated in the constructor and shared
@@ -151,6 +175,7 @@ private:
   PhraseTableImplementation m_implementation;
   std::string m_targetFile;
   std::string m_alignmentsFile;
+  SparsePhraseDictionaryFeature* m_sparsePhraseDictionaryFeature;
 
 };
 

@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "UserMessage.h"
+#include "SparsePhraseDictionaryFeature.h"
 
 using namespace std;
 
@@ -106,7 +107,6 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
  
     //target
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
-    targetPhrase->SetSourcePhrase(&sourcePhrase); // TODO(bhaddow): This is a dangling pointer
     targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
 
     scv.clear();
@@ -127,14 +127,30 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       UserMessage::Add(strme.str());
       abort();
     }
-    // scv good to go sir!
-    targetPhrase->SetScore(m_feature, scv, weight, weightWP, languageModels);
 
+
+    
     size_t consumed = 3;
     if (pipes) {
       targetPhrase->SetAlignmentInfo(*pipes++);
       ++consumed;
     }
+
+    ScoreComponentCollection sparse;
+    if (pipes) pipes++; //counts
+    if (pipes) {
+      //sparse features
+      SparsePhraseDictionaryFeature* spdf = 
+        GetFeature()->GetSparsePhraseDictionaryFeature();
+      if (spdf) {
+        sparse.Assign(spdf,(pipes++)->as_string());
+      }
+    }
+
+
+    // scv good to go sir!
+    targetPhrase->SetScore(m_feature, scv, sparse, weight, weightWP, languageModels);
+
     // Check number of entries delimited by ||| agrees across all lines.  
     for (; pipes; ++pipes, ++consumed) {}
     if (numElement != consumed) {
@@ -148,12 +164,15 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
 
-    // Reuse source if possible.  Otherwise, create node for it.  
+    //TODO: Would be better to reuse source phrases, but ownership has to be 
+    //consistent across phrase table implementations
+    sourcePhrase.Clear();
+    sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
+    //Now that the source phrase is ready, we give the target phrase a copy
+    targetPhrase->SetSourcePhrase(sourcePhrase);
     if (preSourceString == sourcePhraseString && preSourceNode) {
       preSourceNode->Add(targetPhrase.release());
     } else {
-      sourcePhrase.Clear();
-      sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
       preSourceNode = CreateTargetPhraseCollection(sourcePhrase);
       preSourceNode->Add(targetPhrase.release());
       preSourceString.assign(sourcePhraseString.data(), sourcePhraseString.size());

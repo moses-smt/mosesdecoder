@@ -40,7 +40,7 @@ class RuleTableLoader
 
   virtual bool Load(const std::vector<FactorType> &input,
                     const std::vector<FactorType> &output,
-                    std::istream &inStream,
+                    const std::string &inFile,
                     const std::vector<float> &weight,
                     size_t tableLimit,
                     const LMList &languageModels,

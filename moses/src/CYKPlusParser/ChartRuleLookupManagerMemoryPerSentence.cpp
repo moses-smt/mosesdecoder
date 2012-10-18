@@ -21,7 +21,7 @@
 
 #include "RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "InputType.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "DotChartInMemory.h"
 #include "StaticData.h"
 #include "NonTerminal.h"
@@ -32,7 +32,7 @@ namespace Moses
 
 ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence(
   const InputType &src,
-  const ChartCellCollection &cellColl,
+  const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryFuzzyMatch &ruleTable)
   : ChartRuleLookupManagerCYKPlus(src, cellColl)
   , m_ruleTable(ruleTable)
@@ -65,7 +65,7 @@ ChartRuleLookupManagerMemoryPerSentence::~ChartRuleLookupManagerMemoryPerSentenc
 
 void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
@@ -76,8 +76,6 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
   
-  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
-
   // loop through the rules
   // (note that expandableDottedRuleList can be expanded as the loop runs 
   //  through calls to ExtendPartialRuleApplication())
@@ -95,6 +93,7 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
 
       // look up in rule dictionary, if the current rule can be extended
       // with the source word in the last position
+      const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
       const Word &sourceWord = sourceWordLabel.GetLabel();
       const PhraseDictionaryNodeSCFG *node = prevDottedRule.GetLastNode().GetChild(sourceWord);
 
@@ -183,8 +182,7 @@ void ChartRuleLookupManagerMemoryPerSentence::ExtendPartialRuleApplication(
     GetSentence().GetLabelSet(startPos, endPos);
 
   // target non-terminal labels for the remainder
-  const ChartCellLabelSet &targetNonTerms =
-    GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+  const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
 
   // note where it was found in the prefix tree of the rule dictionary
   const PhraseDictionaryNodeSCFG &node = prevDottedRule.GetLastNode();

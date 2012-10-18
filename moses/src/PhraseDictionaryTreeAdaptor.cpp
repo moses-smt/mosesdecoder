@@ -55,8 +55,7 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
   // set PhraseDictionary members
   m_tableLimit=tableLimit;
 
-  imp->Create(input,output,filePath,
-              weight,languageModels,weightWP);
+  imp->Create(input,output,filePath,weight,languageModels);
   return true;
 }
 

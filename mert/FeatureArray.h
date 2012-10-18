@@ -27,11 +27,11 @@ class FeatureArray
 private:
   // idx to identify the utterance. It can differ from
   // the index inside the vector.
+
   std::string m_index;
   featarray_t m_array;
   std::size_t m_num_features;
   std::string m_features;
-  bool m_sparse_flag;
 
 public:
   FeatureArray();
@@ -39,7 +39,6 @@ public:
 
   void clear() { m_array.clear(); }
 
-  bool hasSparseFeatures() const { return m_sparse_flag; }
 
   std::string getIndex() const { return m_index; }
   void setIndex(const std::string& value) { m_index = value; }
@@ -75,10 +74,9 @@ public:
   void save(const std::string &file, bool bin=false);
   void save(bool bin=false);
 
-  void loadtxt(std::istream* is, std::size_t n);
+  void loadtxt(std::istream* is, const SparseVector& sparseWeights, std::size_t n);
   void loadbin(std::istream* is, std::size_t n);
-  void load(std::istream* is);
-  void load(const std::string &file);
+  void load(std::istream* is, const SparseVector& sparseWeights);
 
   bool check_consistency() const;
 };

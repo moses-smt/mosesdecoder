@@ -37,28 +37,23 @@ namespace Moses
 {
 extern bool g_debug;
 
+ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
+  m_coverage(startPos, endPos),
+  m_targetLabelSet(m_coverage) {}
+
+ChartCellBase::~ChartCellBase() {}
+
 /** Constructor
  * \param startPos endPos range of this cell
  * \param manager pointer back to the manager 
  */
-ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager)
-  :m_coverage(startPos, endPos)
-  ,m_sourceWordLabel(NULL)
-  ,m_targetLabelSet(m_coverage)
-  ,m_manager(manager)
-{
+ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
+  ChartCellBase(startPos, endPos), m_manager(manager) {
   const StaticData &staticData = StaticData::Instance();
   m_nBestIsEnabled = staticData.IsNBestEnabled();
-  if (startPos == endPos) {
-    const Word &sourceWord = manager.GetSource().GetWord(startPos);
-    m_sourceWordLabel = new ChartCellLabel(m_coverage, sourceWord);
-  }
 }
 
-ChartCell::~ChartCell()
-{
-  delete m_sourceWordLabel;
-}
+ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell. 
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
@@ -117,8 +112,8 @@ void ChartCell::SortHypotheses()
   MapType::iterator iter;
   for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
     ChartHypothesisCollection &coll = iter->second;
-    m_targetLabelSet.AddConstituent(iter->first, coll);
     coll.SortHypotheses();
+    m_targetLabelSet.AddConstituent(iter->first, &coll.GetSortedHypotheses());
   }
 }
 

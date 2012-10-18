@@ -132,7 +132,7 @@ private:
 	int SampleSelection(std::vector<unsigned>&, int = 300) const;
 
 	std::vector<int> GetSntIndexes(std::vector<unsigned>&, int, const std::vector<unsigned>&) const;	
-	TargetPhrase* GetMosesFactorIDs(const SAPhrase&) const;
+	TargetPhrase* GetMosesFactorIDs(const SAPhrase&, const Phrase& sourcePhrase) const;
 	SAPhrase TrgPhraseFromSntIdx(const PhrasePair&) const;
 	bool GetLocalVocabIDs(const Phrase&, SAPhrase &) const;
 	void CacheWordProbs(wordID_t) const;

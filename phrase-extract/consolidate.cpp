@@ -308,7 +308,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     fileConsolidated << " ||| " << itemDirect[3];
 
     // counts, for debugging
-    fileConsolidated << "||| " << countE << " " << countF; // << " " << countEF;
+    fileConsolidated << "||| " << countE << " " << countF << " " << countEF; 
 
     if (outputNTLengths)
     {

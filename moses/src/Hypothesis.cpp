@@ -91,7 +91,6 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_wordDeleted(false)
   ,	m_totalScore(0.0f)
   ,	m_futureScore(0.0f)
-  , m_scoreBreakdown				(prevHypo.m_scoreBreakdown)
   , m_ffStates(prevHypo.m_ffStates.size())
   , m_arcList(NULL)
   , m_transOpt(&transOpt)
@@ -247,18 +246,19 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
     }
     if (comp != 0) return comp;
   }
-
+  
   return 0;
 }
 
 void Hypothesis::ResetScore()
 {
-  m_scoreBreakdown.ZeroAll();
+  m_currScoreBreakdown.ZeroAll();
+  m_scoreBreakdown.reset(0);
   m_futureScore = m_totalScore = 0.0f;
 }
 
 void Hypothesis::IncorporateTransOptScores() {
-  m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+  m_currScoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
 }
 
 void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
@@ -266,12 +266,12 @@ void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
   m_ffStates[state_idx] = sfff->Evaluate(
       *this,
       m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
-      &m_scoreBreakdown);
+      &m_currScoreBreakdown);
             
 }
 
 void Hypothesis::EvaluateWith(const StatelessFeatureFunction* slff) {
-  slff->Evaluate(m_targetPhrase, &m_scoreBreakdown);
+  slff->Evaluate(PhraseBasedFeatureContext(this), &m_currScoreBreakdown);
 }
 
 void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
@@ -279,7 +279,7 @@ void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
 }
 
 void Hypothesis::CalculateFinalScore() {
-  m_totalScore = m_scoreBreakdown.InnerProduct(
+  m_totalScore = GetScoreBreakdown().InnerProduct(
         StaticData::Instance().GetAllWeights()) + m_futureScore;
 }
 
@@ -292,17 +292,24 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // option: add these here
   // language model scores for n-grams completely contained within a target
   // phrase are also included here
-  m_scoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
+  m_currScoreBreakdown = m_transOpt->GetScoreBreakdown();
+
+  // other stateless features have their scores cached in the 
+  // TranslationOptionsCollection
+  m_manager.getSntTranslationOptions()->InsertPreCalculatedScores
+    (*m_transOpt, &m_currScoreBreakdown);
 
   const StaticData &staticData = StaticData::Instance();
   clock_t t=0; // used to track time
 
   // compute values of stateless feature functions that were not
-  // cached in the translation option-- there is no principled distinction
+  // cached in the translation option
   const vector<const StatelessFeatureFunction*>& sfs =
     m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
-    sfs[i]->Evaluate(m_targetPhrase, &m_scoreBreakdown);
+    if (!sfs[i]->ComputeValueInTranslationOption()) {
+      EvaluateWith(sfs[i]);
+    }
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
@@ -311,7 +318,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
     m_ffStates[i] = ffs[i]->Evaluate(
                       *this,
                       m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
-                      &m_scoreBreakdown);
+                      &m_currScoreBreakdown);
   }
 
   IFVERBOSE(2) {
@@ -321,8 +328,19 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // FUTURE COST
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
+  // Apply sparse producer weights
+  ScoreComponentCollection tempScoreBreakdown = m_currScoreBreakdown;
+  const vector<const FeatureFunction*>& sparseProducers = m_manager.GetTranslationSystem()->GetSparseProducers();
+  for (unsigned i = 0; i < sparseProducers.size(); ++i) {
+    float weight = sparseProducers[i]->GetSparseProducerWeight();
+    tempScoreBreakdown.MultiplyEquals(sparseProducers[i], weight);
+  }
+
   // TOTAL
-  m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  m_totalScore = tempScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  if (m_prevHypo) {
+    m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
+  }
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
@@ -353,7 +371,7 @@ float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore )
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
   // TOTAL
-  float total = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore + estimatedLMScore;
+  float total = m_totalScore + estimatedLMScore;
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().AddTimeEstimateScore( clock()-t );
@@ -375,11 +393,14 @@ void Hypothesis::CalcRemainingScore()
   }
 
   // WORD PENALTY
-  m_scoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
+  m_currScoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
                               , - (float)m_currTargetWordsRange.GetNumWordsCovered());
 
   // TOTAL
-  m_totalScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  m_totalScore = m_currScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  if (m_prevHypo) {
+    m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
+  }
 
   IFVERBOSE(2) {
     m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
@@ -424,7 +445,7 @@ void Hypothesis::PrintHypothesis() const
   //	TRACE_ERR( "\tlanguage model cost "); // <<m_score[ScoreType::LanguageModelScore]<<endl;
   //	TRACE_ERR( "\tword penalty "); // <<(m_score[ScoreType::WordPenalty]*weightWordPenalty)<<endl;
   TRACE_ERR( "\tscore "<<m_totalScore - m_futureScore<<" + future cost "<<m_futureScore<<" = "<<m_totalScore<<endl);
-  TRACE_ERR(  "\tunweighted feature scores: " << m_scoreBreakdown << endl);
+  TRACE_ERR(  "\tunweighted feature scores: " << m_currScoreBreakdown << endl);
   //PrintLMScores();
 }
 

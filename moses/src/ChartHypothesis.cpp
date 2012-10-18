@@ -32,6 +32,8 @@
 #include "ChartTranslationOptions.h"
 #include "FFState.h"
 
+using namespace std;
+
 namespace Moses
 {
 
@@ -90,11 +92,12 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
 {
+
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = GetCurrTargetPhrase().GetNonTermIndex(pos);
+      size_t nonTermInd = GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 
@@ -157,21 +160,21 @@ void ChartHypothesis::CalcScore()
   const ScoreComponentCollection &scoreBreakdown = GetCurrTargetPhrase().GetScoreBreakdown();
   m_scoreBreakdown.PlusEquals(scoreBreakdown);
 
+  //Add pre-computed features
+  m_manager.InsertPreCalculatedScores(GetCurrTargetPhrase(), &m_scoreBreakdown);
+
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
-
-  //const vector<const StatelessFeatureFunction*>& sfs =
-  //  m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
-	// TODO!
-  //for (unsigned i = 0; i < sfs.size(); ++i) {
-  //  sfs[i]->ChartEvaluate(m_targetPhrase, &m_scoreBreakdown);
-  //}
+  const std::vector<const StatelessFeatureFunction*>& sfs =
+    m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
+  for (unsigned i = 0; i < sfs.size(); ++i)
+  	if (sfs[i]->ComputeValueInTranslationOption() == false)
+  		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
     m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i) {
-		m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
-  }
+  for (unsigned i = 0; i < ffs.size(); ++i)
+    m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
 
   m_totalScore	= m_scoreBreakdown.GetWeightedScore();
 }

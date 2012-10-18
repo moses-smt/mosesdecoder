@@ -37,7 +37,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "TypeDef.h"
-#include "ScoreIndexManager.h"
 #include "FactorCollection.h"
 #include "Parameter.h"
 #include "LM/Base.h"
@@ -46,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
+#include "ScoreComponentCollection.h"
 
 namespace Moses
 {
@@ -53,11 +53,23 @@ namespace Moses
 class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
+class GlobalLexicalModelUnlimited;
+class PhraseBoundaryFeature;
 class PhraseDictionaryFeature;
+class SparsePhraseDictionaryFeature;
+class PhrasePairFeature;
+class BleuScoreFeature;
+class PhraseLengthFeature;
+class TargetWordInsertionFeature;
+class SourceWordDeletionFeature;
+class WordTranslationFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
+class MetaScoreProducer;
+class TargetBigramFeature;
+class TargetNgramFeature;
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
@@ -78,22 +90,31 @@ protected:
 
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
+  std::vector<SparsePhraseDictionaryFeature*>	m_sparsePhraseDictionary;
   std::vector<GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
+  ScoreComponentCollection m_allWeights;
+  std::vector<LexicalReordering*>                   m_reorderModels;
+  std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
+  std::vector<GlobalLexicalModelUnlimited*>          m_globalLexicalModelsUnlimited;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
-  ScoreIndexManager				m_scoreIndexManager;
-  std::vector<float>			m_allWeights;
-  std::vector<LexicalReordering*>  m_reorderModels;
-  std::vector<GlobalLexicalModel*> m_globalLexicalModels;
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   std::map<std::string, TranslationSystem> m_translationSystems;
+  TargetBigramFeature *m_targetBigramFeature;
+  std::vector<TargetNgramFeature*> m_targetNgramFeatures;
+  PhraseBoundaryFeature *m_phraseBoundaryFeature;
+  PhraseLengthFeature* m_phraseLengthFeature;
+  TargetWordInsertionFeature* m_targetWordInsertionFeature;
+  SourceWordDeletionFeature* m_sourceWordDeletionFeature;
+  std::vector<WordTranslationFeature*> m_wordTranslationFeatures;
+  std::vector<PhrasePairFeature*> m_phrasePairFeatures;
   float
   m_beamWidth,
   m_earlyDiscardingThreshold,
@@ -143,6 +164,8 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+  MetaFeatureProducer *m_metaFeatureProducer;
+  BleuScoreFeature* m_bleuScoreFeature;
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
@@ -163,6 +186,7 @@ protected:
 
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
+  bool m_mira; // do mira training
   bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
   size_t m_mbrSize; //! number of translation candidates considered
   float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
@@ -221,6 +245,8 @@ protected:
   
   StaticData();
 
+
+
   void LoadPhraseBasedParameters();
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
@@ -241,6 +267,17 @@ protected:
   bool LoadDecodeGraphs();
   bool LoadLexicalReorderingModel();
   bool LoadGlobalLexicalModel();
+  bool LoadGlobalLexicalModelUnlimited();
+  //References used for scoring feature (eg BleuScoreFeature) for online training
+  bool LoadReferences();
+  bool LoadDiscrimLMFeature();
+  bool LoadPhraseBoundaryFeature();
+  bool LoadPhrasePairFeature();
+  bool LoadPhraseLengthFeature();
+  bool LoadTargetWordInsertionFeature();
+  bool LoadSourceWordDeletionFeature();
+  bool LoadWordTranslationFeature();
+
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
 
@@ -253,16 +290,32 @@ public:
   }
   //! destructor
   ~StaticData();
+
   //! return static instance for use like global variable
   static const StaticData& Instance() {
     return s_instance;
   }
+
+  //! do NOT call unless you know what you're doing
+  static StaticData& InstanceNonConst() {
+    return s_instance;
+  }
+
+  /** delete current static instance and replace with another.
+  	* Used by gui front end
+  	*/
+#ifdef WIN32
+  static void Reset() {
+    s_instance = StaticData();
+  }
+#endif
 
   //! Load data into static instance. This function is required as LoadData() is not const
   static bool LoadDataStatic(Parameter *parameter, const std::string &execPath);
 
   //! Main function to load everything. Also initialize the Parameter object
   bool LoadData(Parameter *parameter);
+  void ClearData();
 
   const PARAM_VEC &GetParam(const std::string &paramName) const {
     return m_parameter->GetParam(paramName);
@@ -274,7 +327,6 @@ public:
   const std::vector<FactorType> &GetOutputFactorOrder() const {
     return m_outputFactorOrder;
   }
-
 
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
@@ -305,6 +357,9 @@ public:
   }
   bool IsWordDeletionEnabled() const {
     return m_wordDeletionEnabled;
+  }
+  BleuScoreFeature* GetBleuScoreFeature() const {
+  	return m_bleuScoreFeature;
   }
   size_t GetMaxHypoStackSize() const {
     return m_maxHypoStackSize;
@@ -344,13 +399,6 @@ public:
   }
   float GetTranslationOptionThreshold() const {
     return m_translationOptionThreshold;
-  }
-  //! returns the total number of score components across all types, all factors
-  size_t GetTotalScoreComponents() const {
-    return m_scoreIndexManager.GetTotalNumberOfScores();
-  }
-  const ScoreIndexManager& GetScoreIndexManager() const {
-    return m_scoreIndexManager;
   }
 
   const TranslationSystem& GetTranslationSystem(std::string id) const {
@@ -419,7 +467,7 @@ public:
     return m_nBestFilePath;
   }
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
+    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
 #ifdef HAVE_PROTOBUF
            || m_outputSearchGraphPB
 #endif
@@ -441,7 +489,6 @@ public:
   }
 
   //! Sets the global score vector weights for a given ScoreProducer.
-  void SetWeightsForScoreProducer(const ScoreProducer* sp, const std::vector<float>& weights);
   InputTypeEnum GetInputType() const {
     return m_inputType;
   }
@@ -451,16 +498,62 @@ public:
   SearchAlgorithm GetSearchAlgorithm() const {
     return m_searchAlgorithm;
   }
+  bool IsChart() const {
+    return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
+  }
   LMList GetLMList() const { 
     return m_languageModel; 
+  }
+  WordPenaltyProducer* GetFirstWordPenaltyProducer() const {
+    assert(m_wordPenaltyProducers.size() >= 1);
+    return m_wordPenaltyProducers[0];
+  }
+  DistortionScoreProducer* GetDistortionScoreProducer() const {
+    assert(m_distortionScoreProducers.size() >= 1);
+    return m_distortionScoreProducers[0];
+  }
+  MetaFeatureProducer* GetMetaFeatureProducer() const {
+    return m_metaFeatureProducer;
+  }
+  std::vector<LexicalReordering*> GetLexicalReorderModels() const {
+    return m_reorderModels;
+  } 
+  std::vector<PhraseDictionaryFeature*> GetPhraseDictionaryModels() const {
+    return m_phraseDictionary;
   }
   size_t GetNumInputScores() const {
     return m_numInputScores;
   }
 
-  const std::vector<float>& GetAllWeights() const {
+  const ScoreComponentCollection& GetAllWeights() const {
     return m_allWeights;
   }
+
+  void SetAllWeights(const ScoreComponentCollection& weights) {
+    m_allWeights = weights;
+  }
+
+  //Weight for a single-valued feature
+  float GetWeight(const ScoreProducer* sp) const {
+    return m_allWeights.GetScoreForProducer(sp);
+  }
+
+  //Weight for a single-valued feature
+  void SetWeight(const ScoreProducer* sp, float weight) ;
+
+
+  //Weights for feature with fixed number of values
+  std::vector<float> GetWeights(const ScoreProducer* sp) const {
+    return m_allWeights.GetScoresForProducer(sp);
+  }
+
+  float GetSparseWeight(const FName& featureName) const {
+    return m_allWeights.GetSparseWeight(featureName);
+  }
+  
+  //Weights for feature with fixed number of values
+  void SetWeights(const ScoreProducer* sp, const std::vector<float>& weights);
+
 
   bool UseAlignmentInfo() const {
     return m_UseAlignmentInfo;
@@ -627,6 +720,13 @@ public:
 
   bool ContinuePartialTranslation() const {
     return m_continuePartialTranslation;
+  }
+
+  void ReLoadParameter();
+  void ReLoadBleuScoreFeatureParameter(float weight);
+
+  Parameter* GetParameter() {
+    return m_parameter;
   }
 
   WordAlignmentSort GetWordAlignmentSort() const {

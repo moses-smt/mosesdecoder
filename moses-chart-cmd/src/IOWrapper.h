@@ -44,6 +44,8 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "OutputCollector.h"
 #include "ChartHypothesis.h"
 
+#include "ChartTrellisPath.h"
+
 namespace Moses
 {
 class FactorCollection;
@@ -72,7 +74,6 @@ protected:
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
-  Moses::OutputCollector                *m_alignmentOutputCollector;
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -84,12 +85,14 @@ public:
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
-  void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId, bool reportSegmentation, bool reportAllFactors);
-  void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId, bool reportSegmentation, bool reportAllFactors);
+  void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
+  void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
   void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
+  void OutputSparseFeatureScores(std::ostream& out, const Moses::ChartTrellisPath &path, const Moses::FeatureFunction *ff, std::string &lastName);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
-  void OutputAlignment(const Moses::ChartHypothesis *hypo, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
+
+  Moses::OutputCollector *ExposeSingleBest() { return m_singleBestOutputCollector; }
 
   void ResetTranslationId();
 

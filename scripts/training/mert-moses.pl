@@ -77,7 +77,7 @@ $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 # moses.ini file uses FULL names for lambdas, while this training script
 # internally (and on the command line) uses ABBR names.
 my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
-  g=weight-generation lex=weight-lex I=weight-i);
+  g=weight-generation lex=weight-lex I=weight-i dlm=weight-dlm pp=weight-pp wt=weight-wt pb=weight-pb lex=weight-lex glm=weight-glm);
 my %ABBR2FULL = map { split /=/, $_, 2 } @ABBR_FULL_MAP;
 my %FULL2ABBR = map { my ($a, $b) = split /=/, $_, 2; ($b, $a); } @ABBR_FULL_MAP;
 
@@ -785,7 +785,7 @@ while (1) {
 
   $cmd .= $file_settings;
 
-
+  my %sparse_weights; # sparse features
   my $pro_optimizer_cmd = "$pro_optimizer $megam_default_options run$run.pro.data";
   if ($___PAIRWISE_RANKED_OPTIMIZER) {  # pro optimization
     $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
@@ -795,12 +795,29 @@ while (1) {
     my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
-    my %dummy;
-    ($bestpoint, $devbleu) = &get_weights_from_mert("run$run.pro.out", "run$run.pro.err", scalar @{$featlist->{"names"}}, \%dummy);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);
+    # Get the pro outputs ready for mert. Add the weight ranges,
+    # and a weight and range for the single sparse feature
+    $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
+    open(MERT_START,$1);
+    open(PRO_START,">run$run.init.pro");
+    print PRO_START $bestpoint." 1\n";
+    my $mert_line = <MERT_START>;
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 0\n";
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 1\n";
+    close(PRO_START);
 
-    open my $pro_fh, '>', "run$run.init.pro" or die "run$run.init.pro: $!";
-    print $pro_fh $bestpoint . "\n";
-    close $pro_fh;
+    # Write the sparse weights to file so mert can use them
+    open(SPARSE_WEIGHTS,">run$run.merge-weights");
+    foreach my $fname (keys %sparse_weights) {
+      print SPARSE_WEIGHTS "$fname $sparse_weights{$fname}\n";
+    }
+    close(SPARSE_WEIGHTS);
+    $cmd = $cmd." --sparse-weights run$run.merge-weights";
 
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
@@ -826,8 +843,8 @@ while (1) {
 
   print "run $run end at ".`date`;
 
-  my %sparse_weights; # sparse features
-  ($bestpoint, $devbleu) = &get_weights_from_mert("run$run.$mert_outfile", "run$run.$mert_logfile", scalar @{$featlist->{"names"}}, \%sparse_weights);
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+  my $merge_weight = 0;
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -836,6 +853,10 @@ while (1) {
 
   # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
+
+  if ($___PRO_STARTING_POINT) {
+    $merge_weight = pop @newweights;
+  }
 
   # interpolate with prior's interation weight, if historic-interpolation is specified
   if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
@@ -876,7 +897,11 @@ while (1) {
     $sparse_weights_file = "run" . ($run + 1) . ".sparse-weights";
     open my $sparse_fh, '>', $sparse_weights_file or die "$sparse_weights_file: $!";
     foreach my $feature (keys %sparse_weights) {
-      print $sparse_fh "$feature $sparse_weights{$feature}\n";
+      my $sparse_weight = $sparse_weights{$feature};
+      if ($___PRO_STARTING_POINT) {
+        $sparse_weight *= $merge_weight;
+      }
+      print $sparse_fh "$feature $sparse_weight\n";
     }
     close $sparse_fh;
   }

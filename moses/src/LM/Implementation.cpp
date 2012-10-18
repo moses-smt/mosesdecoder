@@ -230,6 +230,8 @@ private:
   size_t CalcPrefix(const ChartHypothesis &hypo, int featureID, Phrase &ret, size_t size) const
   {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
+    const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+          target.GetAlignmentInfo().GetNonTermIndexMap();
     
     // loop over the rule that is being applied
     for (size_t pos = 0; pos < target.GetSize(); ++pos) {
@@ -237,7 +239,7 @@ private:
 
       // for non-terminals, retrieve it from underlying hypothesis
       if (word.IsNonTerminal()) {
-        size_t nonTermInd = target.GetNonTermIndex(pos);
+        size_t nonTermInd = nonTermIndexMap[pos];
         const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
         size = static_cast<const LanguageModelChartState*>(prevHypo->GetFFState(featureID))->CalcPrefix(*prevHypo, featureID, ret, size);
       }
@@ -282,11 +284,13 @@ private:
     // construct suffix analogous to prefix
     else {
       const TargetPhrase& target = hypo.GetCurrTargetPhrase();
+      const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+            target.GetAlignmentInfo().GetNonTermIndexMap();
       for (int pos = (int) target.GetSize() - 1; pos >= 0 ; --pos) {
         const Word &word = target.GetWord(pos);
 
         if (word.IsNonTerminal()) {
-          size_t nonTermInd = target.GetNonTermIndex(pos);;
+          size_t nonTermInd = nonTermIndexMap[pos];
           const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermInd);
           size = static_cast<const LanguageModelChartState*>(prevHypo->GetFFState(featureID))->CalcSuffix(*prevHypo, featureID, ret, size);
         }
@@ -386,14 +390,16 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
   // get index map for underlying hypotheses
   const TargetPhrase &target = hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+      hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
 
   // loop over rule
   for (size_t phrasePos = 0, wordPos = 0;
-       phrasePos < target.GetSize();
+       phrasePos < hypo.GetCurrTargetPhrase().GetSize();
        phrasePos++)
   {
     // consult rule for either word or non-terminal
-    const Word &word = target.GetWord(phrasePos);
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
 
     // regular word
     if (!word.IsNonTerminal())
@@ -418,7 +424,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
     else
     {
       // look up underlying hypothesis
-      size_t nonTermIndex = target.GetNonTermIndex(phrasePos);
+      size_t nonTermIndex = nonTermIndexMap[phrasePos];
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndex);
 
       const LanguageModelChartState* prevState =

@@ -33,13 +33,10 @@ using namespace std;
 
 namespace Moses
 {
-GenerationDictionary::GenerationDictionary(size_t numFeatures, ScoreIndexManager &scoreIndexManager,
-    const std::vector<FactorType> &input,
-    const std::vector<FactorType> &output)
-  : Dictionary(numFeatures), DecodeFeature(input,output)
-{
-  scoreIndexManager.AddScoreProducer(this);
-}
+  GenerationDictionary::GenerationDictionary(size_t numFeatures,
+                                             const std::vector<FactorType> &input,
+                                             const std::vector<FactorType> &output)
+  : Dictionary(numFeatures), DecodeFeature("Generation",numFeatures,input,output) {}
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {
@@ -117,22 +114,6 @@ GenerationDictionary::~GenerationDictionary()
     delete iter->first;
   }
 }
-
-size_t GenerationDictionary::GetNumScoreComponents() const
-{
-  return m_numScoreComponent;
-}
-
-std::string GenerationDictionary::GetScoreProducerDescription(unsigned) const
-{
-  return "GenerationScore,file=" + m_filePath;
-}
-
-std::string GenerationDictionary::GetScoreProducerWeightShortName(unsigned) const
-{
-  return "g";
-}
-
 
 const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) const
 {

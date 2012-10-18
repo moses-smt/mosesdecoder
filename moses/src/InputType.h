@@ -47,9 +47,15 @@ class InputType
 {
 protected:
   long m_translationId; 	//< contiguous Id
+  long m_documentId;
+  long m_topicId;
+  std::vector<std::string> m_topicIdAndProb;
+  bool m_useTopicId;
+  bool m_useTopicIdAndProb;
   bool m_hasMetaData;
   long m_segId;
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
+  std::string m_textType;
 
 public:
 
@@ -70,6 +76,42 @@ public:
   void SetTranslationId(long translationId) {
     m_translationId = translationId;
   }
+  long GetDocumentId() const {
+    return m_documentId;
+  }
+  void SetDocumentId(long documentId) {
+    m_documentId = documentId;
+  }  
+  long GetTopicId() const {
+    return m_topicId;
+  }
+  void SetTopicId(long topicId) {
+    m_topicId = topicId;
+  }
+  const std::vector<std::string>* GetTopicIdAndProb() const {
+    return &m_topicIdAndProb;
+  }
+  void SetTopicIdAndProb(std::vector<std::string> topicIdAndProb) {
+    m_topicIdAndProb = topicIdAndProb;
+  }
+  bool GetUseTopicId() const {
+    return m_useTopicId;
+  }
+  void SetUseTopicId(bool useTopicId) {
+    m_useTopicId = useTopicId;
+  }
+  bool GetUseTopicIdAndProb() const {
+    return m_useTopicIdAndProb;
+  }
+  void SetUseTopicIdAndProb(bool useTopicIdAndProb) {
+    m_useTopicIdAndProb = useTopicIdAndProb;
+  }
+  std::string GetTextType() const {
+    return m_textType;
+  }
+  void SetTextType(std::string type) {
+    m_textType = type;
+  }  
   //! returns the number of words moved
   virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 
