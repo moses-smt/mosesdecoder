@@ -7,6 +7,7 @@
 #include "search/types.hh"
 #include "search/vertex.hh"
 #include "util/exception.hh"
+#include "util/pool.hh"
 
 #include <boost/pool/object_pool.hpp>
 #include <boost/ptr_container/ptr_vector.hpp>
@@ -21,10 +22,8 @@ class ContextBase {
   public:
     explicit ContextBase(const Config &config) : pop_limit_(config.PopLimit()), weights_(config.GetWeights()) {}
 
-    Final *NewFinal() {
-     Final *ret = final_pool_.construct();
-     assert(ret);
-     return ret;
+    util::Pool &FinalPool() {
+      return final_pool_;
     }
 
     VertexNode *NewVertexNode() {
@@ -42,7 +41,8 @@ class ContextBase {
     const Weights &GetWeights() const { return weights_; }
 
   private:
-    boost::object_pool<Final> final_pool_;
+    util::Pool final_pool_;
+
     boost::object_pool<VertexNode> vertex_node_pool_;
 
     unsigned int pop_limit_;

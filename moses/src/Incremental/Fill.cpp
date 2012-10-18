@@ -22,14 +22,13 @@ template <class Model> Fill<Model>::Fill(search::Context<Model> &context, const 
   : context_(context), vocab_mapping_(vocab_mapping) {}
 
 template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targets, const StackVec &nts, const WordsRange &) {
-  CHECK(nts.size() <= search::kMaxArity);
-
-  search::PartialVertex vertices[search::kMaxArity];
+  std::vector<search::PartialVertex> vertices;
+  vertices.reserve(nts.size());
   float below_score = 0.0;
-  for (unsigned int i = 0; i < nts.size(); ++i) {
-    vertices[i] = nts[i]->GetStack().incr->RootPartial();
-    if (vertices[i].Empty()) return;
-    below_score += vertices[i].Bound();
+  for (StackVec::const_iterator i(nts.begin()); i != nts.end(); ++i) {
+    vertices.push_back((*i)->GetStack().incr->RootPartial());
+    if (vertices.back().Empty()) return;
+    below_score += vertices.back().Bound();
   }
 
   std::vector<lm::WordIndex> words;

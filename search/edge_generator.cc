@@ -75,7 +75,7 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
   PartialVertex old_value(top_nt[victim]);
   PartialVertex alternate_changed;
   if (top_nt[victim].Split(alternate_changed)) {
-    PartialEdge alternate = partial_edge_pool_.Allocate(arity, incomplete + 1);
+    PartialEdge alternate(partial_edge_pool_, arity, incomplete + 1);
     alternate.SetScore(top.GetScore() + alternate_changed.Bound() - old_value.Bound());
 
     alternate.SetNote(top.GetNote());

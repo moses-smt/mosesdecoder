@@ -16,15 +16,6 @@ namespace {
 
 const uint64_t kCompleteAdd = static_cast<uint64_t>(-1);
 
-void FillFinal(PartialEdge partial, Final &out) {
-  const Final **final_out = out.Reset(partial.GetScore(), partial.GetNote());
-  const PartialVertex *part = partial.NT();
-  const PartialVertex *const part_end_loop = part + partial.GetArity();
-  for (; part != part_end_loop; ++part, ++final_out) {
-    *final_out = &part->End();
-  }
-}
-
 // Parallel structure to VertexNode.  
 struct Trie {
   Trie() : under(NULL) {}
@@ -49,11 +40,14 @@ Trie &FindOrInsert(ContextBase &context, Trie &node, uint64_t added, const lm::n
 }
 
 void CompleteTransition(ContextBase &context, Trie &starter, PartialEdge partial) {
-  Final *final = context.NewFinal();
-  FillFinal(partial, *final);
-  VertexNode &node = *starter.under;
-  assert(!node.End());
-  node.SetEnd(final);
+  Final final(context.FinalPool(), partial.GetScore(), partial.GetArity(), partial.GetNote());
+  Final *child_out = final.Children();
+  const PartialVertex *part = partial.NT();
+  const PartialVertex *const part_end_loop = part + partial.GetArity();
+  for (; part != part_end_loop; ++part, ++child_out)
+    *child_out = part->End();
+
+  starter.under->SetEnd(final);
 }
 
 void AddHypothesis(ContextBase &context, Trie &root, PartialEdge partial) {
