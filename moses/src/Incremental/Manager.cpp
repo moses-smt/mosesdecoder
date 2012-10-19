@@ -37,13 +37,15 @@ Manager::~Manager() {
 
 namespace {
 
-void ConstructString(const search::Final &final, std::ostringstream &stream) {
+void ConstructString(const search::Final final, std::ostringstream &stream) {
+  assert(final.Valid());
   const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(final.GetNote().vp);
   size_t child = 0;
   for (std::size_t i = 0; i < phrase.GetSize(); ++i) {
     const Word &word = phrase.GetWord(i);
     if (word.IsNonTerminal()) {
-      ConstructString(*final.Children()[child++], stream);
+      assert(child < final.GetArity());
+      ConstructString(final.Children()[child++], stream);
     } else {
       stream << word[0]->GetString() << ' ';
     }
@@ -51,19 +53,19 @@ void ConstructString(const search::Final &final, std::ostringstream &stream) {
 }
 
 void BestString(const ChartCellLabelSet &labels, std::string &out) {
-  const search::Final *best = NULL;
+  search::Final best;
   for (ChartCellLabelSet::const_iterator i = labels.begin(); i != labels.end(); ++i) {
-    const search::Final *child = i->second.GetStack().incr->BestChild();
-    if (child && (!best || (child->Bound() > best->Bound()))) {
+    const search::Final child(i->second.GetStack().incr->BestChild());
+    if (child.Valid() && (!best.Valid() || (child.GetScore() > best.GetScore()))) {
       best = child;
     }
   }
-  if (!best) {
+  if (!best.Valid()) {
     out.clear();
     return;
   }
   std::ostringstream stream;
-  ConstructString(*best, stream);
+  ConstructString(best, stream);
   out = stream.str();
   CHECK(out.size() > 9);
   // <s>
@@ -72,7 +74,7 @@ void BestString(const ChartCellLabelSet &labels, std::string &out) {
   out.erase(out.size() - 5);
   // Hack: include model score
   out += " ||| ";
-  out += boost::lexical_cast<std::string>(best->Bound());
+  out += boost::lexical_cast<std::string>(best.GetScore());
 }
 
 } // namespace

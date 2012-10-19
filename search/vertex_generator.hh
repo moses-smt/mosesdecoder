@@ -1,12 +1,10 @@
 #ifndef SEARCH_VERTEX_GENERATOR__
 #define SEARCH_VERTEX_GENERATOR__
 
-#include "search/note.hh"
+#include "search/edge.hh"
 #include "search/vertex.hh"
 
 #include <boost/unordered_map.hpp>
-
-#include <queue>
 
 namespace lm {
 namespace ngram {
@@ -18,40 +16,29 @@ namespace search {
 
 class ContextBase;
 class Final;
-struct PartialEdge;
 
 class VertexGenerator {
   public:
     VertexGenerator(ContextBase &context, Vertex &gen);
 
-    void NewHypothesis(PartialEdge partial);
-
-    void FinishedSearch() {
-      root_.under->SortAndSet(context_, NULL);
+    void NewHypothesis(PartialEdge partial) {
+      const lm::ngram::ChartState &state = partial.CompletedState();
+      std::pair<Existing::iterator, bool> ret(existing_.insert(std::make_pair(hash_value(state), partial)));
+      if (!ret.second && ret.first->second < partial) {
+        ret.first->second = partial;
+      }
     }
+
+    void FinishedSearch();
 
     const Vertex &Generating() const { return gen_; }
 
   private:
-    // Parallel structure to VertexNode.  
-    struct Trie {
-      Trie() : under(NULL) {}
-
-      VertexNode *under;
-      boost::unordered_map<uint64_t, Trie> extend;
-    };
-
-    Trie &FindOrInsert(Trie &node, uint64_t added, const lm::ngram::ChartState &state, unsigned char left, bool left_full, unsigned char right, bool right_full);
-
-    Final *CompleteTransition(Trie &node, const lm::ngram::ChartState &state, PartialEdge partial);
-
     ContextBase &context_;
 
     Vertex &gen_;
 
-    Trie root_;
-
-    typedef boost::unordered_map<uint64_t, Final*> Existing;
+    typedef boost::unordered_map<uint64_t, PartialEdge> Existing;
     Existing existing_;
 };
 

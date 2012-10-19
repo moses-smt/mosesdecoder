@@ -59,6 +59,8 @@
 #
 # --max-kenlm-order              maximum ngram order that kenlm can process (default 6)
 #
+# --max-factors                  maximum number of factors (default 4)
+#
 #CONTROLLING THE BUILD
 #-a to build from scratch
 #-j$NCPUS to compile in parallel

@@ -50,10 +50,6 @@ class AnyCharacter {
       return StringPiece(std::find_first_of(in.data(), in.data() + in.size(), chars_.data(), chars_.data() + chars_.size()), 1);
     }
 
-    StringPiece FindLast(const StringPiece &in) const {
-      return StringPiece(std::find_end(in.data(), in.data() + in.size(), chars_.data(), chars_.data() + chars_.size()), 1);
-    }
-
   private:
     StringPiece chars_;
 };
