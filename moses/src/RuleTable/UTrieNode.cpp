@@ -93,7 +93,7 @@ UTrieNode *UTrieNode::GetOrCreateNonTerminalChild(const Word &targetNonTerm)
 TargetPhraseCollection &UTrieNode::GetOrCreateTargetPhraseCollection(
     const TargetPhrase &target)
 {
-  const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+  const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
   const size_t rank = alignmentInfo.GetSize();
 
   std::vector<int> vec;

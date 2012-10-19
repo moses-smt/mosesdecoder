@@ -36,7 +36,7 @@ void SourceWordDeletionFeature::Evaluate(
             ScoreComponentCollection* accumulator) const
 {
 	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
@@ -45,7 +45,7 @@ void SourceWordDeletionFeature::EvaluateChart(
             const ChartBasedFeatureContext& context,
 		 	 	 	 	ScoreComponentCollection* accumulator) const
 {
-	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignmentInfo();
+	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignTerm();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 	ComputeFeatures(context.GetTargetPhrase(), accumulator, alignment);
 }

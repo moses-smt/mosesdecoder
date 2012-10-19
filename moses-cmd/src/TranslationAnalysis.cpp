@@ -42,7 +42,7 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
     std::string source = (*tpi)->GetSourcePhraseStringRep();
     WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
     WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
-    const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignmentInfo();
+    const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignTerm();
     // language model backoff stats,
     if (doLMStats) {
       std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->GetLMStats();

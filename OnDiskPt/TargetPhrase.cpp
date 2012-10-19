@@ -247,17 +247,26 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
   ret->SetScoreChart(phraseDict.GetFeature(), m_scores, weightT, lmList, wpProducer);
 
   // alignments
-  int indicator[m_align.size()];
   int index = 0;
+  Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
   std::set<std::pair<size_t, size_t> > alignmentInfo;
   const PhrasePtr sp = GetSourcePhrase(); 
   for (size_t ind = 0; ind < m_align.size(); ++ind) {
     const std::pair<size_t, size_t> &entry = m_align[ind];
     alignmentInfo.insert(entry);
     size_t sourcePos = entry.first;
-    indicator[index++] = sp->GetWord(sourcePos).IsNonTerminal() ? 1: 0;
+    size_t targetPos = entry.second;
+
+    if (GetWord(targetPos).IsNonTerminal()) {
+    	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+  	else {
+  		alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+  	}
+
   }
-  ret->SetAlignmentInfo(alignmentInfo, indicator);
+  ret->SetAlignTerm(alignTerm);
+  ret->SetAlignNonTerm(alignNonTerm);
 
   GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, ret->MutableTargetLHS());
   

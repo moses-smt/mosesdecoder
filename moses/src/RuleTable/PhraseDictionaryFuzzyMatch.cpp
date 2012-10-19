@@ -286,7 +286,7 @@ namespace Moses
     cerr << source << endl << target << endl;
     const size_t size = source.GetSize();
     
-    const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+    const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
     AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
     
     PhraseDictionaryNodeSCFG *currNode = &rootNode;
@@ -297,7 +297,7 @@ namespace Moses
         // indexed by source label 1st
         const Word &sourceNonTerm = word;
         
-        CHECK(iterAlign != target.GetAlignmentInfo().end());
+        CHECK(iterAlign != alignmentInfo.end());
         CHECK(iterAlign->first == pos);
         size_t targetNonTermInd = iterAlign->second;
         ++iterAlign;

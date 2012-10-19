@@ -143,14 +143,16 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
   reader.ReadLine();
   const size_t alignmentSetCount = std::atoi(reader.m_line.c_str());
 
-  alignmentSets.resize(alignmentSetCount);
-  std::set<std::pair<size_t,size_t> > alignmentInfo;
+  alignmentSets.resize(alignmentSetCount * 2);
+  AlignmentInfo::CollType alignTerm, alignNonTerm;
   std::vector<std::string> tokens;
   std::vector<size_t> points;
   for (size_t i = 0; i < alignmentSetCount; ++i) {
     // Read alignment set, lookup in collection, and store pointer.
-    alignmentInfo.clear();
+  	alignTerm.clear();
+  	alignNonTerm.clear();
     tokens.clear();
+
     reader.ReadLine();
     Tokenize(tokens, reader.m_line);
     std::vector<std::string>::const_iterator p;
@@ -160,10 +162,17 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
       points.clear();
       Tokenize<size_t>(points, *p, "-");
       std::pair<size_t, size_t> alignmentPair(points[0], points[1]);
-      alignmentInfo.insert(alignmentPair);
-      indicator[index++] = sourcePhrases[i].GetWord(points[0]).IsNonTerminal() ? 1: 0;
+
+      if (sourcePhrases[i].GetWord(alignmentPair.first).IsNonTerminal()) {
+      	alignNonTerm.insert(alignmentPair);
+      }
+    	else {
+    		alignTerm.insert(alignmentPair);
+    	}
+
     }
-    alignmentSets[i] = AlignmentInfoCollection::Instance().Add(alignmentInfo, indicator);
+    alignmentSets[i*2] = AlignmentInfoCollection::Instance().Add(alignNonTerm);
+    alignmentSets[i*2 + 1] = AlignmentInfoCollection::Instance().Add(alignTerm);
   }
 }
 
@@ -206,7 +215,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const Phrase &targetPhrasePhrase = targetPhrases[targetPhraseId];
     const Word &targetLhs = vocab[targetLhsIds[targetPhraseId]];
     Word sourceLHS("X"); // TODO not implemented for compact
-    const AlignmentInfo *alignmentInfo = alignmentSets[alignmentSetId];
+    const AlignmentInfo *alignNonTerm = alignmentSets[alignmentSetId];
 
     // Then there should be one score for each score component.
     for (size_t j = 0; j < numScoreComponents; ++j) {
@@ -226,7 +235,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     // Create and score target phrase.
     TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
-    targetPhrase->SetAlignmentInfo(alignmentInfo);
+    targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weights,
                                 languageModels, wpProducer);

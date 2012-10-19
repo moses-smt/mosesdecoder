@@ -51,6 +51,9 @@ class AlignmentInfo
   const_iterator begin() const { return m_collection.begin(); }
   const_iterator end() const { return m_collection.end(); }
 
+  void Add(size_t sourcePos, size_t targetPos) {
+  	m_collection.insert(std::pair<size_t, size_t>(sourcePos, targetPos));
+  }
   /** Provides a map from target-side to source-side non-terminal indices.
     * The target-side index should be the rule symbol index (counting terminals).
     * The index returned is the rule non-terminal index (ignoring terminals).

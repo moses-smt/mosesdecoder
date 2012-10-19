@@ -46,7 +46,6 @@ class AlignmentInfoCollection
     * one is inserted.
    */
   const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &);
-  const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &, int* indicator);
 
   //! Returns a pointer to an empty AlignmentInfo object.
   const AlignmentInfo &GetEmptyAlignmentInfo() const;

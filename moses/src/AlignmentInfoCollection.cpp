@@ -53,12 +53,5 @@ const AlignmentInfo *AlignmentInfoCollection::Add(
   return &(*ret.first);
 }
 
-const AlignmentInfo *AlignmentInfoCollection::Add(
-    const std::set<std::pair<size_t,size_t> > &pairs, int* indicator)
-{
-  std::pair<AlignmentInfoSet::iterator, bool> ret =
-    m_collection.insert(AlignmentInfo(pairs, indicator));
-  return &(*ret.first);
-}
 
 }

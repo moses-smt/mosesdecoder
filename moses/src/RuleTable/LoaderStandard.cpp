@@ -235,7 +235,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // rest of target phrase
-    targetPhrase->SetAlignmentInfo(alignString, sourcePhrase);
+    targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
     
     targetPhrase->SetRuleCount(ruleCountString, scoreVector[0]);

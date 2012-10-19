@@ -78,7 +78,7 @@ Phrase ChartTrellisNode::GetOutputPhrase() const
 
   const Phrase &currTargetPhrase = m_hypo.GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    m_hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+    m_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap();
   for (size_t pos = 0; pos < currTargetPhrase.GetSize(); ++pos) {
     const Word &word = currTargetPhrase.GetWord(pos);
     if (word.IsNonTerminal()) {

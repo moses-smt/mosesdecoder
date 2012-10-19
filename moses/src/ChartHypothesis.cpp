@@ -97,7 +97,7 @@ void ChartHypothesis::CreateOutputPhrase(Phrase &outPhrase) const
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
     if (word.IsNonTerminal()) {
       // non-term. fill out with prev hypo
-      size_t nonTermInd = GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap()[pos];
+      size_t nonTermInd = GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
       const ChartHypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->CreateOutputPhrase(outPhrase);
     } 

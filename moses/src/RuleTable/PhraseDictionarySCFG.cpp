@@ -55,7 +55,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
 {
   const size_t size = source.GetSize();
 
-  const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+  const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
   AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
 
   PhraseDictionaryNodeSCFG *currNode = &m_collection;
@@ -66,7 +66,7 @@ PhraseDictionaryNodeSCFG &PhraseDictionarySCFG::GetOrCreateNode(const Phrase &so
       // indexed by source label 1st
       const Word &sourceNonTerm = word;
 
-      CHECK(iterAlign != target.GetAlignmentInfo().end());
+      CHECK(iterAlign != alignmentInfo.end());
       CHECK(iterAlign->first == pos);
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;

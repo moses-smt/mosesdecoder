@@ -254,7 +254,7 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
     
-    OutputAlignment(out, tp.GetAlignmentInfo(), sourceOffset, targetOffset);
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
 
     targetOffset += tp.GetSize();
   }
@@ -457,7 +457,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
         WordsRange targetRange = path.GetTargetWordsRange(edge);
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
-        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignmentInfo();
+        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
         
         OutputAlignment(out, ai, sourceOffset, targetOffset);
 

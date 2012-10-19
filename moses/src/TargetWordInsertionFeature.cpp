@@ -36,7 +36,7 @@ void TargetWordInsertionFeature::Evaluate(
                       ScoreComponentCollection* accumulator) const
 {
 	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignmentInfo();
+	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }
@@ -46,7 +46,7 @@ void TargetWordInsertionFeature::EvaluateChart(
 						ScoreComponentCollection* accumulator) const
 {
 	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
-	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignmentInfo();
+	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignTerm();
 	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 	ComputeFeatures(targetPhrase, accumulator, alignment);
 }

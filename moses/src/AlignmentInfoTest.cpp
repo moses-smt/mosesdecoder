@@ -45,11 +45,9 @@ struct AlignmentInfoFixture {
     aligns2.insert(IndexPair(2,1));
     aligns3.insert(IndexPair(1,2));
     aligns3.insert(IndexPair(2,1));
-    int ind1[] = {0,1};
-    int ind2[] = {0};
-    ai1 = collection.Add(aligns1, ind1);
-    ai2 = collection.Add(aligns2, ind1);
-    ai3 = collection.Add(aligns3, ind2);
+    ai1 = collection.Add(aligns1);
+    ai2 = collection.Add(aligns2);
+    ai3 = collection.Add(aligns3);
   }
 
 };

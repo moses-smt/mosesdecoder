@@ -36,7 +36,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   for (TargetPhraseCollection::const_iterator p(targets.begin()); p != targets.end(); ++p) {
     words.clear();
     const TargetPhrase &phrase = **p;
-    const AlignmentInfo::NonTermIndexMap &align = phrase.GetAlignmentInfo().GetNonTermIndexMap();
+    const AlignmentInfo::NonTermIndexMap &align = phrase.GetAlignNonTerm().GetNonTermIndexMap();
     search::PartialEdge edge(edges_.AllocateEdge(nts.size()));
 
     size_t i = 0;

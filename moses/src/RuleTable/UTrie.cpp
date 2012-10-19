@@ -52,7 +52,7 @@ UTrieNode &RuleTableUTrie::GetOrCreateNode(const Phrase &source,
 {
   const size_t size = source.GetSize();
 
-  const AlignmentInfo &alignmentInfo = target.GetAlignmentInfo();
+  const AlignmentInfo &alignmentInfo = target.GetAlignNonTerm();
   AlignmentInfo::const_iterator iterAlign = alignmentInfo.begin();
 
   UTrieNode *currNode = &m_root;
@@ -60,7 +60,7 @@ UTrieNode &RuleTableUTrie::GetOrCreateNode(const Phrase &source,
     const Word &word = source.GetWord(pos);
 
     if (word.IsNonTerminal()) {
-      assert(iterAlign != target.GetAlignmentInfo().end());
+      assert(iterAlign != alignmentInfo.end());
       assert(iterAlign->first == pos);
       size_t targetNonTermInd = iterAlign->second;
       ++iterAlign;

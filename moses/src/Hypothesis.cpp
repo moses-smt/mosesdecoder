@@ -503,7 +503,7 @@ ostream& operator<<(ostream& out, const Hypothesis& hypo)
   out << " " << hypo.GetScoreBreakdown();
 
   // alignment
-  out << " " << hypo.GetCurrTargetPhrase().GetAlignmentInfo();
+  out << " " << hypo.GetCurrTargetPhrase().GetAlignNonTerm();
 
   /*
   const Hypothesis *prevHypo = hypo.GetPrevHypo();

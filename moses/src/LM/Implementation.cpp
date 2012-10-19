@@ -231,7 +231,7 @@ private:
   {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-          target.GetAlignmentInfo().GetNonTermIndexMap();
+          target.GetAlignNonTerm().GetNonTermIndexMap();
     
     // loop over the rule that is being applied
     for (size_t pos = 0; pos < target.GetSize(); ++pos) {
@@ -285,7 +285,7 @@ private:
     else {
       const TargetPhrase& target = hypo.GetCurrTargetPhrase();
       const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-            target.GetAlignmentInfo().GetNonTermIndexMap();
+            target.GetAlignNonTerm().GetNonTermIndexMap();
       for (int pos = (int) target.GetSize() - 1; pos >= 0 ; --pos) {
         const Word &word = target.GetWord(pos);
 
@@ -391,7 +391,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   // get index map for underlying hypotheses
   const TargetPhrase &target = hypo.GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-      hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+      hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap();
 
   // loop over rule
   for (size_t phrasePos = 0, wordPos = 0;

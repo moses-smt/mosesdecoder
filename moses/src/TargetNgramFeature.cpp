@@ -187,7 +187,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
 
   // get index map for underlying hypotheses
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-    cur_hypo.GetCurrTargetPhrase().GetAlignmentInfo().GetNonTermIndexMap();
+    cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap();
 
   // loop over rule
   bool makePrefix = false;

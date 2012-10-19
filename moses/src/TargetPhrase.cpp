@@ -42,7 +42,8 @@ namespace Moses
 {
 TargetPhrase::TargetPhrase( std::string out_string)
   :Phrase(0), m_fullScore(0.0), m_sourcePhrase(0)
-  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+  , m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 
   //ACAT
@@ -55,7 +56,8 @@ TargetPhrase::TargetPhrase()
   :Phrase(ARRAY_SIZE_INCR)
   , m_fullScore(0.0)
   ,m_sourcePhrase(0)
-  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
 
@@ -63,7 +65,8 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
   , m_fullScore(0.0)
   , m_sourcePhrase(0)
-  , m_alignmentInfo(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
 }
 
@@ -290,7 +293,7 @@ void MosesShouldUseExceptions(bool value) {
 
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
-  set<pair<size_t,size_t> > alignmentInfo;
+	AlignmentInfo::CollType alignTerm, alignNonTerm;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
     util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
     MosesShouldUseExceptions(dash);
@@ -299,50 +302,35 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     size_t targetPos = boost::lexical_cast<size_t>(*dash++);
     MosesShouldUseExceptions(!dash);
 
-    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
+    if (GetWord(targetPos).IsNonTerminal()) {
+    	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+  	else {
+  		alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+  	}
   }
+  SetAlignTerm(alignTerm);
+  SetAlignNonTerm(alignNonTerm);
 
-  SetAlignmentInfo(alignmentInfo);
 }
 
-
-
-void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString, Phrase &sourcePhrase)
+void TargetPhrase::SetAlignTerm(const AlignmentInfo::CollType &coll)
 {
-  std::vector<int> indicator;
-	
-  set<pair<size_t,size_t> > alignmentInfo;
-  for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
-    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
-    MosesShouldUseExceptions(dash);
-    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(dash);
-    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(!dash);
-
-    alignmentInfo.insert(pair<size_t,size_t>(sourcePos, targetPos));
-    indicator.push_back(sourcePhrase.GetWord(sourcePos).IsNonTerminal() ? 1: 0);
-  }
-
-  SetAlignmentInfo(alignmentInfo, &indicator[0]);
+	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+	m_alignTerm = alignmentInfo;
 }
 
-void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo)
+void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
 {
-    m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo);
-}
-
-
-void TargetPhrase::SetAlignmentInfo(const std::set<std::pair<size_t,size_t> > &alignmentInfo, int* indicator)
-{
-  m_alignmentInfo = AlignmentInfoCollection::Instance().Add(alignmentInfo, indicator);
+	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
+	m_alignNonTerm = alignmentInfo;
 }
 
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
-  os << static_cast<const Phrase&>(tp) << ":" << tp.GetAlignmentInfo();
+  os << static_cast<const Phrase&>(tp) << ":" << tp.GetAlignNonTerm();
   os << ": c=" << tp.m_fullScore;
 
   return os;

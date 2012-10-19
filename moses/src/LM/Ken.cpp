@@ -300,7 +300,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
   const TargetPhrase &target = hypo.GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-        target.GetAlignmentInfo().GetNonTermIndexMap();
+        target.GetAlignNonTerm().GetNonTermIndexMap();
 
   const size_t size = hypo.GetCurrTargetPhrase().GetSize();
   size_t phrasePos = 0;

@@ -43,7 +43,7 @@ private:
   {
     const TargetPhrase &target = hypo.GetCurrTargetPhrase();
     const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-      target.GetAlignmentInfo().GetNonTermIndexMap();
+      target.GetAlignNonTerm().GetNonTermIndexMap();
 
     // loop over the rule that is being applied
     for (size_t pos = 0; pos < target.GetSize(); ++pos) {
@@ -100,7 +100,7 @@ private:
     else {
     	const TargetPhrase targetPhrase = hypo.GetCurrTargetPhrase();
       const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
-      		targetPhrase.GetAlignmentInfo().GetNonTermIndexMap();
+      		targetPhrase.GetAlignTerm().GetNonTermIndexMap();
       for (int pos = (int) targetPhrase.GetSize() - 1; pos >= 0 ; --pos) {
         const Word &word = targetPhrase.GetWord(pos);
 
