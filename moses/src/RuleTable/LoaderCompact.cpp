@@ -156,8 +156,6 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
     reader.ReadLine();
     Tokenize(tokens, reader.m_line);
     std::vector<std::string>::const_iterator p;
-    int indicator[tokens.size()];
-    size_t index = 0;
     for (p = tokens.begin(); p != tokens.end(); ++p) {
       points.clear();
       Tokenize<size_t>(points, *p, "-");

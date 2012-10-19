@@ -39,6 +39,7 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.752586397" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="IS_ECLIPSE"/>
+									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>

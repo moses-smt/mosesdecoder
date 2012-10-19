@@ -37,7 +37,7 @@ public:
 
   void ComputeFeatures(const TargetPhrase& targetPhrase, 
 		  	           ScoreComponentCollection* accumulator, 
-		  	           const AlignmentInfo::CollType &alignment) const;
+		  	           const AlignmentInfo &alignmentInfo) const;
 
   // basic properties
 	std::string GetScoreProducerWeightShortName(unsigned) const { return "swd"; }

@@ -37,8 +37,7 @@ void TargetWordInsertionFeature::Evaluate(
 {
 	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-	const AlignmentInfo::CollType &alignment = alignmentInfo.GetAlignments();
-	ComputeFeatures(targetPhrase, accumulator, alignment);
+	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
 void TargetWordInsertionFeature::EvaluateChart(
@@ -47,13 +46,12 @@ void TargetWordInsertionFeature::EvaluateChart(
 {
 	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
 	const AlignmentInfo &alignmentInfo = context.GetTargetPhrase().GetAlignTerm();
-	const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
-	ComputeFeatures(targetPhrase, accumulator, alignment);
+	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
 void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
     											 ScoreComponentCollection* accumulator,
-    											 const AlignmentInfo::CollType &alignment) const
+    											 const AlignmentInfo &alignmentInfo) const
 {
   // handle special case: unknown words (they have no word alignment)
   size_t targetLength = targetPhrase.GetSize();
@@ -71,7 +69,7 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
   for(size_t i=0; i<targetLength; i++) {
     aligned[i] = false;
   }
-  for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
+  for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
     aligned[ alignmentPoint->second ] = true;
   }
 

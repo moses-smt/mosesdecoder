@@ -318,6 +318,7 @@ void TargetPhrase::SetAlignTerm(const AlignmentInfo::CollType &coll)
 {
 	const AlignmentInfo *alignmentInfo = AlignmentInfoCollection::Instance().Add(coll);
 	m_alignTerm = alignmentInfo;
+
 }
 
 void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)

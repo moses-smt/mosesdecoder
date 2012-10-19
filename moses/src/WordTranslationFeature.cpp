@@ -294,10 +294,9 @@ void WordTranslationFeature::EvaluateChart(
 {
   const TargetPhrase& targetPhrase = context.GetTargetPhrase();
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
-  const AlignmentInfo::CollType &alignment = alignmentInfo.GetTerminalAlignments();
 
   // process aligned words
-  for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
+  for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
     const Phrase& sourcePhrase = targetPhrase.GetSourcePhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
