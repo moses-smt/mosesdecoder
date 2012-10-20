@@ -14,7 +14,8 @@ using namespace MosesTraining;
 using namespace PSD;
 using namespace boost::bimaps;
 
-TranslationTable::TranslationTable(const string &fileName)
+TranslationTable::TranslationTable(const string &fileName, PSD::TargetIndexType *targetIndex)
+  : m_targetIndex(targetIndex)
 {
   InputFileStream in(fileName);
   if (! in.good())
@@ -26,29 +27,12 @@ TranslationTable::TranslationTable(const string &fileName)
   }
 }
 
-const TargetIndexType &TranslationTable::GetTargetIndex()
-{
-  return m_targetIndex;
-}
-
 bool TranslationTable::SrcExists(const string &phrase)
 {
   return m_ttable.find(phrase) != m_ttable.end();
 }
 
-size_t TranslationTable::GetTgtPhraseID(const string &phrase, /* out */ bool *found)
-{
-  *found = false;
-  TargetIndexType::left_map::const_iterator it = m_targetIndex.left.find(phrase);
-  if (it != m_targetIndex.left.end()) {
-    *found = true;
-    return it->second;
-  } else {
-    return 0; // user must test value of found!
-  }
-}
-
-const vector<Translation> &TranslationTable::GetTranslations(const string &srcPhrase)
+const map<size_t, TTableTranslation> &TranslationTable::GetTranslations(const string &srcPhrase)
 {
   DictionaryType::const_iterator it = m_ttable.find(srcPhrase);
   if (it == m_ttable.end())
@@ -63,15 +47,14 @@ const vector<Translation> &TranslationTable::GetTranslations(const string &srcPh
 void TranslationTable::AddPhrasePair(const std::string &src, const std::string &tgt,
     const std::vector<float> &scores, const PSD::AlignmentType &align)
 {
-  pair<DictionaryType::iterator, bool> ret = m_ttable.insert(make_pair(src, vector<Translation>()));
-  vector<Translation> &translations = ret.first->second;
+  pair<DictionaryType::iterator, bool> ret = m_ttable.insert(make_pair(src, map<size_t, TTableTranslation>()));
+  map<size_t, TTableTranslation> &translations = ret.first->second;
   size_t tgtID = AddTargetPhrase(tgt);
 
-  Translation t;
-  t.m_index = tgtID;
+  TTableTranslation t;
   t.m_alignment = align;
   t.m_scores = scores;
-  translations.push_back(t);
+  translations.insert(make_pair(tgtID, t));
 }
 
 std::vector<float> TranslationTable::GetScores(const std::string &scoreStr)
@@ -95,11 +78,13 @@ PSD::AlignmentType TranslationTable::GetAlignment(const std::string &alignStr)
 
 size_t TranslationTable::AddTargetPhrase(const string &phrase)
 {
-  bool found;
-  size_t id = GetTgtPhraseID(phrase, &found);
-  if (! found) {
-    id = m_targetIndex.size() + 1; // index is one-based because of VW
-    m_targetIndex.left.insert(TargetIndexType::left_map::value_type(phrase, id));
+  size_t id;
+  TargetIndexType::left_map::const_iterator it = m_targetIndex->left.find(phrase);
+  if (it != m_targetIndex->left.end()) {
+    id = it->second;
+  } else {
+    id = m_targetIndex->size() + 1; // index is one-based because of VW
+    m_targetIndex->left.insert(TargetIndexType::left_map::value_type(phrase, id));
   }
   return id;
 }

@@ -8,25 +8,27 @@
 #include <map>
 #include <set>
 
-typedef std::map<std::string, std::vector<PSD::Translation> > DictionaryType;
+struct TTableTranslation
+{
+  PSD::AlignmentType m_alignment;
+  std::vector<float> m_scores;
+};
+
+typedef std::map<std::string, std::map<size_t, TTableTranslation> > DictionaryType;
 
 class TranslationTable
 {
 public:
-  TranslationTable(const std::string &fileName);
-  const PSD::TargetIndexType &GetTargetIndex();
+  TranslationTable(const std::string &fileName, PSD::TargetIndexType *targetIndex);
   bool SrcExists(const std::string &phrase);
-
-  // get ID of target phrase, set found to true if found, false otherwise
-  size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
 
   // get all translations of source phrase, assumes that srcPhrase is known 
   // (throws logic_error otherwise)
-  const std::vector<PSD::Translation> &GetTranslations(const std::string &srcPhrase);
+  const std::map<size_t, TTableTranslation> &GetTranslations(const std::string &srcPhrase);
 
 private:
   DictionaryType m_ttable;
-  PSD::TargetIndexType m_targetIndex;
+  PSD::TargetIndexType *m_targetIndex;
 
   void AddPhrasePair(const std::string &src, const std::string &tgt,
       const std::vector<float> &scores, const PSD::AlignmentType &align); 

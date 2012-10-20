@@ -56,11 +56,18 @@ typedef std::vector<std::vector<std::string> > ContextType;
 
 typedef std::multimap<size_t, size_t> AlignmentType;
 
+struct TTableEntry
+{
+  std::string m_id;
+  bool m_exists;
+  std::vector<float> m_scores;
+};
+
 struct Translation
 {
   size_t m_index;
   AlignmentType m_alignment;
-  std::vector<float> m_scores;
+  std::vector<TTableEntry> m_ttableScores;
 };
 
 // index of possible target spans
@@ -85,7 +92,7 @@ private:
   const ExtractorConfig &m_config;
   bool m_train;
 
-  float GetMaxProb(const std::vector<Translation> &translations);
+  std::map<std::string, float> GetMaxProb(const std::vector<Translation> &translations);
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GeneratePhraseFactorFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
@@ -96,7 +103,11 @@ private:
       const std::vector<std::string> &tgtPhrase,
       const AlignmentType &align,
       FeatureConsumer *fc);
-  void GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc);
+  void GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
+  void GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores,
+      const std::map<std::string, float> &maxProbs,
+      FeatureConsumer *fc);
+  void GenerateTTableEntryFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 

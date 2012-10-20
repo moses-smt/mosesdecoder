@@ -74,10 +74,14 @@ Translation PSDScoreProducer::GetPSDTranslation(const TranslationOption *option)
   const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
   const ScoreComponentCollection &scoreCollection = option->GetTargetPhrase().GetScoreBreakdown();
-  psdOpt.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
-  for (size_t i = 0; i < psdOpt.m_scores.size(); i++) {
-    psdOpt.m_scores[i] = exp(psdOpt.m_scores[i]); // don't take log(log())
+  TTableEntry tableEntry;
+  tableEntry.m_id = ""; // no domain adaptation so far
+  tableEntry.m_exists = true;
+  tableEntry.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
+  for (size_t i = 0; i < tableEntry.m_scores.size(); i++) {
+    tableEntry.m_scores[i] = exp(tableEntry.m_scores[i]); // don't take log(log())
   }
+  psdOpt.m_ttableScores.push_back(tableEntry);
 
   return psdOpt;
 }

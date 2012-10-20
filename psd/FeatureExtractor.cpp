@@ -23,13 +23,19 @@ FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, const Ext
     throw logic_error("configuration file not loaded");
 }
 
-float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
+map<string, float> FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
 {
-  float maxProb = 0; 
+  map<string, float> maxProbs;
   vector<Translation>::const_iterator it;
-  for (it = translations.begin(); it != translations.end(); it++) 
-    maxProb = max(it->m_scores[P_E_F_INDEX], maxProb);
-  return maxProb;
+  vector<TTableEntry>::const_iterator tableIt;
+  for (it = translations.begin(); it != translations.end(); it++) {
+    for (tableIt = it->m_ttableScores.begin(); tableIt != it->m_ttableScores.end(); tableIt++) {
+      if (tableIt->m_exists) {
+        maxProbs[tableIt->m_id] = max(tableIt->m_scores[P_E_F_INDEX], maxProbs[tableIt->m_id]);
+      }
+    }
+  }
+  return maxProbs;
 }
 
 void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
@@ -53,8 +59,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   for (size_t i = spanStart; i <= spanEnd; i++)
     sourceForms[i - spanStart] = context[i][FACTOR_FORM]; 
   
-  float maxProb = 0;
-  if (m_config.GetMostFrequent()) maxProb = GetMaxProb(translations);
+  map<string, float> maxProbs;
+  if (m_config.GetMostFrequent()) maxProbs = GetMaxProb(translations);
 
   if (m_config.GetSourceInternal()) GenerateInternalFeatures(sourceForms, fc);
   if (m_config.GetPhraseFactor()) GeneratePhraseFactorFeatures(context, spanStart, spanEnd, fc);
@@ -75,10 +81,12 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
     if (m_config.GetPaired()) GeneratePairedFeatures(sourceForms, targetForms, transIt->m_alignment, fc);
 
-    if (m_config.GetMostFrequent() && Equals(transIt->m_scores[P_E_F_INDEX], maxProb)) 
-      fc->AddFeature("MOST_FREQUENT");
+    if (m_config.GetMostFrequent()) GenerateMostFrequentFeature(transIt->m_ttableScores, maxProbs, fc);
 
-    if (m_config.GetBinnedScores()) GenerateScoreFeatures(transIt->m_scores, fc);
+    if (m_config.GetBinnedScores()) GenerateScoreFeatures(transIt->m_ttableScores, fc);
+
+    // "NOT_IN_" features
+    if (m_config.GetBinnedScores() || m_config.GetMostFrequent()) GenerateTTableEntryFeatures(transIt->m_ttableScores, fc);
 
 		if (m_config.GetTargetIndicator()) GenerateIndicatorFeature(targetForms, fc); 
 
@@ -214,19 +222,44 @@ void FeatureExtractor::GeneratePairedFeatures(const vector<string> &srcPhrase, c
   }
 }
 
-void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)
+void FeatureExtractor::GenerateScoreFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc)
 {
   vector<size_t>::const_iterator scoreIt;
   vector<float>::const_iterator binIt;
+  vector<TTableEntry>::const_iterator tableIt;
   const vector<size_t> &scoreIDs = m_config.GetScoreIndexes();
   const vector<float> &bins = m_config.GetScoreBins();
 
-  for (scoreIt = scoreIDs.begin(); scoreIt != scoreIDs.end(); scoreIt++) {
-    for (binIt = bins.begin(); binIt != bins.end(); binIt++) {
-      float logScore = log(scores[*scoreIt]);
-      if (logScore < *binIt || Equals(logScore, *binIt))
-        fc->AddFeature("sc^" + SPrint<size_t>(*scoreIt) + "_" + SPrint(*binIt));
+  for (tableIt = ttableScores.begin(); tableIt != ttableScores.end(); tableIt++) {
+    string prefix = ttableScores.size() == 1 ? "" : tableIt->m_id + "_";
+    for (scoreIt = scoreIDs.begin(); scoreIt != scoreIDs.end(); scoreIt++) {
+      for (binIt = bins.begin(); binIt != bins.end(); binIt++) {
+        float logScore = log(tableIt->m_scores[*scoreIt]);
+        if (logScore < *binIt || Equals(logScore, *binIt)) {
+          fc->AddFeature(prefix + "sc^" + SPrint<size_t>(*scoreIt) + "_" + SPrint(*binIt));
+        }
+      }
     }
+  }
+}
+
+void FeatureExtractor::GenerateMostFrequentFeature(const std::vector<TTableEntry> &ttableScores, const map<string, float> &maxProbs, FeatureConsumer *fc)
+{
+  vector<TTableEntry>::const_iterator it;
+  for (it = ttableScores.begin(); it != ttableScores.end(); it++) {
+    if (Equals(it->m_scores[P_E_F_INDEX], maxProbs.find(it->m_id)->second)) {
+      string prefix = ttableScores.size() == 1 ? "" : it->m_id + "_";
+      fc->AddFeature(prefix + "MOST_FREQUENT");
+    }
+  }
+}
+
+void FeatureExtractor::GenerateTTableEntryFeatures(const std::vector<TTableEntry> &ttableScores, FeatureConsumer *fc)
+{
+  vector<TTableEntry>::const_iterator it;
+  for (it = ttableScores.begin(); it != ttableScores.end(); it++) {
+    if (! it->m_exists)
+      fc->AddFeature("NOT_IN_" + it->m_id);
   }
 }
 

@@ -8,7 +8,7 @@
 #include "OutputFileStream.h"
 #include "FeatureExtractor.h"
 #include "FeatureConsumer.h"
-#include "TranslationTable.h"
+#include "TTableCollection.h"
 
 using namespace std;
 using namespace Moses;
@@ -39,7 +39,7 @@ private:
   string m_srcPhrase, m_tgtPhrase;
 };
 
-void WritePhraseIndex(const TargetIndexType &index, const string &outFile)
+void WritePhraseIndex(const TargetIndexType *index, const string &outFile)
 {
   OutputFileStream out(outFile);
   if (! out.good()) {
@@ -47,7 +47,7 @@ void WritePhraseIndex(const TargetIndexType &index, const string &outFile)
     exit(1);
   }
   TargetIndexType::right_map::const_iterator it; // keys are sorted in the map
-  for (it = index.right.begin(); it != index.right.end(); it++)
+  for (it = index->right.begin(); it != index->right.end(); it++)
     out << it->second << "\n";
   out.Close();
 }
@@ -72,7 +72,8 @@ int main(int argc, char**argv)
 {  
   if (argc < 7) {
     cerr << "error: wrong arguments" << endl;
-    cerr << "Usage: extract-psd psd-file corpus phrase-table extractor-config output-train output-index" << endl;
+    cerr << "Usage: extract-psd psd-file corpus phrase-tables extractor-config output-train output-index" << endl;
+    cerr << "  For multiple phrase tables (=domains), use id1:file1:::id2:file2" << endl;
     exit(1);
   }
   InputFileStream psd(argv[1]);
@@ -85,12 +86,13 @@ int main(int argc, char**argv)
     cerr << "error: Failed to open " << argv[2] << endl;
     exit(1);
   }
-  TranslationTable ttable(argv[3]);
+  TTableCollection ttables(argv[3]);
+
   ExtractorConfig config;
   config.Load(argv[4]);
-  FeatureExtractor extractor(ttable.GetTargetIndex(), config, true);
+  FeatureExtractor extractor(*ttables.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
-  WritePhraseIndex(ttable.GetTargetIndex(), argv[6]);
+  WritePhraseIndex(ttables.GetTargetIndex(), argv[6]);
 
   // parse options 
   // TODO use some library to do this
@@ -137,7 +139,7 @@ int main(int argc, char**argv)
       newSentence = true;
     }
 
-    if (! ttable.SrcExists(psdLine.GetSrcPhrase()))
+    if (! ttables.SrcExists(psdLine.GetSrcPhrase()))
       continue;
 
     // we have all correct translations of the current phrase
@@ -160,14 +162,14 @@ int main(int argc, char**argv)
       spanStart = psdLine.GetSrcStart();
       spanEnd = psdLine.GetSrcEnd();
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
-      translations = ttable.GetTranslations(srcPhrase);
+      translations = ttables.GetAllTranslations(srcPhrase);
       losses.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
     }
 
     bool foundTgt = false;
-    size_t tgtPhraseID = ttable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
+    size_t tgtPhraseID = ttables.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
     
     if (foundTgt) {
       // add correct translation (i.e., set its loss to 0)
