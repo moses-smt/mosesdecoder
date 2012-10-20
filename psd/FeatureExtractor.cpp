@@ -231,6 +231,8 @@ void FeatureExtractor::GenerateScoreFeatures(const std::vector<TTableEntry> &tta
   const vector<float> &bins = m_config.GetScoreBins();
 
   for (tableIt = ttableScores.begin(); tableIt != ttableScores.end(); tableIt++) {
+    if (! tableIt->m_exists)
+      continue;
     string prefix = ttableScores.size() == 1 ? "" : tableIt->m_id + "_";
     for (scoreIt = scoreIDs.begin(); scoreIt != scoreIDs.end(); scoreIt++) {
       for (binIt = bins.begin(); binIt != bins.end(); binIt++) {
@@ -247,7 +249,7 @@ void FeatureExtractor::GenerateMostFrequentFeature(const std::vector<TTableEntry
 {
   vector<TTableEntry>::const_iterator it;
   for (it = ttableScores.begin(); it != ttableScores.end(); it++) {
-    if (Equals(it->m_scores[P_E_F_INDEX], maxProbs.find(it->m_id)->second)) {
+    if (it->m_exists && Equals(it->m_scores[P_E_F_INDEX], maxProbs.find(it->m_id)->second)) {
       string prefix = ttableScores.size() == 1 ? "" : it->m_id + "_";
       fc->AddFeature(prefix + "MOST_FREQUENT");
     }

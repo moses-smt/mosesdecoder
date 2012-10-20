@@ -43,6 +43,7 @@ std::vector<PSD::Translation> TTableCollection::GetAllTranslations(const std::st
       map<size_t, TTableTranslation>::const_iterator it;
       for (it = translations.begin(); it != translations.end(); it++)
         allIDs.insert(it->first);
+      ttableTranslations.insert(make_pair(tableIt->m_id, translations));
     }
   }
 
@@ -59,7 +60,7 @@ std::vector<PSD::Translation> TTableCollection::GetAllTranslations(const std::st
         map<size_t, TTableTranslation>::iterator it;
         // XXX inefficient, a multipath merge should be implemented here
         it = ttableTranslations[tableIt->m_id].find(*idIt);
-        if (it->first) {
+        if (it != ttableTranslations[tableIt->m_id].end()) {
           // this phrase table knows source phrase and translation *idIt
           entry.m_exists = true;
           entry.m_scores = it->second.m_scores;
