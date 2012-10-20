@@ -5,9 +5,17 @@
       <Configuration>Debug</Configuration>
       <Platform>Win32</Platform>
     </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
     <ProjectConfiguration Include="Release|Win32">
       <Configuration>Release</Configuration>
       <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
     </ProjectConfiguration>
   </ItemGroup>
   <ItemGroup>
@@ -23,9 +31,8 @@
     <ClInclude Include="..\..\moses\src\ChartHypothesis.h" />
     <ClInclude Include="..\..\moses\src\ChartHypothesisCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartManager.h" />
-    <ClInclude Include="..\..\moses\src\ChartTranslationOption.h" />
-    <ClInclude Include="..\..\moses\src\ChartTranslationOptionCollection.h" />
     <ClInclude Include="..\..\moses\src\ChartTranslationOptionList.h" />
+    <ClInclude Include="..\..\moses\src\ChartTranslationOptions.h" />
     <ClInclude Include="..\..\moses\src\ChartTrellisDetour.h" />
     <ClInclude Include="..\..\moses\src\ChartTrellisDetourQueue.h" />
     <ClInclude Include="..\..\moses\src\ChartTrellisNode.h" />
@@ -62,7 +69,6 @@
     <ClInclude Include="..\..\moses\src\GenerationDictionary.h" />
     <ClInclude Include="..\..\moses\src\GlobalLexicalModel.h" />
     <ClInclude Include="..\..\moses\src\gzfilebuf.h" />
-    <ClInclude Include="..\..\moses\src\hash.h" />
     <ClInclude Include="..\..\moses\src\Hypothesis.h" />
     <ClInclude Include="..\..\moses\src\HypothesisStack.h" />
     <ClInclude Include="..\..\moses\src\HypothesisStackCubePruning.h" />
@@ -126,7 +132,6 @@
     <ClInclude Include="..\..\moses\src\Scope3Parser\VarSpanNode.h" />
     <ClInclude Include="..\..\moses\src\Scope3Parser\VarSpanTrieBuilder.h" />
     <ClInclude Include="..\..\moses\src\ScoreComponentCollection.h" />
-    <ClInclude Include="..\..\moses\src\ScoreIndexManager.h" />
     <ClInclude Include="..\..\moses\src\ScoreProducer.h" />
     <ClInclude Include="..\..\moses\src\Search.h" />
     <ClInclude Include="..\..\moses\src\SearchCubePruning.h" />
@@ -170,9 +175,8 @@
     <ClCompile Include="..\..\moses\src\ChartHypothesis.cpp" />
     <ClCompile Include="..\..\moses\src\ChartHypothesisCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartManager.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartTranslationOption.cpp" />
-    <ClCompile Include="..\..\moses\src\ChartTranslationOptionCollection.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTranslationOptionList.cpp" />
+    <ClCompile Include="..\..\moses\src\ChartTranslationOptions.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTrellisDetour.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTrellisDetourQueue.cpp" />
     <ClCompile Include="..\..\moses\src\ChartTrellisNode.cpp" />
@@ -202,7 +206,6 @@
     <ClCompile Include="..\..\moses\src\FloydWarshall.cpp" />
     <ClCompile Include="..\..\moses\src\GenerationDictionary.cpp" />
     <ClCompile Include="..\..\moses\src\GlobalLexicalModel.cpp" />
-    <ClCompile Include="..\..\moses\src\hash.cpp" />
     <ClCompile Include="..\..\moses\src\Hypothesis.cpp" />
     <ClCompile Include="..\..\moses\src\HypothesisStack.cpp" />
     <ClCompile Include="..\..\moses\src\HypothesisStackCubePruning.cpp" />
@@ -256,7 +259,6 @@
     <ClCompile Include="..\..\moses\src\Scope3Parser\StackLatticeBuilder.cpp" />
     <ClCompile Include="..\..\moses\src\Scope3Parser\VarSpanTrieBuilder.cpp" />
     <ClCompile Include="..\..\moses\src\ScoreComponentCollection.cpp" />
-    <ClCompile Include="..\..\moses\src\ScoreIndexManager.cpp" />
     <ClCompile Include="..\..\moses\src\ScoreProducer.cpp" />
     <ClCompile Include="..\..\moses\src\Search.cpp" />
     <ClCompile Include="..\..\moses\src\SearchCubePruning.cpp" />
@@ -301,7 +303,16 @@
     <CharacterSet>Unicode</CharacterSet>
     <WholeProgramOptimization>true</WholeProgramOptimization>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+  </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>StaticLibrary</ConfigurationType>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>StaticLibrary</ConfigurationType>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
@@ -311,23 +322,35 @@
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup>
     <_ProjectFileVersion>10.0.30319.1</_ProjectFileVersion>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(Configuration)\</IntDir>
     <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(SolutionDir)$(Configuration)\</OutDir>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(SolutionDir)$(Configuration)\</OutDir>
     <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(Configuration)\</IntDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(Configuration)\</IntDir>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">C:\Program Files\boost\boost_1_47;C:\GnuWin32\include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\boostpro\boost_1_51;C:\GnuWin32\include;$(IncludePath)</IncludePath>
     <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">C:\Program Files\boost\boost_1_47;C:\GnuWin32\include;$(IncludePath)</IncludePath>
+    <IncludePath Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\boost\boost_1_47;C:\GnuWin32\include;$(IncludePath)</IncludePath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_51;C:\GnuWin32\include;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;_DEBUG;_CONSOLE;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -339,9 +362,44 @@
     </ClCompile>
     <Lib>
       <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <AdditionalLibraryDirectories>C:\Program Files\boost\boost_1_51\lib;C:\GnuWin32\lib</AdditionalLibraryDirectories>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <Optimization>Disabled</Optimization>
+      <AdditionalIncludeDirectories>C:\Program Files\boost\boost_1_51;C:\GnuWin32\include;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;_DEBUG;_CONSOLE;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+      <AdditionalLibraryDirectories>C:\Program Files\boost\boost_1_51\lib;C:\GnuWin32\lib</AdditionalLibraryDirectories>
     </Lib>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
+      <AdditionalIncludeDirectories>C:\boost\boost_1_47;$(SolutionDir)/../../moses/src;$(SolutionDir)/../../;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>WITH_THREADS;NO_PIPES;WIN32;NDEBUG;_CONSOLE;LM_INTERNAL;TRACE_ENABLE;_CRT_SECURE_NO_DEPRECATE;_SCL_SECURE_NO_DEPRECATE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+    </ClCompile>
+    <Lib>
+      <OutputFile>$(OutDir)$(ProjectName).lib</OutputFile>
+    </Lib>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <IntrinsicFunctions>true</IntrinsicFunctions>
