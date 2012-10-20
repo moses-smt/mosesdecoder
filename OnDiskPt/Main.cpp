@@ -45,7 +45,7 @@ int main (int argc, char * const argv[])
   Moses::PrintUserTime("Starting");
 
   if (argc != 8) {
-    std::cerr << "Usage: " << argv[0] << " numSourceFactors numTargetFactors numScores tableLimit inputPath outputPath" << std::endl;
+    std::cerr << "Usage: " << argv[0] << " numSourceFactors numTargetFactors numScores tableLimit sortScoreIndex inputPath outputPath" << std::endl;
     return 1;
   }
 
