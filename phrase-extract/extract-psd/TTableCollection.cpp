@@ -1,6 +1,5 @@
 #include "TTableCollection.h"
 #include "Util.h"
-#include <boost/bind.hpp>
 #include <algorithm>
 
 using namespace std;
