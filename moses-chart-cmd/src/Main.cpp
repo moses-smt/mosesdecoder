@@ -319,7 +319,7 @@ int main(int argc, char* argv[])
 
   IFVERBOSE(1) util::PrintUsage(std::cerr);
 
-#ifdef HACK_EXIT
+#ifndef EXIT_RETURN
   //This avoids that detructors are called (it can take a long time)
   exit(EXIT_SUCCESS);
 #else
