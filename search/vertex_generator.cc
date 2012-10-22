@@ -4,6 +4,9 @@
 #include "search/context.hh"
 #include "search/edge.hh"
 
+#include <boost/unordered_map.hpp>
+#include <boost/version.hpp>
+
 #include <stdint.h>
 
 namespace search {
@@ -12,6 +15,7 @@ VertexGenerator::VertexGenerator(ContextBase &context, Vertex &gen) : context_(c
   gen.root_.InitRoot();
 }
 
+#if BOOST_VERSION > 104200
 namespace {
 
 const uint64_t kCompleteAdd = static_cast<uint64_t>(-1);
@@ -81,6 +85,18 @@ void AddHypothesis(ContextBase &context, Trie &root, PartialEdge partial) {
 }
 
 } // namespace
+
+#else // BOOST_VERSION
+
+struct Trie {
+  VertexNode *under;
+};
+
+void AddHypothesis(ContextBase &context, Trie &root, PartialEdge partial) {
+  UTIL_THROW(util::Exception, "Upgrade Boost to >= 1.42.0 to use incremental search.");
+}
+
+#endif // BOOST_VERSION
 
 void VertexGenerator::FinishedSearch() {
   Trie root;
