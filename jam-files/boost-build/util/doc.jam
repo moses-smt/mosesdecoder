@@ -670,7 +670,7 @@ local rule extract-syntax (
     while ! $(syntax) && ! [ MATCH "^[$(ws)]*(#)" : $(line) ] && $($(var))
     {
         local m = [ MATCH "^[$(ws)]*(.*)$" : $(line) ] ;
-        if $(m) && ! $(m) = ""
+        if $(m)
         {
             syntax = $(m) ;
         }

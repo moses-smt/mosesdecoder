@@ -12,7 +12,7 @@ then
 fi
 
 top="$(dirname "$0")"
-if [ ! -x "$top"/jam-files/bjam ]; then
+if [ ! -x "$top"/jam-files/bjam ] || "$top"/jam-files/bjam -v |grep 2011.4 >/dev/null; then
   pushd "$top/jam-files/engine"
   ./build.sh
   cp -f bin.*/bjam ../bjam

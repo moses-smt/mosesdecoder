@@ -1178,7 +1178,7 @@ class python-test-generator : generator
 
         property-set = [ $(property-set).add-raw <dependency>$(other-pythons) ] ;
 
-        result = [ construct-result $(python) $(extensions) $(new-sources) :
+        return [ construct-result $(python) $(extensions) $(new-sources) :
             $(project) $(name) : $(property-set) ] ;
     }
 }

@@ -15,31 +15,27 @@
  * have the same name:  it never appears in the bound name of a target.
  * (member) is an archive member name: the syntax is arbitrary, but must
  * agree in path_parse(), path_build() and the Jambase.
- *
- * On VMS, we keep track of whether the original path was a directory
- * (without a file), so that $(VAR:D) can climb to the parent.
  */
 
 #ifndef PATHSYS_VP_20020211_H
 # define PATHSYS_VP_20020211_H
 
+#include "jam.h"
 #include "strings.h"
+#include "object.h"
 
 typedef struct _pathname PATHNAME;
 typedef struct _pathpart PATHPART;
 
 struct _pathpart
 {
-    char * ptr;
-    int    len;
+    const char * ptr;
+    int          len;
 };
 
 struct _pathname
 {
     PATHPART    part[6];
-#ifdef OS_VMS
-    int     parent;
-#endif
 
 #define f_grist    part[0]
 #define f_root     part[1]
@@ -52,17 +48,25 @@ struct _pathname
 void path_build( PATHNAME * f, string * file, int binding );
 void path_build1( PATHNAME * f, string * file );
 
-void path_parse( char * file, PATHNAME * f );
+void path_parse( const char * file, PATHNAME * f );
 void path_parent( PATHNAME * f );
 
 #ifdef NT
 
-/** Returns newstr-allocated string with long equivivalent of 'short_name'.
+/** Returns object_new-allocated string with long equivivalent of 'short_name'.
     If none exists -- i.e. 'short_path' is already long path, it's returned
     unaltered. */
-char * short_path_to_long_path( char * short_path );
+OBJECT * short_path_to_long_path( OBJECT * short_path );
 
 #endif
+
+/** Given a path, returns an object that can be
+    used as a unique key for that path.  Equivalent
+    paths such as a/b, A\B, and a\B on NT all yield the
+    same key.
+ */
+OBJECT * path_as_key( OBJECT * path );
+void path_add_key( OBJECT * path );
 
 #ifdef USE_PATHUNIX
 /** Returns a static pointer to the system dependent path to the temporary
@@ -72,11 +76,11 @@ const char * path_tmpdir( void );
 
 /** Returns a new temporary name.
 */
-const char * path_tmpnam( void );
+OBJECT * path_tmpnam( void );
 
 /** Returns a new temporary path.
 */
-const char * path_tmpfile( void );
+OBJECT * path_tmpfile( void );
 #endif
 
 /** Give the first argument to 'main', return a full path to
@@ -86,6 +90,8 @@ const char * path_tmpfile( void );
 
     Implemented in jam.c
 */
-char * executable_path (char *argv0);
+char * executable_path (const char *argv0);
+
+void path_done( void );
 
 #endif

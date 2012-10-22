@@ -68,7 +68,7 @@ feature.feature qt3support : off on : propagated link-incompatible ;
 
 # The Qt version used for requirements
 # Valid are <qt>4.4 or <qt>4.5.0
-# Auto-detection via qmake sets '<qt>major.minor.patch' 
+# Auto-detection via qmake sets '<qt>major.minor.patch'
 feature.feature qt : : propagated ;
 
 project.initialize $(__name__) ;
@@ -110,7 +110,7 @@ local rule read-output ( content )
 # Capture Qt version from qmake
 local rule check-version ( bin_prefix )
 {
-    full-cmd = $(bin_prefix)"/qmake -v" ; 
+    full-cmd = $(bin_prefix)"/qmake -v" ;
     debug-message Running '$(full-cmd)' ;
     local output = [ SHELL $(full-cmd) ] ;
     for line in [ read-output $(output) ]
@@ -120,7 +120,7 @@ local rule check-version ( bin_prefix )
         {
             # Skip first line of output
         }
-        else 
+        else
         {
             temp = [ MATCH "([0-9]*)\\.([0-9]*)\\.([0-9]*)" : $(line) ] ;
         }
@@ -144,14 +144,14 @@ local rule split-version ( version )
     return $(major-minor[1]) $(major-minor[2]) ;
 }
 
-# Initialize the QT support module. 
+# Initialize the QT support module.
 # Parameters:
 # - 'prefix'    parameter tells where Qt is installed.
 # - 'full_bin'  optional full path to Qt binaries (qmake,moc,uic,rcc)
 # - 'full_inc'  optional full path to Qt top-level include directory
 # - 'full_lib'  optional full path to Qt library directory
 # - 'version'   optional version of Qt, else autodetected via 'qmake -v'
-# - 'condition' optional requirements 
+# - 'condition' optional requirements
 rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : condition * )
 {
     project.push-current $(.project) ;
@@ -172,7 +172,7 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
     local inc_prefix lib_prefix bin_prefix ;
     if $(full_inc)
     {
-        inc_prefix = $(full_inc) ; 
+        inc_prefix = $(full_inc) ;
     }
     else
     {
@@ -236,7 +236,7 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
         version = $(major-minor:J=.) ;
     }
     else
-    {   
+    {
         version = [ check-version $(bin_prefix) ] ;
         if $(version)
         {
@@ -259,7 +259,7 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
 
     local target-os = [ feature.get-values target-os : $(condition) ] ;
     if ! $(target-os)
-    { 
+    {
         target-os ?= [ feature.defaults target-os ] ;
         target-os = $(target-os:G=) ;
         target-requirements += <target-os>$(target-os) ;
@@ -317,12 +317,12 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
        # ToDo: 2009-02-12: Maybe throw this away and
        # require separate setup with <variant>debug as condition.
        .have_separate_debug = FALSE ;
-              
+
        # Setup other platforms
-       if $(target-os) in windows cygwin 
+       if $(target-os) in windows cygwin
        {
            .have_separate_debug = TRUE ;
-    
+
            # On NT, the libs have "4" suffix, and "d" suffix in debug builds.
            .suffix_version = "4" ;
            .suffix_debug = "d" ;
@@ -335,7 +335,7 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
                   <variant>debug
                   $(target-requirements)
                ;
-           
+
            lib qtmain
                : # sources
                : # requirements
@@ -370,7 +370,7 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
            ;
 
        if $(.have_separate_debug) = TRUE
-       {    
+       {
            debug-message Configure debug libraries with suffix '$(.suffix_debug)' ;
 
            lib QtCore : $(main)
@@ -389,13 +389,13 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
 
     # Initialising the remaining libraries is canonical
     # parameters 'module' : 'depends-on' : 'usage-define' : 'requirements' : 'include'
-    # 'include' only for non-canonical include paths. 
+    # 'include' only for non-canonical include paths.
     add-shared-library QtGui     : QtCore : QT_GUI_LIB     : $(target-requirements) ;
     add-shared-library QtNetwork : QtCore : QT_NETWORK_LIB : $(target-requirements) ;
     add-shared-library QtSql     : QtCore : QT_SQL_LIB     : $(target-requirements) ;
     add-shared-library QtXml     : QtCore : QT_XML_LIB     : $(target-requirements) ;
 
-    add-shared-library Qt3Support : QtGui QtNetwork QtXml QtSql 
+    add-shared-library Qt3Support : QtGui QtNetwork QtXml QtSql
                                   : QT_QT3SUPPORT_LIB QT3_SUPPORT
                                   : <qt3support>on $(target-requirements) ;
 
@@ -415,6 +415,7 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
 
     # Qt designer library
     add-shared-library QtDesigner : QtGui QtXml : : $(target-requirements) ;
+    add-shared-library QtDesignerComponents : QtGui QtXml : : $(target-requirements) ;
 
     # Support for dynamic Widgets (Qt 4.1)
     add-static-library  QtUiTools : QtGui QtXml : $(target-requirements) ;
@@ -431,23 +432,29 @@ rule init ( prefix : full_bin ? : full_inc ? : full_lib ? : version ? : conditio
     # WebKit (Qt 4.4)
     add-shared-library QtWebKit : QtGui : QT_WEBKIT_LIB : $(target-requirements) ;
 
-    # Phonon Multimedia (Qt 4.4) 
+    # Phonon Multimedia (Qt 4.4)
     add-shared-library phonon : QtGui QtXml : QT_PHONON_LIB : $(target-requirements) ;
 
-    # Multimedia engine (Qt 4.6) 
+    # Multimedia engine (Qt 4.6)
     add-shared-library QtMultimedia : QtGui : QT_MULTIMEDIA_LIB : $(target-requirements) ;
 
-    # XmlPatterns-Engine (Qt 4.4) 
+    # XmlPatterns-Engine (Qt 4.4)
     add-shared-library QtXmlPatterns : QtNetwork : QT_XMLPATTERNS_LIB : $(target-requirements) ;
 
-    # Help-Engine (Qt 4.4) 
-    add-shared-library QtHelp : QtGui QtSql QtXml : : $(target-requirements) ;
+    # Help-Engine (Qt 4.4)
+    add-shared-library QtHelp    : QtGui QtSql QtXml : : $(target-requirements) ;
+    add-shared-library QtCLucene : QCore QtSql QtXml : : $(target-requirements) ;
+
+    # QML-Engine (Qt 4.7)
+    add-shared-library QtDeclarative : QtGui QtXml : : $(target-requirements) ;
 
     # AssistantClient Support
-    # Compat library
+    # Compat library removed in 4.7.0
     # Pre-4.4 help system, use QtHelp for new programs
-    add-shared-library QtAssistantClient : QtGui : : $(target-requirements) : QtAssistant ;
-
+    if $(version) < "4.7"
+    {
+       add-shared-library QtAssistantClient : QtGui : : $(target-requirements) : QtAssistant ;
+    }
     debug-message "==== Configured Qt-$(version) ====" ;
 
     project.pop-current ;
@@ -620,8 +627,8 @@ rule add-library ( lib-name : version ? : depends-on * : usage-defines * : requi
         local real_include ;
         real_include ?= $(include) ;
         real_include ?= $(lib-name) ;
-        
-        lib $(lib-name) 
+
+        lib $(lib-name)
            : # sources
              $(depends-on)
            : # requirements
@@ -635,7 +642,7 @@ rule add-library ( lib-name : version ? : depends-on * : usage-defines * : requi
 
         if $(.have_separate_debug) = TRUE
         {
-            lib $(lib-name) 
+            lib $(lib-name)
                : # sources
                  $(depends-on)
                : # requirements
@@ -648,7 +655,7 @@ rule add-library ( lib-name : version ? : depends-on * : usage-defines * : requi
                  <include>$(.incprefix)/$(real_include)
                ;
         }
-    } 
+    }
 
     # Make library explicit so that a simple <use>qt4 will not bring in everything.
     # And some components like QtDBus/Phonon may not be available on all platforms.
@@ -662,21 +669,25 @@ rule add-library ( lib-name : version ? : depends-on * : usage-defines * : requi
 flags qt4.moc INCLUDES <include> ;
 flags qt4.moc DEFINES <define> ;
 
+# need a newline for expansion of DEFINES and INCLUDES in the response file.
+.nl  = "
+" ;
+
 # Processes headers to create Qt MetaObject information. Qt4-moc has its
 # c++-parser, so pass INCLUDES and DEFINES.
-# 
+# We use response file with one INCLUDE/DEFINE per line
+#
 actions moc
 {
-    $(.BINPREFIX[-1])/moc -I"$(INCLUDES)" -D$(DEFINES) -f $(>) -o $(<)
+    $(.BINPREFIX[-1])/moc -f $(>) -o $(<) @"@($(<).rsp:E=-D$(DEFINES)$(.nl) -I$(INCLUDES:T)$(.nl))"
 }
-
 
 # When moccing files for include only, we don't need -f, otherwise the generated
 # code will include the .cpp and we'll get duplicated symbols.
 #
 actions moc.inc
 {
-    $(.BINPREFIX[-1])/moc -I"$(INCLUDES)" -D$(DEFINES) $(>) -o $(<)
+    $(.BINPREFIX[-1])/moc $(>) -o $(<) @"@($(<).rsp:E=-D$(DEFINES)$(.nl) -I$(INCLUDES:T)$(.nl))"
 }
 
 

@@ -9,7 +9,7 @@
 # include "parse.h"
 # include "variable.h"
 # include "rules.h"
-# include "newstr.h"
+# include "object.h"
 # include "hash.h"
 # include "modules.h"
 # include "search.h"
@@ -45,18 +45,9 @@
  */
 
 static void set_rule_actions( RULE *, rule_actions * );
-static void set_rule_body   ( RULE *, argument_list *, PARSE * procedure );
+static void set_rule_body   ( RULE *, FUNCTION * procedure );
 
 static struct hash * targethash = 0;
-
-struct _located_target
-{
-    char   * file_name;
-    TARGET * target;
-};
-typedef struct _located_target LOCATED_TARGET ;
-
-static struct hash * located_targets = 0;
 
 
 /*
@@ -83,25 +74,20 @@ void target_include( TARGET * including, TARGET * included )
  * target_module.
  */
 
-static RULE * enter_rule( char * rulename, module_t * target_module )
+static RULE * enter_rule( OBJECT * rulename, module_t * target_module )
 {
-    RULE rule;
-    RULE * r = &rule;
+    int found;
+    RULE * r;
 
-    r->name = rulename;
-
-    if ( hashenter( demand_rules( target_module ), (HASHDATA * *)&r ) )
+    r = (RULE *)hash_insert( demand_rules(target_module), rulename, &found );
+    if ( !found )
     {
-        r->name = newstr( rulename );   /* never freed */
-        r->procedure = (PARSE *)0;
+        r->name = object_copy( rulename );
+        r->procedure = 0;
         r->module = 0;
         r->actions = 0;
-        r->arguments = 0;
         r->exported = 0;
         r->module = target_module;
-#ifdef HAVE_PYTHON
-        r->python_function = 0;
-#endif
     }
     return r;
 }
@@ -116,14 +102,14 @@ static RULE * enter_rule( char * rulename, module_t * target_module )
 static RULE * define_rule
 (
     module_t * src_module,
-    char     * rulename,
+    OBJECT   * rulename,
     module_t * target_module
 )
 {
     RULE * r = enter_rule( rulename, target_module );
     if ( r->module != src_module ) /* if the rule was imported from elsewhere, clear it now */
     {
-        set_rule_body( r, 0, 0 );
+        set_rule_body( r, 0 );
         set_rule_actions( r, 0 );
         r->module = src_module; /* r will be executed in the source module */
     }
@@ -133,13 +119,11 @@ static RULE * define_rule
 
 void rule_free( RULE * r )
 {
-    freestr( r->name );
-    r->name = "";
-    parse_free( r->procedure );
+    object_free( r->name );
+    r->name = 0;
+    if ( r->procedure )
+        function_free( r->procedure );
     r->procedure = 0;
-    if ( r->arguments )
-        args_free( r->arguments );
-    r->arguments = 0;
     if ( r->actions )
         actions_free( r->actions );
     r->actions = 0;
@@ -150,25 +134,20 @@ void rule_free( RULE * r )
  * bindtarget() - return pointer to TARGET, creating it if necessary.
  */
 
-TARGET * bindtarget( char const * target_name )
+TARGET * bindtarget( OBJECT * target_name )
 {
-    TARGET target;
-    TARGET * t = &target;
+    int found;
+    TARGET * t;
 
     if ( !targethash )
         targethash = hashinit( sizeof( TARGET ), "targets" );
 
-    /* Perforce added const everywhere. No time to merge that change. */
-#ifdef NT
-    target_name = short_path_to_long_path( (char *)target_name );
-#endif
-    t->name = (char *)target_name;
-
-    if ( hashenter( targethash, (HASHDATA * *)&t ) )
+    t = (TARGET *)hash_insert( targethash, target_name, &found );
+    if ( !found )
     {
         memset( (char *)t, '\0', sizeof( *t ) );
-        t->name = newstr( (char *)target_name );  /* never freed */
-        t->boundname = t->name;  /* default for T_FLAG_NOTFILE */
+        t->name = object_copy( target_name );
+        t->boundname = object_copy( t->name );  /* default for T_FLAG_NOTFILE */
     }
 
     return t;
@@ -184,14 +163,15 @@ static void bind_explicitly_located_target( void * xtarget, void * data )
         SETTINGS * s = t->settings;
         for ( ; s ; s = s->next )
         {
-            if ( strcmp( s->symbol, "LOCATE" ) == 0 )
+            if ( strcmp( object_str( s->symbol ), "LOCATE" ) == 0 )
             {
-                pushsettings( t->settings );
+                pushsettings( root_module(), t->settings );
                 /* We are binding a target with explicit LOCATE. So third
                  * argument is of no use: nothing will be returned through it.
                  */
+                object_free( t->boundname );
                 t->boundname = search( t->name, &t->time, 0, 0 );
-                popsettings( t->settings );
+                popsettings( root_module(), t->settings );
                 break;
             }
         }
@@ -206,81 +186,6 @@ void bind_explicitly_located_targets()
 }
 
 
-/* TODO: It is probably not a good idea to use functions in other modules like
-  this. */
-void call_bind_rule( char * target, char * boundname );
-
-
-TARGET * search_for_target ( char * name, LIST * search_path )
-{
-    PATHNAME f[1];
-    string buf[1];
-    LOCATED_TARGET lt;
-    LOCATED_TARGET * lta = &lt;
-    time_t time;
-    int found = 0;
-    TARGET * result;
-
-    string_new( buf );
-
-    path_parse( name, f );
-
-    f->f_grist.ptr = 0;
-    f->f_grist.len = 0;
-
-    while ( search_path )
-    {
-        f->f_root.ptr = search_path->string;
-        f->f_root.len = strlen( search_path->string );
-
-        string_truncate( buf, 0 );
-        path_build( f, buf, 1 );
-
-        lt.file_name = buf->value ;
-
-        if ( !located_targets )
-            located_targets = hashinit( sizeof(LOCATED_TARGET),
-                                        "located targets" );
-
-        if ( hashcheck( located_targets, (HASHDATA * *)&lta ) )
-        {
-            return lta->target;
-        }
-
-        timestamp( buf->value, &time );
-        if ( time )
-        {
-            found = 1;
-            break;
-        }
-
-        search_path = list_next( search_path );
-    }
-
-    if ( !found )
-    {
-        f->f_root.ptr = 0;
-        f->f_root.len = 0;
-
-        string_truncate( buf, 0 );
-        path_build( f, buf, 1 );
-
-        timestamp( buf->value, &time );
-    }
-
-    result = bindtarget( name );
-    result->boundname = newstr( buf->value );
-    result->time = time;
-    result->binding = time ? T_BIND_EXISTS : T_BIND_MISSING;
-
-    call_bind_rule( result->name, result->boundname );
-
-    string_free( buf );
-
-    return result;
-}
-
-
 /*
  * copytarget() - make a new target with the old target's name.
  *
@@ -291,8 +196,8 @@ TARGET * copytarget( const TARGET * ot )
 {
     TARGET * t = (TARGET *)BJAM_MALLOC( sizeof( *t ) );
     memset( (char *)t, '\0', sizeof( *t ) );
-    t->name = copystr( ot->name );
-    t->boundname = t->name;
+    t->name = object_copy( ot->name );
+    t->boundname = object_copy( t->name );
 
     t->flags |= T_FLAG_NOTFILE | T_FLAG_INTERNAL;
 
@@ -304,7 +209,7 @@ TARGET * copytarget( const TARGET * ot )
  * touch_target() - mark a target to simulate being new.
  */
 
-void touch_target( char * t )
+void touch_target( OBJECT * t )
 {
     bindtarget( t )->flags |= T_FLAG_TOUCHED;
 }
@@ -320,8 +225,9 @@ void touch_target( char * t )
 
 TARGETS * targetlist( TARGETS * chain, LIST * target_names )
 {
-    for ( ; target_names; target_names = list_next( target_names ) )
-        chain = targetentry( chain, bindtarget( target_names->string ) );
+    LISTITER iter = list_begin( target_names ), end = list_end( target_names );
+    for ( ; iter != end; iter = list_next( iter ) )
+        chain = targetentry( chain, bindtarget( list_item( iter ) ) );
     return chain;
 }
 
@@ -368,6 +274,21 @@ TARGETS * targetchain( TARGETS * chain, TARGETS * targets )
 }
 
 /*
+ * action_free - decrement the ACTIONs refrence count
+ * and (maybe) free it.
+ */
+
+void action_free ( ACTION * action )
+{
+    if ( --action->refs == 0 )
+    {
+        freetargets( action->targets );
+        freetargets( action->sources );
+        BJAM_FREE( action );
+    }
+}
+
+/*
  * actionlist() - append to an ACTION chain.
  */
 
@@ -377,6 +298,7 @@ ACTIONS * actionlist( ACTIONS * chain, ACTION * action )
 
     actions->action = action;
 
+    ++action->refs;
     if ( !chain ) chain = actions;
     else chain->tail->next = actions;
     chain->tail = actions;
@@ -397,13 +319,13 @@ static SETTINGS * settings_freelist;
  * the head of the settings chain.
  */
 
-SETTINGS * addsettings( SETTINGS * head, int flag, char * symbol, LIST * value )
+SETTINGS * addsettings( SETTINGS * head, int flag, OBJECT * symbol, LIST * value )
 {
     SETTINGS * v;
 
     /* Look for previous settings. */
     for ( v = head; v; v = v->next )
-        if ( !strcmp( v->symbol, symbol ) )
+        if ( object_equal( v->symbol, symbol ) )
             break;
 
     /* If not previously set, alloc a new. */
@@ -418,10 +340,9 @@ SETTINGS * addsettings( SETTINGS * head, int flag, char * symbol, LIST * value )
         else
             v = (SETTINGS *)BJAM_MALLOC( sizeof( *v ) );
 
-        v->symbol = newstr( symbol );
+        v->symbol = object_copy( symbol );
         v->value = value;
         v->next = head;
-        v->multiple = 0;
         head = v;
     }
     else if ( flag == VAR_APPEND )
@@ -445,10 +366,10 @@ SETTINGS * addsettings( SETTINGS * head, int flag, char * symbol, LIST * value )
  * pushsettings() - set all target specific variables.
  */
 
-void pushsettings( SETTINGS * v )
+void pushsettings( struct module_t * module, SETTINGS * v )
 {
     for ( ; v; v = v->next )
-        v->value = var_swap( v->symbol, v->value );
+        v->value = var_swap( module, v->symbol, v->value );
 }
 
 
@@ -456,9 +377,9 @@ void pushsettings( SETTINGS * v )
  * popsettings() - reset target specific variables to their pre-push values.
  */
 
-void popsettings( SETTINGS * v )
+void popsettings( struct module_t * module, SETTINGS * v )
 {
-    pushsettings( v );  /* just swap again */
+    pushsettings( module, v );  /* just swap again */
 }
 
 
@@ -471,7 +392,7 @@ SETTINGS * copysettings( SETTINGS * head )
     SETTINGS * copy = 0;
     SETTINGS * v;
     for ( v = head; v; v = v->next )
-        copy = addsettings( copy, VAR_SET, v->symbol, list_copy( 0, v->value ) );
+        copy = addsettings( copy, VAR_SET, v->symbol, list_copy( v->value ) );
     return copy;
 }
 
@@ -500,6 +421,7 @@ void freeactions( ACTIONS * chain )
     while ( chain )
     {
         ACTIONS * n = chain->next;
+        action_free( chain->action );
         BJAM_FREE( chain );
         chain = n;
     }
@@ -515,7 +437,7 @@ void freesettings( SETTINGS * v )
     while ( v )
     {
         SETTINGS * n = v->next;
-        freestr( v->symbol );
+        object_free( v->symbol );
         list_free( v->value );
         v->next = settings_freelist;
         settings_freelist = v;
@@ -527,10 +449,19 @@ void freesettings( SETTINGS * v )
 static void freetarget( void * xt, void * data )
 {
     TARGET * t = (TARGET *)xt;
-    if ( t->settings ) freesettings( t->settings            );
-    if ( t->depends  ) freetargets ( t->depends             );
-    if ( t->includes ) freetarget  ( t->includes, (void *)0 );
-    if ( t->actions  ) freeactions ( t->actions             );
+    if ( t->name       ) object_free ( t->name       );
+    if ( t->boundname  ) object_free ( t->boundname  );
+    if ( t->settings   ) freesettings( t->settings   );
+    if ( t->depends    ) freetargets ( t->depends    );
+    if ( t->dependants ) freetargets ( t->dependants );
+    if ( t->parents    ) freetargets ( t->parents    );
+    if ( t->actions    ) freeactions ( t->actions    );
+
+    if ( t->includes   )
+    {
+        freetarget( t->includes, (void *)0 );
+        BJAM_FREE( t->includes );
+    }
 }
 
 
@@ -540,50 +471,16 @@ static void freetarget( void * xt, void * data )
 
 void rules_done()
 {
-    hashenumerate( targethash, freetarget, 0 );
-    hashdone( targethash );
+    if ( targethash )
+    {
+        hashenumerate( targethash, freetarget, 0 );
+        hashdone( targethash );
+    }
     while ( settings_freelist )
     {
         SETTINGS * n = settings_freelist->next;
         BJAM_FREE( settings_freelist );
         settings_freelist = n;
-    }
-}
-
-
-/*
- * args_new() - make a new reference-counted argument list.
- */
-
-argument_list * args_new()
-{
-    argument_list * r = (argument_list *)BJAM_MALLOC( sizeof(argument_list) );
-    r->reference_count = 0;
-    lol_init( r->data );
-    return r;
-}
-
-
-/*
- * args_refer() - add a new reference to the given argument list.
- */
-
-void args_refer( argument_list * a )
-{
-    ++a->reference_count;
-}
-
-
-/*
- * args_free() - release a reference to the given argument list.
- */
-
-void args_free( argument_list * a )
-{
-    if ( --a->reference_count <= 0 )
-    {
-        lol_free( a->data );
-        BJAM_FREE( a );
     }
 }
 
@@ -606,29 +503,22 @@ void actions_free( rule_actions * a )
 {
     if ( --a->reference_count <= 0 )
     {
-        freestr( a->command );
+        function_free( a->command );
         list_free( a->bindlist );
         BJAM_FREE( a );
     }
 }
 
-
 /*
  * set_rule_body() - set the argument list and procedure of the given rule.
  */
 
-static void set_rule_body( RULE * rule, argument_list * args, PARSE * procedure )
+static void set_rule_body( RULE * rule, FUNCTION * procedure )
 {
-    if ( args )
-        args_refer( args );
-    if ( rule->arguments )
-        args_free( rule->arguments );
-    rule->arguments = args;
-
     if ( procedure )
-        parse_refer( procedure );
+        function_refer( procedure );
     if ( rule->procedure )
-        parse_free( rule->procedure );
+        function_free( rule->procedure );
     rule->procedure = procedure;
 }
 
@@ -638,16 +528,20 @@ static void set_rule_body( RULE * rule, argument_list * args, PARSE * procedure 
  * global module.
  */
 
-static char * global_rule_name( RULE * r )
+static OBJECT * global_rule_name( RULE * r )
 {
     if ( r->module == root_module() )
-        return r->name;
+        return object_copy( r->name );
 
     {
         char name[4096] = "";
-        strncat( name, r->module->name, sizeof( name ) - 1 );
-        strncat( name, r->name, sizeof( name ) - 1 );
-        return newstr( name);
+        if ( r->module->name )
+        {
+            strncat( name, object_str( r->module->name ), sizeof( name ) - 1 );
+            strncat( name, ".", sizeof( name ) - 1 );
+        }
+        strncat( name, object_str( r->name ), sizeof( name ) - 1 );
+        return object_new( name );
     }
 }
 
@@ -663,9 +557,9 @@ static RULE * global_rule( RULE * r )
         return r;
 
     {
-        char * name = global_rule_name( r );
+        OBJECT * name = global_rule_name( r );
         RULE * result = define_rule( r->module, name, root_module() );
-        freestr( name );
+        object_free( name );
         return result;
     }
 }
@@ -677,19 +571,19 @@ static RULE * global_rule( RULE * r )
  * exported to the global module as modulename.rulename.
  */
 
-RULE * new_rule_body( module_t * m, char * rulename, argument_list * args, PARSE * procedure, int exported )
+RULE * new_rule_body( module_t * m, OBJECT * rulename, FUNCTION * procedure, int exported )
 {
     RULE * local = define_rule( m, rulename, m );
     local->exported = exported;
-    set_rule_body( local, args, procedure );
+    set_rule_body( local, procedure );
 
     /* Mark the procedure with the global rule name, regardless of whether the
      * rule is exported. That gives us something reasonably identifiable that we
      * can use, e.g. in profiling output. Only do this once, since this could be
      * called multiple times with the same procedure.
      */
-    if ( procedure->rulename == 0 )
-        procedure->rulename = global_rule_name( local );
+    if ( function_rulename( procedure ) == 0 )
+        function_set_rulename( procedure, global_rule_name( local ) );
 
     return local;
 }
@@ -705,10 +599,11 @@ static void set_rule_actions( RULE * rule, rule_actions * actions )
 }
 
 
-static rule_actions * actions_new( char * command, LIST * bindlist, int flags )
+static rule_actions * actions_new( FUNCTION * command, LIST * bindlist, int flags )
 {
     rule_actions * result = (rule_actions *)BJAM_MALLOC( sizeof( rule_actions ) );
-    result->command = copystr( command );
+    function_refer( command );
+    result->command = command;
     result->bindlist = bindlist;
     result->flags = flags;
     result->reference_count = 0;
@@ -716,7 +611,7 @@ static rule_actions * actions_new( char * command, LIST * bindlist, int flags )
 }
 
 
-RULE * new_rule_actions( module_t * m, char * rulename, char * command, LIST * bindlist, int flags )
+RULE * new_rule_actions( module_t * m, OBJECT * rulename, FUNCTION * command, LIST * bindlist, int flags )
 {
     RULE * local = define_rule( m, rulename, m );
     RULE * global = global_rule( local );
@@ -733,32 +628,37 @@ RULE * new_rule_actions( module_t * m, char * rulename, char * command, LIST * b
  * modules, look in module 'name1' for rule 'name2'.
  */
 
-RULE * lookup_rule( char * rulename, module_t * m, int local_only )
+RULE * lookup_rule( OBJECT * rulename, module_t * m, int local_only )
 {
-    RULE       rule;
-    RULE     * r = &rule;
+    RULE     * r;
     RULE     * result = 0;
     module_t * original_module = m;
-
-    r->name = rulename;
 
     if ( m->class_module )
         m = m->class_module;
 
-    if ( m->rules && hashcheck( m->rules, (HASHDATA * *)&r ) )
+    if ( m->rules && ( r = (RULE *)hash_find( m->rules, rulename ) ) )
         result = r;
     else if ( !local_only && m->imported_modules )
     {
         /* Try splitting the name into module and rule. */
-        char *p = strchr( r->name, '.' ) ;
+        char *p = strchr( object_str( rulename ), '.' ) ;
         if ( p )
         {
-            *p = '\0';
+            string buf[1];
+            OBJECT * module_part;
+            OBJECT * rule_part;
+            string_new( buf );
+            string_append_range( buf, object_str( rulename ), p );
+            module_part = object_new( buf->value );
+            rule_part = object_new( p + 1 );
             /* Now, r->name keeps the module name, and p+1 keeps the rule name.
              */
-            if ( hashcheck( m->imported_modules, (HASHDATA * *)&r ) )
-                result = lookup_rule( p + 1, bindmodule( rulename ), 1 );
-            *p = '.';
+            if ( hash_find( m->imported_modules, module_part ) )
+                result = lookup_rule( rule_part, bindmodule( module_part ), 1 );
+            object_free( rule_part );
+            object_free( module_part );
+            string_free( buf );
         }
     }
 
@@ -786,7 +686,7 @@ RULE * lookup_rule( char * rulename, module_t * m, int local_only )
 }
 
 
-RULE * bindrule( char * rulename, module_t * m )
+RULE * bindrule( OBJECT * rulename, module_t * m )
 {
     RULE * result = lookup_rule( rulename, m, 0 );
     if ( !result )
@@ -801,10 +701,24 @@ RULE * bindrule( char * rulename, module_t * m )
 }
 
 
-RULE * import_rule( RULE * source, module_t * m, char * name )
+RULE * import_rule( RULE * source, module_t * m, OBJECT * name )
 {
     RULE * dest = define_rule( source->module, name, m );
-    set_rule_body( dest, source->arguments, source->procedure );
+    set_rule_body( dest, source->procedure );
     set_rule_actions( dest, source->actions );
     return dest;
 }
+
+
+void rule_localize( RULE * rule, module_t * m )
+{
+    rule->module = m;
+    if ( rule->procedure )
+    {
+        FUNCTION * procedure = function_unbind_variables( rule->procedure );
+        function_refer( procedure );
+        function_free( rule->procedure );
+        rule->procedure = procedure;
+    }
+}
+

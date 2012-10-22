@@ -31,25 +31,26 @@
 
 typedef struct _YYSTYPE
 {
-    int     type;
-    char  * string;
-    PARSE * parse;
-    LIST  * list;
-    int     number;
-    char  * file;
-    int     line;
+    int          type;
+    OBJECT     * string;
+    PARSE      * parse;
+    LIST       * list;
+    int          number;
+    OBJECT     * file;
+    int          line;
+    const char * keyword;
 } YYSTYPE;
 
 extern YYSTYPE yylval;
 
 void yymode( int n );
-void yyerror( char * s );
+void yyerror( const char * s );
 int yyanyerrors();
-void yyfparse( char * s );
+void yyfparse( OBJECT * s );
 int yyline();
 int yylex();
 int yyparse();
-void yyinput_stream( char * * name, int * line );
+void yyinput_stream( OBJECT * * name, int * line );
 
 # define SCAN_NORMAL  0   /* normal parsing */
 # define SCAN_STRING  1   /* look only for matching } */

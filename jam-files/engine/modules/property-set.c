@@ -4,7 +4,7 @@
 
 #include "../native.h"
 #include "../timestamp.h"
-#include "../newstr.h"
+#include "../object.h"
 #include "../strings.h"
 #include "../lists.h"
 #include "../variable.h"
@@ -19,7 +19,7 @@ LIST* get_grist(char* f)
     string_new(s);
 
     string_append_range(s, f, end+1);
-    result = list_new(0, newstr(s->value));
+    result = list_new(object_new(s->value));
 
     string_free(s);
     return result;
@@ -41,17 +41,18 @@ rule create ( raw-properties * )
 }
 */
 
-LIST *property_set_create( PARSE *parse, FRAME *frame )
+LIST *property_set_create( FRAME *frame, int flags )
 {
     LIST* properties = lol_get( frame->args, 0 );
-    LIST* sorted = 0;
+    LIST* sorted = L0;
 #if 0
     LIST* order_sensitive = 0;
 #endif
     LIST* unique;
-    LIST* tmp;
     LIST* val;
     string var[1];
+    OBJECT* name;
+    LISTITER iter, end;
 
 #if 0
     /* Sort all properties which are not order sensitive */
@@ -59,9 +60,9 @@ LIST *property_set_create( PARSE *parse, FRAME *frame )
         LIST* g = get_grist(tmp->string);
         LIST* att = call_rule("feature.attributes", frame, g, 0);
         if (list_in(att, "order-sensitive")) {
-            order_sensitive = list_new( order_sensitive, tmp->string);
+            order_sensitive = list_new( order_sensitive, copystr(tmp->string));
         } else {
-            sorted = list_new( sorted, tmp->string);
+            sorted = list_new( sorted, copystr(tmp->string));
         }
         list_free(att);
     }
@@ -76,22 +77,28 @@ LIST *property_set_create( PARSE *parse, FRAME *frame )
     string_new(var);
     string_append(var, ".ps.");
 
-    for(tmp = unique; tmp; tmp = tmp->next) {
-        string_append(var, tmp->string);
+    iter = list_begin( unique ), end = list_end( unique );
+    for( ; iter != end; iter = list_next( iter ) ) {
+        string_append(var, object_str( list_item( iter ) ));
         string_push_back(var, '-');
     }
-    val = var_get(var->value);
-    if (val == 0)
+    name = object_new(var->value);
+    val = var_get(frame->module, name);
+    if (list_empty(val))
     {
-        val = call_rule("new", frame,
-                        list_append(list_new(0, "property-set"), unique), 0);
+        OBJECT* rulename = object_new("new");
+        val = call_rule(rulename, frame,
+                        list_append(list_new(object_new("property-set")), unique), 0);
+        object_free(rulename);
 
-        var_set(newstr(var->value), list_copy(0, val), VAR_SET);
+        var_set(frame->module, name, list_copy(val), VAR_SET);
     }
     else
     {
-        val = list_copy(0, val);
+        list_free(unique);
+        val = list_copy(val);
     }
+    object_free(name);
 
     string_free(var);
     /* The 'unique' variable is freed in 'call_rule'. */
@@ -104,7 +111,7 @@ LIST *property_set_create( PARSE *parse, FRAME *frame )
 void init_property_set()
 {
     {
-        char* args[] = { "raw-properties", "*", 0 };
+        const char* args[] = { "raw-properties", "*", 0 };
         declare_native_rule("property-set", "create", args, property_set_create, 1);
     }
 }

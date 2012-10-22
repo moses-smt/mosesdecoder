@@ -11,8 +11,8 @@
 # include "regexp.h"
 # include "lists.h"
 
-void hcache_init(void);
-void hcache_done(void);
-LIST *hcache(TARGET *t, int rec, regexp *re[], LIST *hdrscan);
+void hcache_init( void );
+void hcache_done( void );
+LIST * hcache( TARGET *t, int rec, regexp * re[], LIST * hdrscan );
 
 #endif

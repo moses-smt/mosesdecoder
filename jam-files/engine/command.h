@@ -36,6 +36,13 @@
  * CMD - an action, ready to be formatted into a buffer and executed.
  */
 
+#ifndef COMMAND_SW20111118_H
+#define COMMAND_SW20111118_H
+
+#include "lists.h"
+#include "rules.h"
+#include "strings.h"
+
 typedef struct _cmd CMD;
 
 struct _cmd
@@ -45,7 +52,7 @@ struct _cmd
     RULE * rule;   /* rule->actions contains shell script */
     LIST * shell;  /* $(SHELL) value */
     LOL    args;   /* LISTs for $(<), $(>) */
-    char * buf;    /* actual commands */
+    string buf[1]; /* actual commands */
 };
 
 CMD * cmd_new
@@ -59,3 +66,5 @@ CMD * cmd_new
 void cmd_free( CMD * );
 
 #define cmd_next( c ) ( ( c )->next )
+
+#endif

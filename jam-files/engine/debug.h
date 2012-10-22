@@ -6,6 +6,7 @@
 #ifndef BJAM_DEBUG_H
 #define BJAM_DEBUG_H
 
+#include "constants.h"
 #include "jam.h"
 #include <time.h>
 
@@ -13,7 +14,7 @@
 struct profile_info
 {
     /* name of rule being called */
-    char* name;
+    OBJECT * name;
     /* cumulative time spent in rule */
     clock_t cumulative;
     /* time spent in rule proper */
@@ -42,13 +43,13 @@ struct profile_frame
 };
 typedef struct profile_frame profile_frame;
 
-profile_frame * profile_init( char * rulename, profile_frame * frame );
-void profile_enter( char* rulename, profile_frame * frame );
+profile_frame * profile_init( OBJECT * rulename, profile_frame * frame );
+void profile_enter( OBJECT * rulename, profile_frame * frame );
 void profile_memory( long mem );
 void profile_exit( profile_frame * frame );
 void profile_dump();
 
-#define PROFILE_ENTER( scope ) profile_frame PROF_ ## scope, *PROF_ ## scope ## _p = profile_init( #scope, &PROF_ ## scope )
+#define PROFILE_ENTER( scope ) profile_frame PROF_ ## scope, *PROF_ ## scope ## _p = profile_init( constant_ ## scope, &PROF_ ## scope )
 #define PROFILE_EXIT( scope ) profile_exit( PROF_ ## scope ## _p )
 
 #endif
