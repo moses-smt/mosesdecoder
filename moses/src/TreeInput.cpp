@@ -168,7 +168,7 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 	  //TRACE_ERR("number of translations: " << altTexts.size() << endl);
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
-            TargetPhrase targetPhrase(Output);
+            TargetPhrase targetPhrase;
             targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],factorDelimiter);
 
             // set constituent label

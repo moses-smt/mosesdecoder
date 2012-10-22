@@ -151,7 +151,7 @@ protected:
 
     // convert into TargetPhrases
     for(size_t i=0; i<cands.size(); ++i) {
-      TargetPhrase targetPhrase(Output);
+      TargetPhrase targetPhrase;
 
       StringTgtCand::Tokens const& factorStrings=cands[i].tokens;
       Scores const& probVector=cands[i].scores;
@@ -506,7 +506,7 @@ protected:
 
       for(E2Costs::const_iterator j=i->second.begin(); j!=i->second.end(); ++j) {
         TScores const & scores=j->second;
-        TargetPhrase targetPhrase(Output);
+        TargetPhrase targetPhrase;
         CreateTargetPhrase(targetPhrase,j->first,scores.trans,ScoreComponentCollection(),weightT,weightWP,scores.src);
         costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
         tCands.push_back(targetPhrase);

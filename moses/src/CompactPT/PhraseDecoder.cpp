@@ -289,7 +289,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     if(state == New)
     {
       // Creating new TargetPhrase on the heap
-      tpv->push_back(TargetPhrase(Output));
+      tpv->push_back(TargetPhrase());
       targetPhrase = &tpv->back();
       
       targetPhrase->SetSourcePhrase(sourcePhrase);

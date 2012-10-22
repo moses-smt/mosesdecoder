@@ -235,7 +235,7 @@ namespace Moses
       sourcePhrase.CreateFromStringNewFormat(Input, *m_input, sourcePhraseString, factorDelimiter, sourceLHS);
       
       // create target phrase obj
-      TargetPhrase *targetPhrase = new TargetPhrase(Output);
+      TargetPhrase *targetPhrase = new TargetPhrase();
       targetPhrase->CreateFromStringNewFormat(Output, *m_output, targetPhraseString, factorDelimiter, targetLHS);
       
       // rest of target phrase

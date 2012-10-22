@@ -226,7 +226,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	m_unksrcs.push_back(m_unksrc);
 
 	TranslationOption *transOpt;
-	TargetPhrase targetPhrase(Output);
+	TargetPhrase targetPhrase;
 	targetPhrase.SetSourcePhrase(*m_unksrc);
 	if (inputScores != NULL) {
 		targetPhrase.SetScore(m_system,*inputScores);
@@ -246,9 +246,9 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 			
 			const Factor *sourceFactor = sourceWord[currFactor];
 			if (sourceFactor == NULL)
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
+				targetWord[factorType] = factorCollection.AddFactor(UNKNOWN_FACTOR);
 			else
-				targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
+				targetWord[factorType] = factorCollection.AddFactor(sourceFactor->GetString());
 		}
 		//create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation	
         

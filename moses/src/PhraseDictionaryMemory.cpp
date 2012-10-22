@@ -106,7 +106,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     }
  
     //target
-    std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(Output));
+    std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase());
     targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
 
     scv.clear();

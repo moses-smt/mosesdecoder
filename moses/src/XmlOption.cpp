@@ -339,7 +339,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               float scoreValue = FloorScore(TransformScore(probValue));
 
               WordsRange range(startPos,endPos-1); // span covered by phrase
-              TargetPhrase targetPhrase(Output);
+              TargetPhrase targetPhrase;
               targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],factorDelimiter);
               targetPhrase.SetScore(scoreValue);
               // TODO: targetPhrase.SetSourcePhrase() ?

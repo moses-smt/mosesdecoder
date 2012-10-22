@@ -230,7 +230,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase(Output);
+    TargetPhrase *targetPhrase = new TargetPhrase();
     targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, targetLHS);
     targetPhrase->SetSourcePhrase(sourcePhrase);
 

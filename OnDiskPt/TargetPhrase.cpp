@@ -232,7 +232,7 @@ Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::Facto
     , const Moses::WordPenaltyProducer* wpProducer
     , const Moses::LMList &lmList) const
 {
-  Moses::TargetPhrase *ret = new Moses::TargetPhrase(Moses::Output);
+  Moses::TargetPhrase *ret = new Moses::TargetPhrase();
 
   // words
   size_t phraseSize = GetSize();

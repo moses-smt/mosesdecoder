@@ -397,7 +397,7 @@ SAPhrase BilingualDynSuffixArray::TrgPhraseFromSntIdx(const PhrasePair& phrasepa
 	
 TargetPhrase* BilingualDynSuffixArray::GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase) const
 {
-	TargetPhrase* targetPhrase = new TargetPhrase(Output);
+	TargetPhrase* targetPhrase = new TargetPhrase();
 	for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
 		Word& word = m_trgVocab->GetWord( phrase.words[i]);
 		CHECK(word != m_trgVocab->GetkOOVWord());

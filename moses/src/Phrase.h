@@ -57,9 +57,9 @@ public:
 
   /** create empty phrase
   */
-  Phrase(size_t reserveSize);
+  explicit Phrase(size_t reserveSize);
   /** create phrase from vectors of words	*/
-  Phrase(const std::vector< const Word* > &mergeWords);
+  explicit Phrase(const std::vector< const Word* > &mergeWords);
 
   /** destructor */
   virtual ~Phrase();
