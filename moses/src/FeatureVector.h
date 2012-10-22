@@ -169,6 +169,10 @@ namespace Moses {
       return m_coreFeatures.size();
     }
     
+    const std::valarray<FValue> &getCoreFeatures() const {
+      return m_coreFeatures;
+    }
+    
     /** Equality */
     bool operator== (const FVector& rhs) const;
     bool operator!= (const FVector& rhs) const;
