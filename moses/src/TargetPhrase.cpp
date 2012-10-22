@@ -53,9 +53,9 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
 
 TargetPhrase::TargetPhrase()
-  :Phrase(ARRAY_SIZE_INCR)
+  :Phrase()
   , m_fullScore(0.0)
-  ,m_sourcePhrase(0)
+  ,m_sourcePhrase()
 	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
@@ -64,7 +64,7 @@ TargetPhrase::TargetPhrase()
 TargetPhrase::TargetPhrase(const Phrase &phrase)
   : Phrase(phrase)
   , m_fullScore(0.0)
-  , m_sourcePhrase(0)
+  , m_sourcePhrase()
 	, m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 	, m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 {
