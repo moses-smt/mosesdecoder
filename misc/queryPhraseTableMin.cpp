@@ -82,7 +82,7 @@ int main(int argc, char **argv)
           std::cout << static_cast<const Phrase&>(tp) << "|||";
           
           if(useAlignments)
-            std::cout << " " << tp.GetAlignmentInfo() << "|||"; 
+            std::cout << " " << tp.GetAlignTerm() << "|||"; 
           
           size_t offset = tp.GetScoreBreakdown().size() - nscores;
           for(size_t i = offset; i < tp.GetScoreBreakdown().size(); i++)
