@@ -119,6 +119,10 @@ public:
 	  return m_scores;
   }
 
+  const std::valarray<FValue> &getCoreFeatures() const {
+    return m_scores.getCoreFeatures();
+  }
+
   size_t Size() const
   {
 	  return m_scores.size();
