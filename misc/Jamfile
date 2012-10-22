@@ -10,9 +10,10 @@ local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
     exe processPhraseTableMin : processPhraseTableMin.cpp ../moses/src//moses ;
     exe processLexicalTableMin : processLexicalTableMin.cpp ../moses/src//moses ;
-    exe queryPhraseTableMin : queryPhraseTableMin.cpp ../moses/src//moses ;
+#    exe queryPhraseTableMin : queryPhraseTableMin.cpp ../moses/src//moses ;
 
-    alias programsMin : processPhraseTableMin processLexicalTableMin queryPhraseTableMin ;
+#    alias programsMin : processPhraseTableMin processLexicalTableMin queryPhraseTableMin ;
+    alias programsMin : processPhraseTableMin processLexicalTableMin ;
 }
 else {
     alias programsMin ;
