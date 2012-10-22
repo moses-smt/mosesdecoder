@@ -43,7 +43,6 @@ class PhraseExtractionOptions {
   REO_MODEL_TYPE hierType;
   bool orientationFlag;
   bool translationFlag;
-  bool sentenceIdFlag; //create extract file with sentence id
   bool includeSentenceIdFlag; //include sentence id in extract file
   bool onlyOutputSpanInfo;
   bool gzOutput;
@@ -60,7 +59,6 @@ public:
             hierType(REO_MSD),
             orientationFlag(false),
             translationFlag(true),
-            sentenceIdFlag(false),
             includeSentenceIdFlag(false),
             onlyOutputSpanInfo(false),
             gzOutput(false){}
@@ -92,9 +90,6 @@ public:
     }
     void initTranslationFlag(const bool inittranslationFlag){
         translationFlag=inittranslationFlag;
-    }
-    void initSentenceIdFlag(const bool initsentenceIdFlag){
-        sentenceIdFlag=initsentenceIdFlag;
     }
     void initIncludeSentenceIdFlag(const bool initincludeSentenceIdFlag){
         includeSentenceIdFlag=initincludeSentenceIdFlag;
@@ -132,9 +127,6 @@ public:
     }
     bool isTranslationFlag() const {
         return translationFlag;
-    }
-    bool isSentenceIdFlag() const {
-        return sentenceIdFlag;
     }
     bool isIncludeSentenceIdFlag() const {
         return includeSentenceIdFlag;
