@@ -82,13 +82,12 @@ namespace MosesTraining{
 class ExtractTask 
 {
 public:
-  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation,Moses::OutputFileStream &extractFileSentenceId  ):
+  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation):
     m_sentence(sentence),
     m_options(initoptions),
     m_extractFile(extractFile),
     m_extractFileInv(extractFileInv),
-    m_extractFileOrientation(extractFileOrientation),
-    m_extractFileSentenceId(extractFileSentenceId) {}
+    m_extractFileOrientation(extractFileOrientation){}
 void Run();
 private:
   vector< string > m_extractedPhrases;
@@ -105,7 +104,6 @@ private:
   Moses::OutputFileStream &m_extractFile;
   Moses::OutputFileStream &m_extractFileInv;
   Moses::OutputFileStream &m_extractFileOrientation;
-  Moses::OutputFileStream &m_extractFileSentenceId;
 };
 }
 
@@ -116,14 +114,13 @@ int main(int argc, char* argv[])
 
  if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
-    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --SentenceId | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
+    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
     exit(1);
   }
 
   Moses::OutputFileStream extractFile;
   Moses::OutputFileStream extractFileInv;
   Moses::OutputFileStream extractFileOrientation;
-  Moses::OutputFileStream extractFileSentenceId;
   const char* const &fileNameE = argv[1];
   const char* const &fileNameF = argv[2];
   const char* const &fileNameA = argv[3];
@@ -137,8 +134,6 @@ int main(int argc, char* argv[])
       options.initOrientationFlag(true);
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       options.initTranslationFlag(false);
-    } else if (strcmp(argv[i], "--SentenceId") == 0) {
-      options.initSentenceIdFlag(true);  
     } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
       options.initIncludeSentenceIdFlag(true);  
     } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
@@ -236,11 +231,6 @@ int main(int argc, char* argv[])
     extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
 
-  if (options.isSentenceIdFlag()) {
-    string fileNameExtractSentenceId = fileNameExtract + ".sid" + (options.isGzOutput()?".gz":"");
-    extractFileSentenceId.Open(fileNameExtractSentenceId.c_str());
-  }
-
   int i = sentenceOffset;
   while(true) {
     i++;
@@ -262,7 +252,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
-   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileSentenceId);
+   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation);
       task->Run();
       delete task;
 
@@ -284,9 +274,6 @@ int main(int argc, char* argv[])
     if (options.isOrientationFlag()){ 
 	extractFileOrientation.Close();
 	}
-    if (options.isSentenceIdFlag()) {
-      extractFileSentenceId.Close();
-    }
   }
 }
 
@@ -664,7 +651,6 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   	ostringstream outextractstr;
   	ostringstream outextractstrInv;
   	ostringstream outextractstrOrientation;
-  	ostringstream outextractstrSentenceId;
 
   if (m_options.isOnlyOutputSpanInfo()) {
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
@@ -674,23 +660,19 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
 for(int fi=startF; fi<=endF; fi++) {
     if (m_options.isTranslationFlag()) outextractstr << sentence.source[fi] << " ";
     if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
-    if (m_options.isSentenceIdFlag()) outextractstrSentenceId << sentence.source[fi] << " ";
   }
   if (m_options.isTranslationFlag()) outextractstr << "||| ";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
-  if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "||| ";
 
   // target
   for(int ei=startE; ei<=endE; ei++) {
     if (m_options.isTranslationFlag()) outextractstr << sentence.target[ei] << " ";
     if (m_options.isTranslationFlag()) outextractstrInv << sentence.target[ei] << " ";
     if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.target[ei] << " ";
-    if (m_options.isSentenceIdFlag()) outextractstrSentenceId << sentence.target[ei] << " ";
   }
   if (m_options.isTranslationFlag()) outextractstr << "|||";
   if (m_options.isTranslationFlag()) outextractstrInv << "||| ";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
-  if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "||| ";
 
   // source (for inverse)
 
@@ -713,9 +695,6 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isOrientationFlag())
     outextractstrOrientation << orientationInfo;
 
-  if (m_options.isSentenceIdFlag()) {
-    outextractstrSentenceId << sentence.sentenceID;
-  }
   if (m_options.isIncludeSentenceIdFlag()) {
     outextractstr << " ||| " << sentence.sentenceID;
   }
@@ -723,13 +702,11 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isTranslationFlag()) outextractstr << "\n";
   if (m_options.isTranslationFlag()) outextractstrInv << "\n";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
-  if (m_options.isSentenceIdFlag()) outextractstrSentenceId << "\n";
 
 
     m_extractedPhrases.push_back(outextractstr.str());
     m_extractedPhrasesInv.push_back(outextractstrInv.str());
     m_extractedPhrasesOri.push_back(outextractstrOrientation.str());
-    m_extractedPhrasesSid.push_back(outextractstrSentenceId.str());
 }
 
 
@@ -738,7 +715,6 @@ void ExtractTask::writePhrasesToFile(){
     ostringstream outextractFile;
     ostringstream outextractFileInv;
     ostringstream outextractFileOrientation;
-    ostringstream outextractFileSentenceId;
 
     for(vector<string>::const_iterator phrase=m_extractedPhrases.begin();phrase!=m_extractedPhrases.end();phrase++){
         outextractFile<<phrase->data();
@@ -749,14 +725,10 @@ void ExtractTask::writePhrasesToFile(){
     for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin();phrase!=m_extractedPhrasesOri.end();phrase++){
         outextractFileOrientation<<phrase->data();
     }
-    for(vector<string>::const_iterator phrase=m_extractedPhrasesSid.begin();phrase!=m_extractedPhrasesSid.end();phrase++){
-        outextractFileSentenceId<<phrase->data();
-    }
 
       m_extractFile << outextractFile.str();
       m_extractFileInv  << outextractFileInv.str();
       m_extractFileOrientation << outextractFileOrientation.str();
-      m_extractFileSentenceId << outextractFileSentenceId.str();
 }
 
 // if proper conditioning, we need the number of times a source phrase occured
