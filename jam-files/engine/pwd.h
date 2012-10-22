@@ -5,6 +5,7 @@
 #ifndef PWD_H
 #define PWD_H
 
-LIST* pwd(void);
+LIST * pwd( void );
+void   pwd_done( void );
 
 #endif

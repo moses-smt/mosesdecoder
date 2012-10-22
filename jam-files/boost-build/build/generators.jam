@@ -400,13 +400,13 @@ class generator
 
         if $(self.composing)
         {
-            convert-multiple-sources-to-consumable-types $(project)
-                : $(property-set) : $(sources) : consumed bypassed ;
+            consumed = [ convert-multiple-sources-to-consumable-types $(project)
+                : $(property-set) : $(sources) ] ;
         }
         else
         {
-            convert-to-consumable-types $(project) $(name) : $(property-set)
-                : $(sources) : : consumed bypassed ;
+            consumed = [ convert-to-consumable-types $(project) $(name)
+                : $(property-set) : $(sources) ] ;
         }
 
         local result ;
@@ -579,16 +579,9 @@ class generator
         : sources +
         : only-one ?    # Convert 'source' to only one of the source types. If
                         # there is more that one possibility, report an error.
-        : consumed-var  # Name of the variable which receives all targets which
-                        # can be consumed.
-          bypassed-var  # Name of the variable which receives all targets which
-                        # can not be consumed.
     )
     {
-        # We are likely to be passed 'consumed' and 'bypassed' var names. Use
-        # '_' to avoid name conflicts.
         local _consumed ;
-        local _bypassed ;
         local missing-types ;
 
         if $(sources[2])
@@ -599,7 +592,12 @@ class generator
         }
         else
         {
-            consume-directly $(sources) : _consumed : missing-types ;
+            local temp = [ consume-directly $(sources) ] ;
+            if $(temp[1])
+            {
+                _consumed = $(temp[1]) ;
+            }
+            missing-types = $(temp[2-]) ;
         }
 
         # No need to search for transformation if some source type has consumed
@@ -611,8 +609,6 @@ class generator
 
         # TODO: we should check that only one source type if create of
         # 'only-one' is true.
-        # TODO: consider if consumed/bypassed separation should be done by
-        # 'construct-types'.
 
         if $(missing-types)
         {
@@ -631,61 +627,35 @@ class generator
                 {
                     _consumed += $(t) ;
                 }
-                else
-                {
-                    _bypassed += $(t) ;
-                }
             }
         }
 
-        _consumed = [ sequence.unique $(_consumed) ] ;
-        _bypassed = [ sequence.unique $(_bypassed) ] ;
-
-        # Remove elements of '_bypassed' that are in '_consumed'.
-
-        # Suppose the target type of current generator, X is produced from X_1
-        # and X_2, which are produced from Y by one generator. When creating X_1
-        # from Y, X_2 will be added to 'bypassed'. Likewise, when creating X_2
-        # from Y, X_1 will be added to 'bypassed', but they are also in
-        # 'consumed'. We have to remove them from bypassed, so that generators
-        # up the call stack do not try to convert them.
-
-        # In this particular case, X_1 instance in 'consumed' and X_1 instance
-        # in 'bypassed' will be the same: because they have the same source and
-        # action name, and 'virtual-target.register' will not allow two
-        # different instances. Therefore, it is OK to use 'set.difference'.
-
-        _bypassed = [ set.difference $(_bypassed) : $(_consumed) ] ;
-
-        $(consumed-var) += $(_consumed) ;
-        $(bypassed-var) += $(_bypassed) ;
+        return [ sequence.unique $(_consumed) ] ;
     }
 
     # Converts several files to consumable types. Called for composing
     # generators only.
     #
     rule convert-multiple-sources-to-consumable-types ( project : property-set :
-        sources * : consumed-var bypassed-var )
+        sources * )
     {
+        local result ;
         # We process each source one-by-one, trying to convert it to a usable
         # type.
         for local source in $(sources)
         {
-            local _c ;
-            local _b ;
-            # TODO: need to check for failure on each source.
-            convert-to-consumable-types $(project) : $(property-set) : $(source)
-                : true : _c _b ;
+            local _c = [ convert-to-consumable-types $(project) : $(property-set)
+                : $(source) : true ] ;
             if ! $(_c)
             {
                 generators.dout [ indent ] " failed to convert " $(source) ;
             }
-            $(consumed-var) += $(_c) ;
-            $(bypassed-var) += $(_b) ;
+            result += $(_c) ;
         }
+        return $(result) ;
     }
 
-    rule consume-directly ( source : consumed-var : missing-types-var )
+    rule consume-directly ( source )
     {
         local real-source-type = [ $(source).type ] ;
 
@@ -693,19 +663,23 @@ class generator
         local source-types = $(self.source-types) ;
         source-types ?= $(real-source-type) ;
 
+        local result = "" ;
+        local missing-types ;
+
         for local st in $(source-types)
         {
             # The 'source' if of the right type already.
             if $(real-source-type) = $(st) || [ type.is-derived
                 $(real-source-type) $(st) ]
             {
-                $(consumed-var) += $(source) ;
+                result = $(source) ;
             }
             else
             {
-                $(missing-types-var) += $(st) ;
+                missing-types += $(st) ;
             }
         }
+        return $(result) $(missing-types) ;
     }
 
     # Returns the class to be used to actions. Default implementation returns
@@ -1072,7 +1046,6 @@ rule construct-types ( project name ? : target-types + : property-set
     : sources + )
 {
     local result ;
-    local matched-types ;
     local usage-requirements = [ property-set.empty ] ;
     for local t in $(target-types)
     {
@@ -1082,7 +1055,6 @@ rule construct-types ( project name ? : target-types + : property-set
         {
             usage-requirements = [ $(usage-requirements).add $(r[1]) ] ;
             result += $(r[2-]) ;
-            matched-types += $(t) ;
         }
     }
     # TODO: have to introduce parameter controlling if several types can be

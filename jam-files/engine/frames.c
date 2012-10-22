@@ -13,7 +13,8 @@ void frame_init( FRAME* frame )
     lol_init(frame->args);
     frame->module = root_module();
     frame->rulename = "module scope";
-    frame->procedure = 0;
+    frame->file = 0;
+    frame->line = -1;
 }
 
 void frame_free( FRAME* frame )

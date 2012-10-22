@@ -4,33 +4,36 @@
 
 #include "native.h"
 #include "hash.h"
+#include "object.h"
+#include "assert.h"
 
-# define P0 (PARSE *)0
-# define C0 (char *)0
-
-
-void declare_native_rule(char* module, char* rule, char** args,
-                         LIST*(*f)(PARSE*, FRAME*), int version)
+void declare_native_rule( const char * module, const char * rule, const char * * args,
+                          LIST * (*f)( FRAME *, int ), int version )
 {
-    module_t* m = bindmodule(module);
-    if (m->native_rules == 0) {
+    OBJECT * module_obj = 0;
+    module_t * m;
+    if ( module )
+    {
+        module_obj = object_new( module );
+    }
+    m = bindmodule( module_obj );
+    if ( module_obj )
+    {
+        object_free( module_obj );
+    }
+    if (m->native_rules == 0)
+    {
         m->native_rules = hashinit( sizeof( native_rule_t ), "native rules");
     }
 
     {
-        native_rule_t n, *np = &n;
-        n.name = rule;
-        if (args)
-        {
-            n.arguments = args_new();
-            lol_build( n.arguments->data, args );
-        }
-        else
-        {
-            n.arguments = 0;
-        }
-        n.procedure = parse_make( f, P0, P0, P0, C0, C0, 0 );
-        n.version = version;
-        hashenter(m->native_rules, (HASHDATA**)&np);
+        native_rule_t *np;
+        OBJECT * name = object_new( rule );
+        int found;
+        np = (native_rule_t *)hash_insert( m->native_rules, name, &found );
+        np->name = name;
+        assert( !found );
+        np->procedure = function_builtin( f, 0, args );
+        np->version = version;
     }
 }

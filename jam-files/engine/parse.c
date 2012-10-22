@@ -14,9 +14,10 @@
 #include "lists.h"
 #include "parse.h"
 #include "scan.h"
-#include "newstr.h"
+#include "object.h"
 #include "modules.h"
 #include "frames.h"
+#include "function.h"
 
 /*
  * parse.c - make and destroy parse trees as driven by the parser
@@ -29,7 +30,7 @@
 
 static PARSE * yypsave;
 
-void parse_file( char * f, FRAME * frame )
+void parse_file( OBJECT * f, FRAME * frame )
 {
     /* Suspend scan of current file and push this new file in the stream. */
     yyfparse( f );
@@ -41,6 +42,7 @@ void parse_file( char * f, FRAME * frame )
     for ( ; ; )
     {
         PARSE * p;
+        FUNCTION * func;
 
         /* Filled by yyparse() calling parse_save(). */
         yypsave = 0;
@@ -50,8 +52,10 @@ void parse_file( char * f, FRAME * frame )
             break;
 
         /* Run the parse tree. */
-        parse_evaluate( p, frame );
+        func = function_compile( p );
         parse_free( p );
+        list_free( function_run( func, frame, stack_global() ) );
+        function_free( func );
     }
 }
 
@@ -63,17 +67,17 @@ void parse_save( PARSE * p )
 
 
 PARSE * parse_make(
-    LIST  * (* func)( PARSE *, FRAME * ),
-    PARSE * left,
-    PARSE * right,
-    PARSE * third,
-    char  * string,
-    char  * string1,
-    int     num )
+    int      type,
+    PARSE  * left,
+    PARSE  * right,
+    PARSE  * third,
+    OBJECT * string,
+    OBJECT * string1,
+    int      num )
 {
     PARSE * p = (PARSE *)BJAM_MALLOC( sizeof( PARSE ) );
 
-    p->func = func;
+    p->type = type;
     p->left = left;
     p->right = right;
     p->third = third;
@@ -85,12 +89,13 @@ PARSE * parse_make(
 
     if ( left )
     {
-        p->file = left->file;
+        p->file = object_copy( left->file );
         p->line = left->line;
     }
     else
     {
         yyinput_stream( &p->file, &p->line );
+        p->file = object_copy( p->file );
     }
 
     return p;
@@ -109,9 +114,9 @@ void parse_free( PARSE * p )
         return;
 
     if ( p->string )
-        freestr( p->string );
+        object_free( p->string );
     if ( p->string1 )
-        freestr( p->string1 );
+        object_free( p->string1 );
     if ( p->left )
         parse_free( p->left );
     if ( p->right )
@@ -119,14 +124,9 @@ void parse_free( PARSE * p )
     if ( p->third )
         parse_free( p->third );
     if ( p->rulename )
-        freestr( p->rulename );
+        object_free( p->rulename );
+    if ( p->file )
+        object_free( p->file );
 
     BJAM_FREE( (char *)p );
-}
-
-
-LIST * parse_evaluate( PARSE * p, FRAME * frame )
-{
-    frame->procedure = p;
-    return (*p->func)( p, frame );
 }

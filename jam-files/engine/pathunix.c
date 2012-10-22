@@ -14,10 +14,11 @@
 # include "jam.h"
 # include "pathsys.h"
 # include "strings.h"
-# include "newstr.h"
+# include "object.h"
 # include "filesys.h"
 # include <time.h>
 # include <stdlib.h>
+# include <assert.h>
 # ifndef OS_NT
 # include <unistd.h>
 # endif
@@ -56,11 +57,11 @@
  * path_parse() - split a file name into dir/base/suffix/member
  */
 
-void path_parse( char * file, PATHNAME * f )
+void path_parse( const char * file, PATHNAME * f )
 {
-    char * p;
-    char * q;
-    char * end;
+    const char * p;
+    const char * q;
+    const char * end;
 
     memset( (char *)f, 0, sizeof( *f ) );
 
@@ -273,124 +274,250 @@ path_parent( PATHNAME *f )
 
 #ifdef NT
 #include <windows.h>
-#include <tchar.h>
 
 /* The definition of this in winnt.h is not ANSI-C compatible. */
 #undef INVALID_FILE_ATTRIBUTES
 #define INVALID_FILE_ATTRIBUTES ((DWORD)-1)
 
+OBJECT * path_as_key( OBJECT * path );
+static void path_write_key( char * path_, string * out );
 
-DWORD ShortPathToLongPath(LPCTSTR lpszShortPath,LPTSTR lpszLongPath,DWORD
-                          cchBuffer)
+void ShortPathToLongPath( char * short_path, string * out )
 {
-    LONG i=0;
-    TCHAR path[_MAX_PATH]={0};
-    TCHAR ret[_MAX_PATH]={0};
-    LONG pos=0, prev_pos=0;
-    LONG len=_tcslen(lpszShortPath);
+    const char * new_element;
+    unsigned long saved_size;
+    char * p;
 
-    /* Is the string valid? */
-    if (!lpszShortPath) {
-        SetLastError(ERROR_INVALID_PARAMETER);
-        return 0;
+    if ( short_path[0] == '\0' )
+    {
+        return;
     }
 
-    /* Is the path valid? */
-    if (GetFileAttributes(lpszShortPath)==INVALID_FILE_ATTRIBUTES)
-        return 0;
-
-    /* Convert "/" to "\" */
-    for (i=0;i<len;++i) {
-        if (lpszShortPath[i]==_T('/'))
-            path[i]=_T('\\');
-        else
-            path[i]=lpszShortPath[i];
+    if ( short_path[0] == '\\' && short_path[1] == '\0')
+    {
+        string_push_back( out, '\\' );
+        return;
     }
 
-    /* UNC path? */
-    if (path[0]==_T('\\') && path[1]==_T('\\')) {
-        pos=2;
-        for (i=0;i<2;++i) {
-            while (path[pos]!=_T('\\') && path[pos]!=_T('\0'))
-                ++pos;
-            ++pos;
-        }
-        _tcsncpy(ret,path,pos-1);
-    } /* Drive letter? */
-    else if (path[1]==_T(':')) {
-        if (path[2]==_T('\\'))
-            pos=3;
-        if (len==3) {
-            if (cchBuffer>3)
-                _tcscpy(lpszLongPath,lpszShortPath);
-            return len;
-        }
-        _tcsncpy(ret,path,2);
+    if ( short_path[1] == ':' &&
+        ( short_path[2] == '\0' ||
+        ( short_path[2] == '\\' && short_path[3] == '\0' ) ) )
+    {
+        string_push_back( out, toupper( short_path[0] ) );
+        string_push_back( out, ':' );
+        string_push_back( out, '\\' );
+        return;
+    }
+    
+    /* '/' already handled. */
+    if ( ( p = strrchr( short_path, '\\' ) ) )
+    {
+        char saved;
+        new_element = p + 1;
+
+        /* special case \ */
+        if ( p == short_path )
+            ++p;
+        
+        /* special case D:\ */
+        if ( p == short_path + 2  && short_path[1] == ':' )
+            ++p;
+
+        saved = *p;
+        *p = '\0';
+        path_write_key( short_path, out );
+        *p = saved;
+    }
+    else
+    {
+        new_element = short_path;
     }
 
-    /* Expand the path for each subpath, and strip trailing backslashes */
-    for (prev_pos = pos-1;pos<=len;++pos) {
-        if (path[pos]==_T('\\') || (path[pos]==_T('\0') &&
-                                    path[pos-1]!=_T('\\'))) {
-            WIN32_FIND_DATA fd;
-            HANDLE hf=0;
-            TCHAR c=path[pos];
-            char* new_element;
-            path[pos]=_T('\0');
+    if ( out->size && out->value[ out->size - 1 ] != '\\' )
+    {
+        string_push_back( out, '\\' );
+    }
+    
+    saved_size = out->size;
+    string_append( out, new_element );
 
-            /* the path[prev_pos+1]... path[pos] range is the part of
-               path we're handling right now. We need to find long
-               name for that element and add it. */
-            new_element = path + prev_pos + 1;
+    if ( ! ( new_element[0] == '.' && new_element[1] == '\0' ||
+        new_element[0] == '.' && new_element[1] == '.'
+        && new_element[2] == '\0' ) )
+    {
+        WIN32_FIND_DATA fd;
+        HANDLE hf = 0;
+        hf = FindFirstFile( out->value, &fd );
 
-            /* First add separator, but only if there's something in result already. */
-            if (ret[0] != _T('\0'))
-            {
-                _tcscat(ret,_T("\\"));
-            }
-
-            /* If it's ".." element, we need to append it, not
-               the name in parent that FindFirstFile will return.
-               Same goes for "." */
-
-            if (new_element[0] == _T('.') && new_element[1] == _T('\0') ||
-                new_element[0] == _T('.') && new_element[1] == _T('.')
-                && new_element[2] == _T('\0'))
-            {
-                _tcscat(ret, new_element);
-            }
-            else
-            {
-                hf=FindFirstFile(path, &fd);
-                if (hf==INVALID_HANDLE_VALUE)
-                    return 0;
-
-                _tcscat(ret,fd.cFileName);
-                FindClose(hf);
-            }
-
-            path[pos]=c;
-
-            prev_pos = pos;
+        /* If the file exists, replace the name. */
+        if ( hf != INVALID_HANDLE_VALUE )
+        {
+            string_truncate( out, saved_size );
+            string_append( out, fd.cFileName );
+            FindClose( hf );
         }
     }
-
-    len=_tcslen(ret)+1;
-    if (cchBuffer>=len)
-        _tcscpy(lpszLongPath,ret);
-
-    return len;
 }
 
-char* short_path_to_long_path(char* short_path)
+OBJECT * short_path_to_long_path( OBJECT * short_path )
 {
-    char buffer2[_MAX_PATH];
-    int ret = ShortPathToLongPath(short_path, buffer2, _MAX_PATH);
+    return path_as_key( short_path );
+}
 
-    if (ret)
-    return newstr(buffer2);
+struct path_key_entry
+{
+    OBJECT * path;
+    OBJECT * key;
+};
+
+static struct hash * path_key_cache;
+
+static void path_write_key( char * path_, string * out )
+{
+    struct path_key_entry * result;
+    OBJECT * path = object_new( path_ );
+    int found;
+
+    /* This is only called by path_as_key, which initializes the cache. */
+    assert( path_key_cache );
+
+    result = (struct path_key_entry *)hash_insert( path_key_cache, path, &found );
+    if ( !found )
+    {
+        /* path_ is already normalized. */
+        result->path = path;
+        ShortPathToLongPath( path_, out );
+        result->key = object_new( out->value );
+    }
     else
-      return newstr(short_path);
+    {
+        object_free( path );
+        string_append( out, object_str( result->key ) );
+    }
+
+}
+
+static void normalize_path( string * path )
+{
+    char * s;
+    for ( s = path->value; s < path->value + path->size; ++s )
+    {
+        if ( *s == '/' )
+            *s = '\\';
+        else
+            *s = tolower( *s );
+    }
+    /* Strip trailing "/" */
+    if ( path->size != 0 && path->size != 3 && path->value[ path->size - 1 ] == '\\' )
+    {
+        string_pop_back( path );
+    }
+}
+
+void path_add_key( OBJECT * path )
+{
+    struct path_key_entry * result;
+    int found;
+
+    if ( ! path_key_cache )
+        path_key_cache = hashinit( sizeof( struct path_key_entry ), "path to key" );
+
+    result = (struct path_key_entry *)hash_insert( path_key_cache, path, &found );
+    if ( !found )
+    {
+        string buf[1];
+        OBJECT * normalized;
+        struct path_key_entry * nresult;
+        result->path = path;
+        string_copy( buf, object_str( path ) );
+        normalize_path( buf );
+        normalized = object_new( buf->value );
+        string_free( buf );
+        nresult = (struct path_key_entry *)hash_insert( path_key_cache, normalized, &found );
+        if ( !found || nresult == result )
+        {
+            nresult->path = object_copy( normalized );
+            nresult->key = object_copy( path );
+        }
+        object_free( normalized );
+        if ( nresult != result )
+        {
+            result->path = object_copy( path );
+            result->key = object_copy( nresult->key );
+        }
+    }
+}
+
+OBJECT * path_as_key( OBJECT * path )
+{
+    struct path_key_entry * result;
+    int found;
+
+    if ( ! path_key_cache )
+        path_key_cache = hashinit( sizeof( struct path_key_entry ), "path to key" );
+
+    result = (struct path_key_entry *)hash_insert( path_key_cache, path, &found );
+    if ( !found )
+    {
+        string buf[1];
+        OBJECT * normalized;
+        struct path_key_entry * nresult;
+        result->path = path;
+        string_copy( buf, object_str( path ) );
+        normalize_path( buf );
+        normalized = object_new( buf->value );
+        nresult = (struct path_key_entry *)hash_insert( path_key_cache, normalized, &found );
+        if ( !found || nresult == result )
+        {
+            string long_path[1];
+            nresult->path = normalized;
+            string_new( long_path );
+            ShortPathToLongPath( buf->value, long_path );
+            nresult->path = object_copy( normalized );
+            nresult->key = object_new( long_path->value );
+            string_free( long_path );
+        }
+        string_free( buf );
+        object_free( normalized );
+        if ( nresult != result )
+        {
+            result->path = object_copy( path );
+            result->key = object_copy( nresult->key );
+        }
+    }
+
+    return object_copy( result->key );
+}
+
+static void free_path_key_entry( void * xentry, void * data )
+{
+    struct path_key_entry * entry = (struct path_key_entry *)xentry;
+    object_free( entry->path );
+    object_free( entry->key );
+}
+
+void path_done( void )
+{
+    if ( path_key_cache )
+    {
+        hashenumerate( path_key_cache, &free_path_key_entry, (void *)0 );
+        hashdone( path_key_cache );
+    }
+}
+
+#else
+
+void path_add_key( OBJECT * path )
+{
+}
+
+OBJECT * path_as_key( OBJECT * path )
+{
+    return object_copy( path );
+}
+
+void path_done( void )
+{
 }
 
 #endif
@@ -424,7 +551,7 @@ const char * path_tmpdir()
     return path_tmpdir_result;
 }
 
-const char * path_tmpnam(void)
+OBJECT * path_tmpnam(void)
 {
     char name_buffer[64];
     # ifdef OS_NT
@@ -436,18 +563,21 @@ const char * path_tmpnam(void)
     if (0 == c1) c1 = time(0)&0xffff;
     c1 += 1;
     sprintf(name_buffer,"jam%lx%lx.000",c0,c1);
-    return newstr(name_buffer);
+    return object_new(name_buffer);
 }
 
-const char * path_tmpfile(void)
+OBJECT * path_tmpfile(void)
 {
-    const char * result = 0;
+    OBJECT * result = 0;
+    OBJECT * tmpnam;
 
     string file_path;
     string_copy(&file_path,path_tmpdir());
     string_push_back(&file_path,PATH_DELIM);
-    string_append(&file_path,path_tmpnam());
-    result = newstr(file_path.value);
+    tmpnam = path_tmpnam();
+    string_append(&file_path,object_str(tmpnam));
+    object_free(tmpnam);
+    result = object_new(file_path.value);
     string_free(&file_path);
 
     return result;

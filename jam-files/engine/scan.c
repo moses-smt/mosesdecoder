@@ -10,7 +10,8 @@
 #include "scan.h"
 #include "jamgram.h"
 #include "jambase.h"
-#include "newstr.h"
+#include "object.h"
+#include "constants.h"
 
 /*
  * scan.c - the jam yacc scanner
@@ -41,7 +42,7 @@ struct include
     char             * string;     /* pointer into current line */
     char           * * strings;    /* for yyfparse() -- text to parse */
     FILE             * file;       /* for yyfparse() -- file being read */
-    char             * fname;      /* for yyfparse() -- file name */
+    OBJECT           * fname;      /* for yyfparse() -- file name */
     int                line;       /* line counter for error messages */
     char               buf[ 512 ]; /* for yyfparse() -- line buffer */
 };
@@ -67,7 +68,7 @@ void yymode( int n )
 }
 
 
-void yyerror( char * s )
+void yyerror( const char * s )
 {
     /* We use yylval instead of incp to access the error location information as
      * the incp pointer will already be reset to 0 in case the error occurred at
@@ -82,7 +83,7 @@ void yyerror( char * s )
      * TODO: Test the theory about when yylval and incp location information are
      * the same and when they differ.
      */
-    printf( "%s:%d: %s at %s\n", yylval.file, yylval.line, s, symdump( &yylval ) );
+    printf( "%s:%d: %s at %s\n", object_str( yylval.file ), yylval.line, s, symdump( &yylval ) );
     ++anyerrors;
 }
 
@@ -93,7 +94,7 @@ int yyanyerrors()
 }
 
 
-void yyfparse( char * s )
+void yyfparse( OBJECT * s )
 {
     struct include * i = (struct include *)BJAM_MALLOC( sizeof( *i ) );
 
@@ -101,13 +102,13 @@ void yyfparse( char * s )
     i->string = "";
     i->strings = 0;
     i->file = 0;
-    i->fname = copystr( s );
+    i->fname = object_copy( s );
     i->line = 0;
     i->next = incp;
     incp = i;
 
     /* If the filename is "+", it means use the internal jambase. */
-    if ( !strcmp( s, "+" ) )
+    if ( !strcmp( object_str( s ), "+" ) )
         i->strings = jambase;
 }
 
@@ -151,8 +152,8 @@ int yyline()
         if ( !i->file )
         {
             FILE * f = stdin;
-            if ( strcmp( i->fname, "-" ) && !( f = fopen( i->fname, "r" ) ) )
-                perror( i->fname );
+            if ( strcmp( object_str( i->fname ), "-" ) && !( f = fopen( object_str( i->fname ), "r" ) ) )
+                perror( object_str( i->fname ) );
             i->file = f;
         }
 
@@ -174,7 +175,7 @@ int yyline()
     /* Close file, free name. */
     if ( i->file && ( i->file != stdin ) )
         fclose( i->file );
-    freestr( i->fname );
+    object_free( i->fname );
     BJAM_FREE( (char *)i );
 
     return EOF;
@@ -252,7 +253,7 @@ int yylex()
 
         *b = 0;
         yylval.type = STRING;
-        yylval.string = newstr( buf );
+        yylval.string = object_new( buf );
         yylval.file = incp->fname;
         yylval.line = incp->line;
     }
@@ -361,12 +362,12 @@ int yylex()
                 if ( ( *buf == *k->word ) && !strcmp( k->word, buf ) )
                 { 
                     yylval.type = k->type;
-                    yylval.string = k->word;  /* used by symdump */
+                    yylval.keyword = k->word;  /* used by symdump */
                     break;
                 }
 
         if ( yylval.type == ARG )
-            yylval.string = newstr( buf );
+            yylval.string = object_new( buf );
     }
 
     if ( DEBUG_SCAN )
@@ -388,11 +389,11 @@ static char * symdump( YYSTYPE * s )
     static char buf[ BIGGEST_TOKEN + 20 ];
     switch ( s->type )
     {
-        case EOF   : sprintf( buf, "EOF"                          ); break;
-        case 0     : sprintf( buf, "unknown symbol %s", s->string ); break;
-        case ARG   : sprintf( buf, "argument %s"      , s->string ); break;
-        case STRING: sprintf( buf, "string \"%s\""    , s->string ); break;
-        default    : sprintf( buf, "keyword %s"       , s->string ); break;
+        case EOF   : sprintf( buf, "EOF"                       ); break;
+        case 0     : sprintf( buf, "unknown symbol %s", object_str( s->string ) ); break;
+        case ARG   : sprintf( buf, "argument %s"      , object_str( s->string ) ); break;
+        case STRING: sprintf( buf, "string \"%s\""    , object_str( s->string ) ); break;
+        default    : sprintf( buf, "keyword %s"       , s->keyword ); break;
     }
     return buf;
 }
@@ -403,7 +404,7 @@ static char * symdump( YYSTYPE * s )
  * transitions that produce a parse.
  */
 
-void yyinput_stream( char * * name, int * line )
+void yyinput_stream( OBJECT * * name, int * line )
 {
     if ( incp )
     {
@@ -412,7 +413,7 @@ void yyinput_stream( char * * name, int * line )
     }
     else
     {
-        *name = "(builtin)";
+        *name = constant_builtin;
         *line = -1;
     }
 }
