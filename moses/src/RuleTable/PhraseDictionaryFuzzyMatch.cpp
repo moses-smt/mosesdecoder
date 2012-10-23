@@ -266,7 +266,7 @@ namespace Moses
     // sort and prune each target phrase collection
     SortAndPrune(rootNode);
    
-    removedirectoryrecursively(dirName);
+    //removedirectoryrecursively(dirName);
   }
   
   TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeSCFG &rootNode

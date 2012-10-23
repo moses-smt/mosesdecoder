@@ -46,6 +46,7 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.1952961175" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="TRACE_ENABLE"/>
+									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1420621104" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
