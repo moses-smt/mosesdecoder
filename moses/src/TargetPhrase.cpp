@@ -337,39 +337,5 @@ std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
   return os;
 }
 
-namespace {
-// Not a general function.  Assumes str has something sane like a space or newline after it.  
-float ParseOrThrow(StringPiece str) {
-  char *end;
-  float ret = strtod(str.data(), &end);
-  UTIL_THROW_IF(end == str.data(), util::Exception, "Could not parse " << str << " into a float.");
-  return ret;
-}
-} // namespace
-
-void TargetPhrase::SetRuleCount(const StringPiece &ruleCountString, float p_f_given_e) {
-  StringPiece tokens[3];
-  size_t token_count = 0;
-  for (util::TokenIter<util::AnyCharacter,true> tokenize(ruleCountString, " \t"); tokenize && token_count < 3; ++tokenize, ++token_count) {
-    tokens[token_count] = *tokenize;
-  }
-  
-  if (token_count == 2) {
-    // TODO: if no third column is provided, do we have to take smoothing into account (consolidate.cpp)? 
-    // infer rule counts from target counts
-    float targetCount = ParseOrThrow(tokens[0]);
-    float ruleCount = p_f_given_e * targetCount;
-    //float ruleCount2 = p_e_given_f * sourceCount; // could use this to double-check the counts
-    m_ruleCount = floor(ruleCount + 0.5);
-  }
-  else if (token_count == 3) {
-    m_ruleCount = ParseOrThrow(tokens[2]);
-  } else if (token_count == 1) {
-    //glue rule
-    m_ruleCount = ParseOrThrow(tokens[0]);
-  }
-
-}
-
 }
 
