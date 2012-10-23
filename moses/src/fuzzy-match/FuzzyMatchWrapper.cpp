@@ -27,7 +27,7 @@ namespace tmmt
   ,length_filter_flag(true)
   ,parse_flag(true)
   ,min_match(70)
-  ,multiple_flag(false)
+  ,multiple_flag(true)
   ,multiple_slack(0)
   ,multiple_max(100)
   {
