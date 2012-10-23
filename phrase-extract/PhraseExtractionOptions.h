@@ -33,6 +33,7 @@ class PhraseExtractionOptions {
   
  public: 
      const int maxPhraseLength;
+    bool outputContext;
  private:
   bool allModelsOutputFlag;
   bool wordModel;

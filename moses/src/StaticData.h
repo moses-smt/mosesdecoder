@@ -74,6 +74,7 @@ class TargetNgramFeature;
 class SyntacticLanguageModel;
 #endif
 class TranslationSystem;
+class ContextSimilarityScoreProducer;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -166,6 +167,7 @@ protected:
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
   MetaFeatureProducer *m_metaFeatureProducer;
   BleuScoreFeature* m_bleuScoreFeature;
+  ContextSimilarityScoreProducer *m_contextSimilarityScoreProducer;
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
@@ -277,6 +279,7 @@ protected:
   bool LoadTargetWordInsertionFeature();
   bool LoadSourceWordDeletionFeature();
   bool LoadWordTranslationFeature();
+  void LoadContextSimilarityScoreProducer();
 
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;

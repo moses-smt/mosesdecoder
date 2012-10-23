@@ -52,6 +52,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "BleuScoreFeature.h"
 #include "ScoreComponentCollection.h"
+#include "ContextSimilarityScoreProducer.h"
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -102,6 +103,7 @@ StaticData::StaticData()
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
+  ,m_contextSimilarityScoreProducer(false)
 
 {
   m_maxFactorIdx[0] = 0;  // source side
@@ -566,6 +568,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadTargetWordInsertionFeature()) return false;
   if (!LoadSourceWordDeletionFeature()) return false;
   if (!LoadWordTranslationFeature()) return false;
+  LoadContextSimilarityScoreProducer();
 
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
@@ -725,6 +728,9 @@ bool StaticData::LoadData(Parameter *parameter)
       for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
     	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
     }
+    if (m_contextSimilarityScoreProducer) {
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_contextSimilarityScoreProducer);
+    }
   }
 
   //Load extra feature weights
@@ -852,6 +858,7 @@ StaticData::~StaticData()
   // small score producers
   delete m_unknownWordPenaltyProducer;
   delete m_targetBigramFeature;
+  delete m_contextSimilarityScoreProducer;
   for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
   	delete m_targetNgramFeatures[i];
   delete m_phraseBoundaryFeature;
@@ -1470,6 +1477,16 @@ void StaticData::LoadPhraseBasedParameters()
     m_distortionScoreProducers.push_back(new DistortionScoreProducer());
     SetWeight(m_distortionScoreProducers.back(), weightDistortion);
   }
+}
+
+void StaticData::LoadContextSimilarityScoreProducer()
+{
+  const vector<string> weights = m_parameter->GetParam("weight-csim");
+  if (weights.size() == 1) {
+    float weight = Scan<float>(weights[0]);
+    m_contextSimilarityScoreProducer = new ContextSimilarityScoreProducer();
+    SetWeight(m_contextSimilarityScoreProducer, weight);
+  }  
 }
 
 bool StaticData::LoadDecodeGraphs()

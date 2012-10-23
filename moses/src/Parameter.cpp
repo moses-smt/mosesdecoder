@@ -184,6 +184,7 @@ Parameter::Parameter()
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("text-type", "should be one of dev/devtest/test, used for domain adaptation features");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
+  AddParam("weight-csim", "csim", "Weight of context-similarity feature.");
   
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          

@@ -33,6 +33,7 @@ namespace MosesTraining {
 
 
 const long int LINE_MAX_LENGTH = 500000 ;
+const int CONTEXT_SIZE = 3;
 
 
 // HPhraseVertex represents a point in the alignment matrix
@@ -82,18 +83,20 @@ namespace MosesTraining{
 class ExtractTask 
 {
 public:
-  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation):
+  ExtractTask(size_t id, SentenceAlignment &sentence,PhraseExtractionOptions &initoptions, Moses::OutputFileStream &extractFile, Moses::OutputFileStream &extractFileInv,Moses::OutputFileStream &extractFileOrientation,Moses::OutputFileStream &extractFileContext):
     m_sentence(sentence),
     m_options(initoptions),
     m_extractFile(extractFile),
     m_extractFileInv(extractFileInv),
-    m_extractFileOrientation(extractFileOrientation){}
+    m_extractFileOrientation(extractFileOrientation),
+    m_extractFileContext(extractFileContext){}
 void Run();
 private:
   vector< string > m_extractedPhrases;
   vector< string > m_extractedPhrasesInv;
   vector< string > m_extractedPhrasesOri;
   vector< string > m_extractedPhrasesSid;
+  vector< string > m_extractedContexts;
   void extractBase(SentenceAlignment &);
   void extract(SentenceAlignment &);
   void addPhrase(SentenceAlignment &, int, int, int, int, string &);
@@ -104,6 +107,7 @@ private:
   Moses::OutputFileStream &m_extractFile;
   Moses::OutputFileStream &m_extractFileInv;
   Moses::OutputFileStream &m_extractFileOrientation;
+  Moses::OutputFileStream &m_extractFileContext;
 };
 }
 
@@ -121,6 +125,7 @@ int main(int argc, char* argv[])
   Moses::OutputFileStream extractFile;
   Moses::OutputFileStream extractFileInv;
   Moses::OutputFileStream extractFileOrientation;
+  Moses::OutputFileStream extractFileContext;
   const char* const &fileNameE = argv[1];
   const char* const &fileNameF = argv[2];
   const char* const &fileNameA = argv[3];
@@ -144,6 +149,8 @@ int main(int argc, char* argv[])
       sentenceOffset = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       options.initGzOutput(true);  
+    } else if (strcmp(argv[i], "--PhraseContext") == 0) {
+      options.outputContext = true;
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -230,6 +237,10 @@ int main(int argc, char* argv[])
     string fileNameExtractOrientation = fileNameExtract + ".o" + (options.isGzOutput()?".gz":"");
     extractFileOrientation.Open(fileNameExtractOrientation.c_str());
   }
+  if (options.outputContext) {
+    string contextFileName = fileNameExtract + ".context" + (options.isGzOutput() ? ".gz" : "");
+    extractFileContext.Open(contextFileName);
+  }
 
   int i = sentenceOffset;
   while(true) {
@@ -252,7 +263,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
-   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation);
+   	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation, extractFileContext);
       task->Run();
       delete task;
 
@@ -274,6 +285,7 @@ int main(int argc, char* argv[])
     if (options.isOrientationFlag()){ 
 	extractFileOrientation.Close();
 	}
+    if (options.outputContext) extractFileContext.Close();
   }
 }
 
@@ -644,6 +656,23 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
   return "";
 }
 
+static string ExtractContextLine(const vector<string> &words, int phraseStart, int phraseEnd)
+{
+  ostringstream out;
+  for (int i = phraseStart - CONTEXT_SIZE; i < phraseStart; i++) {
+    out << ((i < 0) ? "<s>" : words[i]) << " ";
+  }
+  out << "\t";
+  for (int i = phraseStart; i <= phraseEnd; i++) {
+    out << words[i] << " ";
+  }
+  out << "\t";
+  for (int i = phraseEnd + 1; i <= phraseEnd + CONTEXT_SIZE; i++) {
+    out << ((i >= words.size()) ? "</s>" : words[i]) << " ";
+  }
+  return out.str();
+}
+
 void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, int startF, int endF , string &orientationInfo)
 {
   // source
@@ -651,6 +680,7 @@ void ExtractTask::addPhrase( SentenceAlignment &sentence, int startE, int endE, 
   	ostringstream outextractstr;
   	ostringstream outextractstrInv;
   	ostringstream outextractstrOrientation;
+    ostringstream outextractstrContext;
 
   if (m_options.isOnlyOutputSpanInfo()) {
     cout << startF << " " << endF << " " << startE << " " << endE << endl;
@@ -673,6 +703,14 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isTranslationFlag()) outextractstr << "|||";
   if (m_options.isTranslationFlag()) outextractstrInv << "||| ";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
+
+  if (m_options.outputContext) {
+    // format: sourceLeft<tab>sourcePhrase<tab>sourceRight<tab>targetLeft<tab>targetPhrase<tab>targetRight<endl>
+    outextractstrContext << ExtractContextLine(sentence.source, startF, endF);
+    outextractstrContext << "\t";
+    outextractstrContext << ExtractContextLine(sentence.target, startE, endE);
+    outextractstrContext << "\n";
+  }
 
   // source (for inverse)
 
@@ -707,6 +745,7 @@ for(int fi=startF; fi<=endF; fi++) {
     m_extractedPhrases.push_back(outextractstr.str());
     m_extractedPhrasesInv.push_back(outextractstrInv.str());
     m_extractedPhrasesOri.push_back(outextractstrOrientation.str());
+    m_extractedContexts.push_back(outextractstrContext.str());
 }
 
 
@@ -715,6 +754,7 @@ void ExtractTask::writePhrasesToFile(){
     ostringstream outextractFile;
     ostringstream outextractFileInv;
     ostringstream outextractFileOrientation;
+    ostringstream outextractFileContext;
 
     for(vector<string>::const_iterator phrase=m_extractedPhrases.begin();phrase!=m_extractedPhrases.end();phrase++){
         outextractFile<<phrase->data();
@@ -725,10 +765,15 @@ void ExtractTask::writePhrasesToFile(){
     for(vector<string>::const_iterator phrase=m_extractedPhrasesOri.begin();phrase!=m_extractedPhrasesOri.end();phrase++){
         outextractFileOrientation<<phrase->data();
     }
+    for(vector<string>::const_iterator phrase=m_extractedContexts.begin();phrase!=m_extractedContexts.end();phrase++){
+        outextractFileContext<<phrase->data();
+    }
+
 
       m_extractFile << outextractFile.str();
       m_extractFileInv  << outextractFileInv.str();
       m_extractFileOrientation << outextractFileOrientation.str();
+      m_extractFileContext << outextractFileContext.str();
 }
 
 // if proper conditioning, we need the number of times a source phrase occured

@@ -155,8 +155,13 @@ void Phrase::PrependWord(const Word &newWord)
 void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
+  vector<string> sections = Tokenize(phraseString.as_string(), "\t");
+  if (sections.size() > 1) {
+    vector<string> words = Tokenize(sections[1], " ");
+    copy(words.begin(), words.end(), std::inserter(m_context, m_context.end()));
+  }
 
-  for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
+  for (util::TokenIter<util::AnyCharacter, true> word_it(sections[0], util::AnyCharacter(" \t")); word_it; ++word_it) {
     Word &word = AddWord();
     size_t index = 0;
     for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
