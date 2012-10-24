@@ -9,7 +9,7 @@
 using namespace std;
 using namespace Moses;
 
-void createXML();
+void createXML(const string &source, const string &input, const string &target, const string &align, const string &path );
 
 int main(int argc, char **argv)
 {
@@ -23,10 +23,9 @@ int main(int argc, char **argv)
 
   int setenceId;
   float score;
-  string source;
+  string source, target, alignment, path;
   string *input = NULL;
-  vector<string> targets, alignments, paths;
-  vector<int> counts;
+  int count;
 
   string inLine;
   
@@ -59,25 +58,25 @@ int main(int argc, char **argv)
       ++step;
       break;
     case 4:
-      targets.push_back(inLine);
+      target = inLine;
       ++step;
       break;
     case 5:
-      alignments.push_back(inLine);
+      alignment = inLine;
       ++step;
       break;
     case 6:
-      paths.push_back(inLine);
+      path = inLine;
       ++step;
       break;
     case 7:
-      counts.push_back(Scan<int>(inLine));
+      count = Scan<int>(inLine);
       ++step;
       break;
 
     }
 
-    createXML();
+    createXML(source, *input, target, alignment, path);
   }
 
   delete input;
@@ -87,7 +86,7 @@ int main(int argc, char **argv)
 
 }
 
-void createXML()
+void createXML(const string &source, const string &input, const string &targets, const string &aligns, const string &path)
 {
 
 }
