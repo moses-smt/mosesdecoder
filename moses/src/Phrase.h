@@ -70,7 +70,9 @@ public:
   	* \param phraseString formatted input string to parse
   	*	\param factorDelimiter delimiter between factors.  
   */
-  void CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter);
+  void CreateFromString(const std::vector<FactorType> &factorOrder
+  											, const StringPiece &phraseString
+  											, const StringPiece &factorDelimiter);
 
   void CreateFromStringNewFormat(FactorDirection direction
                                  , const std::vector<FactorType> &factorOrder

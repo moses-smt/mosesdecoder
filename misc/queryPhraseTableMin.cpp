@@ -8,6 +8,7 @@
 
 #include "CompactPT/PhraseDictionaryCompact.h"
 #include "Util.h"
+#include "Phrase.h"
 
 void usage();
 
@@ -56,17 +57,17 @@ int main(int argc, char **argv)
   const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
   const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
   
-  const_cast<StaticData&>(StaticData::Instance()).LoadData(parameter);
+  StaticData::InstanceNonConst().LoadData(parameter);
 
-  
-  PhraseDictionaryFeature pdf(Compact, nscores, nscores, input, output, ttable, weight, 0, "", "");
+  SparsePhraseDictionaryFeature *spdf = NULL;
+  PhraseDictionaryFeature pdf(Compact, spdf, nscores, nscores, input, output, ttable, weight, 0, 0, "", "");
   PhraseDictionaryCompact pdc(nscores, Compact, &pdf, false, useAlignments);
   bool ret = pdc.Load(input, output, ttable, weight, 0, lmList, 0);                                                                           
   assert(ret);
   
   std::string line;
   while(getline(std::cin, line)) {
-    Phrase sourcePhrase(0);
+    Phrase sourcePhrase;
     sourcePhrase.CreateFromString(input, line, "||dummy_string||");
     
     TargetPhraseVectorPtr decodedPhraseColl
