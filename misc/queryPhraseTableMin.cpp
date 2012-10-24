@@ -85,9 +85,9 @@ int main(int argc, char **argv)
           if(useAlignments)
             std::cout << " " << tp.GetAlignTerm() << "|||"; 
           
-          size_t offset = tp.GetScoreBreakdown().size() - nscores;
-          for(size_t i = offset; i < tp.GetScoreBreakdown().size(); i++)
-            std::cout << " " << exp(tp.GetScoreBreakdown()[i]);
+          std::vector<float> scores = tp.GetScoreBreakdown().GetScoresForProducer(&pdf);
+          for(size_t i = 0; i < scores.size(); i++)
+            std::cout << " " << exp(scores[i]);
           std::cout << std::endl;
         }
     }
