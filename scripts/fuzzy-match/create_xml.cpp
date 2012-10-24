@@ -238,8 +238,51 @@ void createXML(const string &source, const string &input, const string &target, 
 		// hierarchical rule
 		string rule_s     = "";
 		int rule_pos_s = 0;
-		//my %RULE_ALIGNMENT_S;
+		map<int, int> ruleAlignS;
 
+		for (size_t i = 0 ; i < inputBitmap.size() ; ++i ) {
+	    if ( inputBitmap[i] ) {
+	      rule_s += inputToks[i] + " ";
+	      ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
+	    }
+
+	    for (size_t j = 0; j < nonTerms.size(); ++j) {
+	    	const pair<int, int> &nt = nonTerms[j];
+	    	if (i == nt.second) {
+	    		rule_s += "[X][X]";
+	    		//$$NT{"rule_pos_s"} = $rule_pos_s++; TODO
+	    	}
+	    }
+		}
+
+	  string rule_t     = "";
+	  int rule_pos_t = 0;
+	  map<int, int> ruleAlignT;
+
+	  for (size_t t = -1 ; t < targetBitmap.size(); t++ ) {
+	  	if (t >= 0 && targetBitmap[t]) {
+	      rule_t += targetsToks[t] + " ";
+	      ruleAlignT[t] = rule_pos_t++;
+	  	}
+
+	  	for (size_t i = 0; i < nonTerms.size(); ++i) {
+	  		pair<int, int> nt = nonTerms[i];
+
+	  		if (t == nt.first) {
+	  			rule_t += "[X][X] ";
+	  			//$$NT{"rule_pos_t"} = $rule_pos_t++; TODO
+	  		}
+	  	}
+	  }
+
+	  my $rule_alignment = "";
+	  foreach my $s ( sort { $a <=> $b } keys %RULE_ALIGNMENT_S ) {
+	    foreach my $t ( keys %{ $ALIGN{"s"}[$s] } ) {
+	      next unless defined( $RULE_ALIGNMENT_T{$t} );
+	      $rule_alignment .=
+	        $RULE_ALIGNMENT_S{$s} . "-" . $RULE_ALIGNMENT_T{$t} . " ";
+	    }
+	  }
 
   } // for ( size_t p = 0
 }
