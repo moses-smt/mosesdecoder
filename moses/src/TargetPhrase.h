@@ -55,7 +55,6 @@ protected:
 	Phrase m_sourcePhrase; 
 	const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
 	Word m_lhsTarget;
-	size_t m_ruleCount;
 
 public:
   TargetPhrase();
@@ -134,6 +133,10 @@ public:
 	{
 		m_sourcePhrase=p;
 	}
+  // ... but if we must store a copy, at least initialize it in-place
+  Phrase &MutableSourcePhrase() {
+    return m_sourcePhrase;
+  }
 	const Phrase& GetSourcePhrase() const 
 	{
 		return m_sourcePhrase;
@@ -164,12 +167,8 @@ public:
   const AlignmentInfo &GetAlignNonTerm() const
 	{ return *m_alignNonTerm; }
 	
-	void SetRuleCount(const StringPiece &ruleCountString, float p_f_given_e);
-	size_t GetRuleCount() const { return m_ruleCount; }
 
   TO_STRING();
-	
-
 };
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
