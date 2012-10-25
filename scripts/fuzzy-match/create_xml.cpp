@@ -221,98 +221,105 @@ void createXML(const string &source, const string &input, const string &target, 
 	    	inputBitmap.push_back(0);
 	    }
 		} // else if ( !currently_matching
-
-		cerr << target << endl;
-		for (size_t i = 0; i < targetBitmap.size(); ++i)
-			cerr << targetBitmap[i];
-		cerr << endl;
-
-		for (map<int, string>::const_iterator iter = frameInput.begin(); iter != frameInput.end(); ++iter) {
-			cerr << iter->first << ":" <<iter->second << endl;
-		}
-
-		// STEP 2: BUILD RULE AND FRAME
-
-		// hierarchical rule
-		string rule_s     = "";
-		int rule_pos_s = 0;
-		map<int, int> ruleAlignS;
-
-		for (size_t i = 0 ; i < inputBitmap.size() ; ++i ) {
-	    if ( inputBitmap[i] ) {
-	      rule_s += inputToks[i] + " ";
-	      ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
-	    }
-
-	    for (size_t j = 0; j < nonTerms.size(); ++j) {
-	    	map<string, int> &nt = nonTerms[j];
-	    	if (i == nt["start_i"]) {
-	    		rule_s += "[X][X]";
-	    		nt["rule_pos_s"] = rule_pos_s++;
-	    	}
-	    }
-		}
-
-	  string rule_t     = "";
-	  int rule_pos_t = 0;
-	  map<int, int> ruleAlignT;
-
-	  for (size_t t = -1 ; t < targetBitmap.size(); t++ ) {
-	  	if (t >= 0 && targetBitmap[t]) {
-	      rule_t += targetsToks[t] + " ";
-	      ruleAlignT[t] = rule_pos_t++;
-	  	}
-
-	  	for (size_t i = 0; i < nonTerms.size(); ++i) {
-	  		map<string, int> &nt = nonTerms[i];
-
-	  		if (t == nt["start_t"]) {
-	  			rule_t += "[X][X] ";
-	  			nt["rule_pos_t"] = rule_pos_t++;
-	  		}
-	  	}
-	  }
-
-	  string ruleAlignment;
-
-	  for (map<int, int>::const_iterator iter = ruleAlignT.begin(); iter != ruleAlignT.end(); ++iter) {
-	  	int s = iter->first;
-	  	std::map<int, int> &targets = alignments.m_alignS2T[s];
-
-	  	std::map<int, int>::const_iterator iter;
-	  	for (iter = targets.begin(); iter != targets.end(); ++iter) {
-	  		int t =iter->first;
-	  		if (ruleAlignT.find(s) == ruleAlignT.end())
-	  			continue;
-	  		ruleAlignment += ruleAlignS[s] + "-" + SPrint(ruleAlignT[t]) + " ";
-	  	}
-	  }
-
-	  for (size_t i = 0; i < nonTerms.size(); ++i) {
-	  	map<string, int> &nt = nonTerms[i];
-	  	ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
-	  }
-
-	  /* TODO
-	  rule_s = Trim(rule_s);
-	  rule_t = Trim(rule_t);
-	  ruleAlignment = Trim(ruleAlignment);
-		*/
-
-	  string rule_alignment_inv;
-    vector<string> ruleAlignmentToks = Tokenize(ruleAlignment, "-");
-    for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
-    	const string &alignPoint = ruleAlignmentToks[i];
-    	vector<string> toks = Tokenize(alignPoint);
-    	assert(toks.size() == 2);
-    	rule_alignment_inv += toks[1] + "-" +toks[0];
-    }
-    //rule_alignment_inv = Trim(rule_alignment_inv); TODO
-
-
-
-
   } // for ( size_t p = 0
+
+	cerr << target << endl;
+	for (size_t i = 0; i < targetBitmap.size(); ++i)
+		cerr << targetBitmap[i];
+	cerr << endl;
+
+	for (map<int, string>::const_iterator iter = frameInput.begin(); iter != frameInput.end(); ++iter) {
+		cerr << iter->first << ":" <<iter->second << endl;
+	}
+
+	// STEP 2: BUILD RULE AND FRAME
+
+	// hierarchical rule
+	string rule_s     = "";
+	int rule_pos_s = 0;
+	map<int, int> ruleAlignS;
+
+	for (size_t i = 0 ; i < inputBitmap.size() ; ++i ) {
+		if ( inputBitmap[i] ) {
+			rule_s += inputToks[i] + " ";
+			ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
+		}
+
+		for (size_t j = 0; j < nonTerms.size(); ++j) {
+			map<string, int> &nt = nonTerms[j];
+			if (i == nt["start_i"]) {
+				rule_s += "[X][X]";
+				nt["rule_pos_s"] = rule_pos_s++;
+			}
+		}
+	}
+
+	string rule_t     = "";
+	int rule_pos_t = 0;
+	map<int, int> ruleAlignT;
+
+	for (size_t t = -1 ; t < targetBitmap.size(); t++ ) {
+		if (t >= 0 && targetBitmap[t]) {
+			rule_t += targetsToks[t] + " ";
+			ruleAlignT[t] = rule_pos_t++;
+		}
+
+		for (size_t i = 0; i < nonTerms.size(); ++i) {
+			map<string, int> &nt = nonTerms[i];
+
+			if (t == nt["start_t"]) {
+				rule_t += "[X][X] ";
+				nt["rule_pos_t"] = rule_pos_t++;
+			}
+		}
+	}
+
+	string ruleAlignment;
+
+	for (map<int, int>::const_iterator iter = ruleAlignT.begin(); iter != ruleAlignT.end(); ++iter) {
+		int s = iter->first;
+		std::map<int, int> &targets = alignments.m_alignS2T[s];
+
+		std::map<int, int>::const_iterator iter;
+		for (iter = targets.begin(); iter != targets.end(); ++iter) {
+			int t =iter->first;
+			if (ruleAlignT.find(s) == ruleAlignT.end())
+				continue;
+			ruleAlignment += ruleAlignS[s] + "-" + SPrint(ruleAlignT[t]) + " ";
+		}
+	}
+
+	for (size_t i = 0; i < nonTerms.size(); ++i) {
+		map<string, int> &nt = nonTerms[i];
+		ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
+	}
+
+	/* TODO
+	rule_s = Trim(rule_s);
+	rule_t = Trim(rule_t);
+	ruleAlignment = Trim(ruleAlignment);
+	*/
+
+	string rule_alignment_inv;
+	vector<string> ruleAlignmentToks = Tokenize(ruleAlignment, "-");
+	for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
+		const string &alignPoint = ruleAlignmentToks[i];
+		vector<string> toks = Tokenize(alignPoint);
+		assert(toks.size() == 2);
+		rule_alignment_inv += toks[1] + "-" +toks[0];
+	}
+	//rule_alignment_inv = Trim(rule_alignment_inv); TODO
+
+	// frame
+	string frame;
+	if (frameInput.find(-1) == frameInput.end())
+		frame = frameInput[-1];
+
+	int currently_included = 0;
+	int start_t            = -1;
+	targetBitmap.push_back(0);
+
+
 }
 
 
