@@ -295,9 +295,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_useTransOptCache = false;
   }
 
-  std::cerr << "transOptCache: " << m_useTransOptCache << std::endl;
-  std::cerr << "transOptCache max size: " << m_transOptCacheMaxSize << std::endl;
-
   //input factors
   const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
   for(size_t i=0; i<inputFactorVector.size(); i++) {
@@ -358,7 +355,7 @@ bool StaticData::LoadData(Parameter *parameter)
   // settings for pruning
   m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
                        ? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
-  std::cerr << "max stack size: " << m_maxHypoStackSize << std::endl;
+
   m_minHypoStackDiversity = 0;
   if (m_parameter->GetParam("stack-diversity").size() > 0) {
     if (m_maxDistortion > 15) {
