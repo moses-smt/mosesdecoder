@@ -98,7 +98,7 @@ void createXML(const string &source, const string &input, const string &target, 
   Alignments alignments(align, sourceToks.size(), targetsToks.size());
   map<int, string> frameInput;
   map<int, int> alignI2S;
-  vector< pair<int, int> > nonTerms;
+  vector< map<string, int> > nonTerms;
   vector<bool> targetBitmap(targetsToks.size(), true);
   vector<bool> inputBitmap;
 
@@ -108,20 +108,17 @@ void createXML(const string &source, const string &input, const string &target, 
   int start_s = 0, start_i = 0;
 
   cerr << input << endl << source << endl << target << endl << path << endl;
-  for ( size_t p = 0 ; p < path.length() ; p++ )
-  {
+  for ( size_t p = 0 ; p < path.length() ; p++ ) {
     string action = path.substr(p, 1);
 
 		// beginning of a mismatch
-		if ( currently_matching && action != "M" && action != "X" )
-		{
+		if ( currently_matching && action != "M" && action != "X" ) {
 			start_i            = i;
 			start_s            = s;
 			currently_matching = 0;
 		} // if ( currently_matching
 		// end of a mismatch
-		else if ( !currently_matching && ( action == "M" || action == "X" ) )
-		{
+		else if ( !currently_matching && ( action == "M" || action == "X" ) ) {
 
 			// remove use of affected target words
 			for ( int ss = start_s ; ss < s ; ss++ ) {
@@ -183,7 +180,9 @@ void createXML(const string &source, const string &input, const string &target, 
 					} // if ( start_t == 1000 ) {
 
 					frameInput[start_t] += insertion;
-					pair<int, int> nt(start_t, start_i);
+					map<string, int> nt;
+					nt["start_t"] = start_t;
+					nt["start_i"] = start_i;
 					nonTerms.push_back(nt);
 				}
 
@@ -228,8 +227,7 @@ void createXML(const string &source, const string &input, const string &target, 
 			cerr << targetBitmap[i];
 		cerr << endl;
 
-		map<int, string>::const_iterator iter;
-		for (iter = frameInput.begin(); iter != frameInput.end(); ++iter) {
+		for (map<int, string>::const_iterator iter = frameInput.begin(); iter != frameInput.end(); ++iter) {
 			cerr << iter->first << ":" <<iter->second << endl;
 		}
 
@@ -247,10 +245,10 @@ void createXML(const string &source, const string &input, const string &target, 
 	    }
 
 	    for (size_t j = 0; j < nonTerms.size(); ++j) {
-	    	const pair<int, int> &nt = nonTerms[j];
-	    	if (i == nt.second) {
+	    	map<string, int> &nt = nonTerms[j];
+	    	if (i == nt["start_i"]) {
 	    		rule_s += "[X][X]";
-	    		//$$NT{"rule_pos_s"} = $rule_pos_s++; TODO
+	    		nt["rule_pos_s"] = rule_pos_s++;
 	    	}
 	    }
 		}
@@ -266,23 +264,53 @@ void createXML(const string &source, const string &input, const string &target, 
 	  	}
 
 	  	for (size_t i = 0; i < nonTerms.size(); ++i) {
-	  		pair<int, int> nt = nonTerms[i];
+	  		map<string, int> &nt = nonTerms[i];
 
-	  		if (t == nt.first) {
+	  		if (t == nt["start_t"]) {
 	  			rule_t += "[X][X] ";
-	  			//$$NT{"rule_pos_t"} = $rule_pos_t++; TODO
+	  			nt["rule_pos_t"] = rule_pos_t++;
 	  		}
 	  	}
 	  }
 
-	  my $rule_alignment = "";
-	  foreach my $s ( sort { $a <=> $b } keys %RULE_ALIGNMENT_S ) {
-	    foreach my $t ( keys %{ $ALIGN{"s"}[$s] } ) {
-	      next unless defined( $RULE_ALIGNMENT_T{$t} );
-	      $rule_alignment .=
-	        $RULE_ALIGNMENT_S{$s} . "-" . $RULE_ALIGNMENT_T{$t} . " ";
-	    }
+	  string ruleAlignment;
+
+	  for (map<int, int>::const_iterator iter = ruleAlignT.begin(); iter != ruleAlignT.end(); ++iter) {
+	  	int s = iter->first;
+	  	std::map<int, int> &targets = alignments.m_alignS2T[s];
+
+	  	std::map<int, int>::const_iterator iter;
+	  	for (iter = targets.begin(); iter != targets.end(); ++iter) {
+	  		int t =iter->first;
+	  		if (ruleAlignT.find(s) == ruleAlignT.end())
+	  			continue;
+	  		ruleAlignment += ruleAlignS[s] + "-" + SPrint(ruleAlignT[t]) + " ";
+	  	}
 	  }
+
+	  for (size_t i = 0; i < nonTerms.size(); ++i) {
+	  	map<string, int> &nt = nonTerms[i];
+	  	ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
+	  }
+
+	  /* TODO
+	  rule_s = Trim(rule_s);
+	  rule_t = Trim(rule_t);
+	  ruleAlignment = Trim(ruleAlignment);
+		*/
+
+	  string rule_alignment_inv;
+    vector<string> ruleAlignmentToks = Tokenize(ruleAlignment, "-");
+    for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
+    	const string &alignPoint = ruleAlignmentToks[i];
+    	vector<string> toks = Tokenize(alignPoint);
+    	assert(toks.size() == 2);
+    	rule_alignment_inv += toks[1] + "-" +toks[0];
+    }
+    //rule_alignment_inv = Trim(rule_alignment_inv); TODO
+
+
+
 
   } // for ( size_t p = 0
 }
