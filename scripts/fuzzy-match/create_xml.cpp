@@ -78,7 +78,15 @@ int main(int argc, char **argv)
       break;
     case 7:
       count = Scan<int>(inLine);
-      createXML(source, *input, target, align, path);
+      CreateXMLRetValues ret = createXML(source, *input, target, align, path);
+
+			//print STDOUT $frame."\n";
+      rule << ret.ruleS << " [X] ||| " << ret.ruleT << " [X] ||| " << ret.ruleAlignment
+      		<< " ||| " << count << endl;
+      ruleInv << ret.ruleT << " [X] ||| " << ret.ruleS << " [X] ||| " << ret.ruleAlignmentInv
+      		<< " ||| " << count << endl;
+
+			//print STDOUT "$sentenceInd ||| $score ||| $count\n";
 
       step = 0;
       break;
