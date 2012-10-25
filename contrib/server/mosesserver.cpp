@@ -2,9 +2,6 @@
 #include <stdexcept>
 #include <iostream>
 
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/registry.hpp>
-#include <xmlrpc-c/server_abyss.hpp>
 
 #include "ChartManager.h"
 #include "Hypothesis.h"
@@ -15,6 +12,10 @@
 #include "TreeInput.h"
 #include "LMList.h"
 #include "LM/ORLM.h"
+
+#include <xmlrpc-c/base.hpp>
+#include <xmlrpc-c/registry.hpp>
+#include <xmlrpc-c/server_abyss.hpp>
 
 using namespace Moses;
 using namespace std;
