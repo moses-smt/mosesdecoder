@@ -10,7 +10,13 @@
 using namespace std;
 using namespace Moses;
 
-void createXML(const string &source, const string &input, const string &target, const string &align, const string &path );
+class CreateXMLRetValues
+{
+public:
+	string frame, ruleS, ruleT, ruleAlignment, ruleAlignmentInv;
+};
+
+CreateXMLRetValues createXML(const string &source, const string &input, const string &target, const string &align, const string &path );
 
 int main(int argc, char **argv)
 {
@@ -90,8 +96,9 @@ int main(int argc, char **argv)
 }
 
 
-void createXML(const string &source, const string &input, const string &target, const string &align, const string &path)
+CreateXMLRetValues createXML(const string &source, const string &input, const string &target, const string &align, const string &path)
 {
+	CreateXMLRetValues ret;
   vector<string> sourceToks   = Tokenize(source, " ")
                 ,inputToks    = Tokenize(input, " ")
                 ,targetsToks  = Tokenize(target, " ");
@@ -235,32 +242,30 @@ void createXML(const string &source, const string &input, const string &target, 
 	// STEP 2: BUILD RULE AND FRAME
 
 	// hierarchical rule
-	string rule_s     = "";
 	int rule_pos_s = 0;
 	map<int, int> ruleAlignS;
 
 	for (size_t i = 0 ; i < inputBitmap.size() ; ++i ) {
 		if ( inputBitmap[i] ) {
-			rule_s += inputToks[i] + " ";
+			ret.ruleS += inputToks[i] + " ";
 			ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
 		}
 
 		for (size_t j = 0; j < nonTerms.size(); ++j) {
 			map<string, int> &nt = nonTerms[j];
 			if (i == nt["start_i"]) {
-				rule_s += "[X][X]";
+				ret.ruleS += "[X][X]";
 				nt["rule_pos_s"] = rule_pos_s++;
 			}
 		}
 	}
 
-	string rule_t     = "";
 	int rule_pos_t = 0;
 	map<int, int> ruleAlignT;
 
 	for (size_t t = -1 ; t < targetBitmap.size(); t++ ) {
 		if (t >= 0 && targetBitmap[t]) {
-			rule_t += targetsToks[t] + " ";
+			ret.ruleT += targetsToks[t] + " ";
 			ruleAlignT[t] = rule_pos_t++;
 		}
 
@@ -268,13 +273,13 @@ void createXML(const string &source, const string &input, const string &target, 
 			map<string, int> &nt = nonTerms[i];
 
 			if (t == nt["start_t"]) {
-				rule_t += "[X][X] ";
+				ret.ruleT += "[X][X] ";
 				nt["rule_pos_t"] = rule_pos_t++;
 			}
 		}
 	}
 
-	string ruleAlignment;
+	ret.ruleAlignment;
 
 	for (map<int, int>::const_iterator iter = ruleAlignT.begin(); iter != ruleAlignT.end(); ++iter) {
 		int s = iter->first;
@@ -285,40 +290,72 @@ void createXML(const string &source, const string &input, const string &target, 
 			int t =iter->first;
 			if (ruleAlignT.find(s) == ruleAlignT.end())
 				continue;
-			ruleAlignment += ruleAlignS[s] + "-" + SPrint(ruleAlignT[t]) + " ";
+			ret.ruleAlignment += ruleAlignS[s] + "-" + SPrint(ruleAlignT[t]) + " ";
 		}
 	}
 
 	for (size_t i = 0; i < nonTerms.size(); ++i) {
 		map<string, int> &nt = nonTerms[i];
-		ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
+		ret.ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
 	}
 
 	/* TODO
-	rule_s = Trim(rule_s);
-	rule_t = Trim(rule_t);
+	ruleS = Trim(ruleS);
+	ruleT = Trim(ruleT);
 	ruleAlignment = Trim(ruleAlignment);
 	*/
 
-	string rule_alignment_inv;
-	vector<string> ruleAlignmentToks = Tokenize(ruleAlignment, "-");
+	vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment, "-");
 	for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
 		const string &alignPoint = ruleAlignmentToks[i];
 		vector<string> toks = Tokenize(alignPoint);
 		assert(toks.size() == 2);
-		rule_alignment_inv += toks[1] + "-" +toks[0];
+		ret.ruleAlignmentInv += toks[1] + "-" +toks[0];
 	}
-	//rule_alignment_inv = Trim(rule_alignment_inv); TODO
+	//ruleAlignmentInv = Trim(ruleAlignmentInv); TODO
 
 	// frame
-	string frame;
+	ret.frame;
 	if (frameInput.find(-1) == frameInput.end())
-		frame = frameInput[-1];
+		ret.frame = frameInput[-1];
 
 	int currently_included = 0;
 	int start_t            = -1;
 	targetBitmap.push_back(0);
 
+  for (size_t t = 0 ; t <= targetsToks.size() ; t++ ) {
+    // beginning of tm target inclusion
+    if ( !currently_included && targetBitmap[t] ) {
+      start_t            = t;
+      currently_included = 1;
+    }
+		// end of tm target inclusion (not included word or inserted input)
+    else if (currently_included
+    				&& ( targetBitmap[t] || frameInput.find(t) != frameInput.end() )
+    				)
+		{
+			// add xml (unless change is at the beginning of the sentence
+      if ( start_t >= 0 ) {
+        string target = "";
+        cerr << "for(tt=$start_t;tt<$t+$TARGET_BITMAP[$t]);\n";
+        for (size_t tt = start_t ; tt < t + targetBitmap[t] ; tt++ ) {
+          target += targetsToks[tt] + " ";
+        }
+        // target = Trim(target); TODO
+        ret.frame += "<xml translation=\"" + target + "\"> x </xml> ";
+      }
+      currently_included = 0;
+		}
+
+    if (frameInput.find(t) != frameInput.end())
+    	ret.frame += frameInput[t];
+    cerr << targetBitmap[t] << " " << t << " " << "(" << start_t << ")"
+    			<< currently_included << endl;
+
+  } //for (size_t t = 0
+
+  cerr << ret.frame << "\n-------------------------------------\n";
+  return ret;
 
 }
 
