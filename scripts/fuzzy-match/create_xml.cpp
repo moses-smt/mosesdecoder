@@ -90,10 +90,7 @@ int main(int argc, char **argv)
 
       step = 0;
       break;
-
     }
-
-
   }
 
   delete input;
@@ -204,38 +201,39 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 				currently_matching = 1;
 
 			} // if (start_i < i ) {
-
-	    cerr << action << " " << s << " " << i
-	    		<< "(" << start_s << " " << start_i << ")"
-	    		<< currently_matching;
-
-	    if ( action != "I" ) {
-	    	cerr << " ->";
-
-	    	const std::map<int, int> &targets = alignments.m_alignS2T[s];
-
-				std::map<int, int>::const_iterator iter;
-				for (iter = targets.begin(); iter != targets.end(); ++iter) {
-					size_t tt = iter->first;
-					cerr << " " << tt;
-				}
-	    }
-	    cerr << endl;
-
-	    if (action != "I")
-	    	s++;
-	    if (action != "D") {
-	    	i++;
-	    	alignI2S[i] = s;
-	    }
-
-	    if (action == "M") {
-	    	inputBitmap.push_back(1);
-	    }
-	    else if (action == "I" || action == "S") {
-	    	inputBitmap.push_back(0);
-	    }
 		} // else if ( !currently_matching
+
+    cerr << action << " " << s << " " << i
+    		<< "(" << start_s << " " << start_i << ")"
+    		<< currently_matching;
+
+    if ( action != "I" ) {
+    	cerr << " ->";
+
+    	const std::map<int, int> &targets = alignments.m_alignS2T[s];
+
+			std::map<int, int>::const_iterator iter;
+			for (iter = targets.begin(); iter != targets.end(); ++iter) {
+				size_t tt = iter->first;
+				cerr << " " << tt;
+			}
+    }
+    cerr << endl;
+
+    if (action != "I")
+    	s++;
+    if (action != "D") {
+    	i++;
+    	alignI2S[i] = s;
+    }
+
+    if (action == "M") {
+    	inputBitmap.push_back(1);
+    }
+    else if (action == "I" || action == "S") {
+    	inputBitmap.push_back(0);
+    }
+
   } // for ( size_t p = 0
 
 	cerr << target << endl;
@@ -262,7 +260,7 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 		for (size_t j = 0; j < nonTerms.size(); ++j) {
 			map<string, int> &nt = nonTerms[j];
 			if (i == nt["start_i"]) {
-				ret.ruleS += "[X][X]";
+				ret.ruleS += "[X][X] ";
 				nt["rule_pos_s"] = rule_pos_s++;
 			}
 		}
@@ -313,10 +311,10 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 	ruleAlignment = Trim(ruleAlignment);
 	*/
 
-	vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment, "-");
+	vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment);
 	for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
 		const string &alignPoint = ruleAlignmentToks[i];
-		vector<string> toks = Tokenize(alignPoint);
+		vector<string> toks = Tokenize(alignPoint, "-");
 		assert(toks.size() == 2);
 		ret.ruleAlignmentInv += toks[1] + "-" +toks[0];
 	}
