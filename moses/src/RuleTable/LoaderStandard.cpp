@@ -39,7 +39,7 @@
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
-
+#include "util/double-conversion/double-conversion.h"
 
 using namespace std;
 
@@ -173,6 +173,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
   StringPiece line;
   std::string hiero_before, hiero_after;
 
+  double_conversion::StringToDoubleConverter converter(double_conversion::StringToDoubleConverter::NO_FLAGS, NAN, NAN, "inf", "nan");
+
   while(true) {
     try {
       line = in.ReadLine();
@@ -206,9 +208,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     scoreVector.clear();
     for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
-      char *err_ind;
-      scoreVector.push_back(strtod(s->data(), &err_ind));
-      UTIL_THROW_IF(err_ind == s->data(), util::Exception, "Bad score " << *s << " on line " << count);
+      int processed;
+      float score = converter.StringToFloat(s->data(), s->length(), &processed);
+      UTIL_THROW_IF(isnan(score), util::Exception, "Bad score " << *s << " on line " << count);
+      scoreVector.push_back(FloorScore(TransformScore(score)));
     }
     const size_t numScoreComponents = ruleTable.GetFeature()->GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
@@ -237,10 +240,6 @@ bool RuleTableLoaderStandard::Load(FormatType format
     
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
     
-    // component score, for n-best output
-    std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
-    std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels,wpProducer);
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);

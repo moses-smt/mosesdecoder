@@ -19,9 +19,10 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <algorithm>
-#include <boost/lexical_cast.hpp>
+#include <stdlib.h>
+#include "util/check.hh"
+#include "util/exception.hh"
 #include "util/tokenize_piece.hh"
 
 #include "TargetPhrase.h"
@@ -282,25 +283,20 @@ TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
   return clone;
 }
 
-namespace {
-void MosesShouldUseExceptions(bool value) {
-  if (!value) {
-    std::cerr << "Could not parse alignment info" << std::endl;
-    abort();
-  }
-}
-} // namespace
-
 void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
 {
 	AlignmentInfo::CollType alignTerm, alignNonTerm;
   for (util::TokenIter<util::AnyCharacter, true> token(alignString, util::AnyCharacter(" \t")); token; ++token) {
-    util::TokenIter<util::AnyCharacter, false> dash(*token, util::AnyCharacter("-"));
-    MosesShouldUseExceptions(dash);
-    size_t sourcePos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(dash);
-    size_t targetPos = boost::lexical_cast<size_t>(*dash++);
-    MosesShouldUseExceptions(!dash);
+    util::TokenIter<util::SingleCharacter, false> dash(*token, util::SingleCharacter('-'));
+
+    char *endptr;
+    size_t sourcePos = strtoul(dash->data(), &endptr, 10);
+    UTIL_THROW_IF(endptr != dash->data() + dash->size(), util::ErrnoException, "Error parsing alignment" << *dash);
+    ++dash;
+    size_t targetPos = strtoul(dash->data(), &endptr, 10);
+    UTIL_THROW_IF(endptr != dash->data() + dash->size(), util::ErrnoException, "Error parsing alignment" << *dash);
+    UTIL_THROW_IF(++dash, util::Exception, "Extra gunk in alignment " << *token);
+
 
     if (GetWord(targetPos).IsNonTerminal()) {
     	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
