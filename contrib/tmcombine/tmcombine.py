@@ -813,9 +813,15 @@ def cross_entropy_light(model_interface,reference_interface,weights,score,mode,f
     for (src,target,c) in cache:
         features = score(weights,src,target,model_interface,flags,cache=True)
 
+        if 0 in features:
+            #sys.stderr.write('Warning: 0 probability in model {0}: source phrase: {1!r}; target phrase: {2!r}\n'.format(i,src,target))
+            #sys.stderr.write('Possible reasons: 0 probability in phrase table; very low (or 0) weight; recompute lexweight and different alignments\n')
+            #sys.stderr.write('Phrase pair is ignored for cross_entropy calculation\n\n')
+            continue
+
         for i in range(model_interface.number_of_features):
             cross_entropies[i] -= log(features[i],2)*c
-                
+
     return cross_entropies
 
 
