@@ -50,7 +50,7 @@ int OpenReadOrThrow(const char *name) {
 int CreateOrThrow(const char *name) {
   int ret;
 #if defined(_WIN32) || defined(_WIN64)
-  UTIL_THROW_IF(-1 == (ret = _open(name, _O_CREAT | _O_TRUNC | _O_RDWR, _S_IREAD | _S_IWRITE)), ErrnoException, "while creating " << name);
+  UTIL_THROW_IF(-1 == (ret = _open(name, _O_CREAT | _O_TRUNC | _O_RDWR | _O_BINARY, _S_IREAD | _S_IWRITE)), ErrnoException, "while creating " << name);
 #else
   UTIL_THROW_IF(-1 == (ret = open(name, O_CREAT | O_TRUNC | O_RDWR, S_IRUSR | S_IWUSR | S_IRGRP | S_IROTH)), ErrnoException, "while creating " << name);
 #endif
@@ -76,29 +76,21 @@ void ResizeOrThrow(int fd, uint64_t to) {
 #endif
 }
 
-namespace {
-
+std::size_t PartialRead(int fd, void *to, std::size_t amount) {
 #if defined(_WIN32) || defined(_WIN64)
-typedef int ReadReturn;
+  amount = min(static_cast<std::size_t>(INT_MAX), amount);
+  int ret = _read(fd, to, amount); 
 #else
-typedef ssize_t ReadReturn;
+  ssize_t ret = read(fd, to, amount);
 #endif
-
-ReadReturn InternalRead(int fd, void *to, std::size_t amount) {
-#if defined(_WIN32) || defined(_WIN64)
-  return _read(fd, to, std::min(static_cast<std::size_t>(INT_MAX), amount)); 
-#else
-  return read(fd, to, amount);
-#endif
+  UTIL_THROW_IF(ret < 0, ErrnoException, "Reading " << amount << " from fd " << fd << " failed.");
+  return static_cast<std::size_t>(ret);
 }
-
-} // namespace
 
 void ReadOrThrow(int fd, void *to_void, std::size_t amount) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   while (amount) {
-    ReadReturn ret = InternalRead(fd, to, amount);
-    UTIL_THROW_IF(ret == -1, ErrnoException, "Reading " << amount << " from fd " << fd << " failed.");
+    std::size_t ret = PartialRead(fd, to, amount);
     UTIL_THROW_IF(ret == 0, EndOfFileException, "Hit EOF in fd " << fd << " but there should be " << amount << " more bytes to read.");
     amount -= ret;
     to += ret;
@@ -109,8 +101,7 @@ std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   std::size_t remaining = amount;
   while (remaining) {
-    ReadReturn ret = InternalRead(fd, to, remaining);
-    UTIL_THROW_IF(ret == -1, ErrnoException, "Reading " << remaining << " from fd " << fd << " failed.");
+    std::size_t ret = PartialRead(fd, to, remaining);
     if (!ret) return amount - remaining;
     remaining -= ret;
     to += ret;
@@ -122,7 +113,7 @@ void WriteOrThrow(int fd, const void *data_void, std::size_t size) {
   const uint8_t *data = static_cast<const uint8_t*>(data_void);
   while (size) {
 #if defined(_WIN32) || defined(_WIN64)
-    int ret = write(fd, data, std::min(static_cast<std::size_t>(INT_MAX), size));
+    int ret = write(fd, data, min(static_cast<std::size_t>(INT_MAX), size));
 #else
     ssize_t ret = write(fd, data, size);
 #endif
@@ -169,7 +160,14 @@ void SeekEnd(int fd) {
 
 std::FILE *FDOpenOrThrow(scoped_fd &file) {
   std::FILE *ret = fdopen(file.get(), "r+b");
-  if (!ret) UTIL_THROW(util::ErrnoException, "Could not fdopen");
+  if (!ret) UTIL_THROW(util::ErrnoException, "Could not fdopen descriptor " << file.get());
+  file.release();
+  return ret;
+}
+
+std::FILE *FDOpenReadOrThrow(scoped_fd &file) {
+  std::FILE *ret = fdopen(file.get(), "rb");
+  if (!ret) UTIL_THROW(util::ErrnoException, "Could not fdopen descriptor " << file.get());
   file.release();
   return ret;
 }
