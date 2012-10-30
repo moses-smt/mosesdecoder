@@ -121,8 +121,12 @@ my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
-# Train phrase weighting 
-my $__PHRASE_WEIGHTING = 0;
+# Use the phrase weighting framework. This argument specifies the script location
+my $__PHRASE_WEIGHTING = undef;
+my $__PHRASE_WEIGHTING_TRAINER = "pro"; # which type of trainer to use
+# For mixture modelling, require the phrase tables. These should be filtered
+# to the tuning set, but not binarised
+my $__PHRASE_WEIGHTING_TABLES;
 
 my $__THREADS = 0;
 
@@ -224,7 +228,8 @@ GetOptions(
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
   "batch-mira-args=s" => \$batch_mira_args,
-  "phrase-weighting" => \$__PHRASE_WEIGHTING,
+  "phrase-weighting=s" => \$__PHRASE_WEIGHTING,
+  "phrase-weighting-trainer=s" => \$__PHRASE_WEIGHTING_TRAINER,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -314,7 +319,8 @@ Options:
   --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
                                 change MIRA's hyperparameters such as regularization parameter C,
                                 BLEU decay factor, and the number of iterations of MIRA.
-  --phrase-weighting        ... Train using the phrase weighting framework
+  --phrase-weighting        ... Phrase-weighting framework main script
+  --phrase-weighting-trainer... Training method for phrase weighting (pro or mix) 
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -372,6 +378,13 @@ if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optim
   `gunzip $pro_optimizer.gz`;
   `chmod +x $pro_optimizer`;
   die("ERROR: Installation of megam_i686.opt failed! Install by hand from $megam_url") unless -x $pro_optimizer;
+}
+
+if ($__PHRASE_WEIGHTING) {
+  die "Not executable $__PHRASE_WEIGHTING" unless -x $__PHRASE_WEIGHTING;
+  die "Unknown phrase weighting trainer: $__PHRASE_WEIGHTING_TRAINER" unless
+    ($__PHRASE_WEIGHTING_TRAINER eq "mix" || $__PHRASE_WEIGHTING_TRAINER eq "pro");
+
 }
 
 $mertargs = "" if !defined $mertargs;
@@ -838,9 +851,9 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
-  } elsif ($__PHRASE_WEIGHTING) {
+  } elsif ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "pro") {
     safesystem("echo 'not used' > $weights_out_file") or die;
-    $cmd = "/home/bhaddow/code/mixture-models/main.py $phrase_weight_file_settings";
+    $cmd = "$__PHRASE_WEIGHTING $phrase_weight_file_settings";
     &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
