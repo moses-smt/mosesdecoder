@@ -96,11 +96,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/IOWrapper.h</locationURI>
 		</link>
 		<link>
-			<name>Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Jamfile</locationURI>
-		</link>
-		<link>
 			<name>LatticeMBR.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBR.cpp</locationURI>
@@ -136,11 +131,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>lmbrgrid</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/lmbrgrid</locationURI>
-		</link>
-		<link>
 			<name>mbr.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.cpp</locationURI>
@@ -149,11 +139,6 @@
 			<name>mbr.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.h</locationURI>
-		</link>
-		<link>
-			<name>moses</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/moses</locationURI>
 		</link>
 		<link>
 			<name>bin/gcc-4.6</name>

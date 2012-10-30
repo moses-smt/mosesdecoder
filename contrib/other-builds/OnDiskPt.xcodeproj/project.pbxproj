@@ -189,17 +189,20 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
 				GCC_MODEL_TUNING = G5;
 				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = "MAX_NUM_FACTORS=4";
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					../..,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = OnDiskPt;
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -207,14 +210,17 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
+				GCC_PREPROCESSOR_DEFINITIONS = "MAX_NUM_FACTORS=4";
 				HEADER_SEARCH_PATHS = (
 					/opt/local/include,
 					../..,
 				);
 				INSTALL_PATH = /usr/local/lib;
 				PRODUCT_NAME = OnDiskPt;
+				SDKROOT = "";
 			};
 			name = Release;
 		};

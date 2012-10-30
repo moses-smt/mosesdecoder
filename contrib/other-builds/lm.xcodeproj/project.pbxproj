@@ -561,6 +561,7 @@
 					"\"$(SRCROOT)/../../util/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = "";
 			};
 			name = Debug;
 		};
@@ -579,6 +580,7 @@
 					"\"$(SRCROOT)/../../util/bin/gcc-4.2.1/release/debug-symbols-on/link-static/threading-multi\"",
 				);
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = "";
 			};
 			name = Release;
 		};

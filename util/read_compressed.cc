@@ -339,7 +339,7 @@ MagicResult DetectMagic(const void *from_void) {
   return UNKNOWN;
 }
 
-ReadBase *ReadFactory(int fd, std::size_t &raw_amount) {
+ReadBase *ReadFactory(int fd, uint64_t &raw_amount) {
   scoped_fd hold(fd);
   unsigned char header[ReadCompressed::kMagicSize];
   raw_amount = ReadOrEOF(fd, header, ReadCompressed::kMagicSize);

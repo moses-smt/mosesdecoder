@@ -292,6 +292,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				COPY_PHASE_STRIP = NO;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_FIX_AND_CONTINUE = YES;
@@ -301,6 +302,7 @@
 					TRACE_ENABLE,
 					_LARGE_FILES,
 					"_FILE_OFFSET_BITS=64",
+					"MAX_NUM_FACTORS=4",
 				);
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /usr/local/bin;
@@ -324,6 +326,7 @@
 					"-lcmph",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
+				SDKROOT = "";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";
 			};
 			name = Debug;
@@ -332,12 +335,14 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ALWAYS_SEARCH_USER_PATHS = NO;
+				ARCHS = "$(ARCHS_STANDARD_64_BIT)";
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				GCC_MODEL_TUNING = G5;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					TRACE_ENABLE,
 					_LARGE_FILES,
 					"_FILE_OFFSET_BITS=64",
+					"MAX_NUM_FACTORS=4",
 				);
 				HEADER_SEARCH_PATHS = /opt/local/include;
 				INSTALL_PATH = /usr/local/bin;
@@ -361,6 +366,7 @@
 					"-lcmph",
 				);
 				PRODUCT_NAME = "moses-chart-cmd";
+				SDKROOT = "";
 				USER_HEADER_SEARCH_PATHS = "../../ ../../moses/src";
 			};
 			name = Release;

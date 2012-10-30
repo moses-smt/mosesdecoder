@@ -258,7 +258,7 @@ inline std::ostream& operator<<(std::ostream& o, const StringPiece& piece) {
 
 #ifdef HAVE_BOOST
 inline size_t hash_value(const StringPiece &str) {
-  return boost::hash_range(str.data(), str.data() + str.length());
+	return boost::hash_range(str.data(), str.data() + str.length());
 }
 
 /* Support for lookup of StringPiece in boost::unordered_map<std::string> */
