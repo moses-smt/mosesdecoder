@@ -37,6 +37,8 @@ using namespace std;
 namespace Moses
 {
 
+Phrase::Phrase() {}
+
 Phrase::Phrase(size_t reserveSize)
 {
   m_words.reserve(reserveSize);
@@ -97,6 +99,20 @@ Phrase Phrase::GetSubString(const WordsRange &wordsRange) const
   }
 
   return retPhrase;
+}
+
+Phrase Phrase::GetSubString(const WordsRange &wordsRange, FactorType factorType) const
+{
+	Phrase retPhrase(wordsRange.GetNumWordsCovered());
+
+	for (size_t currPos = wordsRange.GetStartPos() ; currPos <= wordsRange.GetEndPos() ; currPos++)
+	{
+		const Factor* f = GetFactor(currPos, factorType);
+		Word &word = retPhrase.AddWord();
+		word.SetFactor(factorType, f);
+	}
+
+	return retPhrase;
 }
 
 std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
@@ -160,13 +176,15 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
 
 void Phrase::CreateFromStringNewFormat(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
-                                       , const std::string &phraseString
+                                       , const StringPiece &phraseString
                                        , const std::string & /*factorDelimiter */
                                        , Word &lhs)
 {
   // parse
-  vector<string> annotatedWordVector;
-  Tokenize(annotatedWordVector, phraseString);
+  vector<StringPiece> annotatedWordVector;
+  for (util::TokenIter<util::AnyCharacter, true> it(phraseString, "\t "); it; ++it) {
+    annotatedWordVector.push_back(*it);
+  }
   // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
   //		to
   // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
@@ -174,13 +192,13 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   m_words.reserve(annotatedWordVector.size()-1);
 
   for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++) {
-    string &annotatedWord = annotatedWordVector[phrasePos];
+    StringPiece &annotatedWord = annotatedWordVector[phrasePos];
     bool isNonTerminal;
-    if (annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]") {
+    if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
       // non-term
       isNonTerminal = true;
 
-      size_t nextPos = annotatedWord.find("[", 1);
+      size_t nextPos = annotatedWord.find('[', 1);
       CHECK(nextPos != string::npos);
 
       if (direction == Input)
@@ -197,12 +215,11 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   }
 
   // lhs
-  string &annotatedWord = annotatedWordVector.back();
-  CHECK(annotatedWord.substr(0, 1) == "[" && annotatedWord.substr(annotatedWord.size()-1, 1) == "]");
-  annotatedWord = annotatedWord.substr(1, annotatedWord.size() - 2);
+  const StringPiece &annotatedWord = annotatedWordVector.back();
+  CHECK(annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']');
 
-  lhs.CreateFromString(direction, factorOrder, annotatedWord, true);
-  CHECK(lhs.IsNonTerminal());
+  lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+  assert(lhs.IsNonTerminal());
 }
 
 int Phrase::Compare(const Phrase &other) const

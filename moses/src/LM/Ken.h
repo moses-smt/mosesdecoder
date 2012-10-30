@@ -28,11 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses {
 
-class ScoreIndexManager;
 class LanguageModel;
 
 //! This will also load. Returns a templated KenLM class
-LanguageModel *ConstructKenLM(const std::string &file, ScoreIndexManager &manager, FactorType factorType, bool lazy);
+LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy);
 
 } // namespace Moses
 

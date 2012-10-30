@@ -42,7 +42,7 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
     std::string source = (*tpi)->GetSourcePhraseStringRep();
     WordsRange twr = (*tpi)->GetCurrTargetWordsRange();
     WordsRange swr = (*tpi)->GetCurrSourceWordsRange();
-    const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignmentInfo();
+    const AlignmentInfo &alignmentInfo = (*tpi)->GetCurrTargetPhrase().GetAlignTerm();
     // language model backoff stats,
     if (doLMStats) {
       std::vector<std::vector<unsigned int> >& lmstats = *(*tpi)->GetLMStats();
@@ -118,9 +118,10 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
       os << "\tdropped=" << *dwi << std::endl;
     }
   }
-  os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
-  StaticData::Instance().GetScoreIndexManager().PrintLabeledWeightedScores(os, translationPath.back()->GetScoreBreakdown(), StaticData::Instance().GetAllWeights());
-  os << std::endl;
+	os << std::endl << "SCORES (UNWEIGHTED/WEIGHTED): ";
+  os << translationPath.back()->GetScoreBreakdown();
+  os << " weighted(TODO)";
+	os << std::endl;
 }
 
 }

@@ -344,6 +344,33 @@ double GetUserTime();
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 
+/**
+ * Returns the first string bounded by the delimiters (default delimiters are " " and "\t")i starting from position first_pos
+ * and and stores the starting position of the next string (in first_str)
+ */
+inline std::string GetFirstString(const std::string& str, int& first_pos,  const std::string& delimiters = " \t")
+{
+	
+	std::string first_str;
+	// Skip delimiters at beginning.
+	std::string::size_type lastPos = str.find_first_not_of(delimiters, first_pos);
+	
+	// Find first "non-delimiter".
+	std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+	
+	if (std::string::npos != pos || std::string::npos != lastPos){
+		
+		first_str = str.substr(lastPos, pos - lastPos);
+		
+		// Skip delimiters.  Note the "not_of"
+		lastPos = str.find_first_not_of(delimiters, pos);
+		
+	}
+	
+	first_pos = lastPos;
+	return first_str;
+}
+	
 template<class T>
 T log_sum (T log_a, T log_b)
 {

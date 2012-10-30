@@ -38,7 +38,7 @@ namespace Moses
 {
 
 class InputType;
-class ChartCellCollection;
+class ChartCellCollectionBase;
 class ChartHypothesisCollection;
 class WordsRange;
 
@@ -48,7 +48,7 @@ class Scope3Parser : public ChartRuleLookupManager
 {
  public:
   Scope3Parser(const InputType &sentence,
-               const ChartCellCollection &cellColl,
+               const ChartCellCollectionBase &cellColl,
                const RuleTableUTrie &ruleTable,
                size_t maxChartSpan)
       : ChartRuleLookupManager(sentence, cellColl)
@@ -60,7 +60,7 @@ class Scope3Parser : public ChartRuleLookupManager
 
   void GetChartRuleCollection(
     const WordsRange &range,
-    ChartTranslationOptionList &outColl);
+    ChartParserCallback &outColl);
 
  private:
   // Define a callback type for use by StackLatticeSearcher.
@@ -68,7 +68,7 @@ class Scope3Parser : public ChartRuleLookupManager
   {
     public:
       MatchCallback(const WordsRange &range,
-                    ChartTranslationOptionList &out)
+                    ChartParserCallback &out)
           : m_range(range)
           , m_out(out)
           , m_tpc(NULL) {}
@@ -77,7 +77,7 @@ class Scope3Parser : public ChartRuleLookupManager
         m_out.Add(*m_tpc, stackVec, m_range);
       }
       const WordsRange &m_range;
-      ChartTranslationOptionList &m_out;
+      ChartParserCallback &m_out;
       const TargetPhraseCollection *m_tpc;
   };
 

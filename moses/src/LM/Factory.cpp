@@ -65,11 +65,10 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                                    , const std::vector<FactorType> &factorTypes
                                    , size_t nGramOrder
                                    , const std::string &languageModelFile
-                                   , ScoreIndexManager &scoreIndexManager
-                                   , int dub )
+                                   , int dub)
 {
   if (lmImplementation == Ken || lmImplementation == LazyKen) {
-    return ConstructKenLM(languageModelFile, scoreIndexManager, factorTypes[0], lmImplementation == LazyKen);
+    return ConstructKenLM(languageModelFile, factorTypes[0], lmImplementation == LazyKen);
   }
   LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
@@ -140,7 +139,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     }
   }
 
-  return new LMRefCount(scoreIndexManager, lm);
+  return new LMRefCount(lm);
 }
 }
 

@@ -43,8 +43,11 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "PhraseDictionary.h"
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "ChartHypothesis.h"
+
+#include <boost/algorithm/string.hpp>
+#include "FeatureVector.h"
 
 
 using namespace std;
@@ -62,7 +65,6 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
-  ,m_nBestStream(NULL)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
   ,m_inputFilePath(inputFilePath)
@@ -79,21 +81,19 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_inputStream = new InputFileStream(inputFilePath);
   }
 
-  m_surpressSingleBestOutput = false;
+  bool suppressSingleBestOutput = false;
 
   if (nBestSize > 0) {
     if (nBestFilePath == "-") {
-      m_nBestStream = &std::cout;
-      m_surpressSingleBestOutput = true;
+      m_nBestOutputCollector = new Moses::OutputCollector(&std::cout);
+      suppressSingleBestOutput = true;
     } else {
-      std::ofstream *nBestFile = new std::ofstream;
-      m_nBestStream = nBestFile;
-      nBestFile->open(nBestFilePath.c_str());
+      m_nBestOutputCollector = new Moses::OutputCollector(new std::ofstream(nBestFilePath.c_str()));
+      m_nBestOutputCollector->HoldOutputStream();
     }
-    m_nBestOutputCollector = new Moses::OutputCollector(m_nBestStream);
   }
 
-  if (!m_surpressSingleBestOutput) {
+  if (!suppressSingleBestOutput) {
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
@@ -118,10 +118,6 @@ IOWrapper::~IOWrapper()
 {
   if (!m_inputFilePath.empty()) {
     delete m_inputStream;
-  }
-  if (!m_surpressSingleBestOutput) {
-    // outputting n-best to file, rather than stdout. need to close file and delete obj
-    delete m_nBestStream;
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
@@ -148,6 +144,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
     return NULL;
   }
 }
+
 
 /***
  * print surface factor only for the given phrase
@@ -205,7 +202,7 @@ void IOWrapper::Backtrack(const ChartHypothesis *hypo)
   }
 }
 
-void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/, bool /* reportSegmentation */, bool /* reportAllFactors */)
+void IOWrapper::OutputBestHypo(const std::vector<const Factor*>&  mbrBestHypo, long /*translationId*/)
 {
   for (size_t i = 0 ; i < mbrBestHypo.size() ; i++) {
     const Factor *factor = mbrBestHypo[i];
@@ -325,9 +322,12 @@ void IOWrapper::OutputDetailedTranslationReport(
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
+  
 
-void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, bool /* reportSegmentation */, bool /* reportAllFactors */)
+void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId)
 {
+  if (!m_singleBestOutputCollector)
+    return;
   std::ostringstream out;
   IOWrapper::FixPrecision(out);
   if (hypo != NULL) {
@@ -339,23 +339,21 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
     if (StaticData::Instance().GetOutputHypoScore()) {
       out << hypo->GetTotalScore() << " ";
     }
-
-    if (!m_surpressSingleBestOutput) {
-      if (StaticData::Instance().IsPathRecoveryEnabled()) {
-        out << "||| ";
-      }
-      Phrase outPhrase(ARRAY_SIZE_INCR);
-      hypo->CreateOutputPhrase(outPhrase);
-
-      // delete 1st & last
-      CHECK(outPhrase.GetSize() >= 2);
-      outPhrase.RemoveWord(0);
-      outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-
-      const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-      string output = outPhrase.GetStringRep(outputFactorOrder);
-      out << output << endl;
+    
+    if (StaticData::Instance().IsPathRecoveryEnabled()) {
+      out << "||| ";
     }
+    Phrase outPhrase(ARRAY_SIZE_INCR);
+    hypo->CreateOutputPhrase(outPhrase);
+    
+    // delete 1st & last
+    CHECK(outPhrase.GetSize() >= 2);
+    outPhrase.RemoveWord(0);
+    outPhrase.RemoveWord(outPhrase.GetSize() - 1);
+    
+    const std::vector<FactorType> outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+    string output = outPhrase.GetStringRep(outputFactorOrder);
+    out << output << endl;
   } else {
     VERBOSE(1, "NO BEST TRANSLATION" << endl);
 
@@ -365,10 +363,7 @@ void IOWrapper::OutputBestHypo(const ChartHypothesis *hypo, long translationId, 
 
     out << endl;
   }
-
-  if (m_singleBestOutputCollector) {
-    m_singleBestOutputCollector->Write(translationId, out.str());
-  }
+  m_singleBestOutputCollector->Write(translationId, out.str());
 }
 
 void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const ChartHypothesis *bestHypo, const TranslationSystem* system, long translationId)
@@ -376,7 +371,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
   std::ostringstream out;
 
   // Check if we're writing to std::cout.
-  if (m_surpressSingleBestOutput) {
+  if (m_nBestOutputCollector->OutputIsCout()) {
     // Set precision only if we're writing the n-best list to cout.  This is to
     // preserve existing behaviour, but should probably be done either way.
     IOWrapper::FixPrecision(out);
@@ -409,7 +404,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // print the surface factor of the translation
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
-    out << " |||";
+    out << " ||| ";
 
     // print the scores in a hardwired order
     // before each model type, the corresponding command-line-like name must be emitted
@@ -426,26 +421,29 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
       }
     }
 
-
     std::string lastName = "";
+
+    // output stateful sparse features
+    const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
+    for( size_t i=0; i<sff.size(); i++ )
+    	if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
+    		OutputSparseFeatureScores( out, path, sff[i], lastName );
 
     // translation components
     const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
     if (pds.size() > 0) {
-
       for( size_t i=0; i<pds.size(); i++ ) {
-	size_t pd_numinputscore = pds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
-
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+      	size_t pd_numinputscore = pds[i]->GetNumInputScores();
+      	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+      	for (size_t j = 0; j<scores.size(); ++j){
+      		if (labeledOutput && (i == 0) ){
+      			if ((j == 0) || (j == pd_numinputscore)){
+      				lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+      				out << " " << lastName << ":";
+      			}
+      		}
+      		out << " " << scores[j];
+      	}
       }
     }
 
@@ -457,26 +455,33 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     // generation
     const vector<GenerationDictionary*>& gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
-
       for( size_t i=0; i<gds.size(); i++ ) {
-	size_t pd_numinputscore = gds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
-
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+      	size_t pd_numinputscore = gds[i]->GetNumInputScores();
+      	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+      	for (size_t j = 0; j<scores.size(); ++j){
+      		if (labeledOutput && (i == 0) ){
+      			if ((j == 0) || (j == pd_numinputscore)){
+      				lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+      				out << " " << lastName << ":";
+      			}
+      		}
+      		out << " " << scores[j];
+      	}
       }
     }
 
+    // output stateless sparse features
+    lastName = "";
+
+    const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
+    for( size_t i=0; i<slf.size(); i++ ) {
+      if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
+	OutputSparseFeatureScores( out, path, slf[i], lastName );
+      }
+    }
 
     // total
-    out << " |||" << path.GetTotalScore();
+    out << " ||| " << path.GetTotalScore();
 
     /*
     if (includeAlignment) {
@@ -505,6 +510,32 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
   CHECK(m_nBestOutputCollector);
   m_nBestOutputCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputSparseFeatureScores( std::ostream& out, const ChartTrellisPath &path, const FeatureFunction *ff, std::string &lastName )
+{
+  const StaticData &staticData = StaticData::Instance();
+  bool labeledOutput = staticData.IsLabeledNBestList();
+  const FVector scores = path.GetScoreBreakdown().GetVectorForProducer( ff );
+
+  // report weighted aggregate
+  if (! ff->GetSparseFeatureReporting()) {
+  	const FVector &weights = staticData.GetAllWeights().GetScoresVector();
+  	if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
+  		out << " " << ff->GetScoreProducerWeightShortName() << ":";
+    out << " " << scores.inner_product(weights);
+  }
+
+  // report each feature
+  else {
+  	for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+  		if (i->second != 0) { // do not report zero-valued features
+  			if (labeledOutput)
+  				out << " " << i->first << ":";
+        out << " " << i->second;
+      }
+    }
+  }
 }
 
 void IOWrapper::FixPrecision(std::ostream &stream, size_t size)

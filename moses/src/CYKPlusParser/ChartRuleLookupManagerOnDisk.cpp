@@ -24,7 +24,7 @@
 #include "RuleTable/PhraseDictionaryOnDisk.h"
 #include "StaticData.h"
 #include "DotChartOnDisk.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "../../OnDiskPt/TargetPhraseCollection.h"
 
 using namespace std;
@@ -34,14 +34,13 @@ namespace Moses
 
 ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   const InputType &sentence,
-  const ChartCellCollection &cellColl,
+  const ChartCellCollectionBase &cellColl,
   const PhraseDictionaryOnDisk &dictionary,
   OnDiskPt::OnDiskWrapper &dbWrapper,
   const LMList *languageModels,
   const WordPenaltyProducer *wpProducer,
   const std::vector<FactorType> &inputFactorsVec,
   const std::vector<FactorType> &outputFactorsVec,
-  const std::vector<float> &weight,
   const std::string &filePath)
   : ChartRuleLookupManagerCYKPlus(sentence, cellColl)
   , m_dictionary(dictionary)
@@ -50,7 +49,6 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
   , m_wpProducer(wpProducer)
   , m_inputFactorsVec(inputFactorsVec)
   , m_outputFactorsVec(outputFactorsVec)
-  , m_weight(weight)
   , m_filePath(filePath)
 {
   CHECK(m_expandableDottedRuleListVec.size() == 0);
@@ -81,8 +79,9 @@ ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 
 void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
+  const StaticData &staticData = StaticData::Instance();
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 
@@ -95,7 +94,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   const DottedRuleStackOnDisk::SavedNodeColl &savedNodeColl = expandableDottedRuleList.GetSavedNodeColl();
   //cerr << "savedNodeColl=" << savedNodeColl.size() << " ";
 
-  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+  const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
   for (size_t ind = 0; ind < (savedNodeColl.size()) ; ++ind) {
     const SavedNodeOnDisk &savedNode = *savedNodeColl[ind];
@@ -142,7 +141,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // get target nonterminals in this span from chart
     const ChartCellLabelSet &chartNonTermSet =
-      GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+      GetTargetLabelSet(startPos, endPos);
 
     //const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal()
     //                                   ,&defaultTargetNonTerm = staticData.GetOutputDefaultNonTerminal();
@@ -237,11 +236,12 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
 
+            std::vector<float> weightT = staticData.GetWeights(m_dictionary.GetFeature());
             targetPhraseCollection
             = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
                                                ,m_outputFactorsVec
                                                ,m_dictionary
-                                               ,m_weight
+                                               ,weightT
                                                ,m_wpProducer
                                                ,*m_languageModels
                                                ,m_filePath
@@ -267,8 +267,6 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       }
     }
   } // for (size_t ind = 0; ind < savedNodeColl.size(); ++ind)
-
-  outColl.ShrinkToLimit();
 
   //cerr << numDerivations << " ";
 }

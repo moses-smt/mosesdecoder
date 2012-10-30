@@ -6,6 +6,7 @@
 #include <cstdio>
 #include <iostream>
 
+#include <assert.h>
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -14,6 +15,8 @@
 #if defined(_WIN32) || defined(_WIN64)
 #include <windows.h>
 #include <io.h>
+#include <algorithm>
+#include <limits.h>
 #else
 #include <unistd.h>
 #endif
@@ -73,14 +76,28 @@ void ResizeOrThrow(int fd, uint64_t to) {
 #endif
 }
 
-#ifdef WIN32
-typedef int ssize_t;
+namespace {
+
+#if defined(_WIN32) || defined(_WIN64)
+typedef int ReadReturn;
+#else
+typedef ssize_t ReadReturn;
 #endif
+
+ReadReturn InternalRead(int fd, void *to, std::size_t amount) {
+#if defined(_WIN32) || defined(_WIN64)
+  return _read(fd, to, std::min(static_cast<std::size_t>(INT_MAX), amount)); 
+#else
+  return read(fd, to, amount);
+#endif
+}
+
+} // namespace
 
 void ReadOrThrow(int fd, void *to_void, std::size_t amount) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   while (amount) {
-    ssize_t ret = read(fd, to, amount);
+    ReadReturn ret = InternalRead(fd, to, amount);
     UTIL_THROW_IF(ret == -1, ErrnoException, "Reading " << amount << " from fd " << fd << " failed.");
     UTIL_THROW_IF(ret == 0, EndOfFileException, "Hit EOF in fd " << fd << " but there should be " << amount << " more bytes to read.");
     amount -= ret;
@@ -92,7 +109,7 @@ std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   std::size_t remaining = amount;
   while (remaining) {
-    ssize_t ret = read(fd, to, remaining);
+    ReadReturn ret = InternalRead(fd, to, remaining);
     UTIL_THROW_IF(ret == -1, ErrnoException, "Reading " << remaining << " from fd " << fd << " failed.");
     if (!ret) return amount - remaining;
     remaining -= ret;
@@ -104,11 +121,20 @@ std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount) {
 void WriteOrThrow(int fd, const void *data_void, std::size_t size) {
   const uint8_t *data = static_cast<const uint8_t*>(data_void);
   while (size) {
+#if defined(_WIN32) || defined(_WIN64)
+    int ret = write(fd, data, std::min(static_cast<std::size_t>(INT_MAX), size));
+#else
     ssize_t ret = write(fd, data, size);
+#endif
     if (ret < 1) UTIL_THROW(util::ErrnoException, "Write failed");
     data += ret;
     size -= ret;
   }
+}
+
+void WriteOrThrow(FILE *to, const void *data, std::size_t size) {
+  assert(size);
+  UTIL_THROW_IF(1 != std::fwrite(data, size, 1, to), util::ErrnoException, "Short write; requested size " << size);
 }
 
 void FSyncOrThrow(int fd) {
@@ -119,8 +145,13 @@ void FSyncOrThrow(int fd) {
 }
 
 namespace {
-void InternalSeek(int fd, off_t off, int whence) {
+void InternalSeek(int fd, int64_t off, int whence) {
+#if defined(_WIN32) || defined(_WIN64)
+  UTIL_THROW_IF((__int64)-1 == _lseeki64(fd, off, whence), ErrnoException, "Windows seek failed");
+
+#else
   UTIL_THROW_IF((off_t)-1 == lseek(fd, off, whence), ErrnoException, "Seek failed");
+#endif
 }
 } // namespace
 
@@ -140,6 +171,12 @@ std::FILE *FDOpenOrThrow(scoped_fd &file) {
   std::FILE *ret = fdopen(file.get(), "r+b");
   if (!ret) UTIL_THROW(util::ErrnoException, "Could not fdopen");
   file.release();
+  return ret;
+}
+
+std::FILE *FOpenOrThrow(const char *path, const char *mode) {
+  std::FILE *ret;
+  UTIL_THROW_IF(!(ret = fopen(path, mode)), util::ErrnoException, "Could not fopen " << path << " for " << mode);
   return ret;
 }
 
@@ -168,7 +205,7 @@ static const char letters[] =
    does not exist at the time of the call to mkstemp.  TMPL is
    overwritten with the result.  */
 int
-mkstemp_and_unlink(char *tmpl, bool and_unlink)
+mkstemp_and_unlink(char *tmpl)
 {
   int len;
   char *XXXXXX;
@@ -243,7 +280,7 @@ mkstemp_and_unlink(char *tmpl, bool and_unlink)
     /* Modified for windows and to unlink */
     //      fd = open (tmpl, O_RDWR | O_CREAT | O_EXCL, _S_IREAD | _S_IWRITE);
     int flags = _O_RDWR | _O_CREAT | _O_EXCL | _O_BINARY;
-    if (and_unlink) flags |= _O_TEMPORARY;
+    flags |= _O_TEMPORARY;
     fd = _open (tmpl, flags, _S_IREAD | _S_IWRITE);
     if (fd >= 0)
     {
@@ -260,9 +297,9 @@ mkstemp_and_unlink(char *tmpl, bool and_unlink)
 }
 #else
 int
-mkstemp_and_unlink(char *tmpl, bool and_unlink) {
+mkstemp_and_unlink(char *tmpl) {
   int ret = mkstemp(tmpl);
-  if (ret != -1 && and_unlink) {
+  if (ret != -1) {
     UTIL_THROW_IF(unlink(tmpl), util::ErrnoException, "Failed to delete " << tmpl);
   }
   return ret;
@@ -273,22 +310,13 @@ int TempMaker::Make() const {
   std::string name(base_);
   name.push_back(0);
   int ret;
-  UTIL_THROW_IF(-1 == (ret = mkstemp_and_unlink(&name[0], true)), util::ErrnoException, "Failed to make a temporary based on " << base_);
+  UTIL_THROW_IF(-1 == (ret = mkstemp_and_unlink(&name[0])), util::ErrnoException, "Failed to make a temporary based on " << base_);
   return ret;
 }
 
 std::FILE *TempMaker::MakeFile() const {
   util::scoped_fd file(Make());
   return FDOpenOrThrow(file);
-}
-
-std::string TempMaker::Name(scoped_fd &opened) const {
-  std::string name(base_);
-  name.push_back(0);
-  int fd;
-  UTIL_THROW_IF(-1 == (fd = mkstemp_and_unlink(&name[0], false)), util::ErrnoException, "Failed to make a temporary based on " << base_);
-  opened.reset(fd);
-  return name;
 }
 
 } // namespace util

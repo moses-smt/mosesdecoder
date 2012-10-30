@@ -1,1 +1,1 @@
-lib dynsa : [ glob *.cpp ] ../../../util//kenutil : : : <include>. ;
+lib dynsa : [ glob *.cpp ] ../../../util//kenutil ..//headers : : : <include>. ;

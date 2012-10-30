@@ -263,7 +263,7 @@ class install-target-class : basic-target
             }
         }
         DELETE_MODULE $(result) ;
-        result = [ sequence.unique $(result2) ] ;
+        return [ sequence.unique $(result2) ] ;
     }
 
     # Returns true iff 'type' is subtype of some element of 'types-to-include'.

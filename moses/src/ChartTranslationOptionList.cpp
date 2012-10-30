@@ -21,7 +21,7 @@
 #include <iostream>
 #include "StaticData.h"
 #include "ChartTranslationOptionList.h"
-#include "ChartTranslationOption.h"
+#include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
 #include "WordsRange.h"
 
@@ -49,7 +49,7 @@ void ChartTranslationOptionList::Clear()
 class ChartTranslationOptionOrderer
 {
 public:
-  bool operator()(const ChartTranslationOption* itemA, const ChartTranslationOption* itemB) const {
+  bool operator()(const ChartTranslationOptions* itemA, const ChartTranslationOptions* itemB) const {
     return itemA->GetEstimateOfBestScore() > itemB->GetEstimateOfBestScore();
   }
 };
@@ -62,7 +62,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
     return;
   }
 
-  float score = ChartTranslationOption::CalcEstimateOfBestScore(tpc, stackVec);
+  float score = ChartTranslationOptions::CalcEstimateOfBestScore(tpc, stackVec);
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
@@ -73,11 +73,11 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   // Add the option to the list.
   if (m_size == m_collection.size()) {
     // m_collection has reached capacity: create a new object.
-    m_collection.push_back(new ChartTranslationOption(tpc, stackVec,
+    m_collection.push_back(new ChartTranslationOptions(tpc, stackVec,
                                                       range, score));
   } else {
     // Overwrite an unused object.
-    *(m_collection[m_size]) = ChartTranslationOption(tpc, stackVec,
+    *(m_collection[m_size]) = ChartTranslationOptions(tpc, stackVec,
                                                      range, score);
   }
   ++m_size;
@@ -98,8 +98,15 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
-void ChartTranslationOptionList::ShrinkToLimit()
-{
+void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range) {
+  TargetPhraseCollection *tpc = new TargetPhraseCollection();
+  tpc->Add(&phrase);
+  waste_memory.push_back(tpc);
+  StackVec empty;
+  Add(*tpc, empty, range);
+}
+
+void ChartTranslationOptionList::ApplyThreshold() {
   if (m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
     // without being pruned.
@@ -112,17 +119,14 @@ void ChartTranslationOptionList::ShrinkToLimit()
                      ChartTranslationOptionOrderer());
     m_size = m_ruleLimit;
   }
-}
 
-void ChartTranslationOptionList::ApplyThreshold()
-{
   // keep only those over best + threshold
 
   float scoreThreshold = -std::numeric_limits<float>::infinity();
 
   CollType::const_iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.begin()+m_size; ++iter) {
-    const ChartTranslationOption *transOpt = *iter;
+    const ChartTranslationOptions *transOpt = *iter;
     float score = transOpt->GetEstimateOfBestScore();
     scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
   }

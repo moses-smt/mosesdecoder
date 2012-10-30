@@ -334,7 +334,7 @@ rule get-absolute-tool-path ( command )
 # first path found. Otherwise, returns an empty string. If 'path-last' is
 # specified, PATH is searched after 'additional-paths'.
 #
-local rule find-tool ( name : additional-paths * : path-last ? )
+rule find-tool ( name : additional-paths * : path-last ? )
 {
     local path = [ path.programs-path ] ;
     local match = [ path.glob $(path) : $(name) $(name).exe ] ;
@@ -961,25 +961,22 @@ rule __test__ ( )
 {
     import assert ;
 
-    local nl = "
-" ;
-
     local save-os = [ modules.peek os : .name ] ;
 
     modules.poke os : .name : LINUX ;
 
-    assert.result "PATH=\"foo:bar:baz\"$(nl)export PATH$(nl)"
+    assert.result "PATH=\"foo:bar:baz\"\nexport PATH\n"
         : path-variable-setting-command PATH : foo bar baz ;
 
-    assert.result "PATH=\"foo:bar:$PATH\"$(nl)export PATH$(nl)"
+    assert.result "PATH=\"foo:bar:$PATH\"\nexport PATH\n"
         : prepend-path-variable-command PATH : foo bar ;
 
     modules.poke os : .name : NT ;
 
-    assert.result "set PATH=foo;bar;baz$(nl)"
+    assert.result "set PATH=foo;bar;baz\n"
         : path-variable-setting-command PATH : foo bar baz ;
 
-    assert.result "set PATH=foo;bar;%PATH%$(nl)"
+    assert.result "set PATH=foo;bar;%PATH%\n"
         : prepend-path-variable-command PATH : foo bar ;
 
     modules.poke os : .name : $(save-os) ;

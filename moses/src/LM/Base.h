@@ -24,15 +24,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cstddef>
+
 #include "../FeatureFunction.h"
 
 namespace Moses
 {
 
+namespace Incremental { class Manager; }
+
 class FactorCollection;
 class Factor;
 class Phrase;
-class ScoreIndexManager;
 
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction {
@@ -40,7 +42,6 @@ protected:
   LanguageModel();
 
   // This can't be in the constructor for virual function dispatch reasons
-  void Init(ScoreIndexManager &scoreIndexManager);
 
   bool m_enableOOVFeature;
   
@@ -48,10 +49,7 @@ public:
   virtual ~LanguageModel();
 
   // Make another feature without copying the underlying model data.  
-  virtual LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const = 0;
-
-  //! see ScoreProducer.h
-  std::size_t GetNumScoreComponents() const;
+  virtual LanguageModel *Duplicate() const = 0;
 
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
@@ -95,6 +93,8 @@ public:
   virtual void SetFFStateIdx(int state_idx) {
   }
 
+  // KenLM only (others throw an exception): call incremental search with the model and mapping.
+  virtual void IncrementalCallback(Incremental::Manager &manager) const;
 };
 
 }

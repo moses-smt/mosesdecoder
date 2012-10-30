@@ -38,30 +38,36 @@ protected:
   const Factor *m_sentenceStart, *m_sentenceEnd;
   FactorType	m_factorType;
 
+	LanguageModelSingleFactor() {}
+
 public:
-  virtual ~LanguageModelSingleFactor();
-  virtual bool Load(const std::string &filePath
-                    , FactorType factorType
-                    , size_t nGramOrder) = 0;
+	virtual ~LanguageModelSingleFactor();
+	virtual bool Load(const std::string &filePath
+					, FactorType factorType
+					, size_t nGramOrder) = 0;
 
-  LMType GetLMType() const {
-    return SingleFactor;
-  }
+	LMType GetLMType() const
+	{
+		return SingleFactor;
+	}
 
-  bool Useable(const Phrase &phrase) const {
-    return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
-  }
-
-  const Factor *GetSentenceStart() const {
-    return m_sentenceStart;
-  }
-  const Factor *GetSentenceEnd() const {
-    return m_sentenceEnd;
-  }
-  FactorType GetFactorType() const {
-    return m_factorType;
-  }
-  std::string GetScoreProducerDescription(unsigned) const;
+	bool Useable(const Phrase &phrase) const
+	{
+		return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);		
+	}
+	
+	const Factor *GetSentenceStart() const
+	{
+		return m_sentenceStart;
+	}
+	const Factor *GetSentenceEnd() const
+	{
+		return m_sentenceEnd;
+	}
+	FactorType GetFactorType() const
+	{
+		return m_factorType;
+	}
 };
 
 // Single factor LM that uses a null pointer state.

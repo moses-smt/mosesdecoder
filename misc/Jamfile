@@ -13,6 +13,7 @@ if $(with-cmph) {
     exe queryPhraseTableMin : queryPhraseTableMin.cpp ../moses/src//moses ;
 
     alias programsMin : processPhraseTableMin processLexicalTableMin queryPhraseTableMin ;
+#    alias programsMin : processPhraseTableMin processLexicalTableMin ;
 }
 else {
     alias programsMin ;

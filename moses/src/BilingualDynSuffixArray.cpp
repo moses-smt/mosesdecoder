@@ -395,14 +395,15 @@ SAPhrase BilingualDynSuffixArray::TrgPhraseFromSntIdx(const PhrasePair& phrasepa
 	return phraseIds;
 }
 	
-TargetPhrase* BilingualDynSuffixArray::GetMosesFactorIDs(const SAPhrase& phrase) const 
+TargetPhrase* BilingualDynSuffixArray::GetMosesFactorIDs(const SAPhrase& phrase, const Phrase& sourcePhrase) const
 {
-	TargetPhrase* targetPhrase = new TargetPhrase(Output);
+	TargetPhrase* targetPhrase = new TargetPhrase();
 	for(size_t i=0; i < phrase.words.size(); ++i) { // look up trg words
 		Word& word = m_trgVocab->GetWord( phrase.words[i]);
 		CHECK(word != m_trgVocab->GetkOOVWord());
 		targetPhrase->AddWord(word);
 	}
+	targetPhrase->SetSourcePhrase(sourcePhrase);
 	// scoring
 	return targetPhrase;
 }
@@ -464,7 +465,7 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 	std::multimap<Scores, const SAPhrase*, ScoresComp>::reverse_iterator ritr;
 	for(ritr = phraseScores.rbegin(); ritr != phraseScores.rend(); ++ritr) {
 		Scores scoreVector = ritr->first;
-		TargetPhrase *targetPhrase = GetMosesFactorIDs(*ritr->second);
+		TargetPhrase *targetPhrase = GetMosesFactorIDs(*ritr->second, src);
 		target.push_back(make_pair( scoreVector, targetPhrase));
 		if(target.size() == m_maxSampleSize) break;
 	}

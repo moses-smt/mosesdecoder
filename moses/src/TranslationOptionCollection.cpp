@@ -201,66 +201,73 @@ void TranslationOptionCollection::ProcessUnknownWord()
 void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,size_t sourcePos, size_t length, const Scores *inputScores)
 
 {
-  // unknown word, add as trans opt
-  FactorCollection &factorCollection = FactorCollection::Instance();
+	// unknown word, add as trans opt
+	FactorCollection &factorCollection = FactorCollection::Instance();
 
-  size_t isDigit = 0;
+	size_t isDigit = 0;
+	
+	const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
+	const string &s = f->GetString();
+	bool isEpsilon = (s=="" || s==EPSILON);
+	if (StaticData::Instance().GetDropUnknown())
+	{
 
-  const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-  const string &s = f->GetString();
-  bool isEpsilon = (s=="" || s==EPSILON);
-  if (StaticData::Instance().GetDropUnknown()) {
 
-
-    isDigit = s.find_first_of("0123456789");
-    if (isDigit == 1)
-      isDigit = 1;
-    else
-      isDigit = 0;
-    // modify the starting bitmap
-  }
-
-  Phrase* m_unksrc = new Phrase(1);
+		isDigit = s.find_first_of("0123456789");
+		if (isDigit == 1) 
+			isDigit = 1;
+		else 
+			isDigit = 0;
+		// modify the starting bitmap
+	}
+	
+	Phrase* m_unksrc = new Phrase(1);
   m_unksrc->AddWord() = sourceWord;
-  m_unksrcs.push_back(m_unksrc);
+	m_unksrcs.push_back(m_unksrc);
 
-  TranslationOption *transOpt;
-  TargetPhrase targetPhrase(Output);
-  targetPhrase.SetSourcePhrase(m_unksrc);
-  if (inputScores != NULL) {
-    targetPhrase.SetScore(m_system,*inputScores);
-  } else {
-    targetPhrase.SetScore(m_system);
-  }
+	TranslationOption *transOpt;
+	TargetPhrase targetPhrase;
+	targetPhrase.SetSourcePhrase(*m_unksrc);
+	if (inputScores != NULL) {
+		targetPhrase.SetScore(m_system,*inputScores);
+	} else {
+		targetPhrase.SetScore(m_system);
+	}
+	
+	if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit)
+	{
+		// add to dictionary
 
-  if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit) {
-    // add to dictionary
+		Word &targetWord = targetPhrase.AddWord();
+					
+		for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++)
+		{
+			FactorType factorType = static_cast<FactorType>(currFactor);
+			
+			const Factor *sourceFactor = sourceWord[currFactor];
+			if (sourceFactor == NULL)
+				targetWord[factorType] = factorCollection.AddFactor(UNKNOWN_FACTOR);
+			else
+				targetWord[factorType] = factorCollection.AddFactor(sourceFactor->GetString());
+		}
+		//create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation	
+        
+		targetPhrase.SetAlignmentInfo("0-0");
+		
+	}
+	else 
+	{ 
+		// drop source word. create blank trans opt
 
-    Word &targetWord = targetPhrase.AddWord();
+		//targetPhrase.SetAlignment();
 
-    for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
-      FactorType factorType = static_cast<FactorType>(currFactor);
+	}
+	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
+  , m_system->GetUnknownWordPenaltyProducer());	
+	transOpt->CalcScore(m_system);
+	Add(transOpt);
 
-      const Factor *sourceFactor = sourceWord[currFactor];
-      if (sourceFactor == NULL)
-        targetWord[factorType] = factorCollection.AddFactor(Output, factorType, UNKNOWN_FACTOR);
-      else
-        targetWord[factorType] = factorCollection.AddFactor(Output, factorType, sourceFactor->GetString());
-    }
-    //create a one-to-one alignment between UNKNOWN_FACTOR and its verbatim translation
 
-    targetPhrase.SetAlignmentInfo("0-0");
-
-  } else {
-    // drop source word. create blank trans opt
-
-    //targetPhrase.SetAlignment();
-
-  }
-  transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
-                                   , m_system->GetUnknownWordPenaltyProducer());
-  transOpt->CalcScore(m_system);
-  Add(transOpt);
 }
 
 /** compute future score matrix in a dynamic programming fashion.
@@ -413,6 +420,9 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
+
+  // stateless feature scores
+  PreCalculateScores();
 }
 
 void TranslationOptionCollection::IncorporateDLMScores() {
@@ -667,6 +677,11 @@ std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& c
   return out;
 }
 
+const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() const 
+{
+  return m_unksrcs;
+}
+
 void TranslationOptionCollection::CacheLexReordering()
 {
   const vector<LexicalReordering*> &lexReorderingModels = m_system->GetReorderModels();
@@ -699,6 +714,51 @@ void TranslationOptionCollection::CacheLexReordering()
     }
   }
 }
+
+void TranslationOptionCollection::PreCalculateScores() 
+{
+  //Figure out which features need to be precalculated
+  const vector<const StatelessFeatureFunction*>& sfs =
+    m_system->GetStatelessFeatureFunctions();
+  vector<const StatelessFeatureFunction*> precomputedFeatures;
+  for (unsigned i = 0; i < sfs.size(); ++i) {
+    if (sfs[i]->ComputeValueInTranslationOption() && 
+        !sfs[i]->ComputeValueInTranslationTable()) {
+      precomputedFeatures.push_back(sfs[i]);
+    }
+  }
+  //empty coverage vector
+  WordsBitmap coverage(m_source.GetSize());
+
+  //Go through translation options and precompute features
+  for (size_t i = 0; i < m_collection.size(); ++i) {
+    for (size_t j = 0; j < m_collection[i].size(); ++j) {
+      for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
+        const TranslationOption* toption =  m_collection[i][j].Get(k);
+        ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
+        PhraseBasedFeatureContext context(*toption, m_source);
+        for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
+          precomputedFeatures[si]->Evaluate(context, &breakdown);
+        }
+      }
+    }
+  }
+}
+
+void TranslationOptionCollection::InsertPreCalculatedScores
+  (const TranslationOption& translationOption, ScoreComponentCollection* scoreBreakdown) 
+    const
+{
+  boost::unordered_map<TranslationOption,ScoreComponentCollection>::const_iterator scoreIter = 
+    m_precalculatedScores.find(translationOption);
+  if (scoreIter != m_precalculatedScores.end()) {
+    scoreBreakdown->PlusEquals(scoreIter->second);
+  } else {
+    TRACE_ERR("ERROR: " << translationOption << " missing from precalculation cache" << endl);
+    assert(0);  
+  }
+}
+
 //! list of trans opt for a particular span
 TranslationOptionList &TranslationOptionCollection::GetTranslationOptionList(size_t startPos, size_t endPos)
 {

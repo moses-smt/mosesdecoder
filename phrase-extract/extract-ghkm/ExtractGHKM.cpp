@@ -90,7 +90,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   std::string alignmentLine;
   XmlTreeParser xmlTreeParser(labelSet, topLabelSet);
   ScfgRuleWriter writer(fwdExtractStream, invExtractStream, options);
-  size_t lineNum = 0;
+  size_t lineNum = options.sentenceOffset;
   while (true) {
     std::getline(targetStream, targetLine);
     std::getline(sourceStream, sourceLine);
@@ -289,6 +289,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
         "extract minimal rules only")
     ("PCFG",
         "include score based on PCFG scores in target corpus")
+    ("SentenceOffset",
+        po::value(&options.sentenceOffset)->default_value(options.sentenceOffset),
+        "set sentence number offset if processing split corpus")
     ("UnknownWordLabel",
         po::value(&options.unknownWordFile),
         "write unknown word labels to named file")

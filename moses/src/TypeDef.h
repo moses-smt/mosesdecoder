@@ -74,7 +74,7 @@ const size_t DEFAULT_VERBOSE_LEVEL = 1;
 // can only be 2 at the moment
 const int NUM_LANGUAGES = 2;
 
-const size_t MAX_NUM_FACTORS = 4;
+// Looking for MAX_NUM_FACTORS?  It's defined by the build system: bjam --max-factors=4
 
 enum FactorDirection {
   Input,			//! Source factors
@@ -173,6 +173,7 @@ enum SearchAlgorithm {
   ,CubeGrowing	= 2
   ,ChartDecoding= 3
   ,NormalBatch  = 4
+  ,ChartIncremental = 5
 };
 
 enum SourceLabelOverlap {
@@ -200,7 +201,6 @@ typedef std::vector<std::string> WordAlignments;
 
 typedef std::vector<FactorType> FactorList;
 
-typedef std::pair<std::vector<std::string const*>,Scores > StringTgtCand;
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
 }

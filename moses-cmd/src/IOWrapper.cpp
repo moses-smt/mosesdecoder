@@ -42,7 +42,9 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "TrellisPathList.h"
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
+#include "FeatureVector.h"
 #include "InputFileStream.h"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 using namespace Moses;
@@ -252,7 +254,7 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
     
-    OutputAlignment(out, tp.GetAlignmentInfo(), sourceOffset, targetOffset);
+    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
 
     targetOffset += tp.GetSize();
   }
@@ -382,30 +384,9 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     }
     out << " |||";
 
-    std::string lastName = "";
-    const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
-    for( size_t i=0; i<sff.size(); i++ ) {
-      if( labeledOutput && lastName != sff[i]->GetScoreProducerWeightShortName() ) {
-        lastName = sff[i]->GetScoreProducerWeightShortName();
-        out << " " << lastName << ":";
-      }
-      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( sff[i] );
-      for (size_t j = 0; j<scores.size(); ++j) {
-        out << " " << scores[j];
-      }
-    }
-
-    const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
-    for( size_t i=0; i<slf.size(); i++ ) {
-      if( labeledOutput && lastName != slf[i]->GetScoreProducerWeightShortName() ) {
-        lastName = slf[i]->GetScoreProducerWeightShortName();
-        out << " " << lastName << ":";
-      }
-      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( slf[i] );
-      for (size_t j = 0; j<scores.size(); ++j) {
-        out << " " << scores[j];
-      }
-    }
+    // print scores with feature names
+    OutputAllFeatureScores( out, system, path );
+    string lastName;
 
     // translation components
     const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
@@ -476,7 +457,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
         WordsRange targetRange = path.GetTargetWordsRange(edge);
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
-        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignmentInfo();
+        const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
         
         OutputAlignment(out, ai, sourceOffset, targetOffset);
 
@@ -491,8 +472,66 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     out << endl;
   }
 
+  out << std::flush;
+}
 
-  out <<std::flush;
+void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system, const TrellisPath &path )
+{
+  std::string lastName = "";
+  const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ )
+  	if (sff[i]->GetScoreProducerWeightShortName() != "bl")
+      OutputFeatureScores( out, path, sff[i], lastName );
+
+  const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ )
+    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
+          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
+          slf[i]->GetScoreProducerWeightShortName() != "I" &&
+          slf[i]->GetScoreProducerWeightShortName() != "g")
+      OutputFeatureScores( out, path, slf[i], lastName );
+}
+
+void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const FeatureFunction *ff, std::string &lastName )
+{
+  const StaticData &staticData = StaticData::Instance();
+  bool labeledOutput = staticData.IsLabeledNBestList();
+
+  // regular features (not sparse)
+  if (ff->GetNumScoreComponents() != ScoreProducer::unlimited) {
+    if( labeledOutput && lastName != ff->GetScoreProducerWeightShortName() ) {
+      lastName = ff->GetScoreProducerWeightShortName();
+      out << " " << lastName << ":";
+    }
+    vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( ff );
+    for (size_t j = 0; j<scores.size(); ++j) {
+      out << " " << scores[j];
+    }
+  }
+
+  // sparse features
+  else {
+    const FVector scores = path.GetScoreBreakdown().GetVectorForProducer( ff );
+
+    // report weighted aggregate
+    if (! ff->GetSparseFeatureReporting()) {
+      const FVector &weights = staticData.GetAllWeights().GetScoresVector();
+      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
+        out << " " << ff->GetScoreProducerWeightShortName() << ":";
+      out << " " << scores.inner_product(weights);
+    }
+
+    // report each feature
+    else {
+      for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) 
+	out << " " << i->first << ": " << i->second;
+	/*        if (i->second != 0) { // do not report zero-valued features
+	  float weight = staticData.GetSparseWeight(i->first);
+          if (weight != 0)
+	  out << " " << i->first << "=" << weight;
+	  }*/
+    }
+  }
 }
 
 void OutputLatticeMBRNBest(std::ostream& out, const vector<LatticeMBRSolution>& solutions,long translationId)

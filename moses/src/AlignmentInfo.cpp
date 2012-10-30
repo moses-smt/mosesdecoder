@@ -24,6 +24,11 @@
 
 namespace Moses
 {
+AlignmentInfo::AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs)
+  : m_collection(pairs)
+{
+  BuildNonTermIndexMap();
+}
 
 void AlignmentInfo::BuildNonTermIndexMap()
 {
@@ -40,6 +45,11 @@ void AlignmentInfo::BuildNonTermIndexMap()
   m_nonTermIndexMap.resize(maxIndex+1, NOT_FOUND);
   size_t i = 0;
   for (p = begin(); p != end(); ++p) {
+  	if (m_nonTermIndexMap[p->second] != NOT_FOUND) {
+  		// 1-to-many. Definitely a set of terminals. Don't bother storing 1-to-1 index map
+  		m_nonTermIndexMap.clear();
+  		return;
+  	}
     m_nonTermIndexMap[p->second] = i++;
   }
             

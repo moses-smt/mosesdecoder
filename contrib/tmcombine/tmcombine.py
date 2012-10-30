@@ -114,17 +114,29 @@ class Moses():
                 
                 if mode == 'counts' and not priority == 2: #priority 2 is MAP
                     try:
-                        target_count,src_count = map(float,line[-1].split())
+                        counts = map(float,line[-1].split())
+                        try:
+                            target_count,src_count,joint_count = counts
+                            joint_count_e2f = joint_count
+                            joint_count_f2e = joint_count
+                        except ValueError:
+                            # possibly old-style phrase table with 2 counts in last column, or phrase table produced by tmcombine
+                            # note: since each feature has different weight vector, we may have two different phrase pair frequencies
+                            target_count,src_count = counts
+                            i_e2f = flags['i_e2f']
+                            i_f2e = flags['i_f2e']
+                            joint_count_e2f = model_probabilities[i_e2f] * target_count
+                            joint_count_f2e = model_probabilities[i_f2e] * src_count
                     except:
-                        sys.stderr.write(str(line)+'\n')
-                        sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
-                        return
-                        
+                        sys.stderr.write(str(b" ||| ".join(line))+b'\n')
+                        sys.stderr.write('ERROR: counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
+                        raise
+                    
                     i_e2f = flags['i_e2f']
                     i_f2e = flags['i_f2e']
-                    model_probabilities[i_e2f] *= target_count
-                    model_probabilities[i_f2e] *= src_count
-                
+                    model_probabilities[i_e2f] = joint_count_e2f
+                    model_probabilities[i_f2e] = joint_count_f2e
+                        
                 for j,p in enumerate(model_probabilities):
                     phrase_probabilities[j][i] = p
                 
@@ -801,9 +813,15 @@ def cross_entropy_light(model_interface,reference_interface,weights,score,mode,f
     for (src,target,c) in cache:
         features = score(weights,src,target,model_interface,flags,cache=True)
 
+        if 0 in features:
+            #sys.stderr.write('Warning: 0 probability in model {0}: source phrase: {1!r}; target phrase: {2!r}\n'.format(i,src,target))
+            #sys.stderr.write('Possible reasons: 0 probability in phrase table; very low (or 0) weight; recompute lexweight and different alignments\n')
+            #sys.stderr.write('Phrase pair is ignored for cross_entropy calculation\n\n')
+            continue
+
         for i in range(model_interface.number_of_features):
             cross_entropies[i] -= log(features[i],2)*c
-                
+
     return cross_entropies
 
 

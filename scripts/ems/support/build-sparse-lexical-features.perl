@@ -39,7 +39,7 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/ && $SPEC[3] =~ /^\d+$/) {
       my $file_in  = &create_top_words($input_extension,  $SPEC[2]);
       my $file_out = &create_top_words($output_extension, $SPEC[3]);
-      $ini .= "[word-translation-feature]\n0 0 $file_in $file_out\n\n";
+      $ini .= "[word-translation-feature]\n0-0 0 0 0 $file_in $file_out\n\n";
       $report .= "wt\n";
     }
     else {

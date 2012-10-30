@@ -80,14 +80,14 @@ void WriteWordsWrapper::Add(WordIndex index, const StringPiece &str) {
   buffer_.push_back(0);
 }
 
-void WriteWordsWrapper::Write(int fd) {
-  util::SeekEnd(fd);
+void WriteWordsWrapper::Write(int fd, uint64_t start) {
+  util::SeekOrThrow(fd, start);
   util::WriteOrThrow(fd, buffer_.data(), buffer_.size());
 }
 
 SortedVocabulary::SortedVocabulary() : begin_(NULL), end_(NULL), enumerate_(NULL) {}
 
-std::size_t SortedVocabulary::Size(std::size_t entries, const Config &/*config*/) {
+uint64_t SortedVocabulary::Size(uint64_t entries, const Config &/*config*/) {
   // Lead with the number of entries.  
   return sizeof(uint64_t) + sizeof(uint64_t) * entries;
 }
@@ -165,7 +165,7 @@ struct ProbingVocabularyHeader {
 
 ProbingVocabulary::ProbingVocabulary() : enumerate_(NULL) {}
 
-std::size_t ProbingVocabulary::Size(std::size_t entries, const Config &config) {
+uint64_t ProbingVocabulary::Size(uint64_t entries, const Config &config) {
   return ALIGN8(sizeof(detail::ProbingVocabularyHeader)) + Lookup::Size(entries, config.probing_multiplier);
 }
 

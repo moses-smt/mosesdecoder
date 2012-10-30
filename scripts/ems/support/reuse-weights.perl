@@ -22,7 +22,7 @@ while(<WEIGHT>) {
     elsif (/^\[weight\-(\S+)\]/) {
 	$current_weight = $1;
     }
-  elsif ($current_weight && /^(([\-\d\.]+)([Ee][+-]?[\d]+)?)$/) {
+    elsif ($current_weight && /^(([\-\d\.]+)([Ee][+-]?[\d]+)?)$/) {
 	push @{$WEIGHT{$current_weight}},$1;
     }
     elsif ($weights_file_flag && !/^\[/ && !/^\s*$/) {
@@ -37,11 +37,21 @@ close(WEIGHT);
 
 my %IGNORE;
 while(<STDIN>) {
-    if (/^\[weight\-(\S+)\]/) {
+    if (/^\[weight-file\]/) {
+	$weights_file_flag = 1;
+    }
+    elsif (/^\[weight\-(\S+)\]/) {
 	$current_weight = $1;
 	if (!defined($WEIGHT{$current_weight})) {    
-	    print STDERR "(reuse-weights) WARNING: no weights for weight-$1, deleting\n";
-	    $current_weight = "xxx";
+	    if (/^\[weight\-wt/ or /^\[weight\-pp/) {
+		print $_;
+		$_ = <STDIN>;
+		print $_;
+	    }
+	    else {
+		print STDERR "(reuse-weights) WARNING: no weights for weight-$1, deleting\n";
+		$current_weight = "xxx";
+	    }
 	}
 	else {
 	    print $_;
@@ -52,6 +62,11 @@ while(<STDIN>) {
     }
     elsif ($current_weight && /^([\-\d\.]+)([Ee][+-]?[\d]+)?$/) {
 	$IGNORE{$current_weight}++;
+    }
+    elsif ($weights_file_flag && !/^\[/ && !/^\s*$/) {
+	$weights_file_flag = 0;
+        # if weight-file was not defined in weights.ini, take this version 
+	#$weights_file_spec = "\n[weight-file]\n".$_;
     }
     elsif (/^\[/) {
 	$current_weight = "";

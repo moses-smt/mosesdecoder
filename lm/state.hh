@@ -1,6 +1,7 @@
 #ifndef LM_STATE__
 #define LM_STATE__
 
+#include "lm/max_order.hh"
 #include "lm/word_index.hh"
 #include "util/murmur_hash.hh"
 
@@ -45,6 +46,8 @@ class State {
     float backoff[KENLM_MAX_ORDER - 1];
     unsigned char length;
 };
+
+typedef State Right;
 
 inline uint64_t hash_value(const State &state, uint64_t seed = 0) {
   return util::MurmurHashNative(state.words, sizeof(WordIndex) * state.length, seed);

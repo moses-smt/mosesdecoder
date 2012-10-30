@@ -289,10 +289,10 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     if(state == New)
     {
       // Creating new TargetPhrase on the heap
-      tpv->push_back(TargetPhrase(Output));
+      tpv->push_back(TargetPhrase());
       targetPhrase = &tpv->back();
       
-      targetPhrase->SetSourcePhrase(&sourcePhrase);
+      targetPhrase->SetSourcePhrase(sourcePhrase);
       alignment.clear();
       scores.clear();
         
@@ -401,8 +401,8 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
               if(m_phraseDictionary.m_useAlignmentInfo)
               {
                 // reconstruct the alignment data based on the alignment of the subphrase
-                for(AlignmentInfo::const_iterator it = subTp.GetAlignmentInfo().begin();
-                    it != subTp.GetAlignmentInfo().end(); it++)
+                for(AlignmentInfo::const_iterator it = subTp.GetAlignNonTerm().begin();
+                    it != subTp.GetAlignNonTerm().end(); it++)
                 {
                   alignment.insert(AlignPointSizeT(srcStart + it->first,
                                                    targetPhrase->GetSize() + it->second));
@@ -431,7 +431,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
-        targetPhrase->SetScore(m_feature, scores, *m_weight, m_weightWP, *m_languageModels);
+        targetPhrase->SetScore(m_feature, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
         
         if(m_containsAlignmentInfo)
           state = Alignment;
@@ -456,7 +456,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     if(state == Add)
     {
       if(m_phraseDictionary.m_useAlignmentInfo)
-        targetPhrase->SetAlignmentInfo(alignment);
+        targetPhrase->SetAlignTerm(alignment);
       
       if(m_coding == PREnc)
       {

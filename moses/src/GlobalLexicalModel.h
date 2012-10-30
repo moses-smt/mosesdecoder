@@ -50,7 +50,6 @@ private:
 #else
   std::auto_ptr<ThreadLocalStorage> m_local;
 #endif
-
   Word *m_bias;
 
   FactorMask m_inputFactors;
@@ -64,19 +63,10 @@ private:
   float GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const;
 
 public:
-  GlobalLexicalModel(const std::string &filePath,
-                     const float weight,
-                     const std::vector< FactorType >& inFactors,
-                     const std::vector< FactorType >& outFactors);
-  virtual ~GlobalLexicalModel();
-
-  virtual size_t GetNumScoreComponents() const {
-    return 1;
-  };
-
-  virtual std::string GetScoreProducerDescription(unsigned) const {
-    return "GlobalLexicalModel";
-  };
+	GlobalLexicalModel(const std::string &filePath,
+	                   const std::vector< FactorType >& inFactors,
+	                   const std::vector< FactorType >& outFactors);
+	virtual ~GlobalLexicalModel();
 
   virtual std::string GetScoreProducerWeightShortName(unsigned) const {
     return "lex";
@@ -84,7 +74,17 @@ public:
 
   void InitializeForInput( Sentence const& in );
 
-  void Evaluate(const TargetPhrase&, ScoreComponentCollection* ) const;
+  void Evaluate(const PhraseBasedFeatureContext& context,
+  							ScoreComponentCollection* accumulator) const;
+
+
+  void EvaluateChart(
+    const ChartBasedFeatureContext& context,
+    ScoreComponentCollection* accumulator) const
+  {
+  	std::cerr << "EvaluateChart not implemented." << std::endl;
+  	exit(1);
+  }
 };
 
 }

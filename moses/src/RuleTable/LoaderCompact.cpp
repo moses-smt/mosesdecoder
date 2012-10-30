@@ -36,7 +36,7 @@ namespace Moses
 
 bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
                                   const std::vector<FactorType> &output,
-                                  std::istream &inStream,
+                                  const std::string &inFile,
                                   const std::vector<float> &weight,
                                   size_t /* tableLimit */,
                                   const LMList &languageModels,
@@ -45,6 +45,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 {
   PrintUserTime("Start loading compact rule table");
 
+  InputFileStream inStream(inFile);
   LineReader reader(inStream);
 
   // Read and check version number.
@@ -72,7 +73,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
 
   // Load alignments.
   std::vector<const AlignmentInfo *> alignmentSets;
-  LoadAlignmentSection(reader, alignmentSets);
+  LoadAlignmentSection(reader, alignmentSets, sourcePhrases);
 
   // Load rules.
   if (!LoadRuleSection(reader, vocab, sourcePhrases, targetPhrases,
@@ -136,20 +137,22 @@ void RuleTableLoaderCompact::LoadPhraseSection(
 }
 
 void RuleTableLoaderCompact::LoadAlignmentSection(
-    LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets)
+    LineReader &reader, std::vector<const AlignmentInfo *> &alignmentSets, std::vector<Phrase> &sourcePhrases)
 {
   // Read alignment set count.
   reader.ReadLine();
   const size_t alignmentSetCount = std::atoi(reader.m_line.c_str());
 
-  alignmentSets.resize(alignmentSetCount);
-  std::set<std::pair<size_t,size_t> > alignmentInfo;
+  alignmentSets.resize(alignmentSetCount * 2);
+  AlignmentInfo::CollType alignTerm, alignNonTerm;
   std::vector<std::string> tokens;
   std::vector<size_t> points;
   for (size_t i = 0; i < alignmentSetCount; ++i) {
     // Read alignment set, lookup in collection, and store pointer.
-    alignmentInfo.clear();
+  	alignTerm.clear();
+  	alignNonTerm.clear();
     tokens.clear();
+
     reader.ReadLine();
     Tokenize(tokens, reader.m_line);
     std::vector<std::string>::const_iterator p;
@@ -157,9 +160,17 @@ void RuleTableLoaderCompact::LoadAlignmentSection(
       points.clear();
       Tokenize<size_t>(points, *p, "-");
       std::pair<size_t, size_t> alignmentPair(points[0], points[1]);
-      alignmentInfo.insert(alignmentPair);
+
+      if (sourcePhrases[i].GetWord(alignmentPair.first).IsNonTerminal()) {
+      	alignNonTerm.insert(alignmentPair);
+      }
+    	else {
+    		alignTerm.insert(alignmentPair);
+    	}
+
     }
-    alignmentSets[i] = AlignmentInfoCollection::Instance().Add(alignmentInfo);
+    alignmentSets[i*2] = AlignmentInfoCollection::Instance().Add(alignNonTerm);
+    alignmentSets[i*2 + 1] = AlignmentInfoCollection::Instance().Add(alignTerm);
   }
 }
 
@@ -202,7 +213,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     const Phrase &targetPhrasePhrase = targetPhrases[targetPhraseId];
     const Word &targetLhs = vocab[targetLhsIds[targetPhraseId]];
     Word sourceLHS("X"); // TODO not implemented for compact
-    const AlignmentInfo *alignmentInfo = alignmentSets[alignmentSetId];
+    const AlignmentInfo *alignNonTerm = alignmentSets[alignmentSetId];
 
     // Then there should be one score for each score component.
     for (size_t j = 0; j < numScoreComponents; ++j) {
@@ -222,10 +233,11 @@ bool RuleTableLoaderCompact::LoadRuleSection(
 
     // Create and score target phrase.
     TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
-    targetPhrase->SetAlignmentInfo(alignmentInfo);
+    targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
     targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weights,
                                 languageModels, wpProducer);
+    targetPhrase->SetSourcePhrase(sourcePhrase);
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(

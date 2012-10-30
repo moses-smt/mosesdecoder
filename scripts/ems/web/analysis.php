@@ -869,9 +869,12 @@ function rule_summary() {
   printf("tree depth:  %.2f<br>\n",$depth);
   printf("nt/rule: %.2f<br>\n",$nt_count/$total);
   print "<table>\n";
+  arsort($count_nt);
+  $i=0;
   foreach ($count_nt as $rule => $count) {
-      printf("<tr><td>%s</td><td align=right>%d</td><td align=right>%.1f%s</td></tr>\n",$rule,$count,$count/$total*100,'%');
+    if ($i++ < 5) { printf("<tr><td>%s</td><td align=right>%d</td><td align=right>%.1f%s</td></tr>\n",$rule,$count,$count/$total*100,'%'); }
   }
+  if (count($count_nt)>5) { print "<tr><td align=center>...</td><td align=center>...</td><td align=center>...</td></tr>\n"; }
   print "</table>\n";
 }
 
@@ -920,6 +923,7 @@ function bleu_show() {
   if ($filter != "") {
     print "; filter: '$filter'";
   }
+  
   sentence_annotation($count,$filter);
   print "<p align=center><A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',5+$count,'".base64_encode($filter)."')\">5 more</A> | ";
   print "<A HREF=\"javascript:show('bleu','" . $_GET['sort'] . "',10+$count,'".base64_encode($filter)."')\">10 more</A> | ";
@@ -1126,6 +1130,12 @@ function sentence_annotation($count,$filter) {
   //print "<div id=\"debug\">$sort / $offset</div>";
   for($i=$offset;$i<$count+$offset && $i<count($bleu);$i++) {
      $line = $bleu[$i]; 
+     $search_graph_dir = get_current_analysis_filename("basic","search-graph");
+     if (file_exists($search_graph_dir) && file_exists($search_graph_dir."/graph.".$line["id"])) {
+       $state = return_state_for_link();
+       print "<FONT SIZE=-1><A TARGET=_blank HREF=\"?$state&analysis=sgviz&set=$set&id=$id&sentence=".$line["id"]."\">show search graph</a></FONT><br>\n";
+     }
+
      if ($hierarchical) {
 	 annotation_hierarchical($line["id"],$segmentation[$line["id"]],$segmentation_out[$line["id"]],$node[$line["id"]]);
      }

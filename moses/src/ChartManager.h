@@ -22,14 +22,15 @@
 #pragma once
 
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "ChartCell.h"
-#include "ChartTranslationOptionCollection.h"
 #include "ChartCellCollection.h"
 #include "InputType.h"
 #include "WordsRange.h"
 #include "SentenceStats.h"
 #include "TranslationSystem.h"
-#include "ChartRuleLookupManager.h"
+#include "ChartTranslationOptionList.h"
+#include "ChartParser.h"
 
 #include <boost/shared_ptr.hpp>
 
@@ -56,12 +57,20 @@ private:
 
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
-  ChartTranslationOptionCollection m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
   std::auto_ptr<SentenceStats> m_sentenceStats;
   const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
-  std::vector<ChartRuleLookupManager*> m_ruleLookupManagers;
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
+
+  ChartParser m_parser;
+
+  ChartTranslationOptionList m_translationOptionList; /**< pre-computed list of translation options for the phrases in this sentence */
+
+  //! Some features should be calculated prior to search
+  boost::unordered_map<TargetPhrase,ScoreComponentCollection, TargetPhraseHasher, TargetPhraseComparator> m_precalculatedScores;
+
+  //! Pre-calculate most stateless feature values
+  void PreCalculateScores();
 
 public:
   ChartManager(InputType const& source, const TranslationSystem* system);
@@ -102,6 +111,11 @@ public:
 
   //! contigious hypo id for each input sentence. For debugging purposes
   unsigned GetNextHypoId() { return m_hypothesisId++; }
+
+  //! Access the pre-calculated values
+  void InsertPreCalculatedScores(const TargetPhrase& targetPhrase,
+      ScoreComponentCollection* scoreBreakdown) const;
+
 };
 
 }

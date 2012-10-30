@@ -86,6 +86,8 @@ $CORPUS = "$DIR/aligned.truecased" if (-e "$DIR/aligned.truecased");
 &train_recase_model() if $FIRST_STEP <= 10 && $LAST_STEP >= 3;
 &cleanup()            if $LAST_STEP == 11;
 
+exit(0);
+
 ### subs ###
 
 sub truecase {
@@ -159,7 +161,7 @@ sub train_recase_model {
         $cmd .= " --lm 0:3:$DIR/cased.irstlm.gz:1";
     }
     else {
-        $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:0";
+        $cmd .= " --lm 0:3:$DIR/cased.srilm.gz:8";
     }
     $cmd .= " -config $CONFIG" if $CONFIG;
     print STDERR $cmd."\n";

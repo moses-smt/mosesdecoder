@@ -10,11 +10,14 @@ namespace Moses
 
 LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      std::vector<FactorType>& e_factors,
-                                     const std::string &modelType,
+                                     const LexicalReorderingConfiguration& configuration,
                                      const std::string &filePath,
                                      const std::vector<float>& weights)
-  : m_configuration(this, modelType)
+  : StatefulFeatureFunction("LexicalReordering_" + configuration.GetModelString(),
+                            configuration.GetNumScoreComponents()),
+    m_configuration(configuration)
 {
+  m_configuration.SetScoreProducer(this);
   std::cerr << "Creating lexical reordering...\n";
   std::cerr << "weights: ";
   for(size_t w = 0; w < weights.size(); ++w) {
@@ -22,7 +25,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
   }
   std::cerr << "\n";
 
-  m_modelTypeString = modelType;
+  m_modelTypeString = m_configuration.GetModelString();
 
   switch(m_configuration.GetCondition()) {
   case LexicalReorderingConfiguration::FE:
@@ -46,17 +49,17 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     exit(1);
   }
 
-
-  if(weights.size() != m_configuration.GetNumScoreComponents()) {
+  size_t numberOfScoreComponents = m_configuration.GetNumScoreComponents();
+  if (weights.size() > numberOfScoreComponents) {
+    m_configuration.SetAdditionalScoreComponents(weights.size() - numberOfScoreComponents);
+  } else if(weights.size() < numberOfScoreComponents) {
     std::ostringstream os;
-    os << "Lexical reordering model (type " << modelType << "): expected " << m_numScoreComponents << " weights, got " << weights.size() << std::endl;
+    os << "Lexical reordering model (type " << m_modelTypeString << "): expected " << numberOfScoreComponents << " weights, got " << weights.size() << std::endl;
     UserMessage::Add(os.str());
     exit(1);
   }
 
-  // add ScoreProducer - don't do this before our object is set up
-  const_cast<ScoreIndexManager&>(StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
-  const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
+  const_cast<StaticData&>(StaticData::Instance()).SetWeights(this, weights);
 
   m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 }

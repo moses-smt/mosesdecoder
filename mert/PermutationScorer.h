@@ -32,10 +32,15 @@ public:
   void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   void prepareStats(size_t sid, const std::string& text, ScoreStats& entry);
   static const int SCORE_PRECISION;
+  static const int SCORE_MULTFACT;
 
   size_t NumberOfScores() const {
     //cerr << "PermutationScorer number of scores: 1" << endl;
-    return 1;
+    //return 1;
+
+    //cerr << "PermutationScorer number of scores: 2" << endl;
+    //the second it is just a counter for the normalization of the amount of test sentences
+    return 2;
   };
   bool useAlignment() const {
     //cout << "PermutationScorer::useAlignment returning true" << endl;

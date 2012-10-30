@@ -268,7 +268,12 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"-threads") == 0 || 
                strcmp(argv[i],"--threads") == 0 ||
                strcmp(argv[i],"--Threads") == 0) {
+#ifdef WITH_THREADS
       thread_count = atoi(argv[++i]);
+#else
+      cerr << "thread support not compiled in." << '\n';
+      exit(1);
+#endif
     } else if (strcmp(argv[i], "--SentenceOffset") == 0) {
       if (i+1 >= argc || argv[i+1][0] < '0' || argv[i+1][0] > '9') {
         cerr << "extract: syntax error, used switch --SentenceOffset without a number" << endl;

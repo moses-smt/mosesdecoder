@@ -114,9 +114,6 @@ public:
     return m_sentenceEndArray;
   }
 
-  virtual std::string GetScoreProducerDescription(unsigned) const = 0;
-
-  float GetWeight() const;
 
   std::string GetScoreProducerWeightShortName(unsigned) const {
     return "lm";
@@ -129,12 +126,10 @@ public:
 
 class LMRefCount : public LanguageModel {
   public:
-    LMRefCount(ScoreIndexManager &scoreIndexManager, LanguageModelImplementation *impl) : m_impl(impl) {
-      Init(scoreIndexManager);
-    }
+    LMRefCount(LanguageModelImplementation *impl) : m_impl(impl) {}
 
-    LanguageModel *Duplicate(ScoreIndexManager &scoreIndexManager) const {
-      return new LMRefCount(scoreIndexManager, *this);
+    LanguageModel *Duplicate() const {
+      return new LMRefCount(*this);
     }
 
     void InitializeBeforeSentenceProcessing() {
@@ -165,16 +160,11 @@ class LMRefCount : public LanguageModel {
       return m_impl->EvaluateChart(cur_hypo, featureID, accumulator, this);
     }
 
-    std::string GetScoreProducerDescription(unsigned int param) const {
-      return m_impl->GetScoreProducerDescription(param);
-    }
 
     LanguageModelImplementation *MosesServerCppShouldNotHaveLMCode() { return m_impl.get(); }
 
   private:
-    LMRefCount(ScoreIndexManager &scoreIndexManager, const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {
-      Init(scoreIndexManager);
-    }
+    LMRefCount(const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {}
 
     boost::shared_ptr<LanguageModelImplementation> m_impl;
 };

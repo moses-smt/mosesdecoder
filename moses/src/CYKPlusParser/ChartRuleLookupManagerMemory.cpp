@@ -21,7 +21,7 @@
 
 #include "RuleTable/PhraseDictionarySCFG.h"
 #include "InputType.h"
-#include "ChartTranslationOptionList.h"
+#include "ChartParserCallback.h"
 #include "DotChartInMemory.h"
 #include "StaticData.h"
 #include "NonTerminal.h"
@@ -32,7 +32,7 @@ namespace Moses
 
 ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
   const InputType &src,
-  const ChartCellCollection &cellColl,
+  const ChartCellCollectionBase &cellColl,
   const PhraseDictionarySCFG &ruleTable)
   : ChartRuleLookupManagerCYKPlus(src, cellColl)
   , m_ruleTable(ruleTable)
@@ -65,7 +65,7 @@ ChartRuleLookupManagerMemory::~ChartRuleLookupManagerMemory()
 
 void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   const WordsRange &range,
-  ChartTranslationOptionList &outColl)
+  ChartParserCallback &outColl)
 {
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
@@ -76,7 +76,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   DottedRuleColl &dottedRuleCol = *m_dottedRuleColls[range.GetStartPos()];
   const DottedRuleList &expandableDottedRuleList = dottedRuleCol.GetExpandableDottedRuleList();
   
-  const ChartCellLabel &sourceWordLabel = GetCellCollection().Get(WordsRange(absEndPos, absEndPos)).GetSourceWordLabel();
+  const ChartCellLabel &sourceWordLabel = GetSourceAt(absEndPos);
 
   // loop through the rules
   // (note that expandableDottedRuleList can be expanded as the loop runs 
@@ -165,8 +165,6 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
   }
 
   dottedRuleCol.Clear(relEndPos+1);
-
-  outColl.ShrinkToLimit();
 }
 
 // Given a partial rule application ending at startPos-1 and given the sets of
@@ -185,8 +183,7 @@ void ChartRuleLookupManagerMemory::ExtendPartialRuleApplication(
     GetSentence().GetLabelSet(startPos, endPos);
 
   // target non-terminal labels for the remainder
-  const ChartCellLabelSet &targetNonTerms =
-    GetCellCollection().Get(WordsRange(startPos, endPos)).GetTargetLabelSet();
+  const ChartCellLabelSet &targetNonTerms = GetTargetLabelSet(startPos, endPos);
 
   // note where it was found in the prefix tree of the rule dictionary
   const PhraseDictionaryNodeSCFG &node = prevDottedRule.GetLastNode();
