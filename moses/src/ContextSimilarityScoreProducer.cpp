@@ -54,7 +54,8 @@ float ContextSimilarityScoreProducer::CosineSimilarity(const map<string, int> &a
   for (it = b.begin(); it != b.end(); it++) b_set.insert(it->first);
 
   // throw away the counts for now, just compute cosine similarity on sets (sparse binary vectors)
-  set_intersection(a_set.begin(), a_set.end(), b_set.begin(), b_set.end(), intersect.begin());
+  set_intersection(a_set.begin(), a_set.end(), b_set.begin(), b_set.end(),
+      inserter(intersect, intersect.begin()));
   return intersect.size() / (sqrt(a.size()) * sqrt(b.size()));
 }
 
