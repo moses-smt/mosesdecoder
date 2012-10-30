@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <iostream>
 
+#include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
 #include "ScoreArray.h"
@@ -36,6 +37,8 @@ ScoreDataIterator::ScoreDataIterator(const string& filename) {
   m_in.reset(new FilePiece(filename.c_str()));
   readNext();
 }
+
+ScoreDataIterator::~ScoreDataIterator() {}
 
 void ScoreDataIterator::readNext() {
   m_next.clear();

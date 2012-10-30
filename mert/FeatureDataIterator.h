@@ -32,10 +32,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "util/file_piece.hh"
+#include "util/exception.hh"
 #include "util/string_piece.hh"
 
 #include "FeatureStats.h"
+
+namespace util { class FilePiece; }
 
 namespace MosesTuning
 {
@@ -75,6 +77,7 @@ class FeatureDataIterator :
   public:
     FeatureDataIterator();
     explicit FeatureDataIterator(const std::string& filename);
+    ~FeatureDataIterator();
 
     static FeatureDataIterator end() {
       return FeatureDataIterator();
