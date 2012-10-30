@@ -158,10 +158,23 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
   vector<string> sections = Tokenize(phraseString.as_string(), "\t");
   if (sections.size() > 1) {
     vector<string> words = Tokenize(sections[1], " ");
-    copy(words.begin(), words.end(), std::inserter(m_context, m_context.end()));
+    vector<string>::const_iterator wordIt;
+    for (wordIt = words.begin(); wordIt != words.end(); wordIt++) {
+      vector<string> tokens = Tokenize(*wordIt, "|");
+      if (tokens.size() == 2) {
+        // counts are included
+        m_context.insert(make_pair(tokens[0], Scan<int>(tokens[1])));
+      } else if (tokens.size() == 1) {
+        m_context.insert(make_pair(tokens[0], 1));
+      }
+    }
+  }
+  if (sections.empty()) {
+    cerr << "Empty phrase." << endl;
+    sections.push_back(""); // why does this happen?
   }
 
-  for (util::TokenIter<util::AnyCharacter, true> word_it(sections[0], util::AnyCharacter(" \t")); word_it; ++word_it) {
+  for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
     Word &word = AddWord();
     size_t index = 0;
     for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 

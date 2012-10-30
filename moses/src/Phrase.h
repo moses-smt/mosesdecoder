@@ -27,7 +27,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <list>
 #include <string>
-#include <set>
+#include <map>
 
 #include <boost/functional/hash.hpp>
 
@@ -50,7 +50,7 @@ class Phrase
 private:
 
   std::vector<Word>			m_words;
-  std::set<std::string> m_context;
+  std::map<std::string, int> m_context;
 
 public:
   /** No longer does anything as not using mem pool for Phrase class anymore */
@@ -153,7 +153,7 @@ public:
 	//! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
 	std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const; 
   
-  const std::set<std::string> &GetContext() const { return m_context; }
+  const std::map<std::string, int> &GetContext() const { return m_context; }
 
 	TO_STRING();
 

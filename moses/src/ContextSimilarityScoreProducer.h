@@ -6,6 +6,7 @@
 #include "FeatureFunction.h"
 #include <string>
 #include <set>
+#include <map>
 
 namespace Moses
 {
@@ -28,7 +29,7 @@ public:
 	}
 
 private:
-  float CosineSimilarity(const std::set<std::string> &a, const std::set<std::string> &b) const;
+  float CosineSimilarity(const std::map<std::string, int> &a, const std::map<std::string, int> &b) const;
 };
 
 }
