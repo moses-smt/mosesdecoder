@@ -124,9 +124,10 @@ my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 # Use the phrase weighting framework. This argument specifies the script location
 my $__PHRASE_WEIGHTING = undef;
 my $__PHRASE_WEIGHTING_TRAINER = "pro"; # which type of trainer to use
-# For mixture modelling, require the phrase tables. These should be filtered
-# to the tuning set, but not binarised
-my $__PHRASE_WEIGHTING_TABLES;
+# For mixture modelling, require the phrase tables. These should be gzip text format.
+my @__PHRASE_WEIGHTING_TABLES;
+# The tmcombine script
+my $__PHRASE_WEIGHTING_TMCOMBINE = "$SCRIPTS_ROOTDIR/../contrib/tmcombine/tmcombine.py";
 
 my $__THREADS = 0;
 
@@ -230,6 +231,8 @@ GetOptions(
   "batch-mira-args=s" => \$batch_mira_args,
   "phrase-weighting=s" => \$__PHRASE_WEIGHTING,
   "phrase-weighting-trainer=s" => \$__PHRASE_WEIGHTING_TRAINER,
+  "phrase-weighting-table=s" => \@__PHRASE_WEIGHTING_TABLES,
+  "phrase-weighting-tmcombine=s" => \$__PHRASE_WEIGHTING_TMCOMBINE,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -321,6 +324,8 @@ Options:
                                 BLEU decay factor, and the number of iterations of MIRA.
   --phrase-weighting        ... Phrase-weighting framework main script
   --phrase-weighting-trainer... Training method for phrase weighting (pro or mix) 
+  --phrase-weighting-table  ... Phrase tables for training mixture models
+  --phrase-weighting-tmcombine  Script for combining ttables
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -384,7 +389,16 @@ if ($__PHRASE_WEIGHTING) {
   die "Not executable $__PHRASE_WEIGHTING" unless -x $__PHRASE_WEIGHTING;
   die "Unknown phrase weighting trainer: $__PHRASE_WEIGHTING_TRAINER" unless
     ($__PHRASE_WEIGHTING_TRAINER eq "mix" || $__PHRASE_WEIGHTING_TRAINER eq "pro");
-
+  if ($__PHRASE_WEIGHTING_TRAINER eq "mix") {
+    die "For mixture model training, specify the tables with --phrase-weighting-tables" unless @__PHRASE_WEIGHTING_TABLES;
+    die "For mixture model, need at least 2 tables" unless scalar(@__PHRASE_WEIGHTING_TABLES) > 1;
+  
+    for my $TABLE (@__PHRASE_WEIGHTING_TABLES) {
+      die "Phrase table $TABLE not found" unless -r $TABLE;
+    }
+    die "Not executable: $__PHRASE_WEIGHTING_TMCOMBINE" unless -x $__PHRASE_WEIGHTING_TMCOMBINE;
+    die "To use phrase-weighting, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
+  }
 }
 
 $mertargs = "" if !defined $mertargs;
@@ -508,7 +522,27 @@ my $prev_score_file = undef;
 my $prev_init_file = undef;
 my @allnbests;
 
-if ($___FILTER_PHRASE_TABLE) {
+# If we're training mixture models, need to make sure the appropriate
+# tables are in place
+my @_PHRASE_WEIGHTING_TABLES_BIN;
+if ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
+  print STDERR "Training mixture model\n";
+  for (my $i = 0; $i < scalar(@__PHRASE_WEIGHTING_TABLES); ++$i) {
+    # Create filtered, binarised tables
+    my $filtered_config = "moses_$i.ini";
+    substitute_ttable($___CONFIG, $filtered_config, $__PHRASE_WEIGHTING_TABLES[$i]); 
+    my $filtered_path = "filtered_$i";
+    my $___FILTER_F  = $___DEV_F;
+    $___FILTER_F = $filterfile if (defined $filterfile);
+    my $cmd = "$filtercmd ./$filtered_path $filtered_config $___FILTER_F";
+    &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err");
+    push (@_PHRASE_WEIGHTING_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
+
+    # Create directory structure for the text phrase tables required by tmcombine
+    mkpath("model_$i/model");
+    safesystem("ln -s ../../$filtered_path/phrase-table.0-0.1.1 model_$i/model/phrase-table");
+  }
+} elsif ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
     print STDERR "Assuming the tables are already filtered, reusing $outdir/moses.ini\n";
@@ -662,6 +696,7 @@ my $allsorted       = undef;
 my $nbest_file      = undef;
 my $lsamp_file      = undef; # Lattice samples
 my $orig_nbest_file = undef; # replaced if lattice sampling
+my @phrase_weighting_mix_weights;
 
 while (1) {
   $run++;
@@ -669,10 +704,44 @@ while (1) {
     print "Maximum number of iterations exceeded - stopping\n";
     last;
   }
+  print "run $run start at ".`date`;
+
+  if ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
+    # Need to interpolate the phrase tables with current weights, and binarise
+    if (!@phrase_weighting_mix_weights) {
+      @phrase_weighting_mix_weights = (1.0/scalar(@__PHRASE_WEIGHTING_TABLES)) x scalar(@__PHRASE_WEIGHTING_TABLES);  
+    }
+    # make a backup copy of startup ini filepath
+    $___CONFIG_ORIG = $___CONFIG unless defined($___CONFIG_ORIG);
+    # Interpolation
+    my $interpolated_phrase_table = "./phrase-table.interpolated.gz";
+    my $cmd = "$__PHRASE_WEIGHTING_TMCOMBINE combine_given_weights ";
+    $cmd .= join(" ", map {"model_$_"} (0..(scalar(@phrase_weighting_mix_weights)-1)));
+    $cmd .= " -w " . join(",",@phrase_weighting_mix_weights);
+    $cmd .= " -o $interpolated_phrase_table";
+    &submit_or_exec($cmd, "interpolate.out", "interpolate.err");
+
+    # Create an ini file for the interpolated phrase table
+    my $interpolated_config ="moses.interpolated.ini"; 
+    substitute_ttable($___CONFIG_ORIG, $interpolated_config, $interpolated_phrase_table);
+
+    # Filter and binarise
+    print STDERR "filtering the interpolated phrase table\n";
+    my $___FILTER_F  = $___DEV_F;
+    my $outdir = "filtered";
+    safesystem("rm -rf $outdir");
+    $___FILTER_F = $filterfile if (defined $filterfile);
+    $cmd = "$filtercmd ./$outdir $interpolated_config $___FILTER_F";
+    &submit_or_exec($cmd, "filterphrases.out", "filterphrases.err");
+
+    # the decoder should now use the filtered model
+    $___CONFIG = "$outdir/moses.ini";
+
+  }
+
   # run beamdecoder with option to output nbestlists
   # the end result should be (1) @NBEST_LIST, a list of lists; (2) @SCORE, a list of lists of lists
 
-  print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined $devbleu ? $devbleu : "--not-estimated--"), $sparse_weights_file);
@@ -820,7 +889,7 @@ while (1) {
     my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
-    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights, \@phrase_weighting_mix_weights);
     # Get the pro outputs ready for mert. Add the weight ranges,
     # and a weight and range for the single sparse feature
     $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
@@ -851,13 +920,22 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+  } elsif ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
+    # Phrase weighting, mixture model
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $cmd = "$__PHRASE_WEIGHTING $phrase_weight_file_settings";
+    $cmd .= " -t mix ";
+    $cmd .= join(" ", map {"-p $_"} @_PHRASE_WEIGHTING_TABLES_BIN);
+    $cmd .= " -i $___DEV_F";
+    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
   } elsif ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "pro") {
+    # Phrase weighting, PRO
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$__PHRASE_WEIGHTING $phrase_weight_file_settings";
     &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
-  }
+  } 
 
   die "Optimization failed, file $weights_out_file does not exist or is empty"
     if ! -s $weights_out_file;
@@ -872,8 +950,9 @@ while (1) {
 
   print "run $run end at ".`date`;
 
-  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@phrase_weighting_mix_weights);
   my $merge_weight = 0;
+  print "New mixture weights: " . join(" ", @phrase_weighting_mix_weights) . "\n";
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -1032,12 +1111,13 @@ print "Training finished at " . `date`;
 } # end of local scope
 
 sub get_weights_from_mert {
-  my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
+  my ($outfile, $logfile, $weight_count, $sparse_weights, $mix_weights) = @_;
   my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
           || $___BATCH_MIRA || $__PHRASE_WEIGHTING) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my @WEIGHT;
+    @$mix_weights = ();
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
     my $sum = 0.0;
     while (<$fh>) {
@@ -1046,11 +1126,13 @@ sub get_weights_from_mert {
         $sum += abs($2);
       } elsif (/^(.+_.+) ([\-\.\de]+)/) { # sparse features
         $$sparse_weights{$1} = $2;
+      } elsif (/^M(\d+) ([\-\.\de]+)/) {     # mix weights
+        push @$mix_weights,$2;
       }
     }
     close $fh;
     die "It seems feature values are invalid or unable to read $outfile." if $sum < 1e-09;
-
+  
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
@@ -1110,6 +1192,7 @@ sub run_decoder {
     my $decoder_config = "";
     $decoder_config = join(" ", values %model_weights) unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
+    $decoder_config .= " -report-segmentation" if $__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix";
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
 
@@ -1382,6 +1465,30 @@ sub create_config {
   close $out;
   print STDERR "Saved: $outfn\n";
 }
+
+# Create a new ini file, with the first ttable replaced by the given one
+# and its type set to text
+sub substitute_ttable {
+  my ($old_ini, $new_ini, $new_ttable) = @_;
+  open(NEW_INI,">$new_ini") || die "Failed to create $new_ini";
+  open(INI,$old_ini) || die "Failed to open $old_ini";
+  while(<INI>) {
+    if (/\[ttable-file\]/) {
+      print NEW_INI "[ttable-file]\n";
+      my $ttable_config = <INI>;
+      chomp $ttable_config;
+      my @ttable_fields = split /\s+/, $ttable_config;
+      $ttable_fields[0] = "0";
+      $ttable_fields[4] = $new_ttable;
+      print NEW_INI join(" ", @ttable_fields) . "\n";
+    } else {
+      print NEW_INI;
+    }
+  }
+  close NEW_INI;
+  close INI;
+}
+
 
 sub safesystem {
   print STDERR "Executing: @_\n";
