@@ -56,7 +56,8 @@ float ContextSimilarityScoreProducer::CosineSimilarity(const map<string, int> &a
   // throw away the counts for now, just compute cosine similarity on sets (sparse binary vectors)
   set_intersection(a_set.begin(), a_set.end(), b_set.begin(), b_set.end(),
       inserter(intersect, intersect.begin()));
-  return intersect.size() / (sqrt(a.size()) * sqrt(b.size()));
+//  cerr << intersect.size() / (sqrt(a.size()) * sqrt(b.size())) << endl;
+  return log( intersect.size() / (sqrt(a.size()) * sqrt(b.size())) );
 }
 
 } // namespace Moses

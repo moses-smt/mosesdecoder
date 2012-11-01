@@ -174,7 +174,7 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
     sections.push_back(""); // why does this happen?
   }
 
-  for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
+  for (util::TokenIter<util::AnyCharacter, true> word_it(sections[0], util::AnyCharacter(" \t")); word_it; ++word_it) {
     Word &word = AddWord();
     size_t index = 0;
     for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
