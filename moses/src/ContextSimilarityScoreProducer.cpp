@@ -48,16 +48,34 @@ FFState* ContextSimilarityScoreProducer::Evaluate(
 float ContextSimilarityScoreProducer::CosineSimilarity(const map<string, int> &a, const map<string, int> &b) const
 {
   if (a.empty() || b.empty()) return 0;
-  vector<string> intersect;
-  set<string> a_set, b_set;
-  map<string, int>::const_iterator it;
-  for (it = a.begin(); it != a.end(); it++) a_set.insert(it->first);
-  for (it = b.begin(); it != b.end(); it++) b_set.insert(it->first);
+  map<string, int>::const_iterator itA, itB;
+  int sumA, sumB;
+  sumA = sumB = 0;
+  float score = 0;
+  itA = a.begin();
+  itB = b.begin();
+  while (true) {
+    if (itA == a.end()) {
+      for (; itB != b.end(); itB++) sumB++;
+      break;
+    }
+    if (itB == b.end()) {
+      for (; itA != a.end(); itA++) sumA++;
+      break;
+    }
+    // neither is at end()
+    if (itA->first < itB->first) {
+      sumA++; itA++;    
+    } else if (itA->first > itB->first) {
+      sumB++; itB++;
+    } else {
+      score++;
+      sumA++; itA++;
+      sumB++; itB++;
+    }
+  }
 
-  // throw away the counts for now, just compute cosine similarity on sets (sparse binary vectors)
-  set_intersection(a_set.begin(), a_set.end(), b_set.begin(), b_set.end(),
-      inserter(intersect, intersect.begin()));
-  float score = intersect.size() / (sqrt(a.size()) * sqrt(b.size()));
+  score = score / (sqrt(sumA) * sqrt(sumB));
 //  cerr << score << endl;
   return FloorScore(log(score));
 }
