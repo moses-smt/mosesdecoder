@@ -5,6 +5,7 @@
 #include "StaticData.h"
 #include "ContextSimilarityScoreProducer.h"
 #include "WordsRange.h"
+#include "Util.h"
 #include "TranslationOption.h"
 #include <algorithm>
 #include <iostream>
@@ -56,8 +57,9 @@ float ContextSimilarityScoreProducer::CosineSimilarity(const map<string, int> &a
   // throw away the counts for now, just compute cosine similarity on sets (sparse binary vectors)
   set_intersection(a_set.begin(), a_set.end(), b_set.begin(), b_set.end(),
       inserter(intersect, intersect.begin()));
-//  cerr << intersect.size() / (sqrt(a.size()) * sqrt(b.size())) << endl;
-  return log( intersect.size() / (sqrt(a.size()) * sqrt(b.size())) );
+  float score = intersect.size() / (sqrt(a.size()) * sqrt(b.size()));
+//  cerr << score << endl;
+  return FloorScore(log(score));
 }
 
 } // namespace Moses
