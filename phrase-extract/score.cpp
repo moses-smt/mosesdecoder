@@ -29,6 +29,7 @@
 #include <algorithm>
 
 #include "SafeGetline.h"
+#include "ScoreFeature.h"
 #include "tables-core.h"
 #include "domain.h"
 #include "PhraseAlignment.h"
@@ -52,10 +53,9 @@ bool conditionOnTargetLhsFlag = false;
 bool wordAlignmentFlag = false;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
-#define COC_MAX 10
 bool logProbFlag = false;
 int negLogProb = 1;
-inline float maybeLogProb( float a ) { return logProbFlag ? negLogProb*log(a) : a; }
+#define COC_MAX 10
 bool lexFlag = true;
 bool unalignedFlag = false;
 bool unalignedFWFlag = false;
@@ -65,12 +65,6 @@ bool crossedNonTerm = false;
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
 float minCountHierarchical = 0;
-bool domainFlag = false;
-bool domainRatioFlag = false;
-bool domainSubsetFlag = false;
-bool domainSparseFlag = false;
-Domain *domain;
-bool includeSentenceIdFlag = false;
 
 Vocabulary vcbT;
 Vocabulary vcbS;
@@ -80,9 +74,9 @@ Vocabulary vcbS;
 vector<string> tokenize( const char [] );
 
 void writeCountOfCounts( const string &fileNameCountOfCounts );
-void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile, bool isSingleton);
+void processPhrasePairs( vector< PhraseAlignment > & , ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLog);
 const PhraseAlignment &findBestAlignment(const PhraseAlignmentCollection &phrasePair );
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile, bool isSingleton );
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float, int, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLog );
 double computeLexicalTranslation( const PHRASE &, const PHRASE &, const PhraseAlignment & );
 double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
 set<string> functionWordList;
@@ -99,8 +93,10 @@ int main(int argc, char* argv[])
   cerr << "Score v2.0 written by Philipp Koehn\n"
        << "scoring methods for extracted rules\n";
 
+  ScoreFeatureManager featureManager;
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--[Sparse]Domain[Indicator|Ratio|Subset|Bin] domain-file [bins]] [--Singleton] [--CrossedNonTerm] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
+    cerr << featureManager.usage() << endl;
     exit(1);
   }
   string fileNameExtract = argv[1];
@@ -109,6 +105,7 @@ int main(int argc, char* argv[])
   string fileNameCountOfCounts;
   char* fileNameFunctionWords = NULL;
   char* fileNameDomain = NULL;
+  vector<string> featureArgs; //all unknown args passed to feature manager
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"inverse") == 0 || strcmp(argv[i],"--Inverse") == 0) {
@@ -151,23 +148,7 @@ int main(int argc, char* argv[])
       }
       fileNameFunctionWords = argv[++i];
       cerr << "using unaligned function word penalty with function words from " << fileNameFunctionWords << endl;
-    } else if (strcmp(argv[i],"--SparseDomainIndicator") == 0 ||
-               strcmp(argv[i],"--SparseDomainRatio") == 0 ||
-               strcmp(argv[i],"--SparseDomainSubset") == 0 ||
-               strcmp(argv[i],"--DomainIndicator") == 0 ||
-               strcmp(argv[i],"--DomainRatio") == 0 ||
-               strcmp(argv[i],"--DomainSubset") == 0) {
-      includeSentenceIdFlag = true;
-      domainFlag = true;
-      domainSparseFlag = strstr( argv[i], "Sparse" );
-      domainRatioFlag = strstr( argv[i], "Ratio" );
-      domainSubsetFlag = strstr( argv[i], "Subset" );
-      if (i+1==argc) {
-        cerr << "ERROR: specify domain info file with " << argv[i] << endl;
-        exit(1);
-      }
-      fileNameDomain = argv[++i];
-    } else if (strcmp(argv[i],"--LogProb") == 0) {
+    }  else if (strcmp(argv[i],"--LogProb") == 0) {
       logProbFlag = true;
       cerr << "using log-probabilities\n";
     } else if (strcmp(argv[i],"--NegLogProb") == 0) {
@@ -187,10 +168,17 @@ int main(int argc, char* argv[])
       crossedNonTerm = true;
       cerr << "crossed non-term reordering feature\n";
     } else {
-      cerr << "ERROR: unknown option " << argv[i] << endl;
-      exit(1);
+      featureArgs.push_back(argv[i]);
+      for (; i < argc &&  strncmp(argv[i], "--", 2); ++i) {
+        featureArgs.push_back(argv[i]);
+      }
     }
   }
+
+  MaybeLog maybeLogProb(logProbFlag, negLogProb);
+
+  //configure extra features
+  if (!inverseFlag) featureManager.configure(featureArgs);
 
   // lexical translation table
   if (lexFlag)
@@ -199,18 +187,6 @@ int main(int argc, char* argv[])
   // function word list
   if (unalignedFWFlag)
     loadFunctionWords( fileNameFunctionWords );
-
-  // load domain information
-  if (domainFlag) {
-    if (inverseFlag) {
-      domainFlag = false;
-      includeSentenceIdFlag = false;
-    }
-    else {
-      domain = new Domain;
-      domain->load( fileNameDomain );
-    }
-  }
 
   // compute count of counts for Good Turing discounting
   if (goodTuringFlag || kneserNeyFlag) {
@@ -268,16 +244,14 @@ int main(int argc, char* argv[])
 
     // create new phrase pair
     PhraseAlignment phrasePair;
-    phrasePair.create( line, i, includeSentenceIdFlag );
+    phrasePair.create( line, i, featureManager.includeSentenceId());
     lastCount = phrasePair.count;
     lastPcfgSum = phrasePair.pcfgSum;
 
     // only differs in count? just add count
     if (lastPhrasePair != NULL 
-	&& lastPhrasePair->equals( phrasePair )
-	&& (!domainFlag
-	    || domain->getDomainOfSentence( lastPhrasePair->sentenceId )
-	    == domain->getDomainOfSentence( phrasePair.sentenceId ) )) {
+	    && lastPhrasePair->equals( phrasePair )
+	    && featureManager.equals(*lastPhrasePair, phrasePair)) {
       lastPhrasePair->count += phrasePair.count;
       lastPhrasePair->pcfgSum += phrasePair.pcfgSum;
       continue;
@@ -286,7 +260,7 @@ int main(int argc, char* argv[])
     // if new source phrase, process last batch
     if (lastPhrasePair != NULL &&
         lastPhrasePair->GetSource() != phrasePair.GetSource()) {
-      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
+      processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton, featureManager, maybeLogProb );
       
       phrasePairsWithSameF.clear();
       isSingleton = false;
@@ -301,7 +275,7 @@ int main(int argc, char* argv[])
     phrasePairsWithSameF.push_back( phrasePair );
     lastPhrasePair = &phrasePairsWithSameF.back();
   }
-  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton );
+  processPhrasePairs( phrasePairsWithSameF, *phraseTableFile, isSingleton, featureManager, maybeLogProb );
 	
 	phraseTableFile->flush();
 	if (phraseTableFile != &cout) {
@@ -335,7 +309,7 @@ void writeCountOfCounts( const string &fileNameCountOfCounts )
 	countOfCountsFile.Close();
 }
 
-void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile, bool isSingleton )
+void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager, const MaybeLog& maybeLogProb )
 {
   if (phrasePair.size() == 0) return;
 
@@ -376,7 +350,7 @@ void processPhrasePairs( vector< PhraseAlignment > &phrasePair, ostream &phraseT
   for(iter = sortedColl.begin(); iter != sortedColl.end(); ++iter) 
   {
     const PhraseAlignmentCollection &group = **iter;
-    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile, isSingleton );
+    outputPhrasePair( group, totalSource, phrasePairGroup.GetSize(), phraseTableFile, isSingleton, featureManager, maybeLogProb );
   }
   
 }
@@ -493,9 +467,9 @@ void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t,
 
 }
 
-bool calcCrossedNonTerm(int sourcePos, int targetPos, const std::vector< std::set<size_t> > &alignedToS)
+bool calcCrossedNonTerm(size_t sourcePos, size_t targetPos, const std::vector< std::set<size_t> > &alignedToS)
 {
-  for (int currSource = 0; currSource < alignedToS.size(); ++currSource)
+  for (size_t currSource = 0; currSource < alignedToS.size(); ++currSource)
   {
     if (currSource == sourcePos)
     { // skip
@@ -526,7 +500,7 @@ int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignme
 {
   const std::vector< std::set<size_t> > &alignedToS = bestAlignment.alignedToS;
   
-  for (int sourcePos = 0; sourcePos < alignedToS.size(); ++sourcePos)
+  for (size_t sourcePos = 0; sourcePos < alignedToS.size(); ++sourcePos)
   {
     const std::set<size_t> &targetSet = alignedToS[sourcePos];
     
@@ -537,7 +511,7 @@ int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignme
     if (isNonTerm)
     {
       assert(targetSet.size() == 1);
-      int targetPos = *targetSet.begin();
+      size_t targetPos = *targetSet.begin();
       bool ret = calcCrossedNonTerm(sourcePos, targetPos, alignedToS);
       if (ret)
         return 1;
@@ -547,7 +521,8 @@ int calcCrossedNonTerm(const PHRASE &phraseS, const PhraseAlignment &bestAlignme
   return 0;
 }
 
-void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile, bool isSingleton )
+void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCount, int distinctCount, ostream &phraseTableFile, bool isSingleton, const ScoreFeatureManager& featureManager,
+  const MaybeLog& maybeLogProb )
 {
   if (phrasePair.size() == 0) return;
 
@@ -559,17 +534,7 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
     count += phrasePair[i]->count;
   }
 
-  // compute domain counts
   map< string, float > domainCount;
-  if (domainFlag) {
-    for(size_t i=0; i<phrasePair.size(); i++) {
-      string d = domain->getDomainOfSentence( phrasePair[i]->sentenceId );
-      if (domainCount.find( d ) == domainCount.end())
-        domainCount[ d ] = phrasePair[i]->count;
-      else
-        domainCount[ d ] += phrasePair[i]->count;
-    }
-  }
 
   // collect count of count statistics
   if (goodTuringFlag || kneserNeyFlag) {
@@ -620,19 +585,19 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   // lexical translation probability
   if (lexFlag) {
     double lexScore = computeLexicalTranslation( phraseS, phraseT, bestAlignment);
-    phraseTableFile << maybeLogProb( lexScore );
+    phraseTableFile << maybeLogProb(lexScore );
   }
 
   // unaligned word penalty
   if (unalignedFlag) {
     double penalty = computeUnalignedPenalty( phraseS, phraseT, bestAlignment);
-    phraseTableFile << " " << maybeLogProb( penalty );
+    phraseTableFile << " " << maybeLogProb(penalty );
   }
 
   // unaligned function word penalty
   if (unalignedFWFlag) {
     double penalty = computeUnalignedFWPenalty( phraseS, phraseT, bestAlignment);
-    phraseTableFile << " " << maybeLogProb( penalty );
+    phraseTableFile << " " << maybeLogProb(penalty );
   }
 
   if (singletonFeature) {
@@ -645,67 +610,21 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   
   // target-side PCFG score
   if (pcfgFlag && !inverseFlag) {
-    phraseTableFile << " " << maybeLogProb( pcfgScore );
+    phraseTableFile << " " << maybeLogProb(pcfgScore );
   }
 
-  // domain count features
-  if (domainFlag) {
-    if (domainSparseFlag) {
-      // sparse, subset
-      if (domainSubsetFlag) {
-        typedef vector< string >::const_iterator I;
-        phraseTableFile << " doms";
-        for (I i = domain->list.begin(); i != domain->list.end(); i++ ) {
-          if (domainCount.find( *i ) != domainCount.end() ) {
-            phraseTableFile << "_" << *i;
-          }
-        }
-        phraseTableFile << " 1";
-      }
-      // sparse, indicator or ratio
-      else {
-        typedef map< string, float >::const_iterator I;
-        for (I i=domainCount.begin(); i != domainCount.end(); i++) {
-          if (domainRatioFlag) {
-            phraseTableFile << " domr_" << i->first << " " << (i->second / count);
-          }
-          else {
-            phraseTableFile << " dom_" << i->first << " 1";
-          }
-        }
-      }
-    }
-    // core, subset
-    else if (domainSubsetFlag) {
-      if (domain->list.size() > 6) {
-        cerr << "ERROR: too many domains for core domain subset features\n";
-        exit(1);
-      }
-      size_t bitmap = 0;
-      for(size_t bit = 0; bit < domain->list.size(); bit++) {
-        if (domainCount.find( domain->list[ bit ] ) != domainCount.end()) {
-          bitmap += 1 << bit;
-        }
-      }
-      for(size_t i = 1; i < (1 << domain->list.size()); i++) {
-        phraseTableFile << " " << maybeLogProb( (bitmap == i) ? 2.718 : 1 );
-      }
-    }
-    // core, indicator or ratio
-    else {
-      typedef vector< string >::const_iterator I;
-      for (I i = domain->list.begin(); i != domain->list.end(); i++ ) {
-        if (domainCount.find( *i ) == domainCount.end() ) {
-          phraseTableFile << " " << maybeLogProb( 1 );
-        }
-        else if (domainRatioFlag) {
-          phraseTableFile << " " << maybeLogProb( exp( domainCount[ *i ] / count ) );
-        }
-        else {
-          phraseTableFile << " " << maybeLogProb( 2.718 );
-        }
-      }
-    }
+  // extra features
+  ScoreFeatureContext context(phrasePair, count, maybeLogProb);
+  vector<float> extraDense;
+  map<string,float> extraSparse;
+  featureManager.addFeatures(context, extraDense, extraSparse);
+  for (size_t i = 0; i < extraDense.size(); ++i) {
+    phraseTableFile << " " << extraDense[i];
+  }
+
+  for (map<string,float>::const_iterator i = extraSparse.begin();
+        i != extraSparse.end(); ++i) {
+    phraseTableFile << " " << i->first << " " << i->second;
   }
 
   phraseTableFile << " ||| ";
