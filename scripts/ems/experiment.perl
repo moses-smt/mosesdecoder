@@ -2528,9 +2528,6 @@ sub define_tuningevaluation_filter {
     # clean-up
     $cmd .= "rm $config" if $delete_config;
 
-    # copy moses.ini into specified file location
-    $cmd .= "\ncp $filter_dir/moses.ini $config\n";
- 
     &create_step($step_id,$cmd);
 }
 
