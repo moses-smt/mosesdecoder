@@ -21,6 +21,12 @@ while(<STDIN>) {
   s/\[/\&#91;/g;   # syntax non-terminal
   s/\]/\&#93;/g;   # syntax non-terminal
   
+  # escape parentheses that were part of the input text
+  s/(\(\S+ )\(\)/$1\&openingparenthesis;\)/g;
+  s/(\(\S+ )\)\)/$1\&closingparenthesis;\)/g;
+
+
+  
   # convert into tree
   s/\((\S+) /<tree label=\"$1\"> /g;
   s/\)/ <\/tree> /g;
@@ -30,6 +36,11 @@ while(<STDIN>) {
   s/\-RRB\-/\)/g;
   s/ +/ /g;
   s/ $//g;
+  
+  # de-escape parentheses that were part of the input text
+  s/\&openingparenthesis;/\(/g;
+  s/\&closingparenthesis;/\)/g;
+
 
   # output, replace words with original
   print $_;
