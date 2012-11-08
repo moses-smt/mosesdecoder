@@ -1932,6 +1932,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>Scope3Parser/ApplicableRuleTrie.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/ApplicableRuleTrie.cpp</locationURI>
+		</link>
+		<link>
+			<name>Scope3Parser/ApplicableRuleTrie.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/ApplicableRuleTrie.h</locationURI>
+		</link>
+		<link>
 			<name>Scope3Parser/IntermediateVarSpanNode.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Scope3Parser/IntermediateVarSpanNode.h</locationURI>

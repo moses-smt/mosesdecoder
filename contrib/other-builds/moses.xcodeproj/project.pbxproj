@@ -120,7 +120,6 @@
 		1E316611163B0CB200F64999 /* Joint.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3164FF163B0CB100F64999 /* Joint.h */; };
 		1E316612163B0CB200F64999 /* Ken.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E316500163B0CB100F64999 /* Ken.cpp */; };
 		1E316613163B0CB200F64999 /* Ken.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316501163B0CB100F64999 /* Ken.h */; };
-		1E316614163B0CB200F64999 /* LDHT.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E316502163B0CB100F64999 /* LDHT.cpp */; };
 		1E316615163B0CB200F64999 /* LDHT.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316503163B0CB100F64999 /* LDHT.h */; };
 		1E316616163B0CB200F64999 /* MultiFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E316504163B0CB100F64999 /* MultiFactor.cpp */; };
 		1E316617163B0CB200F64999 /* MultiFactor.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316505163B0CB100F64999 /* MultiFactor.h */; };
@@ -128,8 +127,6 @@
 		1E316619163B0CB200F64999 /* ORLM.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316507163B0CB100F64999 /* ORLM.h */; };
 		1E31661A163B0CB200F64999 /* ParallelBackoff.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E316508163B0CB100F64999 /* ParallelBackoff.cpp */; };
 		1E31661B163B0CB200F64999 /* ParallelBackoff.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316509163B0CB100F64999 /* ParallelBackoff.h */; };
-		1E31661C163B0CB200F64999 /* Rand.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E31650A163B0CB100F64999 /* Rand.cpp */; };
-		1E31661D163B0CB200F64999 /* Rand.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E31650B163B0CB100F64999 /* Rand.h */; };
 		1E31661E163B0CB200F64999 /* Remote.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E31650C163B0CB100F64999 /* Remote.cpp */; };
 		1E31661F163B0CB200F64999 /* Remote.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E31650D163B0CB100F64999 /* Remote.h */; };
 		1E316620163B0CB200F64999 /* SingleFactor.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E31650E163B0CB100F64999 /* SingleFactor.cpp */; };
@@ -241,13 +238,7 @@
 		1E31668C163B0CB200F64999 /* SourceWordDeletionFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316596163B0CB200F64999 /* SourceWordDeletionFeature.h */; };
 		1E31668D163B0CB200F64999 /* SparsePhraseDictionaryFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E316597163B0CB200F64999 /* SparsePhraseDictionaryFeature.cpp */; };
 		1E31668E163B0CB200F64999 /* SparsePhraseDictionaryFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E316598163B0CB200F64999 /* SparsePhraseDictionaryFeature.h */; };
-		1E31668F163B0CB200F64999 /* SRI.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E31659A163B0CB200F64999 /* SRI.o */; };
 		1E316690163B0CB200F64999 /* StackVec.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E31659B163B0CB200F64999 /* StackVec.h */; };
-		1E316691163B0CB200F64999 /* StaticData.o in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E31659D163B0CB200F64999 /* StaticData.o */; };
-		1E316692163B0CB200F64999 /* SyntacticLanguageModel.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E31659E163B0CB200F64999 /* SyntacticLanguageModel.cpp */; };
-		1E316693163B0CB200F64999 /* SyntacticLanguageModel.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E31659F163B0CB200F64999 /* SyntacticLanguageModel.h */; };
-		1E316694163B0CB200F64999 /* SyntacticLanguageModelFiles.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3165A0163B0CB200F64999 /* SyntacticLanguageModelFiles.h */; };
-		1E316695163B0CB200F64999 /* SyntacticLanguageModelState.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3165A1163B0CB200F64999 /* SyntacticLanguageModelState.h */; };
 		1E316696163B0CB200F64999 /* TargetBigramFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3165A2163B0CB200F64999 /* TargetBigramFeature.cpp */; };
 		1E316697163B0CB200F64999 /* TargetBigramFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1E3165A3163B0CB200F64999 /* TargetBigramFeature.h */; };
 		1E316698163B0CB200F64999 /* TargetBigramFeatureTest.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E3165A4163B0CB200F64999 /* TargetBigramFeatureTest.cpp */; };
@@ -295,6 +286,8 @@
 		1EAC363B14CDC79300DF97C3 /* LoaderHiero.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363214CDC79300DF97C3 /* LoaderHiero.h */; };
 		1EAC363C14CDC79300DF97C3 /* LoaderStandard.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */; };
 		1EAC363D14CDC79300DF97C3 /* LoaderStandard.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EAC363414CDC79300DF97C3 /* LoaderStandard.h */; };
+		1EBC53A0164C44FC00ADFA2C /* WordTranslationFeature.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EBC539E164C44FC00ADFA2C /* WordTranslationFeature.cpp */; };
+		1EBC53A1164C44FC00ADFA2C /* WordTranslationFeature.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EBC539F164C44FC00ADFA2C /* WordTranslationFeature.h */; };
 		1EC32DB815D2D90700A313B1 /* ThrowingFwrite.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC32DB615D2D90700A313B1 /* ThrowingFwrite.cpp */; };
 		1EC32DB915D2D90700A313B1 /* ThrowingFwrite.h in Headers */ = {isa = PBXBuildFile; fileRef = 1EC32DB715D2D90700A313B1 /* ThrowingFwrite.h */; };
 		1EC7374614B977AB00238410 /* AlignmentInfo.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EC735D314B977AA00238410 /* AlignmentInfo.cpp */; };
@@ -700,8 +693,6 @@
 		1E316507163B0CB100F64999 /* ORLM.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ORLM.h; sourceTree = "<group>"; };
 		1E316508163B0CB100F64999 /* ParallelBackoff.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = ParallelBackoff.cpp; sourceTree = "<group>"; };
 		1E316509163B0CB100F64999 /* ParallelBackoff.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ParallelBackoff.h; sourceTree = "<group>"; };
-		1E31650A163B0CB100F64999 /* Rand.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Rand.cpp; sourceTree = "<group>"; };
-		1E31650B163B0CB100F64999 /* Rand.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Rand.h; sourceTree = "<group>"; };
 		1E31650C163B0CB100F64999 /* Remote.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Remote.cpp; sourceTree = "<group>"; };
 		1E31650D163B0CB100F64999 /* Remote.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Remote.h; sourceTree = "<group>"; };
 		1E31650E163B0CB100F64999 /* SingleFactor.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = SingleFactor.cpp; sourceTree = "<group>"; };
@@ -813,15 +804,7 @@
 		1E316596163B0CB200F64999 /* SourceWordDeletionFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SourceWordDeletionFeature.h; path = ../../moses/src/SourceWordDeletionFeature.h; sourceTree = "<group>"; };
 		1E316597163B0CB200F64999 /* SparsePhraseDictionaryFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SparsePhraseDictionaryFeature.cpp; path = ../../moses/src/SparsePhraseDictionaryFeature.cpp; sourceTree = "<group>"; };
 		1E316598163B0CB200F64999 /* SparsePhraseDictionaryFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SparsePhraseDictionaryFeature.h; path = ../../moses/src/SparsePhraseDictionaryFeature.h; sourceTree = "<group>"; };
-		1E316599163B0CB200F64999 /* SRI.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = SRI.lo; path = ../../moses/src/SRI.lo; sourceTree = "<group>"; };
-		1E31659A163B0CB200F64999 /* SRI.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = SRI.o; path = ../../moses/src/SRI.o; sourceTree = "<group>"; };
 		1E31659B163B0CB200F64999 /* StackVec.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = StackVec.h; path = ../../moses/src/StackVec.h; sourceTree = "<group>"; };
-		1E31659C163B0CB200F64999 /* StaticData.lo */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text; name = StaticData.lo; path = ../../moses/src/StaticData.lo; sourceTree = "<group>"; };
-		1E31659D163B0CB200F64999 /* StaticData.o */ = {isa = PBXFileReference; lastKnownFileType = "compiled.mach-o.objfile"; name = StaticData.o; path = ../../moses/src/StaticData.o; sourceTree = "<group>"; };
-		1E31659E163B0CB200F64999 /* SyntacticLanguageModel.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = SyntacticLanguageModel.cpp; path = ../../moses/src/SyntacticLanguageModel.cpp; sourceTree = "<group>"; };
-		1E31659F163B0CB200F64999 /* SyntacticLanguageModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SyntacticLanguageModel.h; path = ../../moses/src/SyntacticLanguageModel.h; sourceTree = "<group>"; };
-		1E3165A0163B0CB200F64999 /* SyntacticLanguageModelFiles.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SyntacticLanguageModelFiles.h; path = ../../moses/src/SyntacticLanguageModelFiles.h; sourceTree = "<group>"; };
-		1E3165A1163B0CB200F64999 /* SyntacticLanguageModelState.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = SyntacticLanguageModelState.h; path = ../../moses/src/SyntacticLanguageModelState.h; sourceTree = "<group>"; };
 		1E3165A2163B0CB200F64999 /* TargetBigramFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetBigramFeature.cpp; path = ../../moses/src/TargetBigramFeature.cpp; sourceTree = "<group>"; };
 		1E3165A3163B0CB200F64999 /* TargetBigramFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = TargetBigramFeature.h; path = ../../moses/src/TargetBigramFeature.h; sourceTree = "<group>"; };
 		1E3165A4163B0CB200F64999 /* TargetBigramFeatureTest.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = TargetBigramFeatureTest.cpp; path = ../../moses/src/TargetBigramFeatureTest.cpp; sourceTree = "<group>"; };
@@ -869,6 +852,8 @@
 		1EAC363214CDC79300DF97C3 /* LoaderHiero.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderHiero.h; path = ../../moses/src/RuleTable/LoaderHiero.h; sourceTree = "<group>"; };
 		1EAC363314CDC79300DF97C3 /* LoaderStandard.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = LoaderStandard.cpp; path = ../../moses/src/RuleTable/LoaderStandard.cpp; sourceTree = "<group>"; };
 		1EAC363414CDC79300DF97C3 /* LoaderStandard.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = LoaderStandard.h; path = ../../moses/src/RuleTable/LoaderStandard.h; sourceTree = "<group>"; };
+		1EBC539E164C44FC00ADFA2C /* WordTranslationFeature.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = WordTranslationFeature.cpp; path = ../../moses/src/WordTranslationFeature.cpp; sourceTree = "<group>"; };
+		1EBC539F164C44FC00ADFA2C /* WordTranslationFeature.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = WordTranslationFeature.h; path = ../../moses/src/WordTranslationFeature.h; sourceTree = "<group>"; };
 		1EC32DB615D2D90700A313B1 /* ThrowingFwrite.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = ThrowingFwrite.cpp; path = ../../moses/src/CompactPT/ThrowingFwrite.cpp; sourceTree = "<group>"; };
 		1EC32DB715D2D90700A313B1 /* ThrowingFwrite.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; name = ThrowingFwrite.h; path = ../../moses/src/CompactPT/ThrowingFwrite.h; sourceTree = "<group>"; };
 		1EC735D314B977AA00238410 /* AlignmentInfo.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; name = AlignmentInfo.cpp; path = ../../moses/src/AlignmentInfo.cpp; sourceTree = "<group>"; };
@@ -1282,8 +1267,6 @@
 				1E31667B163B0CB200F64999 /* Parser.o in Frameworks */,
 				1E31667C163B0CB200F64999 /* StackLatticeBuilder.o in Frameworks */,
 				1E31667D163B0CB200F64999 /* VarSpanTrieBuilder.o in Frameworks */,
-				1E31668F163B0CB200F64999 /* SRI.o in Frameworks */,
-				1E316691163B0CB200F64999 /* StaticData.o in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -1303,6 +1286,8 @@
 		08FB7795FE84155DC02AAC07 /* Source */ = {
 			isa = PBXGroup;
 			children = (
+				1EBC539E164C44FC00ADFA2C /* WordTranslationFeature.cpp */,
+				1EBC539F164C44FC00ADFA2C /* WordTranslationFeature.h */,
 				1E31646E163B0CB000F64999 /* FeatureVector.cpp */,
 				1E31646F163B0CB000F64999 /* FeatureVector.h */,
 				1E316470163B0CB000F64999 /* FeatureVectorTest.cpp */,
@@ -1326,15 +1311,7 @@
 				1E316596163B0CB200F64999 /* SourceWordDeletionFeature.h */,
 				1E316597163B0CB200F64999 /* SparsePhraseDictionaryFeature.cpp */,
 				1E316598163B0CB200F64999 /* SparsePhraseDictionaryFeature.h */,
-				1E316599163B0CB200F64999 /* SRI.lo */,
-				1E31659A163B0CB200F64999 /* SRI.o */,
 				1E31659B163B0CB200F64999 /* StackVec.h */,
-				1E31659C163B0CB200F64999 /* StaticData.lo */,
-				1E31659D163B0CB200F64999 /* StaticData.o */,
-				1E31659E163B0CB200F64999 /* SyntacticLanguageModel.cpp */,
-				1E31659F163B0CB200F64999 /* SyntacticLanguageModel.h */,
-				1E3165A0163B0CB200F64999 /* SyntacticLanguageModelFiles.h */,
-				1E3165A1163B0CB200F64999 /* SyntacticLanguageModelState.h */,
 				1E3165A2163B0CB200F64999 /* TargetBigramFeature.cpp */,
 				1E3165A3163B0CB200F64999 /* TargetBigramFeature.h */,
 				1E3165A4163B0CB200F64999 /* TargetBigramFeatureTest.cpp */,
@@ -1773,8 +1750,6 @@
 				1E316507163B0CB100F64999 /* ORLM.h */,
 				1E316508163B0CB100F64999 /* ParallelBackoff.cpp */,
 				1E316509163B0CB100F64999 /* ParallelBackoff.h */,
-				1E31650A163B0CB100F64999 /* Rand.cpp */,
-				1E31650B163B0CB100F64999 /* Rand.h */,
 				1E31650C163B0CB100F64999 /* Remote.cpp */,
 				1E31650D163B0CB100F64999 /* Remote.h */,
 				1E31650E163B0CB100F64999 /* SingleFactor.cpp */,
@@ -2688,7 +2663,6 @@
 				1E316617163B0CB200F64999 /* MultiFactor.h in Headers */,
 				1E316619163B0CB200F64999 /* ORLM.h in Headers */,
 				1E31661B163B0CB200F64999 /* ParallelBackoff.h in Headers */,
-				1E31661D163B0CB200F64999 /* Rand.h in Headers */,
 				1E31661F163B0CB200F64999 /* Remote.h in Headers */,
 				1E316621163B0CB200F64999 /* SingleFactor.h in Headers */,
 				1E316623163B0CB200F64999 /* SRI.h in Headers */,
@@ -2721,13 +2695,11 @@
 				1E31668C163B0CB200F64999 /* SourceWordDeletionFeature.h in Headers */,
 				1E31668E163B0CB200F64999 /* SparsePhraseDictionaryFeature.h in Headers */,
 				1E316690163B0CB200F64999 /* StackVec.h in Headers */,
-				1E316693163B0CB200F64999 /* SyntacticLanguageModel.h in Headers */,
-				1E316694163B0CB200F64999 /* SyntacticLanguageModelFiles.h in Headers */,
-				1E316695163B0CB200F64999 /* SyntacticLanguageModelState.h in Headers */,
 				1E316697163B0CB200F64999 /* TargetBigramFeature.h in Headers */,
 				1E31669A163B0CB200F64999 /* TargetNgramFeature.h in Headers */,
 				1E31669C163B0CB200F64999 /* TargetWordInsertionFeature.h in Headers */,
 				1E31669D163B0CB200F64999 /* Terminal.h in Headers */,
+				1EBC53A1164C44FC00ADFA2C /* WordTranslationFeature.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -2945,11 +2917,9 @@
 				1E31660F163B0CB200F64999 /* Jamfile in Sources */,
 				1E316610163B0CB200F64999 /* Joint.cpp in Sources */,
 				1E316612163B0CB200F64999 /* Ken.cpp in Sources */,
-				1E316614163B0CB200F64999 /* LDHT.cpp in Sources */,
 				1E316616163B0CB200F64999 /* MultiFactor.cpp in Sources */,
 				1E316618163B0CB200F64999 /* ORLM.cpp in Sources */,
 				1E31661A163B0CB200F64999 /* ParallelBackoff.cpp in Sources */,
-				1E31661C163B0CB200F64999 /* Rand.cpp in Sources */,
 				1E31661E163B0CB200F64999 /* Remote.cpp in Sources */,
 				1E316620163B0CB200F64999 /* SingleFactor.cpp in Sources */,
 				1E316622163B0CB200F64999 /* SRI.cpp in Sources */,
@@ -2978,11 +2948,11 @@
 				1E31668A163B0CB200F64999 /* ScoreComponentCollectionTest.cpp in Sources */,
 				1E31668B163B0CB200F64999 /* SourceWordDeletionFeature.cpp in Sources */,
 				1E31668D163B0CB200F64999 /* SparsePhraseDictionaryFeature.cpp in Sources */,
-				1E316692163B0CB200F64999 /* SyntacticLanguageModel.cpp in Sources */,
 				1E316696163B0CB200F64999 /* TargetBigramFeature.cpp in Sources */,
 				1E316698163B0CB200F64999 /* TargetBigramFeatureTest.cpp in Sources */,
 				1E316699163B0CB200F64999 /* TargetNgramFeature.cpp in Sources */,
 				1E31669B163B0CB200F64999 /* TargetWordInsertionFeature.cpp in Sources */,
+				1EBC53A0164C44FC00ADFA2C /* WordTranslationFeature.cpp in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
