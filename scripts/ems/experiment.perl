@@ -1576,6 +1576,7 @@ sub factorize_one_language {
 sub define_tuning_tune {
     my ($step_id) = @_;
     my $dir = &check_and_get("GENERAL:working-dir");
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $tuning_script = &check_and_get("TUNING:tuning-script");
     my $use_mira = &backoff_and_get("TUNING:use-mira", 0);
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
@@ -1634,7 +1635,7 @@ sub define_tuning_tune {
 	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
 	$decoder_settings = "" unless $decoder_settings;
 	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
-  $decoder_settings .= " -use-alignment-info " unless defined($word_alignment) && $word_alignment eq "no";
+  $decoder_settings .= " -use-alignment-info " unless $hierarchical ||  defined($word_alignment) && $word_alignment eq "no";
 	
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
@@ -2429,11 +2430,11 @@ sub define_tuningevaluation_filter {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
     my $tuning_flag = !defined($set);
+    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
 
     my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
 
     my $binarizer = &get("GENERAL:ttable-binarizer");
-    my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $report_precision_by_coverage = !$tuning_flag && &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     
     # occasionally, lattices and conf nets need to be able 
@@ -2449,10 +2450,10 @@ sub define_tuningevaluation_filter {
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
-    $binarizer .= " -alignment-info" unless !defined ($binarizer) || ( defined $word_alignment && $word_alignment eq "no");
+    $binarizer .= " -alignment-info" unless !defined ($binarizer) || $hierarchical || ( defined $word_alignment && $word_alignment eq "no");
         
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
-    $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
+    $settings .= " --Hierarchical" if $hierarchical;
 
     # get model, and whether suffix array is used. Determines the pt implementation.
     my $sa_exec_dir = &get("TRAINING:suffix-array");
@@ -2551,7 +2552,7 @@ sub define_evaluation_decode {
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
 
-    $settings .= " -use-alignment-info" unless defined($word_alignment) && $word_alignment eq "no";
+    $settings .= " -use-alignment-info" unless $hierarchical || ( defined($word_alignment) && $word_alignment eq "no");
     
     # specify additional output for analysis
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
