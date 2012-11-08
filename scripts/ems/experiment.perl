@@ -1578,6 +1578,7 @@ sub define_tuning_tune {
     my $dir = &check_and_get("GENERAL:working-dir");
     my $tuning_script = &check_and_get("TUNING:tuning-script");
     my $use_mira = &backoff_and_get("TUNING:use-mira", 0);
+    my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
     
     # the last 3 variables are only used for mira tuning 
     my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest) = &get_output_and_input($step_id); 
@@ -1633,6 +1634,7 @@ sub define_tuning_tune {
 	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
 	$decoder_settings = "" unless $decoder_settings;
 	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
+  $decoder_settings .= " -use-alignment-info " unless defined($word_alignment) && $word_alignment eq "no";
 	
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
@@ -1950,10 +1952,7 @@ sub define_training_build_ttable {
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    if ((defined($word_report) && $word_report eq "yes") ||
-	(defined($word_alignment) && $word_alignment eq "yes")) {
-      $cmd .= "-phrase-word-alignment ";
-    }
+    $cmd .=  "-phrase-word-alignment " unless (defined($word_alignment) && $word_alignment eq "no");
 
     $cmd .= &define_domain_feature_score_option($domains) if $domains;
     
@@ -2428,6 +2427,7 @@ sub define_tuningevaluation_filter {
     my ($set,$step_id) = @_;
     my $scripts = &check_and_get("GENERAL:moses-script-dir");
     my $dir = &check_and_get("GENERAL:working-dir");
+    my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
     my $tuning_flag = !defined($set);
 
     my ($filter_dir,$input,$phrase_translation_table,$reordering_table,$domains) = &get_output_and_input($step_id);
@@ -2449,8 +2449,8 @@ sub define_tuningevaluation_filter {
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
-    $binarizer .= " -alignment-info" 
-        if !$tuning_flag && $binarizer && $report_precision_by_coverage;
+    $binarizer .= " -alignment-info" unless !defined ($binarizer) || ( defined $word_alignment && $word_alignment eq "no");
+        
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if &get("TRAINING:hierarchical-rule-set");
 
@@ -2549,10 +2549,13 @@ sub define_evaluation_decode {
     my $analyze_search_graph = &backoff_and_get("EVALUATION:$set:analyze-search-graph");
     my $report_precision_by_coverage = &backoff_and_get("EVALUATION:$set:report-precision-by-coverage");
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
+    my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
+
+    $settings .= " -use-alignment-info" unless defined($word_alignment) && $word_alignment eq "no";
     
     # specify additional output for analysis
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
-      $settings .= " -use-alignment-info -alignment-output-file $system_output.wa";
+      $settings .= " -alignment-output-file $system_output.wa";
       $report_segmentation = "yes";
     }
     if (defined($analyze_search_graph) && $analyze_search_graph eq "yes") {
@@ -2566,6 +2569,7 @@ sub define_evaluation_decode {
         $settings .= " -t";
       }
     }
+    $settings .= " -text-type \"test\"";
 
     my $addTags = &backoff_and_get("EVALUATION:$set:add-tags");
     if ($addTags) {
@@ -2600,7 +2604,6 @@ sub define_evaluation_decode {
 	$cmd = "$decoder $settings -v 0 -f $config < $input > $system_output";
 	$cmd .= " -n-best-list $system_output.best$nbest_size $nbest" if $nbest;
     }
-    $cmd .= " -text-type \"test\"";
 
     &create_step($step_id,$cmd);
 }
