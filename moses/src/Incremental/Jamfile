@@ -1,1 +1,0 @@
-lib Incremental : [ glob *.cpp ] ../../../search//search ..//moses_internal ;
