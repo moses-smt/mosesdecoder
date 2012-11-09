@@ -75,17 +75,17 @@ private:
   void addRule( int, int, int, int, int, RuleExist &ruleExist);
   void addHieroRule( int startT, int endT, int startS, int endS
                     , RuleExist &ruleExist, const HoleCollection &holeColl, int numHoles, int initStartF, int wordCountT, int wordCountS);
-  void printHieroPhrase( int startT, int endT, int startS, int endS
+  void saveHieroPhrase( int startT, int endT, int startS, int endS
                         , HoleCollection &holeColl, LabelIndex &labelIndex, int countS);
-  string printTargetHieroPhrase(  int startT, int endT, int startS, int endS
+  string saveTargetHieroPhrase(  int startT, int endT, int startS, int endS
                                 , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex, double &logPCFGScore, int countS);
-  string printSourceHieroPhrase( int startT, int endT, int startS, int endS
+  string saveSourceHieroPhrase( int startT, int endT, int startS, int endS
                                 , HoleCollection &holeColl, const LabelIndex &labelIndex);
   void preprocessSourceHieroPhrase( int startT, int endT, int startS, int endS
                                    , WordIndex &indexS, HoleCollection &holeColl, const LabelIndex &labelIndex);
-  void printHieroAlignment(  int startT, int endT, int startS, int endS
+  void saveHieroAlignment(  int startT, int endT, int startS, int endS
                            , const WordIndex &indexS, const WordIndex &indexT, HoleCollection &holeColl, ExtractedRule &rule);
-  void printAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl, int countS);
+  void saveAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl, int countS);
   
   inline string IntToString( int i )
   {
@@ -508,7 +508,7 @@ void ExtractTask::preprocessSourceHieroPhrase( int startT, int endT, int startS,
   assert(iterHoleList == holeColl.GetSortedSourceHoles().end());
 }
 
-string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, int endS
+string ExtractTask::saveTargetHieroPhrase( int startT, int endT, int startS, int endS
                               , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex, double &logPCFGScore
                               , int countS)
 {
@@ -570,7 +570,7 @@ string ExtractTask::printTargetHieroPhrase( int startT, int endT, int startS, in
   return out.erase(out.size()-1);
 }
 
-string ExtractTask::printSourceHieroPhrase( int startT, int endT, int startS, int endS
+string ExtractTask::saveSourceHieroPhrase( int startT, int endT, int startS, int endS
                                , HoleCollection &holeColl, const LabelIndex &labelIndex)
 {
   vector<Hole*>::iterator iterHoleList = holeColl.GetSortedSourceHoles().begin();
@@ -614,7 +614,7 @@ string ExtractTask::printSourceHieroPhrase( int startT, int endT, int startS, in
   return out.erase(out.size()-1);
 }
 
-void ExtractTask::printHieroAlignment( int startT, int endT, int startS, int endS
+void ExtractTask::saveHieroAlignment( int startT, int endT, int startS, int endS
                          , const WordIndex &indexS, const WordIndex &indexT, HoleCollection &holeColl, ExtractedRule &rule)
 {
   // print alignment of words
@@ -653,7 +653,7 @@ void ExtractTask::printHieroAlignment( int startT, int endT, int startS, int end
   }
 }
 
-void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
+void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
                        , HoleCollection &holeColl, LabelIndex &labelIndex, int countS)
 {
   WordIndex indexS, indexT; // to keep track of word positions in rule
@@ -679,17 +679,17 @@ void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
   // target
   if (m_options.pcfgScore) {
     double logPCFGScore = m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0]]->GetPcfgScore();
-    rule.target = printTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore, countS)
+    rule.target = saveTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore, countS)
                 + " [" + targetLabel + "]";
     rule.pcfgScore = std::exp(logPCFGScore);
   } else {
     double logPCFGScore = 0.0f;
-    rule.target = printTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore, countS)
+    rule.target = saveTargetHieroPhrase(startT, endT, startS, endS, indexT, holeColl, labelIndex, logPCFGScore, countS)
                 + " [" + targetLabel + "]";
   }
 
   // source
-  rule.source = printSourceHieroPhrase(startT, endT, startS, endS, holeColl, labelIndex);
+  rule.source = saveSourceHieroPhrase(startT, endT, startS, endS, holeColl, labelIndex);
   if (m_options.conditionOnTargetLhs) {
     rule.source += " [" + targetLabel + "]";
   } else {
@@ -697,12 +697,12 @@ void ExtractTask::printHieroPhrase( int startT, int endT, int startS, int endS
   }
 
   // alignment
-  printHieroAlignment(startT, endT, startS, endS, indexS, indexT, holeColl, rule);
+  saveHieroAlignment(startT, endT, startS, endS, indexS, indexT, holeColl, rule);
 
   addRuleToCollection( rule );
 }
 
-void ExtractTask::printAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl, int countS)
+void ExtractTask::saveAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl, int countS)
 {
   LabelIndex labelIndex,labelCount;
 
@@ -737,7 +737,7 @@ void ExtractTask::printAllHieroPhrases( int startT, int endT, int startS, int en
   // loop through the holes
   bool done = false;
   while(!done) {
-    printHieroPhrase( startT, endT, startS, endS, holeColl, labelIndex, countS );
+    saveHieroPhrase( startT, endT, startS, endS, holeColl, labelIndex, countS );
     for(unsigned int i=0; i<labelIndex.size(); i++) {
       labelIndex[i]++;
       if(labelIndex[i] == labelCount[i]) {
@@ -865,7 +865,7 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
 
         // passed all checks...
         if (allowablePhrase)
-          printAllHieroPhrases(startT, endT, startS, endS, copyHoleColl, wordCountS);
+          saveAllHieroPhrases(startT, endT, startS, endS, copyHoleColl, wordCountS);
 
         // recursively search for next hole
         int nextInitStartT = m_options.nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
