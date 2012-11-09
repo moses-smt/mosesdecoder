@@ -10,9 +10,7 @@ else {
   alias cmph ;
 }
 
-alias sources : [ glob *.cpp ] ;
-
 path-constant PT-LOG : bin/pt.log ;
 update-if-changed $(PT-LOG) $(current) ;
 
-lib CompactPT : sources ..//moses_internal cmph : $(includes) <dependency>$(PT-LOG) ;
+lib CompactPT : [ glob *.cpp ] ..//headers cmph : $(includes) <dependency>$(PT-LOG) : : $(includes) ;

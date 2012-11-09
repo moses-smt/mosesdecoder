@@ -29,10 +29,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "util/file_piece.hh"
 #include "util/string_piece.hh"
 
 #include "FeatureDataIterator.h"
+
+namespace util { class FilePiece; }
 
 namespace MosesTuning
 {
@@ -48,6 +49,8 @@ class ScoreDataIterator :
   public:
     ScoreDataIterator();
     explicit ScoreDataIterator(const std::string& filename);
+
+    ~ScoreDataIterator();
 
     static ScoreDataIterator end() {
       return ScoreDataIterator();

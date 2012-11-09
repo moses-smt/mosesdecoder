@@ -132,19 +132,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.cpp</locationURI>
 		</link>
 		<link>
-			<name>BleuScoreFeature.cpp~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.cpp~</locationURI>
-		</link>
-		<link>
 			<name>BleuScoreFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.h</locationURI>
-		</link>
-		<link>
-			<name>BleuScoreFeature.h~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/BleuScoreFeature.h~</locationURI>
 		</link>
 		<link>
 			<name>CYKPlusParser</name>
@@ -457,11 +447,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVector.h</locationURI>
 		</link>
 		<link>
-			<name>FeatureVector.h~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVector.h~</locationURI>
-		</link>
-		<link>
 			<name>FeatureVectorTest.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/FeatureVectorTest.cpp</locationURI>
@@ -592,11 +577,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/InputType.h</locationURI>
 		</link>
 		<link>
-			<name>Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Jamfile</locationURI>
-		</link>
-		<link>
 			<name>LM</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -650,11 +630,6 @@
 			<name>LexicalReorderingTable.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/LexicalReorderingTable.h</locationURI>
-		</link>
-		<link>
-			<name>Makefile.am</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/Makefile.am</locationURI>
 		</link>
 		<link>
 			<name>Manager.cpp</name>
@@ -917,19 +892,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollection.cpp</locationURI>
 		</link>
 		<link>
-			<name>ScoreComponentCollection.cpp~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollection.cpp~</locationURI>
-		</link>
-		<link>
 			<name>ScoreComponentCollection.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollection.h</locationURI>
-		</link>
-		<link>
-			<name>ScoreComponentCollection.h~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/ScoreComponentCollection.h~</locationURI>
 		</link>
 		<link>
 			<name>ScoreComponentCollectionTest.cpp</name>
@@ -1047,19 +1012,9 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.cpp</locationURI>
 		</link>
 		<link>
-			<name>StaticData.cpp~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.cpp~</locationURI>
-		</link>
-		<link>
 			<name>StaticData.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.h</locationURI>
-		</link>
-		<link>
-			<name>StaticData.h~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/StaticData.h~</locationURI>
 		</link>
 		<link>
 			<name>SyntacticLanguageModel.cpp</name>
@@ -1360,11 +1315,6 @@
 			<name>hypergraph.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/hypergraph.proto</locationURI>
-		</link>
-		<link>
-			<name>rule.proto</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/rule.proto</locationURI>
 		</link>
 		<link>
 			<name>CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>
@@ -1930,11 +1880,6 @@
 			<name>RuleTable/PhraseDictionaryOnDisk.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryOnDisk.cpp</locationURI>
-		</link>
-		<link>
-			<name>RuleTable/PhraseDictionaryOnDisk.cpp~</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/src/RuleTable/PhraseDictionaryOnDisk.cpp~</locationURI>
 		</link>
 		<link>
 			<name>RuleTable/PhraseDictionaryOnDisk.h</name>

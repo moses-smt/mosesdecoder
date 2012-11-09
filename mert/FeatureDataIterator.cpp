@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <boost/functional/hash.hpp>
 
+#include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
 #include "FeatureArray.h"
@@ -70,6 +71,8 @@ FeatureDataIterator::FeatureDataIterator(const string& filename) {
   m_in.reset(new FilePiece(filename.c_str()));
   readNext();
 }
+
+FeatureDataIterator::~FeatureDataIterator() {}
 
 void FeatureDataIterator::readNext() {
   m_next.clear();

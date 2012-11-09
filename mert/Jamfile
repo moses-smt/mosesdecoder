@@ -49,15 +49,15 @@ SentenceLevelScorer.cpp
 Permutation.cpp
 PermutationScorer.cpp
 StatisticsBasedScorer.cpp
-../util//kenutil m ..//z ;
+../util//kenutil m ..//z : <include>. : : <include>. ;
 
-exe mert : mert.cpp mert_lib bleu_lib ../moses/src//ThreadPool ;
+exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
 
-exe extractor : extractor.cpp mert_lib bleu_lib ;
+exe extractor : extractor.cpp mert_lib ;
 
-exe evaluator : evaluator.cpp mert_lib bleu_lib ;
+exe evaluator : evaluator.cpp mert_lib ;
 
-exe pro : pro.cpp mert_lib bleu_lib ..//boost_program_options ;
+exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ;
 
@@ -76,6 +76,3 @@ unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ;
 
 install legacy : programs : <location>. ;
-
-lib bleu_lib : BleuScorer.cpp mert_lib : : : <include>. ;
-

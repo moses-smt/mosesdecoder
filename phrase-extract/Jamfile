@@ -1,33 +1,41 @@
 obj InputFileStream.o : InputFileStream.cpp : <include>. ;
 alias InputFileStream : InputFileStream.o ..//z ;
 
+obj OutputFileStream.o : OutputFileStream.cpp : <include>. ;
+alias OutputFileStream : OutputFileStream.o ..//z ..//boost_iostreams ;
+
 obj tables-core.o : tables-core.cpp : <include>. ;
-obj domain.o : domain.cpp : <include>. ;
+obj domain.o : domain.cpp : <include>. <include>.. ;
 obj AlignmentPhrase.o : AlignmentPhrase.cpp : <include>. ;
+obj PhraseAlignment.o : PhraseAlignment.cpp : <include>. ;
+obj ScoreFeature.o : ScoreFeature.cpp : <include>. <include>..  ;
 obj SentenceAlignment.o : SentenceAlignment.cpp : <include>. ;
 obj SyntaxTree.o : SyntaxTree.cpp : <include>. ;
 obj XmlTree.o : XmlTree.cpp : <include>. ;
 
-alias filestreams : InputFileStream.cpp OutputFileStream.cpp : : : <include>. ;
+alias filestreams : InputFileStream OutputFileStream : : : <include>. ;
 alias trees : SyntaxTree.cpp tables-core.o XmlTree.o : : : <include>. ;
 
-exe extract : tables-core.o SentenceAlignment.o extract.cpp OutputFileStream.cpp InputFileStream ../moses/src//ThreadPool ..//boost_iostreams ;
+exe extract : tables-core.o SentenceAlignment.o extract.cpp filestreams ../moses/src//ThreadPool ..//boost_iostreams ;
 
-exe extract-rules : tables-core.o SentenceAlignment.o SyntaxTree.o XmlTree.o SentenceAlignmentWithSyntax.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+exe extract-rules : tables-core.o SentenceAlignment.o SyntaxTree.o XmlTree.o SentenceAlignmentWithSyntax.cpp HoleCollection.cpp extract-rules.cpp ExtractedRule.cpp filestreams  ..//boost_iostreams ;
 
-exe extract-lex : extract-lex.cpp InputFileStream ;
+exe extract-lex : extract-lex.cpp filestreams ;
 
-exe score : tables-core.o domain.o AlignmentPhrase.o score.cpp PhraseAlignment.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+exe score : tables-core.o domain.o AlignmentPhrase.o score.cpp ScoreFeature.o PhraseAlignment.o filestreams ../util//kenutil ..//boost_iostreams ;
 
-exe consolidate : consolidate.cpp tables-core.o OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+exe consolidate : consolidate.cpp tables-core.o filestreams ..//boost_iostreams ;
 
-exe consolidate-direct : consolidate-direct.cpp OutputFileStream.cpp InputFileStream ..//boost_iostreams ;
+exe consolidate-direct : consolidate-direct.cpp filestreams ..//boost_iostreams ;
 
-exe consolidate-reverse :  consolidate-reverse.cpp tables-core.o InputFileStream ;
+exe consolidate-reverse :  consolidate-reverse.cpp tables-core.o filestreams ;
 
-exe relax-parse : tables-core.o SyntaxTree.o XmlTree.o relax-parse.cpp InputFileStream ;
+exe relax-parse : tables-core.o SyntaxTree.o XmlTree.o relax-parse.cpp filestreams ;
 
-exe statistics : tables-core.o AlignmentPhrase.o statistics.cpp InputFileStream ;
+exe statistics : tables-core.o AlignmentPhrase.o statistics.cpp filestreams ;
 
 alias programs : extract extract-rules extract-lex score consolidate consolidate-direct consolidate-reverse relax-parse statistics ;
+
+import testing ;
+run ScoreFeatureTest.cpp tables-core.o  domain.o ScoreFeature.o PhraseAlignment.o filestreams  ../util//kenutil ..//boost_unit_test_framework ..//boost_iostreams : : test.domain ;
 
