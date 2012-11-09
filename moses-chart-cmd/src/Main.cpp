@@ -88,8 +88,6 @@ public:
 
     VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
 
-    if ((*m_source).GetSize() == 0) return;
-
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
       Incremental::Manager manager(*m_source, system);
       manager.ProcessSentence();

@@ -113,7 +113,6 @@ public:
     // execute the translation
     // note: this executes the search, resulting in a search graph
     //       we still need to apply the decision rule (MAP, MBR, ...)
-    if ((*m_source).GetSize() == 0) return;
     Manager manager(m_lineNumber, *m_source,staticData.GetSearchAlgorithm(), &system);
     manager.ProcessSentence();
 
