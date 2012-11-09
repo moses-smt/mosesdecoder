@@ -1,1 +1,0 @@
-lib Scope3Parser : [ glob *.cpp ] ..//moses_internal ;

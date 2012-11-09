@@ -24,16 +24,26 @@ if $(have-clock[2]) = 0 {
   alias rt ;
 }
 
-lib moses_internal :
-#All cpp files except those listed
-[ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp *Test.cpp Mock*.cpp ]
-synlm ThreadPool headers rt ;
-
-lib moses : PhraseDictionary.cpp moses_internal CYKPlusParser//CYKPlusParser CompactPT//CompactPT LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match Incremental//Incremental headers ../..//z ../../OnDiskPt//OnDiskPt ;
+lib moses :
+[ glob 
+  *.cpp
+  DynSAInclude/*.cpp
+  Scope3Parser/*.cpp
+  CYKPlusParser/*.cpp
+  RuleTable/*.cpp
+  fuzzy-match/*.cpp
+  Incremental/*.cpp
+: #exceptions
+  ThreadPool.cpp
+  SyntacticLanguageModel.cpp
+  *Test.cpp Mock*.cpp
+]
+headers LM//LM CompactPT//CompactPT synlm ThreadPool rt
+../..//search ../../util/double-conversion//double-conversion ../..//z ../../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp ]  moses moses_internal CYKPlusParser//CYKPlusParser CompactPT//CompactPT LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser fuzzy-match//fuzzy-match headers ../..//z ../../OnDiskPt//OnDiskPt ../..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp ] moses headers ../..//z ../../OnDiskPt//OnDiskPt ../..//boost_unit_test_framework ;
 

@@ -30,7 +30,7 @@ const char REFLEN_CLOSEST[] = "closest";
 
 namespace MosesTuning
 {
-  
+
 
 BleuScorer::BleuScorer(const string& config)
     : StatisticsBasedScorer("BLEU", config),
@@ -245,7 +245,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
   std::vector<float> stats;
   CHECK(sent.size()==bg.size());
   CHECK(sent.size()==kBleuNgramOrder*2+1);
-  for(size_t i=0;i<sent.size();i++) 
+  for(size_t i=0;i<sent.size();i++)
     stats.push_back(sent[i]+bg[i]);
 
   // Calculate BLEU
@@ -255,7 +255,7 @@ float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vec
   }
   logbleu /= kBleuNgramOrder;
   const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
-  
+
   if (brevity < 0.0) {
     logbleu += brevity;
   }
@@ -280,19 +280,19 @@ float unsmoothedBleu(const std::vector<float>& stats) {
   return exp(logbleu);
 }
 
-vector<float> BleuScorer::ScoreNbestList(string scoreFile, string featureFile) {
+vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& featureFile) {
 	vector<string> scoreFiles;
 	vector<string> featureFiles;
 	scoreFiles.push_back(scoreFile);
 	featureFiles.push_back(featureFile);
-	
+
 	vector<FeatureDataIterator> featureDataIters;
 	vector<ScoreDataIterator> scoreDataIters;
 	for (size_t i = 0; i < featureFiles.size(); ++i) {
 		featureDataIters.push_back(FeatureDataIterator(featureFiles[i]));
 	    scoreDataIters.push_back(ScoreDataIterator(scoreFiles[i]));
 	}
-	  
+
 	vector<pair<size_t,size_t> > hypotheses;
 	if (featureDataIters[0] == FeatureDataIterator::end()) {
 		cerr << "Error: at the end of feature data iterator" << endl;
@@ -315,16 +315,16 @@ vector<float> BleuScorer::ScoreNbestList(string scoreFile, string featureFile) {
 			hypotheses.push_back(pair<size_t,size_t>(i,j));
 	    }
 	}
-	    
+
 	// score the nbest list
 	vector<float> bleuScores;
 	for (size_t i=0; i < hypotheses.size(); ++i) {
 		pair<size_t,size_t> translation = hypotheses[i];
 		float bleu = sentenceLevelBleuPlusOne(scoreDataIters[translation.first]->operator[](translation.second));
 		bleuScores.push_back(bleu);
-	}	
+	}
 	return bleuScores;
-}	
+}
 
 float BleuScorer::sentenceLevelBleuPlusOne(const vector<float>& stats) {
 	float logbleu = 0.0;
