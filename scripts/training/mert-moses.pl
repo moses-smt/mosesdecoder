@@ -539,7 +539,7 @@ if ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
     push (@_PHRASE_WEIGHTING_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
 
     # Create directory structure for the text phrase tables required by tmcombine
-    mkpath("model_$i/model");
+    mkpath("model_$i/model") || die "Failed to create model_$i/model";
     safesystem("ln -s ../../$filtered_path/phrase-table.0-0.1.1 model_$i/model/phrase-table");
   }
 } elsif ($___FILTER_PHRASE_TABLE) {
