@@ -10,6 +10,13 @@
 using namespace std;
 using namespace Moses;
 
+inline const std::string TrimInternal(const std::string& str, const std::string dropChars = " \t\n\r")
+{
+  std::string res = str;
+  res.erase(str.find_last_not_of(dropChars)+1);
+  return res.erase(0, res.find_first_not_of(dropChars));
+}
+
 class CreateXMLRetValues
 {
 public:
@@ -172,38 +179,38 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 							start_t = tt;
 						}
 					}
-
-					// end of sentence? add to end
-					if ( start_t == 1000 && i > inputToks.size() - 1 ) {
-						start_t = targetsToks.size() - 1;
-					}
-
-					// backtrack to previous words if unaligned
-					if ( start_t == 1000 ) {
-						start_t = -1;
-						for ( int ss = s - 1 ; start_t == -1 && ss >= 0 ; ss-- ) {
-							const std::map<int, int> &targets = alignments.m_alignS2T[ss];
-
-							std::map<int, int>::const_iterator iter;
-							for (iter = targets.begin(); iter != targets.end(); ++iter) {
-								size_t tt = iter->first;
-								if (tt > start_t) {
-									start_t = tt;
-								}
-							}
-						}
-					} // if ( start_t == 1000 ) {
-
-					frameInput[start_t] += insertion;
-					map<string, int> nt;
-					nt["start_t"] = start_t;
-					nt["start_i"] = start_i;
-					nonTerms.push_back(nt);
 				}
 
-				currently_matching = 1;
+				// end of sentence? add to end
+				if ( start_t == 1000 && i > inputToks.size() - 1 ) {
+					start_t = targetsToks.size() - 1;
+				}
+
+				// backtrack to previous words if unaligned
+				if ( start_t == 1000 ) {
+					start_t = -1;
+					for ( int ss = s - 1 ; start_t == -1 && ss >= 0 ; ss-- ) {
+						const std::map<int, int> &targets = alignments.m_alignS2T[ss];
+
+						std::map<int, int>::const_iterator iter;
+						for (iter = targets.begin(); iter != targets.end(); ++iter) {
+							size_t tt = iter->first;
+							if (tt > start_t) {
+								start_t = tt;
+							}
+						}
+					}
+				} // if ( start_t == 1000 ) {
+
+				frameInput[start_t] += insertion;
+				map<string, int> nt;
+				nt["start_t"] = start_t;
+				nt["start_i"] = start_i;
+				nonTerms.push_back(nt);
 
 			} // if (start_i < i ) {
+
+			currently_matching = 1;
 		} // else if ( !currently_matching
 
     cerr << action << " " << s << " " << i
@@ -314,11 +321,9 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 		ret.ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
 	}
 
-	/* TODO
-	ruleS = Trim(ruleS);
-	ruleT = Trim(ruleT);
-	ruleAlignment = Trim(ruleAlignment);
-	*/
+	ret.ruleS = TrimInternal(ret.ruleS);
+	ret.ruleT = TrimInternal(ret.ruleT);
+	ret.ruleAlignment = TrimInternal(ret.ruleAlignment);
 
 	vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment);
 	for (size_t i = 0; i < ruleAlignmentToks.size(); ++i) {
@@ -327,7 +332,7 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 		assert(toks.size() == 2);
 		ret.ruleAlignmentInv += toks[1] + "-" +toks[0];
 	}
-	//ruleAlignmentInv = Trim(ruleAlignmentInv); TODO
+	ret.ruleAlignmentInv = TrimInternal(ret.ruleAlignmentInv);
 
 	// frame
 	ret.frame;
