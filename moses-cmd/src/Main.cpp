@@ -334,6 +334,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
 
 static void ShowWeights()
 {
+  //TODO: Find a way of ensuring this order is synced with the nbest
   fix(cout,6);
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
@@ -343,10 +344,23 @@ static void ShowWeights()
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    if (slf[i]->GetScoreProducerWeightShortName() != "u") {
+    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
+          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
+          slf[i]->GetScoreProducerWeightShortName() != "I" &&
+          slf[i]->GetScoreProducerWeightShortName() != "g")
+    {
   	  PrintFeatureWeight(slf[i]);
     }
   }
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  for( size_t i=0; i<pds.size(); i++ ) {
+    PrintFeatureWeight(pds[i]);
+  }
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for( size_t i=0; i<gds.size(); i++ ) {
+    PrintFeatureWeight(gds[i]);
+  }
+
 }
 
 } //namespace
