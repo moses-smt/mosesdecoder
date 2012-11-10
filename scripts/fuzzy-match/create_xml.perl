@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -d 
+#!/usr/bin/perl -w 
 
 binmode( STDIN,  ":utf8" );
 binmode( STDOUT, ":utf8" );

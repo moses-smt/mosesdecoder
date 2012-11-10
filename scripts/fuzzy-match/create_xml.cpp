@@ -210,13 +210,16 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
     if ( action != "I" ) {
     	cerr << " ->";
 
-    	const std::map<int, int> &targets = alignments.m_alignS2T[s];
+    	if (s < alignments.m_alignS2T.size()) {
+				const std::map<int, int> &targets = alignments.m_alignS2T[s];
+				cerr << "s=" << s << endl;
 
-			std::map<int, int>::const_iterator iter;
-			for (iter = targets.begin(); iter != targets.end(); ++iter) {
-				size_t tt = iter->first;
-				cerr << " " << tt;
-			}
+				std::map<int, int>::const_iterator iter;
+				for (iter = targets.begin(); iter != targets.end(); ++iter) {
+					size_t tt = iter->first;
+					cerr << " " << tt;
+				}
+    	}
     }
     cerr << endl;
 
@@ -289,7 +292,7 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 
 	for (map<int, int>::const_iterator iter = ruleAlignT.begin(); iter != ruleAlignT.end(); ++iter) {
 		int s = iter->first;
-		std::map<int, int> &targets = alignments.m_alignS2T[s];
+		const std::map<int, int> &targets = alignments.m_alignS2T[s];
 
 		std::map<int, int>::const_iterator iter;
 		for (iter = targets.begin(); iter != targets.end(); ++iter) {
