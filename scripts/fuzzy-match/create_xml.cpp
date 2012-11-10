@@ -34,6 +34,7 @@ int main(int argc, char **argv)
   string *input = NULL;
   int count;
 
+  int lineCount = 1;
   string inLine;
   
   int step = 0;
@@ -91,6 +92,8 @@ int main(int argc, char **argv)
       step = 0;
       break;
     }
+
+    ++lineCount;
   }
 
   delete input;
@@ -272,7 +275,7 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 	int rule_pos_t = 0;
 	map<int, int> ruleAlignT;
 
-	for (size_t t = -1 ; t < targetBitmap.size(); t++ ) {
+	for (size_t t = 0 ; t < targetBitmap.size(); t++ ) {
 		if (t >= 0 && targetBitmap[t]) {
 			ret.ruleT += targetsToks[t] + " ";
 			ruleAlignT[t] = rule_pos_t++;
@@ -288,18 +291,21 @@ CreateXMLRetValues createXML(const string &source, const string &input, const st
 		}
 	}
 
-	ret.ruleAlignment;
+	ret.ruleAlignment = "";
 
 	for (map<int, int>::const_iterator iter = ruleAlignT.begin(); iter != ruleAlignT.end(); ++iter) {
 		int s = iter->first;
-		const std::map<int, int> &targets = alignments.m_alignS2T[s];
 
-		std::map<int, int>::const_iterator iter;
-		for (iter = targets.begin(); iter != targets.end(); ++iter) {
-			int t =iter->first;
-			if (ruleAlignT.find(s) == ruleAlignT.end())
-				continue;
-			ret.ruleAlignment += ruleAlignS[s] + "-" + SPrint(ruleAlignT[t]) + " ";
+		if (s < alignments.m_alignS2T.size()) {
+			const std::map<int, int> &targets = alignments.m_alignS2T[s];
+
+			std::map<int, int>::const_iterator iter;
+			for (iter = targets.begin(); iter != targets.end(); ++iter) {
+				int t =iter->first;
+				if (ruleAlignT.find(s) == ruleAlignT.end())
+					continue;
+				ret.ruleAlignment += SPrint(ruleAlignS[s]) + "-" + SPrint(ruleAlignT[t]) + " ";
+			}
 		}
 	}
 
