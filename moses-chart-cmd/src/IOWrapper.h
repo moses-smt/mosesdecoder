@@ -36,15 +36,14 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 #include <vector>
-#include "TypeDef.h"
-#include "Sentence.h"
-#include "FactorTypeSet.h"
-#include "TranslationSystem.h"
-#include "ChartTrellisPathList.h"
-#include "OutputCollector.h"
-#include "ChartHypothesis.h"
-
-#include "ChartTrellisPath.h"
+#include "moses/TypeDef.h"
+#include "moses/Sentence.h"
+#include "moses/FactorTypeSet.h"
+#include "moses/TranslationSystem.h"
+#include "moses/ChartTrellisPathList.h"
+#include "moses/OutputCollector.h"
+#include "moses/ChartHypothesis.h"
+#include "moses/ChartTrellisPath.h"
 
 namespace Moses
 {

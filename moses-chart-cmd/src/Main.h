@@ -34,7 +34,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #pragma once
 
-#include "StaticData.h"
+#include "moses/StaticData.h"
 
 namespace MosesChartCmd {
   class IOWrapper;

@@ -8,8 +8,8 @@
 #define moses_cmd_TranslationAnalysis_h
 
 #include <iostream>
-#include "Hypothesis.h"
-#include "TranslationSystem.h"
+#include "moses/Hypothesis.h"
+#include "moses/TranslationSystem.h"
 
 namespace TranslationAnalysis
 {

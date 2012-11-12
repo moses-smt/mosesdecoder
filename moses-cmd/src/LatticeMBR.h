@@ -13,9 +13,9 @@
 #include <map>
 #include <vector>
 #include <set>
-#include "Hypothesis.h"
-#include "Manager.h"
-#include "TrellisPathList.h"
+#include "moses/Hypothesis.h"
+#include "moses/Manager.h"
+#include "moses/TrellisPathList.h"
 
 
 

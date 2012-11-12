@@ -8,7 +8,7 @@
  */
 
 #include "LatticeMBR.h"
-#include "StaticData.h"
+#include "moses/StaticData.h"
 #include <algorithm>
 #include <set>
 

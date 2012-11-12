@@ -3,10 +3,12 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "StaticData.h"
+
 #include "TranslationAnalysis.h"
-#include "TranslationOption.h"
-#include "DecodeStepTranslation.h"
+
+#include "moses/StaticData.h"
+#include "moses/TranslationOption.h"
+#include "moses/DecodeStepTranslation.h"
 
 using namespace std;
 using namespace Moses;

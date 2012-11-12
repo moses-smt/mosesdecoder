@@ -33,21 +33,21 @@ POSSIBILITY OF SUCH DAMAGE.
 // example file on how to use moses library
 
 #include <iostream>
-#include "TypeDef.h"
-#include "Util.h"
 #include "IOWrapper.h"
-#include "WordsRange.h"
-#include "StaticData.h"
-#include "DummyScoreProducers.h"
-#include "InputFileStream.h"
-#include "PhraseDictionary.h"
-#include "ChartTrellisPathList.h"
-#include "ChartTrellisPath.h"
-#include "ChartTranslationOptions.h"
-#include "ChartHypothesis.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/WordsRange.h"
+#include "moses/StaticData.h"
+#include "moses/DummyScoreProducers.h"
+#include "moses/InputFileStream.h"
+#include "moses/PhraseDictionary.h"
+#include "moses/ChartTrellisPathList.h"
+#include "moses/ChartTrellisPath.h"
+#include "moses/ChartTranslationOptions.h"
+#include "moses/ChartHypothesis.h"
+#include "moses/FeatureVector.h"
 
 #include <boost/algorithm/string.hpp>
-#include "FeatureVector.h"
 
 
 using namespace std;

@@ -8,10 +8,10 @@
 #include <math.h>
 #include <algorithm>
 #include <stdio.h>
-#include "TrellisPathList.h"
-#include "TrellisPath.h"
-#include "StaticData.h"
-#include "Util.h"
+#include "moses/TrellisPathList.h"
+#include "moses/TrellisPath.h"
+#include "moses/StaticData.h"
+#include "moses/Util.h"
 #include "mbr.h"
 
 using namespace std ;

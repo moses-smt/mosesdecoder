@@ -34,7 +34,6 @@
 								<option id="gnu.cpp.compiler.option.include.paths.57896781" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 									<listOptionValue builtIn="false" value="/opt/local/include/"/>
-									<listOptionValue builtIn="false" value="${workspace_loc}/../../moses/src"/>
 									<listOptionValue builtIn="false" value="${workspace_loc}/../../irstlm/include"/>
 									<listOptionValue builtIn="false" value="${workspace_loc}/../../srilm/include"/>
 									<listOptionValue builtIn="false" value="${workspace_loc}/../../"/>

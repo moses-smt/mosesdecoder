@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <algorithm>
-#include "StaticData.h"
-#include "Hypothesis.h"
+#include "moses/StaticData.h"
+#include "moses/Hypothesis.h"
 #include "TranslationAnalysis.h"
 
 using namespace Moses;

@@ -34,17 +34,18 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <iostream>
 #include <stack>
-#include "TypeDef.h"
-#include "Util.h"
-#include "IOWrapper.h"
-#include "Hypothesis.h"
-#include "WordsRange.h"
-#include "TrellisPathList.h"
-#include "StaticData.h"
-#include "DummyScoreProducers.h"
-#include "FeatureVector.h"
-#include "InputFileStream.h"
 #include <boost/algorithm/string.hpp>
+
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/Hypothesis.h"
+#include "moses/WordsRange.h"
+#include "moses/TrellisPathList.h"
+#include "moses/StaticData.h"
+#include "moses/DummyScoreProducers.h"
+#include "moses/FeatureVector.h"
+#include "moses/InputFileStream.h"
+#include "IOWrapper.h"
 
 using namespace std;
 using namespace Moses;

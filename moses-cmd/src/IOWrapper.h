@@ -41,16 +41,16 @@ POSSIBILITY OF SUCH DAMAGE.
 #include <vector>
 #include "util/check.hh"
 
-#include "TypeDef.h"
-#include "Sentence.h"
-#include "FactorTypeSet.h"
-#include "FactorCollection.h"
-#include "Hypothesis.h"
-#include "OutputCollector.h"
-#include "TrellisPathList.h"
-#include "InputFileStream.h"
-#include "InputType.h"
-#include "WordLattice.h"
+#include "moses/TypeDef.h"
+#include "moses/Sentence.h"
+#include "moses/FactorTypeSet.h"
+#include "moses/FactorCollection.h"
+#include "moses/Hypothesis.h"
+#include "moses/OutputCollector.h"
+#include "moses/TrellisPathList.h"
+#include "moses/InputFileStream.h"
+#include "moses/InputType.h"
+#include "moses/WordLattice.h"
 #include "LatticeMBR.h"
 
 namespace MosesCmd

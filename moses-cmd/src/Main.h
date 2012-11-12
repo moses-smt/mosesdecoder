@@ -35,7 +35,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #ifndef moses_cmd_Main_h
 #define moses_cmd_Main_h
 
-#include "StaticData.h"
+#include "moses/StaticData.h"
 
 class IOWrapper;
 

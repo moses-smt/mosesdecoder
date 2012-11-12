@@ -35,17 +35,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //#include <vld.h>
 #endif
 
-#include "Hypothesis.h"
+#include "TranslationAnalysis.h"
 #include "IOWrapper.h"
 #include "LatticeMBR.h"
-#include "Manager.h"
-#include "StaticData.h"
-#include "Util.h"
-#include "Timer.h"
 #include "mbr.h"
-#include "ThreadPool.h"
-#include "TranslationAnalysis.h"
-#include "OutputCollector.h"
+
+#include "moses/Hypothesis.h"
+#include "moses/Manager.h"
+#include "moses/StaticData.h"
+#include "moses/Util.h"
+#include "moses/Timer.h"
+#include "moses/ThreadPool.h"
+#include "moses/OutputCollector.h"
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"

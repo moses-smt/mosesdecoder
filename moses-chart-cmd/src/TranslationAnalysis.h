@@ -8,7 +8,7 @@
 #define _TRANSLATION_ANALYSIS_H_
 
 #include <iostream>
-#include "ChartHypothesis.h"
+#include "moses/ChartHypothesis.h"
 
 namespace TranslationAnalysis
 {
