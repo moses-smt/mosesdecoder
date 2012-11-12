@@ -1,4 +1,4 @@
-alias deps : ../../moses//moses ;
+alias deps : ../moses//moses ;
 
 exe moses : Main.cpp mbr.cpp TranslationAnalysis.cpp deps : <include>. ;
 exe lmbrgrid : LatticeMBRGrid.cpp deps : <include>. ;
