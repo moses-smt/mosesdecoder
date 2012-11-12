@@ -1,4 +1,4 @@
-alias deps : ../../moses/src//moses ;
+alias deps : ../../moses//moses ;
 
 exe moses : Main.cpp mbr.cpp TranslationAnalysis.cpp LatticeMBR.cpp IOWrapper_lib ;
 exe lmbrgrid : LatticeMBRGrid.cpp LatticeMBR.cpp IOWrapper_lib ;

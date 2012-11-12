@@ -51,7 +51,7 @@ PermutationScorer.cpp
 StatisticsBasedScorer.cpp
 ../util//kenutil m ..//z : <include>. : : <include>. ;
 
-exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
+exe mert : mert.cpp mert_lib ../moses//ThreadPool ;
 
 exe extractor : extractor.cpp mert_lib ;
 

@@ -18,9 +18,9 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-#include "../moses/src/FactorCollection.h"
-#include "../moses/src/Util.h"
-#include "../moses/src/Word.h"
+#include "moses/FactorCollection.h"
+#include "moses/Util.h"
+#include "moses/Word.h"
 #include "Word.h"
 
 #include "util/tokenize_piece.hh"

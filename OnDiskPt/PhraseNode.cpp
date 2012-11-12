@@ -22,7 +22,7 @@
 #include "OnDiskWrapper.h"
 #include "TargetPhraseCollection.h"
 #include "SourcePhrase.h"
-#include "../moses/src/Util.h"
+#include "moses/Util.h"
 
 using namespace std;
 

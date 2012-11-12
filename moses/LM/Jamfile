@@ -1,0 +1,98 @@
+#This is somewhat hairy due to the number of optional language models.  
+#Currently, the optional models are IRSTLM, SRILM, and RandLM.  These are
+#activated by --with-irstlm, --with-srilm, and --with-randlm respectively.
+#The value is the path where it's installed e.g. --with-irstlm=/path/to/irst.
+#Each optional model has a section below.  The top level rule is lib LM, which
+#appears after the optional models.  
+
+import option path ;
+
+#This is a kludge to force rebuilding if different --with options are passed. 
+#Could have used features like <srilm>on but getting these to apply only to
+#linking was ugly and it still didn't trigger an install (since the install
+#path doesn't encode features).  It stores a file lm.log with the previous
+#options and forces a rebuild if the current options differ.  
+local current = ;
+for local i in srilm irstlm randlm {
+  local optval = [ option.get "with-$(i)" ] ;
+  if $(optval) {
+    current += "--with-$(i)=$(optval)" ;
+  }
+}
+current = $(current:J=" ") ;
+current ?= "" ;
+
+path-constant LM-LOG : bin/lm.log ;
+update-if-changed $(LM-LOG) $(current) ;
+
+
+local dependencies = ;
+
+#IRSTLM
+local with-irstlm = [ option.get "with-irstlm" ] ;
+if $(with-irstlm) {
+  lib irstlm : : <search>$(with-irstlm)/lib <search>$(with-irstlm)/lib64 ;
+  obj IRST.o : IRST.cpp ..//headers : <include>$(with-irstlm)/include <include>$(with-irstlm)/include/irstlm ;
+  alias irst : IRST.o irstlm : : : <define>LM_IRST ;
+  dependencies += irst ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking the IRSTLM library; be sure the release is >= 5.70.02 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+}
+
+#SRILM
+local with-srilm = [ option.get "with-srilm" ] ;
+if $(with-srilm) {
+  if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
+    lib srilm ;
+    alias sri-libs : srilm ;
+  } else {
+    sri-arch = [ option.get "with-srilm-arch" ] ;
+    sri-arch ?= [ _shell $(with-srilm)/sbin/machine-type ] ;
+    sri-lib = <search>$(with-srilm)/lib/$(sri-arch) <search>$(with-srilm)/lib <search>$(with-srilm)/lib64 <search>$(with-srilm)/flm/obj/$(sri-arch) ;
+
+    lib flm : : $(sri-lib) ;
+    lib misc : flm : $(sri-lib) ;
+    lib dstruct : misc flm : $(sri-lib) ;
+    lib oolm : dstruct misc flm : $(sri-lib) ;
+
+    alias sri-libs : oolm dstruct misc flm ;
+  }
+
+  obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
+  obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
+  alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+  dependencies += sri ;
+}
+
+#RandLM
+local with-randlm = [ option.get "with-randlm" ] ;
+if $(with-randlm) {
+  lib RandLM : : <search>$(with-randlm)/lib <search>$(with-randlm)/lib64 ;
+  obj Rand.o : Rand.cpp RandLM ..//headers : <include>$(with-randlm)/include <include>$(with-randlm)/include/RandLM ;
+  alias rand : Rand.o RandLM : : : <define>LM_RAND ;
+  dependencies += rand ;
+}
+
+# LDHTLM
+local with-ldhtlm = [ option.get "with-ldhtlm" ] ;
+if $(with-ldhtlm) {
+  lib LDHT : : <search>$(with-ldhtlm)/lib ;
+  lib ticpp : LDHT : <search>$(with-ldhtlm)/lib ;
+  obj LDHT.o : LDHT.cpp LDHT ..//headers : <include>$(with-ldhtlm)/include <include>$(with-ldhtlm)/include/LDHT ;
+  alias ldht : LDHT.o LDHT ticpp : : : <define>LM_LDHT ;
+  dependencies += ldht ;
+}
+
+#ORLM is always compiled but needs special headers
+obj ORLM.o : ORLM.cpp ..//headers ../DynSAInclude//dynsa : : : <include>../DynSAInclude ;
+
+#The factory needs the macros LM_IRST etc to know which ones to use.  
+obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclude <dependency>$(LM-LOG) ;
+
+#Top-level LM library.  If you've added a file that doesn't depend on external
+#libraries, put it here.  
+alias LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
+  ../../lm//kenlm ..//headers $(dependencies) ;
+
+
