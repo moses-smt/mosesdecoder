@@ -2007,6 +2007,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>fuzzy-match/Alignments.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Alignments.cpp</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/Alignments.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Alignments.h</locationURI>
+		</link>
+		<link>
 			<name>fuzzy-match/FuzzyMatchWrapper.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/FuzzyMatchWrapper.cpp</locationURI>
@@ -2062,6 +2072,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>fuzzy-match/create_xml.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/create_xml.cpp</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/fuzzy-match</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>CYKPlusParser/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -2110,6 +2130,21 @@
 			<name>fuzzy-match/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/fuzzy-match/Alignments.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Alignments.cpp</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/fuzzy-match/Alignments.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/Alignments.h</locationURI>
+		</link>
+		<link>
+			<name>fuzzy-match/fuzzy-match/create_xml.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/src/fuzzy-match/create_xml.cpp</locationURI>
 		</link>
 		<link>
 			<name>CYKPlusParser/bin/gcc-4.6/release</name>
