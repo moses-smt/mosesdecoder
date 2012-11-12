@@ -83,6 +83,12 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.461114338.1207454186" name="LatticeMBRGrid.cpp" rcbsApplicability="disable" resourcePath="LatticeMBRGrid.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.626095182.1072381674">
+						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.626095182.1072381674" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.exe.debug.626095182"/>
+					</fileInfo>
+					<sourceEntries>
+						<entry excluding="LatticeMBRGrid.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+					</sourceEntries>
 				</configuration>
 			</storageModule>
 			<storageModule moduleId="org.eclipse.cdt.core.externalSettings"/>

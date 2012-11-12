@@ -1,6 +1,6 @@
-alias deps : ../moses//moses ;
+alias deps : IOWrapper.cpp mbr.cpp LatticeMBR.cpp TranslationAnalysis.cpp ../moses//moses ;
 
-exe moses : Main.cpp mbr.cpp TranslationAnalysis.cpp deps : <include>. ;
+exe moses : Main.cpp deps : <include>. ;
 exe lmbrgrid : LatticeMBRGrid.cpp deps : <include>. ;
 
 alias programs : moses lmbrgrid ;

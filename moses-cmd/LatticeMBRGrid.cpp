@@ -48,8 +48,8 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "IOWrapper.h"
 #include "LatticeMBR.h"
-#include "Manager.h"
-#include "StaticData.h"
+#include "moses/Manager.h"
+#include "moses/StaticData.h"
 
 
 using namespace std;
