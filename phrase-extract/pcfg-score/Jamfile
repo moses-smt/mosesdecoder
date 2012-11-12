@@ -1,1 +1,1 @@
-exe pcfg-score : [ glob *.cc ] ..//pcfg-common ../..//boost_program_options ;
+exe pcfg-score : [ glob *.cc ] ..//pcfg-common ../..//boost_program_options : <include>.. ;
