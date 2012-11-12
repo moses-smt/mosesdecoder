@@ -19,8 +19,8 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 #include <string>
-#include "../OnDiskPt/SourcePhrase.h"
-#include "../OnDiskPt/TargetPhrase.h"
+#include "SourcePhrase.h"
+#include "TargetPhrase.h"
 
 typedef std::pair<size_t, size_t>  AlignPair;
 typedef std::vector<AlignPair> AlignType;
