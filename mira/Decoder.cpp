@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TrellisPathList.h"
 #include "ChartTrellisPathList.h"
 #include "ChartTrellisPath.h"
-#include "IOWrapper.h"
 
 using namespace std;
 using namespace Moses;

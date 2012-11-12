@@ -13,4 +13,4 @@ else {
 path-constant PT-LOG : bin/pt.log ;
 update-if-changed $(PT-LOG) $(current) ;
 
-lib CompactPT : [ glob *.cpp ] ..//headers cmph : $(includes) <dependency>$(PT-LOG) : : $(includes) ;
+fakelib CompactPT : [ glob *.cpp ] ..//headers cmph : $(includes) <dependency>$(PT-LOG) : : $(includes) ;
