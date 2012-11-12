@@ -11,6 +11,7 @@
 #include "fuzzy-match/SentenceAlignment.h"
 #include "fuzzy-match/Vocabulary.h"
 #include "fuzzy-match/Match.h"
+#include "fuzzy-match/create_xml.h"
 #include "Util.h"
 #include "StaticData.h"
 #include "util/file.hh"
@@ -49,17 +50,31 @@ namespace tmmt
     
     string fuzzyMatchFile = ExtractTM(dirNameStr);
     
-    string cmd("perl ");
-#ifdef IS_XCODE
-    cmd += "/Users/hieuhoang/unison/workspace/github/moses-smt/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
-#elif IS_ECLIPSE
-    cmd += "/home/hieu/workspace/github/moses-smt/scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
-#else
-    cmd += staticData.GetBinDirectory() +  "/../scripts/fuzzy-match/create_xml.perl " + fuzzyMatchFile;
-#endif
-    cerr << cmd << endl;
+    // create extrac files
+    create_xml(fuzzyMatchFile);
+
+    // create phrase table with usual Moses scoring and consolidate programs
+    string cmd;
+    cmd = "LC_ALL=C sort " + fuzzyMatchFile + ".extract | gzip -c > "
+    	+ fuzzyMatchFile + ".extract.sorted.gz";
     system(cmd.c_str());
-        
+    cmd = "LC_ALL=C sort " + fuzzyMatchFile + ".extract.inv | gzip -c > "
+    	+ fuzzyMatchFile + ".extract.inv.sorted.gz";
+    system(cmd.c_str());
+
+#ifdef IS_XCODE
+    cmd = "/Users/hieuhoang/unison/workspace/github/moses-smt/bin";
+#elif IS_ECLIPSE
+    cmd = "/home/hieu/workspace/github/moses-smt/bin";
+#else
+    cmd = staticData.GetBinDirectory();
+#endif
+
+	cmd += string("/../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical ")
+		    	+ " -extract-file " + fuzzyMatchFile + ".extract -lexical-file - -score-options \"--NoLex\" "
+		    	+ " -phrase-translation-table " + fuzzyMatchFile + ".pt";
+    system(cmd.c_str());
+
     return fuzzyMatchFile + ".pt.gz";
   }
   

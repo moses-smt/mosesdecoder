@@ -20,17 +20,13 @@ inline const std::string TrimInternal(const std::string& str, const std::string 
 class CreateXMLRetValues
 {
 public:
-	string frame, ruleS, ruleT, ruleAlignment, ruleAlignmentInv;
+  string frame, ruleS, ruleT, ruleAlignment, ruleAlignmentInv;
 };
 
 CreateXMLRetValues createXML(int ruleCount, const string &source, const string &input, const string &target, const string &align, const string &path );
 
-int main(int argc, char **argv)
+void create_xml(const string &inPath)
 {
-  assert(argc == 2);
-
-  string inPath(argv[1]);
-
   ifstream inStrme(inPath.c_str());
   ofstream rule((inPath + ".extract").c_str());
   ofstream ruleInv((inPath + ".extract.inv").c_str());
@@ -44,7 +40,7 @@ int main(int argc, char **argv)
   int lineCount = 1;
   int ruleCount = 1;
   string inLine;
-  
+
   int step = 0;
   while (!inStrme.eof())
   {
@@ -89,13 +85,13 @@ int main(int argc, char **argv)
       count = Scan<int>(inLine);
       CreateXMLRetValues ret = createXML(ruleCount, source, *input, target, align, path);
 
-			//print STDOUT $frame."\n";
+      //print STDOUT $frame."\n";
       rule << ret.ruleS << " [X] ||| " << ret.ruleT << " [X] ||| " << ret.ruleAlignment
-      		<< " ||| " << count << endl;
+          << " ||| " << count << endl;
       ruleInv << ret.ruleT << " [X] ||| " << ret.ruleS << " [X] ||| " << ret.ruleAlignmentInv
-      		<< " ||| " << count << endl;
+          << " ||| " << count << endl;
 
-			//print STDOUT "$sentenceInd ||| $score ||| $count\n";
+      //print STDOUT "$sentenceInd ||| $score ||| $count\n";
       ++ruleCount;
       step = 0;
       break;
@@ -114,10 +110,10 @@ int main(int argc, char **argv)
 
 CreateXMLRetValues createXML(int ruleCount, const string &source, const string &input, const string &target, const string &align, const string &path)
 {
-	CreateXMLRetValues ret;
+  CreateXMLRetValues ret;
   vector<string> sourceToks   = Tokenize(source, " ")
-                ,inputToks    = Tokenize(input, " ")
-                ,targetsToks  = Tokenize(target, " ");
+                		    ,inputToks    = Tokenize(input, " ")
+                		    ,targetsToks  = Tokenize(target, " ");
   Alignments alignments(align, sourceToks.size(), targetsToks.size());
   map<int, string> frameInput;
   map<int, int> alignI2S;
@@ -130,227 +126,229 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
   bool currently_matching = false;
   int start_s = 0, start_i = 0;
 
-  cerr << input << endl << source << endl << target << endl << path << endl;
+  //cerr << input << endl << source << endl << target << endl << path << endl;
   for ( int p = 0 ; p < path.length() ; p++ ) {
     string action = path.substr(p, 1);
 
-		// beginning of a mismatch
-		if ( currently_matching && action != "M" && action != "X" ) {
-			start_i            = i;
-			start_s            = s;
-			currently_matching = 0;
-		} // if ( currently_matching
-		// end of a mismatch
-		else if ( !currently_matching && ( action == "M" || action == "X" ) ) {
+    // beginning of a mismatch
+    if ( currently_matching && action != "M" && action != "X" ) {
+      start_i            = i;
+      start_s            = s;
+      currently_matching = 0;
+    } // if ( currently_matching
+    // end of a mismatch
+    else if ( !currently_matching && ( action == "M" || action == "X" ) ) {
 
-			// remove use of affected target words
-			for ( int ss = start_s ; ss < s ; ss++ ) {
-				const std::map<int, int> &targets = alignments.m_alignS2T[ss];
+      // remove use of affected target words
+      for ( int ss = start_s ; ss < s ; ss++ ) {
+        const std::map<int, int> &targets = alignments.m_alignS2T[ss];
 
-				std::map<int, int>::const_iterator iter;
-				for (iter = targets.begin(); iter != targets.end(); ++iter) {
-					int tt = iter->first;
-					targetBitmap[tt] = 0;
-				}
+        std::map<int, int>::const_iterator iter;
+        for (iter = targets.begin(); iter != targets.end(); ++iter) {
+          int tt = iter->first;
+          targetBitmap[tt] = 0;
+        }
 
-				// also remove enclosed unaligned words?
-			} //for ( int ss = start_s ; ss < s ; ss++ ) {
+        // also remove enclosed unaligned words?
+      } //for ( int ss = start_s ; ss < s ; ss++ ) {
 
-			// are there input words that need to be inserted ?
-			cerr << start_i << "<" << i << "?" << endl;
-			if (start_i < i ) {
+      // are there input words that need to be inserted ?
+      //cerr << start_i << "<" << i << "?" << endl;
+      if (start_i < i ) {
 
-				// take note of input words to be inserted
-				string insertion = "";
-				for (int ii = start_i ; ii < i ; ii++ ) {
-					insertion += inputToks[ii] + " ";
-				}
+        // take note of input words to be inserted
+        string insertion = "";
+        for (int ii = start_i ; ii < i ; ii++ ) {
+          insertion += inputToks[ii] + " ";
+        }
 
-				// find position for inserted input words
+        // find position for inserted input words
 
-				// find first removed target word
-				int start_t = 1000;
-				for ( int ss = start_s ; ss < s ; ss++ ) {
-					const std::map<int, int> &targets = alignments.m_alignS2T[ss];
+        // find first removed target word
+        int start_t = 1000;
+        for ( int ss = start_s ; ss < s ; ss++ ) {
+          const std::map<int, int> &targets = alignments.m_alignS2T[ss];
 
-					std::map<int, int>::const_iterator iter;
-					for (iter = targets.begin(); iter != targets.end(); ++iter) {
-						int tt = iter->first;
-						if (tt < start_t) {
-							start_t = tt;
-						}
-					}
-				}
+          std::map<int, int>::const_iterator iter;
+          for (iter = targets.begin(); iter != targets.end(); ++iter) {
+            int tt = iter->first;
+            if (tt < start_t) {
+              start_t = tt;
+            }
+          }
+        }
 
-				// end of sentence? add to end
-				if ( start_t == 1000 && i > inputToks.size() - 1 ) {
-					start_t = targetsToks.size() - 1;
-				}
+        // end of sentence? add to end
+        if ( start_t == 1000 && i > inputToks.size() - 1 ) {
+          start_t = targetsToks.size() - 1;
+        }
 
-				// backtrack to previous words if unaligned
-				if ( start_t == 1000 ) {
-					start_t = -1;
-					for ( int ss = s - 1 ; start_t == -1 && ss >= 0 ; ss-- ) {
-						const std::map<int, int> &targets = alignments.m_alignS2T[ss];
-						cerr << targets.size() << endl;
+        // backtrack to previous words if unaligned
+        if ( start_t == 1000 ) {
+          start_t = -1;
+          for ( int ss = s - 1 ; start_t == -1 && ss >= 0 ; ss-- ) {
+            const std::map<int, int> &targets = alignments.m_alignS2T[ss];
 
-						std::map<int, int>::const_iterator iter;
-						for (iter = targets.begin(); iter != targets.end(); ++iter) {
-							int tt = iter->first;
-							if (tt > start_t) {
-								start_t = tt;
-							}
-						}
-					}
-				} // if ( start_t == 1000 ) {
+            std::map<int, int>::const_iterator iter;
+            for (iter = targets.begin(); iter != targets.end(); ++iter) {
+              int tt = iter->first;
+              if (tt > start_t) {
+                start_t = tt;
+              }
+            }
+          }
+        } // if ( start_t == 1000 ) {
 
-				frameInput[start_t] += insertion;
-				map<string, int> nt;
-				nt["start_t"] = start_t;
-				nt["start_i"] = start_i;
-				nonTerms.push_back(nt);
+        frameInput[start_t] += insertion;
+        map<string, int> nt;
+        nt["start_t"] = start_t;
+        nt["start_i"] = start_i;
+        nonTerms.push_back(nt);
 
-			} // if (start_i < i ) {
+      } // if (start_i < i ) {
 
-			currently_matching = 1;
-		} // else if ( !currently_matching
+      currently_matching = 1;
+    } // else if ( !currently_matching
 
+    /*
     cerr << action << " " << s << " " << i
     		<< "(" << start_s << " " << start_i << ")"
     		<< currently_matching;
+     */
 
     if ( action != "I" ) {
-    	cerr << " ->";
+      //cerr << " ->";
 
-    	if (s < alignments.m_alignS2T.size()) {
-				const std::map<int, int> &targets = alignments.m_alignS2T[s];
-				cerr << "s=" << s << endl;
+      if (s < alignments.m_alignS2T.size()) {
+        const std::map<int, int> &targets = alignments.m_alignS2T[s];
+        //cerr << "s=" << s << endl;
 
-				std::map<int, int>::const_iterator iter;
-				for (iter = targets.begin(); iter != targets.end(); ++iter) {
-					int tt = iter->first;
-					cerr << " " << tt;
-				}
-    	}
+        std::map<int, int>::const_iterator iter;
+        for (iter = targets.begin(); iter != targets.end(); ++iter) {
+          int tt = iter->first;
+          //cerr << " " << tt;
+        }
+      }
     }
-    cerr << endl;
+    //cerr << endl;
 
     if (action != "I")
-    	s++;
+      s++;
     if (action != "D") {
-    	i++;
-    	alignI2S[i] = s;
+      i++;
+      alignI2S[i] = s;
     }
 
     if (action == "M") {
-    	inputBitmap.push_back(1);
+      inputBitmap.push_back(1);
     }
     else if (action == "I" || action == "S") {
-    	inputBitmap.push_back(0);
+      inputBitmap.push_back(0);
     }
 
   } // for ( int p = 0
 
-	cerr << target << endl;
-	for (int i = 0; i < targetBitmap.size(); ++i)
-		cerr << targetBitmap[i];
-	cerr << endl;
+  //cerr << target << endl;
+  for (int i = 0; i < targetBitmap.size(); ++i) {
+    //cerr << targetBitmap[i];
+  }
+  //cerr << endl;
 
-	for (map<int, string>::const_iterator iter = frameInput.begin(); iter != frameInput.end(); ++iter) {
-		cerr << iter->first << ":" <<iter->second << endl;
-	}
+  for (map<int, string>::const_iterator iter = frameInput.begin(); iter != frameInput.end(); ++iter) {
+    //cerr << iter->first << ":" <<iter->second << endl;
+  }
 
-	// STEP 2: BUILD RULE AND FRAME
+  // STEP 2: BUILD RULE AND FRAME
 
-	// hierarchical rule
-	int rule_pos_s = 0;
-	map<int, int> ruleAlignS;
+  // hierarchical rule
+  int rule_pos_s = 0;
+  map<int, int> ruleAlignS;
 
-	for (int i = 0 ; i < inputBitmap.size() ; ++i ) {
-		if ( inputBitmap[i] ) {
-			ret.ruleS += inputToks[i] + " ";
-			ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
-		}
+  for (int i = 0 ; i < inputBitmap.size() ; ++i ) {
+    if ( inputBitmap[i] ) {
+      ret.ruleS += inputToks[i] + " ";
+      ruleAlignS[ alignI2S[i] ] = rule_pos_s++;
+    }
 
-		for (int j = 0; j < nonTerms.size(); ++j) {
-			map<string, int> &nt = nonTerms[j];
-			if (i == nt["start_i"]) {
-				ret.ruleS += "[X][X] ";
-				nt["rule_pos_s"] = rule_pos_s++;
-			}
-		}
-	}
+    for (int j = 0; j < nonTerms.size(); ++j) {
+      map<string, int> &nt = nonTerms[j];
+      if (i == nt["start_i"]) {
+        ret.ruleS += "[X][X] ";
+        nt["rule_pos_s"] = rule_pos_s++;
+      }
+    }
+  }
 
-	int rule_pos_t = 0;
-	map<int, int> ruleAlignT;
+  int rule_pos_t = 0;
+  map<int, int> ruleAlignT;
 
-	for (int t = -1 ; t < (int) targetBitmap.size(); t++ ) {
-		if (t >= 0 && targetBitmap[t]) {
-			ret.ruleT += targetsToks[t] + " ";
-			ruleAlignT[t] = rule_pos_t++;
-		}
+  for (int t = -1 ; t < (int) targetBitmap.size(); t++ ) {
+    if (t >= 0 && targetBitmap[t]) {
+      ret.ruleT += targetsToks[t] + " ";
+      ruleAlignT[t] = rule_pos_t++;
+    }
 
-		for (int i = 0; i < nonTerms.size(); ++i) {
-			map<string, int> &nt = nonTerms[i];
+    for (int i = 0; i < nonTerms.size(); ++i) {
+      map<string, int> &nt = nonTerms[i];
 
-			if (t == nt["start_t"]) {
-				ret.ruleT += "[X][X] ";
-				nt["rule_pos_t"] = rule_pos_t++;
-			}
-		}
-	}
+      if (t == nt["start_t"]) {
+        ret.ruleT += "[X][X] ";
+        nt["rule_pos_t"] = rule_pos_t++;
+      }
+    }
+  }
 
-	int numAlign = 0;
-	ret.ruleAlignment = "";
+  int numAlign = 0;
+  ret.ruleAlignment = "";
 
-	for (map<int, int>::const_iterator iter = ruleAlignS.begin(); iter != ruleAlignS.end(); ++iter) {
-		int s = iter->first;
+  for (map<int, int>::const_iterator iter = ruleAlignS.begin(); iter != ruleAlignS.end(); ++iter) {
+    int s = iter->first;
 
-		if (s < alignments.m_alignS2T.size()) {
-			const std::map<int, int> &targets = alignments.m_alignS2T[s];
+    if (s < alignments.m_alignS2T.size()) {
+      const std::map<int, int> &targets = alignments.m_alignS2T[s];
 
-			std::map<int, int>::const_iterator iter;
-			for (iter = targets.begin(); iter != targets.end(); ++iter) {
-				int t =iter->first;
-				if (ruleAlignT.find(t) == ruleAlignT.end())
-					continue;
-				ret.ruleAlignment += SPrint(ruleAlignS[s]) + "-" + SPrint(ruleAlignT[t]) + " ";
-				++numAlign;
-			}
-		}
-	}
+      std::map<int, int>::const_iterator iter;
+      for (iter = targets.begin(); iter != targets.end(); ++iter) {
+        int t =iter->first;
+        if (ruleAlignT.find(t) == ruleAlignT.end())
+          continue;
+        ret.ruleAlignment += SPrint(ruleAlignS[s]) + "-" + SPrint(ruleAlignT[t]) + " ";
+        ++numAlign;
+      }
+    }
+  }
 
-	cerr << "numAlign=" << numAlign << endl;
+  //cerr << "numAlign=" << numAlign << endl;
 
-	for (int i = 0; i < nonTerms.size(); ++i) {
-		map<string, int> &nt = nonTerms[i];
-		ret.ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
-		++numAlign;
-	}
+  for (int i = 0; i < nonTerms.size(); ++i) {
+    map<string, int> &nt = nonTerms[i];
+    ret.ruleAlignment += SPrint(nt["rule_pos_s"]) + "-" + SPrint(nt["rule_pos_t"]) + " ";
+    ++numAlign;
+  }
 
-	cerr << "numAlign=" << numAlign << endl;
+  //cerr << "numAlign=" << numAlign << endl;
 
-	ret.ruleS = TrimInternal(ret.ruleS);
-	ret.ruleT = TrimInternal(ret.ruleT);
-	ret.ruleAlignment = TrimInternal(ret.ruleAlignment);
+  ret.ruleS = TrimInternal(ret.ruleS);
+  ret.ruleT = TrimInternal(ret.ruleT);
+  ret.ruleAlignment = TrimInternal(ret.ruleAlignment);
 
-	vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment);
-	for (int i = 0; i < ruleAlignmentToks.size(); ++i) {
-		const string &alignPoint = ruleAlignmentToks[i];
-		vector<string> toks = Tokenize(alignPoint, "-");
-		assert(toks.size() == 2);
-		ret.ruleAlignmentInv += toks[1] + "-" +toks[0];
-	}
-	ret.ruleAlignmentInv = TrimInternal(ret.ruleAlignmentInv);
+  vector<string> ruleAlignmentToks = Tokenize(ret.ruleAlignment);
+  for (int i = 0; i < ruleAlignmentToks.size(); ++i) {
+    const string &alignPoint = ruleAlignmentToks[i];
+    vector<string> toks = Tokenize(alignPoint, "-");
+    assert(toks.size() == 2);
+    ret.ruleAlignmentInv += toks[1] + "-" +toks[0];
+  }
+  ret.ruleAlignmentInv = TrimInternal(ret.ruleAlignmentInv);
 
-	// frame
-	ret.frame;
-	if (frameInput.find(-1) == frameInput.end())
-		ret.frame = frameInput[-1];
+  // frame
+  ret.frame;
+  if (frameInput.find(-1) == frameInput.end())
+    ret.frame = frameInput[-1];
 
-	int currently_included = 0;
-	int start_t            = -1;
-	targetBitmap.push_back(0);
+  int currently_included = 0;
+  int start_t            = -1;
+  targetBitmap.push_back(0);
 
   for (int t = 0 ; t <= targetsToks.size() ; t++ ) {
     // beginning of tm target inclusion
@@ -358,15 +356,15 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
       start_t            = t;
       currently_included = 1;
     }
-		// end of tm target inclusion (not included word or inserted input)
+    // end of tm target inclusion (not included word or inserted input)
     else if (currently_included
-    				&& ( targetBitmap[t] || frameInput.find(t) != frameInput.end() )
-    				)
-		{
-			// add xml (unless change is at the beginning of the sentence
+        && ( targetBitmap[t] || frameInput.find(t) != frameInput.end() )
+    )
+    {
+      // add xml (unless change is at the beginning of the sentence
       if ( start_t >= 0 ) {
         string target = "";
-        cerr << "for(tt=$start_t;tt<$t+$TARGET_BITMAP[$t]);\n";
+        //cerr << "for(tt=$start_t;tt<$t+$TARGET_BITMAP[$t]);\n";
         for (int tt = start_t ; tt < t + targetBitmap[t] ; tt++ ) {
           target += targetsToks[tt] + " ";
         }
@@ -374,12 +372,12 @@ CreateXMLRetValues createXML(int ruleCount, const string &source, const string &
         ret.frame += "<xml translation=\"" + target + "\"> x </xml> ";
       }
       currently_included = 0;
-		}
+    }
 
     if (frameInput.find(t) != frameInput.end())
-    	ret.frame += frameInput[t];
-    cerr << targetBitmap[t] << " " << t << " " << "(" << start_t << ")"
-    			<< currently_included << endl;
+      ret.frame += frameInput[t];
+    //cerr << targetBitmap[t] << " " << t << " " << "(" << start_t << ")"
+    //			<< currently_included << endl;
 
   } //for (int t = 0
 
