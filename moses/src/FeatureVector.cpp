@@ -53,8 +53,7 @@ namespace Moses {
 #ifdef WITH_THREADS
       //release the reader lock, and upgrade to writer lock
       lock.unlock();
-      boost::upgrade_lock<boost::shared_mutex> upgradeLock(m_idLock);
-      boost::upgrade_to_unique_lock<boost::shared_mutex> uniqueLock(upgradeLock);
+      boost::unique_lock<boost::shared_mutex> write_lock(m_idLock);
 #endif
       //Need to check again if the id is in the map, as someone may have added
       //it while we were waiting on the writer lock.
