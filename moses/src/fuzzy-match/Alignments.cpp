@@ -21,7 +21,7 @@ Alignments::Alignments(const std::string &str, size_t sourceSize, size_t targetS
 
     std::map<int, int>::iterator iter;
 
-    // m_alignedToS
+    // m_alignedS2T
     std::map<int, int> &targets = m_alignS2T[ point[0] ];
     iter = targets.find(point[1]);
     if (iter == targets .end()) {
@@ -31,7 +31,7 @@ Alignments::Alignments(const std::string &str, size_t sourceSize, size_t targetS
     	++(iter->second);
     }
 
-    // m_alignedToT
+    // m_alignedToS
     std::map<int, int> &sources = m_alignT2S[ point[1] ];
     iter = sources.find(point[0]);
     if (iter == targets .end()) {
