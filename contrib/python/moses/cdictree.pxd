@@ -1,6 +1,5 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.pair cimport pair
 
 ctypedef string* str_pointer
 ctypedef string* const_str_pointer "const str_pointer"
@@ -15,8 +14,6 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
         Scores scores
         Tokens fnames
         Scores fvalues
-
-
 
     cdef cppclass PhraseDictionaryTree:
         PhraseDictionaryTree(unsigned nscores)
