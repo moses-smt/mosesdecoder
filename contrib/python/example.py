@@ -1,5 +1,5 @@
-import binpt
-#from binpt import QueryResult
+from moses.dictree import PhraseDictionaryTree as BinaryPhraseTable
+from moses.dictree import QueryResult
 import sys
 
 
@@ -11,12 +11,12 @@ pt_file = sys.argv[1]
 nscores = int(sys.argv[2])
 wa = len(sys.argv) == 4
 
-pt = binpt.BinaryPhraseTable(pt_file, nscores, wa)
+pt = BinaryPhraseTable(pt_file, nscores, wa)
 print >> sys.stderr, "-ttable %s -nscores %d -alignment-info %s -delimiter '%s'\n" %(pt.path, pt.nscores, str(pt.wa), pt.delimiters)
 
 for line in sys.stdin:
     f = line.strip()
-    matches = pt.query(f, cmp = binpt.QueryResult.desc, top = 20)
+    matches = pt.query(f, cmp = QueryResult.desc, top = 20)
     print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
     '''
     # This is how one would use the QueryResult object

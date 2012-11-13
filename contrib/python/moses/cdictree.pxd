@@ -3,12 +3,21 @@ from libcpp.vector cimport vector
 from libcpp.pair cimport pair
 
 ctypedef string* str_pointer
-
-cdef extern from 'TypeDef.h' namespace 'Moses':
-    ctypedef vector[float] Scores
-    ctypedef pair[vector[str_pointer], Scores] StringTgtCand
+ctypedef string* const_str_pointer "const str_pointer"
+ctypedef vector[const_str_pointer] Tokens
+ctypedef float FValue
+ctypedef vector[FValue] Scores
 
 cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
+
+    cdef struct StringTgtCand:
+        Tokens tokens
+        Scores scores
+        Tokens fnames
+        Scores fvalues
+
+
+
     cdef cppclass PhraseDictionaryTree:
         PhraseDictionaryTree(unsigned nscores)
         void UseWordAlignment(bint use)
