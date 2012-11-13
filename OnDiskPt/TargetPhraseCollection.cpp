@@ -20,9 +20,9 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../moses/src/Util.h"
-#include "../moses/src/TargetPhraseCollection.h"
-#include "../moses/src/PhraseDictionary.h"
+#include "moses/Util.h"
+#include "moses/TargetPhraseCollection.h"
+#include "moses/PhraseDictionary.h"
 #include "TargetPhraseCollection.h"
 #include "Vocab.h"
 #include "OnDiskWrapper.h"

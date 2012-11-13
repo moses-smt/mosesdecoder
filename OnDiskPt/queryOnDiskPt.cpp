@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "Util.h"
+#include "moses/Util.h"
 #include "OnDiskWrapper.h"
 #include "SourcePhrase.h"
 

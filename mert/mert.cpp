@@ -25,7 +25,7 @@
 #include "Timer.h"
 #include "Util.h"
 
-#include "../moses/src/ThreadPool.h"
+#include "moses/ThreadPool.h"
 
 using namespace std;
 using namespace MosesTuning;

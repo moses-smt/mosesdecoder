@@ -22,7 +22,7 @@
 #include <fstream>
 #include "Vocab.h"
 #include "PhraseNode.h"
-#include "../moses/src/Word.h"
+#include "../moses/Word.h"
 
 namespace OnDiskPt
 {

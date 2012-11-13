@@ -18,7 +18,9 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
     Then you can build the extension (in case you used --libdir=path above, use --moses-lib=path below) 
 
-        python setup.py build_ext -i [--with-cmph] [--moses-lib=path]
+        python setup.py build_ext -i [--with-cmph] [--moses-lib=PATH] [--cython] [--max-factors=NUM] [--max-kenlm-order=NUM]
+
+    Use `--cython` if you want to compile the pyx files, note that they already come compiled so that you don't need to have Cython installed 
 
 3.  Check the example code
 
@@ -29,6 +31,8 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 If you want to add your changes you are going to have to recompile the cython code.
 
-1.  Compile the cython code (use Cython 0.16): this will generate binpt/binpt.cpp
+1.  Compile the cython code using Cython 0.17.1
 
-        cython --cplus binpt/binpt.pyx
+    
+        python setup.py build_ext -i --cython
+ 

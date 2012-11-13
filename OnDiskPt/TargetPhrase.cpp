@@ -20,10 +20,10 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../moses/src/Util.h"
-#include "../moses/src/TargetPhrase.h"
-#include "../moses/src/PhraseDictionary.h"
-#include "../moses/src/DummyScoreProducers.h"
+#include "moses/Util.h"
+#include "moses/TargetPhrase.h"
+#include "moses/PhraseDictionary.h"
+#include "moses/DummyScoreProducers.h"
 #include "TargetPhrase.h"
 #include "OnDiskWrapper.h"
 

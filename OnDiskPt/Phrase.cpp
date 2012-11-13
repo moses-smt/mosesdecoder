@@ -19,7 +19,7 @@
  ***********************************************************************/
 #include <iostream>
 #include "util/check.hh"
-#include "../moses/src/Util.h"
+#include "moses/Util.h"
 #include "Phrase.h"
 
 using namespace std;

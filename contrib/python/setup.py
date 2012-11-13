@@ -1,54 +1,64 @@
 from distutils.core import setup
 from distutils.extension import Extension
-import os
 import sys
-
-available_switches = ['--with-cmph', '--moses-lib']
-with_cmph = False
+import os
 
 mosesdir = os.path.abspath('../../')
-includes = [mosesdir, os.path.join(mosesdir, 'moses/src'), os.path.join(mosesdir, 'util')]
+includes = [mosesdir, os.path.join(mosesdir, 'moses')] 
 libdir = os.path.join(mosesdir, 'lib')
 
+# options
+# TODO: use argparse
+available_switches = ['--with-cmph', '--moses-lib', '--cython', '--max-factors', '--max-kenlm-order']
+with_cmph = False
+defines = {'MAX_NUM_FACTORS':'1'}
+suffix = '.cpp'
+cmdcls = {}
 while sys.argv[-1].split('=')[0] in available_switches:
     param = sys.argv.pop().split('=')
     if param[0] == '--with-cmph':
         with_cmph = True
     if param[0] == '--moses-lib':
         libdir = param[1]
-
+    if param[0] == '--cython':
+        print >> sys.stderr, 'I will be cythoning your pyx files...'
+        try:
+            from Cython.Distutils import build_ext
+            suffix = '.pyx'
+            cmdcls['build_ext'] = build_ext
+        except ImportError:
+            print 'You do not seem to have Cython installed'
+    if param[0] == '--max-factors':
+        defines['MAX_NUM_FACTORS'] = param[1]
+    if param[0] == '--max-kenlm-order':
+        defines['KENLM_MAX_ORDER'] = param[1]
 
 print >> sys.stderr, 'mosesdir=%s\nincludes=%s\nlibdir=%s\ncmph=%s' % (mosesdir, includes, libdir, with_cmph)
-#### From here you probably don't need to change anything
-#### unless a new dependency shows up in Moses
-
 
 basic=['z', 'stdc++', 'pthread', 'm', 'gcc_s', 'c', 'boost_system', 'boost_thread', 'boost_filesystem', 'rt']
-moses=['OnDiskPt', 'kenutil', 'kenlm', 'LM', 'mert_lib', 'moses_internal', 'CYKPlusParser', 'Scope3Parser', 'fuzzy-match', 'RuleTable', 'CompactPT', 'moses', 'dynsa', 'pcfg_common' ]
-additional=[]
-
+moses = ['moses']
+additional = []
 
 if with_cmph:
     additional.append('cmph')
 
-exobj = [os.path.join(libdir, 'lib' + l + '.so') for l in moses]
-
-print >> sys.stderr, 'basic=%s\nmoses=%s\nadditional=%s\nextra=%s' % (basic, moses, additional, exobj)
-
-ext_modules = [
-    Extension(name = 'binpt',
-        sources = ['binpt/binpt.cpp'],
-        language = 'C++', 
-        include_dirs = includes,
-        extra_objects = exobj,
-        library_dirs = [libdir],
-        runtime_library_dirs = [libdir],
-        libraries = basic + moses + additional,
-        extra_compile_args = ['-O3', '-DNDEBUG'],
-    )
-]
+extensions = [
+            Extension(name='moses.dictree',
+                sources=['moses/dictree' + suffix],
+                include_dirs = ['.'] + includes,
+                library_dirs = [libdir],
+                runtime_library_dirs = [libdir],
+                libraries= basic + moses + additional,
+                language='c++',
+                extra_compile_args=['-O3'] + ['-D%s=%s' % (k, v) for k, v in defines.iteritems()]
+                ),
+            ]
 
 setup(
-    name='binpt',
-    ext_modules=ext_modules
+    cmdclass = cmdcls,
+    name = 'moses',
+    ext_modules= extensions,
+    packages = ['moses'],
+    package_dir = {'':'.'},
+
 )
