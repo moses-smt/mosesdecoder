@@ -35,7 +35,8 @@ while sys.argv[-1].split('=')[0] in available_switches:
 
 print >> sys.stderr, 'mosesdir=%s\nincludes=%s\nlibdir=%s\ncmph=%s' % (mosesdir, includes, libdir, with_cmph)
 
-basic=['z', 'stdc++', 'pthread', 'm', 'gcc_s', 'c', 'boost_system', 'boost_thread', 'boost_filesystem', 'rt']
+#basic=['z', 'stdc++', 'pthread', 'm', 'gcc_s', 'c', 'boost_system', 'boost_filesystem']
+basic=[]
 moses = ['moses']
 additional = []
 
