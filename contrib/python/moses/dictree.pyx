@@ -5,6 +5,7 @@ from libcpp.vector cimport vector
 import os
 import cython
 cimport cdictree
+cimport condiskpt
 
 cpdef int fsign(float x):
     """Simply returns the sign of float x (zero is assumed +), it's defined here just so one gains a little bit with static typing"""
@@ -87,7 +88,7 @@ cdef class PhraseDictionaryTree(object):
         self.delimiters = delimiters
         self.__tree = new cdictree.PhraseDictionaryTree(nscores)
         self.__tree.UseWordAlignment(wa)
-        self.__tree.Read(string(path))
+        self.__tree.Read(path)
 
     def __dealloc__(self):
         del self.__tree
@@ -115,7 +116,7 @@ cdef class PhraseDictionaryTree(object):
         If 'cmp' is defined the return list is sorted.
         If 'top' is defined, onlye the top elements will be returned."""
         cdef bytes text = as_str(line)
-        cdef vector[string] fphrase = cdictree.Tokenize(string(text), string(self.delimiters))
+        cdef vector[string] fphrase = cdictree.Tokenize(text, self.delimiters)
         cdef vector[cdictree.StringTgtCand]* rv = new vector[cdictree.StringTgtCand]()
         cdef vector[string]* wa = NULL
         cdef list phrases
@@ -134,4 +135,20 @@ cdef class PhraseDictionaryTree(object):
             return phrases[0:top]
         else:  
             return phrases
+    
+cdef class OnDiskWrapper(object):
+
+    cdef condiskpt.OnDiskWrapper* wrapper
+    cdef readonly bytes delimiters
+
+    def __cinit__(self, bytes path, delimiters = ' \t'):
+        self.delimiters = delimiters
+        self.wrapper = new condiskpt.OnDiskWrapper()
+        self.wrapper.BeginLoad(string(path))
+
+    def query(self, line):
+        cdef bytes text = as_str(line)
+        cdef vector[string] ftokens = cdictree.Tokenize(text, self.delimiters)
+        #print 'query:', ftokens
+        #cdef condiskpt.SourcePhrase fphrase = condiskpt.Tokenize(ftokens, self.wrapper[0])
         
