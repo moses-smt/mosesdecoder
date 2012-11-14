@@ -175,15 +175,10 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //word-to-word alignment
   SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
-  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
 
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
-  if (!m_UseAlignmentInfo && m_PrintAlignmentInfo) {
-    TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
-    m_PrintAlignmentInfo=false;
-  }
   if (!m_UseAlignmentInfo && m_PrintAlignmentInfoNbest) {
     TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
     m_PrintAlignmentInfoNbest=false;

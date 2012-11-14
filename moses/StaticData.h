@@ -172,7 +172,6 @@ protected:
   std::string m_detailedTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
   bool m_UseAlignmentInfo;
-  bool m_PrintAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
   std::string m_alignmentOutputFile;
@@ -561,9 +560,6 @@ public:
   void UseAlignmentInfo(bool a) {
     m_UseAlignmentInfo=a;
   };
-  bool PrintAlignmentInfo() const {
-    return m_PrintAlignmentInfo;
-  }
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;
   }

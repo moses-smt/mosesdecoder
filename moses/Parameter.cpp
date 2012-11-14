@@ -180,7 +180,6 @@ Parameter::Parameter()
 
   AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
   AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
-  AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are taken from the phrase table if any. Default is false");
   AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
