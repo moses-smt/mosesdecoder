@@ -439,7 +439,7 @@ public:
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;
   }
-  bool NBestIncludesAlignment() const {
+  bool NBestIncludesSegmentation() const {
     return m_nBestIncludesSegmentation;
   }
   
