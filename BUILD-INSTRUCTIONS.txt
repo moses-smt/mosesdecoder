@@ -69,7 +69,10 @@ Add all the above code to your .bashrc or .bash_login as appropriate.  Then
 you're ready to install packages in non-standard paths:
 
 #For autotools packages e.g. xmlrpc-c
-./configure --prefix=$PREFIX --libdir=$PREFIX/lib64 [other options here]
+./configure --prefix=$PREFIX --libdir=$LIBDIR [other options here]
+
+#For tcmalloc (we only need the minimal version)
+./configure --prefix=$PREFIX --libdir=$LIBDIR --enable-shared --enable-static --enable-minimal
 
 #For Boost:
 ./bootstrap.sh
