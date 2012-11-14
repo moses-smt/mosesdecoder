@@ -144,7 +144,7 @@ protected:
   m_constraintFileName;
 
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
-  bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
+  bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_wordDeletionEnabled;
 
@@ -440,7 +440,7 @@ public:
     return m_labeledNBestList;
   }
   bool NBestIncludesAlignment() const {
-    return m_nBestIncludesAlignment;
+    return m_nBestIncludesSegmentation;
   }
   
   bool UseMinphrInMemory() const {

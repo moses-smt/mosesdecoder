@@ -178,7 +178,7 @@ Parameter::Parameter()
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
 
-  AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
+  AddParam("include-segmentation-in-n-best", "include phrasal segmentation in the n-best list. default is false");
   AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
   AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("alignment-output-file", "print output word alignments into given file");
