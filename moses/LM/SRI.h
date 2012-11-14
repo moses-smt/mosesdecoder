@@ -24,9 +24,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <vector>
-#include "Factor.h"
-#include "TypeDef.h"
-#include "LM/SingleFactor.h"
+#include "moses/Factor.h"
+#include "moses/TypeDef.h"
+#include "SingleFactor.h"
 
 class Factor;
 class Phrase;
