@@ -24,8 +24,17 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 3.  Check the example code
 
-        echo "casa" | python example.py examples/phrase-table 5 1
-        echo "essa casa" | python example.py examples/phrase-table 5 1
+    * Phrase-based
+
+            echo "casa" | python example.py examples/phrase-table 5
+            echo "essa casa" | python example.py examples/phrase-table 5
+
+    * Rule-based
+
+            echo "i [X]" | python example.py examples/rule-table 5
+            echo "have [X]" | python example.py examples/rule-table 5
+            echo "[X][X] do not [X][X] [X]" | python example.py examples/rule-table 5
+
 
 ## Changing the code
 

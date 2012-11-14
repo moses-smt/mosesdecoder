@@ -9,7 +9,7 @@
 #include "moses/Util.h"
 #include "OnDiskWrapper.h"
 #include "SourcePhrase.h"
-#include "Util.h"
+#include "OnDiskQuery.h"
 
 using namespace std;
 using namespace OnDiskPt;
@@ -44,6 +44,7 @@ int main(int argc, char **argv)
   OnDiskWrapper onDiskWrapper;
   bool retDb = onDiskWrapper.BeginLoad(ttable);
   CHECK(retDb);
+  OnDiskQuery onDiskQuery(onDiskWrapper);
 
   cerr << "Ready..." << endl;
 
@@ -53,8 +54,7 @@ int main(int argc, char **argv)
     tokens = Moses::Tokenize(line, " ");
 
     cerr << "line: " << line << endl;
-    SourcePhrase sourcePhrase = Tokenize(tokens, onDiskWrapper); 
-    const PhraseNode* node = Query(sourcePhrase, onDiskWrapper);
+    const PhraseNode* node = onDiskQuery.Query(tokens);
     
     if (node)
     { // source phrase points to a bunch of rules

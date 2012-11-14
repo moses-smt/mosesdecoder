@@ -1,21 +1,13 @@
-#pragma once
-#include <string>
-#include <vector>
-#include "OnDiskWrapper.h"
-#include "Phrase.h"
-#include "SourcePhrase.h"
-#include "Word.h"
-#include "PhraseNode.h"
-
+#include "OnDiskQuery.h"
 
 namespace OnDiskPt
 {
 
-void Tokenize(Phrase &phrase
-              , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
-              , OnDiskWrapper &onDiskWrapper)
+void OnDiskQuery::Tokenize(Phrase &phrase, 
+    const std::string &token,
+    bool addSourceNonTerm,
+    bool addTargetNonTerm)
 {
-
   bool nonTerm = false;
   size_t tokSize = token.size();
   int comStr =token.compare(0, 1, "[");
@@ -33,20 +25,20 @@ void Tokenize(Phrase &phrase
     if (splitPos == std::string::npos) {
       // lhs - only 1 word
       WordPtr word (new Word());
-      word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+      word->CreateFromString(wordStr, m_wrapper.GetVocab());
       phrase.AddWord(word);
     } else {
       // source & target non-terms
       if (addSourceNonTerm) {
         WordPtr word( new Word());
-        word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+        word->CreateFromString(wordStr, m_wrapper.GetVocab());
         phrase.AddWord(word);
       }
 
       wordStr = token.substr(splitPos, tokSize - splitPos);
       if (addTargetNonTerm) {
         WordPtr word(new Word());
-        word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
+        word->CreateFromString(wordStr, m_wrapper.GetVocab());
         phrase.AddWord(word);
       }
 
@@ -54,34 +46,34 @@ void Tokenize(Phrase &phrase
   } else {
     // term
     WordPtr word(new Word());
-    word->CreateFromString(token, onDiskWrapper.GetVocab());
+    word->CreateFromString(token, m_wrapper.GetVocab());
     phrase.AddWord(word);
   }
 }
-
-SourcePhrase Tokenize(const std::vector<std::string>& tokens, OnDiskWrapper &onDiskWrapper)
+  
+SourcePhrase OnDiskQuery::Tokenize(const std::vector<std::string>& tokens)
 {
   SourcePhrase sourcePhrase;
   if (tokens.size() > 0){
     std::vector<std::string>::const_iterator token = tokens.begin();
     for (; token + 1 != tokens.end(); ++token){
-      Tokenize(sourcePhrase, *token, true, true, onDiskWrapper);
+      Tokenize(sourcePhrase, *token, true, true);
     }
     // last position. LHS non-term
-    Tokenize(sourcePhrase, *token, false, true, onDiskWrapper);
+    Tokenize(sourcePhrase, *token, false, true);
   }
   return sourcePhrase;
 }
-
-const PhraseNode* Query(const SourcePhrase& sourcePhrase, OnDiskWrapper& onDiskWrapper)
+  
+const PhraseNode* OnDiskQuery::Query(const SourcePhrase& sourcePhrase)
 {
-    const PhraseNode *node = &onDiskWrapper.GetRootSourceNode();
+    const PhraseNode *node = &m_wrapper.GetRootSourceNode();
     assert(node);
     
     for (size_t pos = 0; pos < sourcePhrase.GetSize(); ++pos)
     {
       const Word &word = sourcePhrase.GetWord(pos);
-      node = node->GetChild(word, onDiskWrapper);
+      node = node->GetChild(word, m_wrapper);
       if (node == NULL)
       {
         break;

@@ -53,7 +53,7 @@ protected:
   AlignType m_align;
   PhrasePtr m_sourcePhrase; 
 
-  std::vector<float>	m_scores;
+  std::vector<float> m_scores;
   UINT64 m_filePos;
 
   size_t WriteAlignToMemory(char *mem) const;
@@ -63,15 +63,20 @@ protected:
   UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
 
 public:
+  TargetPhrase()
+  {}
   TargetPhrase(size_t numScores);
-  TargetPhrase(const 	TargetPhrase &copy);
+  TargetPhrase(const TargetPhrase &copy);
   virtual ~TargetPhrase();
 
   void SetSourcePhrase(PhrasePtr p) {
     m_sourcePhrase = p;
   }
   const PhrasePtr GetSourcePhrase() const {
-	  return m_sourcePhrase;
+    return m_sourcePhrase;
+  }
+  const std::vector<float> &GetScores() const{
+    return m_scores;
   }
   
   void SetLHS(WordPtr lhs);
