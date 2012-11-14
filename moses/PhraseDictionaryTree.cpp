@@ -190,10 +190,10 @@ public:
   ObjectPool<PPimp> pPool;
   // a comparison with the Boost MemPools might be useful
 
-  bool usewordalign;
+  bool needwordalign, haswordAlign;
   bool printwordalign;
 
-  PDTimp() : os(0),ot(0), usewordalign(false), printwordalign(false) {
+  PDTimp() : os(0),ot(0), printwordalign(false) {
     PTF::setDefault(InvalidOffT);
   }
   ~PDTimp() {
@@ -202,11 +202,17 @@ public:
     FreeMemory();
   }
 
-  inline void UseWordAlignment(bool a) {
-    usewordalign=a;
+  inline void NeedAlignmentInfo(bool a) {
+    needwordalign=a;
   }
-  inline bool UseWordAlignment() {
-    return usewordalign;
+  inline bool NeedAlignmentInfo() {
+    return needwordalign;
+  };
+  inline void HasAlignmentInfo(bool a) {
+    haswordAlign=a;
+  }
+  inline bool HasAlignmentInfo() {
+    return haswordAlign;
   };
 
   inline void PrintWordAlignment(bool a) {
@@ -232,8 +238,10 @@ public:
     if(tCandOffset==InvalidOffT) return;
     fSeek(ot,tCandOffset);
 
-    if (UseWordAlignment())    	tgtCands.readBinWithAlignment(ot);
-    else tgtCands.readBin(ot);
+    if (HasAlignmentInfo())
+      tgtCands.readBinWithAlignment(ot);
+    else
+      tgtCands.readBin(ot);
   }
 
   typedef PhraseDictionaryTree::PrefixPtr PPtr;
@@ -244,8 +252,10 @@ public:
     OFF_T tCandOffset=p.imp->ptr()->getData(p.imp->idx);
     if(tCandOffset==InvalidOffT) return;
     fSeek(ot,tCandOffset);
-    if (UseWordAlignment())    	tgtCands.readBinWithAlignment(ot);
-    else tgtCands.readBin(ot);
+    if (HasAlignmentInfo())
+      tgtCands.readBinWithAlignment(ot);
+    else
+      tgtCands.readBin(ot);
   }
 
   void PrintTgtCand(const TgtCands& tcands,std::ostream& out) const;
@@ -307,34 +317,27 @@ int PDTimp::Read(const std::string& fn)
 {
   std::string ifs, ift, ifi, ifsv, iftv;
 
-  if (UseWordAlignment()) { //asking for word-to-word alignment
-    if (!FileExists(fn+".binphr.srctree.wa") || !FileExists(fn+".binphr.tgtdata.wa")) {
-      //		ERROR
-      std::stringstream strme;
-      strme << "You are asking for word alignment but the binary phrase table does not contain any alignment info. Please check if you had generated the correct phrase table with word alignment (.wa)\n";
-      UserMessage::Add(strme.str());
-      return false;
-    }
+  HasAlignmentInfo(FileExists(fn+".binphr.srctree.wa"));
+
+  if (NeedAlignmentInfo() && !HasAlignmentInfo()) {
+    //    ERROR
+    std::stringstream strme;
+    strme << "You are asking for word alignment but the binary phrase table does not contain any alignment info. Please check if you had generated the correct phrase table with word alignment (.wa)\n";
+    UserMessage::Add(strme.str());
+    return false;
+  }
+
+  if (HasAlignmentInfo()) {
     ifs=fn+".binphr.srctree.wa";
     ift=fn+".binphr.tgtdata.wa";
-    ifi=fn+".binphr.idx";
-    ifsv=fn+".binphr.srcvoc";
-    iftv=fn+".binphr.tgtvoc";
   } else {
-    if (!FileExists(fn+".binphr.srctree") || !FileExists(fn+".binphr.tgtdata")) {
-      //		ERROR
-      std::stringstream strme;
-      strme << "You are asking binary phrase table without word alignments but the file do not exist. Please check if you had generated the correct phrase table without word alignment (" << (fn+".binphr.srctree") << "," << (fn+".binphr.tgtdata")<< ")\n";
-      UserMessage::Add(strme.str());
-      return false;
-    }
-
     ifs=fn+".binphr.srctree";
     ift=fn+".binphr.tgtdata";
-    ifi=fn+".binphr.idx";
-    ifsv=fn+".binphr.srcvoc";
-    iftv=fn+".binphr.tgtvoc";
   }
+
+  ifi=fn+".binphr.idx";
+  ifsv=fn+".binphr.srcvoc";
+  iftv=fn+".binphr.tgtvoc";
 
   FILE *ii=fOpen(ifi.c_str(),"rb");
   fReadVector(ii,srcOffsets);
@@ -395,15 +398,10 @@ PhraseDictionaryTree::~PhraseDictionaryTree()
   delete imp;
 }
 
-void PhraseDictionaryTree::UseWordAlignment(bool a)
+void PhraseDictionaryTree::NeedAlignmentInfo(bool a)
 {
-  imp->UseWordAlignment(a);
+  imp->NeedAlignmentInfo(a);
 };
-bool PhraseDictionaryTree::UseWordAlignment()
-{
-  return imp->UseWordAlignment();
-};
-
 void PhraseDictionaryTree::PrintWordAlignment(bool a)
 {
   imp->PrintWordAlignment(a);

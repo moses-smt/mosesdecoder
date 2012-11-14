@@ -204,7 +204,7 @@ protected:
     m_languageModels=&languageModels;
 
     const StaticData &staticData = StaticData::Instance();
-    m_dict->UseWordAlignment(staticData.NeedAlignmentInfo());
+    m_dict->NeedAlignmentInfo(staticData.NeedAlignmentInfo());
 
     std::string binFname=filePath+".binphr.idx";
     if(!FileExists(binFname.c_str())) {

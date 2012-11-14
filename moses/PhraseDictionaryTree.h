@@ -57,8 +57,7 @@ class PhraseDictionaryTree : public Dictionary
 public:
   PhraseDictionaryTree(size_t numScoreComponent);
 
-  void UseWordAlignment(bool a);
-  bool UseWordAlignment();
+  void NeedAlignmentInfo(bool a);
 
   void PrintWordAlignment(bool a);
   bool PrintWordAlignment();
