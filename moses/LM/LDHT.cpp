@@ -4,10 +4,10 @@
 
 #include "LM/Base.h"
 #include "LM/LDHT.h"
-#include "../FFState.h"
-#include "../TypeDef.h"
-#include "../Hypothesis.h"
-#include "../StaticData.h"
+#include "moses/FFState.h"
+#include "moses/TypeDef.h"
+#include "moses/Hypothesis.h"
+#include "moses/StaticData.h"
 
 #include <LDHT/Client.h>
 #include <LDHT/ClientLocal.h>

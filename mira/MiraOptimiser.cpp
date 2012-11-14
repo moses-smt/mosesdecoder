@@ -1,6 +1,6 @@
 #include "Optimiser.h"
 #include "Hildreth.h"
-#include "StaticData.h"
+#include "moses/StaticData.h"
 
 using namespace Moses;
 using namespace std;

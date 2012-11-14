@@ -21,9 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <vector>
 
-#include "ScoreComponentCollection.h"
-#include "Word.h"
-#include "ScoreProducer.h"
+#include "moses/ScoreComponentCollection.h"
+#include "moses/Word.h"
+#include "moses/ScoreProducer.h"
 #include "Decoder.h"
 
 typedef std::map<const Moses::ScoreProducer*, std::vector< float > > ProducerWeightMap;

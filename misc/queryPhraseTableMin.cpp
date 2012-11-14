@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "CompactPT/PhraseDictionaryCompact.h"
-#include "Util.h"
-#include "Phrase.h"
+#include "moses/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/Util.h"
+#include "moses/Phrase.h"
 
 void usage();
 

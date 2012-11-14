@@ -5,7 +5,7 @@
 #include <boost/thread/thread.hpp>
 #endif
 
-#include "CompactPT/LexicalReorderingTableCreator.h"
+#include "moses/CompactPT/LexicalReorderingTableCreator.h"
 
 using namespace Moses;
 

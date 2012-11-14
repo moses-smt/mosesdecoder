@@ -1,5 +1,5 @@
-#include "FeatureVector.h"
-#include "ScoreComponentCollection.h"
+#include "moses/FeatureVector.h"
+#include "moses/ScoreComponentCollection.h"
 
 namespace Mira {
 

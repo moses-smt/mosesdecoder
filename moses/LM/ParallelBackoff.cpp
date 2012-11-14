@@ -19,21 +19,21 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "LM/ParallelBackoff.h"
+#include "ParallelBackoff.h"
 
 #include <vector>
 #include <string>
 #include <sstream>
 #include <fstream>
 
-#include "LM/MultiFactor.h"
-#include "Word.h"
-#include "Factor.h"
-#include "FactorTypeSet.h"
-#include "FactorCollection.h"
-#include "Phrase.h"
-#include "TypeDef.h"
-#include "Util.h"
+#include "MultiFactor.h"
+#include "moses/Word.h"
+#include "moses/Factor.h"
+#include "moses/FactorTypeSet.h"
+#include "moses/FactorCollection.h"
+#include "moses/Phrase.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
 
 #include "FNgramSpecs.h"
 #include "FNgramStats.h"

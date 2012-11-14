@@ -24,13 +24,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 
 
-#include "BleuScoreFeature.h"
-#include "ChartTrellisPathList.h"
-#include "Hypothesis.h"
-#include "Parameter.h"
-#include "SearchNormal.h"
-#include "Sentence.h"
-#include "StaticData.h"
+#include "moses/BleuScoreFeature.h"
+#include "moses/ChartTrellisPathList.h"
+#include "moses/Hypothesis.h"
+#include "moses/Parameter.h"
+#include "moses/SearchNormal.h"
+#include "moses/Sentence.h"
+#include "moses/StaticData.h"
 
 //
 // Wrapper functions and objects for the decoder.
