@@ -128,6 +128,8 @@ my $__PHRASE_WEIGHTING_TRAINER = "pro"; # which type of trainer to use
 my @__PHRASE_WEIGHTING_TABLES;
 # The tmcombine script
 my $__PHRASE_WEIGHTING_TMCOMBINE = "$SCRIPTS_ROOTDIR/../contrib/tmcombine/tmcombine.py";
+# used to filter output
+my $__REMOVE_SEGMENTATION = "$SCRIPTS_ROOTDIR/ems/support/remove-segmentation-markup.perl";
 
 my $__THREADS = 0;
 
@@ -794,6 +796,8 @@ while (1) {
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
   $cmd .= " -d" if $__PHRASE_WEIGHTING; # Allow duplicates
+  # remove segmentation
+  $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix";
   $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
   &submit_or_exec($cmd, "extract.out","extract.err");
 
@@ -1080,7 +1084,9 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    safesystem("$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out 2> /dev/null 1> $evalout");
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out";
+    $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PHRASE_WEIGHTING) && $__PHRASE_WEIGHTING_TRAINER eq "mix";
+    safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
     my $bleu = <$fh>;
     chomp $bleu;
