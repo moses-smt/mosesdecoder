@@ -171,7 +171,7 @@ protected:
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
-  bool m_UseAlignmentInfo;
+  bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
   std::string m_alignmentOutputFile;
@@ -431,16 +431,8 @@ public:
   const std::string &GetDetailedTranslationReportingFilePath() const {
     return m_detailedTranslationReportingFilePath;
   }
-
-  const std::string &GetAlignmentOutputFile() const {
-    return m_alignmentOutputFile;
-  }
-
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;
-  }
-  bool NBestIncludesSegmentation() const {
-    return m_nBestIncludesSegmentation;
   }
   
   bool UseMinphrInMemory() const {
@@ -553,16 +545,6 @@ public:
   //Weights for feature with fixed number of values
   void SetWeights(const ScoreProducer* sp, const std::vector<float>& weights);
 
-
-  bool UseAlignmentInfo() const {
-    return m_UseAlignmentInfo;
-  }
-  void UseAlignmentInfo(bool a) {
-    m_UseAlignmentInfo=a;
-  };
-  bool PrintAlignmentInfoInNbest() const {
-    return m_PrintAlignmentInfoNbest;
-  }
   bool GetDistinctNBest() const {
     return m_onlyDistinctNBest;
   }
@@ -725,10 +707,6 @@ public:
     return m_parameter;
   }
 
-  WordAlignmentSort GetWordAlignmentSort() const {
-    return m_wordAlignmentSort;
-  }
-
   int ThreadCount() const {
     return m_threadCount;
   }
@@ -738,6 +716,23 @@ public:
   
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
+
+  bool NeedAlignmentInfo() const {
+    return m_needAlignmentInfo; }
+  const std::string &GetAlignmentOutputFile() const {
+    return m_alignmentOutputFile;
+  }
+  bool PrintAlignmentInfoInNbest() const {
+    return m_PrintAlignmentInfoNbest;
+  }
+  WordAlignmentSort GetWordAlignmentSort() const {
+    return m_wordAlignmentSort;
+  }
+
+  bool NBestIncludesSegmentation() const {
+    return m_nBestIncludesSegmentation;
+  }
+
 };
 
 }

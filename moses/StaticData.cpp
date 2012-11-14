@@ -102,7 +102,7 @@ StaticData::StaticData()
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
-
+  ,m_needAlignmentInfo(false)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -172,20 +172,17 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );
-
-  //word-to-word alignment
-  SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
-  SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
-
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
-  if (!m_UseAlignmentInfo && m_PrintAlignmentInfoNbest) {
-    TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
-    m_PrintAlignmentInfoNbest=false;
+  //word-to-word alignment
+  SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
+  if (m_PrintAlignmentInfoNbest) {
+    m_needAlignmentInfo = true;
   }
 
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+    m_needAlignmentInfo = true;
   }
 
   // n-best
@@ -1793,10 +1790,7 @@ bool StaticData::LoadTargetWordInsertionFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-    UserMessage::Add("Target word insertion feature needs word alignments in phrase table.");
-    return false;
-  }
+  m_needAlignmentInfo = true;
 
   // set factor
   FactorType factorId = Scan<size_t>(tokens[0]);
@@ -1832,10 +1826,7 @@ bool StaticData::LoadSourceWordDeletionFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-    UserMessage::Add("Source word deletion feature needs word alignments in phrase table.");
-    return false;
-  }
+  m_needAlignmentInfo = true;
 
   // set factor
   FactorType factorId = Scan<size_t>(tokens[0]);
@@ -1856,15 +1847,17 @@ bool StaticData::LoadSourceWordDeletionFeature()
 
 bool StaticData::LoadWordTranslationFeature()
 {
+  const vector<string> &parameters = m_parameter->GetParam("word-translation-feature");
+  if (parameters.empty())
+    return true;
+
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-wt"));
-  if (weight.size() > 1) {
+  if (weight.size() != 1) {
     std::cerr << "Only one sparse producer weight allowed for the word translation feature" << std::endl;
     return false;
   }
 	
-  const vector<string> &parameters = m_parameter->GetParam("word-translation-feature");
-  if (parameters.empty())
-    return true;
+  m_needAlignmentInfo = true;
 
   for (size_t i=0; i<parameters.size(); ++i) {
     vector<string> tokens = Tokenize(parameters[i]);
@@ -1874,11 +1867,6 @@ bool StaticData::LoadWordTranslationFeature()
       return false;
     }
     
-    if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-      UserMessage::Add("Word translation feature needs word alignments in phrase table.");
-      return false;
-    }
-
     // set factor
     vector <string> factors = Tokenize(tokens[0],"-");
     FactorType factorIdSource = Scan<size_t>(factors[0]);

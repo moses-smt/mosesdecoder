@@ -79,7 +79,7 @@ public:
                           PhraseTableImplementation implementation,
                           PhraseDictionaryFeature* feature,
                           bool inMemory = StaticData::Instance().UseMinphrInMemory(),
-                          bool useAlignmentInfo = StaticData::Instance().UseAlignmentInfo())
+                          bool useAlignmentInfo = StaticData::Instance().NeedAlignmentInfo())
     : PhraseDictionary(numScoreComponent, feature),
       m_implementation(implementation),
       m_inMemory(inMemory),
