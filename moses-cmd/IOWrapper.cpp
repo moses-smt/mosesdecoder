@@ -369,7 +369,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
   bool reportAllFactors = staticData.GetReportAllFactorsNBest();
-  bool includeAlignment = staticData.NBestIncludesAlignment();
+  bool includeSegmentation = staticData.NBestIncludesSegmentation();
   bool includeWordAlignment = staticData.PrintAlignmentInfoInNbest();
 
   TrellisPathList::const_iterator iter;
@@ -432,8 +432,8 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     // total
     out << " ||| " << path.GetTotalScore();
 
-    //phrase-to-phrase alignment
-    if (includeAlignment) {
+    //phrase-to-phrase segmentation
+    if (includeSegmentation) {
       out << " |||";
       for (int currEdge = (int)edges.size() - 2 ; currEdge >= 0 ; currEdge--) {
         const Hypothesis &edge = *edges[currEdge];

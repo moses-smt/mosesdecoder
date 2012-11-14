@@ -177,6 +177,19 @@ size_t ChartCell::GetSize() const
   return ret;
 }
 
+const HypoList *ChartCell::GetAllSortedHypotheses() const
+{
+	HypoList *ret = new HypoList();
+
+	MapType::const_iterator iter;
+	for (iter = m_hypoColl.begin(); iter != m_hypoColl.end(); ++iter) {
+	  const ChartHypothesisCollection &coll = iter->second;
+	  const HypoList &list = coll.GetSortedHypotheses();
+    std::copy(list.begin(), list.end(), std::inserter(*ret, ret->end()));
+	}
+	return ret;
+}
+
 //! call GetSearchGraph() for each hypo collection
 void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
 {

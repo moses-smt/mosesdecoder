@@ -18,15 +18,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "Decoder.h"
-#include "Manager.h"
-#include "ChartManager.h"
-#include "Sentence.h"
-#include "InputType.h"
-#include "TranslationSystem.h"
-#include "Phrase.h"
-#include "TrellisPathList.h"
-#include "ChartTrellisPathList.h"
-#include "ChartTrellisPath.h"
+#include "moses/Manager.h"
+#include "moses/ChartManager.h"
+#include "moses/Sentence.h"
+#include "moses/InputType.h"
+#include "moses/TranslationSystem.h"
+#include "moses/Phrase.h"
+#include "moses/TrellisPathList.h"
+#include "moses/ChartTrellisPathList.h"
+#include "moses/ChartTrellisPath.h"
 
 using namespace std;
 using namespace Moses;

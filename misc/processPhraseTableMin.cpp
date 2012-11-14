@@ -4,8 +4,8 @@
 #include <boost/thread/thread.hpp>
 #endif 
 
-#include "TypeDef.h"
-#include "CompactPT/PhraseTableCreator.h"
+#include "moses/TypeDef.h"
+#include "moses/CompactPT/PhraseTableCreator.h"
 
 using namespace Moses;
 

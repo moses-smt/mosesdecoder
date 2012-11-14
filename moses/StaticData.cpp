@@ -175,15 +175,10 @@ bool StaticData::LoadData(Parameter *parameter)
 
   //word-to-word alignment
   SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
-  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
 
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
-  if (!m_UseAlignmentInfo && m_PrintAlignmentInfo) {
-    TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
-    m_PrintAlignmentInfo=false;
-  }
   if (!m_UseAlignmentInfo && m_PrintAlignmentInfoNbest) {
     TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
     m_PrintAlignmentInfoNbest=false;
@@ -275,7 +270,7 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
 
   // include word alignment in the n-best list
-  SetBooleanParameter( &m_nBestIncludesAlignment, "include-alignment-in-n-best", false );
+  SetBooleanParameter( &m_nBestIncludesSegmentation, "include-segmentation-in-n-best", false );
 
   // printing source phrase spans
   SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );

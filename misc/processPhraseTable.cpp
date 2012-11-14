@@ -6,13 +6,13 @@
 #include <iterator>
 #include <functional>
 #include <sys/stat.h>
-#include "TypeDef.h"
-#include "PhraseDictionaryTree.h"
-#include "ConfusionNet.h"
-#include "FactorCollection.h"
-#include "Phrase.h"
-#include "InputFileStream.h"
-#include "Timer.h"
+#include "moses/TypeDef.h"
+#include "moses/PhraseDictionaryTree.h"
+#include "moses/ConfusionNet.h"
+#include "moses/FactorCollection.h"
+#include "moses/Phrase.h"
+#include "moses/InputFileStream.h"
+#include "moses/Timer.h"
 
 using namespace std;
 using namespace Moses;

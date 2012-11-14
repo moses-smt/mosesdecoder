@@ -144,7 +144,7 @@ protected:
   m_constraintFileName;
 
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
-  bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesAlignment;
+  bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_wordDeletionEnabled;
 
@@ -172,7 +172,6 @@ protected:
   std::string m_detailedTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
   bool m_UseAlignmentInfo;
-  bool m_PrintAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
   std::string m_alignmentOutputFile;
@@ -440,8 +439,8 @@ public:
   bool IsLabeledNBestList() const {
     return m_labeledNBestList;
   }
-  bool NBestIncludesAlignment() const {
-    return m_nBestIncludesAlignment;
+  bool NBestIncludesSegmentation() const {
+    return m_nBestIncludesSegmentation;
   }
   
   bool UseMinphrInMemory() const {
@@ -561,9 +560,6 @@ public:
   void UseAlignmentInfo(bool a) {
     m_UseAlignmentInfo=a;
   };
-  bool PrintAlignmentInfo() const {
-    return m_PrintAlignmentInfo;
-  }
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;
   }

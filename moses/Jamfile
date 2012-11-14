@@ -3,7 +3,7 @@ path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
 max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
-alias headers : ../util//kenutil : : : <include>. $(max-factors) ;
+alias headers : ../util//kenutil : : : $(max-factors) ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
