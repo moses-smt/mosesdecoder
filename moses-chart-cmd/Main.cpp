@@ -59,7 +59,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartTrellisPath.h"
 #include "moses/ChartTrellisPathList.h"
-#include "moses/Incremental/Manager.h"
+#include "moses/Incremental.h"
 
 #include "util/usage.hh"
 

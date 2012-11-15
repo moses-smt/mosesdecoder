@@ -5,6 +5,9 @@
 #include "moses/ChartCellCollection.h"
 #include "moses/ChartParser.h"
 
+#include <vector>
+#include <string>
+
 namespace Moses {
 class InputType;
 class TranslationSystem;

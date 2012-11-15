@@ -1,4 +1,4 @@
-#include "Manager.h"
+#include "moses/Incremental.h"
 
 #include "moses/ChartCell.h"
 #include "moses/ChartParserCallback.h"

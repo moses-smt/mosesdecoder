@@ -38,7 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/ChartHypothesis.h"
-#include "moses/Incremental/Manager.h"
+#include "moses/Incremental.h"
 
 #include <boost/shared_ptr.hpp>
 
