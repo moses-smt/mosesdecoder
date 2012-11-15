@@ -4,7 +4,7 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 ## What's been interfaced?
 
-* Binary phrase table:
+* Binary tables:
 
         Moses::PhraseDictionaryTree
         OnDiskPt::OnDiskWrapper
@@ -52,7 +52,7 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 ### Code
 
 ```python
-from moses.dictree import load # load abstracts away the choice of implementation by checking the files available
+from moses.dictree import load # load abstracts away the choice of implementation by checking the available files
 import sys
 
 if len(sys.argv) < 2:
@@ -69,7 +69,7 @@ for line in sys.stdin:
     result = table.query(f)
     # you could simply print the matches
     # print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
-    # or you can use its attributes
+    # or you can use their attributes
     print result.source
     for e in result:
         if e.lhs:
