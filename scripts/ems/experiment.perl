@@ -1635,7 +1635,6 @@ sub define_tuning_tune {
 	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
 	$decoder_settings = "" unless $decoder_settings;
 	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
-  $decoder_settings .= " -use-alignment-info " unless $hierarchical ||  defined($word_alignment) && $word_alignment eq "no";
 	
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
@@ -2552,7 +2551,6 @@ sub define_evaluation_decode {
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
 
-    $settings .= " -use-alignment-info" unless $hierarchical || ( defined($word_alignment) && $word_alignment eq "no");
     
     # specify additional output for analysis
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
