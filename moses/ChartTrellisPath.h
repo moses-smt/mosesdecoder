@@ -34,7 +34,7 @@ class ChartTrellisDetour;
 class ChartTrellisDetourQueue;
 class ChartTrellisNode;
 
-/** 1 path throught the output hypergraph
+/** 1 path through the output hypergraph
  *  The class hold the final node in the path used for constructing n-best list in chart decoding.
  *  Each node hold it's own children.
  *  Also contains the total score and score breakdown for this path.

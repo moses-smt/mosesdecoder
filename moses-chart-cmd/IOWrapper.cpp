@@ -43,6 +43,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/PhraseDictionary.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/ChartTrellisPath.h"
+#include "moses/ChartTrellisNode.h"
 #include "moses/ChartTranslationOptions.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/FeatureVector.h"
@@ -397,7 +398,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
   }
 
   bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
-  //bool includeAlignment = StaticData::Instance().NBestIncludesAlignment();
+  bool includeWordAlignment = StaticData::Instance().PrintAlignmentInfoInNbest();
 
   ChartTrellisPathList::const_iterator iter;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
@@ -486,7 +487,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
     for( size_t i=0; i<slf.size(); i++ ) {
       if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
-	OutputSparseFeatureScores( out, path, slf[i], lastName );
+        OutputSparseFeatureScores( out, path, slf[i], lastName );
       }
     }
 
@@ -512,6 +513,11 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
     	}
     }
     */
+
+    if (includeWordAlignment) {
+      out << " ||| ";
+      OutputAlignmentNBest(out, path);
+    }
 
     out << endl;
   }
@@ -552,6 +558,29 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
 {
   stream.setf(std::ios::fixed);
   stream.precision(size);
+}
+
+void IOWrapper::OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisPath &path)
+{
+  size_t sourceOffset = 0; // TODO. this is gonna be quite difficult
+  size_t targetOffset = 0;
+
+  const ChartTrellisNode &node = path.GetFinalNode();
+  OutputAlignmentNBest(out, node, sourceOffset, targetOffset);
+}
+
+void IOWrapper::OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset)
+{
+  const ChartTrellisNode::NodeChildren &children = node.GetChildren();
+
+  for (size_t i = 0; i < children.size(); ++i) {
+    const ChartTrellisNode &child = *children[i];
+    OutputAlignmentNBest(out, child, sourceOffset, targetOffset);
+  }
+
+  // finally, output alignments for this node
+  const AlignmentInfo &ai = node.GetHypothesis().GetCurrTargetPhrase().GetAlignTerm();
+  OutputAlignment(out, ai, sourceOffset, targetOffset);
 }
 
 void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)

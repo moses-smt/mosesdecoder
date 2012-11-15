@@ -78,6 +78,8 @@ protected:
 
   void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
   void OutputAlignment(std::ostream &out, const Moses::ChartHypothesis *hypo, size_t sourceOffset, size_t targetOffset);
+  void OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisPath &path);
+  void OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset);
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
