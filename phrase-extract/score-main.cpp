@@ -50,7 +50,7 @@ bool hierarchicalFlag = false;
 bool pcfgFlag = false;
 bool unpairedExtractFormatFlag = false;
 bool conditionOnTargetLhsFlag = false;
-bool wordAlignmentFlag = false;
+bool wordAlignmentFlag = true;
 bool goodTuringFlag = false;
 bool kneserNeyFlag = false;
 bool logProbFlag = false;
@@ -95,7 +95,7 @@ int main(int argc, char* argv[])
 
   ScoreFeatureManager featureManager;
   if (argc < 4) {
-    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--WordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
+    cerr << "syntax: score extract lex phrase-table [--Inverse] [--Hierarchical] [--LogProb] [--NegLogProb] [--NoLex] [--GoodTuring] [--KneserNey] [--NoWordAlignment] [--UnalignedPenalty] [--UnalignedFunctionWordPenalty function-word-file] [--MinCountHierarchical count] [--OutputNTLengths] [--PCFG] [--UnpairedExtractFormat] [--ConditionOnTargetLHS] [--Singleton] [--CrossedNonTerm] \n";
     cerr << featureManager.usage() << endl;
     exit(1);
   }
@@ -104,7 +104,6 @@ int main(int argc, char* argv[])
   string fileNamePhraseTable = argv[3];
   string fileNameCountOfCounts;
   char* fileNameFunctionWords = NULL;
-  char* fileNameDomain = NULL;
   vector<string> featureArgs; //all unknown args passed to feature manager
 
   for(int i=4; i<argc; i++) {
@@ -123,9 +122,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--ConditionOnTargetLHS") == 0) {
       conditionOnTargetLhsFlag = true;
       cerr << "processing unpaired extract format\n";
-    } else if (strcmp(argv[i],"--WordAlignment") == 0) {
-      wordAlignmentFlag = true;
-      cerr << "outputing word alignment" << endl;
+    } else if (strcmp(argv[i],"--NoWordAlignment") == 0) {
+      wordAlignmentFlag = false;
+      cerr << "omitting word alignment" << endl;
     } else if (strcmp(argv[i],"--NoLex") == 0) {
       lexFlag = false;
       cerr << "not computing lexical translation score\n";
@@ -169,9 +168,11 @@ int main(int argc, char* argv[])
       cerr << "crossed non-term reordering feature\n";
     } else {
       featureArgs.push_back(argv[i]);
+      ++i;
       for (; i < argc &&  strncmp(argv[i], "--", 2); ++i) {
         featureArgs.push_back(argv[i]);
       }
+      if (i != argc) --i; //roll back, since we found another -- argument
     }
   }
 

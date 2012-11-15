@@ -1952,7 +1952,7 @@ sub define_training_build_ttable {
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    $cmd .=  "-phrase-word-alignment " unless (defined($word_alignment) && $word_alignment eq "no");
+    $cmd .=  "-no-word-alignment " if  defined($word_alignment) && $word_alignment eq "no";
 
     $cmd .= &define_domain_feature_score_option($domains) if $domains;
     
@@ -2449,7 +2449,7 @@ sub define_tuningevaluation_filter {
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
-    $binarizer .= " -alignment-info" unless !defined ($binarizer) || $hierarchical || ( defined $word_alignment && $word_alignment eq "no");
+    $binarizer .= " -no-alignment-info" if defined ($binarizer) && !$hierarchical && defined $word_alignment && $word_alignment eq "no";
         
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if $hierarchical;

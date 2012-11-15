@@ -73,6 +73,8 @@ namespace MosesTraining
         }
         sparseDomainAdded = true;
         m_includeSentenceId = true;
+      } else {
+        UTIL_THROW(ScoreFeatureArgumentException,"Unknown score argument " << args[i]);
       }
     }
 
