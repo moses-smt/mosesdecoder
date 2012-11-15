@@ -17,8 +17,9 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
 
     cdef cppclass PhraseDictionaryTree:
         PhraseDictionaryTree(unsigned nscores)
-        void UseWordAlignment(bint use)
-        bint UseWordAlignment()
+        void NeedAlignmentInfo(bint value)
+        void PrintWordAlignment(bint value)
+        bint PrintWordAlignment()
         int Read(string& path)
         void GetTargetCandidates(vector[string]& fs, 
                 vector[StringTgtCand]& rv)
