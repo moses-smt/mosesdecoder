@@ -188,11 +188,10 @@ cdef class DictionaryTree(object):
         """Whether or not the path represents a valid table for that class."""
         raise NotImplementedError
 
-    def query(self, line, top = 0, converter = None, cmp = None, key = None):
+    def query(self, line, converter = None, cmp = None, key = None):
         """
         Returns a list of target productions that translate a given source production
         :line query (string)
-        :top table limit (int) (0 or less for no limit)
         :converter applies a transformation to the score (function)
         :cmp define it to get a sorted list (design it compatible with your converter)
         :key defines the key of the comparison
@@ -209,17 +208,20 @@ cdef class PhraseDictionaryTree(DictionaryTree):
     cdef readonly unsigned nscores
     cdef readonly bint wa
     cdef readonly bytes delimiters
+    cdef readonly unsigned tableLimit
 
-    def __cinit__(self, bytes path, unsigned nscores = 5, bint wa = False, delimiters = ' \t'):
-        """It requies a path to binary phrase table (stem of the table, e.g europarl.fr-en 
-        is the stem for europar.fr-en.binphr.*).
-        Moses::PhraseDictionaryTree also needs to be aware of the number of scores (usually 5),
-        and whether or not there is word-alignment info in the table (usually not).
-        One can also specify the token delimiters, for Moses::Tokenize(text, delimiters), which is space or tab by default."""
+    def __cinit__(self, bytes path, unsigned tableLimit = 20, unsigned nscores = 5, bint wa = False, delimiters = ' \t'):
+        """
+        :path stem of the table, e.g europarl.fr-en is the stem for europar.fr-en.binphr.*
+        :tableLimit maximum translations per source (defaults to 20 - use zero to impose no limit)
+        :wa whether or not it has word-alignment information
+        :delimiters for tokenization (defaults to space and tab)
+        """
 
         if not PhraseDictionaryTree.canLoad(path, wa):
             raise ValueError, "'%s' doesn't seem a valid binary table." % path
         self.path = path
+        self.tableLimit = tableLimit
         self.nscores = nscores
         self.wa = wa
         self.delimiters = delimiters
@@ -253,11 +255,10 @@ cdef class PhraseDictionaryTree(DictionaryTree):
         cdef list scores = [score for score in cand.scores] if converter is None else [converter(score) for score in cand.scores]
         return TargetProduction(words, scores, wa)
 
-    def query(self, line, top = 20, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):
+    def query(self, line, converter = lambda x: log(x), cmp = lambda x, y: fsign(y.scores[2] - x.scores[2]), key = None):
         """
         Returns a list of target productions that translate a given source production
         :line query (string)
-        :top table limit (int) - defaults to 20 as in Moses (0 or less means no limit)
         :converter applies a transformation to the score (function) - defaults to the natural log (since by default binary phrase-tables store probabilities)
         :cmp define it to get a sorted list - defaults to sorting by t(e|f) (since by default binary phrase-tables are not sorted)
         :key defines the key of the comparison - defauls to none
@@ -281,8 +282,8 @@ cdef class PhraseDictionaryTree(DictionaryTree):
         del rv
         if cmp:
             results.sort(cmp=cmp, key=key)
-        if top > 0:
-            return QueryResult(source, results[0:top])
+        if self.tableLimit > 0:
+            return QueryResult(source, results[0:self.tableLimit])
         else:  
             return results
     
@@ -293,7 +294,7 @@ cdef class OnDiskWrapper(DictionaryTree):
     cdef readonly bytes delimiters
     cdef readonly unsigned tableLimit
 
-    def __cinit__(self, bytes path, unsigned tableLimit, delimiters = ' \t'):
+    def __cinit__(self, bytes path, unsigned tableLimit = 20, delimiters = ' \t'):
         self.delimiters = delimiters
         self.tableLimit = tableLimit
         self.wrapper = new condiskpt.OnDiskWrapper()
@@ -312,11 +313,10 @@ cdef class OnDiskWrapper(DictionaryTree):
         cdef list tokens = [f.c_str() for f in ftokens]
         return Production(tokens[:-1], tokens[-1])
 
-    def query(self, line, top = 0, converter = None, cmp = None, key = None):
+    def query(self, line, converter = None, cmp = None, key = None):
         """
         Returns a list of target productions that translate a given source production
         :line query (string)
-        :top table limit (int) - defaults to 0 'no limit' (since OnDiskPt prunes at construction)
         :converter applies a transformation to the score (function) - defaults to None (since by default OnDiskWrapper store the ln(prob))
         :cmp define it to get a sorted list - defaults to None (since by default OnDiskWrapper is already sorted)
         :key defines the key of the comparison - defauls to none
@@ -344,18 +344,15 @@ cdef class OnDiskWrapper(DictionaryTree):
                 results.append(TargetProduction(words[:-1], (converter(score) for score in scores), ephr.GetAlign(), words[-1]))
         if cmp:
             results.sort(cmp=cmp, key=key)
-        if top > 0:
-            return QueryResult(source, results[0:top])
-        else:  
-            return results
+        return results
     
-def load(path, nscores):
+def load(path, nscores, limit):
     """Finds out the correct implementation depending on the content of 'path' and returns the appropriate dictionary tree."""
     if PhraseDictionaryTree.canLoad(path, False):
-        return PhraseDictionaryTree(path, nscores, False)
+        return PhraseDictionaryTree(path, limit, nscores, False)
     elif PhraseDictionaryTree.canLoad(path, True):
-        return PhraseDictionaryTree(path, nscores, True)
+        return PhraseDictionaryTree(path, limit, nscores, True)
     elif OnDiskWrapper.canLoad(path):
-        return OnDiskWrapper(path, nscores)
+        return OnDiskWrapper(path, limit)
     else:
         raise ValueError, '%s does not seem to be a valid table' % path
