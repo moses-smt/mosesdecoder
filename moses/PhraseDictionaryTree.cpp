@@ -499,6 +499,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
   imp->sv = new WordVoc();
   imp->tv = new WordVoc();
+  size_t missingAlignmentCount = 0; 
 
   while(getline(inFile, line)) {
     ++lnc;
@@ -526,6 +527,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
     const std::string sparseFeatureString = tokens.size() > 5 ? tokens[5] : empty;
     IPhrase f,e;
     Scores sc;
+
+    if (PrintWordAlignment() && alignmentString == " ") ++missingAlignmentCount;
 
     std::vector<std::string> wordVec = Tokenize(sourcePhraseString);
     for (size_t i = 0 ; i < wordVec.size() ; ++i)
@@ -636,6 +639,11 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
             <<" distinct first words of source phrases: "<<vo.size()
             <<" number of phrase pairs (line count): "<<lnc
             <<"\n");
+
+  if ( PrintWordAlignment()) {
+    TRACE_ERR("Count of lines with missing alignments: " <<
+      missingAlignmentCount << "/" << lnc << "\n");
+  }
 
   fClose(os);
   fClose(ot);

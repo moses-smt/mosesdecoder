@@ -34,7 +34,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
    $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
-   $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
+   $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
@@ -116,7 +116,7 @@ $_HELP = 1
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
 		       'xml' => \$_XML,
-		       'phrase-word-alignment' => \$_PHRASE_WORD_ALIGNMENT,
+		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
 		       'do-steps=s' => \$_DO_STEPS,
@@ -1471,7 +1471,7 @@ sub score_phrase_phrase_extract {
 
         my $cmd = "$PHRASE_SCORE $extract $lexical_file.$direction $ttable_file.half.$direction.gz $inverse";
         $cmd .= " --Hierarchical" if $_HIERARCHICAL;
-        $cmd .= " --WordAlignment" if $_PHRASE_WORD_ALIGNMENT;
+        $cmd .= " --NoWordAlignment" if $_OMIT_WORD_ALIGNMENT;
         $cmd .= " --KneserNey" if $KNESER_NEY;
         $cmd .= " --GoodTuring" if $GOOD_TURING && $inverse eq "";
         $cmd .= " --UnalignedPenalty" if $UNALIGNED_COUNT;
