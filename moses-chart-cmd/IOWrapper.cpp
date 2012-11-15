@@ -67,11 +67,13 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_inputFactorUsed(inputFactorUsed)
   ,m_outputSearchGraphStream(NULL)
   ,m_detailedTranslationReportingStream(NULL)
+  ,m_alignmentInfoStream(NULL)
   ,m_inputFilePath(inputFilePath)
   ,m_detailOutputCollector(NULL)
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
+  ,m_alignmentInfoCollector(NULL)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -112,6 +114,12 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_detailedTranslationReportingStream = new std::ofstream(path.c_str());
     m_detailOutputCollector = new Moses::OutputCollector(m_detailedTranslationReportingStream);
   }
+
+  if (!staticData.GetAlignmentOutputFile().empty()) {
+    m_alignmentInfoStream = new std::ofstream(staticData.GetAlignmentOutputFile().c_str());
+    m_alignmentInfoCollector = new Moses::OutputCollector(m_alignmentInfoStream);
+    CHECK(m_alignmentInfoStream->good());
+  }
 }
 
 IOWrapper::~IOWrapper()
@@ -121,10 +129,12 @@ IOWrapper::~IOWrapper()
   }
   delete m_outputSearchGraphStream;
   delete m_detailedTranslationReportingStream;
+  delete m_alignmentInfoStream;
   delete m_detailOutputCollector;
   delete m_nBestOutputCollector;
   delete m_searchGraphOutputCollector;
   delete m_singleBestOutputCollector;
+  delete m_alignmentInfoCollector;
 }
 
 void IOWrapper::ResetTranslationId() {
@@ -542,6 +552,50 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
 {
   stream.setf(std::ios::fixed);
   stream.precision(size);
+}
+
+void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)
+{
+  ostringstream out;
+
+  size_t sourceOffset = 0; // TODO. this is gonna be quite difficult
+  size_t targetOffset = 0;
+
+  OutputAlignment(out, hypo, sourceOffset, targetOffset);
+  out << endl;
+
+  m_alignmentInfoCollector->Write(translationId, out.str());
+}
+
+void IOWrapper::OutputAlignment(std::ostream &out, const Moses::ChartHypothesis *hypo, size_t sourceOffset, size_t targetOffset)
+{
+  if ( hypo != NULL) {
+    const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+
+    vector<const ChartHypothesis*>::const_iterator iter;
+    for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
+      const ChartHypothesis *prevHypo = *iter;
+
+      OutputAlignment(out, prevHypo, sourceOffset, targetOffset);
+    }
+
+    const AlignmentInfo &ai = hypo->GetCurrTargetPhrase().GetAlignTerm();
+    OutputAlignment(*m_alignmentInfoStream, ai, sourceOffset, targetOffset);
+  }
+
+}
+
+void IOWrapper::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+{
+  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
+  AlignVec alignments = ai.GetSortedAlignments();
+
+  AlignVec::const_iterator it;
+  for (it = alignments.begin(); it != alignments.end(); ++it) {
+    const std::pair<size_t,size_t> &alignment = **it;
+    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
+  }
+
 }
 
 }
