@@ -272,7 +272,7 @@ cdef class PhraseDictionaryTree(DictionaryTree):
 
         if not self.wa:
             self.tree.GetTargetCandidates(fphrase, rv[0])
-            results.extend([self.getTargetProduction(candidate) for candidate in rv[0]])
+            results.extend([self.getTargetProduction(candidate, None, converter) for candidate in rv[0]])
         else:
             wa = new vector[string]()
             self.tree.GetTargetCandidates(fphrase, rv[0], wa[0])
