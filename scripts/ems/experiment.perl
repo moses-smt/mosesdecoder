@@ -1781,7 +1781,7 @@ sub define_training_psd_model {
   my $cores = &get("GENERAL:cores");
   my $vwparallel = &get("GENERAL:moses-script-dir") . "/generic/vw-parallel.perl";
   my $vwpath = &get("GENERAL:vw-path");
-  my $vw_opts = "-q st --hash all --noconstant -k --passes 10 -b 22 --csoaa_ldf m ";
+  my $vw_opts = "-q st --hash all --noconstant -k --passes 40 --power_t 0.5 -b 22 --csoaa_ldf m ";
   my $cmd = "$vwparallel $cores $trainfile vwcache $out.model $vwpath $vw_opts";
 
   &create_step($step_id, $cmd);

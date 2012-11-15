@@ -24,6 +24,7 @@ class ExtractorConfig
     inline bool GetTargetInternal() const { return m_targetInternal; }
     inline bool GetSourceIndicator() const { return m_sourceIndicator; }
     inline bool GetTargetIndicator() const { return m_targetIndicator; }
+    inline bool GetSourceTargetIndicator() const { return m_sourceTargetIndicator; }
     inline bool GetPhraseFactor() const   { return m_phraseFactor; }
     inline bool GetPaired() const         { return m_paired; }
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
@@ -41,7 +42,7 @@ class ExtractorConfig
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic,
+         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTargetIndicator, m_sourceTopic,
          m_phraseFactor;
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
@@ -97,6 +98,7 @@ private:
   void GeneratePhraseFactorFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
+  void GenerateConcatIndicatorFeature(const std::vector<std::string> &span1, const std::vector<std::string> &span2, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
   void GenerateSourceTopicFeatures(const std::vector<std::string> &wordSpan, const std::vector<std::string> &sourceTopics, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,

@@ -49,6 +49,7 @@ private:
   ScoreComponentCollection ScoreFactory(float score);
   PSD::Translation GetPSDTranslation(const TranslationOption *option);
 
+  void Normalize0(std::vector<float> &losses);
   void Normalize1(std::vector<float> &losses);
   void Normalize2(std::vector<float> &losses);
   void Normalize3(std::vector<float> &losses);

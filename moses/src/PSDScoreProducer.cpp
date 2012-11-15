@@ -104,7 +104,7 @@ vector<ScoreComponentCollection> PSDScoreProducer::ScoreOptions(const vector<Tra
         options[0]->GetEndPos(), psdOptions, losses);
     m_consumerFactory->Release(p_consumer);
 
-    Normalize1(losses);
+    Normalize0(losses);
 
     vector<float>::const_iterator lossIt;
     for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
@@ -154,6 +154,30 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   return true;
 }
 
+void PSDScoreProducer::Normalize0(vector<float> &losses)
+{
+  float sum = 0;
+
+	// clip to [0,1] and take 1-Z as non-normalized prob
+  vector<float>::iterator it;
+  for (it = losses.begin(); it != losses.end(); it++) {
+		if (*it <= 0.0) *it = 1.0;
+		else if (*it >= 1.0) *it = 0.0;
+		else *it = 1 - *it;
+		sum += *it;
+  }
+
+  if (! Equals(sum, 0)) {
+		// normalize
+    for (it = losses.begin(); it != losses.end(); it++)
+      *it /= sum;
+  } else {
+		// sum of non-normalized probs is 0, then take uniform probs
+    for (it = losses.begin(); it != losses.end(); it++) 
+      *it = 1 / losses.size();
+  }
+}
+
 void PSDScoreProducer::Normalize1(vector<float> &losses)
 {
   float sum = 0;
@@ -199,7 +223,9 @@ void PSDScoreProducer::Normalize3(vector<float> &losses)
   float sum = 0;
   vector<float>::iterator it;
   for (it = losses.begin(); it != losses.end(); it++) {
-    *it = 1 / (1 + exp(-*it));
+		// Alex changed this to be *it rather than -*it because it sorted backwards; not sure if this is right though!
+    //*it = 1 / (1 + exp(-*it));
+    *it = 1 / (1 + exp(*it));
     sum += *it;
   }
   for (it = losses.begin(); it != losses.end(); it++)

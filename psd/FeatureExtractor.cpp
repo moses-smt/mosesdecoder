@@ -90,6 +90,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
 		if (m_config.GetTargetIndicator()) GenerateIndicatorFeature(targetForms, fc); 
 
+		if (m_config.GetSourceTargetIndicator()) GenerateConcatIndicatorFeature(sourceForms, targetForms, fc); 
+
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
     } else {
@@ -113,6 +115,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_targetInternal  = pTree.get<bool>("features.target-internal", false);
   m_sourceIndicator = pTree.get<bool>("features.source-indicator", false);
   m_targetIndicator = pTree.get<bool>("features.target-indicator", false);
+  m_sourceTargetIndicator = pTree.get<bool>("features.source-target-indicator", false);
   m_paired          = pTree.get<bool>("features.paired", false);
   m_bagOfWords      = pTree.get<bool>("features.bag-of-words", false);
   m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
@@ -170,6 +173,11 @@ void FeatureExtractor::GenerateContextFeatures(const ContextType &context,
 void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, FeatureConsumer *fc)
 {
   fc->AddFeature("p^" + Join("_", span));
+}
+
+void FeatureExtractor::GenerateConcatIndicatorFeature(const vector<string> &span1, const vector<string> &span2, FeatureConsumer *fc)
+{
+  fc->AddFeature("p^" + Join("_", span1) + "^" + Join("_", span2));
 }
 
 void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
