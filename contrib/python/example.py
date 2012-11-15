@@ -1,6 +1,3 @@
-from moses.dictree import PhraseDictionaryTree as BinaryPhraseTable
-from moses.dictree import OnDiskWrapper as BinaryRuleTable
-from moses.dictree import QueryResult
 from moses.dictree import load
 import sys
 
@@ -15,7 +12,20 @@ table = load(path, nscores)
 
 for line in sys.stdin:
     f = line.strip()
-    matches = table.query(f, cmp = QueryResult.desc, top = 20)
-    print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
+    result = table.query(f)
+    # you could simply print the matches
+    # print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
+    # or you can use its attributes
+    print result.source
+    for e in result:
+        if e.lhs:
+            print '\t%s -> %s ||| %s ||| %s' % (e.lhs, 
+                    ' '.join(e.rhs), 
+                    e.scores, 
+                    e.alignment)
+        else:
+            print '\t%s ||| %s ||| %s' % (' '.join(e.rhs), 
+                    e.scores, 
+                    e.alignment)
      
 

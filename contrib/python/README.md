@@ -4,36 +4,84 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 ## What's been interfaced?
 
-* Binary phrase table:
+* Binary tables:
 
-        Moses::PhraseDictionaryTree.h
+        Moses::PhraseDictionaryTree
+        OnDiskPt::OnDiskWrapper
 
 ## Building
 
 1.  Build the python extension: 
 
-    You need to compile Moses with link=shared and (for while) without SRILM (for some reason SRILM prevents the compiler from generating libLM.so)
+    You need to compile Moses with link=shared
 
-        ./bjam --libdir=path cxxflags=-fPIC link=shared
+        ./bjam --libdir=path link=shared
 
     Then you can build the extension (in case you used --libdir=path above, use --moses-lib=path below) 
 
         python setup.py build_ext -i [--with-cmph] [--moses-lib=PATH] [--cython] [--max-factors=NUM] [--max-kenlm-order=NUM]
 
-    Use `--cython` if you want to compile the pyx files, note that they already come compiled so that you don't need to have Cython installed 
+    Use `--cython` if you want to re-compile the pyx files, note that they already come compiled so that you don't need to have Cython installed 
 
-3.  Check the example code
+## Example
 
-    * Phrase-based
+### Getting a phrase table
 
-            echo "casa" | python example.py examples/phrase-table 5
-            echo "essa casa" | python example.py examples/phrase-table 5
+    cd examples
+    export LC_ALL=C
+    cat phrase-table.txt | sort | ../../../bin/processPhraseTable -ttable 0 0 - -nscores 5 -alignment-info -out phrase-table
 
-    * Rule-based
+### Getting a rule table
 
-            echo "i [X]" | python example.py examples/rule-table 5
-            echo "have [X]" | python example.py examples/rule-table 5
-            echo "[X][X] do not [X][X] [X]" | python example.py examples/rule-table 5
+    cd examples
+    ../../../bin/CreateOnDiskPt 0 0 5 20 2 rule-table.txt rule-table
+
+### Querying
+
+1. Phrase-based
+    
+        echo "casa" | python example.py examples/phrase-table 5
+        echo "essa casa" | python example.py examples/phrase-table 5
+
+2. Hierarchical
+
+        echo "i [X]" | python example.py examples/rule-table 5
+        echo "have [X]" | python example.py examples/rule-table 5
+        echo "[X][X] do not [X][X] [X]" | python example.py examples/rule-table 5
+
+### Code
+
+```python
+from moses.dictree import load # load abstracts away the choice of implementation by checking the available files
+import sys
+
+if len(sys.argv) < 2:
+    print "Usage: %s table nscores < query > result" % (sys.argv[0])
+    sys.exit(0)
+
+path = sys.argv[1]
+nscores = int(sys.argv[2])
+
+table = load(path, nscores)
+
+for line in sys.stdin:
+    f = line.strip()
+    result = table.query(f)
+    # you could simply print the matches
+    # print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
+    # or you can use their attributes
+    print result.source
+    for e in result:
+        if e.lhs:
+            print '\t%s -> %s ||| %s ||| %s' % (e.lhs, 
+                    ' '.join(e.rhs), 
+                    e.scores, 
+                    e.alignment)
+        else:
+            print '\t%s ||| %s ||| %s' % (' '.join(e.rhs), 
+                    e.scores, 
+                    e.alignment)
+```
 
 
 ## Changing the code
