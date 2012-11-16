@@ -23,7 +23,7 @@
 #include "Word.h"
 #include "WordsRange.h"
 
-namespace search { class Vertex; class VertexGenerator; }
+namespace search { class Vertex; }
 
 namespace Moses
 {
@@ -41,7 +41,7 @@ class ChartCellLabel
   union Stack {
     const HypoList *cube; // cube pruning
     const search::Vertex *incr; // incremental search after filling.  
-    search::VertexGenerator *incr_generator; // incremental search during filling.  
+    void *incr_generator; // incremental search during filling.  
   };
 
 

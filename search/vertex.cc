@@ -19,21 +19,34 @@ struct GreaterByBound : public std::binary_function<const VertexNode *, const Ve
 
 } // namespace
 
-void VertexNode::SortAndSet(ContextBase &context, VertexNode **parent_ptr) {
+void VertexNode::RecursiveSortAndSet(ContextBase &context, VertexNode *&parent_ptr) {
   if (Complete()) {
-    assert(end_.Valid());
+    assert(end_);
     assert(extend_.empty());
-    bound_ = end_.GetScore();
     return;
   }
-  if (extend_.size() == 1 && parent_ptr) {
-    *parent_ptr = extend_[0];
-    extend_[0]->SortAndSet(context, parent_ptr);
+  if (extend_.size() == 1) {
+    parent_ptr = extend_[0];
+    extend_[0]->RecursiveSortAndSet(context, parent_ptr);
     context.DeleteVertexNode(this);
     return;
   }
   for (std::vector<VertexNode*>::iterator i = extend_.begin(); i != extend_.end(); ++i) {
-    (*i)->SortAndSet(context, &*i);
+    (*i)->RecursiveSortAndSet(context, *i);
+  }
+  std::sort(extend_.begin(), extend_.end(), GreaterByBound());
+  bound_ = extend_.front()->Bound();
+}
+
+void VertexNode::SortAndSet(ContextBase &context) {
+  // This is the root.  The root might be empty.  
+  if (extend_.empty()) {
+    bound_ = -INFINITY;
+    return;
+  }
+  // The root cannot be replaced.  There's always one transition.  
+  for (std::vector<VertexNode*>::iterator i = extend_.begin(); i != extend_.end(); ++i) {
+    (*i)->RecursiveSortAndSet(context, *i);
   }
   std::sort(extend_.begin(), extend_.end(), GreaterByBound());
   bound_ = extend_.front()->Bound();

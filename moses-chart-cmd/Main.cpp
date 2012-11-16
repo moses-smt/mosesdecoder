@@ -59,7 +59,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartTrellisPath.h"
 #include "moses/ChartTrellisPathList.h"
-#include "moses/Incremental/Manager.h"
+#include "moses/Incremental.h"
 
 #include "util/usage.hh"
 
@@ -91,10 +91,14 @@ public:
 
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
       Incremental::Manager manager(*m_source, system);
-      manager.ProcessSentence();
-      if (m_ioWrapper.ExposeSingleBest()) {
-        m_ioWrapper.ExposeSingleBest()->Write(translationId, manager.String() + '\n');
+      const std::vector<search::Applied> &nbest = manager.ProcessSentence();
+      if (!nbest.empty()) {
+        m_ioWrapper.OutputBestHypo(nbest[0], translationId);
+      } else {
+        m_ioWrapper.OutputBestNone(translationId);
       }
+      if (staticData.GetNBestSize() > 0)
+        m_ioWrapper.OutputNBestList(nbest, system, translationId);
       return;
     }
 
@@ -125,7 +129,7 @@ public:
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
       ChartTrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, bestHypo, &system, translationId);
+      m_ioWrapper.OutputNBestList(nBestList, &system, translationId);
       IFVERBOSE(2) {
         PrintUserTime("N-Best Hypotheses Generation Time:");
       }

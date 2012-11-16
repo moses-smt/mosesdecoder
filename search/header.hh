@@ -3,7 +3,6 @@
 
 // Header consisting of Score, Arity, and Note
 
-#include "search/note.hh"
 #include "search/types.hh"
 
 #include <stdint.h>
@@ -24,6 +23,9 @@ class Header {
     bool operator<(const Header &other) const {
       return GetScore() < other.GetScore();
     }
+    bool operator>(const Header &other) const {
+      return GetScore() > other.GetScore();
+    }
 
     Arity GetArity() const {
       return *reinterpret_cast<const Arity*>(base_ + sizeof(Score));
@@ -36,8 +38,13 @@ class Header {
       *reinterpret_cast<Note*>(base_ + sizeof(Score) + sizeof(Arity)) = to;
     }
 
+    uint8_t *Base() { return base_; }
+    const uint8_t *Base() const { return base_; }
+
   protected:
     Header() : base_(NULL) {}
+
+    explicit Header(void *base) : base_(static_cast<uint8_t*>(base)) {}
 
     Header(void *base, Arity arity) : base_(static_cast<uint8_t*>(base)) {
       *reinterpret_cast<Arity*>(base_ + sizeof(Score)) = arity;
