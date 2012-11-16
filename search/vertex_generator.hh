@@ -8,6 +8,10 @@
 #include <boost/unordered_map.hpp>
 #include <boost/version.hpp>
 
+#if BOOST_VERSION < 104200
+#include "util/exception.hh"
+#endif
+
 namespace lm {
 namespace ngram {
 class ChartState;
