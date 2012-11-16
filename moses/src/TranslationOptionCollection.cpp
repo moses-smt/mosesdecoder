@@ -518,11 +518,13 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 {
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
+    PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
 
     // consult persistent (cross-sentence) cache for stored translation options
     bool skipTransOptCreation = false
                                 , useCache = StaticData::Instance().GetUseTransOptCache();
-    if (useCache) {
+    // PSD relies on scores computed in context
+    if (useCache && psd == NULL) {
       const WordsRange wordsRange(startPos, endPos);
       sourcePhrase = new Phrase(m_source.GetSubString(wordsRange));
 
@@ -581,7 +583,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
 
 //#ifdef HAVE_VW
       // add PSD scores if user specified it
-      PSDScoreProducer *psd = StaticData::Instance().GetPSDScoreProducer();
       if (psd != NULL) {
         vector<ScoreComponentCollection> scores = psd->ScoreOptions(partTransOptList, m_source);
         vector<ScoreComponentCollection>::const_iterator iterPSD = scores.begin();
