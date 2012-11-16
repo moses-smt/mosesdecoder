@@ -401,8 +401,8 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
               if(m_phraseDictionary.m_useAlignmentInfo)
               {
                 // reconstruct the alignment data based on the alignment of the subphrase
-                for(AlignmentInfo::const_iterator it = subTp.GetAlignNonTerm().begin();
-                    it != subTp.GetAlignNonTerm().end(); it++)
+                for(AlignmentInfo::const_iterator it = subTp.GetAlignTerm().begin();
+                    it != subTp.GetAlignTerm().end(); it++)
                 {
                   alignment.insert(AlignPointSizeT(srcStart + it->first,
                                                    targetPhrase->GetSize() + it->second));
@@ -455,8 +455,9 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     
     if(state == Add)
     {
-      if(m_phraseDictionary.m_useAlignmentInfo)
+      if(m_phraseDictionary.m_useAlignmentInfo) {
         targetPhrase->SetAlignTerm(alignment);
+      }
       
       if(m_coding == PREnc)
       {
