@@ -33,10 +33,10 @@ class LexicalReorderingTableCreator {
     
     std::FILE* m_outFile;
     
-    size_t m_orderBits;
-    size_t m_fingerPrintBits;
+    uint64_t m_orderBits;
+    uint64_t m_fingerPrintBits;
     
-    size_t m_numScoreComponent;
+    uint64_t m_numScoreComponent;
     
     bool m_multipleScoreTrees;
     bool m_quantize;
@@ -51,8 +51,8 @@ class LexicalReorderingTableCreator {
     std::vector<ScoreCounter*> m_scoreCounters;
     std::vector<ScoreTree*> m_scoreTrees;
     
-    StringVector<unsigned char, unsigned long, MmapAllocator> m_encodedScores;
-    StringVector<unsigned char, unsigned long, MmapAllocator> m_compressedScores;
+    StringVector<unsigned char, uint64_t, MmapAllocator> m_encodedScores;
+    StringVector<unsigned char, uint64_t, MmapAllocator> m_compressedScores;
     
     std::priority_queue<PackedItem> m_queue;
     long m_lastFlushedLine;
@@ -125,11 +125,11 @@ class CompressionTaskReordering
     static boost::mutex m_mutex;
 #endif
     static size_t m_scoresNum;
-    StringVector<unsigned char, unsigned long, MmapAllocator> &m_encodedScores;
+    StringVector<unsigned char, uint64_t, MmapAllocator> &m_encodedScores;
     LexicalReorderingTableCreator &m_creator;
     
   public:
-    CompressionTaskReordering(StringVector<unsigned char, unsigned long, MmapAllocator>&
+    CompressionTaskReordering(StringVector<unsigned char, uint64_t, MmapAllocator>&
                     m_encodedScores, LexicalReorderingTableCreator& creator);
     void operator()();
 };

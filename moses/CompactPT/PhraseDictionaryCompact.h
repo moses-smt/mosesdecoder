@@ -64,8 +64,8 @@ protected:
   BlockHashIndex m_hash;
   PhraseDecoder* m_phraseDecoder;
   
-  StringVector<unsigned char, size_t, MmapAllocator>  m_targetPhrasesMapped;
-  StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
+  StringVector<unsigned char, uint64_t, MmapAllocator>  m_targetPhrasesMapped;
+  StringVector<unsigned char, uint64_t, std::allocator> m_targetPhrasesMemory;
   
   const std::vector<FactorType>* m_input;
   const std::vector<FactorType>* m_output;

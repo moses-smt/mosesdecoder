@@ -64,10 +64,10 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   #ifdef WITH_THREADS
     m_threads(threads),
     m_srcHash(m_orderBits, m_fingerPrintBits, 1),
-    m_rnkHash(10, 24, m_threads),
+    m_rnkHash(10, 20, m_threads),
   #else
     m_srcHash(m_orderBits, m_fingerPrintBits),
-    m_rnkHash(m_orderBits, m_fingerPrintBits),
+    m_rnkHash(10, 20),
   #endif
     m_maxPhraseLength(0),
     m_lastFlushedLine(-1), m_lastFlushedSourceNum(0),
@@ -115,6 +115,8 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   
   std::cerr << "Intermezzo: Calculating Huffman code sets" << std::endl;
   CalcHuffmanCodes();
+  
+  m_encodedTargetPhrases.Rewind();
   
   // 2nd pass
   std::cerr << "Pass " << cur_pass << "/" << all_passes << ": Compressing target phrases" << std::endl;
@@ -171,7 +173,7 @@ void PhraseTableCreator::PrintInfo()
 }
 
 void PhraseTableCreator::Save()
-{
+{  
   // Save type of encoding
   ThrowingFwrite(&m_coding, sizeof(m_coding), 1, m_outFile);
   ThrowingFwrite(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, m_outFile);
@@ -184,32 +186,32 @@ void PhraseTableCreator::Save()
     // Save source language symbols for REnc
     std::vector<std::string> temp1;
     temp1.resize(m_sourceSymbolsMap.size());
-    for(boost::unordered_map<std::string, unsigned>::iterator it
+    for(boost::unordered_map<std::string, uint32_t>::iterator it
         = m_sourceSymbolsMap.begin(); it != m_sourceSymbolsMap.end(); it++)
         temp1[it->second] = it->first;
     std::sort(temp1.begin(), temp1.end());
-    StringVector<unsigned char, unsigned, std::allocator> sourceSymbols;
+    StringVector<unsigned char, uint32_t, std::allocator> sourceSymbols;
     for(std::vector<std::string>::iterator it = temp1.begin();
         it != temp1.end(); it++)
         sourceSymbols.push_back(*it);
     sourceSymbols.save(m_outFile);
         
     // Save lexical translation table for REnc
-    size_t size = m_lexicalTableIndex.size();
-    ThrowingFwrite(&size, sizeof(size_t), 1, m_outFile);
-    ThrowingFwrite(&m_lexicalTableIndex[0], sizeof(size_t), size, m_outFile);
+    uint64_t size = m_lexicalTableIndex.size();
+    ThrowingFwrite(&size, sizeof(uint64_t), 1, m_outFile);
+    ThrowingFwrite(&m_lexicalTableIndex[0], sizeof(uint64_t), size, m_outFile);
     size = m_lexicalTable.size();
-    ThrowingFwrite(&size, sizeof(size_t), 1, m_outFile);
+    ThrowingFwrite(&size, sizeof(uint64_t), 1, m_outFile);
     ThrowingFwrite(&m_lexicalTable[0], sizeof(SrcTrg), size, m_outFile);
   }
     
   // Save target language symbols
   std::vector<std::string> temp2;
   temp2.resize(m_targetSymbolsMap.size());
-  for(boost::unordered_map<std::string, unsigned>::iterator it
+  for(boost::unordered_map<std::string, uint32_t>::iterator it
     = m_targetSymbolsMap.begin(); it != m_targetSymbolsMap.end(); it++)
     temp2[it->second] = it->first;
-  StringVector<unsigned char, unsigned, std::allocator> targetSymbols;
+  StringVector<unsigned char, uint32_t, std::allocator> targetSymbols;
   for(std::vector<std::string>::iterator it = temp2.begin();
     it != temp2.end(); it++)
     targetSymbols.push_back(*it);
@@ -230,7 +232,7 @@ void PhraseTableCreator::Save()
     m_alignTree->Save(m_outFile);
   
   // Save compressed target phrase collections 
-  m_compressedTargetPhrases.save(m_outFile);
+  m_compressedTargetPhrases.Save(m_outFile);
 }
     
 void PhraseTableCreator::LoadLexicalTable(std::string filePath)
@@ -374,6 +376,7 @@ void PhraseTableCreator::CalcHuffmanCodes()
        
   m_symbolTree = new SymbolTree(m_symbolCounter.Begin(),
                                 m_symbolCounter.End());      
+  m_symbolCounter.Clear();
   
   std::vector<ScoreTree*>::iterator treeIt = m_scoreTrees.begin();
   for(std::vector<ScoreCounter*>::iterator it = m_scoreCounters.begin();
@@ -386,6 +389,10 @@ void PhraseTableCreator::CalcHuffmanCodes()
         << " scores" << std::endl;
     
     *treeIt = new ScoreTree((*it)->Begin(), (*it)->End());
+    
+    if(not m_quantize)
+      (*it)->Clear();
+      
     treeIt++;
   }
   
@@ -394,6 +401,7 @@ void PhraseTableCreator::CalcHuffmanCodes()
     std::cerr << "\tCreating Huffman codes for " << m_alignCounter.Size()
         << " alignment points" << std::endl;
     m_alignTree = new AlignTree(m_alignCounter.Begin(), m_alignCounter.End());
+    m_alignCounter.Clear();
   }
   std::cerr << std::endl;
 }
@@ -940,7 +948,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
           targetPhraseCollection << *it;
         
         m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));    
-        m_encodedTargetPhrases.push_back(targetPhraseCollection.str());
+        m_encodedTargetPhrases.PushBack(targetPhraseCollection.str());
         
         m_lastFlushedSourceNum++;
         if(m_lastFlushedSourceNum % 100000 == 0)
@@ -982,7 +990,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
         m_lastCollection.begin(); it != m_lastCollection.end(); it++)
         targetPhraseCollection << *it;
           
-      m_encodedTargetPhrases.push_back(targetPhraseCollection.str());
+      m_encodedTargetPhrases.PushBack(targetPhraseCollection.str());
       m_lastCollection.clear();
     }
       
@@ -1011,7 +1019,7 @@ void PhraseTableCreator::AddCompressedCollection(PackedItem& pi)
 
 void PhraseTableCreator::FlushCompressedQueue(bool force)
 {
-  if(force || m_queue.size() > 10000)
+  if(force || m_queue.size() > 20000)
   {
     while(!m_queue.empty() && m_lastFlushedLine + 1 == m_queue.top().GetLine())
     {
@@ -1019,7 +1027,7 @@ void PhraseTableCreator::FlushCompressedQueue(bool force)
       m_queue.pop();
       m_lastFlushedLine++;
           
-      m_compressedTargetPhrases.push_back(pi.GetTrg());
+      m_compressedTargetPhrases.PushBack(pi.GetTrg());
       
       if((pi.GetLine()+1) % 100000 == 0)
         std::cerr << ".";
@@ -1222,42 +1230,57 @@ void EncodingTask::operator()()
 
 size_t CompressionTask::m_collectionNum = 0;
 #ifdef WITH_THREADS
-boost::mutex CompressionTask::m_mutex;
+boost::mutex CompressionTask::m_mutexIn;
+boost::mutex CompressionTask::m_mutexOut;
 #endif
 
-CompressionTask::CompressionTask(StringVector<unsigned char, unsigned long,
-                              MmapAllocator>& encodedCollections,
+CompressionTask::CompressionTask(OndiskLineCollection& encodedCollections,
                               PhraseTableCreator& creator)
   : m_encodedCollections(encodedCollections), m_creator(creator) {}
   
 void CompressionTask::operator()()
 {
+  size_t bufferMax = 100;
   size_t collectionNum;
+  std::vector<std::string> buffer;
+  
   {
 #ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
+    boost::mutex::scoped_lock lock(m_mutexIn);
 #endif
     collectionNum = m_collectionNum;
-    m_collectionNum++;
+    while(m_encodedCollections.HasNext() && buffer.size() < bufferMax) {
+      buffer.push_back(m_encodedCollections.GetNext());
+      m_collectionNum++;
+    }
   }
   
-  while(collectionNum < m_encodedCollections.size())
+  while(buffer.size())
   {
-    std::string collection = m_encodedCollections[collectionNum];
-    std::string compressedCollection
-      = m_creator.CompressEncodedCollection(collection);
+    for(std::vector<std::string>::iterator it = buffer.begin(); it != buffer.end(); it++) {
+      std::string compressedCollection
+        = m_creator.CompressEncodedCollection(*it);
 
-    std::string dummy;
-    PackedItem packedItem(collectionNum, dummy, compressedCollection, 0);
+      std::string dummy;
+      PackedItem packedItem(collectionNum++, dummy, compressedCollection, 0);
 
 #ifdef WITH_THREADS
-    boost::mutex::scoped_lock lock(m_mutex);
+      boost::mutex::scoped_lock lock(m_mutexOut);
 #endif
-    m_creator.AddCompressedCollection(packedItem);
-    m_creator.FlushCompressedQueue();
+      m_creator.AddCompressedCollection(packedItem);
+      m_creator.FlushCompressedQueue();
+    }
     
-    collectionNum = m_collectionNum;  
-    m_collectionNum++;    
+    buffer.clear();
+    
+#ifdef WITH_THREADS
+    boost::mutex::scoped_lock lock(m_mutexIn);
+#endif
+    collectionNum = m_collectionNum;
+    while(m_encodedCollections.HasNext() && buffer.size() < bufferMax) {
+      buffer.push_back(m_encodedCollections.GetNext());
+      m_collectionNum++;
+    }
   }
 }
 

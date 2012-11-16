@@ -19,59 +19,116 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA                                                        
 ***********************************************************************/  
 
-#ifndef moses_LexicalReorderingTableCompact_h
-#define moses_LexicalReorderingTableCompact_h
+#ifndef moses_OndiskLineCollection_h
+#define moses_OndiskLineCollection_h
 
-#include "moses/LexicalReorderingTable.h"
-#include "moses/StaticData.h"
-#include "moses/PhraseDictionary.h"
-#include "moses/GenerationDictionary.h"
-#include "moses/TargetPhrase.h"
-#include "moses/TargetPhraseCollection.h"
+#include <vector>
+#include <string>
+#include <cstdio>
 
-#include "BlockHashIndex.h"
-#include "CanonicalHuffman.h"
-#include "StringVector.h"
+#include "ThrowingFwrite.h"
+#include "MonotonicVector.h"
 
-namespace Moses {
+namespace Moses
+{
 
-class LexicalReorderingTableCompact: public LexicalReorderingTable
+class OndiskLineCollection
 {
   private:
-    bool m_inMemory;
-    
-    uint64_t m_numScoreComponent;
-    bool m_multipleScoreTrees;
-    
-    BlockHashIndex m_hash;
-    
-    typedef CanonicalHuffman<float> ScoreTree;  
-    std::vector<ScoreTree*> m_scoreTrees;
-    
-    StringVector<unsigned char, uint64_t, MmapAllocator>  m_scoresMapped;
-    StringVector<unsigned char, uint64_t, std::allocator> m_scoresMemory;
-
-    std::string MakeKey(const Phrase& f, const Phrase& e, const Phrase& c) const;
-    std::string MakeKey(const std::string& f, const std::string& e, const std::string& c) const;
+    MonotonicVector<uint64_t, uint32_t> m_positions;  
+    std::FILE* m_filePtr;
+    uint64_t m_currPos;
+    uint64_t m_totalSize;
     
   public:
-    LexicalReorderingTableCompact(
-                                const std::string& filePath,
-                                const std::vector<FactorType>& f_factors,
-                                const std::vector<FactorType>& e_factors,
-                                const std::vector<FactorType>& c_factors);
-  
-    LexicalReorderingTableCompact(
-                                const std::vector<FactorType>& f_factors,
-                                const std::vector<FactorType>& e_factors,
-                                const std::vector<FactorType>& c_factors);
-  
-    virtual ~LexicalReorderingTableCompact();
-
-    virtual std::vector<float> GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
-    void Load(std::string filePath);
+    OndiskLineCollection()
+    : m_filePtr(std::tmpfile()), m_currPos(0), m_totalSize(0)
+    { }
+    
+    void Rewind()
+    {
+      m_currPos = 0;
+      std::rewind(m_filePtr);
+      m_positions.commit();
+    }
+    
+    bool HasNext()
+    {
+      return m_currPos < m_positions.size();
+    }
+    
+    std::string GetNext()
+    {
+      std::string s; 
+      if(m_currPos < m_positions.size())
+      {
+        size_t size;
+        if(m_currPos + 1 < m_positions.size())
+          size = m_positions[m_currPos + 1] - m_positions[m_currPos];
+        else
+          size = m_totalSize - m_positions[m_currPos];
+          
+        char buffer[size];
+        std::fread(buffer, sizeof(char), size, m_filePtr);
+        s = std::string(buffer, size);
+        m_currPos++;
+      }
+      return s;
+    }
+    
+    void PushBack(std::string s)
+    {
+      uint64_t pos = ftello(m_filePtr);
+      m_positions.push_back(pos);
+      size_t length = s.size();
+      ThrowingFwrite(s.c_str(), sizeof(char), length, m_filePtr);
+      m_currPos++;
+      m_totalSize += s.size();
+    }
+    
+    uint64_t Size()
+    {
+      return m_positions.size();
+    }
+    
+    uint64_t Save(std::FILE* out)
+    {
+      uint64_t byteSize = 0;
+      bool sorted = false;
+      byteSize += ThrowingFwrite(&sorted, sizeof(bool), 1, out) * sizeof(bool);
+      
+      uint64_t test = m_positions.save(out);
+      byteSize += test;
+    
+      byteSize += ThrowingFwrite(&m_totalSize, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
+      
+      Rewind();
+      
+      size_t bufferSize = 1000000;
+      std::vector<std::string> buffer;
+      
+      while(HasNext()) {
+        std::string s = GetNext();
+        buffer.push_back(s);
+        
+        if(buffer.size() == bufferSize) {
+          for(std::vector<std::string>::iterator it = buffer.begin();
+              it != buffer.end(); it++)
+            byteSize += ThrowingFwrite(it->c_str(), sizeof(char), it->size(), out)
+                        * sizeof(char);
+          buffer.clear();
+        }
+      }
+      
+      for(std::vector<std::string>::iterator it = buffer.begin();
+          it != buffer.end(); it++)
+        byteSize += ThrowingFwrite(it->c_str(), sizeof(char), it->size(), out)
+                    * sizeof(char);
+      return byteSize;
+    }
 };
 
 }
 
 #endif
+
