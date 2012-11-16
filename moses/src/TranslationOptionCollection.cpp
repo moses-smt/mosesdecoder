@@ -601,7 +601,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       }
 
       // storing translation options in persistent cache (kept across sentences)
-      if (useCache) {
+      if (useCache && psd == NULL) {
         if (partTransOptList.size() > 0) {
           TranslationOptionList &transOptList = GetTranslationOptionList(startPos, endPos);
           StaticData::Instance().AddTransOptListToCache(decodeGraph, *sourcePhrase, transOptList);
