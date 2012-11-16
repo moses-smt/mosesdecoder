@@ -2,7 +2,6 @@
 #define SEARCH_EDGE_GENERATOR__
 
 #include "search/edge.hh"
-#include "search/note.hh"
 #include "search/types.hh"
 
 #include <queue>

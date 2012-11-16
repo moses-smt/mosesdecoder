@@ -1,6 +1,7 @@
 #include "search/edge_generator.hh"
 
 #include "lm/left.hh"
+#include "lm/model.hh"
 #include "lm/partial.hh"
 #include "search/context.hh"
 #include "search/vertex.hh"
@@ -38,7 +39,7 @@ template <class Model> void FastScore(const Context<Model> &context, Arity victi
       *cover = *(cover + 1);
     }
   }
-  update.SetScore(update.GetScore() + adjustment * context.GetWeights().LM());
+  update.SetScore(update.GetScore() + adjustment * context.LMWeight());
 }
 
 } // namespace
