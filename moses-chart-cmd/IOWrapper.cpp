@@ -734,7 +734,7 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
       pair<size_t, size_t> alignPoint(source + sourceOffsets[source]
                                      ,target + targetOffsets[target]);
       pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-      assert(ret.second);
+      CHECK(ret.second);
 
     }
   }
@@ -751,9 +751,9 @@ void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const A
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignPoint = **it;
 
-    assert(alignPoint.first < retAlignmentsS2T.size());
+    CHECK(alignPoint.first < retAlignmentsS2T.size());
     pair<set<size_t>::iterator, bool> ret = retAlignmentsS2T[alignPoint.first].insert(alignPoint.second);
-    assert(ret.second);
+    CHECK(ret.second);
   }
 }
 
