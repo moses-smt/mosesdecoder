@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <boost/dynamic_bitset.hpp>
 #include <boost/unordered_map.hpp>
-#include <map>
 
 #include "ThrowingFwrite.h"
 
@@ -37,10 +36,10 @@ class CanonicalHuffman
 {
   private:
     std::vector<Data> m_symbols;    
-    std::vector<uint64_t> m_firstCodes;
-    std::vector<uint64_t> m_lengthIndex;
+    std::vector<size_t> m_firstCodes;
+    std::vector<size_t> m_lengthIndex;
     
-    typedef boost::unordered_map<Data, std::pair<uint16_t, uint64_t> > EncodeMap;
+    typedef boost::unordered_map<Data, boost::dynamic_bitset<> > EncodeMap;
     EncodeMap m_encodeMap;
     
     struct MinHeapSorter {
@@ -55,7 +54,7 @@ class CanonicalHuffman
     };
     
     template <class Iterator>
-    void CalcLengths(Iterator begin, Iterator end, std::vector<uint16_t>& lengths)
+    void CalcLengths(Iterator begin, Iterator end, std::vector<size_t>& lengths)
     {
       size_t n = std::distance(begin, end);
       std::vector<size_t> A(2 * n, 0);
@@ -108,10 +107,10 @@ class CanonicalHuffman
         lengths[i] = A[i + n];
     }
 
-    void CalcCodes(std::vector<uint16_t>& lengths)
+    void CalcCodes(std::vector<size_t>& lengths)
     {
       std::vector<size_t> numLength;
-      for(std::vector<uint16_t>::iterator it = lengths.begin();
+      for(std::vector<size_t>::iterator it = lengths.begin();
           it != lengths.end(); it++) {
         size_t length = *it;
         if(numLength.size() <= length)
@@ -133,11 +132,11 @@ class CanonicalHuffman
       std::vector<Data> t_symbols;
       t_symbols.resize(lengths.size());
       
-      std::vector<uint64_t> nextCode = m_firstCodes;
+      std::vector<size_t> nextCode = m_firstCodes;
       for(size_t i = 0; i < lengths.size(); i++)
       {    
         Data data = m_symbols[i];
-        uint16_t length = lengths[i];
+        size_t length = lengths[i];
         
         size_t pos = m_lengthIndex[length]
                      + (nextCode[length] - m_firstCodes[length]);
@@ -151,17 +150,32 @@ class CanonicalHuffman
     
     void CreateCodeMap()
     {
-      for(uint16_t l = 1; l < m_lengthIndex.size(); l++)
+      for(size_t l = 1; l < m_lengthIndex.size(); l++)
       {
+        size_t intCode = m_firstCodes[l];
         size_t num = ((l+1 < m_lengthIndex.size()) ? m_lengthIndex[l+1]
                       : m_symbols.size()) - m_lengthIndex[l];
         
         for(size_t i = 0; i < num; i++)
         {
           Data data = m_symbols[m_lengthIndex[l] + i];  
-          m_encodeMap[data] = std::make_pair(l, i);
+          boost::dynamic_bitset<> bitCode(l, intCode);
+          m_encodeMap[data] = bitCode;  
+          intCode++;
         }
       }
+    }
+    
+    boost::dynamic_bitset<>& Encode(Data data)
+    {
+      return m_encodeMap[data];
+    }
+    
+    template <class BitWrapper>
+    void PutCode(BitWrapper& bitWrapper, boost::dynamic_bitset<>& code)
+    {
+      for(int j = code.size()-1; j >= 0; j--)
+        bitWrapper.Put(code[j]);
     }
     
   public:
@@ -169,7 +183,7 @@ class CanonicalHuffman
     template <class Iterator>
     CanonicalHuffman(Iterator begin, Iterator end, bool forEncoding = true)
     {
-      std::vector<uint16_t> lengths;
+      std::vector<size_t> lengths;
       CalcLengths(begin, end, lengths);
       CalcCodes(lengths);
 
@@ -188,13 +202,7 @@ class CanonicalHuffman
     template <class BitWrapper>
     void Put(BitWrapper& bitWrapper, Data data)
     {
-      uint16_t l = m_encodeMap[data].first;
-      uint64_t i = m_encodeMap[data].second;
-      
-      uint64_t intCode = m_firstCodes[l] + i;
-      
-      for(int j = l-1; j >= 0; j--)
-        bitWrapper.Put((intCode >> j) & 1);
+      PutCode(bitWrapper, Encode(data));
     }
     
     template <class BitWrapper>
@@ -202,8 +210,8 @@ class CanonicalHuffman
     {
       if(bitWrapper.TellFromEnd())
       {
-        uint64_t intCode = bitWrapper.Read();
-        uint16_t len = 1;
+        size_t intCode = bitWrapper.Read();
+        size_t len = 1;
         while(intCode < m_firstCodes[len]) {
           intCode = 2 * intCode + bitWrapper.Read();
           len++;
@@ -213,44 +221,44 @@ class CanonicalHuffman
       return Data();
     }
     
-    uint64_t Load(std::FILE* pFile)
+    size_t Load(std::FILE* pFile)
     {
-      uint64_t start = ftello(pFile);
-      uint64_t read = 0;
+      size_t start = std::ftell(pFile);
+      size_t read = 0;
       
-      uint64_t size;
-      read += std::fread(&size, sizeof(uint64_t), 1, pFile);
+      size_t size;
+      read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_symbols.resize(size);
       read += std::fread(&m_symbols[0], sizeof(Data), size, pFile);
       
-      read += std::fread(&size, sizeof(uint64_t), 1, pFile);
+      read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_firstCodes.resize(size);
-      read += std::fread(&m_firstCodes[0], sizeof(uint64_t), size, pFile);
+      read += std::fread(&m_firstCodes[0], sizeof(size_t), size, pFile);
       
-      read += std::fread(&size, sizeof(uint64_t), 1, pFile);
+      read += std::fread(&size, sizeof(size_t), 1, pFile);
       m_lengthIndex.resize(size);
-      read += std::fread(&m_lengthIndex[0], sizeof(uint64_t), size, pFile);
+      read += std::fread(&m_lengthIndex[0], sizeof(size_t), size, pFile);
       
-      return ftello(pFile) - start;
+      return std::ftell(pFile) - start;
     }
     
-    uint64_t Save(std::FILE* pFile)
+    size_t Save(std::FILE* pFile)
     {
-      uint64_t start = ftello(pFile);
+      size_t start = std::ftell(pFile);
       
-      uint64_t size = m_symbols.size();
-      ThrowingFwrite(&size, sizeof(uint64_t), 1, pFile);
+      size_t size = m_symbols.size();
+      ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
       ThrowingFwrite(&m_symbols[0], sizeof(Data), size, pFile);
       
       size = m_firstCodes.size();
-      ThrowingFwrite(&size, sizeof(uint64_t), 1, pFile);
-      ThrowingFwrite(&m_firstCodes[0], sizeof(uint64_t), size, pFile);
+      ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
+      ThrowingFwrite(&m_firstCodes[0], sizeof(size_t), size, pFile);
       
       size = m_lengthIndex.size();
-      ThrowingFwrite(&size, sizeof(uint64_t), 1, pFile);
-      ThrowingFwrite(&m_lengthIndex[0], sizeof(uint64_t), size, pFile);
+      ThrowingFwrite(&size, sizeof(size_t), 1, pFile);
+      ThrowingFwrite(&m_lengthIndex[0], sizeof(size_t), size, pFile);
       
-      return ftello(pFile) - start;
+      return std::ftell(pFile) - start;
     }
 };
 

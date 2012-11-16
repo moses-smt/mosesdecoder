@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <queue>
 #include <vector>
 #include <set>
-#include <map>
 #include <boost/unordered_map.hpp>
 
 #include "moses/InputFileStream.h"
@@ -36,13 +35,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Util.h"
 
 #include "BlockHashIndex.h"
-#include "OndiskLineCollection.h"
+#include "StringVector.h"
 #include "CanonicalHuffman.h"
 
 namespace Moses
 {
     
-typedef std::pair<uint8_t, uint8_t> AlignPoint;
+typedef std::pair<unsigned char, unsigned char> AlignPoint;
 
 template <typename DataType> 
 class Counter
@@ -200,7 +199,7 @@ class PhraseTableCreator
     
     std::FILE* m_outFile;
     
-    uint64_t m_numScoreComponent;
+    size_t m_numScoreComponent;
     size_t m_sortScoreIndex;
     size_t m_warnMe;
     
@@ -210,7 +209,7 @@ class PhraseTableCreator
     bool m_useAlignmentInfo;
     bool m_multipleScoreTrees;
     size_t m_quantize;
-    uint64_t m_maxRank;
+    size_t m_maxRank;
         
     static std::string m_phraseStopSymbol;
     static std::string m_separator;
@@ -223,7 +222,7 @@ class PhraseTableCreator
     BlockHashIndex m_srcHash;
     BlockHashIndex m_rnkHash;
     
-    uint64_t m_maxPhraseLength;
+    size_t m_maxPhraseLength;
     
     std::vector<unsigned> m_ranks;
     
@@ -250,21 +249,23 @@ class PhraseTableCreator
       }
     };
     
-    std::vector<uint64_t> m_lexicalTableIndex;
+    std::vector<size_t> m_lexicalTableIndex;
     std::vector<SrcTrg> m_lexicalTable;
     
-    OndiskLineCollection m_encodedTargetPhrases;
+    StringVector<unsigned char, unsigned long, MmapAllocator>
+    m_encodedTargetPhrases;
         
-    OndiskLineCollection m_compressedTargetPhrases;
+    StringVector<unsigned char, unsigned long, MmapAllocator>
+    m_compressedTargetPhrases;
     
-    boost::unordered_map<std::string, uint32_t> m_targetSymbolsMap;
-    boost::unordered_map<std::string, uint32_t> m_sourceSymbolsMap;
+    boost::unordered_map<std::string, unsigned> m_targetSymbolsMap;
+    boost::unordered_map<std::string, unsigned> m_sourceSymbolsMap;
     
-    typedef Counter<uint32_t> SymbolCounter;
+    typedef Counter<unsigned> SymbolCounter;
     typedef Counter<float> ScoreCounter;
     typedef Counter<AlignPoint> AlignCounter;
     
-    typedef CanonicalHuffman<uint32_t> SymbolTree;
+    typedef CanonicalHuffman<unsigned> SymbolTree;
     typedef CanonicalHuffman<float> ScoreTree;
     typedef CanonicalHuffman<AlignPoint> AlignTree;
     
@@ -406,16 +407,16 @@ class CompressionTask
 {
   private:
 #ifdef WITH_THREADS
-    static boost::mutex m_mutexIn;
-    static boost::mutex m_mutexOut;
+    static boost::mutex m_mutex;
 #endif
     static size_t m_collectionNum;
-    OndiskLineCollection& m_encodedCollections;
+    StringVector<unsigned char, unsigned long, MmapAllocator>&
+    m_encodedCollections;
     PhraseTableCreator& m_creator;
     
   public:
-    CompressionTask(OndiskLineCollection& encodedCollections,
-                    PhraseTableCreator& creator);
+    CompressionTask(StringVector<unsigned char, unsigned long, MmapAllocator>&
+                    encodedCollections, PhraseTableCreator& creator);
     void operator()();
 };
 

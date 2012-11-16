@@ -31,7 +31,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/iterator/iterator_facade.hpp>
 
-#include "moses/TypeDef.h"
 #include "ThrowingFwrite.h"
 #include "MonotonicVector.h"
 #include "MmapAllocator.h"
@@ -59,7 +58,7 @@ class ValueIteratorRange
       return str();
     }
     
-    uint64_t size()
+    size_t size()
     {
       return std::distance(m_begin, m_end);
     }
@@ -75,13 +74,13 @@ class ValueIteratorRange
 
 // ********** StringVector **********
 
-template <typename ValueT = uint8_t, typename PosT = uint32_t,
+template <typename ValueT = unsigned char, typename PosT = unsigned int,
           template <typename> class Allocator = std::allocator>
 class StringVector
 {    
   protected:
     std::vector<ValueT, Allocator<ValueT> > m_charArray;
-    MonotonicVector<PosT, uint32_t, 32, Allocator> m_positions;
+    MonotonicVector<PosT, unsigned int, 32, Allocator> m_positions;
     bool m_sorted;
     bool m_memoryMapped;
 
@@ -179,7 +178,7 @@ class StringVector
     {
       m_charArray.clear();
       m_sorted = true;
-      m_positions = MonotonicVector<PosT, uint32_t, 32>();
+      m_positions = MonotonicVector<PosT, unsigned int, 32>();
     }
     
     range at(PosT i) const;
@@ -194,9 +193,9 @@ class StringVector
     PosT find(StringT &s) const;
     PosT find(const char* c) const;
     
-    virtual uint64_t load(std::FILE* in, bool memoryMapped = false)
+    virtual size_t load(std::FILE* in, bool memoryMapped = false)
     {
-      uint64_t size = 0;
+      size_t size = 0;
       m_memoryMapped = memoryMapped;
       
       size += std::fread(&m_sorted, sizeof(bool), 1, in) * sizeof(bool);
@@ -206,16 +205,16 @@ class StringVector
       return size;
     }
     
-    uint64_t loadCharArray(std::vector<ValueT, std::allocator<ValueT> >& c,
+    size_t loadCharArray(std::vector<ValueT, std::allocator<ValueT> >& c,
                        std::FILE* in, bool map = false)
     {
-      // Can only be read into memory. Mapping not possible with std::allocator.
+      // Can only be read into memory. Mapping not possible with std:allocator.
       assert(map == false);
       
-      uint64_t byteSize = 0;
+      size_t byteSize = 0;
       
-      uint64_t valSize;
-      byteSize += std::fread(&valSize, sizeof(uint64_t), 1, in) * sizeof(uint64_t);
+      size_t valSize;
+      byteSize += std::fread(&valSize, sizeof(size_t), 1, in) * sizeof(size_t);
       
       c.resize(valSize, 0);
       byteSize += std::fread(&c[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
@@ -223,13 +222,13 @@ class StringVector
       return byteSize;
     }
     
-    uint64_t loadCharArray(std::vector<ValueT, MmapAllocator<ValueT> >& c,
+    size_t loadCharArray(std::vector<ValueT, MmapAllocator<ValueT> >& c,
                        std::FILE* in, bool map = false)
     {
-      uint64_t byteSize = 0;
+      size_t byteSize = 0;
 
-      uint64_t valSize;
-      byteSize += std::fread(&valSize, sizeof(uint64_t), 1, in) * sizeof(uint64_t);
+      size_t valSize;
+      byteSize += std::fread(&valSize, sizeof(size_t), 1, in) * sizeof(size_t);
 
       if(map == false)
       {
@@ -244,7 +243,7 @@ class StringVector
         // Map it directly on specified region of file "in" starting at valPos
         // with length valSize * sizeof(ValueT). Mapped region cannot be resized.
         
-        uint64_t valPos = ftello(in);
+        size_t valPos = std::ftell(in);
         Allocator<ValueT> alloc(in, valPos);
         std::vector<ValueT, Allocator<ValueT> > charArrayTemp(alloc);
         charArrayTemp.resize(valSize);
@@ -256,23 +255,23 @@ class StringVector
       return byteSize;
     }
     
-    uint64_t load(std::string filename, bool memoryMapped = false)
+    size_t load(std::string filename, bool memoryMapped = false)
     {
       std::FILE* pFile = fopen(filename.c_str(), "r");
-      uint64_t byteSize = load(pFile, memoryMapped);
+      size_t byteSize = load(pFile, memoryMapped);
       fclose(pFile);
       return byteSize;
     }
 
-    uint64_t save(std::FILE* out)
+    size_t save(std::FILE* out)
     {
-      uint64_t byteSize = 0;
+      size_t byteSize = 0;
       byteSize += ThrowingFwrite(&m_sorted, sizeof(bool), 1, out) * sizeof(bool);
       
       byteSize += m_positions.save(out);
     
-      uint64_t valSize = size2();
-      byteSize += ThrowingFwrite(&valSize, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
+      size_t valSize = size2();
+      byteSize += ThrowingFwrite(&valSize, sizeof(size_t), 1, out) * sizeof(size_t);
       byteSize += ThrowingFwrite(&m_charArray[0], sizeof(ValueT), valSize, out) * sizeof(ValueT);
 
       return byteSize;
@@ -281,7 +280,7 @@ class StringVector
     size_t save(std::string filename)
     { 
       std::FILE* pFile = fopen(filename.c_str(), "w");
-      uint64_t byteSize = save(pFile);
+      size_t byteSize = save(pFile);
       fclose(pFile);
       return byteSize;
     }
@@ -357,7 +356,7 @@ bool operator<(const StringT &s1, const ValueIteratorRange<ValueIteratorT> &s2)
 template <typename ValueIteratorT>
 bool operator<(const char* c, const ValueIteratorRange<ValueIteratorT> &s2)
 {
-    uint64_t len = std::char_traits<char>::length(c);
+    size_t len = std::char_traits<char>::length(c);
     return std::lexicographical_compare(c, c + len, s2.begin(), s2.end(),
         std::less<typename std::iterator_traits<ValueIteratorT>::value_type>());  
 }
@@ -615,8 +614,8 @@ PosT StringVector<ValueT, PosT, Allocator>::StringIterator::distance_to(
 
 // ********** Some typedefs **********
 
-typedef StringVector<unsigned char, uint32_t> MediumStringVector;
-typedef StringVector<unsigned char, uint64_t> LongStringVector;
+typedef StringVector<unsigned char, unsigned int> MediumStringVector;
+typedef StringVector<unsigned char, unsigned long> LongStringVector;
 
 }
 

@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstdio>
 #include <cassert>
 
-#include "moses/TypeDef.h"
 #include "ThrowingFwrite.h"
 #include "ListCoders.h"
 #include "MmapAllocator.h"
@@ -43,19 +42,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-template<typename PosT = uint64_t, typename NumT = uint64_t, PosT stepSize = 32,
+template<typename PosT = size_t, typename NumT = size_t, PosT stepSize = 32,
 template <typename> class Allocator = std::allocator>
 class MonotonicVector
 {
   private:
     typedef std::vector<NumT, Allocator<NumT> > Anchors;
-    typedef std::vector<uint32_t, Allocator<uint32_t> > Diffs;
+    typedef std::vector<unsigned int, Allocator<unsigned int> > Diffs;
     
     Anchors m_anchors;
     Diffs m_diffs;
-    std::vector<uint32_t> m_tempDiffs;
+    std::vector<unsigned int> m_tempDiffs;
     
-    uint64_t m_size;
+    size_t m_size;
     PosT m_last;
     bool m_final;
     
@@ -64,12 +63,12 @@ class MonotonicVector
     
     MonotonicVector() : m_size(0), m_last(0), m_final(false) {}
     
-    uint64_t size() const
+    size_t size() const
     {
       return m_size + m_tempDiffs.size();
     }
     
-    PosT at(PosT i) const
+    PosT at(size_t i) const
     {
       PosT s = stepSize;
       PosT j = m_anchors[i / s];
@@ -133,27 +132,26 @@ class MonotonicVector
     
     void commit()
     {
-      if(m_final != true) {
-        Simple9::Encode(m_tempDiffs.begin(), m_tempDiffs.end(),
-                        std::back_inserter(m_diffs));
-        m_size += m_tempDiffs.size();
-        m_tempDiffs.clear();
-        m_final = true;
-      }
+      assert(m_final != true);
+      Simple9::Encode(m_tempDiffs.begin(), m_tempDiffs.end(),
+                      std::back_inserter(m_diffs));
+      m_size += m_tempDiffs.size();
+      m_tempDiffs.clear();
+      m_final = true;
     }
     
     size_t usage()
     {      
-      return m_diffs.size() * sizeof(uint32_t)
+      return m_diffs.size() * sizeof(unsigned int)
         + m_anchors.size() * sizeof(NumT);
     }
     
-    uint64_t load(std::FILE* in, bool map = false)
+    size_t load(std::FILE* in, bool map = false)
     {
-      uint64_t byteSize = 0;
+      size_t byteSize = 0;
       
       byteSize += fread(&m_final, sizeof(bool), 1, in) * sizeof(bool);
-      byteSize += fread(&m_size, sizeof(uint64_t), 1, in) * sizeof(uint64_t);
+      byteSize += fread(&m_size, sizeof(size_t), 1, in) * sizeof(size_t);
       byteSize += fread(&m_last, sizeof(PosT), 1, in) * sizeof(PosT);
       
       byteSize += loadVector(m_diffs, in, map);
@@ -163,16 +161,16 @@ class MonotonicVector
     }
     
     template <typename ValueT>
-    uint64_t loadVector(std::vector<ValueT, std::allocator<ValueT> >& v,
+    size_t loadVector(std::vector<ValueT, std::allocator<ValueT> >& v,
                        std::FILE* in, bool map = false)
     {
       // Can only be read into memory. Mapping not possible with std:allocator.
       assert(map == false);
       
-      uint64_t byteSize = 0;
+      size_t byteSize = 0;
       
-      uint64_t valSize;
-      byteSize += std::fread(&valSize, sizeof(uint64_t), 1, in) * sizeof(uint64_t);
+      size_t valSize;
+      byteSize += std::fread(&valSize, sizeof(size_t), 1, in) * sizeof(size_t);
       
       v.resize(valSize, 0);
       byteSize += std::fread(&v[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
@@ -184,10 +182,10 @@ class MonotonicVector
     size_t loadVector(std::vector<ValueT, MmapAllocator<ValueT> >& v,
                        std::FILE* in, bool map = false)
     {
-      uint64_t byteSize = 0;
+      size_t byteSize = 0;
 
-      uint64_t valSize;
-      byteSize += std::fread(&valSize, sizeof(uint64_t), 1, in) * sizeof(uint64_t);
+      size_t valSize;
+      byteSize += std::fread(&valSize, sizeof(size_t), 1, in) * sizeof(size_t);
 
       if(map == false)
       {
@@ -202,14 +200,14 @@ class MonotonicVector
         // Map it directly on specified region of file "in" starting at valPos
         // with length valSize * sizeof(ValueT). Mapped region cannot be resized.
         
-        uint64_t valPos = ftello(in);
+        size_t valPos = std::ftell(in);
         
         Allocator<ValueT> alloc(in, valPos);
         std::vector<ValueT, Allocator<ValueT> > vTemp(alloc);
         vTemp.resize(valSize);
         v.swap(vTemp);
         
-        fseeko(in, valSize * sizeof(ValueT), SEEK_CUR);
+        std::fseek(in, valSize * sizeof(ValueT), SEEK_CUR);
         byteSize += valSize * sizeof(ValueT);
       }
       
@@ -221,17 +219,17 @@ class MonotonicVector
       if(!m_final)
         commit();
       
-      uint64_t byteSize = 0;
+      bool byteSize = 0;
       byteSize += ThrowingFwrite(&m_final, sizeof(bool), 1, out) * sizeof(bool);
-      byteSize += ThrowingFwrite(&m_size, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
+      byteSize += ThrowingFwrite(&m_size, sizeof(size_t), 1, out) * sizeof(size_t);
       byteSize += ThrowingFwrite(&m_last, sizeof(PosT), 1, out) * sizeof(PosT);
       
-      uint64_t size = m_diffs.size();
-      byteSize += ThrowingFwrite(&size, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
-      byteSize += ThrowingFwrite(&m_diffs[0], sizeof(uint32_t), size, out) * sizeof(uint32_t);
+      size_t size = m_diffs.size();
+      byteSize += ThrowingFwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
+      byteSize += ThrowingFwrite(&m_diffs[0], sizeof(unsigned int), size, out) * sizeof(unsigned int);
       
       size = m_anchors.size();
-      byteSize += ThrowingFwrite(&size, sizeof(uint64_t), 1, out) * sizeof(uint64_t);
+      byteSize += ThrowingFwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
       byteSize += ThrowingFwrite(&m_anchors[0], sizeof(NumT), size, out) * sizeof(NumT);
       
       return byteSize;

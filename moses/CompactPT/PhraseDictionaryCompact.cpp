@@ -77,17 +77,17 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
   
-  uint64_t indexSize;
+  size_t indexSize;
   if(m_inMemory)
     // Load source phrase index into memory
     indexSize = m_hash.Load(pFile);
   else
     // Keep source phrase index on disk
     indexSize = m_hash.LoadIndex(pFile);
-    
-  uint64_t coderSize = m_phraseDecoder->Load(pFile);
+
+  size_t coderSize = m_phraseDecoder->Load(pFile);
   
-  uint64_t phraseSize;
+  size_t phraseSize;
   if(m_inMemory)
     // Load target phrase collections into memory
     phraseSize = m_targetPhrasesMemory.load(pFile, false);

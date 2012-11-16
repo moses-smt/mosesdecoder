@@ -68,7 +68,7 @@ BlockHashIndex::~BlockHashIndex()
 #endif
 }
 
-uint64_t BlockHashIndex::GetHash(const char* key)
+size_t BlockHashIndex::GetHash(const char* key)
 {
   std::string keyStr(key);
   size_t i = std::distance(m_landmarks.begin(),
@@ -78,22 +78,22 @@ uint64_t BlockHashIndex::GetHash(const char* key)
   if(i == 0ul-1)
     return GetSize();
     
-  uint64_t pos = GetHash(i, key);
+  size_t pos = GetHash(i, key);
   if(pos != GetSize())
-    return (uint64_t(1) << m_orderBits) * i + pos; 
+    return (1ul << m_orderBits) * i + pos; 
   else
     return GetSize();
 }
 
-uint64_t BlockHashIndex::GetFprint(const char* key) const
+size_t BlockHashIndex::GetFprint(const char* key) const
 {
-  uint64_t hash;
+  size_t hash;
   MurmurHash3_x86_32(key, std::strlen(key), 100000, &hash);
-  hash &= (uint64_t(1) << m_fingerPrintBits) - 1;
+  hash &= (1ul << m_fingerPrintBits) - 1;
   return hash;
 }
 
-uint64_t BlockHashIndex::GetHash(size_t i, const char* key)
+size_t BlockHashIndex::GetHash(size_t i, const char* key)
 {
 #ifdef WITH_THREADS
   boost::mutex::scoped_lock lock(m_mutex);
@@ -101,13 +101,13 @@ uint64_t BlockHashIndex::GetHash(size_t i, const char* key)
   if(m_hashes[i] == 0)
     LoadRange(i);
 #ifdef HAVE_CMPH    
-  uint64_t idx = cmph_search((cmph_t*)m_hashes[i], key, (cmph_uint32) strlen(key));
+  size_t idx = cmph_search((cmph_t*)m_hashes[i], key, (cmph_uint32) strlen(key));
 #else
   assert(0);
-  uint64_t idx = 0;
+  size_t idx = 0;
 #endif
 
-  std::pair<uint64_t, uint64_t> orderPrint = m_arrays[i]->Get(idx, m_orderBits, m_fingerPrintBits);
+  std::pair<size_t, size_t> orderPrint = m_arrays[i]->Get(idx, m_orderBits, m_fingerPrintBits);
   m_clocks[i] = clock();
   
   if(GetFprint(key) == orderPrint.second)
@@ -116,25 +116,25 @@ uint64_t BlockHashIndex::GetHash(size_t i, const char* key)
       return GetSize();
 }
 
-uint64_t BlockHashIndex::GetHash(std::string key)
+size_t BlockHashIndex::GetHash(std::string key)
 {
   return GetHash(key.c_str());
 }
 
-uint64_t BlockHashIndex::operator[](std::string key)
+size_t BlockHashIndex::operator[](std::string key)
 {
   return GetHash(key);
 }
 
-uint64_t BlockHashIndex::operator[](char* key)
+size_t BlockHashIndex::operator[](char* key)
 {
   return GetHash(key);
 }
 
-uint64_t BlockHashIndex::Save(std::string filename)
+size_t BlockHashIndex::Save(std::string filename)
 {
   std::FILE* mphf = std::fopen(filename.c_str(), "w");
-  uint64_t size = Save(mphf);
+  size_t size = Save(mphf);
   std::fclose(mphf);
   return size;
 }
@@ -142,13 +142,13 @@ uint64_t BlockHashIndex::Save(std::string filename)
 void BlockHashIndex::BeginSave(std::FILE * mphf)
 {
   m_fileHandle = mphf;
-  ThrowingFwrite(&m_orderBits, sizeof(uint64_t), 1, m_fileHandle);
-  ThrowingFwrite(&m_fingerPrintBits, sizeof(uint64_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_orderBits, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_fingerPrintBits, sizeof(size_t), 1, m_fileHandle);
   
-  m_fileHandleStart = ftello(m_fileHandle);
+  m_fileHandleStart = std::ftell(m_fileHandle);
   
-  uint64_t relIndexPos = 0;
-  ThrowingFwrite(&relIndexPos, sizeof(uint64_t), 1, m_fileHandle);    
+  size_t relIndexPos = 0;
+  ThrowingFwrite(&relIndexPos, sizeof(size_t), 1, m_fileHandle);    
 }
 
 void BlockHashIndex::SaveRange(size_t i)
@@ -156,7 +156,7 @@ void BlockHashIndex::SaveRange(size_t i)
 #ifdef HAVE_CMPH
   if(m_seekIndex.size() <= i)
     m_seekIndex.resize(i+1);
-  m_seekIndex[i] = ftello(m_fileHandle) - m_fileHandleStart;
+  m_seekIndex[i] = std::ftell(m_fileHandle) - m_fileHandleStart;
   cmph_dump((cmph_t*)m_hashes[i], m_fileHandle);
   m_arrays[i]->Save(m_fileHandle);
 #endif
@@ -212,7 +212,7 @@ void BlockHashIndex::WaitAll()
 }
 #endif
 
-uint64_t BlockHashIndex::FinalizeSave()
+size_t BlockHashIndex::FinalizeSave()
 {
 #ifdef WITH_THREADS
   m_threadPool.Stop(true);
@@ -220,26 +220,26 @@ uint64_t BlockHashIndex::FinalizeSave()
 
   SaveLastRange();
   
-  uint64_t relIndexPos = ftello(m_fileHandle) - m_fileHandleStart;
+  size_t relIndexPos = std::ftell(m_fileHandle) - m_fileHandleStart;
   
-  fseeko(m_fileHandle, m_fileHandleStart, SEEK_SET);
-  ThrowingFwrite(&relIndexPos, sizeof(uint64_t), 1, m_fileHandle);
+  std::fseek(m_fileHandle, m_fileHandleStart, SEEK_SET);
+  ThrowingFwrite(&relIndexPos, sizeof(size_t), 1, m_fileHandle);
   
-  fseeko(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
+  std::fseek(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
   m_landmarks.save(m_fileHandle);
   
-  uint64_t seekIndexSize = m_seekIndex.size();
-  ThrowingFwrite(&seekIndexSize, sizeof(uint64_t), 1, m_fileHandle);
-  ThrowingFwrite(&m_seekIndex[0], sizeof(uint64_t), seekIndexSize, m_fileHandle);
+  size_t seekIndexSize = m_seekIndex.size();
+  ThrowingFwrite(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_seekIndex[0], sizeof(size_t), seekIndexSize, m_fileHandle);
   
-  ThrowingFwrite(&m_size, sizeof(uint64_t), 1, m_fileHandle);
+  ThrowingFwrite(&m_size, sizeof(size_t), 1, m_fileHandle);
   
-  uint64_t fileHandleStop = ftello(m_fileHandle);
+  size_t fileHandleStop = std::ftell(m_fileHandle);
   return fileHandleStop - m_fileHandleStart + sizeof(m_orderBits)
     + sizeof(m_fingerPrintBits);
 }
 
-uint64_t BlockHashIndex::Save(std::FILE * mphf)
+size_t BlockHashIndex::Save(std::FILE * mphf)
 {
   m_queue = std::priority_queue<int>();
   BeginSave(mphf);
@@ -248,41 +248,42 @@ uint64_t BlockHashIndex::Save(std::FILE * mphf)
   return FinalizeSave();
 }
 
-uint64_t BlockHashIndex::LoadIndex(std::FILE* mphf)
+size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
 {
   m_fileHandle = mphf;
   
-  uint64_t beginning = ftello(mphf);
+  size_t beginning = std::ftell(mphf);
 
-  uint64_t read = 0;
-  read += std::fread(&m_orderBits, sizeof(uint64_t), 1, mphf);
-  read += std::fread(&m_fingerPrintBits, sizeof(uint64_t), 1, mphf);
-  m_fileHandleStart = ftello(m_fileHandle);
-
-  uint64_t relIndexPos;
-  read += std::fread(&relIndexPos, sizeof(uint64_t), 1, mphf);
-  fseeko(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
+  size_t read = 0;
+  read += std::fread(&m_orderBits, sizeof(size_t), 1, mphf);
+  read += std::fread(&m_fingerPrintBits, sizeof(size_t), 1, mphf);
+  m_fileHandleStart = std::ftell(m_fileHandle);
+  
+  size_t relIndexPos;
+  read += std::fread(&relIndexPos, sizeof(size_t), 1, mphf);
+  std::fseek(m_fileHandle, m_fileHandleStart + relIndexPos, SEEK_SET);
 
   m_landmarks.load(mphf);
 
-  uint64_t seekIndexSize;
-  read += std::fread(&seekIndexSize, sizeof(uint64_t), 1, m_fileHandle);
+  size_t seekIndexSize;
+  read += std::fread(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
   m_seekIndex.resize(seekIndexSize);
-  read += std::fread(&m_seekIndex[0], sizeof(uint64_t), seekIndexSize, m_fileHandle);
+  read += std::fread(&m_seekIndex[0], sizeof(size_t), seekIndexSize, m_fileHandle);
   m_hashes.resize(seekIndexSize, 0);
   m_clocks.resize(seekIndexSize, 0);
   m_arrays.resize(seekIndexSize, 0);
+  
+  read += std::fread(&m_size, sizeof(size_t), 1, m_fileHandle);
 
-  read += std::fread(&m_size, sizeof(uint64_t), 1, m_fileHandle);
+  size_t end = std::ftell(mphf);
 
-  uint64_t end = ftello(mphf);
   return end - beginning;  
 }
 
 void BlockHashIndex::LoadRange(size_t i)
 {
 #ifdef HAVE_CMPH
-  fseeko(m_fileHandle, m_fileHandleStart + m_seekIndex[i], SEEK_SET);
+  std::fseek(m_fileHandle, m_fileHandleStart + m_seekIndex[i], SEEK_SET);
   cmph_t* hash = cmph_load(m_fileHandle);
   m_arrays[i] = new PairedPackedArray<>(0, m_orderBits,
                                         m_fingerPrintBits);
@@ -295,26 +296,26 @@ void BlockHashIndex::LoadRange(size_t i)
 #endif
 }
 
-uint64_t BlockHashIndex::Load(std::string filename)
+size_t BlockHashIndex::Load(std::string filename)
 {
   std::FILE* mphf = std::fopen(filename.c_str(), "r");
-  uint64_t size = Load(mphf);
+  size_t size = Load(mphf);
   std::fclose(mphf);
   return size;
 }
 
-uint64_t BlockHashIndex::Load(std::FILE * mphf)
+size_t BlockHashIndex::Load(std::FILE * mphf)
 {
-  uint64_t byteSize = LoadIndex(mphf);
-  uint64_t end = ftello(mphf);
+  size_t byteSize = LoadIndex(mphf);
+  size_t end = std::ftell(mphf);
   
   for(size_t i = 0; i < m_seekIndex.size(); i++)
       LoadRange(i);
-  fseeko(m_fileHandle, end, SEEK_SET);
+  std::fseek(m_fileHandle, end, SEEK_SET);
   return byteSize;
 }
 
-uint64_t BlockHashIndex::GetSize() const
+size_t BlockHashIndex::GetSize() const
 {
   return m_size;
 }
@@ -373,8 +374,8 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
     }
     lastKey = temp;
     
-    uint64_t fprint = GetFprint(temp.c_str());
-    uint64_t idx = cmph_search(hash, temp.c_str(),
+    size_t fprint = GetFprint(temp.c_str());
+    size_t idx = cmph_search(hash, temp.c_str(),
                              (cmph_uint32) temp.size());
   
     pv->Set(idx, i, fprint, m_orderBits, m_fingerPrintBits);
@@ -407,12 +408,12 @@ void* BlockHashIndex::vectorAdapter(std::vector<std::string>& v)
   return (void*)CmphVectorAdapter(v);
 }
       
-void* BlockHashIndex::vectorAdapter(StringVector<unsigned, uint64_t, std::allocator>& sv)
+void* BlockHashIndex::vectorAdapter(StringVector<unsigned, size_t, std::allocator>& sv)
 {
   return (void*)CmphStringVectorAdapter(sv);
 }
 
-void* BlockHashIndex::vectorAdapter(StringVector<unsigned, uint64_t, MmapAllocator>& sv)
+void* BlockHashIndex::vectorAdapter(StringVector<unsigned, size_t, MmapAllocator>& sv)
 {
   return (void*)CmphStringVectorAdapter(sv);
 }

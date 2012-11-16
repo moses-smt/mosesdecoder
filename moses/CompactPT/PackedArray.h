@@ -32,14 +32,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-template <typename T = uint64_t, typename D = uint8_t>
+template <typename T = size_t, typename D = unsigned char>
 class PackedArray
 {
   protected:
     static size_t m_dataBits;
     
-    uint64_t m_size;
-    uint64_t m_storageSize;
+    size_t m_size;
+    size_t m_storageSize;
     D* m_storage;
     
   public:
@@ -120,40 +120,40 @@ class PackedArray
       return m_storage;
     }
     
-    virtual uint64_t GetStorageSize() const
+    virtual size_t GetStorageSize() const
     {
       return m_storageSize;
     }
     
-    virtual uint64_t Size() const
+    virtual size_t Size() const
     {
       return m_size;
     }
     
-    virtual uint64_t Load(std::FILE* in)
+    virtual size_t Load(std::FILE* in)
     {
-      uint64_t a1 = ftello(in);
+      size_t a1 = std::ftell(in);
       
-      uint64_t read = 0;
+      size_t read = 0;
       read += std::fread(&m_size, sizeof(m_size), 1, in);
       read += std::fread(&m_storageSize, sizeof(m_storageSize), 1, in);
       delete [] m_storage;
       m_storage = new D[m_storageSize];
       read += std::fread(m_storage, sizeof(D), m_storageSize, in);
       
-      uint64_t a2 = ftello(in);
+      size_t a2 = std::ftell(in);
       return a2 - a1;
     }
     
-    virtual uint64_t Save(std::FILE* out)
+    virtual size_t Save(std::FILE* out)
     {
-      uint64_t a1 = ftello(out);
+      size_t a1 = std::ftell(out);
       
       ThrowingFwrite(&m_size, sizeof(m_size), 1, out);
       ThrowingFwrite(&m_storageSize, sizeof(m_storageSize), 1, out);
       ThrowingFwrite(m_storage, sizeof(D), m_storageSize, out);
       
-      uint64_t a2 = ftello(out);
+      size_t a2 = std::ftell(out);
       return a2 - a1;
     }
     
@@ -164,11 +164,11 @@ size_t PackedArray<T, D>::m_dataBits = sizeof(D)*8;
 
 /**************************************************************************/
 
-template <typename T = uint64_t, typename D = uint8_t>
-class PairedPackedArray : public PackedArray<T, D>
+template <typename T = size_t, typename D = unsigned char>
+class PairedPackedArray : public PackedArray<T,D>
 {    
   public:
-    PairedPackedArray() : PackedArray<T, D>() {}
+    PairedPackedArray() : PackedArray<T,D>() {}
     
     PairedPackedArray(size_t size, size_t bits1, size_t bits2)
     : PackedArray<T, D>(size, bits1 + bits2) { }

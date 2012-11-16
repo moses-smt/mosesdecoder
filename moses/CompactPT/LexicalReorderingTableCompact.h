@@ -40,7 +40,7 @@ class LexicalReorderingTableCompact: public LexicalReorderingTable
   private:
     bool m_inMemory;
     
-    uint64_t m_numScoreComponent;
+    size_t m_numScoreComponent;
     bool m_multipleScoreTrees;
     
     BlockHashIndex m_hash;
@@ -48,8 +48,8 @@ class LexicalReorderingTableCompact: public LexicalReorderingTable
     typedef CanonicalHuffman<float> ScoreTree;  
     std::vector<ScoreTree*> m_scoreTrees;
     
-    StringVector<unsigned char, uint64_t, MmapAllocator>  m_scoresMapped;
-    StringVector<unsigned char, uint64_t, std::allocator> m_scoresMemory;
+    StringVector<unsigned char, unsigned long, MmapAllocator>  m_scoresMapped;
+    StringVector<unsigned char, unsigned long, std::allocator> m_scoresMemory;
 
     std::string MakeKey(const Phrase& f, const Phrase& e, const Phrase& c) const;
     std::string MakeKey(const std::string& f, const std::string& e, const std::string& c) const;
