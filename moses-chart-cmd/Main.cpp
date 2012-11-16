@@ -91,10 +91,14 @@ public:
 
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
       Incremental::Manager manager(*m_source, system);
-      manager.ProcessSentence();
-      if (m_ioWrapper.ExposeSingleBest()) {
-        m_ioWrapper.ExposeSingleBest()->Write(lineNumber, manager.String() + '\n');
+      const std::vector<search::Applied> &nbest = manager.ProcessSentence();
+      if (!nbest.empty()) {
+        m_ioWrapper.OutputBestHypo(nbest[0], lineNumber);
+      } else {
+        m_ioWrapper.OutputBestNone(lineNumber);
       }
+      if (staticData.GetNBestSize() > 0)
+        m_ioWrapper.OutputNBestList(nbest, system, lineNumber);
       return;
     }
 
@@ -121,7 +125,7 @@ public:
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
       ChartTrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, bestHypo, &system, lineNumber);
+      m_ioWrapper.OutputNBestList(nBestList, &system, lineNumber);
       IFVERBOSE(2) {
         PrintUserTime("N-Best Hypotheses Generation Time:");
       }

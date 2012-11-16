@@ -2,8 +2,10 @@
 
 #include "moses/ChartCell.h"
 #include "moses/ChartParserCallback.h"
-#include "moses/TranslationSystem.h"
+#include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
+#include "moses/TranslationSystem.h"
+#include "moses/Util.h"
 
 #include "lm/model.hh"
 #include "search/applied.hh"
@@ -76,6 +78,14 @@ template <class Model> class Fill : public ChartParserCallback {
     template <class Best> void Search(Best &best, ChartCellLabelSet &out, boost::object_pool<search::Vertex> &vertex_pool) {
       HypothesisCallback<Best> callback(context_, best, out, vertex_pool);
       edges_.Search(context_, callback);
+    }
+
+    // Root: everything into one vertex.  
+    template <class Best> search::History RootSearch(Best &best) {
+      search::Vertex vertex;
+      search::RootVertexGenerator<Best> gen(vertex, best);
+      edges_.Search(context_, gen);
+      return vertex.BestChild();
     }
 
   private:
@@ -166,80 +176,58 @@ Manager::Manager(const InputType &source, const TranslationSystem &system) :
   source_(source),
   system_(system),
   cells_(source, ChartCellBaseFactory()),
-  parser_(source, system, cells_) {}
+  parser_(source, system, cells_),
+  n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
 
 Manager::~Manager() {
   system_.CleanUpAfterSentenceProcessing(source_);
 }
 
-namespace {
-
-void ConstructString(const search::Applied final, std::ostringstream &stream) {
-  assert(final.Valid());
-  const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(final.GetNote().vp);
-  size_t child = 0;
-  for (std::size_t i = 0; i < phrase.GetSize(); ++i) {
-    const Word &word = phrase.GetWord(i);
-    if (word.IsNonTerminal()) {
-      assert(child < final.GetArity());
-      ConstructString(final.Children()[child++], stream);
-    } else {
-      stream << word[0]->GetString() << ' ';
-    }
-  }
-}
-
-void BestString(const ChartCellLabelSet &labels, std::string &out) {
-  search::Applied best;
-  for (ChartCellLabelSet::const_iterator i = labels.begin(); i != labels.end(); ++i) {
-    const search::Applied child(i->second.GetStack().incr->BestChild());
-    if (child.Valid() && (!best.Valid() || (child.GetScore() > best.GetScore()))) {
-      best = child;
-    }
-  }
-  if (!best.Valid()) {
-    out.clear();
-    return;
-  }
-  std::ostringstream stream;
-  ConstructString(best, stream);
-  out = stream.str();
-  CHECK(out.size() > 9);
-  // <s>
-  out.erase(0, 4);
-  // </s>
-  out.erase(out.size() - 5);
-  // Hack: include model score
-  out += " ||| ";
-  out += boost::lexical_cast<std::string>(best.GetScore());
-}
-
-} // namespace
-
-
-template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words) {
+template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out) {
   const LanguageModel &abstract = **system_.GetLanguageModels().begin();
   const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
   search::Config config(abstract.GetWeight(), data.GetCubePruningPopLimit(), search::NBestConfig(data.GetNBestSize()));
   search::Context<Model> context(config, model);
 
-  search::SingleBest best;
-
   size_t size = source_.GetSize();
   boost::object_pool<search::Vertex> vertex_pool(std::max<size_t>(size * size / 2, 32));
   
-
-  for (size_t width = 1; width <= size; ++width) {
+  for (size_t width = 1; width < size; ++width) {
     for (size_t startPos = 0; startPos <= size-width; ++startPos) {
-      size_t endPos = startPos + width - 1;
-      WordsRange range(startPos, endPos);
+      WordsRange range(startPos, startPos + width - 1);
       Fill<Model> filler(context, words, oov_weight);
       parser_.Create(range, filler);
-      filler.Search(best, cells_.MutableBase(range).MutableTargetLabelSet(), vertex_pool);
+      filler.Search(out, cells_.MutableBase(range).MutableTargetLabelSet(), vertex_pool);
     }
   }
-  BestString(cells_.GetBase(WordsRange(0, source_.GetSize() - 1)).GetTargetLabelSet(), output_);
+
+  WordsRange range(0, size - 1);
+  Fill<Model> filler(context, words, oov_weight);
+  parser_.Create(range, filler);
+  return filler.RootSearch(out);
+}
+
+template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words) {
+  std::size_t nbest = StaticData::Instance().GetNBestSize();
+  if (nbest <= 1) {
+    search::History ret = PopulateBest(model, words, single_best_);
+    if (ret) {
+      backing_for_single_.resize(1);
+      backing_for_single_[0] = search::Applied(ret);
+    } else {
+      backing_for_single_.clear();
+    }
+    completed_nbest_ = &backing_for_single_;
+  } else {
+    search::History ret = PopulateBest(model, words, n_best_);
+    if (ret) {
+      completed_nbest_ = &n_best_.Extract(ret);
+    } else {
+      backing_for_single_.clear();
+      completed_nbest_ = &backing_for_single_;
+    }
+  }
 }
 
 template void Manager::LMCallback<lm::ngram::ProbingModel>(const lm::ngram::ProbingModel &model, const std::vector<lm::WordIndex> &words);
@@ -249,10 +237,59 @@ template void Manager::LMCallback<lm::ngram::QuantTrieModel>(const lm::ngram::Qu
 template void Manager::LMCallback<lm::ngram::ArrayTrieModel>(const lm::ngram::ArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 template void Manager::LMCallback<lm::ngram::QuantArrayTrieModel>(const lm::ngram::QuantArrayTrieModel &model, const std::vector<lm::WordIndex> &words);
 
-void Manager::ProcessSentence() {
+const std::vector<search::Applied> &Manager::ProcessSentence() {
   const LMList &lms = system_.GetLanguageModels();
   UTIL_THROW_IF(lms.size() != 1, util::Exception, "Incremental search only supports one language model.");
   (*lms.begin())->IncrementalCallback(*this);
+  return *completed_nbest_;
+}
+
+namespace {
+
+struct NoOp {
+  void operator()(const TargetPhrase &) const {}
+};
+struct AccumScore {
+  AccumScore(ScoreComponentCollection &out) : out_(&out) {}
+  void operator()(const TargetPhrase &phrase) {
+    out_->PlusEquals(phrase.GetScoreBreakdown());
+  }
+  ScoreComponentCollection *out_;
+};
+template <class Action> void AppendToPhrase(const search::Applied final, Phrase &out, Action action) {
+  assert(final.Valid());
+  const TargetPhrase &phrase = *static_cast<const TargetPhrase*>(final.GetNote().vp);
+  action(phrase);
+  const search::Applied *child = final.Children();
+  for (std::size_t i = 0; i < phrase.GetSize(); ++i) {
+    const Word &word = phrase.GetWord(i);
+    if (word.IsNonTerminal()) {
+      AppendToPhrase(*child++, out, action);
+    } else {
+      out.AddWord(word);
+    }
+  }
+}
+
+} // namespace
+
+void ToPhrase(const search::Applied final, Phrase &out) {
+  out.Clear();
+  AppendToPhrase(final, out, NoOp());
+}
+
+void PhraseAndFeatures(const TranslationSystem &system, const search::Applied final, Phrase &phrase, ScoreComponentCollection &features) {
+  phrase.Clear();
+  features.ZeroAll();
+  AppendToPhrase(final, phrase, AccumScore(features));
+
+  // If we made it this far, there is only one language model.  
+  float full, ignored_ngram;
+  std::size_t ignored_oov;
+  const LanguageModel &model = **system.GetLanguageModels().begin();
+  model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
+  // CalcScore transforms, but EvaluateChart doesn't.  
+  features.Assign(&model, UntransformLMScore(full));
 }
 
 } // namespace Incremental
