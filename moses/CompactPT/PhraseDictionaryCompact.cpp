@@ -152,6 +152,8 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase
 PhraseDictionaryCompact::~PhraseDictionaryCompact() {
   if(m_phraseDecoder)
     delete m_phraseDecoder;
+  if(m_weight)
+    delete m_weight;
 }
 
 //TO_STRING_BODY(PhraseDictionaryCompact)

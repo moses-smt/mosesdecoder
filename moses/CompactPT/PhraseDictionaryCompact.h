@@ -88,11 +88,6 @@ public:
       m_phraseDecoder(0),
       m_weight(0)
   {}
-    
-  ~PhraseDictionaryCompact() {
-    if(m_weight != 0)
-      delete m_weight;
-  }
 
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
