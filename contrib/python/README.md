@@ -4,7 +4,7 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 ## What's been interfaced?
 
-* Binary phrase table:
+* Binary tables:
 
         Moses::PhraseDictionaryTree
         OnDiskPt::OnDiskWrapper
@@ -40,36 +40,37 @@ The idea is to have some of Moses' internals exposed to Python (inspired on pycd
 
 1. Phrase-based
     
-        echo "casa" | python example.py examples/phrase-table 5
-        echo "essa casa" | python example.py examples/phrase-table 5
+        echo "casa" | python example.py examples/phrase-table 5 20
+        echo "essa casa" | python example.py examples/phrase-table 5 20
 
 2. Hierarchical
 
-        echo "i [X]" | python example.py examples/rule-table 5
-        echo "have [X]" | python example.py examples/rule-table 5
-        echo "[X][X] do not [X][X] [X]" | python example.py examples/rule-table 5
+        echo "i [X]" | python example.py examples/rule-table 5 20
+        echo "have [X]" | python example.py examples/rule-table 5 20
+        echo "[X][X] do not [X][X] [X]" | python example.py examples/rule-table 5 20
 
 ### Code
 
 ```python
-from moses.dictree import load # load abstracts away the choice of implementation by checking the files available
+from moses.dictree import load # load abstracts away the choice of implementation by checking the available files
 import sys
 
-if len(sys.argv) < 2:
-    print "Usage: %s table nscores < query > result" % (sys.argv[0])
+if len(sys.argv) != 4:
+    print "Usage: %s table nscores tlimit < query > result" % (sys.argv[0])
     sys.exit(0)
 
 path = sys.argv[1]
 nscores = int(sys.argv[2])
+tlimit = int(sys.argv[3])
 
-table = load(path, nscores)
+table = load(path, nscores, tlimit)
 
 for line in sys.stdin:
     f = line.strip()
     result = table.query(f)
     # you could simply print the matches
     # print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
-    # or you can use its attributes
+    # or you can use their attributes
     print result.source
     for e in result:
         if e.lhs:

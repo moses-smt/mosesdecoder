@@ -85,20 +85,20 @@ public:
   void Run() {
     const StaticData &staticData = StaticData::Instance();
     const TranslationSystem &system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-    const size_t lineNumber = m_source->GetTranslationId();
+    const size_t translationId = m_source->GetTranslationId();
 
-    VERBOSE(2,"\nTRANSLATING(" << lineNumber << "): " << *m_source);
+    VERBOSE(2,"\nTRANSLATING(" << translationId << "): " << *m_source);
 
     if (staticData.GetSearchAlgorithm() == ChartIncremental) {
       Incremental::Manager manager(*m_source, system);
       const std::vector<search::Applied> &nbest = manager.ProcessSentence();
       if (!nbest.empty()) {
-        m_ioWrapper.OutputBestHypo(nbest[0], lineNumber);
+        m_ioWrapper.OutputBestHypo(nbest[0], translationId);
       } else {
-        m_ioWrapper.OutputBestNone(lineNumber);
+        m_ioWrapper.OutputBestNone(translationId);
       }
       if (staticData.GetNBestSize() > 0)
-        m_ioWrapper.OutputNBestList(nbest, system, lineNumber);
+        m_ioWrapper.OutputNBestList(nbest, system, translationId);
       return;
     }
 
@@ -109,14 +109,18 @@ public:
 
     // 1-best
     const ChartHypothesis *bestHypo = manager.GetBestHypothesis();
-    m_ioWrapper.OutputBestHypo(bestHypo, lineNumber);
+    m_ioWrapper.OutputBestHypo(bestHypo, translationId);
     IFVERBOSE(2) {
       PrintUserTime("Best Hypothesis Generation Time:");
     }
 
+    if (!staticData.GetAlignmentOutputFile().empty()) {
+      m_ioWrapper.OutputAlignment(translationId, bestHypo);
+    }
+
     if (staticData.IsDetailedTranslationReportingEnabled()) {
       const Sentence &sentence = dynamic_cast<const Sentence &>(*m_source);
-      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, lineNumber);
+      m_ioWrapper.OutputDetailedTranslationReport(bestHypo, sentence, translationId);
     }
 
     // n-best
@@ -125,7 +129,7 @@ public:
       VERBOSE(2,"WRITING " << nBestSize << " TRANSLATION ALTERNATIVES TO " << staticData.GetNBestFilePath() << endl);
       ChartTrellisPathList nBestList;
       manager.CalcNBest(nBestSize, nBestList,staticData.GetDistinctNBest());
-      m_ioWrapper.OutputNBestList(nBestList, &system, lineNumber);
+      m_ioWrapper.OutputNBestList(nBestList, &system, translationId);
       IFVERBOSE(2) {
         PrintUserTime("N-Best Hypotheses Generation Time:");
       }
@@ -133,10 +137,10 @@ public:
 
     if (staticData.GetOutputSearchGraph()) {
       std::ostringstream out;
-      manager.GetSearchGraph(lineNumber, out);
+      manager.GetSearchGraph(translationId, out);
       OutputCollector *oc = m_ioWrapper.GetSearchGraphOutputCollector();
       CHECK(oc);
-      oc->Write(lineNumber, out.str());
+      oc->Write(translationId, out.str());
     }
 
     IFVERBOSE(2) {

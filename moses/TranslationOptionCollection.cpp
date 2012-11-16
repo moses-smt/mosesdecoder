@@ -730,15 +730,17 @@ void TranslationOptionCollection::PreCalculateScores()
   //empty coverage vector
   WordsBitmap coverage(m_source.GetSize());
 
-  //Go through translation options and precompute features
-  for (size_t i = 0; i < m_collection.size(); ++i) {
-    for (size_t j = 0; j < m_collection[i].size(); ++j) {
-      for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
-        const TranslationOption* toption =  m_collection[i][j].Get(k);
-        ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
-        PhraseBasedFeatureContext context(*toption, m_source);
-        for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
-          precomputedFeatures[si]->Evaluate(context, &breakdown);
+  if (precomputedFeatures.size()) {
+    //Go through translation options and precompute features
+    for (size_t i = 0; i < m_collection.size(); ++i) {
+      for (size_t j = 0; j < m_collection[i].size(); ++j) {
+        for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
+          const TranslationOption* toption =  m_collection[i][j].Get(k);
+          ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
+          PhraseBasedFeatureContext context(*toption, m_source);
+          for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
+            precomputedFeatures[si]->Evaluate(context, &breakdown);
+          }
         }
       }
     }
@@ -749,13 +751,15 @@ void TranslationOptionCollection::InsertPreCalculatedScores
   (const TranslationOption& translationOption, ScoreComponentCollection* scoreBreakdown) 
     const
 {
-  boost::unordered_map<TranslationOption,ScoreComponentCollection>::const_iterator scoreIter = 
-    m_precalculatedScores.find(translationOption);
-  if (scoreIter != m_precalculatedScores.end()) {
-    scoreBreakdown->PlusEquals(scoreIter->second);
-  } else {
-    TRACE_ERR("ERROR: " << translationOption << " missing from precalculation cache" << endl);
-    assert(0);  
+  if (m_precalculatedScores.size()) {
+    boost::unordered_map<TranslationOption,ScoreComponentCollection>::const_iterator scoreIter = 
+      m_precalculatedScores.find(translationOption);
+    if (scoreIter != m_precalculatedScores.end()) {
+      scoreBreakdown->PlusEquals(scoreIter->second);
+    } else {
+      TRACE_ERR("ERROR: " << translationOption << " missing from precalculation cache" << endl);
+      assert(0);  
+    }
   }
 }
 

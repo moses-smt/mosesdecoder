@@ -1,14 +1,15 @@
 from moses.dictree import load
 import sys
 
-if len(sys.argv) < 2:
-    print "Usage: %s table nscores < query > result" % (sys.argv[0])
+if len(sys.argv) != 4:
+    print "Usage: %s table nscores tlimit < query > result" % (sys.argv[0])
     sys.exit(0)
 
 path = sys.argv[1]
 nscores = int(sys.argv[2])
+tlimit = int(sys.argv[3])
 
-table = load(path, nscores)
+table = load(path, nscores, tlimit)
 
 for line in sys.stdin:
     f = line.strip()

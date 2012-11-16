@@ -66,14 +66,21 @@ protected:
   const std::vector<Moses::FactorType>	&m_inputFactorOrder;
   const std::vector<Moses::FactorType>	&m_outputFactorOrder;
   const Moses::FactorMask								&m_inputFactorUsed;
-  std::ostream 									*m_outputSearchGraphStream;
-  std::ostream                  *m_detailedTranslationReportingStream;
-  std::string										m_inputFilePath;
-  std::istream									*m_inputStream;
+  std::ostream 				        					*m_outputSearchGraphStream;
+  std::ostream                          *m_detailedTranslationReportingStream;
+  std::ostream                          *m_alignmentInfoStream;
+  std::string		        								m_inputFilePath;
+  std::istream					        				*m_inputStream;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
+  Moses::OutputCollector                *m_alignmentInfoCollector;
+
+  void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+  void OutputAlignment(std::ostream &out, const Moses::ChartHypothesis *hypo, size_t sourceOffset, size_t targetOffset);
+  void OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisPath &path);
+  void OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset);
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -99,6 +106,8 @@ public:
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;
   }
+
+  void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
 
   static void FixPrecision(std::ostream &, size_t size=3);
 };

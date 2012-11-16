@@ -84,6 +84,8 @@ public:
     //do nothing - not a real feature
   }
 
+  bool ComputeValueInTranslationTable() const {return true;}
+
 };
 
 class MetaFeatureProducer : public StatelessFeatureFunction
