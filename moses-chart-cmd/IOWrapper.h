@@ -79,8 +79,7 @@ protected:
   Moses::OutputCollector                *m_alignmentInfoCollector;
 
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
-  void OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisPath &path);
-  void OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset);
+  size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget);
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
 
