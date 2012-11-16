@@ -552,9 +552,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/HypothesisStackNormal.h</locationURI>
 		</link>
 		<link>
-			<name>Incremental</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<name>Incremental.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental.cpp</locationURI>
+		</link>
+		<link>
+			<name>Incremental.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental.h</locationURI>
 		</link>
 		<link>
 			<name>InputFileStream.cpp</name>
@@ -1620,26 +1625,6 @@
 			<name>DynSAInclude/vocab.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/vocab.h</locationURI>
-		</link>
-		<link>
-			<name>Incremental/Fill.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental/Fill.cpp</locationURI>
-		</link>
-		<link>
-			<name>Incremental/Fill.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental/Fill.h</locationURI>
-		</link>
-		<link>
-			<name>Incremental/Manager.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental/Manager.cpp</locationURI>
-		</link>
-		<link>
-			<name>Incremental/Manager.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Incremental/Manager.h</locationURI>
 		</link>
 		<link>
 			<name>LM/Base.cpp</name>

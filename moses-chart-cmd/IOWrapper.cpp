@@ -636,9 +636,11 @@ void IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTre
   }
 
   // finally, output alignments for this node
-  //vector< set<size_t> > alignmentsS2T(hypo->GetCurrSourceRange().GetNumWordsCovered());
-  //const AlignmentInfo &ai = node.GetHypothesis().GetCurrTargetPhrase().GetAlignTerm();
-  //OutputAlignment(retAlign, ai);
+  const ChartHypothesis &hypo = node.GetHypothesis();
+  vector< set<size_t> > alignmentsS2T(hypo.GetCurrSourceRange().GetNumWordsCovered());
+  const AlignmentInfo &ai = hypo.GetCurrTargetPhrase().GetAlignTerm();
+
+  OutputAlignment(alignmentsS2T, ai);
 }
 
 void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)
