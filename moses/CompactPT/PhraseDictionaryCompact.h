@@ -89,6 +89,8 @@ public:
       m_weight(0)
   {}
 
+  ~PhraseDictionaryCompact();
+
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
             , const std::string &filePath
