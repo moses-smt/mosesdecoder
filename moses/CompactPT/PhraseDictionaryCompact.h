@@ -85,10 +85,11 @@ public:
       m_inMemory(inMemory),
       m_useAlignmentInfo(useAlignmentInfo),
       m_hash(10, 16),
-      m_phraseDecoder(0)
+      m_phraseDecoder(0),
+      m_weight(0)
   {}
-    
-  virtual ~PhraseDictionaryCompact();
+
+  ~PhraseDictionaryCompact();
 
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
