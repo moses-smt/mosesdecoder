@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 #include <vector>
+#include <set>
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
 #include "moses/FactorTypeSet.h"
@@ -76,10 +77,11 @@ protected:
   Moses::OutputCollector                *m_singleBestOutputCollector;
   Moses::OutputCollector                *m_alignmentInfoCollector;
 
-  void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
-  void OutputAlignment(std::ostream &out, const Moses::ChartHypothesis *hypo, size_t sourceOffset, size_t targetOffset);
-  void OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisPath &path);
-  void OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset);
+  typedef std::set< std::pair<size_t, size_t>  > Alignments;
+  void OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisPath &path);
+  void OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset);
+  size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
+  void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder

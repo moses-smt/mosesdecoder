@@ -54,14 +54,13 @@ class AlignmentInfo
   	m_collection.insert(std::pair<size_t, size_t>(sourcePos, targetPos));
   }
   /** Provides a map from target-side to source-side non-terminal indices.
-    * The target-side index should be the rule symbol index (counting terminals).
-    * The index returned is the rule non-terminal index (ignoring terminals).
+    * The target-side index should be the rule symbol index (COUNTING terminals).
+    * The index returned is the rule non-terminal index (IGNORING terminals).
    */
   const NonTermIndexMap &GetNonTermIndexMap() const {
     return m_nonTermIndexMap;
   }
 
-  // for phrase-based models, this contains all alignments, for hierarchical models only the NT alignments
   const CollType &GetAlignments() const {
     return m_collection;
   }
@@ -69,6 +68,8 @@ class AlignmentInfo
   size_t GetSize() const { return m_collection.size(); }
 
   std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+
+  std::vector<size_t> GetSourceIndex2PosMap() const;
 
   bool operator==(const AlignmentInfo& rhs) const 
   {

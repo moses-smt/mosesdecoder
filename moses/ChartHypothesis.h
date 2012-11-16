@@ -61,7 +61,7 @@ protected:
   ChartArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
   const ChartHypothesis 	*m_winningHypo;
 
-  std::vector<const ChartHypothesis*> m_prevHypos;
+  std::vector<const ChartHypothesis*> m_prevHypos; // always sorted by source position?
 
   ChartManager& m_manager;
 

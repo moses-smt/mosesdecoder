@@ -17,6 +17,7 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <algorithm>
+#include <set>
 #include "util/check.hh"
 #include "AlignmentInfo.h"
 #include "TypeDef.h"
@@ -92,7 +93,21 @@ std::vector< const std::pair<size_t,size_t>* > AlignmentInfo::GetSortedAlignment
   return ret;
   
 }
-  
+
+std::vector<size_t> AlignmentInfo::GetSourceIndex2PosMap() const
+{
+  std::set<size_t> sourcePoses;
+
+  CollType::const_iterator iter;
+  for (iter = m_collection.begin(); iter != m_collection.end(); ++iter) {
+    size_t sourcePos = iter->first;
+    sourcePoses.insert(sourcePos);
+  }
+
+  std::vector<size_t> ret(sourcePoses.begin(), sourcePoses.end());
+  return ret;
+}
+
 std::ostream& operator<<(std::ostream &out, const AlignmentInfo &alignmentInfo)
 {
   AlignmentInfo::const_iterator iter;

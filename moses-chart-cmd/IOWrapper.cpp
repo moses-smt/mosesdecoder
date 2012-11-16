@@ -516,7 +516,11 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Cha
 
     if (includeWordAlignment) {
       out << " ||| ";
-      OutputAlignmentNBest(out, path);
+
+      Alignments retAlign;
+      OutputAlignmentNBest(retAlign, path);
+
+      // TODO convert retAlign to out
     }
 
     out << endl;
@@ -560,71 +564,144 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
   stream.precision(size);
 }
 
-void IOWrapper::OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisPath &path)
+void IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisPath &path)
 {
   size_t sourceOffset = 0; // TODO. this is gonna be quite difficult
   size_t targetOffset = 0;
 
   const ChartTrellisNode &node = path.GetFinalNode();
-  OutputAlignmentNBest(out, node, sourceOffset, targetOffset);
+  OutputAlignmentNBest(retAlign, node, sourceOffset, targetOffset);
 }
 
-void IOWrapper::OutputAlignmentNBest(std::ostream &out, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset)
+void IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t sourceOffset, size_t targetOffset)
 {
   const ChartTrellisNode::NodeChildren &children = node.GetChildren();
 
   for (size_t i = 0; i < children.size(); ++i) {
     const ChartTrellisNode &child = *children[i];
-    OutputAlignmentNBest(out, child, sourceOffset, targetOffset);
+    OutputAlignmentNBest(retAlign, child, sourceOffset, targetOffset);
   }
 
   // finally, output alignments for this node
-  const AlignmentInfo &ai = node.GetHypothesis().GetCurrTargetPhrase().GetAlignTerm();
-  OutputAlignment(out, ai, sourceOffset, targetOffset);
+  //vector< set<size_t> > alignmentsS2T(hypo->GetCurrSourceRange().GetNumWordsCovered());
+  //const AlignmentInfo &ai = node.GetHypothesis().GetCurrTargetPhrase().GetAlignTerm();
+  //OutputAlignment(retAlign, ai);
 }
 
 void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo)
 {
   ostringstream out;
 
-  size_t sourceOffset = 0; // TODO. this is gonna be quite difficult
-  size_t targetOffset = 0;
+  Alignments retAlign;
+  OutputAlignment(retAlign, hypo, 0);
 
-  OutputAlignment(out, hypo, sourceOffset, targetOffset);
+  // output alignments
+  Alignments::const_iterator iter;
+  for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
+    const pair<size_t, size_t> &alignPoint = *iter;
+    out << alignPoint.first << "-" << alignPoint.second << " ";
+  }
   out << endl;
 
   m_alignmentInfoCollector->Write(translationId, out.str());
 }
 
-void IOWrapper::OutputAlignment(std::ostream &out, const Moses::ChartHypothesis *hypo, size_t sourceOffset, size_t targetOffset)
+template <class T>
+void ShiftOffsets(vector<T> &offsets, T shift)
 {
-  if ( hypo != NULL) {
-    const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
-
-    vector<const ChartHypothesis*>::const_iterator iter;
-    for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
-      const ChartHypothesis *prevHypo = *iter;
-
-      OutputAlignment(out, prevHypo, sourceOffset, targetOffset);
-    }
-
-    const AlignmentInfo &ai = hypo->GetCurrTargetPhrase().GetAlignTerm();
-    OutputAlignment(*m_alignmentInfoStream, ai, sourceOffset, targetOffset);
+  for (size_t i = 0; i < offsets.size(); ++i) {
+    shift += offsets[i];
+    offsets[i] += shift;
   }
-
 }
 
-void IOWrapper::OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset)
+size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget)
+{
+  if ( hypo == NULL) {
+    return 0;
+  }
+
+  size_t totalTargetSize = 0;
+  size_t startSource = hypo->GetCurrSourceRange().GetStartPos();
+
+  const TargetPhrase &tp = hypo->GetCurrTargetPhrase();
+
+  vector<size_t> sourceOffsets(hypo->GetCurrSourceRange().GetNumWordsCovered(), 0);
+  vector<size_t> targetOffsets(tp.GetSize(), 0);
+
+  const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+
+  const AlignmentInfo &aiNonTerm = hypo->GetCurrTargetPhrase().GetAlignNonTerm();
+  vector<size_t> sourceInd2pos = aiNonTerm.GetSourceIndex2PosMap();
+  const AlignmentInfo::NonTermIndexMap &targetPos2SourceInd = aiNonTerm.GetNonTermIndexMap();
+
+  CHECK(sourceInd2pos.size() == prevHypos.size());
+
+  size_t targetInd = 0;
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+    if (tp.GetWord(targetPos).IsNonTerminal()) {
+      CHECK(targetPos < targetPos2SourceInd.size());
+      size_t sourceInd = targetPos2SourceInd[targetPos];
+      size_t sourcePos = sourceInd2pos[sourceInd];
+
+      const ChartHypothesis *prevHypo = prevHypos[sourceInd];
+
+      // 1st. calc source size
+      size_t sourceSize = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
+      sourceOffsets[sourcePos] = sourceSize;
+
+      // 2nd. calc target size. Recursively look thru child hypos
+      size_t currStartTarget = startTarget + totalTargetSize;
+      size_t targetSize = OutputAlignment(retAlign, prevHypo, currStartTarget);
+      targetOffsets[targetPos] = targetSize;
+
+      totalTargetSize += targetSize;
+      ++targetInd;
+    }
+    else {
+      ++totalTargetSize;
+    }
+  }
+
+  // 3rd. shift offsets
+  ShiftOffsets(sourceOffsets, startSource);
+  ShiftOffsets(targetOffsets, startTarget);
+
+  // get alignments from this hypo
+  vector< set<size_t> > retAlignmentsS2T(hypo->GetCurrSourceRange().GetNumWordsCovered());
+  const AlignmentInfo &aiTerm = hypo->GetCurrTargetPhrase().GetAlignTerm();
+  OutputAlignment(retAlignmentsS2T, aiTerm);
+
+  // add to output arg, offsetting by source & target
+  for (size_t source = 0; source < retAlignmentsS2T.size(); ++source) {
+    const set<size_t> &targets = retAlignmentsS2T[source];
+    set<size_t>::const_iterator iter;
+    for (iter = targets.begin(); iter != targets.end(); ++iter) {
+      size_t target = *iter;
+      pair<size_t, size_t> alignPoint(source + sourceOffsets[source]
+                                     ,target + targetOffsets[target]);
+      pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+      assert(ret.second);
+
+    }
+  }
+
+  return totalTargetSize;
+}
+
+void IOWrapper::OutputAlignment(vector< set<size_t> > &retAlignmentsS2T, const AlignmentInfo &ai)
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments();
 
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
-    const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
-  }
+    const std::pair<size_t,size_t> &alignPoint = **it;
 
+    assert(alignPoint.first < retAlignmentsS2T.size());
+    pair<set<size_t>::iterator, bool> ret = retAlignmentsS2T[alignPoint.first].insert(alignPoint.second);
+    assert(ret.second);
+  }
 }
 
 }
