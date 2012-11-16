@@ -45,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/OutputCollector.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartTrellisPath.h"
+#include "search/applied.hh"
 
 namespace Moses
 {
@@ -94,13 +95,13 @@ public:
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
+  void OutputBestHypo(search::Applied applied, long translationId);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
-  void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
-  void OutputSparseFeatureScores(std::ostream& out, const Moses::ChartTrellisPath &path, const Moses::FeatureFunction *ff, std::string &lastName);
+  void OutputBestNone(long translationId);
+  void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
+  void OutputNBestList(const std::vector<search::Applied> &nbest, const Moses::TranslationSystem &system, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
-
-  Moses::OutputCollector *ExposeSingleBest() { return m_singleBestOutputCollector; }
 
   void ResetTranslationId();
 

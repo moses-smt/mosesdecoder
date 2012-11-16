@@ -51,7 +51,7 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
 {
   m_input = &input;
   m_output = &output;
-  m_weight = &weight;
+  m_weight = new std::vector<float>(weight);
   m_tableLimit = tableLimit;
   m_languageModels = &languageModels; 
   m_weightWP = weightWP;

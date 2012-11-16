@@ -32,7 +32,6 @@ lib moses :
   CYKPlusParser/*.cpp
   RuleTable/*.cpp
   fuzzy-match/*.cpp
-  Incremental/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
