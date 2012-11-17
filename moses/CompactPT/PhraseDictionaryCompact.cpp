@@ -57,16 +57,25 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
   m_weightWP = weightWP;
  
   std::string tFilePath = filePath;
- 
-  if(!FileExists(tFilePath))
+  
+  std::string suffix = ".minphr";
+  if(tFilePath.substr(tFilePath.length() - suffix.length(), suffix.length()) == suffix)
   {
-    if(FileExists(tFilePath + ".minphr"))
+    if(!FileExists(tFilePath))
     {
-      tFilePath += ".minphr";
+      std::cerr << "Error: File " << tFilePath << " does not exit." << std::endl;
+      exit(1);
+    }
+  }
+  else 
+  {
+    if(FileExists(tFilePath + suffix))
+    {
+      tFilePath += suffix;
     }
     else
     {
-       std::cerr << "Error: File " + tFilePath + "(.minphr) does not exit." << std::endl;
+       std::cerr << "Error: File " << tFilePath << ".minphr does not exit." << std::endl;
        exit(1);
     }
   }

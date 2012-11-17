@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
-#include <fstream>
 #include <string>
 #include <iterator>
 #include <algorithm>
