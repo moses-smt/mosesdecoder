@@ -37,6 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "BlockHashIndex.h"
 #include "OndiskLineCollection.h"
+#include "StringVector.h"
 #include "CanonicalHuffman.h"
 
 namespace Moses
@@ -253,9 +254,13 @@ class PhraseTableCreator
     std::vector<uint64_t> m_lexicalTableIndex;
     std::vector<SrcTrg> m_lexicalTable;
     
-    OndiskLineCollection m_encodedTargetPhrases;
-        
-    OndiskLineCollection m_compressedTargetPhrases;
+    bool m_mmapped;
+    
+    OndiskLineCollection m_encodedTargetPhrasesFile;
+    OndiskLineCollection m_compressedTargetPhrasesFile;
+
+    StringVector<uint8_t, uint64_t, MmapAllocator> m_encodedTargetPhrasesVec;
+    StringVector<uint8_t, uint64_t, MmapAllocator> m_compressedTargetPhrasesVec;
     
     boost::unordered_map<std::string, uint32_t> m_targetSymbolsMap;
     boost::unordered_map<std::string, uint32_t> m_sourceSymbolsMap;
@@ -354,7 +359,8 @@ class PhraseTableCreator
                        bool multipleScoreTrees = true,
                        size_t quantize = 0,
                        size_t maxRank = 100,
-                       bool warnMe = true
+                       bool warnMe = true,
+                       bool mmapped = true
 #ifdef WITH_THREADS
                        , size_t threads = 2
 #endif
@@ -409,14 +415,24 @@ class CompressionTask
     static boost::mutex m_mutexIn;
     static boost::mutex m_mutexOut;
 #endif
+    bool m_mmapped;
+   
     static size_t m_collectionNum;
-    OndiskLineCollection& m_encodedCollections;
+    OndiskLineCollection* m_encodedCollectionsFile;
+    StringVector<uint8_t, uint64_t, MmapAllocator>* m_encodedCollectionsVec;
+
     PhraseTableCreator& m_creator;
     
   public:
     CompressionTask(OndiskLineCollection& encodedCollections,
                     PhraseTableCreator& creator);
+
+    CompressionTask(StringVector<uint8_t, uint64_t, MmapAllocator>& encodedCollections, 
+                    PhraseTableCreator& creator);
+
     void operator()();
+    void ProcessVec();
+    void ProcessFile();
 };
 
 }

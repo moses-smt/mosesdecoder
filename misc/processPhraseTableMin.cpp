@@ -28,6 +28,7 @@ void printHelp(char **argv) {
             "\t-join-scores      -- single set of Huffman codes for score components\n"
             "\t-quantize int     -- maximum number of scores per score component\n"
             "\t-no-warnings      -- suppress warnings about missing alignment data\n"
+            "\t-no-memmap        -- do not use memory mapping (for 32-bit systems)\n"
             "\n"
             "  For more information see: http://www.statmt.org/moses/?n=Moses.AdvancedFeatures#ntoc6\n\n"
             "  If you use this please cite:\n\n"
@@ -61,6 +62,7 @@ int main(int argc, char **argv) {
   bool sortScoreIndexSet = false;
   size_t sortScoreIndex = 2; 
   bool warnMe = true;
+  bool mmapped = true;
   size_t threads = 1;
   
   if(1 >= argc) {
@@ -124,6 +126,9 @@ int main(int argc, char **argv) {
     else if("-no-warnings" == arg) {
       warnMe = false;
     }
+    else if("-no-memmap" == arg) {
+      mmapped = false;
+    }
     else if("-threads" == arg && i+1 < argc) {
 #ifdef WITH_THREADS
       ++i;
@@ -169,7 +174,7 @@ int main(int argc, char **argv) {
   PhraseTableCreator(inFilePath, outFilePath, numScoreComponent, sortScoreIndex,
                      coding, orderBits, fingerprintBits,
                      useAlignmentInfo, multipleScoreTrees,
-                     quantize, maxRank, warnMe
+                     quantize, maxRank, warnMe, mmapped
 #ifdef WITH_THREADS
                      , threads
 #endif                     
