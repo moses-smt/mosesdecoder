@@ -15,7 +15,7 @@ void printHelp(char **argv) {
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
             "\t-nscores int      -- number of score components in phrase table\n"
-            "\t-alignment-info   -- include alignment info in the binary phrase table\n"
+            "\t-no-alignment-info   -- do not include alignment info in the binary phrase table\n"
 #ifdef WITH_THREADS
             "\t-threads int|all  -- number of threads used for conversion\n"
 #endif 
@@ -54,7 +54,7 @@ int main(int argc, char **argv) {
   size_t numScoreComponent = 5;  
   size_t orderBits = 10;
   size_t fingerprintBits = 16;
-  bool useAlignmentInfo = false;
+  bool useAlignmentInfo = true;
   bool multipleScoreTrees = true;
   size_t quantize = 0;
   size_t maxRank = 100;
@@ -103,8 +103,8 @@ int main(int argc, char **argv) {
       sortScoreIndex = atoi(argv[i]);
       sortScoreIndexSet = true;
     }
-    else if("-alignment-info" == arg) {
-      useAlignmentInfo = true;
+    else if("-no-alignment-info" == arg) {
+      useAlignmentInfo = false;
     }
     else if("-landmark" == arg && i+1 < argc) {
       ++i;
