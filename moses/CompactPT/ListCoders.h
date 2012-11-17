@@ -25,10 +25,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cmath>
 #include <cassert>
 
+#include "moses/TypeDef.h"
+
 namespace Moses
 {
 
-template <typename T = unsigned int>
+template <typename T = uint32_t>
 class VarIntType
 {
   private:
@@ -104,14 +106,14 @@ class VarIntType
     }
     
     template <typename InIt>
-    static size_t DecodeAndSum(InIt &it, InIt end, size_t num)
+    static uint64_t DecodeAndSum(InIt &it, InIt end, uint64_t num)
     {
-      size_t sum = 0;
-      size_t curr = 0;
+      uint64_t sum = 0;
+      uint64_t curr = 0;
       
       while(it != end && curr < num)
       {
-        size_t output;
+        uint64_t output;
         DecodeSymbol(it, end, output);
         sum += output; curr++;
       }
@@ -121,16 +123,16 @@ class VarIntType
 
 };
 
-typedef VarIntType<unsigned char> VarByte;
+typedef VarIntType<uint8_t> VarByte;
 
 typedef VarByte VarInt8;
-typedef VarIntType<unsigned short> VarInt16;
-typedef VarIntType<unsigned int>   VarInt32;
+typedef VarIntType<uint16_t> VarInt16;
+typedef VarIntType<uint32_t>   VarInt32;
 
 class Simple9
 {
   private:
-    typedef unsigned int uint;
+    typedef uint32_t uint;
         
     template <typename InIt>
     inline static void EncodeSymbol(uint &output, InIt it, InIt end)
@@ -198,7 +200,7 @@ class Simple9
       outIt++;  
     }
     
-    static inline size_t DecodeAndSumSymbol(uint input, size_t num, size_t &curr)
+    static inline uint64_t DecodeAndSumSymbol(uint input, size_t num, uint64_t &curr)
     {
       uint type = (input >> 28);
       
@@ -219,7 +221,7 @@ class Simple9
         case 9: bitlen = 1;  shift = 27; mask = 1; break;
       }
 
-      size_t sum = 0;
+      uint64_t sum = 0;
       while(shift > 0)
       {
         sum += (input >> shift) & mask;
@@ -255,6 +257,7 @@ class Simple9
           buffer[lastpos] = *(i + lastpos);
           
           uint reqbit = ceil(log(buffer[lastpos]+1)/log2);
+          reqbit = (reqbit == 0) ? 1 : reqbit;
           assert(reqbit <= 28);
           
           uint bit = 28/floor(28/reqbit);
@@ -290,10 +293,10 @@ class Simple9
     }
     
     template <typename InIt>
-    static size_t DecodeAndSum(InIt &it, InIt end, size_t num)
+    static uint64_t DecodeAndSum(InIt &it, InIt end, uint64_t num)
     {
-      size_t sum = 0;
-      size_t curr = 0;
+      uint64_t sum = 0;
+      uint64_t curr = 0;
       while(it != end && curr < num)
       {
         sum += DecodeAndSumSymbol(*it, num, curr);

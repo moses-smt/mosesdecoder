@@ -394,7 +394,7 @@ size_t CompressionTaskReordering::m_scoresNum = 0;
 boost::mutex CompressionTaskReordering::m_mutex;
 #endif
 
-CompressionTaskReordering::CompressionTaskReordering(StringVector<unsigned char, unsigned long,
+CompressionTaskReordering::CompressionTaskReordering(StringVector<unsigned char, uint64_t,
                               MmapAllocator>& encodedScores,
                               LexicalReorderingTableCreator& creator)
   : m_encodedScores(encodedScores), m_creator(creator)

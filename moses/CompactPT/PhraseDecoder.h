@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
+#include <fstream>
 #include <string>
 #include <iterator>
 #include <algorithm>
@@ -56,24 +57,24 @@ class PhraseDecoder
     
     friend class PhraseDictionaryCompact;
     
-    typedef std::pair<unsigned char, unsigned char> AlignPoint;
-    typedef std::pair<unsigned, unsigned> SrcTrg;
+    typedef std::pair<uint8_t, uint8_t> AlignPoint;
+    typedef std::pair<uint32_t, uint32_t> SrcTrg;
         
     enum Coding { None, REnc, PREnc } m_coding;
     
-    size_t m_numScoreComponent;
+    uint64_t m_numScoreComponent;
     bool m_containsAlignmentInfo;
-    size_t m_maxRank;
-    size_t m_maxPhraseLength;
+    uint64_t m_maxRank;
+    uint64_t m_maxPhraseLength;
     
-    boost::unordered_map<std::string, unsigned> m_sourceSymbolsMap;
-    StringVector<unsigned char, unsigned, std::allocator> m_sourceSymbols;
-    StringVector<unsigned char, unsigned, std::allocator> m_targetSymbols;
+    boost::unordered_map<std::string, uint32_t> m_sourceSymbolsMap;
+    StringVector<unsigned char, uint32_t, std::allocator> m_sourceSymbols;
+    StringVector<unsigned char, uint32_t, std::allocator> m_targetSymbols;
     
-    std::vector<size_t> m_lexicalTableIndex;
+    std::vector<uint64_t> m_lexicalTableIndex;
     std::vector<SrcTrg> m_lexicalTable;
     
-    CanonicalHuffman<unsigned>* m_symbolTree;
+    CanonicalHuffman<uint32_t>* m_symbolTree;
     
     bool m_multipleScoreTrees;
     std::vector<CanonicalHuffman<float>*> m_scoreTrees;
@@ -98,24 +99,24 @@ class PhraseDecoder
     // ***********************************************
     
     unsigned GetSourceSymbolId(std::string& s);
-    std::string GetTargetSymbol(unsigned id) const;
+    std::string GetTargetSymbol(uint32_t id) const;
     
-    size_t GetREncType(unsigned encodedSymbol);
-    size_t GetPREncType(unsigned encodedSymbol);
+    size_t GetREncType(uint32_t encodedSymbol);
+    size_t GetPREncType(uint32_t encodedSymbol);
     
-    unsigned GetTranslation(unsigned srcIdx, size_t rank);
+    uint32_t GetTranslation(uint32_t srcIdx, size_t rank);
     
     size_t GetMaxSourcePhraseLength();
     
-    unsigned DecodeREncSymbol1(unsigned encodedSymbol);
-    unsigned DecodeREncSymbol2Rank(unsigned encodedSymbol);
-    unsigned DecodeREncSymbol2Position(unsigned encodedSymbol);
-    unsigned DecodeREncSymbol3(unsigned encodedSymbol);
+    uint32_t DecodeREncSymbol1(uint32_t encodedSymbol);
+    uint32_t DecodeREncSymbol2Rank(uint32_t encodedSymbol);
+    uint32_t DecodeREncSymbol2Position(uint32_t encodedSymbol);
+    uint32_t DecodeREncSymbol3(uint32_t encodedSymbol);
     
-    unsigned DecodePREncSymbol1(unsigned encodedSymbol);
-    int DecodePREncSymbol2Left(unsigned encodedSymbol);
-    int DecodePREncSymbol2Right(unsigned encodedSymbol);
-    unsigned DecodePREncSymbol2Rank(unsigned encodedSymbol);
+    uint32_t DecodePREncSymbol1(uint32_t encodedSymbol);
+    int32_t DecodePREncSymbol2Left(uint32_t encodedSymbol);
+    int32_t DecodePREncSymbol2Right(uint32_t encodedSymbol);
+    uint32_t DecodePREncSymbol2Rank(uint32_t encodedSymbol);
     
     std::string MakeSourceKey(std::string &);
     
@@ -134,7 +135,7 @@ class PhraseDecoder
     
     ~PhraseDecoder();
      
-    size_t Load(std::FILE* in);
+    uint64_t Load(std::FILE* in);
     
     TargetPhraseVectorPtr CreateTargetPhraseCollection(const Phrase &sourcePhrase,
                                                        bool topLevel = false);

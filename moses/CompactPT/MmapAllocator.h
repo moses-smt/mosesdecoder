@@ -37,11 +37,11 @@ namespace Moses
         std::FILE* m_file_ptr;
         size_t m_file_desc;
         
-        size_t m_page_size;
-        size_t m_map_size;
+        uint64_t m_page_size;
+        uint64_t m_map_size;
         
         char* m_data_ptr;
-        size_t m_data_offset;
+        uint64_t m_data_offset;
         bool m_fixed;
         size_t* m_count;
         
@@ -51,7 +51,7 @@ namespace Moses
         typedef const T* const_pointer;
         typedef T&       reference;
         typedef const T& const_reference;
-        typedef std::size_t    size_type;
+        typedef uint64_t       size_type;
         typedef std::ptrdiff_t difference_type;
     
         MmapAllocator() throw()
@@ -115,7 +115,7 @@ namespace Moses
      
         size_type max_size () const throw()
         {
-            return std::numeric_limits<size_t>::max() / sizeof(value_type);
+            return std::numeric_limits<uint64_t>::max() / sizeof(value_type);
         }
      
         pointer allocate (size_type num, const void* = 0)
@@ -124,7 +124,7 @@ namespace Moses
             
             if(!m_fixed)
             {
-                size_t read = 0;
+                uint64_t read = 0;
                 read += ftruncate(m_file_desc, m_map_size);
                 m_data_ptr = (char*)mmap(0, m_map_size, PROT_READ|PROT_WRITE, MAP_SHARED,
                                        m_file_desc, 0);
@@ -134,10 +134,10 @@ namespace Moses
             }
             else
             {
-                size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
-                size_t relative_offset = m_data_offset - map_offset;
+                uint64_t map_offset = (m_data_offset / m_page_size) * m_page_size;
+                uint64_t relative_offset = m_data_offset - map_offset;
                 
-                size_t map_size = m_map_size + relative_offset;
+                uint64_t map_size = m_map_size + relative_offset;
             
                 m_data_ptr = (char*)mmap(0, map_size, PROT_READ, MAP_SHARED,
                                        m_file_desc, map_offset);
@@ -152,8 +152,8 @@ namespace Moses
                 munmap(p, num * sizeof(T));
             }
             else {
-                size_t map_offset = (m_data_offset / m_page_size) * m_page_size;
-                size_t relative_offset = m_data_offset - map_offset;
+                uint64_t map_offset = (m_data_offset / m_page_size) * m_page_size;
+                uint64_t relative_offset = m_data_offset - map_offset;
                 munmap((pointer)((char*)p - relative_offset), num * sizeof(T));    
             }
             
