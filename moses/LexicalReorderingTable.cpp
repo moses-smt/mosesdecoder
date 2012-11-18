@@ -53,24 +53,10 @@ LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string&
 {
   //decide use Compact or Tree or Memory table
 #ifndef WIN32
-#ifdef HAVE_CMPH
-  std::string minlexr = ".minlexr";
-  // file name is specified without suffix
-  if(FileExists(filePath + minlexr))
-  {                                                                                                                                   
-    //there exists a compact binary version use that
-    VERBOSE(2,"Using compact lexical reordering table" << std::endl);  
-    return new LexicalReorderingTableCompact(filePath + minlexr, f_factors, e_factors, c_factors);                                              
-  }
-  // file name is specified with suffix
-  if(filePath.substr(filePath.length() - minlexr.length(), minlexr.length()) == minlexr
-     || FileExists(filePath))
-  {
-    //there exists a compact binary version use that
-    VERBOSE(2,"Using compact lexical reordering table" << std::endl);  
-    return new LexicalReorderingTableCompact(filePath, f_factors, e_factors, c_factors);                                              
-  }
-#endif
+  LexicalReorderingTable *compactLexr =
+    LexicalReorderingTableCompact::CheckAndLoad(filePath, f_factors, e_factors, c_factors);
+  if(compactLexr)
+    return compactLexr;
 #endif
   if(FileExists(filePath+".binlexr.idx")) {
     //there exists a binary version use that

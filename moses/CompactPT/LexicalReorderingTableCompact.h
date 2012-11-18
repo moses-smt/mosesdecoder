@@ -69,6 +69,13 @@ class LexicalReorderingTableCompact: public LexicalReorderingTable
     virtual ~LexicalReorderingTableCompact();
 
     virtual std::vector<float> GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
+    
+    static LexicalReorderingTable* CheckAndLoad(
+                                const std::string& filePath,
+                                const std::vector<FactorType>& f_factors,
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
+    
     void Load(std::string filePath);
 };
 

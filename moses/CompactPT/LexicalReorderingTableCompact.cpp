@@ -124,6 +124,33 @@ std::string  LexicalReorderingTableCompact::MakeKey(const std::string& f,
   return key;
 }
 
+LexicalReorderingTable* LexicalReorderingTableCompact::CheckAndLoad(
+  const std::string& filePath,
+  const std::vector<FactorType>& f_factors,
+  const std::vector<FactorType>& e_factors,
+  const std::vector<FactorType>& c_factors)
+{
+#ifdef HAVE_CMPH
+  std::string minlexr = ".minlexr";
+  // file name is specified without suffix
+  if(FileExists(filePath + minlexr))
+  {                                                                                                                                   
+    //there exists a compact binary version use that
+    VERBOSE(2,"Using compact lexical reordering table" << std::endl);  
+    return new LexicalReorderingTableCompact(filePath + minlexr, f_factors, e_factors, c_factors);                                              
+  }
+  // file name is specified with suffix
+  if(filePath.substr(filePath.length() - minlexr.length(), minlexr.length()) == minlexr
+     || FileExists(filePath))
+  {
+    //there exists a compact binary version use that
+    VERBOSE(2,"Using compact lexical reordering table" << std::endl);  
+    return new LexicalReorderingTableCompact(filePath, f_factors, e_factors, c_factors);                                              
+  }
+#endif
+  return 0;
+}
+
 void LexicalReorderingTableCompact::Load(std::string filePath)
 {  
   std::FILE* pFile = std::fopen(filePath.c_str(), "r");
