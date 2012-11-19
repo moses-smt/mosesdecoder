@@ -49,5 +49,10 @@ if $(with-regtest) {
   }
   reg_test mert : [ glob $(test-dir)/mert.* ] : ../mert//mert ../mert//extractor ../mert//pro : @reg_test_mert ;
 
-   alias all : phrase chart mert score extract extractrules ;
+  actions reg_test_misc {
+    $(TOP)/regression-testing/run-test-misc.perl --moses-root=$(TOP) --moses-bin=$(BINDIR) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+  }
+  reg_test misc : [ glob $(test-dir)/misc.* ] : ..//prefix-bin ..//prefix-lib : @reg_test_misc ;
+
+   alias all : phrase chart mert score extract extractrules misc ;
 }
