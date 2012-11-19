@@ -199,7 +199,7 @@ if [ option.get "git" : : "yes" ] {
   constant GITTAG : "" ;
 }
 
-prefix = [ option.get "prefix" ] ;
+local prefix = [ option.get "prefix" ] ;
 if $(prefix) {
   prefix = [ path.root $(prefix) [ path.pwd ] ] ;
   prefix = $(prefix)$(GITTAG) ;
@@ -207,11 +207,13 @@ if $(prefix) {
   prefix = $(TOP)$(GITTAG) ;
 }
 
-bindir = [ option.get "bindir" : $(prefix)/bin ] ;
-libdir = [ option.get "libdir" : $(prefix)/lib ] ;
+path-constant PREFIX : $(prefix) ;
+
+path-constant BINDIR : [ option.get "bindir" : $(PREFIX)/bin ] ;
+path-constant LIBDIR : [ option.get "libdir" : $(PREFIX)/lib ] ;
 rule install-bin-libs ( deps * ) {
-  install prefix-bin : $(deps) : <location>$(bindir) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(libdir) ;
-  install prefix-lib : $(deps) : <location>$(libdir) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(libdir) ;
+  install prefix-bin : $(deps) : <location>$(BINDIR) <install-dependencies>on <install-type>EXE <link>shared:<dll-path>$(LIBDIR) ;
+  install prefix-lib : $(deps) : <location>$(LIBDIR) <install-dependencies>on <install-type>LIB <link>shared:<dll-path>$(LIBDIR) ;
 }
 rule install-headers ( name : list * : source-root ? ) {
   local includedir = [ option.get "includedir" : $(prefix)/include ] ;
