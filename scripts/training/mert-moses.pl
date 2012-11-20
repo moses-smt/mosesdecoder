@@ -698,7 +698,9 @@ my $allsorted       = undef;
 my $nbest_file      = undef;
 my $lsamp_file      = undef; # Lattice samples
 my $orig_nbest_file = undef; # replaced if lattice sampling
+# For mixture modelling
 my @phrase_weighting_mix_weights;
+my $num_mixed_phrase_features;
 
 while (1) {
   $run++;
@@ -711,15 +713,31 @@ while (1) {
   if ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
     # Need to interpolate the phrase tables with current weights, and binarise
     if (!@phrase_weighting_mix_weights) {
-      @phrase_weighting_mix_weights = (1.0/scalar(@__PHRASE_WEIGHTING_TABLES)) x scalar(@__PHRASE_WEIGHTING_TABLES);  
-    }
+      # total number of weights is 1 less than number of phrase features, multiplied
+      # by the number of tables
+      $num_mixed_phrase_features = (grep { $_ eq 'tm' } @{$featlist->{"names"}}) - 1;
+  
+      @phrase_weighting_mix_weights = (1.0/scalar(@__PHRASE_WEIGHTING_TABLES)) x 
+        ($num_mixed_phrase_features * scalar(@__PHRASE_WEIGHTING_TABLES));
+    } 
+
     # make a backup copy of startup ini filepath
     $___CONFIG_ORIG = $___CONFIG unless defined($___CONFIG_ORIG);
     # Interpolation
     my $interpolated_phrase_table = "./phrase-table.interpolated.gz";
     my $cmd = "$__PHRASE_WEIGHTING_TMCOMBINE combine_given_weights ";
-    $cmd .= join(" ", map {"model_$_"} (0..(scalar(@phrase_weighting_mix_weights)-1)));
-    $cmd .= " -w " . join(",",@phrase_weighting_mix_weights);
+    $cmd .= join(" ", map {"model_$_"} (0..(scalar(@__PHRASE_WEIGHTING_TABLES)-1)));
+    # convert from table,feature ordering to feature,table ordering
+    my @transposed_weights;
+    for my $feature (0..($num_mixed_phrase_features-1)) {
+      my @table_weights;
+      for my $table (0..(scalar(@__PHRASE_WEIGHTING_TABLES)-1)) {
+        push @table_weights, $phrase_weighting_mix_weights[$table * $num_mixed_phrase_features + $feature];
+      }
+      push @transposed_weights, join ",", @table_weights;
+    }
+    
+    $cmd .= " -w \"" . join(";",@transposed_weights) . "\"";
     $cmd .= " -o $interpolated_phrase_table";
     &submit_or_exec($cmd, "interpolate.out", "interpolate.err");
 
@@ -1084,7 +1102,7 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out";
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
     $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PHRASE_WEIGHTING) && $__PHRASE_WEIGHTING_TRAINER eq "mix";
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
@@ -1130,10 +1148,10 @@ sub get_weights_from_mert {
       if (/^F(\d+) ([\-\.\de]+)/) {     # regular features
         $WEIGHT[$1] = $2;
         $sum += abs($2);
+      } elsif (/^M(\d+_\d+) ([\-\.\de]+)/) {     # mix weights
+        push @$mix_weights,$2;
       } elsif (/^(.+_.+) ([\-\.\de]+)/) { # sparse features
         $$sparse_weights{$1} = $2;
-      } elsif (/^M(\d+) ([\-\.\de]+)/) {     # mix weights
-        push @$mix_weights,$2;
       }
     }
     close $fh;
