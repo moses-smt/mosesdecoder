@@ -364,6 +364,11 @@ bool Parameter::Validate()
   // input file
   if (noErrorFlag && m_setting["input-file"].size() == 1) {
     noErrorFlag = FileExists(m_setting["input-file"][0]);
+    if (!noErrorFlag) {
+      stringstream errorMsg("");
+      errorMsg << endl << "Input file " << m_setting["input-file"][0] << " does not exist";
+      UserMessage::Add(errorMsg.str());
+    }
   }
   // generation tables
   if (noErrorFlag) {
