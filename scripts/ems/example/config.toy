@@ -133,9 +133,10 @@ raw-stem = $toy-data/nc-5k
 lm-training = $srilm-dir/ngram-count
 settings = "-interpolate -kndiscount -unk"
 
-# irstlm
-#lm-training = "$moses-script-dir/generic/trainlm-irst.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/lm"
-#settings = "-s improved-kneser-ney"
+# irstlm training
+# msb = modified kneser ney; p=0 no singleton pruning
+#lm-training = "$moses-script-dir/generic/trainlm-irst2.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/tmp"
+#settings = "-s msb -p 0"
 
 # order of the language model
 order = 5
