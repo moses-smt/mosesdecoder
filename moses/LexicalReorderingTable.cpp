@@ -52,10 +52,10 @@ void auxAppend(IPhrase& head, const IPhrase& tail)
 LexicalReorderingTable* LexicalReorderingTable::LoadAvailable(const std::string& filePath, const FactorList& f_factors, const FactorList& e_factors, const FactorList& c_factors)
 {
   //decide use Compact or Tree or Memory table
-#ifndef HAVE_CMPH
+#ifdef HAVE_CMPH
   if(FileExists(filePath + ".minlexr")) {
     LexicalReorderingTable *compactLexr =
-      LexicalReorderingTableCompact::CheckAndLoad(filePath, f_factors, e_factors, c_factors);
+      LexicalReorderingTableCompact::CheckAndLoad(filePath + ".minlexr", f_factors, e_factors, c_factors);
     if(compactLexr)
       return compactLexr;
   }
