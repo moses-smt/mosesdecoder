@@ -1491,7 +1491,7 @@ sub score_phrase_phrase_extract {
 					$cmd .= " 0 ";
 				}
 
-      print $cmd."\n";
+        print STDERR $cmd."\n";
         safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
   
         exit();

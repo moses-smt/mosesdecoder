@@ -45,7 +45,7 @@ void create_xml(const string &inPath)
   while (!inStrme.eof())
   {
     getline(inStrme, inLine);
-    cout << inLine << endl;
+    //cout << inLine << endl;
     switch (step)
     {
     case 0:

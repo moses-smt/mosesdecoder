@@ -240,7 +240,7 @@ void SuffixArray::List(INDEX start, INDEX end)
 		// cerr << i << ":" << pos << "\t";
 		for(int j=0; j<5 && j+pos<m_size; j++)
 		{
-			cout << " " << m_vcb.GetWord( m_array[ pos+j ] );
+			//cout << " " << m_vcb.GetWord( m_array[ pos+j ] );
 		}
 		// cerr << "\n";
 	}
