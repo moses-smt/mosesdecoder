@@ -272,12 +272,12 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     // prob indirect
     if (!onlyDirectFlag) {
       fileConsolidated << " " << maybeLogProb(adjustedCountEF_indirect/countE);
-      fileConsolidated << " " << directScores;
+      fileConsolidated << " " << indirectScores;
     }
 
     // prob direct
     fileConsolidated << " " << maybeLogProb(adjustedCountEF/countF);
-    fileConsolidated << " " << indirectScores;
+    fileConsolidated << " " << directScores;
 
     // phrase count feature
     if (phraseCountFlag) {
