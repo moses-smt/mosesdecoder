@@ -29,8 +29,7 @@ public:
   
 protected:
   // tm-mt
-  tmmt::Vocabulary vocabulary;
-  std::vector< std::vector< tmmt::WORD_ID > > source;
+  //std::vector< std::vector< tmmt::WORD_ID > > source;
   std::vector< std::vector< tmmt::SentenceAlignment > > targetAndAlignment;
   tmmt::SuffixArray *suffixArray;
   std::map< WORD_ID,std::vector< int > > single_word_index;
@@ -70,6 +69,8 @@ protected:
   void create_extract(int sentenceInd, int cost, const std::vector< WORD_ID > &sourceSentence, const std::vector<SentenceAlignment> &targets, const std::string &inputStr, const std::string  &path, std::ofstream &outputFile);
 
   std::string ExtractTM(const std::string &inputPath);
+  Vocabulary &GetVocabulary()
+  { return suffixArray->GetVocabulary(); }
 
 };
 

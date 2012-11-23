@@ -13,7 +13,9 @@ public:
 	typedef unsigned int INDEX;
 
 private:
-	WORD_ID *m_array;
+  std::vector< std::vector< WORD_ID > > corpus;
+
+  WORD_ID *m_array;
 	INDEX *m_index;
 	INDEX *m_buffer;
 	char *m_wordInSentence;
@@ -44,6 +46,11 @@ public:
 	inline char GetWordInSentence( INDEX position ) { return m_wordInSentence[position]; }
 	inline char GetSentenceLength( size_t sentenceId ) { return m_sentenceLength[sentenceId]; }
 	inline INDEX GetSize() { return m_size; }
+
+	Vocabulary &GetVocabulary()
+	{ return m_vcb; }
+	const std::vector< std::vector< WORD_ID > > &GetCorpus() const
+  { return corpus; }
 };
 
 }

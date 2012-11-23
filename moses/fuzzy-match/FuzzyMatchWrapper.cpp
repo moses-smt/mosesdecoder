@@ -9,7 +9,6 @@
 #include <iostream>
 #include "FuzzyMatchWrapper.h"
 #include "SentenceAlignment.h"
-#include "Vocabulary.h"
 #include "Match.h"
 #include "create_xml.h"
 #include "moses/Util.h"
@@ -32,16 +31,22 @@ namespace tmmt
   ,multiple_slack(0)
   ,multiple_max(100)
   {
-    // create suffix array
-    //load_corpus(m_config[0], input);
-    load_corpus(sourcePath, source);
-    load_target(targetPath, targetAndAlignment);
-    load_alignment(alignmentPath, targetAndAlignment);
-    
     cerr << "creating suffix array" << endl;
     suffixArray = new tmmt::SuffixArray( sourcePath );
-    cerr << "done creating suffix array" << endl;
 
+    //cerr << "loading source data" << endl;
+    //load_corpus(sourcePath, source);
+
+    cerr << "loading target data" << endl;
+    load_target(targetPath, targetAndAlignment);
+
+    cerr << "loading alignment" << endl;
+    load_alignment(alignmentPath, targetAndAlignment);
+
+    // create suffix array
+    //load_corpus(m_config[0], input);
+    
+    cerr << "loading completed" << endl;
   }
 
   string FuzzyMatchWrapper::Extract(const string &dirNameStr)
@@ -80,6 +85,8 @@ namespace tmmt
   
   string FuzzyMatchWrapper::ExtractTM(const string &dirNameStr)
   {
+    const std::vector< std::vector< WORD_ID > > &source = suffixArray->GetCorpus();
+
     string inputPath = dirNameStr + "/in";    
     string fuzzyMatchFile = dirNameStr + "/fuzzyMatchFile";
     ofstream fuzzyMatchStream(fuzzyMatchFile.c_str());
@@ -114,7 +121,7 @@ namespace tmmt
 			//cerr << "start: " << start;
 			for(int word=start; stillMatched && word<input[sentenceInd].size(); word++)
 			{
-				substring.push_back( vocabulary.GetWord( input[sentenceInd][word] ) );
+				substring.push_back( GetVocabulary().GetWord( input[sentenceInd][word] ) );
         
 				// only look up, if needed (i.e. no unnecessary short gram lookups)
         //				if (! word-start+1 <= short_match_max_length( input_length ) )
@@ -326,7 +333,7 @@ namespace tmmt
     // create xml and extract files
     string inputStr, sourceStr;
     for (size_t pos = 0; pos < input_length; ++pos) {
-      inputStr += vocabulary.GetWord(input[sentenceInd][pos]) + " ";
+      inputStr += GetVocabulary().GetWord(input[sentenceInd][pos]) + " ";
     }
     
 		// do not try to find the best ... report multiple matches
@@ -342,7 +349,7 @@ namespace tmmt
 				//cout << "(" << best_cost <<"/" << input_length <<") ";
 				//cout << "||| " << s << " ||| " << path << endl;
         
-        vector<WORD_ID> &sourceSentence = source[s];
+        const vector<WORD_ID> &sourceSentence = source[s];
         vector<SentenceAlignment> &targets = targetAndAlignment[s];
         create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, path, fuzzyMatchStream);
         
@@ -399,7 +406,7 @@ namespace tmmt
       }
       
       // creat xml & extracts
-      vector<WORD_ID> &sourceSentence = source[best_match];
+      const vector<WORD_ID> &sourceSentence = source[best_match];
       vector<SentenceAlignment> &targets = targetAndAlignment[best_match];
       create_extract(sentenceInd, best_cost, sourceSentence, targets, inputStr, best_path, fuzzyMatchStream);
       
@@ -427,7 +434,7 @@ namespace tmmt
     {
       SAFE_GETLINE((*fileStreamP), line, LINE_MAX_LENGTH, '\n');
       if (fileStreamP->eof()) break;
-      corpus.push_back( vocabulary.Tokenize( line ) );
+      corpus.push_back( GetVocabulary().Tokenize( line ) );
     }
   }
   
@@ -443,7 +450,7 @@ namespace tmmt
     
     istream *fileStreamP = &fileStream;
     
-    WORD_ID delimiter = vocabulary.StoreIfNew("|||");
+    WORD_ID delimiter = GetVocabulary().StoreIfNew("|||");
     
     int lineNum = 0;
     char line[LINE_MAX_LENGTH];
@@ -452,7 +459,7 @@ namespace tmmt
       SAFE_GETLINE((*fileStreamP), line, LINE_MAX_LENGTH, '\n');
       if (fileStreamP->eof()) break;
       
-      vector<WORD_ID> toks = vocabulary.Tokenize( line );
+      vector<WORD_ID> toks = GetVocabulary().Tokenize( line );
       
       corpus.push_back(vector< SentenceAlignment >());
       vector< SentenceAlignment > &vec = corpus.back();
@@ -460,7 +467,7 @@ namespace tmmt
       vec.push_back(SentenceAlignment());
       SentenceAlignment *sentence = &vec.back();
       
-      const WORD &countStr = vocabulary.GetWord(toks[0]);
+      const WORD &countStr = GetVocabulary().GetWord(toks[0]);
       sentence->count = atoi(countStr.c_str());
       
       for (size_t i = 1; i < toks.size(); ++i) {
@@ -474,7 +481,7 @@ namespace tmmt
           // count
           ++i;
           
-          const WORD &countStr = vocabulary.GetWord(toks[i]);
+          const WORD &countStr = GetVocabulary().GetWord(toks[i]);
           sentence->count = atoi(countStr.c_str());
         }
         else {
@@ -553,8 +560,8 @@ unsigned int FuzzyMatchWrapper::letter_sed( WORD_ID aIdx, WORD_ID bIdx )
 	}
   
 	// get surface strings for word indices
-	const string &a = vocabulary.GetWord( aIdx );
-	const string &b = vocabulary.GetWord( bIdx );
+	const string &a = GetVocabulary().GetWord( aIdx );
+	const string &b = GetVocabulary().GetWord( bIdx );
   
 	// initialize cost matrix
 	unsigned int **cost  = (unsigned int**) calloc( sizeof( unsigned int*  ), a.size()+1 );
@@ -610,7 +617,7 @@ unsigned int FuzzyMatchWrapper::sed( const vector< WORD_ID > &a, const vector< W
 			cost[i][0] = cost[i-1][0];
 			if (use_letter_sed)
 			{
-				cost[i][0] += vocabulary.GetWord( a[i-1] ).size();
+				cost[i][0] += GetVocabulary().GetWord( a[i-1] ).size();
 			}
 			else
 			{
@@ -630,7 +637,7 @@ unsigned int FuzzyMatchWrapper::sed( const vector< WORD_ID > &a, const vector< W
 			cost[0][j] = cost[0][j-1];
 			if (use_letter_sed)
 			{
-				cost[0][j] +=	vocabulary.GetWord( b[j-1] ).size();
+				cost[0][j] +=	GetVocabulary().GetWord( b[j-1] ).size();
 			}
 			else
 			{
@@ -652,8 +659,8 @@ unsigned int FuzzyMatchWrapper::sed( const vector< WORD_ID > &a, const vector< W
 			unsigned int match;
 			if (use_letter_sed)
 			{
-				ins += vocabulary.GetWord( a[i-1] ).size();
-				del += vocabulary.GetWord( b[j-1] ).size();
+				ins += GetVocabulary().GetWord( a[i-1] ).size();
+				del += GetVocabulary().GetWord( b[j-1] ).size();
 				match = letter_sed( a[i-1], b[j-1] );
 			}
 			else
@@ -721,7 +728,7 @@ unsigned int FuzzyMatchWrapper::compute_length( const vector< WORD_ID > &sentenc
 {
 	unsigned int length = 0; for( unsigned int i=0; i<sentence.size(); i++ )
 	{
-		length += vocabulary.GetWord( sentence[i] ).size();
+		length += GetVocabulary().GetWord( sentence[i] ).size();
 	}
 	return length;
 }
@@ -1067,12 +1074,12 @@ void FuzzyMatchWrapper::create_extract(int sentenceInd, int cost, const vector< 
   string sourceStr;
   for (size_t pos = 0; pos < sourceSentence.size(); ++pos) {
     WORD_ID wordId = sourceSentence[pos];
-    sourceStr += vocabulary.GetWord(wordId) + " ";
+    sourceStr += GetVocabulary().GetWord(wordId) + " ";
   }
     
   for (size_t targetInd = 0; targetInd < targets.size(); ++targetInd) {
     const SentenceAlignment &sentenceAlignment = targets[targetInd]; 
-    string targetStr = sentenceAlignment.getTargetString(vocabulary);
+    string targetStr = sentenceAlignment.getTargetString(GetVocabulary());
     string alignStr = sentenceAlignment.getAlignmentString();
     
     outputFile
