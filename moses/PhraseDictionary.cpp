@@ -77,10 +77,10 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_sparsePhraseDictionaryFeature(spdf)
 {
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
-      implementation==Compact ) {
+      implementation==Compact) { // || implementation==FuzzyMatch ) {
     m_useThreadSafePhraseDictionary = true;
     if (implementation == SuffixArray) {
-      cerr << "Warning: implementation holds chached weights!" << endl;
+      cerr << "Warning: implementation holds cached weights!" << endl;
       exit(1);
     }
   } else {

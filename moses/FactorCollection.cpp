@@ -43,7 +43,7 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
   FactorFriend to_ins;
   to_ins.in.m_string.assign(factorString.data(), factorString.size());
 #endif // BOOST_VERSION
-  {
+  { // read=lock scope
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
 #if BOOST_VERSION >= 104200
     // If this line doesn't compile, upgrade your Boost.  

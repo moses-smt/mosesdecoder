@@ -11,6 +11,10 @@
 #include <map>
 #include <cmath>
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
 namespace tmmt
 {
 
@@ -38,6 +42,14 @@ class Vocabulary {
   WORD_ID GetWordID( const WORD& );
   std::vector<WORD_ID> Tokenize( const char[] );
   inline WORD &GetWord( WORD_ID id ) const { WORD &i = (WORD&) vocab[ id ]; return i; }
+
+ protected:
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
+
+
 };
 
 }

@@ -29,7 +29,6 @@ public:
   
 protected:
   // tm-mt
-  //std::vector< std::vector< tmmt::WORD_ID > > source;
   std::vector< std::vector< tmmt::SentenceAlignment > > targetAndAlignment;
   tmmt::SuffixArray *suffixArray;
   std::map< WORD_ID,std::vector< int > > single_word_index;

@@ -1,5 +1,8 @@
 // $Id: Vocabulary.cpp 1565 2008-02-22 14:42:01Z bojar $
 #include "Vocabulary.h"
+#ifdef WITH_THREADS
+#include <boost/thread/locks.hpp>
+#endif
 
 using namespace std;
 
@@ -30,11 +33,17 @@ vector<WORD_ID> Vocabulary::Tokenize( const char input[] ) {
 }
 
 WORD_ID Vocabulary::StoreIfNew( const WORD& word ) {
-  map<WORD, WORD_ID>::iterator i = lookup.find( word );
-  
-  if( i != lookup.end() )
-    return i->second;
 
+  { // read=lock scope
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+
+    map<WORD, WORD_ID>::iterator i = lookup.find( word );
+
+    if( i != lookup.end() )
+      return i->second;
+  }
+  
+  boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
   WORD_ID id = vocab.size();
   vocab.push_back( word );
   lookup[ word ] = id;
@@ -42,6 +51,8 @@ WORD_ID Vocabulary::StoreIfNew( const WORD& word ) {
 }
 
 WORD_ID Vocabulary::GetWordID( const WORD &word ) {
+  boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+
   map<WORD, WORD_ID>::iterator i = lookup.find( word );
   if( i == lookup.end() )
     return 0;
