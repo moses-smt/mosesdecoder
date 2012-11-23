@@ -356,18 +356,18 @@ parse-relax
 	template-if: input-parse-relaxer IN.$input-extension OUT.$input-extension
 	template-if: output-parse-relaxer IN.$output-extension OUT.$output-extension
 pcfg-extract
-  in: parse-relaxed-corpus
-  out: pcfg
-  default-name: model/pcfg
-  ignore-unless: use-pcfg-feature
-  rerun-on-change: use-pcfg-feature
-  template: $moses-bin-dir/pcfg-extract < IN.$output-extension > OUT.$output-extension
+	in: parse-relaxed-corpus
+	out: pcfg
+	default-name: model/pcfg
+	ignore-unless: use-pcfg-feature
+	rerun-on-change: use-pcfg-feature
+	template: $moses-bin-dir/pcfg-extract < IN.$output-extension > OUT.$output-extension
 pcfg-score
-  in: parse-relaxed-corpus pcfg
-  out: scored-corpus
-  default-name: model/scored-corpus
-  pass-unless: use-pcfg-feature
-  template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
+	in: parse-relaxed-corpus pcfg
+	out: scored-corpus
+	default-name: model/scored-corpus
+	pass-unless: use-pcfg-feature
+	template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
 extract-phrases
 	in: word-alignment scored-corpus
 	out: extracted-phrases
@@ -387,6 +387,32 @@ build-ttable
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array
+sigtest-filter-suffix-array
+	in: corpus
+	out: sigtest-filter-suffix-array
+	default-name: training/corpus
+	template: $salm-index IN.$input-extension ; \
+		mv IN.${input-extension}.id_voc OUT.${input-extension}.id_voc ; \
+		mv IN.${input-extension}.sa_corpus OUT.${input-extension}.sa_corpus ; \
+		mv IN.${input-extension}.sa_offset OUT.${input-extension}.sa_offset ; \
+		mv IN.${input-extension}.sa_suffix OUT.${input-extension}.sa_suffix ; \
+		$salm-index IN.$output-extension ; \
+		mv IN.${output-extension}.id_voc OUT.${output-extension}.id_voc ; \
+		mv IN.${output-extension}.sa_corpus OUT.${output-extension}.sa_corpus ; \
+		mv IN.${output-extension}.sa_offset OUT.${output-extension}.sa_offset ; \
+		mv IN.${output-extension}.sa_suffix OUT.${output-extension}.sa_suffix
+	ignore-unless: sigtest-filter
+sigtest-filter-ttable
+	in: phrase-translation-table sigtest-filter-suffix-array
+	out: sigtest-filter-phrase-translation-table
+	default-name: model/phrase-table-sigtest-filter
+	pass-unless: sigtest-filter
+sigtest-filter-reordering
+	in: reordering-table sigtest-filter-suffix-array
+	out: sigtest-filter-reordering-table
+	default-name: model/reordering-table-sigtest-filter
+	pass-unless: sigtest-filter
+	ignore-unless: lexicalized-reordering
 build-generation
 	in: corpus
 	out: generation-table
@@ -408,7 +434,7 @@ build-sparse-lexical
         default-name: model/most-frequent-words
 	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
 create-config
-	in: reordering-table phrase-translation-table generation-table sparse-lexical domains INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse-lexical domains INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -653,7 +679,7 @@ split-reference-devtest
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:domains
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:domains
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings
@@ -661,7 +687,7 @@ filter
 	ignore-if: use-hiero
 	error: already exists. Please delete
 filter-devtest
-	in: input-devtest TRAINING:phrase-translation-table TRAINING:reordering-table
+	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
 	out: filtered-dir-devtest
 	default-name: tuning/filtered.devtest
  	rerun-on-change: filter-settings
@@ -772,7 +798,7 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: input TRAINING:phrase-translation-table TRAINING:reordering-table TRAINING:domains
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:domains
 	out: filtered-dir
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage
@@ -941,13 +967,13 @@ analysis
 	ignore-unless: analysis
   rerun-on-change: analyze-search-graph
 analysis-coverage
-	in: input TRAINING:corpus TRAINING:phrase-translation-table
+	in: input TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table
 	out: analysis-coverage
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage
 	rerun-on-change: score-settings
 analysis-precision
-	in: recased-output reference input TRAINING:corpus TRAINING:phrase-translation-table analysis-coverage
+	in: recased-output reference input TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table analysis-coverage
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage
