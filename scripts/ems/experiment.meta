@@ -129,7 +129,7 @@ train
 
 [LM] multiple
 get-corpus
-  in: get-corpus-script
+	in: get-corpus-script
 	out: raw-corpus
 	pass-unless: get-corpus-script
 	default-name: lm/txt
@@ -166,7 +166,7 @@ truecase
 	default-name: lm/truecased
 	ignore-unless: output-truecaser
 	only-factor-0: yes
-  template: $output-truecaser -model IN1.$output-extension < IN > OUT
+	template: $output-truecaser -model IN1.$output-extension < IN > OUT
 	parallelizable: yes
 split
 	in: lowercased-corpus SPLITTER:splitter-model
@@ -208,7 +208,7 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
-  error: set KENLM_MAX_ORDER to at least this value
+	error: set KENLM_MAX_ORDER to at least this value
 
 [INTERPOLATED-LM] single
 tuning-from-sgm
@@ -276,6 +276,14 @@ binarize
 	rerun-on-change: lm
 	default-name: lm/interpolated-binlm
 	error: set kMaxOrder to at least this value
+[MML] single
+train
+	in: indomain-stem outdomain-stem
+	out: model
+	ignore-unless: settings
+	default-name: model/mml
+	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN.$input-extension -in-target IN.$output-extension -out-source IN1.$input-extension -out-target IN1.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
+
 [TRAINING] single
 consolidate
 	in: CORPUS:clean-split-stem
@@ -286,10 +294,24 @@ build-domains
 	in: CORPUS:clean-split-stem
 	out: domains
 	default-name: model/domains
-	ignore-unless: domain-features
+	ignore-unless: domain-features mml-filter-corpora
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
+mml-score
+	in: MML:model corpus domains
+	out: mml-scores
+	ignore-unless: mml-before-wa mml-after-wa
+	rerun-on-change: mml-filter-corpora
+	default-name: training/corpus-mml-score
+	template: $moses-script-dir/ems/support/mml-score.perl -model IN -corpus IN1 -domains IN2 -input-extension $input-extension -output-extension $output-extension -query $MML:lm-query -filter-domains $mml-filter-corpora > OUT
+mml-filter-before-wa
+	in: corpus mml-scores
+	out: corpus-mml-prefilter
+	ignore-unless: mml-before-wa
+	rerun-on-change: mml-filter-corpora
+	default-name: training/corpus-mml
+	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -score IN1 -input-extension $input-extension -output-extension $output-extension $mml-before-wa
 prepare-data
-	in: corpus
+	in: corpus-mml-prefilter=OR=corpus
 	out: prepared-data
 	rerun-on-change: alignment-factors training-options script
 	ignore-if: use-berkeley
@@ -309,7 +331,7 @@ run-giza-inverse
 	default-name: giza-inverse
 	error: not found	
 run-berkeley
-	in: corpus
+	in: corpus-mml-prefilter
 	out: berkeley-alignment
 	ignore-unless: use-berkeley
 	rerun-on-change: berkeley-train berkeley-jar berkeley-training-options
@@ -317,7 +339,7 @@ run-berkeley
 	template: $berkeley-train " $berkeley-java-options " $berkeley-jar IN OUT $input-extension $output-extension $berkeley-training-options
 	not-error: 0 errors,
 process-berkeley
-	in: corpus berkeley-alignment
+	in: corpus-mml-prefilter berkeley-alignment
 	out: word-alignment
 	default-name: model/aligned
 	rerun-on-change: berkeley-process berkeley-jar berkeley-posterior berkeley-process-options
@@ -331,25 +353,32 @@ symmetrize-giza
 	rerun-on-change: alignment-symmetrization-method training-options script
 	default-name: model/aligned
 	error: skip=<[1-9]
+mml-filter-after-wa
+	in: corpus-mml-prefilter=OR=corpus word-alignment mml-scores
+	out: corpus-mml-postfilter
+	ignore-unless: mml-after-wa
+	rerun-on-change: mml-filter-corpora
+	default-name: model/corpus-mml
+	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -alignment IN1 -score IN2 -input-extension $input-extension -output-extension $output-extension $mml-after-wa
 build-biconcor
-	in: word-alignment corpus
+	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: biconcor-model
 	default-name: model/biconcor
 	ignore-unless: biconcor
 	error: usage
 build-suffix-array
-	in: word-alignment corpus
+	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: phrase-translation-table
 	default-name: model/suffix-array
 	ignore-unless: suffix-array
 	error: usage
 build-lex-trans
-	in: word-alignment corpus
+	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: lexical-translation-table
 	rerun-on-change: translation-factors training-options script
 	default-name: model/lex
 parse-relax
-	in: corpus
+	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: parse-relaxed-corpus
 	default-name: model/parsed-relaxed
 	pass-unless: input-parse-relaxer output-parse-relaxer
@@ -369,7 +398,7 @@ pcfg-score
 	pass-unless: use-pcfg-feature
 	template: ln -s IN.$input-extension OUT.$input-extension ; $moses-bin-dir/pcfg-score IN1.$output-extension < IN.$output-extension > OUT.$output-extension
 extract-phrases
-	in: word-alignment scored-corpus
+	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
 	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features
         only-existence-matters: domain-features
@@ -388,7 +417,7 @@ build-ttable
 	default-name: model/phrase-table
 	ignore-if: suffix-array
 sigtest-filter-suffix-array
-	in: corpus
+	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: sigtest-filter-suffix-array
 	default-name: training/corpus
 	template: $salm-index IN.$input-extension ; \
@@ -414,7 +443,7 @@ sigtest-filter-reordering
 	pass-unless: sigtest-filter
 	ignore-unless: lexicalized-reordering
 build-generation
-	in: corpus
+	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: generation-table
 	rerun-on-change: generation-factors generation-type training-options script
 	ignore-unless: generation-factors
@@ -427,7 +456,7 @@ build-generation-custom
 	ignore-unless: AND generation-factors generation-corpus
 	default-name: model/generation-table
 build-sparse-lexical
-	in: corpus
+	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
         out: sparse-lexical
         ignore-unless: sparse-lexical-features
 	rerun-on-change: sparse-lexical-features
@@ -448,19 +477,19 @@ binarize-config
 	default-name: model/moses.bin.ini
 	template: $binarize-all $ttable-binarizer $rtable-binarizer OUT IN
 hiero-compile-source-suffix-array
-	in: corpus
+	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: hiero-source-suffix-array
 	ignore-unless: use-hiero
 	default-name: hiero-model/f.sa.bin
 	template: $hiero-decode-dir/compile_bin.py -s IN.$input-extension OUT
 hiero-compile-target
-	in: corpus
+	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: hiero-target-array
 	ignore-unless: use-hiero
 	default-name: hiero-model/e.bin
 	template: $hiero-decode-dir/compile_bin.py IN.$output-extension OUT
 hiero-compile-alignment
-	in: word-alignment
+	in: corpus-mml-postfilter=OR=word-alignment
 	out: hiero-alignment-array
 	ignore-unless: use-hiero
 	default-name: hiero-model/a.bin
@@ -967,13 +996,13 @@ analysis
 	ignore-unless: analysis
   rerun-on-change: analyze-search-graph
 analysis-coverage
-	in: input TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table
+	in: input TRAINING:corpus-mml-postfilter=OR=TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table
 	out: analysis-coverage
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage
 	rerun-on-change: score-settings
 analysis-precision
-	in: recased-output reference input TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table analysis-coverage
+	in: recased-output reference input TRAINING:corpus-mml-postfilter=OR=TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus TRAINING:sigtest-filter-phrase-translation-table analysis-coverage
 	out: analysis
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage

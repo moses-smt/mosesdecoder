@@ -1968,7 +1968,7 @@ sub define_training_build_ttable {
 
     $cmd .=  "-no-word-alignment " if  defined($word_alignment) && $word_alignment eq "no";
 
-    $cmd .= &define_domain_feature_score_option($domains) if $domains;
+    $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
     &create_step($step_id,$cmd);
 }
@@ -2188,7 +2188,7 @@ sub define_training_create_config {
 
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
-    $cmd .= &define_domain_feature_score_option($domains) if $domains;
+    $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
 
     &create_step($step_id,$cmd);
 }
@@ -2529,7 +2529,7 @@ sub define_tuningevaluation_filter {
       $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
       $delete_config = 1;
       $cmd = &get_training_setting(9);
-      $cmd .= &define_domain_feature_score_option($domains) if $domains;
+      $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
       my $ptCmd = $phrase_translation_table;
       $ptCmd .= ":$ptImpl" if $ptImpl>0;
