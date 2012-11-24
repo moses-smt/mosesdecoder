@@ -361,6 +361,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             Word word;
             word.CreateFromString(Output, *m_output,
                                   GetTargetSymbol(decodedSymbol), false);
+            
             targetPhrase->AddWord(word);
           }
           // if the symbol is a subphrase pointer
@@ -389,6 +390,11 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             {
               Phrase subPhrase = sourcePhrase.GetSubString(WordsRange(srcStart, srcEnd));
               subTpv = CreateTargetPhraseCollection(subPhrase, false);
+            }
+            else {
+              // false positive consistency check
+              if(rank >= tpv->size()-1)
+                return TargetPhraseVectorPtr();
             }
             
             // false positive consistency check
