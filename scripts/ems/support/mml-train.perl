@@ -36,7 +36,7 @@ die("ERROR: model not specified (-model FILESTEM)") unless defined($model);
 &train_lm($indomain_source,"in-source");
 &train_lm($indomain_target,"in-target");
 &train_lm($outdomain_source,"out-source");
-&train_lm($outdomain_source,"out-target");
+&train_lm($outdomain_target,"out-target");
 
 sub train_lm {
   my ($file,$type) = @_;

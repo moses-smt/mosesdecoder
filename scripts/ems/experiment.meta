@@ -277,12 +277,101 @@ binarize
 	default-name: lm/interpolated-binlm
 	error: set kMaxOrder to at least this value
 [MML] single
+tokenize-indomain-source
+	in: raw-indomain-source
+	out: tokenized-indomain-source
+	default-name: mml/indomain-source.tok
+	pass-unless: input-tokenizer
+	template: $input-tokenizer < IN > OUT
+	parallelizable: yes
+factorize-indomain-source
+	in: tokenized-indomain-source
+	out: factorized-indomain-source
+	rerun-on-change: TRAINING:input-factors
+	default-name: mml/indomain-source.factored
+	pass-unless: factors	
+	parallelizable: yes
+	error: can't open
+	error: incompatible number of words in factor
+lowercase-indomain-source
+	in: factorized-indomain-source
+	out: lowercased-indomain-source
+	default-name: mml/indomain-source.lowercased
+	pass-unless: input-lowercaser
+	ignore-if: input-truecaser
+	only-factor-0: yes
+	template: $input-lowercaser < IN > OUT
+	parallelizable: yes
+truecase-indomain-source
+	in: factorized-indomain-source TRUECASER:truecase-model
+	out: lowercased-indomain-source
+	rerun-on-change: input-truecaser
+	default-name: mml/indomain-source.truecased
+	ignore-unless: input-truecaser
+	only-factor-0: yes
+	template: $input-truecaser -model IN1.$input-extension < IN > OUT
+	parallelizable: yes
+split-indomain-source
+	in: lowercased-indomain-source SPLITTER:splitter-model
+	out: indomain-source
+	rerun-on-change: input-splitter
+	default-name: mml/indomain-source.split
+	pass-unless: input-splitter
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
+tokenize-indomain-target
+	in: raw-indomain-target
+	out: tokenized-indomain-target
+	default-name: mml/indomain-target.tok
+	pass-unless: output-tokenizer
+	template: $output-tokenizer < IN > OUT
+	parallelizable: yes
+factorize-indomain-target
+	in: tokenized-indomain-target
+	out: factorized-indomain-target
+	rerun-on-change: TRAINING:output-factors
+	default-name: mml/indomain-target.factored
+	pass-unless: factors	
+	parallelizable: yes
+	error: can't open
+	error: incompatible number of words in factor
+lowercase-indomain-target
+	in: factorized-indomain-target
+	out: lowercased-indomain-target
+	default-name: mml/indomain-target.lowercased
+	pass-unless: output-lowercaser
+	ignore-if: output-truecaser
+	only-factor-0: yes
+	template: $output-lowercaser < IN > OUT
+	parallelizable: yes
+truecase-indomain-target
+	in: factorized-indomain-target TRUECASER:truecase-model
+	out: lowercased-indomain-target
+	rerun-on-change: output-truecaser
+	default-name: mml/indomain-target.truecased
+	ignore-unless: output-truecaser
+	only-factor-0: yes
+	template: $output-truecaser -model IN1.$output-extension < IN > OUT
+	parallelizable: yes
+split-indomain-target
+	in: lowercased-indomain-target SPLITTER:splitter-model
+	out: indomain-target
+	rerun-on-change: output-splitter
+	default-name: mml/indomain-target.split
+	pass-unless: output-splitter
+	template: $output-splitter -model IN1.$output-extension < IN > OUT
 train
 	in: indomain-stem outdomain-stem
 	out: model
-	ignore-unless: settings
-	default-name: model/mml
+	ignore-unless: AND settings indomain-stem
+	default-name: mml/model
 	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN.$input-extension -in-target IN.$output-extension -out-source IN1.$input-extension -out-target IN1.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
+train-in-mono
+	in: indomain-source indomain-target outdomain-stem
+	out: model
+	ignore-unless: settings
+	ignore-if: indomain-stem
+	default-name: mml/model
+	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings 
 
 [TRAINING] single
 consolidate

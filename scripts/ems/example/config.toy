@@ -236,6 +236,35 @@ type = 8
 #lm-randomizer = "$randlm-dir/buildlm -falsepos 8 -values 8"
 
 #################################################################
+# MODIFIED MOORE LEWIS FILTERING
+
+[MML] IGNORE
+
+### specifications for language models to be trained
+#
+#lm-training = $srilm-dir/ngram-count
+#lm-settings = "-interpolate -kndiscount -unk"
+#lm-binarizer = $moses-src-dir/bin/build_binary
+#lm-query = $moses-src-dir/bin/query
+#order = 5
+
+### in-/out-of-domain source/target corpora to train the 4 language model
+# 
+# in-domain: point either to a parallel corpus
+#outdomain-stem = [CORPUS:toy:clean-split-stem]
+
+# ... or to two separate monolingual corpora
+#indomain-target = [LM:toy:lowercased-corpus]
+#raw-indomain-source = $toy-data/nc-5k.$input-extension
+
+# point to out-of-domain parallel corpus
+#outdomain-stem = [CORPUS:giga:clean-split-stem]
+
+# settings: number of lines sampled from the corpora to train each language model on
+# (typically a million or so)
+#settings = "--line-count 1000000"
+
+#################################################################
 # TRANSLATION MODEL TRAINING
 
 [TRAINING]
@@ -299,6 +328,12 @@ alignment-symmetrization-method = grow-diag-final-and
 # point to word alignment files
 #
 #word-alignment = $working-dir/model/aligned.1
+
+### filtering some corpora with modified Moore-Lewis
+# specify corpora to be filtered and ratio to be kept, either before or after word alignment
+#mml-filter-corpora = toy
+#mml-before-wa = "-proportion 0.9"
+#mml-after-wa = "-proportion 0.9"
 
 ### create a bilingual concordancer for the model
 #
