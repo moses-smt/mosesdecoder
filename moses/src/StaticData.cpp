@@ -1132,7 +1132,9 @@ bool StaticData::LoadCacheBasedLanguageModel()
    if (weight.size() == 1) // check if feature is used
    {
      m_CacheBasedLanguageModel = new CacheBasedLanguageModel(weight); // create the feature
-
+     if (m_parameter->GetParam("cblm-type").size() != 0) {
+       m_CacheBasedLanguageModel->SetQueryType(Scan<size_t>( m_parameter->GetParam("cblm-type")[0]));
+     }
 
      for(size_t j = 0; j < file.size(); ++j)
      {

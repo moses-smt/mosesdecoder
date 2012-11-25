@@ -154,6 +154,7 @@ Parameter::Parameter()
 
   AddParam("cblm-file", "location of the initialization data for cache-based language model");
   AddParam("weight-cblm", "cblm", "weight for cache-based language model");
+  AddParam("cblm-type", "way of querying the cache-based Language model: 0=looks for all sub-string, 1=llok for the whole string; default is 0");
 
 }
 

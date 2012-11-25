@@ -294,10 +294,12 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
         else if (tagName == "dlt") {
 	/*
-	for the dlt tag extract the info about previous phrases (uni-grams or n-grams) from the trg attribute
-	the phrases are separted by ||
+	 the dlt tag provides information to use for the present the future sentences
+	 the information comes usually from an analysis of the previous translations
 	*/
-	  VERBOSE(2, "tag:|" << tagContent << "|" << std::endl);
+	/*
+	 cblm attribute provides information for the cache-based LM
+	*/
           vector<string> dlt_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"trg"), "||");
           // add to the global static producer
           const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
