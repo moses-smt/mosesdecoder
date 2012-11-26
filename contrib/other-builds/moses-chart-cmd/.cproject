@@ -71,7 +71,6 @@
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="z"/>
-									<listOptionValue builtIn="false" value="rt"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="boost_filesystem-mt"/>

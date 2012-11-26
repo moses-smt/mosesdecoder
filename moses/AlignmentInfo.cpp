@@ -103,7 +103,6 @@ std::vector<size_t> AlignmentInfo::GetSourceIndex2PosMap() const
     size_t sourcePos = iter->first;
     sourcePoses.insert(sourcePos);
   }
-
   std::vector<size_t> ret(sourcePoses.begin(), sourcePoses.end());
   return ret;
 }
