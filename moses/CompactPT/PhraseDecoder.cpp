@@ -392,6 +392,11 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
               Phrase subPhrase = sourcePhrase.GetSubString(WordsRange(srcStart, srcEnd));
               subTpv = CreateTargetPhraseCollection(subPhrase, false);
             }
+            else {
+              // false positive consistency check
+              if(rank >= tpv->size()-1)
+                return TargetPhraseVectorPtr();
+            }
             
             // false positive consistency check
             if(subTpv != NULL && rank < subTpv->size())
