@@ -31,8 +31,8 @@ lib moses :
   Scope3Parser/*.cpp
   CYKPlusParser/*.cpp
   RuleTable/*.cpp
-  fuzzy-match/*.cpp
   TranslationModel/*.cpp
+  TranslationModel/fuzzy-match/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp

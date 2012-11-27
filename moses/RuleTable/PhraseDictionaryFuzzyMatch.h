@@ -22,7 +22,7 @@
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
-#include "moses/fuzzy-match/FuzzyMatchWrapper.h"
+#include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "Trie.h"
 #include "PhraseDictionaryNodeSCFG.h"
 #include "PhraseDictionarySCFG.h"
