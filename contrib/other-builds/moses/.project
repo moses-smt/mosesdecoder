@@ -1827,11 +1827,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/pt.log</locationURI>
 		</link>
 		<link>
-			<name>Debug/CompactPT/DynSAInclude</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1847,102 +1842,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Debug/CompactPT/DynSAInclude/FileHandler.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/FileHandler.cpp</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/FileHandler.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/FileHandler.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/RandLMCache.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/RandLMCache.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/RandLMFilter.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/RandLMFilter.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/fdstream.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/fdstream.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/hash.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/hash.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/onlineRLM.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/onlineRLM.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/params.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/params.cpp</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/params.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/params.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/perfectHash.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/perfectHash.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/quantizer.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/quantizer.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/types.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/types.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/utils.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/utils.h</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/vocab.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/vocab.cpp</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/vocab.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/vocab.h</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1957,22 +1862,12 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2032,11 +1927,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libCompactPT.a</locationURI>
 		</link>
 		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Factory.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Factory.o</locationURI>
@@ -2045,36 +1935,6 @@
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ORLM.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ORLM.o</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libdynsa.a</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/FileHandler.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/FileHandler.o</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/params.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/params.o</locationURI>
-		</link>
-		<link>
-			<name>Debug/CompactPT/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSAInclude/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/DynSAInclude/vocab.o</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

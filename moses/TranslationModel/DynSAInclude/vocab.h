@@ -6,8 +6,8 @@
 #include "types.h"
 #include "FileHandler.h"
 #include "utils.h"
-#include "../TypeDef.h"
-#include "../Word.h"
+#include "moses/TypeDef.h"
+#include "moses/Word.h"
 
 namespace Moses
 {

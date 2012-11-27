@@ -7,7 +7,7 @@
 #include <utility>
 #include "Util.h"
 #include "File.h"
-#include "DynSAInclude/types.h"
+#include "moses/TranslationModel/DynSAInclude/types.h"
 
 namespace Moses
 {

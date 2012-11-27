@@ -3,9 +3,9 @@
 
 #include "TargetPhrase.h"
 #include "DynSuffixArray.h" 
-#include "DynSAInclude/vocab.h"
-#include "DynSAInclude/types.h"
-#include "DynSAInclude/utils.h"
+#include "moses/TranslationModel/DynSAInclude/vocab.h"
+#include "moses/TranslationModel/DynSAInclude/types.h"
+#include "moses/TranslationModel/DynSAInclude/utils.h"
 #include "InputFileStream.h"
 #include "FactorTypeSet.h"
 

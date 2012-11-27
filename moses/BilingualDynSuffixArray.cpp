@@ -1,5 +1,5 @@
 #include "BilingualDynSuffixArray.h"
-#include "DynSAInclude/utils.h"
+#include "moses/TranslationModel/DynSAInclude/utils.h"
 #include "FactorCollection.h"
 #include "StaticData.h"
 #include "TargetPhrase.h"
