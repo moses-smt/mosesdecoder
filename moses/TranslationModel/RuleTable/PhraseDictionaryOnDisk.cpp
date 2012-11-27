@@ -22,8 +22,8 @@
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/CYKPlusParser/DotChartOnDisk.h"
-#include "moses/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
+#include "moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"
 
 using namespace std;
 

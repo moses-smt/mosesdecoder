@@ -33,7 +33,7 @@
 #include "moses/StaticData.h"
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
-#include "moses/CYKPlusParser/ChartRuleLookupManagerMemory.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"
 
 using namespace std;
 

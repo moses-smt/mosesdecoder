@@ -42,7 +42,7 @@
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "util/file.hh"
-#include "moses/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 
 using namespace std;
 

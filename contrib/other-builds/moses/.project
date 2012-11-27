@@ -127,11 +127,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BleuScoreFeature.h</locationURI>
 		</link>
 		<link>
-			<name>CYKPlusParser</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>ChartCell.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartCell.cpp</locationURI>
@@ -1240,71 +1235,6 @@
 			<name>rule.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerCYKPlus.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerCYKPlus.h</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerMemory.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerMemory.cpp</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerMemory.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerMemory.h</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/ChartRuleLookupManagerOnDisk.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/DotChart.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/DotChart.h</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/DotChartInMemory.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/DotChartInMemory.cpp</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/DotChartInMemory.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/DotChartInMemory.h</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/DotChartOnDisk.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/DotChartOnDisk.cpp</locationURI>
-		</link>
-		<link>
-			<name>CYKPlusParser/DotChartOnDisk.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CYKPlusParser/DotChartOnDisk.h</locationURI>
 		</link>
 		<link>
 			<name>CompactPT/BlockHashIndex.cpp</name>
