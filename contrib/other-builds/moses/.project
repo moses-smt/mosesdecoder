@@ -807,11 +807,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCubeQueue.h</locationURI>
 		</link>
 		<link>
-			<name>Scope3Parser</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>ScoreComponentCollection.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ScoreComponentCollection.cpp</locationURI>
@@ -1600,71 +1595,6 @@
 			<name>LM/bin</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/ApplicableRuleTrie.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/ApplicableRuleTrie.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/ApplicableRuleTrie.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/ApplicableRuleTrie.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/IntermediateVarSpanNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/IntermediateVarSpanNode.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/Parser.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/Parser.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/Parser.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/Parser.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/SentenceMap.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/SentenceMap.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLattice.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/StackLattice.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLatticeBuilder.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/StackLatticeBuilder.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLatticeBuilder.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/StackLatticeBuilder.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/StackLatticeSearcher.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/StackLatticeSearcher.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/VarSpanNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/VarSpanNode.h</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/VarSpanTrieBuilder.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/VarSpanTrieBuilder.cpp</locationURI>
-		</link>
-		<link>
-			<name>Scope3Parser/VarSpanTrieBuilder.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/VarSpanTrieBuilder.h</locationURI>
 		</link>
 		<link>
 			<name>CompactPT/bin/gcc-4.6</name>

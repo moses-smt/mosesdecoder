@@ -27,12 +27,12 @@ if $(have-clock[2]) = 0 {
 lib moses :
 [ glob 
   *.cpp
-  Scope3Parser/*.cpp
   CYKPlusParser/*.cpp
   TranslationModel/*.cpp
   TranslationModel/fuzzy-match/*.cpp
   TranslationModel/DynSAInclude/*.cpp
   TranslationModel/RuleTable/*.cpp
+  TranslationModel/Scope3Parser/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp

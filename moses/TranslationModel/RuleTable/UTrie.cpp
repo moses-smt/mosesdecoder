@@ -18,7 +18,7 @@
  ***********************************************************************/
 
 #include "moses/NonTerminal.h"
-#include "moses/Scope3Parser/Parser.h"
+#include "moses/TranslationModel/Scope3Parser/Parser.h"
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"
