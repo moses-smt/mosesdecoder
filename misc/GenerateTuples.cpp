@@ -12,7 +12,7 @@
 #include "moses/Phrase.h"
 #include "moses/ConfusionNet.h"
 #include "moses/WordsRange.h"
-#include "moses/PhraseDictionaryTree.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 
 using namespace Moses;
 

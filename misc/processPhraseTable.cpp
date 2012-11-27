@@ -7,12 +7,12 @@
 #include <functional>
 #include <sys/stat.h>
 #include "moses/TypeDef.h"
-#include "moses/PhraseDictionaryTree.h"
 #include "moses/ConfusionNet.h"
 #include "moses/FactorCollection.h"
 #include "moses/Phrase.h"
 #include "moses/InputFileStream.h"
 #include "moses/Timer.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 
 using namespace std;
 using namespace Moses;

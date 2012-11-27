@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "moses/PhraseDictionaryTree.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "moses/Util.h"
 
 void usage();
