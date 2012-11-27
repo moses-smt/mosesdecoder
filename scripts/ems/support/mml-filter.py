@@ -46,6 +46,7 @@ class ScoreFilterStrategy(FilterStrategy):
   def __init__(self,config):
     section = "score"
     self.score_file = config.get(section,"score_file")
+    self.ignore_score = config.get(section, "ignore_score", "99999")
     option_names = ("threshold", "proportion", "count")
     options = [config.config.has_option(section,o) for o in option_names]
     if sum(options) != 1:
@@ -60,12 +61,17 @@ class ScoreFilterStrategy(FilterStrategy):
       else:
         # need to count entries
         count = 0
-        for line in open(self.score_file): count = count + 1
+        ignore_count = 0
+        for line in open(self.score_file):
+          if line[:-1] != self.ignore_score:
+             count = count + 1
+          else:
+            ignore_count = ignore_count + 1
         count = int(count * config.getfloat(section,option_names[1]))
-      log.info("Retaining %d entries" % count)
+      log.info("Retaining at least %d entries and ignoring %d" % (count, ignore_count))
       # Find the threshold
       self.threshold = sorted(\
-        [float(line[:-1]) for line in open(self.score_file)], reverse=True)[count]
+        [float(line[:-1]) for line in open(self.score_file)], reverse=True)[ignore_count + count]
       #self.threshold = heapq.nlargest(count, \
       #  [float(line[:-1]) for line in open(self.score_file)])[-1]
 
@@ -77,7 +83,7 @@ class ScoreFilterStrategy(FilterStrategy):
     score = self.sfh.readline()
     if not score:
       raise RuntimeError("score file truncated")
-    return float(score[:-1]) >= self.threshold
+    return score[:-1] == self.ignore_score  or float(score[:-1]) >= self.threshold
   
 
 def main():
@@ -100,6 +106,8 @@ def main():
   # Optional general parameters
   alignment_stem = config.get("general", "alignment_stem", "")
   alignment_type = config.get("general", "alignment_type", "grow-diag-final-and")
+  domain_file_in = config.get("general", "domain_file", "")
+  domain_file_out = config.get("general", "domain_file_out", "")
 
   strategy_class = globals()[strategy + "FilterStrategy"]
   strategy = strategy_class(config)
@@ -115,7 +123,21 @@ def main():
     alignment_input_fh = open(alignment_stem + "." + alignment_type)
     alignment_output_fh = open(output_stem + "." + alignment_type,"w")
 
+  domain_boundaries = {}
+  if domain_file_in:
+    dfh = open(domain_file_in)
+    for line in dfh:
+      line_no,name = line[:-1].split()
+      domain_boundaries[int(line_no)] = name
+  
+  domain_output_fh = None
+  if domain_file_out:
+    domain_output_fh = open(domain_file_out, "w")
+
+  #log.info(str(domain_boundaries))
+
   retained = 0
+  line_no = 0
   for source_line in source_input_fh:
     target_line = target_input_fh.readline()
     if alignment_input_fh:
@@ -126,6 +148,10 @@ def main():
       print>>target_output_fh, target_line,
       if alignment_input_fh:
         print>>alignment_output_fh, align_line,
+    line_no = line_no + 1
+    # check if this is a domain boundary
+    if domain_boundaries and domain_boundaries.has_key(line_no):
+      print>>domain_output_fh,"%d %s" % (retained,domain_boundaries[line_no])
   log.info("Lines retained: %d" % retained)
 
 if __name__ == "__main__":

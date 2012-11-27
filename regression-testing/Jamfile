@@ -52,7 +52,8 @@ if $(with-regtest) {
   actions reg_test_misc {
     $(TOP)/regression-testing/run-test-misc.perl --moses-root=$(TOP) --moses-bin=$(BINDIR) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
   }
-  reg_test misc : [ glob $(test-dir)/misc.* ] : ..//prefix-bin ..//prefix-lib : @reg_test_misc ;
+  reg_test misc : [ glob $(test-dir)/misc.* : $(test-dir)/misc.mml*  ] : ..//prefix-bin ..//prefix-lib : @reg_test_misc ;
+  reg_test misc-mml : [ glob $(test-dir)/misc.mml*  ] : $(TOP)/scripts/ems/support/mml-filter.py $(TOP)/scripts/ems/support/defaultconfig.py  : @reg_test_misc ;
 
-   alias all : phrase chart mert score extract extractrules misc ;
+   alias all : phrase chart mert score extract extractrules misc misc-mml ;
 }
