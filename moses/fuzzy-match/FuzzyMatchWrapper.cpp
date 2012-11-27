@@ -49,21 +49,34 @@ namespace tmmt
     cerr << "loading completed" << endl;
   }
 
-  void FuzzyMatchWrapper::InitializeForInput(Moses::InputType const& inputSentence)
+  FuzzyMatchWrapper::WordIndex &FuzzyMatchWrapper::GetWordIndex(long translationId)
   {
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+    std::map<long, WordIndex>::iterator iter = m_wordIndex.find(translationId);
+    assert(iter != m_wordIndex.end());
 
+    return iter->second;
   }
 
-  void FuzzyMatchWrapper::CleanUp(const Moses::InputType& source)
+  void FuzzyMatchWrapper::AddWordIndex(long translationId)
   {
-
+    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+    WordIndex &ret = m_wordIndex[translationId];
   }
 
+  void FuzzyMatchWrapper::DeleteWordIndex(long translationId)
+  {
+    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+    size_t ret = m_wordIndex.erase(translationId);
+    CHECK(ret == 1);
+  }
 
   string FuzzyMatchWrapper::Extract(long translationId, const string &dirNameStr)
   {
     const Moses::StaticData &staticData = Moses::StaticData::Instance();
     
+    AddWordIndex(translationId);
+
     string fuzzyMatchFile = ExtractTM(translationId, dirNameStr);
     
     // create extrac files
@@ -86,10 +99,12 @@ namespace tmmt
     cmd = staticData.GetBinDirectory();
 #endif
 
-	cmd += string("/../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical ")
+    cmd += string("/../scripts/training/train-model.perl -dont-zip -first-step 6 -last-step 6 -f en -e fr -hierarchical ")
 		    	+ " -extract-file " + fuzzyMatchFile + ".extract -lexical-file - -score-options \"--NoLex\" "
 		    	+ " -phrase-translation-table " + fuzzyMatchFile + ".pt";
     system(cmd.c_str());
+
+    DeleteWordIndex(translationId);
 
     return fuzzyMatchFile + ".pt.gz";
   }

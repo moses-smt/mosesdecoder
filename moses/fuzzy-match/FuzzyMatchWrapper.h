@@ -9,6 +9,9 @@
 #ifndef moses_FuzzyMatchWrapper_h
 #define moses_FuzzyMatchWrapper_h
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
 #include <fstream>
 #include <string>
 #include "SuffixArray.h"
@@ -28,9 +31,6 @@ public:
 
   std::string Extract(long translationId, const std::string &dirNameStr);
   
-  void InitializeForInput(Moses::InputType const& inputSentence);
-  void CleanUp(const Moses::InputType& source);
-
 protected:
   // tm-mt
   std::vector< std::vector< tmmt::SentenceAlignment > > targetAndAlignment;
@@ -46,8 +46,12 @@ protected:
   int multiple_max;
 
   typedef std::map< WORD_ID,std::vector< int > > WordIndex;
-  //std::map<long, WordIndex> m_wordIndex;
-  WordIndex m_wordIndex;
+  std::map<long, WordIndex> m_wordIndex;
+  //WordIndex m_wordIndex;
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
 
   // global cache for word pairs
   std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > lsed;
@@ -77,8 +81,9 @@ protected:
   Vocabulary &GetVocabulary()
   { return suffixArray->GetVocabulary(); }
 
-  WordIndex &GetWordIndex(long translationId)
-  { return m_wordIndex;}
+  WordIndex &GetWordIndex(long translationId);
+  void AddWordIndex(long translationId);
+  void DeleteWordIndex(long translationId);
 };
 
 }
