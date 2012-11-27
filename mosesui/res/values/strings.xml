@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="hello">Hello World, mosesui!</string>
+    <string name="app_name">mosesui</string>
+
+<!--     <string name="defult_url">http://10.0.2.2/en-ht.zip</string>  -->
+    <string name="defult_url">http://10.0.2.2/fr-en.zip</string>
+    <string name="defult_source_string">je achète un chat</string>
+    <string name="download">Download</string>
+    <string name="status">Status...</string>
+    <string name="deleteAllModels">Delete All Models</string>
+    <string name="show_log">Show Log</string>
+    <string name="deleteLog">Delete Log</string>
+</resources>
