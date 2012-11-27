@@ -250,9 +250,6 @@ static void ShowWeights()
 
 int main(int argc, char* argv[])
 {
-  string cmd = "-score-options \"--NoLex\" ";
-  cerr << cmd << endl;
-
   try {
     IFVERBOSE(1) {
       TRACE_ERR("command: ");
