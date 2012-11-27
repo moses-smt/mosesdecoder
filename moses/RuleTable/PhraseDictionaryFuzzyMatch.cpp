@@ -159,11 +159,10 @@ namespace Moses
     inFile << endl;
     inFile.close();
         
-    string ptFileName = m_FuzzyMatchWrapper->Extract(dirNameStr);
+    long translationId = inputSentence.GetTranslationId();
+    string ptFileName = m_FuzzyMatchWrapper->Extract(translationId, dirNameStr);
 
     // populate with rules for this sentence
-    long translationId = inputSentence.GetTranslationId();
-
     PhraseDictionaryNodeSCFG &rootNode = m_collection[translationId];
     FormatType format = MosesFormat;
         
