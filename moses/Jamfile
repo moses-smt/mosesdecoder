@@ -38,7 +38,7 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
 ]
-headers LM//LM CompactPT//CompactPT synlm ThreadPool rt
+headers LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;

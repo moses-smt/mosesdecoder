@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #ifndef WIN32
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
-#include "moses/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
 #include "moses/TranslationModel/RuleTable/UTrie.h"
 

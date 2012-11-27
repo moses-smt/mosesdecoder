@@ -272,11 +272,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ChartTrellisPathList.h</locationURI>
 		</link>
 		<link>
-			<name>CompactPT</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>ConfusionNet.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ConfusionNet.cpp</locationURI>
@@ -1237,146 +1232,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>
 		</link>
 		<link>
-			<name>CompactPT/BlockHashIndex.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/BlockHashIndex.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/BlockHashIndex.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/BlockHashIndex.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/CanonicalHuffman.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/CanonicalHuffman.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/CmphStringVectorAdapter.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/CmphStringVectorAdapter.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/CmphStringVectorAdapter.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/CmphStringVectorAdapter.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/ConsistentPhrases.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/ConsistentPhrases.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/LexicalReorderingTableCompact.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/LexicalReorderingTableCompact.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/LexicalReorderingTableCompact.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/LexicalReorderingTableCompact.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/LexicalReorderingTableCreator.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/LexicalReorderingTableCreator.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/LexicalReorderingTableCreator.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/LexicalReorderingTableCreator.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/ListCoders.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/ListCoders.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/MmapAllocator.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/MmapAllocator.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/MonotonicVector.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/MonotonicVector.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/MurmurHash3.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/MurmurHash3.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/MurmurHash3.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/MurmurHash3.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PackedArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PackedArray.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PhraseDecoder.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PhraseDecoder.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PhraseDecoder.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PhraseDecoder.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PhraseDictionaryCompact.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PhraseDictionaryCompact.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PhraseDictionaryCompact.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PhraseDictionaryCompact.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PhraseTableCreator.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PhraseTableCreator.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/PhraseTableCreator.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/PhraseTableCreator.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/StringVector.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/StringVector.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/TargetPhraseCollectionCache.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/TargetPhraseCollectionCache.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/ThrowingFwrite.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/ThrowingFwrite.cpp</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/ThrowingFwrite.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/ThrowingFwrite.h</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>LM/Base.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Base.cpp</locationURI>
@@ -1527,16 +1382,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>CompactPT/bin/gcc-4.6</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/pt.log</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/pt.log</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1547,17 +1392,7 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
 		</link>
 		<link>
-			<name>CompactPT/bin/gcc-4.6/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1567,17 +1402,7 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -1585,56 +1410,6 @@
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/BlockHashIndex.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/BlockHashIndex.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/CmphStringVectorAdapter.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/CmphStringVectorAdapter.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LexicalReorderingTableCompact.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LexicalReorderingTableCompact.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LexicalReorderingTableCreator.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/LexicalReorderingTableCreator.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/MurmurHash3.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/MurmurHash3.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDecoder.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDecoder.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryCompact.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseDictionaryCompact.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseTableCreator.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/PhraseTableCreator.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ThrowingFwrite.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/ThrowingFwrite.o</locationURI>
-		</link>
-		<link>
-			<name>CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libCompactPT.a</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/CompactPT/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/libCompactPT.a</locationURI>
 		</link>
 		<link>
 			<name>LM/bin/gcc-4.6/release/debug-symbols-on/link-static/threading-multi/Factory.o</name>
