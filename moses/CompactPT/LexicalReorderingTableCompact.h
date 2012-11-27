@@ -24,7 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/LexicalReorderingTable.h"
 #include "moses/StaticData.h"
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/GenerationDictionary.h"
 #include "moses/TargetPhrase.h"
 #include "moses/TargetPhraseCollection.h"

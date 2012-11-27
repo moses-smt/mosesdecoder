@@ -23,8 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_PhraseDictionaryMemory_h
 #define moses_PhraseDictionaryMemory_h
 
-#include "PhraseDictionary.h"
-#include "PhraseDictionaryNode.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionaryNode.h"
 
 namespace Moses
 {

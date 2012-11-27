@@ -19,9 +19,9 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "PhraseDictionaryNode.h"
-#include "TargetPhrase.h"
-#include "PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryNode.h"
+#include "moses/TargetPhrase.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses
 {

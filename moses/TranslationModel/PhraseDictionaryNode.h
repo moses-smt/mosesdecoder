@@ -26,8 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include <iterator>
-#include "Word.h"
-#include "TargetPhraseCollection.h"
+#include "moses/Word.h"
+#include "moses/TargetPhraseCollection.h"
 
 namespace Moses
 {

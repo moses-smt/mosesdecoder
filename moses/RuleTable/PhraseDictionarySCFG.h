@@ -19,7 +19,7 @@
 
 #pragma once
 
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/InputType.h"
 #include "moses/NonTerminal.h"
 #include "PhraseDictionaryNodeSCFG.h"

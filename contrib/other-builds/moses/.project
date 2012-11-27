@@ -747,66 +747,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseBoundaryFeature.h</locationURI>
 		</link>
 		<link>
-			<name>PhraseDictionary.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionary.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionary.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionary.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryDynSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryDynSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryDynSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryDynSuffixArray.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryMemory.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryMemory.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryMemory.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryMemory.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryNode.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryNode.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryNode.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryNode.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryTree.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryTree.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryTree.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryTree.h</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryTreeAdaptor.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryTreeAdaptor.cpp</locationURI>
-		</link>
-		<link>
-			<name>PhraseDictionaryTreeAdaptor.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseDictionaryTreeAdaptor.h</locationURI>
-		</link>
-		<link>
 			<name>PhraseLengthFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PhraseLengthFeature.cpp</locationURI>
@@ -1130,6 +1070,11 @@
 			<name>Timer.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Timer.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel</name>
+			<type>2</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel</locationURI>
 		</link>
 		<link>
 			<name>TranslationOption.cpp</name>

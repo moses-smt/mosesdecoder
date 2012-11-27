@@ -3,7 +3,7 @@
 //#include "LVoc.h" //need IPhrase
 
 #include "StaticData.h"
-#include "PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "GenerationDictionary.h"
 #include "TargetPhrase.h"
 #include "TargetPhraseCollection.h"

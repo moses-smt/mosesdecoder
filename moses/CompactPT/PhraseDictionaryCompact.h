@@ -30,7 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 #endif
 
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/ThreadPool.h"
 
 #include "BlockHashIndex.h"

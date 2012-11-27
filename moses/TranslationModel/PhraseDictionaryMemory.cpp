@@ -30,15 +30,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
-#include "PhraseDictionaryMemory.h"
-#include "FactorCollection.h"
-#include "Word.h"
-#include "Util.h"
-#include "InputFileStream.h"
-#include "StaticData.h"
-#include "WordsRange.h"
-#include "UserMessage.h"
-#include "SparsePhraseDictionaryFeature.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/FactorCollection.h"
+#include "moses/Word.h"
+#include "moses/Util.h"
+#include "moses/InputFileStream.h"
+#include "moses/StaticData.h"
+#include "moses/WordsRange.h"
+#include "moses/UserMessage.h"
+#include "moses/SparsePhraseDictionaryFeature.h"
 
 using namespace std;
 

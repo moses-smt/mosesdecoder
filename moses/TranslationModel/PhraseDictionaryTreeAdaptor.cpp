@@ -1,19 +1,19 @@
 // $Id$
 
-#include "PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include <sys/stat.h>
 #include <algorithm>
-#include "PhraseDictionaryTree.h"
-#include "Phrase.h"
-#include "FactorCollection.h"
-#include "InputFileStream.h"
-#include "InputType.h"
-#include "ConfusionNet.h"
-#include "Sentence.h"
-#include "StaticData.h"
-#include "UniqueObject.h"
-#include "PDTAimp.h"
-#include "UserMessage.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
+#include "moses/Phrase.h"
+#include "moses/FactorCollection.h"
+#include "moses/InputFileStream.h"
+#include "moses/InputType.h"
+#include "moses/ConfusionNet.h"
+#include "moses/Sentence.h"
+#include "moses/StaticData.h"
+#include "moses/UniqueObject.h"
+#include "moses/PDTAimp.h"
+#include "moses/UserMessage.h"
 
 namespace Moses
 {

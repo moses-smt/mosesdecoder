@@ -34,11 +34,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/tss.hpp>
 #endif
 
-#include "Phrase.h"
-#include "TargetPhrase.h"
-#include "Dictionary.h"
-#include "TargetPhraseCollection.h"
-#include "DecodeFeature.h"
+#include "moses/Phrase.h"
+#include "moses/TargetPhrase.h"
+#include "moses/Dictionary.h"
+#include "moses/TargetPhraseCollection.h"
+#include "moses/DecodeFeature.h"
 
 namespace Moses
 {

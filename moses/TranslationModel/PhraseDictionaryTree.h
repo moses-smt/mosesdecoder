@@ -11,17 +11,17 @@
 #include <boost/thread/mutex.hpp>
 #endif
 
-#include "TypeDef.h"
-#include "Dictionary.h"
+#include "moses/TypeDef.h"
+#include "moses/Dictionary.h"
 
 
-#include "PrefixTree.h"
-#include "File.h"
-#include "ObjectPool.h"
-#include "LexicalReorderingTable.h"
-#include "LVoc.h"
-#include "TypeDef.h"
-#include "Util.h"
+#include "moses/PrefixTree.h"
+#include "moses/File.h"
+#include "moses/ObjectPool.h"
+#include "moses/LexicalReorderingTable.h"
+#include "moses/LVoc.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
 
 namespace Moses
 {

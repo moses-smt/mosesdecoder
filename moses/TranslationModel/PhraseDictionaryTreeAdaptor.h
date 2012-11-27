@@ -5,9 +5,9 @@
 
 #include <vector>
 #include "util/check.hh"
-#include "TypeDef.h"
-#include "PhraseDictionaryMemory.h"
-#include "TargetPhraseCollection.h"
+#include "moses/TypeDef.h"
+#include "moses/TargetPhraseCollection.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 
 namespace Moses
 {

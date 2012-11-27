@@ -24,7 +24,7 @@
 #include <map>
 #include <vector>
 #include <string>
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 #include "OnDiskPt/PhraseNode.h"

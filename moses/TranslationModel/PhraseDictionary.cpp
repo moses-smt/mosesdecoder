@@ -19,23 +19,23 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "PhraseDictionary.h"
-#include "PhraseDictionaryTreeAdaptor.h"
-#include "RuleTable/PhraseDictionarySCFG.h"
-#include "RuleTable/PhraseDictionaryOnDisk.h"
-#include "RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "moses/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "moses/RuleTable/PhraseDictionaryFuzzyMatch.h"
 
 #ifndef WIN32
-#include "PhraseDictionaryDynSuffixArray.h"
-#include "CompactPT/PhraseDictionaryCompact.h"
+#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/CompactPT/PhraseDictionaryCompact.h"
 #endif
-#include "RuleTable/UTrie.h"
+#include "moses/RuleTable/UTrie.h"
 
-#include "StaticData.h"
-#include "InputType.h"
-#include "TranslationOption.h"
-#include "UserMessage.h"
+#include "moses/StaticData.h"
+#include "moses/InputType.h"
+#include "moses/TranslationOption.h"
+#include "moses/UserMessage.h"
 
 using namespace std;
 

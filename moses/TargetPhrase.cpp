@@ -26,7 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/tokenize_piece.hh"
 
 #include "TargetPhrase.h"
-#include "PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LM/Base.h"
 #include "StaticData.h"

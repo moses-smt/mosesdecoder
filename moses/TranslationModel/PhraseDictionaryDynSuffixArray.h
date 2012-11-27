@@ -3,8 +3,8 @@
 
 #include <map>
 
-#include "PhraseDictionary.h"
-#include "BilingualDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/BilingualDynSuffixArray.h"
 
 namespace Moses
 {

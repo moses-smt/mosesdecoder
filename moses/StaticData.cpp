@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include "util/check.hh"
-#include "PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
-#include "PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"

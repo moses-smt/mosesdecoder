@@ -20,7 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "DecodeStep.h"
-#include "PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "StaticData.h"
 

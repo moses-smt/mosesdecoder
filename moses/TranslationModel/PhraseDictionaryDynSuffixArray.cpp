@@ -1,7 +1,7 @@
-#include "PhraseDictionaryDynSuffixArray.h"
-#include "FactorCollection.h"
-#include "StaticData.h"
-#include "TargetPhrase.h"
+#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/FactorCollection.h"
+#include "moses/StaticData.h"
+#include "moses/TargetPhrase.h"
 #include <iomanip>
 
 using namespace std;

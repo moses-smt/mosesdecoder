@@ -41,7 +41,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/DummyScoreProducers.h"
 #include "moses/InputFileStream.h"
 #include "moses/Incremental.h"
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/ChartTrellisPathList.h"
 #include "moses/ChartTrellisPath.h"
 #include "moses/ChartTrellisNode.h"

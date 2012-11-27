@@ -22,7 +22,7 @@
 #include <iostream>
 #include "moses/Util.h"
 #include "moses/TargetPhrase.h"
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/DummyScoreProducers.h"
 #include "TargetPhrase.h"
 #include "OnDiskWrapper.h"

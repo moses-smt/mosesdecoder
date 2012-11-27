@@ -1,7 +1,7 @@
 // $Id$
 // vim:tabstop=2
-#include "FeatureVector.h"
-#include "PhraseDictionaryTree.h"
+#include "moses/FeatureVector.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include <map>
 #include "util/check.hh"
 #include <sstream>

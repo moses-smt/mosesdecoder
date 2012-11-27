@@ -7,7 +7,7 @@
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
-#include "moses/PhraseDictionaryDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationSystem.h"
 #include "moses/TreeInput.h"
 #include "moses/LMList.h"

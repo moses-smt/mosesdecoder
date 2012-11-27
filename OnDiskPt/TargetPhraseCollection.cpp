@@ -22,7 +22,7 @@
 #include <iostream>
 #include "moses/Util.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhraseCollection.h"
 #include "Vocab.h"
 #include "OnDiskWrapper.h"
