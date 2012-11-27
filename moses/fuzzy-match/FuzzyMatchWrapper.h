@@ -46,8 +46,9 @@ protected:
   int multiple_max;
 
   typedef std::map< WORD_ID,std::vector< int > > WordIndex;
-  std::map<long, WordIndex> m_wordIndex;
-  
+  //std::map<long, WordIndex> m_wordIndex;
+  WordIndex m_wordIndex;
+
   // global cache for word pairs
   std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > lsed;
 
@@ -76,7 +77,8 @@ protected:
   Vocabulary &GetVocabulary()
   { return suffixArray->GetVocabulary(); }
 
-  WordIndex &GetWordIndex(long translationId);
+  WordIndex &GetWordIndex(long translationId)
+  { return m_wordIndex;}
 };
 
 }
