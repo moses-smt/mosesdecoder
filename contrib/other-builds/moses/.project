@@ -107,16 +107,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfoTest.cpp</locationURI>
 		</link>
 		<link>
-			<name>BilingualDynSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/BilingualDynSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>BilingualDynSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/BilingualDynSuffixArray.h</locationURI>
-		</link>
-		<link>
 			<name>BitmapContainer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BitmapContainer.cpp</locationURI>
@@ -370,16 +360,6 @@
 			<name>DummyScoreProducers.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DummyScoreProducers.h</locationURI>
-		</link>
-		<link>
-			<name>DynSuffixArray.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSuffixArray.cpp</locationURI>
-		</link>
-		<link>
-			<name>DynSuffixArray.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/DynSuffixArray.h</locationURI>
 		</link>
 		<link>
 			<name>FFState.cpp</name>
@@ -1069,7 +1049,7 @@
 		<link>
 			<name>TranslationModel</name>
 			<type>2</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel</locationURI>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>TranslationOption.cpp</name>
@@ -1817,6 +1797,101 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Scope3Parser/VarSpanTrieBuilder.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/BilingualDynSuffixArray.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/BilingualDynSuffixArray.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/BilingualDynSuffixArray.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSuffixArray.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSuffixArray.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSuffixArray.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSuffixArray.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionary.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionary.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionary.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionary.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryDynSuffixArray.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryDynSuffixArray.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemory.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemory.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryNode.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNode.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryNode.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryNode.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTreeAdaptor.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTreeAdaptor.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryTreeAdaptor.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTreeAdaptor.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>CompactPT/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -1835,6 +1910,151 @@
 			<name>LM/bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/bin/lm.log</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/FileHandler.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/FileHandler.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/FileHandler.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/FileHandler.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/Jamfile</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/Jamfile</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/RandLMCache.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/RandLMCache.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/RandLMFilter.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/RandLMFilter.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/fdstream.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/fdstream.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/hash.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/hash.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/onlineRLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/onlineRLM.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/params.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/params.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/params.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/params.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/perfectHash.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/perfectHash.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/quantizer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/quantizer.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/types.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/types.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/utils.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/utils.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/vocab.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/DynSAInclude/vocab.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/DynSAInclude/vocab.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/Alignments.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/Alignments.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/Alignments.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/Alignments.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/FuzzyMatchWrapper.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/FuzzyMatchWrapper.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/Match.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/Match.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/SentenceAlignment.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/SentenceAlignment.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/SentenceAlignment.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/SentenceAlignment.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/SuffixArray.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/SuffixArray.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/SuffixArray.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/SuffixArray.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/Vocabulary.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/Vocabulary.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/Vocabulary.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/Vocabulary.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/create_xml.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/create_xml.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/fuzzy-match/create_xml.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/fuzzy-match/create_xml.h</locationURI>
 		</link>
 		<link>
 			<name>CompactPT/bin/gcc-4.6/release</name>

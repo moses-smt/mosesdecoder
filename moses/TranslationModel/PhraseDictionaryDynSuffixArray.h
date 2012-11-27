@@ -4,7 +4,7 @@
 #include <map>
 
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "moses/BilingualDynSuffixArray.h"
+#include "moses/TranslationModel/BilingualDynSuffixArray.h"
 
 namespace Moses
 {

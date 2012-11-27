@@ -1,8 +1,8 @@
 #include "BilingualDynSuffixArray.h"
 #include "moses/TranslationModel/DynSAInclude/utils.h"
-#include "FactorCollection.h"
-#include "StaticData.h"
-#include "TargetPhrase.h"
+#include "moses/FactorCollection.h"
+#include "moses/StaticData.h"
+#include "moses/TargetPhrase.h"
 #include <iomanip>
 
 using namespace std;

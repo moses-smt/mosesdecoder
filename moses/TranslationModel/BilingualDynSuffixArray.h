@@ -1,13 +1,13 @@
 #ifndef moses_BilingualDynSuffixArray_h
 #define moses_BilingualDynSuffixArray_h
 
-#include "TargetPhrase.h"
 #include "DynSuffixArray.h" 
 #include "moses/TranslationModel/DynSAInclude/vocab.h"
 #include "moses/TranslationModel/DynSAInclude/types.h"
 #include "moses/TranslationModel/DynSAInclude/utils.h"
-#include "InputFileStream.h"
-#include "FactorTypeSet.h"
+#include "moses/InputFileStream.h"
+#include "moses/FactorTypeSet.h"
+#include "moses/TargetPhrase.h"
 
 namespace Moses {
 

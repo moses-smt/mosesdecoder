@@ -5,8 +5,8 @@
 #include <set>
 #include <algorithm>
 #include <utility>
-#include "Util.h"
-#include "File.h"
+#include "moses/Util.h"
+#include "moses/File.h"
 #include "moses/TranslationModel/DynSAInclude/types.h"
 
 namespace Moses
