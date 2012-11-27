@@ -25,7 +25,7 @@
 
 #include "ChartRuleLookupManagerCYKPlus.h"
 #include "DotChartOnDisk.h"
-#include "moses/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/InputType.h"
 

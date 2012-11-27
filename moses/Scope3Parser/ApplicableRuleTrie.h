@@ -21,7 +21,7 @@
 
 #include "SentenceMap.h"
 #include "VarSpanNode.h"
-#include "moses/RuleTable/UTrieNode.h"
+#include "moses/TranslationModel/RuleTable/UTrieNode.h"
 #include "moses/Util.h"
 
 #include <vector>

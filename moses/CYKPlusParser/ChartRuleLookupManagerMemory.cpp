@@ -20,7 +20,7 @@
 #include "ChartRuleLookupManagerMemory.h"
 #include "DotChartInMemory.h"
 
-#include "moses/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/StaticData.h"

@@ -20,7 +20,7 @@
 #include "StackLatticeBuilder.h"
 
 #include "moses/ChartRuleLookupManager.h"
-#include "moses/RuleTable/UTrieNode.h"
+#include "moses/TranslationModel/RuleTable/UTrieNode.h"
 #include "StackLattice.h"
 #include "VarSpanNode.h"
 

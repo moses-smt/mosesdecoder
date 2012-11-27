@@ -20,7 +20,7 @@
 #include "ChartRuleLookupManagerMemoryPerSentence.h"
 #include "DotChartInMemory.h"
 
-#include "moses/RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "moses/InputType.h"
 #include "moses/ChartParserCallback.h"
 #include "moses/StaticData.h"

@@ -21,16 +21,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "moses/RuleTable/PhraseDictionarySCFG.h"
-#include "moses/RuleTable/PhraseDictionaryOnDisk.h"
-#include "moses/RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "moses/RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 
 #ifndef WIN32
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/CompactPT/PhraseDictionaryCompact.h"
 #endif
-#include "moses/RuleTable/UTrie.h"
+#include "moses/TranslationModel/RuleTable/UTrie.h"
 
 #include "moses/StaticData.h"
 #include "moses/InputType.h"

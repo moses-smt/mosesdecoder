@@ -21,7 +21,7 @@
 
 #include <algorithm>
 
-#include "moses/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/StaticData.h"
 #include "moses/ChartParserCallback.h"
 #include "DotChartOnDisk.h"

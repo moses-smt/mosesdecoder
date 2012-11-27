@@ -29,10 +29,10 @@ lib moses :
   *.cpp
   Scope3Parser/*.cpp
   CYKPlusParser/*.cpp
-  RuleTable/*.cpp
   TranslationModel/*.cpp
   TranslationModel/fuzzy-match/*.cpp
   TranslationModel/DynSAInclude/*.cpp
+  TranslationModel/RuleTable/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp

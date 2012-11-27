@@ -21,7 +21,7 @@
 
 #include "StackLattice.h"
 #include "VarSpanNode.h"
-#include "moses/RuleTable/UTrieNode.h"
+#include "moses/TranslationModel/RuleTable/UTrieNode.h"
 
 namespace Moses
 {
