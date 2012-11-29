@@ -396,7 +396,7 @@ mml-filter-before-wa
 	in: corpus mml-scores
 	out: corpus-mml-prefilter
 	ignore-unless: mml-before-wa
-	rerun-on-change: mml-filter-corpora
+	rerun-on-change: mml-filter-corpora mml-before-wa
 	default-name: training/corpus-mml
 	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -score IN1 -input-extension $input-extension -output-extension $output-extension $mml-before-wa
 prepare-data
@@ -446,7 +446,7 @@ mml-filter-after-wa
 	in: corpus-mml-prefilter=OR=corpus word-alignment mml-scores
 	out: corpus-mml-postfilter
 	ignore-unless: mml-after-wa
-	rerun-on-change: mml-filter-corpora
+	rerun-on-change: mml-filter-corpora mml-after-wa
 	default-name: model/corpus-mml
 	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -alignment IN1 -score IN2 -input-extension $input-extension -output-extension $output-extension $mml-after-wa
 build-biconcor

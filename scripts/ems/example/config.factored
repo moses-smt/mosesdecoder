@@ -430,7 +430,7 @@ score-settings = "--GoodTuring"
 # Johnson, Martin, Foster and Kuhn. (2007): "Improving Translation Quality by Discarding Most of the Phrasetable"
 # options: -n number of translations; -l 'a+e', 'a-e', or a positive real value -log prob threshold
 #salm-index = /path/to/project/salm/Bin/Linux/Index/IndexSA.O64
-#sigtest-filter = "-l a+e -n 20"
+#sigtest-filter = "-l a+e -n 50"
 
 ### if training should be skipped, 
 # point to a configuration file that contains
