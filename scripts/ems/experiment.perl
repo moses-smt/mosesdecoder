@@ -541,14 +541,16 @@ sub find_steps_for_module {
 
 	    # if multiple potential inputs, find first that matches
 	    if ($in =~ /=OR=/) {
-		foreach my $potential_in (split(/=OR=/,$in)) {
+    my @POTENTIAL_IN = split(/=OR=/,$in);
+		foreach my $potential_in (@POTENTIAL_IN) {
 		    if (&check_producability($module,$set,$potential_in)) {
 			$in = $potential_in;
 			last;
 		    }
+
 		}
-		die("ERROR: none of potential inputs $in possible for $step")
-		    if $in =~ /=OR=/;
+		#die("ERROR: none of potential inputs $in possible for $step")
+		$in = $POTENTIAL_IN[$#POTENTIAL_IN] if $in =~ /=OR=/;
 	    }
 
 	    # define input(s) as needed by this step
