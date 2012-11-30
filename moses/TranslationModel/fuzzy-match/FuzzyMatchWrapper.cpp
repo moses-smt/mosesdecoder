@@ -49,35 +49,13 @@ namespace tmmt
     cerr << "loading completed" << endl;
   }
 
-  FuzzyMatchWrapper::WordIndex &FuzzyMatchWrapper::GetWordIndex(long translationId)
-  {
-    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-    std::map<long, WordIndex>::iterator iter = m_wordIndex.find(translationId);
-    assert(iter != m_wordIndex.end());
-
-    return iter->second;
-  }
-
-  void FuzzyMatchWrapper::AddWordIndex(long translationId)
-  {
-    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-    WordIndex &ret = m_wordIndex[translationId];
-  }
-
-  void FuzzyMatchWrapper::DeleteWordIndex(long translationId)
-  {
-    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
-    size_t ret = m_wordIndex.erase(translationId);
-    CHECK(ret == 1);
-  }
-
   string FuzzyMatchWrapper::Extract(long translationId, const string &dirNameStr)
   {
     const Moses::StaticData &staticData = Moses::StaticData::Instance();
-    
-    AddWordIndex(translationId);
 
-    string fuzzyMatchFile = ExtractTM(translationId, dirNameStr);
+    WordIndex wordIndex;
+
+    string fuzzyMatchFile = ExtractTM(wordIndex, translationId, dirNameStr);
     
     // create extrac files
     create_xml(fuzzyMatchFile);
@@ -104,12 +82,11 @@ namespace tmmt
 		    	+ " -phrase-translation-table " + fuzzyMatchFile + ".pt";
     system(cmd.c_str());
 
-    DeleteWordIndex(translationId);
 
     return fuzzyMatchFile + ".pt.gz";
   }
   
-  string FuzzyMatchWrapper::ExtractTM(long translationId, const string &dirNameStr)
+  string FuzzyMatchWrapper::ExtractTM(WordIndex &wordIndex, long translationId, const string &dirNameStr)
   {
     const std::vector< std::vector< WORD_ID > > &source = suffixArray->GetCorpus();
 
@@ -277,7 +254,7 @@ namespace tmmt
 		int pruned_match_count = 0;
 		if (short_match_max_length( input_length ))
 		{
-			init_short_matches(translationId, input[sentenceInd] );
+			init_short_matches(wordIndex, translationId, input[sentenceInd] );
 		}
 		vector< int > best_tm;
 		typedef map< int, vector< Match > >::iterator I;
@@ -289,7 +266,7 @@ namespace tmmt
 			int tmID = tm->first;
 			int tm_length = suffixArray->GetSentenceLength(tmID);
 			vector< Match > &match = tm->second;
-			add_short_matches( translationId, match, source[tmID], input_length, best_cost );
+			add_short_matches(wordIndex, translationId, match, source[tmID], input_length, best_cost );
       
 			//cerr << "match in sentence " << tmID << ": " << match.size() << " [" << tm_length << "]" << endl;
       
@@ -838,13 +815,12 @@ int FuzzyMatchWrapper::short_match_max_length( int input_length )
  (to be used by the next function) 
  (done here, because this has be done only once for an input sentence) */
 
-void FuzzyMatchWrapper::init_short_matches(long translationId, const vector< WORD_ID > &input )
+void FuzzyMatchWrapper::init_short_matches(WordIndex &wordIndex, long translationId, const vector< WORD_ID > &input )
 {
 	int max_length = short_match_max_length( input.size() );
 	if (max_length == 0)
 		return;
   
-	WordIndex &wordIndex = GetWordIndex(translationId);
 	wordIndex.clear();
 	
 	// store input words and their positions in hash map
@@ -861,14 +837,12 @@ void FuzzyMatchWrapper::init_short_matches(long translationId, const vector< WOR
 
 /* add all short matches to list of matches for a sentence */
 
-void FuzzyMatchWrapper::add_short_matches(long translationId, vector< Match > &match, const vector< WORD_ID > &tm, int input_length, int best_cost )
+void FuzzyMatchWrapper::add_short_matches(WordIndex &wordIndex, long translationId, vector< Match > &match, const vector< WORD_ID > &tm, int input_length, int best_cost )
 {	
 	int max_length = short_match_max_length( input_length );
 	if (max_length == 0)
 		return;
   
-  WordIndex &wordIndex = GetWordIndex(translationId);
-
 	int tm_length = tm.size();
 	map< WORD_ID,vector< int > >::iterator input_word_hit;
 	for(int t_pos=0; t_pos<tm.size(); t_pos++)
