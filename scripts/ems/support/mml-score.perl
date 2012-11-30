@@ -34,6 +34,12 @@ my $target_outlm = "$model.out-target.binlm";
 my $source_corpus = "$corpus_stem.$source_lang";
 my $target_corpus = "$corpus_stem.$target_lang";
 
+print STDERR "querying language models...
+$query $source_inlm < $source_corpus
+$query $target_inlm < $target_corpus
+$query $source_outlm < $source_corpus
+$query $target_outlm < $target_corpus\n";
+
 open(INSOURCE, "$query $source_inlm < $source_corpus |") || die "Failed to open in lm query on source";
 open(INTARGET, "$query $target_inlm < $target_corpus |") || die "Failed to open in lm query on target";
 open(OUTSOURCE, "$query $source_outlm < $source_corpus |") || die "Failed to open out lm query on source";

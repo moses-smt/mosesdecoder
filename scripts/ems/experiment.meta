@@ -393,12 +393,12 @@ mml-score
 	default-name: training/corpus-mml-score
 	template: $moses-script-dir/ems/support/mml-score.perl -model IN -corpus IN1 -domains IN2 -input-extension $input-extension -output-extension $output-extension -query $MML:lm-query -filter-domains $mml-filter-corpora > OUT
 mml-filter-before-wa
-	in: corpus mml-scores
+	in: corpus mml-scores domains
 	out: corpus-mml-prefilter
 	ignore-unless: mml-before-wa
 	rerun-on-change: mml-filter-corpora mml-before-wa
 	default-name: training/corpus-mml
-	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -score IN1 -input-extension $input-extension -output-extension $output-extension $mml-before-wa
+	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -score IN1 -domain IN2 -input-extension $input-extension -output-extension $output-extension $mml-before-wa
 prepare-data
 	in: corpus-mml-prefilter=OR=corpus
 	out: prepared-data
@@ -443,12 +443,12 @@ symmetrize-giza
 	default-name: model/aligned
 	error: skip=<[1-9]
 mml-filter-after-wa
-	in: corpus-mml-prefilter=OR=corpus word-alignment mml-scores
+	in: corpus-mml-prefilter=OR=corpus word-alignment mml-scores corpus-mml-prefilter=OR=domains
 	out: corpus-mml-postfilter
 	ignore-unless: mml-after-wa
 	rerun-on-change: mml-filter-corpora mml-after-wa
 	default-name: model/corpus-mml
-	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -alignment IN1 -score IN2 -input-extension $input-extension -output-extension $output-extension $mml-after-wa
+	template: $moses-script-dir/ems/support/mml-filter.perl -in IN -out OUT -alignment IN1 -score IN2 -domain IN3 -input-extension $input-extension -output-extension $output-extension $mml-after-wa
 build-biconcor
 	in: corpus-mml-postfilter=OR=word-alignment corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
 	out: biconcor-model
@@ -500,7 +500,7 @@ build-reordering
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
 build-ttable
-	in: extracted-phrases lexical-translation-table domains
+	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
 	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
@@ -552,7 +552,7 @@ build-sparse-lexical
         default-name: model/most-frequent-words
 	template: $moses-script-dir/ems/support/build-sparse-lexical-features.perl IN $input-extension $output-extension OUT "$sparse-lexical-features"
 create-config
-	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse-lexical domains INTERPOLATED-LM:binlm LM:binlm 
+	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table generation-table sparse-lexical corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains INTERPOLATED-LM:binlm LM:binlm 
 	out: config
 	ignore-if: use-hiero
 	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini
@@ -797,7 +797,7 @@ split-reference-devtest
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 filter
-	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:domains
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings
@@ -916,7 +916,7 @@ split-input
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
-	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:domains
+	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains
 	out: filtered-dir
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage

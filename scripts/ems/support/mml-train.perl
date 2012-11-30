@@ -35,11 +35,34 @@ die("ERROR: model not specified (-model FILESTEM)") unless defined($model);
 
 &train_lm($indomain_source,"in-source");
 &train_lm($indomain_target,"in-target");
-&train_lm($outdomain_source,"out-source");
-&train_lm($outdomain_target,"out-target");
+&extract_vocabulary("in-source");
+&extract_vocabulary("in-target");
+&train_lm($outdomain_source,"out-source","in-source");
+&train_lm($outdomain_target,"out-target","in-target");
+
+sub extract_vocabulary {
+  my ($type) = @_;
+  print STDERR "extracting vocabulary from $type language model\n";
+  open(LM,"$model.$type.lm");
+  open(VOCAB,">$model.$type.vocab");
+  my $unigrams = 0;
+  while(<LM>) {
+    $unigrams = 1 if /^\\1-grams:/;
+    last if /^\\2-grams:/;
+    next unless $unigrams;
+    my @TOKEN = split(/\s/);
+    next unless @TOKEN == 3;
+    next if $TOKEN[1] eq '<s>';
+    next if $TOKEN[1] eq '<unk>';
+    next if $TOKEN[1] eq '<\\s>';
+    print VOCAB $TOKEN[1]."\n";
+  }
+  close(LM);
+  close(VOCAB);
+}
 
 sub train_lm {
-  my ($file,$type) = @_;
+  my ($file,$type,$vocab) = @_;
   print STDERR "training $type language model\n";
   if (defined($line_count)) {
     my $cmd = "cat $file | shuf -n $line_count --random-source $file > $model.$type.tok";
@@ -49,6 +72,7 @@ sub train_lm {
   }
 
   my $cmd = "$lm_training -order $order $lm_settings -text $model.$type.tok -lm $model.$type.lm";
+  $cmd .= " -vocab $model.$vocab.vocab" if defined($vocab);
   print STDERR $cmd."\n";
   print STDERR `$cmd`;
 
