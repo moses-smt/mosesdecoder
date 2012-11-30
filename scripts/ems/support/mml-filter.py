@@ -11,8 +11,6 @@ import optparse
 import random
 import sys
 
-import numpy
-
 from defaultconfig import Config
 
 logging.basicConfig(format = "%(asctime)-15s %(message)s")
