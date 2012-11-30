@@ -141,7 +141,7 @@ LexicalReorderingTable* LexicalReorderingTableCompact::CheckAndLoad(
   }
   // file name is specified with suffix
   if(filePath.substr(filePath.length() - minlexr.length(), minlexr.length()) == minlexr
-     || FileExists(filePath))
+     && FileExists(filePath))
   {
     //there exists a compact binary version use that
     VERBOSE(2,"Using compact lexical reordering table" << std::endl);  
