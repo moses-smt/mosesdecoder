@@ -9,7 +9,7 @@
 typedef std::pair<int, float> decaying_cache_value_t; 
 typedef std::map<std::string, decaying_cache_value_t > decaying_cache_t; 
 
-#define ALLSUBSTRING 0
+#define ALLSUBSTRINGS 0
 #define WHOLESTRING 1
 
 namespace Moses
@@ -30,6 +30,14 @@ class CacheBasedLanguageModel : public StatelessFeatureFunction
   void Evaluate_Whole_String( const TargetPhrase&, ScoreComponentCollection* ) const;
   void Evaluate_All_Substrings( const TargetPhrase&, ScoreComponentCollection* ) const;
 
+  void Decay();
+  void Update(std::vector<std::string> words, int age);
+  void Execute(std::string command);
+
+
+  void Print() const;
+  void Clear();
+
 public:
   CacheBasedLanguageModel(const std::vector<float>& weights);
 
@@ -39,13 +47,9 @@ public:
   void SetQueryType(size_t type);
 
   void Evaluate( const TargetPhrase&, ScoreComponentCollection* ) const;
-
-  void Decay();
-  void Update(std::vector<std::string> words, int age);
-  void Insert(std::vector<std::string> words);
+  void Insert(std::vector<std::string> ngrams);
+  void Execute(std::vector<std::string> commands);
   void Load(const std::string file);
-
-  void PrintCache();
 };
 
 }

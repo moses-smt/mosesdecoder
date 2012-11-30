@@ -1140,8 +1140,6 @@ bool StaticData::LoadCacheBasedLanguageModel()
      {
 	VERBOSE(1,"Loading data from the cache file " << file[j] << endl);
         m_CacheBasedLanguageModel->Load(file[j]);
-	VERBOSE(1,"Actual cache" << endl);
-        m_CacheBasedLanguageModel->PrintCache();
      }
    }
    else

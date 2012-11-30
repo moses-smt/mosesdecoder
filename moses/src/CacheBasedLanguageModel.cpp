@@ -1,5 +1,3 @@
-
-
 #include <utility>
 #include "util/check.hh"
 #include "StaticData.h"
@@ -13,7 +11,7 @@ CacheBasedLanguageModel::CacheBasedLanguageModel(const std::vector<float>& weigh
   const_cast<ScoreIndexManager&>  (StaticData::Instance().GetScoreIndexManager()).AddScoreProducer(this);
   const_cast<StaticData&>(StaticData::Instance()).SetWeightsForScoreProducer(this, weights);
 
-  query_type = ALLSUBSTRING;
+  query_type = ALLSUBSTRINGS;
 }
 
 void CacheBasedLanguageModel::SetQueryType(size_t type)
@@ -42,7 +40,7 @@ void CacheBasedLanguageModel::Evaluate(const TargetPhrase& tp, ScoreComponentCol
         {
                 Evaluate_Whole_String(tp,out);
         }
-        else if (query_type == ALLSUBSTRING)
+        else if (query_type == ALLSUBSTRINGS)
 	{
                 Evaluate_All_Substrings(tp,out);
 	}
@@ -142,9 +140,9 @@ void CacheBasedLanguageModel::Evaluate_all(const TargetPhrase& tp, ScoreComponen
 }
 */
 
-void CacheBasedLanguageModel::PrintCache()
+void CacheBasedLanguageModel::Print() const
 {
-        decaying_cache_t::iterator it;
+        decaying_cache_t::const_iterator it;
 	std::cout << "Content of the cache of Cache-Based Language Model" << std::endl;
 	for ( it=m_cache.begin() ; it != m_cache.end(); it++ )
 	{
@@ -156,16 +154,21 @@ void CacheBasedLanguageModel::Decay()
 {
 	decaying_cache_t::iterator it;
 
+	int age;
+	float score;
 	for ( it=m_cache.begin() ; it != m_cache.end(); it++ )
 	{
-		int age=((*it).second).first + 1;
-		float score = decaying_score(age);
-		if (age < 1000){
-			decaying_cache_value_t p (age, score);
-	    		(*it).second = p;
-		}
-		else{
+		age=((*it).second).first + 1;
+		if (age > 1000)
+                {
 			m_cache.erase(it);
+			it--;
+		}
+		else
+		{
+			score = decaying_score(age);
+			decaying_cache_value_t p (age, score);
+		    	(*it).second = p;
 		}
 	}
 }
@@ -183,15 +186,44 @@ void CacheBasedLanguageModel::Update(std::vector<std::string> words, int age)
         }
 }
 
-void CacheBasedLanguageModel::Insert(std::vector<std::string> words)
+void CacheBasedLanguageModel::Insert(std::vector<std::string> ngrams)
 {
-	Decay(); 
-	Update(words,1);
-	PrintCache();
-	IFVERBOSE (2)
-	{
-//		PrintCache();
+	VERBOSE(1,"CacheBasedLanguageModel Insert ngrams.size():|" << ngrams.size() << "|" << std::endl);
+        Decay();
+        Update(ngrams,1);
+        Print();
+}
+
+void CacheBasedLanguageModel::Execute(std::vector<std::string> commands)
+{
+        for (size_t j=0; j<commands.size(); j++)
+        {
+        	Execute(commands[j]);
 	}
+        Print();
+}
+
+void CacheBasedLanguageModel::Execute(std::string command)
+{
+	if (command == "clear")
+	{
+		VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Cache cleared." << std::endl);
+		m_cache.clear();
+	}
+	else if (command == "settype_wholestring")
+	{
+		VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << WHOLESTRING << " (WHOLESTRING)." << std::endl);
+		SetQueryType(WHOLESTRING);
+	}
+        else if (command == "settype_allsubstrings")
+        {
+		VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "|. Query type set to " << ALLSUBSTRINGS << " (ALLSUBSTRINGS)." << std::endl);
+                SetQueryType(ALLSUBSTRINGS);
+        }
+	else
+	{
+               VERBOSE(1,"CacheBasedLanguageModel Execute command:|"<< command << "| is unknown. Skipped." << std::endl);
+	}        
 }
 
 void CacheBasedLanguageModel::Load(const std::string file)
@@ -216,15 +248,13 @@ void CacheBasedLanguageModel::Load(const std::string file)
       std::vector<std::string> vecStr = TokenizeMultiCharSeparator( line , "||" );
       if (vecStr.size() >= 2) {
         age = Scan<int>(vecStr[0]);
-        //vecStr.pop_back();
         vecStr.erase(vecStr.begin());
-        std::vector<std::string> entries = vecStr;
-        //std::vector<std::string> entries = TokenizeMultiCharSeparator( vecStr[1] , "||" );
-        Update(entries,age);
+        Update(vecStr,age);
       } else {
         CHECK(false);
       }
     }
+    Print();
 }
 
 float CacheBasedLanguageModel::decaying_score(const int age)

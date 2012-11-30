@@ -297,19 +297,38 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 	 the dlt tag provides information to use for the present the future sentences
 	 the information comes usually from an analysis of the previous translations
 	*/
-	/*
-	 cblm attribute provides information for the cache-based LM
-	*/
-          vector<string> dlt_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"trg"), "||");
-          // add to the global static producer
           const TranslationSystem trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
           CacheBasedLanguageModel* cache_model = trans_sys.GetCacheBasedLanguageModel();
           if (cache_model != NULL)
-          {
-            cache_model->Insert(dlt_elements);
-          }
-        }
+	  {
+   	    std::string attributeContent;
 
+          /*
+            "cblm-command" attribute provides commands for the cache-based LM (clean, settype,...) which are executed sequentially
+          */
+            attributeContent = ParseXmlTagAttribute(tagContent,"cblm-command");
+            if (attributeContent != "")
+            {
+              VERBOSE(1,"attributeContent:|" << attributeContent << "|" << std::endl);
+              vector<string> dlt_cblmcommand_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"cblm-command"), "||");
+              VERBOSE(1,"dlt_cblmcommand_elements.size() after:|" << dlt_cblmcommand_elements.size() << "|" << std::endl);
+              cache_model->Execute(dlt_cblmcommand_elements);
+            }
+
+	  /*
+	    "cblm" attribute provides information to add to the cache-based LM
+	  */
+	    attributeContent = ParseXmlTagAttribute(tagContent,"cblm");
+	    if (attributeContent != "")
+	    {
+              VERBOSE(1,"attributeContent:|" << attributeContent << "|" << std::endl);
+            
+              vector<string> dlt_cblm_elements = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"cblm"), "||");
+              VERBOSE(1,"dlt_cblm_elements.size(): after|" << dlt_cblm_elements.size() << "|" << std::endl); 
+	      cache_model->Insert(dlt_cblm_elements);
+            }
+	  }
+        }
         // default: opening tag that specifies translation options
         else {
           if (startPos >= endPos) {
