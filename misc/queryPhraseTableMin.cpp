@@ -6,7 +6,7 @@
 #include <string>
 #include <vector>
 
-#include "moses/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "moses/Util.h"
 #include "moses/Phrase.h"
 
