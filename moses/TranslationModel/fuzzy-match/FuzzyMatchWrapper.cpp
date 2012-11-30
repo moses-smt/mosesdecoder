@@ -550,16 +550,34 @@ namespace tmmt
     }
   }
   
+  bool FuzzyMatchWrapper::GetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, unsigned int &value) const
+  {
+    boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+    map< pair< WORD_ID, WORD_ID >, unsigned int >::const_iterator lookup = m_lsed.find( key );
+    if (lookup != m_lsed.end()) {
+      value = lookup->second;
+      return true;
+    }
+
+    return false;
+  }
+
+  void FuzzyMatchWrapper::SetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, const unsigned int &value)
+  {
+    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+    m_lsed[ key ] = value;
+  }
+
 /* Letter string edit distance, e.g. sub 'their' to 'there' costs 2 */
 
 unsigned int FuzzyMatchWrapper::letter_sed( WORD_ID aIdx, WORD_ID bIdx )
 {
 	// check if already computed -> lookup in cache
 	pair< WORD_ID, WORD_ID > pIdx = make_pair( aIdx, bIdx );
-	map< pair< WORD_ID, WORD_ID >, unsigned int >::const_iterator lookup = lsed.find( pIdx );
-	if (lookup != lsed.end())
-	{
-		return (lookup->second);
+	unsigned int value;
+	bool ret = GetLSEDCache(pIdx, value);
+	if (ret) {
+		return value;
 	}
   
 	// get surface strings for word indices
@@ -600,129 +618,129 @@ unsigned int FuzzyMatchWrapper::letter_sed( WORD_ID aIdx, WORD_ID bIdx )
 	free( cost );
   
 	// cache and return result
-	lsed[ pIdx ] = final;
+	SetLSEDCache(pIdx, final);
 	return final;
 }
+  
+  /* string edit distance implementation */
+  
+  unsigned int FuzzyMatchWrapper::sed( const vector< WORD_ID > &a, const vector< WORD_ID > &b, string &best_path, bool use_letter_sed ) {
 
-/* string edit distance implementation */
+    // initialize cost and path matrices
+    unsigned int **cost  = (unsigned int**) calloc( sizeof( unsigned int* ), a.size()+1 );
+    char **path = (char**) calloc( sizeof( char* ), a.size()+1 );
 
-unsigned int FuzzyMatchWrapper::sed( const vector< WORD_ID > &a, const vector< WORD_ID > &b, string &best_path, bool use_letter_sed ) {
-  
-	// initialize cost and path matrices
-	unsigned int **cost  = (unsigned int**) calloc( sizeof( unsigned int* ), a.size()+1 );
-	char **path = (char**) calloc( sizeof( char* ), a.size()+1 );
-	
-	for( unsigned int i=0; i<=a.size(); i++ ) {
-		cost[i] = (unsigned int*) calloc( sizeof(unsigned int), b.size()+1 );
-		path[i] = (char*) calloc( sizeof(char), b.size()+1 );
-		if (i>0)
-		{
-			cost[i][0] = cost[i-1][0];
-			if (use_letter_sed)
-			{
-				cost[i][0] += GetVocabulary().GetWord( a[i-1] ).size();
-			}
-			else
-			{
-				cost[i][0]++;
-			}
-		}
-		else
-		{
-			cost[i][0] = 0;
-		}
-		path[i][0] = 'I';
-	}
-  
-	for( unsigned int j=0; j<=b.size(); j++ ) {
-		if (j>0) 
-		{
-			cost[0][j] = cost[0][j-1];
-			if (use_letter_sed)
-			{
-				cost[0][j] +=	GetVocabulary().GetWord( b[j-1] ).size();
-			}
-			else
-			{
-				cost[0][j]++;
-			}
-		}
-		else
-		{
-			cost[0][j] = 0;
-		}
-		path[0][j] = 'D';
-	}
-  
-	// core string edit distance algorithm
-	for( unsigned int i=1; i<=a.size(); i++ ) {
-		for( unsigned int j=1; j<=b.size(); j++ ) {
-			unsigned int ins = cost[i-1][j];
-			unsigned int del = cost[i][j-1];
-			unsigned int match;
-			if (use_letter_sed)
-			{
-				ins += GetVocabulary().GetWord( a[i-1] ).size();
-				del += GetVocabulary().GetWord( b[j-1] ).size();
-				match = letter_sed( a[i-1], b[j-1] );
-			}
-			else
-			{
-				ins++;
-				del++;
-				match = ( a[i-1] == b[j-1] ) ? 0 : 1;
-			}
-			unsigned int diag = cost[i-1][j-1] + match;
-      
-			char action = (ins < del) ? 'I' : 'D';
-			unsigned int min = (ins < del) ? ins : del;
-			if (diag < min)
-			{
-				action = (match>0) ? 'S' : 'M';
-				min = diag;
-			}
-      
-			cost[i][j] = min;
-			path[i][j] = action;
-		}
-	}
-  
-	// construct string for best path
-	unsigned int i = a.size();
-	unsigned int j = b.size();
-	best_path = "";
-	while( i>0 || j>0 )
-	{
-		best_path = path[i][j] + best_path;
-		if (path[i][j] == 'I') 
-		{
-			i--;
-		}
-		else if (path[i][j] == 'D') 
-		{
-			j--;
-		}
-		else 
-		{ 
-			i--; 
-			j--;
-		}
-	}
-	
-  
-	// clear out memory
-	unsigned int final = cost[a.size()][b.size()];
-  
-	for( unsigned int i=0; i<=a.size(); i++ ) {
-		free( cost[i] );
-		free( path[i] );
-	}
-	free( cost );
-	free( path );
-  
-	// return result
-	return final;
-}
+    for( unsigned int i=0; i<=a.size(); i++ ) {
+      cost[i] = (unsigned int*) calloc( sizeof(unsigned int), b.size()+1 );
+      path[i] = (char*) calloc( sizeof(char), b.size()+1 );
+      if (i>0)
+      {
+        cost[i][0] = cost[i-1][0];
+        if (use_letter_sed)
+        {
+          cost[i][0] += GetVocabulary().GetWord( a[i-1] ).size();
+        }
+        else
+        {
+          cost[i][0]++;
+        }
+      }
+      else
+      {
+        cost[i][0] = 0;
+      }
+      path[i][0] = 'I';
+    }
+
+    for( unsigned int j=0; j<=b.size(); j++ ) {
+      if (j>0)
+      {
+        cost[0][j] = cost[0][j-1];
+        if (use_letter_sed)
+        {
+          cost[0][j] +=	GetVocabulary().GetWord( b[j-1] ).size();
+        }
+        else
+        {
+          cost[0][j]++;
+        }
+      }
+      else
+      {
+        cost[0][j] = 0;
+      }
+      path[0][j] = 'D';
+    }
+
+    // core string edit distance algorithm
+    for( unsigned int i=1; i<=a.size(); i++ ) {
+      for( unsigned int j=1; j<=b.size(); j++ ) {
+        unsigned int ins = cost[i-1][j];
+        unsigned int del = cost[i][j-1];
+        unsigned int match;
+        if (use_letter_sed)
+        {
+          ins += GetVocabulary().GetWord( a[i-1] ).size();
+          del += GetVocabulary().GetWord( b[j-1] ).size();
+          match = letter_sed( a[i-1], b[j-1] );
+        }
+        else
+        {
+          ins++;
+          del++;
+          match = ( a[i-1] == b[j-1] ) ? 0 : 1;
+        }
+        unsigned int diag = cost[i-1][j-1] + match;
+
+        char action = (ins < del) ? 'I' : 'D';
+        unsigned int min = (ins < del) ? ins : del;
+        if (diag < min)
+        {
+          action = (match>0) ? 'S' : 'M';
+          min = diag;
+        }
+
+        cost[i][j] = min;
+        path[i][j] = action;
+      }
+    }
+
+    // construct string for best path
+    unsigned int i = a.size();
+    unsigned int j = b.size();
+    best_path = "";
+    while( i>0 || j>0 )
+    {
+      best_path = path[i][j] + best_path;
+      if (path[i][j] == 'I')
+      {
+        i--;
+      }
+      else if (path[i][j] == 'D')
+      {
+        j--;
+      }
+      else
+      {
+        i--;
+        j--;
+      }
+    }
+
+
+    // clear out memory
+    unsigned int final = cost[a.size()][b.size()];
+
+    for( unsigned int i=0; i<=a.size(); i++ ) {
+      free( cost[i] );
+      free( path[i] );
+    }
+    free( cost );
+    free( path );
+
+    // return result
+    return final;
+  }
 
 /* utlility function: compute length of sentence in characters 
  (spaces do not count) */

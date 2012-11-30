@@ -9,6 +9,10 @@
 #ifndef moses_FuzzyMatchWrapper_h
 #define moses_FuzzyMatchWrapper_h
 
+#ifdef WITH_THREADS
+#include <boost/thread/shared_mutex.hpp>
+#endif
+
 #include <fstream>
 #include <string>
 #include "SuffixArray.h"
@@ -45,7 +49,11 @@ protected:
   typedef std::map< WORD_ID,std::vector< int > > WordIndex;
 
   // global cache for word pairs
-  std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > lsed;
+  std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > m_lsed;
+#ifdef WITH_THREADS
+  //reader-writer lock
+  mutable boost::shared_mutex m_accessLock;
+#endif
 
   void load_corpus( const std::string &fileName, std::vector< std::vector< tmmt::WORD_ID > > &corpus );
   void load_target( const std::string &fileName, std::vector< std::vector< tmmt::SentenceAlignment > > &corpus);
@@ -71,6 +79,9 @@ protected:
   std::string ExtractTM(WordIndex &wordIndex, long translationId, const std::string &inputPath);
   Vocabulary &GetVocabulary()
   { return suffixArray->GetVocabulary(); }
+
+  bool GetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, unsigned int &value) const;
+  void SetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, const unsigned int &value);
 
 };
 
