@@ -22,10 +22,10 @@ die("ERROR: in-domain target file not specified (-in-target FILE)") unless defin
 die("ERROR: out-of-domain source file not specified (-out-source FILE)") unless defined($outdomain_source);
 die("ERROR: out-of-domain target file not specified (-out-target FILE)") unless defined($outdomain_target);
 
-die("ERROR: in-domain source file '$indomain_source' not found") unless -e $indomain_source;
-die("ERROR: in-domain target file '$indomain_target' not found") unless -e $indomain_target;
-die("ERROR: out-of-domain source file '$outdomain_source' not found") unless -e $outdomain_source;
-die("ERROR: out-of-domain target file '$outdomain_target' not found") unless -e $outdomain_target;
+die("ERROR: in-domain source file '$indomain_source' not found") unless -e $indomain_source || -e $indomain_source.".gz";
+die("ERROR: in-domain target file '$indomain_target' not found") unless -e $indomain_target || -e $indomain_target.".gz";
+die("ERROR: out-of-domain source file '$outdomain_source' not found") unless -e $outdomain_source || -e $outdomain_source.".gz";
+die("ERROR: out-of-domain target file '$outdomain_target' not found") unless -e $outdomain_target || -e $outdomain_target.".gz";
 
 die("ERROR: language model order not specified (-order NUM)") unless defined($order);
 die("ERROR: language model settings not specified (-lm-settings STRING)") unless defined($lm_settings);
@@ -65,7 +65,8 @@ sub train_lm {
   my ($file,$type,$vocab) = @_;
   print STDERR "training $type language model\n";
   if (defined($line_count)) {
-    my $cmd = "cat $file | shuf -n $line_count --random-source $file > $model.$type.tok";
+    my $cmd = (-e $file.".gz" ? "zcat $file.gz" : "cat $file");
+    $cmd .= " | shuf -n $line_count --random-source ".(-e $file.".gz" ? "$file.gz" : $file)." > $model.$type.tok";
     print STDERR "extracting $line_count random lines from $file\n$cmd\n";
     print STDERR `$cmd`;
     $file = "$model.$type.tok";
