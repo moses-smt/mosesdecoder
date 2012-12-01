@@ -1663,7 +1663,7 @@ bool StaticData::LoadPhraseBoundaryFeature()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pb"));
   if (weight.size() > 1) {
-	std::cerr << "only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
+	std::cerr << "Only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
     return false;
   }
 

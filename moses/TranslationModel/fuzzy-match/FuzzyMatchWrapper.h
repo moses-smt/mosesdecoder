@@ -12,6 +12,7 @@
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
 #endif
+
 #include <fstream>
 #include <string>
 #include "SuffixArray.h"
@@ -46,15 +47,13 @@ protected:
   int multiple_max;
 
   typedef std::map< WORD_ID,std::vector< int > > WordIndex;
-  std::map<long, WordIndex> m_wordIndex;
-  //WordIndex m_wordIndex;
+
+  // global cache for word pairs
+  std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > m_lsed;
 #ifdef WITH_THREADS
   //reader-writer lock
   mutable boost::shared_mutex m_accessLock;
 #endif
-
-  // global cache for word pairs
-  std::map< std::pair< WORD_ID, WORD_ID >, unsigned int > lsed;
 
   void load_corpus( const std::string &fileName, std::vector< std::vector< tmmt::WORD_ID > > &corpus );
   void load_target( const std::string &fileName, std::vector< std::vector< tmmt::SentenceAlignment > > &corpus);
@@ -69,21 +68,21 @@ protected:
   unsigned int compute_length( const std::vector< tmmt::WORD_ID > &sentence );
   unsigned int letter_sed( WORD_ID aIdx, WORD_ID bIdx );
   unsigned int sed( const std::vector< WORD_ID > &a, const std::vector< WORD_ID > &b, std::string &best_path, bool use_letter_sed );
-  void init_short_matches(long translationId, const std::vector< WORD_ID > &input );
+  void init_short_matches(WordIndex &wordIndex, long translationId, const std::vector< WORD_ID > &input );
   int short_match_max_length( int input_length );
-  void add_short_matches(long translationId, std::vector< Match > &match, const std::vector< WORD_ID > &tm, int input_length, int best_cost );
+  void add_short_matches(WordIndex &wordIndex, long translationId, std::vector< Match > &match, const std::vector< WORD_ID > &tm, int input_length, int best_cost );
   std::vector< Match > prune_matches( const std::vector< Match > &match, int best_cost );
   int parse_matches( std::vector< Match > &match, int input_length, int tm_length, int &best_cost );
 
   void create_extract(int sentenceInd, int cost, const std::vector< WORD_ID > &sourceSentence, const std::vector<SentenceAlignment> &targets, const std::string &inputStr, const std::string  &path, std::ofstream &outputFile);
 
-  std::string ExtractTM(long translationId, const std::string &inputPath);
+  std::string ExtractTM(WordIndex &wordIndex, long translationId, const std::string &inputPath);
   Vocabulary &GetVocabulary()
   { return suffixArray->GetVocabulary(); }
 
-  WordIndex &GetWordIndex(long translationId);
-  void AddWordIndex(long translationId);
-  void DeleteWordIndex(long translationId);
+  bool GetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, unsigned int &value) const;
+  void SetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, const unsigned int &value);
+
 };
 
 }

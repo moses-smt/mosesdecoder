@@ -5,7 +5,7 @@
 #endif 
 
 #include "moses/TypeDef.h"
-#include "moses/CompactPT/PhraseTableCreator.h"
+#include "moses/TranslationModel/CompactPT/PhraseTableCreator.h"
 
 using namespace Moses;
 
