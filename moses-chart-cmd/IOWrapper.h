@@ -61,6 +61,7 @@ namespace MosesChartCmd
 class IOWrapper
 {
 protected:
+  typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
 
   long m_translationId;
 
@@ -82,6 +83,12 @@ protected:
   size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget);
   size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
   void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
+  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void ReconstructApplicationContext(const Moses::ChartHypothesis &hypo,
+                                     const Moses::Sentence &sentence,
+                                     ApplicationContext &context);
+  void WriteApplicationContext(std::ostream &out,
+                               const ApplicationContext &context);
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder

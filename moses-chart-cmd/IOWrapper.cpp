@@ -243,13 +243,9 @@ void OutputInput(std::ostream& os, const ChartHypothesis* hypo)
 }
 */
 
-namespace {
-
-typedef std::vector<std::pair<Word, WordsRange> > ApplicationContext;
-
 // Given a hypothesis and sentence, reconstructs the 'application context' --
 // the source RHS symbols of the SCFG rule that was applied, plus their spans.
-void ReconstructApplicationContext(const ChartHypothesis &hypo,
+void IOWrapper::ReconstructApplicationContext(const ChartHypothesis &hypo,
                                    const Sentence &sentence,
                                    ApplicationContext &context)
 {
@@ -280,7 +276,7 @@ void ReconstructApplicationContext(const ChartHypothesis &hypo,
 // output format is a bit odd (reverse order and double spacing between symbols)
 // but there are scripts and tools that expect the output of -T to look like
 // that.
-void WriteApplicationContext(std::ostream &out,
+void IOWrapper::WriteApplicationContext(std::ostream &out,
                              const ApplicationContext &context)
 {
   assert(!context.empty());
@@ -294,12 +290,8 @@ void WriteApplicationContext(std::ostream &out,
   }
 }
 
-}  // anonymous namespace
-
-void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
+void IOWrapper::OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const ChartHypothesis *hypo, const Sentence &sentence, long translationId)
 {
-  static ApplicationContext applicationContext;
-
   // recursive
   if (hypo != NULL) {
     ReconstructApplicationContext(*hypo, sentence, applicationContext);
@@ -317,7 +309,7 @@ void OutputTranslationOptions(std::ostream &out, const ChartHypothesis *hypo, co
   std::vector<const ChartHypothesis*>::const_iterator iter;
   for (iter = prevHypos.begin(); iter != prevHypos.end(); ++iter) {
     const ChartHypothesis *prevHypo = *iter;
-    OutputTranslationOptions(out, prevHypo, sentence, translationId);
+    OutputTranslationOptions(out, applicationContext, prevHypo, sentence, translationId);
   }
 }
 
@@ -330,7 +322,9 @@ void IOWrapper::OutputDetailedTranslationReport(
     return;
   }
   std::ostringstream out;
-  OutputTranslationOptions(out, hypo, sentence, translationId);
+  ApplicationContext applicationContext;
+
+  OutputTranslationOptions(out, applicationContext, hypo, sentence, translationId);
   CHECK(m_detailOutputCollector);
   m_detailOutputCollector->Write(translationId, out.str());
 }
