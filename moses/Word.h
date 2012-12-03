@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "TypeDef.h"
 #include "Factor.h"
+#include "FactorTypeSet.h"
 #include "Util.h"
 #include "util/string_piece.hh"
 
@@ -49,8 +50,10 @@ class Word
 protected:
 
   typedef const Factor * FactorArray[MAX_NUM_FACTORS];
+  typedef std::map<FactorMask, std::string> StringCacheType;
 
   FactorArray m_factorArray; /**< set of factors */
+  mutable StringCacheType m_stringCache; /**< cache for speeding up joint LM queries */
   bool m_isNonTerminal;
 
 public:
@@ -101,7 +104,7 @@ public:
   * use streaming output or ToString() from any class so not dependant on
   * these debugging functions.
   */
-  std::string GetString(const std::vector<FactorType> factorType,bool endWithBlank) const;
+  std::string GetString(const std::vector<FactorType> &factorType,bool endWithBlank) const;
   std::string GetString(FactorType factorType) const;
   TO_STRING();
 

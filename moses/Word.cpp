@@ -65,26 +65,35 @@ void Word::Merge(const Word &sourceWord)
   }
 }
 
-std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
+std::string Word::GetString(const vector<FactorType> &factorType,bool endWithBlank) const
 {
-  stringstream strme;
-  CHECK(factorType.size() <= MAX_NUM_FACTORS);
-  const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
-  bool firstPass = true;
-  for (unsigned int i = 0 ; i < factorType.size() ; i++) {
-    const Factor *factor = m_factorArray[factorType[i]];
-    if (factor != NULL) {
-      if (firstPass) {
-        firstPass = false;
-      } else {
-        strme << factorDelimiter;
+  string outStr;
+  FactorMask mask(factorType);
+  StringCacheType::const_iterator cacheIt = m_stringCache.find(mask);
+  if (cacheIt != m_stringCache.end()) {
+    outStr = cacheIt->second;
+  } else {
+    stringstream strme;
+    CHECK(factorType.size() <= MAX_NUM_FACTORS);
+    const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+    bool firstPass = true;
+    for (unsigned int i = 0 ; i < factorType.size() ; i++) {
+      const Factor *factor = m_factorArray[factorType[i]];
+      if (factor != NULL) {
+        if (firstPass) {
+          firstPass = false;
+        } else {
+          strme << factorDelimiter;
+        }
+        strme << factor->GetString();
       }
-      strme << factor->GetString();
     }
+    outStr = strme.str();
+    m_stringCache.insert(make_pair(mask, outStr));
   }
-  if(endWithBlank) strme << " ";
-  return strme.str();
+  return endWithBlank ? outStr + " " : outStr;
 }
+
 
 std::string Word::GetString(FactorType factorType) const
 {

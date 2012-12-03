@@ -93,19 +93,9 @@ public:
     for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos ) {
       const Word &word = *contextFactor[currPos];
 
-      // add word to chunked context
-      std::stringstream stream("");
-
-      const Factor *factor = word[ m_factorTypesOrdered[0] ];
-      stream << factor->GetString();
-
-      for (size_t index = 1 ; index < m_factorTypesOrdered.size() ; ++index) {
-        FactorType factorType = m_factorTypesOrdered[index];
-        const Factor *factor = word[factorType];
-        stream << "|" << factor->GetString();
-      }
-
-      factor = FactorCollection::Instance().AddFactor(Output, m_implFactor, stream.str());
+      // do not get factors one by one, take advantage of internal caching in the Word object
+      const Factor *factor = FactorCollection::Instance().AddFactor(Output, m_implFactor,
+          word.GetString(m_factorTypesOrdered, false));
 
       Word* jointWord = new Word;
       jointWord->SetFactor(m_implFactor, factor);
