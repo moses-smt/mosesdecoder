@@ -2728,16 +2728,16 @@ sub define_template {
     # input is array, but just specified as IN
     if ($cmd !~ /IN1/ && (scalar @INPUT) > 1 ) {
 	my $in = join(" ",@INPUT);
-	$cmd =~ s/([^AN])IN/$1$in/;
+	$cmd =~ s/([^AHNSW])IN/$1$in/;
 	$cmd =~ s/^IN/$in/;
     }
     # input is defined as IN or IN0, IN1, IN2
     else {
-  if ($cmd =~ /([^ANS])IN/ && scalar(@INPUT) == 0) {
+  if ($cmd =~ /([^AHNSW])IN/ && scalar(@INPUT) == 0) {
     die("ERROR: Step $step requires input from prior steps, but none defined.");
   }
-	$cmd =~ s/([^ANS])IN(\d+)/$1$INPUT[$2]/g;  # a bit trickier to
-	$cmd =~ s/([^ANS])IN/$1$INPUT[0]/g;        # avoid matching TRAINING, RECASING
+	$cmd =~ s/([^AHNSW])IN(\d+)/$1$INPUT[$2]/g;  # a bit trickier to
+	$cmd =~ s/([^AHNSW])IN/$1$INPUT[0]/g;        # avoid matching TRAINING, RECASING
 	$cmd =~ s/^IN(\d+)/$INPUT[$2]/g;
 	$cmd =~ s/^IN/$INPUT[0]/g; 
     }
