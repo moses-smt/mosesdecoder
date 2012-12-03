@@ -77,6 +77,10 @@ public:
     return m_totalPruned;
   }
 
+  bool IsEmpty() {
+    return m_list.empty();
+  }
+
 };
 
 }

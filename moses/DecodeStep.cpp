@@ -35,6 +35,7 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* pre
   FactorMask conflictMask = (m_outputFactors & decodeFeature->GetOutputFactorMask());
   m_outputFactors |= decodeFeature->GetOutputFactorMask();
   FactorMask newOutputFactorMask = m_outputFactors ^ prevOutputFactors;  //xor
+  m_inputFactors = decodeFeature->GetInput();
   m_newOutputFactors.resize(newOutputFactorMask.count());
   m_conflictFactors.resize(conflictMask.count());
   size_t j=0, k=0;

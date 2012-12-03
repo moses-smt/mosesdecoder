@@ -51,6 +51,7 @@ protected:
   FactorMask m_outputFactors; //! mask of what factors exist on the output side after this decode step
   std::vector<FactorType> m_conflictFactors; //! list of the factors that may conflict during this step
   std::vector<FactorType> m_newOutputFactors; //! list of the factors that are new in this step, may be empty
+  std::vector<FactorType> m_inputFactors; //! list of input factors
   const DecodeFeature* m_decodeFeature;
 
 public:
@@ -86,6 +87,11 @@ public:
    * conflict or compatibility */
   const std::vector<FactorType>& GetConflictFactors() const {
     return m_conflictFactors;
+  }
+
+  //! return input factors
+  const std::vector<FactorType>& GetInputFactors() const {
+    return m_inputFactors;
   }
 
   /*! returns phrase table feature for translation step */

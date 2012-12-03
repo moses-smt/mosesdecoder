@@ -148,6 +148,10 @@ public:
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 
+  void FakePartialTranslation(const TranslationOption *oldOpt, PartialTranslOptColl *newPtoc,
+    const std::vector<FactorType> &inFactors, const std::vector<FactorType> &outFactors,
+    size_t startPos);
+
   //! Access these pre-calculated values
   void InsertPreCalculatedScores(const TranslationOption& translationOption,
       ScoreComponentCollection* scoreBreakdown) const;

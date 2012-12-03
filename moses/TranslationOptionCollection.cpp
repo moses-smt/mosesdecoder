@@ -557,6 +557,16 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       (m_system, m_source, *oldPtoc
        , startPos, endPos, adhereTableLimit );
 
+      if (oldPtoc->IsEmpty() // an OOV
+          && decodeStep.GetInputFactors().size() == 1 // 1 source factor
+          && decodeStep.GetOutputFactorMask().count() == 1 // 1 target factor
+          && endPos - startPos == 1 // only handle 1-word OOV phrase
+          && ! StaticData::Instance().GetDropUnknown()) {
+        // we should only be producing new factors
+        assert(decodeStep.IsFactorProducingStep() && ! decodeStep.IsFilteringStep());
+        FakePartialTranslation(NULL, oldPtoc, decodeStep.GetInputFactors(), decodeStep.GetNewOutputFactors(), startPos);
+      }
+
       // do rest of decode steps
       int indexStep = 0;
       for (++iterStep ; iterStep != decodeGraph.end() ; ++iterStep) {
@@ -573,6 +583,17 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
                              , *newPtoc
                              , this
                              , adhereTableLimit);
+          if (newPtoc->IsEmpty()) {
+            const DecodeStepTranslation *tStep = dynamic_cast<const DecodeStepTranslation *>(&decodeStep);
+            if (tStep != NULL // this is a translation step
+                && decodeStep.GetInputFactors().size() == 1 // 1 source factor
+                && decodeStep.GetOutputFactorMask().count() == 1 // 1 target factor
+                && endPos - startPos == 1 // only handle 1-word OOV phrase
+                && ! StaticData::Instance().GetDropUnknown()) {
+              assert(decodeStep.IsFactorProducingStep() && ! decodeStep.IsFilteringStep());
+              FakePartialTranslation(*iterPartialTranslOpt, newPtoc, decodeStep.GetInputFactors(), decodeStep.GetNewOutputFactors(), startPos);
+            }
+          }
         }
         // last but 1 partial trans not required anymore
         totalEarlyPruned += newPtoc->GetPrunedCount();
@@ -781,6 +802,35 @@ const TranslationOptionList &TranslationOptionCollection::GetTranslationOptionLi
 
   CHECK(maxSize < m_collection[startPos].size());
   return m_collection[startPos][maxSize];
+}
+
+
+void TranslationOptionCollection::FakePartialTranslation(const TranslationOption *oldOpt,
+    PartialTranslOptColl *newPtoc, const std::vector<FactorType> &inFactors, const std::vector<FactorType> &outFactors,
+    size_t startPos)
+{
+  WordsRange wordsRange(startPos, startPos); // this is a 1-word phrase
+
+  Phrase* src = new Phrase(1);
+  src->AddWord() = m_source.GetWord(startPos);
+  m_unksrcs.push_back(src);
+
+  TargetPhrase targetPhrase;
+  targetPhrase.CreateFromString(outFactors, m_source.GetWord(startPos).GetString(inFactors, false),
+      StaticData::Instance().GetFactorDelimiter());
+  targetPhrase.SetSourcePhrase(*src);
+  targetPhrase.SetScore(m_system);
+  targetPhrase.SetAlignmentInfo("0-0");
+
+  if (oldOpt == NULL) {
+    // initial translation step
+    newPtoc->Add(m_system, new TranslationOption(wordsRange, targetPhrase, m_source));
+  } else {
+    // merge with output of previous mapping steps
+    TranslationOption *newTransOpt = new TranslationOption(*oldOpt);
+    newTransOpt->MergeNewFeatures(targetPhrase, targetPhrase.GetScoreBreakdown(), outFactors);
+    newPtoc->Add(m_system, newTransOpt);
+  }
 }
 
 }
