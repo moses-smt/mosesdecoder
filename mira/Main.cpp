@@ -533,7 +533,7 @@ int main(int argc, char** argv) {
     if (spWeight != 1.0) {
       tuneMetaFeature = true;
       cerr << "Rank " << rank << ", sparse Producer " <<
-	sparseProducers[i]->GetScoreProducerWeightShortName()
+	sparseProducers[i]->GetScoreProducerDescription()
 	   << " weight: " << spWeight << endl;
     }
   }
@@ -698,12 +698,12 @@ int main(int argc, char** argv) {
 	// initialise meta feature
 	MetaFeatureProducer *m = staticData.GetMetaFeatureProducer();
 	FeatureFunction* ff = const_cast<FeatureFunction*>(sparseProducers[0]);
-	if (sparseProducers[0]->GetScoreProducerWeightShortName().compare("wt") == 0) {
+	if (sparseProducers[0]->GetScoreProducerDescription().compare("wt") == 0) {
 	  WordTranslationFeature* wt =
 	    static_cast<WordTranslationFeature*>(ff);
 	  mosesWeights.Assign(m, wt->GetSparseProducerWeight());
 	}
-	else if (sparseProducers[0]->GetScoreProducerWeightShortName().compare("pp") == 0) {
+	else if (sparseProducers[0]->GetScoreProducerDescription().compare("pp") == 0) {
 	  PhrasePairFeature* pp =
 	    static_cast<PhrasePairFeature*>(ff);
 	  mosesWeights.Assign(m, pp->GetSparseProducerWeight());
@@ -1187,7 +1187,7 @@ int main(int argc, char** argv) {
 	vector<const ScoreProducer*>::const_iterator iter;
 	const vector<const ScoreProducer*> featureFunctions2 = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
 	for (iter = featureFunctions2.begin(); iter != featureFunctions2.end(); ++iter) {
-	  if ((*iter)->GetScoreProducerWeightShortName() == "bl") {
+	  if ((*iter)->GetScoreProducerDescription() == "BleuScoreFeature") {
 	    mosesWeights.Assign(*iter, 0);
 	    break;
 	  }
@@ -1277,11 +1277,11 @@ int main(int argc, char** argv) {
 		    const FVector &weights = staticData.GetAllWeights().GetScoresVector();
 		    float aggregate = scores.inner_product(weights);
 		    //cerr << "Rank " << rank << ", epoch " << epoch << ", sparse Producer " <<
-		    //sparseProducers[i]->GetScoreProducerWeightShortName()
+		    //sparseProducers[i]->GetScoreProducerDescription()
 		    //<< " aggregate: " << aggregate << endl;
 		    aggregate *= spWeight;
 		    //cerr << "Rank " << rank << ", epoch " << epoch << ", sparse Producer " <<
-		    //sparseProducers[i]->GetScoreProducerWeightShortName()
+		    //sparseProducers[i]->GetScoreProducerDescription()
 		    //<< " weighted aggregate: " << aggregate << endl;
 		    
 		    // copy core features to a new collection, then assign aggregated sparse feature
@@ -1391,7 +1391,7 @@ int main(int argc, char** argv) {
 	    const vector<const FeatureFunction*> sparseProducers =
 	      staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetSparseProducers();
 	    FeatureFunction* ff = const_cast<FeatureFunction*>(sparseProducers[0]);
-	    if (sparseProducers[0]->GetScoreProducerWeightShortName().compare("wt") == 0) {
+	    if (sparseProducers[0]->GetScoreProducerDescription().compare("wt") == 0) {
 	      WordTranslationFeature* wt =
 		static_cast<WordTranslationFeature*>(ff);
 	      float newWeight = wt->GetSparseProducerWeight();
@@ -1400,7 +1400,7 @@ int main(int argc, char** argv) {
 	      wt->SetSparseProducerWeight(newWeight);
 	      cerr << "Rank " << rank << ", epoch " << epoch << ", new meta weight: " << newWeight << endl;
 	    }
-	    else if (sparseProducers[0]->GetScoreProducerWeightShortName().compare("pp") == 0) {
+	    else if (sparseProducers[0]->GetScoreProducerDescription().compare("pp") == 0) {
 	      PhrasePairFeature* pp =
 		static_cast<PhrasePairFeature*>(ff);
 	      float newWeight = pp->GetSparseProducerWeight();
@@ -1963,7 +1963,7 @@ void applyPerFeatureLearningRates(vector<vector<ScoreComponentCollection> > &fea
 }
 
 void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
-  string name = sp->GetScoreProducerWeightShortName();
+  string name = sp->GetScoreProducerDescription();
 
   // scale down score
   float featureScore;
@@ -1977,7 +1977,7 @@ void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<Sc
 }
 
 void scaleFeatureScores(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
-  string name = sp->GetScoreProducerWeightShortName();
+  string name = sp->GetScoreProducerDescription();
 
   // scale down score
   for (size_t i=0; i<featureValues.size(); ++i) { // each item in batch

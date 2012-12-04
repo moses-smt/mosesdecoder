@@ -389,26 +389,6 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     OutputAllFeatureScores( out, system, path );
     string lastName;
 
-    // translation components
-    const vector<PhraseDictionaryFeature*>& pds = system->GetPhraseDictionaries();
-    if (pds.size() > 0) {
-
-      for( size_t i=0; i<pds.size(); i++ ) {
-        size_t pd_numinputscore = pds[i]->GetNumInputScores();
-        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-        for (size_t j = 0; j<scores.size(); ++j){
-
-          if (labeledOutput && (i == 0) ){
-            if ((j == 0) || (j == pd_numinputscore)){
-              lastName =  pds[i]->GetScoreProducerDescription();
-              out << " " << lastName << ":";
-            }
-          }
-          out << " " << scores[j];
-        }
-      }
-    }
-
     // generation
     const vector<GenerationDictionary*>& gds = system->GetGenerationDictionaries();
     if (gds.size() > 0) {
@@ -487,7 +467,6 @@ void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system,
   const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
     if (slf[i]->GetScoreProducerDescription() != "!UnknownWordPenalty" &&
-        slf[i]->GetScoreProducerDescription() != "PhraseModel" &&
         slf[i]->GetScoreProducerDescription() != "Generation")
       OutputFeatureScores( out, path, slf[i], lastName );
 }
