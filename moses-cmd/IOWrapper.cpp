@@ -8,12 +8,12 @@ All rights reserved.
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
 
-    * Redistributions of source code must retain the above copyright notice,
+ * Redistributions of source code must retain the above copyright notice,
 			this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright notice,
+ * Redistributions in binary form must reproduce the above copyright notice,
 			this list of conditions and the following disclaimer in the documentation
 			and/or other materials provided with the distribution.
-    * Neither the name of the University of Edinburgh nor the names of its contributors
+ * Neither the name of the University of Edinburgh nor the names of its contributors
 			may be used to endorse or promote products derived from this software
 			without specific prior written permission.
 
@@ -28,7 +28,7 @@ INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER
 IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
-***********************************************************************/
+ ***********************************************************************/
 
 // example file on how to use moses library
 
@@ -54,47 +54,47 @@ namespace MosesCmd
 {
 
 IOWrapper::IOWrapper(
-  const vector<FactorType>				&inputFactorOrder
-  , const vector<FactorType>			&outputFactorOrder
-  , const FactorMask							&inputFactorUsed
-  , size_t												nBestSize
-  , const string									&nBestFilePath)
-  :m_inputFactorOrder(inputFactorOrder)
-  ,m_outputFactorOrder(outputFactorOrder)
-  ,m_inputFactorUsed(inputFactorUsed)
-  ,m_inputFile(NULL)
-  ,m_inputStream(&std::cin)
-  ,m_nBestStream(NULL)
-  ,m_outputWordGraphStream(NULL)
-  ,m_outputSearchGraphStream(NULL)
-  ,m_detailedTranslationReportingStream(NULL)
-  ,m_alignmentOutputStream(NULL)
+    const vector<FactorType>				&inputFactorOrder
+    , const vector<FactorType>			&outputFactorOrder
+    , const FactorMask							&inputFactorUsed
+    , size_t												nBestSize
+    , const string									&nBestFilePath)
+:m_inputFactorOrder(inputFactorOrder)
+,m_outputFactorOrder(outputFactorOrder)
+,m_inputFactorUsed(inputFactorUsed)
+,m_inputFile(NULL)
+,m_inputStream(&std::cin)
+,m_nBestStream(NULL)
+,m_outputWordGraphStream(NULL)
+,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
+,m_alignmentOutputStream(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
-                 , inputFactorUsed
-                 , nBestSize, nBestFilePath);
+      , inputFactorUsed
+      , nBestSize, nBestFilePath);
 }
 
 IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
-                     , const std::vector<FactorType>	&outputFactorOrder
-                     , const FactorMask							&inputFactorUsed
-                     , size_t												nBestSize
-                     , const std::string							&nBestFilePath
-                     , const std::string							&inputFilePath)
-  :m_inputFactorOrder(inputFactorOrder)
-  ,m_outputFactorOrder(outputFactorOrder)
-  ,m_inputFactorUsed(inputFactorUsed)
-  ,m_inputFilePath(inputFilePath)
-  ,m_inputFile(new InputFileStream(inputFilePath))
-  ,m_nBestStream(NULL)
-  ,m_outputWordGraphStream(NULL)
-  ,m_outputSearchGraphStream(NULL)
-  ,m_detailedTranslationReportingStream(NULL)
-  ,m_alignmentOutputStream(NULL)
+    , const std::vector<FactorType>	&outputFactorOrder
+    , const FactorMask							&inputFactorUsed
+    , size_t												nBestSize
+    , const std::string							&nBestFilePath
+    , const std::string							&inputFilePath)
+:m_inputFactorOrder(inputFactorOrder)
+,m_outputFactorOrder(outputFactorOrder)
+,m_inputFactorUsed(inputFactorUsed)
+,m_inputFilePath(inputFilePath)
+,m_inputFile(new InputFileStream(inputFilePath))
+,m_nBestStream(NULL)
+,m_outputWordGraphStream(NULL)
+,m_outputSearchGraphStream(NULL)
+,m_detailedTranslationReportingStream(NULL)
+,m_alignmentOutputStream(NULL)
 {
   Initialization(inputFactorOrder, outputFactorOrder
-                 , inputFactorUsed
-                 , nBestSize, nBestFilePath);
+      , inputFactorUsed
+      , nBestSize, nBestFilePath);
 
   m_inputStream = m_inputFile;
 }
@@ -118,10 +118,10 @@ IOWrapper::~IOWrapper()
 }
 
 void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder*/
-                               , const std::vector<FactorType>			&/*outputFactorOrder*/
-                               , const FactorMask							&/*inputFactorUsed*/
-                               , size_t												nBestSize
-                               , const std::string							&nBestFilePath)
+    , const std::vector<FactorType>			&/*outputFactorOrder*/
+    , const FactorMask							&/*inputFactorUsed*/
+    , size_t												nBestSize
+    , const std::string							&nBestFilePath)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -148,7 +148,7 @@ void IOWrapper::Initialization(const std::vector<FactorType>	&/*inputFactorOrder
   }
 
 
-// search graph output
+  // search graph output
   if (staticData.GetOutputSearchGraph()) {
     string fileName;
     if (staticData.GetOutputSearchGraphExtended())
@@ -193,7 +193,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
  * print surface factor only for the given phrase
  */
 void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-		   bool reportSegmentation, bool reportAllFactors)
+    bool reportSegmentation, bool reportAllFactors)
 {
   CHECK(outputFactorOrder.size() > 0);
   const Phrase& phrase = edge.GetCurrTargetPhrase();
@@ -219,12 +219,12 @@ void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<
   // trace option "-t"
   if (reportSegmentation == true && phrase.GetSize() > 0) {
     out << "|" << edge.GetCurrSourceWordsRange().GetStartPos()
-	<< "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
+	    << "-" << edge.GetCurrSourceWordsRange().GetEndPos() << "| ";
   }
 }
 
 void OutputBestSurface(std::ostream &out, const Hypothesis *hypo, const std::vector<FactorType> &outputFactorOrder,
-                   bool reportSegmentation, bool reportAllFactors)
+    bool reportSegmentation, bool reportAllFactors)
 {
   if (hypo != NULL) {
     // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
@@ -237,13 +237,13 @@ void OutputAlignment(ostream &out, const AlignmentInfo &ai, size_t sourceOffset,
 {
   typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
   AlignVec alignments = ai.GetSortedAlignments();
-  
+
   AlignVec::const_iterator it;
   for (it = alignments.begin(); it != alignments.end(); ++it) {
     const std::pair<size_t,size_t> &alignment = **it;
     out << alignment.first + sourceOffset << "-" << alignment.second + targetOffset << " ";
   }
-  
+
 }
 
 void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
@@ -254,7 +254,7 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     const Hypothesis &edge = *edges[currEdge];
     const TargetPhrase &tp = edge.GetCurrTargetPhrase();
     size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-    
+
     OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset);
 
     targetOffset += tp.GetSize();
@@ -266,7 +266,7 @@ void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<co
 {
   ostringstream out;
   OutputAlignment(out, edges);
-  
+
   collector->Write(lineNo,out.str());
 }
 
@@ -394,18 +394,18 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (pds.size() > 0) {
 
       for( size_t i=0; i<pds.size(); i++ ) {
-	size_t pd_numinputscore = pds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = pds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( pds[i] );
+        for (size_t j = 0; j<scores.size(); ++j){
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerDescription();
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ){
+            if ((j == 0) || (j == pd_numinputscore)){
+              lastName =  pds[i]->GetScoreProducerDescription();
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 
@@ -414,18 +414,18 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     if (gds.size() > 0) {
 
       for( size_t i=0; i<gds.size(); i++ ) {
-	size_t pd_numinputscore = gds[i]->GetNumInputScores();
-	vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
-	for (size_t j = 0; j<scores.size(); ++j){
+        size_t pd_numinputscore = gds[i]->GetNumInputScores();
+        vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( gds[i] );
+        for (size_t j = 0; j<scores.size(); ++j){
 
-	  if (labeledOutput && (i == 0) ){
-	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerDescription();
-	      out << " " << lastName << ":";
-	    }
-	  }
-	  out << " " << scores[j];
-	}
+          if (labeledOutput && (i == 0) ){
+            if ((j == 0) || (j == pd_numinputscore)){
+              lastName =  gds[i]->GetScoreProducerDescription();
+              out << " " << lastName << ":";
+            }
+          }
+          out << " " << scores[j];
+        }
       }
     }
 
@@ -459,7 +459,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
         const int sourceOffset = sourceRange.GetStartPos();
         const int targetOffset = targetRange.GetStartPos();
         const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-        
+
         OutputAlignment(out, ai, sourceOffset, targetOffset);
 
       }
@@ -481,14 +481,14 @@ void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system,
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ )
-  	if (sff[i]->GetScoreProducerDescription() != "BleuScoreFeature")
+    if (sff[i]->GetScoreProducerDescription() != "BleuScoreFeature")
       OutputFeatureScores( out, path, sff[i], lastName );
 
   const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
     if (slf[i]->GetScoreProducerDescription() != "!UnknownWordPenalty" &&
-          slf[i]->GetScoreProducerDescription() != "PhraseModel" &&
-          slf[i]->GetScoreProducerDescription() != "Generation")
+        slf[i]->GetScoreProducerDescription() != "PhraseModel" &&
+        slf[i]->GetScoreProducerDescription() != "Generation")
       OutputFeatureScores( out, path, slf[i], lastName );
 }
 
@@ -524,8 +524,8 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
     // report each feature
     else {
       for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) 
-	out << " " << i->first << ": " << i->second;
-	/*        if (i->second != 0) { // do not report zero-valued features
+        out << " " << i->first << ": " << i->second;
+      /*        if (i->second != 0) { // do not report zero-valued features
 	  float weight = staticData.GetSparseWeight(i->first);
           if (weight != 0)
 	  out << " " << i->first << "=" << weight;
@@ -589,7 +589,7 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
 {
   IOWrapper *ioWrapper;
   const std::vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder()
-      ,&outputFactorOrder = staticData.GetOutputFactorOrder();
+          ,&outputFactorOrder = staticData.GetOutputFactorOrder();
   FactorMask inputFactorUsed(inputFactorOrder);
 
   // io
@@ -598,14 +598,14 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
     string filePath = staticData.GetParam("input-file")[0];
 
     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath()
-                              , filePath);
+        , staticData.GetNBestSize()
+        , staticData.GetNBestFilePath()
+        , filePath);
   } else {
     VERBOSE(1,"IO from STDOUT/STDIN" << endl);
     ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
-                              , staticData.GetNBestSize()
-                              , staticData.GetNBestFilePath());
+        , staticData.GetNBestSize()
+        , staticData.GetNBestFilePath());
   }
   ioWrapper->ResetTranslationId();
 
