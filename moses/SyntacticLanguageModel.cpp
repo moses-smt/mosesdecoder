@@ -40,7 +40,7 @@ namespace Moses
     return "Syntactic Language Model";
   }
 
-  std::string SyntacticLanguageModel::GetScoreProducerWeightShortName(unsigned) const {
+  std::string SyntacticLanguageModel::GetScoreProducerWeightShortName() const {
     return "slm";
   }
 

@@ -80,7 +80,7 @@ public:
                      ScoreComponentCollection* accumulator) const;
 
   // basic properties
-  std::string GetScoreProducerWeightShortName(unsigned) const { return "wt"; }
+  std::string GetScoreProducerWeightShortName() const { return "wt"; }
   size_t GetNumInputScores() const { return 0; }
 
   bool ComputeValueInTranslationOption() const {return true;}

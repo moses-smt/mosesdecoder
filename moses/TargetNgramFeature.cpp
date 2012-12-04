@@ -55,7 +55,7 @@ bool TargetNgramFeature::Load(const std::string &filePath)
   return true;
 }
 
-string TargetNgramFeature::GetScoreProducerWeightShortName(unsigned) const
+string TargetNgramFeature::GetScoreProducerWeightShortName() const
 {
 	return "dlm";
 }

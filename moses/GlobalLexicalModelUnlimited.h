@@ -109,7 +109,7 @@ public:
   	std::cerr << "done." << std::endl;
   }
 
-  std::string GetScoreProducerWeightShortName(unsigned) const {
+  std::string GetScoreProducerWeightShortName() const {
     return "glm";
   };
 

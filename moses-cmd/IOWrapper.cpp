@@ -400,7 +400,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 	  if (labeledOutput && (i == 0) ){
 	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName(j);
+	      lastName =  pds[i]->GetScoreProducerWeightShortName();
 	      out << " " << lastName << ":";
 	    }
 	  }
@@ -420,7 +420,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 	  if (labeledOutput && (i == 0) ){
 	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName(j);
+	      lastName =  gds[i]->GetScoreProducerWeightShortName();
 	      out << " " << lastName << ":";
 	    }
 	  }

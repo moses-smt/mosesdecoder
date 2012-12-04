@@ -39,7 +39,7 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
 }
 
 
-std::string DistortionScoreProducer::GetScoreProducerWeightShortName(unsigned) const
+std::string DistortionScoreProducer::GetScoreProducerWeightShortName() const
 {
   return "d";
 }
@@ -108,7 +108,7 @@ FFState* DistortionScoreProducer::Evaluate(
 }
 
 
-std::string WordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
+std::string WordPenaltyProducer::GetScoreProducerWeightShortName() const
 {
   return "w";
 }
@@ -121,7 +121,7 @@ void WordPenaltyProducer::Evaluate(
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 
-std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName(unsigned) const
+std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName() const
 {
   return "u";
 }
@@ -132,7 +132,7 @@ bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
   return true;
 }
 
-std::string MetaFeatureProducer::GetScoreProducerWeightShortName(unsigned) const
+std::string MetaFeatureProducer::GetScoreProducerWeightShortName() const
 {
   return "m"+m_shortName;
 }

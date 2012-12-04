@@ -41,19 +41,19 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction {
 class MockSingleFeature : public MockStatelessFeatureFunction {
   public:
     MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1) {}
-    std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
+    std::string GetScoreProducerWeightShortName() const {return "sf";}
 };
 
 class MockMultiFeature : public MockStatelessFeatureFunction {
   public:
     MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5) {}
-    std::string GetScoreProducerWeightShortName(unsigned) const {return "mf";}
+    std::string GetScoreProducerWeightShortName() const {return "mf";}
 };
 
 class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
     MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", ScoreProducer::unlimited) {}
-    std::string GetScoreProducerWeightShortName(unsigned) const {return "sf";}
+    std::string GetScoreProducerWeightShortName() const {return "sf";}
 };
 
 

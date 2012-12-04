@@ -85,7 +85,7 @@ public:
     	return "BleuScoreFeature";
     }
 
-    std::string GetScoreProducerWeightShortName(unsigned) const
+    std::string GetScoreProducerWeightShortName() const
     {
         return "bl";
     }

@@ -28,7 +28,7 @@ public:
 	}
 
   // basic properties
-	std::string GetScoreProducerWeightShortName(unsigned) const { return "stm"; }
+	std::string GetScoreProducerWeightShortName() const { return "stm"; }
 	size_t GetNumInputScores() const { return 0; }
 
 };

@@ -58,7 +58,7 @@ public:
   float GetWeight() const;
   float GetOOVWeight() const;
 
-  std::string GetScoreProducerWeightShortName(unsigned) const {
+  std::string GetScoreProducerWeightShortName() const {
     return "lm";
   }
 

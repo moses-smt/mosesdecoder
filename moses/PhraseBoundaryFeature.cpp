@@ -22,7 +22,7 @@ PhraseBoundaryFeature::PhraseBoundaryFeature
 {
 }
 
-string PhraseBoundaryFeature::GetScoreProducerWeightShortName(unsigned) const 
+string PhraseBoundaryFeature::GetScoreProducerWeightShortName() const
 {
   return "pb";
 }

@@ -40,7 +40,7 @@ public:
     virtual const FFState* EmptyHypothesisState(const InputType &input) const;
     
     
-    std::string GetScoreProducerWeightShortName(unsigned) const {
+    std::string GetScoreProducerWeightShortName() const {
         return "d";
     };
     

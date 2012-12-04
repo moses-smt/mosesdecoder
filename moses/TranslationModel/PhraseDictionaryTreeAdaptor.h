@@ -57,7 +57,7 @@ public:
   TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
   std::string GetScoreProducerDescription(unsigned idx=0) const;
-  std::string GetScoreProducerWeightShortName(unsigned idx=0) const;
+  std::string GetScoreProducerWeightShortName() const;
 
   size_t GetNumInputScores() const;
   virtual void InitializeForInput(InputType const& source);

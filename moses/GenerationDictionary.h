@@ -71,7 +71,7 @@ public:
 	//! load data file
 	bool Load(const std::string &filePath, FactorDirection direction);
 
-	std::string GetScoreProducerWeightShortName(unsigned) const
+	std::string GetScoreProducerWeightShortName() const
 	{
 		return "g";
 	}

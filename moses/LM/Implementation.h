@@ -115,7 +115,7 @@ public:
   }
 
 
-  std::string GetScoreProducerWeightShortName(unsigned) const {
+  std::string GetScoreProducerWeightShortName() const {
     return "lm";
   }
 

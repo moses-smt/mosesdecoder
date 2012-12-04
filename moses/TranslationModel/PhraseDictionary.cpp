@@ -304,13 +304,9 @@ PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 
 
-std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName(unsigned idx) const
+std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName() const
 {
-  if (idx < GetNumInputScores()){
-    return "I";
-  }else{
-    return "tm";
-  }
+  return "tm";
 }
 
 

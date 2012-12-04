@@ -11,7 +11,7 @@ using namespace std;
 
 namespace Moses {
 
-string PhrasePairFeature::GetScoreProducerWeightShortName(unsigned) const
+string PhrasePairFeature::GetScoreProducerWeightShortName() const
 {
   return "pp";
 }

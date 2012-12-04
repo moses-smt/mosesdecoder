@@ -560,30 +560,30 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName(0)) == 0)
+      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName()) == 0)
         m_targetBigramFeature->SetSparseFeatureReporting();
       if (m_targetNgramFeatures.size() > 0)
       	for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-      		if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerWeightShortName(0)) == 0)
+      		if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerWeightShortName()) == 0)
       			m_targetNgramFeatures[i]->SetSparseFeatureReporting();
-      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName(0)) == 0)
+      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName()) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
-      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName(0)) == 0)
+      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName()) == 0)
         m_phraseLengthFeature->SetSparseFeatureReporting();
-      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerWeightShortName(0)) == 0)
+      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerWeightShortName()) == 0)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
-      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName(0)) == 0)
+      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName()) == 0)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeatures.size() > 0)
       	for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerWeightShortName(0)) == 0)
+	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerWeightShortName()) == 0)
 	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       if (m_phrasePairFeatures.size() > 0)
       	for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-	  if (name.compare(m_phrasePairFeatures[i]->GetScoreProducerWeightShortName(0)) == 0)
+	  if (name.compare(m_phrasePairFeatures[i]->GetScoreProducerWeightShortName()) == 0)
 	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
-        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerWeightShortName(0)) == 0) {
+        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerWeightShortName()) == 0) {
           m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();          
         }
       }
