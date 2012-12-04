@@ -115,8 +115,6 @@ public:
 
   virtual bool ComputeValueInTranslationOption() const;
 
-  std::string GetScoreProducerWeightShortName() const;
-
   size_t GetNumInputScores() const;
 
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {

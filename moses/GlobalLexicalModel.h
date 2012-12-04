@@ -68,10 +68,6 @@ public:
 	                   const std::vector< FactorType >& outFactors);
 	virtual ~GlobalLexicalModel();
 
-  virtual std::string GetScoreProducerWeightShortName() const {
-    return "lex";
-  };
-
   void InitializeForInput( Sentence const& in );
 
   void Evaluate(const PhraseBasedFeatureContext& context,

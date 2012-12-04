@@ -120,15 +120,16 @@ namespace Moses {
       for(size_t i=0;i<m_globalLexicalModels.size();++i) {
         m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
       }
-      //for(size_t i=0;i<m_statefulFFs.size();++i) {
-      //}
+
+      /* TODO - get rid of GetScoreProducerWeightShortName()
       for(size_t i=0;i<m_statelessFFs.size();++i) {
         if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm") 
         {
 	        ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
         }
       }
-      
+      */
+
       LMList::const_iterator iterLM;
       for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
       {

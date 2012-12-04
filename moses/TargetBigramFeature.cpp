@@ -33,11 +33,6 @@ bool TargetBigramFeature::Load(const std::string &filePath)
   return true;
 }
 
-string TargetBigramFeature::GetScoreProducerWeightShortName() const
-{
-	return "dlmb";
-}
-
 size_t TargetBigramFeature::GetNumInputScores() const
 {
 	return 0;

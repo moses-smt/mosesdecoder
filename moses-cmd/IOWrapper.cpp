@@ -400,7 +400,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 	  if (labeledOutput && (i == 0) ){
 	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  pds[i]->GetScoreProducerWeightShortName();
+	      lastName =  pds[i]->GetScoreProducerDescription();
 	      out << " " << lastName << ":";
 	    }
 	  }
@@ -420,7 +420,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
 
 	  if (labeledOutput && (i == 0) ){
 	    if ((j == 0) || (j == pd_numinputscore)){
-	      lastName =  gds[i]->GetScoreProducerWeightShortName();
+	      lastName =  gds[i]->GetScoreProducerDescription();
 	      out << " " << lastName << ":";
 	    }
 	  }
@@ -481,15 +481,14 @@ void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system,
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ )
-  	if (sff[i]->GetScoreProducerWeightShortName() != "bl")
+  	if (sff[i]->GetScoreProducerDescription() != "BleuScoreFeature")
       OutputFeatureScores( out, path, sff[i], lastName );
 
   const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
-    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
-          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
-          slf[i]->GetScoreProducerWeightShortName() != "I" &&
-          slf[i]->GetScoreProducerWeightShortName() != "g")
+    if (slf[i]->GetScoreProducerDescription() != "!UnknownWordPenalty" &&
+          slf[i]->GetScoreProducerDescription() != "PhraseModel" &&
+          slf[i]->GetScoreProducerDescription() != "Generation")
       OutputFeatureScores( out, path, slf[i], lastName );
 }
 
@@ -500,8 +499,8 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
 
   // regular features (not sparse)
   if (ff->GetNumScoreComponents() != ScoreProducer::unlimited) {
-    if( labeledOutput && lastName != ff->GetScoreProducerWeightShortName() ) {
-      lastName = ff->GetScoreProducerWeightShortName();
+    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
+      lastName = ff->GetScoreProducerDescription();
       out << " " << lastName << ":";
     }
     vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( ff );
@@ -518,7 +517,7 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
     if (! ff->GetSparseFeatureReporting()) {
       const FVector &weights = staticData.GetAllWeights().GetScoresVector();
       if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
-        out << " " << ff->GetScoreProducerWeightShortName() << ":";
+        out << " " << ff->GetScoreProducerDescription() << ":";
       out << " " << scores.inner_product(weights);
     }
 

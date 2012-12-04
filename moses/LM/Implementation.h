@@ -114,11 +114,6 @@ public:
     return m_sentenceEndArray;
   }
 
-
-  std::string GetScoreProducerWeightShortName() const {
-    return "lm";
-  }
-
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
   virtual void InitializeBeforeSentenceProcessing() {};
   virtual void CleanUpAfterSentenceProcessing(const InputType& source) {};

@@ -66,7 +66,6 @@ class PhrasePairFeature: public StatelessFeatureFunction {
     
     bool ComputeValueInTranslationOption() const;
     
-    std::string GetScoreProducerWeightShortName() const;
     size_t GetNumInputScores() const;
 
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);

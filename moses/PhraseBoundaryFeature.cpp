@@ -22,11 +22,6 @@ PhraseBoundaryFeature::PhraseBoundaryFeature
 {
 }
 
-string PhraseBoundaryFeature::GetScoreProducerWeightShortName() const
-{
-  return "pb";
-}
-
 size_t PhraseBoundaryFeature::GetNumInputScores() const 
 {
   return 0;

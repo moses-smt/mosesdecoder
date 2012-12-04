@@ -38,12 +38,7 @@ public:
                               ScoreComponentCollection* accumulator) const;
     
     virtual const FFState* EmptyHypothesisState(const InputType &input) const;
-    
-    
-    std::string GetScoreProducerWeightShortName() const {
-        return "d";
-    };
-    
+
     void InitializeForInput(const InputType& i){
         m_table->InitializeForInput(i);
     }

@@ -410,7 +410,7 @@ void OutputSparseFeatureScores(std::ostream& out, const ScoreComponentCollection
   if (! ff->GetSparseFeatureReporting()) {
   	const FVector &weights = staticData.GetAllWeights().GetScoresVector();
   	if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
-  		out << " " << ff->GetScoreProducerWeightShortName() << ":";
+  		out << " " << ff->GetScoreProducerDescription() << ":";
     out << " " << scores.inner_product(weights);
   }
 
@@ -456,7 +456,7 @@ void WriteFeatures(const TranslationSystem &system, const ScoreComponentCollecti
       for (size_t j = 0; j<scores.size(); ++j){
         if (labeledOutput && (i == 0) ){
           if ((j == 0) || (j == pd_numinputscore)){
-            lastName =  pds[i]->GetScoreProducerWeightShortName();
+            lastName =  pds[i]->GetScoreProducerDescription();
             out << " " << lastName << ":";
           }
         }
@@ -479,7 +479,7 @@ void WriteFeatures(const TranslationSystem &system, const ScoreComponentCollecti
       for (size_t j = 0; j<scores.size(); ++j){
         if (labeledOutput && (i == 0) ){
           if ((j == 0) || (j == pd_numinputscore)){
-            lastName =  gds[i]->GetScoreProducerWeightShortName();
+            lastName =  gds[i]->GetScoreProducerDescription();
             out << " " << lastName << ":";
           }
         }

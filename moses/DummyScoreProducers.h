@@ -20,7 +20,6 @@ public:
   float CalculateDistortionScore(const Hypothesis& hypo,
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
 
-	std::string GetScoreProducerWeightShortName() const;
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   virtual FFState* Evaluate(
@@ -45,8 +44,6 @@ class WordPenaltyProducer : public StatelessFeatureFunction
 public:
 	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty",1) {}
 
-	std::string GetScoreProducerWeightShortName() const;
-
   virtual void Evaluate(
     const PhraseBasedFeatureContext& context,
   	ScoreComponentCollection* accumulator) const;
@@ -67,8 +64,6 @@ class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
 	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty",1) {}
-
-	std::string GetScoreProducerWeightShortName() const;
 
   virtual bool ComputeValueInTranslationOption() const;
   void Evaluate(  const PhraseBasedFeatureContext& context,
@@ -95,8 +90,6 @@ class MetaFeatureProducer : public StatelessFeatureFunction
 
   std::string m_shortName;
   
-  std::string GetScoreProducerWeightShortName() const;
-
   void Evaluate(const PhraseBasedFeatureContext& context,
 		ScoreComponentCollection* accumulator) const {
     //do nothing - not a real feature

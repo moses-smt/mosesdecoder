@@ -38,12 +38,6 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
            NOT_FOUND);
 }
 
-
-std::string DistortionScoreProducer::GetScoreProducerWeightShortName() const
-{
-  return "d";
-}
-
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
     const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
 {
@@ -107,12 +101,6 @@ FFState* DistortionScoreProducer::Evaluate(
   return res;
 }
 
-
-std::string WordPenaltyProducer::GetScoreProducerWeightShortName() const
-{
-  return "w";
-}
-
 void WordPenaltyProducer::Evaluate(
     const PhraseBasedFeatureContext& context,
     ScoreComponentCollection* out) const
@@ -121,20 +109,9 @@ void WordPenaltyProducer::Evaluate(
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 
-std::string UnknownWordPenaltyProducer::GetScoreProducerWeightShortName() const
-{
-  return "u";
-}
-
-
 bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
 {
   return true;
-}
-
-std::string MetaFeatureProducer::GetScoreProducerWeightShortName() const
-{
-  return "m"+m_shortName;
 }
 
 }

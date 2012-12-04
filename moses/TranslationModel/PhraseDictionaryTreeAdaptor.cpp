@@ -99,17 +99,8 @@ size_t PhraseDictionaryTreeAdaptor::GetNumInputScores() const
   return imp->GetNumInputScores();
 }
 
-std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription(unsigned idx) const{
-  if (idx < imp->GetNumInputScores()){
-    return "InputScore";
-  }else{
-    return "PhraseModel";
-  }
-}
-
-std::string PhraseDictionaryTreeAdaptor::GetScoreProducerWeightShortName() const
-{
-  return "tm";
+std::string PhraseDictionaryTreeAdaptor::GetScoreProducerDescription() const{
+  return "PhraseModel";
 }
 
 }

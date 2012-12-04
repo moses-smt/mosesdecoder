@@ -109,10 +109,6 @@ public:
   	std::cerr << "done." << std::endl;
   }
 
-  std::string GetScoreProducerWeightShortName() const {
-    return "glm";
-  };
-
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
   void InitializeForInput( Sentence const& in );

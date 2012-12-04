@@ -40,7 +40,6 @@ public:
 		  	           const AlignmentInfo &alignmentInfo) const;
 
   // basic properties
-	std::string GetScoreProducerWeightShortName() const { return "swd"; }
 	size_t GetNumInputScores() const { return 0; }
 };
 

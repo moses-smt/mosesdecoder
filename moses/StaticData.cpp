@@ -560,30 +560,30 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerDescription()) == 0)
         m_targetBigramFeature->SetSparseFeatureReporting();
       if (m_targetNgramFeatures.size() > 0)
       	for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-      		if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerWeightShortName()) == 0)
+      		if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerDescription()) == 0)
       			m_targetNgramFeatures[i]->SetSparseFeatureReporting();
-      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerDescription()) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
-      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerDescription()) == 0)
         m_phraseLengthFeature->SetSparseFeatureReporting();
-      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerDescription()) == 0)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
-      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerWeightShortName()) == 0)
+      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerDescription()) == 0)
         m_sourceWordDeletionFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeatures.size() > 0)
       	for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerWeightShortName()) == 0)
+	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerDescription()) == 0)
 	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       if (m_phrasePairFeatures.size() > 0)
       	for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-	  if (name.compare(m_phrasePairFeatures[i]->GetScoreProducerWeightShortName()) == 0)
+	  if (name.compare(m_phrasePairFeatures[i]->GetScoreProducerDescription()) == 0)
 	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
-        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerWeightShortName()) == 0) {
+        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerDescription()) == 0) {
           m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();          
         }
       }
@@ -1990,6 +1990,8 @@ void StaticData::ClearTransOptionCache() const {
 
 void StaticData::ReLoadParameter()
 {
+  assert(false); // TODO completely redo. Too many hardcoded ff
+  /*
   m_verboseLevel = 1;
   if (m_parameter->GetParam("verbose").size() == 1) {
     m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
@@ -2049,11 +2051,13 @@ void StaticData::ReLoadParameter()
 
     SetWeights(&phraseDictionaryFeature, tmp_weights);
   }
-
+  */
 }
 
 void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
 {
+  assert(false);
+  /*
   //loop over ScoreProducers to update weights of BleuScoreFeature
   const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
 
@@ -2065,6 +2069,7 @@ void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
       break;
     }
   }
+  */
 }
 
 // ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() const {}

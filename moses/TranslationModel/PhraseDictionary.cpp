@@ -303,13 +303,6 @@ PhraseDictionary* PhraseDictionaryFeature::GetDictionary()
 PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 
-
-std::string PhraseDictionaryFeature::GetScoreProducerWeightShortName() const
-{
-  return "tm";
-}
-
-
 size_t PhraseDictionaryFeature::GetNumInputScores() const
 {
   return m_numInputScores;

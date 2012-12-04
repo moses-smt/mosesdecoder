@@ -85,11 +85,6 @@ public:
     	return "BleuScoreFeature";
     }
 
-    std::string GetScoreProducerWeightShortName() const
-    {
-        return "bl";
-    }
-
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);
     void SetCurrSourceLength(size_t);
