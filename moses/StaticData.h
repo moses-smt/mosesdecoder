@@ -138,7 +138,7 @@ protected:
   , m_maxNoTransOptPerCoverage
   , m_maxNoPartTransOpt
   , m_maxPhraseLength
-  , m_numLinkParams;
+  , m_numRealWordsInInput;
 
   std::string
   m_constraintFileName;
@@ -443,8 +443,8 @@ public:
      return m_minlexrMemory;
   }
   
-  size_t GetNumLinkParams() const {
-    return m_numLinkParams;
+  size_t GetNumRealWordsInInput() const {
+    return m_numRealWordsInInput;
   }
   const std::vector<std::string> &GetDescription() const {
     return m_parameter->GetParam("description");

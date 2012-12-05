@@ -121,7 +121,6 @@ Parameter::Parameter()
 	AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
 	AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
 	AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
-	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
 	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
 	AddParam("non-terminals", "list of non-term symbols, space separated");
@@ -166,6 +165,9 @@ Parameter::Parameter()
 
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 
+  AddParam("translation-systems", "DEPRECATED. DO NOT USE. specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
+  AddParam("link-param-count", "DEPRECATED. DO NOT USE. Number of parameters on word links when using confusion networks or lattices (default = 1)");
+
   AddParam("weight-slm", "slm", "DEPRECATED. DO NOT USE. weight(s) for syntactic language model");
   AddParam("weight-bl", "bl", "DEPRECATED. DO NOT USE. weight for bleu score feature");
   AddParam("weight-d", "d", "DEPRECATED. DO NOT USE. weight(s) for distortion (reordering components)");
@@ -189,8 +191,7 @@ Parameter::Parameter()
   AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
   AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
 
-  AddParam("translation-systems", "DEPRECATED. DO NOT USE. specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
-
+  AddParam("input-scores", "2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
 }
 
 Parameter::~Parameter()
@@ -349,22 +350,11 @@ void Parameter::ConvertWeightArgs()
        m_setting.count("weight-l") || m_setting.count("weight-u") || m_setting.count("weight-lex") ||
        m_setting.count("weight-generation") || m_setting.count("weight-lr") || m_setting.count("weight-d")
        ))
-    {
-      cerr << "Do not mix old and new format for specify weights";
-    }
-
-  // input scores. if size=1, add an extra for 'real' word count feature. TODO HACK
-  bool addExtraInputWeight = false;
-  if (m_setting["weight-i"].size() == 1)
   {
-    addExtraInputWeight = true;
+    cerr << "Do not mix old and new format for specify weights";
   }
+
   ConvertWeightArgs("weight-i", "PhraseModel");
-
-  if (addExtraInputWeight)
-    m_setting["weight"].push_back("PhraseModel 0.0");
-
-
   ConvertWeightArgs("weight-t", "PhraseModel");
   ConvertWeightArgs("weight-w", "WordPenalty");
   ConvertWeightArgs("weight-l", "LM");

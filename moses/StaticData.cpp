@@ -91,11 +91,9 @@ StaticData::StaticData()
   ,m_phraseLengthFeature(NULL)
   ,m_targetWordInsertionFeature(NULL)
   ,m_sourceWordDeletionFeature(NULL)
-  ,m_numLinkParams(1)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_numInputScores(0)
   ,m_bleuScoreFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
@@ -1213,6 +1211,8 @@ bool StaticData::LoadPhraseTables()
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
     const vector<float> &weightAll	= m_parameter->GetWeights("PhraseModel");
+    for (int i = 0; i < weightAll.size(); ++i)
+      cerr << weightAll[i] << " " << flush;
 
     const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
     vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
@@ -1272,57 +1272,38 @@ bool StaticData::LoadPhraseTables()
       // first InputScores (if any), then translation scores
       vector<float> weight;
 
-      if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput)) {
-        // TODO. find what the assumptions made by confusion network about phrase table output which makes
-        // it only work with binrary file. This is a hack
+      if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
+        if (currDict==0) { // only the 1st pt. THis is shit
+          // TODO. find what the assumptions made by confusion network about phrase table output which makes
+          // it only work with binary file. This is a hack
+          CHECK(implementation == Binary);
 
-        m_numInputScores=m_parameter->GetParam("weight-i").size();
-        
-        if (implementation == Binary)
-        {
-          for(unsigned k=0; k<m_numInputScores; ++k)
-            weight.push_back(Scan<float>(m_parameter->GetParam("weight-i")[k]));
-        }
-        
-        if(m_parameter->GetParam("link-param-count").size())
-          m_numLinkParams = Scan<size_t>(m_parameter->GetParam("link-param-count")[0]);
-
-        //print some info about this interaction:
-        if (implementation == Binary) {
-          if (m_numLinkParams == m_numInputScores) {
-            VERBOSE(1,"specified equal numbers of link parameters and insertion weights, not using non-epsilon 'real' word link count.\n");
-          } else if ((m_numLinkParams + 1) == m_numInputScores) {
-            VERBOSE(1,"WARN: "<< m_numInputScores << " insertion weights found and only "<< m_numLinkParams << " link parameters specified, applying non-epsilon 'real' word link count for last feature weight.\n");
-          } else {
-            stringstream strme;
-            strme << "You specified " << m_numInputScores
-                  << " input weights (weight-i), but you specified " << m_numLinkParams << " link parameters (link-param-count)!";
-            UserMessage::Add(strme.str());
-            return false;
+          if (m_parameter->GetParam("input-scores").size()) {
+            m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
           }
+          else {
+            m_numInputScores = 1;
+          }
+          numScoreComponent += m_numInputScores;
+
+          if (m_parameter->GetParam("input-scores").size() > 1) {
+            m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
+          }
+          else {
+            m_numRealWordsInInput = 0;
+          }
+          numScoreComponent += m_numRealWordsInInput;
         }
-        
       }
-      if (!m_inputType) {
-        m_numInputScores=0;
+      else { // not confusion network or lattice input
+        m_numInputScores = 0;
+        m_numRealWordsInInput = 0;
       }
-      //this number changes depending on what phrase table we're talking about: only 0 has the weights on it
-      size_t tableInputScores = (currDict == 0 && implementation == Binary) ? m_numInputScores : 0;
 
       for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
         weight.push_back(weightAll[weightAllOffset + currScore]);
 
-      
-      if(weight.size() - tableInputScores != numScoreComponent) {
-        stringstream strme;
-        strme << "Your phrase table has " << numScoreComponent
-              << " scores, but you specified " << (weight.size() - tableInputScores) << " weights!";
-        UserMessage::Add(strme.str());
-        return false;
-      }
-
       weightAllOffset += numScoreComponent;
-      numScoreComponent += tableInputScores;
 
       string targetPath, alignmentsFile;
       if (implementation == SuffixArray) {
