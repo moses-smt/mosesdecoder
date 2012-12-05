@@ -328,13 +328,13 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // word penalties
-  for (size_t i = 0; i < m_parameter->GetParam("weight-w").size(); ++i) {
-    float weightWordPenalty       = Scan<float>( m_parameter->GetParam("weight-w")[i] );
+  for (size_t i = 0; i < m_parameter->GetWeights("WordPenalty").size(); ++i) {
+    float weightWordPenalty       = m_parameter->GetWeights("WordPenalty")[i];
     m_wordPenaltyProducers.push_back(new WordPenaltyProducer());
     SetWeight(m_wordPenaltyProducers.back(), weightWordPenalty);
   }
 
-  float weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
+  float weightUnknownWord				= (m_parameter->GetWeights("UnknownWordPenalty").size() > 0) ? m_parameter->GetWeights("UnknownWordPenalty")[0] : 1.0;
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
@@ -1085,7 +1085,7 @@ bool StaticData::LoadLanguageModels()
 {
   if (m_parameter->GetParam("lmodel-file").size() > 0) {
     // weights
-    vector<float> weightAll = Scan<float>(m_parameter->GetParam("weight-l"));
+    const vector<float> &weightAll = m_parameter->GetWeights("LM");
 
     // dictionary upper-bounds fo all IRST LMs
     vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
@@ -1166,7 +1166,7 @@ bool StaticData::LoadGenerationTables()
 {
   if (m_parameter->GetParam("generation-file").size() > 0) {
     const vector<string> &generationVector = m_parameter->GetParam("generation-file");
-    const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-generation"));
+    const vector<float> &weight = m_parameter->GetWeights("Generation");
 
     IFVERBOSE(1) {
       TRACE_ERR( "weight-generation: ");
@@ -1225,7 +1225,7 @@ bool StaticData::LoadPhraseTables()
   // load phrase translation tables
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
-    vector<float> weightAll									= Scan<float>(m_parameter->GetParam("weight-t"));
+    const vector<float> &weightAll	= m_parameter->GetWeights("PhraseModel");
 
     const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
     vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
@@ -1447,15 +1447,11 @@ void StaticData::LoadChartDecodingParameters()
 
 void StaticData::LoadPhraseBasedParameters()
 {
-  const vector<string> distortionWeights = m_parameter->GetParam("weight-d");
+  const vector<float> &distortionWeights = m_parameter->GetWeights("Distortion");
   size_t distortionWeightCount = distortionWeights.size();
-  //if there's a lex-reordering model, and no separate weight set, then
-  //take just one of these weights for linear distortion
-  if (!m_parameter->GetParam("weight-lr").size() && m_parameter->GetParam("distortion-file").size()) {
-    distortionWeightCount = 1;
-  }
+
   for (size_t i = 0; i < distortionWeightCount; ++i) {
-    float weightDistortion = Scan<float>(distortionWeights[i]);
+    float weightDistortion = distortionWeights[i];
     m_distortionScoreProducers.push_back(new DistortionScoreProducer());
     SetWeight(m_distortionScoreProducers.back(), weightDistortion);
   }
@@ -1851,7 +1847,7 @@ bool StaticData::LoadWordTranslationFeature()
   if (parameters.empty())
     return true;
 
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-wt"));
+  const vector<float> &weight = m_parameter->GetWeights("WordPenalty");
   if (weight.size() > 1) {
     std::cerr << "Only one sparse producer weight allowed for the word translation feature" << std::endl;
     return false;

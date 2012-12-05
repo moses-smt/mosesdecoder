@@ -48,6 +48,8 @@ protected:
 	PARAM_STRING m_description;
 	PARAM_STRING m_fullname;
 
+  std::map<std::string, std::vector<float> >  m_weights;
+
   std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
   void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, int argc, char* argv[]);
   bool ReadConfigFile(const std::string &filePath );
@@ -59,6 +61,11 @@ protected:
   void AddParam(const std::string &paramName, const std::string &abbrevName, const std::string &description);
 
   void PrintCredit();
+
+  void ConvertWeightArgs();
+  void ConvertWeightArgs(const std::string &oldWeightName, const std::string &newWeightName);
+  void CreateWeightsMap();
+  void WeightOverwrite();
 
 public:
   Parameter();
@@ -101,6 +108,10 @@ public:
 		OverwriteParam(GetFullName(paramShortName),values);
 	}
 	
+  std::vector<float> &GetWeights(const std::string &name)
+  {   return m_weights[name]; }
+
+
 };
 
 }

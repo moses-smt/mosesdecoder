@@ -71,7 +71,6 @@ Parameter::Parameter()
   AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
 #ifdef HAVE_SYNLM
 	AddParam("slmodel-file", "location of the syntactic language model file(s)");
-	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
 	AddParam("slmodel-factor", "factor to use with syntactic language model");
 	AddParam("slmodel-beam", "beam width to use with syntactic language model's parser");
 #endif
@@ -85,23 +84,6 @@ Parameter::Parameter()
 	AddParam("early-discarding-threshold", "edt", "threshold for constructing hypotheses based on estimate cost");
 	AddParam("verbose", "v", "verbosity level of the logging");
   AddParam("references", "Reference file(s) - used for bleu score feature");
-  AddParam("weight-bl", "bl", "weight for bleu score feature");
-	AddParam("weight-d", "d", "weight(s) for distortion (reordering components)");
-	AddParam("weight-dlm", "dlm", "weight for discriminative LM feature function (on top of sparse weights)");
-  AddParam("weight-lr", "lr", "weight(s) for lexicalized reordering, if not included in weight-d");
-	AddParam("weight-generation", "g", "weight(s) for generation components");
-	AddParam("weight-i", "I", "weight(s) for word insertion - used for parameters from confusion network and lattice input links");
-	AddParam("weight-l", "lm", "weight(s) for language models");
-	AddParam("weight-lex", "lex", "weight for global lexical model");
-	AddParam("weight-glm", "glm", "weight for global lexical feature, sparse producer");
-	AddParam("weight-wt", "wt", "weight for word translation feature");
-	AddParam("weight-pp", "pp", "weight for phrase pair feature");
-	AddParam("weight-pb", "pb", "weight for phrase boundary feature");
-	AddParam("weight-t", "tm", "weights for translation model components");
-	AddParam("weight-w", "w", "weight for word penalty");
-	AddParam("weight-u", "u", "weight for unknown word penalty");
-	AddParam("weight-e", "e", "weight for word deletion"); 
-  AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
 	AddParam("distortion-limit", "dl", "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");	
@@ -184,6 +166,31 @@ Parameter::Parameter()
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
 
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
+
+  AddParam("weight-slm", "slm", "DEPRECATED. DO NOT USE. weight(s) for syntactic language model");
+  AddParam("weight-bl", "bl", "DEPRECATED. DO NOT USE. weight for bleu score feature");
+  AddParam("weight-d", "d", "DEPRECATED. DO NOT USE. weight(s) for distortion (reordering components)");
+  AddParam("weight-dlm", "dlm", "DEPRECATED. DO NOT USE. weight for discriminative LM feature function (on top of sparse weights)");
+  AddParam("weight-lr", "lr", "DEPRECATED. DO NOT USE. weight(s) for lexicalized reordering, if not included in weight-d");
+  AddParam("weight-generation", "g", "DEPRECATED. DO NOT USE. weight(s) for generation components");
+  AddParam("weight-i", "I", "DEPRECATED. DO NOT USE. weight(s) for word insertion - used for parameters from confusion network and lattice input links");
+  AddParam("weight-l", "lm", "DEPRECATED. DO NOT USE. weight(s) for language models");
+  AddParam("weight-lex", "lex", "DEPRECATED. DO NOT USE. weight for global lexical model");
+  AddParam("weight-glm", "glm", "DEPRECATED. DO NOT USE. weight for global lexical feature, sparse producer");
+  AddParam("weight-wt", "wt", "DEPRECATED. DO NOT USE. weight for word translation feature");
+  AddParam("weight-pp", "pp", "DEPRECATED. DO NOT USE. weight for phrase pair feature");
+  AddParam("weight-pb", "pb", "DEPRECATED. DO NOT USE. weight for phrase boundary feature");
+  AddParam("weight-t", "tm", "DEPRECATED. DO NOT USE. weights for translation model components");
+  AddParam("weight-w", "w", "DEPRECATED. DO NOT USE. weight for word penalty");
+  AddParam("weight-u", "u", "DEPRECATED. DO NOT USE. weight for unknown word penalty");
+  AddParam("weight-e", "e", "DEPRECATED. DO NOT USE. weight for word deletion");
+
+  AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
+
+  AddParam("weight", "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
+  AddParam("weight-overwrite", "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
+
+
 }
 
 Parameter::~Parameter()
@@ -291,6 +298,11 @@ bool Parameter::LoadParam(int argc, char* argv[])
     }
   }
 
+  // convert old weights args to new format
+  ConvertWeightArgs();
+  CreateWeightsMap();
+  WeightOverwrite();
+
   // check for illegal parameters
   bool noErrorFlag = true;
   for (int i = 0 ; i < argc ; i++) {
@@ -306,6 +318,119 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
   // check if parameters make sense
   return Validate() && noErrorFlag;
+}
+
+void Parameter::ConvertWeightArgs(const string &oldWeightName, const string &newWeightName)
+{
+  PARAM_VEC &newWeights = m_setting["weight"];
+  PARAM_MAP::iterator iterMap;
+
+  // translation ff
+  iterMap = m_setting.find(oldWeightName);
+  if (iterMap != m_setting.end())
+  {
+    const PARAM_VEC &weights = iterMap->second;
+    for (size_t i = 0; i < weights.size(); ++i)
+    {
+      string line = newWeightName + " " + weights[i];
+      newWeights.push_back(line);
+    }
+
+    m_setting.erase(iterMap);
+  }
+
+}
+
+void Parameter::ConvertWeightArgs()
+{
+  // check that old & new format aren't mixed
+  if (m_setting.count("weight") &&
+      (m_setting.count("weight-i") || m_setting.count("weight-t") || m_setting.count("weight-w") ||
+       m_setting.count("weight-l") || m_setting.count("weight-u") || m_setting.count("weight-lex") ||
+       m_setting.count("weight-generation") || m_setting.count("weight-lr") || m_setting.count("weight-d")
+       ))
+    {
+      cerr << "Do not mix old and new format for specify weights";
+    }
+
+  // input scores. if size=1, add an extra for 'real' word count feature. TODO HACK
+  bool addExtraInputWeight = false;
+  if (m_setting["weight-i"].size() == 1)
+  {
+    addExtraInputWeight = true;
+  }
+  ConvertWeightArgs("weight-i", "PhraseModel");
+
+  if (addExtraInputWeight)
+    m_setting["weight"].push_back("PhraseModel 0.0");
+
+
+  ConvertWeightArgs("weight-t", "PhraseModel");
+  ConvertWeightArgs("weight-w", "WordPenalty");
+  ConvertWeightArgs("weight-l", "LM");
+  ConvertWeightArgs("weight-slm", "SyntacticLM");
+  ConvertWeightArgs("weight-u", "UnknownWordPenalty");
+  ConvertWeightArgs("weight-lex", "GlobalLexicalReordering");
+  ConvertWeightArgs("weight-generation", "Generation");
+  ConvertWeightArgs("weight-lr", "LexicalReordering");
+
+  // distortion / lex distortion
+  PARAM_VEC &newWeights = m_setting["weight"];
+  PARAM_VEC &weights = m_setting["weight-d"];
+
+  if (weights.size() > 0)
+  {
+    // distance distortion
+    string line = "Distortion " + weights[0];
+    newWeights.push_back(line);
+
+    // everything but the last is lex reordering model
+    for (size_t i = 1; i < weights.size(); ++i)
+    {
+      string line = "LexicalReordering " + weights[i];
+      newWeights.push_back(line);
+    }
+
+    m_setting.erase("weight-d");
+  }
+}
+
+void Parameter::CreateWeightsMap()
+{
+  PARAM_VEC &vec = m_setting["weight"];
+  for (size_t i = 0; i < vec.size(); ++i)
+  {
+    const string &line = vec[i];
+    vector<string> toks = Tokenize(line);
+    CHECK(toks.size() == 2);
+
+    string &name = toks[0];
+    float weight = Scan<float>(toks[1]);
+    m_weights[name].push_back(weight);
+  }
+
+}
+
+void Parameter::WeightOverwrite()
+{
+  PARAM_VEC &vec = m_setting["weight-overwrite"];
+  for (size_t i = 0; i < vec.size(); ++i)
+  {
+    cerr << vec[i] << endl;
+    const string &line = vec[i];
+
+    vector<string> toks = Tokenize(line);
+    CHECK(toks.size() == 3);
+
+    string &name = toks[0];
+    size_t ind = Scan<size_t>(toks[1]);
+    float weight = Scan<float>(toks[2]);
+
+    vector<float> &weightsForProducer = m_weights[name];
+    CHECK(ind < weightsForProducer.size());
+    weightsForProducer[ind] = weight;
+
+  }
 }
 
 /** check that parameter settings make sense */
@@ -345,13 +470,14 @@ bool Parameter::Validate()
     }
   }
 
+  const vector<float> &lmWeights = GetWeights("LM");
   if (m_setting["lmodel-file"].size() * (m_setting.find("lmodel-oov-feature") != m_setting.end() ? 2 : 1)
-         != m_setting["weight-l"].size()) {
+         != lmWeights.size()) {
     stringstream errorMsg("");
     errorMsg << "Config and parameters specify "
              << static_cast<int>(m_setting["lmodel-file"].size())
              << " language model files (lmodel-file), but "
-             << static_cast<int>(m_setting["weight-l"].size())
+             << static_cast<int>(lmWeights.size())
              << " weights (weight-l)";
     errorMsg << endl << "You might be giving '-lmodel-file TYPE FACTOR ORDER FILENAME' but you should be giving these four as a single argument, i.e. '-lmodel-file \"TYPE FACTOR ORDER FILENAME\"'";
     errorMsg << endl << "You should also remember that each language model requires 2 weights, if and only if lmodel-oov-feature is on.";
