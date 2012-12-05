@@ -917,26 +917,13 @@ StaticData::~StaticData()
 bool StaticData::LoadLexicalReorderingModel()
 {
   VERBOSE(1, "Loading lexical distortion models...");
-  const vector<string> fileStr    = m_parameter->GetParam("distortion-file");
-  bool hasWeightlr = (m_parameter->GetParam("weight-lr").size() != 0);
-  vector<string> weightsStr;
-  if (hasWeightlr) {
-    weightsStr = m_parameter->GetParam("weight-lr");
-  } else {
-    weightsStr = m_parameter->GetParam("weight-d");
-  }
+  const vector<string> fileStr = m_parameter->GetParam("distortion-file");
+  const vector<float> &weights= m_parameter->GetWeights("LexicalReordering");
 
-  std::vector<float>   weights;
-  size_t w = 1; //cur weight
-  if (hasWeightlr) {
-    w = 0; // if reading from weight-lr, don't have to count first as distortion penalty
-  }
+  size_t w = 0; //cur weight
   size_t f = 0; //cur file
-  //get weights values
   VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
-  for(size_t j = 0; j < weightsStr.size(); ++j) {
-    weights.push_back(Scan<float>(weightsStr[j]));
-  }
+
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i) {
     vector<string> spec = Tokenize<string>(fileStr[f], " ");
