@@ -341,7 +341,7 @@ static void ShowWeights()
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    if (slf[i]->GetScoreProducerDescription() != "!UnknownWordPenalty" &&
+    if (slf[i]->GetScoreProducerDescription() != "UnknownWordPenalty" &&
           slf[i]->GetScoreProducerDescription() != "PhraseModel" &&
           slf[i]->GetScoreProducerDescription() != "Generation")
     {

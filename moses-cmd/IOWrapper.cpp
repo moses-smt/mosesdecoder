@@ -466,7 +466,7 @@ void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system,
 
   const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
-    if (slf[i]->GetScoreProducerDescription() != "!UnknownWordPenalty" &&
+    if (slf[i]->GetScoreProducerDescription() != "UnknownWordPenalty" &&
         slf[i]->GetScoreProducerDescription() != "Generation")
       OutputFeatureScores( out, path, slf[i], lastName );
 }

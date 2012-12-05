@@ -63,7 +63,7 @@ public:
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	UnknownWordPenaltyProducer() : StatelessFeatureFunction("!UnknownWordPenalty",1) {}
+	UnknownWordPenaltyProducer() : StatelessFeatureFunction("UnknownWordPenalty",1) {}
 
   virtual bool ComputeValueInTranslationOption() const;
   void Evaluate(  const PhraseBasedFeatureContext& context,
