@@ -337,6 +337,7 @@ static void ShowWeights()
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+
   for (size_t i = 0; i < sff.size(); ++i) {
     PrintFeatureWeight(sff[i]);
   }
