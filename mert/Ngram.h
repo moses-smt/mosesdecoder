@@ -45,14 +45,7 @@ class NgramCounts {
   /**
    * If the specified "ngram" is found, we add counts.
    * If not, we insert the default count in the container. */
-  void Add(const Key& ngram) {
-    const_iterator it = find(ngram);
-    if (it != end()) {
-      m_counts[ngram] = it->second + 1;
-    } else {
-      m_counts[ngram] = kDefaultCount;
-    }
-  }
+  inline void Add(const Key& ngram) { m_counts[ngram]++; }
 
   /**
    * Return true iff the specified "ngram" is found in the container.
