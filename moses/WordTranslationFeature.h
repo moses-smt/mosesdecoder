@@ -39,7 +39,7 @@ public:
   WordTranslationFeature(FactorType factorTypeSource, FactorType factorTypeTarget,
 			 bool simple, bool sourceContext, bool targetContext, bool ignorePunctuation, 
 			 bool domainTrigger):
-  StatelessFeatureFunction("wt", ScoreProducer::unlimited),
+  StatelessFeatureFunction("WordTranslationFeature", ScoreProducer::unlimited),
     m_factorTypeSource(factorTypeSource),
     m_factorTypeTarget(factorTypeTarget),
     m_unrestricted(true),

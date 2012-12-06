@@ -17,7 +17,7 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 
 PhraseBoundaryFeature::PhraseBoundaryFeature
   (const FactorList& sourceFactors, const FactorList& targetFactors) :
-    StatefulFeatureFunction("pb", ScoreProducer::unlimited), m_sourceFactors(sourceFactors),
+    StatefulFeatureFunction("PhraseBoundaryFeature", ScoreProducer::unlimited), m_sourceFactors(sourceFactors),
     m_targetFactors(targetFactors), m_sparseProducerWeight(1)
 {
 }

@@ -13,7 +13,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      const LexicalReorderingConfiguration& configuration,
                                      const std::string &filePath,
                                      const std::vector<float>& weights)
-  : StatefulFeatureFunction("LexicalReordering_" + configuration.GetModelString(),
+  : StatefulFeatureFunction("LexicalReordering",
                             configuration.GetNumScoreComponents()),
     m_configuration(configuration)
 {

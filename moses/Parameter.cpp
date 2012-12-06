@@ -374,9 +374,17 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgs("weight-l", "LM");
   ConvertWeightArgs("weight-slm", "SyntacticLM");
   ConvertWeightArgs("weight-u", "UnknownWordPenalty");
-  ConvertWeightArgs("weight-lex", "GlobalLexicalReordering");
   ConvertWeightArgs("weight-generation", "Generation");
   ConvertWeightArgs("weight-lr", "LexicalReordering");
+  ConvertWeightArgs("weight-lr", "BleuScoreFeature");
+  ConvertWeightArgs("weight-glm", "GlobalLexicalModel");
+  ConvertWeightArgs("weight-wt", "WordTranslationFeature");
+  ConvertWeightArgs("weight-pp", "PhrasePairFeature");
+  ConvertWeightArgs("weight-pb", "PhraseBoundaryFeature");
+
+  ConvertWeightArgs("weight-e", "WordDeletion"); // TODO Can't find real name
+  ConvertWeightArgs("weight-dlm", "DiscriminativeLM"); // TODO Can't find real name
+  ConvertWeightArgs("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
   // distortion / lex distortion
   PARAM_VEC &newWeights = m_setting["weight"];

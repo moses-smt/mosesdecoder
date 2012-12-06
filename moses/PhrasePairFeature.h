@@ -33,7 +33,7 @@ class PhrasePairFeature: public StatelessFeatureFunction {
   public:
     PhrasePairFeature (FactorType sourceFactorId, FactorType targetFactorId, 
 		       bool simple, bool sourceContext, bool ignorePunctuation, bool domainTrigger) :
-    StatelessFeatureFunction("pp", ScoreProducer::unlimited),
+    StatelessFeatureFunction("PhrasePairFeature", ScoreProducer::unlimited),
       m_sourceFactorId(sourceFactorId),
       m_targetFactorId(targetFactorId),
       m_unrestricted(true),
