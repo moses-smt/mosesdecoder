@@ -341,22 +341,8 @@ static void ShowWeights()
     PrintFeatureWeight(sff[i]);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-    if (slf[i]->GetScoreProducerDescription() != "UnknownWordPenalty" &&
-          slf[i]->GetScoreProducerDescription() != "PhraseModel" &&
-          slf[i]->GetScoreProducerDescription() != "Generation")
-    {
-  	  PrintFeatureWeight(slf[i]);
-    }
+	  PrintFeatureWeight(slf[i]);
   }
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  for( size_t i=0; i<pds.size(); i++ ) {
-    PrintFeatureWeight(pds[i]);
-  }
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
-  for( size_t i=0; i<gds.size(); i++ ) {
-    PrintFeatureWeight(gds[i]);
-  }
-
 }
 
 } //namespace
