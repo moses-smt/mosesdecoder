@@ -37,7 +37,7 @@ namespace Moses
   }
 
   std::string SyntacticLanguageModel::GetScoreProducerDescription() const {
-    return "Syntactic Language Model";
+    return "SyntacticLM";
   }
 
   const FFState* SyntacticLanguageModel::EmptyHypothesisState(const InputType &input) const {
