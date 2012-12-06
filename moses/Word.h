@@ -50,7 +50,7 @@ class Word
 protected:
 
   typedef const Factor * FactorArray[MAX_NUM_FACTORS];
-  typedef std::map<FactorMask, std::string> StringCacheType;
+  typedef std::map<unsigned long, std::string> StringCacheType;
 
   FactorArray m_factorArray; /**< set of factors */
   mutable StringCacheType m_stringCache; /**< cache for speeding up joint LM queries */

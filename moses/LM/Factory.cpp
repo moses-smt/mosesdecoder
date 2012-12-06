@@ -70,7 +70,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
   LanguageModelImplementation *lm = NULL;
   if (factorTypes.size() > 1 && lmImplementation != Joint) {
 #ifdef LM_SRI
-    UserMessage::Add("Warning: Ignoring specified LM type, using JointLM (multiple factors defined)");
+    cerr << "Warning: Ignoring specified LM type, using JointLM (multiple factors defined)" << endl;
     lm = new LanguageModelJoint(new LanguageModelSRI());
     if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder)) {
       cerr << "multi factor model failed" << endl;
@@ -79,8 +79,8 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     }
     return new LMRefCount(lm);
 #else
-    UserMessage::Add("Warning: Multiple factors specified, cannot switch to JointLM (LM_SRI is not defined)");
-    UserMessage::Add("Will only model factor " + SPrint(factorTypes[0]));
+    cerr << "Warning: Multiple factors specified, cannot switch to JointLM (LM_SRI is not defined)" << endl;
+    cerr << "Will only model factor " + SPrint(factorTypes[0]) << endl;
 #endif // LM_SRI
   }
 
