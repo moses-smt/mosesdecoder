@@ -67,10 +67,26 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                                    , const std::string &languageModelFile
                                    , int dub)
 {
+  LanguageModelImplementation *lm = NULL;
+  if (factorTypes.size() > 1 && lmImplementation != Joint) {
+#ifdef LM_SRI
+    UserMessage::Add("Warning: Ignoring specified LM type, using JointLM (multiple factors defined)");
+    lm = new LanguageModelJoint(new LanguageModelSRI());
+    if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder)) {
+      cerr << "multi factor model failed" << endl;
+      delete lm;
+      return NULL;
+    }
+    return new LMRefCount(lm);
+#else
+    UserMessage::Add("Warning: Multiple factors specified, cannot switch to JointLM (LM_SRI is not defined)");
+    UserMessage::Add("Will only model factor " + SPrint(factorTypes[0]));
+#endif // LM_SRI
+  }
+
   if (lmImplementation == Ken || lmImplementation == LazyKen) {
     return ConstructKenLM(languageModelFile, factorTypes[0], lmImplementation == LazyKen);
   }
-  LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
   case RandLM:
 #ifdef LM_RAND
