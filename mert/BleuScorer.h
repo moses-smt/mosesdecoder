@@ -51,7 +51,7 @@ public:
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n);
+  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false);
 
   void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 

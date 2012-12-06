@@ -1,21 +1,21 @@
 #ifndef MERT_VOCABULARY_H_
 #define MERT_VOCABULARY_H_
 
-#include <map>
+#include <boost/unordered_map.hpp>
 #include <string>
 
 namespace mert {
 
 /**
- * A embarrassingly simple map to handle vocabularies to calculate
+ * A map to handle vocabularies to calculate
  * various scores such as BLEU.
  *
  * TODO: replace this with more efficient data structure.
  */
 class Vocabulary {
  public:
-  typedef std::map<std::string, int>::iterator iterator;
-  typedef std::map<std::string, int>::const_iterator const_iterator;
+  typedef boost::unordered_map<std::string, int>::iterator iterator;
+  typedef boost::unordered_map<std::string, int>::const_iterator const_iterator;
 
   Vocabulary() {}
   virtual ~Vocabulary() {}
@@ -45,8 +45,7 @@ class Vocabulary {
   const_iterator end() const { return m_vocab.end(); }
 
  private:
-  std::map<std::string, int> m_vocab;
-  
+  boost::unordered_map<std::string, int> m_vocab;
 };
 
 class VocabularyFactory {

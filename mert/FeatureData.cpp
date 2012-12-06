@@ -16,7 +16,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 
 FeatureData::FeatureData()
@@ -90,7 +90,7 @@ void FeatureData::add(FeatureArray& e)
   }
 }
 
-void FeatureData::add(FeatureStats& e, const string& sent_idx)
+void FeatureData::add(FeatureStats& e, int sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
@@ -168,4 +168,3 @@ string FeatureData::ToString() const {
 }
 
 }
-
