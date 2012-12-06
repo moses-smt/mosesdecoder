@@ -11,12 +11,12 @@
 #include <fstream>
 
 #include "Data.h"
-#include "FileStream.h"
 #include "Scorer.h"
 #include "ScorerFactory.h"
 #include "Util.h"
 #include "util/check.hh"
 
+#include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 #include "util/string_piece.hh"
 #include "FeatureDataIterator.h"
@@ -136,57 +136,60 @@ void Data::load(const std::string &featfile, const std::string &scorefile) {
 void Data::loadNBest(const string &file)
 {
   TRACE_ERR("loading nbest from " << file << endl);
-  inputfilestream inp(file); // matches a stream with a file. Opens the file
-  if (!inp.good())
-    throw runtime_error("Unable to open: " + file);
+  util::FilePiece in(file.c_str());
 
   ScoreStats scoreentry;
-  string line, sentence, feature_str, alignment;
+  string sentence, feature_str, alignment;
   int sentence_index;
 
-  while (getline(inp, line, '\n')) {
-    if (line.empty()) continue;
-    // adding statistics for error measures
-    scoreentry.clear();
+  while (true) {
+    try {
+      StringPiece line = in.ReadLine();
+      if (line.empty()) continue;
+      // adding statistics for error measures
+      scoreentry.clear();
 
-    util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
+      util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
 
-    sentence_index = ParseInt(*it);
-    ++it;
-    sentence = it->as_string();
-    ++it;
-    feature_str = it->as_string();
-    ++it;
-
-    if (it) {
-      ++it;                             // skip model score.
+      sentence_index = ParseInt(*it);
+      ++it;
+      sentence = it->as_string();
+      ++it;
+      feature_str = it->as_string();
+      ++it;
 
       if (it) {
-        ++it;
-        alignment = it->as_string(); //fifth field (if present) is either phrase or word alignment
+        ++it;                             // skip model score.
+
         if (it) {
           ++it;
-          alignment = it->as_string(); //sixth field (if present) is word alignment
+          alignment = it->as_string(); //fifth field (if present) is either phrase or word alignment
+          if (it) {
+            ++it;
+            alignment = it->as_string(); //sixth field (if present) is word alignment
+          }
         }
       }
-    }
-    //TODO check alignment exists if scorers need it
+      //TODO check alignment exists if scorers need it
 
-    if (m_scorer->useAlignment()) {
-      sentence += "|||";
-      sentence += alignment;
-    }
-    m_scorer->prepareStats(sentence_index, sentence, scoreentry);
+      if (m_scorer->useAlignment()) {
+        sentence += "|||";
+        sentence += alignment;
+      }
+      m_scorer->prepareStats(sentence_index, sentence, scoreentry);
 
-    m_score_data->add(scoreentry, sentence_index);
+      m_score_data->add(scoreentry, sentence_index);
 
-    // examine first line for name of features
-    if (!existsFeatureNames()) {
-      InitFeatureMap(feature_str);
+      // examine first line for name of features
+      if (!existsFeatureNames()) {
+        InitFeatureMap(feature_str);
+      }
+      AddFeatures(feature_str, sentence_index);
+    } catch (util::EndOfFileException &e) {
+      PrintUserTime("Loaded N-best lists");
+      break;
     }
-    AddFeatures(feature_str, sentence_index);
   }
-  inp.close();
 }
 
 void Data::save(const std::string &featfile, const std::string &scorefile, bool bin) {
