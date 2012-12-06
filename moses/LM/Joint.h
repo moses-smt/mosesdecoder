@@ -90,7 +90,7 @@ public:
     // joint context for internal LM
     std::vector<const Word*> jointContext;
 
-    for (size_t currPos = 0 ; currPos < m_nGramOrder ; ++currPos ) {
+    for (size_t currPos = 0 ; currPos < std::min(contextFactor.size(), m_nGramOrder) ; ++currPos ) {
       const Word &word = *contextFactor[currPos];
 
       // do not get factors one by one, take advantage of internal caching in the Word object

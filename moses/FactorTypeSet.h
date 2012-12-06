@@ -45,14 +45,8 @@ public:
   //! copy constructor
   FactorMask(const std::bitset<MAX_NUM_FACTORS>& rhs) : std::bitset<MAX_NUM_FACTORS>(rhs) { }
 
-  friend bool operator <(const FactorMask &a, const FactorMask &b);
-
   TO_STRING();
 };
-
-inline bool operator <(const FactorMask &a, const FactorMask &b) {
-  return a.to_ulong() < b.to_ulong();  
-}
 
 }
 #endif

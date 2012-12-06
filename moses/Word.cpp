@@ -69,7 +69,7 @@ std::string Word::GetString(const vector<FactorType> &factorType,bool endWithBla
 {
   string outStr;
   FactorMask mask(factorType);
-  StringCacheType::const_iterator cacheIt = m_stringCache.find(mask);
+  StringCacheType::const_iterator cacheIt = m_stringCache.find(mask.to_ulong());
   if (cacheIt != m_stringCache.end()) {
     outStr = cacheIt->second;
   } else {
@@ -89,11 +89,10 @@ std::string Word::GetString(const vector<FactorType> &factorType,bool endWithBla
       }
     }
     outStr = strme.str();
-    m_stringCache.insert(make_pair(mask, outStr));
+    m_stringCache.insert(make_pair(mask.to_ulong(), outStr));
   }
   return endWithBlank ? outStr + " " : outStr;
 }
-
 
 std::string Word::GetString(FactorType factorType) const
 {
