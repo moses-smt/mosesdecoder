@@ -62,6 +62,7 @@ size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
     }
     for (size_t i = 0; i < encoded_tokens.size()-k+1; ++i) {
       vector<int> ngram;
+      ngram.reserve(encoded_tokens.size());
       for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
         ngram.push_back(encoded_tokens[j]);
       }

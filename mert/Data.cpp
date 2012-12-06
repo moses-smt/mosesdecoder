@@ -153,9 +153,9 @@ void Data::loadNBest(const string &file)
       getNextPound(line, temp, "|||"); //fourth field sentence score
       if (line.length() > 0) {
         getNextPound(line, alignment, "|||"); //fifth field (if present) is either phrase or word alignment
-	if (line.length() > 0) {
-	  getNextPound(line, alignment, "|||"); //sixth field (if present) is word alignment 
-	}
+        if (line.length() > 0) {
+          getNextPound(line, alignment, "|||"); //sixth field (if present) is word alignment
+        }
       }
     }
     //TODO check alignment exists if scorers need it
@@ -165,7 +165,7 @@ void Data::loadNBest(const string &file)
       sentence += alignment;
     }
     m_scorer->prepareStats(sentence_index, sentence, scoreentry);
-    
+
     m_score_data->add(scoreentry, sentence_index);
 
     // examine first line for name of features
@@ -281,4 +281,3 @@ void Data::createShards(size_t shard_count, float shard_size, const string& scor
 }
 
 }
-
