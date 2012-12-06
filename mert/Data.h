@@ -18,7 +18,7 @@
 
 namespace MosesTuning
 {
-  
+
 class Scorer;
 
 typedef boost::shared_ptr<ScoreData> ScoreDataHandle;
@@ -91,7 +91,7 @@ public:
   // Helper functions for loadnbest();
   void InitFeatureMap(const std::string& str);
   void AddFeatures(const std::string& str,
-                   const std::string& sentence_index);
+                   int sentence_index);
 };
 
 }

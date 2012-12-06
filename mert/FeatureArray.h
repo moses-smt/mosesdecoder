@@ -15,7 +15,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 const char FEATURES_TXT_BEGIN[] = "FEATURES_TXT_BEGIN_0";
 const char FEATURES_TXT_END[] = "FEATURES_TXT_END_0";
@@ -27,8 +27,7 @@ class FeatureArray
 private:
   // idx to identify the utterance. It can differ from
   // the index inside the vector.
-
-  std::string m_index;
+  int m_index;
   featarray_t m_array;
   std::size_t m_num_features;
   std::string m_features;
@@ -40,8 +39,8 @@ public:
   void clear() { m_array.clear(); }
 
 
-  std::string getIndex() const { return m_index; }
-  void setIndex(const std::string& value) { m_index = value; }
+  int getIndex() const { return m_index; }
+  void setIndex(const int value) { m_index = value; }
 
   FeatureStats& get(std::size_t i) { return m_array.at(i); }
   const FeatureStats& get(std::size_t i) const { return m_array.at(i); }

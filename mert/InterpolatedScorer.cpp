@@ -6,7 +6,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 // TODO: This is too long. Consider creating a function for
 // initialization such as Init().
@@ -88,10 +88,6 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
     for (size_t i = 0; i < data->size(); i++) {
       ScoreArray scoreArray = data->get(i);
       ScoreArray newScoreArray;
-      std::string istr;
-      std::stringstream out;
-      out << i;
-      istr = out.str();
       size_t numNBest = scoreArray.size();
       //cout << " Datasize " << data->size() <<  " NumNBest " << numNBest << endl ;
       for (size_t j = 0; j < numNBest ; j++) {
@@ -105,7 +101,7 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
         //cout << " last " << last << " NumScores " << numScoresScorer << "newScorestats " << newScoreStats << endl;
         newScoreArray.add(newScoreStats);
       }
-      newScoreArray.setIndex(istr);
+      newScoreArray.setIndex(i);
       newData->add(newScoreArray);
     }
     //newData->dump();
@@ -224,4 +220,3 @@ void InterpolatedScorer::setFilter(const string& filterCommand)
 }
 
 }
-

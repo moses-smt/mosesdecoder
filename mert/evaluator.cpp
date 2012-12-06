@@ -60,8 +60,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
       for (int j = 0; j < n; ++j)
       {
         int randomIndex = random() % n;
-        string str_j = int2string(j);
-        scoredata->add(entries[randomIndex], str_j);
+        scoredata->add(entries[randomIndex], j);
       }
       g_scorer->setScoreData(scoredata);
       candidates_t candidates(n, 0);
@@ -93,8 +92,7 @@ void EvaluatorUtil::evaluate(const string& candFile, int bootstrap)
     ScoreData* scoredata = new ScoreData(g_scorer);
     for (int sid = 0; sid < n; ++sid)
     {
-      string str_sid = int2string(sid);
-      scoredata->add(entries[sid], str_sid);
+      scoredata->add(entries[sid], sid);
     }
     g_scorer->setScoreData(scoredata);
     candidates_t candidates(n, 0);

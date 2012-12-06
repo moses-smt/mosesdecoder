@@ -17,6 +17,10 @@
 #include "Util.h"
 #include "util/check.hh"
 
+#include "util/tokenize_piece.hh"
+#include "util/string_piece.hh"
+#include "FeatureDataIterator.h"
+
 using namespace std;
 
 namespace MosesTuning
@@ -137,24 +141,32 @@ void Data::loadNBest(const string &file)
     throw runtime_error("Unable to open: " + file);
 
   ScoreStats scoreentry;
-  string line, sentence_index, sentence, feature_str, alignment;
+  string line, sentence, feature_str, alignment;
+  int sentence_index;
 
   while (getline(inp, line, '\n')) {
     if (line.empty()) continue;
     // adding statistics for error measures
     scoreentry.clear();
 
-    getNextPound(line, sentence_index, "|||"); // first field
-    getNextPound(line, sentence, "|||");       // second field
-    getNextPound(line, feature_str, "|||");    // third field
+    util::TokenIter<util::MultiCharacter> it(line, util::MultiCharacter("|||"));
 
-    if (line.length() > 0) {
-      string temp;
-      getNextPound(line, temp, "|||"); //fourth field sentence score
-      if (line.length() > 0) {
-        getNextPound(line, alignment, "|||"); //fifth field (if present) is either phrase or word alignment
-        if (line.length() > 0) {
-          getNextPound(line, alignment, "|||"); //sixth field (if present) is word alignment
+    sentence_index = ParseInt(*it);
+    ++it;
+    sentence = it->as_string();
+    ++it;
+    feature_str = it->as_string();
+    ++it;
+
+    if (it) {
+      ++it;                             // skip model score.
+
+      if (it) {
+        ++it;
+        alignment = it->as_string(); //fifth field (if present) is either phrase or word alignment
+        if (it) {
+          ++it;
+          alignment = it->as_string(); //sixth field (if present) is word alignment
         }
       }
     }
@@ -216,7 +228,7 @@ void Data::InitFeatureMap(const string& str) {
 }
 
 void Data::AddFeatures(const string& str,
-                       const string& sentence_index) {
+                       int sentence_index) {
   string buf = str;
   string substr;
   FeatureStats feature_entry;
