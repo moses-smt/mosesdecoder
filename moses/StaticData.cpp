@@ -1211,9 +1211,6 @@ bool StaticData::LoadPhraseTables()
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
     const vector<float> &weightAll	= m_parameter->GetWeights("PhraseModel");
-    for (int i = 0; i < weightAll.size(); ++i)
-      cerr << weightAll[i] << " " << flush;
-
     const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
     vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
 
@@ -1332,7 +1329,7 @@ bool StaticData::LoadPhraseTables()
         implementation
         , spdf
         , numScoreComponent
-        , (currDict==0 ? m_numInputScores : 0)
+        , (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0)
         , input
         , output
         , filePath

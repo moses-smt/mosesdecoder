@@ -354,6 +354,20 @@ void Parameter::ConvertWeightArgs()
     cerr << "Do not mix old and new format for specify weights";
   }
 
+  // input weights
+  PARAM_VEC &inputWeights = m_setting["weight-i"];
+  PARAM_VEC &numInputScores = m_setting["input-scores"];
+  if (inputWeights.size() == 1) {
+    CHECK(numInputScores.size() == 0);
+    numInputScores.push_back("1");
+    numInputScores.push_back("0");
+  }
+  else if (inputWeights.size() == 2) {
+    CHECK(numInputScores.size() == 0);
+    numInputScores.push_back("1");
+    numInputScores.push_back("1");
+  }
+
   ConvertWeightArgs("weight-i", "PhraseModel");
   ConvertWeightArgs("weight-t", "PhraseModel");
   ConvertWeightArgs("weight-w", "WordPenalty");
