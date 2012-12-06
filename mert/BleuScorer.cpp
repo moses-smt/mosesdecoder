@@ -50,11 +50,21 @@ BleuScorer::BleuScorer(const string& config)
 BleuScorer::~BleuScorer() {}
 
 size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
-                               unsigned int n)
+                               unsigned int n, bool is_testing)
 {
   assert(n > 0);
   vector<int> encoded_tokens;
-  TokenizeAndEncode(line, encoded_tokens);
+
+  // When performing tokenization of a hypothesis translation, we don't have
+  // to update the Scorer's word vocabulary. However, the tokenization of
+  // reference translations requires modifying the vocabulary, which means
+  // this procedure might be slower than the tokenization the hypothesis
+  // translation.
+  if (is_testing) {
+    TokenizeAndEncodeTesting(line, encoded_tokens);
+  } else {
+    TokenizeAndEncode(line, encoded_tokens);
+  }
   for (size_t k = 1; k <= n; ++k) {
     //ngram order longer than sentence - no point
     if (k > encoded_tokens.size()) {
@@ -147,7 +157,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   // stats for this line
   vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
   string sentence = preprocessSentence(text);
-  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder);
+  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder, true);
 
   const int reference_len = CalcReferenceLength(sid, length);
   stats.push_back(reference_len);

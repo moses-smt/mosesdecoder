@@ -12,7 +12,7 @@ int Vocabulary::Encode(const std::string& token) {
 	if (it == m_vocab.end()) {
 		// Add an new entry to the vocaburary.
 		encoded_token = static_cast<int>(m_vocab.size());
-		
+
 		m_vocab[token] = encoded_token;
 	} else {
 		encoded_token = it->second;
