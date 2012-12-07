@@ -47,11 +47,6 @@ public:
 	const std::string& GetScoreProducerDescription() const
 	{ return m_description; }
 
-  //! returns the number of scores gathered from the input (0 by default)
-  virtual size_t GetNumInputScores() const {
-    return 0;
-  };
-
 	virtual bool IsStateless() const = 0;
 
   void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }

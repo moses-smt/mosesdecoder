@@ -27,9 +27,6 @@ public:
     throw std::logic_error("SparsePhraseDictionaryFeature not valid in chart decoder");
 	}
 
-  // basic properties
-	size_t GetNumInputScores() const { return 0; }
-
 };
 
 

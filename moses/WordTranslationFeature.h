@@ -79,9 +79,6 @@ public:
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection* accumulator) const;
 
-  // basic properties
-  size_t GetNumInputScores() const { return 0; }
-
   bool ComputeValueInTranslationOption() const {return true;}
   
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }

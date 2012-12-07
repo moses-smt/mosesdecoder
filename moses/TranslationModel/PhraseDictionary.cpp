@@ -303,11 +303,6 @@ PhraseDictionary* PhraseDictionaryFeature::GetDictionary()
 PhraseDictionaryFeature::~PhraseDictionaryFeature()
 {}
 
-size_t PhraseDictionaryFeature::GetNumInputScores() const
-{
-  return m_numInputScores;
-}
-
 bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const
 {
   return true;

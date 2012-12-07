@@ -39,8 +39,6 @@ public:
 		           	   ScoreComponentCollection* accumulator,
 		           	   const AlignmentInfo &alignmentInfo) const;
 
-  // basic properties
-	size_t GetNumInputScores() const { return 0; }
 };
 
 }

@@ -33,11 +33,6 @@ bool TargetBigramFeature::Load(const std::string &filePath)
   return true;
 }
 
-size_t TargetBigramFeature::GetNumInputScores() const
-{
-	return 0;
-}
-
 
 const FFState* TargetBigramFeature::EmptyHypothesisState(const InputType &/*input*/) const
 {

@@ -92,11 +92,4 @@ void PhraseDictionaryTreeAdaptor::DisableCache()
   imp->useCache=0;
 }
 
-
-
-size_t PhraseDictionaryTreeAdaptor::GetNumInputScores() const
-{
-  return imp->GetNumInputScores();
-}
-
 }

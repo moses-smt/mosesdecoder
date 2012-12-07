@@ -115,8 +115,6 @@ public:
 
   virtual bool ComputeValueInTranslationOption() const;
 
-  size_t GetNumInputScores() const;
-
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
     return m_sparsePhraseDictionaryFeature;
   }

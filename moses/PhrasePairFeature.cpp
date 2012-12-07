@@ -11,11 +11,6 @@ using namespace std;
 
 namespace Moses {
 
-size_t PhrasePairFeature::GetNumInputScores() const 
-{
-  return 0;
-}
-
 bool PhrasePairFeature::Load(const std::string &filePathSource/*, const std::string &filePathTarget*/) 
 {
   if (m_domainTrigger) {

@@ -196,8 +196,6 @@ public:
 
 	bool Load(const std::string &filePath);
 
-	size_t GetNumInputScores() const;
-
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 

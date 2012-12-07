@@ -22,11 +22,6 @@ PhraseBoundaryFeature::PhraseBoundaryFeature
 {
 }
 
-size_t PhraseBoundaryFeature::GetNumInputScores() const 
-{
-  return 0;
-}
-
 const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const 
 {
   return new PhraseBoundaryState(NULL,NULL);

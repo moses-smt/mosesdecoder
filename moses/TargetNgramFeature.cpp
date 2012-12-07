@@ -55,11 +55,6 @@ bool TargetNgramFeature::Load(const std::string &filePath)
   return true;
 }
 
-size_t TargetNgramFeature::GetNumInputScores() const
-{
-	return 0;
-}
-
 const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input*/) const
 {
 	vector<Word> bos(1,m_bos);
