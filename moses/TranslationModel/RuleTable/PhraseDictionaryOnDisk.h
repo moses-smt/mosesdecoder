@@ -69,10 +69,6 @@ public:
             const LMList& languageModels,
             const WordPenaltyProducer* wpProducer);
 
-  std::string GetScoreProducerDescription(unsigned) const {
-    return "BerkeleyPt";
-  }
-
   // PhraseDictionary impl
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;

@@ -68,11 +68,7 @@ public:
                       FactorType factorType);
     LanguageModelLDHT(ScoreIndexManager& manager,
                       LanguageModelLDHT& copyFrom);
-    std::string GetScoreProducerDescription(unsigned) const {
-      std::ostringstream oss;
-      oss << "DLM_" << LDHT::NewNgram::k_max_order << "gram";
-      return oss.str();
-    }
+
     LDHT::Client* getClientUnsafe() const;
     LDHT::Client* getClientSafe();
     LDHT::Client* initTSSClient();

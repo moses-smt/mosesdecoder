@@ -44,7 +44,8 @@ public:
 	size_t GetNumScoreComponents() const {return m_numScoreComponents;}
 
 	//! returns a string description of this producer
-	const std::string& GetScoreProducerDescription() const {return m_description;}
+	const std::string& GetScoreProducerDescription() const
+	{ return m_description; }
 
   //! returns the number of scores gathered from the input (0 by default)
   virtual size_t GetNumInputScores() const {

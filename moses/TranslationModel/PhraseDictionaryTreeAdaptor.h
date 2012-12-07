@@ -56,8 +56,6 @@ public:
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
   TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
-  std::string GetScoreProducerDescription() const;
-
   size_t GetNumInputScores() const;
   virtual void InitializeForInput(InputType const& source);
 

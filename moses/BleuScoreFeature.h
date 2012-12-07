@@ -63,7 +63,7 @@ public:
   typedef boost::unordered_map<size_t, NGrams> Matches;
 
 	BleuScoreFeature():
-	                                 StatefulFeatureFunction("BleuScore",1),
+	                                 StatefulFeatureFunction("BleuScoreFeature",1),
 	                                 m_enabled(true),
 	                                 m_sentence_bleu(true),
 					 m_simple_history_bleu(false),
@@ -79,11 +79,6 @@ public:
 	                                 m_scale_by_x(1),
 	                                 m_historySmoothing(0.9),
 					 m_smoothing_scheme(PLUS_POINT_ONE) {}
-
-    std::string GetScoreProducerDescription() const
-    {
-    	return "BleuScoreFeature";
-    }
 
     void PrintHistory(std::ostream& out) const;
     void LoadReferences(const std::vector< std::vector< std::string > > &);

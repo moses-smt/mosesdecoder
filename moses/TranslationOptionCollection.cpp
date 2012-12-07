@@ -431,7 +431,7 @@ void TranslationOptionCollection::IncorporateDLMScores() {
            m_system->GetStatefulFeatureFunctions();
     std::map<int, LanguageModel*> dlm_ffs;
     for (unsigned i = 0; i < ffs.size(); ++i) {
-        if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") {
+        if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WTF
             dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
             dlm_ffs[i]->SetFFStateIdx(i);
         }

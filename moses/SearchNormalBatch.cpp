@@ -19,7 +19,7 @@ SearchNormalBatch::SearchNormalBatch(Manager& manager, const InputType &source, 
   const vector<const StatefulFeatureFunction*>& ffs =
          m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
-      if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") {
+      if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WFT
           m_dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
           m_dlm_ffs[i]->SetFFStateIdx(i);
       }

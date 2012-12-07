@@ -26,8 +26,6 @@ namespace Moses
     ~SyntacticLanguageModel();
 
     size_t GetNumScoreComponents() const;
-    std::string GetScoreProducerDescription(unsigned) const;
-    std::string GetScoreProducerWeightShortName() const;
 
     const FFState* EmptyHypothesisState(const InputType &input) const;
 

@@ -70,12 +70,6 @@ template <class Model> class LanguageModelKen : public LanguageModel {
       return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
     }
 
-    std::string GetScoreProducerDescription(unsigned) const {
-      std::ostringstream oss;
-      oss << "LM_" << (unsigned)m_ngram->Order() << "gram";
-      return oss.str();
-    }
-
     const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
       KenLMState *ret = new KenLMState();
       ret->state = m_ngram->BeginSentenceState();
