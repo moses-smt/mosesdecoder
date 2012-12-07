@@ -29,6 +29,7 @@
 								<option id="gnu.cpp.compiler.option.include.paths.2118465683" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/opt/local/include/"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../..&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.849384962" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>

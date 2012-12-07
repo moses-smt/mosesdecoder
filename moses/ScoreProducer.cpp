@@ -21,10 +21,9 @@ ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComp
   size_t count = description_counts.count(description);
   ostringstream dstream;
   dstream << description;
-  if (count > 1) 
-  {
-    dstream << ":" << count;
-  }
+
+  dstream << "_" << count;
+
   m_description = dstream.str();
   if (numScoreComponents != unlimited)
   {
