@@ -51,6 +51,8 @@ namespace Moses
 {
 class FactorCollection;
 class ChartTrellisPathList;
+class TranslationSystem;
+class ScoreComponentCollection;
 }
 
 namespace MosesChartCmd
@@ -89,6 +91,14 @@ protected:
                                      ApplicationContext &context);
   void WriteApplicationContext(std::ostream &out,
                                const ApplicationContext &context);
+
+  void OutputAllFeatureScores(const Moses::TranslationSystem &system
+                                , const Moses::ScoreComponentCollection &features
+                                , std::ostream &out);
+  void OutputFeatureScores( std::ostream& out
+                                , const Moses::ScoreComponentCollection &features
+                                , const Moses::FeatureFunction *ff
+                                , std::string &lastName );
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder

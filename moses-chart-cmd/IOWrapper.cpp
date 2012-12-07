@@ -399,107 +399,60 @@ void IOWrapper::OutputBestNone(long translationId) {
   }
 }
 
-namespace {
+void IOWrapper::OutputAllFeatureScores(const TranslationSystem &system, const ScoreComponentCollection &features, std::ostream &out)
+{
+  std::string lastName = "";
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ )
+    if (sff[i]->GetScoreProducerDescription() != "BleuScoreFeature")
+      OutputFeatureScores( out, features, sff[i], lastName );
 
-void OutputSparseFeatureScores(std::ostream& out, const ScoreComponentCollection &features, const FeatureFunction *ff, std::string &lastName) {
+  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ )
+    OutputFeatureScores( out, features, slf[i], lastName );
+} // namespace
+
+void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentCollection &features, const FeatureFunction *ff, std::string &lastName )
+{
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
-  const FVector scores = features.GetVectorForProducer( ff );
 
-  // report weighted aggregate
-  if (! ff->GetSparseFeatureReporting()) {
-  	const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-  	if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
-  		out << " " << ff->GetScoreProducerDescription() << ":";
-    out << " " << scores.inner_product(weights);
+  // regular features (not sparse)
+  if (ff->GetNumScoreComponents() != ScoreProducer::unlimited) {
+    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
+      lastName = ff->GetScoreProducerDescription();
+      out << " " << lastName << ":";
+    }
+    vector<float> scores = features.GetScoresForProducer( ff );
+    for (size_t j = 0; j<scores.size(); ++j) {
+      out << " " << scores[j];
+    }
   }
 
-  // report each feature
+  // sparse features
   else {
-  	for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
-  		if (i->second != 0) { // do not report zero-valued features
-  			if (labeledOutput)
-  				out << " " << i->first << ":";
-        out << " " << i->second;
-      }
+    const FVector scores = features.GetVectorForProducer( ff );
+
+    // report weighted aggregate
+    if (! ff->GetSparseFeatureReporting()) {
+      const FVector &weights = staticData.GetAllWeights().GetScoresVector();
+      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
+        out << " " << ff->GetScoreProducerDescription() << ":";
+      out << " " << scores.inner_product(weights);
+    }
+
+    // report each feature
+    else {
+      for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++)
+        out << " " << i->first << ": " << i->second;
+      /*        if (i->second != 0) { // do not report zero-valued features
+    float weight = staticData.GetSparseWeight(i->first);
+          if (weight != 0)
+    out << " " << i->first << "=" << weight;
+    }*/
     }
   }
 }
-
-void WriteFeatures(const TranslationSystem &system, const ScoreComponentCollection &features, std::ostream &out) {
-  bool labeledOutput = StaticData::Instance().IsLabeledNBestList();
-  // lm
-  const LMList& lml = system.GetLanguageModels();
-  if (lml.size() > 0) {
-    if (labeledOutput)
-      out << "lm:";
-    LMList::const_iterator lmi = lml.begin();
-    for (; lmi != lml.end(); ++lmi) {
-      out << " " << features.GetScoreForProducer(*lmi);
-    }
-  }
-
-  std::string lastName = "";
-
-  // output stateful sparse features
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  for( size_t i=0; i<sff.size(); i++ )
-    if (sff[i]->GetNumScoreComponents() == ScoreProducer::unlimited)
-      OutputSparseFeatureScores(out, features, sff[i], lastName);
-
-  // translation components
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
-  if (pds.size() > 0) {
-    for( size_t i=0; i<pds.size(); i++ ) {
-      size_t pd_numinputscore = pds[i]->GetNumInputScores();
-      vector<float> scores = features.GetScoresForProducer( pds[i] );
-      for (size_t j = 0; j<scores.size(); ++j){
-        if (labeledOutput && (i == 0) ){
-          if ((j == 0) || (j == pd_numinputscore)){
-            lastName =  pds[i]->GetScoreProducerDescription();
-            out << " " << lastName << ":";
-          }
-        }
-        out << " " << scores[j];
-      }
-    }
-  }
-
-  // word penalty
-  if (labeledOutput)
-    out << " w:";
-  out << " " << features.GetScoreForProducer(system.GetWordPenaltyProducer());
-
-  // generation
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
-  if (gds.size() > 0) {
-    for( size_t i=0; i<gds.size(); i++ ) {
-      size_t pd_numinputscore = gds[i]->GetNumInputScores();
-      vector<float> scores = features.GetScoresForProducer( gds[i] );
-      for (size_t j = 0; j<scores.size(); ++j){
-        if (labeledOutput && (i == 0) ){
-          if ((j == 0) || (j == pd_numinputscore)){
-            lastName =  gds[i]->GetScoreProducerDescription();
-            out << " " << lastName << ":";
-          }
-        }
-        out << " " << scores[j];
-      }
-    }
-  }
-
-  // output stateless sparse features
-  lastName = "";
-
-  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
-  for( size_t i=0; i<slf.size(); i++ ) {
-    if (slf[i]->GetNumScoreComponents() == ScoreProducer::unlimited) {
-      OutputSparseFeatureScores(out, features, slf[i], lastName);
-    }
-  }
-} 
-
-} // namespace
 
 void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const TranslationSystem* system, long translationId) {
   std::ostringstream out;
@@ -537,7 +490,7 @@ void IOWrapper::OutputNBestList(const ChartTrellisPathList &nBestList, const Tra
     // before each model type, the corresponding command-line-like name must be emitted
     // MERT script relies on this
 
-    WriteFeatures(*system, path.GetScoreBreakdown(), out);
+    OutputAllFeatureScores(*system, path.GetScoreBreakdown(), out);
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -603,7 +556,7 @@ void IOWrapper::OutputNBestList(const std::vector<search::Applied> &nbest, const
     out << translationId << " ||| ";
     OutputSurface(out, outputPhrase, m_outputFactorOrder, false);
     out << " ||| ";
-    WriteFeatures(system, features, out);
+    OutputAllFeatureScores(system, features, out);
     out << " ||| " << i->GetScore() << '\n';
   }
   out << std::flush;
