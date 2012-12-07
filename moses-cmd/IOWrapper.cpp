@@ -364,7 +364,12 @@ void IOWrapper::OutputBestHypo(const Hypothesis *hypo, long /*translationId*/, b
   }
 }
 
-void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, const std::vector<Moses::FactorType>& outputFactorOrder, const TranslationSystem* system, long translationId, bool reportSegmentation)
+void OutputNBest(std::ostream& out
+                  , const Moses::TrellisPathList &nBestList
+                  , const std::vector<Moses::FactorType>& outputFactorOrder
+                  , const TranslationSystem &system
+                  , long translationId
+                  , bool reportSegmentation)
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
@@ -386,7 +391,7 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
     out << " |||";
 
     // print scores with feature names
-    OutputAllFeatureScores( out, system, path );
+    OutputAllFeatureScores( system, path.GetScoreBreakdown(), out );
 
     // total
     out << " ||| " << path.GetTotalScore();
@@ -435,20 +440,25 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
   out << std::flush;
 }
 
-void OutputAllFeatureScores( std::ostream& out, const TranslationSystem* system, const TrellisPath &path )
+void OutputAllFeatureScores(const Moses::TranslationSystem &system
+                                          , const Moses::ScoreComponentCollection &features
+                                          , std::ostream &out)
 {
   std::string lastName = "";
-  const vector<const StatefulFeatureFunction*>& sff = system->GetStatefulFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ )
     if (sff[i]->GetScoreProducerDescription() != "BleuScoreFeature")
-      OutputFeatureScores( out, path, sff[i], lastName );
+      OutputFeatureScores( out, features, sff[i], lastName );
 
-  const vector<const StatelessFeatureFunction*>& slf = system->GetStatelessFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ )
-    OutputFeatureScores( out, path, slf[i], lastName );
+    OutputFeatureScores( out, features, slf[i], lastName );
 }
 
-void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const FeatureFunction *ff, std::string &lastName )
+void OutputFeatureScores( std::ostream& out
+                                      , const ScoreComponentCollection &features
+                                      , const FeatureFunction *ff
+                                      , std::string &lastName )
 {
   const StaticData &staticData = StaticData::Instance();
   bool labeledOutput = staticData.IsLabeledNBestList();
@@ -459,7 +469,7 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
       lastName = ff->GetScoreProducerDescription();
       out << " " << lastName << ":";
     }
-    vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer( ff );
+    vector<float> scores = features.GetScoresForProducer( ff );
     for (size_t j = 0; j<scores.size(); ++j) {
       out << " " << scores[j];
     }
@@ -467,7 +477,7 @@ void OutputFeatureScores( std::ostream& out, const TrellisPath &path, const Feat
 
   // sparse features
   else {
-    const FVector scores = path.GetScoreBreakdown().GetVectorForProducer( ff );
+    const FVector scores = features.GetVectorForProducer( ff );
 
     // report weighted aggregate
     if (! ff->GetSparseFeatureReporting()) {

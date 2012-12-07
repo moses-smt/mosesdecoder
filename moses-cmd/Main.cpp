@@ -249,7 +249,7 @@ public:
       TrellisPathList nBestList;
       ostringstream out;
       manager.CalcNBest(staticData.GetNBestSize(), nBestList,staticData.GetDistinctNBest());
-      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber,
+      OutputNBest(out, nBestList, staticData.GetOutputFactorOrder(), *manager.GetTranslationSystem(), m_lineNumber,
 		  staticData.GetReportSegmentation());
       m_nbestCollector->Write(m_lineNumber, out.str());
     }
@@ -259,7 +259,7 @@ public:
       TrellisPathList latticeSamples;
       ostringstream out;
       manager.CalcLatticeSamples(staticData.GetLatticeSamplesSize(), latticeSamples);
-      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), manager.GetTranslationSystem(), m_lineNumber,
+      OutputNBest(out,latticeSamples, staticData.GetOutputFactorOrder(), *manager.GetTranslationSystem(), m_lineNumber,
 		  staticData.GetReportSegmentation());
       m_latticeSamplesCollector->Write(m_lineNumber, out.str());
     }
