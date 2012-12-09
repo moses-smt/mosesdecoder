@@ -2914,7 +2914,7 @@ sub define_template {
 		    || die("ERROR: could not find OUT in $single_cmd");
 		my $out = $1;
 		#  replace IN and OUT with %s
-		$single_cmd =~ s/EMS_IN_EMS/\%s/;
+		$single_cmd =~ s/EMS_IN_EMS\S*/\%s/;
 		$single_cmd =~ s/EMS_OUT_EMS\S*/\%s/;
 		# build tmp
 		my $tmp_dir = $module;
