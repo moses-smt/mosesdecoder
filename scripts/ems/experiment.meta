@@ -360,18 +360,17 @@ split-indomain-target
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 train
-	in: indomain-stem outdomain-stem
+	in: indomain-stem outdomain-stem settings
 	out: model
-	ignore-unless: AND settings indomain-stem
+	ignore-unless: indomain-stem
 	default-name: mml/model
-	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN.$input-extension -in-target IN.$output-extension -out-source IN1.$input-extension -out-target IN1.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
+	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN.$input-extension -in-target IN.$output-extension -out-source IN1.$input-extension -out-target IN1.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer IN2
 train-in-mono
-	in: indomain-source indomain-target outdomain-stem
+	in: indomain-source indomain-target outdomain-stem settings
 	out: model
-	ignore-unless: settings
 	ignore-if: indomain-stem
 	default-name: mml/model
-	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings 
+	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer IN3 
 
 [TRAINING] single
 consolidate
@@ -391,7 +390,7 @@ mml-score
 	ignore-unless: mml-before-wa mml-after-wa
 	rerun-on-change: mml-filter-corpora
 	default-name: training/corpus-mml-score
-	template: $moses-script-dir/ems/support/mml-score.perl -model IN -corpus IN1 -domains IN2 -input-extension $input-extension -output-extension $output-extension -query $MML:lm-query -filter-domains $mml-filter-corpora > OUT
+	template: $moses-script-dir/ems/support/mml-score.perl -model IN -corpus IN1 -domains IN2 -input-extension $input-extension -output-extension $output-extension -query $MML:lm-query -filter-domains "$mml-filter-corpora" > OUT
 mml-filter-before-wa
 	in: corpus mml-scores domains
 	out: corpus-mml-prefilter

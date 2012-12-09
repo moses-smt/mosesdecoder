@@ -297,8 +297,8 @@ factor-script = "$moses-script-dir/training/wrappers/make-factor-en-pos.mxpost.p
 #outdomain-stem = [CORPUS:giga:clean-split-stem]
 
 # settings: number of lines sampled from the corpora to train each language model on
-# (typically a million or so)
-#settings = "--line-count 1000000"
+# (if used at all, should be small as a percentage of corpus)
+#settings = "--line-count 100000"
 
 #################################################################
 # TRANSLATION MODEL TRAINING
@@ -602,6 +602,9 @@ report-segmentation = yes
 #
 # further precision breakdown by factor
 #precision-by-coverage-factor = pos
+# 
+# visualization of the search graph in tree-based models
+#analyze-search-graph = yes
 
 [EVALUATION:newstest2011]
 

@@ -72,7 +72,7 @@ sub train_lm {
     $file = "$model.$type.tok";
   }
 
-  my $cmd = "$lm_training -order $order $lm_settings -text $model.$type.tok -lm $model.$type.lm";
+  my $cmd = "$lm_training -order $order $lm_settings -text $file -lm $model.$type.lm";
   $cmd .= " -vocab $model.$vocab.vocab" if defined($vocab);
   print STDERR $cmd."\n";
   print STDERR `$cmd`;
