@@ -17,7 +17,7 @@ sub trim($)
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$VERBOSE,$IGNORE_TIME);
+my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL,$VERBOSE,$IGNORE_TIME);
 my $SLEEP = 2;
 my $META = "$RealBin/experiment.meta";
 
@@ -38,6 +38,7 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
 			'exec' => \$EXECUTE,
 			'cluster' => \$CLUSTER,
 			'multicore' => \$MULTICORE,
+		   	'final=s' => \$FINAL,
 		   	'meta=s' => \$META,
 			'verbose' => \$VERBOSE,
 			'sleep=i' => \$SLEEP,
@@ -405,7 +406,12 @@ sub log_config {
 
 sub find_steps {
     # find final output to be produced by the experiment
-    push @{$NEEDED{"REPORTING:report"}}, "final";
+    if (defined($FINAL)) {
+      push @{$NEEDED{$FINAL}}, "final";
+    }
+    else {
+      push @{$NEEDED{"REPORTING:report"}}, "final";
+    }
 
     # go through each module
     for(my $m=$#MODULE; $m>=0; $m--) {
