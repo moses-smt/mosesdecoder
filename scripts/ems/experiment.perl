@@ -248,12 +248,14 @@ sub read_meta {
 	    }
 	    elsif ($1 eq "template") {
 		my $escaped_template = $2;
+		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
 		$TEMPLATE{"$module:$step"} = $escaped_template;
 	    }
 	    elsif ($1 eq "template-if") {
 		my $escaped_template = $2;
+		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
 		my @IF = split(/\s+/,$escaped_template);
@@ -2944,7 +2946,7 @@ sub define_template {
 
     # command to be run on multiple reference translations
     if (defined($multiref)) {
-      $cmd =~ s/^(.+)EMS_IN_EMS (.+)EMS_OUT_EMS(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' EMS_IN_EMS EMS_OUT_EMS/;
+      $cmd =~ s/^(.*)EMS_IN_EMS (.+)EMS_OUT_EMS(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' EMS_IN_EMS EMS_OUT_EMS/;
       $cmd =~ s/^(.+)EMS_OUT_EMS(.+)EMS_IN_EMS (.*)$/$multiref '$1 mref-output-file $2 mref-input-file $3' EMS_IN_EMS EMS_OUT_EMS/;
     }
 
