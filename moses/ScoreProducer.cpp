@@ -17,12 +17,13 @@ const size_t ScoreProducer::unlimited = -1;
 ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComponents)
   : m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {
-  description_counts.insert(description);
-  size_t count = description_counts.count(description);
+  size_t index = description_counts.count(description);
+
   ostringstream dstream;
   dstream << description;
+  dstream << "_" << index;
 
-  dstream << "_" << count;
+  description_counts.insert(description);
 
   m_description = dstream.str();
   if (numScoreComponents != unlimited)
