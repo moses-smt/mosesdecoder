@@ -320,25 +320,57 @@ bool Parameter::LoadParam(int argc, char* argv[])
   return Validate() && noErrorFlag;
 }
 
-void Parameter::ConvertWeightArgs(const string &oldWeightName, const string &newWeightName)
+std::vector<float> &Parameter::GetWeights(const std::string &name, size_t ind)
+{
+  return m_weights[name + SPrint(ind)];
+}
+
+void Parameter::AddWeight(const std::string &name, size_t ind, float weight)
 {
   PARAM_VEC &newWeights = m_setting["weight"];
+  string line = name + SPrint(ind) + " " + SPrint(weight);
+  newWeights.push_back(line);
+
+}
+
+void Parameter::ConvertWeightArgsDefault(const string &oldWeightName, const string &newWeightName)
+{
+  size_t ind = 0;
   PARAM_MAP::iterator iterMap;
 
-  // translation ff
   iterMap = m_setting.find(oldWeightName);
   if (iterMap != m_setting.end())
   {
     const PARAM_VEC &weights = iterMap->second;
     for (size_t i = 0; i < weights.size(); ++i)
     {
-      string line = newWeightName + " " + weights[i];
-      newWeights.push_back(line);
+      AddWeight(newWeightName, ind, Scan<float>(weights[i]));
     }
 
     m_setting.erase(iterMap);
   }
+}
 
+void Parameter::ConvertWeightArgsT(const string &oldWeightName, const string &newWeightName)
+{
+  int ind = 0;
+  const PARAM_VEC &oldWeights = m_setting[oldWeightName];
+
+  size_t currOldInd = 0;
+  PARAM_VEC &ttable = m_setting["ttable-file"];
+  for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
+    string &line = ttable[ttableInd];
+    vector<string> toks = Tokenize(line);
+    size_t numFF = Scan<size_t>(toks[3]);
+
+    for (size_t currFF = 0; currFF < numFF; ++currFF) {
+      CHECK(currOldInd < oldWeights.size());
+      float weight = Scan<float>(oldWeights[currOldInd]);
+      AddWeight(newWeightName, ttableInd, weight);
+
+      ++currOldInd;
+    }
+  }
 }
 
 void Parameter::ConvertWeightArgs()
@@ -367,23 +399,25 @@ void Parameter::ConvertWeightArgs()
     numInputScores.push_back("1");
   }
 
-  ConvertWeightArgs("weight-i", "PhraseModel");
-  ConvertWeightArgs("weight-t", "PhraseModel");
-  ConvertWeightArgs("weight-w", "WordPenalty");
-  ConvertWeightArgs("weight-l", "LM");
-  ConvertWeightArgs("weight-slm", "SyntacticLM");
-  ConvertWeightArgs("weight-u", "UnknownWordPenalty");
-  ConvertWeightArgs("weight-generation", "Generation");
-  ConvertWeightArgs("weight-lr", "LexicalReordering");
-  ConvertWeightArgs("weight-lr", "BleuScoreFeature");
-  ConvertWeightArgs("weight-glm", "GlobalLexicalModel");
-  ConvertWeightArgs("weight-wt", "WordTranslationFeature");
-  ConvertWeightArgs("weight-pp", "PhrasePairFeature");
-  ConvertWeightArgs("weight-pb", "PhraseBoundaryFeature");
-  ConvertWeightArgs("weight-dlm", "DiscriminativeLM");
+  ConvertWeightArgsDefault("weight-i", "PhraseModel");
+  ConvertWeightArgsT("weight-t", "PhraseModel");
+  ConvertWeightArgsDefault("weight-w", "WordPenalty");
+  ConvertWeightArgsDefault("weight-l", "LM");
+  ConvertWeightArgsDefault("weight-slm", "SyntacticLM");
+  ConvertWeightArgsDefault("weight-u", "UnknownWordPenalty");
+  ConvertWeightArgsDefault("weight-generation", "Generation");
 
-  ConvertWeightArgs("weight-e", "WordDeletion"); // TODO Can't find real name
-  ConvertWeightArgs("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
+  // don't know or can't be bothered converting these weights
+  ConvertWeightArgsDefault("weight-lr", "LexicalReordering");
+  ConvertWeightArgsDefault("weight-bl", "BleuScoreFeature");
+  ConvertWeightArgsDefault("weight-glm", "GlobalLexicalModel");
+  ConvertWeightArgsDefault("weight-wt", "WordTranslationFeature");
+  ConvertWeightArgsDefault("weight-pp", "PhrasePairFeature");
+  ConvertWeightArgsDefault("weight-pb", "PhraseBoundaryFeature");
+  ConvertWeightArgsDefault("weight-dlm", "DiscriminativeLM");
+
+  ConvertWeightArgsDefault("weight-e", "WordDeletion"); // TODO Can't find real name
+  ConvertWeightArgsDefault("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
   // distortion / lex distortion
   PARAM_VEC &newWeights = m_setting["weight"];
@@ -392,14 +426,12 @@ void Parameter::ConvertWeightArgs()
   if (weights.size() > 0)
   {
     // distance distortion
-    string line = "Distortion " + weights[0];
-    newWeights.push_back(line);
+    AddWeight("Distortion", 0, Scan<float>(weights[0]));
 
     // everything but the last is lex reordering model
     for (size_t i = 1; i < weights.size(); ++i)
     {
-      string line = "LexicalReordering " + weights[i];
-      newWeights.push_back(line);
+      AddWeight("LexicalReordering", 0, Scan<float>(weights[i]));
     }
 
     m_setting.erase("weight-d");
@@ -481,6 +513,7 @@ bool Parameter::Validate()
     }
   }
 
+  /*
   const vector<float> &lmWeights = GetWeights("LM");
   if (m_setting["lmodel-file"].size() * (m_setting.find("lmodel-oov-feature") != m_setting.end() ? 2 : 1)
          != lmWeights.size()) {
@@ -495,6 +528,7 @@ bool Parameter::Validate()
     UserMessage::Add(errorMsg.str());
     noErrorFlag = false;
   }
+  */
 
   // do files exist?
 

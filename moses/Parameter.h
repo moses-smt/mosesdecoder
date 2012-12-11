@@ -62,10 +62,13 @@ protected:
 
   void PrintCredit();
 
+  void AddWeight(const std::string &name, size_t ind, float weight);
   void ConvertWeightArgs();
-  void ConvertWeightArgs(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsDefault(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsT(const std::string &oldWeightName, const std::string &newWeightName);
   void CreateWeightsMap();
   void WeightOverwrite();
+
 
 public:
   Parameter();
@@ -108,8 +111,7 @@ public:
 		OverwriteParam(GetFullName(paramShortName),values);
 	}
 	
-  std::vector<float> &GetWeights(const std::string &name)
-  {   return m_weights[name]; }
+  std::vector<float> &GetWeights(const std::string &name, size_t ind);
 
 
 };

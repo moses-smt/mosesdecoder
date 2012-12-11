@@ -326,13 +326,15 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // word penalties
-  for (size_t i = 0; i < m_parameter->GetWeights("WordPenalty").size(); ++i) {
-    float weightWordPenalty       = m_parameter->GetWeights("WordPenalty")[i];
+  for (size_t i = 0; i < m_parameter->GetWeights("WordPenalty", 0).size(); ++i) {
+    float weightWordPenalty       = m_parameter->GetWeights("WordPenalty", 0)[i];
     m_wordPenaltyProducers.push_back(new WordPenaltyProducer());
     SetWeight(m_wordPenaltyProducers.back(), weightWordPenalty);
   }
 
-  float weightUnknownWord				= (m_parameter->GetWeights("UnknownWordPenalty").size() > 0) ? m_parameter->GetWeights("UnknownWordPenalty")[0] : 1.0;
+  const vector<float> &weightsUnknownWord				= m_parameter->GetWeights("UnknownWordPenalty", 0);
+  float weightUnknownWord = weightsUnknownWord.size() ? weightsUnknownWord[0] : 1.0;
+
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
@@ -916,18 +918,16 @@ bool StaticData::LoadLexicalReorderingModel()
 {
   VERBOSE(1, "Loading lexical distortion models...");
   const vector<string> fileStr = m_parameter->GetParam("distortion-file");
-  const vector<float> &weights= m_parameter->GetWeights("LexicalReordering");
 
-  size_t w = 0; //cur weight
-  size_t f = 0; //cur file
   VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
 
   //load all models
   for(size_t i = 0; i < fileStr.size(); ++i) {
-    vector<string> spec = Tokenize<string>(fileStr[f], " ");
-    ++f; //mark file as consumed
+    vector<string> spec = Tokenize<string>(fileStr[i], " ");
+    const vector<float> &weights= m_parameter->GetWeights("LexicalReordering", i);
+
     if(spec.size() != 4) {
-      UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[f]);
+      UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[i]);
       return false;
     }
 
@@ -956,12 +956,13 @@ bool StaticData::LoadLexicalReorderingModel()
     // decode num weights and fetch weights from array
     std::vector<float> mweights;
     size_t numWeights = atoi(spec[2].c_str());
-    for(size_t k = 0; k < numWeights; ++k, ++w) {
-      if(w >= weights.size()) {
-        UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
-        return false;
-      } else
-        mweights.push_back(weights[w]);
+    if(numWeights > weights.size()) {
+      UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
+      return false;
+    }
+
+    for(size_t k = 0; k < numWeights; ++k) {
+        mweights.push_back(weights[k]);
     }
 
     string filePath = spec[3];
@@ -1069,8 +1070,6 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
 bool StaticData::LoadLanguageModels()
 {
   if (m_parameter->GetParam("lmodel-file").size() > 0) {
-    // weights
-    const vector<float> &weightAll = m_parameter->GetWeights("LM");
 
     // dictionary upper-bounds fo all IRST LMs
     vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
@@ -1085,6 +1084,9 @@ bool StaticData::LoadLanguageModels()
     map<string,LanguageModel*> languageModelsLoaded;
 
     for(size_t i=0; i<lmVector.size(); i++) {
+      // weights
+      const vector<float> &weights = m_parameter->GetWeights("LM", i);
+
       LanguageModel* lm = NULL;
       if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
         lm = languageModelsLoaded[lmVector[i]]->Duplicate(); 
@@ -1130,12 +1132,12 @@ bool StaticData::LoadLanguageModels()
 
       m_languageModel.Add(lm);
       if (m_lmEnableOOVFeature) {
-        vector<float> weights(2);
-        weights[0] = weightAll.at(i*2);
-        weights[1] = weightAll.at(i*2+1);
+        CHECK(weights.size() == 2);
         SetWeights(lm,weights);
-      } else {
-        SetWeight(lm,weightAll[i]);
+      }
+      else {
+        CHECK(weights.size() == 1);
+        SetWeight(lm,weights[0]);
       }
     }
   }
@@ -1151,16 +1153,10 @@ bool StaticData::LoadGenerationTables()
 {
   if (m_parameter->GetParam("generation-file").size() > 0) {
     const vector<string> &generationVector = m_parameter->GetParam("generation-file");
-    const vector<float> &weight = m_parameter->GetWeights("Generation");
 
     IFVERBOSE(1) {
-      TRACE_ERR( "weight-generation: ");
-      for (size_t i = 0 ; i < weight.size() ; i++) {
-        TRACE_ERR( weight[i] << "\t");
-      }
-      TRACE_ERR(endl);
+      TRACE_ERR( "weight-generation: " << endl);
     }
-    size_t currWeightNum = 0;
 
     for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) {
       vector<string>			token		= Tokenize(generationVector[currDict]);
@@ -1169,6 +1165,8 @@ bool StaticData::LoadGenerationTables()
       m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
       string							filePath;
       size_t							numFeatures;
+
+      const vector<float> &weight = m_parameter->GetWeights("Generation", currDict);
 
       numFeatures = Scan<size_t>(token[2]);
       filePath = token[3];
@@ -1185,15 +1183,7 @@ bool StaticData::LoadGenerationTables()
         delete m_generationDictionary.back();
         return false;
       }
-      vector<float> gdWeights;
-      for(size_t i = 0; i < numFeatures; i++) {
-        CHECK(currWeightNum < weight.size());
-        gdWeights.push_back(weight[currWeightNum++]);
-      }
-      SetWeights(m_generationDictionary.back(), gdWeights);
-    }
-    if (currWeightNum != weight.size()) {
-      TRACE_ERR( "  [WARNING] config file has " << weight.size() << " generation weights listed, but the configuration for generation files indicates there should be " << currWeightNum << "!\n");
+      SetWeights(m_generationDictionary.back(), weight);
     }
   }
 
@@ -1210,7 +1200,6 @@ bool StaticData::LoadPhraseTables()
   // load phrase translation tables
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
-    const vector<float> &weightAll	= m_parameter->GetWeights("PhraseModel");
     const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
     vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
 
@@ -1225,11 +1214,11 @@ bool StaticData::LoadPhraseTables()
       return false;
     }
 
-    size_t index = 0;
-    size_t weightAllOffset = 0;
+    // MAIN LOOP
     bool oldFileFormat = false;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
       vector<string>                  token           = Tokenize(translationVector[currDict]);
+      const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
 
       if(currDict == 0 && token.size() == 4) {
         VERBOSE(1, "Warning: Phrase table specification in old 4-field format. Assuming binary phrase tables (type 1)!" << endl);
@@ -1263,11 +1252,7 @@ bool StaticData::LoadPhraseTables()
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath= token[4];
 
-      CHECK(weightAll.size() >= weightAllOffset + numScoreComponent);
-
-      // weights for this phrase dictionary
-      // first InputScores (if any), then translation scores
-      vector<float> weight;
+      CHECK(weights.size() >= numScoreComponent);
 
       if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
         if (currDict==0) { // only the 1st pt. THis is shit
@@ -1297,19 +1282,11 @@ bool StaticData::LoadPhraseTables()
         m_numRealWordsInInput = 0;
       }
 
-      for (size_t currScore = 0 ; currScore < numScoreComponent; currScore++)
-        weight.push_back(weightAll[weightAllOffset + currScore]);
-
-      weightAllOffset += numScoreComponent;
-
       string targetPath, alignmentsFile;
       if (implementation == SuffixArray) {
         targetPath		= token[5];
         alignmentsFile= token[6];
       }
-
-      CHECK(numScoreComponent==weight.size());
-
 
       //This is needed for regression testing, but the phrase table
       //might not really be loading here
@@ -1333,19 +1310,15 @@ bool StaticData::LoadPhraseTables()
         , input
         , output
         , filePath
-        , weight
+        , weights
        	, currDict
-        , maxTargetPhrase[index]
+        , maxTargetPhrase[currDict]
         , targetPath, alignmentsFile);
 
       m_phraseDictionary.push_back(pdf);
 
-      SetWeights(m_phraseDictionary.back(),weight);
+      SetWeights(m_phraseDictionary.back(),weights);
 
-
-
-
-      index++;
     }
   }
 
@@ -1412,14 +1385,13 @@ void StaticData::LoadChartDecodingParameters()
 
 void StaticData::LoadPhraseBasedParameters()
 {
-  const vector<float> &distortionWeights = m_parameter->GetWeights("Distortion");
-  size_t distortionWeightCount = distortionWeights.size();
+  const vector<float> &distortionWeights = m_parameter->GetWeights("Distortion", 0);
+  CHECK(distortionWeights.size() == 1);
 
-  for (size_t i = 0; i < distortionWeightCount; ++i) {
-    float weightDistortion = distortionWeights[i];
-    m_distortionScoreProducers.push_back(new DistortionScoreProducer());
-    SetWeight(m_distortionScoreProducers.back(), weightDistortion);
-  }
+  float weightDistortion = distortionWeights[0];
+  m_distortionScoreProducers.push_back(new DistortionScoreProducer());
+  SetWeight(m_distortionScoreProducers.back(), weightDistortion);
+
 }
 
 bool StaticData::LoadDecodeGraphs()
@@ -1812,11 +1784,8 @@ bool StaticData::LoadWordTranslationFeature()
   if (parameters.empty())
     return true;
 
-  const vector<float> &weight = m_parameter->GetWeights("WordPenalty");
-  if (weight.size() > 1) {
-    std::cerr << "Only one sparse producer weight allowed for the word translation feature" << std::endl;
-    return false;
-  }
+  const vector<float> &weight = m_parameter->GetWeights("WordPenalty", 0);
+  CHECK(weight.size() == 1);
 	
   m_needAlignmentInfo = true;
 
