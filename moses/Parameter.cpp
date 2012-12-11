@@ -361,7 +361,8 @@ void Parameter::ConvertWeightArgsT(const string &oldWeightName, const string &ne
   for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
     string &line = ttable[ttableInd];
     vector<string> toks = Tokenize(line);
-    size_t numFF = Scan<size_t>(toks[3]);
+    size_t numFFInd = (toks.size() == 4) ? 2 : 3;
+    size_t numFF = Scan<size_t>(toks[numFFInd]);
 
     for (size_t currFF = 0; currFF < numFF; ++currFF) {
       CHECK(currOldInd < oldWeights.size());
