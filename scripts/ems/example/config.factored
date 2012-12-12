@@ -401,6 +401,14 @@ lexicalized-reordering = msd-bidirectional-fe
 #extract-settings = ""
 max-phrase-length = 5
 
+### add extracted phrases from baseline model
+#
+#baseline-extract = $working-dir/model/extract.$baseline
+#
+# requires aligned parallel corpus for re-estimating lexical translation probabilities
+#baseline-corpus = $working-dir/training/corpus.$baseline
+#baseline-alignment = $working-dir/model/aligned.$baseline.$alignment-symmetrization-method
+
 ### unknown word labels (target syntax only)
 # enables use of unknown word labels during decoding
 # label file is generated during rule extraction

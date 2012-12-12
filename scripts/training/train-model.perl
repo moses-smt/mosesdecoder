@@ -38,7 +38,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
-   $_SPARSE_TRANSLATION_TABLE, @_BASELINE_ALIGNMENT_MODEL,
+   $_SPARSE_TRANSLATION_TABLE, @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_CORPUS, $_BASELINE_ALIGNMENT,
    $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $IGNORE);
 my $_CORES = 1;
 
@@ -129,6 +129,9 @@ $_HELP = 1
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
 		       'sparse-translation-table' => \$_SPARSE_TRANSLATION_TABLE,
 		       'baseline-alignment-model=s{8}' => \@_BASELINE_ALIGNMENT_MODEL,
+		       'baseline-extract=s' => \$_BASELINE_EXTRACT,
+		       'baseline-corpus=s' => \$_BASELINE_CORPUS,
+		       'baseline-alignment=s' => \$_BASELINE_ALIGNMENT,
 		       'cores=i' => \$_CORES
                );
 
@@ -1247,7 +1250,10 @@ sub get_lexical_factored {
 		     $___CORPUS.".".$___E,
 		     $___ALIGNMENT_FILE.".".$___ALIGNMENT,
 		     $___LEXICAL_FILE, 
-		     $___LEXICAL_COUNTS);
+		     $___LEXICAL_COUNTS,
+                     $_BASELINE_CORPUS.".".$___F,
+                     $_BASELINE_CORPUS.".".$___E,
+                     $_BASELINE_ALIGNMENT);
     }
     else {
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
@@ -1265,7 +1271,10 @@ sub get_lexical_factored {
 			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			 $___ALIGNMENT_FILE.".".$___ALIGNMENT,
 			 $lexical_file, 
-			 $___LEXICAL_COUNTS);
+			 $___LEXICAL_COUNTS,
+                         $_BASELINE_CORPUS.".".$factor_f.".".$___F,
+                         $_BASELINE_CORPUS.".".$factor_e.".".$___E,
+                         $_BASELINE_ALIGNMENT);
 	}
     }
 }
@@ -1373,11 +1382,12 @@ sub extract_phrase {
      }
     }
     my $cmd;
+    my $suffix = (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) ? ".new" : "";
     if ($_HIERARCHICAL)
     {
         my $max_length = &get_max_phrase_length($table_number);
 
-        $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
+        $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
         $cmd .= " --PCFG" if $_PCFG;
@@ -1394,14 +1404,14 @@ sub extract_phrase {
     {
 		if ( $_EPPEX ) {
 			# eppex sets max_phrase_length itself (as the maximum phrase length for which any Lossy Counter is defined)
-      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $_EPPEX";
+      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix $_EPPEX";
 		}
 		else {
       my $max_length = &get_max_phrase_length($table_number);
       print "MAX $max_length $reordering_flag $table_number\n";
       $max_length = &get_max_phrase_length(-1) if $reordering_flag;
 
-      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
+      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix $max_length";
 		}
       if ($reordering_flag) {
         $cmd .= " orientation";
@@ -1412,10 +1422,24 @@ sub extract_phrase {
     }
     
     $cmd .= " --GZOutput ";
+    $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
+
+    if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
+      print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | gzip > $extract_file.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | gzip > $extract_file.inv.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | gzip > $extract_file.o.gz")
+	if -e "$extract_file$suffix.o.gz";
+      safesystem("rm $extract_file$suffix.gz");
+      safesystem("rm $extract_file$suffix.inv.gz");
+      safesystem("rm $extract_file$suffix.o.gz") 
+        if -e "$extract_file$suffix.o.gz";
+    }
+
     foreach my $f (@tempfiles) {
       unlink $f;
     }

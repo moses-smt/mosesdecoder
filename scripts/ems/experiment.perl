@@ -1926,11 +1926,16 @@ sub define_training_build_lex_trans {
     my ($step_id) = @_;
 
     my ($lex, $aligned,$corpus) = &get_output_and_input($step_id);
+    my $baseline_alignment = &get("TRAINING:baseline-alignment");
+    my $baseline_corpus = &get("TRAINING:baseline-corpus");
+
     my $cmd = &get_training_setting(4);
     $cmd .= "-lexical-file $lex ";
     $cmd .= "-alignment-file $aligned ";
     $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
     $cmd .= "-corpus $corpus ";
+    $cmd .= "-baseline-corpus $baseline_corpus " if defined($baseline_corpus) && defined($baseline_alignment);
+    $cmd .= "-baseline-alignment $baseline_alignment " if defined($baseline_corpus) && defined($baseline_alignment);
 
     &create_step($step_id,$cmd);
 }
@@ -1964,6 +1969,9 @@ sub define_training_extract_phrases {
     my $extract_settings = &get("TRAINING:extract-settings");
     $extract_settings .= " --IncludeSentenceId " if &get("TRAINING:domain-features");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
+
+    my $baseline_extract = &get("TRAINING:baseline-extract");
+    $cmd .= "-baseline-extract $baseline_extract" if defined($baseline_extract);
 
     &create_step($step_id,$cmd);
 }
