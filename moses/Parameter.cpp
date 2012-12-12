@@ -376,13 +376,20 @@ void Parameter::ConvertWeightArgsSingleWeight(const string &oldWeightName, const
     {
       SetWeight(newWeightName, ind, Scan<float>(weights[i]));
     }
-
-    m_setting.erase(iterMap);
   }
+
+  m_setting.erase(iterMap);
 }
 
 void Parameter::ConvertWeightArgsT(const string &oldWeightName, const string &newWeightName)
 {
+  // process input weights 1st
+  if (isParamSpecified("weight-i")) {
+    vector<float> inputWeights = Scan<float>(m_setting["weight-i"]);
+    SetWeight(newWeightName, 0, inputWeights);
+  }
+
+  // real pt weights
   int ind = 0;
   const PARAM_VEC &oldWeights = m_setting[oldWeightName];
 
@@ -405,6 +412,10 @@ void Parameter::ConvertWeightArgsT(const string &oldWeightName, const string &ne
     AddWeight(newWeightName, ttableInd, weights);
 
   }
+
+  m_setting.erase("weight-i");
+  m_setting.erase(oldWeightName);
+
 }
 
 void Parameter::ConvertWeightArgsDistortion()
@@ -442,10 +453,81 @@ void Parameter::ConvertWeightArgsDistortion()
       SetWeight("LexicalReordering", indTable, weights);
 
     }
-
-    m_setting.erase(oldWeightName);
   }
 
+  m_setting.erase(oldWeightName);
+
+}
+
+void Parameter::ConvertWeightArgsLM(const string &oldWeightName, const string &newWeightName)
+{
+  vector<int> oovWeights;
+  if (isParamSpecified("lmodel-oov-feature")) {
+    oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
+  }
+
+  size_t ind = 0;
+  PARAM_MAP::iterator iterMap;
+
+  iterMap = m_setting.find(oldWeightName);
+  if (iterMap != m_setting.end())
+  {
+
+    size_t currOldInd = 0;
+    const PARAM_VEC &weights = iterMap->second;
+    const PARAM_VEC &models = m_setting["lmodel-file"];
+    for (size_t currLM = 0; currLM < models.size(); ++currLM)
+    {
+      size_t numFF = 1;
+      if (oovWeights.size() > currLM)
+        numFF += oovWeights[currLM];
+
+      vector<float> weightsLM(numFF);
+      for (size_t currFF = 0; currFF < numFF; ++currFF)
+      {
+        CHECK(currOldInd < weights.size());
+        weightsLM[currFF] = Scan<float>(weights[currOldInd]);
+        ++currOldInd;
+      }
+      SetWeight(newWeightName, ind, weightsLM);
+    }
+
+    m_setting.erase(iterMap);
+  }
+
+}
+
+void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName)
+{
+  // distortion / lex distortion
+  PARAM_VEC &oldWeights = m_setting[oldWeightName];
+
+  if (oldWeights.size() > 0)
+  {
+    size_t currOldInd = 0;
+    PARAM_VEC &models = m_setting["generation-file"];
+
+    for (size_t indTable = 0; indTable < models.size(); ++indTable) {
+      string &line = models[indTable];
+      vector<string> toks = Tokenize(line);
+
+      size_t numFF = Scan<size_t>(toks[2]);
+
+      vector<float> weights(numFF);
+      for (size_t currFF = 0; currFF < numFF; ++currFF)
+      {
+        CHECK(currOldInd < oldWeights.size());
+        float weight = Scan<float>(oldWeights[currOldInd]);
+        weights[currFF] = weight;
+
+        ++currOldInd;
+      }
+      SetWeight(newWeightName, indTable, weights);
+
+    }
+  }
+
+  m_setting.erase(oldWeightName);
 }
 
 void Parameter::ConvertWeightArgs()
@@ -474,13 +556,12 @@ void Parameter::ConvertWeightArgs()
     numInputScores.push_back("1");
   }
 
-  ConvertWeightArgsSingleWeight("weight-i", "PhraseModel");
   ConvertWeightArgsT("weight-t", "PhraseModel");
   ConvertWeightArgsSingleWeight("weight-w", "WordPenalty");
-  ConvertWeightArgsSingleWeight("weight-l", "LM");
+  ConvertWeightArgsLM("weight-l", "LM");
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
   ConvertWeightArgsSingleWeight("weight-u", "UnknownWordPenalty");
-  ConvertWeightArgsSingleWeight("weight-generation", "Generation");
+  ConvertWeightArgsGeneration("weight-generation", "Generation");
 
   // don't know or can't be bothered converting these weights
   ConvertWeightArgsSingleWeight("weight-lr", "LexicalReordering");
