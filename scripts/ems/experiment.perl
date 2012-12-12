@@ -297,6 +297,10 @@ sub read_config {
 	$line_count++;
 	s/\#.*$//; # strip comments
 	next if /^\#/ || /^\s*$/;
+        while (/\\\s*$/) { # merge with next line
+          s/\s*\\\s*$/ /;
+          $_ .= <INI>;
+        }
 	if (/^\[(.+)\]/) {
 	    $module = $1;
 	    $ignore = /ignore/i;
@@ -329,7 +333,7 @@ sub read_config {
     # resolve parameters used in values
     my $resolve = 1;
     my $loop_count = 0;
-    while($resolve && $loop_count++ < 10) {
+    while($resolve && $loop_count++ < 100) {
 	$resolve = 0;
 	foreach my $parameter (keys %CONFIG) {
 	    foreach (@{$CONFIG{$parameter}}) {
@@ -2354,6 +2358,7 @@ sub get_training_setting {
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
     my $pcfg = &get("TRAINING:use-pcfg-feature");
+    my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2377,6 +2382,7 @@ sub get_training_setting {
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
+    $cmd .= "-baseline-alignment-model $baseline_alignment " if defined($baseline_alignment) && ($step == 1 || $step == 2);
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
