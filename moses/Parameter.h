@@ -62,10 +62,13 @@ protected:
 
   void PrintCredit();
 
-  void AddWeight(const std::string &name, size_t ind, float weight);
+  void SetWeight(const std::string &name, size_t ind, float weight);
+  void SetWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
+  void AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
   void ConvertWeightArgs();
-  void ConvertWeightArgsDefault(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsT(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsDistortion();
   void CreateWeightsMap();
   void WeightOverwrite();
 
