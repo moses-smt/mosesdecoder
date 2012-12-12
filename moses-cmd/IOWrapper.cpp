@@ -467,7 +467,7 @@ void OutputFeatureScores( std::ostream& out
   if (ff->GetNumScoreComponents() != ScoreProducer::unlimited) {
     if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
       lastName = ff->GetScoreProducerDescription();
-      out << " " << lastName << ":";
+      out << " " << lastName << "=";
     }
     vector<float> scores = features.GetScoresForProducer( ff );
     for (size_t j = 0; j<scores.size(); ++j) {
@@ -482,15 +482,17 @@ void OutputFeatureScores( std::ostream& out
     // report weighted aggregate
     if (! ff->GetSparseFeatureReporting()) {
       const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
-        out << " " << ff->GetScoreProducerDescription() << ":";
+      if (labeledOutput && lastName != ff->GetScoreProducerDescription()) {
+        lastName = ff->GetScoreProducerDescription();
+        out << " " << lastName << "=";
+      }
       out << " " << scores.inner_product(weights);
     }
 
     // report each feature
     else {
       for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) 
-        out << " " << i->first << ": " << i->second;
+        out << " " << i->first << "= " << i->second;
       /*        if (i->second != 0) { // do not report zero-valued features
 	  float weight = staticData.GetSparseWeight(i->first);
           if (weight != 0)

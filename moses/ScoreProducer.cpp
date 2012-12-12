@@ -21,7 +21,7 @@ ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComp
 
   ostringstream dstream;
   dstream << description;
-  dstream << "_" << index;
+  dstream << index;
 
   description_counts.insert(description);
 
