@@ -604,23 +604,41 @@ void Parameter::CreateWeightsMap()
 void Parameter::WeightOverwrite()
 {
   PARAM_VEC &vec = m_setting["weight-overwrite"];
-  for (size_t i = 0; i < vec.size(); ++i)
+
+  if (vec.size() == 0)
+    return;
+
+  // should only be 1 line
+  CHECK(vec.size() == 1);
+
+  string name("");
+  vector<float> weights;
+  vector<string> toks = Tokenize(vec[0]);
+  for (size_t i = 0; i < toks.size(); ++i)
   {
-    cerr << vec[i] << endl;
-    const string &line = vec[i];
+    cerr << toks[i] << endl;
+    const string &tok = toks[i];
 
-    vector<string> toks = Tokenize(line);
-    CHECK(toks.size() == 3);
+    if (tok.substr(tok.size() - 1, 1) == "=") {
+      // start of new feature
 
-    string &name = toks[0];
-    size_t ind = Scan<size_t>(toks[1]);
-    float weight = Scan<float>(toks[2]);
+      if (name != "") {
+        // save previous ff
+        m_weights[name] = weights;
+        weights.clear();
+      }
 
-    vector<float> &weightsForProducer = m_weights[name];
-    CHECK(ind < weightsForProducer.size());
-    weightsForProducer[ind] = weight;
-
+      name = tok.substr(0, tok.size() - 1);
+    }
+    else {
+      // a weight for curr ff
+      float weight = Scan<float>(toks[2]);
+      weights.push_back(weight);
+    }
   }
+
+  m_weights[name] = weights;
+
 }
 
 /** check that parameter settings make sense */

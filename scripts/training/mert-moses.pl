@@ -58,29 +58,6 @@ my $SCRIPTS_ROOTDIR = $RealBin;
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-## We preserve this bit of comments to keep the traditional weight ranges.
-#     "w" => [ [ 0.0, -1.0, 1.0 ] ],  # word penalty
-#     "d"  => [ [ 1.0, 0.0, 2.0 ] ],  # lexicalized reordering model
-#     "lm" => [ [ 1.0, 0.0, 2.0 ] ],  # language model
-#     "g"  => [ [ 1.0, 0.0, 2.0 ],    # generation model
-# 	      [ 1.0, 0.0, 2.0 ] ],
-#     "tm" => [ [ 0.3, 0.0, 0.5 ],    # translation model
-# 	      [ 0.2, 0.0, 0.5 ],
-# 	      [ 0.3, 0.0, 0.5 ],
-# 	      [ 0.2, 0.0, 0.5 ],
-# 	      [ 0.0,-1.0, 1.0 ] ],  # ... last weight is phrase penalty
-#     "lex"=> [ [ 0.1, 0.0, 0.2 ] ],  # global lexical model
-#     "I"  => [ [ 0.0,-1.0, 1.0 ] ],  # input lattice scores
-
-
-
-# moses.ini file uses FULL names for lambdas, while this training script
-# internally (and on the command line) uses ABBR names.
-my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
-  g=weight-generation lex=weight-lex I=weight-i dlm=weight-dlm pp=weight-pp wt=weight-wt pb=weight-pb lex=weight-lex glm=weight-glm);
-my %ABBR2FULL = map { split /=/, $_, 2 } @ABBR_FULL_MAP;
-my %FULL2ABBR = map { my ($a, $b) = split /=/, $_, 2; ($b, $a); } @ABBR_FULL_MAP;
-
 my $minimum_required_change_in_weights = 0.00001;
     # stop if no lambda changes more than this
 
@@ -1075,11 +1052,11 @@ sub run_decoder {
     my %model_weights;
     for(my $i=0; $i<scalar(@{$featlist->{"names"}}); $i++) {
       my $name = $featlist->{"names"}->[$i];
-      $model_weights{$name} = "-$name" if !defined $model_weights{$name};
+      $model_weights{$name} = "$name=" if !defined $model_weights{$name};
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
     my $decoder_config = "";
-    $decoder_config = join(" ", values %model_weights) unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
+    $decoder_config = "-weight-overwrite '" . join(" ", values %model_weights) ."'" unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
@@ -1118,8 +1095,6 @@ sub insert_ranges_to_featlist {
       if ($namedpair =~ /^(.*?):/) {
         $name = $1;
         $namedpair =~ s/^.*?://;
-        die "Unrecognized name '$name' in --range=$range"
-          if !defined $ABBR2FULL{$name};
       }
       my ($min, $max) = split /\.\./, $namedpair;
       die "Bad min '$min' in --range=$range" if $min !~ /^-?[0-9.]+$/;
@@ -1182,14 +1157,12 @@ sub get_featlist_from_file {
   while (<$fh>) {
     $nr++;
     chomp;
-    /^(.+) (\S+) (\S+)$/ || die "invalid feature: $_";
-    my ($longname, $feature, $value) = ($1, $2, $3);
+    /^(.+) (\S+)$/ || die "invalid feature: $_";
+    my ($longname, $value) = ($1, $2);
     next if $value eq "sparse";
-    push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
+    push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
       if $value !~ /^[+-]?[0-9.\-e]+$/;
-    push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
-      if !defined $ABBR2FULL{$feature};
-    push @names, $feature;
+    push @names, $longname;
     push @startvalues, $value;
   }
   close $fh;
@@ -1260,7 +1233,6 @@ sub create_config {
     foreach (split(/ /, $___DECODER_FLAGS)) {
       if (/^\-([^\d].*)$/) {
         $parameter = $1;
-        $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
       } else {
         die "Found value with no -paramname before it: $_"
             if !defined $parameter;
@@ -1274,14 +1246,12 @@ sub create_config {
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
     delete($P{$name});
-    delete($P{$ABBR2FULL{$name}});
   }
 
   # Convert weights to elements in P
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
     my $val = $featlist->{"values"}->[$i];
-    $name = defined $ABBR2FULL{$name} ? $ABBR2FULL{$name} : $name;
     # ensure long name
     push @{$P{$name}}, $val;
   }
@@ -1315,7 +1285,6 @@ sub create_config {
 
     # parameter name
     my $parameter = $1;
-    $parameter = $ABBR2FULL{$parameter} if defined($ABBR2FULL{$parameter});
     print $out "[$parameter]\n";
 
     # change parameter, if new values
