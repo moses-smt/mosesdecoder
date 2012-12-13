@@ -376,9 +376,9 @@ void Parameter::ConvertWeightArgsSingleWeight(const string &oldWeightName, const
     {
       SetWeight(newWeightName, ind, Scan<float>(weights[i]));
     }
-  }
 
-  m_setting.erase(iterMap);
+    m_setting.erase(iterMap);
+  }
 }
 
 void Parameter::ConvertWeightArgsT(const string &oldWeightName, const string &newWeightName)
