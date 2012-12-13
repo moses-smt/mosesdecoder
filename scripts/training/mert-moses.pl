@@ -1194,7 +1194,7 @@ sub get_order_of_scores_from_nbestlist {
   foreach my $tok (split /\s+/, $scores) {
     if ($tok =~ /.+_.+:/) {
       $sparse = 1;
-    } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
+    } elsif ($tok =~ /^([a-z][0-9a-z]*)=/i) {
       $label = $1;
     } elsif ($tok =~ /^-?[-0-9.\-e]+$/) {
       if (!$sparse) {
