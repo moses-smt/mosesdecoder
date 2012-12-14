@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 # $Id$
 # Usage:
 # mert-moses.pl <foreign> <english> <decoder-executable> <decoder-config>
@@ -1285,37 +1285,34 @@ sub create_config {
 
     # parameter name
     my $parameter = $1;
-    print $out "[$parameter]\n";
 
-    # change parameter, if new values
-    if (defined($P{$parameter})) {
-      # write new values
-      foreach (@{$P{$parameter}}) {
-        print $out $_ . "\n";
-      }
-      delete($P{$parameter});
-      # skip until new parameter, only write comments
-      while ($line = <$ini_fh>) {
-        print $out $line if $line =~ /^\#/ || $line =~ /^\s+$/;
-        last if $line =~ /^\[/;
-        last unless $line;
-      }
-      next;
-    }
+		my $doOutput;
+		if ($parameter eq "weight") {
+			$doOutput = 0;
+		}
+		else {
+	    # unchanged parameter, write old
+			$doOutput = 1;
+	    print $out "[$parameter]\n";
+		}
 
-    # unchanged parameter, write old
-    while ($line = <$ini_fh>) {
-      last if $line =~ /^\[/;
-      print $out $line;
-    }
+	  while ($line = <$ini_fh>) {
+	    last if $line =~ /^\[/;
+			if ($doOutput) {
+		    print $out $line;
+			}
+	  }
+
   }
 
-  # write all additional parameters
+  # write all weights
+  print $out "[weight]\n";
   foreach my $parameter (keys %P) {
-    print $out "\n[$parameter]\n";
+    print $out "$parameter=";
     foreach (@{$P{$parameter}}) {
-      print $out $_."\n";
+      print $out " $_";
     }
+		print $out "\n";
   }
 
   close $ini_fh;
