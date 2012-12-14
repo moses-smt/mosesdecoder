@@ -1729,8 +1729,12 @@ sub create_ini {
 ### MOSES CONFIG FILE ###
 #########################
 \n";
-    
-    if (defined $___TRANSLATION_FACTORS) {
+  my $weightHandle;
+	my $weightStr;
+	open $weightHandle, '>', \$weightStr or die "Can't open variable: $!";
+	print $weightHandle "\n[weight]\n";
+
+  if (defined $___TRANSLATION_FACTORS) {
 	print INI "# input factors\n";
 	print INI "[input-factors]\n";
 	my $INPUT_FACTOR_MAX = 0;
@@ -1876,64 +1880,84 @@ sub create_ini {
   }
   print INI "\n";
 
-  my $weight_d_count = 1;
   if ($___REORDERING ne "distance") {
     my $file = "# distortion (reordering) files\n\[distortion-file]\n";
     my $factor_i = 0;
  
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
-	foreach my $model (@REORDERING_MODELS) {
-	    $weight_d_count += $model->{"numfeatures"};
-	    my $table_file = "$___MODEL_DIR/reordering-table";
-	    $table_file .= ".$factor" unless $___NOT_FACTORED;
-	    $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-	    $table_file .= ".";
-	    $table_file .= $model->{"filename"};
-	    $table_file .= ".gz";
-	    $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
-	}
-        $factor_i++;
-      }
-      print INI $file."\n";
-  }
-  else {
-    $weight_d_count = 1;
+			foreach my $model (@REORDERING_MODELS) {
+			  my $table_file = "$___MODEL_DIR/reordering-table";
+			  $table_file .= ".$factor" unless $___NOT_FACTORED;
+			  $table_file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
+			  $table_file .= ".";
+			  $table_file .= $model->{"filename"};
+			  $table_file .= ".gz";
+			  $file .= "$factor ".$model->{"config"}." ".$model->{"numfeatures"}." $table_file\n";
+			}
+      $factor_i++;
+    }
+    print INI $file."\n";
   }
   
   if (!$_HIERARCHICAL) {
-    print INI "# distortion (reordering) weight\n[weight-d]\n";
-    for(my $i=0;$i<$weight_d_count;$i++) { 
-      print INI "".(0.6/(scalar @REORDERING_MODELS+1))."\n";
-    }
+		my $weight = 0.6/(scalar @REORDERING_MODELS+1);
+    print $weightHandle "# distortion (reordering)\n";
+    print $weightHandle "Distortion0= " .$weight ."\n";
+
+		my $indModel = 0;
+		foreach my $model (@REORDERING_MODELS) {
+	    print $weightHandle "LexicalReordering" .$indModel ."=";
+
+	    my $weight_count += $model->{"numfeatures"};
+			for (my $i = 0; $i < $weight_count; ++$i) {
+				print $weightHandle " " .$weight;
+			}
+			print $weightHandle "\n";
+			++$indModel;
+		}
   }
-  print INI "\n# language model weights\n[weight-l]\n";
-  my $lmweighttotal = 0.5;
+  print $weightHandle "\n# language model weights\n";
+	my $lmweighttotal = 0.5;
+	my $indLM = 0;
   foreach(1..scalar @___LM) {
-    printf INI "%.4f\n", $lmweighttotal / scalar @___LM;
+    print $weightHandle "LM" .$indLM;
+    printf $weightHandle "= %.4f\n", $lmweighttotal / scalar @___LM;
+		++$indLM;
   }
 
-  print INI "\n\n# translation model weights\n[weight-t]\n";
+  printf $weightHandle "\n# translation model weights\n";
+	my $indPT = 0;
   foreach my $f (split(/\+/,$___TRANSLATION_FACTORS)) {
-     for(1..$basic_weight_count) {
-       printf INI "%.2f\n", 1/$basic_weight_count;
-     }
+		print $weightHandle "PhraseModel" .$indPT ."=";
+    for(1..$basic_weight_count) {
+      printf $weightHandle " %.2f", 1/$basic_weight_count;
+    }
+		print $weightHandle "\n";
+		++$indPT;
   }
-  print INI "1.0\n" if $_HIERARCHICAL; # glue grammar
+	
+	if ($_HIERARCHICAL) {
+		# glue grammar
+	  print $weightHandle "\n# glue grammar\n";
+  	print $weightHandle "PhraseModel" .$indPT ."= 1.0\n";
+	}
 
     if (defined $___GENERATION_FACTORS) {
-      print INI "\n# generation model weights\n";
-      print INI "[weight-generation]\n";
+      print $weightHandle "\n# generation model weights\n";
       my @TYPE = @_GENERATION_TYPE;
+			my $indGen = 0;
       foreach my $f (split(/\+/,$___GENERATION_FACTORS)) {
-        print INI "0.3\n";
-        print INI "0\n" unless scalar(@TYPE) && (shift @TYPE) eq 'single';
+        print $weightHandle "Generation" .$indGen ."= 0.3 ";
+        print $weightHandle "0" unless scalar(@TYPE) && (shift @TYPE) eq 'single';
+				print $weightHandle "\n";
+				++$indGen;
       }
     } else {
-      print INI "\n# no generation models, no weight-generation section\n";
+      print $weightHandle "\n# no generation models, no weight-generation section\n";
     }
 
-  print INI "\n# word penalty\n[weight-w]\n-1\n\n";
+  print $weightHandle "\n# word penalty\nWordPenalty0= -1\n\n";
 
   if ($_HIERARCHICAL) {
     print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
@@ -1963,6 +1987,9 @@ sub create_ini {
     print INI "\n# additional settings\n\n";
     print INI `cat $_ADDITIONAL_INI_FILE`;
   }
+
+	close $weightHandle;
+  print INI "\n\n$weightStr\n\n";
 
   close(INI);
 }

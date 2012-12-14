@@ -67,7 +67,7 @@ protected:
   void AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
   void ConvertWeightArgs();
   void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
-  void ConvertWeightArgsT(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsPhraseModel(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsLM(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
@@ -90,11 +90,6 @@ public:
   bool isParamSpecified(const std::string &paramName) {
     return  m_setting.find( paramName ) != m_setting.end();
   }
-
-	bool isParamShortNameSpecified(const std::string &paramName)
-	{
-		return  m_setting.find( GetFullName(paramName) ) != m_setting.end();
-	}
 		
 	const std::string GetFullName(std::string abbr)
 	{

@@ -381,36 +381,50 @@ void Parameter::ConvertWeightArgsSingleWeight(const string &oldWeightName, const
   }
 }
 
-void Parameter::ConvertWeightArgsT(const string &oldWeightName, const string &newWeightName)
+void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const string &newWeightName)
 {
   // process input weights 1st
   if (isParamSpecified("weight-i")) {
     vector<float> inputWeights = Scan<float>(m_setting["weight-i"]);
+    PARAM_VEC &numInputScores = m_setting["input-scores"];
+    if (inputWeights.size() == 1) {
+      CHECK(numInputScores.size() == 0);
+      numInputScores.push_back("1");
+      numInputScores.push_back("0");
+    }
+    else if (inputWeights.size() == 2) {
+      CHECK(numInputScores.size() == 0);
+      numInputScores.push_back("1");
+      numInputScores.push_back("1");
+    }
+
     SetWeight(newWeightName, 0, inputWeights);
   }
 
   // real pt weights
-  int ind = 0;
-  const PARAM_VEC &oldWeights = m_setting[oldWeightName];
+  if (isParamSpecified(oldWeightName)) {
+    int ind = 0;
+    const PARAM_VEC &oldWeights = m_setting[oldWeightName];
 
-  size_t currOldInd = 0;
-  PARAM_VEC &ttable = m_setting["ttable-file"];
-  for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
-    string &line = ttable[ttableInd];
-    vector<string> toks = Tokenize(line);
-    size_t numFFInd = (toks.size() == 4) ? 2 : 3;
-    size_t numFF = Scan<size_t>(toks[numFFInd]);
+    size_t currOldInd = 0;
+    PARAM_VEC &ttable = m_setting["ttable-file"];
+    for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
+      string &line = ttable[ttableInd];
+      vector<string> toks = Tokenize(line);
+      size_t numFFInd = (toks.size() == 4) ? 2 : 3;
+      size_t numFF = Scan<size_t>(toks[numFFInd]);
 
-    vector<float> weights(numFF);
-    for (size_t currFF = 0; currFF < numFF; ++currFF) {
-      CHECK(currOldInd < oldWeights.size());
-      float weight = Scan<float>(oldWeights[currOldInd]);
-      weights[currFF] = weight;
+      vector<float> weights(numFF);
+      for (size_t currFF = 0; currFF < numFF; ++currFF) {
+        CHECK(currOldInd < oldWeights.size());
+        float weight = Scan<float>(oldWeights[currOldInd]);
+        weights[currFF] = weight;
 
-      ++currOldInd;
+        ++currOldInd;
+      }
+      AddWeight(newWeightName, ttableInd, weights);
+
     }
-    AddWeight(newWeightName, ttableInd, weights);
-
   }
 
   m_setting.erase("weight-i");
@@ -542,26 +556,13 @@ void Parameter::ConvertWeightArgs()
     cerr << "Do not mix old and new format for specify weights";
   }
 
-  // input weights
-  PARAM_VEC &inputWeights = m_setting["weight-i"];
-  PARAM_VEC &numInputScores = m_setting["input-scores"];
-  if (inputWeights.size() == 1) {
-    CHECK(numInputScores.size() == 0);
-    numInputScores.push_back("1");
-    numInputScores.push_back("0");
-  }
-  else if (inputWeights.size() == 2) {
-    CHECK(numInputScores.size() == 0);
-    numInputScores.push_back("1");
-    numInputScores.push_back("1");
-  }
-
-  ConvertWeightArgsT("weight-t", "PhraseModel");
+  ConvertWeightArgsPhraseModel("weight-t", "PhraseModel");
   ConvertWeightArgsSingleWeight("weight-w", "WordPenalty");
   ConvertWeightArgsLM("weight-l", "LM");
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
   ConvertWeightArgsSingleWeight("weight-u", "UnknownWordPenalty");
   ConvertWeightArgsGeneration("weight-generation", "Generation");
+  ConvertWeightArgsDistortion();
 
   // don't know or can't be bothered converting these weights
   ConvertWeightArgsSingleWeight("weight-lr", "LexicalReordering");
@@ -575,7 +576,6 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
-  ConvertWeightArgsDistortion();
 }
 
 void Parameter::CreateWeightsMap()
@@ -585,7 +585,6 @@ void Parameter::CreateWeightsMap()
   {
     const string &line = vec[i];
     vector<string> toks = Tokenize(line);
-    cerr << line << endl;
     CHECK(toks.size() >= 2);
 
     string name = toks[0];
@@ -616,7 +615,6 @@ void Parameter::WeightOverwrite()
   vector<string> toks = Tokenize(vec[0]);
   for (size_t i = 0; i < toks.size(); ++i)
   {
-    cerr << toks[i] << endl;
     const string &tok = toks[i];
 
     if (tok.substr(tok.size() - 1, 1) == "=") {
