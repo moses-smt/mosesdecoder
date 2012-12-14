@@ -113,6 +113,8 @@ public:
 	
   std::vector<float> &GetWeights(const std::string &name, size_t ind);
 
+  const PARAM_MAP &GetParams() const
+  { return m_setting; }
 
 };
 

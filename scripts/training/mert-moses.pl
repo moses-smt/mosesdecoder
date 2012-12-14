@@ -1221,6 +1221,13 @@ sub create_config {
   my $bleu_achieved       = shift; # just for verbosity
   my $sparse_weights_file = shift; # only defined when optimizing sparse features
 
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    my $val = $featlist->{"values"}->[$i];
+    # ensure long name
+		print STDERR "featlist: $name=$val \n";
+  }
+
   my %P; # the hash of all parameters we wish to override
 
   # first convert the command line parameters to the hash
@@ -1234,26 +1241,12 @@ sub create_config {
       if (/^\-([^\d].*)$/) {
         $parameter = $1;
       } else {
-        die "Found value with no -paramname before it: $_"
+				my $value = $_;
+        die "Found value with no -paramname before it: $value"
             if !defined $parameter;
-        push @{$P{$parameter}}, $_;
+        push @{$P{$parameter}}, $value;
       }
     }
-  }
-
-  # First delete all weights params from the input, we're overwriting them.
-  # Delete both short and long-named version.
-  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-    my $name = $featlist->{"names"}->[$i];
-    delete($P{$name});
-  }
-
-  # Convert weights to elements in P
-  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
-    my $name = $featlist->{"names"}->[$i];
-    my $val = $featlist->{"values"}->[$i];
-    # ensure long name
-    push @{$P{$name}}, $val;
   }
 
   if (defined($sparse_weights_file)) {
@@ -1286,33 +1279,43 @@ sub create_config {
     # parameter name
     my $parameter = $1;
 
-		my $doOutput;
 		if ($parameter eq "weight") {
-			$doOutput = 0;
+			# leave weights 'til last. We're changing it
+			while ($line = <$ini_fh>) {
+			  last if $line =~ /^\[/;
+			}
 		}
-		else {
-	    # unchanged parameter, write old
-			$doOutput = 1;
-	    print $out "[$parameter]\n";
-		}
-
-	  while ($line = <$ini_fh>) {
-	    last if $line =~ /^\[/;
-			if ($doOutput) {
-		    print $out $line;
+	  elsif (defined($P{$parameter})) {
+			# found a param (thread, verbose etc) that we're overriding. Leave to the end
+			while ($line = <$ini_fh>) {
+			  last if $line =~ /^\[/;
 			}
 	  }
+		else {
+			# unchanged parameter, write old
+			print $out "[$parameter]\n";
+			while ($line = <$ini_fh>) {
+				last if $line =~ /^\[/;
+				print $out $line;
+			}
+		}
+	}
 
+  # write all additional parameters
+  foreach my $parameter (keys %P) {
+    print $out "\n[$parameter]\n";
+    foreach (@{$P{$parameter}}) {
+      print $out $_."\n";
+    }
   }
 
   # write all weights
   print $out "[weight]\n";
-  foreach my $parameter (keys %P) {
-    print $out "$parameter=";
-    foreach (@{$P{$parameter}}) {
-      print $out " $_";
-    }
-		print $out "\n";
+  for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
+    my $name = $featlist->{"names"}->[$i];
+    my $val = $featlist->{"values"}->[$i];
+    # ensure long name
+		print $out "$name= $val\n";
   }
 
   close $ini_fh;
