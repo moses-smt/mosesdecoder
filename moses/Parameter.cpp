@@ -630,7 +630,7 @@ void Parameter::WeightOverwrite()
     }
     else {
       // a weight for curr ff
-      float weight = Scan<float>(toks[2]);
+      float weight = Scan<float>(toks[i]);
       weights.push_back(weight);
     }
   }
