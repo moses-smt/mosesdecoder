@@ -81,6 +81,8 @@ public:
 
   bool ComputeValueInTranslationTable() const {return true;}
 
+  virtual bool IsTuneable() const { return false; }
+
 };
 
 class MetaFeatureProducer : public StatelessFeatureFunction

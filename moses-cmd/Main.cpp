@@ -339,10 +339,16 @@ static void ShowWeights()
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
 
   for (size_t i = 0; i < sff.size(); ++i) {
-    PrintFeatureWeight(sff[i]);
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
+    }
   }
   for (size_t i = 0; i < slf.size(); ++i) {
-	  PrintFeatureWeight(slf[i]);
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
+    }
   }
 }
 

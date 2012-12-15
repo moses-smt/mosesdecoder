@@ -53,6 +53,8 @@ public:
   bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; } 
 
   virtual float GetSparseProducerWeight() const { return 1; }
+
+  virtual bool IsTuneable() const { return true; }
 };
 
 
