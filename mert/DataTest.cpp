@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_CASE(init_feature_map_test) {
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
   Data data(scorer.get());
 
-  std::string s = " d: 0 -7.66174 0 0 -3.51621 0 0 lm: -41.3435 -40.3647 tm: -67.6349 -100.438 -27.6817 -23.4685 8.99907 w: -9 ";
+  std::string s = " d= 0 -7.66174 0 0 -3.51621 0 0 lm= -41.3435 -40.3647 tm= -67.6349 -100.438 -27.6817 -23.4685 8.99907 w= -9 ";
   std::string expected = "d_0 d_1 d_2 d_3 d_4 d_5 d_6 lm_0 lm_1 tm_0 tm_1 tm_2 tm_3 tm_4 w_0 ";
   data.InitFeatureMap(s);
   BOOST_CHECK_EQUAL(expected, data.Features());
@@ -53,12 +53,12 @@ BOOST_AUTO_TEST_CASE(add_features_test) {
   boost::scoped_ptr<Scorer> scorer(ScorerFactory::getScorer("BLEU", ""));
   Data data(scorer.get());
 
-  const std::string s1 = " d: 0 lm: -55.5464 -54.8813 w: -8 tm: -75.184 -93.1203 -21.9993 -20.594 7.99917 ";
+  const std::string s1 = " d= 0 lm= -55.5464 -54.8813 w= -8 tm= -75.184 -93.1203 -21.9993 -20.594 7.99917 ";
   const std::string& expected = "d_0 lm_0 lm_1 w_0 tm_0 tm_1 tm_2 tm_3 tm_4 ";
   data.InitFeatureMap(s1);
   BOOST_CHECK_EQUAL(expected, data.Features());
 
-  const std::string& s2 = "d: 0 lm: -64.7399 -65.0127 w: -8 tm: -55.8122 -74.8652 -15.6311 -14.7486 7.99917 ";
+  const std::string& s2 = "d= 0 lm= -64.7399 -65.0127 w= -8 tm= -55.8122 -74.8652 -15.6311 -14.7486 7.99917 ";
   data.AddFeatures(s2, 0);
   const FeatureStats& stats = data.getFeatureData()->get(0, 0);
   BOOST_CHECK_EQUAL(9, stats.size());

@@ -403,13 +403,20 @@ void IOWrapper::OutputAllFeatureScores(const TranslationSystem &system, const Sc
 {
   std::string lastName = "";
   const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
-  for( size_t i=0; i<sff.size(); i++ )
-    if (sff[i]->GetScoreProducerDescription() != "BleuScoreFeature")
-      OutputFeatureScores( out, features, sff[i], lastName );
-
+  for( size_t i=0; i<sff.size(); i++ ) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->GetScoreProducerDescription() != "BleuScoreFeature"
+        && ff->IsTuneable()) {
+      OutputFeatureScores( out, features, ff, lastName );
+    }
+  }
   const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
-  for( size_t i=0; i<slf.size(); i++ )
-    OutputFeatureScores( out, features, slf[i], lastName );
+  for( size_t i=0; i<slf.size(); i++ ) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      OutputFeatureScores( out, features, ff, lastName );
+    }
+  }
 } // namespace
 
 void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentCollection &features, const FeatureFunction *ff, std::string &lastName )

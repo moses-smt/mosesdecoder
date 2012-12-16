@@ -213,7 +213,7 @@ void Data::InitFeatureMap(const string& str) {
     getNextPound(buf, substr);
 
     // string ending with ":" are skipped, because they are the names of the features
-    if (!EndsWith(substr, ":")) {
+    if (!EndsWith(substr, "=")) {
       stringstream ss;
       ss << tmp_name << "_" << tmp_index << " ";
       features.append(ss.str());
@@ -241,7 +241,7 @@ void Data::AddFeatures(const string& str,
     getNextPound(buf, substr);
 
     // no ':' -> feature value that needs to be stored
-    if (!EndsWith(substr, ":")) {
+    if (!EndsWith(substr, "=")) {
       feature_entry.add(ConvertStringToFeatureStatsType(substr));
     } else if (substr.find("_") != string::npos) {
       // sparse feature name? store as well
