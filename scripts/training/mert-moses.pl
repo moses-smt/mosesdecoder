@@ -1157,13 +1157,17 @@ sub get_featlist_from_file {
   while (<$fh>) {
     $nr++;
     chomp;
-    /^(.+) (\S+)$/ || die "invalid feature: $_";
-    my ($longname, $value) = ($1, $2);
-    next if $value eq "sparse";
-    push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
-      if $value !~ /^[+-]?[0-9.\-e]+$/;
-    push @names, $longname;
-    push @startvalues, $value;
+    /^(\S+)= (.+)$/ || die "invalid feature: $_";
+    my ($longname, $valuesStr) = ($1, $2);
+    next if $valuesStr eq "sparse";
+    
+    my @values = split(/ /, $valuesStr);
+		foreach my $value (@values) {
+			push @errs, "$featlistfn:$nr:Bad initial value of $longname: $value\n"
+				if $value !~ /^[+-]?[0-9.\-e]+$/;
+			push @names, $longname;
+			push @startvalues, $value;
+    }
   }
   close $fh;
 

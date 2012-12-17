@@ -19,8 +19,8 @@ while(<WEIGHT>) {
       $weights_file_spec = "\n".$_;
       $weights_file_flag = 1;
     }
-    elsif (/^\[weight\-(\S+)\]/) {
-	$current_weight = $1;
+    elsif (/^\[weight]/) {
+		  $current_weight = $1;
     }
     elsif ($current_weight && /^(([\-\d\.]+)([Ee][+-]?[\d]+)?)$/) {
 	push @{$WEIGHT{$current_weight}},$1;
