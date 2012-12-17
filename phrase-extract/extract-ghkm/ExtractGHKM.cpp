@@ -180,7 +180,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   }
 
   if (!options.unknownWordFile.empty()) {
-    WriteUnknownWordLabel(wordCount, wordLabel, unknownWordStream);
+    WriteUnknownWordLabel(wordCount, wordLabel, options, unknownWordStream);
   }
 
   return 0;
@@ -295,6 +295,12 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     ("UnknownWordLabel",
         po::value(&options.unknownWordFile),
         "write unknown word labels to named file")
+    ("UnknownWordMinRelFreq",
+        po::value(&options.unknownWordMinRelFreq)->default_value(
+          options.unknownWordMinRelFreq),
+        "set minimum relative frequency for unknown word labels")
+    ("UnknownWordUniform",
+        "write uniform weights to unknown word label file")
     ("UnpairedExtractFormat",
         "do not pair non-terminals in extract files")
   ;
@@ -373,6 +379,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   }
   if (vm.count("PCFG")) {
     options.pcfg = true;
+  }
+  if (vm.count("UnknownWordUniform")) {
+    options.unknownWordUniform = true;
   }
   if (vm.count("UnpairedExtractFormat")) {
     options.unpairedExtractFormat = true;
@@ -467,6 +476,7 @@ void ExtractGHKM::CollectWordLabelCounts(
 void ExtractGHKM::WriteUnknownWordLabel(
     const std::map<std::string, int> &wordCount,
     const std::map<std::string, std::string> &wordLabel,
+    const Options &options,
     std::ostream &out)
 {
   std::map<std::string, int> labelCount;
@@ -485,8 +495,9 @@ void ExtractGHKM::WriteUnknownWordLabel(
   for (std::map<std::string, int>::const_iterator p = labelCount.begin();
        p != labelCount.end(); ++p) {
     double ratio = static_cast<double>(p->second) / static_cast<double>(total);
-    if (ratio > 0.03) {
-      out << p->first << " " << ratio << std::endl;
+    if (ratio >= options.unknownWordMinRelFreq) {
+      float weight = options.unknownWordUniform ? 1.0f : ratio;
+      out << p->first << " " << weight << std::endl;
     }
   }
 }

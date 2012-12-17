@@ -51,10 +51,10 @@ class ExtractGHKM
   void CollectWordLabelCounts(ParseTree &,
                               std::map<std::string, int> &,
                               std::map<std::string, std::string> &);
-  void WriteUnknownWordLabel(
-    const std::map<std::string, int> &,
-    const std::map<std::string, std::string> &,
-    std::ostream &);
+  void WriteUnknownWordLabel(const std::map<std::string, int> &,
+                             const std::map<std::string, std::string> &,
+                             const Options &,
+                             std::ostream &);
   void WriteGlueGrammar(const std::set<std::string> &,
                         const std::map<std::string, int> &,
                         std::ostream &);
