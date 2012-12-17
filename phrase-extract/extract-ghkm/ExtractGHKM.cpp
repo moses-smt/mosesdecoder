@@ -144,7 +144,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
     // Record word counts.
     if (!options.unknownWordFile.empty()) {
-      CollectWordLabelCounts(*t, wordCount, wordLabel);
+      CollectWordLabelCounts(*t, options, wordCount, wordLabel);
     }
 
     // Form an alignment graph from the target tree, source words, and
@@ -458,6 +458,7 @@ void ExtractGHKM::WriteGlueGrammar(
 
 void ExtractGHKM::CollectWordLabelCounts(
     ParseTree &root,
+    const Options &options,
     std::map<std::string, int> &wordCount,
     std::map<std::string, std::string> &wordLabel)
 {
@@ -467,7 +468,18 @@ void ExtractGHKM::CollectWordLabelCounts(
        p != leaves.end(); ++p) {
     const ParseTree &leaf = **p;
     const std::string &word = leaf.GetLabel();
-    const std::string &label = leaf.GetParent()->GetLabel();
+    const ParseTree *ancestor = leaf.GetParent();
+    // If unary rule elimination is enabled and this word is at the end of a
+    // chain of unary rewrites, e.g.
+    //    PN-SB -> NE -> word
+    // then record the constituent label at the top of the chain instead of
+    // the part-of-speech label.
+    while (!options.allowUnary &&
+           ancestor->GetParent() &&
+           ancestor->GetParent()->GetChildren().size() == 1) {
+      ancestor = ancestor->GetParent();
+    }
+    const std::string &label = ancestor->GetLabel();
     ++wordCount[word];
     wordLabel[word] = label;
   }

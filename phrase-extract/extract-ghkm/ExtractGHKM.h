@@ -49,6 +49,7 @@ class ExtractGHKM
   void OpenOutputFileOrDie(const std::string &, OutputFileStream &);
   void RecordTreeLabels(const ParseTree &, std::set<std::string> &);
   void CollectWordLabelCounts(ParseTree &,
+                              const Options &,
                               std::map<std::string, int> &,
                               std::map<std::string, std::string> &);
   void WriteUnknownWordLabel(const std::map<std::string, int> &,
