@@ -839,7 +839,7 @@ apply-weights
 	out: config-with-reused-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.tuned.ini
-	template: $moses-script-dir/ems/support/reuse-weights.perl IN1 < IN > OUT
+	template: $moses-bin-dir/reuse-weights IN1 < IN > OUT
 	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference
