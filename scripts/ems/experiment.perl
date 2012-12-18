@@ -17,7 +17,7 @@ sub trim($)
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$VERBOSE,$IGNORE_TIME);
+my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL,$VERBOSE,$IGNORE_TIME);
 my $SLEEP = 2;
 my $META = "$RealBin/experiment.meta";
 
@@ -38,6 +38,7 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
 			'exec' => \$EXECUTE,
 			'cluster' => \$CLUSTER,
 			'multicore' => \$MULTICORE,
+		   	'final=s' => \$FINAL,
 		   	'meta=s' => \$META,
 			'verbose' => \$VERBOSE,
 			'sleep=i' => \$SLEEP,
@@ -247,12 +248,14 @@ sub read_meta {
 	    }
 	    elsif ($1 eq "template") {
 		my $escaped_template = $2;
+		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
 		$TEMPLATE{"$module:$step"} = $escaped_template;
 	    }
 	    elsif ($1 eq "template-if") {
 		my $escaped_template = $2;
+		$escaped_template =~ s/^IN/EMS_IN_EMS/;
 		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
 		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
 		my @IF = split(/\s+/,$escaped_template);
@@ -294,6 +297,10 @@ sub read_config {
 	$line_count++;
 	s/\#.*$//; # strip comments
 	next if /^\#/ || /^\s*$/;
+        while (/\\\s*$/) { # merge with next line
+          s/\s*\\\s*$/ /;
+          $_ .= <INI>;
+        }
 	if (/^\[(.+)\]/) {
 	    $module = $1;
 	    $ignore = /ignore/i;
@@ -326,7 +333,7 @@ sub read_config {
     # resolve parameters used in values
     my $resolve = 1;
     my $loop_count = 0;
-    while($resolve && $loop_count++ < 10) {
+    while($resolve && $loop_count++ < 100) {
 	$resolve = 0;
 	foreach my $parameter (keys %CONFIG) {
 	    foreach (@{$CONFIG{$parameter}}) {
@@ -405,7 +412,12 @@ sub log_config {
 
 sub find_steps {
     # find final output to be produced by the experiment
-    push @{$NEEDED{"REPORTING:report"}}, "final";
+    if (defined($FINAL)) {
+      push @{$NEEDED{$FINAL}}, "final";
+    }
+    else {
+      push @{$NEEDED{"REPORTING:report"}}, "final";
+    }
 
     # go through each module
     for(my $m=$#MODULE; $m>=0; $m--) {
@@ -1914,11 +1926,16 @@ sub define_training_build_lex_trans {
     my ($step_id) = @_;
 
     my ($lex, $aligned,$corpus) = &get_output_and_input($step_id);
+    my $baseline_alignment = &get("TRAINING:baseline-alignment");
+    my $baseline_corpus = &get("TRAINING:baseline-corpus");
+
     my $cmd = &get_training_setting(4);
     $cmd .= "-lexical-file $lex ";
     $cmd .= "-alignment-file $aligned ";
     $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
     $cmd .= "-corpus $corpus ";
+    $cmd .= "-baseline-corpus $baseline_corpus " if defined($baseline_corpus) && defined($baseline_alignment);
+    $cmd .= "-baseline-alignment $baseline_alignment " if defined($baseline_corpus) && defined($baseline_alignment);
 
     &create_step($step_id,$cmd);
 }
@@ -1952,6 +1969,9 @@ sub define_training_extract_phrases {
     my $extract_settings = &get("TRAINING:extract-settings");
     $extract_settings .= " --IncludeSentenceId " if &get("TRAINING:domain-features");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
+
+    my $baseline_extract = &get("TRAINING:baseline-extract");
+    $cmd .= "-baseline-extract $baseline_extract" if defined($baseline_extract);
 
     &create_step($step_id,$cmd);
 }
@@ -2346,6 +2366,7 @@ sub get_training_setting {
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
     my $pcfg = &get("TRAINING:use-pcfg-feature");
+    my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2369,6 +2390,7 @@ sub get_training_setting {
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
+    $cmd .= "-baseline-alignment-model $baseline_alignment " if defined($baseline_alignment) && ($step == 1 || $step == 2);
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2914,7 +2936,7 @@ sub define_template {
 		    || die("ERROR: could not find OUT in $single_cmd");
 		my $out = $1;
 		#  replace IN and OUT with %s
-		$single_cmd =~ s/EMS_IN_EMS/\%s/;
+		$single_cmd =~ s/EMS_IN_EMS\S*/\%s/;
 		$single_cmd =~ s/EMS_OUT_EMS\S*/\%s/;
 		# build tmp
 		my $tmp_dir = $module;
@@ -2938,7 +2960,7 @@ sub define_template {
 
     # command to be run on multiple reference translations
     if (defined($multiref)) {
-      $cmd =~ s/^(.+)EMS_IN_EMS (.+)EMS_OUT_EMS(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' EMS_IN_EMS EMS_OUT_EMS/;
+      $cmd =~ s/^(.*)EMS_IN_EMS (.+)EMS_OUT_EMS(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' EMS_IN_EMS EMS_OUT_EMS/;
       $cmd =~ s/^(.+)EMS_OUT_EMS(.+)EMS_IN_EMS (.*)$/$multiref '$1 mref-output-file $2 mref-input-file $3' EMS_IN_EMS EMS_OUT_EMS/;
     }
 

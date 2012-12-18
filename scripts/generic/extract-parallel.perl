@@ -26,9 +26,14 @@ my $extract = $ARGV[7]; # 4th arg of extract argument
 
 my $makeTTable = 1; # whether to build the ttable extract files
 my $otherExtractArgs= "";
+my $baselineExtract;
 for (my $i = 8; $i < $#ARGV + 1; ++$i)
 {
   $makeTTable = 0 if $ARGV[$i] eq "--NoTTable";
+  if ($ARGV[$i] eq '--BaselineExtract') {
+    $baselineExtract = $ARGV[++$i];
+    next;
+  }
   $otherExtractArgs .= $ARGV[$i] ." ";
 }
 
@@ -119,6 +124,12 @@ for (my $i = 0; $i < $numParallel; ++$i)
 		$catCmd .= "$TMPDIR/extract.$numStr.gz ";
 		$catInvCmd .= "$TMPDIR/extract.$numStr.inv.gz ";
 		$catOCmd .= "$TMPDIR/extract.$numStr.o.gz ";
+}
+if (defined($baselineExtract)) {
+		my $sorted = -e "$baselineExtract.sorted.gz" ? ".sorted" : "";
+		$catCmd .= "$baselineExtract$sorted.gz ";
+		$catInvCmd .= "$baselineExtract.inv$sorted.gz ";
+		$catOCmd .= "$baselineExtract.o$sorted.gz ";
 }
 
 $catCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.sorted.gz \n";

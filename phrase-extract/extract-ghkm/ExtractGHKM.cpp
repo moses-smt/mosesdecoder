@@ -144,7 +144,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
 
     // Record word counts.
     if (!options.unknownWordFile.empty()) {
-      CollectWordLabelCounts(*t, wordCount, wordLabel);
+      CollectWordLabelCounts(*t, options, wordCount, wordLabel);
     }
 
     // Form an alignment graph from the target tree, source words, and
@@ -180,7 +180,7 @@ int ExtractGHKM::Main(int argc, char *argv[])
   }
 
   if (!options.unknownWordFile.empty()) {
-    WriteUnknownWordLabel(wordCount, wordLabel, unknownWordStream);
+    WriteUnknownWordLabel(wordCount, wordLabel, options, unknownWordStream);
   }
 
   return 0;
@@ -295,6 +295,12 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
     ("UnknownWordLabel",
         po::value(&options.unknownWordFile),
         "write unknown word labels to named file")
+    ("UnknownWordMinRelFreq",
+        po::value(&options.unknownWordMinRelFreq)->default_value(
+          options.unknownWordMinRelFreq),
+        "set minimum relative frequency for unknown word labels")
+    ("UnknownWordUniform",
+        "write uniform weights to unknown word label file")
     ("UnpairedExtractFormat",
         "do not pair non-terminals in extract files")
   ;
@@ -374,6 +380,9 @@ void ExtractGHKM::ProcessOptions(int argc, char *argv[],
   if (vm.count("PCFG")) {
     options.pcfg = true;
   }
+  if (vm.count("UnknownWordUniform")) {
+    options.unknownWordUniform = true;
+  }
   if (vm.count("UnpairedExtractFormat")) {
     options.unpairedExtractFormat = true;
   }
@@ -449,6 +458,7 @@ void ExtractGHKM::WriteGlueGrammar(
 
 void ExtractGHKM::CollectWordLabelCounts(
     ParseTree &root,
+    const Options &options,
     std::map<std::string, int> &wordCount,
     std::map<std::string, std::string> &wordLabel)
 {
@@ -458,7 +468,18 @@ void ExtractGHKM::CollectWordLabelCounts(
        p != leaves.end(); ++p) {
     const ParseTree &leaf = **p;
     const std::string &word = leaf.GetLabel();
-    const std::string &label = leaf.GetParent()->GetLabel();
+    const ParseTree *ancestor = leaf.GetParent();
+    // If unary rule elimination is enabled and this word is at the end of a
+    // chain of unary rewrites, e.g.
+    //    PN-SB -> NE -> word
+    // then record the constituent label at the top of the chain instead of
+    // the part-of-speech label.
+    while (!options.allowUnary &&
+           ancestor->GetParent() &&
+           ancestor->GetParent()->GetChildren().size() == 1) {
+      ancestor = ancestor->GetParent();
+    }
+    const std::string &label = ancestor->GetLabel();
     ++wordCount[word];
     wordLabel[word] = label;
   }
@@ -467,6 +488,7 @@ void ExtractGHKM::CollectWordLabelCounts(
 void ExtractGHKM::WriteUnknownWordLabel(
     const std::map<std::string, int> &wordCount,
     const std::map<std::string, std::string> &wordLabel,
+    const Options &options,
     std::ostream &out)
 {
   std::map<std::string, int> labelCount;
@@ -485,8 +507,9 @@ void ExtractGHKM::WriteUnknownWordLabel(
   for (std::map<std::string, int>::const_iterator p = labelCount.begin();
        p != labelCount.end(); ++p) {
     double ratio = static_cast<double>(p->second) / static_cast<double>(total);
-    if (ratio > 0.03) {
-      out << p->first << " " << ratio << std::endl;
+    if (ratio >= options.unknownWordMinRelFreq) {
+      float weight = options.unknownWordUniform ? 1.0f : ratio;
+      out << p->first << " " << weight << std::endl;
     }
   }
 }

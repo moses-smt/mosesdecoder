@@ -105,12 +105,12 @@ while(1) {
   my $outsource = score(*OUTSOURCE);
   my $outtarget = score(*OUTTARGET);
   last if ($insource == 1 || $outsource == 1 || $intarget == 1 || $outtarget == 1);
+  my $source_length = line_length(*SOURCE);
+  my $target_length = line_length(*TARGET);
   if (defined($filter_domains) && !&check_sentence_filtered($i)) {
     print "99999\n"; # keep it
   }
   else {
-    my $source_length = line_length(*SOURCE);
-    my $target_length = line_length(*TARGET);
     my $total =  $insource/$source_length - $outsource/$source_length + $intarget/$target_length - $outtarget/$target_length;
     print "$total\n";
   }

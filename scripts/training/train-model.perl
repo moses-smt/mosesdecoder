@@ -38,7 +38,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
-   $_SPARSE_TRANSLATION_TABLE,
+   $_SPARSE_TRANSLATION_TABLE, @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_CORPUS, $_BASELINE_ALIGNMENT,
    $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $IGNORE);
 my $_CORES = 1;
 
@@ -128,6 +128,10 @@ $_HELP = 1
 		       'additional-ini=s' => \@_ADDITIONAL_INI, 
 		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
 		       'sparse-translation-table' => \$_SPARSE_TRANSLATION_TABLE,
+		       'baseline-alignment-model=s{8}' => \@_BASELINE_ALIGNMENT_MODEL,
+		       'baseline-extract=s' => \$_BASELINE_EXTRACT,
+		       'baseline-corpus=s' => \$_BASELINE_CORPUS,
+		       'baseline-alignment=s' => \$_BASELINE_ALIGNMENT,
 		       'cores=i' => \$_CORES
                );
 
@@ -373,6 +377,11 @@ my $___ALIGNMENT = "grow-diag-final";
 $___ALIGNMENT = $_ALIGNMENT if $_ALIGNMENT;
 my $___NOTE_ALIGNMENT_DROPS = 1;
 
+# baseline alignment model for incremetal updating
+die "ERROR: buggy definition of baseline alignment model, should have 8 values:\n\t".join("\n\t",@_BASELINE_ALIGNMENT_MODEL)."\n"
+  unless scalar(@_BASELINE_ALIGNMENT_MODEL) == 8 || scalar(@_BASELINE_ALIGNMENT_MODEL) == 0;
+die "ERROR: use of baseline alignment model limited to HMM training (-hmm-align)\n"
+  if defined($___FINAL_ALIGNMENT_MODEL) && $___FINAL_ALIGNMENT_MODEL ne 'hmm' && scalar(@_BASELINE_ALIGNMENT_MODEL) == 8;
 
 # model dir and alignment/extract file
 my $___MODEL_DIR = $___ROOT_DIR."/model";
@@ -620,8 +629,8 @@ sub prepare {
 	&make_classes($corpus.".".$___F,$___VCB_F.".classes");
 	&make_classes($corpus.".".$___E,$___VCB_E.".classes");
 	
-	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
-	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
+	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F,0);
+	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E,1);
 	
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
@@ -659,8 +668,8 @@ sub prepare {
 	    exit 0;
 	}
 	
-	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F);
-	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E);
+	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F,0);
+	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E,1);
 	
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
@@ -787,7 +796,7 @@ sub make_classes {
 
 sub get_vocabulary {
 #    return unless $___LEXICAL_WEIGHTING;
-    my($corpus,$vcb) = @_;
+    my($corpus,$vcb,$is_target) = @_;
     print STDERR "(1.2) creating vcb file $vcb @ ".`date`;
     
     my %WORD;
@@ -797,17 +806,37 @@ sub get_vocabulary {
 	foreach (split) { $WORD{$_}++; }
     }
     close(TXT);
-    
+
+    my ($id,%VCB);
+    open(VCB,">", "$vcb") or die "ERROR: Can't write $vcb";
+
+    # words from baseline alignment model when incrementally updating
+    if (scalar @_BASELINE_ALIGNMENT_MODEL) {
+      open(BASELINE_VCB,$_BASELINE_ALIGNMENT_MODEL[$is_target]);
+      while(<BASELINE_VCB>) {
+        chop;
+        my ($i,$word,$count) = split;
+	if (defined($WORD{$word})) {
+          $count += $WORD{$word};
+          delete($WORD{$word});
+        }
+	printf VCB "%d\t%s\t%d\n",$i,$word,$count;
+	$VCB{$word} = $i;
+        $id = $i+1;
+      }
+      close(BASELINE_VCB);
+    }
+    # not incrementally updating
+    else {
+      print VCB "1\tUNK\t0\n";
+      $id=2;
+    }
+
     my @NUM;
     foreach my $word (keys %WORD) {
 	my $vcb_with_number = sprintf("%07d %s",$WORD{$word},$word);
 	push @NUM,$vcb_with_number;
     }
-    
-    my %VCB;
-    open(VCB,">", "$vcb") or die "ERROR: Can't write $vcb";
-    print VCB "1\tUNK\t0\n";
-    my $id=2;
     foreach (reverse sort @NUM) {
 	my($count,$word) = split;
 	printf VCB "%d\t%s\t%d\n",$id,$word,$count;
@@ -986,15 +1015,30 @@ sub run_single_giza_on_parts {
     close(SNT);
 
     # run snt2cooc in parts
+    my @COOC_PART_FILE_NAME;
     for(my $i=1;$i<=$___PARTS;$i++) {
 	&run_single_snt2cooc("$dir/part$i",$e,$f,$vcb_e,$vcb_f,"$___CORPUS_DIR/part$i/$f-$e-int-train.snt");
+        push @COOC_PART_FILE_NAME, "$dir/part$i/$f-$e.cooc";
     }
+    # include baseline cooc, if baseline alignment model (incremental training)
+    if (scalar @_BASELINE_ALIGNMENT_MODEL) {
+      push @COOC_PART_FILE_NAME, $_BASELINE_ALIGNMENT_MODEL[2 + ($dir eq $___GIZA_F2E?1:0)];
+    }
+    &merge_cooc_files($dir,$e,$f,@COOC_PART_FILE_NAME);
+
+    # run giza
+    &run_single_giza($dir,$e,$f,$vcb_e,$vcb_f,$train);
+}
+
+sub merge_cooc_files {
+    my ($dir,$e,$f,@COOC_PART_FILE_NAME) = @_;
 
     # merge parts
     open(COOC,">$dir/$f-$e.cooc") or die "ERROR: Can't write $dir/$f-$e.cooc";
     my(@PF,@CURRENT);
-    for(my $i=1;$i<=$___PARTS;$i++) {
-	open($PF[$i],"$dir/part$i/$f-$e.cooc")or die "ERROR: Can't read $dir/part$i/$f-$e.cooc";
+    for(my $i=0;$i<scalar(@COOC_PART_FILE_NAME);$i++) {
+	print STDERR "merging cooc file $COOC_PART_FILE_NAME[$i]...\n";
+	open($PF[$i],$COOC_PART_FILE_NAME[$i]) or die "ERROR: Can't read $COOC_PART_FILE_NAME[$i]";
 	my $pf = $PF[$i];
 	$CURRENT[$i] = <$pf>;
 	chop($CURRENT[$i]) if $CURRENT[$i];
@@ -1002,7 +1046,7 @@ sub run_single_giza_on_parts {
 
     while(1) {
 	my ($min1,$min2) = (1e20,1e20);
-	for(my $i=1;$i<=$___PARTS;$i++) {
+        for(my $i=0;$i<scalar(@COOC_PART_FILE_NAME);$i++) {
 	    next unless $CURRENT[$i];
 	    my ($w1,$w2) = split(/ /,$CURRENT[$i]);
 	    if ($w1 < $min1 || ($w1 == $min1 && $w2 < $min2)) {
@@ -1012,7 +1056,7 @@ sub run_single_giza_on_parts {
 	}
 	last if $min1 == 1e20;
 	print COOC "$min1 $min2\n";
-	for(my $i=1;$i<=$___PARTS;$i++) {
+        for(my $i=0;$i<scalar(@COOC_PART_FILE_NAME);$i++) {
 	    next unless $CURRENT[$i];
 	    my ($w1,$w2) = split(/ /,$CURRENT[$i]);
 	    if ($w1 == $min1 && $w2 == $min2) {
@@ -1022,13 +1066,10 @@ sub run_single_giza_on_parts {
 	    }
 	}	
     }
-    for(my $i=1;$i<=$___PARTS;$i++) {
+    for(my $i=0;$i<scalar(@COOC_PART_FILE_NAME);$i++) {
 	close($PF[$i]);
     }
     close(COOC);
-
-    # run giza
-    &run_single_giza($dir,$e,$f,$vcb_e,$vcb_f,$train);
 }
 
 sub run_single_giza {
@@ -1083,6 +1124,12 @@ sub run_single_giza {
         $GizaDefaultOptions{m5} =                    ($___FINAL_ALIGNMENT_MODEL eq '5')? 3: 0;
     }
 
+    if (scalar(@_BASELINE_ALIGNMENT_MODEL)) {
+        $GizaDefaultOptions{oldTrPrbs} = $_BASELINE_ALIGNMENT_MODEL[4 + ($dir eq $___GIZA_F2E?2:0)];
+        $GizaDefaultOptions{oldAlPrbs} = $_BASELINE_ALIGNMENT_MODEL[5 + ($dir eq $___GIZA_F2E?2:0)];
+        $GizaDefaultOptions{step_k} = 1;
+    }
+
     if ($___GIZA_OPTION) {
 	foreach (split(/[ ,]+/,$___GIZA_OPTION)) {
 	    my ($option,$value) = split(/=/,$_,2);
@@ -1123,16 +1170,19 @@ sub run_single_giza {
 }
 
 sub run_single_snt2cooc {
-    my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
-    print STDERR "(2.1a) running snt2cooc $f-$e @ ".`date`."\n";
-    safesystem("mkdir -p $dir") or die("ERROR");
-    if ($SNT2COOC eq "$_EXTERNAL_BINDIR/snt2cooc.out") {
-    print "$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc\n";
-    safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc") or die("ERROR");
-    } else {
-    print "$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train\n";
-    safesystem("$SNT2COOC $dir/$f-$e.cooc $vcb_e $vcb_f $train") or die("ERROR");
-    } 
+  my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
+  print STDERR "(2.1a) running snt2cooc $f-$e @ ".`date`."\n";
+  my $suffix = (scalar @_BASELINE_ALIGNMENT_MODEL) ? ".new" : "";
+  safesystem("mkdir -p $dir") or die("ERROR");
+  if ($SNT2COOC eq "$_EXTERNAL_BINDIR/snt2cooc.out") {
+    print "$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc$suffix\n";
+    safesystem("$SNT2COOC $vcb_e $vcb_f $train > $dir/$f-$e.cooc$suffix") or die("ERROR");
+  } else {
+    print "$SNT2COOC $dir/$f-$e.cooc$suffix $vcb_e $vcb_f $train\n";
+    safesystem("$SNT2COOC $dir/$f-$e.cooc$suffix $vcb_e $vcb_f $train") or die("ERROR");
+  }
+  &merge_cooc_files($dir,$e,$f,"$dir/$f-$e.cooc.new",$_BASELINE_ALIGNMENT_MODEL[2 + ($dir eq $___GIZA_F2E?1:0)])
+    if scalar @_BASELINE_ALIGNMENT_MODEL;
 }
 
 ### (3) CREATE WORD ALIGNMENT FROM GIZA ALIGNMENTS
@@ -1200,7 +1250,10 @@ sub get_lexical_factored {
 		     $___CORPUS.".".$___E,
 		     $___ALIGNMENT_FILE.".".$___ALIGNMENT,
 		     $___LEXICAL_FILE, 
-		     $___LEXICAL_COUNTS);
+		     $___LEXICAL_COUNTS,
+                     $_BASELINE_CORPUS.".".$___F,
+                     $_BASELINE_CORPUS.".".$___E,
+                     $_BASELINE_ALIGNMENT);
     }
     else {
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
@@ -1218,7 +1271,10 @@ sub get_lexical_factored {
 			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			 $___ALIGNMENT_FILE.".".$___ALIGNMENT,
 			 $lexical_file, 
-			 $___LEXICAL_COUNTS);
+			 $___LEXICAL_COUNTS,
+                         $_BASELINE_CORPUS.".".$factor_f.".".$___F,
+                         $_BASELINE_CORPUS.".".$factor_e.".".$___E,
+                         $_BASELINE_ALIGNMENT);
 	}
     }
 }
@@ -1326,11 +1382,12 @@ sub extract_phrase {
      }
     }
     my $cmd;
+    my $suffix = (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) ? ".new" : "";
     if ($_HIERARCHICAL)
     {
         my $max_length = &get_max_phrase_length($table_number);
 
-        $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file";
+        $cmd = "$RULE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix";
         $cmd .= " --GlueGrammar $___GLUE_GRAMMAR_FILE" if $_GLUE_GRAMMAR;
         $cmd .= " --UnknownWordLabel $_UNKNOWN_WORD_LABEL_FILE" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
         $cmd .= " --PCFG" if $_PCFG;
@@ -1347,14 +1404,14 @@ sub extract_phrase {
     {
 		if ( $_EPPEX ) {
 			# eppex sets max_phrase_length itself (as the maximum phrase length for which any Lossy Counter is defined)
-      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $_EPPEX";
+      		$cmd = "$EPPEX $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix $_EPPEX";
 		}
 		else {
       my $max_length = &get_max_phrase_length($table_number);
       print "MAX $max_length $reordering_flag $table_number\n";
       $max_length = &get_max_phrase_length(-1) if $reordering_flag;
 
-      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file $max_length";
+      $cmd = "$PHRASE_EXTRACT $alignment_file_e $alignment_file_f $alignment_file_a $extract_file$suffix $max_length";
 		}
       if ($reordering_flag) {
         $cmd .= " orientation";
@@ -1365,10 +1422,24 @@ sub extract_phrase {
     }
     
     $cmd .= " --GZOutput ";
+    $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
+
+    if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
+      print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | gzip > $extract_file.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | gzip > $extract_file.inv.gz");
+      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | gzip > $extract_file.o.gz")
+	if -e "$extract_file$suffix.o.gz";
+      safesystem("rm $extract_file$suffix.gz");
+      safesystem("rm $extract_file$suffix.inv.gz");
+      safesystem("rm $extract_file$suffix.o.gz") 
+        if -e "$extract_file$suffix.o.gz";
+    }
+
     foreach my $f (@tempfiles) {
       unlink $f;
     }

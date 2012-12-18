@@ -65,21 +65,24 @@ size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
   } else {
     TokenizeAndEncode(line, encoded_tokens);
   }
+  const size_t len = encoded_tokens.size();
+  vector<int> ngram;
+
   for (size_t k = 1; k <= n; ++k) {
     //ngram order longer than sentence - no point
-    if (k > encoded_tokens.size()) {
+    if (k > len) {
       continue;
     }
-    for (size_t i = 0; i < encoded_tokens.size()-k+1; ++i) {
-      vector<int> ngram;
-      ngram.reserve(encoded_tokens.size());
-      for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
+    for (size_t i = 0; i < len - k + 1; ++i) {
+      ngram.clear();
+      ngram.reserve(len);
+      for (size_t j = i; j < i+k && j < len; ++j) {
         ngram.push_back(encoded_tokens[j]);
       }
       counts.Add(ngram);
     }
   }
-  return encoded_tokens.size();
+  return len;
 }
 
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)

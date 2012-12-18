@@ -297,8 +297,8 @@ factor-script = "$moses-script-dir/training/wrappers/make-factor-en-pos.mxpost.p
 #outdomain-stem = [CORPUS:giga:clean-split-stem]
 
 # settings: number of lines sampled from the corpora to train each language model on
-# (typically a million or so)
-#settings = "--line-count 1000000"
+# (if used at all, should be small as a percentage of corpus)
+#settings = "--line-count 100000"
 
 #################################################################
 # TRANSLATION MODEL TRAINING
@@ -360,6 +360,18 @@ alignment-symmetrization-method = grow-diag-final-and
 #berkeley-process-options = "-EMWordAligner.numThreads 8"
 #berkeley-posterior = 0.5
 
+### use of baseline alignment model (incremental training)
+# 
+#baseline = 68
+#baseline-alignment-model = "$working-dir/training/prepared.$baseline/$input-extension.vcb \
+#  $working-dir/training/prepared.$baseline/$output-extension.vcb \
+#  $working-dir/training/giza.$baseline/${output-extension}-$input-extension.cooc \
+#  $working-dir/training/giza-inverse.$baseline/${input-extension}-$output-extension.cooc \ 
+#  $working-dir/training/giza.$baseline/${output-extension}-$input-extension.thmm.5 \
+#  $working-dir/training/giza.$baseline/${output-extension}-$input-extension.hhmm.5 \
+#  $working-dir/training/giza-inverse.$baseline/${input-extension}-$output-extension.thmm.5 \
+#  $working-dir/training/giza-inverse.$baseline/${input-extension}-$output-extension.hhmm.5"
+
 ### if word alignment should be skipped,
 # point to word alignment files
 #
@@ -388,6 +400,14 @@ lexicalized-reordering = msd-bidirectional-fe
 #
 #extract-settings = ""
 max-phrase-length = 5
+
+### add extracted phrases from baseline model
+#
+#baseline-extract = $working-dir/model/extract.$baseline
+#
+# requires aligned parallel corpus for re-estimating lexical translation probabilities
+#baseline-corpus = $working-dir/training/corpus.$baseline
+#baseline-alignment = $working-dir/model/aligned.$baseline.$alignment-symmetrization-method
 
 ### unknown word labels (target syntax only)
 # enables use of unknown word labels during decoding
@@ -602,6 +622,9 @@ report-segmentation = yes
 #
 # further precision breakdown by factor
 #precision-by-coverage-factor = pos
+# 
+# visualization of the search graph in tree-based models
+#analyze-search-graph = yes
 
 [EVALUATION:newstest2011]
 
