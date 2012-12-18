@@ -1315,12 +1315,23 @@ sub create_config {
 
   # write all weights
   print $out "[weight]\n";
+  
+  my $prevName = "";
+  my $outStr = "";
   for (my $i = 0; $i < scalar(@{$featlist->{"names"}}); $i++) {
     my $name = $featlist->{"names"}->[$i];
     my $val = $featlist->{"values"}->[$i];
-    # ensure long name
-		print $out "$name= $val\n";
+    
+    if ($prevName eq $name) {
+      $outStr .= " $val";
+    }
+    else {
+  		print $out "$outStr\n";
+  		$outStr = "$name= $val";
+  		$prevName = $name;
+    }
   }
+	print $out "$outStr\n";
 
   close $ini_fh;
   close $out;

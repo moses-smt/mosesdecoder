@@ -20,7 +20,10 @@ int main(int argc, char **argv)
 	bool inWeightSection = false;
 	string line;
 	while (getline(newWeightStrme, line)) {
-		if (line.substr(0, 1) == "["
+		if (line.size() == 0) {
+		  // do nothing
+		}
+		else if (line.substr(0, 1) == "["
 				&& line.substr(line.size() -1, 1) == "]") {
 			if (line == "[weight]") {
 				inWeightSection = true;
