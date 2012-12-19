@@ -68,11 +68,6 @@ namespace Moses {
       m_reorderingTables.push_back(reorderModel);
       StaticData::InstanceNonConst().AddFeatureFunction(reorderModel);
     }
-
-    void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel) {
-      m_globalLexicalModels.push_back(globalLexicalModel);
-      StaticData::InstanceNonConst().AddFeatureFunction(globalLexicalModel);
-    }
     
     void TranslationSystem::ConfigDictionaries() {
       for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
@@ -103,16 +98,10 @@ namespace Moses {
       for(size_t i=0;i<m_reorderingTables.size();++i) {
         m_reorderingTables[i]->InitializeForInput(source);
       }
+
+      /*
       for(size_t i=0;i<m_globalLexicalModels.size();++i) {
         m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
-      }
-
-      /* TODO - get rid of GetScoreProducerWeightShortName()
-      for(size_t i=0;i<m_statelessFFs.size();++i) {
-        if (m_statelessFFs[i]->GetScoreProducerWeightShortName() == "glm") 
-        {
-	        ((GlobalLexicalModelUnlimited*)m_statelessFFs[i])->InitializeForInput((Sentence const&)source);
-        }
       }
       */
 

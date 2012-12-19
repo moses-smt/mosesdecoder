@@ -633,8 +633,7 @@ bool StaticData::LoadData(Parameter *parameter)
       } else if (id == "G") {
         for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
           if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-            m_translationSystems.find(config[0])->second.AddGlobalLexicalModel(m_globalLexicalModels[k]);
-            VERBOSE(2,"Adding global lexical model " << k << " to translation system " << config[0] << endl);
+            AddFeatureFunction(m_globalLexicalModels[k]);
           }
         }
       } else if (id == "L") {

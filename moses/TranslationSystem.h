@@ -58,7 +58,6 @@ class TranslationSystem {
       void AddLanguageModel(LanguageModel* languageModel);
       void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
       void AddReorderModel(LexicalReordering* reorderModel);
-      void AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel);
 
       //Called after adding the tables in order to set up the dictionaries
       void ConfigDictionaries();
@@ -76,7 +75,6 @@ class TranslationSystem {
       
       const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries().at(index); }
       
-      float GetWeightDistortion() const;
       std::vector<float> GetTranslationWeights(size_t index) const;
       
       //sentence (and thread) specific initialisationn and cleanup
@@ -95,7 +93,6 @@ class TranslationSystem {
         std::vector<PhraseDictionaryFeature*> m_phraseDictionaries;
         std::vector<GenerationDictionary*> m_generationDictionaries;
         LMList m_languageModels;
-        std::vector<GlobalLexicalModel*> m_globalLexicalModels;
 
 	
 };
