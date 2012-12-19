@@ -32,7 +32,7 @@ class FactorCollection;
 class Factor;
 
 //! Abstract class for for single factor LM
-class LanguageModelSingleFactor : public LanguageModelImplementation
+class LanguageModelSingleFactor : virtual public LanguageModelImplementation
 {
 protected:
   const Factor *m_sentenceStart, *m_sentenceEnd;
@@ -70,8 +70,8 @@ public:
 	}
 };
 
-// Single factor LM that uses a null pointer state.
-class LanguageModelPointerState : public LanguageModelSingleFactor
+// LM that uses a null pointer state.
+class LanguageModelPointerState : virtual public LanguageModelImplementation
 {
 private:
   FFState *m_nullContextState;

@@ -19,14 +19,16 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_LanguageModelSRI_h
-#define moses_LanguageModelSRI_h
+#ifndef moses_LanguageModelLocal_h
+#define moses_LanguageModelLocal_h
 
 #include <string>
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "moses/Factor.h"
 #include "moses/TypeDef.h"
 #include "SingleFactor.h"
+#include "MultiFactor.h"
 
 class Factor;
 class Phrase;
@@ -36,27 +38,31 @@ class Ngram;
 namespace Moses
 {
 
-/** Implementation of single factor LM using IRST's code.
+/** Local language models (Monz 2011)
  */
-class LanguageModelSRI : public LanguageModelPointerState, public LanguageModelSingleFactor
+class LanguageModelLocal : public LanguageModelMultiFactor, public LanguageModelPointerState
 {
 protected:
-  std::vector<unsigned int> m_lmIdLookup;
-  ::Vocab			*m_srilmVocab;
-  Ngram 			*m_srilmModel;
-  unsigned int	m_unknownId;
+  boost::unordered_map<size_t, unsigned int> m_lmIdLookup;
+  ::Vocab *m_srilmVocab;
+  Ngram   *m_srilmModel;
+  unsigned int  m_unknownId;
 
   LMResult GetValue(unsigned int wordId, unsigned int *context) const;
   void CreateFactors();
   unsigned int GetLmID( const std::string &str ) const;
-  unsigned int GetLmID( const Factor *factor ) const;
+  unsigned int GetLmID( const Factor *form, const Factor *tag ) const;
+
+  // Cantor's pairing function
+  size_t PairNumbers(size_t a, size_t b) const
+  {
+    return (a + b) * (a + b + 1) / 2 + b;
+  }
 
 public:
-  LanguageModelSRI();
-  ~LanguageModelSRI();
-  bool Load(const std::string &filePath
-            , FactorType factorType
-            , size_t nGramOrder);
+  LanguageModelLocal();
+  ~LanguageModelLocal();
+  bool Load(const std::string &filePath, const std::vector<FactorType> &factors, size_t nGramOrder);
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 };

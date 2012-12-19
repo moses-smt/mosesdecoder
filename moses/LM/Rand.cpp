@@ -41,7 +41,7 @@ namespace
 {
 using namespace std;
 
-class LanguageModelRandLM : public LanguageModelPointerState
+class LanguageModelRandLM : public LanguageModelPointerState, public LanguageModelSingleFactor
 {
 public:
   LanguageModelRandLM()

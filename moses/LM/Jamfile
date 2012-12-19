@@ -60,8 +60,9 @@ if $(with-srilm) {
   }
 
   obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
+  obj Local.o : Local.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
   obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
-  alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI ;
+  alias sri : SRI.o ParallelBackoff.o Local.o sri-libs : : : <define>LM_SRI ;
   dependencies += sri ;
 }
 

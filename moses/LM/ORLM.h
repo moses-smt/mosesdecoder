@@ -17,7 +17,7 @@ class Phrase;
 
 /** @todo ask ollie
  */
-class LanguageModelORLM : public LanguageModelPointerState {
+class LanguageModelORLM : public LanguageModelPointerState, public LanguageModelSingleFactor {
 public:
   typedef count_t T;  // type for ORLM filter
   LanguageModelORLM()

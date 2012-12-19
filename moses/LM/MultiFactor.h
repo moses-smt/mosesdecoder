@@ -36,7 +36,7 @@ class Phrase;
 /* Abstract class for for multi factor LM. Only inherited by the JointLM at the moment. 
  * Could use this when factored LM are implemented
  */
-class LanguageModelMultiFactor : public LanguageModelImplementation
+class LanguageModelMultiFactor : virtual public LanguageModelImplementation
 {
 protected:
   FactorMask m_factorTypes;

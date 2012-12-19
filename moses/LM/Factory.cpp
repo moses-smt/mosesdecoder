@@ -30,6 +30,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef LM_SRI
 #  include "SRI.h"
 #include "ParallelBackoff.h"
+#include "Local.h"
 #endif
 #ifdef LM_IRST
 #  include "IRST.h"
@@ -101,6 +102,11 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
     lm = new LanguageModelJoint(new LanguageModelSRI());
 #endif
     break;
+  case Local:
+#ifdef LM_SRI
+    lm = new LanguageModelLocal();
+#endif
+    break;
   case ParallelBackoff:
 #ifdef LM_SRI
     lm = NewParallelBackoff();
@@ -123,14 +129,14 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
   } else {
     switch (lm->GetLMType()) {
     case SingleFactor:
-      if (! static_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], nGramOrder)) {
+      if (! dynamic_cast<LanguageModelSingleFactor*>(lm)->Load(languageModelFile, factorTypes[0], nGramOrder)) {
         cerr << "single factor model failed" << endl;
         delete lm;
         lm = NULL;
       }
       break;
     case MultiFactor:
-      if (! static_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder)) {
+      if (! dynamic_cast<LanguageModelMultiFactor*>(lm)->Load(languageModelFile, factorTypes, nGramOrder)) {
         cerr << "multi factor model failed" << endl;
         delete lm;
         lm = NULL;
