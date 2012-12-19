@@ -128,6 +128,7 @@ void ChartManager::ProcessSentence()
  *  @todo check walls & zones. Check that the implementation doesn't leak, xml options sometimes does if you're not careful
  */
 void ChartManager::AddXmlChartOptions() {
+  const StaticData &staticData = StaticData::Instance();
   const std::vector <ChartTranslationOptions*> xmlChartOptionsList = m_source.GetXmlChartTranslationOptions();
   IFVERBOSE(2) { cerr << "AddXmlChartOptions " << xmlChartOptionsList.size() << endl; }
   if (xmlChartOptionsList.size() == 0) return;
@@ -137,7 +138,7 @@ void ChartManager::AddXmlChartOptions() {
     ChartTranslationOptions* opt = *i;
 
     Moses::Scores wordPenaltyScore(1, -0.434294482); // TODO what is this number?
-    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((ScoreProducer*)m_system->GetWordPenaltyProducer(), wordPenaltyScore);
+    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((ScoreProducer*)staticData.GetWordPenaltyProducer(), wordPenaltyScore);
 
     const WordsRange &range = opt->GetSourceWordsRange();
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );

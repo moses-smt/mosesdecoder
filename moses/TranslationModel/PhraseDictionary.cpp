@@ -111,7 +111,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
-                         , system->GetWeightWordPenalty());
+                         , staticData.GetWeightWordPenalty());
     CHECK(ret);
     return pdm;
   } else if (m_implementation == Binary) {
@@ -122,7 +122,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                , weightT
                , m_tableLimit
                , system->GetLanguageModels()
-               , system->GetWeightWordPenalty());
+               , staticData.GetWeightWordPenalty());
     CHECK(ret);
     return pdta;
   } else if (m_implementation == SCFG || m_implementation == Hiero) {
@@ -149,7 +149,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
-                         , system->GetWordPenaltyProducer());
+                         , staticData.GetWordPenaltyProducer());
     CHECK(ret);
     return dict;
   } else if (m_implementation == ALSuffixArray) {
@@ -169,7 +169,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , weightT
                          , m_tableLimit
                          , system->GetLanguageModels()
-                         , system->GetWordPenaltyProducer());
+                         , staticData.GetWordPenaltyProducer());
     CHECK(ret);
     return pdm;
   } else if (m_implementation == OnDisk) {
@@ -181,7 +181,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                           , weightT
                           , m_tableLimit
                           , system->GetLanguageModels()
-                          , system->GetWordPenaltyProducer());
+                          , staticData.GetWordPenaltyProducer());
     CHECK(ret);
     return pdta;
   } else if (m_implementation == SuffixArray) {
@@ -197,7 +197,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
            ,m_alignmentsFile
            ,weightT, m_tableLimit
            ,system->GetLanguageModels()
-	   ,system->GetWeightWordPenalty()))) {
+	   ,staticData.GetWeightWordPenalty()))) {
       std::cerr << "FAILED TO LOAD\n" << endl;
       delete pd;
       pd = NULL;
@@ -217,7 +217,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                           , weightT
                           , m_tableLimit
                           , system->GetLanguageModels()
-                          , system->GetWordPenaltyProducer());
+                          , staticData.GetWordPenaltyProducer());
     CHECK(ret);
 
     return dict;    
@@ -231,7 +231,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , weightT                                                                                                  
                          , m_tableLimit                                                                                               
                          , system->GetLanguageModels()                                                                                
-                         , system->GetWeightWordPenalty());                                                                           
+                         , staticData.GetWeightWordPenalty());
     CHECK(ret);                                                                                                                      
     return pd;                                                                                                                       
 #else

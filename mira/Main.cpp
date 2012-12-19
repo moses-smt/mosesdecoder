@@ -1211,7 +1211,7 @@ int main(int argc, char** argv) {
 	// scale WP
 	if (scale_wp) {
 	  // scale up weight
-	  WordPenaltyProducer *wp = staticData.GetFirstWordPenaltyProducer();
+	  WordPenaltyProducer *wp = StaticData::InstanceNonConst().GetWordPenaltyProducer();
 	  
 	  // scale down score
 	  if (model_hope_fear) {

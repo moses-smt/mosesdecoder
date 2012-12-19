@@ -88,7 +88,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       
       //targetPhrase->SetScore();
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
-      targetPhrase->SetScore(m_system.GetWordPenaltyProducer(), wordPenaltyScore);
+      targetPhrase->SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
       

@@ -73,7 +73,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
 void TargetPhrase::SetScore(const TranslationSystem* system)
 {
   // used when creating translations of unknown words:
-  m_fullScore = - system->GetWeightWordPenalty();
+  m_fullScore = - StaticData::Instance().GetWeightWordPenalty();
 }
 
 #ifdef HAVE_PROTOBUF
@@ -105,7 +105,7 @@ void TargetPhrase::SetScore(float score)
 	vector <float> scoreVector(numScores,score/numScores);
 	
 	//Now we have what we need to call the full SetScore method
-	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, system.GetWeightWordPenalty(), system.GetLanguageModels());
+	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, StaticData::Instance().GetWeightWordPenalty(), system.GetLanguageModels());
 }
 
 /**
@@ -125,7 +125,7 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
 	Scores sizedScoreVector = scoreVector;
 	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,system->GetWeightWordPenalty(),system->GetLanguageModels());
+	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,StaticData::Instance().GetWeightWordPenalty(),system->GetLanguageModels());
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,

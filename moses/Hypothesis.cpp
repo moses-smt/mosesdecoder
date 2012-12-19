@@ -393,7 +393,7 @@ void Hypothesis::CalcRemainingScore()
   }
 
   // WORD PENALTY
-  m_currScoreBreakdown.PlusEquals(m_manager.GetTranslationSystem()->GetWordPenaltyProducer()
+  m_currScoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer()
                               , - (float)m_currTargetWordsRange.GetNumWordsCovered());
 
   // TOTAL

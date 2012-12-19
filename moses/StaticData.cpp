@@ -326,11 +326,10 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // word penalties
-  for (size_t i = 0; i < m_parameter->GetWeights("WordPenalty", 0).size(); ++i) {
-    float weightWordPenalty       = m_parameter->GetWeights("WordPenalty", 0)[i];
-    m_wordPenaltyProducers.push_back(new WordPenaltyProducer());
-    SetWeight(m_wordPenaltyProducers.back(), weightWordPenalty);
-  }
+  CHECK(m_parameter->GetWeights("WordPenalty", 0).size() == 1);
+  float weightWordPenalty       = m_parameter->GetWeights("WordPenalty", 0)[0];
+  m_wpProducer = new WordPenaltyProducer();
+  SetWeight(m_wpProducer, weightWordPenalty);
 
   const vector<float> &weightsUnknownWord				= m_parameter->GetWeights("UnknownWordPenalty", 0);
   float weightUnknownWord = weightsUnknownWord.size() ? weightsUnknownWord[0] : 1.0;
@@ -597,11 +596,6 @@ bool StaticData::LoadData(Parameter *parameter)
     tsConfig.push_back(TranslationSystem::DEFAULT + " R * D * L * G *");
   }
 
-  if (m_wordPenaltyProducers.size() != tsConfig.size()) {
-    UserMessage::Add(string("Mismatch between number of word penalties and number of translation systems"));
-    return false;
-  }
-
   if (IsChart()) {
     //insert some null distortion score producers
     m_distortionScoreProducers.assign(tsConfig.size(), NULL);
@@ -619,7 +613,7 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add(string("Incorrect number of fields in Translation System config. Should be an odd number"));
     }
     m_translationSystems.insert(pair<string, TranslationSystem>(config[0],
-                                TranslationSystem(config[0],m_wordPenaltyProducers[i],m_unknownWordPenaltyProducer,m_distortionScoreProducers[i])));
+                                TranslationSystem(config[0],m_wpProducer,m_unknownWordPenaltyProducer,m_distortionScoreProducers[i])));
     tmpTS = &(m_translationSystems.find(config[0])->second);
     for (size_t j = 1; j < config.size(); j += 2) {
       const string& id = config[j];
@@ -831,7 +825,6 @@ StaticData::~StaticData()
 
 
   RemoveAllInColl(m_decodeGraphs);
-  RemoveAllInColl(m_wordPenaltyProducers);
   RemoveAllInColl(m_distortionScoreProducers);
   m_languageModel.CleanUp();
 
@@ -839,6 +832,7 @@ StaticData::~StaticData()
   ClearTransOptionCache();
 
   // small score producers
+  delete m_wpProducer;
   delete m_unknownWordPenaltyProducer;
   delete m_targetBigramFeature;
   for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
@@ -2030,6 +2024,12 @@ void StaticData::SetExecPath(const std::string &path)
 const string &StaticData::GetBinDirectory() const
 {
   return m_binPath;
+}
+
+float StaticData::GetWeightWordPenalty() const {
+  float weightWP = GetWeight(m_wpProducer);
+  //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
+  return weightWP;
 }
 
 }

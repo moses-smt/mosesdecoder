@@ -162,9 +162,10 @@ protected:
   size_t m_numInputScores;
 
   mutable size_t m_verboseLevel;
-  std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
+  WordPenaltyProducer* m_wpProducer;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+
   MetaFeatureProducer *m_metaFeatureProducer;
   BleuScoreFeature* m_bleuScoreFeature;
   bool m_reportSegmentation;
@@ -496,10 +497,11 @@ public:
   LMList GetLMList() const { 
     return m_languageModel; 
   }
-  WordPenaltyProducer* GetFirstWordPenaltyProducer() const {
-    assert(m_wordPenaltyProducers.size() >= 1);
-    return m_wordPenaltyProducers[0];
-  }
+  const WordPenaltyProducer *GetWordPenaltyProducer() const
+  { return m_wpProducer; }
+  WordPenaltyProducer *GetWordPenaltyProducer() // for mira
+  { return m_wpProducer; }
+
   DistortionScoreProducer* GetDistortionScoreProducer() const {
     assert(m_distortionScoreProducers.size() >= 1);
     return m_distortionScoreProducers[0];
@@ -762,6 +764,12 @@ public:
   std::vector<const StatefulFeatureFunction*> m_statefulFFs;
   //All sparse producers that have an activated global weight
 	std::vector<const FeatureFunction*> m_sparseProducers;
+
+  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const
+  { return m_unknownWordPenaltyProducer; }
+
+  float GetWeightWordPenalty() const;
+  float GetWeightUnknownWordPenalty() const;
 
 
 };
