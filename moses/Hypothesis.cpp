@@ -58,7 +58,7 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
     m_sourceCompleted.GetFirstGapPos()>0 ? m_sourceCompleted.GetFirstGapPos()-1 : NOT_FOUND)
   , m_currTargetWordsRange(0, emptyTarget.GetSize()-1)
   , m_wordDeleted(false)
-  , m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
+  , m_ffStates(StaticData::Instance().GetStatefulFeatureFunctions().size())
   , m_arcList(NULL)
   , m_transOpt(NULL)
   , m_manager(manager)
@@ -70,7 +70,7 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   //_hash_computed = false;
   //s_HypothesesCreated = 1;
   ResetScore();
-  const vector<const StatefulFeatureFunction*>& ffs = m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& ffs = StaticData::Instance().GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
     m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
   m_manager.GetSentenceStats().AddCreated();
@@ -305,7 +305,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // compute values of stateless feature functions that were not
   // cached in the translation option
   const vector<const StatelessFeatureFunction*>& sfs =
-    m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
+    StaticData::Instance().GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (!sfs[i]->ComputeValueInTranslationOption()) {
       EvaluateWith(sfs[i]);
@@ -313,7 +313,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
-    m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+    StaticData::Instance().GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     m_ffStates[i] = ffs[i]->Evaluate(
                       *this,
@@ -330,7 +330,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 
   // Apply sparse producer weights
   ScoreComponentCollection tempScoreBreakdown = m_currScoreBreakdown;
-  const vector<const FeatureFunction*>& sparseProducers = m_manager.GetTranslationSystem()->GetSparseProducers();
+  const vector<const FeatureFunction*>& sparseProducers = StaticData::Instance().GetSparseProducers();
   for (unsigned i = 0; i < sparseProducers.size(); ++i) {
     float weight = sparseProducers[i]->GetSparseProducerWeight();
     tempScoreBreakdown.MultiplyEquals(sparseProducers[i], weight);

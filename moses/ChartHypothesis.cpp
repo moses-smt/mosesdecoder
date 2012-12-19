@@ -51,7 +51,7 @@ ChartHypothesis::ChartHypothesis(const ChartTranslationOptions &transOpt,
                                  ChartManager &manager)
   :m_targetPhrase(*(item.GetTranslationDimension().GetTargetPhrase()))
   ,m_currSourceWordsRange(transOpt.GetSourceWordsRange())
-  ,m_ffStates(manager.GetTranslationSystem()->GetStatefulFeatureFunctions().size())
+  ,m_ffStates(StaticData::Instance().GetStatefulFeatureFunctions().size())
   ,m_arcList(NULL)
   ,m_winningHypo(NULL)
   ,m_manager(manager)
@@ -166,13 +166,13 @@ void ChartHypothesis::CalcScore()
 	// compute values of stateless feature functions that were not
   // cached in the translation option-- there is no principled distinction
   const std::vector<const StatelessFeatureFunction*>& sfs =
-    m_manager.GetTranslationSystem()->GetStatelessFeatureFunctions();
+		  StaticData::Instance().GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i)
   	if (sfs[i]->ComputeValueInTranslationOption() == false)
   		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
 
   const std::vector<const StatefulFeatureFunction*>& ffs =
-    m_manager.GetTranslationSystem()->GetStatefulFeatureFunctions();
+		  StaticData::Instance().GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
     m_ffStates[i] = ffs[i]->EvaluateChart(*this,i,&m_scoreBreakdown);
 

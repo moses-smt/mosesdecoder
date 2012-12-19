@@ -445,7 +445,7 @@ void OutputAllFeatureScores(const Moses::TranslationSystem &system
                                           , std::ostream &out)
 {
   std::string lastName = "";
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StaticData::Instance().GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ ) {
     const StatefulFeatureFunction *ff = sff[i];
     if (ff->GetScoreProducerDescription() != "BleuScoreFeature"
@@ -453,7 +453,7 @@ void OutputAllFeatureScores(const Moses::TranslationSystem &system
       OutputFeatureScores( out, features, ff, lastName );
     }
   }
-  const vector<const StatelessFeatureFunction*>& slf = system.GetStatelessFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf = StaticData::Instance().GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ ) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {

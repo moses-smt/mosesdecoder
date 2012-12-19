@@ -671,48 +671,48 @@ bool StaticData::LoadData(Parameter *parameter)
 
     //Add any other features here.
     if (m_bleuScoreFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_bleuScoreFeature);
+      AddFeatureFunction(m_bleuScoreFeature);
     }
     if (m_targetBigramFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetBigramFeature);
+      AddFeatureFunction(m_targetBigramFeature);
     }
     if (m_targetNgramFeatures.size() > 0) {
       for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetNgramFeatures[i]);
+        AddFeatureFunction(m_targetNgramFeatures[i]);
     }
     if (m_phraseBoundaryFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phraseBoundaryFeature);
+      AddFeatureFunction(m_phraseBoundaryFeature);
     }
     if (m_phraseLengthFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phraseLengthFeature);
+      AddFeatureFunction(m_phraseLengthFeature);
     }
     if (m_targetWordInsertionFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_targetWordInsertionFeature);
+      AddFeatureFunction(m_targetWordInsertionFeature);
     }
     if (m_sourceWordDeletionFeature) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sourceWordDeletionFeature);
+      AddFeatureFunction(m_sourceWordDeletionFeature);
     }
     if (m_wordTranslationFeatures.size() > 0) {
       for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_wordTranslationFeatures[i]);
+        AddFeatureFunction(m_wordTranslationFeatures[i]);
     }
     if (m_phrasePairFeatures.size() > 0) {
       for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_phrasePairFeatures[i]);
+        AddFeatureFunction(m_phrasePairFeatures[i]);
     }
 #ifdef HAVE_SYNLM
     if (m_syntacticLanguageModel != NULL) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
+      AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
     for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
       if (m_sparsePhraseDictionary[i]) {
-        m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sparsePhraseDictionary[i]);
+        AddFeatureFunction(m_sparsePhraseDictionary[i]);
       }
     }
     if (m_globalLexicalModelsUnlimited.size() > 0) {
       for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
-    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
+        AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
     }
   }
 
@@ -735,8 +735,8 @@ bool StaticData::LoadData(Parameter *parameter)
     for (size_t i = 0; i < m_targetNgramFeatures.size(); ++i) {
     	float weight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
     	if (weight != 1) {
-	  tmpTS->AddSparseProducer(m_targetNgramFeatures[i]);
-	  cerr << "dlm sparse producer weight: " << weight << endl;
+    	  AddSparseProducer(m_targetNgramFeatures[i]);
+    	  cerr << "dlm sparse producer weight: " << weight << endl;
     	}
     }
 
@@ -744,8 +744,8 @@ bool StaticData::LoadData(Parameter *parameter)
     for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
     	float weight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
     	if (weight != 1) {
-	  tmpTS->AddSparseProducer(m_globalLexicalModelsUnlimited[i]);
-	  cerr << "glm sparse producer weight: " << weight << endl;
+    	  AddSparseProducer(m_globalLexicalModelsUnlimited[i]);
+    	  cerr << "glm sparse producer weight: " << weight << endl;
     	}
     }
 
@@ -753,10 +753,10 @@ bool StaticData::LoadData(Parameter *parameter)
     for (size_t i = 0; i < m_wordTranslationFeatures.size(); ++i) {
       float weight = m_wordTranslationFeatures[i]->GetSparseProducerWeight();
       if (weight != 1) {
-	tmpTS->AddSparseProducer(m_wordTranslationFeatures[i]);
-	cerr << "wt sparse producer weight: " << weight << endl;
-	if (m_mira) 
-	  m_metaFeatureProducer = new MetaFeatureProducer("wt");
+        AddSparseProducer(m_wordTranslationFeatures[i]);
+        cerr << "wt sparse producer weight: " << weight << endl;
+        if (m_mira)
+          m_metaFeatureProducer = new MetaFeatureProducer("wt");
       }
     }
     
@@ -764,10 +764,10 @@ bool StaticData::LoadData(Parameter *parameter)
     for (size_t i = 0; i < m_phrasePairFeatures.size(); ++i) {
       float weight = m_phrasePairFeatures[i]->GetSparseProducerWeight();
       if (weight != 1) {
-	tmpTS->AddSparseProducer(m_phrasePairFeatures[i]);
-	cerr << "pp sparse producer weight: " << weight << endl;
-	if (m_mira)
-	  m_metaFeatureProducer = new MetaFeatureProducer("pp");
+        AddSparseProducer(m_phrasePairFeatures[i]);
+        cerr << "pp sparse producer weight: " << weight << endl;
+        if (m_mira)
+          m_metaFeatureProducer = new MetaFeatureProducer("pp");
       }
     }
     
@@ -775,8 +775,8 @@ bool StaticData::LoadData(Parameter *parameter)
     if (m_phraseBoundaryFeature) {
     	float weight = m_phraseBoundaryFeature->GetSparseProducerWeight();
     	if (weight != 1) {
-	  tmpTS->AddSparseProducer(m_phraseBoundaryFeature);
-	  cerr << "pb sparse producer weight: " << weight << endl;
+    	  AddSparseProducer(m_phraseBoundaryFeature);
+    	  cerr << "pb sparse producer weight: " << weight << endl;
     	}
     }
     

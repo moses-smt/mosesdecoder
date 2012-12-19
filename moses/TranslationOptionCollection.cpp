@@ -428,7 +428,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
 void TranslationOptionCollection::IncorporateDLMScores() {
     // Build list of dlms.
     const vector<const StatefulFeatureFunction*>& ffs =
-           m_system->GetStatefulFeatureFunctions();
+        StaticData::Instance().GetStatefulFeatureFunctions();
     std::map<int, LanguageModel*> dlm_ffs;
     for (unsigned i = 0; i < ffs.size(); ++i) {
         if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WTF
@@ -719,7 +719,7 @@ void TranslationOptionCollection::PreCalculateScores()
 {
   //Figure out which features need to be precalculated
   const vector<const StatelessFeatureFunction*>& sfs =
-    m_system->GetStatelessFeatureFunctions();
+      StaticData::Instance().GetStatelessFeatureFunctions();
   vector<const StatelessFeatureFunction*> precomputedFeatures;
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (sfs[i]->ComputeValueInTranslationOption() && 

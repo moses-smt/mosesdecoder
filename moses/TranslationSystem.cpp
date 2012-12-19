@@ -46,17 +46,17 @@ namespace Moses {
                       const DistortionScoreProducer* distortionProducer)
     : m_id(id), m_wpProducer(wpProducer), m_unknownWpProducer(uwpProducer), m_distortionScoreProducer(distortionProducer)
     {
-      AddFeatureFunction(wpProducer);
-      AddFeatureFunction(uwpProducer);
+      StaticData::InstanceNonConst().AddFeatureFunction(wpProducer);
+      StaticData::InstanceNonConst().AddFeatureFunction(uwpProducer);
       if (distortionProducer) {
-        AddFeatureFunction(distortionProducer);
+        StaticData::InstanceNonConst().AddFeatureFunction(distortionProducer);
       }
     }
     
     //Insert core 'big' features
     void TranslationSystem::AddLanguageModel(LanguageModel* languageModel) {
       m_languageModels.Add(languageModel);
-      AddFeatureFunction(languageModel);
+      StaticData::InstanceNonConst().AddFeatureFunction(languageModel);
     }
 
     void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff) {
@@ -66,28 +66,14 @@ namespace Moses {
 
     void TranslationSystem::AddReorderModel(LexicalReordering* reorderModel) {
       m_reorderingTables.push_back(reorderModel);
-      AddFeatureFunction(reorderModel);
+      StaticData::InstanceNonConst().AddFeatureFunction(reorderModel);
     }
 
     void TranslationSystem::AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel) {
       m_globalLexicalModels.push_back(globalLexicalModel);
-      AddFeatureFunction(globalLexicalModel);
+      StaticData::InstanceNonConst().AddFeatureFunction(globalLexicalModel);
     }
     
-    void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff) {
-			m_producers.push_back(ff);
-
-      if (ff->IsStateless()) {
-        m_statelessFFs.push_back(static_cast<const StatelessFeatureFunction*>(ff));
-      } else {
-        m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
-      }
-    }
-
-    void TranslationSystem::AddSparseProducer(const FeatureFunction* ff) {
-      m_sparseProducers.push_back(ff);
-    }
-
     void TranslationSystem::ConfigDictionaries() {
       for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
         i != m_decodeGraphs.end(); ++i) {
@@ -96,13 +82,13 @@ namespace Moses {
             PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
             if (pdict) {
               m_phraseDictionaries.push_back(pdict);
-              AddFeatureFunction(pdict);
+              StaticData::InstanceNonConst().AddFeatureFunction(pdict);
               const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
             }
             GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
             if (gdict) {
               m_generationDictionaries.push_back(gdict);
-              AddFeatureFunction(gdict);
+              StaticData::InstanceNonConst().AddFeatureFunction(gdict);
             }
           }
       }

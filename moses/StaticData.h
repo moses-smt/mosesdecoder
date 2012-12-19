@@ -102,6 +102,7 @@ protected:
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
+
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
@@ -732,6 +733,36 @@ public:
   bool NBestIncludesSegmentation() const {
     return m_nBestIncludesSegmentation;
   }
+
+  const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
+  const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const {return m_statefulFFs;}
+  const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const {return m_statelessFFs;}
+  const std::vector<const FeatureFunction*>& GetSparseProducers() const {return m_sparseProducers;}
+
+  void AddFeatureFunction(const FeatureFunction* ff) {
+			m_producers.push_back(ff);
+
+    if (ff->IsStateless()) {
+      m_statelessFFs.push_back(static_cast<const StatelessFeatureFunction*>(ff));
+    } else {
+      m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
+    }
+  }
+
+  void AddSparseProducer(const FeatureFunction* ff) {
+    m_sparseProducers.push_back(ff);
+  }
+
+	/**< all the score producers in this run */
+	std::vector<const ScoreProducer*> m_producers;
+
+  //All stateless FFs, except those that cache scores in T-Option
+  std::vector<const StatelessFeatureFunction*> m_statelessFFs;
+  //All statefull FFs
+  std::vector<const StatefulFeatureFunction*> m_statefulFFs;
+  //All sparse producers that have an activated global weight
+	std::vector<const FeatureFunction*> m_sparseProducers;
+
 
 };
 

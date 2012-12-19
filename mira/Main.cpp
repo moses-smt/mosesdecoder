@@ -522,12 +522,11 @@ int main(int argc, char** argv) {
   }
   
   // get reference to feature functions
-  const vector<const ScoreProducer*> featureFunctions =
-    staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+  const vector<const ScoreProducer*> featureFunctions = staticData.GetFeatureFunctions();
   ScoreComponentCollection initialWeights = decoder->getWeights();
   
   bool tuneMetaFeature = false;
-  const vector<const FeatureFunction*>& sparseProducers = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetSparseProducers();
+  const vector<const FeatureFunction*>& sparseProducers = staticData.GetSparseProducers();
   for (unsigned i = 0; i < sparseProducers.size(); ++i) {
     float spWeight = sparseProducers[i]->GetSparseProducerWeight();
     if (spWeight != 1.0) {
@@ -1185,7 +1184,7 @@ int main(int argc, char** argv) {
 	
 	// set weight for bleu feature to 0 before optimizing
 	vector<const ScoreProducer*>::const_iterator iter;
-	const vector<const ScoreProducer*> featureFunctions2 = staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetFeatureFunctions();
+	const vector<const ScoreProducer*> featureFunctions2 = staticData.GetFeatureFunctions();
 	for (iter = featureFunctions2.begin(); iter != featureFunctions2.end(); ++iter) {
 	  if ((*iter)->GetScoreProducerDescription() == "BleuScoreFeature") {
 	    mosesWeights.Assign(*iter, 0);
@@ -1388,8 +1387,7 @@ int main(int argc, char** argv) {
 	    // (NOTE: this currently doesn't work for more than one sparse producer)
 	    float metaWeightUpdate = weightUpdate.GetScoreForProducer(m);
 	    
-	    const vector<const FeatureFunction*> sparseProducers =
-	      staticData.GetTranslationSystem(TranslationSystem::DEFAULT).GetSparseProducers();
+	    const vector<const FeatureFunction*> sparseProducers = staticData.GetSparseProducers();
 	    FeatureFunction* ff = const_cast<FeatureFunction*>(sparseProducers[0]);
 	    if (sparseProducers[0]->GetScoreProducerDescription().compare("wt") == 0) {
 	      WordTranslationFeature* wt =

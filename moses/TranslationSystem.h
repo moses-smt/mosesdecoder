@@ -59,13 +59,7 @@ class TranslationSystem {
       void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
       void AddReorderModel(LexicalReordering* reorderModel);
       void AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel);
-      
-      //Insert non-core feature function
-      void AddFeatureFunction(const FeatureFunction* featureFunction);
 
-      //Insert sparse producer
-      void AddSparseProducer(const FeatureFunction* sparseProducer);
-      
       //Called after adding the tables in order to set up the dictionaries
       void ConfigDictionaries();
       
@@ -79,11 +73,7 @@ class TranslationSystem {
       const LMList& GetLanguageModels() const {return m_languageModels;}
       const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
       const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
-      
-      const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const {return m_statefulFFs;}
-      const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const {return m_statelessFFs;}
-      const std::vector<const FeatureFunction*>& GetSparseProducers() const {return m_sparseProducers;}
-      
+
       const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
       const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
       const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
@@ -98,9 +88,7 @@ class TranslationSystem {
       //sentence (and thread) specific initialisationn and cleanup
       void InitializeBeforeSentenceProcessing(const InputType& source) const;
       void CleanUpAfterSentenceProcessing(const InputType& source) const;
-      
-      const std::vector<const ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
-        
+
       static const  std::string DEFAULT;
         
         
@@ -114,20 +102,11 @@ class TranslationSystem {
         std::vector<GenerationDictionary*> m_generationDictionaries;
         LMList m_languageModels;
         std::vector<GlobalLexicalModel*> m_globalLexicalModels;
-        
-        //All stateless FFs, except those that cache scores in T-Option
-        std::vector<const StatelessFeatureFunction*> m_statelessFFs;
-        //All statefull FFs
-        std::vector<const StatefulFeatureFunction*> m_statefulFFs;
-	//All sparse producers that have an activated global weight
-	std::vector<const FeatureFunction*> m_sparseProducers;
-        
+
         const WordPenaltyProducer* m_wpProducer;
         const UnknownWordPenaltyProducer* m_unknownWpProducer;
         const DistortionScoreProducer* m_distortionScoreProducer;
 	
-	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
-
 };
 
 
