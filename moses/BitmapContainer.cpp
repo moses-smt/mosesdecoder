@@ -61,8 +61,8 @@ public:
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
     CHECK(m_transOptRange != NULL);
 
-    const float weightDistortion = m_system->GetWeightDistortion();
-    const DistortionScoreProducer *dsp = m_system->GetDistortionProducer();
+    const float weightDistortion = StaticData::Instance().GetWeightDistortion();
+    const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionProducer();
     const float distortionScoreA = dsp->CalculateDistortionScore(
                                      *hypoA,
                                      hypoA->GetCurrSourceWordsRange(),

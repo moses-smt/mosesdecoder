@@ -596,16 +596,6 @@ bool StaticData::LoadData(Parameter *parameter)
     tsConfig.push_back(TranslationSystem::DEFAULT + " R * D * L * G *");
   }
 
-  if (IsChart()) {
-    //insert some null distortion score producers
-    m_distortionScoreProducers.assign(tsConfig.size(), NULL);
-  } else {
-    if (m_distortionScoreProducers.size() != tsConfig.size()) {
-      UserMessage::Add(string("Mismatch between number of distortion scores and number of translation systems. Or [search-algorithm] has been set to a phrase-based algorithm when it should be chart decoding"));
-      return false;
-    }
-  }
-
   TranslationSystem* tmpTS;
   for (size_t i = 0; i < tsConfig.size(); ++i) {
     vector<string> config = Tokenize(tsConfig[i]);
@@ -613,7 +603,7 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add(string("Incorrect number of fields in Translation System config. Should be an odd number"));
     }
     m_translationSystems.insert(pair<string, TranslationSystem>(config[0],
-                                TranslationSystem(config[0],m_wpProducer,m_unknownWordPenaltyProducer,m_distortionScoreProducers[i])));
+                                TranslationSystem(config[0],m_wpProducer,m_unknownWordPenaltyProducer,m_distortionScoreProducer)));
     tmpTS = &(m_translationSystems.find(config[0])->second);
     for (size_t j = 1; j < config.size(); j += 2) {
       const string& id = config[j];
@@ -825,7 +815,6 @@ StaticData::~StaticData()
 
 
   RemoveAllInColl(m_decodeGraphs);
-  RemoveAllInColl(m_distortionScoreProducers);
   m_languageModel.CleanUp();
 
   // delete trans opt
@@ -834,6 +823,7 @@ StaticData::~StaticData()
   // small score producers
   delete m_wpProducer;
   delete m_unknownWordPenaltyProducer;
+  delete m_distortionScoreProducer;
   delete m_targetBigramFeature;
   for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
   	delete m_targetNgramFeatures[i];
@@ -1383,8 +1373,8 @@ void StaticData::LoadPhraseBasedParameters()
   CHECK(distortionWeights.size() == 1);
 
   float weightDistortion = distortionWeights[0];
-  m_distortionScoreProducers.push_back(new DistortionScoreProducer());
-  SetWeight(m_distortionScoreProducers.back(), weightDistortion);
+  m_distortionScoreProducer = new DistortionScoreProducer();
+  SetWeight(m_distortionScoreProducer, weightDistortion);
 
 }
 
@@ -2036,6 +2026,11 @@ float StaticData::GetWeightUnknownWordPenalty() const {
   return GetWeight(m_unknownWordPenaltyProducer);
 }
 
+float StaticData::GetWeightDistortion() const {
+  CHECK(m_distortionScoreProducer);
+  return StaticData::Instance().GetWeight(m_distortionScoreProducer);
 }
+
+} // namespace
 
 

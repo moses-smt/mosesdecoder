@@ -44,7 +44,7 @@ namespace Moses {
                       const WordPenaltyProducer* wpProducer,
                       const UnknownWordPenaltyProducer* uwpProducer,
                       const DistortionScoreProducer* distortionProducer)
-    : m_id(id), m_distortionScoreProducer(distortionProducer)
+    : m_id(id)
     {
       StaticData::InstanceNonConst().AddFeatureFunction(wpProducer);
       StaticData::InstanceNonConst().AddFeatureFunction(uwpProducer);
@@ -145,11 +145,6 @@ namespace Moses {
           languageModel.CleanUpAfterSentenceProcessing(source);
         }
      }
-
-    float TranslationSystem::GetWeightDistortion() const {
-      CHECK(m_distortionScoreProducer);
-      return StaticData::Instance().GetWeight(m_distortionScoreProducer);
-    }
 
     std::vector<float> TranslationSystem::GetTranslationWeights(size_t index) const {
       std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer(index));

@@ -73,8 +73,6 @@ class TranslationSystem {
       const LMList& GetLanguageModels() const {return m_languageModels;}
       const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
       const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
-
-      const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
       
       const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries().at(index); }
       
@@ -99,7 +97,6 @@ class TranslationSystem {
         LMList m_languageModels;
         std::vector<GlobalLexicalModel*> m_globalLexicalModels;
 
-        const DistortionScoreProducer* m_distortionScoreProducer;
 	
 };
 

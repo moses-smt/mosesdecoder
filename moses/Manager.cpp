@@ -481,7 +481,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   // re-ordering
   outputWordGraphStream << "\tr=";
 
-  outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(system->GetDistortionProducer());
+  outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionProducer());
 
   // lexicalised re-ordering
   const std::vector<LexicalReordering*> &lexOrderings = system->GetReorderModels();

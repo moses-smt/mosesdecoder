@@ -163,7 +163,7 @@ protected:
 
   mutable size_t m_verboseLevel;
   WordPenaltyProducer* m_wpProducer;
-  std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
+  DistortionScoreProducer* m_distortionScoreProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 
   MetaFeatureProducer *m_metaFeatureProducer;
@@ -502,9 +502,12 @@ public:
   WordPenaltyProducer *GetWordPenaltyProducer() // for mira
   { return m_wpProducer; }
 
-  DistortionScoreProducer* GetDistortionScoreProducer() const {
-    assert(m_distortionScoreProducers.size() >= 1);
-    return m_distortionScoreProducers[0];
+  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const
+  { return m_unknownWordPenaltyProducer; }
+
+  DistortionScoreProducer* GetDistortionProducer() const {
+    assert(m_distortionScoreProducer);
+    return m_distortionScoreProducer;
   }
   MetaFeatureProducer* GetMetaFeatureProducer() const {
     return m_metaFeatureProducer;
@@ -765,12 +768,9 @@ public:
   //All sparse producers that have an activated global weight
 	std::vector<const FeatureFunction*> m_sparseProducers;
 
-  const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const
-  { return m_unknownWordPenaltyProducer; }
-
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
-
+  float GetWeightDistortion() const;
 
 };
 
