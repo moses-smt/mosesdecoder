@@ -47,8 +47,9 @@ protected:
   ::Vocab *m_srilmVocab;
   Ngram   *m_srilmModel;
   unsigned int  m_unknownId;
+  const Factor *m_factorHead;
 
-  LMResult GetValue(unsigned int wordId, unsigned int *context) const;
+  void GetValue(unsigned int wordId, unsigned int *context, LMResult &ret) const;
   void CreateFactors();
   unsigned int GetLmID( const std::string &str ) const;
   unsigned int GetLmID( const Factor *form, const Factor *tag ) const;
@@ -64,7 +65,7 @@ public:
   ~LanguageModelLocal();
   bool Load(const std::string &filePath, const std::vector<FactorType> &factors, size_t nGramOrder);
 
-  virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
+  virtual LMResult GetValue(const std::vector<const Word*> &contextFactors, State* finalState = 0) const;
 };
 
 

@@ -70,7 +70,12 @@ bool LanguageModelLocal::Load(const std::string &filePath, const std::vector<Fac
   m_srilmModel->read(file);
 
   // LM can be ok, just outputs warnings
+  m_factorHead = NULL;
   CreateFactors();
+  if (m_factorHead == NULL) {
+    cerr << "Language model does not contain the 'HEAD' token. Is this a local LM?" << endl;
+    abort();
+  }
   m_unknownId = m_srilmVocab->unkIndex();
 
   return true;
@@ -93,7 +98,10 @@ void LanguageModelLocal::CreateFactors()
     }
     VocabIndex lmId = GetLmID(str);
     size_t formId = factorCollection.AddFactor(Output, formFactor, factors[0])->GetId();
-    size_t tagId  = factorCollection.AddFactor(Output, tagFactor, factors[1])->GetId();
+    const Factor *tag = factorCollection.AddFactor(Output, tagFactor, factors[1]);
+    if (factors[1] == "HEAD")
+      m_factorHead = tag;
+    size_t tagId  = tag->GetId();
     m_lmIdLookup[PairNumbers(formId, tagId)] = lmId;
   }
 
@@ -121,42 +129,51 @@ VocabIndex LanguageModelLocal::GetLmID( const Factor *form, const Factor *tag ) 
   return (it == m_lmIdLookup.end()) ? m_unknownId : it->second;
 }
 
-LMResult LanguageModelLocal::GetValue(VocabIndex wordId, VocabIndex *context) const
+void LanguageModelLocal::GetValue(VocabIndex wordId, VocabIndex *context, LMResult &ret) const
 {
-  LMResult ret;
-  ret.score = FloorScore(TransformLMScore(m_srilmModel->wordProb( wordId, context)));
-  ret.unknown = (wordId == m_unknownId);
-  return ret;
+  ret.score += FloorScore(TransformLMScore(m_srilmModel->wordProb( wordId, context)));
+  ret.unknown = (ret.unknown || (wordId == m_unknownId));
 }
 
-LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
+LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors, State* finalState) const
 {
-  LMResult ret;
+  LMResult ret = { 0.0, false };
+
   FactorType factorType = 0; // XXX
-  size_t count = contextFactor.size();
+  size_t count = contextFactors.size();
   if (count <= 0) {
     if(finalState)
       *finalState = NULL;
-    ret.score = 0.0;
-    ret.unknown = false;
     return ret;
   }
 
-  // set up context
-  // 
-  // TODO
-  // for each head word (i.e. word W in contextFactor, ask about this n-gram:
-  //   contextFactor[0].tag + W.form, ..., "HEAD" + W.form, ..., contextFactor[last].tag + W.form
-  VocabIndex ngram[count + 1];
-  for (size_t i = 0 ; i < count - 1 ; i++) {
-    ngram[i+1] =  GetLmID((*contextFactor[count-2-i])[factorType], 0); // XXX
-  } 
-  ngram[count] = Vocab_None;
+  FactorType formFactor = m_factorTypes[0];
+  FactorType tagFactor  = m_factorTypes[1];
 
-  CHECK((*contextFactor[count-1])[factorType] != NULL);
-  // call sri lm fn
-  VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType], 0); // XXX
-  ret = GetValue(lmId, ngram+1);
+  VocabIndex lmId;
+  VocabIndex ngram[count + 1];
+  for (size_t head = 0; head < count; head++) {
+    for (size_t i = 1 ; i < count ; i++) {
+      size_t contextPosition = count - i - 1;
+      if (contextPosition == head) {
+        ngram[i] = GetLmID(m_factorHead, (*contextFactors[head])[formFactor]);
+      } else {
+        ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor],
+            (*contextFactors[head])[formFactor]);
+      }
+    } 
+    ngram[count] = Vocab_None;
+
+    CHECK((*contextFactors[count-1])[tagFactor] != NULL);
+    if (head == count - 1) {
+      lmId = GetLmID(m_factorHead, (*contextFactors[head])[formFactor]);
+    } else {
+      lmId = GetLmID((*contextFactors[count - 1])[tagFactor],
+          (*contextFactors[head])[formFactor]);
+    }
+    // call SRILM
+    GetValue(lmId, ngram+1, /* out */ ret);
+  }
 
   if (finalState) {
     ngram[0] = lmId;
