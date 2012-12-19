@@ -43,7 +43,7 @@ ChartParserUnknown::~ChartParserUnknown() {
 void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to) {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = m_system.GetUnknownWordPenaltyProducer();
+  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
   vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
   
   size_t isDigit = 0;

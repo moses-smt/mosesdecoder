@@ -2032,6 +2032,10 @@ float StaticData::GetWeightWordPenalty() const {
   return weightWP;
 }
 
+float StaticData::GetWeightUnknownWordPenalty() const {
+  return GetWeight(m_unknownWordPenaltyProducer);
+}
+
 }
 
 

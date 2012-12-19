@@ -74,12 +74,10 @@ class TranslationSystem {
       const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
       const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
 
-      const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
       const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
       
       const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries().at(index); }
       
-      float GetWeightUnknownWordPenalty() const;
       float GetWeightDistortion() const;
       std::vector<float> GetTranslationWeights(size_t index) const;
       
@@ -101,7 +99,6 @@ class TranslationSystem {
         LMList m_languageModels;
         std::vector<GlobalLexicalModel*> m_globalLexicalModels;
 
-        const UnknownWordPenaltyProducer* m_unknownWpProducer;
         const DistortionScoreProducer* m_distortionScoreProducer;
 	
 };
