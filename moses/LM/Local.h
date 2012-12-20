@@ -48,6 +48,7 @@ protected:
   Ngram   *m_srilmModel;
   unsigned int  m_unknownId;
   const Factor *m_factorHead;
+  std::vector<FactorType> m_factorTypesOrdered;
 
   void GetValue(unsigned int wordId, unsigned int *context, LMResult &ret) const;
   void CreateFactors();

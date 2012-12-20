@@ -56,6 +56,7 @@ bool LanguageModelLocal::Load(const std::string &filePath, const std::vector<Fac
   m_srilmVocab  = new ::Vocab();
   m_srilmModel  = new Ngram(*m_srilmVocab, nGramOrder);
   m_factorTypes = FactorMask(factors);
+  m_factorTypesOrdered = factors;
   m_nGramOrder  = nGramOrder;
   m_filePath    = filePath;
 
@@ -88,8 +89,8 @@ void LanguageModelLocal::CreateFactors()
 
   VocabString str;
   VocabIter iter(*m_srilmVocab);
-  FactorType formFactor = m_factorTypes[0];
-  FactorType tagFactor  = m_factorTypes[1];
+  FactorType formFactor = m_factorTypesOrdered[0];
+  FactorType tagFactor  = m_factorTypesOrdered[1];
   while ( (str = iter.next()) != NULL) {
     vector<string> factors = Tokenize(str, "|");
     if (factors.size() != 2) {
@@ -106,8 +107,8 @@ void LanguageModelLocal::CreateFactors()
   }
 
   // sentence markers
-  for (size_t index = 0 ; index < m_factorTypes.size() ; ++index) {
-    FactorType factorType = m_factorTypes[index];
+  for (size_t index = 0 ; index < m_factorTypesOrdered.size() ; ++index) {
+    FactorType factorType = m_factorTypesOrdered[index];
     m_sentenceStartArray[factorType] = factorCollection.AddFactor(Output, factorType, BOS_);
     m_sentenceEndArray[factorType]   = factorCollection.AddFactor(Output, factorType, EOS_);
   }
@@ -131,7 +132,9 @@ VocabIndex LanguageModelLocal::GetLmID( const Factor *tag, const Factor *form ) 
 
 void LanguageModelLocal::GetValue(VocabIndex wordId, VocabIndex *context, LMResult &ret) const
 {
-  ret.score += FloorScore(TransformLMScore(m_srilmModel->wordProb( wordId, context)));
+  if (wordId != m_unknownId) {
+    ret.score += FloorScore(TransformLMScore(m_srilmModel->wordProb( wordId, context)));
+  }
   ret.unknown = (ret.unknown || (wordId == m_unknownId));
 }
 
@@ -146,8 +149,8 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
     return ret;
   }
 
-  FactorType formFactor = m_factorTypes[0];
-  FactorType tagFactor  = m_factorTypes[1];
+  FactorType formFactor = m_factorTypesOrdered[0];
+  FactorType tagFactor  = m_factorTypesOrdered[1];
 
   VocabIndex lmId;
   VocabIndex ngram[count + 1];
@@ -185,6 +188,10 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
     }
     // call SRILM
     GetValue(lmId, ngram+1, /* out */ ret);
+//    if (! ret.unknown) {
+//      cerr << "LocalLM adding score of LM " << (*contextFactors[head])[formFactor]->GetString()
+//        << "\t" << ret.score << "\n";
+//    }
   }
 
   if (finalState) {
