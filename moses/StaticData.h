@@ -512,7 +512,7 @@ public:
   MetaFeatureProducer* GetMetaFeatureProducer() const {
     return m_metaFeatureProducer;
   }
-  std::vector<LexicalReordering*> GetLexicalReorderModels() const {
+  std::vector<LexicalReordering*> GetReorderModels() const {
     return m_reorderModels;
   } 
   std::vector<PhraseDictionaryFeature*> GetPhraseDictionaryModels() const {

@@ -63,11 +63,6 @@ namespace Moses {
       m_decodeGraphs.push_back(decodeGraph);
       m_decodeGraphBackoff.push_back(backoff);
     }
-
-    void TranslationSystem::AddReorderModel(LexicalReordering* reorderModel) {
-      m_reorderingTables.push_back(reorderModel);
-      StaticData::InstanceNonConst().AddFeatureFunction(reorderModel);
-    }
     
     void TranslationSystem::ConfigDictionaries() {
       for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
@@ -95,8 +90,9 @@ namespace Moses {
              (*i)->InitDictionary(this,source);
            }
            
-      for(size_t i=0;i<m_reorderingTables.size();++i) {
-        m_reorderingTables[i]->InitializeForInput(source);
+      const std::vector<LexicalReordering*> &reorderingTables = StaticData::Instance().GetReorderModels();
+      for(size_t i=0;i<reorderingTables.size();++i) {
+        reorderingTables[i]->InitializeForInput(source);
       }
 
       /*

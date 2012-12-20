@@ -626,7 +626,7 @@ bool StaticData::LoadData(Parameter *parameter)
       } else if (id == "R") {
         for (size_t k = 0; k < m_reorderModels.size(); ++k) {
           if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-            m_translationSystems.find(config[0])->second.AddReorderModel(m_reorderModels[k]);
+            AddFeatureFunction(m_reorderModels[k]);
             VERBOSE(2,"Adding reorder table " << k << " to translation system " << config[0] << endl);
           }
         }

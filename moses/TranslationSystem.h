@@ -57,7 +57,6 @@ class TranslationSystem {
       //Insert core 'big' features
       void AddLanguageModel(LanguageModel* languageModel);
       void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
-      void AddReorderModel(LexicalReordering* reorderModel);
 
       //Called after adding the tables in order to set up the dictionaries
       void ConfigDictionaries();
@@ -66,7 +65,6 @@ class TranslationSystem {
       const std::string& GetId() const {return m_id;}
       
       //Lists of tables relevant to this system.
-      const std::vector<LexicalReordering*>& GetReorderModels() const {return m_reorderingTables;}
       const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
       const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
       const LMList& GetLanguageModels() const {return m_languageModels;}
@@ -89,7 +87,6 @@ class TranslationSystem {
         
         std::vector<DecodeGraph*> m_decodeGraphs;
       	std::vector<size_t> m_decodeGraphBackoff;
-        std::vector<LexicalReordering*> m_reorderingTables;
         std::vector<PhraseDictionaryFeature*> m_phraseDictionaries;
         std::vector<GenerationDictionary*> m_generationDictionaries;
         LMList m_languageModels;

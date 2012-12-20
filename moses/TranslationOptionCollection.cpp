@@ -684,7 +684,7 @@ const std::vector<Phrase*>& TranslationOptionCollection::GetUnknownSources() con
 
 void TranslationOptionCollection::CacheLexReordering()
 {
-  const vector<LexicalReordering*> &lexReorderingModels = m_system->GetReorderModels();
+  const vector<LexicalReordering*> &lexReorderingModels = StaticData::Instance().GetReorderModels();
   std::vector<LexicalReordering*>::const_iterator iterLexreordering;
 
   size_t size = m_source.GetSize();
