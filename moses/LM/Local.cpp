@@ -60,7 +60,7 @@ bool LanguageModelLocal::Load(const std::string &filePath, const std::vector<Fac
   m_filePath    = filePath;
 
   if (factors.size() != 2) {
-    cerr << "LocalLM needs exactly two factors form|tag" << endl;
+    cerr << "LocalLM needs exactly two factors tag|form" << endl;
     abort();
   }
 
@@ -93,16 +93,16 @@ void LanguageModelLocal::CreateFactors()
   while ( (str = iter.next()) != NULL) {
     vector<string> factors = Tokenize(str, "|");
     if (factors.size() != 2) {
-      cerr << "Incorrect format for LocalLM, expected 2 factors in word: " << str << endl;
-      abort();
+      cerr << "Warning: skipping word '" << str << "'" << endl;
+      continue;
     }
     VocabIndex lmId = GetLmID(str);
-    size_t formId = factorCollection.AddFactor(Output, formFactor, factors[0])->GetId();
-    const Factor *tag = factorCollection.AddFactor(Output, tagFactor, factors[1]);
-    if (factors[1] == "HEAD")
+    const Factor *tag = factorCollection.AddFactor(Output, tagFactor, factors[0]);
+    if (factors[0] == "HEAD")
       m_factorHead = tag;
-    size_t tagId  = tag->GetId();
-    m_lmIdLookup[PairNumbers(formId, tagId)] = lmId;
+    size_t tagId = tag->GetId();
+    size_t formId = factorCollection.AddFactor(Output, formFactor, factors[1])->GetId();
+    m_lmIdLookup[PairNumbers(tagId, formId)] = lmId;
   }
 
   // sentence markers
@@ -111,10 +111,10 @@ void LanguageModelLocal::CreateFactors()
     m_sentenceStartArray[factorType] = factorCollection.AddFactor(Output, factorType, BOS_);
     m_sentenceEndArray[factorType]   = factorCollection.AddFactor(Output, factorType, EOS_);
   }
-  m_lmIdLookup[PairNumbers(m_sentenceStartArray[formFactor]->GetId(),
-                           m_sentenceStartArray[tagFactor]->GetId())] = GetLmID(BOS_);
-  m_lmIdLookup[PairNumbers(m_sentenceEndArray[formFactor]->GetId(),
-                           m_sentenceEndArray[tagFactor]->GetId())] = GetLmID(EOS_);
+  m_lmIdLookup[PairNumbers(m_sentenceStartArray[tagFactor]->GetId(),
+                           m_sentenceStartArray[formFactor]->GetId())] = GetLmID(BOS_);
+  m_lmIdLookup[PairNumbers(m_sentenceEndArray[tagFactor]->GetId(),
+                           m_sentenceEndArray[formFactor]->GetId())] = GetLmID(EOS_);
 }
 
 VocabIndex LanguageModelLocal::GetLmID( const std::string &str ) const
@@ -122,10 +122,10 @@ VocabIndex LanguageModelLocal::GetLmID( const std::string &str ) const
   return m_srilmVocab->getIndex( str.c_str(), m_unknownId );
 }
 
-VocabIndex LanguageModelLocal::GetLmID( const Factor *form, const Factor *tag ) const
+VocabIndex LanguageModelLocal::GetLmID( const Factor *tag, const Factor *form ) const
 {
   boost::unordered_map<size_t, unsigned int>::const_iterator it;
-  it = m_lmIdLookup.find(PairNumbers(form->GetId(), tag->GetId()));
+  it = m_lmIdLookup.find(PairNumbers(tag->GetId(), form->GetId()));
   return (it == m_lmIdLookup.end()) ? m_unknownId : it->second;
 }
 
@@ -139,7 +139,6 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
 {
   LMResult ret = { 0.0, false };
 
-  FactorType factorType = 0; // XXX
   size_t count = contextFactors.size();
   if (count <= 0) {
     if(finalState)
@@ -153,13 +152,21 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
   VocabIndex lmId;
   VocabIndex ngram[count + 1];
   for (size_t head = 0; head < count; head++) {
+    if (! IsOrdinaryWord(contextFactors[head]))
+      continue; // head cannot be <s>,</s>
+
     for (size_t i = 1 ; i < count ; i++) {
       size_t contextPosition = count - i - 1;
       if (contextPosition == head) {
         ngram[i] = GetLmID(m_factorHead, (*contextFactors[head])[formFactor]);
       } else {
-        ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor],
-            (*contextFactors[head])[formFactor]);
+        if (IsOrdinaryWord(contextFactors[contextPosition])) {
+          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor],
+              (*contextFactors[head])[formFactor]);
+        } else {
+          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor],
+              (*contextFactors[contextPosition])[formFactor]);
+        }
       }
     } 
     ngram[count] = Vocab_None;
@@ -168,8 +175,13 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
     if (head == count - 1) {
       lmId = GetLmID(m_factorHead, (*contextFactors[head])[formFactor]);
     } else {
-      lmId = GetLmID((*contextFactors[count - 1])[tagFactor],
-          (*contextFactors[head])[formFactor]);
+      if (IsOrdinaryWord(contextFactors[count - 1])) {
+        lmId = GetLmID((*contextFactors[count - 1])[tagFactor],
+            (*contextFactors[head])[formFactor]);
+      } else {
+        lmId = GetLmID((*contextFactors[count - 1])[tagFactor],
+            (*contextFactors[count - 1])[formFactor]);
+      }
     }
     // call SRILM
     GetValue(lmId, ngram+1, /* out */ ret);

@@ -64,6 +64,10 @@ public:
   LanguageModelLocal();
   ~LanguageModelLocal();
   bool Load(const std::string &filePath, const std::vector<FactorType> &factors, size_t nGramOrder);
+  inline bool IsOrdinaryWord(const Word *word) const {
+    return (*word)[m_factorTypes[0]]->GetString() != BOS_
+      && (*word)[m_factorTypes[0]]->GetString() != EOS_;
+  }
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactors, State* finalState = 0) const;
 };
