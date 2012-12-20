@@ -55,7 +55,6 @@ class TranslationSystem {
                         const DistortionScoreProducer* distortionProducer);
       
       //Insert core 'big' features
-      void AddLanguageModel(LanguageModel* languageModel);
       void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
 
       //Called after adding the tables in order to set up the dictionaries
@@ -67,7 +66,6 @@ class TranslationSystem {
       //Lists of tables relevant to this system.
       const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
       const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
-      const LMList& GetLanguageModels() const {return m_languageModels;}
       const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
       const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
       
@@ -89,7 +87,6 @@ class TranslationSystem {
       	std::vector<size_t> m_decodeGraphBackoff;
         std::vector<PhraseDictionaryFeature*> m_phraseDictionaries;
         std::vector<GenerationDictionary*> m_generationDictionaries;
-        LMList m_languageModels;
 
 	
 };

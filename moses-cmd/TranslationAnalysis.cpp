@@ -102,8 +102,8 @@ void PrintTranslationAnalysis(const TranslationSystem* system, std::ostream &os,
   os << std::endl << std::endl;
   if (doLMStats && lmCalls > 0) {
     std::vector<unsigned int>::iterator acc = lmAcc.begin();
-    const LMList& lmlist = system->GetLanguageModels();
-    LMList::const_iterator i = lmlist.begin();
+    const LMList &lmList = StaticData::Instance().GetLMList();
+    LMList::const_iterator i = lmList.begin();
     for (; acc != lmAcc.end(); ++acc, ++i) {
       char buf[256];
       sprintf(buf, "%.4f", (float)(*acc)/(float)lmCalls);

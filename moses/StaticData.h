@@ -494,7 +494,7 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  LMList GetLMList() const { 
+  const LMList &GetLMList() const {
     return m_languageModel; 
   }
   const WordPenaltyProducer *GetWordPenaltyProducer() const

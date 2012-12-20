@@ -465,7 +465,8 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
   // language model scores
   outputWordGraphStream << "\tl=";
-  const LMList &lmList = system->GetLanguageModels();
+  const LMList &lmList = StaticData::Instance().GetLMList();
+
   LMList::const_iterator iterLM;
   for (iterLM = lmList.begin() ; iterLM != lmList.end() ; ++iterLM) {
     LanguageModel *lm = *iterLM;

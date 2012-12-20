@@ -107,9 +107,9 @@ void TranslationOption::CalcScore(const TranslationSystem* system)
   float retFullScore = 0;
   float oovScore = 0;
 
-  const LMList &allLM = system->GetLanguageModels();
+  const LMList &lmList = StaticData::Instance().GetLMList();
 
-  allLM.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, oovScore, &m_scoreBreakdown);
+  lmList.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, oovScore, &m_scoreBreakdown);
 
   size_t phraseSize = GetTargetPhrase().GetSize();
   

@@ -640,7 +640,7 @@ bool StaticData::LoadData(Parameter *parameter)
         size_t lmid = 0;
         for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
           if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
-            m_translationSystems.find(config[0])->second.AddLanguageModel(*k);
+            AddFeatureFunction(*k);
             VERBOSE(2,"Adding language model " << lmid << " to translation system " << config[0] << endl);
           }
         }

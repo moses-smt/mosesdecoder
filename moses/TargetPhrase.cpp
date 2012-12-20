@@ -105,7 +105,9 @@ void TargetPhrase::SetScore(float score)
 	vector <float> scoreVector(numScores,score/numScores);
 	
 	//Now we have what we need to call the full SetScore method
-	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, StaticData::Instance().GetWeightWordPenalty(), system.GetLanguageModels());
+	const LMList &lmList = StaticData::Instance().GetLMList();
+
+	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, StaticData::Instance().GetWeightWordPenalty(), lmList);
 }
 
 /**
@@ -125,7 +127,8 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
 	Scores sizedScoreVector = scoreVector;
 	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,StaticData::Instance().GetWeightWordPenalty(),system->GetLanguageModels());
+	const LMList &lmList = StaticData::Instance().GetLMList();
+	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,StaticData::Instance().GetWeightWordPenalty(),lmList);
 }
 
 void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,

@@ -54,11 +54,6 @@ namespace Moses {
     }
     
     //Insert core 'big' features
-    void TranslationSystem::AddLanguageModel(LanguageModel* languageModel) {
-      m_languageModels.Add(languageModel);
-      StaticData::InstanceNonConst().AddFeatureFunction(languageModel);
-    }
-
     void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff) {
       m_decodeGraphs.push_back(decodeGraph);
       m_decodeGraphBackoff.push_back(backoff);
@@ -101,12 +96,8 @@ namespace Moses {
       }
       */
 
-      LMList::const_iterator iterLM;
-      for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
-      {
-        LanguageModel &languageModel = **iterLM;
-        languageModel.InitializeBeforeSentenceProcessing();
-      }
+      LMList lmList = StaticData::Instance().GetLMList();
+      lmList.InitializeBeforeSentenceProcessing();
     }
     
      void TranslationSystem::CleanUpAfterSentenceProcessing(const InputType& source) const {
@@ -122,13 +113,8 @@ namespace Moses {
         for(size_t i=0;i<m_generationDictionaries.size();++i)
             m_generationDictionaries[i]->CleanUp(source);
   
-        //something LMs could do after each sentence 
-        LMList::const_iterator iterLM;
-        for (iterLM = m_languageModels.begin() ; iterLM != m_languageModels.end() ; ++iterLM)
-        {
-          LanguageModel &languageModel = **iterLM;
-          languageModel.CleanUpAfterSentenceProcessing(source);
-        }
+        LMList lmList = StaticData::Instance().GetLMList();
+        lmList.CleanUpAfterSentenceProcessing(source);
      }
 
     std::vector<float> TranslationSystem::GetTranslationWeights(size_t index) const {
