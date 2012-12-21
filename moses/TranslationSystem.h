@@ -22,25 +22,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifndef moses_TranslationSystem_h
 #define moses_TranslationSystem_h
 
-#include <stdexcept>
-#include <string>
-#include <vector>
-
-#include "FeatureFunction.h"
-#include "LMList.h"
-
 namespace Moses
 {
-
-class DecodeGraph;
-class LexicalReordering;
-class PhraseDictionaryFeature;
-class GenerationDictionary;
-class WordPenaltyProducer;
-class DistortionScoreProducer;
-class UnknownWordPenaltyProducer;
-class MetaFeatureProducer;
-class GlobalLexicalModel;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -49,10 +32,7 @@ class TranslationSystem {
 
     public:
       /** Creates a system with the given id */
-      TranslationSystem(const std::string& id, 
-                        const WordPenaltyProducer* wpProducer,
-                        const UnknownWordPenaltyProducer* uwpProducer,
-                        const DistortionScoreProducer* distortionProducer);
+      TranslationSystem();
       
       
         

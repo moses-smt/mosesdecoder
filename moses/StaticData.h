@@ -68,6 +68,7 @@ class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class MetaScoreProducer;
+class MetaFeatureProducer;
 class TargetBigramFeature;
 class TargetNgramFeature;
 #ifdef HAVE_SYNLM
@@ -107,7 +108,7 @@ protected:
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
-  std::map<std::string, TranslationSystem> m_translationSystems;
+  TranslationSystem m_translationSystem;
   TargetBigramFeature *m_targetBigramFeature;
   std::vector<TargetNgramFeature*> m_targetNgramFeatures;
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
@@ -403,14 +404,7 @@ public:
   }
 
   const TranslationSystem& GetTranslationSystem(std::string id) const {
-    std::map<std::string, TranslationSystem>::const_iterator iter =
-      m_translationSystems.find(id);
-    if (iter == m_translationSystems.end()) {
-      VERBOSE(1, "Translation system not found " << id << std::endl);
-      throw std::runtime_error("Unknown translation system id");
-    } else {
-      return iter->second;
-    }
+    return m_translationSystem;
   }
   size_t GetVerboseLevel() const {
     return m_verboseLevel;

@@ -19,20 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <stdexcept>
-#include <iostream>
-
-#include "DecodeGraph.h"
-#include "DecodeStep.h"
-#include "DummyScoreProducers.h"
-#include "GlobalLexicalModel.h"
-#include "GlobalLexicalModelUnlimited.h"
-#include "WordTranslationFeature.h"
-#include "PhrasePairFeature.h"
-#include "LexicalReordering.h"
-#include "StaticData.h"
+#include <string>
 #include "TranslationSystem.h"
-#include "Util.h"
 
 using namespace std;
 
@@ -40,10 +28,7 @@ namespace Moses {
   
   const string TranslationSystem::DEFAULT = "default";
 
-    TranslationSystem::TranslationSystem(const std::string& id, 
-                      const WordPenaltyProducer* wpProducer,
-                      const UnknownWordPenaltyProducer* uwpProducer,
-                      const DistortionScoreProducer* distortionProducer)
+    TranslationSystem::TranslationSystem()
     {
     }
     

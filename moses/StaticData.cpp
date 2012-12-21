@@ -590,16 +590,6 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // rip out trans system
-  vector<string> config = Tokenize(TranslationSystem::DEFAULT + " R * D * L * G *");
-  set<size_t> tableIds;
-
-  TranslationSystem transSys(config[0],
-                    m_wpProducer,
-                    m_unknownWordPenaltyProducer,
-                    m_distortionScoreProducer
-                    );
-  m_translationSystems.insert(pair<string, TranslationSystem>(config[0], transSys));
-
   StaticData::InstanceNonConst().AddFeatureFunction(m_wpProducer);
   StaticData::InstanceNonConst().AddFeatureFunction(m_unknownWordPenaltyProducer);
   if (m_distortionScoreProducer) {
@@ -608,24 +598,18 @@ bool StaticData::LoadData(Parameter *parameter)
 
 
   for (size_t k = 0; k < m_reorderModels.size(); ++k) {
-    if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-      AddFeatureFunction(m_reorderModels[k]);
-      VERBOSE(2,"Adding reorder table " << k << " to translation system " << config[0] << endl);
-    }
+    AddFeatureFunction(m_reorderModels[k]);
+    VERBOSE(2,"Adding reorder table " << k << endl);
   }
 
   size_t lmid = 0;
   for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
-    if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
-      AddFeatureFunction(*k);
-      VERBOSE(2,"Adding language model " << lmid << " to translation system " << config[0] << endl);
-    }
+    AddFeatureFunction(*k);
+    VERBOSE(2,"Adding language model " << lmid << endl);
   }
 
   for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
-    if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-      AddFeatureFunction(m_globalLexicalModels[k]);
-    }
+    AddFeatureFunction(m_globalLexicalModels[k]);
   }
 
   //Instigate dictionary loading
