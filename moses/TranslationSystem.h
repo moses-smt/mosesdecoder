@@ -54,18 +54,11 @@ class TranslationSystem {
                         const UnknownWordPenaltyProducer* uwpProducer,
                         const DistortionScoreProducer* distortionProducer);
       
-      //Insert core 'big' features
-      void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
-
-      //Called after adding the tables in order to set up the dictionaries
-      void ConfigDictionaries();
       
         
       const std::string& GetId() const {return m_id;}
       
       //Lists of tables relevant to this system.
-      const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
-      const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
       
       //sentence (and thread) specific initialisationn and cleanup
       void InitializeBeforeSentenceProcessing(const InputType& source) const;
@@ -76,10 +69,7 @@ class TranslationSystem {
         
     private:
         std::string m_id;
-        
-        std::vector<DecodeGraph*> m_decodeGraphs;
-      	std::vector<size_t> m_decodeGraphBackoff;
-	
+
 };
 
 

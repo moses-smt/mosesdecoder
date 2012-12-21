@@ -162,7 +162,7 @@ void TranslationOptionCollection::Prune()
 
 void TranslationOptionCollection::ProcessUnknownWord()
 {
-  const vector<DecodeGraph*>& decodeGraphList = m_system->GetDecodeGraphs();
+  const vector<DecodeGraph*>& decodeGraphList = StaticData::Instance().GetDecodeGraphs();
   size_t size = m_source.GetSize();
   // try to translation for coverage with no trans by expanding table limit
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
@@ -367,8 +367,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
   // for all phrases
 
   // there may be multiple decoding graphs (factorizations of decoding)
-  const vector <DecodeGraph*> &decodeGraphList = m_system->GetDecodeGraphs();
-  const vector <size_t> &decodeGraphBackoff = m_system->GetDecodeGraphBackoff();
+  const vector <DecodeGraph*> &decodeGraphList = StaticData::Instance().GetDecodeGraphs();
+  const vector <size_t> &decodeGraphBackoff = StaticData::Instance().GetDecodeGraphBackoff();
 
   // length of the sentence
   size_t size = m_source.GetSize();

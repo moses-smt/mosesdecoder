@@ -783,6 +783,12 @@ public:
     return weights;
   }
 
+  const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
+  const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
+
+  //Called after adding the tables in order to set up the dictionaries
+  void ConfigDictionaries();
+
 };
 
 }

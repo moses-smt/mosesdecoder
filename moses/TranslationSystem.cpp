@@ -53,31 +53,6 @@ namespace Moses {
       }
     }
     
-    //Insert core 'big' features
-    void TranslationSystem::AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff) {
-      m_decodeGraphs.push_back(decodeGraph);
-      m_decodeGraphBackoff.push_back(backoff);
-    }
-    
-    void TranslationSystem::ConfigDictionaries() {
-      for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
-        i != m_decodeGraphs.end(); ++i) {
-          for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
-            const DecodeStep* step = *j;
-            PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
-            if (pdict) {
-              StaticData::InstanceNonConst().AddFeatureFunction(pdict);
-              const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
-            }
-            GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
-            if (gdict) {
-              StaticData::InstanceNonConst().AddFeatureFunction(gdict);
-            }
-          }
-      }
-
-    }
-    
     void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& source) const {
       const StaticData &staticData = StaticData::Instance();
       const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();

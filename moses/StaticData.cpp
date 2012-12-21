@@ -608,13 +608,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
-    if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-      VERBOSE(2,"Adding decoder graph " << k << " to translation system " << config[0] << endl);
-      m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k],m_decodeGraphBackoff[k]);
-    }
-  }
-
   size_t lmid = 0;
   for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
     if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
@@ -630,7 +623,7 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   //Instigate dictionary loading
-  m_translationSystems.find(config[0])->second.ConfigDictionaries();
+  ConfigDictionaries();
 
   for (int i = 0; i < m_phraseDictionary.size(); i++)
     cerr << m_phraseDictionary[i] << " ";
@@ -2014,6 +2007,25 @@ float StaticData::GetWeightUnknownWordPenalty() const {
 float StaticData::GetWeightDistortion() const {
   CHECK(m_distortionScoreProducer);
   return StaticData::Instance().GetWeight(m_distortionScoreProducer);
+}
+
+void StaticData::ConfigDictionaries() {
+  for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
+    i != m_decodeGraphs.end(); ++i) {
+      for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
+        const DecodeStep* step = *j;
+        PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
+        if (pdict) {
+          StaticData::InstanceNonConst().AddFeatureFunction(pdict);
+          pdict->InitDictionary(NULL);
+        }
+        GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
+        if (gdict) {
+          StaticData::InstanceNonConst().AddFeatureFunction(gdict);
+        }
+      }
+  }
+
 }
 
 } // namespace
