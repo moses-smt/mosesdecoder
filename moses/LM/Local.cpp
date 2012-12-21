@@ -156,7 +156,7 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
   VocabIndex ngram[count + 1];
   for (size_t head = 0; head < count; head++) {
     if (! IsOrdinaryWord(contextFactors[head])
-        && GetLmID(m_factorHead, (*contextFactors[head])[formFactor]) != m_unknownId)
+        || GetLmID(m_factorHead, (*contextFactors[head])[formFactor]) == m_unknownId)
       continue; // head cannot be <s>,</s>; uknown words are skipped
 
     for (size_t i = 1 ; i < count ; i++) {
