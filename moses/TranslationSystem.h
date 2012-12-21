@@ -56,13 +56,11 @@ class TranslationSystem {
       
       
         
-      const std::string& GetId() const {return m_id;}
 
       static const  std::string DEFAULT;
         
         
     private:
-        std::string m_id;
 
 };
 

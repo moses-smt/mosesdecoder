@@ -44,13 +44,7 @@ namespace Moses {
                       const WordPenaltyProducer* wpProducer,
                       const UnknownWordPenaltyProducer* uwpProducer,
                       const DistortionScoreProducer* distortionProducer)
-    : m_id(id)
     {
-      StaticData::InstanceNonConst().AddFeatureFunction(wpProducer);
-      StaticData::InstanceNonConst().AddFeatureFunction(uwpProducer);
-      if (distortionProducer) {
-        StaticData::InstanceNonConst().AddFeatureFunction(distortionProducer);
-      }
     }
     
 

@@ -600,6 +600,12 @@ bool StaticData::LoadData(Parameter *parameter)
                     );
   m_translationSystems.insert(pair<string, TranslationSystem>(config[0], transSys));
 
+  StaticData::InstanceNonConst().AddFeatureFunction(m_wpProducer);
+  StaticData::InstanceNonConst().AddFeatureFunction(m_unknownWordPenaltyProducer);
+  if (m_distortionScoreProducer) {
+    StaticData::InstanceNonConst().AddFeatureFunction(m_distortionScoreProducer);
+  }
+
 
   for (size_t k = 0; k < m_reorderModels.size(); ++k) {
     if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
