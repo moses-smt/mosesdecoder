@@ -66,22 +66,24 @@ namespace Moses {
             const DecodeStep* step = *j;
             PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
             if (pdict) {
-              m_phraseDictionaries.push_back(pdict);
               StaticData::InstanceNonConst().AddFeatureFunction(pdict);
               const_cast<PhraseDictionaryFeature*>(pdict)->InitDictionary(this);
             }
             GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
             if (gdict) {
-              m_generationDictionaries.push_back(gdict);
               StaticData::InstanceNonConst().AddFeatureFunction(gdict);
             }
           }
       }
+
     }
     
     void TranslationSystem::InitializeBeforeSentenceProcessing(const InputType& source) const {
-      for (vector<PhraseDictionaryFeature*>::const_iterator i = m_phraseDictionaries.begin();
-           i != m_phraseDictionaries.end(); ++i) {
+      const StaticData &staticData = StaticData::Instance();
+      const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
+
+      for (vector<PhraseDictionaryFeature*>::const_iterator i = phraseDictionaries.begin();
+           i != phraseDictionaries.end(); ++i) {
              (*i)->InitDictionary(this,source);
            }
            
@@ -101,24 +103,22 @@ namespace Moses {
     }
     
      void TranslationSystem::CleanUpAfterSentenceProcessing(const InputType& source) const {
-        
-        for(size_t i=0;i<m_phraseDictionaries.size();++i)
+       const StaticData &staticData = StaticData::Instance();
+       const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
+       const std::vector<GenerationDictionary*> &generationDictionaries =  staticData.GetGenerationDictionaries();
+
+        for(size_t i=0;i<phraseDictionaries.size();++i)
         {
-          PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionaries[i];
+          PhraseDictionaryFeature &phraseDictionaryFeature = *phraseDictionaries[i];
           PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
           phraseDictionary->CleanUp(source);
 
         }
   
-        for(size_t i=0;i<m_generationDictionaries.size();++i)
-            m_generationDictionaries[i]->CleanUp(source);
+        for(size_t i=0;i<generationDictionaries.size();++i)
+            generationDictionaries[i]->CleanUp(source);
   
         LMList lmList = StaticData::Instance().GetLMList();
         lmList.CleanUpAfterSentenceProcessing(source);
      }
-
-    std::vector<float> TranslationSystem::GetTranslationWeights(size_t index) const {
-      std::vector<float> weights = StaticData::Instance().GetWeights(GetTranslationScoreProducer(index));
-      return weights;
-    }
 };

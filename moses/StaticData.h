@@ -772,6 +772,17 @@ public:
   float GetWeightUnknownWordPenalty() const;
   float GetWeightDistortion() const;
 
+  const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const
+  { return m_phraseDictionary;}
+  const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const
+  { return m_generationDictionary;}
+  const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const
+  { return GetPhraseDictionaries().at(index); }
+  std::vector<float> GetTranslationWeights(size_t index) const {
+    std::vector<float> weights = GetWeights(GetTranslationScoreProducer(index));
+    return weights;
+  }
+
 };
 
 }

@@ -632,6 +632,12 @@ bool StaticData::LoadData(Parameter *parameter)
   //Instigate dictionary loading
   m_translationSystems.find(config[0])->second.ConfigDictionaries();
 
+  for (int i = 0; i < m_phraseDictionary.size(); i++)
+    cerr << m_phraseDictionary[i] << " ";
+  cerr << endl;
+  for (int i = 0; i < m_generationDictionary.size(); i++)
+      cerr << m_generationDictionary[i] << " ";
+    cerr << endl;
 
   //Add any other features here.
   if (m_bleuScoreFeature) {

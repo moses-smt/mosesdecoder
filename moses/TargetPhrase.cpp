@@ -91,11 +91,10 @@ void TargetPhrase::SetScore(float score)
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
 	//TODO: is this a good idea?
-    // Assume the default system.
-    const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-	const ScoreProducer* prod = system.GetPhraseDictionaries()[0];
+  const StaticData &staticData = StaticData::Instance();
+	const ScoreProducer* prod = staticData.GetPhraseDictionaries()[0];
 	
-	vector<float> weights = StaticData::Instance().GetWeights(prod);
+	vector<float> weights = staticData.GetWeights(prod);
 
 	
 	//find out how many items are in the score vector for this producer	
@@ -107,7 +106,7 @@ void TargetPhrase::SetScore(float score)
 	//Now we have what we need to call the full SetScore method
 	const LMList &lmList = StaticData::Instance().GetLMList();
 
-	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, StaticData::Instance().GetWeightWordPenalty(), lmList);
+	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, staticData.GetWeightWordPenalty(), lmList);
 }
 
 /**
@@ -117,8 +116,8 @@ void TargetPhrase::SetScore(float score)
 void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &scoreVector)
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
-
-    const ScoreProducer* prod = system->GetPhraseDictionaries()[0];
+  const StaticData &staticData = StaticData::Instance();
+  const ScoreProducer* prod = staticData.GetPhraseDictionaries()[0];
 
 	vector<float> weights = StaticData::Instance().GetWeights(prod);
 	

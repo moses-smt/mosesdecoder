@@ -66,12 +66,6 @@ class TranslationSystem {
       //Lists of tables relevant to this system.
       const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
       const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
-      const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const {return m_generationDictionaries;}
-      const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const {return m_phraseDictionaries;}
-      
-      const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries().at(index); }
-      
-      std::vector<float> GetTranslationWeights(size_t index) const;
       
       //sentence (and thread) specific initialisationn and cleanup
       void InitializeBeforeSentenceProcessing(const InputType& source) const;
@@ -85,9 +79,6 @@ class TranslationSystem {
         
         std::vector<DecodeGraph*> m_decodeGraphs;
       	std::vector<size_t> m_decodeGraphBackoff;
-        std::vector<PhraseDictionaryFeature*> m_phraseDictionaries;
-        std::vector<GenerationDictionary*> m_generationDictionaries;
-
 	
 };
 

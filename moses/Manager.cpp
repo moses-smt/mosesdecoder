@@ -450,7 +450,8 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
                         << "\ta=";
 
   // phrase table scores
-  const std::vector<PhraseDictionaryFeature*> &phraseTables = system->GetPhraseDictionaries();
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<PhraseDictionaryFeature*> &phraseTables = staticData.GetPhraseDictionaries();
   std::vector<PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
   for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable) {
     const PhraseDictionaryFeature *phraseTable = *iterPhraseTable;

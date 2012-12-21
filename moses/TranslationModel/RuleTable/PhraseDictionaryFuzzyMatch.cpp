@@ -53,7 +53,7 @@ namespace Moses
                             PhraseDictionaryFeature* feature)
   : PhraseDictionary(numScoreComponents, feature) 
   {
-    const StaticData &staticData = StaticData::Instance();
+    //const StaticData &staticData = StaticData::Instance();
     //CHECK(staticData.ThreadCount() == 1);
   }
 
