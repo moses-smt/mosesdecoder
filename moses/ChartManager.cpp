@@ -57,7 +57,7 @@ ChartManager::ChartManager(InputType const& source, const TranslationSystem* sys
 
 ChartManager::~ChartManager()
 {
-  m_system->CleanUpAfterSentenceProcessing(m_source);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 
   clock_t end = clock();
   float et = (end - m_start);

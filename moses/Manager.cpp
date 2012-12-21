@@ -59,7 +59,7 @@ Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm sea
   ,m_hypoId(0)
   ,m_source(source)
 {
-  m_system->InitializeBeforeSentenceProcessing(source);
+  StaticData::Instance().InitializeBeforeSentenceProcessing(source);
 }
 
 Manager::~Manager()
@@ -67,7 +67,7 @@ Manager::~Manager()
   delete m_transOptColl;
   delete m_search;
 
-  m_system->CleanUpAfterSentenceProcessing(m_source);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 }
 
 /**
@@ -80,7 +80,7 @@ void Manager::ProcessSentence()
   ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-  m_system->InitializeBeforeSentenceProcessing(m_source);
+  StaticData::Instance().InitializeBeforeSentenceProcessing(m_source);
   
   Timer getOptionsTime;
   getOptionsTime.start();

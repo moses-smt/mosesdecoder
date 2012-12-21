@@ -57,12 +57,6 @@ class TranslationSystem {
       
         
       const std::string& GetId() const {return m_id;}
-      
-      //Lists of tables relevant to this system.
-      
-      //sentence (and thread) specific initialisationn and cleanup
-      void InitializeBeforeSentenceProcessing(const InputType& source) const;
-      void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
       static const  std::string DEFAULT;
         

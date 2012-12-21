@@ -789,6 +789,9 @@ public:
   //Called after adding the tables in order to set up the dictionaries
   void ConfigDictionaries();
 
+  //sentence (and thread) specific initialisationn and cleanup
+  void InitializeBeforeSentenceProcessing(const InputType& source) const;
+  void CleanUpAfterSentenceProcessing(const InputType& source) const;
 };
 
 }

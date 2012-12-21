@@ -127,7 +127,7 @@ ChartParser::ChartParser(InputType const &source, const TranslationSystem &syste
   m_source(source) {
   const StaticData &staticData = StaticData::Instance();
 
-  system.InitializeBeforeSentenceProcessing(source);
+  staticData.InitializeBeforeSentenceProcessing(source);
   const std::vector<PhraseDictionaryFeature*> &dictionaries = staticData.GetPhraseDictionaries();
   m_ruleLookupManagers.reserve(dictionaries.size());
   for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();

@@ -2028,6 +2028,49 @@ void StaticData::ConfigDictionaries() {
 
 }
 
+void StaticData::InitializeBeforeSentenceProcessing(const InputType& source) const {
+  const StaticData &staticData = StaticData::Instance();
+  const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
+
+  for (vector<PhraseDictionaryFeature*>::const_iterator i = phraseDictionaries.begin();
+       i != phraseDictionaries.end(); ++i) {
+         (*i)->InitDictionary(NULL,source);
+       }
+
+  const std::vector<LexicalReordering*> &reorderingTables = StaticData::Instance().GetReorderModels();
+  for(size_t i=0;i<reorderingTables.size();++i) {
+    reorderingTables[i]->InitializeForInput(source);
+  }
+
+  /*
+  for(size_t i=0;i<m_globalLexicalModels.size();++i) {
+    m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
+  }
+  */
+
+  LMList lmList = StaticData::Instance().GetLMList();
+  lmList.InitializeBeforeSentenceProcessing();
+}
+
+void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
+ const StaticData &staticData = StaticData::Instance();
+ const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
+ const std::vector<GenerationDictionary*> &generationDictionaries =  staticData.GetGenerationDictionaries();
+
+  for(size_t i=0;i<phraseDictionaries.size();++i)
+  {
+    PhraseDictionaryFeature &phraseDictionaryFeature = *phraseDictionaries[i];
+    PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
+    phraseDictionary->CleanUp(source);
+
+  }
+
+  for(size_t i=0;i<generationDictionaries.size();++i)
+      generationDictionaries[i]->CleanUp(source);
+
+  LMList lmList = StaticData::Instance().GetLMList();
+  lmList.CleanUpAfterSentenceProcessing(source);
+}
 } // namespace
 
 
