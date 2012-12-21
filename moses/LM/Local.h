@@ -69,7 +69,7 @@ public:
     return (*word)[m_factorTypes[0]]->GetString() != BOS_
       && (*word)[m_factorTypes[0]]->GetString() != EOS_;
   }
-
+  void DumpNgram(const unsigned int *begin, const unsigned int *end) const;
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactors, State* finalState = 0) const;
 };
 
