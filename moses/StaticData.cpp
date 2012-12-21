@@ -589,114 +589,94 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  //configure the translation systems with these tables
-  vector<string> tsConfig = m_parameter->GetParam("translation-systems");
-  if (!tsConfig.size()) {
-    //use all models in default system.
-    tsConfig.push_back(TranslationSystem::DEFAULT + " R * D * L * G *");
+  // rip out trans system
+  vector<string> config = Tokenize(TranslationSystem::DEFAULT + " R * D * L * G *");
+  set<size_t> tableIds;
+
+  TranslationSystem transSys(config[0],
+                    m_wpProducer,
+                    m_unknownWordPenaltyProducer,
+                    m_distortionScoreProducer
+                    );
+  m_translationSystems.insert(pair<string, TranslationSystem>(config[0], transSys));
+
+
+  for (size_t k = 0; k < m_reorderModels.size(); ++k) {
+    if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
+      AddFeatureFunction(m_reorderModels[k]);
+      VERBOSE(2,"Adding reorder table " << k << " to translation system " << config[0] << endl);
+    }
   }
 
-  TranslationSystem* tmpTS;
-  for (size_t i = 0; i < tsConfig.size(); ++i) {
-    vector<string> config = Tokenize(tsConfig[i]);
-    if (config.size() % 2 != 1) {
-      UserMessage::Add(string("Incorrect number of fields in Translation System config. Should be an odd number"));
+  for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
+    if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
+      VERBOSE(2,"Adding decoder graph " << k << " to translation system " << config[0] << endl);
+      m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k],m_decodeGraphBackoff[k]);
     }
-    m_translationSystems.insert(pair<string, TranslationSystem>(config[0],
-                                TranslationSystem(config[0],m_wpProducer,m_unknownWordPenaltyProducer,m_distortionScoreProducer)));
-    tmpTS = &(m_translationSystems.find(config[0])->second);
-    for (size_t j = 1; j < config.size(); j += 2) {
-      const string& id = config[j];
-      const string& tables = config[j+1];
-      set<size_t> tableIds;
-      if (tables != "*") {
-        //selected tables
-        vector<string> tableIdStrings = Tokenize(tables,",");
-        vector<size_t> tableIdList;
-        Scan<size_t>(tableIdList, tableIdStrings);
-        copy(tableIdList.begin(), tableIdList.end(), inserter(tableIds,tableIds.end()));
-      }
-      if (id == "D") {
-        for (size_t k = 0; k < m_decodeGraphs.size(); ++k) {
-          if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-            VERBOSE(2,"Adding decoder graph " << k << " to translation system " << config[0] << endl);
-            m_translationSystems.find(config[0])->second.AddDecodeGraph(m_decodeGraphs[k],m_decodeGraphBackoff[k]);
-          }
-        }
-      } else if (id == "R") {
-        for (size_t k = 0; k < m_reorderModels.size(); ++k) {
-          if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-            AddFeatureFunction(m_reorderModels[k]);
-            VERBOSE(2,"Adding reorder table " << k << " to translation system " << config[0] << endl);
-          }
-        }
-      } else if (id == "G") {
-        for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
-          if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
-            AddFeatureFunction(m_globalLexicalModels[k]);
-          }
-        }
-      } else if (id == "L") {
-        size_t lmid = 0;
-        for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
-          if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
-            AddFeatureFunction(*k);
-            VERBOSE(2,"Adding language model " << lmid << " to translation system " << config[0] << endl);
-          }
-        }
-      } else {
-        UserMessage::Add(string("Incorrect translation system identifier: ") + id);
-        return false;
-      }
-    }
-    //Instigate dictionary loading
-    m_translationSystems.find(config[0])->second.ConfigDictionaries();
+  }
 
-    //Add any other features here.
-    if (m_bleuScoreFeature) {
-      AddFeatureFunction(m_bleuScoreFeature);
+  size_t lmid = 0;
+  for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
+    if (!tableIds.size() || tableIds.find(lmid) != tableIds.end()) {
+      AddFeatureFunction(*k);
+      VERBOSE(2,"Adding language model " << lmid << " to translation system " << config[0] << endl);
     }
-    if (m_targetBigramFeature) {
-      AddFeatureFunction(m_targetBigramFeature);
+  }
+
+  for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
+    if (!tableIds.size() || tableIds.find(k) != tableIds.end()) {
+      AddFeatureFunction(m_globalLexicalModels[k]);
     }
-    if (m_targetNgramFeatures.size() > 0) {
-      for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-        AddFeatureFunction(m_targetNgramFeatures[i]);
-    }
-    if (m_phraseBoundaryFeature) {
-      AddFeatureFunction(m_phraseBoundaryFeature);
-    }
-    if (m_phraseLengthFeature) {
-      AddFeatureFunction(m_phraseLengthFeature);
-    }
-    if (m_targetWordInsertionFeature) {
-      AddFeatureFunction(m_targetWordInsertionFeature);
-    }
-    if (m_sourceWordDeletionFeature) {
-      AddFeatureFunction(m_sourceWordDeletionFeature);
-    }
-    if (m_wordTranslationFeatures.size() > 0) {
-      for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-        AddFeatureFunction(m_wordTranslationFeatures[i]);
-    }
-    if (m_phrasePairFeatures.size() > 0) {
-      for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-        AddFeatureFunction(m_phrasePairFeatures[i]);
-    }
+  }
+
+  //Instigate dictionary loading
+  m_translationSystems.find(config[0])->second.ConfigDictionaries();
+
+
+  //Add any other features here.
+  if (m_bleuScoreFeature) {
+    AddFeatureFunction(m_bleuScoreFeature);
+  }
+  if (m_targetBigramFeature) {
+    AddFeatureFunction(m_targetBigramFeature);
+  }
+  if (m_targetNgramFeatures.size() > 0) {
+    for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
+      AddFeatureFunction(m_targetNgramFeatures[i]);
+  }
+  if (m_phraseBoundaryFeature) {
+    AddFeatureFunction(m_phraseBoundaryFeature);
+  }
+  if (m_phraseLengthFeature) {
+    AddFeatureFunction(m_phraseLengthFeature);
+  }
+  if (m_targetWordInsertionFeature) {
+    AddFeatureFunction(m_targetWordInsertionFeature);
+  }
+  if (m_sourceWordDeletionFeature) {
+    AddFeatureFunction(m_sourceWordDeletionFeature);
+  }
+  if (m_wordTranslationFeatures.size() > 0) {
+    for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
+      AddFeatureFunction(m_wordTranslationFeatures[i]);
+  }
+  if (m_phrasePairFeatures.size() > 0) {
+    for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
+      AddFeatureFunction(m_phrasePairFeatures[i]);
+  }
 #ifdef HAVE_SYNLM
-    if (m_syntacticLanguageModel != NULL) {
-      AddFeatureFunction(m_syntacticLanguageModel);
-    }
+  if (m_syntacticLanguageModel != NULL) {
+    AddFeatureFunction(m_syntacticLanguageModel);
+  }
 #endif
-    for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
-      if (m_sparsePhraseDictionary[i]) {
-        AddFeatureFunction(m_sparsePhraseDictionary[i]);
-      }
+  for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
+    if (m_sparsePhraseDictionary[i]) {
+      AddFeatureFunction(m_sparsePhraseDictionary[i]);
     }
-    if (m_globalLexicalModelsUnlimited.size() > 0) {
-      for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
-        AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
-    }
+  }
+  if (m_globalLexicalModelsUnlimited.size() > 0) {
+    for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
+      AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
   }
 
   //Load extra feature weights
