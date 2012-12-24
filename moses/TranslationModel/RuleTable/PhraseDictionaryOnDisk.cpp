@@ -32,7 +32,6 @@ namespace Moses
 {
 PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
-  CleanUp();
 }
 
 bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
@@ -75,11 +74,6 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
 }
 
 void PhraseDictionaryOnDisk::InitializeForInput(const InputType& /* input */)
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
-}
-
-void PhraseDictionaryOnDisk::CleanUp()
 {
   // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }

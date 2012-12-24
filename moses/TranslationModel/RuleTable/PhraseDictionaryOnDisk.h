@@ -74,7 +74,6 @@ public:
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
 
   void InitializeForInput(const InputType& input);
-  void CleanUp();
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,

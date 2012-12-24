@@ -67,8 +67,6 @@ class RuleTableTrie : public PhraseDictionary
 
   virtual void InitializeForInput(const InputType& i);
 
-  void CleanUp();
-
  private:
   friend class RuleTableLoader;
 

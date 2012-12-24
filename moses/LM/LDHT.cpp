@@ -76,7 +76,7 @@ public:
     virtual LanguageModel* Duplicate(
             ScoreIndexManager& scoreIndexManager) const;
     virtual void InitializeBeforeSentenceProcessing();
-    virtual void CleanUpAfterSentenceProcessing();
+    virtual void CleanUpAfterSentenceProcessing(const InputType &source);
     virtual const FFState* EmptyHypothesisState(const InputType& input) const;
     virtual bool Useable(const Phrase& phrase) const;
     virtual void CalcScore(const Phrase& phrase,
@@ -184,7 +184,7 @@ void LanguageModelLDHT::InitializeBeforeSentenceProcessing() {
     m_start_tick = LDHT::Util::rdtsc();
 }
 
-void LanguageModelLDHT::CleanUpAfterSentenceProcessing() {
+void LanguageModelLDHT::CleanUpAfterSentenceProcessing(const InputType &source) {
     LDHT::Client* client = getClientSafe();
 
     std::cerr << "LDHT sentence stats:" << std::endl;

@@ -28,7 +28,6 @@ namespace Moses
 
 RuleTableTrie::~RuleTableTrie()
 {
-  CleanUp();
 }
 
 bool RuleTableTrie::Load(const std::vector<FactorType> &input,
@@ -58,9 +57,5 @@ void RuleTableTrie::InitializeForInput(const InputType& /* input */)
   // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
 }
 
-void RuleTableTrie::CleanUp()
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
-}
 
 }  // namespace Moses

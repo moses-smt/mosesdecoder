@@ -214,11 +214,6 @@ bool BilingualDynSuffixArray::ExtractPhrases(const int& sntIndex, const int& wor
 	return curSnt.Extract(m_maxPhraseLength, phrasePairs, leftIdx, rightIdx); // extract all phrase Alignments in sentence
 }
 
-void BilingualDynSuffixArray::CleanUp(const InputType& source) 
-{
-	//m_wordPairCache.clear();
-}
-
 int BilingualDynSuffixArray::LoadCorpus(InputFileStream& corpus, const FactorList& factors,
 	std::vector<wordID_t>& cArray, std::vector<wordID_t>& sntArray,
   Vocab* vocab) 
