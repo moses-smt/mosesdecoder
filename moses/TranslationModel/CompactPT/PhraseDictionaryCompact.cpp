@@ -182,7 +182,7 @@ void PhraseDictionaryCompact::InitializeForInput(const Moses::InputType&) {}
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
                                              const TargetPhrase &targetPhrase) { }
 
-void PhraseDictionaryCompact::CleanUp(const InputType &source) {
+void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &source) {
   if(!m_inMemory)
     m_hash.KeepNLastRanges(0.01, 0.2);
     

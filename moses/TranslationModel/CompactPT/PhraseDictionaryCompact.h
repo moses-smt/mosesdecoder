@@ -107,7 +107,7 @@ public:
   void InitializeForInput(const Moses::InputType&);
   
   void CacheForCleanup(TargetPhraseCollection* tpc);
-  void CleanUp(const InputType &source);
+  void CleanUpAfterSentenceProcessing(const InputType &source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
