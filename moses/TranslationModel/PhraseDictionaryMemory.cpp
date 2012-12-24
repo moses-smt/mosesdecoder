@@ -66,7 +66,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
                                   , const LMList &languageModels
                                   , float weightWP)
 {
-  const_cast<LMList&>(languageModels).InitializeBeforeSentenceProcessing();
+  //const_cast<LMList&>(languageModels).InitializeBeforeSentenceProcessing();
 
   const StaticData &staticData = StaticData::Instance();
 

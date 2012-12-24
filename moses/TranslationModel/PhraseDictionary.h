@@ -75,8 +75,10 @@ public:
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
+
   //! Create entry for translation of source to targetPhrase
-  virtual void InitializeForInput(InputType const& source) = 0;
+  virtual void InitializeForInput(InputType const& source)
+  {}
   // clean up temporary memory, called after processing each sentence
   virtual void CleanUpAfterSentenceProcessing(const InputType& source)
   {}
@@ -148,6 +150,7 @@ public:
 
   virtual bool ComputeValueInTranslationTable() const {return true;}
 
+  void InitializeForInput(const InputType& source);
   // clean up temporary memory, called after processing each sentence
   void CleanUpAfterSentenceProcessing(const InputType& source);
 

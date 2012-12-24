@@ -57,6 +57,10 @@ public:
 
   virtual bool IsTuneable() const { return true; }
 
+  //!
+  virtual void InitializeForInput(InputType const& source)
+  {}
+
   // clean up temporary memory, called after processing each sentence
   virtual void CleanUpAfterSentenceProcessing(const InputType& source)
   {}

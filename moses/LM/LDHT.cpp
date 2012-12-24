@@ -75,7 +75,7 @@ public:
     virtual ~LanguageModelLDHT();
     virtual LanguageModel* Duplicate(
             ScoreIndexManager& scoreIndexManager) const;
-    virtual void InitializeBeforeSentenceProcessing();
+    virtual void InitializeBeforeSentenceProcessing(InputType const& source);
     virtual void CleanUpAfterSentenceProcessing(const InputType &source);
     virtual const FFState* EmptyHypothesisState(const InputType& input) const;
     virtual bool Useable(const Phrase& phrase) const;
@@ -179,7 +179,7 @@ LDHT::Client* LanguageModelLDHT::initTSSClient() {
     return client;
 }
 
-void LanguageModelLDHT::InitializeBeforeSentenceProcessing() {
+void LanguageModelLDHT::InitializeBeforeSentenceProcessing(InputType const& source) {
     getClientSafe()->clearCache();
     m_start_tick = LDHT::Util::rdtsc();
 }

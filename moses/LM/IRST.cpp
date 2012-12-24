@@ -250,6 +250,13 @@ bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
   return false;
 }
 
+void LanguageModelIRST::InitializeBeforeSentenceProcessing(InputType const& source)
+{
+  //nothing to do
+#ifdef TRACE_CACHE
+  m_lmtb->sentence_id++;
+#endif
+}
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
 {
@@ -263,14 +270,6 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
     TRACE_ERR( "reset caches\n");
     m_lmtb->reset_caches();
   }
-}
-
-void LanguageModelIRST::InitializeBeforeSentenceProcessing()
-{
-  //nothing to do
-#ifdef TRACE_CACHE
-  m_lmtb->sentence_id++;
-#endif
 }
 
 }

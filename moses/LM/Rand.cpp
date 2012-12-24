@@ -54,7 +54,7 @@ public:
   void CleanUpAfterSentenceProcessing(const InputType& source) {
     m_lm->clearCaches(); // clear caches
   }
-  void InitializeBeforeSentenceProcessing() {
+  void InitializeBeforeSentenceProcessing(InputType const& source) {
     m_lm->initThreadSpecificData(); // Creates thread specific data iff
                                     // compiled with multithreading.
   }
