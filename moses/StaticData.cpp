@@ -2051,12 +2051,12 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
   {
     PhraseDictionaryFeature &phraseDictionaryFeature = *phraseDictionaries[i];
     PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
-    phraseDictionary->CleanUp(source);
+    phraseDictionary->CleanUpAfterSentenceProcessing(source);
 
   }
 
   for(size_t i=0;i<generationDictionaries.size();++i)
-      generationDictionaries[i]->CleanUp(source);
+      generationDictionaries[i]->CleanUpAfterSentenceProcessing(source);
 
   LMList lmList = StaticData::Instance().GetLMList();
   lmList.CleanUpAfterSentenceProcessing(source);

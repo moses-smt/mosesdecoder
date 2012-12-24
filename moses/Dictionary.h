@@ -49,7 +49,8 @@ public:
   virtual DecodeType GetDecodeType() const = 0;
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUp(const InputType& source);
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
+  {}
 };
 
 }
