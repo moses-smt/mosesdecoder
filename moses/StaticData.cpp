@@ -2039,7 +2039,7 @@ void StaticData::InitializeBeforeSentenceProcessing(const InputType& source) con
   */
 
   LMList lmList = StaticData::Instance().GetLMList();
-  lmList.InitializeBeforeSentenceProcessing();
+  lmList.InitializeForInput(source);
 }
 
 void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {

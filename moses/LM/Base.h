@@ -58,7 +58,6 @@ public:
   float GetWeight() const;
   float GetOOVWeight() const;
 
-  virtual void InitializeBeforeSentenceProcessing() {}
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
