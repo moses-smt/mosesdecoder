@@ -59,7 +59,7 @@ Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm sea
   ,m_hypoId(0)
   ,m_source(source)
 {
-  StaticData::Instance().InitializeBeforeSentenceProcessing(source);
+  StaticData::Instance().InitializeForInput(source);
 }
 
 Manager::~Manager()
@@ -80,7 +80,7 @@ void Manager::ProcessSentence()
   ResetSentenceStats(m_source);
 
   // collect translation options for this sentence
-  StaticData::Instance().InitializeBeforeSentenceProcessing(m_source);
+  StaticData::Instance().InitializeForInput(m_source);
   
   Timer getOptionsTime;
   getOptionsTime.start();

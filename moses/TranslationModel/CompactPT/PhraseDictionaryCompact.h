@@ -103,8 +103,6 @@ public:
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
   
   void AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase);
-
-  void InitializeForInput(const Moses::InputType&);
   
   void CacheForCleanup(TargetPhraseCollection* tpc);
   void CleanUpAfterSentenceProcessing(const InputType &source);

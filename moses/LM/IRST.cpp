@@ -250,7 +250,7 @@ bool LMCacheCleanup(size_t sentences_done, size_t m_lmcache_cleanup_threshold)
   return false;
 }
 
-void LanguageModelIRST::InitializeBeforeSentenceProcessing(InputType const& source)
+void LanguageModelIRST::InitializeForInput(InputType const& source)
 {
   //nothing to do
 #ifdef TRACE_CACHE

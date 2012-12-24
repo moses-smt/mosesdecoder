@@ -28,7 +28,6 @@ public:
              , float weightWP);
   // functions below required by base class
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase& src) const;
-  void InitializeForInput(const InputType& i);
   void insertSnt(string&, string&, string&);
   void deleteSnt(unsigned, unsigned);
   ChartRuleLookupManager *CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&);

@@ -52,10 +52,5 @@ bool RuleTableTrie::Load(const std::vector<FactorType> &input,
   return ret;
 }
 
-void RuleTableTrie::InitializeForInput(const InputType& /* input */)
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
-}
-
 
 }  // namespace Moses

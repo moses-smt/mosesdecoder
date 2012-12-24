@@ -177,8 +177,6 @@ void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection* tpc) {
   ref.push_back(tpc);
 }
 
-void PhraseDictionaryCompact::InitializeForInput(const Moses::InputType&) {}
-
 void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
                                              const TargetPhrase &targetPhrase) { }
 

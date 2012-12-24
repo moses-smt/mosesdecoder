@@ -65,8 +65,6 @@ class RuleTableTrie : public PhraseDictionary
     return NULL;
   }
 
-  virtual void InitializeForInput(const InputType& i);
-
  private:
   friend class RuleTableLoader;
 

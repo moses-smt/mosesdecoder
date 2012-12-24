@@ -2018,7 +2018,7 @@ void StaticData::ConfigDictionaries() {
 
 }
 
-void StaticData::InitializeBeforeSentenceProcessing(const InputType& source) const {
+void StaticData::InitializeForInput(const InputType& source) const {
   const StaticData &staticData = StaticData::Instance();
   const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
 

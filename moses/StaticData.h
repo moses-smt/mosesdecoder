@@ -784,7 +784,7 @@ public:
   void ConfigDictionaries();
 
   //sentence (and thread) specific initialisationn and cleanup
-  void InitializeBeforeSentenceProcessing(const InputType& source) const;
+  void InitializeForInput(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
 };
 

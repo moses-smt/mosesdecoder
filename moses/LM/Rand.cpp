@@ -51,12 +51,11 @@ public:
   ~LanguageModelRandLM() {
     delete m_lm;
   }
+  void InitializeForInput(InputType const& source) {
+    m_lm->initThreadSpecificData(); // Creates thread specific data iff                                    // compiled with multithreading.
+  }
   void CleanUpAfterSentenceProcessing(const InputType& source) {
     m_lm->clearCaches(); // clear caches
-  }
-  void InitializeBeforeSentenceProcessing(InputType const& source) {
-    m_lm->initThreadSpecificData(); // Creates thread specific data iff
-                                    // compiled with multithreading.
   }
 protected:
   std::vector<randlm::WordID> m_randlm_ids_vec;

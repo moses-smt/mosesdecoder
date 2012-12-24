@@ -73,11 +73,6 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
   return NULL;
 }
 
-void PhraseDictionaryOnDisk::InitializeForInput(const InputType& /* input */)
-{
-  // Nothing to do: sentence-specific state is stored in ChartRuleLookupManager
-}
-
 void PhraseDictionaryOnDisk::LoadTargetLookup()
 {
   // TODO
