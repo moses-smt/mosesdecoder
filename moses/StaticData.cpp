@@ -2060,6 +2060,17 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
   LMList lmList = StaticData::Instance().GetLMList();
   lmList.CleanUpAfterSentenceProcessing(source);
 }
+
+void StaticData::AddFeatureFunction(FeatureFunction* ff) {
+   m_producers.push_back(ff);
+
+  if (ff->IsStateless()) {
+    m_statelessFFs.push_back(static_cast<const StatelessFeatureFunction*>(ff));
+  } else {
+    m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
+  }
+}
+
 } // namespace
 
 
