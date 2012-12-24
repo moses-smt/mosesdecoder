@@ -11,6 +11,7 @@
 
 namespace Moses
 {
+class InputType;
 
  /*
  * @note do not confuse this with a producer/consumer pattern.
@@ -55,6 +56,10 @@ public:
   virtual float GetSparseProducerWeight() const { return 1; }
 
   virtual bool IsTuneable() const { return true; }
+
+  // clean up temporary memory, called after processing each sentence
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
+  {}
 };
 
 

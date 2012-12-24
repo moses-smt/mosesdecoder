@@ -318,5 +318,19 @@ size_t PhraseDictionaryFeature::GetDictIndex() const
   return m_dictIndex;
 }
 
+void PhraseDictionaryFeature::CleanUpAfterSentenceProcessing(const InputType& source)
+{
+  PhraseDictionary* dict;
+  if (m_useThreadSafePhraseDictionary) {
+    //thread safe dictionary should already be loaded
+    dict = m_threadSafePhraseDictionary.get();
+  } else {
+    dict = m_threadUnsafePhraseDictionary.get();
+  }
+  CHECK(dict);
+  dict->CleanUpAfterSentenceProcessing(source);
+
+}
+
 }
 

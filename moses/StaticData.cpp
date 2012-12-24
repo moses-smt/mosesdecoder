@@ -2050,8 +2050,7 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
   for(size_t i=0;i<phraseDictionaries.size();++i)
   {
     PhraseDictionaryFeature &phraseDictionaryFeature = *phraseDictionaries[i];
-    PhraseDictionary* phraseDictionary = const_cast<PhraseDictionary*>(phraseDictionaryFeature.GetDictionary());
-    phraseDictionary->CleanUpAfterSentenceProcessing(source);
+    phraseDictionaryFeature.CleanUpAfterSentenceProcessing(source);
 
   }
 

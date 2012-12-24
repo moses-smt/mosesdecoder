@@ -77,6 +77,9 @@ public:
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const;
   //! Create entry for translation of source to targetPhrase
   virtual void InitializeForInput(InputType const& source) = 0;
+  // clean up temporary memory, called after processing each sentence
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
+  {}
 
   //! Create a sentence-specific manager for SCFG rule lookup.
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
@@ -144,6 +147,9 @@ public:
   }
 
   virtual bool ComputeValueInTranslationTable() const {return true;}
+
+  // clean up temporary memory, called after processing each sentence
+  void CleanUpAfterSentenceProcessing(const InputType& source);
 
 
 protected:

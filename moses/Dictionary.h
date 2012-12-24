@@ -48,9 +48,6 @@ public:
   //! returns whether this dictionary is to be used for Translate or Generate
   virtual DecodeType GetDecodeType() const = 0;
 
-  // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
-  {}
 };
 
 }
