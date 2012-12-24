@@ -60,8 +60,6 @@ public:
 
   virtual void InitializeBeforeSentenceProcessing() {}
 
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {}
-
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
   /* whether this LM can be used on a particular phrase.

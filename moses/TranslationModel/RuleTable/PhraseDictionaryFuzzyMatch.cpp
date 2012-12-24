@@ -326,7 +326,7 @@ namespace Moses
     }
   }
   
-  void PhraseDictionaryFuzzyMatch::CleanUp(const InputType &source)
+  void PhraseDictionaryFuzzyMatch::CleanUpAfterSentenceProcessing(const InputType &source)
   {
     m_collection.erase(source.GetTranslationId());
   }

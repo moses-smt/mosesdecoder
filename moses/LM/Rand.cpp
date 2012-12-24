@@ -51,7 +51,7 @@ public:
   ~LanguageModelRandLM() {
     delete m_lm;
   }
-  void CleanUpAfterSentenceProcessing() {
+  void CleanUpAfterSentenceProcessing(const InputType& source) {
     m_lm->clearCaches(); // clear caches
   }
   void InitializeBeforeSentenceProcessing() {

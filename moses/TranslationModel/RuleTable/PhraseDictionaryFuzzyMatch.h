@@ -56,7 +56,7 @@ namespace Moses
                                                     const InputType &,
                                                     const ChartCellCollectionBase &);
     void InitializeForInput(InputType const& inputSentence);
-    void CleanUp(const InputType& source);
+    void CleanUpAfterSentenceProcessing(const InputType& source);
     
     virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const
     {
