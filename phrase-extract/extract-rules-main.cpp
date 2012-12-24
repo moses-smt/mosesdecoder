@@ -337,7 +337,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 
-    if (sentence.create(targetString, sourceString, alignmentString, i, options.boundaryRules)) {
+    if (sentence.create(targetString, sourceString, alignmentString,"", i, options.boundaryRules)) {
       if (options.unknownWordLabelFlag) {
         collectWordLabelCounts(sentence);
       }

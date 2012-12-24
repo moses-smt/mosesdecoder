@@ -13,8 +13,8 @@ void PhraseLengthFeature::Evaluate(
               ScoreComponentCollection* accumulator) const
 {
   // get length of source and target phrase
-  size_t sourceLength = context.GetTargetPhrase().GetSize();
-  size_t targetLength = context.GetTranslationOption().GetSourcePhrase()->GetSize();
+  size_t targetLength = context.GetTargetPhrase().GetSize();
+  size_t sourceLength = context.GetTranslationOption().GetSourceWordsRange().GetNumWordsCovered();
 
   // create feature names
   stringstream nameSource;
