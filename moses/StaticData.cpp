@@ -88,8 +88,6 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_targetBigramFeature(NULL)
   ,m_phraseBoundaryFeature(NULL)
-  ,m_phraseLengthFeature(NULL)
-  ,m_targetWordInsertionFeature(NULL)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
@@ -566,10 +564,6 @@ bool StaticData::LoadData(Parameter *parameter)
       			m_targetNgramFeatures[i]->SetSparseFeatureReporting();
       if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerDescription()) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
-      if (m_phraseLengthFeature && name.compare(m_phraseLengthFeature->GetScoreProducerDescription()) == 0)
-        m_phraseLengthFeature->SetSparseFeatureReporting();
-      if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerDescription()) == 0)
-        m_targetWordInsertionFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeatures.size() > 0)
       	for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
 	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerDescription()) == 0)
@@ -632,12 +626,6 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   if (m_phraseBoundaryFeature) {
     AddFeatureFunction(m_phraseBoundaryFeature);
-  }
-  if (m_phraseLengthFeature) {
-    AddFeatureFunction(m_phraseLengthFeature);
-  }
-  if (m_targetWordInsertionFeature) {
-    AddFeatureFunction(m_targetWordInsertionFeature);
   }
   if (m_wordTranslationFeatures.size() > 0) {
     for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
@@ -1617,8 +1605,13 @@ bool StaticData::LoadPhrasePairFeature()
 bool StaticData::LoadPhraseLengthFeature()
 {
   if (m_parameter->isParamSpecified("phrase-length-feature")) {
-    m_phraseLengthFeature = new PhraseLengthFeature();
+    PhraseLengthFeature *phraseLengthFeature = new PhraseLengthFeature();
+    if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+        phraseLengthFeature->SetSparseFeatureReporting();
+    }
+    AddFeatureFunction(phraseLengthFeature);
   }
+
   return true;
 }
 
@@ -1643,17 +1636,24 @@ bool StaticData::LoadTargetWordInsertionFeature()
 
   // set factor
   FactorType factorId = Scan<size_t>(tokens[0]);
-  m_targetWordInsertionFeature = new TargetWordInsertionFeature(factorId);
+
+  TargetWordInsertionFeature *targetWordInsertionFeature = new TargetWordInsertionFeature(factorId);
 
   // load word list for restricted feature set
   if (tokens.size() == 2) {
     string filename = tokens[1];
     cerr << "loading target word insertion word list from " << filename << endl;
-    if (!m_targetWordInsertionFeature->Load(filename)) {
+    if (!targetWordInsertionFeature->Load(filename)) {
       UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
       return false;
     }
   }
+
+  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+    targetWordInsertionFeature->SetSparseFeatureReporting();
+  }
+  AddFeatureFunction(targetWordInsertionFeature);
+
 
   return true;
 }
