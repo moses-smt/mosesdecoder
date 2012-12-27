@@ -1989,27 +1989,10 @@ void StaticData::ConfigDictionaries() {
 }
 
 void StaticData::InitializeForInput(const InputType& source) const {
-  const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
-
-  for (vector<PhraseDictionaryFeature*>::const_iterator i = phraseDictionaries.begin();
-       i != phraseDictionaries.end(); ++i) {
-         (*i)->InitializeForInput(source);
-       }
-
-  const std::vector<LexicalReordering*> &reorderingTables = StaticData::Instance().GetReorderModels();
-  for(size_t i=0;i<reorderingTables.size();++i) {
-    reorderingTables[i]->InitializeForInput(source);
+  for(size_t i=0;i<m_producers.size();++i) {
+    ScoreProducer &ff = *m_producers[i];
+    ff.InitializeForInput(source);
   }
-
-  /*
-  for(size_t i=0;i<m_globalLexicalModels.size();++i) {
-    m_globalLexicalModels[i]->InitializeForInput((Sentence const&)source);
-  }
-  */
-
-  LMList lmList = StaticData::Instance().GetLMList();
-  lmList.InitializeForInput(source);
 }
 
 void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
