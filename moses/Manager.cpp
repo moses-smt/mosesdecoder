@@ -78,9 +78,6 @@ void Manager::ProcessSentence()
 {
   // reset statistics
   ResetSentenceStats(m_source);
-
-  // collect translation options for this sentence
-  StaticData::Instance().InitializeForInput(m_source);
   
   Timer getOptionsTime;
   getOptionsTime.start();
