@@ -559,25 +559,21 @@ bool StaticData::LoadData(Parameter *parameter)
       if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerDescription()) == 0)
         m_targetBigramFeature->SetSparseFeatureReporting();
       if (m_targetNgramFeatures.size() > 0)
-      	for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-      		if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerDescription()) == 0)
-      			m_targetNgramFeatures[i]->SetSparseFeatureReporting();
+        for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
+          if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerDescription()) == 0)
+            m_targetNgramFeatures[i]->SetSparseFeatureReporting();
       if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerDescription()) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeatures.size() > 0)
-      	for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerDescription()) == 0)
-	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
-      if (m_phrasePairFeatures.size() > 0)
-      	for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-	  if (name.compare(m_phrasePairFeatures[i]->GetScoreProducerDescription()) == 0)
-	    m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
+        for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
+          if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerDescription()) == 0)
+            m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
         if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerDescription()) == 0) {
-          m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();          
+          m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();
         }
       }
-    }
+    } // for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").
   }
 
   // rip out trans system
@@ -630,10 +626,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_wordTranslationFeatures.size() > 0) {
     for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
       AddFeatureFunction(m_wordTranslationFeatures[i]);
-  }
-  if (m_phrasePairFeatures.size() > 0) {
-    for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-      AddFeatureFunction(m_phrasePairFeatures[i]);
   }
 #ifdef HAVE_SYNLM
   if (m_syntacticLanguageModel != NULL) {
@@ -693,18 +685,7 @@ bool StaticData::LoadData(Parameter *parameter)
           m_metaFeatureProducer = new MetaFeatureProducer("wt");
       }
     }
-    
-    // PP: apply additional weight to sparse features if applicable
-    for (size_t i = 0; i < m_phrasePairFeatures.size(); ++i) {
-      float weight = m_phrasePairFeatures[i]->GetSparseProducerWeight();
-      if (weight != 1) {
-        AddSparseProducer(m_phrasePairFeatures[i]);
-        cerr << "pp sparse producer weight: " << weight << endl;
-        if (m_mira)
-          m_metaFeatureProducer = new MetaFeatureProducer("pp");
-      }
-    }
-    
+
     // PB: apply additional weight to sparse features if applicable
     if (m_phraseBoundaryFeature) {
     	float weight = m_phraseBoundaryFeature->GetSparseProducerWeight();
@@ -1537,12 +1518,6 @@ bool StaticData::LoadPhraseBoundaryFeature()
 
 bool StaticData::LoadPhrasePairFeature()
 {
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pp"));
-  if (weight.size() > 1) {
-	std::cerr << "Only one sparse producer weight allowed for the phrase pair feature" << std::endl;
-	return false;
-  }
-
   const vector<string> &parameters = m_parameter->GetParam("phrase-pair-feature");
   if (parameters.size() == 0) return true;
  
@@ -1553,6 +1528,8 @@ bool StaticData::LoadPhrasePairFeature()
 		       "[simple source-trigger] [ignore-punctuation] [domain-trigger] [filename-src]");
       return false;
     }
+
+    const vector<float> &weight = m_parameter->GetWeights("PhrasePairFeature", i);
   
     vector <string> factors;
     if (tokens.size() == 2)
@@ -1572,33 +1549,46 @@ bool StaticData::LoadPhrasePairFeature()
     if (tokens.size() >= 5)
       domainTrigger = Scan<size_t>(tokens[4]);
     
-    m_phrasePairFeatures.push_back(new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext, 
-							 ignorePunctuation, domainTrigger));
-    if (weight.size() > i)
-      m_phrasePairFeatures[i]->SetSparseProducerWeight(weight[i]);
+    PhrasePairFeature *phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext,
+							 ignorePunctuation, domainTrigger);
+    phrasePairFeature->SetSparseProducerWeight(weight[i]);
     
     // load word list 
     if (tokens.size() == 6) {
       string filenameSource = tokens[5];
       if (domainTrigger) {
-	const vector<string> &texttype = m_parameter->GetParam("text-type");
-	if (texttype.size() != 1) {
-	  UserMessage::Add("Need texttype to load dictionary for domain triggers.");
-	  return false;
-	}
-	stringstream filename(filenameSource + "." + texttype[0]);
-	filenameSource = filename.str();
-	cerr << "loading word translation term list from " << filenameSource << endl;
+        const vector<string> &texttype = m_parameter->GetParam("text-type");
+        if (texttype.size() != 1) {
+          UserMessage::Add("Need texttype to load dictionary for domain triggers.");
+          return false;
+        }
+        stringstream filename(filenameSource + "." + texttype[0]);
+        filenameSource = filename.str();
+        cerr << "loading word translation term list from " << filenameSource << endl;
       }
       else {
-	cerr << "loading word translation word list from " << filenameSource << endl;
+        cerr << "loading word translation word list from " << filenameSource << endl;
       }
-      if (!m_phrasePairFeatures[i]->Load(filenameSource)) {
-	UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
-	return false;
-      }
+      if (!phrasePairFeature->Load(filenameSource)) {
+        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
+        return false;
+      } // if (!phrasePairFeature->Load(filenameSource)) {
+    } // if (tokens.size() == 6) {
+
+    // TODO not sure about this
+    if (weight[0] != 1) {
+      AddSparseProducer(phrasePairFeature);
+      cerr << "pp sparse producer weight: " << weight[0] << endl;
+      if (m_mira)
+        m_metaFeatureProducer = new MetaFeatureProducer("pp");
     }
-  }
+
+    if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+      phrasePairFeature->SetSparseFeatureReporting();
+    }
+    AddFeatureFunction(phrasePairFeature);
+  } // for (size_t i=0; i<parameters.size(); ++i)
+
   return true;
 }
 
