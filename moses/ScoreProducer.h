@@ -29,7 +29,6 @@ private:
 	
 protected:
 	ScoreProducer(const std::string& description, size_t numScoreComponents);
-	virtual ~ScoreProducer();
 
 public:
 
@@ -38,6 +37,8 @@ public:
   static void ResetDescriptionCounts() {
     description_counts.clear();
   }
+
+  virtual ~ScoreProducer();
 
 	//! returns the number of scores that a subclass produces.
 	//! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc

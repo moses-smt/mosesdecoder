@@ -29,14 +29,6 @@ using namespace std;
 
 namespace Moses
 {
-LMList::~LMList()
-{
-}
-
-void LMList::CleanUp()
-{
-  RemoveAllInColl(m_coll);
-}
 
 void LMList::CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore,  ScoreComponentCollection* breakdown) const
 {

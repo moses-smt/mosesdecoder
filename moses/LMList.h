@@ -34,8 +34,6 @@ public:
 
 	LMList()
 	{}
-    void CleanUp();
-	~LMList();
 	
 	void CalcScore(const Phrase &phrase, float &retFullScore, float &retNGramScore, float &retOOVScore, ScoreComponentCollection* breakdown) const;
   void InitializeForInput(InputType const& source) {

@@ -771,44 +771,14 @@ void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& w
 
 StaticData::~StaticData()
 {
-  RemoveAllInColl(m_sparsePhraseDictionary);
-  RemoveAllInColl(m_phraseDictionary);
-  RemoveAllInColl(m_generationDictionary);
-  RemoveAllInColl(m_reorderModels);
-  RemoveAllInColl(m_globalLexicalModels);
-	
-#ifdef HAVE_SYNLM
-	delete m_syntacticLanguageModel;
-#endif
+  for(size_t i=0;i<m_producers.size();++i) {
+    ScoreProducer *ff = m_producers[i];
+    delete ff;
+  }
 
-
-  RemoveAllInColl(m_decodeGraphs);
-  m_languageModel.CleanUp();
-
-  // delete trans opt
-  ClearTransOptionCache();
-
-  // small score producers
-  delete m_wpProducer;
-  delete m_unknownWordPenaltyProducer;
-  delete m_distortionScoreProducer;
-  delete m_targetBigramFeature;
-  for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-  	delete m_targetNgramFeatures[i];
-  delete m_phraseBoundaryFeature;
-  delete m_phraseLengthFeature;
-  delete m_targetWordInsertionFeature;
-  delete m_sourceWordDeletionFeature;
-  for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-    delete m_wordTranslationFeatures[i];
-  for (size_t i=0; i < m_phrasePairFeatures.size(); ++i)
-    delete m_phrasePairFeatures[i];
-  for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
-  	delete m_globalLexicalModelsUnlimited[i];
 
   // memory pools
   Phrase::FinalizeMemPool();
-
 }
 
 #ifdef HAVE_SYNLM
