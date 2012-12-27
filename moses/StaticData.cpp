@@ -1996,22 +1996,10 @@ void StaticData::InitializeForInput(const InputType& source) const {
 }
 
 void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
- const StaticData &staticData = StaticData::Instance();
- const std::vector<PhraseDictionaryFeature*> &phraseDictionaries = staticData.GetPhraseDictionaries();
- const std::vector<GenerationDictionary*> &generationDictionaries =  staticData.GetGenerationDictionaries();
-
-  for(size_t i=0;i<phraseDictionaries.size();++i)
-  {
-    PhraseDictionaryFeature &phraseDictionaryFeature = *phraseDictionaries[i];
-    phraseDictionaryFeature.CleanUpAfterSentenceProcessing(source);
-
+  for(size_t i=0;i<m_producers.size();++i) {
+    ScoreProducer &ff = *m_producers[i];
+    ff.CleanUpAfterSentenceProcessing(source);
   }
-
-  for(size_t i=0;i<generationDictionaries.size();++i)
-      generationDictionaries[i]->CleanUpAfterSentenceProcessing(source);
-
-  LMList lmList = StaticData::Instance().GetLMList();
-  lmList.CleanUpAfterSentenceProcessing(source);
 }
 
 void StaticData::AddFeatureFunction(FeatureFunction* ff) {
