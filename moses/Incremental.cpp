@@ -180,7 +180,6 @@ Manager::Manager(const InputType &source, const TranslationSystem &system) :
   n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
 
 Manager::~Manager() {
-  StaticData::Instance().CleanUpAfterSentenceProcessing(source_);
 }
 
 template <class Model, class Best> search::History Manager::PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out) {

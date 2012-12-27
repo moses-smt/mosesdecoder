@@ -141,6 +141,7 @@ ChartParser::ChartParser(InputType const &source, const TranslationSystem &syste
 
 ChartParser::~ChartParser() {
   RemoveAllInColl(m_ruleLookupManagers);
+  StaticData::Instance().CleanUpAfterSentenceProcessing(m_source);
 }
 
 void ChartParser::Create(const WordsRange &wordsRange, ChartParserCallback &to) {
