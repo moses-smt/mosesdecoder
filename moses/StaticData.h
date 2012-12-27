@@ -114,7 +114,6 @@ protected:
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
   PhraseLengthFeature* m_phraseLengthFeature;
   TargetWordInsertionFeature* m_targetWordInsertionFeature;
-  SourceWordDeletionFeature* m_sourceWordDeletionFeature;
   std::vector<WordTranslationFeature*> m_wordTranslationFeatures;
   std::vector<PhrasePairFeature*> m_phrasePairFeatures;
   float

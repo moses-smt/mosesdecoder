@@ -90,7 +90,6 @@ StaticData::StaticData()
   ,m_phraseBoundaryFeature(NULL)
   ,m_phraseLengthFeature(NULL)
   ,m_targetWordInsertionFeature(NULL)
-  ,m_sourceWordDeletionFeature(NULL)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
@@ -571,8 +570,6 @@ bool StaticData::LoadData(Parameter *parameter)
         m_phraseLengthFeature->SetSparseFeatureReporting();
       if (m_targetWordInsertionFeature && name.compare(m_targetWordInsertionFeature->GetScoreProducerDescription()) == 0)
         m_targetWordInsertionFeature->SetSparseFeatureReporting();
-      if (m_sourceWordDeletionFeature && name.compare(m_sourceWordDeletionFeature->GetScoreProducerDescription()) == 0)
-        m_sourceWordDeletionFeature->SetSparseFeatureReporting();
       if (m_wordTranslationFeatures.size() > 0)
       	for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
 	  if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerDescription()) == 0)
@@ -641,9 +638,6 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   if (m_targetWordInsertionFeature) {
     AddFeatureFunction(m_targetWordInsertionFeature);
-  }
-  if (m_sourceWordDeletionFeature) {
-    AddFeatureFunction(m_sourceWordDeletionFeature);
   }
   if (m_wordTranslationFeatures.size() > 0) {
     for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
@@ -1685,17 +1679,24 @@ bool StaticData::LoadSourceWordDeletionFeature()
 
   // set factor
   FactorType factorId = Scan<size_t>(tokens[0]);
-  m_sourceWordDeletionFeature = new SourceWordDeletionFeature(factorId);
+
+  SourceWordDeletionFeature *sourceWordDeletionFeature = new SourceWordDeletionFeature(factorId);
 
   // load word list for restricted feature set
   if (tokens.size() == 2) {
     string filename = tokens[1];
     cerr << "loading source word deletion word list from " << filename << endl;
-    if (!m_sourceWordDeletionFeature->Load(filename)) {
+    if (!sourceWordDeletionFeature->Load(filename)) {
       UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
       return false;
     }
   }
+
+  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+    sourceWordDeletionFeature->SetSparseFeatureReporting();
+  }
+
+  AddFeatureFunction(sourceWordDeletionFeature);
 
   return true;
 }
