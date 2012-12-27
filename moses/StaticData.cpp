@@ -590,10 +590,10 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   // rip out trans system
-  StaticData::InstanceNonConst().AddFeatureFunction(m_wpProducer);
-  StaticData::InstanceNonConst().AddFeatureFunction(m_unknownWordPenaltyProducer);
+  AddFeatureFunction(m_wpProducer);
+  AddFeatureFunction(m_unknownWordPenaltyProducer);
   if (m_distortionScoreProducer) {
-    StaticData::InstanceNonConst().AddFeatureFunction(m_distortionScoreProducer);
+    AddFeatureFunction(m_distortionScoreProducer);
   }
 
 
@@ -1976,12 +1976,12 @@ void StaticData::ConfigDictionaries() {
         const DecodeStep* step = *j;
         PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
         if (pdict) {
-          StaticData::InstanceNonConst().AddFeatureFunction(pdict);
+          AddFeatureFunction(pdict);
           pdict->InitDictionary(NULL);
         }
         GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
         if (gdict) {
-          StaticData::InstanceNonConst().AddFeatureFunction(gdict);
+          AddFeatureFunction(gdict);
         }
       }
   }
