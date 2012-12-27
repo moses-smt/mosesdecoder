@@ -564,10 +564,6 @@ bool StaticData::LoadData(Parameter *parameter)
             m_targetNgramFeatures[i]->SetSparseFeatureReporting();
       if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerDescription()) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
-      if (m_wordTranslationFeatures.size() > 0)
-        for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-          if (name.compare(m_wordTranslationFeatures[i]->GetScoreProducerDescription()) == 0)
-            m_wordTranslationFeatures[i]->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
         if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerDescription()) == 0) {
           m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();
@@ -623,10 +619,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_phraseBoundaryFeature) {
     AddFeatureFunction(m_phraseBoundaryFeature);
   }
-  if (m_wordTranslationFeatures.size() > 0) {
-    for (size_t i=0; i < m_wordTranslationFeatures.size(); ++i)
-      AddFeatureFunction(m_wordTranslationFeatures[i]);
-  }
 #ifdef HAVE_SYNLM
   if (m_syntacticLanguageModel != NULL) {
     AddFeatureFunction(m_syntacticLanguageModel);
@@ -673,17 +665,6 @@ bool StaticData::LoadData(Parameter *parameter)
     	  AddSparseProducer(m_globalLexicalModelsUnlimited[i]);
     	  cerr << "glm sparse producer weight: " << weight << endl;
     	}
-    }
-
-    // WT: apply additional weight to sparse features if applicable
-    for (size_t i = 0; i < m_wordTranslationFeatures.size(); ++i) {
-      float weight = m_wordTranslationFeatures[i]->GetSparseProducerWeight();
-      if (weight != 1) {
-        AddSparseProducer(m_wordTranslationFeatures[i]);
-        cerr << "wt sparse producer weight: " << weight << endl;
-        if (m_mira)
-          m_metaFeatureProducer = new MetaFeatureProducer("wt");
-      }
     }
 
     // PB: apply additional weight to sparse features if applicable
@@ -1729,42 +1710,54 @@ bool StaticData::LoadWordTranslationFeature()
       domainTrigger = Scan<size_t>(tokens[5]);
     }
     
-    m_wordTranslationFeatures.push_back(new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
-							sourceTrigger, targetTrigger, ignorePunctuation, domainTrigger));
-    if (weight.size() > i)
-      m_wordTranslationFeatures[i]->SetSparseProducerWeight(weight[i]);
+    WordTranslationFeature *wordTranslationFeature = new WordTranslationFeature(factorIdSource, factorIdTarget, simple,
+							sourceTrigger, targetTrigger, ignorePunctuation, domainTrigger);
+    wordTranslationFeature->SetSparseProducerWeight(weight[i]);
     
     // load word list for restricted feature set
     if (tokens.size() == 7) {
       string filenameSource = tokens[6];
       if (domainTrigger) {
-	const vector<string> &texttype = m_parameter->GetParam("text-type");
-	if (texttype.size() != 1) {
-	  UserMessage::Add("Need texttype to load dictionary for domain triggers.");
-	  return false;
-	}
-	stringstream filename(filenameSource + "." + texttype[0]);
-	filenameSource = filename.str();    
-	cerr << "loading word translation term list from " << filenameSource << endl;
+        const vector<string> &texttype = m_parameter->GetParam("text-type");
+        if (texttype.size() != 1) {
+          UserMessage::Add("Need texttype to load dictionary for domain triggers.");
+          return false;
+        }
+        stringstream filename(filenameSource + "." + texttype[0]);
+        filenameSource = filename.str();
+        cerr << "loading word translation term list from " << filenameSource << endl;
       }
       else {
-	cerr << "loading word translation word lists from " << filenameSource << endl;
+        cerr << "loading word translation word lists from " << filenameSource << endl;
       }
-      if (!m_wordTranslationFeatures[i]->Load(filenameSource, "")) {
-	UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
-	return false;
+      if (!wordTranslationFeature->Load(filenameSource, "")) {
+        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
+        return false;
       }
-    }
+    } // if (tokens.size() == 7)
     else if (tokens.size() == 8) {
       string filenameSource = tokens[6];
       string filenameTarget = tokens[7];
       cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
-      if (!m_wordTranslationFeatures[i]->Load(filenameSource, filenameTarget)) {
-	UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
-	return false;
+      if (!wordTranslationFeature->Load(filenameSource, filenameTarget)) {
+        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+        return false;
       }
+    } //else if (tokens.size() == 8) {
+
+    // TODO not sure about this
+    if (weight[0] != 1) {
+      AddSparseProducer(wordTranslationFeature);
+      cerr << "wt sparse producer weight: " << weight[0] << endl;
+      if (m_mira)
+        m_metaFeatureProducer = new MetaFeatureProducer("wt");
     }
-  }
+
+    if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+      wordTranslationFeature->SetSparseFeatureReporting();
+    }
+    AddFeatureFunction(wordTranslationFeature);
+  } // for (size_t i=0; i<parameters.size(); ++i)
 
   return true;
 }

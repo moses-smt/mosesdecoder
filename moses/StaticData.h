@@ -112,7 +112,6 @@ protected:
   TargetBigramFeature *m_targetBigramFeature;
   std::vector<TargetNgramFeature*> m_targetNgramFeatures;
   PhraseBoundaryFeature *m_phraseBoundaryFeature;
-  std::vector<WordTranslationFeature*> m_wordTranslationFeatures;
   float
   m_beamWidth,
   m_earlyDiscardingThreshold,
