@@ -257,24 +257,6 @@ void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system)
   //Other types will be lazy loaded
 }
 
-//Called when we start translating a new sentence
-void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system, const InputType& source)
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    //thread safe dictionary should already be loaded
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    //thread-unsafe dictionary may need to be loaded if this is a new thread.
-    if (!m_threadUnsafePhraseDictionary.get()) {
-      m_threadUnsafePhraseDictionary.reset(LoadPhraseTable(system));
-    }
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  dict->InitializeForInput(source);
-}
-
 const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const
 {
   PhraseDictionary* dict;
@@ -325,6 +307,10 @@ void PhraseDictionaryFeature::InitializeForInput(const InputType& source)
     //thread safe dictionary should already be loaded
     dict = m_threadSafePhraseDictionary.get();
   } else {
+    //thread-unsafe dictionary may need to be loaded if this is a new thread.
+    if (!m_threadUnsafePhraseDictionary.get()) {
+      m_threadUnsafePhraseDictionary.reset(LoadPhraseTable(NULL));
+    }
     dict = m_threadUnsafePhraseDictionary.get();
   }
   CHECK(dict);

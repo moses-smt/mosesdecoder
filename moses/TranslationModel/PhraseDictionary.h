@@ -127,9 +127,6 @@ public:
   //Initialises the dictionary (may involve loading from file)
   void InitDictionary(const TranslationSystem* system);
 
-  //Initialise the dictionary for this source (in this thread)
-  void InitDictionary(const TranslationSystem* system,const InputType& source);
-
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();

@@ -1994,7 +1994,7 @@ void StaticData::InitializeForInput(const InputType& source) const {
 
   for (vector<PhraseDictionaryFeature*>::const_iterator i = phraseDictionaries.begin();
        i != phraseDictionaries.end(); ++i) {
-         (*i)->InitDictionary(NULL,source);
+         (*i)->InitializeForInput(source);
        }
 
   const std::vector<LexicalReordering*> &reorderingTables = StaticData::Instance().GetReorderModels();
