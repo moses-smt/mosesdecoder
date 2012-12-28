@@ -86,8 +86,7 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_targetBigramFeature(NULL)
-  ,m_phraseBoundaryFeature(NULL)
+  :m_phraseBoundaryFeature(NULL)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
@@ -556,8 +555,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      if (m_targetBigramFeature && name.compare(m_targetBigramFeature->GetScoreProducerDescription()) == 0)
-        m_targetBigramFeature->SetSparseFeatureReporting();
       if (m_targetNgramFeatures.size() > 0)
         for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
           if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerDescription()) == 0)
@@ -608,9 +605,6 @@ bool StaticData::LoadData(Parameter *parameter)
   //Add any other features here.
   if (m_bleuScoreFeature) {
     AddFeatureFunction(m_bleuScoreFeature);
-  }
-  if (m_targetBigramFeature) {
-    AddFeatureFunction(m_targetBigramFeature);
   }
   if (m_targetNgramFeatures.size() > 0) {
     for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
@@ -1412,12 +1406,6 @@ bool StaticData::LoadDiscrimLMFeature()
   }
   cerr << "Loading " << wordFile.size() << " discriminative language model(s).." << endl;
 
-  // if this weight is specified, the sparse DLM weights will be scaled with an additional weight
-  vector<string> dlmWeightStr = m_parameter->GetParam("weight-dlm");
-  vector<float> dlmWeights;
-  for (size_t i=0; i<dlmWeightStr.size(); ++i)
-  	dlmWeights.push_back(Scan<float>(dlmWeightStr[i]));
-
   for (size_t i = 0; i < wordFile.size(); ++i) {
   	vector<string> tokens = Tokenize(wordFile[i]);
   	if (tokens.size() != 4) {
@@ -1425,18 +1413,26 @@ bool StaticData::LoadDiscrimLMFeature()
   		return false;
   	}
 
+  	vector<float> &weights = m_parameter->GetWeights("DiscriminativeLM", i);
+  	CHECK(weights.size() == 1);
+
   	size_t order = Scan<size_t>(tokens[0]);
   	FactorType factorId = Scan<size_t>(tokens[1]);
   	bool include_lower_ngrams = Scan<bool>(tokens[2]);
   	string filename = tokens[3];
 
   	if (order == 2 && !include_lower_ngrams) { // TODO: remove TargetBigramFeature ?
-  		m_targetBigramFeature = new TargetBigramFeature(factorId);
+  	  TargetBigramFeature *targetBigramFeature = new TargetBigramFeature(factorId);
   		cerr << "loading vocab from " << filename << endl;
-  		if (!m_targetBigramFeature->Load(filename)) {
+  		if (!targetBigramFeature->Load(filename)) {
   			UserMessage::Add("Unable to load word list from file " + filename);
   			return false;
   		}
+
+  	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+        targetBigramFeature->SetSparseFeatureReporting();
+  	  }
+      AddFeatureFunction(targetBigramFeature);
   	}
   	else {
   		if (m_searchAlgorithm == ChartDecoding && !include_lower_ngrams) {
@@ -1445,8 +1441,8 @@ bool StaticData::LoadDiscrimLMFeature()
   		}
 
   		m_targetNgramFeatures.push_back(new TargetNgramFeature(factorId, order, include_lower_ngrams));
-  		if (i < dlmWeights.size())
-  			m_targetNgramFeatures[i]->SetSparseProducerWeight(dlmWeights[i]);
+  		if (i < weights.size())
+  			m_targetNgramFeatures[i]->SetSparseProducerWeight(weights[0]);
   		cerr << "loading vocab from " << filename << endl;
   		if (!m_targetNgramFeatures[i]->Load(filename)) {
   			UserMessage::Add("Unable to load word list from file " + filename);
