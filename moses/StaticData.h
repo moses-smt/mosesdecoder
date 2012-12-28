@@ -109,7 +109,6 @@ protected:
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   TranslationSystem m_translationSystem;
-  PhraseBoundaryFeature *m_phraseBoundaryFeature;
   float
   m_beamWidth,
   m_earlyDiscardingThreshold,

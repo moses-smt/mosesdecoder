@@ -86,8 +86,7 @@ static size_t CalcMax(size_t x, const vector<size_t>& y, const vector<size_t>& z
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_phraseBoundaryFeature(NULL)
-  ,m_fLMsLoaded(false)
+  :m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
   ,m_bleuScoreFeature(NULL)
@@ -555,8 +554,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerDescription()) == 0)
-        m_phraseBoundaryFeature->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
         if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerDescription()) == 0) {
           m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();
@@ -602,9 +599,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_bleuScoreFeature) {
     AddFeatureFunction(m_bleuScoreFeature);
   }
-  if (m_phraseBoundaryFeature) {
-    AddFeatureFunction(m_phraseBoundaryFeature);
-  }
 #ifdef HAVE_SYNLM
   if (m_syntacticLanguageModel != NULL) {
     AddFeatureFunction(m_syntacticLanguageModel);
@@ -640,15 +634,6 @@ bool StaticData::LoadData(Parameter *parameter)
     	if (weight != 1) {
     	  AddSparseProducer(m_globalLexicalModelsUnlimited[i]);
     	  cerr << "glm sparse producer weight: " << weight << endl;
-    	}
-    }
-
-    // PB: apply additional weight to sparse features if applicable
-    if (m_phraseBoundaryFeature) {
-    	float weight = m_phraseBoundaryFeature->GetSparseProducerWeight();
-    	if (weight != 1) {
-    	  AddSparseProducer(m_phraseBoundaryFeature);
-    	  cerr << "pb sparse producer weight: " << weight << endl;
     	}
     }
     
@@ -1452,7 +1437,7 @@ bool StaticData::LoadDiscrimLMFeature()
 
 bool StaticData::LoadPhraseBoundaryFeature()
 {
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pb"));
+  const vector<float> &weight = m_parameter->GetWeights("PhraseBoundaryFeature", 0);
   if (weight.size() > 1) {
 	std::cerr << "Only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
     return false;
@@ -1483,9 +1468,23 @@ bool StaticData::LoadPhraseBoundaryFeature()
   }
   //cerr << "source "; for (size_t i = 0; i < sourceFactors.size(); ++i) cerr << sourceFactors[i] << " "; cerr << endl;
   //cerr << "target "; for (size_t i = 0; i < targetFactors.size(); ++i) cerr << targetFactors[i] << " "; cerr << endl;
-  m_phraseBoundaryFeature = new PhraseBoundaryFeature(sourceFactors,targetFactors);
-  if (weight.size() > 0)
-    m_phraseBoundaryFeature->SetSparseProducerWeight(weight[0]);
+  PhraseBoundaryFeature *phraseBoundaryFeature = new PhraseBoundaryFeature(sourceFactors,targetFactors);
+  if (weight.size() > 0) {
+    phraseBoundaryFeature->SetSparseProducerWeight(weight[0]);
+  }
+
+  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+    phraseBoundaryFeature->SetSparseFeatureReporting();
+  }
+
+  float sparseWeight = phraseBoundaryFeature->GetSparseProducerWeight();
+  if (sparseWeight != 1) {
+    AddSparseProducer(phraseBoundaryFeature);
+    cerr << "pb sparse producer weight: " << sparseWeight << endl;
+  }
+
+  AddFeatureFunction(phraseBoundaryFeature);
+
   return true;
 }
 
