@@ -76,6 +76,7 @@ namespace Mira {
 
 	  const StaticData &staticData = StaticData::Instance();
 	  //m_bleuScoreFeature = staticData.GetBleuScoreFeature(); TODO
+	  assert(false);
   }
   
   void MosesDecoder::cleanup(bool chartDecoding) {
