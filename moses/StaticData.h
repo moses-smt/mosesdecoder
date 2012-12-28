@@ -54,23 +54,15 @@ class InputType;
 class LexicalReordering;
 class GlobalLexicalModel;
 class GlobalLexicalModelUnlimited;
-class PhraseBoundaryFeature;
 class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
-class PhrasePairFeature;
-class BleuScoreFeature;
-class PhraseLengthFeature;
-class TargetWordInsertionFeature;
-class SourceWordDeletionFeature;
-class WordTranslationFeature;
 class GenerationDictionary;
 class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class MetaScoreProducer;
 class MetaFeatureProducer;
-class TargetBigramFeature;
-class TargetNgramFeature;
+
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
