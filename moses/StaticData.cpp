@@ -89,7 +89,6 @@ StaticData::StaticData()
   :m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
-  ,m_bleuScoreFeature(NULL)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
   ,m_factorDelimiter("|") // default delimiter between factors
@@ -596,9 +595,6 @@ bool StaticData::LoadData(Parameter *parameter)
     cerr << endl;
 
   //Add any other features here.
-  if (m_bleuScoreFeature) {
-    AddFeatureFunction(m_bleuScoreFeature);
-  }
 #ifdef HAVE_SYNLM
   if (m_syntacticLanguageModel != NULL) {
     AddFeatureFunction(m_syntacticLanguageModel);
@@ -1329,8 +1325,8 @@ bool StaticData::LoadReferences()
   }
 
   float bleuWeight = Scan<float>(bleuWeightStr[0]);
-  m_bleuScoreFeature = new BleuScoreFeature();
-  SetWeight(m_bleuScoreFeature, bleuWeight);
+  BleuScoreFeature *bleuScoreFeature = new BleuScoreFeature();
+  SetWeight(bleuScoreFeature, bleuWeight);
 
   cerr << "Loading reference file " << referenceFiles[0] << endl;
   vector<vector<string> > references(referenceFiles.size());
@@ -1360,7 +1356,10 @@ bool StaticData::LoadReferences()
     in.close();
   }
   //Set the references in the bleu feature
-  m_bleuScoreFeature->LoadReferences(references);
+  bleuScoreFeature->LoadReferences(references);
+
+  AddFeatureFunction(bleuScoreFeature);
+
   return true;
 }
 

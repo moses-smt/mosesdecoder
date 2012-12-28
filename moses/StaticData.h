@@ -160,7 +160,6 @@ protected:
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 
   MetaFeatureProducer *m_metaFeatureProducer;
-  BleuScoreFeature* m_bleuScoreFeature;
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
@@ -351,9 +350,6 @@ public:
   }
   bool IsWordDeletionEnabled() const {
     return m_wordDeletionEnabled;
-  }
-  BleuScoreFeature* GetBleuScoreFeature() const {
-  	return m_bleuScoreFeature;
   }
   size_t GetMaxHypoStackSize() const {
     return m_maxHypoStackSize;

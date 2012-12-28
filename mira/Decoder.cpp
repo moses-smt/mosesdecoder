@@ -75,7 +75,7 @@ namespace Mira {
 	  delete[] mosesargv;
 
 	  const StaticData &staticData = StaticData::Instance();
-	  m_bleuScoreFeature = staticData.GetBleuScoreFeature();
+	  //m_bleuScoreFeature = staticData.GetBleuScoreFeature(); TODO
   }
   
   void MosesDecoder::cleanup(bool chartDecoding) {
