@@ -555,10 +555,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
       const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      if (m_targetNgramFeatures.size() > 0)
-        for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-          if (name.compare(m_targetNgramFeatures[i]->GetScoreProducerDescription()) == 0)
-            m_targetNgramFeatures[i]->SetSparseFeatureReporting();
       if (m_phraseBoundaryFeature && name.compare(m_phraseBoundaryFeature->GetScoreProducerDescription()) == 0)
         m_phraseBoundaryFeature->SetSparseFeatureReporting();
       for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
@@ -606,10 +602,6 @@ bool StaticData::LoadData(Parameter *parameter)
   if (m_bleuScoreFeature) {
     AddFeatureFunction(m_bleuScoreFeature);
   }
-  if (m_targetNgramFeatures.size() > 0) {
-    for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
-      AddFeatureFunction(m_targetNgramFeatures[i]);
-  }
   if (m_phraseBoundaryFeature) {
     AddFeatureFunction(m_phraseBoundaryFeature);
   }
@@ -641,17 +633,7 @@ bool StaticData::LoadData(Parameter *parameter)
       UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
       return false;
     }
-
     
-    // DLM: apply additional weight to sparse features if applicable
-    for (size_t i = 0; i < m_targetNgramFeatures.size(); ++i) {
-    	float weight = m_targetNgramFeatures[i]->GetSparseProducerWeight();
-    	if (weight != 1) {
-    	  AddSparseProducer(m_targetNgramFeatures[i]);
-    	  cerr << "dlm sparse producer weight: " << weight << endl;
-    	}
-    }
-
     // GLM: apply additional weight to sparse features if applicable
     for (size_t i = 0; i < m_globalLexicalModelsUnlimited.size(); ++i) {
     	float weight = m_globalLexicalModelsUnlimited[i]->GetSparseProducerWeight();
@@ -1414,7 +1396,7 @@ bool StaticData::LoadDiscrimLMFeature()
   	}
 
   	vector<float> &weights = m_parameter->GetWeights("DiscriminativeLM", i);
-  	CHECK(weights.size() == 1);
+  	CHECK(weights.size() == 0 || weights.size() == 1);
 
   	size_t order = Scan<size_t>(tokens[0]);
   	FactorType factorId = Scan<size_t>(tokens[1]);
@@ -1440,14 +1422,28 @@ bool StaticData::LoadDiscrimLMFeature()
   			return false;
   		}
 
-  		m_targetNgramFeatures.push_back(new TargetNgramFeature(factorId, order, include_lower_ngrams));
-  		if (i < weights.size())
-  			m_targetNgramFeatures[i]->SetSparseProducerWeight(weights[0]);
+  		TargetNgramFeature *targetNgramFeature = new TargetNgramFeature(factorId, order, include_lower_ngrams);
+  		if (weights.size() == 1) {
+  			targetNgramFeature->SetSparseProducerWeight(weights[0]);
+  		}
   		cerr << "loading vocab from " << filename << endl;
-  		if (!m_targetNgramFeatures[i]->Load(filename)) {
+  		if (!targetNgramFeature->Load(filename)) {
   			UserMessage::Add("Unable to load word list from file " + filename);
   			return false;
   		}
+  		
+  	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+        targetNgramFeature->SetSparseFeatureReporting();
+  	  }
+
+    	float sparseWeight = targetNgramFeature->GetSparseProducerWeight();
+    	if (sparseWeight != 1) {
+    	  AddSparseProducer(targetNgramFeature);
+    	  cerr << "dlm sparse producer weight: " << sparseWeight << endl;
+    	}
+  		
+      AddFeatureFunction(targetNgramFeature);
+
   	}
   }
 
