@@ -718,7 +718,21 @@ public:
   const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const {return m_statelessFFs;}
   const std::vector<const FeatureFunction*>& GetSparseProducers() const {return m_sparseProducers;}
 
-  void AddFeatureFunction(FeatureFunction* ff);
+  void AddProducer(ScoreProducer* ff)
+  {
+    m_producers.push_back(ff);
+  }
+
+  void AddStatefulFeatureFunction(StatefulFeatureFunction* ff)
+  {
+    m_statefulFFs.push_back(ff);
+  }
+
+  void AddStatelessFeatureFunction(StatelessFeatureFunction* ff)
+  {
+    m_statelessFFs.push_back(ff);
+  }
+
   void AddSparseProducer(const FeatureFunction* ff) {
     m_sparseProducers.push_back(ff);
   }

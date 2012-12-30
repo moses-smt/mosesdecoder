@@ -71,9 +71,20 @@ const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
   return m_targetPhrase;
 }
 
+FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents)
+: ScoreProducer(description, numScoreComponents)
+{
+  StaticData::InstanceNonConst().AddProducer(this);
+}
 
 
 FeatureFunction::~FeatureFunction() {}
+
+StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, size_t numScoreComponents)
+:FeatureFunction(description, numScoreComponents)
+{
+  StaticData::InstanceNonConst().AddStatelessFeatureFunction(this);
+}
 
 bool StatelessFeatureFunction::IsStateless() const
 {
@@ -83,6 +94,12 @@ bool StatelessFeatureFunction::IsStateless() const
 bool StatelessFeatureFunction::ComputeValueInTranslationOption() const
 {
   return false;
+}
+
+StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, size_t numScoreComponents)
+: FeatureFunction(description,numScoreComponents)
+{
+  StaticData::InstanceNonConst().AddStatefulFeatureFunction(this);
 }
 
 bool StatefulFeatureFunction::IsStateless() const

@@ -78,8 +78,7 @@ class FeatureFunction: public ScoreProducer
 {
 
 public:
-  FeatureFunction(const std::string& description, size_t numScoreComponents) :
-    ScoreProducer(description, numScoreComponents) {}
+  FeatureFunction(const std::string& description, size_t numScoreComponents);
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
   
@@ -93,8 +92,7 @@ class StatelessFeatureFunction: public FeatureFunction
 {
 
 public:
-  StatelessFeatureFunction(const std::string& description, size_t numScoreComponents) :
-    FeatureFunction(description, numScoreComponents) {}
+  StatelessFeatureFunction(const std::string& description, size_t numScoreComponents);
   /**
     * This should be implemented for features that apply to phrase-based models.
     **/
@@ -125,9 +123,7 @@ class StatefulFeatureFunction: public FeatureFunction
 {
 
 public:
-  StatefulFeatureFunction(const std::string& description, size_t numScoreComponents) :
-    FeatureFunction(description,numScoreComponents) {}
-
+  StatefulFeatureFunction(const std::string& description, size_t numScoreComponents);
   /**
    * \brief This interface should be implemented.
    * Notes: When evaluating the value of this feature function, you should avoid

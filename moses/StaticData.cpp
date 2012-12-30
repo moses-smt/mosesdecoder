@@ -323,7 +323,6 @@ bool StaticData::LoadData(Parameter *parameter)
   CHECK(m_parameter->GetWeights("WordPenalty", 0).size() == 1);
   float weightWordPenalty       = m_parameter->GetWeights("WordPenalty", 0)[0];
   m_wpProducer = new WordPenaltyProducer();
-  AddFeatureFunction(m_wpProducer);
 
   SetWeight(m_wpProducer, weightWordPenalty);
 
@@ -331,8 +330,8 @@ bool StaticData::LoadData(Parameter *parameter)
   float weightUnknownWord = weightsUnknownWord.size() ? weightsUnknownWord[0] : 1.0;
 
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
-  AddFeatureFunction(m_unknownWordPenaltyProducer);
-  SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
+
+SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
@@ -676,7 +675,6 @@ StaticData::~StaticData()
       
       // create the feature
       m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
-      AddFeatureFunction(m_syntacticLanguageModel);
 
       /* 
       /////////////////////////////////////////
@@ -758,7 +756,6 @@ bool StaticData::LoadLexicalReorderingModel()
     string filePath = spec[3];
 
     LexicalReordering *reorderModel = new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights);
-    AddFeatureFunction(reorderModel);
 
     m_reorderModels.push_back(reorderModel);
   }
@@ -792,7 +789,6 @@ bool StaticData::LoadGlobalLexicalModel()
 
     GlobalLexicalModel *globalLexicalModel = new GlobalLexicalModel( spec[1], inputFactors, outputFactors );
     m_globalLexicalModels.push_back(globalLexicalModel);
-    AddFeatureFunction(globalLexicalModel);
 
     SetWeight(m_globalLexicalModels.back(),weight[i]);
   }
@@ -850,7 +846,6 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
     throw runtime_error("GlobalLexicalModelUnlimited should be reimplemented as a stateful feature");
     GlobalLexicalModelUnlimited* glmu = NULL; // new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, context);
-    AddFeatureFunction(glmu);
 
     m_globalLexicalModelsUnlimited.push_back(glmu);
     if (restricted) {
@@ -929,7 +924,6 @@ bool StaticData::LoadLanguageModels()
         languageModelsLoaded[lmVector[i]] = lm;
       }
 
-      AddFeatureFunction(lm);
       m_languageModel.Add(lm);
       if (m_lmEnableOOVFeature) {
         CHECK(weights.size() == 2);
@@ -1098,7 +1092,6 @@ bool StaticData::LoadPhraseTables()
       SparsePhraseDictionaryFeature* spdf = NULL; 
       if (token.size() >= 6 && token[5] == "sparse") {
           spdf = new SparsePhraseDictionaryFeature();
-          AddFeatureFunction(spdf);
       }
       m_sparsePhraseDictionary.push_back(spdf);
 
@@ -1191,7 +1184,7 @@ void StaticData::LoadPhraseBasedParameters()
 
   float weightDistortion = distortionWeights[0];
   m_distortionScoreProducer = new DistortionScoreProducer();
-  AddFeatureFunction(m_distortionScoreProducer);
+
   SetWeight(m_distortionScoreProducer, weightDistortion);
 
 }
@@ -1337,8 +1330,6 @@ bool StaticData::LoadReferences()
   //Set the references in the bleu feature
   bleuScoreFeature->LoadReferences(references);
 
-  AddFeatureFunction(bleuScoreFeature);
-
   return true;
 }
 
@@ -1377,7 +1368,6 @@ bool StaticData::LoadDiscrimLMFeature()
   	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
         targetBigramFeature->SetSparseFeatureReporting();
   	  }
-      AddFeatureFunction(targetBigramFeature);
   	}
   	else {
   		if (m_searchAlgorithm == ChartDecoding && !include_lower_ngrams) {
@@ -1405,8 +1395,6 @@ bool StaticData::LoadDiscrimLMFeature()
     	  cerr << "dlm sparse producer weight: " << sparseWeight << endl;
     	}
   		
-      AddFeatureFunction(targetNgramFeature);
-
   	}
   }
 
@@ -1460,8 +1448,6 @@ bool StaticData::LoadPhraseBoundaryFeature()
     AddSparseProducer(phraseBoundaryFeature);
     cerr << "pb sparse producer weight: " << sparseWeight << endl;
   }
-
-  AddFeatureFunction(phraseBoundaryFeature);
 
   return true;
 }
@@ -1536,7 +1522,6 @@ bool StaticData::LoadPhrasePairFeature()
     if (m_parameter->GetParam("report-sparse-features").size() > 0) {
       phrasePairFeature->SetSparseFeatureReporting();
     }
-    AddFeatureFunction(phrasePairFeature);
   } // for (size_t i=0; i<parameters.size(); ++i)
 
   return true;
@@ -1549,7 +1534,6 @@ bool StaticData::LoadPhraseLengthFeature()
     if (m_parameter->GetParam("report-sparse-features").size() > 0) {
         phraseLengthFeature->SetSparseFeatureReporting();
     }
-    AddFeatureFunction(phraseLengthFeature);
   }
 
   return true;
@@ -1592,8 +1576,6 @@ bool StaticData::LoadTargetWordInsertionFeature()
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     targetWordInsertionFeature->SetSparseFeatureReporting();
   }
-  AddFeatureFunction(targetWordInsertionFeature);
-
 
   return true;
 }
@@ -1635,8 +1617,6 @@ bool StaticData::LoadSourceWordDeletionFeature()
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     sourceWordDeletionFeature->SetSparseFeatureReporting();
   }
-
-  AddFeatureFunction(sourceWordDeletionFeature);
 
   return true;
 }
@@ -1725,7 +1705,6 @@ bool StaticData::LoadWordTranslationFeature()
     if (m_parameter->GetParam("report-sparse-features").size() > 0) {
       wordTranslationFeature->SetSparseFeatureReporting();
     }
-    AddFeatureFunction(wordTranslationFeature);
   } // for (size_t i=0; i<parameters.size(); ++i)
 
   return true;
@@ -1929,12 +1908,10 @@ void StaticData::ConfigDictionaries() {
         const DecodeStep* step = *j;
         PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
         if (pdict) {
-          AddFeatureFunction(pdict);
           pdict->InitDictionary(NULL);
         }
         GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
         if (gdict) {
-          AddFeatureFunction(gdict);
         }
       }
   }
@@ -1952,16 +1929,6 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
   for(size_t i=0;i<m_producers.size();++i) {
     ScoreProducer &ff = *m_producers[i];
     ff.CleanUpAfterSentenceProcessing(source);
-  }
-}
-
-void StaticData::AddFeatureFunction(FeatureFunction* ff) {
-   m_producers.push_back(ff);
-
-  if (ff->IsStateless()) {
-    m_statelessFFs.push_back(static_cast<const StatelessFeatureFunction*>(ff));
-  } else {
-    m_statefulFFs.push_back(static_cast<const StatefulFeatureFunction*>(ff));
   }
 }
 
