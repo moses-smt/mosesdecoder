@@ -575,20 +575,6 @@ bool StaticData::LoadData(Parameter *parameter)
     cerr << endl;
 
   //Add any other features here.
-#ifdef HAVE_SYNLM
-  if (m_syntacticLanguageModel != NULL) {
-    AddFeatureFunction(m_syntacticLanguageModel);
-  }
-#endif
-  for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
-    if (m_sparsePhraseDictionary[i]) {
-      AddFeatureFunction(m_sparsePhraseDictionary[i]);
-    }
-  }
-  if (m_globalLexicalModelsUnlimited.size() > 0) {
-    for (size_t i=0; i < m_globalLexicalModelsUnlimited.size(); ++i)
-      AddFeatureFunction(m_globalLexicalModelsUnlimited[i]);
-  }
 
   //Load extra feature weights
   //NB: These are common to all translation systems (at the moment!)
@@ -690,6 +676,7 @@ StaticData::~StaticData()
       
       // create the feature
       m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
+      AddFeatureFunction(m_syntacticLanguageModel);
 
       /* 
       /////////////////////////////////////////
@@ -863,6 +850,8 @@ bool StaticData::LoadGlobalLexicalModelUnlimited()
     const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
     throw runtime_error("GlobalLexicalModelUnlimited should be reimplemented as a stateful feature");
     GlobalLexicalModelUnlimited* glmu = NULL; // new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, context);
+    AddFeatureFunction(glmu);
+
     m_globalLexicalModelsUnlimited.push_back(glmu);
     if (restricted) {
       cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
@@ -1109,6 +1098,7 @@ bool StaticData::LoadPhraseTables()
       SparsePhraseDictionaryFeature* spdf = NULL; 
       if (token.size() >= 6 && token[5] == "sparse") {
           spdf = new SparsePhraseDictionaryFeature();
+          AddFeatureFunction(spdf);
       }
       m_sparsePhraseDictionary.push_back(spdf);
 
