@@ -323,12 +323,15 @@ bool StaticData::LoadData(Parameter *parameter)
   CHECK(m_parameter->GetWeights("WordPenalty", 0).size() == 1);
   float weightWordPenalty       = m_parameter->GetWeights("WordPenalty", 0)[0];
   m_wpProducer = new WordPenaltyProducer();
+  AddFeatureFunction(m_wpProducer);
+
   SetWeight(m_wpProducer, weightWordPenalty);
 
   const vector<float> &weightsUnknownWord				= m_parameter->GetWeights("UnknownWordPenalty", 0);
   float weightUnknownWord = weightsUnknownWord.size() ? weightsUnknownWord[0] : 1.0;
 
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
+  AddFeatureFunction(m_unknownWordPenaltyProducer);
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
   // reordering constraints
@@ -561,29 +564,6 @@ bool StaticData::LoadData(Parameter *parameter)
     } // for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").
   }
 
-  // rip out trans system
-  AddFeatureFunction(m_wpProducer);
-  AddFeatureFunction(m_unknownWordPenaltyProducer);
-  if (m_distortionScoreProducer) {
-    AddFeatureFunction(m_distortionScoreProducer);
-  }
-
-
-  for (size_t k = 0; k < m_reorderModels.size(); ++k) {
-    AddFeatureFunction(m_reorderModels[k]);
-    VERBOSE(2,"Adding reorder table " << k << endl);
-  }
-
-  size_t lmid = 0;
-  for (LMList::const_iterator k = m_languageModel.begin(); k != m_languageModel.end(); ++k, ++lmid) {
-    AddFeatureFunction(*k);
-    VERBOSE(2,"Adding language model " << lmid << endl);
-  }
-
-  for (size_t k = 0; k < m_globalLexicalModels.size(); ++k) {
-    AddFeatureFunction(m_globalLexicalModels[k]);
-  }
-
   //Instigate dictionary loading
   ConfigDictionaries();
 
@@ -790,7 +770,10 @@ bool StaticData::LoadLexicalReorderingModel()
 
     string filePath = spec[3];
 
-    m_reorderModels.push_back(new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights));
+    LexicalReordering *reorderModel = new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights);
+    AddFeatureFunction(reorderModel);
+
+    m_reorderModels.push_back(reorderModel);
   }
   return true;
 }
@@ -819,7 +802,11 @@ bool StaticData::LoadGlobalLexicalModel()
     }
     vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
     vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-    m_globalLexicalModels.push_back( new GlobalLexicalModel( spec[1], inputFactors, outputFactors ) );
+
+    GlobalLexicalModel *globalLexicalModel = new GlobalLexicalModel( spec[1], inputFactors, outputFactors );
+    m_globalLexicalModels.push_back(globalLexicalModel);
+    AddFeatureFunction(globalLexicalModel);
+
     SetWeight(m_globalLexicalModels.back(),weight[i]);
   }
   return true;
@@ -953,6 +940,7 @@ bool StaticData::LoadLanguageModels()
         languageModelsLoaded[lmVector[i]] = lm;
       }
 
+      AddFeatureFunction(lm);
       m_languageModel.Add(lm);
       if (m_lmEnableOOVFeature) {
         CHECK(weights.size() == 2);
@@ -1213,6 +1201,7 @@ void StaticData::LoadPhraseBasedParameters()
 
   float weightDistortion = distortionWeights[0];
   m_distortionScoreProducer = new DistortionScoreProducer();
+  AddFeatureFunction(m_distortionScoreProducer);
   SetWeight(m_distortionScoreProducer, weightDistortion);
 
 }
