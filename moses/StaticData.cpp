@@ -529,6 +529,20 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
      cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
   }
 
+  // all features
+  const vector<string> &features = m_parameter->GetParam("feature");
+  for (size_t i = 0; i < features.size(); ++i) {
+    const string &line = features[i];
+    vector<string> toks = Tokenize(line);
+
+    if (toks[0] == "GlobalLexicalModel") {
+      GlobalLexicalModel *model = new GlobalLexicalModel(line);
+      const vector<float> &weights = m_parameter->GetWeights(toks[0], 0);
+      SetWeights(model, weights);
+    }
+
+  }
+
 #ifdef HAVE_SYNLM
 	if (m_parameter->GetParam("slmodel-file").size() > 0) {
 	  if (!LoadSyntacticLanguageModel()) return false;
@@ -539,7 +553,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
-  if (!LoadGlobalLexicalModel()) return false;
   if (!LoadGlobalLexicalModelUnlimited()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
@@ -761,37 +774,6 @@ bool StaticData::LoadLexicalReorderingModel()
     LexicalReordering *reorderModel = new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights);
 
     m_reorderModels.push_back(reorderModel);
-  }
-  return true;
-}
-
-bool StaticData::LoadGlobalLexicalModel()
-{
-  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-lex"));
-  const vector<string> &file = m_parameter->GetParam("global-lexical-file");
-
-  if (weight.size() != file.size()) {
-    std::cerr << "number of weights and models for the global lexical model does not match ("
-              << weight.size() << " != " << file.size() << ")" << std::endl;
-    return false;
-  }
-
-  for (size_t i = 0; i < weight.size(); i++ ) {
-    vector<string> spec = Tokenize<string>(file[i], " ");
-    if ( spec.size() != 2 ) {
-      std::cerr << "wrong global lexical model specification: " << file[i] << endl;
-      return false;
-    }
-    vector< string > factors = Tokenize(spec[0],"-");
-    if ( factors.size() != 2 ) {
-      std::cerr << "wrong factor definition for global lexical model: " << spec[0] << endl;
-      return false;
-    }
-    vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
-    vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
-
-    GlobalLexicalModel *globalLexicalModel = new GlobalLexicalModel( spec[1], inputFactors, outputFactors );
-    SetWeight(globalLexicalModel, weight[i]);
   }
   return true;
 }

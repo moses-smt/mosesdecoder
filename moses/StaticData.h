@@ -52,7 +52,6 @@ namespace Moses
 
 class InputType;
 class LexicalReordering;
-class GlobalLexicalModel;
 class GlobalLexicalModelUnlimited;
 class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
@@ -250,7 +249,6 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
   bool LoadLexicalReorderingModel();
-  bool LoadGlobalLexicalModel();
   bool LoadGlobalLexicalModelUnlimited();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();

@@ -63,9 +63,7 @@ private:
   float GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const;
 
 public:
-	GlobalLexicalModel(const std::string &filePath,
-	                   const std::vector< FactorType >& inFactors,
-	                   const std::vector< FactorType >& outFactors);
+  GlobalLexicalModel(const std::string &line);
 	virtual ~GlobalLexicalModel();
 
   void InitializeForInput( Sentence const& in );

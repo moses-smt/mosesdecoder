@@ -9,21 +9,39 @@ using namespace std;
 
 namespace Moses
 {
-GlobalLexicalModel::GlobalLexicalModel(const string &filePath,
-                                       const vector< FactorType >& inFactors,
-                                       const vector< FactorType >& outFactors)
-  : StatelessFeatureFunction("GlobalLexicalModel",1)
+GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
+: StatelessFeatureFunction("GlobalLexicalModel",1)
 {
   std::cerr << "Creating global lexical model...\n";
 
+  string filePath;
+  vector<FactorType> inputFactors, outputFactors;
+
+  vector<string> toks = Tokenize(line);
+  for (size_t i = 0; i < toks.size(); ++i) {
+    vector<string> args = Tokenize(toks[i], "=");
+
+    if (args[0] == "file") {
+      CHECK(args.size() == 2);
+      filePath = args[1];
+    }
+    else if (args[0] == "inputFactors") {
+      inputFactors = Tokenize<FactorType>(args[1],",");
+    }
+    else if (args[0] == "outputFactors") {
+      outputFactors = Tokenize<FactorType>(args[1],",");
+    }
+  }
+
   // load model
-  LoadData( filePath, inFactors, outFactors );
+  LoadData( filePath, inputFactors, outputFactors );
 
   // define bias word
   FactorCollection &factorCollection = FactorCollection::Instance();
   m_bias = new Word();
-  const Factor* factor = factorCollection.AddFactor( Input, inFactors[0], "**BIAS**" );
-  m_bias->SetFactor( inFactors[0], factor );
+  const Factor* factor = factorCollection.AddFactor( Input, inputFactors[0], "**BIAS**" );
+  m_bias->SetFactor( inputFactors[0], factor );
+
 }
 
 GlobalLexicalModel::~GlobalLexicalModel()
