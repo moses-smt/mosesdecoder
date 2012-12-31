@@ -90,7 +90,6 @@ protected:
   LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
   std::vector<LexicalReordering*>                   m_reorderModels;
-  std::vector<GlobalLexicalModel*>                   m_globalLexicalModels;
   std::vector<GlobalLexicalModelUnlimited*>          m_globalLexicalModelsUnlimited;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;

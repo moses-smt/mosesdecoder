@@ -791,9 +791,7 @@ bool StaticData::LoadGlobalLexicalModel()
     vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
 
     GlobalLexicalModel *globalLexicalModel = new GlobalLexicalModel( spec[1], inputFactors, outputFactors );
-    m_globalLexicalModels.push_back(globalLexicalModel);
-
-    SetWeight(m_globalLexicalModels.back(),weight[i]);
+    SetWeight(globalLexicalModel, weight[i]);
   }
   return true;
 }
