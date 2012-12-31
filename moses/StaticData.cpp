@@ -637,11 +637,14 @@ void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& w
 
 StaticData::~StaticData()
 {
-  for(size_t i=0;i<m_producers.size();++i) {
-    ScoreProducer *ff = m_producers[i];
+  /*
+  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  for(size_t i=0;i<producers.size();++i) {
+    ScoreProducer *ff = producers[i];
+    cerr << endl << "Destroying" << ff << endl;
     delete ff;
   }
-
+  */
 
   // memory pools
   Phrase::FinalizeMemPool();
@@ -1919,17 +1922,22 @@ void StaticData::ConfigDictionaries() {
 }
 
 void StaticData::InitializeForInput(const InputType& source) const {
-  for(size_t i=0;i<m_producers.size();++i) {
-    ScoreProducer &ff = *m_producers[i];
+  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  for(size_t i=0;i<producers.size();++i) {
+    ScoreProducer &ff = *producers[i];
     ff.InitializeForInput(source);
   }
 }
 
 void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
-  for(size_t i=0;i<m_producers.size();++i) {
-    ScoreProducer &ff = *m_producers[i];
+  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  for(size_t i=0;i<producers.size();++i) {
+    ScoreProducer &ff = *producers[i];
     ff.CleanUpAfterSentenceProcessing(source);
+    cerr << endl << "Cleaning " << &ff << endl;
   }
+
+
 }
 
 } // namespace

@@ -713,37 +713,12 @@ public:
     return m_nBestIncludesSegmentation;
   }
 
-  const std::vector<ScoreProducer*>& GetFeatureFunctions() const { return m_producers; }
-  const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() const {return m_statefulFFs;}
-  const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() const {return m_statelessFFs;}
   const std::vector<const FeatureFunction*>& GetSparseProducers() const {return m_sparseProducers;}
-
-  void AddProducer(ScoreProducer* ff)
-  {
-    m_producers.push_back(ff);
-  }
-
-  void AddStatefulFeatureFunction(StatefulFeatureFunction* ff)
-  {
-    m_statefulFFs.push_back(ff);
-  }
-
-  void AddStatelessFeatureFunction(StatelessFeatureFunction* ff)
-  {
-    m_statelessFFs.push_back(ff);
-  }
 
   void AddSparseProducer(const FeatureFunction* ff) {
     m_sparseProducers.push_back(ff);
   }
 
-	/**< all the score producers in this run */
-	std::vector<ScoreProducer*> m_producers;
-
-  //All stateless FFs, except those that cache scores in T-Option
-  std::vector<const StatelessFeatureFunction*> m_statelessFFs;
-  //All statefull FFs
-  std::vector<const StatefulFeatureFunction*> m_statefulFFs;
   //All sparse producers that have an activated global weight
 	std::vector<const FeatureFunction*> m_sparseProducers;
 

@@ -71,10 +71,14 @@ const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
   return m_targetPhrase;
 }
 
+std::vector<ScoreProducer*> FeatureFunction::m_producers;
+std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
+std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
+
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents)
 : ScoreProducer(description, numScoreComponents)
 {
-  StaticData::InstanceNonConst().AddProducer(this);
+  m_producers.push_back(this);
 }
 
 
@@ -83,7 +87,7 @@ FeatureFunction::~FeatureFunction() {}
 StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, size_t numScoreComponents)
 :FeatureFunction(description, numScoreComponents)
 {
-  StaticData::InstanceNonConst().AddStatelessFeatureFunction(this);
+  m_statelessFFs.push_back(this);
 }
 
 bool StatelessFeatureFunction::IsStateless() const
@@ -99,7 +103,7 @@ bool StatelessFeatureFunction::ComputeValueInTranslationOption() const
 StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, size_t numScoreComponents)
 : FeatureFunction(description,numScoreComponents)
 {
-  StaticData::InstanceNonConst().AddStatefulFeatureFunction(this);
+  m_statefulFFs.push_back(this);
 }
 
 bool StatefulFeatureFunction::IsStateless() const

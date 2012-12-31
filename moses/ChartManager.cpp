@@ -352,7 +352,7 @@ void ChartManager::PreCalculateScores()
       if (m_precalculatedScores.find(*targetPhrase) == m_precalculatedScores.end()) {
         ChartBasedFeatureContext context(*targetPhrase,m_source);
         const vector<const StatelessFeatureFunction*>& sfs =
-        		StaticData::Instance().GetStatelessFeatureFunctions();
+            StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
           if (!sfs[k]->ComputeValueInTranslationTable()) {

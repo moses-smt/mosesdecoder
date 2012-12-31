@@ -76,8 +76,12 @@ public:
  */
 class FeatureFunction: public ScoreProducer
 {
+  /**< all the score producers in this run */
+  static std::vector<ScoreProducer*> m_producers;
 
 public:
+  static const std::vector<ScoreProducer*>& GetFeatureFunctions() { return m_producers; }
+
   FeatureFunction(const std::string& description, size_t numScoreComponents);
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
@@ -90,8 +94,12 @@ public:
  */
 class StatelessFeatureFunction: public FeatureFunction
 {
+  //All stateless FFs, except those that cache scores in T-Option
+  static std::vector<const StatelessFeatureFunction*> m_statelessFFs;
 
 public:
+  static const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() {return m_statelessFFs;}
+
   StatelessFeatureFunction(const std::string& description, size_t numScoreComponents);
   /**
     * This should be implemented for features that apply to phrase-based models.
@@ -121,8 +129,12 @@ public:
  */
 class StatefulFeatureFunction: public FeatureFunction
 {
+  //All statefull FFs
+  static std::vector<const StatefulFeatureFunction*> m_statefulFFs;
 
 public:
+  static const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() {return m_statefulFFs;}
+
   StatefulFeatureFunction(const std::string& description, size_t numScoreComponents);
   /**
    * \brief This interface should be implemented.

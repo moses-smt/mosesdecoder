@@ -32,8 +32,11 @@ ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComp
   }
 }
 
-ScoreProducer::~ScoreProducer() {
+ScoreProducer::~ScoreProducer()
+{
+  cerr << endl << "In ~ScoreProducer of" << this << endl;
 }
 
 }
+
 

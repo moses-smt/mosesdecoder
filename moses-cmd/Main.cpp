@@ -337,8 +337,8 @@ static void ShowWeights()
   fix(cout,6);
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =StaticData::Instance().GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = StaticData::Instance().GetStatefulFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
 
   for (size_t i = 0; i < sff.size(); ++i) {
     const StatefulFeatureFunction *ff = sff[i];
