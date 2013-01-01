@@ -68,6 +68,7 @@ private:
   std::set<std::string> m_vocabTarget;
 
 public:
+  GlobalLexicalModelUnlimited(const std::string &line);
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors, const std::vector< FactorType >& outFactors,
   		bool biasFeature, bool ignorePunctuation, size_t context):
     StatelessFeatureFunction("glm",ScoreProducer::unlimited),

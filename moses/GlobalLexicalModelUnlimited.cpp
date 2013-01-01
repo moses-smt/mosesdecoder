@@ -8,6 +8,61 @@ using namespace std;
 
 namespace Moses
 {
+GlobalLexicalModelUnlimited::GlobalLexicalModelUnlimited(const std::string &line)
+:StatelessFeatureFunction("glm",ScoreProducer::unlimited)
+{
+  const vector<string> modelSpec = Tokenize(line);
+
+  for (size_t i = 0; i < modelSpec.size(); i++ ) {
+    bool ignorePunctuation = true, biasFeature = false, restricted = false;
+    size_t context = 0;
+    string filenameSource, filenameTarget;
+    vector< string > factors;
+    vector< string > spec = Tokenize(modelSpec[i]," ");
+
+    // read optional punctuation and bias specifications
+    if (spec.size() > 0) {
+      if (spec.size() != 2 && spec.size() != 3 && spec.size() != 4 && spec.size() != 6) {
+        UserMessage::Add("Format of glm feature is <factor-src>-<factor-tgt> [ignore-punct] [use-bias] "
+            "[context-type] [filename-src filename-tgt]");
+        //return false;
+      }
+
+      factors = Tokenize(spec[0],"-");
+      if (spec.size() >= 2)
+        ignorePunctuation = Scan<size_t>(spec[1]);
+      if (spec.size() >= 3)
+        biasFeature = Scan<size_t>(spec[2]);
+      if (spec.size() >= 4)
+        context = Scan<size_t>(spec[3]);
+      if (spec.size() == 6) {
+        filenameSource = spec[4];
+        filenameTarget = spec[5];
+        restricted = true;
+      }
+    }
+    else
+      factors = Tokenize(modelSpec[i],"-");
+
+    if ( factors.size() != 2 ) {
+      UserMessage::Add("Wrong factor definition for global lexical model unlimited: " + modelSpec[i]);
+      //return false;
+    }
+
+    const vector<FactorType> inputFactors = Tokenize<FactorType>(factors[0],",");
+    const vector<FactorType> outputFactors = Tokenize<FactorType>(factors[1],",");
+    throw runtime_error("GlobalLexicalModelUnlimited should be reimplemented as a stateful feature");
+    GlobalLexicalModelUnlimited* glmu = NULL; // new GlobalLexicalModelUnlimited(inputFactors, outputFactors, biasFeature, ignorePunctuation, context);
+
+    if (restricted) {
+      cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
+      if (!glmu->Load(filenameSource, filenameTarget)) {
+        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+        //return false;
+      }
+    }
+  }
+}
 
 bool GlobalLexicalModelUnlimited::Load(const std::string &filePathSource,
 																			 const std::string &filePathTarget)

@@ -89,7 +89,6 @@ protected:
   LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
   std::vector<LexicalReordering*>                   m_reorderModels;
-  std::vector<GlobalLexicalModelUnlimited*>          m_globalLexicalModelsUnlimited;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
@@ -249,7 +248,6 @@ protected:
   //! load decoding steps
   bool LoadDecodeGraphs();
   bool LoadLexicalReorderingModel();
-  bool LoadGlobalLexicalModelUnlimited();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
   bool LoadDiscrimLMFeature();
