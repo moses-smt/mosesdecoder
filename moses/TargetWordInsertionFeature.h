@@ -20,13 +20,7 @@ private:
   bool m_unrestricted;
 
 public:
-	TargetWordInsertionFeature(FactorType factorType = 0):
-     StatelessFeatureFunction("twi", ScoreProducer::unlimited),
-     m_factorType(factorType),
-     m_unrestricted(true)
-  {
-		std::cerr << "Initializing target word insertion feature.." << std::endl;
-  }
+  TargetWordInsertionFeature(const std::string &line);
       
   bool Load(const std::string &filePath);
   void Evaluate(  const PhraseBasedFeatureContext& context,

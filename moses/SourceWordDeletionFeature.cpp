@@ -8,7 +8,6 @@
 #include "TranslationOption.h"
 #include "UserMessage.h"
 #include "Util.h"
-#include "util/check.hh"
 
 namespace Moses {
 

@@ -254,7 +254,6 @@ protected:
   bool LoadPhraseBoundaryFeature();
   bool LoadPhrasePairFeature();
   bool LoadPhraseLengthFeature();
-  bool LoadTargetWordInsertionFeature();
   bool LoadWordTranslationFeature();
 
   void ReduceTransOptCache() const;

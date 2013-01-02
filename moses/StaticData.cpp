@@ -570,6 +570,11 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "twi") {
+      TargetWordInsertionFeature *model = new TargetWordInsertionFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
 
   }
 
@@ -589,7 +594,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   if (!LoadPhrasePairFeature()) return false;
   if (!LoadPhraseBoundaryFeature()) return false;
   if (!LoadPhraseLengthFeature()) return false;
-  if (!LoadTargetWordInsertionFeature()) return false;
   if (!LoadWordTranslationFeature()) return false;
 
   // report individual sparse features in n-best list
@@ -1470,47 +1474,6 @@ bool StaticData::LoadPhraseLengthFeature()
     if (m_parameter->GetParam("report-sparse-features").size() > 0) {
         phraseLengthFeature->SetSparseFeatureReporting();
     }
-  }
-
-  return true;
-}
-
-bool StaticData::LoadTargetWordInsertionFeature()
-{
-  const vector<string> &parameters = m_parameter->GetParam("target-word-insertion-feature");
-  if (parameters.empty())
-    return true;
-
-  if (parameters.size() != 1) {
-    UserMessage::Add("Can only have one target-word-insertion-feature");
-    return false;
-  }
-
-  vector<string> tokens = Tokenize(parameters[0]);
-  if (tokens.size() != 1 && tokens.size() != 2) {
-    UserMessage::Add("Format of target word insertion feature parameter is: --target-word-insertion-feature <factor> [filename]");
-    return false;
-  }
-
-  m_needAlignmentInfo = true;
-
-  // set factor
-  FactorType factorId = Scan<size_t>(tokens[0]);
-
-  TargetWordInsertionFeature *targetWordInsertionFeature = new TargetWordInsertionFeature(factorId);
-
-  // load word list for restricted feature set
-  if (tokens.size() == 2) {
-    string filename = tokens[1];
-    cerr << "loading target word insertion word list from " << filename << endl;
-    if (!targetWordInsertionFeature->Load(filename)) {
-      UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
-      return false;
-    }
-  }
-
-  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-    targetWordInsertionFeature->SetSparseFeatureReporting();
   }
 
   return true;

@@ -6,10 +6,36 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
+#include "UserMessage.h"
 
 namespace Moses {
 
 using namespace std;
+
+TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
+:StatelessFeatureFunction("twi", ScoreProducer::unlimited),
+m_unrestricted(true)
+{
+  std::cerr << "Initializing target word insertion feature.." << std::endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  // set factor
+  m_factorType = Scan<FactorType>(tokens[1]);
+
+
+  // load word list for restricted feature set
+  if (tokens.size() == 3) {
+    string filename = tokens[2];
+    cerr << "loading target word insertion word list from " << filename << endl;
+    if (!Load(filename)) {
+      UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
+      //return false;
+    }
+  }
+
+}
 
 bool TargetWordInsertionFeature::Load(const std::string &filePath) 
 {
