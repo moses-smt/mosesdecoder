@@ -20,13 +20,7 @@ private:
   bool m_unrestricted;
 
 public:
-	SourceWordDeletionFeature(FactorType factorType = 0):
-     StatelessFeatureFunction("swd", ScoreProducer::unlimited),
-     m_factorType(factorType),
-     m_unrestricted(true)
-  {
-		std::cerr << "Initializing source word deletion feature.." << std::endl;
-  }
+  SourceWordDeletionFeature(const std::string &line);
       
   bool Load(const std::string &filePath);
   void Evaluate(const PhraseBasedFeatureContext& context, 

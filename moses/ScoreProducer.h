@@ -19,15 +19,14 @@ class InputType;
  */
 class ScoreProducer
 {
-private:
+protected:
   std::string m_description;
   bool m_reportSparseFeatures;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
-	ScoreProducer(const ScoreProducer&);  // don't implement
-	
-protected:
+
+  ScoreProducer(const ScoreProducer&);  // don't implement
 	ScoreProducer(const std::string& description, size_t numScoreComponents);
 
 public:
