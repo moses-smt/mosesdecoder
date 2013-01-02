@@ -14,12 +14,28 @@ int PhraseBoundaryState::Compare(const FFState& other) const
   return Word::Compare(*m_sourceWord,*(rhs.m_sourceWord));
 }
 
-
-PhraseBoundaryFeature::PhraseBoundaryFeature
-  (const FactorList& sourceFactors, const FactorList& targetFactors) :
-    StatefulFeatureFunction("PhraseBoundaryFeature", ScoreProducer::unlimited), m_sourceFactors(sourceFactors),
-    m_targetFactors(targetFactors), m_sparseProducerWeight(1)
+PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
+: StatefulFeatureFunction("PhraseBoundaryFeature", ScoreProducer::unlimited)
 {
+  std::cerr << "Initializing source word deletion feature.." << std::endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  FactorList sourceFactors, targetFactors;
+  for (size_t i = 1; i < tokens.size(); ++i) {
+    vector<string> pair = Tokenize(tokens[i], "=");
+
+    if (pair[0] == "source") {
+      CHECK(pair.size() == 2);
+      m_sourceFactors = Tokenize<FactorType>(pair[1], ",");
+    }
+    else if (pair[0] == "target") {
+      CHECK(pair.size() == 2);
+      m_targetFactors = Tokenize<FactorType>(pair[1], ",");
+    }
+
+  }
 }
 
 const FFState* PhraseBoundaryFeature::EmptyHypothesisState(const InputType &) const 

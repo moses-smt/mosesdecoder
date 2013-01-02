@@ -251,7 +251,6 @@ protected:
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
   bool LoadDiscrimLMFeature();
-  bool LoadPhraseBoundaryFeature();
   bool LoadPhrasePairFeature();
   bool LoadPhraseLengthFeature();
   bool LoadWordTranslationFeature();

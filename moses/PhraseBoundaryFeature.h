@@ -31,7 +31,7 @@ private:
  **/
 class PhraseBoundaryFeature : public StatefulFeatureFunction {
 public:
-  PhraseBoundaryFeature(const FactorList& sourceFactors, const FactorList& targetFactors);
+  PhraseBoundaryFeature(const std::string &line);
 
   size_t GetNumScoreComponents() const;
 

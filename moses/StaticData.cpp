@@ -575,6 +575,11 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "PhraseBoundaryFeature") {
+      PhraseBoundaryFeature *model = new PhraseBoundaryFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
 
   }
 
@@ -592,7 +597,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   if (!LoadReferences()) return  false;
   if (!LoadDiscrimLMFeature()) return false;
   if (!LoadPhrasePairFeature()) return false;
-  if (!LoadPhraseBoundaryFeature()) return false;
   if (!LoadPhraseLengthFeature()) return false;
   if (!LoadWordTranslationFeature()) return false;
 
@@ -1336,57 +1340,6 @@ bool StaticData::LoadDiscrimLMFeature()
     	}
   		
   	}
-  }
-
-  return true;
-}
-
-bool StaticData::LoadPhraseBoundaryFeature()
-{
-  const vector<float> &weight = m_parameter->GetWeights("PhraseBoundaryFeature", 0);
-  if (weight.size() > 1) {
-	std::cerr << "Only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
-    return false;
-  }
-
-  const vector<string> &phraseBoundarySourceFactors =
-    m_parameter->GetParam("phrase-boundary-source-feature");
-  const vector<string> &phraseBoundaryTargetFactors =
-    m_parameter->GetParam("phrase-boundary-target-feature");
-  if (phraseBoundarySourceFactors.size() == 0 && phraseBoundaryTargetFactors.size() == 0) {
-    return true;
-  }
-  if (phraseBoundarySourceFactors.size() > 1) {
-    UserMessage::Add("Need to specify comma separated list of source factors for phrase boundary");
-    return false;
-  }
-  if (phraseBoundaryTargetFactors.size() > 1) {
-    UserMessage::Add("Need to specify comma separated list of target factors for phrase boundary");
-    return false;
-  }
-  FactorList sourceFactors;
-  FactorList targetFactors;
-  if (phraseBoundarySourceFactors.size()) {
-    sourceFactors = Tokenize<FactorType>(phraseBoundarySourceFactors[0],",");
-  }
-  if (phraseBoundaryTargetFactors.size()) {
-    targetFactors = Tokenize<FactorType>(phraseBoundaryTargetFactors[0],",");
-  }
-  //cerr << "source "; for (size_t i = 0; i < sourceFactors.size(); ++i) cerr << sourceFactors[i] << " "; cerr << endl;
-  //cerr << "target "; for (size_t i = 0; i < targetFactors.size(); ++i) cerr << targetFactors[i] << " "; cerr << endl;
-  PhraseBoundaryFeature *phraseBoundaryFeature = new PhraseBoundaryFeature(sourceFactors,targetFactors);
-  if (weight.size() > 0) {
-    phraseBoundaryFeature->SetSparseProducerWeight(weight[0]);
-  }
-
-  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-    phraseBoundaryFeature->SetSparseFeatureReporting();
-  }
-
-  float sparseWeight = phraseBoundaryFeature->GetSparseProducerWeight();
-  if (sparseWeight != 1) {
-    AddSparseProducer(phraseBoundaryFeature);
-    cerr << "pb sparse producer weight: " << sparseWeight << endl;
   }
 
   return true;
