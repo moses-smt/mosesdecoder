@@ -252,7 +252,6 @@ protected:
   bool LoadReferences();
   bool LoadDiscrimLMFeature();
   bool LoadPhrasePairFeature();
-  bool LoadPhraseLengthFeature();
   bool LoadWordTranslationFeature();
 
   void ReduceTransOptCache() const;

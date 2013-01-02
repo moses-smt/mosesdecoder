@@ -17,9 +17,7 @@ namespace Moses
  */
 class PhraseLengthFeature : public StatelessFeatureFunction {
 public:
-	PhraseLengthFeature():
-     StatelessFeatureFunction("pl", ScoreProducer::unlimited)
-  {}
+  PhraseLengthFeature(const std::string &line);
       
   void Evaluate(const PhraseBasedFeatureContext& context,
                 ScoreComponentCollection* accumulator) const;

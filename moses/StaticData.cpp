@@ -580,6 +580,11 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "pl") {
+      PhraseLengthFeature *model = new PhraseLengthFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
 
   }
 
@@ -597,7 +602,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   if (!LoadReferences()) return  false;
   if (!LoadDiscrimLMFeature()) return false;
   if (!LoadPhrasePairFeature()) return false;
-  if (!LoadPhraseLengthFeature()) return false;
   if (!LoadWordTranslationFeature()) return false;
 
   // report individual sparse features in n-best list
@@ -1416,18 +1420,6 @@ bool StaticData::LoadPhrasePairFeature()
       phrasePairFeature->SetSparseFeatureReporting();
     }
   } // for (size_t i=0; i<parameters.size(); ++i)
-
-  return true;
-}
-
-bool StaticData::LoadPhraseLengthFeature()
-{
-  if (m_parameter->isParamSpecified("phrase-length-feature")) {
-    PhraseLengthFeature *phraseLengthFeature = new PhraseLengthFeature();
-    if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-        phraseLengthFeature->SetSparseFeatureReporting();
-    }
-  }
 
   return true;
 }
