@@ -93,7 +93,7 @@ void LanguageModelLocal::CreateFactors()
   FactorType tagFactor  = m_factorTypesOrdered[1];
   while ( (str = iter.next()) != NULL) {
     vector<string> factors = Tokenize(str, "|");
-    if (factors.size() != 2) {
+    if (factors.size() != 3) {
       cerr << "Warning: skipping word '" << str << "'" << endl;
       continue;
     }
@@ -102,8 +102,9 @@ void LanguageModelLocal::CreateFactors()
     if (factors[0] == "HEAD")
       m_factorHead = tag;
     size_t tagId = tag->GetId();
-    size_t formId = factorCollection.AddFactor(Output, formFactor, factors[1])->GetId();
-    m_lmIdLookup[PairNumbers(tagId, formId)] = lmId;
+    int position = Scan<int>(factors[1]);
+    size_t formId = factorCollection.AddFactor(Output, formFactor, factors[2])->GetId();
+    m_lmIdLookup[Encode(tagId, position, formId)] = lmId;
   }
 
   // sentence markers
@@ -112,9 +113,9 @@ void LanguageModelLocal::CreateFactors()
     m_sentenceStartArray[factorType] = factorCollection.AddFactor(Output, factorType, BOS_);
     m_sentenceEndArray[factorType]   = factorCollection.AddFactor(Output, factorType, EOS_);
   }
-  m_lmIdLookup[PairNumbers(m_sentenceStartArray[tagFactor]->GetId(),
+  m_lmIdLookup[Encode(m_sentenceStartArray[tagFactor]->GetId(), 0,
                            m_sentenceStartArray[formFactor]->GetId())] = GetLmID(BOS_);
-  m_lmIdLookup[PairNumbers(m_sentenceEndArray[tagFactor]->GetId(),
+  m_lmIdLookup[Encode(m_sentenceEndArray[tagFactor]->GetId(), 0,
                            m_sentenceEndArray[formFactor]->GetId())] = GetLmID(EOS_);
 }
 
@@ -123,10 +124,10 @@ VocabIndex LanguageModelLocal::GetLmID( const std::string &str ) const
   return m_srilmVocab->getIndex( str.c_str(), m_unknownId );
 }
 
-VocabIndex LanguageModelLocal::GetLmID( const Factor *tag, const Factor *form ) const
+VocabIndex LanguageModelLocal::GetLmID( const Factor *tag, int position, const Factor *form ) const
 {
   boost::unordered_map<size_t, unsigned int>::const_iterator it;
-  it = m_lmIdLookup.find(PairNumbers(tag->GetId(), form->GetId()));
+  it = m_lmIdLookup.find(Encode(tag->GetId(), position, form->GetId()));
   return (it == m_lmIdLookup.end()) ? m_unknownId : it->second;
 }
 
@@ -156,19 +157,20 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
   VocabIndex ngram[count + 1];
   for (size_t head = 0; head < count; head++) {
     if (! IsOrdinaryWord(contextFactors[head])
-        || GetLmID(m_factorHead, (*contextFactors[head])[formFactor]) == m_unknownId)
+        || GetLmID(m_factorHead, 0, (*contextFactors[head])[formFactor]) == m_unknownId)
       continue; // head cannot be <s>,</s>; uknown words are skipped
 
     for (size_t i = 1 ; i < count ; i++) {
       size_t contextPosition = count - i - 1;
-      if (contextPosition == head) {
-        ngram[i] = GetLmID(m_factorHead, (*contextFactors[head])[formFactor]);
+      int relPos = contextPosition - head;
+      if (relPos == 0) {
+        ngram[i] = GetLmID(m_factorHead, 0, (*contextFactors[head])[formFactor]);
       } else {
         if (IsOrdinaryWord(contextFactors[contextPosition])) {
-          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor],
+          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor], relPos,
               (*contextFactors[head])[formFactor]);
         } else {
-          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor],
+          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor], relPos,
               (*contextFactors[contextPosition])[formFactor]);
         }
       }
@@ -176,14 +178,15 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
     ngram[count] = Vocab_None;
 
     CHECK((*contextFactors[count-1])[tagFactor] != NULL);
-    if (head == count - 1) {
-      lmId = GetLmID(m_factorHead, (*contextFactors[head])[formFactor]);
+    int relPos = count - 1 - head;
+    if (relPos) {
+      lmId = GetLmID(m_factorHead, 0, (*contextFactors[head])[formFactor]);
     } else {
       if (IsOrdinaryWord(contextFactors[count - 1])) {
-        lmId = GetLmID((*contextFactors[count - 1])[tagFactor],
+        lmId = GetLmID((*contextFactors[count - 1])[tagFactor], relPos,
             (*contextFactors[head])[formFactor]);
       } else {
-        lmId = GetLmID((*contextFactors[count - 1])[tagFactor],
+        lmId = GetLmID((*contextFactors[count - 1])[tagFactor], relPos,
             (*contextFactors[count - 1])[formFactor]);
       }
     }

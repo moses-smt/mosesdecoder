@@ -24,9 +24,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <vector>
+#include <cmath>
 #include <boost/unordered_map.hpp>
 #include "moses/Factor.h"
 #include "moses/TypeDef.h"
+#include "moses/Util.h"
 #include "SingleFactor.h"
 #include "MultiFactor.h"
 
@@ -53,7 +55,14 @@ protected:
   void GetValue(unsigned int wordId, unsigned int *context, LMResult &ret) const;
   void CreateFactors();
   unsigned int GetLmID( const std::string &str ) const;
-  unsigned int GetLmID( const Factor *form, const Factor *tag ) const;
+  unsigned int GetLmID( const Factor *form, int position, const Factor *tag ) const;
+
+  size_t Encode(size_t tagId, int position, size_t formId) const  
+  {
+    position += m_nGramOrder + 2;
+    CHECK(position == abs(position));
+    return PairNumbers(tagId, PairNumbers(formId, (size_t)position));
+  }
 
   // Cantor's pairing function
   size_t PairNumbers(size_t a, size_t b) const
