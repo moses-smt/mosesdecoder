@@ -7,11 +7,112 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
+#include "UserMessage.h"
 #include <boost/algorithm/string.hpp>
 
 namespace Moses {
 
 using namespace std;
+
+WordTranslationFeature::WordTranslationFeature(const std::string &line)
+:StatelessFeatureFunction("WordTranslationFeature", ScoreProducer::unlimited)
+{
+  std::cerr << "Initializing word translation feature.. " << endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  if (tokens.size() != 1 &&  !(tokens.size() >= 4 && tokens.size() <= 9)) {
+    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src>-<factor-tgt> "
+         "[simple source-trigger target-trigger] [ignore-punctuation] [domain-trigger] [filename-src] [filename-tgt] [text-type]");
+    //return false;
+  }
+
+  // set factor
+  vector <string> factors = Tokenize(tokens[1],"-");
+  m_factorTypeSource = Scan<FactorType>(factors[0]);
+  m_factorTypeTarget = Scan<FactorType>(factors[1]);
+
+  m_unrestricted = true;
+  m_sparseProducerWeight = 1;
+  m_simple = true;
+  m_sourceContext = false;
+  m_targetContext = false;
+  m_ignorePunctuation = false;
+  m_domainTrigger = false;
+  if (tokens.size() >= 5) {
+    m_simple = Scan<size_t>(tokens[2]);
+    m_sourceContext = Scan<size_t>(tokens[3]);
+    m_targetContext = Scan<size_t>(tokens[4]);
+  }
+  if (tokens.size() >= 6) {
+    m_ignorePunctuation = Scan<size_t>(tokens[5]);
+  }
+
+  if (tokens.size() >= 7) {
+    m_domainTrigger = Scan<size_t>(tokens[6]);
+  }
+
+  if (m_simple == 1) std::cerr << "using simple word translations.. ";
+  if (m_sourceContext == 1) std::cerr << "using source context.. ";
+  if (m_targetContext == 1) std::cerr << "using target context.. ";
+  if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
+
+  // compile a list of punctuation characters
+  if (m_ignorePunctuation) {
+    std::cerr << "ignoring punctuation for triggers.. ";
+    char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
+    for (size_t i=0; i < sizeof(punctuation)-1; ++i) {
+      m_punctuationHash[punctuation[i]] = 1;
+    }
+  }
+
+  std::cerr << "done." << std::endl;
+
+  // load word list for restricted feature set
+  if (tokens.size() == 9) {
+    string filenameSource = tokens[7];
+    if (m_domainTrigger) {
+      const string &texttype = tokens[8];
+
+      stringstream filename(filenameSource + "." + texttype);
+      filenameSource = filename.str();
+      cerr << "loading word translation term list from " << filenameSource << endl;
+    }
+    else {
+      cerr << "loading word translation word lists from " << filenameSource << endl;
+    }
+    if (!Load(filenameSource, "")) {
+      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
+      //return false;
+    }
+  } // if (tokens.size() == 7)
+  else if (tokens.size() == 10) {
+    // TODO need to change this
+    string filenameSource = tokens[7];
+    string filenameTarget = tokens[8];
+    cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
+    if (!Load(filenameSource, filenameTarget)) {
+      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
+      //return false;
+    }
+  } //else if (tokens.size() == 8) {
+
+  // TODO not sure about this
+  /*
+  if (weight[0] != 1) {
+    AddSparseProducer(wordTranslationFeature);
+    cerr << "wt sparse producer weight: " << weight[0] << endl;
+    if (m_mira)
+      m_metaFeatureProducer = new MetaFeatureProducer("wt");
+  }
+
+  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
+    wordTranslationFeature->SetSparseFeatureReporting();
+  }
+  */
+
+}
 
 bool WordTranslationFeature::Load(const std::string &filePathSource, const std::string &filePathTarget) 
 {

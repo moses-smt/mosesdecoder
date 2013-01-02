@@ -151,7 +151,6 @@ Parameter::Parameter()
   AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("show-weights", "print feature weights and exit");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
-  AddParam("text-type", "should be one of dev/devtest/test, used for domain adaptation features");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
   
   // Compact phrase table and reordering table.                                                                                  
@@ -184,6 +183,7 @@ Parameter::Parameter()
   AddParam("weight-w", "w", "DEPRECATED. DO NOT USE. weight for word penalty");
   AddParam("weight-u", "u", "DEPRECATED. DO NOT USE. weight for unknown word penalty");
   AddParam("weight-e", "e", "DEPRECATED. DO NOT USE. weight for word deletion");
+  //AddParam("text-type", "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
 
   AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 
