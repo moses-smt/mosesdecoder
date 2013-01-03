@@ -79,10 +79,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
       implementation==Compact || implementation==FuzzyMatch ) {
     m_useThreadSafePhraseDictionary = true;
-    if (implementation == SuffixArray) {
-      cerr << "Warning: implementation holds cached weights!" << endl;
-      exit(1);
-    }
   } else {
     m_useThreadSafePhraseDictionary = false;
   }
@@ -154,8 +150,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     return dict;
   } else if (m_implementation == ALSuffixArray) {
     // memory phrase table
-    cerr << "Warning: Implementation holds cached weights!" << endl;
-    exit(1);
     VERBOSE(2,"using Hiero format phrase tables" << std::endl);
     if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
       m_filePath += ".gz";
@@ -185,8 +179,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     CHECK(ret);
     return pdta;
   } else if (m_implementation == SuffixArray) {
-    cerr << "Warning: Implementation holds cached weights!" << endl;
-    exit(1);
 #ifndef WIN32
     PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(GetNumScoreComponents(), this);
     if(!(pd->Load(

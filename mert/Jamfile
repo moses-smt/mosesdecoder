@@ -42,7 +42,6 @@ TER/tercalc.cpp
 TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
-MergeScorer.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp
 SentenceLevelScorer.cpp
