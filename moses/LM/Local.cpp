@@ -149,7 +149,7 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
       *finalState = NULL;
     return ret;
   }
-//  if (count < m_nGramOrder) return ret;
+  if (count < 2) return ret;
 
   FactorType formFactor = m_factorTypesOrdered[0];
   FactorType tagFactor  = m_factorTypesOrdered[1];
@@ -161,7 +161,7 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
   IFVERBOSE(3) {
     cerr << "[LocalLM] ";
     for (wordIt = contextFactors.begin(); wordIt != contextFactors.end(); wordIt++) {
-      cerr << (*wordIt)[formFactor] << " ";
+      cerr << (*wordIt)[formFactor];
     }
     cerr << "\n";
   }
