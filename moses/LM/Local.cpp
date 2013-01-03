@@ -137,6 +137,7 @@ void LanguageModelLocal::GetValue(VocabIndex wordId, VocabIndex *context, LMResu
     ret.score += FloorScore(TransformLMScore(m_srilmModel->wordProb( wordId, context)));
 //  }
   ret.unknown = (ret.unknown || (wordId == m_unknownId));
+//  if (wordId == m_unknownId) cerr << "LocalLM: Scoring <unk>\n";
 }
 
 LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors, State* finalState) const
@@ -149,13 +150,25 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
       *finalState = NULL;
     return ret;
   }
+//  if (count < m_nGramOrder) return ret;
 
   FactorType formFactor = m_factorTypesOrdered[0];
   FactorType tagFactor  = m_factorTypesOrdered[1];
 
   VocabIndex lmId;
   VocabIndex ngram[count + 1];
-  for (size_t head = 0; head < count; head++) {
+  vector<const Word *>::const_iterator wordIt;
+
+  /*
+  cerr << "=== Ngram: ";
+  for (wordIt = contextFactors.begin(); wordIt != contextFactors.end(); wordIt++) {
+    cerr << (*wordIt)[formFactor] << " ";
+  }
+  cerr << "\n";
+  */
+
+  for (size_t head = 0; head < count; head++) {    
+//    cerr << "head at " << head << "\n";
     if (! IsOrdinaryWord(contextFactors[head])
         || GetLmID(m_factorHead, 0, (*contextFactors[head])[formFactor]) == m_unknownId)
       continue; // head cannot be <s>,</s>; uknown words are skipped
@@ -170,7 +183,7 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
           ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor], relPos,
               (*contextFactors[head])[formFactor]);
         } else {
-          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor], relPos,
+          ngram[i] = GetLmID((*contextFactors[contextPosition])[tagFactor], 0,
               (*contextFactors[contextPosition])[formFactor]);
         }
       }
@@ -186,18 +199,20 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
         lmId = GetLmID((*contextFactors[count - 1])[tagFactor], relPos,
             (*contextFactors[head])[formFactor]);
       } else {
-        lmId = GetLmID((*contextFactors[count - 1])[tagFactor], relPos,
+        lmId = GetLmID((*contextFactors[count - 1])[tagFactor], 0,
             (*contextFactors[count - 1])[formFactor]);
       }
     }
     // call SRILM
     GetValue(lmId, ngram+1, /* out */ ret);
-/*    if (! ret.unknown) {
+    /*
+    if (! ret.unknown) {
       cerr << "LocalLM adding score of LM " << (*contextFactors[head])[formFactor]->GetString()
         << "\t" << ret.score << "\n";
     }
     ngram[0] = lmId; // XXX remove me
-    DumpNgram(ngram, ngram + count); */
+    DumpNgram(ngram, ngram + count); 
+    */
   }
 
 
@@ -211,11 +226,11 @@ LMResult LanguageModelLocal::GetValue(const vector<const Word*> &contextFactors,
 
 void LanguageModelLocal::DumpNgram(const unsigned int *begin, const unsigned *end) const
 {
-  cerr << "Scoring ngram: ";
+  cerr << "  Scored ngram: ";
   for (; begin != end; begin++) {
     cerr << m_srilmVocab->getWord(*begin) << " ";
   }
-  cerr << endl;
+  cerr << "\n";
 }
 
 }
