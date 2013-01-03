@@ -6,7 +6,6 @@
 #include "PerScorer.h"
 #include "TerScorer.h"
 #include "CderScorer.h"
-#include "MergeScorer.h"
 #include "InterpolatedScorer.h"
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
@@ -44,8 +43,6 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     return new CderScorer(config, false);
   } else if (type == "SEMPOS") {
     return new SemposScorer(config);
-  } else if (type == "MERGE") {
-    return new MergeScorer(config);
   } else if ((type == "HAMMING") || (type == "KENDALL")) {
     return (PermutationScorer*) new PermutationScorer(type, config);
   } else {
