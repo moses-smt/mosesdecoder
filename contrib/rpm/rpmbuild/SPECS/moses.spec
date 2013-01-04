@@ -1,6 +1,6 @@
 Name: moses
 Summary: Moses is a statistical machine translation system that allows you to automatically train translation models for any language pair.
-Version: 0.91
+Version: ___RPM_VERSION__
 Release: 1
 URL: http://www.statmt.org/moses/
 Source0: %{name}-%{version}.tar.gz

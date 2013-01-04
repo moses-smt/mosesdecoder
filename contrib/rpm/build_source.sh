@@ -1,7 +1,8 @@
 #!/bin/bash
 
 BRANCH="master"
-declare -i NO_MOVE=0
+declare -i NO_RPM_BUILD=0
+declare -r RPM_VERSION_TAG="___RPM_VERSION__"
 
 function usage() {
   echo "`basename $0` -r [Moses Git repo] -b [Moses Git branch: default ${BRANCH}] -v [RPM version]"
@@ -18,7 +19,7 @@ do
       r) REPO="${OPTARG}";;
       b) BRANCH="${OPTARG}";;
       v) VERSION="${OPTARG}";;
-      n) NO_MOVE=1;;
+      n) NO_RPM_BUILD=1;;
       [h\?]) usage;;
   esac
 done
@@ -48,8 +49,11 @@ cd ..
 tar -cf moses-${VERSION}.tar ${MOSES_DIR}
 gzip -f9 moses-${VERSION}.tar
 
-if [ ${NO_MOVE} -eq 0 ]; then
-  cp -R ./rpmbuild ${HOME}
+if [ ${NO_RPM_BUILD} -eq 0 ]; then
+  if [ ! -d ${HOME}/rpmbuild ]; then
+    mkdir ${HOME}/rpmbuild
+  fi
+  eval sed s/${RPM_VERSION_TAG}/${VERSION}/ ./rpmbuild/SPECS/moses.spec > ${HOME}/rpmbuild/SPECS/moses.spec
   if [ ! -d ${HOME}/rpmbuild/SOURCES ]; then
     mkdir ${HOME}/rpmbuild/SOURCES
   fi
