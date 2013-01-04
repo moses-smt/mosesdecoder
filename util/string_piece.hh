@@ -1,6 +1,6 @@
 /* If you use ICU in your program, then compile with -DHAVE_ICU -licui18n.  If
  * you don't use ICU, then this will use the Google implementation from Chrome.
- * This has been modified from the original version to let you choose.  
+ * This has been modified from the original version to let you choose.
  */
 
 // Copyright 2008, Google Inc.
@@ -49,7 +49,11 @@
 #define BASE_STRING_PIECE_H__
 
 #include "util/have.hh"
+
+#ifdef HAVE_BOOST
 #include <boost/functional/hash/hash.hpp>
+#endif // HAVE_BOOST
+
 #include <cstring>
 #include <iosfwd>
 #include <ostream>
@@ -58,9 +62,9 @@
 #include <unicode/stringpiece.h>
 #include <unicode/uversion.h>
 
-// Old versions of ICU don't define operator== and operator!=.  
+// Old versions of ICU don't define operator== and operator!=.
 #if (U_ICU_VERSION_MAJOR_NUM < 4) || ((U_ICU_VERSION_MAJOR_NUM == 4) && (U_ICU_VERSION_MINOR_NUM < 4))
-#warning You are using an old version of ICU.  Consider upgrading to ICU >= 4.6.  
+#warning You are using an old version of ICU.  Consider upgrading to ICU >= 4.6.
 inline bool operator==(const StringPiece& x, const StringPiece& y) {
   if (x.size() != y.size())
     return false;
@@ -252,6 +256,7 @@ inline std::ostream& operator<<(std::ostream& o, const StringPiece& piece) {
   return o.write(piece.data(), static_cast<std::streamsize>(piece.size()));
 }
 
+#ifdef HAVE_BOOST
 inline size_t hash_value(const StringPiece &str) {
   return boost::hash_range(str.data(), str.data() + str.length());
 }
@@ -285,9 +290,12 @@ template <class T> typename T::iterator FindStringPiece(T &t, const StringPiece 
   return t.find(key, StringPieceCompatibleHash(), StringPieceCompatibleEquals());
 #endif
 }
+#endif
 
 #ifdef HAVE_ICU
 U_NAMESPACE_END
+using U_NAMESPACE_QUALIFIER StringPiece;
 #endif
+
 
 #endif  // BASE_STRING_PIECE_H__
