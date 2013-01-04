@@ -50,8 +50,8 @@ tar -cf moses-${VERSION}.tar ${MOSES_DIR}
 gzip -f9 moses-${VERSION}.tar
 
 if [ ${NO_RPM_BUILD} -eq 0 ]; then
-  if [ ! -d ${HOME}/rpmbuild ]; then
-    mkdir ${HOME}/rpmbuild
+  if [ ! -d ${HOME}/rpmbuild/SPECS ]; then
+    mkdir ${HOME}/rpmbuild/SPECS
   fi
   eval sed s/${RPM_VERSION_TAG}/${VERSION}/ ./rpmbuild/SPECS/moses.spec > ${HOME}/rpmbuild/SPECS/moses.spec
   if [ ! -d ${HOME}/rpmbuild/SOURCES ]; then
