@@ -6,10 +6,6 @@
 //#define HAVE_ICU
 #endif
 
-#ifndef HAVE_BOOST
-#define HAVE_BOOST
-#endif
-
 #ifndef HAVE_THREADS
 //#define HAVE_THREADS
 #endif

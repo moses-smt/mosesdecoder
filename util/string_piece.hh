@@ -49,11 +49,7 @@
 #define BASE_STRING_PIECE_H__
 
 #include "util/have.hh"
-
-#ifdef HAVE_BOOST
 #include <boost/functional/hash/hash.hpp>
-#endif // HAVE_BOOST
-
 #include <cstring>
 #include <iosfwd>
 #include <ostream>
@@ -256,7 +252,6 @@ inline std::ostream& operator<<(std::ostream& o, const StringPiece& piece) {
   return o.write(piece.data(), static_cast<std::streamsize>(piece.size()));
 }
 
-#ifdef HAVE_BOOST
 inline size_t hash_value(const StringPiece &str) {
   return boost::hash_range(str.data(), str.data() + str.length());
 }
@@ -290,7 +285,6 @@ template <class T> typename T::iterator FindStringPiece(T &t, const StringPiece 
   return t.find(key, StringPieceCompatibleHash(), StringPieceCompatibleEquals());
 #endif
 }
-#endif
 
 #ifdef HAVE_ICU
 U_NAMESPACE_END
