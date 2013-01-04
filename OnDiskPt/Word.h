@@ -22,6 +22,7 @@
 #include <vector>
 #include <iostream>
 #include <fstream>
+#include <boost/shared_ptr.hpp>
 #include "Vocab.h"
 
 namespace Moses
@@ -40,7 +41,7 @@ class Word
 {
   friend std::ostream& operator<<(std::ostream&, const Word&);
 
-protected:
+private:
   bool m_isNonTerminal;
   UINT64 m_vocabId;
 
@@ -70,16 +71,23 @@ public:
     m_vocabId = vocabId;
   }
 
-  Moses::Word *ConvertToMoses(Moses::FactorDirection direction
-                              , const std::vector<Moses::FactorType> &outputFactorsVec
-                              , const Vocab &vocab) const;
+  void ConvertToMoses(
+    const std::vector<Moses::FactorType> &outputFactorsVec,
+    const Vocab &vocab,
+    Moses::Word &overwrite) const;
 
-	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  inline const std::string &GetString(const Vocab &vocab) const
+  {
+    return vocab.GetString(m_vocabId);
+  }
 
   int Compare(const Word &compare) const;
   bool operator<(const Word &compare) const;
   bool operator==(const Word &compare) const;
 
 };
+
+typedef boost::shared_ptr<Word> WordPtr;
 }
 

@@ -20,9 +20,9 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../moses/src/Util.h"
-#include "../moses/src/TargetPhraseCollection.h"
-#include "../moses/src/PhraseDictionary.h"
+#include "moses/Util.h"
+#include "moses/TargetPhraseCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhraseCollection.h"
 #include "Vocab.h"
 #include "OnDiskWrapper.h"
@@ -82,7 +82,7 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
   CollType::iterator iter;
   for (iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
     // save phrase
-    TargetPhrase &targetPhrase = **iter;
+	TargetPhrase &targetPhrase = **iter;
     targetPhrase.Save(onDiskWrapper);
 
     // save coll
@@ -154,8 +154,9 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
 {
   fstream &fileTPColl = onDiskWrapper.GetFileTargetColl();
   fstream &fileTP = onDiskWrapper.GetFileTargetInd();
-
+    
   size_t numScores = onDiskWrapper.GetNumScores();
+    
 
   UINT64 numPhrases;
 
@@ -167,9 +168,9 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   numPhrases = std::min(numPhrases, (UINT64) tableLimit);
 
   currFilePos += sizeof(UINT64);
-
+ 
   for (size_t ind = 0; ind < numPhrases; ++ind) {
-    TargetPhrase *tp = new TargetPhrase(numScores);
+    TargetPhrase *tp = new TargetPhrase(numScores);    
 
     UINT64 sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
     tp->ReadFromFile(fileTP);

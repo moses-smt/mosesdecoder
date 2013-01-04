@@ -3,6 +3,7 @@
 #ifndef LM_TRIE_SORT__
 #define LM_TRIE_SORT__
 
+#include "lm/max_order.hh"
 #include "lm/word_index.hh"
 
 #include "util/file.hh"
@@ -27,8 +28,6 @@ class SortedVocabulary;
 struct Config;
 
 namespace trie {
-
-void WriteOrThrow(FILE *to, const void *data, size_t size);
 
 class EntryCompare : public std::binary_function<const void*, const void*, bool> {
   public:

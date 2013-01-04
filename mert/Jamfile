@@ -42,7 +42,6 @@ TER/tercalc.cpp
 TER/tools.cpp
 TerScorer.cpp
 CderScorer.cpp
-MergeScorer.cpp
 Vocabulary.cpp
 PreProcessFilter.cpp
 SentenceLevelScorer.cpp
@@ -51,17 +50,19 @@ PermutationScorer.cpp
 StatisticsBasedScorer.cpp
 ../util//kenutil m ..//z ;
 
-exe mert : mert.cpp mert_lib ../moses/src//ThreadPool ;
+exe mert : mert.cpp mert_lib ../moses//ThreadPool ;
 
 exe extractor : extractor.cpp mert_lib ;
 
 exe evaluator : evaluator.cpp mert_lib ;
 
+exe sentence-bleu : sentence-bleu.cpp mert_lib ;
+
 exe pro : pro.cpp mert_lib ..//boost_program_options ;
 
 exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ;
 
-alias programs : mert extractor evaluator pro kbmira ;
+alias programs : mert extractor evaluator pro kbmira sentence-bleu ;
 
 unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ;
@@ -75,3 +76,4 @@ unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ;
 unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ;
 
+install legacy : programs : <location>. ;

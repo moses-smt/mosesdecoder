@@ -77,7 +77,7 @@ $SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 # moses.ini file uses FULL names for lambdas, while this training script
 # internally (and on the command line) uses ABBR names.
 my @ABBR_FULL_MAP = qw(d=weight-d lm=weight-l tm=weight-t w=weight-w
-  g=weight-generation lex=weight-lex I=weight-i);
+  g=weight-generation lex=weight-lex I=weight-i dlm=weight-dlm pp=weight-pp wt=weight-wt pb=weight-pb lex=weight-lex glm=weight-glm);
 my %ABBR2FULL = map { split /=/, $_, 2 } @ABBR_FULL_MAP;
 my %FULL2ABBR = map { my ($a, $b) = split /=/, $_, 2; ($b, $a); } @ABBR_FULL_MAP;
 
@@ -164,6 +164,7 @@ my $___ACTIVATE_FEATURES = undef; # comma-separated (or blank-separated) list of
                                   # if undef work on all features
                                   # (others are fixed to the starting values)
 my $___RANGES = undef;
+my $___USE_CONFIG_WEIGHTS_FIRST = 0; # use weights in configuration file for first iteration
 my $prev_aggregate_nbl_size = -1; # number of previous step to consider when loading data (default =-1)
                                   # -1 means all previous, i.e. from iteration 1
                                   # 0 means no previous data, i.e. from actual iteration
@@ -212,6 +213,7 @@ GetOptions(
   "return-best-dev" => \$___RETURN_BEST_DEV, # return the best weights according to dev, not the last
   "activate-features=s" => \$___ACTIVATE_FEATURES, #comma-separated (or blank-separated) list of features to work on (others are fixed to the starting values)
   "range=s@" => \$___RANGES,
+  "use-config-weights-for-first-run" => \$___USE_CONFIG_WEIGHTS_FIRST, # use the weights in the configuration file when running the decoder for the first time
   "prev-aggregate-nbestlist=i" => \$prev_aggregate_nbl_size, #number of previous step to consider when loading data (default =-1, i.e. all previous)
   "maximum-iterations=i" => \$maximum_iterations,
   "pairwise-ranked" => \$___PAIRWISE_RANKED_OPTIMIZER,
@@ -783,7 +785,7 @@ while (1) {
 
   $cmd .= $file_settings;
 
-
+  my %sparse_weights; # sparse features
   my $pro_optimizer_cmd = "$pro_optimizer $megam_default_options run$run.pro.data";
   if ($___PAIRWISE_RANKED_OPTIMIZER) {  # pro optimization
     $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
@@ -793,12 +795,29 @@ while (1) {
     my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
-    my %dummy;
-    ($bestpoint, $devbleu) = &get_weights_from_mert("run$run.pro.out", "run$run.pro.err", scalar @{$featlist->{"names"}}, \%dummy);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);
+    # Get the pro outputs ready for mert. Add the weight ranges,
+    # and a weight and range for the single sparse feature
+    $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
+    open(MERT_START,$1);
+    open(PRO_START,">run$run.init.pro");
+    print PRO_START $bestpoint." 1\n";
+    my $mert_line = <MERT_START>;
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 0\n";
+    $mert_line = <MERT_START>;
+    chomp $mert_line;
+    print PRO_START $mert_line." 1\n";
+    close(PRO_START);
 
-    open my $pro_fh, '>', "run$run.init.pro" or die "run$run.init.pro: $!";
-    print $pro_fh $bestpoint . "\n";
-    close $pro_fh;
+    # Write the sparse weights to file so mert can use them
+    open(SPARSE_WEIGHTS,">run$run.merge-weights");
+    foreach my $fname (keys %sparse_weights) {
+      print SPARSE_WEIGHTS "$fname $sparse_weights{$fname}\n";
+    }
+    close(SPARSE_WEIGHTS);
+    $cmd = $cmd." --sparse-weights run$run.merge-weights";
 
     # ... and run mert
     $cmd =~ s/(--ifile \S+)/$1,run$run.init.pro/;
@@ -824,8 +843,8 @@ while (1) {
 
   print "run $run end at ".`date`;
 
-  my %sparse_weights; # sparse features
-  ($bestpoint, $devbleu) = &get_weights_from_mert("run$run.$mert_outfile", "run$run.$mert_logfile", scalar @{$featlist->{"names"}}, \%sparse_weights);
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+  my $merge_weight = 0;
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -834,6 +853,10 @@ while (1) {
 
   # update my cache of lambda values
   my @newweights = split /\s+/, $bestpoint;
+
+  if ($___PRO_STARTING_POINT) {
+    $merge_weight = pop @newweights;
+  }
 
   # interpolate with prior's interation weight, if historic-interpolation is specified
   if ($___HISTORIC_INTERPOLATION>0 && $run>3) {
@@ -874,7 +897,11 @@ while (1) {
     $sparse_weights_file = "run" . ($run + 1) . ".sparse-weights";
     open my $sparse_fh, '>', $sparse_weights_file or die "$sparse_weights_file: $!";
     foreach my $feature (keys %sparse_weights) {
-      print $sparse_fh "$feature $sparse_weights{$feature}\n";
+      my $sparse_weight = $sparse_weights{$feature};
+      if ($___PRO_STARTING_POINT) {
+        $sparse_weight *= $merge_weight;
+      }
+      print $sparse_fh "$feature $sparse_weight\n";
     }
     close $sparse_fh;
   }
@@ -1051,7 +1078,8 @@ sub run_decoder {
       $model_weights{$name} = "-$name" if !defined $model_weights{$name};
       $model_weights{$name} .= sprintf " %.6f", $vals[$i];
     }
-    my $decoder_config = join(" ", values %model_weights);
+    my $decoder_config = "";
+    $decoder_config = join(" ", values %model_weights) unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
@@ -1158,7 +1186,7 @@ sub get_featlist_from_file {
     my ($longname, $feature, $value) = ($1, $2, $3);
     next if $value eq "sparse";
     push @errs, "$featlistfn:$nr:Bad initial value of $feature: $value\n"
-      if $value !~ /^[+-]?[0-9.e-]+$/;
+      if $value !~ /^[+-]?[0-9.\-e]+$/;
     push @errs, "$featlistfn:$nr:Unknown feature '$feature', please add it to \@ABBR_FULL_MAP\n"
       if !defined $ABBR2FULL{$feature};
     push @names, $feature;
@@ -1195,7 +1223,7 @@ sub get_order_of_scores_from_nbestlist {
       $sparse = 1;
     } elsif ($tok =~ /^([a-z][0-9a-z]*):/i) {
       $label = $1;
-    } elsif ($tok =~ /^-?[-0-9.e]+$/) {
+    } elsif ($tok =~ /^-?[-0-9.\-e]+$/) {
       if (!$sparse) {
         # a score found, remember it
         die "Found a score but no label before it! Bad nbestlist '$fname_or_source'!"

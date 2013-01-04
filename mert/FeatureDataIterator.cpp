@@ -20,6 +20,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 #include <boost/functional/hash.hpp>
 
+#include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
 #include "FeatureArray.h"
@@ -71,6 +72,8 @@ FeatureDataIterator::FeatureDataIterator(const string& filename) {
   readNext();
 }
 
+FeatureDataIterator::~FeatureDataIterator() {}
+
 void FeatureDataIterator::readNext() {
   m_next.clear();
   try {
@@ -86,7 +89,7 @@ void FeatureDataIterator::readNext() {
       StringPiece line = m_in->ReadLine();
       m_next.push_back(FeatureDataItem());
       for (TokenIter<AnyCharacter, true> token(line, AnyCharacter(" \t")); token; ++token) {
-        TokenIter<AnyCharacter,false> value(*token,AnyCharacter(":"));
+        TokenIter<AnyCharacterLast,false> value(*token,AnyCharacterLast(":"));
         if (!value) throw FileFormatException(m_in->FileName(), line.as_string());
         StringPiece first = *value;
         ++value;

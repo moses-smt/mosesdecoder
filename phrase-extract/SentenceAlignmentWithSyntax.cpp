@@ -42,7 +42,8 @@ bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetStrin
   try {
     ProcessAndStripXMLTags(targetStringCPP, targetTree,
                            m_targetLabelCollection,
-                           m_targetTopLabelCollection);
+                           m_targetTopLabelCollection,
+                           false);
   } catch (const XmlException & e) {
     std::cerr << "WARNING: failed to process target sentence at line "
               << sentenceID << ": " << e.getMsg() << std::endl;
@@ -62,7 +63,8 @@ bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceStrin
   try {
     ProcessAndStripXMLTags(sourceStringCPP, sourceTree,
                            m_sourceLabelCollection ,
-                           m_sourceTopLabelCollection);
+                           m_sourceTopLabelCollection,
+                           false);
   } catch (const XmlException & e) {
     std::cerr << "WARNING: failed to process source sentence at line "
               << sentenceID << ": " << e.getMsg() << std::endl;

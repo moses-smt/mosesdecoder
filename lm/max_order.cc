@@ -1,3 +1,4 @@
+#include "lm/max_order.hh"
 #include <iostream>
 
 int main(int argc, char *argv[]) {

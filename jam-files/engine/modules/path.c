@@ -4,17 +4,17 @@
 
 #include "../native.h"
 #include "../timestamp.h"
-#include "../newstr.h"
+#include "../object.h"
 
-LIST *path_exists( PARSE *parse, FRAME *frame )
+LIST *path_exists( FRAME *frame, int flags )
 {
     LIST* l = lol_get( frame->args, 0 );    
 
     time_t time;
-    timestamp(l->string, &time);
+    timestamp(list_front(l), &time);
     if (time != 0)
     {
-        return list_new(0, newstr("true"));
+        return list_new(object_new("true"));
     }
     else
     {
@@ -25,7 +25,7 @@ LIST *path_exists( PARSE *parse, FRAME *frame )
 void init_path()
 {
     {
-        char* args[] = { "location", 0 };
+        const char* args[] = { "location", 0 };
         declare_native_rule("path", "exists", args, path_exists, 1);
     }
 

@@ -44,7 +44,7 @@ GITREPO="$MCC_GITREPO"
 # location of moses regression test data archive (assumes url at the moment)
 REGTEST_ARCHIVE="$MCC_REGTEST_ARCHIVE"
 [ -n "$REGTEST_ARCHIVE" ] \
-  || REGTEST_ARCHIVE="git://github.com/hieuhoang/moses-reg-test-data.git"
+  || REGTEST_ARCHIVE="git://github.com/moses-smt/moses-regression-tests.git"
 
 if [ ! -d "$WORKDIR" ]; then
   mkdir "$WORKDIR" || die "Failed to create workdir $WORKDIR"

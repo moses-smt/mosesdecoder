@@ -56,34 +56,34 @@
 #include "parse.h"
 #include "scan.h"
 #include "compile.h"
-#include "newstr.h"
+#include "object.h"
 #include "rules.h"
 
 # define YYMAXDEPTH 10000	/* for OSF and other less endowed yaccs */
 
-# define F0 (LIST *(*)(PARSE *, FRAME *))0
+# define F0 -1
 # define P0 (PARSE *)0
-# define S0 (char *)0
+# define S0 (OBJECT *)0
 
-# define pappend( l,r )    	parse_make( compile_append,l,r,P0,S0,S0,0 )
-# define peval( c,l,r )	parse_make( compile_eval,l,r,P0,S0,S0,c )
-# define pfor( s,l,r,x )    	parse_make( compile_foreach,l,r,P0,s,S0,x )
-# define pif( l,r,t )	  	parse_make( compile_if,l,r,t,S0,S0,0 )
-# define pincl( l )       	parse_make( compile_include,l,P0,P0,S0,S0,0 )
-# define plist( s )	  	parse_make( compile_list,P0,P0,P0,s,S0,0 )
-# define plocal( l,r,t )  	parse_make( compile_local,l,r,t,S0,S0,0 )
-# define pmodule( l,r )	  	parse_make( compile_module,l,r,P0,S0,S0,0 )
-# define pclass( l,r )	  	parse_make( compile_class,l,r,P0,S0,S0,0 )
-# define pnull()	  	parse_make( compile_null,P0,P0,P0,S0,S0,0 )
-# define pon( l,r )	  	parse_make( compile_on,l,r,P0,S0,S0,0 )
-# define prule( s,p )     	parse_make( compile_rule,p,P0,P0,s,S0,0 )
-# define prules( l,r )	  	parse_make( compile_rules,l,r,P0,S0,S0,0 )
-# define pset( l,r,a )          parse_make( compile_set,l,r,P0,S0,S0,a )
-# define pset1( l,r,t,a )	parse_make( compile_settings,l,r,t,S0,S0,a )
-# define psetc( s,p,a,l )     	parse_make( compile_setcomp,p,a,P0,s,S0,l )
-# define psete( s,l,s1,f ) 	parse_make( compile_setexec,l,P0,P0,s,s1,f )
-# define pswitch( l,r )   	parse_make( compile_switch,l,r,P0,S0,S0,0 )
-# define pwhile( l,r )   	parse_make( compile_while,l,r,P0,S0,S0,0 )
+# define pappend( l,r )    	parse_make( PARSE_APPEND,l,r,P0,S0,S0,0 )
+# define peval( c,l,r )	parse_make( PARSE_EVAL,l,r,P0,S0,S0,c )
+# define pfor( s,l,r,x )    	parse_make( PARSE_FOREACH,l,r,P0,s,S0,x )
+# define pif( l,r,t )	  	parse_make( PARSE_IF,l,r,t,S0,S0,0 )
+# define pincl( l )       	parse_make( PARSE_INCLUDE,l,P0,P0,S0,S0,0 )
+# define plist( s )	  	parse_make( PARSE_LIST,P0,P0,P0,s,S0,0 )
+# define plocal( l,r,t )  	parse_make( PARSE_LOCAL,l,r,t,S0,S0,0 )
+# define pmodule( l,r )	  	parse_make( PARSE_MODULE,l,r,P0,S0,S0,0 )
+# define pclass( l,r )	  	parse_make( PARSE_CLASS,l,r,P0,S0,S0,0 )
+# define pnull()	  	parse_make( PARSE_NULL,P0,P0,P0,S0,S0,0 )
+# define pon( l,r )	  	parse_make( PARSE_ON,l,r,P0,S0,S0,0 )
+# define prule( s,p )     	parse_make( PARSE_RULE,p,P0,P0,s,S0,0 )
+# define prules( l,r )	  	parse_make( PARSE_RULES,l,r,P0,S0,S0,0 )
+# define pset( l,r,a )          parse_make( PARSE_SET,l,r,P0,S0,S0,a )
+# define pset1( l,r,t,a )	parse_make( PARSE_SETTINGS,l,r,t,S0,S0,a )
+# define psetc( s,p,a,l )     	parse_make( PARSE_SETCOMP,p,a,P0,s,S0,l )
+# define psete( s,l,s1,f ) 	parse_make( PARSE_SETEXEC,l,P0,P0,s,s1,f )
+# define pswitch( l,r )   	parse_make( PARSE_SWITCH,l,r,P0,S0,S0,0 )
+# define pwhile( l,r )   	parse_make( PARSE_WHILE,l,r,P0,S0,S0,0 )
 
 # define pnode( l,r )    	parse_make( F0,l,r,P0,S0,S0,0 )
 # define psnode( s,l )     	parse_make( F0,l,P0,P0,s,S0,0 )
@@ -281,9 +281,9 @@ arg	: ARG
  * This needs to be split cleanly out of 'rule'
  */
 
-func	: arg lol
+func	: ARG lol
 		{ $$.parse = prule( $1.string, $2.parse ); }
-	| `on` arg arg lol
+	| `on` arg ARG lol
 		{ $$.parse = pon( $2.parse, prule( $3.string, $4.parse ) ); }
 	| `on` arg `return` list
 		{ $$.parse = pon( $2.parse, $4.parse ); }

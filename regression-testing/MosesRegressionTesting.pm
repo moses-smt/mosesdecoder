@@ -49,7 +49,7 @@ EOT
 sub get_localized_moses_ini
 {
   use File::Temp;
-  my ($moses_ini, $data_dir) = @_;
+  my ($moses_ini, $data_dir, $results_dir) = @_;
   my $LM_PATH = "$data_dir/lm";
   my $MODEL_PATH = "$data_dir/models";
   use Cwd qw/ abs_path /; use File::Basename; my $TEST_PATH = dirname(abs_path($moses_ini));
@@ -61,6 +61,7 @@ sub get_localized_moses_ini
 	$l =~ s/\$\{LM_PATH\}/$LM_PATH/g;
 	$l =~ s/\$\{MODEL_PATH\}/$MODEL_PATH/g;
 	$l =~ s/\$\{TEST_PATH\}/$TEST_PATH/g;
+	$l =~ s/\$\{RESULTS_PATH\}/$results_dir/g;
 	print $local_moses_ini $l;
   }
   close MO;

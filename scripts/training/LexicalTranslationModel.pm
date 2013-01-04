@@ -38,17 +38,51 @@ sub fix_spaces {
 }
 
 sub get_lexical {
-    my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file) = @_;
+    my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file,$write_counts,$baseline_corpus_f,$baseline_corpus_e,$baseline_alignment) = @_;
     print STDERR "($alignment_file_f,$alignment_file_e,$lexical_file)\n";
+    print STDERR "baseline ($baseline_corpus_f,$baseline_corpus_e,$baseline_alignment)\n";
 #    my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
 
-    my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
 
-    if (-e "$lexical_file.f2e" && -e "$lexical_file.e2f") {
+    if (-e "$lexical_file.f2e" && -e "$lexical_file.e2f" && (!$write_counts || -e "$lexical_file.counts.f2e" && -e "$lexical_file.counts.e2f")) {
       print STDERR "  reusing: $lexical_file.f2e and $lexical_file.e2f\n";
       return;
     }
 
+    my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
+    &get_lexical_counts($alignment_file_e,$alignment_file_f,$alignment_file_a,\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
+    if (defined($baseline_alignment)) {
+      &get_lexical_counts($baseline_corpus_e,$baseline_corpus_f,$baseline_alignment,\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
+    }
+
+    open(F2E,">$lexical_file.f2e") or die "ERROR: Can't write $lexical_file.f2e";
+    open(E2F,">$lexical_file.e2f") or die "ERROR: Can't write $lexical_file.e2f";
+    if ($write_counts) {
+        open(F2E2,">$lexical_file.counts.f2e") or die "ERROR: Can't write $lexical_file.counts.f2e";
+        open(E2F2,">$lexical_file.counts.e2f") or die "ERROR: Can't write $lexical_file.counts.e2f";
+    }
+
+    foreach my $f (keys %WORD_TRANSLATION) {
+	foreach my $e (keys %{$WORD_TRANSLATION{$f}}) {
+	    printf F2E "%s %s %.7f\n",$e,$f,$WORD_TRANSLATION{$f}{$e}/$TOTAL_FOREIGN{$f};
+	    printf E2F "%s %s %.7f\n",$f,$e,$WORD_TRANSLATION{$f}{$e}/$TOTAL_ENGLISH{$e};
+	    if ($write_counts) {
+	        printf F2E2 "%s %s %i %i\n",$e,$f,$WORD_TRANSLATION{$f}{$e},$TOTAL_FOREIGN{$f};
+	        printf E2F2 "%s %s %i %i\n",$f,$e,$WORD_TRANSLATION{$f}{$e},$TOTAL_ENGLISH{$e};
+	    }
+	}
+    }
+    close(E2F);
+    close(F2E);
+    if ($write_counts) {
+        close(E2F2);
+        close(F2E2);
+    }
+    print STDERR "Saved: $lexical_file.f2e and $lexical_file.e2f\n";
+}
+
+sub get_lexical_counts {
+    my ($alignment_file_e,$alignment_file_f,$alignment_file_a,$WORD_TRANSLATION,$TOTAL_FOREIGN,$TOTAL_ENGLISH) = @_;
     open(E,&open_compressed($alignment_file_e)) or die "ERROR: Can't read $alignment_file_e";
     open(F,&open_compressed($alignment_file_f)) or die "ERROR: Can't read $alignment_file_f";
     open(A,&open_compressed($alignment_file_a)) or die "ERROR: Can't read $alignment_file_a";
@@ -74,45 +108,31 @@ sub get_lexical {
 		$ENGLISH_ALIGNED{$ei}++;
 		
 		# global counts
-		$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}++;
-		$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
-		$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
+		$$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}++;
+		$$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
+		$$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
 	    }
         }
 
         # unaligned words
         for(my $ei=0;$ei<scalar(@ENGLISH);$ei++) {
           next if defined($ENGLISH_ALIGNED{$ei});
-          $WORD_TRANSLATION{"NULL"}{$ENGLISH[$ei]}++;
-          $TOTAL_ENGLISH{$ENGLISH[$ei]}++;
-          $TOTAL_FOREIGN{"NULL"}++;
+          $$WORD_TRANSLATION{"NULL"}{$ENGLISH[$ei]}++;
+          $$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
+          $$TOTAL_FOREIGN{"NULL"}++;
         }
         for(my $fi=0;$fi<scalar(@FOREIGN);$fi++) {
           next if defined($FOREIGN_ALIGNED{$fi});
-          $WORD_TRANSLATION{$FOREIGN[$fi]}{"NULL"}++;
-          $TOTAL_FOREIGN{$FOREIGN[$fi]}++;
-          $TOTAL_ENGLISH{"NULL"}++;
+          $$WORD_TRANSLATION{$FOREIGN[$fi]}{"NULL"}++;
+          $$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
+          $$TOTAL_ENGLISH{"NULL"}++;
         }
     }
     print STDERR "\n";
     close(A);
     close(F);
     close(E);
-
-    open(F2E,">$lexical_file.f2e") or die "ERROR: Can't write $lexical_file.f2e";
-    open(E2F,">$lexical_file.e2f") or die "ERROR: Can't write $lexical_file.e2f";
-
-    foreach my $f (keys %WORD_TRANSLATION) {
-	foreach my $e (keys %{$WORD_TRANSLATION{$f}}) {
-	    printf F2E "%s %s %.7f\n",$e,$f,$WORD_TRANSLATION{$f}{$e}/$TOTAL_FOREIGN{$f};
-	    printf E2F "%s %s %.7f\n",$f,$e,$WORD_TRANSLATION{$f}{$e}/$TOTAL_ENGLISH{$e};
-	}
-    }
-    close(E2F);
-    close(F2E);
-    print STDERR "Saved: $lexical_file.f2e and $lexical_file.e2f\n";
 }
-
 
 END {
 }

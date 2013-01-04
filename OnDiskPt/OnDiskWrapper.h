@@ -22,7 +22,7 @@
 #include <fstream>
 #include "Vocab.h"
 #include "PhraseNode.h"
-#include "../moses/src/Word.h"
+#include "../moses/Word.h"
 
 namespace OnDiskPt
 {
@@ -50,6 +50,8 @@ protected:
   bool LoadMisc();
 
 public:
+  static int VERSION_NUM;
+
   OnDiskWrapper();
   ~OnDiskWrapper();
 

@@ -965,7 +965,7 @@ sub safesystem {
 sub getPwdCmd(){
 	my $pwdcmd="pwd";
 	my $a;
-	chomp($a=`which pawd | head -1 | awk '{print $1}'`);
+	chomp($a=`which pawd 2> /dev/null | head -1 | awk '{print $1}'`);
 	if ($a && -e $a){	$pwdcmd=$a;	}
 	return $pwdcmd;
 }

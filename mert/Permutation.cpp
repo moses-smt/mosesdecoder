@@ -86,6 +86,7 @@ void Permutation::set(const string & alignment,const int sourceLength)
     //cout << "SP:" << sourcePos << " TP:" << targetPos << endl;
     if (sourcePos > sourceLength) {
       cerr << "Source sentence length:" << sourceLength << " is smaller than alignment source position:" << sourcePos << endl;
+      cerr << "******** Permutation::set :" << alignment << ": len : " << sourceLength <<endl; 
       exit(1);
     }
     //If have multiple target pos aligned to one source,
@@ -185,11 +186,15 @@ float Permutation::distance(const Permutation &permCompare, const distanceMetric
 {
   float score=0;
 
-  //cout << "*****Permutation::distance" <<endl;
-  //cout << "Ref:" << endl;
-  //dump();
-  //cout << "Comp:" << endl;
-  //permCompare.dump();
+  //bool debug= (verboselevel()>3); // TODO: fix verboselevel()
+  bool debug=false; 
+  if (debug) {
+    cout << "*****Permutation::distance" <<endl;
+    cout << "Hypo:" << endl;
+    dump();
+    cout << "Ref: " << endl;
+    permCompare.dump();
+  }
 
   if (type == HAMMING_DISTANCE) {
     score = calculateHamming(permCompare);
@@ -204,8 +209,10 @@ float Permutation::distance(const Permutation &permCompare, const distanceMetric
     score = score * exp(brevityPenalty);
   }
 
-  //cout << "Distance type:" <<  type << endl;
-  //cout << "Score: "<< score << endl;
+  if (debug) {
+    cout << "Distance type:" <<  type << endl;
+    cout << "Score: "<< score << endl;
+  }
   return score;
 }
 
@@ -243,6 +250,10 @@ float Permutation::calculateKendall(const Permutation & compare) const
   if (getLength() == 0) {
     cerr << "Empty permutation" << endl;
     return 0;
+  }
+  if (getLength() == 1) {
+    cerr << "One-word sentence. Kendall score = 1" << endl;
+    return 1;
   }
   for (size_t i=0; i<getLength(); i++) {
     for (size_t j=0; j<getLength(); j++) {

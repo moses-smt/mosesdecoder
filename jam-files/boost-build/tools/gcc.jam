@@ -446,13 +446,17 @@ rule setup-address-model ( targets * : sources * : properties * )
         }
         else
         {
-            if $(model) = 32
+            local arch = [ feature.get-values architecture : $(properties) ] ;
+            if $(arch) != arm
             {
-                option = -m32 ;
-            }
-            else if $(model) = 64
-            {
-                option = -m64 ;
+                if $(model) = 32
+                {
+                    option = -m32 ;
+                }
+                else if $(model) = 64
+                {
+                    option = -m64 ;
+                }
             }
             # For darwin, the model can be 32_64. darwin.jam will handle that
             # on its own.
@@ -1097,9 +1101,10 @@ local rule cpu-flags ( toolset variable : architecture : instruction-set + : val
 #
 # x86 and compatible
 # The 'native' option appeared in gcc 4.2 so we cannot safely use it
-# as default. Use conservative i386 instead.
+# as default. Use conservative i386 instead for 32-bit.
+toolset.flags gcc OPTIONS <architecture>x86/<address-model>32/<instruction-set> : -march=i386 ;
 cpu-flags gcc OPTIONS : x86 : native : -march=native ;
-cpu-flags gcc OPTIONS : x86 : i386 : -march=i386 : default ;
+cpu-flags gcc OPTIONS : x86 : i386 : -march=i386 ;
 cpu-flags gcc OPTIONS : x86 : i486 : -march=i486 ;
 cpu-flags gcc OPTIONS : x86 : i586 : -march=i586 ;
 cpu-flags gcc OPTIONS : x86 : i686 : -march=i686 ;

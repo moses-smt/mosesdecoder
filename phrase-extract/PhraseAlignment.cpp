@@ -79,12 +79,11 @@ inline void Tokenize( std::vector<T> &output
 }
 
 // read in a phrase pair and store it
-void PhraseAlignment::create( char line[], int lineID )
+void PhraseAlignment::create( char line[], int lineID, bool includeSentenceIdFlag )
 {
   assert(phraseS.empty());
   assert(phraseT.empty());
 
-  //cerr << "processing " << line;
   vector< string > token = tokenize( line );
   int item = 1;
   for (size_t j=0; j<token.size(); j++) {
@@ -111,12 +110,13 @@ void PhraseAlignment::create( char line[], int lineID )
         alignedToT[t].insert( s );
         alignedToS[s].insert( t );
       }
-    } else if (item == 4) { // count
+    } else if (includeSentenceIdFlag && item == 4) { // optional sentence id
+      sscanf(token[j].c_str(), "%d", &sentenceId);
+    } else if (item + (includeSentenceIdFlag?-1:0) == 4) { // count
       sscanf(token[j].c_str(), "%f", &count);
-    }
-    else if (item == 5) { // non-term lengths
+    } else if (item + (includeSentenceIdFlag?-1:0) == 5) { // non-term lengths
       addNTLength(token[j]);
-    } else if (item == 6) { // target syntax PCFG score
+    } else if (item + (includeSentenceIdFlag?-1:0) == 6) { // target syntax PCFG score
       float pcfgScore = std::atof(token[j].c_str());
       pcfgSum = pcfgScore * count;
     }
@@ -124,7 +124,7 @@ void PhraseAlignment::create( char line[], int lineID )
 
   createAlignVec(phraseS.size(), phraseT.size());
 
-  if (item == 3) {
+  if (item + (includeSentenceIdFlag?-1:0) == 3) {
     count = 1.0;
   }
   if (item < 3 || item > 6) {

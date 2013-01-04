@@ -16,6 +16,7 @@
 # include "frames.h"
 # include "parse.h"
 # include "regexp.h"
+# include "object.h"
 
 /*
  * compile.h - compile parsed jam statements
@@ -23,30 +24,10 @@
 
 void compile_builtins();
 
-LIST *compile_append( PARSE *parse, FRAME *frame );
-LIST *compile_foreach( PARSE *parse, FRAME *frame );
-LIST *compile_if( PARSE *parse, FRAME *frame );
-LIST *compile_eval( PARSE *parse, FRAME *args );
-LIST *compile_include( PARSE *parse, FRAME *frame );
-LIST *compile_list( PARSE *parse, FRAME *frame );
-LIST *compile_local( PARSE *parse, FRAME *frame );
-LIST *compile_module( PARSE *parse, FRAME *frame );
-LIST *compile_class( PARSE *parse, FRAME *frame );
-LIST *compile_null( PARSE *parse, FRAME *frame );
-LIST *compile_on( PARSE *parse, FRAME *frame );
-LIST *compile_rule( PARSE *parse, FRAME *frame );
-LIST *compile_rules( PARSE *parse, FRAME *frame );
-LIST *compile_set( PARSE *parse, FRAME *frame );
-LIST *compile_setcomp( PARSE *parse, FRAME *frame );
-LIST *compile_setexec( PARSE *parse, FRAME *frame );
-LIST *compile_settings( PARSE *parse, FRAME *frame );
-LIST *compile_switch( PARSE *parse, FRAME *frame );
-LIST *compile_while( PARSE *parse, FRAME *frame );
+LIST *evaluate_rule( OBJECT * rulename, FRAME * frame );
+LIST *call_rule( OBJECT * rulename, FRAME * caller_frame, ...);
 
-LIST *evaluate_rule( char *rulename, FRAME *frame );
-LIST *call_rule( char *rulename, FRAME* caller_frame, ...);
-
-regexp* regex_compile( const char* pattern );
+regexp* regex_compile( OBJECT * pattern );
 
 /* Flags for compile_set(), etc */
 

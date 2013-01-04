@@ -25,7 +25,7 @@
 #include "Timer.h"
 #include "Util.h"
 
-#include "../moses/src/ThreadPool.h"
+#include "moses/ThreadPool.h"
 
 using namespace std;
 using namespace MosesTuning;
@@ -38,6 +38,7 @@ const char kDefaultScorerFile[] = "statscore.data";
 const char kDefaultFeatureFile[] = "features.data";
 const char kDefaultInitFile[] = "init.opt";
 const char kDefaultPositiveString[] = "";
+const char kDefaultSparseWeightsFile[] = "";
 
 // Used when saving optimized weights.
 const char kOutputFile[] = "weights.txt";
@@ -99,49 +100,48 @@ bool WriteFinalWeights(const char* filename, const Point& point) {
 
 void usage(int ret)
 {
-  cerr << "usage: mert -d <dimensions> (mandatory)" << endl;
-  cerr << "[-n] retry ntimes (default 1)" << endl;
-  cerr << "[-m] number of random directions in powell (default 0)"<< endl;
-  cerr << "[-o] the indexes to optimize(default all)" << endl;
-  cerr << "[-t] the optimizer(default " << kDefaultOptimizer << ")" << endl;
-  cerr << "[-r] the random seed (defaults to system clock)" << endl;
-  cerr << "[--sctype|-s] the scorer type (default " << kDefaultScorer << ")" << endl;
-  cerr << "[--scconfig|-c] configuration string passed to scorer" << endl;
-  cerr << "[--scfile|-S] comma separated list of scorer data files (default " << kDefaultScorerFile << ")" << endl;
-  cerr << "[--ffile|-F] comma separated list of feature data files (default " << kDefaultFeatureFile << ")" << endl;
-  cerr << "[--ifile|-i] the starting point data file (default " << kDefaultInitFile << ")" << endl;
-  cerr << "[--positive|-P] indexes with positive weights (default none)"<<endl;
+  cerr<<"usage: mert -d <dimensions> (mandatory )"<<endl;
+  cerr<<"[-n] retry ntimes (default 1)"<<endl;
+  cerr<<"[-m] number of random directions in powell (default 0)"<<endl;
+  cerr<<"[-o] the indexes to optimize(default all)"<<endl;
+  cerr<<"[-t] the optimizer(default powell)"<<endl;
+  cerr<<"[-r] the random seed (defaults to system clock)"<<endl;
+  cerr<<"[--sctype|-s] the scorer type (default BLEU)"<<endl;
+  cerr<<"[--scconfig|-c] configuration string passed to scorer"<<endl;
+  cerr<<"[--scfile|-S] comma separated list of scorer data files (default score.data)"<<endl;
+  cerr<<"[--ffile|-F] comma separated list of feature data files (default feature.data)"<<endl;
+  cerr<<"[--ifile|-i] the starting point data file (default init.opt)"<<endl;
+  cerr<<"[--sparse-weights|-p] required for merging sparse features"<<endl;
 #ifdef WITH_THREADS
-  cerr << "[--threads|-T] use multiple threads (default 1)" << endl;
+  cerr<<"[--threads|-T] use multiple threads (default 1)"<<endl;
 #endif
-  cerr << "[--shard-count] Split data into shards, optimize for each shard and average" << endl;
-  cerr << "[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards" << endl;
-  cerr << "[-v] verbose level" << endl;
-  cerr << "[--help|-h] print this message and exit" << endl;
+  cerr<<"[--shard-count] Split data into shards, optimize for each shard and average"<<endl;
+  cerr<<"[--shard-size] Shard size as proportion of data. If 0, use non-overlapping shards"<<endl;
+  cerr<<"[-v] verbose level"<<endl;
+  cerr<<"[--help|-h] print this message and exit"<<endl;
   exit(ret);
 }
 
 static struct option long_options[] = {
   {"pdim", 1, 0, 'd'},
-  {"ntry", 1, 0, 'n'},
-  {"nrandom", 1, 0, 'm'},
-  {"rseed", required_argument, 0, 'r'},
-  {"optimize", 1, 0, 'o'},
-  {"pro", required_argument, 0, 'p'},
-  {"positive",1,0,'P'},
-  {"type", 1, 0, 't'},
-  {"sctype", 1, 0, 's'},
-  {"scconfig", required_argument, 0, 'c'},
-  {"scfile", 1, 0, 'S'},
-  {"ffile", 1, 0, 'F'},
-  {"ifile", 1, 0, 'i'},
+  {"ntry",1,0,'n'},
+  {"nrandom",1,0,'m'},
+  {"rseed",required_argument,0,'r'},
+  {"optimize",1,0,'o'},
+  {"type",1,0,'t'},
+  {"sctype",1,0,'s'},
+  {"scconfig",required_argument,0,'c'},
+  {"scfile",1,0,'S'},
+  {"ffile",1,0,'F'},
+  {"ifile",1,0,'i'},
+  {"sparse-weights",required_argument,0,'p'},
 #ifdef WITH_THREADS
-  {"threads", required_argument, 0, 'T'},
+  {"threads", required_argument,0,'T'},
 #endif
   {"shard-count", required_argument, 0, 'a'},
   {"shard-size", required_argument, 0, 'b'},
-  {"verbose", 1, 0, 'v'},
-  {"help", no_argument, 0, 'h'},
+  {"verbose",1,0,'v'},
+  {"help",no_argument,0,'h'},
   {0, 0, 0, 0}
 };
 
@@ -159,6 +159,7 @@ struct ProgramOption {
   string feature_file;
   string init_file;
   string positive_string;
+  string sparse_weights_file;
   size_t num_threads;
   float shard_size;
   size_t shard_count;
@@ -177,6 +178,7 @@ struct ProgramOption {
         feature_file(kDefaultFeatureFile),
         init_file(kDefaultInitFile),
         positive_string(kDefaultPositiveString),
+        sparse_weights_file(kDefaultSparseWeightsFile),
         num_threads(1),
         shard_size(0),
         shard_count(0) { }
@@ -221,6 +223,9 @@ void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
         break;
       case 'i':
         opt->init_file = string(optarg);
+        break;
+      case 'p':
+        opt->sparse_weights_file=string(optarg);
         break;
       case 'v':
         setverboselevel(strtol(optarg, NULL, 10));
@@ -286,6 +291,8 @@ int main(int argc, char **argv)
     srandom(time(NULL));
   }
 
+  if (option.sparse_weights_file.size()) ++option.pdim;
+
   // read in starting points
   string onefile;
   while (!option.init_file.empty()) {
@@ -349,7 +356,7 @@ int main(int argc, char **argv)
       ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
 
   //load data
-  Data data(scorer.get());
+  Data data(scorer.get(), option.sparse_weights_file);
 
   for (size_t i = 0; i < ScoreDataFiles.size(); i++) {
     cerr<<"Loading Data from: "<< ScoreDataFiles.at(i) << " and " << FeatureDataFiles.at(i) << endl;
@@ -418,12 +425,6 @@ int main(int argc, char **argv)
       }
     }
   }
-
-  // treat sparse features just like regular features
-  if (data.hasSparseFeatures()) {
-    data.mergeSparseFeatures();
-  }
-
 
 #ifdef WITH_THREADS
   cerr << "Creating a pool of " << option.num_threads << " threads" << endl;

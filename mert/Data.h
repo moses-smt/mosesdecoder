@@ -18,7 +18,7 @@
 
 namespace MosesTuning
 {
-  
+
 class Scorer;
 
 typedef boost::shared_ptr<ScoreData> ScoreDataHandle;
@@ -32,13 +32,12 @@ private:
   Scorer* m_scorer;
   std::string m_score_type;
   std::size_t m_num_scores;
-  bool m_sparse_flag;
   ScoreDataHandle m_score_data;
   FeatureDataHandle m_feature_data;
+  SparseVector m_sparse_weights;
 
 public:
-  explicit Data(Scorer* scorer);
-  Data();
+  explicit Data(Scorer* scorer, const std::string& sparseweightsfile="");
 
   void clear() {
     m_score_data->clear();
@@ -55,13 +54,8 @@ public:
     return m_feature_data->NumberOfFeatures();
   }
 
-  void NumberOfFeatures(std::size_t v) { m_feature_data->NumberOfFeatures(v); }
-
   std::string Features() const { return m_feature_data->Features(); }
   void Features(const std::string &f) { m_feature_data->Features(f); }
-
-  bool hasSparseFeatures() const { return m_sparse_flag; }
-  void mergeSparseFeatures();
 
   void loadNBest(const std::string &file);
 
@@ -97,7 +91,7 @@ public:
   // Helper functions for loadnbest();
   void InitFeatureMap(const std::string& str);
   void AddFeatures(const std::string& str,
-                   const std::string& sentence_index);
+                   int sentence_index);
 };
 
 }

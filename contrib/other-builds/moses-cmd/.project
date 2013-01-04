@@ -6,6 +6,7 @@
 		<project>lm</project>
 		<project>moses</project>
 		<project>OnDiskPt</project>
+		<project>search</project>
 		<project>util</project>
 	</projects>
 	<buildSpec>
@@ -88,112 +89,62 @@
 		<link>
 			<name>IOWrapper.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/IOWrapper.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.cpp</locationURI>
 		</link>
 		<link>
 			<name>IOWrapper.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/IOWrapper.h</locationURI>
-		</link>
-		<link>
-			<name>IOWrapper.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/IOWrapper.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/IOWrapper.h</locationURI>
 		</link>
 		<link>
 			<name>Jamfile</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Jamfile</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Jamfile</locationURI>
 		</link>
 		<link>
 			<name>LatticeMBR.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBR.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBR.cpp</locationURI>
 		</link>
 		<link>
 			<name>LatticeMBR.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBR.h</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBR.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBR.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBR.h</locationURI>
 		</link>
 		<link>
 			<name>LatticeMBRGrid.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBRGrid.cpp</locationURI>
-		</link>
-		<link>
-			<name>LatticeMBRGrid.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/LatticeMBRGrid.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/LatticeMBRGrid.cpp</locationURI>
 		</link>
 		<link>
 			<name>Main.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Main.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Main.cpp</locationURI>
 		</link>
 		<link>
 			<name>Main.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Main.h</locationURI>
-		</link>
-		<link>
-			<name>Main.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/Main.o</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/Main.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationAnalysis.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/TranslationAnalysis.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/TranslationAnalysis.cpp</locationURI>
 		</link>
 		<link>
 			<name>TranslationAnalysis.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/TranslationAnalysis.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationAnalysis.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/TranslationAnalysis.o</locationURI>
-		</link>
-		<link>
-			<name>libkenlm.dylib</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/libkenlm.dylib</locationURI>
-		</link>
-		<link>
-			<name>libkenutil.dylib</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/libkenutil.dylib</locationURI>
-		</link>
-		<link>
-			<name>lmbrgrid</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/lmbrgrid</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/TranslationAnalysis.h</locationURI>
 		</link>
 		<link>
 			<name>mbr.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.cpp</locationURI>
 		</link>
 		<link>
 			<name>mbr.h</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.h</locationURI>
-		</link>
-		<link>
-			<name>mbr.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/mbr.o</locationURI>
-		</link>
-		<link>
-			<name>moses</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/src/moses</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses-cmd/mbr.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>

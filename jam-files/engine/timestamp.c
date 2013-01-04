@@ -16,7 +16,7 @@
 # include "filesys.h"
 # include "pathsys.h"
 # include "timestamp.h"
-# include "newstr.h"
+# include "object.h"
 # include "strings.h"
 
 /*
@@ -32,12 +32,12 @@
 typedef struct _binding BINDING;
 
 struct _binding {
-    char    *name;
-    short   flags;
+    OBJECT * name;
+    short    flags;
 
 # define BIND_SCANNED   0x01    /* if directory or arch, has been scanned */
 
-    short   progress;
+    short    progress;
 
 # define BIND_INIT  0   /* never seen */
 # define BIND_NOENTRY   1   /* timestamp requested but file never found */
@@ -45,11 +45,11 @@ struct _binding {
 # define BIND_MISSING   3   /* file found but can't get timestamp */
 # define BIND_FOUND 4   /* file found and time stamped */
 
-    time_t  time;       /* update time - 0 if not exist */
+    time_t   time;      /* update time - 0 if not exist */
 };
 
 static struct hash * bindhash = 0;
-static void time_enter( void *, char *, int, time_t );
+static void time_enter( void *, OBJECT *, int, time_t );
 
 static char * time_progress[] =
 {
@@ -65,49 +65,32 @@ static char * time_progress[] =
  * timestamp() - return timestamp on a file, if present.
  */
 
-void timestamp( char * target, time_t * time )
+void timestamp( OBJECT * target, time_t * time )
 {
     PROFILE_ENTER( timestamp );
 
     PATHNAME   f1;
     PATHNAME   f2;
-    BINDING    binding;
-    BINDING  * b = &binding;
+    int        found;
+    BINDING  * b;
     string     buf[ 1 ];
-#ifdef DOWNSHIFT_PATHS
-    string     path;
-    char     * p;
-#endif
 
-#ifdef DOWNSHIFT_PATHS
-    string_copy( &path, target );
-    p = path.value;
+    target = path_as_key( target );
 
-    do
-    {
-        *p = tolower( *p );
-#ifdef NT
-        /* On NT, we must use backslashes or the file will not be found. */
-        if ( *p == '/' )
-            *p = PATH_DELIM;
-#endif
-    }
-    while ( *p++ );
-
-    target = path.value;
-#endif  /* #ifdef DOWNSHIFT_PATHS */
     string_new( buf );
 
     if ( !bindhash )
         bindhash = hashinit( sizeof( BINDING ), "bindings" );
 
     /* Quick path - is it there? */
-    b->name = target;
-    b->time = b->flags = 0;
-    b->progress = BIND_INIT;
 
-    if ( hashenter( bindhash, (HASHDATA * *)&b ) )
-        b->name = newstr( target );  /* never freed */
+    b = (BINDING *)hash_insert( bindhash, target, &found );
+    if ( !found )
+    {
+        b->name = object_copy( target );  /* never freed */
+        b->time = b->flags = 0;
+        b->progress = BIND_INIT;
+    }
 
     if ( b->progress != BIND_INIT )
         goto afterscanning;
@@ -115,37 +98,44 @@ void timestamp( char * target, time_t * time )
     b->progress = BIND_NOENTRY;
 
     /* Not found - have to scan for it. */
-    path_parse( target, &f1 );
+    path_parse( object_str( target ), &f1 );
 
     /* Scan directory if not already done so. */
     {
-        BINDING binding;
-        BINDING * b = &binding;
+        int found;
+        BINDING * b;
+        OBJECT * name;
 
         f2 = f1;
         f2.f_grist.len = 0;
         path_parent( &f2 );
         path_build( &f2, buf, 0 );
 
-        b->name = buf->value;
-        b->time = b->flags = 0;
-        b->progress = BIND_INIT;
+        name = object_new( buf->value );
 
-        if ( hashenter( bindhash, (HASHDATA * *)&b ) )
-            b->name = newstr( buf->value );  /* never freed */
+        b = (BINDING *)hash_insert( bindhash, name, &found );
+        if ( !found )
+        {
+            b->name = object_copy( name );
+            b->time = b->flags = 0;
+            b->progress = BIND_INIT;
+        }
 
         if ( !( b->flags & BIND_SCANNED ) )
         {
-            file_dirscan( buf->value, time_enter, bindhash );
+            file_dirscan( name, time_enter, bindhash );
             b->flags |= BIND_SCANNED;
         }
+
+        object_free( name );
     }
 
     /* Scan archive if not already done so. */
     if ( f1.f_member.len )
     {
-        BINDING binding;
-        BINDING * b = &binding;
+        int found;
+        BINDING * b;
+        OBJECT * name;
 
         f2 = f1;
         f2.f_grist.len = 0;
@@ -153,18 +143,23 @@ void timestamp( char * target, time_t * time )
         string_truncate( buf, 0 );
         path_build( &f2, buf, 0 );
 
-        b->name = buf->value;
-        b->time = b->flags = 0;
-        b->progress = BIND_INIT;
+        name = object_new( buf->value );
 
-        if ( hashenter( bindhash, (HASHDATA * *)&b ) )
-            b->name = newstr( buf->value );  /* never freed */
+        b = (BINDING *)hash_insert( bindhash, name, &found );
+        if ( !found )
+        {
+            b->name = object_copy( name );
+            b->time = b->flags = 0;
+            b->progress = BIND_INIT;
+        }
 
         if ( !( b->flags & BIND_SCANNED ) )
         {
             file_archscan( buf->value, time_enter, bindhash );
             b->flags |= BIND_SCANNED;
         }
+
+        object_free( name );
     }
 
     afterscanning:
@@ -178,43 +173,41 @@ void timestamp( char * target, time_t * time )
 
     *time = b->progress == BIND_FOUND ? b->time : 0;
         string_free( buf );
-#ifdef DOWNSHIFT_PATHS
-    string_free( &path );
-#endif
+
+    object_free( target );
 
     PROFILE_EXIT( timestamp );
 }
 
 
-static void time_enter( void * closure, char * target, int found, time_t time )
+static void time_enter( void * closure, OBJECT * target, int found, time_t time )
 {
-    BINDING binding;
-    BINDING * b = &binding;
+    int item_found;
+    BINDING * b;
     struct hash * bindhash = (struct hash *)closure;
 
-#ifdef DOWNSHIFT_PATHS
-    char path[ MAXJPATH ];
-    char * p = path;
+    target = path_as_key( target );
 
-    do *p++ = tolower( *target );
-    while ( *target++ );
-
-    target = path;
-#endif
-
-    b->name = target;
-    b->flags = 0;
-
-    if ( hashenter( bindhash, (HASHDATA * *)&b ) )
-        b->name = newstr( target );  /* never freed */
+    b = (BINDING *)hash_insert( bindhash, target, &item_found );
+    if ( !item_found )
+    {
+        b->name = object_copy( target );
+        b->flags = 0;
+    }
 
     b->time = time;
     b->progress = found ? BIND_FOUND : BIND_SPOTTED;
 
     if ( DEBUG_BINDSCAN )
-        printf( "time ( %s ) : %s\n", target, time_progress[ b->progress ] );
+        printf( "time ( %s ) : %s\n", object_str( target ), time_progress[ b->progress ] );
+
+    object_free( target );
 }
 
+static void free_timestamps ( void * xbinding, void * data )
+{
+    object_free( ((BINDING *)xbinding)->name );
+}
 
 /*
  * stamps_done() - free timestamp tables.
@@ -222,5 +215,9 @@ static void time_enter( void * closure, char * target, int found, time_t time )
 
 void stamps_done()
 {
-    hashdone( bindhash );
+    if ( bindhash )
+    {
+        hashenumerate( bindhash, free_timestamps, (void *)0 );
+        hashdone( bindhash );
+    }
 }

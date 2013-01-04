@@ -3,7 +3,7 @@
 #PACKAGES
 #Language models (optional):
 #--with-irstlm=/path/to/irstlm 
-#--with-srilm=/path/to/srilm See moses/src/LM/Jamfile for more options.
+#--with-srilm=/path/to/srilm See moses/LM/Jamfile for more options.
 #--with-randlm=/path/to/randlm
 #KenLM is always compiled.  
 #
@@ -18,8 +18,8 @@
 #Compact phrase table and compact lexical reordering table
 #--with-cmph=/path/to/cmph
 #
-#Thread-caching malloc (optional):
-#--with-tcmalloc
+#Thread-caching malloc (if present, used for multi-threaded builds by default)
+#--without-tcmalloc
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
@@ -50,14 +50,16 @@
 #
 # debug-symbols=on|off           include (default) or exclude debugging
 #                                information also known as -g
-#
 # --notrace                      compiles without TRACE macros
 #
 # --enable-boost-pool            uses Boost pools for the memory SCFG table
 #
+# --enable-mpi                   switch on mpi
 # --without-libsegfault          does not link with libSegFault
 #
 # --max-kenlm-order              maximum ngram order that kenlm can process (default 6)
+#
+# --max-factors                  maximum number of factors (default 4)
 #
 #CONTROLLING THE BUILD
 #-a to build from scratch
@@ -73,9 +75,20 @@ include $(TOP)/jam-files/sanity.jam ;
 boost 103600 ;
 external-lib z ;
 
-if [ option.get "with-tcmalloc" : : "yes" ] {
-  external-lib tcmalloc ;
-  requirements += <library>tcmalloc ;
+if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
+  external-lib tcmalloc_minimal ;
+  requirements += <threading>multi:<library>tcmalloc_minimal ;
+}
+
+if [ option.get "enable-mpi" : : "yes" ] {
+  import mpi ;
+  using mpi ;
+  external-lib boost_mpi ;
+  external-lib boost_serialization ;
+  requirements += <define>MPI_ENABLE ;
+  requirements += <library>mpi ;
+  requirements += <library>boost_mpi ;
+  requirements += <library>boost_serialization ;
 }
 
 requirements += [ option.get "notrace" : <define>TRACE_ENABLE=1 ] ;
@@ -98,16 +111,17 @@ project : requirements
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
+  <include>.
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).
-build-projects util lm mert moses-cmd/src moses-chart-cmd/src scripts regression-testing ;
+build-projects lm util phrase-extract search moses mert moses-cmd moses-chart-cmd mira scripts regression-testing  ;
 
-alias programs : lm//query lm//build_binary lm//kenlm_max_order moses-chart-cmd/src//moses_chart moses-cmd/src//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs contrib/server//mosesserver misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor ;
+alias programs : lm//programs moses-chart-cmd//moses_chart moses-cmd//programs OnDiskPt//CreateOnDiskPt OnDiskPt//queryOnDiskPt mert//programs misc//programs symal phrase-extract phrase-extract//lexical-reordering phrase-extract//extract-ghkm phrase-extract//pcfg-extract phrase-extract//pcfg-score biconcor mira//mira contrib/server//mosesserver  ;
 
 install-bin-libs programs ;
 install-headers headers-base : [ path.glob-tree biconcor contrib lm mert misc moses-chart-cmd moses-cmd OnDiskPt phrase-extract symal util : *.hh *.h ] : . ;
-install-headers headers-moses : moses/src//headers-to-install : moses/src ;
+install-headers headers-moses : moses//headers-to-install : moses ;
 
 alias install : prefix-bin prefix-lib headers-base headers-moses ;
 

@@ -7,7 +7,7 @@ import errors ;
 import numbers ;
 
 major = "2011" ;
-minor = "04" ;
+minor = "12" ;
 
 rule boost-build ( )
 {

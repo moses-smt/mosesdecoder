@@ -8,10 +8,10 @@
 /* It can be accessed as $(JAMVERSION) in the Jamfile. */
 
 #define VERSION_MAJOR 2011
-#define VERSION_MINOR 04
+#define VERSION_MINOR 12
 #define VERSION_PATCH 0
 #define VERSION_MAJOR_SYM "2011"
-#define VERSION_MINOR_SYM "04"
+#define VERSION_MINOR_SYM "12"
 #define VERSION_PATCH_SYM "00"
-#define VERSION "2011.4"
-#define JAMVERSYM "JAMVERSION=2011.4"
+#define VERSION "2011.12"
+#define JAMVERSYM "JAMVERSION=2011.12"

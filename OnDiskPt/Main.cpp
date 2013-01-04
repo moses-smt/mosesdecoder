@@ -24,15 +24,15 @@
 #include <vector>
 #include <iterator>
 #include <cassert>
-#include "../moses/src/InputFileStream.h"
-#include "../moses/src/Util.h"
-#include "../moses/src/UserMessage.h"
-#include "../OnDiskPt/OnDiskWrapper.h"
-#include "../OnDiskPt/SourcePhrase.h"
-#include "../OnDiskPt/TargetPhrase.h"
-#include "../OnDiskPt/TargetPhraseCollection.h"
-#include "../OnDiskPt/Word.h"
-#include "../OnDiskPt/Vocab.h"
+#include "moses/InputFileStream.h"
+#include "moses/Util.h"
+#include "moses/UserMessage.h"
+#include "OnDiskWrapper.h"
+#include "SourcePhrase.h"
+#include "TargetPhrase.h"
+#include "TargetPhraseCollection.h"
+#include "Word.h"
+#include "Vocab.h"
 #include "Main.h"
 
 using namespace std;
@@ -44,7 +44,10 @@ int main (int argc, char * const argv[])
   Moses::ResetUserTime();
   Moses::PrintUserTime("Starting");
 
-  assert(argc == 8);
+  if (argc != 8) {
+    std::cerr << "Usage: " << argv[0] << " numSourceFactors numTargetFactors numScores tableLimit sortScoreIndex inputPath outputPath" << std::endl;
+    return 1;
+  }
 
   int numSourceFactors	= Moses::Scan<int>(argv[1])
      , numTargetFactors	= Moses::Scan<int>(argv[2])
@@ -55,7 +58,6 @@ int main (int argc, char * const argv[])
   
   const string filePath 	= argv[6]
                ,destPath	= argv[7];
-
 
   Moses::InputFileStream inStream(filePath);
 
@@ -78,10 +80,10 @@ int main (int argc, char * const argv[])
     std::vector<float> misc(1);
     SourcePhrase sourcePhrase;
     TargetPhrase *targetPhrase = new TargetPhrase(numScores);
-    Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
+    OnDiskPt::PhrasePtr spShort = Tokenize(sourcePhrase, *targetPhrase, line, onDiskWrapper, numScores, misc);
     assert(misc.size() == onDiskWrapper.GetNumCounts());
 
-    rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, misc);
+    rootNode.AddTargetPhrase(sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, misc, spShort);
   }
 
   rootNode.Save(onDiskWrapper, 0, tableLimit);
@@ -106,7 +108,7 @@ bool Flush(const OnDiskPt::SourcePhrase *prevSourcePhrase, const OnDiskPt::Sourc
   return ret;
 }
 
-void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
+OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line, OnDiskWrapper &onDiskWrapper, int numScores, vector<float> &misc)
 {
   size_t scoreInd = 0;
 
@@ -119,13 +121,17 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
    4 = count
    */
   char *tok = strtok (line," ");
+  OnDiskPt::PhrasePtr out(new Phrase());
   while (tok != NULL) {
     if (0 == strcmp(tok, "|||")) {
       ++stage;
     } else {
       switch (stage) {
       case 0: {
-        Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
+    	WordPtr w = Tokenize(sourcePhrase, tok, true, true, onDiskWrapper);
+    	if (w != NULL)
+    	  out->AddWord(w);
+    	
         break;
       }
       case 1: {
@@ -139,19 +145,34 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
         break;
       }
       case 3: {
-        targetPhrase.Create1AlignFromString(tok);
+        //targetPhrase.Create1AlignFromString(tok);
+    	targetPhrase.CreateAlignFromString(tok);	
         break;
       }
       case 4:
         ++stage;
         break;
-      case 5: {
+	/*      case 5: {
         // count info. Only store the 2nd one
         float val = Moses::Scan<float>(tok);
         misc[0] = val;
         ++stage;
         break;
+	}*/
+      case 5: {
+        // count info. Only store the 2nd one
+        //float val = Moses::Scan<float>(tok);
+        //misc[0] = val;
+        ++stage;
+        break;
       }
+      case 6: {
+	// store only the 3rd one (rule count)
+        float val = Moses::Scan<float>(tok);
+        misc[0] = val;
+        ++stage;
+        break;
+	}
       default:
         assert(false);
         break;
@@ -163,10 +184,10 @@ void Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhrase, char *line
 
   assert(scoreInd == numScores);
   targetPhrase.SortAlign();
-
+  return out;
 } // Tokenize()
 
-void Tokenize(OnDiskPt::Phrase &phrase
+OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
               , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
               , OnDiskPt::OnDiskWrapper &onDiskWrapper)
 {
@@ -180,6 +201,7 @@ void Tokenize(OnDiskPt::Phrase &phrase
     nonTerm = comStr == 0;
   }
 
+  OnDiskPt::WordPtr out;
   if (nonTerm) {
     // non-term
     size_t splitPos		= token.find_first_of("[", 2);
@@ -187,31 +209,35 @@ void Tokenize(OnDiskPt::Phrase &phrase
 
     if (splitPos == string::npos) {
       // lhs - only 1 word
-      Word *word = new Word();
+      WordPtr word(new Word());
       word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
       phrase.AddWord(word);
     } else {
       // source & target non-terms
       if (addSourceNonTerm) {
-        Word *word = new Word();
+        WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
-        phrase.AddWord(word);
+        phrase.AddWord(word);        
       }
 
       wordStr = token.substr(splitPos, tokSize - splitPos);
       if (addTargetNonTerm) {
-        Word *word = new Word();
+        WordPtr word(new Word());
         word->CreateFromString(wordStr, onDiskWrapper.GetVocab());
         phrase.AddWord(word);
+        out = word;
       }
 
     }
   } else {
     // term
-    Word *word = new Word();
+    WordPtr word(new Word());
     word->CreateFromString(token, onDiskWrapper.GetVocab());
     phrase.AddWord(word);
+    out = word;
   }
+  
+  return out;
 }
 
 void InsertTargetNonTerminals(std::vector<std::string> &sourceToks, const std::vector<std::string> &targetToks, const ::AlignType &alignments)

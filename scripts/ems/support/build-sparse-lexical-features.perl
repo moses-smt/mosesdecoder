@@ -6,6 +6,7 @@ use strict;
 # * target word insertion
 # * source word deletion
 # * word translation
+# * phrase length
 
 my ($corpus,$input_extension,$output_extension,$outfile_prefix,$specification) = @ARGV;
 my $ini = "";
@@ -38,12 +39,16 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/ && $SPEC[3] =~ /^\d+$/) {
       my $file_in  = &create_top_words($input_extension,  $SPEC[2]);
       my $file_out = &create_top_words($output_extension, $SPEC[3]);
-      $ini .= "[word-translation-feature]\n0 0 $file_in $file_out\n\n";
+      $ini .= "[word-translation-feature]\n0-0 0 0 0 $file_in $file_out\n\n";
       $report .= "wt\n";
     }
     else {
       die("ERROR: Unknown parameter specification in '$feature_spec'\n");
     }
+  }
+  elsif ($SPEC[0] eq 'phrase-length') {
+    $ini .= "[phrase-length-feature]\ntrue\n\n";
+    $report .= "pl\n";
   }
   else {
     die("ERROR: Unknown feature type '$SPEC[0]' in specification '$feature_spec'\nfull spec: '$specification'\n");
@@ -53,7 +58,6 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
 open(INI,">$outfile_prefix.ini");
 print INI $ini;
 print INI "\n[report-sparse-features]\n$report\n";
-print INI "\n[use-alignment-info]\ntrue\n\n";
 close(INI);
 
 sub create_top_words {

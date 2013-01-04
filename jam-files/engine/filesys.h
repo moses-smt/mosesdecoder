@@ -20,22 +20,23 @@
 # include "pathsys.h"
 #include "hash.h"
 #include "lists.h"
+#include "object.h"
 
-typedef void (*scanback)( void *closure, char *file, int found, time_t t );
+typedef void (*scanback)( void *closure, OBJECT * file, int found, time_t t );
 
-void file_dirscan( char *dir, scanback func, void *closure );
-void file_archscan( char *arch, scanback func, void *closure );
+void file_dirscan( OBJECT * dir, scanback func, void * closure );
+void file_archscan( const char * arch, scanback func, void * closure );
 
-int file_time( char *filename, time_t *time );
+int file_time( OBJECT * filename, time_t * time );
 
 void file_build1(PATHNAME *f, string* file) ;
-int file_is_file(char* filename);
-int file_mkdir(char *pathname);
+int file_is_file( OBJECT * filename );
+int file_mkdir( const char * pathname );
 
 typedef struct file_info_t file_info_t ;
 struct file_info_t
 {
-    char          * name;
+    OBJECT        * name;
     short           is_file;
     short           is_dir;
     unsigned long   size;
@@ -47,14 +48,14 @@ struct file_info_t
 /* Creates a pointer to information about file 'filename', creating it as
  * necessary. If created, the structure will be default initialized.
  */
-file_info_t * file_info( char * filename );
+file_info_t * file_info( OBJECT * filename );
 
 /* Returns information about a file, queries the OS if needed. */
-file_info_t * file_query( char * filename );
+file_info_t * file_query( OBJECT * filename );
 
 void file_done();
 
 /* Marks a path/file to be removed when jam exits. */
-void file_remove_atexit( const char * path );
+void file_remove_atexit( OBJECT * path );
 
 #endif

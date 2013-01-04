@@ -74,6 +74,7 @@ ValType evaluate(HypPackEnumerator* train, const AvgWeightVector& wv) {
 
 int main(int argc, char** argv)
 {
+  const ValType BLEU_RATIO = 5;
   bool help;
   string denseInitFile;
   string sparseInitFile;
@@ -88,6 +89,7 @@ int main(int argc, char** argv)
   bool no_shuffle = false; // Don't shuffle, even for in memory version
   bool model_bg = false; // Use model for background corpus
   bool verbose = false; // Verbose updates
+  bool safe_hope = false; // Model score cannot have more than BLEU_RATIO times more influence than BLEU
   
   // Command-line processing follows pro.cpp
   po::options_description desc("Allowed options");
@@ -106,6 +108,7 @@ int main(int argc, char** argv)
       ("no-shuffle", po::value(&no_shuffle)->zero_tokens()->default_value(false), "Don't shuffle hypotheses before each epoch")
       ("model-bg", po::value(&model_bg)->zero_tokens()->default_value(false), "Use model instead of hope for BLEU background")
       ("verbose", po::value(&verbose)->zero_tokens()->default_value(false), "Verbose updates")
+      ("safe-hope", po::value(&safe_hope)->zero_tokens()->default_value(false), "Mode score's influence on hope decoding is limited")
       ;
 
   po::options_description cmdline_options;
@@ -199,30 +202,43 @@ int main(int argc, char** argv)
     int iNumUpdates = 0;
     ValType totalLoss = 0.0;
     for(train->reset(); !train->finished(); train->next()) {
-      
       // Hope / fear decode
+      ValType hope_scale = 1.0;
       size_t hope_index=0, fear_index=0, model_index=0;
       ValType hope_score=0, fear_score=0, model_score=0;
-      for(size_t i=0; i< train->cur_size(); i++) {
-        const MiraFeatureVector& vec=train->featuresAt(i);
-        ValType score = wv.score(vec);
-        ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
-        // Hope
-        if(i==0 || (score + bleu) > hope_score) {
-          hope_score = score + bleu;
-          hope_index = i;
+      int iNumHypsBackup = iNumHyps;
+      for(size_t safe_loop=0; safe_loop<2; safe_loop++) {
+        iNumHyps = iNumHypsBackup;
+        ValType hope_bleu, hope_model;
+        for(size_t i=0; i< train->cur_size(); i++) {
+          const MiraFeatureVector& vec=train->featuresAt(i);
+          ValType score = wv.score(vec);
+          ValType bleu = sentenceLevelBackgroundBleu(train->scoresAt(i),bg);
+          // Hope
+          if(i==0 || (hope_scale*score + bleu) > hope_score) {
+            hope_score = hope_scale*score + bleu;
+            hope_index = i;
+            hope_bleu = bleu;
+            hope_model = score;
+          }
+          // Fear
+          if(i==0 || (score - bleu) > fear_score) {
+            fear_score = score - bleu;
+            fear_index = i;
+          }
+          // Model
+          if(i==0 || score > model_score) {
+            model_score = score;
+            model_index = i;
+          }
+          iNumHyps++;
         }
-        // Fear
-        if(i==0 || (score - bleu) > fear_score) {
-          fear_score = score - bleu;
-          fear_index = i;
-        }
-        // Model
-        if(i==0 || score > model_score) {
-          model_score = score;
-          model_index = i;
-        }
-        iNumHyps++;
+        // Outer loop rescales the contribution of model score to 'hope' in antagonistic cases
+        // where model score is having far more influence than BLEU
+        hope_bleu *= BLEU_RATIO; // We only care about cases where model has MUCH more influence than BLEU
+        if(safe_hope && safe_loop==0 && abs(hope_model)>1e-8 && abs(hope_bleu)/abs(hope_model)<hope_scale)
+          hope_scale = abs(hope_bleu) / abs(hope_model);
+        else break;
       }
       // Update weights
       if(hope_index!=fear_index) {
@@ -240,14 +256,15 @@ int main(int argc, char** argv)
         // Loss and update
         ValType diff_score = wv.score(diff);
         ValType loss = delta - diff_score;
-	if(verbose) {
-	  cerr << "Updating sent " << train->cur_id() << endl;
-	  cerr << "Wght: " << wv << endl;
-	  cerr << "Hope: " << hope << " => " << hopeBleu << " <> " << wv.score(hope) << endl;
-	  cerr << "Fear: " << fear << " => " << fearBleu << " <> " << wv.score(fear) << endl;
-	  cerr << "Diff: " << diff << " => " << delta << " <> " << diff_score << endl;
-	  cerr << endl;
-	}
+        if(verbose) {
+          cerr << "Updating sent " << train->cur_id() << endl;
+          cerr << "Wght: " << wv << endl;
+          cerr << "Hope: " << hope << " BLEU:" << hopeBleu << " Score:" << wv.score(hope) << endl;
+          cerr << "Fear: " << fear << " BLEU:" << fearBleu << " Score:" << wv.score(fear) << endl;
+          cerr << "Diff: " << diff << " BLEU:" << delta << " Score:" << diff_score << endl;
+          cerr << "Loss: " << loss << " Scale: " << hope_scale << endl;
+          cerr << endl;
+        }
         if(loss > 0) {
           ValType eta = min(c, loss / diff.sqrNorm());
           wv.update(diff,eta);

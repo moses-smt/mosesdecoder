@@ -28,15 +28,17 @@ typedef struct timing_info
 
 void exec_cmd
 (
-    char * string,
-    void (* func)( void * closure, int status, timing_info *, char *, char * ),
+    const char * string,
+    void (* func)( void * closure, int status, timing_info *, const char *, const char * ),
     void * closure,
     LIST * shell,
-    char * action,
-    char * target
+    const char * action,
+    const char * target
 );
 
 int exec_wait();
+
+void exec_done( void );
 
 #define EXEC_CMD_OK    0
 #define EXEC_CMD_FAIL  1

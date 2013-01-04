@@ -1,7 +1,7 @@
 # include "jam.h"
 # include "pathsys.h"
 # include "strings.h"
-# include "newstr.h"
+# include "object.h"
 # include "filesys.h"
 # include "lists.h"
 
@@ -36,24 +36,29 @@ void file_build1( PATHNAME * f, string * file )
 static struct hash * filecache_hash = 0;
 static file_info_t filecache_finfo;
 
-file_info_t * file_info(char * filename)
+file_info_t * file_info( OBJECT * filename )
 {
     file_info_t *finfo = &filecache_finfo;
+    int found;
 
     if ( !filecache_hash )
         filecache_hash = hashinit( sizeof( file_info_t ), "file_info" );
 
-    finfo->name = filename;
-    finfo->is_file = 0;
-    finfo->is_dir = 0;
-    finfo->size = 0;
-    finfo->time = 0;
-    finfo->files = 0;
-    if ( hashenter( filecache_hash, (HASHDATA**)&finfo ) )
+    filename = path_as_key( filename );
+
+    finfo = (file_info_t *)hash_insert( filecache_hash, filename, &found );
+    if ( !found )
     {
         /* printf( "file_info: %s\n", filename ); */
-        finfo->name = newstr( finfo->name );
+        finfo->name = object_copy( filename );
+        finfo->is_file = 0;
+        finfo->is_dir = 0;
+        finfo->size = 0;
+        finfo->time = 0;
+        finfo->files = L0;
     }
+
+    object_free( filename );
 
     return finfo;
 }
@@ -62,22 +67,33 @@ static LIST * files_to_remove = L0;
 
 static void remove_files_atexit(void)
 {
-    /* we do pop front in case this exit function is called
-       more than once */
-    while ( files_to_remove )
+    LISTITER iter = list_begin( files_to_remove ), end = list_end( files_to_remove );
+    for ( ; iter != end; iter = list_next( iter ) )
     {
-        remove( files_to_remove->string );
-        files_to_remove = list_pop_front( files_to_remove );
+        remove( object_str( list_item( iter ) ) );
     }
+    list_free( files_to_remove );
+    files_to_remove = L0;
+}
+
+static void free_file_info ( void * xfile, void * data )
+{
+    file_info_t * file = (file_info_t *)xfile;
+    object_free( file->name );
+    list_free( file->files );
 }
 
 void file_done()
 {
     remove_files_atexit();
-    hashdone( filecache_hash );
+    if ( filecache_hash )
+    {
+        hashenumerate( filecache_hash, free_file_info, (void *)0 );
+        hashdone( filecache_hash );
+    }
 }
 
-void file_remove_atexit( const char * path )
+void file_remove_atexit( OBJECT * path )
 {
-    files_to_remove = list_new( files_to_remove, newstr((char*)path) );
+    files_to_remove = list_push_back( files_to_remove, object_copy( path ) );
 }

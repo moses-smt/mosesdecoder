@@ -16,10 +16,10 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 FeatureArray::FeatureArray()
-    : m_index(""), m_num_features(0), m_sparse_flag(false) {}
+    : m_index(0), m_num_features(0){}
 
 FeatureArray::~FeatureArray() {}
 
@@ -81,19 +81,17 @@ void FeatureArray::loadbin(istream* is, size_t n)
   }
 }
 
-void FeatureArray::loadtxt(istream* is, size_t n)
+void FeatureArray::loadtxt(istream* is, const SparseVector& sparseWeights, size_t n)
 {
   FeatureStats entry(m_num_features);
 
-  for (size_t i = 0; i < n; i++) {
-    entry.loadtxt(is);
+  for (size_t i=0 ; i < n; i++) {
+    entry.loadtxt(is, sparseWeights);
     add(entry);
-    if (entry.getSparse().size()>0)
-      m_sparse_flag = true;
   }
 }
 
-void FeatureArray::load(istream* is)
+void FeatureArray::load(istream* is, const SparseVector& sparseWeights)
 {
   size_t number_of_entries = 0;
   bool binmode = false;
@@ -117,7 +115,7 @@ void FeatureArray::load(istream* is)
     }
     getNextPound(stringBuf, substring);
     getNextPound(stringBuf, substring);
-    m_index = substring;
+    m_index = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
     number_of_entries = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
@@ -128,7 +126,7 @@ void FeatureArray::load(istream* is)
   if (binmode) {
     loadbin(is, number_of_entries);
   } else {
-    loadtxt(is, number_of_entries);
+    loadtxt(is, sparseWeights, number_of_entries);
   }
 
   getline(*is, stringBuf);
@@ -139,15 +137,6 @@ void FeatureArray::load(istream* is)
       return;
     }
   }
-}
-
-void FeatureArray::load(const string &file)
-{
-  TRACE_ERR("loading data from " << file << endl);
-  inputfilestream input_stream(file); // matches a stream with a file. Opens the file
-  istream* is = &input_stream;
-  load(is);
-  input_stream.close();
 }
 
 void FeatureArray::merge(FeatureArray& e)
@@ -171,4 +160,3 @@ bool FeatureArray::check_consistency() const
 }
 
 }
-

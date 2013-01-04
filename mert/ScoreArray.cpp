@@ -14,10 +14,10 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 ScoreArray::ScoreArray()
-    : m_num_scores(0), m_index("") {}
+    : m_num_scores(0), m_index(0) {}
 
 void ScoreArray::savetxt(ostream* os, const string& sctype)
 {
@@ -109,7 +109,7 @@ void ScoreArray::load(istream* is)
     }
     getNextPound(stringBuf, substring);
     getNextPound(stringBuf, substring);
-    m_index = substring;
+    m_index = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
     number_of_entries = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
@@ -166,4 +166,3 @@ bool ScoreArray::check_consistency() const
 }
 
 }
-

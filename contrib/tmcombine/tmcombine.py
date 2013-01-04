@@ -15,7 +15,7 @@
 
 
 # Some general things to note:
-#  - Different combination algorithms require different statistics. To be on the safe side, apply train_model.patch to train_model.perl and use the option -phrase-word-alignment for training all models.
+#  - Different combination algorithms require different statistics. To be on the safe side, use the options `-phrase-word-alignment` and `-write-lexical-counts` when training models.
 #  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). sort with LC_ALL=C.
 #  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
 #  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files.
@@ -114,17 +114,29 @@ class Moses():
                 
                 if mode == 'counts' and not priority == 2: #priority 2 is MAP
                     try:
-                        target_count,src_count = map(float,line[-1].split())
+                        counts = map(float,line[-1].split())
+                        try:
+                            target_count,src_count,joint_count = counts
+                            joint_count_e2f = joint_count
+                            joint_count_f2e = joint_count
+                        except ValueError:
+                            # possibly old-style phrase table with 2 counts in last column, or phrase table produced by tmcombine
+                            # note: since each feature has different weight vector, we may have two different phrase pair frequencies
+                            target_count,src_count = counts
+                            i_e2f = flags['i_e2f']
+                            i_f2e = flags['i_f2e']
+                            joint_count_e2f = model_probabilities[i_e2f] * target_count
+                            joint_count_f2e = model_probabilities[i_f2e] * src_count
                     except:
-                        sys.stderr.write(str(line)+'\n')
-                        sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
-                        return
-                        
+                        sys.stderr.write(str(b" ||| ".join(line))+b'\n')
+                        sys.stderr.write('ERROR: counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
+                        raise
+                    
                     i_e2f = flags['i_e2f']
                     i_f2e = flags['i_f2e']
-                    model_probabilities[i_e2f] *= target_count
-                    model_probabilities[i_f2e] *= src_count
-                
+                    model_probabilities[i_e2f] = joint_count_e2f
+                    model_probabilities[i_f2e] = joint_count_f2e
+                        
                 for j,p in enumerate(model_probabilities):
                     phrase_probabilities[j][i] = p
                 
@@ -362,6 +374,11 @@ class Moses():
         
         # information specific to Moses model: alignment info and comment section with target and source counts
         alignment,comments = self.phrase_pairs[src][target][1]
+        if alignment:
+            extra_space = b' '
+        else:
+            extra_space = b''
+
         if mode == 'counts':
             i_e2f = flags['i_e2f']
             i_f2e = flags['i_f2e']
@@ -376,8 +393,7 @@ class Moses():
             origin_features = b' '.join([b'%.4f' %(f) for f in origin_features]) + ' '
         else:
             origin_features = b''
-
-        line = b"%s ||| %s ||| %s 2.718 %s||| %s ||| %s\n" %(src,target,features,origin_features,alignment,comments)
+        line = b"%s ||| %s ||| %s 2.718 %s||| %s%s||| %s\n" %(src,target,features,origin_features,alignment,extra_space,comments)
         return line
         
         
@@ -797,9 +813,15 @@ def cross_entropy_light(model_interface,reference_interface,weights,score,mode,f
     for (src,target,c) in cache:
         features = score(weights,src,target,model_interface,flags,cache=True)
 
+        if 0 in features:
+            #sys.stderr.write('Warning: 0 probability in model {0}: source phrase: {1!r}; target phrase: {2!r}\n'.format(i,src,target))
+            #sys.stderr.write('Possible reasons: 0 probability in phrase table; very low (or 0) weight; recompute lexweight and different alignments\n')
+            #sys.stderr.write('Phrase pair is ignored for cross_entropy calculation\n\n')
+            continue
+
         for i in range(model_interface.number_of_features):
             cross_entropies[i] -= log(features[i],2)*c
-                
+
     return cross_entropies
 
 
@@ -1233,7 +1255,7 @@ def handle_file(filename,action,fileobj=None,mode='r'):
                 
                 if 'counts' in filename and os.path.exists(os.path.isdir(filename)):
                     sys.stderr.write('For a weighted counts combination, we need statistics that Moses doesn\'t write to disk by default.\n')
-                    sys.stderr.write('Apply train_model.patch to train_model.perl and repeat step 4 of Moses training for all models.\n')
+                    sys.stderr.write('Repeat step 4 of Moses training for all models with the option -write-lexical-counts.\n')
                 
                 exit()
 
@@ -1327,7 +1349,7 @@ class Combine_TMs():
            output_lexical: If defined, also writes combined lexical tables. Writes to output_lexical.e2f and output_lexical.f2e, or output_lexical.counts.e2f in mode 'counts'.
 
            mode: declares the basic mixture-model algorithm. there are currently three options:
-                 'counts': weighted counts (requires some statistics that Moses doesn't produce. Apply train_model.patch to train_model.perl and repeat step 4 of Moses training to obtain them.)
+                 'counts': weighted counts (requires some statistics that Moses doesn't produce. Repeat step 4 of Moses training with the option -write-lexical-counts to obtain them.)
                            Only the standard Moses features are recomputed from weighted counts; additional features are linearly interpolated 
                            (see number_of_features to allow more features, and i_e2f etc. if the standard features are in a non-standard position)
                  'interpolate': linear interpolation

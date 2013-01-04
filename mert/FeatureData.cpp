@@ -16,14 +16,11 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
 
-static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
-static const float MAX_FLOAT = numeric_limits<float>::max();
+
 
 FeatureData::FeatureData()
-    : m_num_features(0),
-      m_sparse_flag(false) {}
+    : m_num_features(0) {}
 
 void FeatureData::save(ostream* os, bool bin)
 {
@@ -45,7 +42,7 @@ void FeatureData::save(bool bin) {
   save(&cout, bin);
 }
 
-void FeatureData::load(istream* is)
+void FeatureData::load(istream* is, const SparseVector& sparseWeights)
 {
   FeatureArray entry;
 
@@ -56,7 +53,7 @@ void FeatureData::load(istream* is)
     }
 
     entry.clear();
-    entry.load(is);
+    entry.load(is, sparseWeights);
 
     if (entry.size() == 0)
       break;
@@ -64,15 +61,12 @@ void FeatureData::load(istream* is)
     if (size() == 0)
       setFeatureMap(entry.Features());
 
-    if (entry.hasSparseFeatures())
-      m_sparse_flag = true;
-
     add(entry);
   }
 }
 
 
-void FeatureData::load(const string &file)
+void FeatureData::load(const string &file, const SparseVector& sparseWeights)
 {
   TRACE_ERR("loading feature data from " << file << endl);
   inputfilestream input_stream(file); // matches a stream with a file. Opens the file
@@ -80,7 +74,7 @@ void FeatureData::load(const string &file)
     throw runtime_error("Unable to open feature file: " + file);
   }
   istream* is = &input_stream;
-  load(is);
+  load(is, sparseWeights);
   input_stream.close();
 }
 
@@ -96,7 +90,7 @@ void FeatureData::add(FeatureArray& e)
   }
 }
 
-void FeatureData::add(FeatureStats& e, const string& sent_idx)
+void FeatureData::add(FeatureStats& e, int sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
@@ -157,13 +151,7 @@ string FeatureData::ToString() const {
   {
     stringstream ss;
     ss << "number of features: " << m_num_features
-       << ", features: " << m_features
-       << ", sparse flag: ";
-    if (m_sparse_flag) {
-      ss << "yes, ";
-    } else {
-      ss << "no, ";
-    }
+       << ", features: " << m_features;
     res.append(ss.str());
   }
 
@@ -180,4 +168,3 @@ string FeatureData::ToString() const {
 }
 
 }
-

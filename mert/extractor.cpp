@@ -212,7 +212,7 @@ int main(int argc, char** argv)
     if (referenceFiles.size() > 0)
       scorer->setReferenceFiles(referenceFiles);
 
-    PrintUserTime("References loaded");
+//    PrintUserTime("References loaded");
 
     Data data(scorer.get());
 
@@ -221,14 +221,14 @@ int main(int argc, char** argv)
       data.load(prevFeatureDataFiles.at(i), prevScoreDataFiles.at(i));
     }
 
-    PrintUserTime("Previous data loaded");
+//    PrintUserTime("Previous data loaded");
 
     // computing score statistics of each nbest file
     for (size_t i = 0; i < nbestFiles.size(); i++) {
       data.loadNBest(nbestFiles.at(i));
     }
 
-    PrintUserTime("Nbest entries loaded and scored");
+//    PrintUserTime("Nbest entries loaded and scored");
 
     //ADDED_BY_TS
     if (!option.allowDuplicates) {

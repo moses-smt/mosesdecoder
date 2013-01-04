@@ -38,7 +38,10 @@ struct Options {
       , maxScope(3)
       , minimal(false)
       , pcfg(false)
-      , unpairedExtractFormat(false) {}
+      , sentenceOffset(0)
+      , unpairedExtractFormat(false)
+      , unknownWordMinRelFreq(0.03f)
+      , unknownWordUniform(false) {}
 
   // Positional options
   std::string targetFile;
@@ -57,8 +60,11 @@ struct Options {
   int maxScope;
   bool minimal;
   bool pcfg;
+  int sentenceOffset;
   bool unpairedExtractFormat;
   std::string unknownWordFile;
+  float unknownWordMinRelFreq;
+  bool unknownWordUniform;
 };
 
 }  // namespace GHKM

@@ -108,7 +108,7 @@ feature.feature stdlib             : native          : propagated composite ;
 feature.feature link               : shared static   : propagated ;
 feature.feature runtime-link       : shared static   : propagated ;
 feature.feature runtime-debugging  : on off          : propagated ;
-feature.feature optimization       : off speed space none : propagated ;
+feature.feature optimization       : off speed space : propagated ;
 feature.feature profiling          : off on          : propagated ;
 feature.feature inlining           : off on full     : propagated ;
 feature.feature threading          : single multi    : propagated ;
@@ -121,7 +121,7 @@ feature.feature asynch-exceptions  : off on          : propagated ;
 # Whether all extern "C" functions are considered nothrow by default.
 feature.feature extern-c-nothrow   : off on          : propagated ;
 
-feature.feature debug-symbols      : on off none          : propagated ;
+feature.feature debug-symbols      : on off          : propagated ;
 # Controls whether the binary should be stripped -- that is have
 # everything not necessary to running removed. This option should
 # not be very often needed. Also, this feature will show up in

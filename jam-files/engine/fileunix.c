@@ -15,7 +15,7 @@
 # include "filesys.h"
 # include "strings.h"
 # include "pathsys.h"
-# include "newstr.h"
+# include "object.h"
 # include <stdio.h>
 # include <sys/stat.h>
 
@@ -125,7 +125,7 @@ struct ar_hdr       /* archive file member header - printable ascii */
  * file_dirscan() - scan a directory for files.
  */
 
-void file_dirscan( char * dir, scanback func, void * closure )
+void file_dirscan( OBJECT * dir, scanback func, void * closure )
 {
     PROFILE_ENTER( FILE_DIRSCAN );
 
@@ -139,37 +139,39 @@ void file_dirscan( char * dir, scanback func, void * closure )
         return;
     }
 
-    if ( ! d->files )
+    if ( list_empty( d->files ) )
     {
         LIST* files = L0;
         PATHNAME f;
         DIR *dd;
         STRUCT_DIRENT *dirent;
         string filename[1];
+        const char * dirstr = object_str( dir );
 
         /* First enter directory itself */
 
         memset( (char *)&f, '\0', sizeof( f ) );
 
-        f.f_dir.ptr = dir;
-        f.f_dir.len = strlen(dir);
+        f.f_dir.ptr = dirstr;
+        f.f_dir.len = strlen( dirstr );
 
-        dir = *dir ? dir : ".";
+        dirstr = *dirstr ? dirstr : ".";
 
         /* Now enter contents of directory. */
 
-        if ( !( dd = opendir( dir ) ) )
+        if ( !( dd = opendir( dirstr ) ) )
         {
             PROFILE_EXIT( FILE_DIRSCAN );
             return;
         }
 
         if ( DEBUG_BINDSCAN )
-            printf( "scan directory %s\n", dir );
+            printf( "scan directory %s\n", dirstr );
 
         string_new( filename );
         while ( ( dirent = readdir( dd ) ) )
         {
+            OBJECT * filename_obj;
             # ifdef old_sinix
             /* Broken structure definition on sinix. */
             f.f_base.ptr = dirent->d_name - 2;
@@ -181,8 +183,9 @@ void file_dirscan( char * dir, scanback func, void * closure )
             string_truncate( filename, 0 );
             path_build( &f, filename, 0 );
 
-            files = list_new( files, newstr(filename->value) );
-            file_query( filename->value );
+            filename_obj = object_new( filename->value );
+            files = list_push_back( files, filename_obj );
+            file_query( filename_obj );
         }
         string_free( filename );
 
@@ -193,18 +196,18 @@ void file_dirscan( char * dir, scanback func, void * closure )
 
     /* Special case / : enter it */
     {
-        unsigned long len = strlen(d->name);
-        if ( ( len == 1 ) && ( d->name[0] == '/' ) )
+        if ( strcmp( object_str( d->name ), "/" ) == 0 )
             (*func)( closure, d->name, 1 /* stat()'ed */, d->time );
     }
 
     /* Now enter contents of directory */
-    if ( d->files )
+    if ( !list_empty( d->files ) )
     {
         LIST * files = d->files;
-        while ( files )
+        LISTITER iter = list_begin( files ), end = list_end( files );
+        for ( ; iter != end; iter = list_next( iter ) )
         {
-            file_info_t * ff = file_info( files->string );
+            file_info_t * ff = file_info( list_item( iter ) );
             (*func)( closure, ff->name, 1 /* stat()'ed */, ff->time );
             files = list_next( files );
         }
@@ -214,14 +217,14 @@ void file_dirscan( char * dir, scanback func, void * closure )
 }
 
 
-file_info_t * file_query( char * filename )
+file_info_t * file_query( OBJECT * filename )
 {
     file_info_t * ff = file_info( filename );
     if ( ! ff->time )
     {
         struct stat statbuf;
 
-        if ( stat( *filename ? filename : ".", &statbuf ) < 0 )
+        if ( stat( *object_str( filename ) ? object_str( filename ) : ".", &statbuf ) < 0 )
             return 0;
 
         ff->is_file = statbuf.st_mode & S_IFREG ? 1 : 0;
@@ -238,8 +241,8 @@ file_info_t * file_query( char * filename )
 
 int
 file_time(
-    char    *filename,
-    time_t  *time )
+    OBJECT * filename,
+    time_t * time )
 {
     file_info_t * ff = file_query( filename );
     if ( !ff ) return -1;
@@ -247,16 +250,16 @@ file_time(
     return 0;
 }
 
-int file_is_file(char* filename)
+int file_is_file( OBJECT * filename )
 {
     file_info_t * ff = file_query( filename );
     if ( !ff ) return -1;
     return ff->is_file;
 }
 
-int file_mkdir(char* pathname)
+int file_mkdir( const char * pathname )
 {
-    return mkdir(pathname, 0766);
+    return mkdir( pathname, 0766 );
 }
 
 /*
@@ -270,9 +273,9 @@ int file_mkdir(char* pathname)
 
 void
 file_archscan(
-    char *archive,
+    const char * archive,
     scanback func,
-    void *closure )
+    void * closure )
 {
 # ifndef NO_AR
     struct ar_hdr ar_hdr;
@@ -312,6 +315,7 @@ file_archscan(
         char * c;
         char * src;
         char * dest;
+        OBJECT * member;
 
         strncpy( lar_name, ar_hdr.ar_name, sizeof(ar_hdr.ar_name) );
 
@@ -356,14 +360,16 @@ file_archscan(
 
         sprintf( buf, "%s(%s)", archive, lar_name );
 
-        (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
+        member = object_new( buf );
+        (*func)( closure, member, 1 /* time valid */, (time_t)lar_date );
+        object_free( member );
 
         offset += SARHDR + ( ( lar_size + 1 ) & ~1 );
         lseek( fd, offset, 0 );
     }
 
-    if (string_table)
-        BJAM_FREE(string_table);
+    if ( string_table )
+        BJAM_FREE( string_table );
 
     close( fd );
 
@@ -396,10 +402,11 @@ static void file_archscan_small(
 
     while ( ( offset > 0 )
            && ( lseek( fd, offset, 0 ) >= 0 )
-           && ( read( fd, &ar_hdr, sizeof( ar_hdr ) ) >= sizeof( ar_hdr.hdr ) ) )
+           && ( read( fd, &ar_hdr, sizeof( ar_hdr ) ) >= (int)sizeof( ar_hdr.hdr ) ) )
     {
         long lar_date;
         int  lar_namlen;
+        OBJECT * member;
 
         sscanf( ar_hdr.hdr.ar_namlen, "%d" , &lar_namlen );
         sscanf( ar_hdr.hdr.ar_date  , "%ld", &lar_date   );
@@ -412,7 +419,9 @@ static void file_archscan_small(
 
         sprintf( buf, "%s(%s)", archive, ar_hdr.hdr._ar_name.ar_name );
 
-        (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
+        member = object_new( buf );
+        (*func)( closure, member, 1 /* time valid */, (time_t)lar_date );
+        object_free( member );
     }
 }
 
@@ -446,6 +455,7 @@ static void file_archscan_big(
     {
         long lar_date;
         int  lar_namlen;
+        OBJECT * member;
 
         sscanf( ar_hdr.hdr.ar_namlen, "%d"  , &lar_namlen );
         sscanf( ar_hdr.hdr.ar_date  , "%ld" , &lar_date   );
@@ -458,19 +468,21 @@ static void file_archscan_big(
 
         sprintf( buf, "%s(%s)", archive, ar_hdr.hdr._ar_name.ar_name );
 
-        (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
+        member = object_new( buf );
+        (*func)( closure, member, 1 /* time valid */, (time_t)lar_date );
+        object_free( member );
     }
 
 }
 
 #endif /* AR_HSZ_BIG */
 
-void file_archscan(char *archive, scanback func, void *closure)
+void file_archscan( const char * archive, scanback func, void *closure)
 {
     int fd;
     char fl_magic[SAIAMAG];
 
-    if (( fd = open(archive, O_RDONLY, 0)) < 0)
+    if (( fd = open( archive, O_RDONLY, 0)) < 0)
         return;
 
     if (read( fd, fl_magic, SAIAMAG) != SAIAMAG
@@ -480,16 +492,16 @@ void file_archscan(char *archive, scanback func, void *closure)
         return;
     }
 
-    if (strncmp(AIAMAG, fl_magic, SAIAMAG) == 0)
+    if ( strncmp( AIAMAG, fl_magic, SAIAMAG ) == 0 )
     {
         /* read small variant */
-        file_archscan_small(fd, archive, func, closure);
+        file_archscan_small( fd, archive, func, closure );
     }
 #ifdef AR_HSZ_BIG
-    else if (strncmp(AIAMAGBIG, fl_magic, SAIAMAG) == 0)
+    else if ( strncmp( AIAMAGBIG, fl_magic, SAIAMAG ) == 0 )
     {
         /* read big variant */
-        file_archscan_big(fd, archive, func, closure);
+        file_archscan_big( fd, archive, func, closure );
     }
 #endif
 

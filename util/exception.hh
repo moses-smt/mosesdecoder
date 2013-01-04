@@ -2,8 +2,11 @@
 #define UTIL_EXCEPTION__
 
 #include <exception>
+#include <limits>
 #include <sstream>
 #include <string>
+
+#include <stdint.h>
 
 namespace util {
 
@@ -84,8 +87,14 @@ template <class Except, class Data> typename Except::template ExceptionTag<Excep
   throw UTIL_e; \
 } while (0)
 
+#if __GNUC__ >= 3
+#define UTIL_UNLIKELY(x) __builtin_expect (!!(x), 0)
+#else
+#define UTIL_UNLIKELY(x) (x)
+#endif
+
 #define UTIL_THROW_IF(Condition, Exception, Modify) do { \
-  if (Condition) { \
+  if (UTIL_UNLIKELY(Condition)) { \
     Exception UTIL_e; \
     UTIL_SET_LOCATION(UTIL_e, #Exception, #Condition); \
     UTIL_e << Modify; \
@@ -110,6 +119,25 @@ class EndOfFileException : public Exception {
     EndOfFileException() throw();
     ~EndOfFileException() throw();
 };
+
+class OverflowException : public Exception {
+  public:
+    OverflowException() throw();
+    ~OverflowException() throw();
+};
+
+template <unsigned len> inline std::size_t CheckOverflowInternal(uint64_t value) {
+  UTIL_THROW_IF(value > static_cast<uint64_t>(std::numeric_limits<std::size_t>::max()), OverflowException, "Integer overflow detected.  This model is too big for 32-bit code.");
+  return value;
+}
+
+template <> inline std::size_t CheckOverflowInternal<8>(uint64_t value) {
+  return value;
+}
+
+inline std::size_t CheckOverflow(uint64_t value) {
+  return CheckOverflowInternal<sizeof(std::size_t)>(value);
+}
 
 } // namespace util
 

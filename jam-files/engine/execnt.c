@@ -65,13 +65,13 @@
 int maxline();
 
 /* delete and argv list */
-static void free_argv(char**);
+static void free_argv(const char * *);
 /* Convert a command string into arguments for spawnvp. */
-static char** string_to_args(const char*);
+static const char** string_to_args(const char*);
 /* bump intr to note command interruption */
 static void onintr(int);
 /* If the command is suitable for execution via spawnvp */
-long can_spawn(char*);
+long can_spawn(const char*);
 /* Add two 64-bit unsigned numbers, h1l1 and h2l2 */
 static FILETIME add_64(
     unsigned long h1, unsigned long l1,
@@ -135,7 +135,7 @@ static struct
     int                 exit_reason;  /* reason why a command completed */
 
     /* Function called when the command completes. */
-    void (* func)( void * closure, int status, timing_info *, char *, char * );
+    void (* func)( void * closure, int status, timing_info *, const char *, const char * );
 
     /* Opaque data passed back to the 'func' callback called when the command
      * completes.
@@ -184,7 +184,7 @@ void execnt_unit_test()
         /* Work around vc6 bug; it doesn't like escaped string
          * literals inside assert
          */
-        char * * argv = string_to_args(" \"g++\" -c -I\"Foobar\"" );
+        const char * * argv = string_to_args(" \"g++\" -c -I\"Foobar\"" );
         char const expected[] = "-c -I\"Foobar\"";
 
         assert( !strcmp( argv[ 0 ], "g++" ) );
@@ -201,26 +201,26 @@ void execnt_unit_test()
 
 void exec_cmd
 (
-    char * command,
-    void (* func)( void * closure, int status, timing_info *, char * invoked_command, char * command_output ),
-    void * closure,
-    LIST * shell,
-    char * action,
-    char * target
+    const char * command,
+    void (* func)( void * closure, int status, timing_info *, const char * invoked_command, const char * command_output ),
+    void       * closure,
+    LIST       * shell,
+    const char * action,
+    const char * target
 )
 {
     int      slot;
     int      raw_cmd = 0 ;
-    char   * argv_static[ MAXARGC + 1 ];  /* +1 for NULL */
-    char * * argv = argv_static;
+    const char   * argv_static[ MAXARGC + 1 ];  /* +1 for NULL */
+    const char * * argv = argv_static;
     char   * p;
-    char   * command_orig = command;
+    const char * command_orig = command;
 
     /* Check to see if we need to hack around the line-length limitation. Look
      * for a JAMSHELL setting of "%", indicating that the command should be
      * invoked directly.
      */
-    if ( shell && !strcmp( shell->string, "%" ) && !list_next( shell ) )
+    if ( !list_empty( shell ) && !strcmp( object_str( list_front( shell ) ), "%" ) && list_next( list_begin( shell ) ) == list_end( shell ) )
     {
         raw_cmd = 1;
         shell = 0;
@@ -290,8 +290,8 @@ void exec_cmd
 
         if ( DEBUG_EXECCMD )
         {
-            if ( shell )
-                printf( "using user-specified shell: %s", shell->string );
+            if ( !list_empty( shell ) )
+                printf( "using user-specified shell: %s", object_str( list_front( shell ) ) );
             else
                 printf( "Executing through .bat file\n" );
         }
@@ -305,16 +305,17 @@ void exec_cmd
         int i;
         char jobno[ 4 ];
         int gotpercent = 0;
+        LISTITER shell_iter = list_begin( shell ), shell_end = list_end( shell );
 
         sprintf( jobno, "%d", slot + 1 );
 
-        for ( i = 0; shell && ( i < MAXARGC ); ++i, shell = list_next( shell ) )
+        for ( i = 0; shell_iter != shell_end && ( i < MAXARGC ); ++i, shell_iter = list_next( shell_iter ) )
         {
-            switch ( shell->string[ 0 ] )
+            switch ( object_str( list_item( shell_iter ) )[ 0 ] )
             {
                 case '%': argv[ i ] = command; ++gotpercent; break;
                 case '!': argv[ i ] = jobno; break;
-                default : argv[ i ] = shell->string;
+                default : argv[ i ] = object_str( list_item( shell_iter ) );
             }
             if ( DEBUG_EXECCMD )
                 printf( "argv[%d] = '%s'\n", i, argv[ i ] );
@@ -425,7 +426,7 @@ void exec_cmd
 
         /* Put together the command we run. */
         {
-            char * * argp = argv;
+            const char * * argp = argv;
             string_new( &cmd );
             string_copy( &cmd, *(argp++) );
             while ( *argp )
@@ -577,10 +578,10 @@ int exec_wait()
 
 /* ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ */
 
-static void free_argv( char * * args )
+static void free_argv( const char * * args )
 {
-    BJAM_FREE( args[ 0 ] );
-    BJAM_FREE( args );
+    BJAM_FREE( (void *)args[ 0 ] );
+    BJAM_FREE( (void *)args );
 }
 
 
@@ -613,14 +614,14 @@ int maxline()
  * New strategy: break the string in at most one place.
  */
 
-static char * * string_to_args( char const * string )
+static const char * * string_to_args( char const * string )
 {
     int            src_len;
     int            in_quote;
     char         * line;
     char   const * src;
     char         * dst;
-    char *       * argv;
+    const char * * argv;
 
     /* Drop leading and trailing whitespace if any. */
     while ( isspace( *string ) )
@@ -640,7 +641,7 @@ static char * * string_to_args( char const * string )
      *   element 1: stores the command-line arguments to the executable
      *   element 2: NULL terminator
      */
-    argv = (char * *)BJAM_MALLOC( 3 * sizeof( char * ) );
+    argv = (const char * *)BJAM_MALLOC( 3 * sizeof( const char * ) );
     if ( !argv )
     {
         BJAM_FREE( line );
@@ -697,9 +698,9 @@ static void onintr( int disp )
  * Otherwise, return zero.
  */
 
-long can_spawn( char * command )
+long can_spawn( const char * command )
 {
-    char * p;
+    const char * p;
     char inquote = 0;
 
     /* Move to the first non-whitespace. */
@@ -1292,5 +1293,11 @@ static void close_alert( HANDLE process )
         EnumWindows( &close_alert_window_enum, (LPARAM)&p );
     }
 }
+
+
+void exec_done( void )
+{
+}
+
 
 #endif /* USE_EXECNT */

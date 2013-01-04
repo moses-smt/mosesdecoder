@@ -2,12 +2,13 @@
 #define MERT_NGRAM_H_
 
 #include <vector>
-#include <map>
 #include <string>
+
+#include <boost/unordered_map.hpp>
 
 namespace MosesTuning
 {
-  
+
 /** A simple STL-std::map based n-gram counts. Basically, we provide
  * typical accessors and mutaors, but we intentionally does not allow
  * erasing elements.
@@ -35,8 +36,8 @@ class NgramCounts {
 
   typedef std::vector<int> Key;
   typedef int Value;
-  typedef std::map<Key, Value, NgramComparator>::iterator iterator;
-  typedef std::map<Key, Value, NgramComparator>::const_iterator const_iterator;
+  typedef boost::unordered_map<Key, Value>::iterator iterator;
+  typedef boost::unordered_map<Key, Value>::const_iterator const_iterator;
 
   NgramCounts() : kDefaultCount(1) { }
   virtual ~NgramCounts() { }
@@ -44,14 +45,7 @@ class NgramCounts {
   /**
    * If the specified "ngram" is found, we add counts.
    * If not, we insert the default count in the container. */
-  void Add(const Key& ngram) {
-    const_iterator it = find(ngram);
-    if (it != end()) {
-      m_counts[ngram] = it->second + 1;
-    } else {
-      m_counts[ngram] = kDefaultCount;
-    }
-  }
+  inline void Add(const Key& ngram) { m_counts[ngram]++; }
 
   /**
    * Return true iff the specified "ngram" is found in the container.
@@ -95,7 +89,7 @@ class NgramCounts {
 
  private:
   const int kDefaultCount;
-  std::map<Key, Value, NgramComparator> m_counts;
+  boost::unordered_map<Key, Value> m_counts;
 };
 
 }

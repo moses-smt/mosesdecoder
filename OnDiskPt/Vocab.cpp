@@ -43,7 +43,7 @@ bool Vocab::Load(OnDiskWrapper &onDiskWrapper)
   // create lookup
   // assume contiguous vocab id
   m_lookup.resize(m_vocabColl.size() + 1);
-	m_nextId = m_lookup.size();
+  m_nextId = m_lookup.size();
   
   CollType::const_iterator iter;
   for (iter = m_vocabColl.begin(); iter != m_vocabColl.end(); ++iter) {

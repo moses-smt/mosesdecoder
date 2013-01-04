@@ -16,14 +16,13 @@
 
 namespace MosesTuning
 {
-  
+
 
 class FeatureData
 {
 private:
   std::size_t m_num_features;
   std::string m_features;
-  bool m_sparse_flag;
   std::map<std::string, std::size_t> m_feature_name_to_index; // map from name to index of features
   std::map<std::size_t, std::string> m_index_to_feature_name; // map from index to name of features
   featdata_t m_array;
@@ -36,20 +35,18 @@ public:
 
   void clear() { m_array.clear(); }
 
-  bool hasSparseFeatures() const { return m_sparse_flag; }
-
-  FeatureArray get(const std::string& idx) {
-    return m_array.at(getIndex(idx));
+  FeatureArray& get(size_t idx) {
+    return m_array.at(idx);
   }
-
-  FeatureArray& get(std::size_t idx) { return m_array.at(idx); }
-  const FeatureArray& get(std::size_t idx) const { return m_array.at(idx); }
-
-  inline bool exists(const std::string& sent_idx) const {
-    return exists(getIndex(sent_idx));
+  const FeatureArray& get(size_t idx) const {
+    return m_array.at(idx);
   }
 
   inline bool exists(int sent_idx) const {
+    return existsInternal(getIndex(sent_idx));
+  }
+
+  inline bool existsInternal(int sent_idx) const {
     return (sent_idx > -1 && sent_idx < static_cast<int>(m_array.size())) ? true : false;
   }
 
@@ -62,7 +59,7 @@ public:
   }
 
   void add(FeatureArray& e);
-  void add(FeatureStats& e, const std::string& sent_idx);
+  void add(FeatureStats& e, int sent_idx);
 
   std::size_t size() const { return m_array.size(); }
 
@@ -76,14 +73,14 @@ public:
   void save(std::ostream* os, bool bin=false);
   void save(bool bin=false);
 
-  void load(std::istream* is);
-  void load(const std::string &file);
+  void load(std::istream* is, const SparseVector& sparseWeights);
+  void load(const std::string &file, const SparseVector& sparseWeights);
 
   bool check_consistency() const;
 
   void setIndex();
 
-  inline int getIndex(const std::string& idx) const {
+  inline int getIndex(int idx) const {
     name2idx::const_iterator i = m_array_name_to_index.find(idx);
     if (i != m_array_name_to_index.end())
       return i->second;
@@ -91,7 +88,7 @@ public:
       return -1;
   }
 
-  inline std::string getIndex(std::size_t idx) const {
+  inline int getName(std::size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
       throw std::runtime_error("there is no entry at index " + idx);

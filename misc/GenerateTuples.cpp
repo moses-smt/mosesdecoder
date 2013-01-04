@@ -8,11 +8,11 @@
 
 
 #include <numeric>
-#include "Word.h"
-#include "Phrase.h"
-#include "ConfusionNet.h"
-#include "WordsRange.h"
-#include "PhraseDictionaryTree.h"
+#include "moses/Word.h"
+#include "moses/Phrase.h"
+#include "moses/ConfusionNet.h"
+#include "moses/WordsRange.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 
 using namespace Moses;
 

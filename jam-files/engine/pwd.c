@@ -4,7 +4,7 @@
 
 #include "jam.h"
 #include "lists.h"
-#include "newstr.h"
+#include "object.h"
 #include "pathsys.h"
 #include "mem.h"
 
@@ -29,7 +29,7 @@
 /* The current directory can't change in bjam, so optimize this to cache
 ** the result.
 */
-static char * pwd_result = NULL;
+static OBJECT * pwd_result = NULL;
 
 
 LIST*
@@ -46,9 +46,11 @@ pwd(void)
 			if (result_buffer)
 			{
 				#ifdef NT
-				pwd_result = short_path_to_long_path(result_buffer);
+                OBJECT * result = object_new(result_buffer);
+				pwd_result = short_path_to_long_path(result);
+                object_free( result );
 				#else
-				pwd_result = newstr(result_buffer);
+				pwd_result = object_new(result_buffer);
 				#endif
 			}
 			buffer_size *= 2;
@@ -62,5 +64,13 @@ pwd(void)
             return L0;
         }
     }
-    return list_new(L0, pwd_result);
+    return list_new( object_copy( pwd_result ) );
+}
+
+void pwd_done( void )
+{
+    if( pwd_result )
+    {
+        object_free( pwd_result );
+    }
 }

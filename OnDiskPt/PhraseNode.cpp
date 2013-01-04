@@ -22,7 +22,7 @@
 #include "OnDiskWrapper.h"
 #include "TargetPhraseCollection.h"
 #include "SourcePhrase.h"
-#include "../moses/src/Util.h"
+#include "moses/Util.h"
 
 using namespace std;
 
@@ -58,7 +58,7 @@ PhraseNode::PhraseNode(UINT64 filePos, OnDiskWrapper &onDiskWrapper)
   CHECK(filePos == (UINT64)file.tellg());
 
   file.read((char*) &m_numChildrenLoad, sizeof(UINT64));
-
+  
   size_t memAlloc = GetNodeSize(m_numChildrenLoad, onDiskWrapper.GetSourceWordSize(), countSize);
   m_memLoad = (char*) malloc(memAlloc);
 
@@ -160,15 +160,15 @@ void PhraseNode::Save(OnDiskWrapper &onDiskWrapper, size_t pos, size_t tableLimi
 
 void PhraseNode::AddTargetPhrase(const SourcePhrase &sourcePhrase, TargetPhrase *targetPhrase
                                  , OnDiskWrapper &onDiskWrapper, size_t tableLimit
-                                 , const std::vector<float> &counts)
+                                 , const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort)
 {
-  AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+  AddTargetPhrase(0, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, spShort);
 }
 
 void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
                                  , TargetPhrase *targetPhrase, OnDiskWrapper &onDiskWrapper
-                                 , size_t tableLimit, const std::vector<float> &counts)
-{
+                                 , size_t tableLimit, const std::vector<float> &counts, OnDiskPt::PhrasePtr spShort)
+{	
   size_t phraseSize = sourcePhrase.GetSize();
   if (pos < phraseSize) {
     const Word &word = sourcePhrase.GetWord(pos);
@@ -185,10 +185,12 @@ void PhraseNode::AddTargetPhrase(size_t pos, const SourcePhrase &sourcePhrase
       m_currChild = &node;
     }
 
-    node.AddTargetPhrase(pos + 1, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts);
+    // keep searching for target phrase node.. 
+    node.AddTargetPhrase(pos + 1, sourcePhrase, targetPhrase, onDiskWrapper, tableLimit, counts, spShort);
   } else {
     // drilled down to the right node
     m_counts = counts;
+    targetPhrase->SetSourcePhrase(spShort);
     m_targetPhraseColl.AddTargetPhrase(targetPhrase);
   }
 }
