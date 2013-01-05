@@ -1,3 +1,5 @@
+#define _LARGEFILE64_SOURCE
+
 #include "util/file.hh"
 
 #include "util/exception.hh"
@@ -91,7 +93,7 @@ void ReadOrThrow(int fd, void *to_void, std::size_t amount) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
   while (amount) {
     std::size_t ret = PartialRead(fd, to, amount);
-    UTIL_THROW_IF(ret == 0, EndOfFileException, "Hit EOF in fd " << fd << " but there should be " << amount << " more bytes to read.");
+    UTIL_THROW_IF(ret == 0, EndOfFileException, " in fd " << fd << " but there should be " << amount << " more bytes to read.");
     amount -= ret;
     to += ret;
   }
@@ -136,13 +138,17 @@ void FSyncOrThrow(int fd) {
 }
 
 namespace {
+// Can't we all just get along?  
 void InternalSeek(int fd, int64_t off, int whence) {
+  UTIL_THROW_IF(
 #if defined(_WIN32) || defined(_WIN64)
-  UTIL_THROW_IF((__int64)-1 == _lseeki64(fd, off, whence), ErrnoException, "Windows seek failed");
-
+    (__int64)-1 == _lseeki64(fd, off, whence), 
+#elif defined(__APPLE__) && defined(__MACH__)
+    (off_t)-1 == lseek(fd, off, whence),
 #else
-  UTIL_THROW_IF((off_t)-1 == lseek(fd, off, whence), ErrnoException, "Seek failed");
+    (off64_t)-1 == lseek64(fd, off, whence),
 #endif
+    ErrnoException, "Seek failed");
 }
 } // namespace
 
