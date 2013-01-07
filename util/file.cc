@@ -146,7 +146,7 @@ void InternalSeek(int fd, int64_t off, int whence) {
 #elif defined(__APPLE__) && defined(__MACH__)
     (off_t)-1 == lseek(fd, off, whence),
 #else
-    (off64_t)-1 == lseek64(fd, off, whence),
+    (off_t)-1 == lseek(fd, off, whence),
 #endif
     ErrnoException, "Seek failed");
 }
