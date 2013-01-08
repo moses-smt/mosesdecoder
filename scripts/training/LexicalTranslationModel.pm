@@ -40,7 +40,7 @@ sub fix_spaces {
 sub get_lexical {
     my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file,$write_counts,$baseline_corpus_f,$baseline_corpus_e,$baseline_alignment) = @_;
     print STDERR "($alignment_file_f,$alignment_file_e,$lexical_file)\n";
-    print STDERR "baseline ($baseline_corpus_f,$baseline_corpus_e,$baseline_alignment)\n";
+    print STDERR "baseline ($baseline_corpus_f,$baseline_corpus_e,$baseline_alignment)\n" if defined $baseline_alignment;
 #    my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
 
 
