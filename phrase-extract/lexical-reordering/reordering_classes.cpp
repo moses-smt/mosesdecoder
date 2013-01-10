@@ -56,12 +56,13 @@ void ModelScore::reset_f()
   }
 }
 
-void ModelScore::add_example(const StringPiece& previous, const StringPiece& next)
+void ModelScore::add_example
+  (const StringPiece& previous, const StringPiece& next, float weight)
 {
-  count_fe_prev[getType(previous)]++;
-  count_f_prev[getType(previous)]++;
-  count_fe_next[getType(next)]++;
-  count_f_next[getType(next)]++;
+  count_fe_prev[getType(previous)]+=weight;
+  count_f_prev[getType(previous)]+=weight;
+  count_fe_next[getType(next)]+=weight;
+  count_f_next[getType(next)]+=weight;
 }
 
 const vector<double>& ModelScore::get_scores_fe_prev() const

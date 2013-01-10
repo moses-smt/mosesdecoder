@@ -34,7 +34,7 @@ protected:
 public:
   ModelScore();
   virtual ~ModelScore();
-  void add_example(const StringPiece& previous, const StringPiece& next);
+  void add_example(const StringPiece& previous, const StringPiece& next, float weight);
   void reset_fe();
   void reset_f();
   const std::vector<double>& get_scores_fe_prev() const;

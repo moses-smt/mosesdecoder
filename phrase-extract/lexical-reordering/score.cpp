@@ -24,7 +24,7 @@
 
 using namespace std;
 
-void split_line(const StringPiece& line, StringPiece& foreign, StringPiece& english, StringPiece& wbe, StringPiece& phrase, StringPiece& hier);
+void split_line(const StringPiece& line, StringPiece& foreign, StringPiece& english, StringPiece& wbe, StringPiece& phrase, StringPiece& hier, float& weight);
 void get_orientations(const StringPiece& pair, StringPiece& previous, StringPiece& next);
 
 class FileFormatException : public util::Exception
@@ -113,18 +113,19 @@ int main(int argc, char* argv[])
       } catch (util::EndOfFileException &e) {
         break;
       }
-      split_line(line,e,f,w,p,h);
+      float weight = 1;
+      split_line(line,e,f,w,p,h,weight);
       if (hier) {
         get_orientations(h, prev, next);
-        modelScores["hier"]->add_example(prev,next);
+        modelScores["hier"]->add_example(prev,next,weight);
       }
       if (phrase) {
         get_orientations(p, prev, next);
-        modelScores["phrase"]->add_example(prev,next);
+        modelScores["phrase"]->add_example(prev,next,weight);
       }
       if (wbe) {
         get_orientations(w, prev, next);
-        modelScores["wbe"]->add_example(prev,next);
+        modelScores["wbe"]->add_example(prev,next,weight);
       }
     }
 
@@ -151,7 +152,8 @@ int main(int argc, char* argv[])
     } catch (util::EndOfFileException &e) {
       break;
     }
-    split_line(line,f,e,w,p,h);
+    float weight = 1;
+    split_line(line,f,e,w,p,h,weight);
 
     if (first) {
       f_current = f.as_string(); //FIXME: Avoid the copy.
@@ -184,15 +186,15 @@ int main(int argc, char* argv[])
     // uppdate counts
     if (hier) {
       get_orientations(h, prev, next);
-      modelScores["hier"]->add_example(prev,next);
+      modelScores["hier"]->add_example(prev,next,weight);
     }
     if (phrase) {
       get_orientations(p, prev, next);
-      modelScores["phrase"]->add_example(prev,next);
+      modelScores["phrase"]->add_example(prev,next,weight);
     }
     if (wbe) {
       get_orientations(w, prev, next);
-      modelScores["wbe"]->add_example(prev,next);
+      modelScores["wbe"]->add_example(prev,next,weight);
     }
   }
   //Score the last phrases
@@ -224,12 +226,13 @@ void split_line(
   StringPiece& english,
   StringPiece& wbe,
   StringPiece& phrase,
-  StringPiece& hier)
+  StringPiece& hier,
+  float& weight)
 {
   /*Format is source ||| target ||| orientations
     followed by one of the following 4 possibilities
       eps
-       ||| weights
+       ||| weight
        | phrase | hier
        | phrase | hier ||| weight
   */
@@ -237,9 +240,9 @@ void split_line(
   util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter(" ||| "));
   foreign = GrabOrDie(pipes,line);
   english = GrabOrDie(pipes,line);
-  StringPiece rest = GrabOrDie(pipes,line);
+  StringPiece next = GrabOrDie(pipes,line);
   
-  util::TokenIter<util::MultiCharacter> singlePipe(rest, util::MultiCharacter(" | "));
+  util::TokenIter<util::MultiCharacter> singlePipe(next, util::MultiCharacter(" | "));
   wbe = GrabOrDie(singlePipe,line);
   if (singlePipe) {
     phrase = GrabOrDie(singlePipe, line);
@@ -248,32 +251,14 @@ void split_line(
     phrase.clear();
     hier.clear();
   }
-  
 
-  /*
-  int begin = 0;
-  int end = line.find(" ||| ");
-  foreign = line.substr(begin, end - begin);
-  cerr << begin << " " << end << " " << foreign << endl;
-
-  begin = end+5;
-  end = line.find(" ||| ", begin);
-  english = line.substr(begin, end - begin);
-  cerr << begin << " " << end << " " << english << endl;
-
-  begin = end+5;
-  end = line.find(" | ", begin);
-  wbe = line.substr(begin, end - begin);
-  cerr << begin << " " << end << " " << wbe << endl;
-  exit(0);
-
-  begin = end+3;
-  end = line.find(" | ", begin);
-  phrase = line.substr(begin, end - begin);
-
-  begin = end+3;
-  hier = line.substr(begin, line.size() - begin);
-  */
+  if (pipes) {
+    // read the weight
+    char* errIndex;
+    next = *pipes++;
+    weight = static_cast<float>(strtod(next.data(), &errIndex));
+    UTIL_THROW_IF(errIndex == next.data(), FileFormatException, line.as_string());
+  }
 }
 
 void get_orientations(const StringPiece& pair, StringPiece& previous, StringPiece& next)
