@@ -64,19 +64,30 @@ uint64_t SizeFile(int fd) {
 #if defined(_WIN32) || defined(_WIN64)
   __int64 ret = _filelengthi64(fd);
   return (ret == -1) ? kBadSize : ret;
+#else // Not windows.
+
+#ifdef OS_ANDROID
+  struct stat64 sb;
+  int ret = fstat64(fd, &sb);
 #else
   struct stat sb;
-  if (fstat(fd, &sb) == -1 || (!sb.st_size && !S_ISREG(sb.st_mode))) return kBadSize;
+  int ret = fstat(fd, &sb);
+#endif
+  if (ret == -1 || (!sb.st_size && !S_ISREG(sb.st_mode))) return kBadSize;
   return sb.st_size;
 #endif
 }
 
 void ResizeOrThrow(int fd, uint64_t to) {
+  UTIL_THROW_IF(
 #if defined(_WIN32) || defined(_WIN64)
-  UTIL_THROW_IF(_chsize_s(fd, to), ErrnoException, "Resizing to " << to << " bytes failed");
+    _chsize_s
+#elif defined(OS_ANDROID)
+    ftruncate64
 #else
-  UTIL_THROW_IF(ftruncate(fd, to), ErrnoException, "Resizing to " << to << " bytes failed");
+    ftruncate
 #endif
+    (fd, to), ErrnoException, "Resizing to " << to << " bytes failed");
 }
 
 std::size_t PartialRead(int fd, void *to, std::size_t amount) {
@@ -139,11 +150,25 @@ void FSyncOrThrow(int fd) {
 }
 
 namespace {
+
+// Static assert for 64-bit off_t size.
+#if !defined(_WIN32) && !defined(_WIN64) && !defined(OS_ANDROID)
+template <unsigned> struct CheckOffT;
+template <> struct CheckOffT<8> {
+  struct True {};
+};
+// If there's a compiler error on the next line, then off_t isn't 64 bit.  And
+// that makes me a sad panda.
+typedef CheckOffT<sizeof(off_t)>::True IgnoredType;
+#endif
+
 // Can't we all just get along?  
 void InternalSeek(int fd, int64_t off, int whence) {
   UTIL_THROW_IF(
 #if defined(_WIN32) || defined(_WIN64)
-    (__int64)-1 == _lseeki64(fd, off, whence), 
+    (__int64)-1 == _lseeki64(fd, off, whence),
+#elif defined(OS_ANDROID)
+    (off64_t)-1 == lseek64(fd, off, whence),
 #else
     (off_t)-1 == lseek(fd, off, whence),
 #endif
