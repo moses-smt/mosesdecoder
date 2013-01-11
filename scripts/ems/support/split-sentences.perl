@@ -84,16 +84,16 @@ sub do_it_for {
 }
 
 sub preprocess {
+	#this is one paragraph
+	my($text) = @_;
+
 	# clean up spaces at head and tail of each line as well as any double-spacing
 	$text =~ s/ +/ /g;
 	$text =~ s/\n /\n/g;
 	$text =~ s/ \n/\n/g;
 	$text =~ s/^ //g;
 	$text =~ s/ $//g;
-	
-	#this is one paragraph
-	my($text) = @_;
-	
+		
 	#####add sentence breaks as needed#####
 	
 	#non-period end of sentence markers (?!) followed by sentence starters.
