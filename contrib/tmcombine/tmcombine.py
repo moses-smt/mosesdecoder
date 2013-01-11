@@ -1253,7 +1253,7 @@ def handle_file(filename,action,fileobj=None,mode='r'):
             else:
                 sys.stderr.write('Error: unable to open file. ' + filename + ' - aborting.\n')
                 
-                if 'counts' in filename and os.path.exists(os.path.isdir(filename)):
+                if 'counts' in filename and os.path.exists(os.path.dirname(filename)):
                     sys.stderr.write('For a weighted counts combination, we need statistics that Moses doesn\'t write to disk by default.\n')
                     sys.stderr.write('Repeat step 4 of Moses training for all models with the option -write-lexical-counts.\n')
                 
