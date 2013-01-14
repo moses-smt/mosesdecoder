@@ -30,7 +30,7 @@ if $(with-regtest) {
   actions reg_test_score {
     $(TOP)/regression-testing/run-test-scorer.perl --scorer=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
   }
-  reg_test score : [ glob $(test-dir)/score.* : $(test-dir)/score.phrase-based-with-alignment-inv $(test-dir)/score.phrase-based-inv $(test-dir)/score.phrase-based-with-alignment $(test-dir)/score.phrase-based  ] : ../phrase-extract//score : @reg_test_score ;
+  reg_test score : [ glob $(test-dir)/score.* :  ] : ../phrase-extract//score : @reg_test_score ;
 
   actions reg_test_extract {
     $(TOP)/regression-testing/run-test-extract.perl --extractor=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)

@@ -401,21 +401,21 @@ mml-filter-before-wa
 prepare-data
 	in: corpus-mml-prefilter=OR=corpus
 	out: prepared-data
-	rerun-on-change: alignment-factors training-options script baseline-alignment-model
+	rerun-on-change: alignment-factors training-options script baseline-alignment-model external-bin-dr
 	ignore-if: use-berkeley
 	default-name: prepared
 run-giza
 	in: prepared-data
 	out: giza-alignment
 	ignore-if: use-berkeley
-	rerun-on-change: giza-settings training-options script baseline-alignment-model
+	rerun-on-change: giza-settings training-options script baseline-alignment-model external-bin-dir
 	default-name: giza
 	error: not found
 	not-error: 0 not found
 run-giza-inverse
 	in: prepared-data
 	out: giza-alignment-inverse
-	rerun-on-change: giza-settings training-options script baseline-alignment-model
+	rerun-on-change: giza-settings training-options script baseline-alignment-model external-bin-dir
 	ignore-if: use-berkeley
 	default-name: giza-inverse
 	error: not found	
