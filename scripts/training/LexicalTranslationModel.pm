@@ -38,9 +38,10 @@ sub fix_spaces {
 }
 
 sub get_lexical {
-    my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file,$write_counts,$baseline_corpus_f,$baseline_corpus_e,$baseline_alignment) = @_;
+    my ($alignment_file_f,$alignment_file_e,$alignment_file_a,$lexical_file,$write_counts,$baseline_corpus_f,$baseline_corpus_e,$baseline_alignment, $instance_weights_file) = @_;
     print STDERR "($alignment_file_f,$alignment_file_e,$lexical_file)\n";
-    print STDERR "baseline ($baseline_corpus_f,$baseline_corpus_e,$baseline_alignment)\n";
+    print STDERR "baseline ($baseline_corpus_f,$baseline_corpus_e,$baseline_alignment)\n" if defined $baseline_alignment;
+    print STDERR "instance weights ($instance_weights_file)\n" if defined $instance_weights_file;
 #    my $alignment_file_a = $___ALIGNMENT_FILE.".".$___ALIGNMENT;
 
 
@@ -50,9 +51,9 @@ sub get_lexical {
     }
 
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
-    &get_lexical_counts($alignment_file_e,$alignment_file_f,$alignment_file_a,\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
+    &get_lexical_counts($alignment_file_e,$alignment_file_f,$alignment_file_a,$instance_weights_file,\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
     if (defined($baseline_alignment)) {
-      &get_lexical_counts($baseline_corpus_e,$baseline_corpus_f,$baseline_alignment,\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
+      &get_lexical_counts($baseline_corpus_e,$baseline_corpus_f,$baseline_alignment,undef,\%WORD_TRANSLATION,\%TOTAL_FOREIGN,\%TOTAL_ENGLISH);
     }
 
     open(F2E,">$lexical_file.f2e") or die "ERROR: Can't write $lexical_file.f2e";
@@ -82,10 +83,14 @@ sub get_lexical {
 }
 
 sub get_lexical_counts {
-    my ($alignment_file_e,$alignment_file_f,$alignment_file_a,$WORD_TRANSLATION,$TOTAL_FOREIGN,$TOTAL_ENGLISH) = @_;
+    my ($alignment_file_e,$alignment_file_f,$alignment_file_a,$instance_weights_file,$WORD_TRANSLATION,$TOTAL_FOREIGN,$TOTAL_ENGLISH) = @_;
     open(E,&open_compressed($alignment_file_e)) or die "ERROR: Can't read $alignment_file_e";
     open(F,&open_compressed($alignment_file_f)) or die "ERROR: Can't read $alignment_file_f";
     open(A,&open_compressed($alignment_file_a)) or die "ERROR: Can't read $alignment_file_a";
+    my $W = undef;
+    if (defined($instance_weights_file) && $instance_weights_file) {
+      open($W, $instance_weights_file) or die "ERROR: Can't read $instance_weights_file";
+    }
 
     my $alignment_id = 0;
     while(my $e = <E>) {
@@ -95,7 +100,8 @@ sub get_lexical_counts {
         my $f = <F>; chomp($f); fix_spaces(\$f);
         my @FOREIGN = split(/ /,$f);
         my $a = <A>; chomp($a); fix_spaces(\$a);
-
+        my $iw = 1; # instance weight
+        $iw = <$W> if defined $W;
         my (%FOREIGN_ALIGNED,%ENGLISH_ALIGNED);
         foreach (split(/ /,$a)) {
             my ($fi,$ei) = split(/\-/);
@@ -104,28 +110,28 @@ sub get_lexical_counts {
 	    }
 	    else {
 		# local counts
-		$FOREIGN_ALIGNED{$fi}++;
-		$ENGLISH_ALIGNED{$ei}++;
+		$FOREIGN_ALIGNED{$fi}+=$iw;
+		$ENGLISH_ALIGNED{$ei}+=$iw;
 		
 		# global counts
-		$$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}++;
-		$$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
-		$$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
+		$$WORD_TRANSLATION{$FOREIGN[$fi]}{$ENGLISH[$ei]}+=$iw;
+		$$TOTAL_FOREIGN{$FOREIGN[$fi]}+=$iw;
+		$$TOTAL_ENGLISH{$ENGLISH[$ei]}+=$iw;
 	    }
         }
 
         # unaligned words
         for(my $ei=0;$ei<scalar(@ENGLISH);$ei++) {
           next if defined($ENGLISH_ALIGNED{$ei});
-          $$WORD_TRANSLATION{"NULL"}{$ENGLISH[$ei]}++;
-          $$TOTAL_ENGLISH{$ENGLISH[$ei]}++;
-          $$TOTAL_FOREIGN{"NULL"}++;
+          $$WORD_TRANSLATION{"NULL"}{$ENGLISH[$ei]}+=$iw;
+          $$TOTAL_ENGLISH{$ENGLISH[$ei]}+=$iw;
+          $$TOTAL_FOREIGN{"NULL"}+=$iw;
         }
         for(my $fi=0;$fi<scalar(@FOREIGN);$fi++) {
           next if defined($FOREIGN_ALIGNED{$fi});
-          $$WORD_TRANSLATION{$FOREIGN[$fi]}{"NULL"}++;
-          $$TOTAL_FOREIGN{$FOREIGN[$fi]}++;
-          $$TOTAL_ENGLISH{"NULL"}++;
+          $$WORD_TRANSLATION{$FOREIGN[$fi]}{"NULL"}+=$iw;
+          $$TOTAL_FOREIGN{$FOREIGN[$fi]}+=$iw;
+          $$TOTAL_ENGLISH{"NULL"}+=$iw;
         }
     }
     print STDERR "\n";

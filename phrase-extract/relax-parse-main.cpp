@@ -49,7 +49,7 @@ int main(int argc, char* argv[])
     set< string > labelCollection;         // set of labels, not used
     map< string, int > topLabelCollection; // count of top labels, not used
     SyntaxTree tree;
-    ProcessAndStripXMLTags( inBufferString, tree, labelCollection, topLabelCollection );
+    ProcessAndStripXMLTags( inBufferString, tree, labelCollection, topLabelCollection, false );
     vector< string > inWords = tokenize( inBufferString.c_str() );
 
     // output tree

@@ -20,10 +20,10 @@ int main(int argc, char **argv)
   string factors;
   string filter; 
 
-  BleuScorer *scorer = new BleuScorer(config);
-  scorer->setFactors(factors);
-  scorer->setFilter(filter);
-  scorer->setReferenceFiles(refFiles);
+  BleuScorer scorer(config);
+  scorer.setFactors(factors);
+  scorer.setFilter(filter);
+  scorer.setReferenceFiles(refFiles);
 
   vector<ScoreStats> entries;
 
@@ -31,7 +31,7 @@ int main(int argc, char **argv)
   ScoreStats scoreentry;
   string line;
   while (getline(cin, line)) {
-    scorer->prepareStats(entries.size(), line, scoreentry);
+    scorer.prepareStats(entries.size(), line, scoreentry);
     entries.push_back(scoreentry);
   }
 
@@ -40,4 +40,5 @@ int main(int argc, char **argv)
     vector<float> stats(sentIt->getArray(), sentIt->getArray() + sentIt->size());
     cout << BleuScorer::sentenceLevelBleuPlusOne(stats) << "\n";
   }
+  return 0;
 }
