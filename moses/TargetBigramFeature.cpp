@@ -29,6 +29,9 @@ TargetBigramFeature::TargetBigramFeature(const std::string &line)
      factorCollection.AddFactor(Output,m_factorType,BOS_);
   m_bos.SetFactor(m_factorType,bosFactor);
 
+  const string &filePath = tokens[2];
+  Load(filePath);
+
 }
 
 bool TargetBigramFeature::Load(const std::string &filePath) 

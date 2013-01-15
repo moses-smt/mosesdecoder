@@ -600,6 +600,11 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "PhrasePairFeature") {
+      PhrasePairFeature *model = new PhrasePairFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
 
   }
 
@@ -615,7 +620,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
-  if (!LoadPhrasePairFeature()) return false;
 
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
@@ -1295,80 +1299,6 @@ bool StaticData::LoadReferences()
 }
 
 
-bool StaticData::LoadPhrasePairFeature()
-{
-  const vector<string> &parameters = m_parameter->GetParam("phrase-pair-feature");
-  if (parameters.size() == 0) return true;
- 
-  for (size_t i=0; i<parameters.size(); ++i) {
-    vector<string> tokens = Tokenize(parameters[i]);
-    if (! (tokens.size() >= 1  && tokens.size() <= 6)) {
-      UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
-		       "[simple source-trigger] [ignore-punctuation] [domain-trigger] [filename-src]");
-      return false;
-    }
-
-    const vector<float> &weight = m_parameter->GetWeights("PhrasePairFeature", i);
-  
-    vector <string> factors;
-    if (tokens.size() == 2)
-      factors = Tokenize(tokens[0]," ");  
-    else 
-      factors = Tokenize(tokens[0],"-");
-    
-    size_t sourceFactorId = Scan<size_t>(factors[0]);
-    size_t targetFactorId = Scan<size_t>(factors[1]);
-    bool simple = true, sourceContext = false, ignorePunctuation = false, domainTrigger = false;
-    if (tokens.size() >= 3) {
-      simple = Scan<size_t>(tokens[1]);
-      sourceContext = Scan<size_t>(tokens[2]);
-    }
-    if (tokens.size() >= 4) 
-      ignorePunctuation = Scan<size_t>(tokens[3]);
-    if (tokens.size() >= 5)
-      domainTrigger = Scan<size_t>(tokens[4]);
-    
-    PhrasePairFeature *phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext,
-							 ignorePunctuation, domainTrigger);
-    phrasePairFeature->SetSparseProducerWeight(weight[i]);
-    
-    // load word list 
-    if (tokens.size() == 6) {
-      string filenameSource = tokens[5];
-      if (domainTrigger) {
-        const vector<string> &texttype = m_parameter->GetParam("text-type");
-        if (texttype.size() != 1) {
-          UserMessage::Add("Need texttype to load dictionary for domain triggers.");
-          return false;
-        }
-        stringstream filename(filenameSource + "." + texttype[0]);
-        filenameSource = filename.str();
-        cerr << "loading word translation term list from " << filenameSource << endl;
-      }
-      else {
-        cerr << "loading word translation word list from " << filenameSource << endl;
-      }
-      if (!phrasePairFeature->Load(filenameSource)) {
-        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
-        return false;
-      } // if (!phrasePairFeature->Load(filenameSource)) {
-    } // if (tokens.size() == 6) {
-
-    // TODO not sure about this
-    if (weight[0] != 1) {
-      AddSparseProducer(phrasePairFeature);
-      cerr << "pp sparse producer weight: " << weight[0] << endl;
-      if (m_mira)
-        m_metaFeatureProducer = new MetaFeatureProducer("pp");
-    }
-
-    if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-      phrasePairFeature->SetSparseFeatureReporting();
-    }
-  } // for (size_t i=0; i<parameters.size(); ++i)
-
-  return true;
-}
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {

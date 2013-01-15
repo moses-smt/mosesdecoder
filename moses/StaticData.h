@@ -250,7 +250,6 @@ protected:
   bool LoadLexicalReorderingModel();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
-  bool LoadPhrasePairFeature();
 
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
