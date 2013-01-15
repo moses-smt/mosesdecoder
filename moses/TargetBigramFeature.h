@@ -26,16 +26,7 @@ class TargetBigramState : public FFState {
  */
 class TargetBigramFeature : public StatefulFeatureFunction {
 public:
-	TargetBigramFeature(FactorType factorType = 0):
-     StatefulFeatureFunction("dlmb", ScoreProducer::unlimited),
-     m_factorType(factorType)
-  {
-    FactorCollection& factorCollection = FactorCollection::Instance();
-    const Factor* bosFactor =
-       factorCollection.AddFactor(Output,m_factorType,BOS_);
-    m_bos.SetFactor(m_factorType,bosFactor);
-  }
-      
+	TargetBigramFeature(const std::string &line);
 
 	bool Load(const std::string &filePath);
 

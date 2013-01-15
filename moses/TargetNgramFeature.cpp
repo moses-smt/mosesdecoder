@@ -35,6 +35,22 @@ int TargetNgramState::Compare(const FFState& other) const {
   }
 }
 
+TargetNgramFeature::TargetNgramFeature(const std::string &line)
+:StatefulFeatureFunction("TargetNgramFeature", ScoreProducer::unlimited)
+,m_sparseProducerWeight(1)
+{
+  std::cerr << "Initializing target ngram feature.." << std::endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  CHECK(tokens.size() == 4);
+  m_factorType = Scan<FactorType>(tokens[1]);
+  m_n = Scan<size_t>(tokens[2]);
+  m_lower_ngrams = Scan<bool>(tokens[3]);
+
+}
+
 bool TargetNgramFeature::Load(const std::string &filePath)
 {
   if (filePath == "*") return true; //allow all

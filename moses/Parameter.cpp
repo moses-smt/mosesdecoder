@@ -548,6 +548,9 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
 
 void Parameter::ConvertWeightArgs()
 {
+  // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
+  CHECK( m_setting.count("weight-dlm") == 0);
+
   // check that old & new format aren't mixed
   if (m_setting.count("weight") &&
       (m_setting.count("weight-i") || m_setting.count("weight-t") || m_setting.count("weight-w") ||
@@ -573,7 +576,6 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-wt", "WordTranslationFeature");
   ConvertWeightArgsSingleWeight("weight-pp", "PhrasePairFeature");
   ConvertWeightArgsSingleWeight("weight-pb", "PhraseBoundaryFeature");
-  ConvertWeightArgsSingleWeight("weight-dlm", "DiscriminativeLM");
 
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name

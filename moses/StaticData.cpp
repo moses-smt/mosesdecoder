@@ -590,6 +590,16 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "TargetBigramFeature") {
+    	TargetBigramFeature *model = new TargetBigramFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
+    else if (feature == "TargetNgramFeature") {
+    	TargetNgramFeature *model = new TargetNgramFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
 
   }
 
@@ -605,7 +615,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
-  if (!LoadDiscrimLMFeature()) return false;
   if (!LoadPhrasePairFeature()) return false;
 
   // report individual sparse features in n-best list
@@ -1285,73 +1294,6 @@ bool StaticData::LoadReferences()
   return true;
 }
 
-bool StaticData::LoadDiscrimLMFeature()
-{
-	// only load if specified
-  const vector<string> &wordFile = m_parameter->GetParam("dlm-model");
-  if (wordFile.empty()) {
-    return true;
-  }
-  cerr << "Loading " << wordFile.size() << " discriminative language model(s).." << endl;
-
-  for (size_t i = 0; i < wordFile.size(); ++i) {
-  	vector<string> tokens = Tokenize(wordFile[i]);
-  	if (tokens.size() != 4) {
-  		UserMessage::Add("Format of discriminative language model parameter is <order> <factor> <include-lower-ngrams> <filename>");
-  		return false;
-  	}
-
-  	vector<float> &weights = m_parameter->GetWeights("DiscriminativeLM", i);
-  	CHECK(weights.size() == 0 || weights.size() == 1);
-
-  	size_t order = Scan<size_t>(tokens[0]);
-  	FactorType factorId = Scan<size_t>(tokens[1]);
-  	bool include_lower_ngrams = Scan<bool>(tokens[2]);
-  	string filename = tokens[3];
-
-  	if (order == 2 && !include_lower_ngrams) { // TODO: remove TargetBigramFeature ?
-  	  TargetBigramFeature *targetBigramFeature = new TargetBigramFeature(factorId);
-  		cerr << "loading vocab from " << filename << endl;
-  		if (!targetBigramFeature->Load(filename)) {
-  			UserMessage::Add("Unable to load word list from file " + filename);
-  			return false;
-  		}
-
-  	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-        targetBigramFeature->SetSparseFeatureReporting();
-  	  }
-  	}
-  	else {
-  		if (m_searchAlgorithm == ChartDecoding && !include_lower_ngrams) {
-  			UserMessage::Add("Excluding lower order DLM ngrams is currently not supported for chart decoding.");
-  			return false;
-  		}
-
-  		TargetNgramFeature *targetNgramFeature = new TargetNgramFeature(factorId, order, include_lower_ngrams);
-  		if (weights.size() == 1) {
-  			targetNgramFeature->SetSparseProducerWeight(weights[0]);
-  		}
-  		cerr << "loading vocab from " << filename << endl;
-  		if (!targetNgramFeature->Load(filename)) {
-  			UserMessage::Add("Unable to load word list from file " + filename);
-  			return false;
-  		}
-  		
-  	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-        targetNgramFeature->SetSparseFeatureReporting();
-  	  }
-
-    	float sparseWeight = targetNgramFeature->GetSparseProducerWeight();
-    	if (sparseWeight != 1) {
-    	  AddSparseProducer(targetNgramFeature);
-    	  cerr << "dlm sparse producer weight: " << sparseWeight << endl;
-    	}
-  		
-  	}
-  }
-
-  return true;
-}
 
 bool StaticData::LoadPhrasePairFeature()
 {

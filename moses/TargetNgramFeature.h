@@ -180,8 +180,10 @@ public:
  */
 class TargetNgramFeature : public StatefulFeatureFunction {
 public:
+  TargetNgramFeature(const std::string &line);
+
 	TargetNgramFeature(FactorType factorType = 0, size_t n = 3, bool lower_ngrams = true):
-     StatefulFeatureFunction("dlm", ScoreProducer::unlimited),
+     StatefulFeatureFunction("TargetNgramFeature", ScoreProducer::unlimited),
      m_factorType(factorType),
      m_n(n),
      m_lower_ngrams(lower_ngrams),
