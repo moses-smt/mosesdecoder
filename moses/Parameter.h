@@ -73,6 +73,7 @@ protected:
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
   void CreateWeightsMap();
   void WeightOverwrite();
+  void AddFeature(const std::string &line);
 
 
 public:

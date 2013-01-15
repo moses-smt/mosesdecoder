@@ -434,12 +434,18 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
 
 }
 
+void Parameter::AddFeature(const std::string &line)
+{
+  PARAM_VEC &features = m_setting["feature"];
+  features.push_back(line);
+}
+
 void Parameter::ConvertWeightArgsDistortion()
 {
   const string oldWeightName = "weight-d";
 
   // distortion / lex distortion
-  PARAM_VEC &oldWeights = m_setting[oldWeightName];
+  const PARAM_VEC &oldWeights = GetParam(oldWeightName);
 
   if (oldWeights.size() > 0)
   {
@@ -449,10 +455,10 @@ void Parameter::ConvertWeightArgsDistortion()
     // everything but the last is lex reordering model
 
     size_t currOldInd = 1;
-    PARAM_VEC &lextable = m_setting["distortion-file"];
+    const PARAM_VEC &lextable = GetParam("distortion-file");
 
     for (size_t indTable = 0; indTable < lextable.size(); ++indTable) {
-      string &line = lextable[indTable];
+      const string &line = lextable[indTable];
       vector<string> toks = Tokenize(line);
 
       size_t numFF = Scan<size_t>(toks[2]);
@@ -468,6 +474,17 @@ void Parameter::ConvertWeightArgsDistortion()
       }
       SetWeight("LexicalReordering", indTable, weights);
 
+      stringstream strme;
+      strme << "LexicalReordering "
+            << toks[1] << " ";
+
+      vector<FactorType> factors = Tokenize<FactorType>(toks[0], "-");
+      CHECK(factors.size() == 2);
+      strme << factors[0] << " " << factors[1] << " ";
+
+      strme << toks[3];
+
+      AddFeature(strme.str());
     }
   }
 

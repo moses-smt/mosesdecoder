@@ -247,7 +247,6 @@ protected:
   bool LoadGenerationTables();
   //! load decoding steps
   bool LoadDecodeGraphs();
-  bool LoadLexicalReorderingModel();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
 

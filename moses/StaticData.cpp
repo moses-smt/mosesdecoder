@@ -605,6 +605,13 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "LexicalReordering") {
+      LexicalReordering *model = new LexicalReordering(line);
+      m_reorderModels.push_back(model);
+
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
 
   }
 
@@ -614,7 +621,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 	}
 #endif
 	
-  if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
@@ -765,66 +771,6 @@ StaticData::~StaticData()
 
   }
 #endif
-
-bool StaticData::LoadLexicalReorderingModel()
-{
-  VERBOSE(1, "Loading lexical distortion models...");
-  const vector<string> fileStr = m_parameter->GetParam("distortion-file");
-
-  VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
-
-  //load all models
-  for(size_t i = 0; i < fileStr.size(); ++i) {
-    vector<string> spec = Tokenize<string>(fileStr[i], " ");
-    const vector<float> &weights= m_parameter->GetWeights("LexicalReordering", i);
-
-    if(spec.size() != 4) {
-      UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[i]);
-      return false;
-    }
-
-    // spec[0] = factor map
-    // spec[1] = name
-    // spec[2] = num weights
-    // spec[3] = fileName
-
-    // decode factor map
-
-    vector<FactorType> input, output;
-    vector<string> inputfactors = Tokenize(spec[0],"-");
-    if(inputfactors.size() == 2) {
-      input  = Tokenize<FactorType>(inputfactors[0],",");
-      output = Tokenize<FactorType>(inputfactors[1],",");
-    } else if(inputfactors.size() == 1) {
-      //if there is only one side assume it is on e side... why?
-      output = Tokenize<FactorType>(inputfactors[0],",");
-    } else {
-      //format error
-      return false;
-    }
-
-    string modelType = spec[1];
-
-    // decode num weights and fetch weights from array
-    std::vector<float> mweights;
-    size_t numWeights = atoi(spec[2].c_str());
-    if(numWeights > weights.size()) {
-      UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
-      return false;
-    }
-
-    for(size_t k = 0; k < numWeights; ++k) {
-        mweights.push_back(weights[k]);
-    }
-
-    string filePath = spec[3];
-
-    LexicalReordering *reorderModel = new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights);
-
-    m_reorderModels.push_back(reorderModel);
-  }
-  return true;
-}
 
 bool StaticData::LoadLanguageModels()
 {

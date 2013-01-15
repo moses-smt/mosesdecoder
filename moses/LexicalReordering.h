@@ -26,25 +26,21 @@ class InputType;
  */
 class LexicalReordering : public StatefulFeatureFunction {
 public:   
-    LexicalReordering(std::vector<FactorType>& f_factors, 
-                      std::vector<FactorType>& e_factors,
-                      const LexicalReorderingConfiguration& configuration,
-                      const std::string &filePath, 
-                      const std::vector<float>& weights);
-    virtual ~LexicalReordering();
-    
-    virtual FFState* Evaluate(const Hypothesis& cur_hypo,
-                              const FFState* prev_state,
-                              ScoreComponentCollection* accumulator) const;
-    
-    virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+  LexicalReordering(const std::string &line);
+  virtual ~LexicalReordering();
 
-    void InitializeForInput(const InputType& i){
-        m_table->InitializeForInput(i);
-    }
-    
-    Scores GetProb(const Phrase& f, const Phrase& e) const;
-    
+  virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+                            const FFState* prev_state,
+                            ScoreComponentCollection* accumulator) const;
+
+  virtual const FFState* EmptyHypothesisState(const InputType &input) const;
+
+  void InitializeForInput(const InputType& i){
+      m_table->InitializeForInput(i);
+  }
+
+  Scores GetProb(const Phrase& f, const Phrase& e) const;
+
   virtual FFState* EvaluateChart(const ChartHypothesis&,
                                  int /* featureID */,
 																 ScoreComponentCollection*) const {
