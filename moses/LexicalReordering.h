@@ -57,7 +57,7 @@ private:
     bool DecodeDirection(std::string s);
     bool DecodeNumFeatureFunctions(std::string s);
 
-    LexicalReorderingConfiguration m_configuration;
+    LexicalReorderingConfiguration *m_configuration;
     std::string m_modelTypeString;
     std::vector<std::string> m_modelType;
     LexicalReorderingTable* m_table;

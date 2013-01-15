@@ -15,9 +15,9 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
                                      const std::vector<float>& weights)
   : StatefulFeatureFunction("LexicalReordering",
                             configuration.GetNumScoreComponents()),
-    m_configuration(configuration)
+    m_configuration(new LexicalReorderingConfiguration(configuration))
 {
-  m_configuration.SetScoreProducer(this);
+  m_configuration->SetScoreProducer(this);
   std::cerr << "Creating lexical reordering...\n";
   std::cerr << "weights: ";
   for(size_t w = 0; w < weights.size(); ++w) {
@@ -25,9 +25,9 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
   }
   std::cerr << "\n";
 
-  m_modelTypeString = m_configuration.GetModelString();
+  m_modelTypeString = m_configuration->GetModelString();
 
-  switch(m_configuration.GetCondition()) {
+  switch(m_configuration->GetCondition()) {
   case LexicalReorderingConfiguration::FE:
   case LexicalReorderingConfiguration::E:
     m_factorsE = e_factors;
@@ -35,7 +35,7 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
       UserMessage::Add("TL factor mask for lexical reordering is unexpectedly empty");
       exit(1);
     }
-    if(m_configuration.GetCondition() == LexicalReorderingConfiguration::E)
+    if(m_configuration->GetCondition() == LexicalReorderingConfiguration::E)
       break; // else fall through
   case LexicalReorderingConfiguration::F:
     m_factorsF = f_factors;
@@ -49,9 +49,9 @@ LexicalReordering::LexicalReordering(std::vector<FactorType>& f_factors,
     exit(1);
   }
 
-  size_t numberOfScoreComponents = m_configuration.GetNumScoreComponents();
+  size_t numberOfScoreComponents = m_configuration->GetNumScoreComponents();
   if (weights.size() > numberOfScoreComponents) {
-    m_configuration.SetAdditionalScoreComponents(weights.size() - numberOfScoreComponents);
+    m_configuration->SetAdditionalScoreComponents(weights.size() - numberOfScoreComponents);
   } else if(weights.size() < numberOfScoreComponents) {
     std::ostringstream os;
     os << "Lexical reordering model (type " << m_modelTypeString << "): expected " << numberOfScoreComponents << " weights, got " << weights.size() << std::endl;
@@ -68,6 +68,7 @@ LexicalReordering::~LexicalReordering()
 {
   if(m_table)
     delete m_table;
+  delete m_configuration;
 }
 
 Scores LexicalReordering::GetProb(const Phrase& f, const Phrase& e) const
@@ -90,7 +91,7 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
 
 const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) const
 {
-  return m_configuration.CreateLexicalReorderingState(input);
+  return m_configuration->CreateLexicalReorderingState(input);
 }
 
 }
