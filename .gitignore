@@ -65,3 +65,5 @@ contrib/other-builds/*.xcodeproj/project.xcworkspace/
 contrib/other-builds/*.xcodeproj/xcuserdata/
 */*.xcodeproj/project.xcworkspace
 */*.xcodeproj/xcuserdata
+
+mert/sentence-bleu
