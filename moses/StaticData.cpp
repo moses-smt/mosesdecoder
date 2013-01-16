@@ -607,8 +607,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
     }
     else if (feature == "LexicalReordering") {
       LexicalReordering *model = new LexicalReordering(line);
-      m_reorderModels.push_back(model);
-
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }

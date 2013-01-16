@@ -51,7 +51,6 @@ namespace Moses
 {
 
 class InputType;
-class LexicalReordering;
 class GlobalLexicalModelUnlimited;
 class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
@@ -88,7 +87,6 @@ protected:
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
-  std::vector<LexicalReordering*>                   m_reorderModels;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
