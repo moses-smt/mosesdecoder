@@ -245,7 +245,12 @@ if ($STEPS[1] || $STEPS[2])
 		}
 		print STDERR "Using single-thread GIZA\n";
 	} else {
-		$GIZA = "$_EXTERNAL_BINDIR/mgiza";
+	        # accept either "mgiza" or "mgizapp" and either "snt2cooc.out" or "snt2cooc"
+	        if (-x "$_EXTERNAL_BINDIR/mgiza") {
+		        $GIZA = "$_EXTERNAL_BINDIR/mgiza";
+ 	        } elsif (-x "$_EXTERNAL_BINDIR/mgizapp") {
+		        $GIZA = "$_EXTERNAL_BINDIR/mgizapp";
+	        }
 		if (-x "$_EXTERNAL_BINDIR/snt2cooc") {
 			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
 		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $_EXTERNAL_BINDIR
@@ -1420,8 +1425,8 @@ sub extract_phrase {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
         $cmd .= " --NoTTable" if !$ttable_flag;
-        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
+      $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
     $cmd .= " --GZOutput ";

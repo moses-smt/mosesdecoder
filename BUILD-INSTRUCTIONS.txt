@@ -110,11 +110,13 @@ ALTERNATIVE WAYS TO BUILD ON UNIX AND OTHER PLATFORMS
 
 Microsoft Windows
 -----------------
-Moses is primarily targeted at gcc on UNIX.  Windows users should consult
-http://ssli.ee.washington.edu/people/amittai/Moses-on-Win7.pdf .  
+Moses is primarily targeted at gcc on UNIX.  Windows users should
+install using Cygwin. Outdated instructions can be found here:
+http://ssli.ee.washington.edu/people/amittai/Moses-on-Win7.pdf .
 
 Binaries for all external libraries needed can be downloaded from 
 	http://www.statmt.org/moses/?n=Moses.LibrariesUsed
 
-Only the decoder is developed and tested under Windows. There are difficulties
-using the training scripts under Windows, even with Cygwin.
+Only the decoder is developed and tested under Windows. There are
+difficulties using the training scripts under Windows, even with
+Cygwin, but it can be done.

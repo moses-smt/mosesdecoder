@@ -13,7 +13,7 @@ die("detruecase.perl < in > out")
 		       'in=s' => \$INFILE);
 
 my %SENTENCE_END = ("."=>1,":"=>1,"?"=>1,"!"=>1);
-my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1);
+my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1,"&quot;"=>1,"&apos;"=>1,"&#91;"=>1,"&#93;"=>1);
 
 # lowercase even in headline
 my %ALWAYS_LOWER;

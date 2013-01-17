@@ -161,11 +161,15 @@ $catOCmd .= " | LC_ALL=C $sortCmd -T $TMPDIR | gzip -c > $extract.o.sorted.gz \n
 @children = ();
 if ($makeTTable)
 {
+  print STDERR "merging extract / extract.inv\n";
   $pid = RunFork($catCmd);
   push(@children, $pid);
 
   $pid = RunFork($catInvCmd);
   push(@children, $pid);
+}
+else {
+  print STDERR "skipping extract, doing only extract.o\n";
 }
 
 my $numStr = NumStr(0);

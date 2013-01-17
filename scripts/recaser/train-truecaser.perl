@@ -20,7 +20,7 @@ die("train-truecaser.perl --model truecaser --corpus cased [--possiblyUseFirstTo
     && defined($CORPUS) && defined($MODEL);
 my %CASING;
 my %SENTENCE_END = ("."=>1,":"=>1,"?"=>1,"!"=>1);
-my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1);
+my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1,"&apos;"=>1,"&quot;"=>1,"&#91;"=>1,"&#93;"=>1);
 open(CORPUS,$CORPUS) || die("ERROR: could not open '$CORPUS'");
 binmode(CORPUS, ":utf8");
 while(<CORPUS>) {
