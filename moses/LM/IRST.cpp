@@ -39,6 +39,10 @@ using namespace std;
 
 namespace Moses
 {
+LanguageModelIRST::LanguageModelIRST(const std::string &line)
+{
+
+}
 
 LanguageModelIRST::LanguageModelIRST(int dub)
   :m_lmtb(0),m_lmtb_dub(dub)

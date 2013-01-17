@@ -52,6 +52,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "BleuScoreFeature.h"
 #include "ScoreComponentCollection.h"
+#include "LM/Ken.h"
+#include "LM/IRST.h"
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -610,16 +612,36 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
+    else if (feature == "KENLM") {
+      LanguageModel *model = ConstructKenLM(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+    /*
+    else if (feature == "IRSTLM") {
+      LanguageModel *model = LanguageModelIRST(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+    */
+    else {
+      UserMessage::Add("Unknown feature function");
+      return false;
+    }
 
   }
+
+  CollectLM();
+  m_fLMsLoaded = true;
 
 #ifdef HAVE_SYNLM
 	if (m_parameter->GetParam("slmodel-file").size() > 0) {
 	  if (!LoadSyntacticLanguageModel()) return false;
 	}
 #endif
+
 	
-  if (!LoadLanguageModels()) return false;
+  //if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
@@ -1468,6 +1490,22 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
     cerr << endl << "Cleaning " << &ff << endl;
   }
 
+
+}
+
+void StaticData::CollectLM()
+{
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  std::vector<const StatefulFeatureFunction*>::const_iterator iter;
+  for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+    const StatefulFeatureFunction *ff = *iter;
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+
+    if (lm) {
+      LanguageModel *lm2 = const_cast<LanguageModel*>(lm);
+      m_languageModel.Add(lm2);
+    }
+  }
 
 }
 

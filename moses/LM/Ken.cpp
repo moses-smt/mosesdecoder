@@ -331,6 +331,17 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
 } // namespace
 
+LanguageModel *ConstructKenLM(const std::string &line)
+{
+  vector<string> tokens = Tokenize(line);
+
+  FactorType factorType = Scan<FactorType>(tokens[1]);
+  bool lazy = Scan<bool>(tokens[2]);
+  const string &file = tokens[3];
+
+  return ConstructKenLM(file, factorType, lazy);
+}
+
 LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy) {
   try {
     lm::ngram::ModelType model_type;

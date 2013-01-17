@@ -68,7 +68,7 @@ protected:
   void ConvertWeightArgs();
   void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsPhraseModel(const std::string &oldWeightName, const std::string &newWeightName);
-  void ConvertWeightArgsLM(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsLM(const std::string &oldWeightName);
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
   void CreateWeightsMap();

@@ -453,9 +453,8 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  const LMList &GetLMList() const {
-    return m_languageModel; 
-  }
+  const LMList &GetLMList() const
+  { return m_languageModel;  }
   const WordPenaltyProducer *GetWordPenaltyProducer() const
   { return m_wpProducer; }
   WordPenaltyProducer *GetWordPenaltyProducer() // for mira
@@ -728,6 +727,8 @@ public:
   //sentence (and thread) specific initialisationn and cleanup
   void InitializeForInput(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
+
+  void CollectLM();
 };
 
 }
