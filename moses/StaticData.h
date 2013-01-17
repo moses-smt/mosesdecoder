@@ -233,8 +233,6 @@ protected:
 
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
-  //! load all language models as specified in ini file
-  bool LoadLanguageModels();
 #ifdef HAVE_SYNLM
   //! load syntactic language model
 	bool LoadSyntacticLanguageModel();

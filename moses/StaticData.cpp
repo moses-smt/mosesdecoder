@@ -641,7 +641,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 #endif
 
 	
-  //if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
@@ -791,88 +790,6 @@ StaticData::~StaticData()
 
   }
 #endif
-
-bool StaticData::LoadLanguageModels()
-{
-  if (m_parameter->GetParam("lmodel-file").size() > 0) {
-
-    // dictionary upper-bounds fo all IRST LMs
-    vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
-    if (m_parameter->GetParam("lmodel-dub").size() == 0) {
-      for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
-        LMdub.push_back(0);
-    }
-
-    // initialize n-gram order for each factor. populated only by factored lm
-    const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
-    //prevent language models from being loaded twice
-    map<string,LanguageModel*> languageModelsLoaded;
-
-    for(size_t i=0; i<lmVector.size(); i++) {
-      // weights
-      const vector<float> &weights = m_parameter->GetWeights("LM", i);
-
-      LanguageModel* lm = NULL;
-      if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = languageModelsLoaded[lmVector[i]]->Duplicate(); 
-      } else {
-        vector<string>	token		= Tokenize(lmVector[i]);
-        if (token.size() != 4 && token.size() != 5 ) {
-          UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-          return false;
-        }
-        // type = implementation, SRI, IRST etc
-        LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
-
-        // factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
-        vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-
-        // nGramOrder = 2 = bigram, 3 = trigram, etc
-        size_t nGramOrder = Scan<int>(token[2]);
-
-        string &languageModelFile = token[3];
-        if (token.size() == 5) {
-          if (lmImplementation==IRST)
-            languageModelFile += " " + token[4];
-          else {
-            UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-            return false;
-          }
-        }
-        IFVERBOSE(1)
-        PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
-
-        lm = LanguageModelFactory::CreateLanguageModel(
-               lmImplementation
-               , factorTypes
-               , nGramOrder
-               , languageModelFile
-               , LMdub[i]);
-        if (lm == NULL) {
-          UserMessage::Add("no LM created. We probably don't have it compiled");
-          return false;
-        }
-        languageModelsLoaded[lmVector[i]] = lm;
-      }
-
-      m_languageModel.Add(lm);
-      if (m_lmEnableOOVFeature) {
-        CHECK(weights.size() == 2);
-        SetWeights(lm,weights);
-      }
-      else {
-        CHECK(weights.size() == 1);
-        SetWeight(lm,weights[0]);
-      }
-    }
-  }
-  // flag indicating that language models were loaded,
-  // since phrase table loading requires their presence
-  m_fLMsLoaded = true;
-  IFVERBOSE(1)
-  PrintUserTime("Finished loading LanguageModels");
-  return true;
-}
 
 bool StaticData::LoadGenerationTables()
 {
