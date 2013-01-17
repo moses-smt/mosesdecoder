@@ -617,13 +617,13 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
-    /*
     else if (feature == "IRSTLM") {
-      LanguageModel *model = LanguageModelIRST(line);
+      LanguageModelIRST *irstlm = new LanguageModelIRST(line);
+      LanguageModel *model = new LMRefCount(irstlm);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
-    */
+
     else {
       UserMessage::Add("Unknown feature function");
       return false;

@@ -336,8 +336,8 @@ LanguageModel *ConstructKenLM(const std::string &line)
   vector<string> tokens = Tokenize(line);
 
   FactorType factorType = Scan<FactorType>(tokens[1]);
-  bool lazy = Scan<bool>(tokens[2]);
-  const string &file = tokens[3];
+  bool lazy = Scan<bool>(tokens[3]);
+  const string &file = tokens[4];
 
   return ConstructKenLM(file, factorType, lazy);
 }

@@ -41,6 +41,13 @@ namespace Moses
 {
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
 {
+  vector<string> tokens = Tokenize(line);
+
+  FactorType factorType = Scan<FactorType>(tokens[1]);
+  size_t nGramOrder = Scan<size_t>(tokens[2]);
+  const string &filePath = tokens[3];
+
+  Load(filePath, factorType, nGramOrder);
 
 }
 
