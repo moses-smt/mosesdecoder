@@ -33,10 +33,27 @@ using namespace std;
 
 namespace Moses
 {
-  GenerationDictionary::GenerationDictionary(size_t numFeatures,
-                                             const std::vector<FactorType> &input,
-                                             const std::vector<FactorType> &output)
-  : Dictionary(numFeatures), DecodeFeature("Generation",numFeatures,input,output) {}
+
+GenerationDictionary::GenerationDictionary(const std::string &line)
+: Dictionary(2), DecodeFeature("Generation",2)
+{
+  vector<string> tokens = Tokenize(line);
+
+  m_input = Tokenize<FactorType>(tokens[1]);
+  m_output = Tokenize<FactorType>(tokens[2]);
+  m_inputFactors = FactorMask(m_input);
+  m_outputFactors = FactorMask(m_output);
+
+  const string &filePath = tokens[3];
+
+  Load(filePath, Output);
+
+}
+
+GenerationDictionary::GenerationDictionary(size_t numFeatures,
+                                           const std::vector<FactorType> &input,
+                                           const std::vector<FactorType> &output)
+: Dictionary(numFeatures), DecodeFeature("Generation",numFeatures,input,output) {}
 
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {

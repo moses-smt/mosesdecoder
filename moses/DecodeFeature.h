@@ -38,7 +38,10 @@ namespace Moses
 class DecodeFeature : public StatelessFeatureFunction {
 
   public:
-    DecodeFeature(  const std::string& description,
+  DecodeFeature(  const std::string& description,
+                  size_t numScoreComponents);
+
+  DecodeFeature(  const std::string& description,
                     size_t numScoreComponents,
                     const std::vector<FactorType> &input,
                     const std::vector<FactorType> &output);
@@ -52,7 +55,7 @@ class DecodeFeature : public StatelessFeatureFunction {
     const std::vector<FactorType>& GetInput() const;
     const std::vector<FactorType>& GetOutput() const;
     
-  private:
+  protected:
     std::vector<FactorType> m_input;
     std::vector<FactorType> m_output;
     FactorMask m_inputFactors;

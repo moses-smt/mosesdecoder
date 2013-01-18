@@ -623,6 +623,11 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
+    else if (feature == "Generation") {
+      GenerationDictionary *model = new GenerationDictionary(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
 
     else {
       UserMessage::Add("Unknown feature function");
@@ -631,7 +636,7 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
   }
 
-  CollectLM();
+  CollectFeatureFunctions();
   m_fLMsLoaded = true;
 
 #ifdef HAVE_SYNLM
@@ -641,7 +646,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 #endif
 
 	
-  if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
@@ -790,47 +794,6 @@ StaticData::~StaticData()
 
   }
 #endif
-
-bool StaticData::LoadGenerationTables()
-{
-  if (m_parameter->GetParam("generation-file").size() > 0) {
-    const vector<string> &generationVector = m_parameter->GetParam("generation-file");
-
-    IFVERBOSE(1) {
-      TRACE_ERR( "weight-generation: " << endl);
-    }
-
-    for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) {
-      vector<string>			token		= Tokenize(generationVector[currDict]);
-      vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
-                                    ,output	= Tokenize<FactorType>(token[1], ",");
-      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
-      string							filePath;
-      size_t							numFeatures;
-
-      const vector<float> &weight = m_parameter->GetWeights("Generation", currDict);
-
-      numFeatures = Scan<size_t>(token[2]);
-      filePath = token[3];
-
-      if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
-        filePath += ".gz";
-      }
-
-      VERBOSE(1, filePath << endl);
-
-      m_generationDictionary.push_back(new GenerationDictionary(numFeatures, input,output));
-      CHECK(m_generationDictionary.back() && "could not create GenerationDictionary");
-      if (!m_generationDictionary.back()->Load(filePath, Output)) {
-        delete m_generationDictionary.back();
-        return false;
-      }
-      SetWeights(m_generationDictionary.back(), weight);
-    }
-  }
-
-  return true;
-}
 
 /* Doesn't load phrase tables any more. Just creates the features. */
 bool StaticData::LoadPhraseTables()
@@ -1410,18 +1373,28 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
 
 }
 
-void StaticData::CollectLM()
+void StaticData::CollectFeatureFunctions()
 {
-  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  std::vector<const StatefulFeatureFunction*>::const_iterator iter;
+  const std::vector<ScoreProducer*> &ffs = FeatureFunction::GetFeatureFunctions();
+  std::vector<ScoreProducer*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-    const StatefulFeatureFunction *ff = *iter;
-    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+    const ScoreProducer *ff = *iter;
+    cerr << ff->GetScoreProducerDescription() << endl;
 
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
     if (lm) {
-      LanguageModel *lm2 = const_cast<LanguageModel*>(lm);
-      m_languageModel.Add(lm2);
+      LanguageModel *lmNonConst = const_cast<LanguageModel*>(lm);
+      m_languageModel.Add(lmNonConst);
+      continue;
     }
+
+    const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
+    if (generation) {
+      GenerationDictionary *generationNonConst = const_cast<GenerationDictionary*>(generation);
+      m_generationDictionary.push_back(generationNonConst);
+      continue;
+    }
+
   }
 
 }

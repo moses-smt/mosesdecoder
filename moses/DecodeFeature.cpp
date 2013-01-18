@@ -29,6 +29,11 @@ using namespace std;
 
 namespace Moses
 {
+DecodeFeature::DecodeFeature(  const std::string& description, size_t numScoreComponents)
+: StatelessFeatureFunction(description,numScoreComponents)
+{
+  VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
+}
 
 DecodeFeature::DecodeFeature(const std::string& description, size_t numScoreComponents, const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
   StatelessFeatureFunction(description,numScoreComponents),

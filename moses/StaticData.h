@@ -239,8 +239,6 @@ protected:
 #endif
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
-  //! load all generation tables as specified in ini file
-  bool LoadGenerationTables();
   //! load decoding steps
   bool LoadDecodeGraphs();
   //References used for scoring feature (eg BleuScoreFeature) for online training
@@ -726,7 +724,7 @@ public:
   void InitializeForInput(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
-  void CollectLM();
+  void CollectFeatureFunctions();
 };
 
 }

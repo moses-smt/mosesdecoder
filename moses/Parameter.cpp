@@ -496,6 +496,8 @@ void Parameter::ConvertWeightArgsDistortion()
 
 void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
 {
+  string oldFeatureName = "lmodel-file";
+
   vector<int> oovWeights;
   if (isParamSpecified("lmodel-oov-feature")) {
     oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
@@ -510,25 +512,25 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
 
     size_t currOldInd = 0;
     const PARAM_VEC &weights = iterMap->second;
-    const PARAM_VEC &models = m_setting["lmodel-file"];
+    const PARAM_VEC &models = m_setting[oldFeatureName];
     for (size_t lmIndex = 0; lmIndex < models.size(); ++lmIndex) {
       const string &line = models[lmIndex];
       vector<string> modelToks = Tokenize(line);
 
       LMImplementation lmType = (LMImplementation) Scan<int>(modelToks[0]);
 
-      string newWeightName;
+      string newFeatureName;
       switch (lmType)
       {
       case SRI:
-        newWeightName = "SRILM";
+        newFeatureName = "SRILM";
         break;
       case IRST:
-        newWeightName = "IRSTLM";
+        newFeatureName = "IRSTLM";
         break;
       case Ken:
       case LazyKen:
-        newWeightName = "KENLM";
+        newFeatureName = "KENLM";
         break;
       default:
         abort();
@@ -546,9 +548,9 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
         ++currOldInd;
       }
 
-      SetWeight(newWeightName, ind, weightsLM);
+      SetWeight(newFeatureName, ind, weightsLM);
 
-      string featureLine = newWeightName + " "
+      string featureLine = newFeatureName + " "
                         + modelToks[1] + " "  // factor
                         + modelToks[2] + " "; // order
       if (lmType == LazyKen) {
@@ -566,23 +568,26 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
     m_setting.erase(iterMap);
   }
 
+  m_setting.erase(oldFeatureName);
 }
 
 void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName)
 {
+  string oldFeatureName = "generation-file";
+
   // distortion / lex distortion
   PARAM_VEC &oldWeights = m_setting[oldWeightName];
 
   if (oldWeights.size() > 0)
   {
     size_t currOldInd = 0;
-    PARAM_VEC &models = m_setting["generation-file"];
+    PARAM_VEC &models = m_setting[oldFeatureName];
 
     for (size_t indTable = 0; indTable < models.size(); ++indTable) {
       string &line = models[indTable];
-      vector<string> toks = Tokenize(line);
+      vector<string> modelToks = Tokenize(line);
 
-      size_t numFF = Scan<size_t>(toks[2]);
+      size_t numFF = Scan<size_t>(modelToks[2]);
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF)
@@ -595,10 +600,16 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
       }
       SetWeight(newWeightName, indTable, weights);
 
+      string featureLine = "Generation "
+                        + modelToks[0] + " "  // input factor
+                        + modelToks[1] + " " // output factor
+                        + modelToks[3]; // file factor
+      AddFeature(featureLine);
     }
   }
 
   m_setting.erase(oldWeightName);
+  m_setting.erase(oldFeatureName);
 }
 
 void Parameter::ConvertWeightArgs()

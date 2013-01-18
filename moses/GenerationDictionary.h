@@ -53,6 +53,7 @@ protected:
   std::string						m_filePath;
 
 public:
+  GenerationDictionary(const std::string &line);
   /** constructor.
   * \param numFeatures number of score components, as specified in ini file
   */
