@@ -1355,30 +1355,28 @@ void StaticData::ConfigDictionaries() {
 }
 
 void StaticData::InitializeForInput(const InputType& source) const {
-  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer &ff = *producers[i];
+    FeatureFunction &ff = *producers[i];
     ff.InitializeForInput(source);
   }
 }
 
 void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
-  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer &ff = *producers[i];
+    FeatureFunction &ff = *producers[i];
     ff.CleanUpAfterSentenceProcessing(source);
     cerr << endl << "Cleaning " << &ff << endl;
   }
-
-
 }
 
 void StaticData::CollectFeatureFunctions()
 {
-  const std::vector<ScoreProducer*> &ffs = FeatureFunction::GetFeatureFunctions();
-  std::vector<ScoreProducer*>::const_iterator iter;
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-    const ScoreProducer *ff = *iter;
+    const FeatureFunction *ff = *iter;
     cerr << ff->GetScoreProducerDescription() << endl;
 
     const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
@@ -1390,8 +1388,7 @@ void StaticData::CollectFeatureFunctions()
 
     const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
     if (generation) {
-      GenerationDictionary *generationNonConst = const_cast<GenerationDictionary*>(generation);
-      m_generationDictionary.push_back(generationNonConst);
+      m_generationDictionary.push_back(generation);
       continue;
     }
 

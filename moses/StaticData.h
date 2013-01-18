@@ -82,7 +82,7 @@ protected:
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
   std::vector<SparsePhraseDictionaryFeature*>	m_sparsePhraseDictionary;
-  std::vector<GenerationDictionary*>	m_generationDictionary;
+  std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
@@ -705,7 +705,7 @@ public:
 
   const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const
   { return m_phraseDictionary;}
-  const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const
+  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const
   { return m_generationDictionary;}
   const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const
   { return GetPhraseDictionaries().at(index); }
