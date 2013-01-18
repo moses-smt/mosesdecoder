@@ -50,11 +50,6 @@ GenerationDictionary::GenerationDictionary(const std::string &line)
 
 }
 
-GenerationDictionary::GenerationDictionary(size_t numFeatures,
-                                           const std::vector<FactorType> &input,
-                                           const std::vector<FactorType> &output)
-: Dictionary(numFeatures), DecodeFeature("Generation",numFeatures,input,output) {}
-
 bool GenerationDictionary::Load(const std::string &filePath, FactorDirection direction)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();

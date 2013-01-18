@@ -54,13 +54,6 @@ protected:
 
 public:
   GenerationDictionary(const std::string &line);
-  /** constructor.
-  * \param numFeatures number of score components, as specified in ini file
-  */
-  GenerationDictionary(
-        size_t numFeatures, 
-        const std::vector<FactorType> &input,
-        const std::vector<FactorType> &output);
 	virtual ~GenerationDictionary();
 
 	// returns Generate
