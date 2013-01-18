@@ -199,7 +199,7 @@ void WriteOrThrow(FILE *to, const void *data, std::size_t size) {
 void FSyncOrThrow(int fd) {
 // Apparently windows doesn't have fsync?  
 #if !defined(_WIN32) && !defined(_WIN64)
-  UTIL_THROW_IF_ARG(-1 == fsync(fd), FDException, (fd), "Syncing");
+  UTIL_THROW_IF_ARG(-1 == fsync(fd), FDException, (fd), "while syncing");
 #endif
 }
 
@@ -377,6 +377,17 @@ mkstemp_and_unlink(char *tmpl) {
   return ret;
 }
 #endif
+
+// If it's a directory, add a /.  This lets users say -T /tmp without creating
+// /tmpAAAAAA
+void NormalizeTempPrefix(std::string &base) {
+  if (base.empty()) return;
+  if (base[base.size() - 1] == '/') return;
+  struct stat sb;
+  // It's fine for it to not exist.
+  if (-1 == stat(base.c_str(), &sb)) return;
+  if (S_ISDIR(sb.st_mode)) base += '/';
+}
 
 int MakeTemp(const std::string &base) {
   std::string name(base);

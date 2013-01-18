@@ -13,7 +13,7 @@ update-if-changed $(ORDER-LOG) $(max-order) ;
 
 max-order += <dependency>$(ORDER-LOG) ;
 
-fakelib kenlm : bhiksha.cc binary_format.cc config.cc lm_exception.cc model.cc quantize.cc read_arpa.cc search_hashed.cc search_trie.cc trie.cc trie_sort.cc value_build.cc virtual_interface.cc vocab.cc ../util//kenutil : <include>.. $(max-order) : : <include>.. $(max-order) ;
+fakelib kenlm : bhiksha.cc binary_format.cc config.cc lm_exception.cc model.cc quantize.cc read_arpa.cc search_hashed.cc search_trie.cc sizes.cc trie.cc trie_sort.cc value_build.cc virtual_interface.cc vocab.cc ../util//kenutil : <include>.. $(max-order) : : <include>.. $(max-order) ;
 
 import testing ;
 
@@ -26,4 +26,4 @@ exe build_binary : build_binary.cc kenlm ../util//kenutil ;
 exe kenlm_max_order : max_order.cc : <include>.. $(max-order) ;
 exe fragment : fragment.cc kenlm ;
 
-alias programs : query build_binary kenlm_max_order fragment ;
+alias programs : query build_binary kenlm_max_order fragment filter//filter : <threading>multi:<source>builder//lmplz ;
