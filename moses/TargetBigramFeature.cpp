@@ -4,13 +4,34 @@
 #include "Hypothesis.h"
 #include "ScoreComponentCollection.h"
 
-namespace Moses {
-
 using namespace std;
+
+namespace Moses {
 
 int TargetBigramState::Compare(const FFState& other) const {
   const TargetBigramState& rhs = dynamic_cast<const TargetBigramState&>(other);
   return Word::Compare(m_word,rhs.m_word);
+}
+
+TargetBigramFeature::TargetBigramFeature(const std::string &line)
+:StatefulFeatureFunction("TargetBigramFeature", ScoreProducer::unlimited)
+{
+  std::cerr << "Initializing target bigram feature.." << std::endl;
+
+  vector<string> tokens = Tokenize(line);
+  //CHECK(tokens[0] == m_description);
+
+  // set factor
+  m_factorType = Scan<FactorType>(tokens[1]);
+
+  FactorCollection& factorCollection = FactorCollection::Instance();
+  const Factor* bosFactor =
+     factorCollection.AddFactor(Output,m_factorType,BOS_);
+  m_bos.SetFactor(m_factorType,bosFactor);
+
+  const string &filePath = tokens[2];
+  Load(filePath);
+
 }
 
 bool TargetBigramFeature::Load(const std::string &filePath) 

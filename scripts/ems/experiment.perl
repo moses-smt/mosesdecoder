@@ -1350,6 +1350,7 @@ sub check_if_crashed {
 			     'no such file or directory','unknown option',
 			     'died at','exit code','permission denied',
            'segmentation fault','abort',
+           'no space left on device',
            'can\'t locate', 'unrecognized option') {
 	    if (/$pattern/i) {
 		my $not_error = 0;

@@ -52,6 +52,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "InputFileStream.h"
 #include "BleuScoreFeature.h"
 #include "ScoreComponentCollection.h"
+#include "LM/Ken.h"
+#include "LM/IRST.h"
 
 #ifdef HAVE_SYNLM
 #include "SyntacticLanguageModel.h"
@@ -590,23 +592,63 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
     }
+    else if (feature == "TargetBigramFeature") {
+    	TargetBigramFeature *model = new TargetBigramFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
+    else if (feature == "TargetNgramFeature") {
+    	TargetNgramFeature *model = new TargetNgramFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
+    else if (feature == "PhrasePairFeature") {
+      PhrasePairFeature *model = new PhrasePairFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //SetWeights(model, weights);
+    }
+    else if (feature == "LexicalReordering") {
+      LexicalReordering *model = new LexicalReordering(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+    else if (feature == "KENLM") {
+      LanguageModel *model = ConstructKenLM(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+    else if (feature == "IRSTLM") {
+      LanguageModelIRST *irstlm = new LanguageModelIRST(line);
+      LanguageModel *model = new LMRefCount(irstlm);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+    else if (feature == "Generation") {
+      GenerationDictionary *model = new GenerationDictionary(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+
+    else {
+      UserMessage::Add("Unknown feature function");
+      return false;
+    }
 
   }
+
+  CollectFeatureFunctions();
+  m_fLMsLoaded = true;
 
 #ifdef HAVE_SYNLM
 	if (m_parameter->GetParam("slmodel-file").size() > 0) {
 	  if (!LoadSyntacticLanguageModel()) return false;
 	}
 #endif
+
 	
-  if (!LoadLexicalReorderingModel()) return false;
-  if (!LoadLanguageModels()) return false;
-  if (!LoadGenerationTables()) return false;
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
   if (!LoadReferences()) return  false;
-  if (!LoadDiscrimLMFeature()) return false;
-  if (!LoadPhrasePairFeature()) return false;
 
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
@@ -752,189 +794,6 @@ StaticData::~StaticData()
 
   }
 #endif
-
-bool StaticData::LoadLexicalReorderingModel()
-{
-  VERBOSE(1, "Loading lexical distortion models...");
-  const vector<string> fileStr = m_parameter->GetParam("distortion-file");
-
-  VERBOSE(1, "have " << fileStr.size() << " models" << std::endl);
-
-  //load all models
-  for(size_t i = 0; i < fileStr.size(); ++i) {
-    vector<string> spec = Tokenize<string>(fileStr[i], " ");
-    const vector<float> &weights= m_parameter->GetWeights("LexicalReordering", i);
-
-    if(spec.size() != 4) {
-      UserMessage::Add("Invalid Lexical Reordering Model Specification: " + fileStr[i]);
-      return false;
-    }
-
-    // spec[0] = factor map
-    // spec[1] = name
-    // spec[2] = num weights
-    // spec[3] = fileName
-
-    // decode factor map
-
-    vector<FactorType> input, output;
-    vector<string> inputfactors = Tokenize(spec[0],"-");
-    if(inputfactors.size() == 2) {
-      input  = Tokenize<FactorType>(inputfactors[0],",");
-      output = Tokenize<FactorType>(inputfactors[1],",");
-    } else if(inputfactors.size() == 1) {
-      //if there is only one side assume it is on e side... why?
-      output = Tokenize<FactorType>(inputfactors[0],",");
-    } else {
-      //format error
-      return false;
-    }
-
-    string modelType = spec[1];
-
-    // decode num weights and fetch weights from array
-    std::vector<float> mweights;
-    size_t numWeights = atoi(spec[2].c_str());
-    if(numWeights > weights.size()) {
-      UserMessage::Add("Lexicalized distortion model: Not enough weights, add to [weight-d]");
-      return false;
-    }
-
-    for(size_t k = 0; k < numWeights; ++k) {
-        mweights.push_back(weights[k]);
-    }
-
-    string filePath = spec[3];
-
-    LexicalReordering *reorderModel = new LexicalReordering(input, output, LexicalReorderingConfiguration(modelType), filePath, mweights);
-
-    m_reorderModels.push_back(reorderModel);
-  }
-  return true;
-}
-
-bool StaticData::LoadLanguageModels()
-{
-  if (m_parameter->GetParam("lmodel-file").size() > 0) {
-
-    // dictionary upper-bounds fo all IRST LMs
-    vector<int> LMdub = Scan<int>(m_parameter->GetParam("lmodel-dub"));
-    if (m_parameter->GetParam("lmodel-dub").size() == 0) {
-      for(size_t i=0; i<m_parameter->GetParam("lmodel-file").size(); i++)
-        LMdub.push_back(0);
-    }
-
-    // initialize n-gram order for each factor. populated only by factored lm
-    const vector<string> &lmVector = m_parameter->GetParam("lmodel-file");
-    //prevent language models from being loaded twice
-    map<string,LanguageModel*> languageModelsLoaded;
-
-    for(size_t i=0; i<lmVector.size(); i++) {
-      // weights
-      const vector<float> &weights = m_parameter->GetWeights("LM", i);
-
-      LanguageModel* lm = NULL;
-      if (languageModelsLoaded.find(lmVector[i]) != languageModelsLoaded.end()) {
-        lm = languageModelsLoaded[lmVector[i]]->Duplicate(); 
-      } else {
-        vector<string>	token		= Tokenize(lmVector[i]);
-        if (token.size() != 4 && token.size() != 5 ) {
-          UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-          return false;
-        }
-        // type = implementation, SRI, IRST etc
-        LMImplementation lmImplementation = static_cast<LMImplementation>(Scan<int>(token[0]));
-
-        // factorType = 0 = Surface, 1 = POS, 2 = Stem, 3 = Morphology, etc
-        vector<FactorType> 	factorTypes		= Tokenize<FactorType>(token[1], ",");
-
-        // nGramOrder = 2 = bigram, 3 = trigram, etc
-        size_t nGramOrder = Scan<int>(token[2]);
-
-        string &languageModelFile = token[3];
-        if (token.size() == 5) {
-          if (lmImplementation==IRST)
-            languageModelFile += " " + token[4];
-          else {
-            UserMessage::Add("Expected format 'LM-TYPE FACTOR-TYPE NGRAM-ORDER filePath [mapFilePath (only for IRSTLM)]'");
-            return false;
-          }
-        }
-        IFVERBOSE(1)
-        PrintUserTime(string("Start loading LanguageModel ") + languageModelFile);
-
-        lm = LanguageModelFactory::CreateLanguageModel(
-               lmImplementation
-               , factorTypes
-               , nGramOrder
-               , languageModelFile
-               , LMdub[i]);
-        if (lm == NULL) {
-          UserMessage::Add("no LM created. We probably don't have it compiled");
-          return false;
-        }
-        languageModelsLoaded[lmVector[i]] = lm;
-      }
-
-      m_languageModel.Add(lm);
-      if (m_lmEnableOOVFeature) {
-        CHECK(weights.size() == 2);
-        SetWeights(lm,weights);
-      }
-      else {
-        CHECK(weights.size() == 1);
-        SetWeight(lm,weights[0]);
-      }
-    }
-  }
-  // flag indicating that language models were loaded,
-  // since phrase table loading requires their presence
-  m_fLMsLoaded = true;
-  IFVERBOSE(1)
-  PrintUserTime("Finished loading LanguageModels");
-  return true;
-}
-
-bool StaticData::LoadGenerationTables()
-{
-  if (m_parameter->GetParam("generation-file").size() > 0) {
-    const vector<string> &generationVector = m_parameter->GetParam("generation-file");
-
-    IFVERBOSE(1) {
-      TRACE_ERR( "weight-generation: " << endl);
-    }
-
-    for(size_t currDict = 0 ; currDict < generationVector.size(); currDict++) {
-      vector<string>			token		= Tokenize(generationVector[currDict]);
-      vector<FactorType> 	input		= Tokenize<FactorType>(token[0], ",")
-                                    ,output	= Tokenize<FactorType>(token[1], ",");
-      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], input, output);
-      string							filePath;
-      size_t							numFeatures;
-
-      const vector<float> &weight = m_parameter->GetWeights("Generation", currDict);
-
-      numFeatures = Scan<size_t>(token[2]);
-      filePath = token[3];
-
-      if (!FileExists(filePath) && FileExists(filePath + ".gz")) {
-        filePath += ".gz";
-      }
-
-      VERBOSE(1, filePath << endl);
-
-      m_generationDictionary.push_back(new GenerationDictionary(numFeatures, input,output));
-      CHECK(m_generationDictionary.back() && "could not create GenerationDictionary");
-      if (!m_generationDictionary.back()->Load(filePath, Output)) {
-        delete m_generationDictionary.back();
-        return false;
-      }
-      SetWeights(m_generationDictionary.back(), weight);
-    }
-  }
-
-  return true;
-}
 
 /* Doesn't load phrase tables any more. Just creates the features. */
 bool StaticData::LoadPhraseTables()
@@ -1285,148 +1144,7 @@ bool StaticData::LoadReferences()
   return true;
 }
 
-bool StaticData::LoadDiscrimLMFeature()
-{
-	// only load if specified
-  const vector<string> &wordFile = m_parameter->GetParam("dlm-model");
-  if (wordFile.empty()) {
-    return true;
-  }
-  cerr << "Loading " << wordFile.size() << " discriminative language model(s).." << endl;
 
-  for (size_t i = 0; i < wordFile.size(); ++i) {
-  	vector<string> tokens = Tokenize(wordFile[i]);
-  	if (tokens.size() != 4) {
-  		UserMessage::Add("Format of discriminative language model parameter is <order> <factor> <include-lower-ngrams> <filename>");
-  		return false;
-  	}
-
-  	vector<float> &weights = m_parameter->GetWeights("DiscriminativeLM", i);
-  	CHECK(weights.size() == 0 || weights.size() == 1);
-
-  	size_t order = Scan<size_t>(tokens[0]);
-  	FactorType factorId = Scan<size_t>(tokens[1]);
-  	bool include_lower_ngrams = Scan<bool>(tokens[2]);
-  	string filename = tokens[3];
-
-  	if (order == 2 && !include_lower_ngrams) { // TODO: remove TargetBigramFeature ?
-  	  TargetBigramFeature *targetBigramFeature = new TargetBigramFeature(factorId);
-  		cerr << "loading vocab from " << filename << endl;
-  		if (!targetBigramFeature->Load(filename)) {
-  			UserMessage::Add("Unable to load word list from file " + filename);
-  			return false;
-  		}
-
-  	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-        targetBigramFeature->SetSparseFeatureReporting();
-  	  }
-  	}
-  	else {
-  		if (m_searchAlgorithm == ChartDecoding && !include_lower_ngrams) {
-  			UserMessage::Add("Excluding lower order DLM ngrams is currently not supported for chart decoding.");
-  			return false;
-  		}
-
-  		TargetNgramFeature *targetNgramFeature = new TargetNgramFeature(factorId, order, include_lower_ngrams);
-  		if (weights.size() == 1) {
-  			targetNgramFeature->SetSparseProducerWeight(weights[0]);
-  		}
-  		cerr << "loading vocab from " << filename << endl;
-  		if (!targetNgramFeature->Load(filename)) {
-  			UserMessage::Add("Unable to load word list from file " + filename);
-  			return false;
-  		}
-  		
-  	  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-        targetNgramFeature->SetSparseFeatureReporting();
-  	  }
-
-    	float sparseWeight = targetNgramFeature->GetSparseProducerWeight();
-    	if (sparseWeight != 1) {
-    	  AddSparseProducer(targetNgramFeature);
-    	  cerr << "dlm sparse producer weight: " << sparseWeight << endl;
-    	}
-  		
-  	}
-  }
-
-  return true;
-}
-
-bool StaticData::LoadPhrasePairFeature()
-{
-  const vector<string> &parameters = m_parameter->GetParam("phrase-pair-feature");
-  if (parameters.size() == 0) return true;
- 
-  for (size_t i=0; i<parameters.size(); ++i) {
-    vector<string> tokens = Tokenize(parameters[i]);
-    if (! (tokens.size() >= 1  && tokens.size() <= 6)) {
-      UserMessage::Add("Format for phrase pair feature: --phrase-pair-feature <factor-src>-<factor-tgt> "
-		       "[simple source-trigger] [ignore-punctuation] [domain-trigger] [filename-src]");
-      return false;
-    }
-
-    const vector<float> &weight = m_parameter->GetWeights("PhrasePairFeature", i);
-  
-    vector <string> factors;
-    if (tokens.size() == 2)
-      factors = Tokenize(tokens[0]," ");  
-    else 
-      factors = Tokenize(tokens[0],"-");
-    
-    size_t sourceFactorId = Scan<size_t>(factors[0]);
-    size_t targetFactorId = Scan<size_t>(factors[1]);
-    bool simple = true, sourceContext = false, ignorePunctuation = false, domainTrigger = false;
-    if (tokens.size() >= 3) {
-      simple = Scan<size_t>(tokens[1]);
-      sourceContext = Scan<size_t>(tokens[2]);
-    }
-    if (tokens.size() >= 4) 
-      ignorePunctuation = Scan<size_t>(tokens[3]);
-    if (tokens.size() >= 5)
-      domainTrigger = Scan<size_t>(tokens[4]);
-    
-    PhrasePairFeature *phrasePairFeature = new PhrasePairFeature(sourceFactorId, targetFactorId, simple, sourceContext,
-							 ignorePunctuation, domainTrigger);
-    phrasePairFeature->SetSparseProducerWeight(weight[i]);
-    
-    // load word list 
-    if (tokens.size() == 6) {
-      string filenameSource = tokens[5];
-      if (domainTrigger) {
-        const vector<string> &texttype = m_parameter->GetParam("text-type");
-        if (texttype.size() != 1) {
-          UserMessage::Add("Need texttype to load dictionary for domain triggers.");
-          return false;
-        }
-        stringstream filename(filenameSource + "." + texttype[0]);
-        filenameSource = filename.str();
-        cerr << "loading word translation term list from " << filenameSource << endl;
-      }
-      else {
-        cerr << "loading word translation word list from " << filenameSource << endl;
-      }
-      if (!phrasePairFeature->Load(filenameSource)) {
-        UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
-        return false;
-      } // if (!phrasePairFeature->Load(filenameSource)) {
-    } // if (tokens.size() == 6) {
-
-    // TODO not sure about this
-    if (weight[0] != 1) {
-      AddSparseProducer(phrasePairFeature);
-      cerr << "pp sparse producer weight: " << weight[0] << endl;
-      if (m_mira)
-        m_metaFeatureProducer = new MetaFeatureProducer("pp");
-    }
-
-    if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-      phrasePairFeature->SetSparseFeatureReporting();
-    }
-  } // for (size_t i=0; i<parameters.size(); ++i)
-
-  return true;
-}
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
@@ -1637,21 +1355,44 @@ void StaticData::ConfigDictionaries() {
 }
 
 void StaticData::InitializeForInput(const InputType& source) const {
-  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer &ff = *producers[i];
+    FeatureFunction &ff = *producers[i];
     ff.InitializeForInput(source);
   }
 }
 
 void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
-  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
-    ScoreProducer &ff = *producers[i];
+    FeatureFunction &ff = *producers[i];
     ff.CleanUpAfterSentenceProcessing(source);
     cerr << endl << "Cleaning " << &ff << endl;
   }
+}
 
+void StaticData::CollectFeatureFunctions()
+{
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  std::vector<FeatureFunction*>::const_iterator iter;
+  for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+    const FeatureFunction *ff = *iter;
+    cerr << ff->GetScoreProducerDescription() << endl;
+
+    const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
+    if (lm) {
+      LanguageModel *lmNonConst = const_cast<LanguageModel*>(lm);
+      m_languageModel.Add(lmNonConst);
+      continue;
+    }
+
+    const GenerationDictionary *generation = dynamic_cast<const GenerationDictionary*>(ff);
+    if (generation) {
+      m_generationDictionary.push_back(generation);
+      continue;
+    }
+
+  }
 
 }
 

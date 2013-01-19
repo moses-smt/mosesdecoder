@@ -62,6 +62,8 @@ protected:
   dictionary* d;
 
 public:
+  LanguageModelIRST(const std::string &line);
+
   LanguageModelIRST(int dub);
   ~LanguageModelIRST();
   bool Load(const std::string &filePath

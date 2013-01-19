@@ -957,11 +957,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetBigramFeature.h</locationURI>
 		</link>
 		<link>
-			<name>TargetBigramFeatureTest.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetBigramFeatureTest.cpp</locationURI>
-		</link>
-		<link>
 			<name>TargetNgramFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TargetNgramFeature.cpp</locationURI>

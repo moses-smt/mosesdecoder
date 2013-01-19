@@ -522,7 +522,7 @@ int main(int argc, char** argv) {
   }
   
   // get reference to feature functions
-  const vector<ScoreProducer*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
+  const vector<FeatureFunction*> &featureFunctions = FeatureFunction::GetFeatureFunctions();
   ScoreComponentCollection initialWeights = decoder->getWeights();
   
   bool tuneMetaFeature = false;
@@ -1183,8 +1183,8 @@ int main(int argc, char** argv) {
 	}
 	
 	// set weight for bleu feature to 0 before optimizing
-	vector<ScoreProducer*>::const_iterator iter;
-	const vector<ScoreProducer*> &featureFunctions2 = FeatureFunction::GetFeatureFunctions();
+	vector<FeatureFunction*>::const_iterator iter;
+	const vector<FeatureFunction*> &featureFunctions2 = FeatureFunction::GetFeatureFunctions();
 	for (iter = featureFunctions2.begin(); iter != featureFunctions2.end(); ++iter) {
 	  if ((*iter)->GetScoreProducerDescription() == "BleuScoreFeature") {
 	    mosesWeights.Assign(*iter, 0);

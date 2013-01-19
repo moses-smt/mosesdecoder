@@ -434,12 +434,19 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
 
 }
 
+void Parameter::AddFeature(const std::string &line)
+{
+  PARAM_VEC &features = m_setting["feature"];
+  features.push_back(line);
+}
+
 void Parameter::ConvertWeightArgsDistortion()
 {
   const string oldWeightName = "weight-d";
+  const string oldLexReordingName = "distortion-file";
 
   // distortion / lex distortion
-  PARAM_VEC &oldWeights = m_setting[oldWeightName];
+  const PARAM_VEC &oldWeights = GetParam(oldWeightName);
 
   if (oldWeights.size() > 0)
   {
@@ -449,10 +456,10 @@ void Parameter::ConvertWeightArgsDistortion()
     // everything but the last is lex reordering model
 
     size_t currOldInd = 1;
-    PARAM_VEC &lextable = m_setting["distortion-file"];
+    const PARAM_VEC &lextable = GetParam(oldLexReordingName);
 
     for (size_t indTable = 0; indTable < lextable.size(); ++indTable) {
-      string &line = lextable[indTable];
+      const string &line = lextable[indTable];
       vector<string> toks = Tokenize(line);
 
       size_t numFF = Scan<size_t>(toks[2]);
@@ -468,15 +475,29 @@ void Parameter::ConvertWeightArgsDistortion()
       }
       SetWeight("LexicalReordering", indTable, weights);
 
+      stringstream strme;
+      strme << "LexicalReordering "
+            << toks[1] << " ";
+
+      vector<FactorType> factors = Tokenize<FactorType>(toks[0], "-");
+      CHECK(factors.size() == 2);
+      strme << factors[0] << " " << factors[1] << " ";
+
+      strme << toks[3];
+
+      AddFeature(strme.str());
     }
   }
 
   m_setting.erase(oldWeightName);
+  m_setting.erase(oldLexReordingName);
 
 }
 
-void Parameter::ConvertWeightArgsLM(const string &oldWeightName, const string &newWeightName)
+void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
 {
+  string oldFeatureName = "lmodel-file";
+
   vector<int> oovWeights;
   if (isParamSpecified("lmodel-oov-feature")) {
     oovWeights = Scan<int>(m_setting["lmodel-oov-feature"]);
@@ -491,12 +512,33 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName, const string &n
 
     size_t currOldInd = 0;
     const PARAM_VEC &weights = iterMap->second;
-    const PARAM_VEC &models = m_setting["lmodel-file"];
-    for (size_t currLM = 0; currLM < models.size(); ++currLM)
-    {
+    const PARAM_VEC &models = m_setting[oldFeatureName];
+    for (size_t lmIndex = 0; lmIndex < models.size(); ++lmIndex) {
+      const string &line = models[lmIndex];
+      vector<string> modelToks = Tokenize(line);
+
+      LMImplementation lmType = (LMImplementation) Scan<int>(modelToks[0]);
+
+      string newFeatureName;
+      switch (lmType)
+      {
+      case SRI:
+        newFeatureName = "SRILM";
+        break;
+      case IRST:
+        newFeatureName = "IRSTLM";
+        break;
+      case Ken:
+      case LazyKen:
+        newFeatureName = "KENLM";
+        break;
+      default:
+        abort();
+      }
+
       size_t numFF = 1;
-      if (oovWeights.size() > currLM)
-        numFF += oovWeights[currLM];
+      if (oovWeights.size() > lmIndex)
+        numFF += oovWeights[lmIndex];
 
       vector<float> weightsLM(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF)
@@ -505,29 +547,47 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName, const string &n
         weightsLM[currFF] = Scan<float>(weights[currOldInd]);
         ++currOldInd;
       }
-      SetWeight(newWeightName, ind, weightsLM);
-    }
+
+      SetWeight(newFeatureName, ind, weightsLM);
+
+      string featureLine = newFeatureName + " "
+                        + modelToks[1] + " "  // factor
+                        + modelToks[2] + " "; // order
+      if (lmType == LazyKen) {
+        featureLine += "1 ";
+      }
+      else if (lmType == Ken) {
+        featureLine += "0 ";
+      }
+
+      featureLine += modelToks[3]; // file
+
+      AddFeature(featureLine);
+    } // for (size_t lmIndex = 0; lmIndex < models.size(); ++lmIndex) {
 
     m_setting.erase(iterMap);
   }
 
+  m_setting.erase(oldFeatureName);
 }
 
 void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName)
 {
+  string oldFeatureName = "generation-file";
+
   // distortion / lex distortion
   PARAM_VEC &oldWeights = m_setting[oldWeightName];
 
   if (oldWeights.size() > 0)
   {
     size_t currOldInd = 0;
-    PARAM_VEC &models = m_setting["generation-file"];
+    PARAM_VEC &models = m_setting[oldFeatureName];
 
     for (size_t indTable = 0; indTable < models.size(); ++indTable) {
       string &line = models[indTable];
-      vector<string> toks = Tokenize(line);
+      vector<string> modelToks = Tokenize(line);
 
-      size_t numFF = Scan<size_t>(toks[2]);
+      size_t numFF = Scan<size_t>(modelToks[2]);
 
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF)
@@ -540,14 +600,23 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
       }
       SetWeight(newWeightName, indTable, weights);
 
+      string featureLine = "Generation "
+                        + modelToks[0] + " "  // input factor
+                        + modelToks[1] + " " // output factor
+                        + modelToks[3]; // file factor
+      AddFeature(featureLine);
     }
   }
 
   m_setting.erase(oldWeightName);
+  m_setting.erase(oldFeatureName);
 }
 
 void Parameter::ConvertWeightArgs()
 {
+  // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
+  CHECK( m_setting.count("weight-dlm") == 0);
+
   // check that old & new format aren't mixed
   if (m_setting.count("weight") &&
       (m_setting.count("weight-i") || m_setting.count("weight-t") || m_setting.count("weight-w") ||
@@ -560,7 +629,7 @@ void Parameter::ConvertWeightArgs()
 
   ConvertWeightArgsPhraseModel("weight-t", "PhraseModel");
   ConvertWeightArgsSingleWeight("weight-w", "WordPenalty");
-  ConvertWeightArgsLM("weight-l", "LM");
+  ConvertWeightArgsLM("weight-l");
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
   ConvertWeightArgsSingleWeight("weight-u", "UnknownWordPenalty");
   ConvertWeightArgsGeneration("weight-generation", "Generation");
@@ -573,7 +642,6 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-wt", "WordTranslationFeature");
   ConvertWeightArgsSingleWeight("weight-pp", "PhrasePairFeature");
   ConvertWeightArgsSingleWeight("weight-pb", "PhraseBoundaryFeature");
-  ConvertWeightArgsSingleWeight("weight-dlm", "DiscriminativeLM");
 
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name

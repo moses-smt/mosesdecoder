@@ -71,7 +71,7 @@ const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
   return m_targetPhrase;
 }
 
-std::vector<ScoreProducer*> FeatureFunction::m_producers;
+std::vector<FeatureFunction*> FeatureFunction::m_producers;
 std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 

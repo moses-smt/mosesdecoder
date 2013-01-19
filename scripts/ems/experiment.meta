@@ -360,17 +360,19 @@ split-indomain-target
 	pass-unless: output-splitter
 	template: $output-splitter -model IN1.$output-extension < IN > OUT
 train
-	in: indomain-stem outdomain-stem settings
+	in: indomain-stem outdomain-stem
 	out: model
+	rerun-on-change: settings
 	ignore-unless: indomain-stem
 	default-name: mml/model
-	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN.$input-extension -in-target IN.$output-extension -out-source IN1.$input-extension -out-target IN1.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer IN2
+	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN.$input-extension -in-target IN.$output-extension -out-source IN1.$input-extension -out-target IN1.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
 train-in-mono
-	in: indomain-source indomain-target outdomain-stem settings
+	in: indomain-source indomain-target outdomain-stem
 	out: model
+	rerun-on-change: settings
 	ignore-if: indomain-stem
 	default-name: mml/model
-	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer IN3 
+	template: $moses-script-dir/ems/support/mml-train.perl -in-source IN -in-target IN1 -out-source IN2.$input-extension -out-target IN2.$output-extension -model OUT -lm-training "$lm-training" -order $order -lm-settings "$lm-settings" -lm-binarizer $lm-binarizer $settings
 
 [TRAINING] single
 consolidate
@@ -401,21 +403,21 @@ mml-filter-before-wa
 prepare-data
 	in: corpus-mml-prefilter=OR=corpus
 	out: prepared-data
-	rerun-on-change: alignment-factors training-options script baseline-alignment-model
+	rerun-on-change: alignment-factors training-options script baseline-alignment-model external-bin-dr
 	ignore-if: use-berkeley
 	default-name: prepared
 run-giza
 	in: prepared-data
 	out: giza-alignment
 	ignore-if: use-berkeley
-	rerun-on-change: giza-settings training-options script baseline-alignment-model
+	rerun-on-change: giza-settings training-options script baseline-alignment-model external-bin-dir
 	default-name: giza
 	error: not found
 	not-error: 0 not found
 run-giza-inverse
 	in: prepared-data
 	out: giza-alignment-inverse
-	rerun-on-change: giza-settings training-options script baseline-alignment-model
+	rerun-on-change: giza-settings training-options script baseline-alignment-model external-bin-dir
 	ignore-if: use-berkeley
 	default-name: giza-inverse
 	error: not found	

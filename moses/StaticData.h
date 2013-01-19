@@ -51,7 +51,6 @@ namespace Moses
 {
 
 class InputType;
-class LexicalReordering;
 class GlobalLexicalModelUnlimited;
 class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
@@ -83,12 +82,11 @@ protected:
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
   std::vector<SparsePhraseDictionaryFeature*>	m_sparsePhraseDictionary;
-  std::vector<GenerationDictionary*>	m_generationDictionary;
+  std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
-  std::vector<LexicalReordering*>                   m_reorderModels;
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
@@ -235,23 +233,16 @@ protected:
 
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
-  //! load all language models as specified in ini file
-  bool LoadLanguageModels();
 #ifdef HAVE_SYNLM
   //! load syntactic language model
 	bool LoadSyntacticLanguageModel();
 #endif
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
-  //! load all generation tables as specified in ini file
-  bool LoadGenerationTables();
   //! load decoding steps
   bool LoadDecodeGraphs();
-  bool LoadLexicalReorderingModel();
   //References used for scoring feature (eg BleuScoreFeature) for online training
   bool LoadReferences();
-  bool LoadDiscrimLMFeature();
-  bool LoadPhrasePairFeature();
 
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
@@ -458,9 +449,8 @@ public:
   bool IsChart() const {
     return m_searchAlgorithm == ChartDecoding || m_searchAlgorithm == ChartIncremental;
   }
-  const LMList &GetLMList() const {
-    return m_languageModel; 
-  }
+  const LMList &GetLMList() const
+  { return m_languageModel;  }
   const WordPenaltyProducer *GetWordPenaltyProducer() const
   { return m_wpProducer; }
   WordPenaltyProducer *GetWordPenaltyProducer() // for mira
@@ -476,9 +466,6 @@ public:
   MetaFeatureProducer* GetMetaFeatureProducer() const {
     return m_metaFeatureProducer;
   }
-  std::vector<LexicalReordering*> GetReorderModels() const {
-    return m_reorderModels;
-  } 
   std::vector<PhraseDictionaryFeature*> GetPhraseDictionaryModels() const {
     return m_phraseDictionary;
   }
@@ -718,7 +705,7 @@ public:
 
   const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const
   { return m_phraseDictionary;}
-  const std::vector<GenerationDictionary*>& GetGenerationDictionaries() const
+  const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const
   { return m_generationDictionary;}
   const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const
   { return GetPhraseDictionaries().at(index); }
@@ -736,6 +723,8 @@ public:
   //sentence (and thread) specific initialisationn and cleanup
   void InitializeForInput(const InputType& source) const;
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
+
+  void CollectFeatureFunctions();
 };
 
 }

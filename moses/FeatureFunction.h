@@ -77,10 +77,10 @@ public:
 class FeatureFunction: public ScoreProducer
 {
   /**< all the score producers in this run */
-  static std::vector<ScoreProducer*> m_producers;
+  static std::vector<FeatureFunction*> m_producers;
 
 public:
-  static const std::vector<ScoreProducer*>& GetFeatureFunctions() { return m_producers; }
+  static const std::vector<FeatureFunction*>& GetFeatureFunctions() { return m_producers; }
 
   FeatureFunction(const std::string& description, size_t numScoreComponents);
   virtual bool IsStateless() const = 0;	

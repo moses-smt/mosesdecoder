@@ -483,6 +483,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionProducer());
 
   // lexicalised re-ordering
+  /*
   const std::vector<LexicalReordering*> &lexOrderings = StaticData::Instance().GetReorderModels();
   std::vector<LexicalReordering*>::const_iterator iterLexOrdering;
   for (iterLexOrdering = lexOrderings.begin() ; iterLexOrdering != lexOrderings.end() ; ++iterLexOrdering) {
@@ -495,7 +496,7 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
       outputWordGraphStream << ", " << *iterScore;
     }
   }
-
+  */
   // words !!
 //  outputWordGraphStream << "\tw=" << hypo->GetCurrTargetPhrase();
 
