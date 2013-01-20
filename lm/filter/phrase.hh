@@ -57,6 +57,7 @@ class Substrings {
     LM_FILTER_PHRASE_METHOD(Right, right)
     LM_FILTER_PHRASE_METHOD(Phrase, phrase)
 
+#pragma GCC diagnostic ignored "-Wuninitialized" // end != finish so there's always an initialization
     // sentence_id must be non-decreasing.  Iterators are over words in the phrase.  
     template <class Iterator> void AddPhrase(unsigned int sentence_id, const Iterator &begin, const Iterator &end) {
       // Iterate over all substrings.  
