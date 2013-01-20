@@ -16,6 +16,7 @@
 
 #include <err.h>
 #include <string.h>
+#include <stdint.h>
 
 namespace util { class FilePiece; }
 
@@ -25,25 +26,17 @@ class ARPAInputException : public util::Exception {
   public:
     explicit ARPAInputException(const StringPiece &message) throw();
     explicit ARPAInputException(const StringPiece &message, const StringPiece &line) throw();
-    virtual ~ARPAInputException() throw() {}
-
-    const char *what() const throw() { return what_.c_str(); }
-
-  private:
-    std::string what_;
+    virtual ~ARPAInputException() throw();
 };
 
-class ARPAOutputException : public std::exception {
+class ARPAOutputException : public util::ErrnoException {
   public:
     ARPAOutputException(const char *prefix, const std::string &file_name) throw();
-    virtual ~ARPAOutputException() throw() {}
-
-    const char *what() const throw() { return what_.c_str(); }
+    virtual ~ARPAOutputException() throw();
 
     const std::string &File() const throw() { return file_name_; }
 
   private:
-    std::string what_;
     const std::string file_name_;
 };
 
@@ -52,7 +45,7 @@ size_t SizeNeededForCounts(const std::vector<uint64_t> &number);
 
 /* Writes an ARPA file.  This has to be seekable so the counts can be written
  * at the end.  Hence, I just have it own a std::fstream instead of accepting
- * a separately held std::ostream.  
+ * a separately held std::ostream.  TODO: use the fast one from estimation.
  */
 class ARPAOutput : boost::noncopyable {
   public:
@@ -92,10 +85,10 @@ class ARPAOutput : boost::noncopyable {
 };
 
 
-template <class Output> void ReadNGrams(util::FilePiece &in, unsigned int length, size_t number, Output &out) {
+template <class Output> void ReadNGrams(util::FilePiece &in, unsigned int length, uint64_t number, Output &out) {
   ReadNGramHeader(in, length);
   out.BeginLength(length);
-  for (size_t i = 0; i < number; ++i) {
+  for (uint64_t i = 0; i < number; ++i) {
     StringPiece line = in.ReadLine();
     util::TokenIter<util::SingleCharacter> tabber(line, '\t');
     if (!tabber) throw ARPAInputException("blank line", line);
