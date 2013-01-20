@@ -325,8 +325,8 @@ template <class Compare, class Combine> class MergingReader {
   private:
     Offsets *out_offsets_;
  
-    std::size_t buffer_size_;
-    std::size_t total_memory_;
+    uint64_t buffer_size_;
+    uint64_t total_memory_;
 };
 
 // The lazy step owns the remaining files.  This keeps track of them.  

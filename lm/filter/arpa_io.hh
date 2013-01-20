@@ -48,7 +48,7 @@ class ARPAOutputException : public std::exception {
 };
 
 // Handling for the counts of n-grams at the beginning of ARPA files.
-size_t SizeNeededForCounts(const std::vector<size_t> &number);
+size_t SizeNeededForCounts(const std::vector<uint64_t> &number);
 
 /* Writes an ARPA file.  This has to be seekable so the counts can be written
  * at the end.  Hence, I just have it own a std::fstream instead of accepting
@@ -88,7 +88,7 @@ class ARPAOutput : boost::noncopyable {
     boost::scoped_array<char> buffer_;
     std::fstream file_;
     size_t fast_counter_;
-    std::vector<size_t> counts_;
+    std::vector<uint64_t> counts_;
 };
 
 
@@ -107,7 +107,7 @@ template <class Output> void ReadNGrams(util::FilePiece &in, unsigned int length
 }
 
 template <class Output> void ReadARPA(util::FilePiece &in_lm, Output &out) {
-  std::vector<size_t> number;
+  std::vector<uint64_t> number;
   ReadARPACounts(in_lm, number);
   out.ReserveForCounts(SizeNeededForCounts(number));
   for (unsigned int i = 0; i < number.size(); ++i) {
