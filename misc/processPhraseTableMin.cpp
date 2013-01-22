@@ -14,6 +14,7 @@ void printHelp(char **argv) {
             "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
+            "\t-T string         -- path to temporary directory (uses /tmp by default)\n"
             "\t-nscores int      -- number of score components in phrase table\n"
             "\t-no-alignment-info   -- do not include alignment info in the binary phrase table\n"
 #ifdef WITH_THREADS
@@ -49,6 +50,7 @@ int main(int argc, char **argv) {
     
   std::string inFilePath;
   std::string outFilePath("out");
+  std::string tempfilePath;
   PhraseTableCreator::Coding coding = PhraseTableCreator::PREnc;
   
   size_t numScoreComponent = 5;  
@@ -76,6 +78,10 @@ int main(int argc, char **argv) {
     else if("-out" == arg && i+1 < argc) {
       ++i;
       outFilePath = argv[i];
+    }
+    else if("-T" == arg && i+1 < argc) {
+      ++i;
+      tempfilePath = argv[i];
     }
     else if("-encoding" == arg && i+1 < argc) {
       ++i;
@@ -166,7 +172,8 @@ int main(int argc, char **argv) {
   if(outFilePath.rfind(".minphr") != outFilePath.size() - 7)
     outFilePath += ".minphr";
   
-  PhraseTableCreator(inFilePath, outFilePath, numScoreComponent, sortScoreIndex,
+  PhraseTableCreator(inFilePath, outFilePath, tempfilePath,
+                     numScoreComponent, sortScoreIndex,
                      coding, orderBits, fingerprintBits,
                      useAlignmentInfo, multipleScoreTrees,
                      quantize, maxRank, warnMe

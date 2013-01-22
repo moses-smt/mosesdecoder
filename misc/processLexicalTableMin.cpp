@@ -15,6 +15,7 @@ void printHelp(char **argv)
             "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
+            "\t-T string         -- path to temporary directory (uses /tmp by default)\n"
 #ifdef WITH_THREADS
             "\t-threads int|all  -- number of threads used for conversion\n"
 #endif 
@@ -44,6 +45,7 @@ int main(int argc, char** argv)
   
   std::string inFilePath;
   std::string outFilePath("out");
+  std::string tempfilePath;
   
   size_t orderBits = 10;
   size_t fingerPrintBits = 16;
@@ -71,6 +73,10 @@ int main(int argc, char** argv)
     {
       ++i;
       outFilePath = argv[i];
+    }
+    else if("-T" == arg && i+1 < argc) {
+      ++i;
+      tempfilePath = argv[i];
     }
     else if("-landmark" == arg && i+1 < argc)
     {
@@ -121,7 +127,7 @@ int main(int argc, char** argv)
     outFilePath += ".minlexr";
 
   LexicalReorderingTableCreator(
-    inFilePath, outFilePath,
+    inFilePath, outFilePath, tempfilePath,
     orderBits, fingerPrintBits,
     multipleScoreTrees, quantize
 #ifdef WITH_THREADS

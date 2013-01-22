@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ConsistentPhrases.h"
 #include "ThrowingFwrite.h"
 
+#include "util/file.hh"
+
 namespace Moses
 {
     
@@ -40,6 +42,7 @@ std::string PhraseTableCreator::m_separator = " ||| ";
     
 PhraseTableCreator::PhraseTableCreator(std::string inPath,
                                        std::string outPath,
+                                       std::string tempfilePath,
                                        size_t numScoreComponent,
                                        size_t sortScoreIndex,
                                        Coding coding,
@@ -54,7 +57,7 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
                                        , size_t threads
 #endif
                                        )
-  : m_inPath(inPath), m_outPath(outPath),
+  : m_inPath(inPath), m_outPath(outPath), m_tempfilePath(tempfilePath),
     m_outFile(std::fopen(m_outPath.c_str(), "w")), m_numScoreComponent(numScoreComponent),
     m_sortScoreIndex(sortScoreIndex), m_warnMe(warnMe),
     m_coding(coding), m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
@@ -108,7 +111,15 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   
   // 1st pass
   std::cerr << "Pass " << cur_pass << "/" << all_passes << ": Creating source phrase index + Encoding target phrases" << std::endl;
-  m_srcHash.BeginSave(m_outFile);   
+  m_srcHash.BeginSave(m_outFile);
+  
+  if(tempfilePath.size()) {
+    MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
+    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
+  }
+  else {
+    m_encodedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>();    
+  }
   EncodeTargetPhrases();
   
   cur_pass++;
@@ -118,6 +129,14 @@ PhraseTableCreator::PhraseTableCreator(std::string inPath,
   
   // 2nd pass
   std::cerr << "Pass " << cur_pass << "/" << all_passes << ": Compressing target phrases" << std::endl;
+  
+  if(tempfilePath.size()) {
+    MmapAllocator<unsigned char> allocCompressed(util::FMakeTemp(tempfilePath));
+    m_compressedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocCompressed);
+  }
+  else {
+    m_compressedTargetPhrases = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+  }
   CompressTargetPhrases();
   
   std::cerr << "Saving to " << m_outPath << std::endl;
@@ -135,6 +154,9 @@ PhraseTableCreator::~PhraseTableCreator()
     delete m_scoreTrees[i];
     delete m_scoreCounters[i];
   }
+  
+  delete m_encodedTargetPhrases;
+  delete m_compressedTargetPhrases;  
 }
 
 void PhraseTableCreator::PrintInfo()
@@ -230,7 +252,7 @@ void PhraseTableCreator::Save()
     m_alignTree->Save(m_outFile);
   
   // Save compressed target phrase collections 
-  m_compressedTargetPhrases.save(m_outFile);
+  m_compressedTargetPhrases->save(m_outFile);
 }
     
 void PhraseTableCreator::LoadLexicalTable(std::string filePath)
@@ -355,12 +377,12 @@ void PhraseTableCreator::CompressTargetPhrases()
 #ifdef WITH_THREADS
   boost::thread_group threads;
   for (size_t i = 0; i < m_threads; ++i) {
-      CompressionTask* ct = new CompressionTask(m_encodedTargetPhrases, *this);    
+      CompressionTask* ct = new CompressionTask(*m_encodedTargetPhrases, *this);    
       threads.create_thread(*ct);
   }
   threads.join_all();
 #else
-  CompressionTask* ct = new CompressionTask(m_encodedTargetPhrases, *this);
+  CompressionTask* ct = new CompressionTask(*m_encodedTargetPhrases, *this);
   (*ct)();
   delete ct;
 #endif
@@ -940,7 +962,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
           targetPhraseCollection << *it;
         
         m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));    
-        m_encodedTargetPhrases.push_back(targetPhraseCollection.str());
+        m_encodedTargetPhrases->push_back(targetPhraseCollection.str());
         
         m_lastFlushedSourceNum++;
         if(m_lastFlushedSourceNum % 100000 == 0)
@@ -982,7 +1004,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
         m_lastCollection.begin(); it != m_lastCollection.end(); it++)
         targetPhraseCollection << *it;
           
-      m_encodedTargetPhrases.push_back(targetPhraseCollection.str());
+      m_encodedTargetPhrases->push_back(targetPhraseCollection.str());
       m_lastCollection.clear();
     }
       
@@ -1019,7 +1041,7 @@ void PhraseTableCreator::FlushCompressedQueue(bool force)
       m_queue.pop();
       m_lastFlushedLine++;
           
-      m_compressedTargetPhrases.push_back(pi.GetTrg());
+      m_compressedTargetPhrases->push_back(pi.GetTrg());
       
       if((pi.GetLine()+1) % 100000 == 0)
         std::cerr << ".";
