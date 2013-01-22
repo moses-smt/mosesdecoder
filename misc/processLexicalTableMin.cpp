@@ -7,6 +7,8 @@
 
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCreator.h"
 
+#include "util/file.hh"
+
 using namespace Moses;
 
 void printHelp(char **argv)
@@ -77,6 +79,7 @@ int main(int argc, char** argv)
     else if("-T" == arg && i+1 < argc) {
       ++i;
       tempfilePath = argv[i];
+      util::NormalizeTempPrefix(tempfilePath);
     }
     else if("-landmark" == arg && i+1 < argc)
     {

@@ -7,6 +7,8 @@
 #include "moses/TypeDef.h"
 #include "moses/TranslationModel/CompactPT/PhraseTableCreator.h"
 
+#include "util/file.hh"
+
 using namespace Moses;
 
 void printHelp(char **argv) {
@@ -82,6 +84,7 @@ int main(int argc, char **argv) {
     else if("-T" == arg && i+1 < argc) {
       ++i;
       tempfilePath = argv[i];
+      util::NormalizeTempPrefix(tempfilePath);
     }
     else if("-encoding" == arg && i+1 < argc) {
       ++i;
