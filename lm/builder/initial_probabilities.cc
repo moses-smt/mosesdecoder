@@ -24,6 +24,7 @@ struct BufferEntry {
 class OnlyGamma {
   public:
     void Run(const util::stream::ChainPosition &position) {
+      uint64_t count = 0;
       for (util::stream::Link block_it(position); block_it; ++block_it) {
         float *out = static_cast<float*>(block_it->Get());
         const float *in = out;
@@ -32,7 +33,10 @@ class OnlyGamma {
           *out = *in;
         }
         block_it->SetValidSize(block_it->ValidSize() / 2);
+        count += block_it->ValidSize() / sizeof(float);
       }
+      std::cerr << std::endl;
+      std::cerr << "Backoff count is " << count << std::endl;
     }
 };
 
