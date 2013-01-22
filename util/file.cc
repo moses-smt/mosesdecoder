@@ -22,6 +22,7 @@
 #include <io.h>
 #include <algorithm>
 #include <limits.h>
+#include <limits>
 #else
 #include <unistd.h>
 #endif
@@ -99,15 +100,15 @@ uint64_t SizeOrThrow(int fd) {
 }
 
 void ResizeOrThrow(int fd, uint64_t to) {
-  UTIL_THROW_IF_ARG(
 #if defined(_WIN32) || defined(_WIN64)
-    _chsize_s
+    errno_t ret = _chsize_s
 #elif defined(OS_ANDROID)
-    ftruncate64
+    int ret = ftruncate64
 #else
-    ftruncate
+    int ret = ftruncate
 #endif
-    (fd, to), FDException, (fd), "while resizing to " << to << " bytes");
+    (fd, to);
+  UTIL_THROW_IF_ARG(ret, FDException, (fd), "while resizing to " << to << " bytes");
 }
 
 std::size_t PartialRead(int fd, void *to, std::size_t amount) {
@@ -150,9 +151,21 @@ std::size_t ReadOrEOF(int fd, void *to_void, std::size_t amount) {
 void PReadOrThrow(int fd, void *to_void, std::size_t size, uint64_t off) {
   uint8_t *to = static_cast<uint8_t*>(to_void);
 #if defined(_WIN32) || defined(_WIN64)
-  UTIL_THROW(Exception, "TODO: PReadOrThrow for windows using ReadFile http://stackoverflow.com/questions/766477/are-there-equivalents-to-pread-on-different-platforms");
-#else
+  UTIL_THROW(Exception, "This pread implementation for windows is broken.  Please send me a patch that does not change the file pointer.  Atomically.  Or send me an implementation of pwrite that is allowed to change the file pointer but can be called concurrently with pread.");
+  const std::size_t kMaxDWORD = static_cast<std::size_t>(4294967295UL);
+#endif
   for (;size ;) {
+#if defined(_WIN32) || defined(_WIN64)
+    /* BROKEN: changes file pointer.  Even if you save it and change it back, it won't be safe to use concurrently with write() or read() which lmplz does. */
+    // size_t might be 64-bit.  DWORD is always 32.
+    DWORD reading = static_cast<DWORD>(std::min<std::size_t>(kMaxDWORD, size));
+    DWORD ret;
+    OVERLAPPED overlapped;
+    memset(&overlapped, 0, sizeof(OVERLAPPED));
+    overlapped.Offset = static_cast<DWORD>(off);
+    overlapped.OffsetHigh = static_cast<DWORD>(off >> 32);
+    UTIL_THROW_IF(!ReadFile((HANDLE)_get_osfhandle(fd), to, reading, &ret, &overlapped), Exception, "ReadFile failed for offset " << off);
+#else
     ssize_t ret;
     errno = 0;
     do {
@@ -166,11 +179,11 @@ void PReadOrThrow(int fd, void *to_void, std::size_t size, uint64_t off) {
       UTIL_THROW_IF(ret == 0, EndOfFileException, " for reading " << size << " bytes at " << off << " from " << NameFromFD(fd));
       UTIL_THROW_ARG(FDException, (fd), "while reading " << size << " bytes at offset " << off);
     }
+#endif
     size -= ret;
     off += ret;
     to += ret;
   }
-#endif
 }
 
 void WriteOrThrow(int fd, const void *data_void, std::size_t size) {
@@ -218,15 +231,15 @@ typedef CheckOffT<sizeof(off_t)>::True IgnoredType;
 
 // Can't we all just get along?  
 void InternalSeek(int fd, int64_t off, int whence) {
-  UTIL_THROW_IF_ARG(
+  if (
 #if defined(_WIN32) || defined(_WIN64)
-    (__int64)-1 == _lseeki64(fd, off, whence),
+    (__int64)-1 == _lseeki64(fd, off, whence)
 #elif defined(OS_ANDROID)
-    (off64_t)-1 == lseek64(fd, off, whence),
+    (off64_t)-1 == lseek64(fd, off, whence)
 #else
-    (off_t)-1 == lseek(fd, off, whence),
+    (off_t)-1 == lseek(fd, off, whence)
 #endif
-    FDException, (fd), "while seeking to " << off << " whence " << whence);
+  ) UTIL_THROW_ARG(FDException, (fd), "while seeking to " << off << " whence " << whence);
 }
 } // namespace
 
@@ -386,7 +399,13 @@ void NormalizeTempPrefix(std::string &base) {
   struct stat sb;
   // It's fine for it to not exist.
   if (-1 == stat(base.c_str(), &sb)) return;
-  if (S_ISDIR(sb.st_mode)) base += '/';
+  if (
+#if defined(_WIN32) || defined(_WIN64)
+    sb.st_mode & _S_IFDIR
+#else
+    S_ISDIR(sb.st_mode)
+#endif
+    ) base += '/';
 }
 
 int MakeTemp(const std::string &base) {
