@@ -179,8 +179,8 @@ foreach (@children) {
 }
 
 #sort the PSD file numeric - in the future this will not be necessary once PSD feature extraction does not require sorted input
-print STDERR "WARNING, sorting PSD using $sortCmd, if not parallel this will be slow\n";
-systemCheck("zcat $extract.psd.unsorted.gz | $sortCmd -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n | gzip -9 > $extract.psd.gz");
+print STDERR "WARNING, sorting PSD using LC_ALL=C $sortCmd -T $TMPDIR, if not parallel this will be slow\n";
+systemCheck("zcat $extract.psd.unsorted.gz | LC_ALL=C $sortCmd -T $TMPDIR -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n | gzip -9 > $extract.psd.gz");
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";
