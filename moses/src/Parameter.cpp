@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Parameter.cpp,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -147,9 +147,8 @@ Parameter::Parameter()
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
 
-//  #ifdef HAVE_VW
+  //#ifdef HAVE_VW
   AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
-  //Weight of cell-context dependent feature
 
 //#ifdef HAVE_VW
   AddParam("weight-psd", "psd", "weight for phrase sense disambiguation");

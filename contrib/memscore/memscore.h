@@ -1,6 +1,6 @@
 // memscore - in-memory phrase scoring for Statistical Machine Translation
 // Christian Hardmeier, FBK-irst, Trento, 2010
-// $Id$
+// $Id: memscore.h,v 1.1 2012/10/07 13:43:04 braunefe Exp $
 
 #ifndef MEMSCORE_H
 #define MEMSCORE_H

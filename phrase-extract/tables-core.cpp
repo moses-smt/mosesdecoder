@@ -1,4 +1,4 @@
-// $Id$
+// $Id: tables-core.cpp,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 //#include "beammain.h"
 #include "tables-core.h"
 

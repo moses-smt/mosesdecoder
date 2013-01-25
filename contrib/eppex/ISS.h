@@ -6,7 +6,7 @@
  *
  * (C) Ceslav Przywara, UFAL MFF UK, 2011
  *
- * $Id$
+ * $Id: ISS.h,v 1.1 2012/10/07 13:43:06 braunefe Exp $
  */
 
 #ifndef _ISS_H

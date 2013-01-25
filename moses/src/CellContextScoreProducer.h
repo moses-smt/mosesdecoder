@@ -45,10 +45,13 @@ class CellContextScoreProducer : public StatelessFeatureFunction
     void CheckIndex(const std::string &targetRep);
     PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
     virtual bool ComputeValueInTranslationOption() const { return true; }
+    void Normalize(std::vector<float> &losses);
+    void Normalize0(std::vector<float> &losses);
 
     private :
-    PSD::FeatureExtractor *m_extractor;
+    PSD::FeatureExtractor *m_extractor, *m_debugExtractor;
     PSD::VWLibraryPredictConsumerFactory  *m_consumerFactory;
+    PSD::VWFileTrainConsumer      *m_debugConsumer;
     PSD::ExtractorConfig m_extractorConfig;
     PSD::TargetIndexType m_ruleIndex;
     bool IsOOV(const std::string &targetRep);

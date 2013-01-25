@@ -1,4 +1,4 @@
-// $Id: Vocabulary.cpp 1565 2008-02-22 14:42:01Z bojar $
+// $Id: Vocabulary.cpp,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 #include "Vocabulary.h"
 #include <fstream>
 

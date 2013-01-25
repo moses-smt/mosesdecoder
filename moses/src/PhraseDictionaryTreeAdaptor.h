@@ -1,4 +1,4 @@
-// $Id$
+// $Id: PhraseDictionaryTreeAdaptor.h,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 
 #ifndef moses_PhraseDictionaryTreeAdaptor_h
 #define moses_PhraseDictionaryTreeAdaptor_h

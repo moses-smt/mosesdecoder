@@ -1,5 +1,5 @@
 #pragma once
-// $Id$
+// $Id: Main.h,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 /***********************************************************************
  Moses - factored phrase-based, hierarchical and syntactic language decoder
  Copyright (C) 2009 Hieu Hoang

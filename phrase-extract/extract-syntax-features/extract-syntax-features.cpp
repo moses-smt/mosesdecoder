@@ -10,35 +10,12 @@
 #include "FeatureConsumer.h"
 #include "RuleTable.h"
 #include "InputTreeRep.h"
+#include "PsdLine.h"
 
 using namespace std;
 using namespace Moses;
 using namespace MosesTraining;
 using namespace PSD;
-
-class PSDLine
-{
-public:
-  PSDLine(const string &line)
-  {
-    vector<string> columns = Tokenize(line, "\t");
-    m_sentID   = Scan<size_t>(columns[0]);
-    m_srcStart = Scan<size_t>(columns[1]);
-    m_srcEnd   = Scan<size_t>(columns[2]);
-    m_srcPhrase = columns[5];
-    m_tgtPhrase = columns[6];
-  }
-  const string &GetSrcPhrase() { return m_srcPhrase; }
-  const string &GetTgtPhrase() { return m_tgtPhrase; }
-  size_t GetSentID()    { return m_sentID; }
-  size_t GetSrcStart()  { return m_srcStart; }
-  size_t GetSrcEnd()    { return m_srcEnd; }
-
-private:
-  PSDLine();
-  size_t m_sentID, m_srcStart, m_srcEnd;
-  string m_srcPhrase, m_tgtPhrase;
-};
 
 void WritePhraseIndex(const TargetIndexType &index, const string &outFile)
 {
@@ -96,6 +73,9 @@ inline int makeSpanInterval(int span)
 
 int main(int argc, char**argv)
 {
+
+  std::cerr << "Beginning Extraction of Syntactic Features for LHS of rules..." << std::endl;
+
   if (argc != 8) {
     cerr << "error: wrong arguments" << endl;
     cerr << "Usage: extract-psd psd-file parsed-file corpus phrase-table extractor-config output-train output-index" << endl;
@@ -142,15 +122,29 @@ int main(int argc, char**argv)
   size_t srcSurvived = 0;
   size_t tgtSurvived = 0;
 
+
+  //get span of non-terminals in rule
+  vector<string> rhsSourceToken;
+  vector<string> sourceSentToken;
+  Tokenize(rhsSourceToken,srcPhrase," ");
+  unsigned int nonTermStartPos = spanStart;
+  unsigned int nonTermEndPos = nonTermStartPos;
+  unsigned int rulePos = 0;
+  vector<pair<unsigned int, unsigned int> > nonTermSpans;
+  bool nonTermSeen = false;
+
    // don't generate features if no translations survived filtering
    bool hasTranslation = false;
 
   string corpusLine;
   string rawPSDLine;
   string parseLine;
+
+
   while (getline(psd, rawPSDLine)) {
     tgtTotal++;
     PSDLine psdLine(rawPSDLine); // parse one line in PSD file
+    //std::cerr << "Found PSD line : " << rawPSDLine << std::endl;
 
     // get to the current sentence in annotated corpus
     while (psdLine.GetSentID() > sentID) {
@@ -159,18 +153,19 @@ int main(int argc, char**argv)
       sentID++;
     }
 
+   //std::cerr << "Looking for PSD line : " << psdLine.GetSrcPhrase()<< " : " << psdLine.GetTgtPhrase() << std::endl;
+
     if (! rtable.SrcExists(psdLine.GetSrcPhrase())) {
+      //std::cout << "Source not found, continue" << std::endl;
       continue;
     }
-
     // we have all correct translations of the current phrase
-       // we have all correct translations of the current phrase
     if (psdLine.GetSrcPhrase() != srcPhrase) {
       // generate features
-      if (hasTranslation) {
+      if (hasTranslation) { //ignore first round
+    	//cerr << "EXTRACTING FEATURES FOR : " << srcPhrase << std::endl;
         srcSurvived++;
-        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);
-      }
+        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
       // set new source phrase, context, translations and losses
       srcPhrase = psdLine.GetSrcPhrase();
       spanStart = psdLine.GetSrcStart();
@@ -182,11 +177,12 @@ int main(int argc, char**argv)
       parentLabel.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;
-      //get span in string rep
 
+      // after extraction, set translation to false again
+      hasTranslation = false;
 
+      //get span corresponding to lhs of rule
       int spanInt = (spanEnd - spanStart) + 1;
-
 
       CHECK( spanInt > 0);
       stringstream s;
@@ -203,8 +199,8 @@ int main(int argc, char**argv)
         //myInputChart.Print(sentSize);
 
         //get syntax label associated to span
-        vector<SyntaxLabel> syntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
-        //std::cerr << "Gettting parent label : " << spanStart << " : " << spanEnd << std::endl;
+        vector<SyntaxLabel> lhsSyntaxLabels = myInputChart.GetLabels(spanStart, spanEnd);
+        //std::cerr << "Getting parent label : " << spanStart << " : " << spanEnd << std::endl;
 
         bool IsBegin = false;
         string noTag = "NOTAG";
@@ -228,14 +224,15 @@ int main(int argc, char**argv)
         //MAYBE INEFFICIENT
 
         vector<SyntaxLabel>::iterator itr_syn_lab;
-        for(itr_syn_lab = syntaxLabels.begin(); itr_syn_lab != syntaxLabels.end(); itr_syn_lab++)
+        for(itr_syn_lab = lhsSyntaxLabels.begin(); itr_syn_lab != lhsSyntaxLabels.end(); itr_syn_lab++)
         {
             SyntaxLabel syntaxLabel = *itr_syn_lab;
+            //std::cerr << "Found Syntax Label : " << syntaxLabel.GetString() << std::endl;
             CHECK(syntaxLabel.IsNonTerm() == 1);
             string syntFeat = syntaxLabel.GetString();
 
             bool toRemove = false;
-            if( (syntaxLabels.size() > 1 ) && !(syntFeat.compare( myInputChart.GetNoTag() )) )
+            if( (lhsSyntaxLabels.size() > 1 ) && !(syntFeat.compare( myInputChart.GetNoTag() )) )
             {toRemove = true;}
 
             if(toRemove == false)
@@ -243,24 +240,37 @@ int main(int argc, char**argv)
                 syntFeats.push_back(syntFeat);
             }
         }
-    }
+
+    //restore span start and span end for extraction of context and bow features
+    spanStart = psdLine.GetSrcStart();
+    spanEnd = psdLine.GetSrcEnd();
+
     bool foundTgt = false;
     size_t tgtPhraseID = rtable.GetTgtPhraseID(psdLine.GetTgtPhrase(), &foundTgt);
+    //cerr << "PSD LINE SEARCHED FOR X: " << psdLine.GetSrcPhrase() << " : " << psdLine.GetTgtPhrase() << "X: Found ? : " << foundTgt << std::endl;
 
-    if (foundTgt) {
-      // addadd correct translation (i.e., set its loss to 0)
-      for (size_t i = 0; i < translations.size(); i++) {
-        if (translations[i].m_index == tgtPhraseID) {
-          losses[i] = 0;
-          hasTranslation = true;
-          tgtSurvived++;
-          break;
-        }
-      }
+    //condition that target must be found has to be enforced
+
+    //TODO : Not robust : shall crash if no target is found
+    //if it is not found, no example should be generated
+		if (foundTgt) {
+		  // addadd correct translation (i.e., set its loss to 0)
+		  for (size_t i = 0; i < translations.size(); i++) {
+			if (translations[i].m_index == tgtPhraseID) {
+				//std::cerr << "ID for target found : " << tgtPhraseID << " : " << translations[i].m_index << std::endl;
+				losses[i] = 0;
+				hasTranslation = true;
+				tgtSurvived++;
+			  	break;
+			}
+			else
+			{
+				//std::cerr << "ID for target not found : " << tgtPhraseID << " : " << translations[i].m_index << std::endl;
+			}
+		  }
+		}
     }
   }
-
-  // generate features for the last source phrase
    // generate features for the last source phrase
   if (hasTranslation) {
     srcSurvived++;

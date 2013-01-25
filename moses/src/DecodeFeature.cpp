@@ -1,4 +1,4 @@
-// $Id: PhraseDictionaryMemory.cpp 2477 2009-08-07 16:47:54Z bhaddow $
+// $Id: DecodeFeature.cpp,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 // vim:tabstop=2
 
 /***********************************************************************

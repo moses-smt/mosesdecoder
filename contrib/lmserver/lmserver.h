@@ -1,5 +1,5 @@
 /* -*- Mode: C; tab-width: 4; c-basic-offset: 4; indent-tabs-mode: nil -*- */
-/* $Id$ */
+/* $Id: lmserver.h,v 1.1 2012/10/07 13:43:06 braunefe Exp $ */
 #ifndef lmserver_lmserver_h
 #define lmserver_lmserver_h
 

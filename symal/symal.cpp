@@ -1,4 +1,4 @@
-// $Id$
+// $Id: symal.cpp,v 1.1 2012/10/07 13:43:06 braunefe Exp $
 
 #include <cassert>
 #include <iomanip>

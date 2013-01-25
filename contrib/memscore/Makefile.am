@@ -1,6 +1,6 @@
 # memscore - in-memory phrase scoring for Statistical Machine Translation
 # Christian Hardmeier, FBK-irst, Trento, 2010
-# $Id$
+# $Id: Makefile.am,v 1.1 2012/10/07 13:43:04 braunefe Exp $
 
 ## Process this file with automake to produce Makefile.in
 

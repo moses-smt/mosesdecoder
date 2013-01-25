@@ -1,4 +1,4 @@
-// $Id$
+// $Id: AlignmentPhrase.h,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh

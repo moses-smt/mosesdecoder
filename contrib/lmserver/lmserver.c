@@ -13,7 +13,7 @@
  *      Anatoly Vorobey <mellon@pobox.com>
  *      Brad Fitzpatrick <brad@danga.com>
 std *
- *  $Id$
+ *  $Id: lmserver.c,v 1.1 2012/10/07 13:43:06 braunefe Exp $
  */
 #include "lmserver.h"
 #include "srilm.h"

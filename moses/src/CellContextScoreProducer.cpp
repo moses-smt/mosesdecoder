@@ -1,4 +1,4 @@
-// $Id$
+// $Id: CellContextScoreProducer.cpp,v 1.2 2012/10/08 14:52:03 braunefe Exp $
 
 #include "util/check.hh"
 #include "FFState.h"
@@ -34,7 +34,9 @@ CellContextScoreProducer::CellContextScoreProducer(ScoreIndexManager &scoreIndex
 CellContextScoreProducer::~CellContextScoreProducer()
 {
     delete m_extractor;
+    delete m_debugExtractor;
     delete m_consumerFactory;
+    delete m_debugConsumer;
 }
 
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
@@ -48,6 +50,8 @@ bool CellContextScoreProducer::Initialize(const string &modelFile, const string 
   m_extractorConfig.Load(configFile);
 
   m_extractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, false);
+  m_debugExtractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, true);
+  m_debugConsumer = new VWFileTrainConsumer("/projekte/morphosynt/braune/hiero_debug_features");
   isGood = true;
   VERBOSE(4, "Constructing score producers : " << isGood << endl);
   return isGood;
@@ -209,39 +213,19 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                 syntFeats.push_back(syntFeat);
             }
         }
-
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
+        //std::cerr << "LOOKING FOR SPAN : " << startSpan << " : " << endSpan << std::endl;
         m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         m_consumerFactory->Release(p_consumer);
-
+        Normalize0(losses);
+        //m_debugExtractor->GenerateFeaturesChartLhs(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
+        //Normalize(losses);
         vector<float>::iterator lossIt;
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-        VERBOSE(5, "Obtained prediction : " << sourceSide << endl);
-        *lossIt = exp(-*lossIt);
-        VERBOSE(4, "Obtained score : " <<  *lossIt  << endl);
-        //put the score into scores
-        scores.push_back(ScoreFactory(*lossIt));
-        sum += *lossIt;
-        VERBOSE(4, "Sum to normalize" << sum << std::endl);
-        }
+        float logScore = Equals(*lossIt, 0) ? LOWEST_SCORE : log(*lossIt);
+        *lossIt = logScore;
+         scores.push_back(ScoreFactory(logScore));}
 
-        // normalize
-        if (sum != 0) {
-            vector<ScoreComponentCollection>::iterator colIt;
-            for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-            VERBOSE(5, "Score before normalizing : " << *colIt << std::endl);
-            colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
-            VERBOSE(5, "Score after normalizing : " << *colIt << std::endl);
-            }
-        }
-        else
-        {
-            VERBOSE(5, "SUM IS ZERO : SCORES PUT TO 0 " << std::endl);
-            vector<ScoreComponentCollection>::iterator colIt;
-            for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-            colIt->ZeroAll();
-            }
-        }
     }
     else //make sure that when sum is zero, then all factors are 0
     {
@@ -250,6 +234,66 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         }
     }
     return scores;
+}
+
+void CellContextScoreProducer::Normalize0(vector<float> &losses)
+{
+    float sum = 0;
+
+    // clip to [0,1] and take 1-Z as non-normalized prob
+    vector<float>::iterator it;
+    for (it = losses.begin(); it != losses.end(); it++) {
+      if (*it <= 0.0) *it = 1.0;
+      else if (*it >= 1.0) *it = 0.0;
+      else *it = 1 - *it;
+      sum += *it;
+    }
+    if (! Equals(sum, 0)) {
+      // normalize
+      for (it = losses.begin(); it != losses.end(); it++)
+	*it /= sum;
+    } else {
+      // sum of non-normalized probs is 0, then take uniform probs
+      for (it = losses.begin(); it != losses.end(); it++) 
+	*it = 1 / losses.size();
+    }
+}
+
+
+
+void CellContextScoreProducer::Normalize(std::vector<float> &losses)
+{
+    //Normalization
+      vector<float>::iterator lossIt;
+      float sum = 0;
+      for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
+      *lossIt = exp(-*lossIt);
+      VERBOSE(4, "Obtained score : " <<  *lossIt  << endl);
+      sum += *lossIt;
+      VERBOSE(4, "Sum to normalize" << sum << std::endl);
+      }
+      for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
+          *lossIt /= sum;
+        }
+
+      // handle case where sum is 0
+      /*if (sum != 0) {
+          vector<ScoreComponentCollection>::iterator colIt;
+          for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+          VERBOSE(5, "Score before normalizing : " << *colIt << std::endl);
+          colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
+          VERBOSE(5, "Score after normalizing : " << *colIt << std::endl);
+          }
+          else
+        {
+            VERBOSE(5, "SUM IS ZERO : SCORES PUT TO 0 " << std::endl);
+            vector<ScoreComponentCollection>::iterator colIt;
+            for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
+            colIt->ZeroAll();
+            }
+        }
+      }*/
+
 }
 
 size_t CellContextScoreProducer::GetNumScoreComponents() const

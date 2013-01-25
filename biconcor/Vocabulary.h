@@ -1,4 +1,4 @@
-// $Id: tables-core.h 1470 2007-10-02 21:43:54Z redpony $
+// $Id: Vocabulary.h,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 
 #pragma once
 

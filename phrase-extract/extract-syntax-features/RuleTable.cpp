@@ -22,7 +22,8 @@ RuleTable::RuleTable(const string &fileName)
   string line;
   while (getline(in, line)) {
     vector<string> columns = TokenizeMultiCharSeparator(line, " ||| ");
-    AddRulePair( columns[0], columns[1], GetScores(columns[2]), GetTermAlignment(columns[3],columns[1]), GetNonTermAlignment(columns[3],columns[1],columns[0]));
+    //std::cerr << "In rule table, adding rule pair : X" << columns[0] << "X : X" << columns[1] << "X" << std::endl;
+    AddRulePair(columns[0], columns[1], GetScores(columns[2]), GetTermAlignment(columns[3],columns[1]), GetNonTermAlignment(columns[3],columns[1],columns[0]));
   }
 }
 
@@ -39,6 +40,7 @@ bool RuleTable::SrcExists(const string &phrase)
 size_t RuleTable::GetTgtPhraseID(const string &phrase, /* out */ bool *found)
 {
   *found = false;
+  //std::cerr << "Looking for phrase : " << phrase << std::endl;
   TargetIndexType::left_map::const_iterator it = m_targetIndex.left.find(phrase);
   if (it != m_targetIndex.left.end()) {
     *found = true;
@@ -63,6 +65,8 @@ const vector<ChartTranslation> &RuleTable::GetTranslations(const string &srcPhra
 void RuleTable::AddRulePair(const std::string &src, const std::string &tgt,
     const std::vector<float> &scores, const PSD::AlignmentType &termAlign, const PSD::AlignmentType &nonTermAlign)
 {
+
+  //std::cerr << "Adding rule pair "<< src << " : "<< tgt << std::endl;
   pair<DictionaryType::iterator, bool> ret = m_ttable.insert(make_pair(src, vector<ChartTranslation>()));
   vector<ChartTranslation> &translations = ret.first->second;
   size_t tgtID = AddTargetPhrase(tgt);

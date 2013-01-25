@@ -7,7 +7,7 @@
  * Implementation note: define USE_UNORDERED_MAP to use std::tr1::unordered_map
  * instead std::map for storage of lossy counted items.
  *
- * $Id$
+ * $Id: LossyCounter.h,v 1.1 2012/10/07 13:43:06 braunefe Exp $
  */
 
 #ifndef LOSSYCOUNTER_H

@@ -4,7 +4,7 @@
  *
  * (C) Ceslav Przywara, UFAL MFF UK, 2011
  *
- * $Id$
+ * $Id: IndexedPhrasesPair.h,v 1.1 2012/10/07 13:43:06 braunefe Exp $
  *
  * TODO:
  * - current unordered_map implementation is terribly slow. More sophisticated

@@ -53,7 +53,6 @@ public:
   bool gzOutput;
   bool unpairedExtractFormat;
   bool conditionOnTargetLhs;
- 
   
 
   //new : size of context as options

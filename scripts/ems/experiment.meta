@@ -582,7 +582,7 @@ tune
 	in: filtered-config input reference
 	out: weight-config
 	ignore-if: use-hiero
-	qsub-script: yes
+	qsub-script: no
 	default-name: tuning/moses.ini
 	rerun-on-change: decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
@@ -597,7 +597,7 @@ hiero-tune
 	in: TRAINING:hiero-config input reference
 	out: hiero-weight-config
 	ignore-unless: use-hiero
-	qsub-script: yes
+	qsub-script: no
 	default-name: hiero-tuning/mert
 	rerun-on-change: nbest
 	template: $hiero-mert --nbest $nbest --decoder $hiero-decoder --workdir OUT IN --source-file IN1 --ref-files "IN2*" --no-test
@@ -686,7 +686,7 @@ decode
 	in: filtered-config input
 	out: system-output
 	default-name: evaluation/output
-	qsub-script: yes
+	qsub-script: no
 	ignore-if: use-hiero
 	rerun-on-change: decoder decoder-settings nbest report-segmentation report-precision-by-coverage
 	error: Translation was not performed correctly
@@ -695,9 +695,9 @@ hiero-decode
 	in: TUNING:hiero-config-with-reused-weights input
 	out: system-output
 	default-name: evaluation/output
-	qsub-script: yes
+	qsub-script: no
 	ignore-unless: use-hiero
-	template: $hiero-parallelizer -e OUT.edir -r -- $hiero-decoder -c IN < IN1 > OUT
+	template: $hiero-parallelizer -e OUT.edir -r -- $hiero-decoder -c IN --input-file IN1 > OUT
 	rerun-on-change: hiero-decoder
 remove-markup
 	in: system-output

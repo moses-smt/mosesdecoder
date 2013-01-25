@@ -1,4 +1,4 @@
-// $Id$
+// $Id: ScoreIndexManager.h,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 
 #ifndef moses_ScoreIndexManager_h
 #define moses_ScoreIndexManager_h

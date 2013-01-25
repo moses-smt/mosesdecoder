@@ -2,7 +2,7 @@
 /*
  * Thread management for memcached.
  *
- *  $Id$
+ *  $Id: thread.c,v 1.1 2012/10/07 13:43:06 braunefe Exp $
  */
 #include "lmserver.h"
 #include <stdio.h>

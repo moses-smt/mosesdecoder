@@ -1,4 +1,4 @@
-// $Id$
+// $Id: PhraseDictionaryOnDisk.h,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 // vim:tabstop=2
 /***********************************************************************
  Moses - factored phrase-based language decoder

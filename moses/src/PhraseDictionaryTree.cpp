@@ -1,4 +1,4 @@
-// $Id$
+// $Id: PhraseDictionaryTree.cpp,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 // vim:tabstop=2
 #include "PhraseDictionaryTree.h"
 #include <map>

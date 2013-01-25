@@ -1,4 +1,4 @@
-// $Id: ThreadPool.h 3045 2010-04-05 13:07:29Z hieuhoang1972 $
+// $Id: ThreadPool.h,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder

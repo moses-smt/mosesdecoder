@@ -88,6 +88,26 @@ inline std::string Replace(const std::string& str,
   return newStr;
 }
 
+// speeded up version of above
+inline void Tokenize(std::vector<std::string> &output
+                     , const std::string& str
+                     , const std::string& delimiters = " \t")
+{
+  // Skip delimiters at beginning.
+  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
+  // Find first "non-delimiter".
+  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+
+  while (std::string::npos != pos || std::string::npos != lastPos) {
+    // Found a token, add it to the vector.
+    output.push_back(str.substr(lastPos, pos - lastPos));
+    // Skip delimiters.  Note the "not_of"
+    lastPos = str.find_first_not_of(delimiters, pos);
+    // Find next "non-delimiter"
+    pos = str.find_first_of(delimiters, lastPos);
+  }
+}
+
 ofstream extractFile;
 ofstream extractFileInv;
 ofstream extractFilePsdInfo;
@@ -1037,27 +1057,19 @@ void writeRulesToFile(int sentID)
 {
     vector<ExtractedRule>::const_iterator rule;
     for(rule = extractedRules.begin(); rule != extractedRules.end(); rule++ ) {
+
+    	//std::cout << "Handling extracted rule : " << rule->source << " : " << rule->target << " : " << rule->alignment << std::endl;
+
         if (rule->count == 0)
             continue;
 
-        //FB: todo : handle right context
-
-        //write contexts to file
-        extractFile << rule->leftContext
-        << rule->source << " ||| "
-        //<< rule->rightContext
-        << rule->target << " ||| "
-        << rule->alignment << " ||| "
-        << rule->count;
-        if (options.outputNTLengths) {
-            extractFile << " ||| ";
-            rule->OutputNTLengths(extractFile);
-        }
-        extractFile << "\n";
+        extractFile << rule->source << " ||| "
+                << rule->target << " ||| "
+                << rule->alignment << " ||| "
+                << rule->count << " \n";
 
         if (!options.onlyDirectFlag) {
             extractFileInv << rule->target << " ||| "
-            << rule->leftContext
             << rule->source << " ||| "
             //<< rule->rightContext
             << rule->alignmentInv << " ||| "
@@ -1066,13 +1078,46 @@ void writeRulesToFile(int sentID)
 
         if (options.outputPsdInfo)
         {
-          extractFilePsdInfo << sentID << "\t"
+
+        //Annotate non terminals on target side with position of aligned non terminal on source
+        vector<string> tokenizedSource;
+        vector<string> tokenizedTarget;
+        vector<string> tokenizedAlignments;
+        Tokenize(tokenizedSource, rule->source);
+        Tokenize(tokenizedTarget, rule->target);
+        Tokenize(tokenizedAlignments, rule->alignment);
+        string newTarget = "";
+
+       for (int wordPos = 0 ; wordPos < tokenizedSource.size() - 1 ; wordPos++) {
+    	   	   string &sourceWord = tokenizedSource[wordPos];
+    	   	   if (sourceWord.substr(0, 1) == "[" && sourceWord.substr(sourceWord.size()-1, 1) == "]") {
+    	   		   //std::cout << "Found word position : " << wordPos << std::endl;
+
+        		 	//find source into alignment
+        		 	for(size_t alignPos = 0; alignPos < tokenizedAlignments.size(); alignPos++)
+        		 	{
+        		 		if(atoi(tokenizedAlignments[alignPos].substr(0,1).c_str()) == wordPos)
+        		 		{
+        		 			int targetAlign = atoi(tokenizedAlignments[alignPos].substr(tokenizedAlignments[alignPos].size()-1,1).c_str());
+        		 			//std::cout << "Found target align : " << targetAlign << std::endl;
+        		 			tokenizedTarget[targetAlign].append(IntToString(wordPos));
+        		 		}
+        		 	}
+        	  }
+       }
+       for (int wordPos = 0 ; wordPos < tokenizedTarget.size(); wordPos++) {
+          	 newTarget.append(tokenizedTarget[wordPos]);
+		 if(wordPos != tokenizedTarget.size() -1)
+		   {newTarget.append(" ");}
+             }
+
+       extractFilePsdInfo << sentID << "\t"
           << rule->startS << "\t"
           << rule->endS << "\t"
           << rule->startT << "\t"
           << rule->endT << "\t"
           << rule->source << "\t"
-          << rule->target << endl;
+          << newTarget << endl;
         }
     }
 }

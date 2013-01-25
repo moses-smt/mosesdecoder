@@ -1,4 +1,4 @@
-// $Id$
+// $Id: IOWrapper.cpp,v 1.1 2012/10/07 13:43:06 braunefe Exp $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -189,6 +189,8 @@ int IOWrapper::ReadContext(std::istream& in, InputType* input)
     string line;
     if (getline(in, line, '\n').eof())
     return 0;
+
+    //std::cerr << "READING CONTEXT : " << line << std::endl;
 
     vector<string> words = Tokenize(line, " ");
     for (size_t i = 0; i < words.size(); i++) {

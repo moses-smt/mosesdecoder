@@ -11,7 +11,8 @@ sub systemCheck($);
 sub GetSourcePhrase($);
 sub NumStr($);
 
-my $SIGTEST_SPLIT_LINES = 2000000;
+#FB : constant modified because of RAM consumption
+my $SIGTEST_SPLIT_LINES = 125000;
 
 print "Started ".localtime() ."\n";
 

@@ -1,4 +1,4 @@
-// $Id: InputFileStream.h 2939 2010-02-24 11:15:44Z jfouet $
+// $Id: InputFileStream.h,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 
 /***********************************************************************
  Moses - factored phrase-based language decoder

@@ -86,6 +86,7 @@ project : requirements
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
+  <library>boost_iostreams
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).

@@ -1,4 +1,4 @@
-// $Id$
+// $Id: ObjectPool.h,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 
 /* ---------------------------------------------------------------- */
 /* Copyright 2005 (c) by RWTH Aachen - Lehrstuhl fuer Informatik VI */

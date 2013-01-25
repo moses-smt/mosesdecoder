@@ -1,4 +1,4 @@
-// $Id: InputFileStream.cpp 2780 2010-01-29 17:11:17Z bojar $
+// $Id: InputFileStream.cpp,v 1.1 2012/10/07 13:43:06 braunefe Exp $
 
 /***********************************************************************
  Moses - factored phrase-based language decoder

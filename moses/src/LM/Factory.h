@@ -1,4 +1,4 @@
-// $Id$
+// $Id: Factory.h,v 1.1 2012/10/07 13:43:05 braunefe Exp $
 
 #ifndef moses_LanguageModelFactory_h
 #define moses_LanguageModelFactory_h

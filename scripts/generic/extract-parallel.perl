@@ -12,6 +12,8 @@ sub NumStr($);
 
 print "Started ".localtime() ."\n";
 
+die "FATAL: wrong usage\n" unless defined($ARGV[7]);
+
 my $numParallel= $ARGV[0];
 $numParallel = 1 if $numParallel < 1;
 
@@ -157,7 +159,7 @@ my @psd_lines;
 if ($outputPSD) {
     # need to renumber sentence ids in PSD output, (mis)use the parent process to do this...
 
-    open(OUTPSD, "| gzip -c > $extract.psd.gz") or die "failed to open $extract.psd.gz output pipe";
+    open(OUTPSD, "| gzip -c > $extract.psd.unsorted.gz") or die "failed to open $extract.psd.unsorted.gz output pipe";
     my $lineOffset = 0;
     for (my $i = 0; $i < $numParallel; ++$i)
     {
@@ -175,14 +177,18 @@ if ($outputPSD) {
 
 	$lineOffset += `cat $TMPDIR/source.$numStr | wc -l`;
     }
-    print STDERR "closing $extract.psd.gz pipe";
-    close(OUTPSD) or die "failed to close $extract.psd.gz output pipe";
+    print STDERR "closing $extract.psd.unsorted.gz pipe";
+    close(OUTPSD) or die "failed to close $extract.psd.unsorted.gz output pipe";
 }
 
 # wait for all sorting to finish
 foreach (@children) {
 	waitpid($_, 0);
 }
+
+#sort the PSD file numeric - in the future this will not be necessary once PSD feature extraction does not require sorted input
+print STDERR "WARNING, sorting PSD using LC_ALL=C $sortCmd -T $TMPDIR , if not parallel this will be slow\n";
+systemCheck("zcat $extract.psd.unsorted.gz | LC_ALL=C $sortCmd -T $TMPDIR -k1,1n -k2,2n -k3,3n -k4,4n -k5,5n | gzip -9 > $extract.psd.gz");
 
 # delete temporary files
 $cmd = "rm -rf $TMPDIR \n";

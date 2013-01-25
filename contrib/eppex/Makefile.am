@@ -1,6 +1,6 @@
 # eppex - epochal phrase table extraction for Statistical Machine Translation
 # Ceslav Przywara, UFAL MFF UK, Prague, 2011
-# $Id: $
+# $Id: Makefile.am,v 1.1 2012/10/07 13:43:06 braunefe Exp $
 
 # Process this file with automake to produce Makefile.in
 

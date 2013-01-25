@@ -1,4 +1,4 @@
-// $Id$
+// $Id: ScoreProducer.h,v 1.1 2012/10/07 13:43:03 braunefe Exp $
 
 #ifndef moses_ScoreProducer_h
 #define moses_ScoreProducer_h

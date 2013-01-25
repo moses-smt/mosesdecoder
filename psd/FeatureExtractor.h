@@ -30,6 +30,13 @@ class ExtractorConfig
     inline bool GetTargetInternal() const { return m_targetInternal; }
     inline bool GetSourceIndicator() const { return m_sourceIndicator; }
     inline bool GetTargetIndicator() const { return m_targetIndicator; }
+    inline bool GetSourceTargetIndicatorSyntax() const { return m_sourceTargetIndicatorSyntax; }
+    inline bool GetSourceTargetIndicatorInternal() const { return m_sourceTargetIndicatorInternal; }
+    inline bool GetSourceTargetIndicatorBoW() const { return m_sourceTargetIndicatorBoW; }
+    inline bool GetSourceTargetIndicatorPaired() const { return m_sourceTargetIndicatorPaired; }
+    inline bool GetSourceTargetIndicatorContext() const { return m_sourceTargetIndicatorContext; }
+    inline bool GetSourceTargetIndicatorMostFrequent() const { return m_sourceTargetIndicatorMostFrequent;}
+    inline bool GetSourceTargetIndicatorScore() const { return m_sourceTargetIndicatorScore; }
     inline bool GetSyntaxParent() const { return m_syntaxParent; }
     inline bool GetPaired() const         { return m_paired; }
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
@@ -47,7 +54,9 @@ class ExtractorConfig
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal,
          m_syntaxParent, m_mostFrequent,
-         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic;
+         m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTargetIndicatorSyntax, m_sourceTargetIndicatorInternal,
+         m_sourceTargetIndicatorBoW, m_sourceTargetIndicatorPaired, m_sourceTargetIndicatorContext, m_sourceTargetIndicatorMostFrequent,
+         m_sourceTargetIndicatorScore, m_sourceTopic;
 
     size_t m_windowSize;
     std::vector<size_t> m_factors, m_scoreIndexes;
@@ -94,7 +103,7 @@ public:
     const std::vector<Translation> &translations,
     std::vector<float> &losses);
 
-  void GenerateFeaturesChart(FeatureConsumer *fc,
+  void GenerateFeaturesChartLhs(FeatureConsumer *fc,
     const ContextType &context,
     const std::string &sourceSide,
     const std::vector<std::string> &parentLabels,
@@ -104,6 +113,17 @@ public:
     size_t spanEnd,
     const std::vector<ChartTranslation> &translations,
     std::vector<float> &losses);
+
+  void GenerateFeaturesChart(FeatureConsumer *fc,
+     const ContextType &context,
+     const std::string &sourceSide,
+     const std::vector<std::string> &parentLabels,
+     const std::string parent,
+     const std::string span,
+     size_t spanStart,
+     size_t spanEnd,
+     const std::vector<ChartTranslation> &translations,
+     std::vector<float> &losses);
 
 private:
   const TargetIndexType &m_targetIndex;
@@ -115,10 +135,22 @@ private:
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateInternalFeaturesChart(const std::vector<std::string> &span, FeatureConsumer *fc, AlignmentType a);
-  void GenerateSyntaxFeatures(const std::vector<std::string> &syntaxLabels, const std::string parent,
+  void GenerateLhsSyntaxFeatures(const std::vector<std::string> &syntaxLabels, const std::string parent,
                               const std::string span, FeatureConsumer *fc);
+  //Generate syntax features for each non-terminal
+  void GenerateRhsSyntaxFeatures(const std::vector<std::vector<std::string> > &syntaxLabelsPerNonTerm, const std::vector<std::string> parents,
+                                const std::vector<std::string> spans, FeatureConsumer *fc);
   void GenerateIndicatorFeature(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateIndicatorFeatureChart(const std::vector<std::string> &span, FeatureConsumer *fc,AlignmentType a);
+  void GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
+		  const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc,AlignmentType nonTermAlign,
+		  		const std::vector<std::string> &syntaxLabel, const std::string parent, const std::string span);
+  void GenerateSourceTargetIndicatorFeatureWithInternalFeaturesChart(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc, AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorFeatureWithBagOfWords(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc, AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorFeatureWithPairedFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignTerm, const AlignmentType &alignNonTerm, FeatureConsumer *fc);
+  void GenerateSourceTargetIndicatorFeatureWithContext(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc, AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorMostFrequent(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc,AlignmentType nonTermAlign);
+  void GenerateSourceTargetIndicatorFeatureWithScoreFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignNonTerm, const std::vector<float> scores, FeatureConsumer *fc);
   void GenerateSourceTopicFeatures(const std::vector<std::string> &wordSpan, const std::vector<std::string> &sourceTopics, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,

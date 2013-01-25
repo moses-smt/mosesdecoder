@@ -1,4 +1,4 @@
-// $Id$
+// $Id: TargetPhrase.cpp,v 1.2 2012/10/11 12:39:52 braunefe Exp $
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -273,7 +273,6 @@ void TargetPhrase::AddStatelessScore(const ScoreComponentCollection &score)
 {
   m_scoreBreakdown.PlusEquals(score);
   AddToFullScore(score.GetWeightedScore());
-
 }
 
 void TargetPhrase::AddToFullScore(const float score)
