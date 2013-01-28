@@ -66,7 +66,7 @@ class PackedArray
       std::memcpy(m_storage, c.m_storage, m_storageSize * sizeof(D));
     }
     
-    ~PackedArray()
+    virtual ~PackedArray()
     {
       delete [] m_storage;
       m_size = 0;

@@ -30,6 +30,7 @@ class LexicalReorderingTableCreator {
   private:
     std::string m_inPath;
     std::string m_outPath;
+    std::string m_tempfilePath;
     
     std::FILE* m_outFile;
     
@@ -51,8 +52,8 @@ class LexicalReorderingTableCreator {
     std::vector<ScoreCounter*> m_scoreCounters;
     std::vector<ScoreTree*> m_scoreTrees;
     
-    StringVector<unsigned char, unsigned long, MmapAllocator> m_encodedScores;
-    StringVector<unsigned char, unsigned long, MmapAllocator> m_compressedScores;
+    StringVector<unsigned char, unsigned long, MmapAllocator>* m_encodedScores;
+    StringVector<unsigned char, unsigned long, MmapAllocator>* m_compressedScores;
     
     std::priority_queue<PackedItem> m_queue;
     long m_lastFlushedLine;
@@ -84,6 +85,7 @@ class LexicalReorderingTableCreator {
   public:
     LexicalReorderingTableCreator(std::string inPath,
                                   std::string outPath,
+                                  std::string tempfilePath,
                                   size_t orderBits = 10,
                                   size_t fingerPrintBits = 16,
                                   bool multipleScoreTrees = true,
