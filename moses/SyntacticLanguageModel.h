@@ -17,11 +17,7 @@ namespace Moses
   class SyntacticLanguageModel : public StatefulFeatureFunction {
 
   public:
-
-    SyntacticLanguageModel(const std::vector<std::string>& filePaths,
-			   const std::vector<float>& weights,
-			   const FactorType factorType,
-			   const size_t beamWidth);
+    SyntacticLanguageModel(const std::string &line);
 
     ~SyntacticLanguageModel();
 

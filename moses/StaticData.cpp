@@ -628,7 +628,13 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
-
+#ifdef HAVE_SYNLM
+    else if (feature == "SyntacticLanguageModel") {
+      SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
+#endif
     else {
       UserMessage::Add("Unknown feature function");
       return false;
@@ -638,13 +644,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
   CollectFeatureFunctions();
   m_fLMsLoaded = true;
-
-#ifdef HAVE_SYNLM
-	if (m_parameter->GetParam("slmodel-file").size() > 0) {
-	  if (!LoadSyntacticLanguageModel()) return false;
-	}
-#endif
-
 	
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
@@ -739,61 +738,6 @@ StaticData::~StaticData()
   // memory pools
   Phrase::FinalizeMemPool();
 }
-
-#ifdef HAVE_SYNLM
-  bool StaticData::LoadSyntacticLanguageModel() {
-    cerr << "Loading syntactic language models..." << std::endl;
-    
-    const vector<float> weights = Scan<float>(m_parameter->GetParam("weight-slm"));
-    const vector<string> files = m_parameter->GetParam("slmodel-file");
-    
-    const FactorType factorType = (m_parameter->GetParam("slmodel-factor").size() > 0) ?
-      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-factor")[0]))
-      : 0;
-
-    const size_t beamWidth = (m_parameter->GetParam("slmodel-beam").size() > 0) ?
-      TransformScore(Scan<int>(m_parameter->GetParam("slmodel-beam")[0]))
-      : 500;
-
-    if (files.size() < 1) {
-      cerr << "No syntactic language model files specified!" << std::endl;
-      return false;
-    }
-
-    // check if feature is used
-    if (weights.size() >= 1) {
-
-      //cout.setf(ios::scientific,ios::floatfield);
-      //cerr.setf(ios::scientific,ios::floatfield);
-      
-      // create the feature
-      m_syntacticLanguageModel = new SyntacticLanguageModel(files,weights,factorType,beamWidth); 
-
-      /* 
-      /////////////////////////////////////////
-      // BEGIN LANE's UNSTABLE EXPERIMENT :)
-      //
-
-      double ppl = m_syntacticLanguageModel->perplexity();
-      cerr << "Probability is " << ppl << endl;
-
-
-      //
-      // END LANE's UNSTABLE EXPERIMENT
-      /////////////////////////////////////////
-      */
-
-
-      if (m_syntacticLanguageModel==NULL) {
-	return false;
-      }
-
-    }
-    
-    return true;
-
-  }
-#endif
 
 /* Doesn't load phrase tables any more. Just creates the features. */
 bool StaticData::LoadPhraseTables()

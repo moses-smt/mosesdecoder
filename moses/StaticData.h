@@ -60,10 +60,6 @@ class DecodeStep;
 class UnknownWordPenaltyProducer;
 class MetaScoreProducer;
 class MetaFeatureProducer;
-
-#ifdef HAVE_SYNLM
-class SyntacticLanguageModel;
-#endif
 class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
@@ -87,9 +83,6 @@ protected:
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   LMList									m_languageModel;
   ScoreComponentCollection m_allWeights;
-#ifdef HAVE_SYNLM
-	SyntacticLanguageModel* m_syntacticLanguageModel;
-#endif
 
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
@@ -233,10 +226,7 @@ protected:
 
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
-#ifdef HAVE_SYNLM
-  //! load syntactic language model
-	bool LoadSyntacticLanguageModel();
-#endif
+
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load decoding steps
