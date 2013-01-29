@@ -231,8 +231,6 @@ protected:
   bool LoadPhraseTables();
   //! load decoding steps
   bool LoadDecodeGraphs();
-  //References used for scoring feature (eg BleuScoreFeature) for online training
-  bool LoadReferences();
 
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;

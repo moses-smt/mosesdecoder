@@ -70,6 +70,75 @@ void BleuScoreState::AddNgramCountAndMatches(std::vector< size_t >& counts,
 	}
 }
 
+
+BleuScoreFeature::BleuScoreFeature(const std::string &line)
+:StatefulFeatureFunction("BleuScoreFeature",1),
+m_enabled(true),
+m_sentence_bleu(true),
+m_simple_history_bleu(false),
+m_count_history(BleuScoreState::bleu_order),
+m_match_history(BleuScoreState::bleu_order),
+m_source_length_history(0),
+m_target_length_history(0),
+m_ref_length_history(0),
+m_scale_by_input_length(true),
+m_scale_by_avg_input_length(false),
+m_scale_by_inverse_length(false),
+m_scale_by_avg_inverse_length(false),
+m_scale_by_x(1),
+m_historySmoothing(0.9),
+m_smoothing_scheme(PLUS_POINT_ONE) {}
+{
+  vector<string> referenceFiles = m_parameter->GetParam("references");
+  if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
+    UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
+    return false;
+  }
+  if (!referenceFiles.size()) {
+    return true;
+  }
+  if (bleuWeightStr.size() > 1) {
+    UserMessage::Add("Can only specify one weight for the bleu feature");
+    return false;
+  }
+
+  float bleuWeight = Scan<float>(bleuWeightStr[0]);
+  BleuScoreFeature *bleuScoreFeature = new BleuScoreFeature();
+  SetWeight(bleuScoreFeature, bleuWeight);
+
+  cerr << "Loading reference file " << referenceFiles[0] << endl;
+  vector<vector<string> > references(referenceFiles.size());
+  for (size_t i =0; i < referenceFiles.size(); ++i) {
+    ifstream in(referenceFiles[i].c_str());
+    if (!in) {
+      stringstream strme;
+      strme << "Unable to load references from " << referenceFiles[i];
+      UserMessage::Add(strme.str());
+      return false;
+    }
+    string line;
+    while (getline(in,line)) {
+/*      if (GetSearchAlgorithm() == ChartDecoding) {
+      stringstream tmp;
+      tmp << "<s> " << line << " </s>";
+      line = tmp.str();
+      }*/
+      references[i].push_back(line);
+    }
+    if (i > 0) {
+      if (references[i].size() != references[i-1].size()) {
+        UserMessage::Add("Reference files are of different lengths");
+        return false;
+      }
+    }
+    in.close();
+  }
+  //Set the references in the bleu feature
+  bleuScoreFeature->LoadReferences(references);
+
+
+}
+
 void BleuScoreFeature::PrintHistory(std::ostream& out) const {
 	out << "source length history=" << m_source_length_history << endl;
 	out << "target length history=" << m_target_length_history << endl;

@@ -628,6 +628,11 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
+    else if (feature == "BleuScoreFeature") {
+      BleuScoreFeature *model = new BleuScoreFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+    }
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
       SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
@@ -647,7 +652,6 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 	
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
-  if (!LoadReferences()) return  false;
 
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
@@ -1034,61 +1038,6 @@ bool StaticData::LoadDecodeGraphs()
 
   return true;
 }
-
-bool StaticData::LoadReferences()
-{
-  vector<string> bleuWeightStr = m_parameter->GetParam("weight-bl");
-  vector<string> referenceFiles = m_parameter->GetParam("references");
-  if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
-    UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
-    return false;
-  }
-  if (!referenceFiles.size()) {
-    return true;
-  }
-  if (bleuWeightStr.size() > 1) {
-    UserMessage::Add("Can only specify one weight for the bleu feature");
-    return false;
-  }
-
-  float bleuWeight = Scan<float>(bleuWeightStr[0]);
-  BleuScoreFeature *bleuScoreFeature = new BleuScoreFeature();
-  SetWeight(bleuScoreFeature, bleuWeight);
-
-  cerr << "Loading reference file " << referenceFiles[0] << endl;
-  vector<vector<string> > references(referenceFiles.size());
-  for (size_t i =0; i < referenceFiles.size(); ++i) {
-    ifstream in(referenceFiles[i].c_str());
-    if (!in) {
-      stringstream strme;
-      strme << "Unable to load references from " << referenceFiles[i];
-      UserMessage::Add(strme.str());
-      return false;
-    }
-    string line;
-    while (getline(in,line)) {
-/*      if (GetSearchAlgorithm() == ChartDecoding) {
-    	stringstream tmp;
-    	tmp << "<s> " << line << " </s>";
-    	line = tmp.str();
-      }*/
-      references[i].push_back(line);
-    }
-    if (i > 0) {
-      if (references[i].size() != references[i-1].size()) {
-        UserMessage::Add("Reference files are of different lengths");
-        return false;
-      }
-    }
-    in.close();
-  }
-  //Set the references in the bleu feature
-  bleuScoreFeature->LoadReferences(references);
-
-  return true;
-}
-
-
 
 const TranslationOptionList* StaticData::FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const
 {
