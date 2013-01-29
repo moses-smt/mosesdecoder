@@ -118,7 +118,7 @@ protected:
   m_constraintFileName;
 
   std::string									m_nBestFilePath, m_latticeSamplesFilePath;
-  bool                        m_fLMsLoaded, m_labeledNBestList,m_nBestIncludesSegmentation;
+  bool                        m_labeledNBestList,m_nBestIncludesSegmentation;
   bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
   bool m_wordDeletionEnabled;
 

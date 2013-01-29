@@ -103,8 +103,7 @@ int GetFeatureIndex(std::map<string, int> &map, const string &featureName)
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_fLMsLoaded(false)
-  ,m_sourceStartPosMattersForRecombination(false)
+  :m_sourceStartPosMattersForRecombination(false)
   ,m_inputType(SentenceInput)
   ,m_detailedTranslationReportingFilePath()
   ,m_onlyDistinctNBest(false)
@@ -648,8 +647,7 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
   }
 
   CollectFeatureFunctions();
-  m_fLMsLoaded = true;
-	
+
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
 
@@ -749,7 +747,7 @@ bool StaticData::LoadPhraseTables()
   VERBOSE(2,"Creating phrase table features" << endl);
 
   // language models must be loaded prior to loading phrase tables
-  CHECK(m_fLMsLoaded);
+
   // load phrase translation tables
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
