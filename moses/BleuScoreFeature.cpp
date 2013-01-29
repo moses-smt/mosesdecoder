@@ -1,6 +1,7 @@
 #include "BleuScoreFeature.h"
 
 #include "StaticData.h"
+#include "UserMessage.h"
 
 using namespace std;
 
@@ -87,56 +88,49 @@ m_scale_by_inverse_length(false),
 m_scale_by_avg_inverse_length(false),
 m_scale_by_x(1),
 m_historySmoothing(0.9),
-m_smoothing_scheme(PLUS_POINT_ONE) {}
+m_smoothing_scheme(PLUS_POINT_ONE)
 {
-  vector<string> referenceFiles = m_parameter->GetParam("references");
-  if ((!referenceFiles.size() && bleuWeightStr.size()) || (referenceFiles.size() && !bleuWeightStr.size())) {
-    UserMessage::Add("You cannot use the bleu feature without references, and vice-versa");
-    return false;
-  }
-  if (!referenceFiles.size()) {
-    return true;
-  }
-  if (bleuWeightStr.size() > 1) {
-    UserMessage::Add("Can only specify one weight for the bleu feature");
-    return false;
-  }
+  vector<string> toks = Tokenize(line);
+  for (size_t i = 0; i < toks.size(); ++i) {
+    vector<string> args = Tokenize(toks[i], "=");
+    CHECK(args.size() == 2);
 
-  float bleuWeight = Scan<float>(bleuWeightStr[0]);
-  BleuScoreFeature *bleuScoreFeature = new BleuScoreFeature();
-  SetWeight(bleuScoreFeature, bleuWeight);
+    if (args[0] == "references") {
+      vector<string> referenceFiles = Tokenize(args[1]);
+      CHECK(referenceFiles.size());
+      vector<vector<string> > references(referenceFiles.size());
 
-  cerr << "Loading reference file " << referenceFiles[0] << endl;
-  vector<vector<string> > references(referenceFiles.size());
-  for (size_t i =0; i < referenceFiles.size(); ++i) {
-    ifstream in(referenceFiles[i].c_str());
-    if (!in) {
-      stringstream strme;
-      strme << "Unable to load references from " << referenceFiles[i];
-      UserMessage::Add(strme.str());
-      return false;
-    }
-    string line;
-    while (getline(in,line)) {
-/*      if (GetSearchAlgorithm() == ChartDecoding) {
-      stringstream tmp;
-      tmp << "<s> " << line << " </s>";
-      line = tmp.str();
-      }*/
-      references[i].push_back(line);
-    }
-    if (i > 0) {
-      if (references[i].size() != references[i-1].size()) {
-        UserMessage::Add("Reference files are of different lengths");
-        return false;
-      }
-    }
-    in.close();
-  }
-  //Set the references in the bleu feature
-  bleuScoreFeature->LoadReferences(references);
+      for (size_t i =0; i < referenceFiles.size(); ++i) {
+        ifstream in(referenceFiles[i].c_str());
+        if (!in) {
+          stringstream strme;
+          strme << "Unable to load references from " << referenceFiles[i];
+          UserMessage::Add(strme.str());
+          abort();
+        }
+        string line;
+        while (getline(in,line)) {
+          /*  if (GetSearchAlgorithm() == ChartDecoding) {
+          stringstream tmp;
+          tmp << "<s> " << line << " </s>";
+          line = tmp.str();
+          }
+          */
+          references[i].push_back(line);
+        }
+        if (i > 0) {
+          if (references[i].size() != references[i-1].size()) {
+            UserMessage::Add("Reference files are of different lengths");
+            abort();
+          }
+        }
+        in.close();
+      } // for (size_t i =0; i < referenceFiles.size(); ++i) {
 
-
+      //Set the references in the bleu feature
+      LoadReferences(references);
+    } // if (args[0] == "references") {
+  } // for (size_t i = 0; i < toks.size(); ++i) {
 }
 
 void BleuScoreFeature::PrintHistory(std::ostream& out) const {
