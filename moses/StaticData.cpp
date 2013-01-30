@@ -632,6 +632,13 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
+    else if (feature == "SparsePhraseDictionaryFeature") {
+      SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_sparsePhraseDictionary.push_back(model);
+    }
+
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
       SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
@@ -847,11 +854,9 @@ bool StaticData::LoadPhraseTables()
 
       //optional create sparse phrase feature
       SparsePhraseDictionaryFeature* spdf = NULL; 
-      if (token.size() >= 6 && token[5] == "sparse") {
-          spdf = new SparsePhraseDictionaryFeature();
+      if (m_sparsePhraseDictionary.size() > currDict) {
+        spdf = m_sparsePhraseDictionary[currDict];
       }
-      m_sparsePhraseDictionary.push_back(spdf);
-
 
       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
         implementation
