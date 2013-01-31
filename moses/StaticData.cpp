@@ -635,7 +635,7 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
     else if (feature == "SparsePhraseDictionaryFeature") {
       SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
-      SetWeights(model, weights);
+      //SetWeights(model, weights);
       m_sparsePhraseDictionary.push_back(model);
     }
 

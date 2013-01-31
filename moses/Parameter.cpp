@@ -432,6 +432,18 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
   m_setting.erase("weight-i");
   m_setting.erase(oldWeightName);
 
+  // convert actually pt section
+  if (isParamSpecified("ttable-file")) {
+    PARAM_VEC &ttable = m_setting["ttable-file"];
+    for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
+      string &line = ttable[ttableInd];
+      vector<string> toks = Tokenize(line);
+      if (toks.size() == 6 && toks[5] == "sparse") {
+        AddFeature("SparsePhraseDictionaryFeature");
+      }
+    }
+  }
+
 }
 
 void Parameter::AddFeature(const std::string &line)

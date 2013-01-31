@@ -60,7 +60,6 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.998577284" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="dstruct"/>
-									<listOptionValue builtIn="false" value="rt"/>
 									<listOptionValue builtIn="false" value="flm"/>
 									<listOptionValue builtIn="false" value="lattice"/>
 									<listOptionValue builtIn="false" value="misc"/>
@@ -73,6 +72,7 @@
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
+									<listOptionValue builtIn="false" value="rt"/>
 								</option>
 								<option id="gnu.cpp.link.option.userobjs.1542590830" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/lib64/libboost_system-mt.a&quot;"/>
