@@ -39,7 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    $_SPARSE_TRANSLATION_TABLE, @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_CORPUS, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $IGNORE);
 my $_CORES = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -133,7 +133,8 @@ $_HELP = 1
 		       'baseline-corpus=s' => \$_BASELINE_CORPUS,
 		       'baseline-alignment=s' => \$_BASELINE_ALIGNMENT,
 		       'cores=i' => \$_CORES,
-           'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE
+           'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
+           'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
                );
 
 if ($_HELP) {
@@ -1989,8 +1990,12 @@ sub create_ini {
   }
   print INI "\n# language model weights\n[weight-l]\n";
   my $lmweighttotal = 0.5;
+  my $lmoovweighttotal = 0.1;
   foreach(1..scalar @___LM) {
     printf INI "%.4f\n", $lmweighttotal / scalar @___LM;
+    if ($_LMODEL_OOV_FEATURE) {
+      printf INI "%.4f\n", $lmoovweighttotal / scalar @___LM;
+    }
   }
 
   print INI "\n\n# translation model weights\n[weight-t]\n";
@@ -2032,6 +2037,10 @@ sub create_ini {
   # only set the factor delimiter if it is non-standard
   unless ($___FACTOR_DELIMITER eq '|') {
     print INI "\n# delimiter between factors in input\n[factor-delimiter]\n$___FACTOR_DELIMITER\n\n"
+  }
+
+  if ($_LMODEL_OOV_FEATURE) {
+    print INI "\n# language model OOV feature enabled\n[lmodel-oov-feature]\n1\n\n";
   }
 
   # get addititional content for config file from switch or file
