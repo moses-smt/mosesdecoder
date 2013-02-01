@@ -773,32 +773,18 @@ bool StaticData::LoadPhraseTables()
     }
 
     // MAIN LOOP
-    bool oldFileFormat = false;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
+      //string ptLine = "PhraseModel ";
+
       vector<string>                  token           = Tokenize(translationVector[currDict]);
       const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
 
       if(currDict == 0 && token.size() == 4) {
-        VERBOSE(1, "Warning: Phrase table specification in old 4-field format. Assuming binary phrase tables (type 1)!" << endl);
-        oldFileFormat = true;
-      }
-
-      if((!oldFileFormat && token.size() < 5) || (oldFileFormat && token.size() != 4)) {
-        UserMessage::Add("invalid phrase table specification");
+        UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
         return false;
       }
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-      if(oldFileFormat) {
-        token.push_back(token[3]);
-        token[3] = token[2];
-        token[2] = token[1];
-        token[1] = token[0];
-        token[0] = "1";
-        implementation = Binary;
-      } else
-        implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-
       CHECK(token.size() >= 5);
       //characteristics of the phrase table
 
