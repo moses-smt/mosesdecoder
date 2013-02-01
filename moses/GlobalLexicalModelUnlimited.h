@@ -69,46 +69,6 @@ private:
 
 public:
   GlobalLexicalModelUnlimited(const std::string &line);
-  GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors, const std::vector< FactorType >& outFactors,
-  		bool biasFeature, bool ignorePunctuation, size_t context):
-    StatelessFeatureFunction("glm",ScoreProducer::unlimited),
-  	m_inputFactors(inFactors),
-    m_outputFactors(outFactors),
-    m_unrestricted(true),
-    m_sourceContext(false),
-    m_biphrase(false),
-    m_bitrigger(false),
-    m_biasFeature(biasFeature),
-    m_sparseProducerWeight(1),
-    m_ignorePunctuation(ignorePunctuation)
-  {
-  	std::cerr << "Creating global lexical model unlimited.. ";
-
-
-		switch(context) {
-			case 1:
-				m_sourceContext = true;
-				std::cerr << "using source context.. ";
-				break;
-			case 2:
-				m_biphrase = true;
-				std::cerr << "using biphrases.. ";
-				break;
-			case 3:
-				std::cerr << "using bitriggers.. ";
-				m_bitrigger = true;
-				break;
-		}
-
-  	// compile a list of punctuation characters
-  	if (m_ignorePunctuation) {
-  		std::cerr << "ignoring punctuation.. ";
-  		char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
-  		for (size_t i=0; i < sizeof(punctuation)-1; ++i)
-  			m_punctuationHash[punctuation[i]] = 1;
-  	}
-  	std::cerr << "done." << std::endl;
-  }
 
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 

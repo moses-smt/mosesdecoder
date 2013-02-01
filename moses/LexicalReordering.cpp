@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 LexicalReordering::LexicalReordering(const std::string &line)
-: StatefulFeatureFunction("LexicalReordering", 6)
+: StatefulFeatureFunction("LexicalReordering", 6, line)
 {
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 

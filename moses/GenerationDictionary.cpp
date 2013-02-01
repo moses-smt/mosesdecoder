@@ -35,7 +35,7 @@ namespace Moses
 {
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-: Dictionary(2), DecodeFeature("Generation",2)
+: Dictionary(2), DecodeFeature("Generation",2, line)
 {
   vector<string> tokens = Tokenize(line);
 

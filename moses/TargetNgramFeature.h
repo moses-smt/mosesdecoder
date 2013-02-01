@@ -182,20 +182,6 @@ class TargetNgramFeature : public StatefulFeatureFunction {
 public:
   TargetNgramFeature(const std::string &line);
 
-	TargetNgramFeature(FactorType factorType = 0, size_t n = 3, bool lower_ngrams = true):
-     StatefulFeatureFunction("TargetNgramFeature", ScoreProducer::unlimited),
-     m_factorType(factorType),
-     m_n(n),
-     m_lower_ngrams(lower_ngrams),
-     m_sparseProducerWeight(1)
-  {
-    FactorCollection& factorCollection = FactorCollection::Instance();
-    const Factor* bosFactor = factorCollection.AddFactor(Output,m_factorType,BOS_);
-    m_bos.SetFactor(m_factorType,bosFactor);
-    m_baseName = GetScoreProducerDescription();
-    m_baseName.append("_");
-  }
-
 	bool Load(const std::string &filePath);
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }

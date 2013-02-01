@@ -33,7 +33,7 @@ class LanguageModel;
 LanguageModel *ConstructKenLM(const std::string &line);
 
 //! This will also load. Returns a templated KenLM class
-LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy);
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
 } // namespace Moses
 

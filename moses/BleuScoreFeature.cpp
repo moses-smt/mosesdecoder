@@ -73,7 +73,7 @@ void BleuScoreState::AddNgramCountAndMatches(std::vector< size_t >& counts,
 
 
 BleuScoreFeature::BleuScoreFeature(const std::string &line)
-:StatefulFeatureFunction("BleuScoreFeature",1),
+:StatefulFeatureFunction("BleuScoreFeature",1, line),
 m_enabled(true),
 m_sentence_bleu(true),
 m_simple_history_bleu(false),
@@ -90,10 +90,8 @@ m_scale_by_x(1),
 m_historySmoothing(0.9),
 m_smoothing_scheme(PLUS_POINT_ONE)
 {
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 0; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    CHECK(args.size() == 2);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
     if (args[0] == "references") {
       vector<string> referenceFiles = Tokenize(args[1]);

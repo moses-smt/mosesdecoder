@@ -12,7 +12,7 @@ using namespace std;
 namespace Moses {
 
 PhrasePairFeature::PhrasePairFeature(const std::string &line)
-:StatelessFeatureFunction("PhrasePairFeature", ScoreProducer::unlimited)
+:StatelessFeatureFunction("PhrasePairFeature", ScoreProducer::unlimited, line)
 {
   std::cerr << "Initializing PhrasePairFeature.." << std::endl;
 

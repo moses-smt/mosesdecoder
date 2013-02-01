@@ -10,7 +10,7 @@ using namespace std;
 namespace Moses
 {
 GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
-: StatelessFeatureFunction("GlobalLexicalModel",1)
+: StatelessFeatureFunction("GlobalLexicalModel",1, line)
 {
   std::cerr << "Creating global lexical model...\n";
 

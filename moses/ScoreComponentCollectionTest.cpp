@@ -32,25 +32,25 @@ BOOST_AUTO_TEST_SUITE(scc)
 
 class MockStatelessFeatureFunction : public StatelessFeatureFunction {
   public:
-    MockStatelessFeatureFunction(const string& desc, size_t n) :
-      StatelessFeatureFunction(desc,n) {}
+    MockStatelessFeatureFunction(const string& desc, size_t n, const string &line) :
+      StatelessFeatureFunction(desc,n, line) {}
     virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
     virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction {
   public:
-    MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1) {}
+    MockSingleFeature(): MockStatelessFeatureFunction("MockSingle",1, "MockSingle") {}
 };
 
 class MockMultiFeature : public MockStatelessFeatureFunction {
   public:
-    MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5) {}
+    MockMultiFeature(): MockStatelessFeatureFunction("MockMulti", 5, "MockMulti") {}
 };
 
 class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
-    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", ScoreProducer::unlimited) {}
+    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", ScoreProducer::unlimited, "MockSparse") {}
 };
 
 

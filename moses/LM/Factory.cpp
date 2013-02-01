@@ -60,7 +60,7 @@ namespace Moses
 
 namespace LanguageModelFactory
 {
-
+/*
 LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                                    , const std::vector<FactorType> &factorTypes
                                    , size_t nGramOrder
@@ -141,6 +141,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
 
   return new LMRefCount(lm);
 }
+*/
 }
 
 }

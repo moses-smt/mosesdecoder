@@ -121,7 +121,9 @@ public:
 
 class LMRefCount : public LanguageModel {
   public:
-    LMRefCount(LanguageModelImplementation *impl) : m_impl(impl) {}
+    LMRefCount(LanguageModelImplementation *impl, const std::string &line)
+    : LanguageModel(line)
+    , m_impl(impl) {}
 
     LanguageModel *Duplicate() const {
       return new LMRefCount(*this);
@@ -159,7 +161,9 @@ class LMRefCount : public LanguageModel {
     LanguageModelImplementation *MosesServerCppShouldNotHaveLMCode() { return m_impl.get(); }
 
   private:
-    LMRefCount(const LMRefCount &copy_from) : m_impl(copy_from.m_impl) {}
+    LMRefCount(const LMRefCount &copy_from)
+    : LanguageModel(copy_from.GetArgLine())
+    , m_impl(copy_from.m_impl) {}
 
     boost::shared_ptr<LanguageModelImplementation> m_impl;
 };

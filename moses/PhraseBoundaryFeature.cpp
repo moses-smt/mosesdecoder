@@ -15,7 +15,7 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 }
 
 PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
-: StatefulFeatureFunction("PhraseBoundaryFeature", ScoreProducer::unlimited)
+: StatefulFeatureFunction("PhraseBoundaryFeature", ScoreProducer::unlimited, line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
 

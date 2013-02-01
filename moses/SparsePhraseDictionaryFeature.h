@@ -16,8 +16,6 @@ class SparsePhraseDictionaryFeature : public StatelessFeatureFunction {
 
 public:
   SparsePhraseDictionaryFeature(const std::string &line);
-  SparsePhraseDictionaryFeature():
-    StatelessFeatureFunction("SparsePhraseDictionaryFeature", ScoreProducer::unlimited) {}
 
   void Evaluate(const PhraseBasedFeatureContext& context,
               ScoreComponentCollection* accumulator) const;

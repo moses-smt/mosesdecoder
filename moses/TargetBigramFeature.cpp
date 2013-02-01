@@ -14,7 +14,7 @@ int TargetBigramState::Compare(const FFState& other) const {
 }
 
 TargetBigramFeature::TargetBigramFeature(const std::string &line)
-:StatefulFeatureFunction("TargetBigramFeature", ScoreProducer::unlimited)
+:StatefulFeatureFunction("TargetBigramFeature", ScoreProducer::unlimited, line)
 {
   std::cerr << "Initializing target bigram feature.." << std::endl;
 

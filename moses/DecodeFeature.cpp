@@ -29,15 +29,21 @@ using namespace std;
 
 namespace Moses
 {
-DecodeFeature::DecodeFeature(  const std::string& description, size_t numScoreComponents)
-: StatelessFeatureFunction(description,numScoreComponents)
+DecodeFeature::DecodeFeature(  const std::string& description
+                            , size_t numScoreComponents
+                            , const std::string &line)
+: StatelessFeatureFunction(description,numScoreComponents, line)
 {
   VERBOSE(2,"DecodeFeature: no factors yet" << std::endl);
 }
 
-DecodeFeature::DecodeFeature(const std::string& description, size_t numScoreComponents, const std::vector<FactorType> &input, const std::vector<FactorType> &output) :
-  StatelessFeatureFunction(description,numScoreComponents),
-  m_input(input), m_output(output)
+DecodeFeature::DecodeFeature(const std::string& description
+                            , size_t numScoreComponents
+                            , const std::vector<FactorType> &input
+                            , const std::vector<FactorType> &output
+                            , const std::string &line)
+: StatelessFeatureFunction(description,numScoreComponents, line)
+, m_input(input), m_output(output)
 {
   m_inputFactors = FactorMask(input);
   m_outputFactors = FactorMask(output);

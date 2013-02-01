@@ -338,14 +338,14 @@ bool StaticData::LoadData(Parameter *parameter)
   // word penalties
   CHECK(m_parameter->GetWeights("WordPenalty", 0).size() == 1);
   float weightWordPenalty       = m_parameter->GetWeights("WordPenalty", 0)[0];
-  m_wpProducer = new WordPenaltyProducer();
+  m_wpProducer = new WordPenaltyProducer("WordPenalty");
 
   SetWeight(m_wpProducer, weightWordPenalty);
 
   const vector<float> &weightsUnknownWord				= m_parameter->GetWeights("UnknownWordPenalty", 0);
   float weightUnknownWord = weightsUnknownWord.size() ? weightsUnknownWord[0] : 1.0;
 
-  m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
+  m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer("UnknownWordPenaltyProducer");
 
 SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
@@ -618,7 +618,7 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
     }
     else if (feature == "IRSTLM") {
       LanguageModelIRST *irstlm = new LanguageModelIRST(line);
-      LanguageModel *model = new LMRefCount(irstlm);
+      LanguageModel *model = new LMRefCount(irstlm, line);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
@@ -930,7 +930,7 @@ void StaticData::LoadPhraseBasedParameters()
   CHECK(distortionWeights.size() == 1);
 
   float weightDistortion = distortionWeights[0];
-  m_distortionScoreProducer = new DistortionScoreProducer();
+  m_distortionScoreProducer = new DistortionScoreProducer("DistortionScoreProducer ");
 
   SetWeight(m_distortionScoreProducer, weightDistortion);
 

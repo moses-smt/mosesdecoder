@@ -54,7 +54,7 @@ size_t PhraseDictionary::GetDictIndex() const
 }
 
 PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
-:DecodeFeature("PhraseModel",5) // TODO not always 5
+:DecodeFeature("PhraseModel",5, line) // TODO not always 5
 ,m_tableLimit(20) // TODO default?
 {
 
@@ -103,7 +103,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
  , size_t tableLimit
  , const std::string &targetFile  // default param
  , const std::string &alignmentsFile) // default param
-  :DecodeFeature("PhraseModel",numScoreComponent,input,output),
+  :DecodeFeature("PhraseModel",numScoreComponent,input,output, "PhraseModel"),
   m_dictIndex(dictIndex),
   m_numInputScores(numInputScores),
   m_filePath(filePath),

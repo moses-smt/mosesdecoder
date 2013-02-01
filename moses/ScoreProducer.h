@@ -20,14 +20,18 @@ class InputType;
 class ScoreProducer
 {
 protected:
-  std::string m_description;
+  std::string m_description, m_argLine;
+  std::vector<std::vector<std::string> > m_args;
   bool m_reportSparseFeatures;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
   ScoreProducer(const ScoreProducer&);  // don't implement
-	ScoreProducer(const std::string& description, size_t numScoreComponents);
+	ScoreProducer(const std::string& description, size_t numScoreComponents, const std::string &line);
+
+	void ParseLine(const std::string &line);
+  size_t FindNumFeatures();
 
 public:
 
@@ -64,6 +68,9 @@ public:
   // clean up temporary memory, called after processing each sentence
   virtual void CleanUpAfterSentenceProcessing(const InputType& source)
   {}
+
+  const std::string &GetArgLine() const
+  { return m_argLine; }
 };
 
 

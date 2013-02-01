@@ -15,7 +15,7 @@ namespace Moses {
 using namespace std;
 
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
-:StatelessFeatureFunction("WordTranslationFeature", ScoreProducer::unlimited)
+:StatelessFeatureFunction("WordTranslationFeature", ScoreProducer::unlimited, line)
 {
   std::cerr << "Initializing word translation feature.. " << endl;
 

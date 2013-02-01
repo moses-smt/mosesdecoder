@@ -14,7 +14,7 @@ namespace Moses {
 using namespace std;
 
 SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
-:StatelessFeatureFunction("swd", ScoreProducer::unlimited),
+:StatelessFeatureFunction("swd", ScoreProducer::unlimited, line),
 m_unrestricted(true)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;

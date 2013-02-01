@@ -15,7 +15,7 @@ class WordsRange;
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
-	DistortionScoreProducer() : StatefulFeatureFunction("Distortion", 1) {}
+	DistortionScoreProducer(const std::string &line) : StatefulFeatureFunction("Distortion", 1, line) {}
 
   float CalculateDistortionScore(const Hypothesis& hypo,
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
@@ -42,7 +42,7 @@ public:
 class WordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	WordPenaltyProducer() : StatelessFeatureFunction("WordPenalty",1) {}
+	WordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("WordPenalty",1, line) {}
 
   virtual void Evaluate(
     const PhraseBasedFeatureContext& context,
@@ -63,7 +63,7 @@ public:
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	UnknownWordPenaltyProducer() : StatelessFeatureFunction("UnknownWordPenalty",1) {}
+	UnknownWordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("UnknownWordPenalty",1, line) {}
 
   virtual bool ComputeValueInTranslationOption() const;
   void Evaluate(  const PhraseBasedFeatureContext& context,
@@ -88,7 +88,7 @@ public:
 class MetaFeatureProducer : public StatelessFeatureFunction
 {
  public:
- MetaFeatureProducer(std::string shortName) : StatelessFeatureFunction("MetaFeature_"+shortName,1), m_shortName(shortName) {}
+ MetaFeatureProducer(std::string shortName, const std::string &line) : StatelessFeatureFunction("MetaFeature_"+shortName,1, line), m_shortName(shortName) {}
 
   std::string m_shortName;
   

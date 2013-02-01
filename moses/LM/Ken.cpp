@@ -62,7 +62,7 @@ struct KenLMState : public FFState {
  */
 template <class Model> class LanguageModelKen : public LanguageModel {
   public:
-    LanguageModelKen(const std::string &file, FactorType factorType, bool lazy);
+    LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
     LanguageModel *Duplicate() const;
 
@@ -137,7 +137,10 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &file, FactorType factorType, bool lazy) : m_factorType(factorType) {
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+:LanguageModel(line)
+,m_factorType(factorType)
+{
   lm::ngram::Config config;
   IFVERBOSE(1) {
     config.messages = &std::cerr;
@@ -158,12 +161,13 @@ template <class Model> LanguageModel *LanguageModelKen<Model>::Duplicate() const
   return new LanguageModelKen<Model>(*this);
 }
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from) :
-    m_ngram(copy_from.m_ngram),
-    // TODO: don't copy this.  
-    m_lmIdLookup(copy_from.m_lmIdLookup),
-    m_factorType(copy_from.m_factorType),
-    m_beginSentenceFactor(copy_from.m_beginSentenceFactor) {
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
+:LanguageModel(copy_from.GetArgLine()),
+m_ngram(copy_from.m_ngram),
+// TODO: don't copy this.
+m_lmIdLookup(copy_from.m_lmIdLookup),
+m_factorType(copy_from.m_factorType),
+m_beginSentenceFactor(copy_from.m_beginSentenceFactor) {
 }
 
 template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
@@ -339,32 +343,32 @@ LanguageModel *ConstructKenLM(const std::string &line)
   bool lazy = Scan<bool>(tokens[3]);
   const string &file = tokens[4];
 
-  return ConstructKenLM(file, factorType, lazy);
+  return ConstructKenLM(line, file, factorType, lazy);
 }
 
-LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy) {
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy) {
   try {
     lm::ngram::ModelType model_type;
     if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
       switch(model_type) {
         case lm::ngram::PROBING:
-          return new LanguageModelKen<lm::ngram::ProbingModel>(file,  factorType, lazy);
+          return new LanguageModelKen<lm::ngram::ProbingModel>(line, file,  factorType, lazy);
         case lm::ngram::REST_PROBING:
-          return new LanguageModelKen<lm::ngram::RestProbingModel>(file, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
         case lm::ngram::TRIE:
-          return new LanguageModelKen<lm::ngram::TrieModel>(file, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
         case lm::ngram::QUANT_TRIE:
-          return new LanguageModelKen<lm::ngram::QuantTrieModel>(file, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
         case lm::ngram::ARRAY_TRIE:
-          return new LanguageModelKen<lm::ngram::ArrayTrieModel>(file, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
         case lm::ngram::QUANT_ARRAY_TRIE:
-          return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(file, factorType, lazy);
+          return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
         default:
           std::cerr << "Unrecognized kenlm model type " << model_type << std::endl;
           abort();
       }
     } else {
-      return new LanguageModelKen<lm::ngram::ProbingModel>(file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
     }
   } catch (std::exception &e) {
     std::cerr << e.what() << std::endl;

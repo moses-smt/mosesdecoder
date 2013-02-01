@@ -5,9 +5,8 @@ namespace Moses
 {
 
 SparsePhraseDictionaryFeature::SparsePhraseDictionaryFeature(const std::string &line)
-:StatelessFeatureFunction("SparsePhraseDictionaryFeature", ScoreProducer::unlimited)
+:StatelessFeatureFunction("SparsePhraseDictionaryFeature", ScoreProducer::unlimited, line)
 {
-
 }
 
 void SparsePhraseDictionaryFeature::Evaluate(
