@@ -1237,16 +1237,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Base.h</locationURI>
 		</link>
 		<link>
-			<name>LM/Factory.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Factory.cpp</locationURI>
-		</link>
-		<link>
-			<name>LM/Factory.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Factory.h</locationURI>
-		</link>
-		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>

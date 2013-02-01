@@ -87,12 +87,9 @@ if $(with-ldhtlm) {
 #ORLM is always compiled but needs special headers
 obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 
-#The factory needs the macros LM_IRST etc to know which ones to use.  
-obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclude <dependency>$(LM-LOG) ;
-
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
+alias LM : Base.cpp Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 
