@@ -838,15 +838,8 @@ bool StaticData::LoadPhraseTables()
       PrintUserTime(string("Start loading PhraseTable ") + filePath);
       VERBOSE(1,"filePath: " << filePath <<endl);
 
-      //optional create sparse phrase feature
-      SparsePhraseDictionaryFeature* spdf = NULL; 
-      if (m_sparsePhraseDictionary.size() > currDict) {
-        spdf = m_sparsePhraseDictionary[currDict];
-      }
-
       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
         implementation
-        , spdf
         , numScoreComponent
         , (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0)
         , input
@@ -856,6 +849,12 @@ bool StaticData::LoadPhraseTables()
        	, currDict
         , maxTargetPhrase[currDict]
         , targetPath, alignmentsFile);
+
+      //optional create sparse phrase feature
+      if (m_sparsePhraseDictionary.size() > currDict) {
+        SparsePhraseDictionaryFeature* spdf = m_sparsePhraseDictionary[currDict];
+        pdf->SetSparsePhraseDictionaryFeature(spdf);
+      }
 
       m_phraseDictionary.push_back(pdf);
 

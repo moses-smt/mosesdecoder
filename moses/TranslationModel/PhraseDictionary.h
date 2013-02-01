@@ -105,7 +105,6 @@ public:
   PhraseDictionaryFeature(const std::string &line);
 
   PhraseDictionaryFeature(  PhraseTableImplementation implementation
-                            , SparsePhraseDictionaryFeature* spdf
                             , size_t numScoreComponent
                             , unsigned numInputScores
                             , const std::vector<FactorType> &input
@@ -124,6 +123,9 @@ public:
 
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
     return m_sparsePhraseDictionaryFeature;
+  }
+  void SetSparsePhraseDictionaryFeature(SparsePhraseDictionaryFeature *spdf) {
+    m_sparsePhraseDictionaryFeature = spdf;
   }
 
   //Initialises the dictionary (may involve loading from file)

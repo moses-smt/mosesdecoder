@@ -93,7 +93,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
 
 PhraseDictionaryFeature::PhraseDictionaryFeature
 (PhraseTableImplementation implementation
- , SparsePhraseDictionaryFeature* spdf
  , size_t numScoreComponent
  , unsigned numInputScores
  , const std::vector<FactorType> &input
@@ -111,8 +110,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_tableLimit(tableLimit),
   m_implementation(implementation),
   m_targetFile(targetFile),
-  m_alignmentsFile(alignmentsFile),
-  m_sparsePhraseDictionaryFeature(spdf)
+  m_alignmentsFile(alignmentsFile)
 {
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
       implementation==Compact || implementation==FuzzyMatch ) {
