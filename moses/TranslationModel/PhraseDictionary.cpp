@@ -53,6 +53,44 @@ size_t PhraseDictionary::GetDictIndex() const
   return m_feature->GetDictIndex(); 
 }
 
+PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
+:DecodeFeature("PhraseModel",5) // TODO not always 5
+,m_tableLimit(20) // TODO default?
+{
+
+  /* m_targetFile(targetFile),
+    m_alignmentsFile(alignmentsFile),
+   */
+
+  cerr << "line=" << line << endl;
+  vector<string> toks = Tokenize(line);
+  for (size_t i = 1; i < toks.size(); ++i) {
+    vector<string> args = Tokenize(toks[i], "=");
+    CHECK(args.size() == 2);
+
+    if (args[0] == "implementation") {
+      m_implementation = (PhraseTableImplementation) Scan<size_t>(args[1]);
+    }
+    else if (args[0] == "input-factor") {
+      m_input =Tokenize<FactorType>(args[1]);
+    }
+    else if (args[0] == "output-factor") {
+      m_output =Tokenize<FactorType>(args[1]);
+    }
+    else if (args[0] == "num-features") {
+      CHECK(Scan<int>(args[1]) == 5);
+    }
+    else if (args[0] == "path") {
+      m_filePath = args[1];
+    }
+    else if (args[0] == "table-limit") {
+      m_tableLimit = Scan<size_t>(args[1]);
+    }
+
+  } // for (size_t i = 0; i < toks.size(); ++i) {
+
+}
+
 PhraseDictionaryFeature::PhraseDictionaryFeature
 (PhraseTableImplementation implementation
  , SparsePhraseDictionaryFeature* spdf

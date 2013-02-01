@@ -102,6 +102,8 @@ class PhraseDictionaryFeature :  public DecodeFeature
 
 
 public:
+  PhraseDictionaryFeature(const std::string &line);
+
   PhraseDictionaryFeature(  PhraseTableImplementation implementation
                             , SparsePhraseDictionaryFeature* spdf
                             , size_t numScoreComponent
