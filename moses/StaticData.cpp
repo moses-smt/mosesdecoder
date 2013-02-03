@@ -773,7 +773,7 @@ bool StaticData::LoadPhraseTables()
 
     // MAIN LOOP
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      //string ptLine = "PhraseModel ";
+      stringstream ptLine("PhraseModel ");
 
       vector<string>                  token           = Tokenize(translationVector[currDict]);
       const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
@@ -782,9 +782,14 @@ bool StaticData::LoadPhraseTables()
         UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
         return false;
       }
+      CHECK(token.size() >= 5);
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-      CHECK(token.size() >= 5);
+      ptLine << "implementation=" << implementation << " ";
+      ptLine << "input-factor=" << token[1] << " ";
+      ptLine << "output-factor=" << token[2] << " ";
+      ptLine << "path=" << token[4] << " ";
+
       //characteristics of the phrase table
 
       vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
@@ -824,6 +829,9 @@ bool StaticData::LoadPhraseTables()
         m_numInputScores = 0;
         m_numRealWordsInInput = 0;
       }
+
+      ptLine << "num-features=" << numScoreComponent << " ";
+      ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
 
       string targetPath, alignmentsFile;
       if (implementation == SuffixArray) {
