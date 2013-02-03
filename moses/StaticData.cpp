@@ -838,6 +838,9 @@ bool StaticData::LoadPhraseTables()
       if (implementation == SuffixArray) {
         targetPath		= token[5];
         alignmentsFile= token[6];
+
+        ptLine << "target-path=" << targetPath << " ";
+        ptLine << "alignment-path=" << alignmentsFile << " ";
       }
 
       //This is needed for regression testing, but the phrase table
@@ -846,6 +849,8 @@ bool StaticData::LoadPhraseTables()
       PrintUserTime(string("Start loading PhraseTable ") + filePath);
       VERBOSE(1,"filePath: " << filePath <<endl);
 
+      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(ptLine.str());
+      /*
       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
         implementation
         , numScoreComponent
@@ -855,6 +860,7 @@ bool StaticData::LoadPhraseTables()
         , filePath
         , maxTargetPhrase[currDict]
         , targetPath, alignmentsFile);
+      */
 
       //optional create sparse phrase feature
       if (m_sparsePhraseDictionary.size() > currDict) {

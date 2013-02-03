@@ -81,7 +81,17 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     else if (args[0] == "table-limit") {
       m_tableLimit = Scan<size_t>(args[1]);
     }
+    else if (args[0] == "target-path") {
+      m_targetFile = args[1];
+    }
+    else if (args[0] == "alignment-path") {
+      m_alignmentsFile = args[1];
+    }
 
+    else {
+      UserMessage::Add("Unknown argument " + args[0]);
+      abort();
+    }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 
 }
