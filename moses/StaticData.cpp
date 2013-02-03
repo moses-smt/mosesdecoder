@@ -832,6 +832,7 @@ bool StaticData::LoadPhraseTables()
 
       ptLine << "num-features=" << numScoreComponent << " ";
       ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
+      ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
       string targetPath, alignmentsFile;
       if (implementation == SuffixArray) {
@@ -852,7 +853,6 @@ bool StaticData::LoadPhraseTables()
         , input
         , output
         , filePath
-        , weights
         , maxTargetPhrase[currDict]
         , targetPath, alignmentsFile);
 

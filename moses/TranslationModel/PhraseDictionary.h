@@ -109,7 +109,6 @@ public:
                             , const std::vector<FactorType> &input
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
-                            , const std::vector<float> &weight
                             , size_t tableLimit
                             , const std::string &targetFile
                             , const std::string &alignmentsFile);

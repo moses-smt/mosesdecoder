@@ -72,8 +72,8 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     else if (args[0] == "output-factor") {
       m_output =Tokenize<FactorType>(args[1]);
     }
-    else if (args[0] == "num-features") {
-      CHECK(Scan<int>(args[1]) == 5);
+    else if (args[0] == "num-input-features") {
+      m_numInputScores = Scan<unsigned>(args[1]);
     }
     else if (args[0] == "path") {
       m_filePath = args[1];
@@ -93,7 +93,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
  , const std::vector<FactorType> &input
  , const std::vector<FactorType> &output
  , const std::string &filePath
- , const std::vector<float> &weight
  , size_t tableLimit
  , const std::string &targetFile  // default param
  , const std::string &alignmentsFile) // default param
