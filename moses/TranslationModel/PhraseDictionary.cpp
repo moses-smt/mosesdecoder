@@ -48,11 +48,6 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
   return GetTargetPhraseCollection(src.GetSubString(range));
 }
 
-size_t PhraseDictionary::GetDictIndex() const 
-{ 
-  return m_feature->GetDictIndex(); 
-}
-
 PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
 :DecodeFeature("PhraseModel",5, line) // TODO not always 5
 ,m_tableLimit(20) // TODO default?
@@ -99,12 +94,10 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
  , const std::vector<FactorType> &output
  , const std::string &filePath
  , const std::vector<float> &weight
- , size_t dictIndex
  , size_t tableLimit
  , const std::string &targetFile  // default param
  , const std::string &alignmentsFile) // default param
   :DecodeFeature("PhraseModel",numScoreComponent,input,output, "PhraseModel"),
-  m_dictIndex(dictIndex),
   m_numInputScores(numInputScores),
   m_filePath(filePath),
   m_tableLimit(tableLimit),
@@ -321,11 +314,6 @@ bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const
 const PhraseDictionaryFeature* PhraseDictionary::GetFeature() const
 {
   return m_feature;
-}
-
-size_t PhraseDictionaryFeature::GetDictIndex() const 
-{
-  return m_dictIndex;
 }
 
 void PhraseDictionaryFeature::InitializeForInput(const InputType& source)

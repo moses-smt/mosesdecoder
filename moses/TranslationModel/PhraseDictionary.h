@@ -69,7 +69,6 @@ public:
     return Translate;
   }
   const PhraseDictionaryFeature* GetFeature() const;
-  size_t GetDictIndex() const;
 
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
@@ -111,7 +110,6 @@ public:
                             , const std::vector<FactorType> &output
                             , const std::string &filePath
                             , const std::vector<float> &weight
-                            , size_t dictIndex
                             , size_t tableLimit
                             , const std::string &targetFile
                             , const std::string &alignmentsFile);
@@ -134,7 +132,6 @@ public:
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
   PhraseDictionary* GetDictionary();
-  size_t GetDictIndex() const;
 
   //Usual feature function methods are not implemented
   virtual void Evaluate(const PhraseBasedFeatureContext& context,
@@ -154,10 +151,6 @@ public:
   void InitializeForInput(const InputType& source);
   // clean up temporary memory, called after processing each sentence
   void CleanUpAfterSentenceProcessing(const InputType& source);
-
-
-protected:
-  size_t m_dictIndex;
 
 private:
   /** Load the appropriate phrase table */

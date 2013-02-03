@@ -853,7 +853,6 @@ bool StaticData::LoadPhraseTables()
         , output
         , filePath
         , weights
-       	, currDict
         , maxTargetPhrase[currDict]
         , targetPath, alignmentsFile);
 
