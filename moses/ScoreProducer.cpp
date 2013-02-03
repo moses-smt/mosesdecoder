@@ -14,6 +14,26 @@ namespace Moses
 multiset<string> ScoreProducer::description_counts;
 const size_t ScoreProducer::unlimited = -1;
 
+ScoreProducer::ScoreProducer(const std::string& description, const std::string &line)
+: m_reportSparseFeatures(false)
+{
+  ParseLine(line);
+  m_numScoreComponents = FindNumFeatures();
+  size_t index = description_counts.count(description);
+
+  ostringstream dstream;
+  dstream << description;
+  dstream << index;
+
+  description_counts.insert(description);
+
+  m_description = dstream.str();
+  if (m_numScoreComponents != unlimited)
+  {
+    ScoreComponentCollection::RegisterScoreProducer(this);
+  }
+}
+
 ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComponents, const std::string &line)
   : m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {

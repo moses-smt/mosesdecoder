@@ -82,6 +82,7 @@ class FeatureFunction: public ScoreProducer
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() { return m_producers; }
 
+  FeatureFunction(const std::string& description, const std::string &line);
   FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
@@ -135,7 +136,9 @@ class StatefulFeatureFunction: public FeatureFunction
 public:
   static const std::vector<const StatefulFeatureFunction*>& GetStatefulFeatureFunctions() {return m_statefulFFs;}
 
+  StatefulFeatureFunction(const std::string& description, const std::string &line);
   StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
+
   /**
    * \brief This interface should be implemented.
    * Notes: When evaluating the value of this feature function, you should avoid

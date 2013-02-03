@@ -28,6 +28,7 @@ protected:
   static std::multiset<std::string> description_counts;
 
   ScoreProducer(const ScoreProducer&);  // don't implement
+  ScoreProducer(const std::string& description, const std::string &line);
 	ScoreProducer(const std::string& description, size_t numScoreComponents, const std::string &line);
 
 	void ParseLine(const std::string &line);

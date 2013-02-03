@@ -75,6 +75,12 @@ std::vector<FeatureFunction*> FeatureFunction::m_producers;
 std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
+FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
+: ScoreProducer(description, line)
+{
+  m_producers.push_back(this);
+}
+
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
 : ScoreProducer(description, numScoreComponents, line)
 {
@@ -98,6 +104,12 @@ bool StatelessFeatureFunction::IsStateless() const
 bool StatelessFeatureFunction::ComputeValueInTranslationOption() const
 {
   return false;
+}
+
+StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, const std::string &line)
+: FeatureFunction(description, line)
+{
+  m_statefulFFs.push_back(this);
 }
 
 StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
