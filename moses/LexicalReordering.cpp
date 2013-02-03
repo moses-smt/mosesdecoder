@@ -14,14 +14,27 @@ LexicalReordering::LexicalReordering(const std::string &line)
 {
   std::cerr << "Initializing LexicalReordering.." << std::endl;
 
-  vector<string> tokens = Tokenize(line);
+  vector<FactorType> f_factors, e_factors;
+  string filePath;
 
-  m_configuration = new LexicalReorderingConfiguration(tokens[1]);
-  m_configuration->SetScoreProducer(this);
-  m_modelTypeString = m_configuration->GetModelString();
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
-  vector<FactorType> f_factors = Tokenize<FactorType>(tokens[2]);
-  vector<FactorType> e_factors = Tokenize<FactorType>(tokens[3]);
+    if (args[0] == "type") {
+      m_configuration = new LexicalReorderingConfiguration(args[1]);
+      m_configuration->SetScoreProducer(this);
+      m_modelTypeString = m_configuration->GetModelString();
+    }
+    else if (args[0] == "input-factor") {
+      f_factors =Tokenize<FactorType>(args[1]);
+    }
+    else if (args[0] == "output-factor") {
+      e_factors =Tokenize<FactorType>(args[1]);
+    }
+    else if (args[0] == "path") {
+      filePath = args[1];
+    }
+  }
 
   switch(m_configuration->GetCondition()) {
     case LexicalReorderingConfiguration::FE:
@@ -44,8 +57,6 @@ LexicalReordering::LexicalReordering(const std::string &line)
       UserMessage::Add("Unknown conditioning option!");
       exit(1);
   }
-
-  const string &filePath = tokens[4];
 
   m_table = LexicalReorderingTable::LoadAvailable(filePath, m_factorsF, m_factorsE, std::vector<FactorType>());
 

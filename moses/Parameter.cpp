@@ -489,13 +489,15 @@ void Parameter::ConvertWeightArgsDistortion()
 
       stringstream strme;
       strme << "LexicalReordering "
-            << toks[1] << " ";
+            << "type=" << toks[1] << " ";
 
       vector<FactorType> factors = Tokenize<FactorType>(toks[0], "-");
       CHECK(factors.size() == 2);
-      strme << factors[0] << " " << factors[1] << " ";
+      strme << "input-factor=" << factors[0]
+            << " output-factor=" << factors[1] << " ";
 
-      strme << toks[3];
+      strme << "num-features=" << toks[2] << " ";
+      strme << "path=" << toks[3];
 
       AddFeature(strme.str());
     }
