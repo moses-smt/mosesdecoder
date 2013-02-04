@@ -101,6 +101,7 @@ class StatelessFeatureFunction: public FeatureFunction
 public:
   static const std::vector<const StatelessFeatureFunction*>& GetStatelessFeatureFunctions() {return m_statelessFFs;}
 
+  StatelessFeatureFunction(const std::string& description, const std::string &line);
   StatelessFeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line);
   /**
     * This should be implemented for features that apply to phrase-based models.

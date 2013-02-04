@@ -49,19 +49,11 @@ GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 }
 
 PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
-:DecodeFeature("PhraseModel",5, line) // TODO not always 5
+:DecodeFeature("PhraseModel", line)
 ,m_tableLimit(20) // TODO default?
 {
-
-  /* m_targetFile(targetFile),
-    m_alignmentsFile(alignmentsFile),
-   */
-
-  cerr << "line=" << line << endl;
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    CHECK(args.size() == 2);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
     if (args[0] == "implementation") {
       m_implementation = (PhraseTableImplementation) Scan<size_t>(args[1]);

@@ -773,7 +773,8 @@ bool StaticData::LoadPhraseTables()
 
     // MAIN LOOP
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      stringstream ptLine("PhraseModel ");
+      stringstream ptLine;
+      ptLine << "PhraseModel ";
 
       vector<string>                  token           = Tokenize(translationVector[currDict]);
       const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
@@ -850,17 +851,6 @@ bool StaticData::LoadPhraseTables()
       VERBOSE(1,"filePath: " << filePath <<endl);
 
       PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(ptLine.str());
-      /*
-      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-        implementation
-        , numScoreComponent
-        , (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0)
-        , input
-        , output
-        , filePath
-        , maxTargetPhrase[currDict]
-        , targetPath, alignmentsFile);
-      */
 
       //optional create sparse phrase feature
       if (m_sparsePhraseDictionary.size() > currDict) {

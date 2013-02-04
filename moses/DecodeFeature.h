@@ -39,6 +39,9 @@ class DecodeFeature : public StatelessFeatureFunction {
 
   public:
   DecodeFeature(  const std::string& description
+                  , const std::string &line);
+
+  DecodeFeature(  const std::string& description
                   , size_t numScoreComponents
                   , const std::string &line);
 
