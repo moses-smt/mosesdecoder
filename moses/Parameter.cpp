@@ -669,6 +669,8 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-e", "WordDeletion"); // TODO Can't find real name
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
+  AddFeature("WordPenalty");
+
 }
 
 void Parameter::CreateWeightsMap()
