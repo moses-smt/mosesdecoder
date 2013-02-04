@@ -15,7 +15,9 @@ class WordsRange;
 class DistortionScoreProducer : public StatefulFeatureFunction
 {
 public:
-	DistortionScoreProducer(const std::string &line) : StatefulFeatureFunction("Distortion", 1, line) {}
+	DistortionScoreProducer(const std::string &line)
+	: StatefulFeatureFunction("Distortion", 1, line)
+	{}
 
   float CalculateDistortionScore(const Hypothesis& hypo,
                                  const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;

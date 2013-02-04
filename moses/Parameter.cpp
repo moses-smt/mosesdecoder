@@ -462,8 +462,17 @@ void Parameter::ConvertWeightArgsDistortion()
 
   if (oldWeights.size() > 0)
   {
-    // distance distortion
-    SetWeight("Distortion", 0, Scan<float>(oldWeights[0]));
+    if (!isParamSpecified("search-algorithm") ||
+         (GetParam("search-algorithm").size() > 0
+           && (Trim(GetParam("search-algorithm")[0]) == "0"
+             ||Trim(GetParam("search-algorithm")[0]) == "1"
+              )
+         )
+       ) {
+      // phrase-based. Add distance distortion to list of features
+      AddFeature("Distortion");
+      SetWeight("Distortion", 0, Scan<float>(oldWeights[0]));
+    }
 
     // everything but the last is lex reordering model
 

@@ -219,8 +219,6 @@ protected:
   StaticData();
 
 
-
-  void LoadPhraseBasedParameters();
   void LoadChartDecodingParameters();
   void LoadNonTerminals();
 

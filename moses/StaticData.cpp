@@ -146,8 +146,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   if (IsChart())
     LoadChartDecodingParameters();
-  else
-    LoadPhraseBasedParameters();
 
   // input type has to be specified BEFORE loading the phrase tables!
   if(m_parameter->GetParam("inputtype").size())
@@ -637,6 +635,12 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       //SetWeights(model, weights);
       m_sparsePhraseDictionary.push_back(model);
     }
+    else if (feature == "Distortion") {
+      DistortionScoreProducer *model = new DistortionScoreProducer(line);
+      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_distortionScoreProducer = model;
+    }
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
@@ -924,18 +928,6 @@ void StaticData::LoadChartDecodingParameters()
 
   m_ruleLimit = (m_parameter->GetParam("rule-limit").size() > 0)
                 ? Scan<size_t>(m_parameter->GetParam("rule-limit")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
-}
-
-void StaticData::LoadPhraseBasedParameters()
-{
-  const vector<float> &distortionWeights = m_parameter->GetWeights("Distortion", 0);
-  CHECK(distortionWeights.size() == 1);
-
-  float weightDistortion = distortionWeights[0];
-  m_distortionScoreProducer = new DistortionScoreProducer("DistortionScoreProducer ");
-
-  SetWeight(m_distortionScoreProducer, weightDistortion);
-
 }
 
 bool StaticData::LoadDecodeGraphs()
