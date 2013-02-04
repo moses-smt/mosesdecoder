@@ -19,20 +19,14 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
 
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
-  FactorList sourceFactors, targetFactors;
-  for (size_t i = 1; i < tokens.size(); ++i) {
-    vector<string> pair = Tokenize(tokens[i], "=");
-
-    if (pair[0] == "source") {
-      CHECK(pair.size() == 2);
-      m_sourceFactors = Tokenize<FactorType>(pair[1], ",");
+    if (args[0] == "source") {
+      m_sourceFactors = Tokenize<FactorType>(args[1], ",");
     }
-    else if (pair[0] == "target") {
-      CHECK(pair.size() == 2);
-      m_targetFactors = Tokenize<FactorType>(pair[1], ",");
+    else if (args[0] == "target") {
+      m_targetFactors = Tokenize<FactorType>(args[1], ",");
     }
 
   }
