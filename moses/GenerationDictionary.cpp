@@ -37,14 +37,27 @@ namespace Moses
 GenerationDictionary::GenerationDictionary(const std::string &line)
 : Dictionary(2), DecodeFeature("Generation",2, line)
 {
-  vector<string> tokens = Tokenize(line);
+  string filePath;
 
-  m_input = Tokenize<FactorType>(tokens[1]);
-  m_output = Tokenize<FactorType>(tokens[2]);
-  m_inputFactors = FactorMask(m_input);
-  m_outputFactors = FactorMask(m_output);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
-  const string &filePath = tokens[3];
+    if (args[0] == "input-factor") {
+      m_input =Tokenize<FactorType>(args[1]);
+      m_inputFactors = FactorMask(m_input);
+    }
+    else if (args[0] == "output-factor") {
+      m_output =Tokenize<FactorType>(args[1]);
+      m_outputFactors = FactorMask(m_output);
+    }
+    else if (args[0] == "path") {
+      filePath = args[1];
+    }
+    else {
+      UserMessage::Add("Unknown argument " + args[0]);
+      abort();
+    }
+  }
 
   Load(filePath, Output);
 

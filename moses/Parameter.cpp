@@ -623,11 +623,12 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
       }
       SetWeight(newWeightName, indTable, weights);
 
-      string featureLine = "Generation "
-                        + modelToks[0] + " "  // input factor
-                        + modelToks[1] + " " // output factor
-                        + modelToks[3]; // file factor
-      AddFeature(featureLine);
+      stringstream strme;
+      strme << "Generation "
+                  << "input-factor=" << modelToks[0] << " "
+                  << "output-factor=" << modelToks[1] << " "
+                  << "path=" << modelToks[3];
+      AddFeature(strme.str());
     }
   }
 
