@@ -670,7 +670,7 @@ void Parameter::ConvertWeightArgs()
   ConvertWeightArgsSingleWeight("weight-lex", "GlobalLexicalReordering"); // TODO Can't find real name
 
   AddFeature("WordPenalty");
-
+  AddFeature("UnknownWordPenalty");
 }
 
 void Parameter::CreateWeightsMap()

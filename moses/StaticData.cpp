@@ -332,13 +332,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  const vector<float> &weightsUnknownWord				= m_parameter->GetWeights("UnknownWordPenalty", 0);
-  float weightUnknownWord = weightsUnknownWord.size() ? weightsUnknownWord[0] : 1.0;
-
-  m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer("UnknownWordPenaltyProducer");
-
-SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
-
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
                     Scan<int>(m_parameter->GetParam("distortion-limit")[0])
@@ -639,6 +632,14 @@ SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
       m_wpProducer = model;
+    }
+    else if (feature == "UnknownWordPenalty") {
+      UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      if (weights.size() == 0)
+        weights.push_back(1.0f);
+      SetWeights(model, weights);
+      m_unknownWordPenaltyProducer = model;
     }
 
 #ifdef HAVE_SYNLM
