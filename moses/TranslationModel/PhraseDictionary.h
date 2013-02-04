@@ -102,15 +102,6 @@ class PhraseDictionaryFeature :  public DecodeFeature
 
 public:
   PhraseDictionaryFeature(const std::string &line);
-  PhraseDictionaryFeature(  PhraseTableImplementation implementation
-                              , size_t numScoreComponent
-                              , unsigned numInputScores
-                              , const std::vector<FactorType> &input
-                              , const std::vector<FactorType> &output
-                              , const std::string &filePath
-                              , size_t tableLimit
-                              , const std::string &targetFile
-                              , const std::string &alignmentsFile);
 
   virtual ~PhraseDictionaryFeature();
 

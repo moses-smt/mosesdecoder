@@ -777,7 +777,6 @@ bool StaticData::LoadPhraseTables()
       ptLine << "PhraseModel ";
 
       vector<string>                  token           = Tokenize(translationVector[currDict]);
-      const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
 
       if(currDict == 0 && token.size() == 4) {
         UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
@@ -800,8 +799,6 @@ bool StaticData::LoadPhraseTables()
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath= token[4];
-
-      CHECK(weights.size() >= numScoreComponent);
 
       if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
         if (currDict==0) { // only the 1st pt. THis is shit
@@ -850,18 +847,7 @@ bool StaticData::LoadPhraseTables()
       PrintUserTime(string("Start loading PhraseTable ") + filePath);
       VERBOSE(1,"filePath: " << filePath <<endl);
 
-      //PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(ptLine.str());
-
-      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(
-        implementation
-        , numScoreComponent
-        , (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0)
-        , input
-        , output
-        , filePath
-        , maxTargetPhrase[currDict]
-        , targetPath, alignmentsFile);
-
+      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(ptLine.str());
 
       //optional create sparse phrase feature
       if (m_sparsePhraseDictionary.size() > currDict) {
@@ -870,6 +856,9 @@ bool StaticData::LoadPhraseTables()
       }
 
       m_phraseDictionary.push_back(pdf);
+
+      const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
+      CHECK(weights.size() >= numScoreComponent);
 
       SetWeights(m_phraseDictionary.back(),weights);
 

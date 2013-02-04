@@ -60,9 +60,11 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     }
     else if (args[0] == "input-factor") {
       m_input =Tokenize<FactorType>(args[1]);
+      m_inputFactors = FactorMask(m_input);
     }
     else if (args[0] == "output-factor") {
       m_output =Tokenize<FactorType>(args[1]);
+      m_outputFactors = FactorMask(m_output);
     }
     else if (args[0] == "num-input-features") {
       m_numInputScores = Scan<unsigned>(args[1]);
@@ -86,32 +88,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 
-}
-
-PhraseDictionaryFeature::PhraseDictionaryFeature
-(PhraseTableImplementation implementation
- , size_t numScoreComponent
- , unsigned numInputScores
- , const std::vector<FactorType> &input
- , const std::vector<FactorType> &output
- , const std::string &filePath
- , size_t tableLimit
- , const std::string &targetFile  // default param
- , const std::string &alignmentsFile) // default param
-  :DecodeFeature("PhraseModel",numScoreComponent,input,output, "PhraseModel"),
-  m_numInputScores(numInputScores),
-  m_filePath(filePath),
-  m_tableLimit(tableLimit),
-  m_implementation(implementation),
-  m_targetFile(targetFile),
-  m_alignmentsFile(alignmentsFile)
-{
-  if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
-      implementation==Compact || implementation==FuzzyMatch ) {
-    m_useThreadSafePhraseDictionary = true;
-  } else {
-    m_useThreadSafePhraseDictionary = false;
-  }
 }
 
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
