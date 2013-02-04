@@ -78,8 +78,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
   }
 
   CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
-  int depthInCell = StaticData::Instance().GetCellContextOption();
-  if(ccsp!=NULL && depthInCell == 1){
+  if(ccsp!=NULL){
     //damt hiero : if we use context features then : For each translation option :
         //1. Go through each target phrase and access corresponding source phrase
         //2. Store all targetPhrases for this source phrase

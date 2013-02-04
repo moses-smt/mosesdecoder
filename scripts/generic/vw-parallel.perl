@@ -132,9 +132,9 @@ foreach (@children) {
 
 kill 1, $masterPid;
 
-my $cmd = "rm -rf $TMPDIR $modelFile.*\n";
-print STDERR $cmd;
-systemCheck($cmd);
+ my $cmd = "rm -rf $TMPDIR $modelFile.*\n";
+ print STDERR $cmd;
+ systemCheck($cmd);
 
 print STDERR "Finished ".localtime() ."\n";
 

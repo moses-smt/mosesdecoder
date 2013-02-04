@@ -666,10 +666,6 @@ if ( (m_parameter->GetParam("sentence-cell-context").size() == 0) )
     m_translationSystems.find(config[0])->second.AddFeatureFunction(m_cellContext);
 // #endif
 
-    //Add any other features here.
-    if (m_leftContextScoreProducer != NULL ) {
-      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_leftContextScoreProducer);
-    }
 //#ifdef HAVE_VW
     if (m_PSDScoreProducer != NULL ) {
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_PSDScoreProducer);

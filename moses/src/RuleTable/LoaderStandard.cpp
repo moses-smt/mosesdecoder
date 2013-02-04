@@ -244,8 +244,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
   }
 
   //FB : if working with cell context option, disable pruning of target phraseCollection prior to having sentence context
-  //FB : note : static pruning using rhs : weights and features
-  if(StaticData::Instance().GetCellContextOption() == -1)
+  CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
+  if(ccsp == NULL)
   {
     SortAndPrune(ruleTable);
   }
