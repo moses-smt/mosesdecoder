@@ -81,7 +81,6 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     else if (args[0] == "alignment-path") {
       m_alignmentsFile = args[1];
     }
-
     else {
       UserMessage::Add("Unknown argument " + args[0]);
       abort();

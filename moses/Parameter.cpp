@@ -574,16 +574,16 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
       SetWeight(newFeatureName, ind, weightsLM);
 
       string featureLine = newFeatureName + " "
-                        + modelToks[1] + " "  // factor
-                        + modelToks[2] + " "; // order
+                        + "factor=" + modelToks[1] + " "  // factor
+                        + "order="  + modelToks[2] + " "; // order
       if (lmType == LazyKen) {
-        featureLine += "1 ";
+        featureLine += "lazyken=1 ";
       }
       else if (lmType == Ken) {
-        featureLine += "0 ";
+        featureLine += "lazyken=0 ";
       }
 
-      featureLine += modelToks[3]; // file
+      featureLine += "path=" + modelToks[3]; // file
 
       AddFeature(featureLine);
     } // for (size_t lmIndex = 0; lmIndex < models.size(); ++lmIndex) {

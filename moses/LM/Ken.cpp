@@ -23,6 +23,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <memory>
 #include <stdlib.h>
+#include <boost/shared_ptr.hpp>
+
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/left.hh"
@@ -39,8 +41,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/Incremental.h"
-
-#include <boost/shared_ptr.hpp>
+#include "moses/UserMessage.h"
 
 using namespace std;
 
@@ -337,13 +338,36 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
 LanguageModel *ConstructKenLM(const std::string &line)
 {
-  vector<string> tokens = Tokenize(line);
+  cerr << "line=" << line << endl;
+  FactorType factorType;
+  size_t nGramOrder;
+  string filePath;
+  bool lazy;
 
-  FactorType factorType = Scan<FactorType>(tokens[1]);
-  bool lazy = Scan<bool>(tokens[3]);
-  const string &file = tokens[4];
+  vector<string> toks = Tokenize(line);
+  for (size_t i = 1; i < toks.size(); ++i) {
+    vector<string> args = Tokenize(toks[i], "=");
+    CHECK(args.size() == 2);
 
-  return ConstructKenLM(line, file, factorType, lazy);
+    if (args[0] == "factor") {
+      factorType = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "order") {
+      nGramOrder = Scan<size_t>(args[1]);
+    }
+    else if (args[0] == "path") {
+      filePath = args[1];
+    }
+    else if (args[0] == "lazyken") {
+      lazy = Scan<bool>(args[1]);
+    }
+    else {
+      UserMessage::Add("Unknown argument " + args[0]);
+      abort();
+    }
+  }
+
+  return ConstructKenLM(line, filePath, factorType, lazy);
 }
 
 LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy) {

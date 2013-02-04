@@ -780,7 +780,7 @@ bool StaticData::LoadPhraseTables()
       stringstream ptLine;
       ptLine << "PhraseModel ";
 
-      vector<string>                  token           = Tokenize(translationVector[currDict]);
+      vector<string> token = Tokenize(translationVector[currDict]);
 
       if(currDict == 0 && token.size() == 4) {
         UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
@@ -797,7 +797,7 @@ bool StaticData::LoadPhraseTables()
       //characteristics of the phrase table
 
       vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
-                                    ,output = Tokenize<FactorType>(token[2], ",");
+                         ,output  = Tokenize<FactorType>(token[2], ",");
       m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
       m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
       m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
@@ -836,13 +836,9 @@ bool StaticData::LoadPhraseTables()
       ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
-      string targetPath, alignmentsFile;
       if (implementation == SuffixArray) {
-        targetPath		= token[5];
-        alignmentsFile= token[6];
-
-        ptLine << "target-path=" << targetPath << " ";
-        ptLine << "alignment-path=" << alignmentsFile << " ";
+        ptLine << "target-path=" << token[5] << " ";
+        ptLine << "alignment-path=" << token[6] << " ";
       }
 
       //This is needed for regression testing, but the phrase table
