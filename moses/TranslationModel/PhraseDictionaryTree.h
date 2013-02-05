@@ -65,9 +65,6 @@ public:
 
   virtual ~PhraseDictionaryTree();
 
-  DecodeType GetDecodeType() const {
-    return Translate;
-  }
   size_t GetSize() const {
     return 0;
   }

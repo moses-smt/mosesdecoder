@@ -44,10 +44,6 @@ public:
   //!Destructor
   virtual ~Dictionary();
 
-
-  //! returns whether this dictionary is to be used for Translate or Generate
-  virtual DecodeType GetDecodeType() const = 0;
-
 };
 
 }

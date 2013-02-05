@@ -55,12 +55,6 @@ protected:
 public:
   GenerationDictionary(const std::string &line);
 	virtual ~GenerationDictionary();
-
-	// returns Generate
-	DecodeType GetDecodeType() const
-	{
-		return Generate;
-	}
 	
 	//! load data file
 	bool Load(const std::string &filePath, FactorDirection direction);

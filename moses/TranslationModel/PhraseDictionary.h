@@ -65,9 +65,7 @@ public:
   size_t GetTableLimit() const {
     return m_tableLimit;
   }
-  DecodeType GetDecodeType() const    {
-    return Translate;
-  }
+
   const PhraseDictionaryFeature* GetFeature() const;
 
   //! find list of translations that can translates src. Only for phrase input
