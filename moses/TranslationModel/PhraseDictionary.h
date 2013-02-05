@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/Phrase.h"
 #include "moses/TargetPhrase.h"
-#include "moses/Dictionary.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/DecodeFeature.h"
 
@@ -56,11 +55,15 @@ class SparsePhraseDictionaryFeature;
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
-class PhraseDictionary: public Dictionary
+class PhraseDictionary
 {
 public:
   PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature):
-    Dictionary(numScoreComponent), m_tableLimit(0), m_feature(feature) {}
+    m_numScoreComponent(numScoreComponent), m_tableLimit(0), m_feature(feature)
+  {}
+  virtual ~PhraseDictionary()
+  {}
+
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;
@@ -86,6 +89,7 @@ public:
     const ChartCellCollectionBase &) = 0;
 
 protected:
+  const size_t m_numScoreComponent;
   size_t m_tableLimit;
   const PhraseDictionaryFeature* m_feature;
 };
