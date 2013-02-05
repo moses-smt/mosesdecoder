@@ -43,7 +43,7 @@ typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
 
 /** Implementation of a generation table in a trie.
  */
-class GenerationDictionary : public Dictionary, public DecodeFeature
+class GenerationDictionary : public DecodeFeature
 {
   typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
 protected:

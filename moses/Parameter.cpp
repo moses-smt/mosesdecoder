@@ -627,6 +627,7 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
       strme << "Generation "
                   << "input-factor=" << modelToks[0] << " "
                   << "output-factor=" << modelToks[1] << " "
+                  << "num-features=" << modelToks[2] << " "
                   << "path=" << modelToks[3];
       AddFeature(strme.str());
     }
