@@ -18,16 +18,22 @@ m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;
 
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
+  string filename;
 
-  // set factor
-  m_factorType = Scan<FactorType>(tokens[1]);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
+    if (args[0] == "factor") {
+      m_factorType = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "path") {
+      filename = args[1];
+    }
+
+  }
 
   // load word list for restricted feature set
-  if (tokens.size() == 3) {
-    string filename = tokens[2];
+  if (filename != "") {
     cerr << "loading target word insertion word list from " << filename << endl;
     if (!Load(filename)) {
       UserMessage::Add("Unable to load word list for target word insertion feature from file " + filename);
