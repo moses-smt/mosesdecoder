@@ -16,41 +16,53 @@ using namespace std;
 
 WordTranslationFeature::WordTranslationFeature(const std::string &line)
 :StatelessFeatureFunction("WordTranslationFeature", ScoreProducer::unlimited, line)
+,m_unrestricted(true)
+,m_sparseProducerWeight(1)
+,m_simple(true)
+,m_sourceContext(false)
+,m_targetContext(false)
+,m_ignorePunctuation(false)
+,m_domainTrigger(false)
 {
   std::cerr << "Initializing word translation feature.. " << endl;
 
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
+  string texttype;
+  string filenameSource;
+  string filenameTarget;
 
-  if (tokens.size() != 1 &&  !(tokens.size() >= 4 && tokens.size() <= 9)) {
-    UserMessage::Add("Format of word translation feature parameter is: --word-translation-feature <factor-src>-<factor-tgt> "
-         "[simple source-trigger target-trigger] [ignore-punctuation] [domain-trigger] [filename-src] [filename-tgt] [text-type]");
-    //return false;
-  }
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
-  // set factor
-  vector <string> factors = Tokenize(tokens[1],"-");
-  m_factorTypeSource = Scan<FactorType>(factors[0]);
-  m_factorTypeTarget = Scan<FactorType>(factors[1]);
-
-  m_unrestricted = true;
-  m_sparseProducerWeight = 1;
-  m_simple = true;
-  m_sourceContext = false;
-  m_targetContext = false;
-  m_ignorePunctuation = false;
-  m_domainTrigger = false;
-  if (tokens.size() >= 5) {
-    m_simple = Scan<size_t>(tokens[2]);
-    m_sourceContext = Scan<size_t>(tokens[3]);
-    m_targetContext = Scan<size_t>(tokens[4]);
-  }
-  if (tokens.size() >= 6) {
-    m_ignorePunctuation = Scan<size_t>(tokens[5]);
-  }
-
-  if (tokens.size() >= 7) {
-    m_domainTrigger = Scan<size_t>(tokens[6]);
+    if (args[0] == "input-factor") {
+      m_factorTypeSource = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "output-factor") {
+      m_factorTypeTarget = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "simple") {
+      m_simple = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "source-context") {
+      m_sourceContext = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "target-context") {
+      m_targetContext = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "ignore-punctuation") {
+      m_ignorePunctuation = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "domain-trigger") {
+      m_domainTrigger = Scan<bool>(args[1]);
+    }
+    else if (args[0] == "texttype") {
+      texttype = args[1];
+    }
+    else if (args[0] == "source-path") {
+      filenameSource = args[1];
+    }
+    else if (args[0] == "target-path") {
+      filenameTarget = args[1];
+    }
   }
 
   if (m_simple == 1) std::cerr << "using simple word translations.. ";
@@ -70,27 +82,7 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   std::cerr << "done." << std::endl;
 
   // load word list for restricted feature set
-  if (tokens.size() == 9) {
-    string filenameSource = tokens[7];
-    if (m_domainTrigger) {
-      const string &texttype = tokens[8];
-
-      stringstream filename(filenameSource + "." + texttype);
-      filenameSource = filename.str();
-      cerr << "loading word translation term list from " << filenameSource << endl;
-    }
-    else {
-      cerr << "loading word translation word lists from " << filenameSource << endl;
-    }
-    if (!Load(filenameSource, "")) {
-      UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource);
-      //return false;
-    }
-  } // if (tokens.size() == 7)
-  else if (tokens.size() == 10) {
-    // TODO need to change this
-    string filenameSource = tokens[7];
-    string filenameTarget = tokens[8];
+  if (filenameSource != "") {
     cerr << "loading word translation word lists from " << filenameSource << " and " << filenameTarget << endl;
     if (!Load(filenameSource, filenameTarget)) {
       UserMessage::Add("Unable to load word lists for word translation feature from files " + filenameSource + " and " + filenameTarget);
