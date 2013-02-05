@@ -64,7 +64,7 @@ void ScoreProducer::ParseLine(const std::string &line)
   vector<string> toks = Tokenize(line);
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
-    //CHECK(args.size() == 2);
+    CHECK(args.size() == 2);
     m_args.push_back(args);
   }
 }

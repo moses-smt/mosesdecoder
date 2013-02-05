@@ -19,20 +19,27 @@ m_unrestricted(true)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
 
-  vector<string> tokens = Tokenize(line);
-  //CHECK(tokens[0] == m_description);
+  string filename;
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
-  // set factor
-  m_factorType = Scan<FactorType>(tokens[1]);
+    if (args[0] == "factor") {
+      m_factorType = Scan<FactorType>(args[1]);
+    }
+    else if (args[0] == "path") {
+      filename = args[1];
+    }
+    else {
+      UserMessage::Add("Unknown argument " + args[0]);
+      abort();
+    }
+  }
 
   // load word list for restricted feature set
-  if (tokens.size() == 3) {
-    string filename = tokens[2];
-    cerr << "loading source word deletion word list from " << filename << endl;
-    if (!Load(filename)) {
-      UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
-      //return false;
-    }
+  cerr << "loading source word deletion word list from " << filename << endl;
+  if (!Load(filename)) {
+    UserMessage::Add("Unable to load word list for source word deletion feature from file " + filename);
+    //return false;
   }
 }
 
