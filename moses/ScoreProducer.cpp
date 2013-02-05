@@ -17,7 +17,7 @@ const size_t ScoreProducer::unlimited = -1;
 ScoreProducer::ScoreProducer(const std::string& description, const std::string &line)
 : m_reportSparseFeatures(false)
 {
-  ParseLine(line);
+  ParseLine(description, line);
   m_numScoreComponents = FindNumFeatures();
   size_t index = description_counts.count(description);
 
@@ -37,7 +37,7 @@ ScoreProducer::ScoreProducer(const std::string& description, const std::string &
 ScoreProducer::ScoreProducer(const std::string& description, size_t numScoreComponents, const std::string &line)
   : m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {
-  ParseLine(line);
+  ParseLine(description, line);
   size_t index = description_counts.count(description);
 
   ostringstream dstream;
@@ -58,10 +58,14 @@ ScoreProducer::~ScoreProducer()
   cerr << endl << "In ~ScoreProducer of" << this << endl;
 }
 
-void ScoreProducer::ParseLine(const std::string &line)
+void ScoreProducer::ParseLine(const std::string& description, const std::string &line)
 {
   cerr << "line=" << line << endl;
   vector<string> toks = Tokenize(line);
+
+  CHECK(toks.size());
+  //CHECK(toks[0] == description);
+
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
     CHECK(args.size() == 2);

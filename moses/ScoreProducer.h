@@ -31,7 +31,7 @@ protected:
   ScoreProducer(const std::string& description, const std::string &line);
 	ScoreProducer(const std::string& description, size_t numScoreComponents, const std::string &line);
 
-	void ParseLine(const std::string &line);
+	void ParseLine(const std::string& description, const std::string &line);
   size_t FindNumFeatures();
 
 public:
