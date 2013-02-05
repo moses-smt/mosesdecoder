@@ -129,7 +129,7 @@ class Moses():
                             joint_count_f2e = model_probabilities[i_f2e] * src_count
                     except:
                         sys.stderr.write(str(b" ||| ".join(line))+b'\n')
-                        sys.stderr.write('ERROR: counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
+                        sys.stderr.write('ERROR: counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
                         raise
                     
                     i_e2f = flags['i_e2f']
@@ -148,8 +148,8 @@ class Moses():
                     self.phrase_source[src][i] = float(line[-1].split()[1])
                 except:
                     sys.stderr.write(str(line)+'\n')
-                    sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
-                    return
+                    sys.stderr.write('ERROR: Counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
+                    raise
             else:
                 self.phrase_source[src][i] = 1
                 
@@ -159,8 +159,8 @@ class Moses():
                     self.phrase_target[target][i] = float(line[-1].split()[0])
                 except:
                     sys.stderr.write(str(line)+'\n')
-                    sys.stderr.write('Counts are missing. Maybe your phrase table is from an older Moses version that doesn\'t store counts?\n')
-                    return
+                    sys.stderr.write('ERROR: Counts are missing or misformatted. Maybe your phrase table is from an older Moses version that doesn\'t store counts or word alignment?\n')
+                    raise
             else:
                 self.phrase_target[target][i] = 1
 
