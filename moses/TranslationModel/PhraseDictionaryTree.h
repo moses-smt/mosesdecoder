@@ -12,9 +12,6 @@
 #endif
 
 #include "moses/TypeDef.h"
-#include "moses/Dictionary.h"
-
-
 #include "moses/PrefixTree.h"
 #include "moses/File.h"
 #include "moses/ObjectPool.h"
@@ -47,15 +44,14 @@ struct StringTgtCand
 /** A phrase table for phrase-based decoding that is held on disk, rather than in memory
  *  Wrapper around a PDTimp class
  */
-class PhraseDictionaryTree : public Dictionary
+class PhraseDictionaryTree
 {
   PDTimp *imp; //implementation
 
-  PhraseDictionaryTree(); // not implemented
   PhraseDictionaryTree(const PhraseDictionaryTree&); //not implemented
   void operator=(const PhraseDictionaryTree&); //not implemented
 public:
-  PhraseDictionaryTree(size_t numScoreComponent);
+  PhraseDictionaryTree();
 
   void NeedAlignmentInfo(bool a);
 

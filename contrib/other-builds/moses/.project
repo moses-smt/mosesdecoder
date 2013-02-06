@@ -332,16 +332,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DecodeStepTranslation.h</locationURI>
 		</link>
 		<link>
-			<name>Dictionary.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Dictionary.cpp</locationURI>
-		</link>
-		<link>
-			<name>Dictionary.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/Dictionary.h</locationURI>
-		</link>
-		<link>
 			<name>DummyScoreProducers.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/DummyScoreProducers.cpp</locationURI>

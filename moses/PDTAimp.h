@@ -198,7 +198,7 @@ protected:
              ) {
 
     // set my members
-    m_dict=new PhraseDictionaryTree(weight.size()-m_numInputScores);
+    m_dict=new PhraseDictionaryTree();
     m_input=input;
     m_output=output;
     m_languageModels=&languageModels;

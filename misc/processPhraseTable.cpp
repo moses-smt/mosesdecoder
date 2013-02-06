@@ -84,7 +84,7 @@ int main(int argc,char **argv)
 
     if(ftts.size()==1) {
       std::cerr<<"processing ptree for ";
-      PhraseDictionaryTree pdt(noScoreComponent);
+      PhraseDictionaryTree pdt;
 
       pdt.PrintWordAlignment(aligninfo);
 

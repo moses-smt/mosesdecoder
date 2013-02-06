@@ -382,8 +382,8 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
 //
 ////////////////////////////////////////////////////////////
 
-PhraseDictionaryTree::PhraseDictionaryTree(size_t numScoreComponent)
-  : Dictionary(numScoreComponent),imp(new PDTimp)
+PhraseDictionaryTree::PhraseDictionaryTree()
+  : imp(new PDTimp)
 {
   if(sizeof(OFF_T)!=8) {
     TRACE_ERR("ERROR: size of type 'OFF_T' has to be 64 bit!\n"
