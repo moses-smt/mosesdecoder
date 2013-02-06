@@ -324,7 +324,14 @@ bool Parameter::LoadParam(int argc, char* argv[])
 
 std::vector<float> &Parameter::GetWeights(const std::string &name, size_t ind)
 {
-  return m_weights[name + SPrint(ind)];
+  std::vector<float> &ret = m_weights[name + SPrint(ind)];
+
+  cerr << "WEIGHT " << name << ind << "=";
+  for (size_t i = 0; i < ret.size(); ++i) {
+    cerr << ret[i] << ",";
+  }
+  cerr << endl;
+  return ret;
 }
 
 void Parameter::SetWeight(const std::string &name, size_t ind, float weight)
@@ -1096,6 +1103,17 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
 		VERBOSE(2, " " << *iter);
 	}
 	VERBOSE(2, std::endl);
+}
+
+std::set<std::string> Parameter::GetWeightNames() const
+{
+  std::set<std::string> ret;
+  std::map<std::string, std::vector<float> >::const_iterator iter;
+  for (iter = m_weights.begin(); iter != m_weights.end(); ++iter) {
+    const string &key = iter->first;
+    ret.insert(key);
+  }
+  return ret;
 }
 	
 }

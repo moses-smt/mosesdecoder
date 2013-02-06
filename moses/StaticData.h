@@ -711,6 +711,8 @@ public:
   void CleanUpAfterSentenceProcessing(const InputType& source) const;
 
   void CollectFeatureFunctions();
+  bool CheckWeights() const;
+
 };
 
 }
