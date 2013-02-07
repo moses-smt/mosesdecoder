@@ -18,19 +18,26 @@ inline T Scan(const std::string &input)
   return ret;
 }
 
-struct FF
+class FF
 {
-
+public:
+  string implementation;
+  vector<string> toks;
+  FF(const string &line)
+  {
+    vector<string> toks = Tokenize(line, ":");
+  }
 };
 
-struct LM
+class LM : public FF
 {
-  string implementation, otherArgs, path;
+public:
+  string otherArgs, path;
   int order, factor;
 
   LM(const string &line)
+  :FF(line)
   {
-    vector<string> toks = Tokenize(line, ":");
     factor = Scan<int>(toks[0]);
     order = Scan<int>(toks[1]);
     path = toks[2];
@@ -46,14 +53,14 @@ struct LM
   }
 };
 
-struct Pt
+class Pt : public FF
 {
   string path;
   int numFeatures;
 
   Pt(const string &line)
+  :FF(line)
   {
-    vector<string> toks = Tokenize(line, ":");
     path = toks[0];
     numFeatures = 5;    
   }
