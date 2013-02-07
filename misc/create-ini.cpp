@@ -21,23 +21,28 @@ inline T Scan(const std::string &input)
 class FF
 {
 public:
-  string implementation;
   vector<string> toks;
+  string implementation;
+  string path;
+  int numFeatures;
+  
   FF(const string &line)
   {
-    vector<string> toks = Tokenize(line, ":");
+    toks = Tokenize(line, ":");
   }
 };
 
 class LM : public FF
 {
 public:
-  string otherArgs, path;
+  string otherArgs;
   int order, factor;
 
   LM(const string &line)
   :FF(line)
   {
+    numFeatures = 1;
+
     factor = Scan<int>(toks[0]);
     order = Scan<int>(toks[1]);
     path = toks[2];
@@ -53,22 +58,36 @@ public:
   }
 };
 
+class RO : public FF
+{
+  RO(const string &line)
+  :FF(line)
+  {
+    implementation = "LexicalReordering";
+    numFeatures = 6;
+    path = toks[0];
+  }
+};
+
 class Pt : public FF
 {
-  string path;
   int numFeatures;
 
   Pt(const string &line)
   :FF(line)
   {
-    path = toks[0];
+    implementation = "PhraseModel";
     numFeatures = 5;    
+    path = toks[0];
   }
 };
 
 string iniPath;
-vector<string> ptVec, reorderingVec;
-vector<LM> lmVec;
+vector<FF> ffVec;
+
+void OutputWeights(stringstream &weightStrme, const FF &ff)
+{
+}
 
 void Output()
 {
@@ -87,19 +106,22 @@ void Output()
   strme << "6" << endl;
 
   strme << "[feature]" << endl;
+  for (size_t i = 0; i < ffVec.size(); ++i) {
+    const FF &ff = ffVec[i];
 
-  for (size_t i = 0; i < lmVec.size(); ++i) {
-    const LM &lm = lmVec[i];
-    strme << lm.implementation << i << " "
-          << " order=" << lm.order 
-          << " factor=" << lm.factor
-          << " path=" << lm.path
-          << " " << lm.otherArgs
-          << endl;
-
-    weightStrme << << lm.implementation << i << "= 0.5" << endl;
+    const LM *lm = dynamic_cast<const LM*>(&ff);
+    if (lm) {
+      strme << lm->implementation << i << " "
+            << " order=" << lm->order 
+            << " factor=" << lm->factor
+            << " path=" << lm->path
+            << " " << lm->otherArgs
+            << endl;
+    }
+    OutputWeights(weightStrme, ff);
   }
 
+/*
   for (size_t i = 0; i < reorderingVec.size(); ++i) {
     const string &path = reorderingVec[i];
     strme << "LexicalReordering" << i << " "
@@ -115,6 +137,7 @@ void Output()
           << "path=" << path 
           << endl;
   }
+*/
 
   strme << weightStrme.str();
 
@@ -129,18 +152,18 @@ int main(int argc, char **argv)
     if (key == "-phrase-translation-table") {
       ++i;
       string path = argv[i];
-      ptVec.push_back(path);
+      ffVec.push_back(path);
     }
     else if (key == "-reordering-table") {
       ++i;
       string path = argv[i];
-      reorderingVec.push_back(path);
+      ffVec.push_back(path);
     }
     else if (key == "-lm") {
       ++i;
       string line = argv[i];
       LM lm(line);
-      lmVec.push_back(lm);
+      ffVec.push_back(lm);
     }
     else if (key == "-config") {
       ++i;
