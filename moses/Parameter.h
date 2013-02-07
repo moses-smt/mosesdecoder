@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_Parameter_h
 
 #include <string>
+#include <set>
 #include <map>
 #include <vector>
 #include "TypeDef.h"
@@ -113,6 +114,7 @@ public:
 	}
 	
   std::vector<float> &GetWeights(const std::string &name, size_t ind);
+  std::set<std::string> GetWeightNames() const;
 
   const PARAM_MAP &GetParams() const
   { return m_setting; }

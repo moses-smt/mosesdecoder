@@ -121,8 +121,8 @@ public:
 
 class LMRefCount : public LanguageModel {
   public:
-    LMRefCount(LanguageModelImplementation *impl, const std::string &line)
-    : LanguageModel(line)
+    LMRefCount(LanguageModelImplementation *impl, const std::string& description, const std::string &line)
+    : LanguageModel(description, line)
     , m_impl(impl) {}
 
     LanguageModel *Duplicate() const {
@@ -162,7 +162,7 @@ class LMRefCount : public LanguageModel {
 
   private:
     LMRefCount(const LMRefCount &copy_from)
-    : LanguageModel(copy_from.GetArgLine())
+    : LanguageModel(copy_from.GetScoreProducerDescription(), copy_from.GetArgLine())
     , m_impl(copy_from.m_impl) {}
 
     boost::shared_ptr<LanguageModelImplementation> m_impl;

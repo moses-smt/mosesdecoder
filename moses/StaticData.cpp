@@ -595,13 +595,13 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
     }
     else if (feature == "KENLM") {
-      LanguageModel *model = ConstructKenLM(line);
+      LanguageModel *model = ConstructKenLM(feature, line);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
     else if (feature == "IRSTLM") {
       LanguageModelIRST *irstlm = new LanguageModelIRST(line);
-      LanguageModel *model = new LMRefCount(irstlm, line);
+      LanguageModel *model = new LMRefCount(irstlm, feature, line);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }
@@ -661,6 +661,10 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
 
+  if (!CheckWeights()) {
+    return false;
+  }
+
   // report individual sparse features in n-best list
   if (m_parameter->GetParam("report-sparse-features").size() > 0) {
     for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
@@ -701,6 +705,8 @@ bool StaticData::LoadData(Parameter *parameter)
 
     m_allWeights.PlusEquals(extraWeights);
   }
+
+  cerr << endl << "m_allWeights=" << m_allWeights << endl;
 
   return true;
 }
@@ -1265,6 +1271,36 @@ void StaticData::CollectFeatureFunctions()
 
   }
 
+}
+
+bool StaticData::CheckWeights() const
+{
+  set<string> weightNames = m_parameter->GetWeightNames();
+
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    const string &descr = ff.GetScoreProducerDescription();
+
+    set<string>::iterator iter = weightNames.find(descr);
+    if (iter == weightNames.end()) {
+      cerr << "Can't find weights for feature function " << descr << endl;
+    }
+    else {
+      weightNames.erase(iter);
+    }
+  }
+
+  if (!weightNames.empty()) {
+    cerr << "The following weights have no feature function. Maybe incorrectly spelt weights: ";
+    set<string>::iterator iter;
+    for (iter = weightNames.begin(); iter != weightNames.end(); ++iter) {
+      cerr << *iter << ",";
+    }
+    return false;
+  }
+
+  return true;
 }
 
 } // namespace

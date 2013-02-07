@@ -39,7 +39,7 @@ class Phrase;
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction {
 protected:
-  LanguageModel(const std::string &line);
+  LanguageModel(const std::string& description, const std::string &line);
 
   // This can't be in the constructor for virual function dispatch reasons
 

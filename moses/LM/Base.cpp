@@ -33,8 +33,8 @@ using namespace std;
 
 namespace Moses {
 
-LanguageModel::LanguageModel(const std::string &line) :
-  StatefulFeatureFunction("LM", StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
+LanguageModel::LanguageModel(const std::string& description, const std::string &line) :
+  StatefulFeatureFunction(description, StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
 {
   m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature(); 
 }
