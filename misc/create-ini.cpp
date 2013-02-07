@@ -1,3 +1,4 @@
+#include <typeinfo>
 #include <iostream>
 #include <fstream>
 #include <sstream>
@@ -30,6 +31,8 @@ public:
   {
     toks = Tokenize(line, ":");
   }
+
+  virtual string ffType() const= 0;
 };
 
 class LM : public FF
@@ -56,10 +59,14 @@ public:
       case 9: implementation = "KENLM"; otherArgs = "lazyken=1"; break;
     }
   }
+
+  string ffType() const
+  { return "LM"; }  
 };
 
 class RO : public FF
 {
+public:
   RO(const string &line)
   :FF(line)
   {
@@ -67,10 +74,14 @@ class RO : public FF
     numFeatures = 6;
     path = toks[0];
   }
+
+  string ffType() const
+  { return "RO"; } 
 };
 
 class Pt : public FF
 {
+public:
   int numFeatures;
 
   Pt(const string &line)
@@ -80,10 +91,13 @@ class Pt : public FF
     numFeatures = 5;    
     path = toks[0];
   }
+
+  string ffType() const
+  { return "Pt"; } 
 };
 
 string iniPath;
-vector<FF> ffVec;
+vector<FF*> ffVec;
 
 void OutputWeights(stringstream &weightStrme, const FF &ff)
 {
@@ -107,17 +121,30 @@ void Output()
 
   strme << "[feature]" << endl;
   for (size_t i = 0; i < ffVec.size(); ++i) {
-    const FF &ff = ffVec[i];
+    const FF &ff = *ffVec[i];
 
-    const LM *lm = dynamic_cast<const LM*>(&ff);
-    if (lm) {
-      strme << lm->implementation << i << " "
-            << " order=" << lm->order 
-            << " factor=" << lm->factor
-            << " path=" << lm->path
-            << " " << lm->otherArgs
+    if (ff.ffType() == "LM") {
+      const LM &model = static_cast<const LM&>(ff);
+      strme << model.implementation << i << " "
+            << " order=" << model.order 
+            << " factor=" << model.factor
+            << " path=" << model.path
+            << " " << model.otherArgs
             << endl;
     }
+    else if (ff.ffType() == "Pt") {
+      const Pt &model = static_cast<const Pt&>(ff);
+      strme << model.implementation << i << " "
+            << " path=" << model.path
+            << endl;
+    }
+    else if (ff.ffType() == "RO") {
+      const RO &model = static_cast<const RO&>(ff);
+      strme << model.implementation << i << " "
+            << " path=" << model.path
+            << endl;
+    }
+  
     OutputWeights(weightStrme, ff);
   }
 
@@ -151,19 +178,18 @@ int main(int argc, char **argv)
     
     if (key == "-phrase-translation-table") {
       ++i;
-      string path = argv[i];
-      ffVec.push_back(path);
+      Pt *model = new Pt(argv[i]);
+      ffVec.push_back(model);
     }
     else if (key == "-reordering-table") {
       ++i;
-      string path = argv[i];
-      ffVec.push_back(path);
+      RO *model = new RO(argv[i]);
+      ffVec.push_back(model);
     }
     else if (key == "-lm") {
       ++i;
-      string line = argv[i];
-      LM lm(line);
-      ffVec.push_back(lm);
+      LM *model = new LM(argv[i]);
+      ffVec.push_back(model);
     }
     else if (key == "-config") {
       ++i;
