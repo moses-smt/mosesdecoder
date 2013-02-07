@@ -691,8 +691,6 @@ void TranslationOptionCollection::CacheLexReordering()
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     const StatefulFeatureFunction &ff = **iter;
     if (typeid(ff) == typeid(LexicalReordering)) {
-      cerr << "in=" << ff.GetScoreProducerDescription() << endl;
-
       const LexicalReordering &lexreordering = static_cast<const LexicalReordering&>(ff);
       for (size_t startPos = 0 ; startPos < size ; startPos++) {
         size_t maxSize =  size - startPos;

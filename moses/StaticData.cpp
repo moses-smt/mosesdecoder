@@ -1244,7 +1244,6 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
   for(size_t i=0;i<producers.size();++i) {
     FeatureFunction &ff = *producers[i];
     ff.CleanUpAfterSentenceProcessing(source);
-    cerr << endl << "Cleaning " << &ff << endl;
   }
 }
 
