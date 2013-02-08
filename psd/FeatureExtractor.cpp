@@ -92,6 +92,8 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
 
 		if (m_config.GetSourceTargetIndicator()) GenerateConcatIndicatorFeature(sourceForms, targetForms, fc); 
 
+		if (m_config.GetSTSE()) GenerateSTSE(sourceForms, targetForms, context, spanStart, spanEnd, fc); 
+
     if (m_train) {
       fc->Train(SPrint(transIt->m_index), *lossIt);
     } else {
@@ -116,6 +118,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_sourceIndicator = pTree.get<bool>("features.source-indicator", false);
   m_targetIndicator = pTree.get<bool>("features.target-indicator", false);
   m_sourceTargetIndicator = pTree.get<bool>("features.source-target-indicator", false);
+  m_STSE = pTree.get<bool>("features.source-target-source-external", false);
   m_paired          = pTree.get<bool>("features.paired", false);
   m_bagOfWords      = pTree.get<bool>("features.bag-of-words", false);
   m_mostFrequent    = pTree.get<bool>("features.most-frequent", false);
@@ -178,6 +181,27 @@ void FeatureExtractor::GenerateIndicatorFeature(const vector<string> &span, Feat
 void FeatureExtractor::GenerateConcatIndicatorFeature(const vector<string> &span1, const vector<string> &span2, FeatureConsumer *fc)
 {
   fc->AddFeature("p^" + Join("_", span1) + "^" + Join("_", span2));
+}
+
+void FeatureExtractor::GenerateSTSE(const vector<string> &span1, const vector<string> &span2, 
+  const ContextType &context,
+  size_t spanStart,
+  size_t spanEnd,
+  FeatureConsumer *fc)
+{
+  vector<size_t>::const_iterator factIt;
+  for (factIt = m_config.GetFactors().begin(); factIt != m_config.GetFactors().end(); factIt++) {
+    for (size_t i = 1; i <= m_config.GetWindowSize(); i++) {
+      string left = "<s>";
+      string right = "</s>"; 
+      if (spanStart >= i)
+        left = context[spanStart - i][*factIt];
+      fc->AddFeature("stse^" + Join("_", span1) + "^" + Join("_", span2) + BuildContextFeature(*factIt, -i, left));
+      if (spanEnd + i < context.size()) 
+        right = context[spanEnd + i][*factIt];
+      fc->AddFeature("stse^" + Join("_", span1) + "^" + Join("_", span2) + BuildContextFeature(*factIt, i, right));
+    }
+  }
 }
 
 void FeatureExtractor::GenerateInternalFeatures(const vector<string> &span, FeatureConsumer *fc)
