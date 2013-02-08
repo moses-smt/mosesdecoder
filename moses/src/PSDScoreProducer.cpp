@@ -174,7 +174,7 @@ void PSDScoreProducer::Normalize0(vector<float> &losses)
   } else {
 		// sum of non-normalized probs is 0, then take uniform probs
     for (it = losses.begin(); it != losses.end(); it++) 
-      *it = 1 / losses.size();
+      *it = 1.0 / losses.size();
   }
 }
 
@@ -214,7 +214,7 @@ void PSDScoreProducer::Normalize2(vector<float> &losses)
       *it /= sum;
   } else {
     for (it = losses.begin(); it != losses.end(); it++) 
-      *it = 1 / losses.size();
+      *it = 1.0 / losses.size();
   }
 }
 
