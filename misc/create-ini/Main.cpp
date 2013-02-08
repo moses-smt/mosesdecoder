@@ -19,7 +19,7 @@ void Output()
   ofstream strme(iniPath.c_str());
   stringstream weightStrme;
 
-  weightStrme << "[weight]" << endl;
+  weightStrme << "\n\n[weight]" << endl;
 
   strme << "[input-factors]" << endl;
   strme << "0" << endl;
@@ -30,11 +30,11 @@ void Output()
   strme << "[distortion-limit]" << endl;
   strme << "6" << endl;
 
-  strme << "[feature]" << endl;
+  strme << "\n\n[feature]" << endl;
   for (size_t i = 0; i < ffVec.size(); ++i) {
     const FF &ff = *ffVec[i];
 
-    strme << ff;
+    ff.Output(strme);
     ff.OutputWeights(weightStrme);
   }
 

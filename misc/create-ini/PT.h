@@ -12,14 +12,9 @@ class PT : public FF
   float GetWeight() const
   { return 0.2; }
 
-  void Output(std::ostream &out) const
-  {
-    out << name << index << " "
-        << " path=" << path
-        << std::endl;
-  }
+  void Output(std::ostream &out) const;
+  void Output(std::ostream &out, const std::vector<int> &factors) const;
 public:
-  int numFeatures;
   std::vector<int> inFactor, outFactor;
 
   PT(const std::string &line)

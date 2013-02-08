@@ -7,8 +7,6 @@
 
 class FF
 {
-  friend std::ostream& operator<<(std::ostream &out, const FF&);
-
   virtual float GetWeight() const = 0;
 
 public:
