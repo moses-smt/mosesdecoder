@@ -81,8 +81,11 @@ public:
 
 class Pt : public FF
 {
+  friend std::ostream& operator<<(std::ostream&, const Word&);
+
 public:
   int numFeatures;
+  vector<int> inFactor, outFactor;
 
   Pt(const string &line)
   :FF(line)
@@ -90,6 +93,9 @@ public:
     name = "PhraseModel";
     numFeatures = 5;    
     path = toks[0];
+
+    inFactor.push_back(0);
+    outFactor.push_back(0);
   }
 
   string ffType() const
