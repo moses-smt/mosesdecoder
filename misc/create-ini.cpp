@@ -25,7 +25,7 @@ public:
   vector<string> toks;
   string name;
   string path;
-  int numFeatures;
+  int index, numFeatures;
   
   FF(const string &line)
   {
@@ -37,6 +37,9 @@ public:
 
 class LM : public FF
 {
+  friend std::ostream& operator<<(std::ostream&, const LM&);
+
+  static int s_index;
 public:
   string otherArgs;
   int order, factor;
@@ -64,9 +67,25 @@ public:
   { return "LM"; }  
 };
 
+std::ostream& operator<<(std::ostream &out, const LM &model)
+{
+  out << model.name << model.index << " "
+      << " order=" << model.order 
+      << " factor=" << model.factor
+      << " path=" << model.path
+      << " " << model.otherArgs
+      << endl;
+
+  return out;
+}
+
 class RO : public FF
 {
+  friend std::ostream& operator<<(std::ostream&, const RO&);
+
+  static int s_index;
 public:
+
   RO(const string &line)
   :FF(line)
   {
@@ -79,10 +98,20 @@ public:
   { return "RO"; } 
 };
 
+std::ostream& operator<<(std::ostream &out, const RO &model)
+{
+  out << model.name << model.index << " "
+        << " path=" << model.path
+        << endl;
+
+  return out;
+}
+
 class Pt : public FF
 {
-  friend std::ostream& operator<<(std::ostream&, const Word&);
+  friend std::ostream& operator<<(std::ostream&, const Pt&);
 
+  static int s_index;
 public:
   int numFeatures;
   vector<int> inFactor, outFactor;
@@ -90,6 +119,7 @@ public:
   Pt(const string &line)
   :FF(line)
   {
+    index = s_index++;
     name = "PhraseModel";
     numFeatures = 5;    
     path = toks[0];
@@ -101,6 +131,18 @@ public:
   string ffType() const
   { return "Pt"; } 
 };
+
+int Pt::s_index = 0;
+
+ostream& operator<<(ostream& out, const Pt& model)
+{
+  out << model.name << model.index << " "
+      << " path=" << model.path
+      << endl;
+
+  return out;
+}
+
 
 string iniPath;
 vector<FF*> ffVec;
@@ -129,27 +171,7 @@ void Output()
   for (size_t i = 0; i < ffVec.size(); ++i) {
     const FF &ff = *ffVec[i];
 
-    if (ff.ffType() == "LM") {
-      const LM &model = static_cast<const LM&>(ff);
-      strme << model.name << i << " "
-            << " order=" << model.order 
-            << " factor=" << model.factor
-            << " path=" << model.path
-            << " " << model.otherArgs
-            << endl;
-    }
-    else if (ff.ffType() == "Pt") {
-      const Pt &model = static_cast<const Pt&>(ff);
-      strme << model.name << i << " "
-            << " path=" << model.path
-            << endl;
-    }
-    else if (ff.ffType() == "RO") {
-      const RO &model = static_cast<const RO&>(ff);
-      strme << model.name << i << " "
-            << " path=" << model.path
-            << endl;
-    }
+    strme << ff;
   
     OutputWeights(weightStrme, ff);
   }
