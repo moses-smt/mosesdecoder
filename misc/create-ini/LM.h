@@ -15,7 +15,7 @@ class LM : public FF
 
   void Output(std::ostream &out) const
   {
-    out << name << index << " "
+    out << name << index
         << " order=" << order 
         << " factor=" << factor
         << " path=" << path

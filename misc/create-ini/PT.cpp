@@ -4,19 +4,17 @@ int PT::s_index = 0;
 
 void PT::Output(std::ostream &out) const
 {
-  out << name << index << " "
-      << "implementation=" << 0 << " "
-      << "num-features=" << numFeatures << " "
-      << "path=" << path << " ";
+  out << name << index
+      << " implementation=" << 0
+      << " num-features=" << numFeatures
+      << " path=" << path << " ";
 
 
-  out << "input-factor=";
+  out << " input-factor=";
   Output(out, inFactor);
-  out << " ";
 
-  out << "output-factor=";
+  out << " output-factor=";
   Output(out, outFactor);
-  out << " ";
 
   out << std::endl;
 }
