@@ -24,6 +24,14 @@ class FF
   friend std::ostream& operator<<(std::ostream &out, const FF&);
 
   virtual void Output(std::ostream &out) const = 0;
+  virtual void OutputWeights(std::ostream &out) const
+  {
+    out << name << index << "= ";
+    for (size_t i = 0; i < numFeatures; ++i) {
+
+    }
+  }
+
 public:
   vector<string> toks;
   string name;
@@ -56,6 +64,7 @@ class LM : public FF
         << " path=" << path
         << " " << otherArgs;
   }
+
 public:
   string otherArgs;
   int order, factor;
