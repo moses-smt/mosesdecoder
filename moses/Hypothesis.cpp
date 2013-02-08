@@ -540,8 +540,7 @@ std::string Hypothesis::GetTargetPhraseStringRep(const vector<FactorType> factor
 std::string Hypothesis::GetSourcePhraseStringRep() const
 {
   vector<FactorType> allFactors;
-  const size_t maxSourceFactors = StaticData::Instance().GetMaxNumFactors(Input);
-  for(size_t i=0; i < maxSourceFactors; i++) {
+  for(size_t i=0; i < MAX_NUM_FACTORS; i++) {
     allFactors.push_back(i);
   }
   return GetSourcePhraseStringRep(allFactors);
@@ -549,8 +548,7 @@ std::string Hypothesis::GetSourcePhraseStringRep() const
 std::string Hypothesis::GetTargetPhraseStringRep() const
 {
   vector<FactorType> allFactors;
-  const size_t maxTargetFactors = StaticData::Instance().GetMaxNumFactors(Output);
-  for(size_t i=0; i < maxTargetFactors; i++) {
+  for(size_t i=0; i < MAX_NUM_FACTORS; i++) {
     allFactors.push_back(i);
   }
   return GetTargetPhraseStringRep(allFactors);

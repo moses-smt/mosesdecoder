@@ -111,9 +111,6 @@ StaticData::StaticData()
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_needAlignmentInfo(false)
 {
-  m_maxFactorIdx[0] = 0;  // source side
-  m_maxFactorIdx[1] = 0;  // target side
-
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
 
@@ -808,9 +805,6 @@ bool StaticData::LoadPhraseTables()
 
       vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
                          ,output  = Tokenize<FactorType>(token[2], ",");
-      m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
-      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
-      m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath= token[4];
 

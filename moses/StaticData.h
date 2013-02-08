@@ -151,8 +151,6 @@ protected:
   std::string m_alignmentOutputFile;
 
   std::string m_factorDelimiter; //! by default, |, but it can be changed
-  size_t m_maxFactorIdx[2];  //! number of factors on source and target side
-  size_t m_maxNumFactors;  //! max number of factors on both source and target sides
 
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
@@ -493,12 +491,6 @@ public:
   }
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
-  }
-  size_t GetMaxNumFactors(FactorDirection direction) const {
-    return m_maxFactorIdx[(size_t)direction]+1;
-  }
-  size_t GetMaxNumFactors() const {
-    return m_maxNumFactors;
   }
   bool UseMBR() const {
     return m_mbr;

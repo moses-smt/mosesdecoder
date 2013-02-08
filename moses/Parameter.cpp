@@ -439,7 +439,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
   m_setting.erase("weight-i");
   m_setting.erase(oldWeightName);
 
-  // convert actually pt section
+  // convert sparse pt feature
   if (isParamSpecified("ttable-file")) {
     PARAM_VEC &ttable = m_setting["ttable-file"];
     for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
@@ -448,6 +448,44 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
       if (toks.size() == 6 && toks[5] == "sparse") {
         AddFeature("SparsePhraseDictionaryFeature");
       }
+    }
+  }
+
+  // convert pt feature
+  if (isParamSpecified("ttable-file")) {
+    PARAM_VEC &translationVector = m_setting["ttable-file"];
+    vector<size_t>	maxTargetPhrase = Scan<size_t>(GetParam("ttable-limit"));
+
+    if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
+      VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
+      for(size_t i = 1; i < translationVector.size(); i++)
+        maxTargetPhrase.push_back(maxTargetPhrase[0]);
+    } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
+      stringstream strme;
+      strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
+      UserMessage::Add(strme.str());
+      return; // TODO exception
+    }
+
+    for (size_t currDict = 0; currDict < translationVector.size(); ++currDict) {
+        stringstream ptLine;
+        ptLine << "PhraseModel ";
+
+        vector<string> token = Tokenize(translationVector[currDict]);
+        if(currDict == 0 && token.size() == 4) {
+          UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
+          return; // TODO exception
+        }
+
+        CHECK(token.size() >= 5);
+
+        PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+        ptLine << "implementation=" << implementation << " ";
+        ptLine << "input-factor=" << token[1] << " ";
+        ptLine << "output-factor=" << token[2] << " ";
+        ptLine << "path=" << token[4] << " ";
+
+
     }
   }
 
