@@ -21,6 +21,9 @@ inline T Scan(const std::string &input)
 
 class FF
 {
+  friend std::ostream& operator<<(std::ostream &out, const FF&);
+
+  virtual void Output(std::ostream &out) const = 0;
 public:
   vector<string> toks;
   string name;
@@ -35,11 +38,24 @@ public:
   virtual string ffType() const= 0;
 };
 
+std::ostream& operator<<(std::ostream &out, const FF &model)
+{
+  model.Output(out);
+  return out;
+}
+
 class LM : public FF
 {
-  friend std::ostream& operator<<(std::ostream&, const LM&);
-
   static int s_index;
+
+  void Output(std::ostream &out) const
+  {
+    out << name << index << " "
+        << " order=" << order 
+        << " factor=" << factor
+        << " path=" << path
+        << " " << otherArgs;
+  }
 public:
   string otherArgs;
   int order, factor;
@@ -67,23 +83,15 @@ public:
   { return "LM"; }  
 };
 
-std::ostream& operator<<(std::ostream &out, const LM &model)
-{
-  out << model.name << model.index << " "
-      << " order=" << model.order 
-      << " factor=" << model.factor
-      << " path=" << model.path
-      << " " << model.otherArgs
-      << endl;
-
-  return out;
-}
-
 class RO : public FF
 {
-  friend std::ostream& operator<<(std::ostream&, const RO&);
-
   static int s_index;
+
+  void Output(std::ostream &out) const
+  {
+    out << name << index << " "
+        << " path=" << path;
+  }
 public:
 
   RO(const string &line)
@@ -98,20 +106,15 @@ public:
   { return "RO"; } 
 };
 
-std::ostream& operator<<(std::ostream &out, const RO &model)
-{
-  out << model.name << model.index << " "
-        << " path=" << model.path
-        << endl;
-
-  return out;
-}
-
 class Pt : public FF
 {
-  friend std::ostream& operator<<(std::ostream&, const Pt&);
-
   static int s_index;
+
+  void Output(std::ostream &out) const
+  {
+    out << name << index << " "
+        << " path=" << path;
+  }
 public:
   int numFeatures;
   vector<int> inFactor, outFactor;
@@ -133,15 +136,6 @@ public:
 };
 
 int Pt::s_index = 0;
-
-ostream& operator<<(ostream& out, const Pt& model)
-{
-  out << model.name << model.index << " "
-      << " path=" << model.path
-      << endl;
-
-  return out;
-}
 
 
 string iniPath;
@@ -171,7 +165,7 @@ void Output()
   for (size_t i = 0; i < ffVec.size(); ++i) {
     const FF &ff = *ffVec[i];
 
-    strme << ff;
+    strme << ff << endl;
   
     OutputWeights(weightStrme, ff);
   }
