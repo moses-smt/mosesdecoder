@@ -533,7 +533,11 @@ bool StaticData::LoadData(Parameter *parameter)
 
   const vector<string> &features = m_parameter->GetParam("feature");
   for (size_t i = 0; i < features.size(); ++i) {
-    const string &line = features[i];
+    const string &line = Trim(features[i]);
+    cerr << "line=" << line << endl;
+    if (line.empty())
+      continue;
+
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
@@ -650,7 +654,7 @@ bool StaticData::LoadData(Parameter *parameter)
     }
 #endif
     else {
-      UserMessage::Add("Unknown feature function");
+      UserMessage::Add("Unknown feature function:" + feature);
       return false;
     }
 

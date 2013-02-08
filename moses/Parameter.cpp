@@ -759,13 +759,6 @@ bool Parameter::Validate()
     }
   }
   
-
-  // required parameters
-  if (m_setting["ttable-file"].size() == 0) {
-    UserMessage::Add("No phrase translation table (ttable-file)");
-    noErrorFlag = false;
-  }
-
   if (m_setting["lmodel-dub"].size() > 0) {
     if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()) {
       stringstream errorMsg("");

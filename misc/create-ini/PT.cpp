@@ -7,8 +7,7 @@ void PT::Output(std::ostream &out) const
   out << name << index
       << " implementation=" << 0
       << " num-features=" << numFeatures
-      << " path=" << path << " ";
-
+      << " path=" << path;
 
   out << " input-factor=";
   Output(out, inFactor);

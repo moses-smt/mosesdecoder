@@ -1,0 +1,3 @@
+exe create-ini : FF.cpp LM.cpp PT.cpp RO.cpp Main.cpp ; 
+
+

@@ -12,7 +12,7 @@ class RO : public FF
 
   void Output(std::ostream &out) const
   {
-    out << name << index << " "
+    out << name << index
         << " path=" << path
         << std::endl;
   }
