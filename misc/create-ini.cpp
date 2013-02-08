@@ -23,7 +23,7 @@ class FF
 {
 public:
   vector<string> toks;
-  string implementation;
+  string name;
   string path;
   int numFeatures;
   
@@ -53,10 +53,10 @@ public:
 
     switch (implNum)
     {
-      case 0: implementation = "SRILM"; break;
-      case 1: implementation = "IRSTLM"; break;
-      case 8: implementation = "KENLM"; otherArgs = "lazyken=0"; break;
-      case 9: implementation = "KENLM"; otherArgs = "lazyken=1"; break;
+      case 0: name = "SRILM"; break;
+      case 1: name = "IRSTLM"; break;
+      case 8: name = "KENLM"; otherArgs = "lazyken=0"; break;
+      case 9: name = "KENLM"; otherArgs = "lazyken=1"; break;
     }
   }
 
@@ -70,7 +70,7 @@ public:
   RO(const string &line)
   :FF(line)
   {
-    implementation = "LexicalReordering";
+    name = "LexicalReordering";
     numFeatures = 6;
     path = toks[0];
   }
@@ -87,7 +87,7 @@ public:
   Pt(const string &line)
   :FF(line)
   {
-    implementation = "PhraseModel";
+    name = "PhraseModel";
     numFeatures = 5;    
     path = toks[0];
   }
@@ -125,7 +125,7 @@ void Output()
 
     if (ff.ffType() == "LM") {
       const LM &model = static_cast<const LM&>(ff);
-      strme << model.implementation << i << " "
+      strme << model.name << i << " "
             << " order=" << model.order 
             << " factor=" << model.factor
             << " path=" << model.path
@@ -134,37 +134,19 @@ void Output()
     }
     else if (ff.ffType() == "Pt") {
       const Pt &model = static_cast<const Pt&>(ff);
-      strme << model.implementation << i << " "
+      strme << model.name << i << " "
             << " path=" << model.path
             << endl;
     }
     else if (ff.ffType() == "RO") {
       const RO &model = static_cast<const RO&>(ff);
-      strme << model.implementation << i << " "
+      strme << model.name << i << " "
             << " path=" << model.path
             << endl;
     }
   
     OutputWeights(weightStrme, ff);
   }
-
-/*
-  for (size_t i = 0; i < reorderingVec.size(); ++i) {
-    const string &path = reorderingVec[i];
-    strme << "LexicalReordering" << i << " "
-          << "path=" << path 
-          << endl;
-
-    weightStrme << << lm.implementation << i << "= 0.5" << endl;
-  }
-
-  for (size_t i = 0; i < ptVec.size(); ++i) {
-    const string &path = ptVec[i];
-    strme << "PhraseModel" << i << " "
-          << "path=" << path 
-          << endl;
-  }
-*/
 
   strme << weightStrme.str();
 
