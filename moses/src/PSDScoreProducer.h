@@ -33,20 +33,28 @@ public:
   // of a given source span
   std::vector<ScoreComponentCollection> ScoreOptions(const std::vector<TranslationOption *> &options, const InputType &src);
 
-  // mandatory methods for features
+  // mandatory methods for Moses feature functions
   size_t GetNumScoreComponents() const;
   std::string GetScoreProducerDescription(unsigned) const;
   std::string GetScoreProducerWeightShortName(unsigned) const;
   size_t GetNumInputScores() const;
 
+  // calculate scores when collecting translation options, not during decoding
   virtual bool ComputeValueInTranslationOption() const
   {
     return true;
   }
 private:
+  // Load index/vocabulary of target phrases
   bool LoadPhraseIndex(const std::string &indexFile);
+
+  // throw an exception if target phrase is not in phrase vocabulary
   void CheckIndex(const TargetPhrase &tgtPhrase);
+
+  // Construct a ScoreComponentCollection with PSD feature set to given score
   ScoreComponentCollection ScoreFactory(float score);
+
+  // Build PSD::Translation object from Moses structures
   PSD::Translation GetPSDTranslation(const TranslationOption *option);
 
   void Normalize0(std::vector<float> &losses);

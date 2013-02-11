@@ -126,7 +126,7 @@ void VWLibraryConsumer::AddFeature(const string &name, float value)
 
 void VWLibraryConsumer::FinishExample()
 {
-  m_shared = true;
+  m_shared = true; // avoid removing an empty namespace in next call of SetNamespace
   m_ex->clear_features();
 }
 
