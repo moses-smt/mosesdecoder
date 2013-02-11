@@ -108,6 +108,7 @@ private:
     VWLibraryPredictConsumer(vw * instance, int index);
   };
 
+  // object pool of VWLibraryPredictConsumers
   class VWLibraryPredictConsumerFactory : private boost::noncopyable
   {
   public:
