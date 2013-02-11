@@ -184,6 +184,9 @@ Parameter::Parameter()
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
 
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
+  AddParam("print-id", "prefix translations with id. Default if false");
+
+
 }
 
 Parameter::~Parameter()
