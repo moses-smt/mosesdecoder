@@ -526,7 +526,11 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
 
       AddFeature(ptLine.str());
     } // for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-  }
+  } // if (GetParam("ttable-file").size() > 0) {
+
+  m_setting.erase("ttable-file");
+  m_setting.erase("ttable-limit");
+
 }
 
 void Parameter::AddFeature(const std::string &line)
