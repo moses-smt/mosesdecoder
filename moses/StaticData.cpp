@@ -642,6 +642,12 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
+    else if (feature == "PhraseModel") {
+      PhraseDictionaryFeature* model = new PhraseDictionaryFeature(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
@@ -761,7 +767,7 @@ StaticData::~StaticData()
 /* Doesn't load phrase tables any more. Just creates the features. */
 bool StaticData::LoadPhraseTables()
 {
-  VERBOSE(2,"Creating phrase table features" << endl);
+  //VERBOSE(2,"Creating phrase table features" << endl);
 
   if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
     if (m_parameter->GetParam("input-scores").size()) {
@@ -783,6 +789,7 @@ bool StaticData::LoadPhraseTables()
     m_numRealWordsInInput = 0;
   }
 
+  /*
   // load phrase translation tables
   if (m_parameter->GetParam("ttable-file").size() > 0) {
     // weights
@@ -869,6 +876,7 @@ bool StaticData::LoadPhraseTables()
 
   IFVERBOSE(1)
   PrintUserTime("Finished loading phrase tables");
+  */
   return true;
 }
 

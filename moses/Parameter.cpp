@@ -412,7 +412,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
 
   // real pt weights
   if (isParamSpecified(oldWeightName)) {
-    int ind = 0;
     const PARAM_VEC &oldWeights = m_setting[oldWeightName];
 
     size_t currOldInd = 0;
@@ -451,6 +450,83 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
     }
   }
 
+  // convert actuall pt feature
+  VERBOSE(2,"Creating phrase table features" << endl);
+
+  size_t m_numInputScores = 0;
+  size_t m_numRealWordsInInput = 0;
+
+  if (GetParam("input-scores").size()) {
+    cerr << "JHH:" << GetParam("input-scores").size() << endl;
+    m_numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
+  }
+
+  if (GetParam("input-scores").size() > 1) {
+    m_numRealWordsInInput = Scan<size_t>(GetParam("input-scores")[1]);
+  }
+
+  // load phrase translation tables
+  if (GetParam("ttable-file").size() > 0) {
+    // weights
+    const vector<string> &translationVector = GetParam("ttable-file");
+    vector<size_t>  maxTargetPhrase         = Scan<size_t>(GetParam("ttable-limit"));
+
+    if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
+      VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
+      for(size_t i = 1; i < translationVector.size(); i++)
+        maxTargetPhrase.push_back(maxTargetPhrase[0]);
+    } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
+      stringstream strme;
+      strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
+      UserMessage::Add(strme.str());
+      return;
+    }
+
+    // MAIN LOOP
+    for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
+      stringstream ptLine;
+      ptLine << "PhraseModel ";
+
+      vector<string> token = Tokenize(translationVector[currDict]);
+
+      if(currDict == 0 && token.size() == 4) {
+        UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
+        return;
+      }
+      CHECK(token.size() >= 5);
+
+      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+      ptLine << "implementation=" << implementation << " ";
+      ptLine << "input-factor=" << token[1] << " ";
+      ptLine << "output-factor=" << token[2] << " ";
+      ptLine << "path=" << token[4] << " ";
+
+      //characteristics of the phrase table
+
+      vector<FactorType>  input   = Tokenize<FactorType>(token[1], ",")
+                         ,output  = Tokenize<FactorType>(token[2], ",");
+      size_t numScoreComponent = Scan<size_t>(token[3]);
+      string filePath= token[4];
+
+      if(currDict==0) {
+        // only the 1st pt. THis is shit
+        // TODO. find what the assumptions made by confusion network about phrase table output which makes
+        // it only work with binary file. This is a hack
+        numScoreComponent += m_numInputScores + m_numRealWordsInInput;
+      }
+
+      ptLine << "num-features=" << numScoreComponent << " ";
+      ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
+      ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
+
+      if (implementation == SuffixArray) {
+        ptLine << "target-path=" << token[5] << " ";
+        ptLine << "alignment-path=" << token[6] << " ";
+      }
+
+      AddFeature(ptLine.str());
+    } // for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
+  }
 }
 
 void Parameter::AddFeature(const std::string &line)
@@ -659,7 +735,6 @@ void Parameter::ConvertWeightArgs()
     cerr << "Do not mix old and new format for specify weights";
   }
 
-  ConvertWeightArgsPhraseModel("weight-t", "PhraseModel");
   ConvertWeightArgsSingleWeight("weight-w", "WordPenalty");
   ConvertWeightArgsLM("weight-l");
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
@@ -680,6 +755,9 @@ void Parameter::ConvertWeightArgs()
 
   AddFeature("WordPenalty");
   AddFeature("UnknownWordPenalty");
+
+  ConvertWeightArgsPhraseModel("weight-t", "PhraseModel");
+
 }
 
 void Parameter::CreateWeightsMap()
