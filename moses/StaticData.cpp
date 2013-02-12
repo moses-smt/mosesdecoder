@@ -789,94 +789,14 @@ bool StaticData::LoadPhraseTables()
     m_numRealWordsInInput = 0;
   }
 
-  /*
-  // load phrase translation tables
-  if (m_parameter->GetParam("ttable-file").size() > 0) {
-    // weights
-    const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
-    vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
-
-    if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
-      VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
-      for(size_t i = 1; i < translationVector.size(); i++)
-        maxTargetPhrase.push_back(maxTargetPhrase[0]);
-    } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
-      stringstream strme;
-      strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
-      UserMessage::Add(strme.str());
-      return false;
-    }
-
-    // MAIN LOOP
-    for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      stringstream ptLine;
-      ptLine << "PhraseModel ";
-
-      vector<string> token = Tokenize(translationVector[currDict]);
-
-      if(currDict == 0 && token.size() == 4) {
-        UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
-        return false;
-      }
-      CHECK(token.size() >= 5);
-
-      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-      ptLine << "implementation=" << implementation << " ";
-      ptLine << "input-factor=" << token[1] << " ";
-      ptLine << "output-factor=" << token[2] << " ";
-      ptLine << "path=" << token[4] << " ";
-
-      //characteristics of the phrase table
-
-      vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
-                         ,output  = Tokenize<FactorType>(token[2], ",");
-      size_t numScoreComponent = Scan<size_t>(token[3]);
-      string filePath= token[4];
-
-      if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput)) {
-        // only the 1st pt. THis is shit
-        // TODO. find what the assumptions made by confusion network about phrase table output which makes
-        // it only work with binary file. This is a hack
-        CHECK(implementation == Binary);
-        numScoreComponent += m_numInputScores + m_numRealWordsInInput;
-      }
-
-      ptLine << "num-features=" << numScoreComponent << " ";
-      ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
-      ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
-
-      if (implementation == SuffixArray) {
-        ptLine << "target-path=" << token[5] << " ";
-        ptLine << "alignment-path=" << token[6] << " ";
-      }
-
-      //This is needed for regression testing, but the phrase table
-      //might not really be loading here
-      IFVERBOSE(1)
-      PrintUserTime(string("Start loading PhraseTable ") + filePath);
-      VERBOSE(1,"filePath: " << filePath <<endl);
-
-      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(ptLine.str());
-
-      //optional create sparse phrase feature
-      if (m_sparsePhraseDictionary.size() > currDict) {
-        SparsePhraseDictionaryFeature* spdf = m_sparsePhraseDictionary[currDict];
-        pdf->SetSparsePhraseDictionaryFeature(spdf);
-      }
-
-      m_phraseDictionary.push_back(pdf);
-
-      const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
-      CHECK(weights.size() >= numScoreComponent);
-
-      SetWeights(m_phraseDictionary.back(),weights);
-
+  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    if (i < m_sparsePhraseDictionary.size()) {
+      PhraseDictionaryFeature *pt = m_phraseDictionary[i];
+      SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
+      pt->SetSparsePhraseDictionaryFeature(sparse);
     }
   }
 
-  IFVERBOSE(1)
-  PrintUserTime("Finished loading phrase tables");
-  */
   return true;
 }
 
