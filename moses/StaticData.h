@@ -223,8 +223,6 @@ protected:
   //! helper fn to set bool param from ini file/command line
   void SetBooleanParameter(bool *paramter, std::string parameterName, bool defaultValue);
 
-  //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
-  bool LoadPhraseTables();
   //! load decoding steps
   bool LoadDecodeGraphs();
 

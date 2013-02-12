@@ -453,16 +453,16 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
   // convert actuall pt feature
   VERBOSE(2,"Creating phrase table features" << endl);
 
-  size_t m_numInputScores = 0;
-  size_t m_numRealWordsInInput = 0;
+  size_t numInputScores = 0;
+  size_t numRealWordsInInput = 0;
 
   if (GetParam("input-scores").size()) {
     cerr << "JHH:" << GetParam("input-scores").size() << endl;
-    m_numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
+    numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
   }
 
   if (GetParam("input-scores").size() > 1) {
-    m_numRealWordsInInput = Scan<size_t>(GetParam("input-scores")[1]);
+    numRealWordsInInput = Scan<size_t>(GetParam("input-scores")[1]);
   }
 
   // load phrase translation tables
@@ -512,11 +512,11 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
         // only the 1st pt. THis is shit
         // TODO. find what the assumptions made by confusion network about phrase table output which makes
         // it only work with binary file. This is a hack
-        numScoreComponent += m_numInputScores + m_numRealWordsInInput;
+        numScoreComponent += numInputScores + numRealWordsInInput;
       }
 
       ptLine << "num-features=" << numScoreComponent << " ";
-      ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
+      ptLine << "num-input-features=" << (currDict==0 ? numInputScores + numRealWordsInInput : 0) << " ";
       ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
 
       if (implementation == SuffixArray) {

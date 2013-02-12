@@ -110,6 +110,8 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_needAlignmentInfo(false)
+  ,m_numInputScores(0)
+  ,m_numRealWordsInInput(0)
 {
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
@@ -502,6 +504,15 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  // input scores for lattices & confusion network input. TODO - get rid of this
+  if (m_parameter->GetParam("input-scores").size() > 0) {
+    m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
+  }
+
+  if (m_parameter->GetParam("input-scores").size() > 1) {
+    m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
+  }
+
   // use of xml in input
   if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
   else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
@@ -665,7 +676,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   CollectFeatureFunctions();
 
-  if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
 
   if (!CheckWeights()) {
@@ -762,42 +772,6 @@ StaticData::~StaticData()
 
   // memory pools
   Phrase::FinalizeMemPool();
-}
-
-/* Doesn't load phrase tables any more. Just creates the features. */
-bool StaticData::LoadPhraseTables()
-{
-  //VERBOSE(2,"Creating phrase table features" << endl);
-
-  if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
-    if (m_parameter->GetParam("input-scores").size()) {
-      m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
-    }
-    else {
-      m_numInputScores = 1;
-    }
-
-    if (m_parameter->GetParam("input-scores").size() > 1) {
-      m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
-    }
-    else {
-      m_numRealWordsInInput = 0;
-    }
-  }
-  else { // not confusion network or lattice input
-    m_numInputScores = 0;
-    m_numRealWordsInInput = 0;
-  }
-
-  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
-    if (i < m_sparsePhraseDictionary.size()) {
-      PhraseDictionaryFeature *pt = m_phraseDictionary[i];
-      SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
-      pt->SetSparsePhraseDictionaryFeature(sparse);
-    }
-  }
-
-  return true;
 }
 
 void StaticData::LoadNonTerminals()
@@ -1191,7 +1165,15 @@ void StaticData::CollectFeatureFunctions()
       m_generationDictionary.push_back(generation);
       continue;
     }
+  }
 
+  // put sparse feature into normal pt. TODO redo this
+  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    if (i < m_sparsePhraseDictionary.size()) {
+      PhraseDictionaryFeature *pt = m_phraseDictionary[i];
+      SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
+      pt->SetSparsePhraseDictionaryFeature(sparse);
+    }
   }
 
 }
