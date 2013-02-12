@@ -485,6 +485,41 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
         ptLine << "output-factor=" << token[2] << " ";
         ptLine << "path=" << token[4] << " ";
 
+        //characteristics of the phrase table
+
+        vector<FactorType>  input	= Tokenize<FactorType>(token[1], ",")
+                           ,output	= Tokenize<FactorType>(token[2], ",");
+        size_t numScoreComponent = Scan<size_t>(token[3]);
+        string filePath= token[4];
+
+        if(GetParam("inputtype").size()
+           && (GetParam("inputtype")[0] == "1" || GetParam("inputtype")[0] == "2")) {
+          if (currDict==0) { // only the 1st pt. THis is shit
+            // TODO. find what the assumptions made by confusion network about phrase table output which makes
+            // it only work with binary file. This is a hack
+            CHECK(implementation == Binary);
+
+            if (GetParam("input-scores").size()) {
+              m_numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
+            }
+            else {
+              m_numInputScores = 1;
+            }
+            numScoreComponent += m_numInputScores;
+
+            if (m_parameter->GetParam("input-scores").size() > 1) {
+              m_numRealWordsInInput = Scan<size_t>(GetParam("input-scores")[1]);
+            }
+            else {
+              m_numRealWordsInInput = 0;
+            }
+            numScoreComponent += m_numRealWordsInInput;
+          }
+        }
+        else { // not confusion network or lattice input
+          m_numInputScores = 0;
+          m_numRealWordsInInput = 0;
+        }
 
     }
   }
