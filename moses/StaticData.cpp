@@ -763,7 +763,25 @@ bool StaticData::LoadPhraseTables()
 {
   VERBOSE(2,"Creating phrase table features" << endl);
 
-  // language models must be loaded prior to loading phrase tables
+  if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
+    if (m_parameter->GetParam("input-scores").size()) {
+      m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
+    }
+    else {
+      m_numInputScores = 1;
+    }
+
+    if (m_parameter->GetParam("input-scores").size() > 1) {
+      m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
+    }
+    else {
+      m_numRealWordsInInput = 0;
+    }
+  }
+  else { // not confusion network or lattice input
+    m_numInputScores = 0;
+    m_numRealWordsInInput = 0;
+  }
 
   // load phrase translation tables
   if (m_parameter->GetParam("ttable-file").size() > 0) {
@@ -808,32 +826,12 @@ bool StaticData::LoadPhraseTables()
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath= token[4];
 
-      if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
-        if (currDict==0) { // only the 1st pt. THis is shit
-          // TODO. find what the assumptions made by confusion network about phrase table output which makes
-          // it only work with binary file. This is a hack
-          CHECK(implementation == Binary);
-
-          if (m_parameter->GetParam("input-scores").size()) {
-            m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
-          }
-          else {
-            m_numInputScores = 1;
-          }
-          numScoreComponent += m_numInputScores;
-
-          if (m_parameter->GetParam("input-scores").size() > 1) {
-            m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
-          }
-          else {
-            m_numRealWordsInInput = 0;
-          }
-          numScoreComponent += m_numRealWordsInInput;
-        }
-      }
-      else { // not confusion network or lattice input
-        m_numInputScores = 0;
-        m_numRealWordsInInput = 0;
+      if(currDict==0 && (m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput)) {
+        // only the 1st pt. THis is shit
+        // TODO. find what the assumptions made by confusion network about phrase table output which makes
+        // it only work with binary file. This is a hack
+        CHECK(implementation == Binary);
+        numScoreComponent += m_numInputScores + m_numRealWordsInInput;
       }
 
       ptLine << "num-features=" << numScoreComponent << " ";
