@@ -17,7 +17,7 @@ class LM : public FF
   {
     out << name
         << " order=" << order 
-        << " factor=" << factor
+        << " factor=" << OutputFactors(outFactors)
         << " path=" << path
         << " " << otherArgs
         << std::endl;
@@ -25,7 +25,7 @@ class LM : public FF
 
 public:
   std::string otherArgs;
-  int order, factor;
+  int order;
 
   LM(const std::string &line)
   :FF(line)
@@ -33,7 +33,7 @@ public:
     index = s_index++;
     numFeatures = 1;
 
-    factor = Scan<int>(toks[0]);
+    outFactors.push_back(Scan<int>(toks[0]));
     order = Scan<int>(toks[1]);
     path = toks[2];
     int implNum = Scan<int>(toks[3]);
