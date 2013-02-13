@@ -9,8 +9,12 @@ class FF
 {
   virtual float GetWeight() const = 0;
 
+protected:
+  std::string OutputFactors(const std::vector<int> &factors) const;
+
 public:
   std::vector<std::string> toks;
+  std::vector<int> inFactors, outFactors;
   std::string name;
   std::string path;
   int index, numFeatures;

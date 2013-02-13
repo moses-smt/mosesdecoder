@@ -300,7 +300,8 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // convert old weights args to new format
-  ConvertWeightArgs();
+  if (isParamSpecified("features"))
+    ConvertWeightArgs();
   CreateWeightsMap();
   WeightOverwrite();
 

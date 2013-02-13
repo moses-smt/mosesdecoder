@@ -8,6 +8,7 @@
 #include "LM.h"
 #include "RO.h"
 #include "PT.h"
+#include "WP.h"
 
 using namespace std;
 
@@ -45,6 +46,9 @@ void Output()
 
 int main(int argc, char **argv)
 {
+	WP *model = new WP("");
+	ffVec.push_back(model);	
+
   for (int i = 0; i < argc; ++i) {
     string key(argv[i]);
     

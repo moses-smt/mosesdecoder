@@ -4,7 +4,7 @@ int PT::s_index = 0;
 
 void PT::Output(std::ostream &out) const
 {
-  out << name << index
+  out << name
       << " implementation=" << 0
       << " num-features=" << numFeatures
       << " path=" << path;
