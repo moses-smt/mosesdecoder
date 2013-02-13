@@ -9,6 +9,7 @@
 #include "RO.h"
 #include "PT.h"
 #include "WP.h"
+#include "Distortion.h"
 
 using namespace std;
 
@@ -46,7 +47,11 @@ void Output()
 
 int main(int argc, char **argv)
 {
-	WP *model = new WP("");
+	FF *model;
+	model = new WP("");
+	ffVec.push_back(model);	
+
+	model = new Distortion("");
 	ffVec.push_back(model);	
 
   for (int i = 0; i < argc; ++i) {
