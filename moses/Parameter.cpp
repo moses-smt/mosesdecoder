@@ -45,7 +45,6 @@ Parameter::Parameter()
   AddParam("dlm-model", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
-  AddParam("distinct-nbest", "only distinct translations in nbest list");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
@@ -161,9 +160,7 @@ Parameter::Parameter()
   AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
-
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
-
   AddParam("link-param-count", "DEPRECATED. DO NOT USE. Number of parameters on word links when using confusion networks or lattices (default = 1)");
 
   AddParam("weight-slm", "slm", "DEPRECATED. DO NOT USE. weight(s) for syntactic language model");
@@ -192,6 +189,8 @@ Parameter::Parameter()
   AddParam("input-scores", "2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
 
   AddParam("feature", "");
+  AddParam("print-id", "prefix translations with id. Default if false");
+
 
 }
 
