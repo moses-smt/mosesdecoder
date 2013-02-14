@@ -367,10 +367,12 @@ void BlockHashIndex::CalcHash(size_t current, void* source_void)
     source->dispose(source->data, key, keylen);
   
     if(lastKey > temp) {
-      std::cerr << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
-      std::cerr << "1: " << lastKey << std::endl;
-      std::cerr << "2: " << temp << std::endl;
-      abort();
+      if(source->nkeys != 2 || temp != "###DUMMY_KEY###") {
+        std::cerr << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort" << std::endl;
+        std::cerr << "1: " << lastKey << std::endl;
+        std::cerr << "2: " << temp << std::endl;
+        abort();
+      }
     }
     lastKey = temp;
     
