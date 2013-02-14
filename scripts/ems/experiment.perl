@@ -2082,9 +2082,11 @@ sub define_training_create_config {
     my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
 			= &get_output_and_input($step_id);
 
-    my $cmd = &get_training_setting(9);
+    #my $cmd = &get_training_setting(9);
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+    my $cmd = "$moses_src_dir/bin/create-ini ";
 
-		# get model, and whether suffix array is used. Determines the pt implementation.
+    # get model, and whether suffix array is used. Determines the pt implementation.
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $sa_exec_dir = &get("TRAINING:suffix-array");
 		
