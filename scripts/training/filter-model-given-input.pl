@@ -88,100 +88,110 @@ my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
 while(<INI>) {
-    print INI_OUT $_;
-    if (/ttable-file\]/) {
-      while(1) {	       
-    	my $table_spec = <INI>;
-    	if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)( \S+)?$/) {
-    	    print INI_OUT $table_spec;
-    	    last;
-    	}
-    	my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag) = ($1,$2,$3,$4,$5,$6);
-      $table_flag = "" if (!defined($table_flag));
+  if (/PhraseModel /) {
+    print STDERR "HELLO THERE: " .$_;
+  }
+  elsif (/LexicalReordering /) {
+    print STDERR "BYE THERE: " .$_;  
+  }
+  else {
+    print INI_OUT $_;  
+  }
 
-        if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
-            # Only Memory ("0") and NewFormat ("6") can be filtered.
-            print INI_OUT $table_spec;
-            next;
-        }
+	if (/ttable-file\]/) {
+	  while(1) {	       
+		  my $table_spec = <INI>;
+			if ($table_spec !~ /^(\d+) ([\d\,\-]+) ([\d\,\-]+) (\d+) (\S+)( \S+)?$/) {
+					print INI_OUT $table_spec;
+					last;
+			}
+			my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag) = ($1,$2,$3,$4,$5,$6);
+			$table_flag = "" if (!defined($table_flag));
 
-    	chomp($file);
-    	push @TABLE, $file;
-	push @TABLE_WEIGHTS,$w;
-	$KNOWN_TTABLE{$#TABLE}++;
+			if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
+					# Only Memory ("0") and NewFormat ("6") can be filtered.
+					print INI_OUT $table_spec;
+					next;
+			}
 
-    	my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
-        my $cnt = 1;
-        $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
-        $new_name .= ".$cnt";
-        $new_name_used{$new_name} = 1;
-	if ($binarizer && $phrase_table_impl == 6) {
-    	  print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
-        }
-        elsif ($binarizer && $phrase_table_impl == 0) {
-          if ($binarizer =~ /processPhraseTableMin/) {
-            print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
-          } else {
-    	    print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
-          }
-        } else {
-          $new_name .= ".gz" if $opt_gzip;
-    	    print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
-        }
-    	push @TABLE_NEW_NAME,$new_name;
+			chomp($file);
+			push @TABLE, $file;
+			push @TABLE_WEIGHTS,$w;
+			$KNOWN_TTABLE{$#TABLE}++;
+	
+			my $new_name = "$dir/phrase-table.$source_factor-$t.".(++$TABLE_NUMBER{"$source_factor-$t"});
+			my $cnt = 1;
+			$cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
+			$new_name .= ".$cnt";
+			$new_name_used{$new_name} = 1;
+			if ($binarizer && $phrase_table_impl == 6) {
+				print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
+			}
+			elsif ($binarizer && $phrase_table_impl == 0) {
+				if ($binarizer =~ /processPhraseTableMin/) {
+					print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
+				}
+				else {
+				print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
+				}
+			}
+			else {
+				$new_name .= ".gz" if $opt_gzip;
+				print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
+			}
+			push @TABLE_NEW_NAME,$new_name;
+	
+			$CONSIDER_FACTORS{$source_factor} = 1;
+				print STDERR "Considering factor $source_factor\n";
+			push @TABLE_FACTORS, $source_factor;
+		}
+	}
+	elsif (/distortion-file/) {
+		while(1) {
+			my $table_spec = <INI>;
+			if ($table_spec !~ /^([\d\,\-]+) (\S+) (\d+) (\S+)$/) {
+					print INI_OUT $table_spec;
+					last;
+			}
+			my ($factors,$t,$w,$file) = ($1,$2,$3,$4);
+			my $source_factor = $factors;
+			$source_factor =~ s/\-[\d,]+$//;
 
-    	$CONSIDER_FACTORS{$source_factor} = 1;
-        print STDERR "Considering factor $source_factor\n";
-    	push @TABLE_FACTORS, $source_factor;
-      }
-    }
-    elsif (/distortion-file/) {
-        while(1) {
-    	  my $table_spec = <INI>;
-    	  if ($table_spec !~ /^([\d\,\-]+) (\S+) (\d+) (\S+)$/) {
-    	      print INI_OUT $table_spec;
-    	      last;
-    	}
-    	my ($factors,$t,$w,$file) = ($1,$2,$3,$4);
-	my $source_factor = $factors;
-	$source_factor =~ s/\-[\d,]+$//;
-
-    	chomp($file);
-    	push @TABLE,$file;
-
-    	$file =~ s/^.*\/+([^\/]+)/$1/g;
-    	my $new_name = "$dir/$file";
-	    $new_name =~ s/\.gz//;
-    	print INI_OUT "$factors $t $w $new_name\n";
-    	push @TABLE_NEW_NAME,$new_name;
-
-    	$CONSIDER_FACTORS{$source_factor} = 1;
-        print STDERR "Considering factor $source_factor\n";
-    	push @TABLE_FACTORS,$source_factor;
-        }
-    }
-}
+			chomp($file);
+			push @TABLE,$file;
+	
+			$file =~ s/^.*\/+([^\/]+)/$1/g;
+			my $new_name = "$dir/$file";
+			$new_name =~ s/\.gz//;
+			print INI_OUT "$factors $t $w $new_name\n";
+			push @TABLE_NEW_NAME,$new_name;
+	
+			$CONSIDER_FACTORS{$source_factor} = 1;
+				print STDERR "Considering factor $source_factor\n";
+			push @TABLE_FACTORS,$source_factor;
+		}
+	} # elsif (/distortion-file/) {
+} # while(<INI>) {
 close(INI);
 close(INI_OUT);
 
 my %TMP_INPUT_FILENAME;
 
-if ($opt_hierarchical)
-{
-    # Write a separate, temporary input file for each combination of source
-    # factors
-    foreach my $key (keys %CONSIDER_FACTORS) {
-        my $filename = "$dir/input-$key";
-        open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
-        $TMP_INPUT_FILENAME{$key} = $filename;
-        my @FACTOR = split(/,/, $key);
-        open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
-        while (my $line = <PIPE>) {
-            print FILEHANDLE $line
-        }
-        close(FILEHANDLE);
-    }
-}
+if ($opt_hierarchical) {
+	# Write a separate, temporary input file for each combination of source
+	# factors
+	foreach my $key (keys %CONSIDER_FACTORS) {
+		my $filename = "$dir/input-$key";
+		open(FILEHANDLE,">$filename") or die "Can't open $filename for writing";
+		$TMP_INPUT_FILENAME{$key} = $filename;
+		my @FACTOR = split(/,/, $key);
+		open(PIPE,"$SCRIPTS_ROOTDIR/training/reduce_combine.pl $input @FACTOR |");
+		while (my $line = <PIPE>) {
+			print FILEHANDLE $line
+		}
+		close(FILEHANDLE);
+	} # foreach my $key (keys %CONSIDER_FACTORS) {
+} #if ($opt_hierarchical) {
 
 my %PHRASE_USED;
 if (!$opt_hierarchical) {
