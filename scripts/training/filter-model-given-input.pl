@@ -404,3 +404,19 @@ sub ensure_full_path {
     return $PATH;
 }
 
+sub join_array {
+  my @outside = shift;
+  
+  my $ret = "";
+  for (my $i = 0; $i < scalar(@outside); ++$i) {
+    my @inside = $outside[$i];
+    
+    $ret .= $inside[0];
+    for (my $j = 1; $j < scalar(@inside); ++$j) {
+      $ret .= "=" .$inside[$j];
+    }
+    $ret .= " ";
+  }
+  
+  return $ret;
+}
