@@ -181,8 +181,8 @@ while(<INI>) {
 
 		} # for (my $i = 1; $i < scalar(@toks); ++$i) {
 		
-		push @TABLE,$file;
-
+  	push @TABLE, $file;
+		
 		$file =~ s/^.*\/+([^\/]+)/$1/g;
 		my $new_name = "$dir/$file";
 		$new_name =~ s/\.gz//;

@@ -6,7 +6,7 @@
 class RO : public FF
 {
   static int s_index;
-	std::string type;
+	std::string type, fileTypeSuffix;
 	
   float GetWeight() const
   { return 0.3; }
@@ -18,7 +18,7 @@ class RO : public FF
     		<< " type=" << type
     		<< " input-factor=" << OutputFactors(inFactors)
     		<< " output-factor=" << OutputFactors(outFactors)
-        << " path=" << path
+        << " path=" << path << "." << fileTypeSuffix << ".gz"
         << std::endl;
   }
 public:
@@ -30,7 +30,8 @@ public:
     name = "LexicalReordering";
     numFeatures = 6;
     path = toks[0];
-    type = "msd-bidirectional-fe";
+    type = "wbe-msd-bidirectional-fe-allff"; // TODO what is this?
+    fileTypeSuffix = "wbe-msd-bidirectional-fe";
     
     inFactors.push_back(0);
     outFactors.push_back(0);
