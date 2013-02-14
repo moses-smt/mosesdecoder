@@ -2082,7 +2082,6 @@ sub define_training_create_config {
     my ($config,$reordering_table,$phrase_translation_table,$generation_table,$sparse_lexical_features,$domains,@LM)
 			= &get_output_and_input($step_id);
 
-    #my $cmd = &get_training_setting(9);
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $cmd = "$moses_src_dir/bin/create-ini ";
 
@@ -2555,7 +2554,9 @@ sub define_tuningevaluation_filter {
     else {
       $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
       $delete_config = 1;
-      $cmd = &get_training_setting(9);
+      
+      my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+      $cmd = "$moses_src_dir/bin/create-ini ";
       $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
       my $ptCmd = $phrase_translation_table;
