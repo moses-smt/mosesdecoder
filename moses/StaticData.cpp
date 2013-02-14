@@ -202,9 +202,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestFactor = 20;
   }
   
-  // explicit setting of distinct nbest
-  SetBooleanParameter( &m_onlyDistinctNBest, "distinct-nbest", false);
-
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
     m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];

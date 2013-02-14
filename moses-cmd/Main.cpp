@@ -164,6 +164,10 @@ public:
             OutputInput(out, bestHypo);
             out << "||| ";
           }
+          if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
+            out << m_source->GetTranslationId() << " ";
+          }
+
           OutputBestSurface(
             out,
             bestHypo,
