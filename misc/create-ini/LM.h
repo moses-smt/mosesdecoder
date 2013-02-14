@@ -36,7 +36,9 @@ public:
     outFactors.push_back(Scan<int>(toks[0]));
     order = Scan<int>(toks[1]);
     path = toks[2];
-    int implNum = Scan<int>(toks[3]);
+    int implNum = 0;
+    if (toks.size() >= 4)
+      implNum = Scan<int>(toks[3]);
 
     switch (implNum)
     {
