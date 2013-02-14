@@ -901,7 +901,7 @@ void PhraseTableCreator::FlushRankedQueue(bool force)
   }
   
   if(force)
-  {    
+  { 
     m_rnkHash.AddRange(m_lastSourceRange);
     m_lastSourceRange.clear();
 
@@ -983,6 +983,9 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
   
   if(force)
   {
+    if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase)
+      m_lastSourceRange.push_back(m_lastFlushedSourcePhrase);
+    
     if(m_lastCollection.size())
     {
       std::stringstream targetPhraseCollection;
@@ -993,7 +996,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
       m_encodedTargetPhrases.PushBack(targetPhraseCollection.str());
       m_lastCollection.clear();
     }
-      
+    
     m_srcHash.AddRange(m_lastSourceRange);
     m_lastSourceRange.clear();
     

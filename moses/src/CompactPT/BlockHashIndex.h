@@ -152,6 +152,11 @@ class BlockHashIndex
       m_landmarks.push_back(keys[0]);
       m_size += keys.size();
       
+      if(keys.size() == 1) {
+        // add dummy key to avoid null hash
+        keys.push_back("###DUMMY_KEY###");
+      }
+      
 #ifdef WITH_THREADS
       HashTask<Keys>* ht = new HashTask<Keys>(current, *this, keys);
       m_threadPool.Submit(ht);
