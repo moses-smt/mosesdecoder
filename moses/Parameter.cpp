@@ -300,7 +300,7 @@ bool Parameter::LoadParam(int argc, char* argv[])
   }
 
   // convert old weights args to new format
-  if (isParamSpecified("features"))
+  if (!isParamSpecified("feature"))
     ConvertWeightArgs();
   CreateWeightsMap();
   WeightOverwrite();
@@ -457,7 +457,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
   size_t numRealWordsInInput = 0;
 
   if (GetParam("input-scores").size()) {
-    cerr << "JHH:" << GetParam("input-scores").size() << endl;
     numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
   }
 
