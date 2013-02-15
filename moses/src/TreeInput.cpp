@@ -265,7 +265,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // remove extra spaces
   //line = Trim(line);
 
-  VERBOSE(7, "TREE INPUT : LINE : " << line << endl);
+  //VERBOSE(0, "TREE INPUT : LINE : " << line << endl);
 
   //SOLUTION : COPY LINE !!!
    //construct chart for syntactic features
@@ -280,7 +280,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   stringstream strme;
   strme << line << endl;
 
-  VERBOSE(7, "TREE INPUT : SENTENCE : " << line << endl);
+  //VERBOSE(0, "TREE INPUT : SENTENCE : " << line << endl);
 
   std::vector<std::string> sentTokens = Tokenize(" ",line);
 

@@ -54,7 +54,7 @@ public:
   }
 };
 
-void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
+void ChartTranslationOptionList::Add(TargetPhraseCollection &tpc,
                                      const StackVec &stackVec,
                                      const WordsRange &range)
 {

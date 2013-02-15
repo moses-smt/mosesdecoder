@@ -157,7 +157,7 @@ void ChartRuleLookupManagerMemory::GetChartRuleCollection(
     const PhraseDictionaryNodeSCFG &node = dottedRule.GetLastNode();
 
     // look up target sides
-    const TargetPhraseCollection *tpc = node.GetTargetPhraseCollection();
+   TargetPhraseCollection *tpc = node.GetTargetPhraseCollection();
 
     // add the fully expanded rule (with lexical target side)
     if (tpc != NULL) {

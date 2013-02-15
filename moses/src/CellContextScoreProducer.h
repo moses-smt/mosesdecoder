@@ -42,7 +42,7 @@ class CellContextScoreProducer : public StatelessFeatureFunction
                                                     std::map<std::string,TargetPhrase*> * targetMap);
 
 
-    void CheckIndex(const std::string &targetRep);
+    bool CheckIndex(const std::string &targetRep);
     PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
     virtual bool ComputeValueInTranslationOption() const { return true; }
     void Normalize(std::vector<float> &losses);

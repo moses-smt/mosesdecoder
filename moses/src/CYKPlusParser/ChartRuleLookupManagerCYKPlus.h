@@ -43,7 +43,7 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
  protected:
   void AddCompletedRule(
     const DottedRule &dottedRule,
-    const TargetPhraseCollection &tpc,
+    TargetPhraseCollection &tpc,
     const WordsRange &range,
     ChartTranslationOptionList &outColl);
 

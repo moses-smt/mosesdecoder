@@ -1,1 +1,1 @@
-lib RuleTable : [ glob *.cpp ] ..//moses_internal ..//Scope3Parser ..//CYKPlusParser ;
+lib RuleTable : [ glob *.cpp ] ..//moses_internal ..//CYKPlusParser ;

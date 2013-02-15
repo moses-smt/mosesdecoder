@@ -138,7 +138,7 @@ public:
   const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceTerm) const;
   const PhraseDictionaryNodeSCFG *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 
-  const TargetPhraseCollection *GetTargetPhraseCollection() const {
+  TargetPhraseCollection *GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
   }
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection() {

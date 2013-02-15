@@ -55,8 +55,13 @@ void Scope3Parser::GetChartRuleCollection(
 
     if (varSpanNode.m_rank == 0) {  // Purely lexical rule.
       assert(labelMap.size() == 1);
-      const TargetPhraseCollection &tpc = labelMap.begin()->second;
-      matchCB.m_tpc = &tpc;
+
+      //damt hiero : hack remove const
+      const TargetPhraseCollection &tpcConst = labelMap.begin()->second;
+      const TargetPhraseCollection* tpcConstPtr = &(tpcConst);
+      TargetPhraseCollection* tpcPointer = const_cast<TargetPhraseCollection*> (tpcConstPtr);
+
+      matchCB.m_tpc = tpcPointer;
       matchCB(m_emptyStackVec);
     } else {  // Rule has at least one non-terminal.
       varSpanNode.CalculateRanges(start, end, m_ranges);
@@ -67,7 +72,7 @@ void Scope3Parser::GetChartRuleCollection(
       UTrieNode::LabelMap::const_iterator p = labelMap.begin();
       for (; p != labelMap.end(); ++p) {
         const std::vector<int> &labels = p->first;
-        const TargetPhraseCollection &tpc = p->second;
+        const TargetPhraseCollection &tpcConst = p->second;
         assert(labels.size() == varSpanNode.m_rank);
         bool failCheck = false;
         for (size_t i = 0; i < varSpanNode.m_rank; ++i) {
@@ -79,7 +84,12 @@ void Scope3Parser::GetChartRuleCollection(
         if (failCheck) {
           continue;
         }
-        matchCB.m_tpc = &tpc;
+
+        //damt hiero : hack remove const
+        const TargetPhraseCollection* tpcConstPtr = &(tpcConst);
+        TargetPhraseCollection* tpcPointer = const_cast<TargetPhraseCollection*> (tpcConstPtr);
+
+        matchCB.m_tpc = tpcPointer;
         searcher.Search(labels, matchCB);
       }
     }

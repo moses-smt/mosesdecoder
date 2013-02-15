@@ -62,7 +62,7 @@ class ChartRuleLookupManagerOnDisk : public ChartRuleLookupManagerCYKPlus
   const std::vector<float> &m_weight;
   const std::string &m_filePath;
   std::vector<DottedRuleStackOnDisk*> m_expandableDottedRuleListVec;
-  std::map<UINT64, const TargetPhraseCollection*> m_cache;
+  std::map<UINT64, TargetPhraseCollection*> m_cache;
   std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
 };
 

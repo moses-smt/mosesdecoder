@@ -69,7 +69,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
 
 ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 {
-  std::map<UINT64, const TargetPhraseCollection*>::const_iterator iterCache;
+  std::map<UINT64, TargetPhraseCollection*>::const_iterator iterCache;
   for (iterCache = m_cache.begin(); iterCache != m_cache.end(); ++iterCache) {
     delete iterCache->second;
   }
@@ -228,11 +228,11 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         if (sourceLHSBerkeleyDb == NULL)
           continue;
 
-        const TargetPhraseCollection *targetPhraseCollection = NULL;
+        TargetPhraseCollection *targetPhraseCollection = NULL;
         const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
         if (node) {
           UINT64 tpCollFilePos = node->GetValue();
-          std::map<UINT64, const TargetPhraseCollection*>::const_iterator iterCache = m_cache.find(tpCollFilePos);
+          std::map<UINT64, TargetPhraseCollection*>::const_iterator iterCache = m_cache.find(tpCollFilePos);
           if (iterCache == m_cache.end()) {
 
             const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);

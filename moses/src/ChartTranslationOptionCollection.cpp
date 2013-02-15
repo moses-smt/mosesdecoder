@@ -110,6 +110,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
 
          VERBOSE(5, "Looping over target phrase collection for recomputing feature scores" << endl);
 
+        //Get non-rescored target phrase collection for inserting newly scored target
         for(
             itr_targets = transOpt.GetTargetPhraseCollection().begin();
             itr_targets != transOpt.GetTargetPhraseCollection().end();
@@ -189,8 +190,9 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             targetRepresentation += " ";
             targetRepresentation += parentNonTerm;
 
-            VERBOSE(6, "Strings put in rule map : " << sourceSide << "::" << targetRepresentation << endl);
+            VERBOSE(3, "Strings put in rule map : " << sourceSide << "::" << targetRepresentation << endl);
             ruleMap.AddRule(sourceSide,targetRepresentation);
+            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
 
             //clean strings
@@ -203,8 +205,8 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         {
             CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
             CHECK(ccsp != NULL);
-            VERBOSE(3, "Calling vw for rule: " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
-            VERBOSE(4, "Calling vw for source context : " << m_source << endl);
+            VERBOSE(3, "Calling vw for rule : " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
+            VERBOSE(3, "Calling vw for source context : " << m_source << endl);
 
             vector<ScoreComponentCollection> scores = ccsp->ScoreRules(
                                                                        transOpt.GetSourceWordsRange().GetStartPos(),
@@ -222,16 +224,20 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
                 CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
                 itr_rep = targetRepMap.find(*itr_targetRep);
-                VERBOSE(3, "Target Phrase score before adding stateless : " << *itr_targetRep << " : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(3, "Looking at target phrase : " << *itr_rep->second << std::endl);
+                VERBOSE(3, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 VERBOSE(3, "Score component collection : " << *iterLCSP << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
                 VERBOSE(3, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }
         }
+        //sort target phrase collection again
+        transOpt.SortTargetPhrases();
+
         //NOTE : What happens with the stack vector?
         VERBOSE(3, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
         transOpt.CalcEstimateOfBestScore();
-        VERBOSE(3, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(3, "Estimate of best score after computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
   }//end of ifs
 //    #endif // HAVE_VW

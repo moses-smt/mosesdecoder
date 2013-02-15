@@ -28,6 +28,7 @@ m_nonTerm(isNonTerm)
 {
 }
 
+//damt-hiero : puts NOTAG in each cell of the chart
 InputTreeRep::InputTreeRep(size_t sourceSize)
 :m_noTag("NOTAG")
 {
@@ -45,14 +46,13 @@ InputTreeRep::InputTreeRep(size_t sourceSize)
   }
 }
 
+
 void InputTreeRep::PopulateChart(size_t sourceSize)
 {
   SyntaxLabel syntNoLabel(GetNoTag(),true);
   for (size_t startPos = 0; startPos < sourceSize; startPos++) {
-      //cerr << "startPos" << startPos << endl;
       vector<SyntLabels> internal;
       for (size_t endPos = startPos; endPos < sourceSize; endPos++) {
-        //cerr << "endPos" << endPos << endl;
         SyntLabels oneCell;
         oneCell.push_back(syntNoLabel);
         internal.push_back(oneCell);

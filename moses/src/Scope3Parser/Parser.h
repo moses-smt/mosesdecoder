@@ -78,7 +78,7 @@ class Scope3Parser : public ChartRuleLookupManager
       }
       const WordsRange &m_range;
       ChartTranslationOptionList &m_out;
-      const TargetPhraseCollection *m_tpc;
+      TargetPhraseCollection *m_tpc;
   };
 
   void Init();

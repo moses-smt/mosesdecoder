@@ -42,7 +42,7 @@ class ChartTranslationOption
       \param wordsRange the range in the source sentence this translation option covers
       \param score @todo dunno
    */
-  ChartTranslationOption(const TargetPhraseCollection &targetPhraseColl,
+  ChartTranslationOption(TargetPhraseCollection &targetPhraseColl,
                          const StackVec &stackVec,
                          const WordsRange &wordsRange,
                          float score)
@@ -54,7 +54,7 @@ class ChartTranslationOption
 
   ~ChartTranslationOption() {}
 
-  static float CalcEstimateOfBestScore(const TargetPhraseCollection &,
+  static float CalcEstimateOfBestScore( TargetPhraseCollection &,
                                        const StackVec &);
 
   //!damt hiero : neeed to set estimate of best score when recomputing with context
@@ -62,10 +62,11 @@ class ChartTranslationOption
 
   const StackVec &GetStackVec() const { return m_stackVec; }
 
-  const TargetPhraseCollection &GetTargetPhraseCollection() const {
+  //damt hiero : hack : when getting target phrase collection then take
+  TargetPhraseCollection &GetTargetPhraseCollection() const {
 
-    return *m_targetPhraseCollection;
-  }
+     return *m_targetPhraseCollection;
+   }
 
   //! the range in the source sentence this translation option covers
   const WordsRange &GetSourceWordsRange() const {
@@ -78,10 +79,16 @@ class ChartTranslationOption
     */
   inline float GetEstimateOfBestScore() const { return m_estimateOfBestScore; }
 
+  //damt hiero : sort target phrase collection again
+  void SortTargetPhrases()
+  {
+	  m_targetPhraseCollection->Sort(false,999);
+  }
+
  private:
 
   StackVec m_stackVec; //! vector of hypothesis list!
-  const TargetPhraseCollection *m_targetPhraseCollection;
+  TargetPhraseCollection *m_targetPhraseCollection;
   const WordsRange *m_wordsRange;
   float m_estimateOfBestScore;
 };

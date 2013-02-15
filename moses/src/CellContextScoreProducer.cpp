@@ -51,7 +51,7 @@ bool CellContextScoreProducer::Initialize(const string &modelFile, const string 
 
   m_extractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, false);
   m_debugExtractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, true);
-  m_debugConsumer = new VWFileTrainConsumer("/projekte/morphosynt/braune/hiero_debug_features");
+  m_debugConsumer = new VWFileTrainConsumer("/mount/arbeitsdaten26/users/braunefe/hiero_science_filtered_on_dev_and_test/softSyntaxScripts/hiero-feature-debug");
   isGood = true;
   VERBOSE(4, "Constructing score producers : " << isGood << endl);
   return isGood;
@@ -64,10 +64,15 @@ ScoreComponentCollection CellContextScoreProducer::ScoreFactory(float score)
   return out;
 }
 
-void CellContextScoreProducer::CheckIndex(const std::string &targetRep)
+bool CellContextScoreProducer::CheckIndex(const std::string &targetRep)
 {
+  bool returnValue = true;
   if (m_ruleIndex.left.find(targetRep) == m_ruleIndex.left.end())
-    throw runtime_error("Phrase not in index: " + targetRep);
+  { std::cerr << "POTENTIAL ERROR : Phrase not in index: " + targetRep << std::endl;
+    returnValue = false;
+  }
+	  //throw runtime_error("Phrase not in index: " + targetRep);
+  return returnValue;
 }
 
 ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string targetRep, const TargetPhrase *tp)
@@ -162,19 +167,21 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
           CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
           itr_rep = targetMap->find(*tgtRepIt);
           VERBOSE(6, "CHECKING INDEX FOR : " << *tgtRepIt << endl);
-          CheckIndex(*tgtRepIt);
 
-          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));
+          bool DoesIndexExist = CheckIndex(*tgtRepIt);
+          if(DoesIndexExist)
+          {psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));}
         }
 
-        VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
-        VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
+        VERBOSE(3, "Extracting features for source : " << sourceSide << endl);
+        VERBOSE(3, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
 
         //std::cerr << "GETTING SYNTAX LABELS" << std::endl;
         bool IsBegin = false;
-        vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan,endSpan);
+        //skip first symbol in sentence which is <s>
+        vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan-1,endSpan-1);
         //std::cerr << "GETTING PARENT" << std::endl;
-        SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan,IsBegin);
+        SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan-1,endSpan-1,IsBegin);
         vector<string> syntFeats;
 
 
@@ -185,10 +192,7 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         IsBegin = false;
         while(!parentLabel.GetString().compare("NOTAG"))
         {
-            //cerr << "LOOKING FOR PARENT OF : " << parentLabel.GetString() << endl;
             parentLabel = source.GetInputTreeRep()->GetParent(startSpan,endSpan,IsBegin);
-            //cerr << "FOUND PARENT : " << parentLabel.GetString() << endl;
-            //cerr << "BEGIN OF CHART : " << IsBegin << endl;
             if( !(IsBegin ) )
             {startSpan--;}
             else
@@ -218,14 +222,20 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         m_consumerFactory->Release(p_consumer);
         Normalize0(losses);
-        //m_debugExtractor->GenerateFeaturesChartLhs(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
+        //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
         vector<float>::iterator lossIt;
+        VERBOSE(3, "VW losses after normalization : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
+        VERBOSE(3, *lossIt << " ");
         float logScore = Equals(*lossIt, 0) ? LOWEST_SCORE : log(*lossIt);
         *lossIt = logScore;
-         scores.push_back(ScoreFactory(logScore));}
-
+        //FB : maybe we should floor log score before adding to scores
+        //Remove when making example
+        //FloorScore(logScore);
+        scores.push_back(ScoreFactory(logScore));
+        VERBOSE(3, std::endl;);
+        }
     }
     else //make sure that when sum is zero, then all factors are 0
     {
@@ -240,23 +250,47 @@ void CellContextScoreProducer::Normalize0(vector<float> &losses)
 {
     float sum = 0;
 
+    VERBOSE(3, "VW losses before normalization : " << std::endl);
+
     // clip to [0,1] and take 1-Z as non-normalized prob
     vector<float>::iterator it;
     for (it = losses.begin(); it != losses.end(); it++) {
-      if (*it <= 0.0) *it = 1.0;
-      else if (*it >= 1.0) *it = 0.0;
-      else *it = 1 - *it;
+      VERBOSE(3, "" <<  *it << " ");
+      //clip and 1-Z at the same time
+      if (*it <= 0.0) {
+    	  //VERBOSE(3, "Smaller or equal 0, putting to " << *it << std::endl);
+    	  	  *it = 1.0;
+      }
+      else {
+    	  	  if (*it >= 1.0) {
+    	  		  *it = 0.0;
+    	  		  //VERBOSE(3, "Greater or equal 1, putting to " << *it << std::endl);
+    	  	  }
+    	  	  else
+    	  	  {
+    	  		 //VERBOSE(3, "Between 0 and 1, taking 1 - " << *it << std::endl);
+    	  		  *it = 1 - *it;
+    	  		//VERBOSE(3, "= " << *it << std::endl);
+    	  	  }
+           }
       sum += *it;
+      //VERBOSE(3, "My sum is " << sum << std::endl);
     }
     if (! Equals(sum, 0)) {
+    	//VERBOSE(3, "Sum not equals 0 . Divide each loss by sum" << std::endl);
       // normalize
       for (it = losses.begin(); it != losses.end(); it++)
+    	  //VERBOSE(3, "Dividing " << *it << " by " << sum << std::endl);
 	*it /= sum;
+		  //VERBOSE(3, "Result of division " << *it << std::endl);
     } else {
+    	//VERBOSE(3, "Sum equals 0 : make uniform");
       // sum of non-normalized probs is 0, then take uniform probs
       for (it = losses.begin(); it != losses.end(); it++) 
-	*it = 1 / losses.size();
+	{*it = 1.0 / losses.size();}
+      //VERBOSE(3, "Created uniform proba : " << *it << " ");
     }
+    VERBOSE(3, std::endl;);
 }
 
 

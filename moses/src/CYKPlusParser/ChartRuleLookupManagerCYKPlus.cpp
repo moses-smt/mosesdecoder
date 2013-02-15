@@ -33,7 +33,7 @@ namespace Moses
 
 void ChartRuleLookupManagerCYKPlus::AddCompletedRule(
   const DottedRule &dottedRule,
-  const TargetPhraseCollection &tpc,
+  TargetPhraseCollection &tpc,
   const WordsRange &range,
   ChartTranslationOptionList &outColl)
 {

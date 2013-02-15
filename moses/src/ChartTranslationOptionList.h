@@ -45,7 +45,7 @@ class ChartTranslationOptionList
   //! number of translation options
   size_t GetSize() const { return m_size; }
 
-  void Add(const TargetPhraseCollection &, const StackVec &,
+  void Add(TargetPhraseCollection &, const StackVec &,
            const WordsRange &);
 
   void Clear();

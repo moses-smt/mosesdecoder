@@ -556,8 +556,10 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
   }
 
   //Generate LHS syntax features
+  //BEWARE : removed span features, reinsert when doing new extraction
   string noTag = "NOTAG";
-    fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "span^" + span);
+     fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget);
+    //fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "span^" + span);
 
     //if several labels in vector repeats parent
     vector<string>::const_iterator it;
@@ -565,7 +567,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
        //cerr << "I am a syntax label : " << *it << endl;
 
        fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "con^" + *it);
-       fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "con^" + *it + "^span^" + span);
+       //fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "con^" + *it + "^span^" + span);
        if( !(*it).compare(noTag) )
        {
            //cerr << "I am a notag, here is my parent : " << parent << endl;
@@ -576,7 +578,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
        {
            //cerr << "I am a const, here is my parent : " << parent << endl;
            fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "cmp");
-           fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "cmp^span^" + span);
+           //fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "cmp^span^" + span);
            fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "ins^" + parent);
            fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "cmp^ins^" + parent);
        }
