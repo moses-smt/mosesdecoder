@@ -645,16 +645,19 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 
   // Unique start node
   nodes[0] = 0;
-  numNodes += 1;
+  //  numNodes += 1;
 
   for (size_t arcNumber = 0; arcNumber < searchGraph.size(); ++arcNumber) {
 
-    numArcs += 1;
+    int targetWordCount = searchGraph[arcNumber].hypo->GetCurrTargetPhrase().GetSize();
+    numArcs += targetWordCount;
 
     int hypothesisID = searchGraph[arcNumber].hypo->GetId();
     if (nodes.count(hypothesisID) == 0) {
+      
+      numNodes += targetWordCount;
       nodes[hypothesisID] = numNodes;
-      numNodes += 1;
+      //numNodes += 1;
 
       bool terminalNode = (searchGraph[arcNumber].forward == -1);
       if (terminalNode) {
@@ -663,32 +666,54 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
     }
 
   }
+  numNodes += 1;
 
   // Unique end node
   nodes[numNodes] = numNodes;
 
-  outputSearchGraphStream << "UTTERANCE=\"Sentence " << translationId << "\"" << endl;
+  outputSearchGraphStream << "UTTERANCE=Sentence_" << translationId << endl;
   outputSearchGraphStream << "VERSION=1.1" << endl;
   outputSearchGraphStream << "base=e" << endl;
-  outputSearchGraphStream << "NODES=" << numNodes << endl;
+  outputSearchGraphStream << "NODES=" << (numNodes+1) << endl;
   outputSearchGraphStream << "LINKS=" << numArcs  << endl;
 
-  const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+  // const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
 
-  for (size_t arcNumber = 0; arcNumber < searchGraph.size(); ++arcNumber) {
-    const Hypothesis *thisHypo = searchGraph[arcNumber].hypo;
+  for (size_t arcNumber = 0, lineNumber = 0; lineNumber < searchGraph.size(); ++lineNumber) {
+    const Hypothesis *thisHypo = searchGraph[lineNumber].hypo;
     const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
     if (prevHypo) {
 
       int startNode = nodes[prevHypo->GetId()];
       int endNode   = nodes[thisHypo->GetId()];
-      bool terminalNode = (searchGraph[arcNumber].forward == -1);
+      bool terminalNode = (searchGraph[lineNumber].forward == -1);
+      const TargetPhrase &targetPhrase = thisHypo->GetCurrTargetPhrase();
+      int targetWordCount = targetPhrase.GetSize();
 
-      outputSearchGraphStream <<  "J="   << arcNumber 
-			      << " S="   << startNode
-			      << " E="   << endNode
-			      << " W=\"" << thisHypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\""
-			      << endl;
+      for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
+      // for (int startNode = nodes[prevHypo->GetId()] - targetWordCount + 1,
+      // 	     nextNode = startNode + 1;
+      // 	   nextNode < endNode; startNode+=1, nextNode+=1) {
+	int x = (targetWordCount-targetWordIndex);
+
+	outputSearchGraphStream <<  "J=" << arcNumber;
+	// outputSearchGraphStream <<  " startNode=" << startNode;
+	// outputSearchGraphStream <<  " endNode=" << endNode;
+	// outputSearchGraphStream <<  " targetWordCount=" << targetWordCount;
+	// outputSearchGraphStream <<  " targetWordIndex=" << targetWordIndex;
+
+	if (targetWordIndex==0) {
+	  outputSearchGraphStream << " S=" << startNode;
+	} else {
+	  outputSearchGraphStream << " S=" << endNode - x;
+	}
+
+	outputSearchGraphStream << " E=" << endNode - (x-1) //(startNode + targetWordIndex + 1)
+				<< " W=" << targetPhrase.GetWord(targetWordIndex)
+				<< endl;
+
+	arcNumber += 1;
+      }
 
       if (terminalNode && terminalNodes.count(endNode) == 0) {
 	terminalNodes.insert(endNode);
@@ -696,7 +721,7 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 				<< " S="   << endNode
 				<< " E="   << numNodes
 				<< endl;
-
+	arcNumber += 1;
       }
     }	    
   }
