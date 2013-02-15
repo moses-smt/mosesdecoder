@@ -117,6 +117,8 @@ public:
     return *m_outputSearchGraphStream;
   }
 
+  std::ofstream *GetOutputSearchGraphSLFStream(size_t sentenceNumber);
+
   std::ostream &GetDetailedTranslationReportingStream() {
     assert (m_detailedTranslationReportingStream);
     return *m_detailedTranslationReportingStream;

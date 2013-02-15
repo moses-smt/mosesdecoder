@@ -26,8 +26,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include <algorithm>
-#include <limits>
 #include <cmath>
+#include <limits>
+#include <map>
+#include <set>
 #include "Manager.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -625,6 +627,79 @@ void Manager::GetSearchGraph(vector<SearchGraphNode>& searchGraph) const
       } // end if connected
     } // end for iterHypo
   } // end for iterStack
+
+}
+
+/**! Output search graph in HTK standard lattice format (SLF) */
+void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSearchGraphStream) const
+{
+
+  vector<SearchGraphNode> searchGraph;
+  GetSearchGraph(searchGraph);
+
+  long numArcs = 0;
+  long numNodes = 0;
+
+  map<int,int> nodes;
+  set<int> terminalNodes;
+
+  // Unique start node
+  nodes[0] = 0;
+  numNodes += 1;
+
+  for (size_t arcNumber = 0; arcNumber < searchGraph.size(); ++arcNumber) {
+
+    numArcs += 1;
+
+    int hypothesisID = searchGraph[arcNumber].hypo->GetId();
+    if (nodes.count(hypothesisID) == 0) {
+      nodes[hypothesisID] = numNodes;
+      numNodes += 1;
+
+      bool terminalNode = (searchGraph[arcNumber].forward == -1);
+      if (terminalNode) {
+	numArcs += 1;
+      }
+    }
+
+  }
+
+  // Unique end node
+  nodes[numNodes] = numNodes;
+
+  outputSearchGraphStream << "UTTERANCE=\"Sentence " << translationId << "\"" << endl;
+  outputSearchGraphStream << "VERSION=1.1" << endl;
+  outputSearchGraphStream << "base=e" << endl;
+  outputSearchGraphStream << "NODES=" << numNodes << endl;
+  outputSearchGraphStream << "LINKS=" << numArcs  << endl;
+
+  const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
+
+  for (size_t arcNumber = 0; arcNumber < searchGraph.size(); ++arcNumber) {
+    const Hypothesis *thisHypo = searchGraph[arcNumber].hypo;
+    const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
+    if (prevHypo) {
+
+      int startNode = nodes[prevHypo->GetId()];
+      int endNode   = nodes[thisHypo->GetId()];
+      bool terminalNode = (searchGraph[arcNumber].forward == -1);
+
+      outputSearchGraphStream <<  "J="   << arcNumber 
+			      << " S="   << startNode
+			      << " E="   << endNode
+			      << " W=\"" << thisHypo->GetCurrTargetPhrase().GetStringRep(outputFactorOrder) << "\""
+			      << endl;
+
+      if (terminalNode && terminalNodes.count(endNode) == 0) {
+	terminalNodes.insert(endNode);
+	outputSearchGraphStream <<  "J="   << arcNumber 
+				<< " S="   << endNode
+				<< " E="   << numNodes
+				<< endl;
+
+      }
+    }	    
+  }
 
 }
 

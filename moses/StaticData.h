@@ -216,6 +216,7 @@ protected:
   bool m_outputWordGraph; //! whether to output word graph
   bool m_outputSearchGraph; //! whether to output search graph
   bool m_outputSearchGraphExtended; //! ... in extended format
+  bool m_outputSearchGraphSLF; //! whether to output search graph in HTK standard lattice format (SLF)
 #ifdef HAVE_PROTOBUF
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
@@ -630,6 +631,9 @@ public:
   }
   bool GetOutputSearchGraphExtended() const {
     return m_outputSearchGraphExtended;
+  }
+  bool GetOutputSearchGraphSLF() const {
+    return m_outputSearchGraphSLF;
   }
 #ifdef HAVE_PROTOBUF
   bool GetOutputSearchGraphPB() const {

@@ -83,14 +83,16 @@ public:
                   OutputCollector* wordGraphCollector, OutputCollector* searchGraphCollector,
                   OutputCollector* detailedTranslationCollector,
                   OutputCollector* alignmentInfoCollector,
-                  OutputCollector* unknownsCollector) :
+                  OutputCollector* unknownsCollector,
+                  std::ofstream* searchGraphSLFStream) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
     m_wordGraphCollector(wordGraphCollector), m_searchGraphCollector(searchGraphCollector),
     m_detailedTranslationCollector(detailedTranslationCollector),
     m_alignmentInfoCollector(alignmentInfoCollector),
-    m_unknownsCollector(unknownsCollector) {}
+    m_unknownsCollector(unknownsCollector),
+    m_searchGraphSLFStream(searchGraphSLFStream) {}
 
 	/** Translate one sentence
    * gets called by main function implemented at end of this source file */
@@ -142,6 +144,19 @@ public:
       }
 #endif
     }		
+
+    // Output search graph in HTK standard lattice format (SLF)
+    if (m_searchGraphSLFStream) {
+      if (m_searchGraphSLFStream->is_open() && m_searchGraphSLFStream->good()) {
+	ostringstream out;
+	fix(out,PRECISION);
+	manager.OutputSearchGraphAsSLF(m_lineNumber, out);
+	*m_searchGraphSLFStream << out.str();
+	m_searchGraphSLFStream -> flush();
+      } else {
+	TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
+      }
+    }
 
     // apply decision rule and output best translation(s)
     if (m_outputCollector) {
@@ -297,7 +312,14 @@ public:
   }
 
   ~TranslationTask() {
+   
+    if (m_searchGraphSLFStream) {
+      m_searchGraphSLFStream->close();
+    }
+
+    delete m_searchGraphSLFStream;
     delete m_source;
+    
   }
 
 private:
@@ -311,6 +333,7 @@ private:
   OutputCollector* m_detailedTranslationCollector;
   OutputCollector* m_alignmentInfoCollector;
   OutputCollector* m_unknownsCollector;
+  std::ofstream  *m_searchGraphSLFStream;
   std::ofstream *m_alignmentStream;
 
 
@@ -533,7 +556,9 @@ int main(int argc, char** argv)
                             searchGraphCollector.get(),
                             detailedTranslationCollector.get(),
                             alignmentInfoCollector.get(),
-                            unknownsCollector.get() );
+                            unknownsCollector.get(),
+			    staticData.GetOutputSearchGraphSLF() ? 
+			    ioWrapper->GetOutputSearchGraphSLFStream(lineCount) : NULL);
       // execute task
 #ifdef WITH_THREADS
     pool.Submit(task);

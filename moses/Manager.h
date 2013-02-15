@@ -137,6 +137,7 @@ public:
 #endif
 
   void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+  void OutputSearchGraphAsSLF(long translationId, std::ostream &outputSearchGraphStream) const;
   void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
   const InputType& GetSource() const {
     return m_source;
