@@ -87,10 +87,11 @@ my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE
 my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
-while(<INI>) {
-  my @toks = split(/ /, $_);
-  if (/PhraseModel /) {
-    print STDERR "pt: " .$_;
+while(my $line = <INI>) {
+  chomp($line);
+  my @toks = split(/ /, $line);
+  if ($line =~ /PhraseModel /) {
+    print STDERR "pt:$line\n";
 
 		my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag); # = ($1,$2,$3,$4,$5,$6);
     $table_flag = "";
@@ -119,7 +120,7 @@ while(<INI>) {
     
 		if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
 				# Only Memory ("0") and NewFormat ("6") can be filtered.
-				print INI_OUT $_;
+				print INI_OUT "$line\n";
 				next;
 		}
 
@@ -133,22 +134,31 @@ while(<INI>) {
 		$new_name .= ".$cnt";
 		$new_name_used{$new_name} = 1;
 		if ($binarizer && $phrase_table_impl == 6) {
-		  print INI_OUT join_array(\@toks);
 			#print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
+		  @toks = set_value(\@toks, "implementation", "2");
+		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+		  print INI_OUT join_array(\@toks)."\n";
 		}
 		elsif ($binarizer && $phrase_table_impl == 0) {
 			if ($binarizer =~ /processPhraseTableMin/) {
-				print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
+				#print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
+  		  @toks = set_value(\@toks, "implementation", "12");
+  		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+	  	  print INI_OUT join_array(\@toks)."\n";
 			}
 			else {
-			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
-  		  print INI_OUT join_array(\@toks);
   			#print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
+  		  @toks = set_value(\@toks, "implementation", "1");
+			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+  		  print INI_OUT join_array(\@toks)."\n";
 			}
 		}
 		else {
 			$new_name .= ".gz" if $opt_gzip;
-			print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
+			#print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
+ 		  @toks = set_value(\@toks, "implementation", "$phrase_table_impl");
+		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+ 		  print INI_OUT join_array(\@toks)."\n";
 		}
 		push @TABLE_NEW_NAME,$new_name;
 
@@ -157,8 +167,8 @@ while(<INI>) {
 		push @TABLE_FACTORS, $source_factor;
 		
   } #if (/PhraseModel /) {
-  elsif (/LexicalReordering /) {
-    print STDERR "ro: " .$_;  
+  elsif ($line =~ /LexicalReordering /) {
+    print STDERR "ro:$line\n";
 		my ($source_factor, $t, $w, $file); # = ($1,$2,$3,$4);
 
     for (my $i = 1; $i < scalar(@toks); ++$i) {
@@ -189,7 +199,11 @@ while(<INI>) {
 		$file =~ s/^.*\/+([^\/]+)/$1/g;
 		my $new_name = "$dir/$file";
 		$new_name =~ s/\.gz//;
-		print INI_OUT "$source_factor $t $w $new_name\n";
+		
+		#print INI_OUT "$source_factor $t $w $new_name\n";
+	  @toks = set_value(\@toks, "path", "$new_name");
+	  print INI_OUT join_array(\@toks)."\n";
+
 		push @TABLE_NEW_NAME,$new_name;
 
 		$CONSIDER_FACTORS{$source_factor} = 1;
@@ -199,7 +213,7 @@ while(<INI>) {
 		
   } #elsif (/LexicalReordering /) {
   else {
-    print INI_OUT $_;  
+    print INI_OUT "$line\n";  
   }
 } # while(<INI>) {
 close(INI);
@@ -412,13 +426,8 @@ sub join_array {
    
   my $ret = "";
   for (my $i = 0; $i < scalar(@outside); ++$i) {
-    my @inside = $outside[$i];
-    
-    $ret .= $inside[0];
-    for (my $j = 1; $j < scalar(@inside); ++$j) {
-      $ret .= "=" .$inside[$j];
-    }
-    $ret .= " ";
+    my $tok = $outside[$i];    
+    $ret .= "$tok ";
   }
   
   return $ret;
