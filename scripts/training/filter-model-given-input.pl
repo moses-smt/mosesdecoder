@@ -133,14 +133,17 @@ while(<INI>) {
 		$new_name .= ".$cnt";
 		$new_name_used{$new_name} = 1;
 		if ($binarizer && $phrase_table_impl == 6) {
-			print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
+		  print INI_OUT join_array(\@toks);
+			#print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
 		}
 		elsif ($binarizer && $phrase_table_impl == 0) {
 			if ($binarizer =~ /processPhraseTableMin/) {
 				print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
 			}
 			else {
-			print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
+			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+  		  print INI_OUT join_array(\@toks);
+  			#print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
 			}
 		}
 		else {
@@ -405,8 +408,8 @@ sub ensure_full_path {
 }
 
 sub join_array {
-  my @outside = shift;
-  
+  my @outside = @{$_[0]};
+   
   my $ret = "";
   for (my $i = 0; $i < scalar(@outside); ++$i) {
     my @inside = $outside[$i];
@@ -420,3 +423,21 @@ sub join_array {
   
   return $ret;
 }
+
+sub set_value {
+  my @arr = @{$_[0]};
+  my $keySought = $_[1];
+  my $newValue = $_[2];
+
+  for (my $i = 1; $i < scalar(@arr); ++$i) {
+    my @inside = split(/=/, $arr[$i]);
+
+		my $key = $inside[0];
+		if ($key eq $keySought) {
+		  $arr[$i] = "$key=$newValue";
+		  return @arr;
+		}
+  }
+  return @arr;
+}
+
