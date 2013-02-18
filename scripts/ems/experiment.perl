@@ -2559,6 +2559,9 @@ sub define_tuningevaluation_filter {
       
       my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
       $cmd = "$moses_src_dir/bin/create-ini ";
+
+      $cmd .= "-hierarchical " if $hierarchical;
+
       $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
       my $ptCmd = $phrase_translation_table;

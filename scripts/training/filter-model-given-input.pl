@@ -136,21 +136,18 @@ while(my $line = <INI>) {
 		if ($binarizer && $phrase_table_impl == 6) {
 			#print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
 		  @toks = set_value(\@toks, "implementation", "2");
-		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
-		  print INI_OUT join_array(\@toks)."\n";
+		  @toks = set_value(\@toks, "path", "$new_name.bin$table_flag");
 		}
 		elsif ($binarizer && $phrase_table_impl == 0) {
 			if ($binarizer =~ /processPhraseTableMin/) {
 				#print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
   		  @toks = set_value(\@toks, "implementation", "12");
   		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
-	  	  print INI_OUT join_array(\@toks)."\n";
 			}
 			else {
   			#print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
   		  @toks = set_value(\@toks, "implementation", "1");
 			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
-  		  print INI_OUT join_array(\@toks)."\n";
 			}
 		}
 		else {
@@ -158,8 +155,10 @@ while(my $line = <INI>) {
 			#print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
  		  @toks = set_value(\@toks, "implementation", "$phrase_table_impl");
 		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
- 		  print INI_OUT join_array(\@toks)."\n";
 		}
+
+    print INI_OUT join_array(\@toks)."\n";
+
 		push @TABLE_NEW_NAME,$new_name;
 
 		$CONSIDER_FACTORS{$source_factor} = 1;

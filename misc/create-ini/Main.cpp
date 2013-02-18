@@ -54,10 +54,10 @@ int main(int argc, char **argv)
     }
   }
 
-  if (!isHierarchical) {
-	  model = new WP("");
-	  ffVec.insert(ffVec.begin(), model);	
+  model = new WP("");
+  ffVec.insert(ffVec.begin(), model);	
 
+  if (!isHierarchical) {
 	  model = new Distortion("");
 	  ffVec.insert(ffVec.begin(), model);	
 
@@ -101,6 +101,10 @@ void OutputIni()
     strme << "[search-algorithm]" << endl;
     strme << "3" << endl;
 
+    strme << "[max-chart-span]" << endl;
+    strme << "20" << endl;
+    strme << "1000" << endl;
+
   }
 
   strme << "\n\n[feature]" << endl;
@@ -113,6 +117,7 @@ void OutputIni()
 
   strme << weightStrme.str();
 
+  strme << endl << endl << endl;
   strme.close();
 }
 
