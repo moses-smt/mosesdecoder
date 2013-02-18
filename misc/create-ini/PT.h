@@ -15,9 +15,7 @@ class PT : public FF
   { return 0.2; }
 
   void Output(std::ostream &out) const;
-  void Load(const std::string &line, int numFeatures);
 
 public:
-  PT(const std::string &line);
-  PT(const std::string &line, int numFeatures);
+  PT(const std::string &line, int numFeatures, bool isHierarchical);
 };

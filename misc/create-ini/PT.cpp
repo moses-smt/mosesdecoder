@@ -2,19 +2,8 @@
 
 int PT::s_index = 0;
 
-PT::PT(const std::string &line)
+PT::PT(const std::string &line, int numFeatures, bool isHierarchical)
 :FF(line)
-{
-  Load(line, 5);
-}
-
-PT::PT(const std::string &line, int numFeatures)
-:FF(line)
-{
-  Load(line, numFeatures);
-}
-
-void PT::Load(const std::string &line, int numFeatures)
 {
   index = s_index++;
   name = "PhraseModel";
@@ -26,6 +15,8 @@ void PT::Load(const std::string &line, int numFeatures)
 
   if (toks.size() > 1)
     implementation = Scan<int>(toks[1]);
+  else if (isHierarchical)
+    implementation = 6;
   else
     implementation = 0;
 }

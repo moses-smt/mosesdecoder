@@ -27,12 +27,12 @@ int main(int argc, char **argv)
     
     if (key == "-phrase-translation-table") {
       ++i;
-      model = new PT(argv[i]);
+      model = new PT(argv[i], 5, isHierarchical);
       ffVec.push_back(model);
     }
     else if (key == "-glue-grammar-file") {
       ++i;
-      model = new PT(argv[i], 1);
+      model = new PT(argv[i], 1, isHierarchical);
       ffVec.push_back(model);
     }
     else if (key == "-reordering-table") {
