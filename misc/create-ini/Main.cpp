@@ -9,6 +9,7 @@
 #include "RO.h"
 #include "PT.h"
 #include "WP.h"
+#include "UnknownWP.h"
 #include "Distortion.h"
 
 using namespace std;
@@ -55,6 +56,8 @@ int main(int argc, char **argv)
   }
 
   model = new WP("");
+  ffVec.insert(ffVec.begin(), model);	
+  model = new UnknownWP("");
   ffVec.insert(ffVec.begin(), model);	
 
   if (!isHierarchical) {
