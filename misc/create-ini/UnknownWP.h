@@ -7,7 +7,7 @@ class UnknownWP : public FF
   static int s_index;
 
   virtual float GetWeight() const
-  { return -1.0; }
+  { return 1.0; }
 
   void Output(std::ostream &out) const
   {
