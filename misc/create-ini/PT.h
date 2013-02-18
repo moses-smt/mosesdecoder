@@ -9,21 +9,15 @@ class PT : public FF
 {
   static int s_index;
 
+  int implementation;
+
   float GetWeight() const
   { return 0.2; }
 
   void Output(std::ostream &out) const;
+  void Load(const std::string &line, int numFeatures);
+
 public:
-  PT(const std::string &line)
-  :FF(line)
-  {
-    index = s_index++;
-    name = "PhraseModel";
-    numFeatures = 5;    
-    path = toks[0];
-
-    inFactors.push_back(0);
-    outFactors.push_back(0);
-  }
-
+  PT(const std::string &line);
+  PT(const std::string &line, int numFeatures);
 };
