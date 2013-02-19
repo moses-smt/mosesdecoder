@@ -62,7 +62,6 @@ public:
     CHECK(m_transOptRange != NULL);
 
     const StaticData &staticData = StaticData::Instance();
-    const float weightDistortion = staticData.GetWeightDistortion();
 
     const float distortionScoreA = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoA,
@@ -77,8 +76,22 @@ public:
                                      hypoB->GetWordsBitmap().GetFirstGapPos()
                                    );
 
-    const float scoreA = hypoA->GetScore() + distortionScoreA * weightDistortion;
-    const float scoreB = hypoB->GetScore() + distortionScoreB * weightDistortion;
+
+    float totalWeightDistortion = 0;
+    const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+    std::vector<FeatureFunction*>::const_iterator iter;
+    for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+      const FeatureFunction *ff = *iter;
+
+      const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
+      if (model) {
+        float weight =staticData.GetAllWeights().GetScoreForProducer(model);
+        totalWeightDistortion += weight;
+      }
+    }
+    const float scoreA = hypoA->GetScore() + distortionScoreA * totalWeightDistortion;
+    const float scoreB = hypoB->GetScore() + distortionScoreB * totalWeightDistortion;
+
 
     if (scoreA > scoreB) {
       return true;

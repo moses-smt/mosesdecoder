@@ -480,7 +480,16 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
   // re-ordering
   outputWordGraphStream << "\tr=";
 
-  outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(StaticData::Instance().GetDistortionProducer());
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+  std::vector<FeatureFunction*>::const_iterator iter;
+  for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
+    const FeatureFunction *ff = *iter;
+
+    const DistortionScoreProducer *model = dynamic_cast<const DistortionScoreProducer*>(ff);
+    if (model) {
+      outputWordGraphStream << hypo->GetScoreBreakdown().GetScoreForProducer(model);
+    }
+  }
 
   // lexicalised re-ordering
   /*

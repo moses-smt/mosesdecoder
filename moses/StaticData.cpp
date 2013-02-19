@@ -634,7 +634,6 @@ bool StaticData::LoadData(Parameter *parameter)
       DistortionScoreProducer *model = new DistortionScoreProducer(line);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
-      m_distortionScoreProducer = model;
     }
     else if (feature == "WordPenalty") {
       WordPenaltyProducer *model = new WordPenaltyProducer(line);
@@ -1104,11 +1103,6 @@ float StaticData::GetWeightUnknownWordPenalty() const {
   return GetWeight(m_unknownWordPenaltyProducer);
 }
 
-float StaticData::GetWeightDistortion() const {
-  CHECK(m_distortionScoreProducer);
-  return StaticData::Instance().GetWeight(m_distortionScoreProducer);
-}
-
 void StaticData::ConfigDictionaries() {
   for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
     i != m_decodeGraphs.end(); ++i) {
@@ -1148,7 +1142,6 @@ void StaticData::CollectFeatureFunctions()
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     const FeatureFunction *ff = *iter;
-    cerr << ff->GetScoreProducerDescription() << endl;
 
     const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
     if (lm) {

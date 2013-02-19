@@ -55,7 +55,6 @@ class GlobalLexicalModelUnlimited;
 class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
 class GenerationDictionary;
-class DistortionScoreProducer;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
 class MetaScoreProducer;
@@ -136,7 +135,6 @@ protected:
 
   mutable size_t m_verboseLevel;
   WordPenaltyProducer* m_wpProducer;
-  DistortionScoreProducer* m_distortionScoreProducer;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
 
   MetaFeatureProducer *m_metaFeatureProducer;
@@ -441,10 +439,6 @@ public:
   const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const
   { return m_unknownWordPenaltyProducer; }
 
-  DistortionScoreProducer* GetDistortionProducer() const {
-    assert(m_distortionScoreProducer);
-    return m_distortionScoreProducer;
-  }
   MetaFeatureProducer* GetMetaFeatureProducer() const {
     return m_metaFeatureProducer;
   }
@@ -677,7 +671,6 @@ public:
 
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
-  float GetWeightDistortion() const;
 
   const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const
   { return m_phraseDictionary;}
