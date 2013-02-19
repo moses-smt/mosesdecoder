@@ -428,7 +428,7 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
   if (ff->GetNumScoreComponents() != ScoreProducer::unlimited) {
     if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
       lastName = ff->GetScoreProducerDescription();
-      out << " " << lastName << ":";
+      out << " " << lastName << "=";
     }
     vector<float> scores = features.GetScoresForProducer( ff );
     for (size_t j = 0; j<scores.size(); ++j) {
@@ -443,8 +443,8 @@ void IOWrapper::OutputFeatureScores( std::ostream& out, const ScoreComponentColl
     // report weighted aggregate
     if (! ff->GetSparseFeatureReporting()) {
       const FVector &weights = staticData.GetAllWeights().GetScoresVector();
-      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), ":"))
-        out << " " << ff->GetScoreProducerDescription() << ":";
+      if (labeledOutput && !boost::contains(ff->GetScoreProducerDescription(), "="))
+        out << " " << ff->GetScoreProducerDescription() << "=";
       out << " " << scores.inner_product(weights);
     }
 
