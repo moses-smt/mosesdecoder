@@ -61,15 +61,16 @@ public:
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
     CHECK(m_transOptRange != NULL);
 
-    const float weightDistortion = StaticData::Instance().GetWeightDistortion();
-    const DistortionScoreProducer *dsp = StaticData::Instance().GetDistortionProducer();
-    const float distortionScoreA = dsp->CalculateDistortionScore(
+    const StaticData &staticData = StaticData::Instance();
+    const float weightDistortion = staticData.GetWeightDistortion();
+
+    const float distortionScoreA = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoA,
                                      hypoA->GetCurrSourceWordsRange(),
                                      *m_transOptRange,
                                      hypoA->GetWordsBitmap().GetFirstGapPos()
                                    );
-    const float distortionScoreB = dsp->CalculateDistortionScore(
+    const float distortionScoreB = DistortionScoreProducer::CalculateDistortionScore(
                                      *hypoB,
                                      hypoB->GetCurrSourceWordsRange(),
                                      *m_transOptRange,

@@ -39,7 +39,7 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
 }
 
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
-    const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
+    const WordsRange &prev, const WordsRange &curr, const int FirstGap)
 {
   if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);

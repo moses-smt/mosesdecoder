@@ -19,8 +19,8 @@ public:
 	: StatefulFeatureFunction("Distortion", 1, line)
 	{}
 
-  float CalculateDistortionScore(const Hypothesis& hypo,
-                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
+  static float CalculateDistortionScore(const Hypothesis& hypo,
+                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
