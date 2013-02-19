@@ -17,9 +17,8 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
   string filePath;
   vector<FactorType> inputFactors, outputFactors;
 
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 0; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
 
     if (args[0] == "file") {
       CHECK(args.size() == 2);
@@ -30,6 +29,9 @@ GlobalLexicalModel::GlobalLexicalModel(const std::string &line)
     }
     else if (args[0] == "outputFactors") {
       outputFactors = Tokenize<FactorType>(args[1],",");
+    }
+    else {
+      throw "Unknown argument " + args[0];
     }
   }
 

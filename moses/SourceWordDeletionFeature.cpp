@@ -30,8 +30,7 @@ m_unrestricted(true)
       filename = args[1];
     }
     else {
-      UserMessage::Add("Unknown argument " + args[0]);
-      abort();
+      throw "Unknown argument " + args[0];
     }
   }
 

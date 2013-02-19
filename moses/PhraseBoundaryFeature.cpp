@@ -28,7 +28,9 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
     else if (args[0] == "target") {
       m_targetFactors = Tokenize<FactorType>(args[1], ",");
     }
-
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 }
 

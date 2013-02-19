@@ -82,8 +82,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
       m_alignmentsFile = args[1];
     }
     else {
-      UserMessage::Add("Unknown argument " + args[0]);
-      abort();
+      throw "Unknown argument " + args[0];
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 

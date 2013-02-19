@@ -63,6 +63,9 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
     else if (args[0] == "target-path") {
       filenameTarget = args[1];
     }
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 
   if (m_simple == 1) std::cerr << "using simple word translations.. ";

@@ -32,8 +32,7 @@ namespace Moses
 {
 
 /**
-  * A feature on the decoding path (Generation or Translation)
-  * @todo don't quite understand what this is
+  * Baseclass for phrase-table or generation table feature function
  **/
 class DecodeFeature : public StatelessFeatureFunction {
 

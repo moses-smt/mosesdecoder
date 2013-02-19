@@ -29,7 +29,9 @@ m_unrestricted(true)
     else if (args[0] == "path") {
       filename = args[1];
     }
-
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 
   // load word list for restricted feature set

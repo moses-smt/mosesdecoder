@@ -34,6 +34,9 @@ LexicalReordering::LexicalReordering(const std::string &line)
     else if (args[0] == "path") {
       filePath = args[1];
     }
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 
   switch(m_configuration->GetCondition()) {
