@@ -36,9 +36,6 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
-
-
 struct PointerState : public FFState {
   const void* lmstate;
   PointerState(const void* lms) {
@@ -52,30 +49,30 @@ struct PointerState : public FFState {
   }
 };
 
-LanguageModelPointerState::LanguageModelPointerState()
+LanguageModelSingleFactor::LanguageModelSingleFactor()
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);
 }
 
-LanguageModelPointerState::~LanguageModelPointerState() {}
+LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
 
-const FFState *LanguageModelPointerState::GetNullContextState() const
+const FFState *LanguageModelSingleFactor::GetNullContextState() const
 {
   return m_nullContextState;
 }
 
-const FFState *LanguageModelPointerState::GetBeginSentenceState() const
+const FFState *LanguageModelSingleFactor::GetBeginSentenceState() const
 {
   return m_beginSentenceState;
 }
 
-FFState *LanguageModelPointerState::NewState(const FFState *from) const
+FFState *LanguageModelSingleFactor::NewState(const FFState *from) const
 {
   return new PointerState(from ? static_cast<const PointerState*>(from)->lmstate : NULL);
 }
 
-LMResult LanguageModelPointerState::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
+LMResult LanguageModelSingleFactor::GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const
 {
   return GetValue(contextFactor, &static_cast<PointerState&>(outState).lmstate);
 }

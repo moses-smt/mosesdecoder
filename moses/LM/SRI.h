@@ -38,7 +38,7 @@ namespace Moses
 
 /** Implementation of single factor LM using IRST's code.
  */
-class LanguageModelSRI : public LanguageModelPointerState
+class LanguageModelSRI : public LanguageModelSingleFactor
 {
 protected:
   std::vector<unsigned int> m_lmIdLookup;
