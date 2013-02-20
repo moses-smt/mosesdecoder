@@ -51,7 +51,6 @@ namespace Moses
 {
 
 class InputType;
-class GlobalLexicalModelUnlimited;
 class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
 class GenerationDictionary;
