@@ -51,11 +51,6 @@ public:
 					, FactorType factorType
 					, size_t nGramOrder) = 0;
 
-	LMType GetLMType() const
-	{
-		return SingleFactor;
-	}
-
 	bool Useable(const Phrase &phrase) const
 	{
 		return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);		

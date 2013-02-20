@@ -69,9 +69,6 @@ public:
 
   virtual ~LanguageModelImplementation() {}
 
-  //! Single or multi-factor
-  virtual LMType GetLMType() const = 0;
-
   /* whether this LM can be used on a particular phrase.
    * Should return false if phrase size = 0 or factor types required don't exists
    */

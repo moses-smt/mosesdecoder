@@ -106,10 +106,6 @@ enum DistortionOrientationOptions {
 };
 }
 
-enum LMType {
-  SingleFactor
-  ,MultiFactor
-};
 enum LMImplementation {
   SRI			= 0
   ,IRST		= 1

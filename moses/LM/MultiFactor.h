@@ -50,10 +50,6 @@ public:
                     , const std::vector<FactorType> &factorTypes
                     , size_t nGramOrder) = 0;
 
-  LMType GetLMType() const {
-    return MultiFactor;
-  }
-
 	bool Useable(const Phrase &phrase) const;	
 };
 
