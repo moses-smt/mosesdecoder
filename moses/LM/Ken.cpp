@@ -65,8 +65,6 @@ template <class Model> class LanguageModelKen : public LanguageModel {
   public:
     LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
-    LanguageModel *Duplicate() const;
-
     bool Useable(const Phrase &phrase) const {
       return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
     }
@@ -156,10 +154,6 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   m_ngram.reset(new Model(file.c_str(), config));
 
   m_beginSentenceFactor = collection.AddFactor(BOS_);
-}
-
-template <class Model> LanguageModel *LanguageModelKen<Model>::Duplicate() const {
-  return new LanguageModelKen<Model>(*this);
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)

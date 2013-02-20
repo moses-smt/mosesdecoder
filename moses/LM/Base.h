@@ -48,9 +48,6 @@ protected:
 public:
   virtual ~LanguageModel();
 
-  // Make another feature without copying the underlying model data.  
-  virtual LanguageModel *Duplicate() const = 0;
-
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
   }

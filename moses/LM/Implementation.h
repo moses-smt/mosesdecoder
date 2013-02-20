@@ -128,10 +128,6 @@ class LMRefCount : public LanguageModel {
     : LanguageModel(description, line)
     , m_impl(impl) {}
 
-    LanguageModel *Duplicate() const {
-      return new LMRefCount(*this);
-    }
-
     void InitializeBeforeSentenceProcessing() {
       m_impl->InitializeBeforeSentenceProcessing();
     }
