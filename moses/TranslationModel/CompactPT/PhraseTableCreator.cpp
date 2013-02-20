@@ -998,7 +998,7 @@ void PhraseTableCreator::FlushEncodedQueue(bool force)
   if(force)
   {
     if(!m_lastSourceRange.size() || m_lastSourceRange.back() != m_lastFlushedSourcePhrase)
-      m_lastSourceRange.push_back(m_lastFlushedSourcePhrase);
+      m_lastSourceRange.push_back(MakeSourceKey(m_lastFlushedSourcePhrase));
       
     if(m_lastCollection.size())
     {
