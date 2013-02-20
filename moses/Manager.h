@@ -93,6 +93,11 @@ class Manager
   Manager(Manager const&);
   void operator=(Manager const&);
   const TranslationSystem* m_system;
+private:
+  void OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) const;
+  size_t OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const;
+  void OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std::ostream &outputSearchGraphStream) const;
+  size_t OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const;
 protected:
   // data
 //	InputType const& m_source; /**< source sentence to be translated */
@@ -103,6 +108,7 @@ protected:
   size_t interrupted_flag;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   int m_hypoId; //used to number the hypos as they are created.
+  size_t m_lineNumber;
 
   void GetConnectedGraph(
     std::map< int, bool >* pConnected,
@@ -113,7 +119,6 @@ protected:
 
 
 public:
-  size_t m_lineNumber;
   InputType const& m_source; /**< source sentence to be translated */
   Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system);
   ~Manager();
