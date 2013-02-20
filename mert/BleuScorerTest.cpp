@@ -244,7 +244,7 @@ BOOST_AUTO_TEST_CASE(calculate_actual_score) {
   // reference-length
   stats[8] = 7;
 
-  BOOST_CHECK(IsAlmostEqual(0.5115f, scorer.calculateScore(stats)));
+  BOOST_CHECK_CLOSE(0.5115f, scorer.calculateScore(stats), 0.01);
 }
 
 BOOST_AUTO_TEST_CASE(sentence_level_bleu) {
@@ -270,5 +270,7 @@ BOOST_AUTO_TEST_CASE(sentence_level_bleu) {
   // reference-length
   stats[8] = 7.0;
 
-  BOOST_CHECK(IsAlmostEqual(0.5985f, sentenceLevelBleuPlusOne(stats)));
+  BOOST_CHECK_CLOSE(0.5985f, smoothedSentenceBleu(stats), 0.01);
+  BOOST_CHECK_CLOSE(0.5624f, smoothedSentenceBleu(stats, 0.5), 0.01 );
+  BOOST_CHECK_CLOSE(0.5067f, smoothedSentenceBleu(stats, 1.0, true), 0.01);
 }
