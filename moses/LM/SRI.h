@@ -52,7 +52,7 @@ protected:
   unsigned int GetLmID( const Factor *factor ) const;
 
 public:
-  LanguageModelSRI();
+  LanguageModelSRI(const std::string &line);
   ~LanguageModelSRI();
   bool Load(const std::string &filePath
             , FactorType factorType

@@ -69,6 +69,10 @@ private:
   WidMatrix *widMatrix;
 
 public:
+  LanguageModelParallelBackoff(const std::string &line)
+  :LanguageModelMultiFactor("ParallelBackoffLM", line)
+  {}
+
   ~LanguageModelParallelBackoff();
 
   bool Load(const std::string &filePath, const std::vector<FactorType> &factorTypes, size_t nGramOrder);
@@ -347,9 +351,6 @@ const FFState *LanguageModelParallelBackoff::GetBeginSentenceState() const
 
 }
 
-LanguageModelMultiFactor *NewParallelBackoff() {
-  return new LanguageModelParallelBackoff();
-}
 
 }
 

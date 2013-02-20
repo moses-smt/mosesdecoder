@@ -41,7 +41,9 @@ class LanguageModelMultiFactor : public LanguageModelImplementation
 protected:
   FactorMask m_factorTypes;
 
-	LanguageModelMultiFactor(){}
+	LanguageModelMultiFactor(const std::string& description, const std::string &line)
+  :LanguageModelImplementation(description, line)
+  {}
 	
 public:
   virtual bool Load(const std::string &filePath

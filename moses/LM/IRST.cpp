@@ -40,6 +40,7 @@ using namespace std;
 namespace Moses
 {
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
+:LanguageModelSingleFactor("IRSTLM", line)
 {
   cerr << "line=" << line << endl;
   FactorType factorType;
@@ -66,11 +67,6 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
   }
 
   Load(filePath, factorType, nGramOrder);
-}
-
-LanguageModelIRST::LanguageModelIRST(int dub)
-  :m_lmtb(0),m_lmtb_dub(dub)
-{
 }
 
 LanguageModelIRST::~LanguageModelIRST()

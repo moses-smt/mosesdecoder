@@ -49,7 +49,9 @@ protected:
 
   size_t m_implFactor;
 public:
-  LanguageModelJoint(LanguageModelSingleFactor *lmImpl) {
+  LanguageModelJoint(const std::string &line, LanguageModelSingleFactor *lmImpl)
+  :LanguageModelMultiFactor("JointLM", line)
+  {
     m_lmImpl = lmImpl;
   }
 
