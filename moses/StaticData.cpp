@@ -609,8 +609,7 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
     }
     else if (feature == "IRSTLM") {
-      LanguageModelIRST *irstlm = new LanguageModelIRST(line);
-      LanguageModel *model = new LMRefCount(irstlm, feature, line);
+      LanguageModelIRST *model = new LanguageModelIRST(line);
       const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
     }

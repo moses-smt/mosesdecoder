@@ -116,7 +116,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
   }
 }
 
-FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const {
+FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
   // In this function, we only compute the LM scores of n-grams that overlap a
   // phrase boundary. Phrase-internal scores are taken directly from the
   // translation option.
@@ -191,13 +191,13 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
       GetState(contextFactor, *res);
     }
   }
-  if (feature->OOVFeatureEnabled()) {
+  if (OOVFeatureEnabled()) {
     vector<float> scores(2);
     scores[0] = lmScore;
     scores[1] = 0;
-    out->PlusEquals(feature, scores);
+    out->PlusEquals(this, scores);
   } else {
-    out->PlusEquals(feature, lmScore);
+    out->PlusEquals(this, lmScore);
   }
 
 
@@ -375,7 +375,7 @@ public:
 
 } // namespace
 
-FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out, const LanguageModel *scorer) const {
+FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const {
   LanguageModelChartState *ret = new LanguageModelChartState(hypo, featureID, GetNGramOrder());
   // data structure for factored context phrase (history and predicted word)
   vector<const Word*> contextFactor;
@@ -437,7 +437,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
         // get prefixScore and finalizedScore
         prefixScore = prevState->GetPrefixScore();
-        finalizedScore = prevHypo->GetScoreBreakdown().GetScoresForProducer(scorer)[0] - prefixScore;
+        finalizedScore = prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] - prefixScore;
 
         // get language model state
         delete lmState;
@@ -473,7 +473,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
         {
           // add its finalized language model score
           finalizedScore +=
-            prevHypo->GetScoreBreakdown().GetScoresForProducer(scorer)[0] // full score
+            prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] // full score
             - prevState->GetPrefixScore();                              // - prefix score
 
           // copy language model state
@@ -499,7 +499,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   }
 
   // assign combined score to score breakdown
-  out->Assign(scorer, prefixScore + finalizedScore);
+  out->Assign(this, prefixScore + finalizedScore);
 
   ret->Set(prefixScore, lmState);
   return ret;
