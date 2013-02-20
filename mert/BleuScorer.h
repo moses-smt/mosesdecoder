@@ -34,7 +34,6 @@ public:
   ~BleuScorer();
 
   static std::vector<float> ScoreNbestList(const std::string& scoreFile, const std::string& featureFile);
-  static float sentenceLevelBleuPlusOne(const std::vector<float>& stats);
 
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
@@ -74,7 +73,8 @@ private:
 /** Computes sentence-level BLEU+1 score.
  * This function is used in PRO.
  */
-float sentenceLevelBleuPlusOne(const std::vector<float>& stats);
+float smoothedSentenceBleu
+  (const std::vector<float>& stats, float smoothing=1.0, bool smoothBP=false);
 
 /** Computes sentence-level BLEU score given a background corpus.
  * This function is used in batch MIRA.
