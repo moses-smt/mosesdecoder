@@ -103,9 +103,6 @@ public:
                        , TranslationOptionCollection *toc
                        , bool adhereTableLimit) const = 0;
 
-  /** Do any sentence specific initialisation */
-  virtual void InitializeBeforeSentenceProcessing(InputType const&) const {}
-
 };
 
 }
