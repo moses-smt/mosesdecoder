@@ -15,17 +15,9 @@ namespace Moses
  */
 double Timer::elapsed_time()
 {
-#ifdef CLOCK_MONOTONIC
-  struct timespec now;
-  clock_gettime(CLOCK_MONOTONIC, &now);
-  double elapsed = (now.tv_sec - start_time.tv_sec);
-  elapsed += (now.tv_nsec - start_time.tv_nsec) / 1000000000.0;
-  return elapsed;
-#else
   time_t now;
   time(&now);
   return difftime(now, start_time);
-#endif
 }
 
 /***
@@ -56,11 +48,7 @@ void Timer::start(const char* msg)
   running = true;
 
   // Set the start time;
-#ifdef CLOCK_MONOTONIC
-  clock_gettime(CLOCK_MONOTONIC, &start_time);
-#else
   time(&start_time);
-#endif
 }
 
 /***
