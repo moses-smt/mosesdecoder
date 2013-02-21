@@ -24,12 +24,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include <fstream>
 
-#include "LM/SRI.h"
-#include "TypeDef.h"
-#include "Util.h"
-#include "FactorCollection.h"
-#include "Phrase.h"
-#include "StaticData.h"
+#include "SRI.h"
+#include "moses/TypeDef.h"
+#include "moses/Util.h"
+#include "moses/FactorCollection.h"
+#include "moses/Phrase.h"
+#include "moses/StaticData.h"
 
 #include "Vocab.h"
 #include "Ngram.h"

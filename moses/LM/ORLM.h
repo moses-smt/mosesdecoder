@@ -5,10 +5,10 @@
 #include "moses/Factor.h"
 #include "moses/Util.h"
 #include "SingleFactor.h"
-#include "moses/DynSAInclude/onlineRLM.h"
+#include "moses/TranslationModel/DynSAInclude/onlineRLM.h"
 //#include "multiOnlineRLM.h"
-#include "moses/DynSAInclude/FileHandler.h"
-#include "moses/DynSAInclude/vocab.h"
+#include "moses/TranslationModel/DynSAInclude/FileHandler.h"
+#include "moses/TranslationModel/DynSAInclude/vocab.h"
 
 namespace Moses
 {

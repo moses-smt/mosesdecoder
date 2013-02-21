@@ -114,7 +114,7 @@ int main(int argc, char* argv[])
 
  if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
-    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --GZOutput | --IncludeSentenceId | --SentenceOffset n ]\n";
+    cerr<<"| --OnlyOutputSpanInfo | --NoTTable | --GZOutput | --IncludeSentenceId | --SentenceOffset n | --InstanceWeights filename ]\n";
     exit(1);
   }
 
@@ -144,6 +144,12 @@ int main(int argc, char* argv[])
       sentenceOffset = atoi(argv[++i]);
     } else if (strcmp(argv[i], "--GZOutput") == 0) {
       options.initGzOutput(true);  
+    } else if (strcmp(argv[i], "--InstanceWeights") == 0) {
+      if (i+1 >= argc) {
+        cerr << "extract: syntax error, used switch --InstanceWeights without file name" << endl;
+        exit(1);
+      }
+      options.initInstanceWeightsFile(argv[++i]);
     } else if(strcmp(argv[i],"--model") == 0) {
       if (i+1 >= argc) {
         cerr << "extract: syntax error, no model's information provided to the option --model " << endl;
@@ -220,6 +226,13 @@ int main(int argc, char* argv[])
   istream *fFileP = &fFile;
   istream *aFileP = &aFile;
 
+  istream *iwFileP = NULL;
+  auto_ptr<Moses::InputFileStream> instanceWeightsFile;
+  if (options.getInstanceWeightsFile().length()) {
+    instanceWeightsFile.reset(new Moses::InputFileStream(options.getInstanceWeightsFile()));
+    iwFileP = instanceWeightsFile.get();
+  }
+
   // open output files
   if (options.isTranslationFlag()) {
     string fileNameExtractInv = fileNameExtract + ".inv" + (options.isGzOutput()?".gz":"");
@@ -238,10 +251,14 @@ int main(int argc, char* argv[])
     char englishString[LINE_MAX_LENGTH];
     char foreignString[LINE_MAX_LENGTH];
     char alignmentString[LINE_MAX_LENGTH];
+    char weightString[LINE_MAX_LENGTH];
     SAFE_GETLINE((*eFileP), englishString, LINE_MAX_LENGTH, '\n', __FILE__);
     if (eFileP->eof()) break;
     SAFE_GETLINE((*fFileP), foreignString, LINE_MAX_LENGTH, '\n', __FILE__);
     SAFE_GETLINE((*aFileP), alignmentString, LINE_MAX_LENGTH, '\n', __FILE__);
+    if (iwFileP) {
+      SAFE_GETLINE((*iwFileP), weightString, LINE_MAX_LENGTH, '\n', __FILE__);
+    }
     SentenceAlignment sentence;
 	// cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
@@ -251,7 +268,7 @@ int main(int argc, char* argv[])
       cout << "LOG: ALT: " << alignmentString << endl;
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
-	if (sentence.create( englishString, foreignString, alignmentString, i, false)) {
+	if (sentence.create( englishString, foreignString, alignmentString, weightString, i, false)) {
    	ExtractTask *task = new ExtractTask(i-1, sentence, options, extractFile , extractFileInv, extractFileOrientation);
       task->Run();
       delete task;
@@ -694,6 +711,16 @@ for(int fi=startF; fi<=endF; fi++) {
 
   if (m_options.isOrientationFlag())
     outextractstrOrientation << orientationInfo;
+
+  if (m_options.getInstanceWeightsFile().length()) {
+    if (m_options.isTranslationFlag()) {
+      outextractstr << " ||| " << sentence.weightString;
+      outextractstrInv << " ||| " << sentence.weightString;
+    }
+    if (m_options.isOrientationFlag()) {
+      outextractstrOrientation << " ||| " << sentence.weightString;
+    }
+  }
 
   if (m_options.isIncludeSentenceIdFlag()) {
     outextractstr << " ||| " << sentence.sentenceID;

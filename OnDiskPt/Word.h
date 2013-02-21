@@ -76,7 +76,11 @@ public:
     const Vocab &vocab,
     Moses::Word &overwrite) const;
 
-	void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  inline const std::string &GetString(const Vocab &vocab) const
+  {
+    return vocab.GetString(m_vocabId);
+  }
 
   int Compare(const Word &compare) const;
   bool operator<(const Word &compare) const;

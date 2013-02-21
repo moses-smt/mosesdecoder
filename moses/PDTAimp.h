@@ -5,10 +5,10 @@
 #define moses_PDTAimp_h
 
 #include "StaticData.h"  // needed for factor splitter
-#include "PhraseDictionaryTree.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 #include "UniqueObject.h"
 #include "InputFileStream.h"
-#include "PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "Util.h"
 
@@ -204,7 +204,7 @@ protected:
     m_languageModels=&languageModels;
 
     const StaticData &staticData = StaticData::Instance();
-    m_dict->UseWordAlignment(staticData.UseAlignmentInfo());
+    m_dict->NeedAlignmentInfo(staticData.NeedAlignmentInfo());
 
     std::string binFname=filePath+".binphr.idx";
     if(!FileExists(binFname.c_str())) {

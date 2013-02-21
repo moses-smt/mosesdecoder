@@ -5,7 +5,7 @@
 #ifndef moses_LanguageModelLDHT_h
 #define moses_LanguageModelLDHT_h
 
-#include "../TypeDef.h"
+#include "moses/TypeDef.h"
 
 namespace Moses {
 

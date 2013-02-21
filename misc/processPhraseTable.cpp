@@ -6,13 +6,13 @@
 #include <iterator>
 #include <functional>
 #include <sys/stat.h>
-#include "TypeDef.h"
-#include "PhraseDictionaryTree.h"
-#include "ConfusionNet.h"
-#include "FactorCollection.h"
-#include "Phrase.h"
-#include "InputFileStream.h"
-#include "Timer.h"
+#include "moses/TypeDef.h"
+#include "moses/ConfusionNet.h"
+#include "moses/FactorCollection.h"
+#include "moses/Phrase.h"
+#include "moses/InputFileStream.h"
+#include "moses/Timer.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
 
 using namespace std;
 using namespace Moses;
@@ -44,7 +44,7 @@ int main(int argc,char **argv)
   std::string fto;
   size_t noScoreComponent=5;
   int cn=0;
-  bool aligninfo=false;
+  bool aligninfo=true;
   std::vector<std::pair<std::string,std::pair<char*,char*> > > ftts;
   int verb=0;
   for(int i=1; i<argc; ++i) {
@@ -58,7 +58,7 @@ int main(int argc,char **argv)
     else if(s=="-out") fto=std::string(argv[++i]);
     else if(s=="-cn") cn=1;
     else if(s=="-irst") cn=2;
-    else if(s=="-alignment-info") aligninfo=true;
+    else if(s=="-no-alignment-info") aligninfo=false;
     else if(s=="-v") verb=atoi(argv[++i]);
     else if(s=="-h") {
       std::cerr<<"usage "<<argv[0]<<" :\n\n"
@@ -66,7 +66,7 @@ int main(int argc,char **argv)
                "\t-ttable int int string   -- translation table file, use '-' for stdin\n"
                "\t-out string      -- output file name prefix for binary ttable\n"
                "\t-nscores int     -- number of scores in ttable\n"
-               "\t-alignment-info  -- include alignment info in the binary ttable (suffix \".wa\")\n"
+               "\t-no-alignment-info  -- omit alignment info from the binary ttable \n"
                "\nfunctions:\n"
                "\t - convert ascii ttable in binary format\n"
                "\t - if ttable is not read from stdin:\n"

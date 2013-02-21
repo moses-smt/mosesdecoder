@@ -25,34 +25,19 @@ void ReadLoop(ReadCompressed &reader, void *to_void, std::size_t amount) {
   }
 }
 
-void TestRandom(const char *compressor) {
-  const uint32_t kSize4 = 100000 / 4;
+const uint32_t kSize4 = 100000 / 4;
+
+std::string WriteRandom() {
   char name[] = "tempXXXXXX";
-
-  // Write test file.  
-  {
-    scoped_fd original(mkstemp(name));
-    BOOST_REQUIRE(original.get() > 0);
-    for (uint32_t i = 0; i < kSize4; ++i) {
-      WriteOrThrow(original.get(), &i, sizeof(uint32_t));
-    }
+  scoped_fd original(mkstemp(name));
+  BOOST_REQUIRE(original.get() > 0);
+  for (uint32_t i = 0; i < kSize4; ++i) {
+    WriteOrThrow(original.get(), &i, sizeof(uint32_t));
   }
+  return name;
+}
 
-  char gzname[] = "tempXXXXXX";
-  scoped_fd gzipped(mkstemp(gzname));
-
-  std::string command(compressor);
-  command += " <\"";
-  command += name;
-  command += "\" >\"";
-  command += gzname;
-  command += "\"";
-  BOOST_REQUIRE_EQUAL(0, system(command.c_str()));
-
-  BOOST_CHECK_EQUAL(0, unlink(name));
-  BOOST_CHECK_EQUAL(0, unlink(gzname));
-
-  ReadCompressed reader(gzipped.release());
+void VerifyRead(ReadCompressed &reader) {
   for (uint32_t i = 0; i < kSize4; ++i) {
     uint32_t got;
     ReadLoop(reader, &got, sizeof(uint32_t));
@@ -63,6 +48,30 @@ void TestRandom(const char *compressor) {
   BOOST_CHECK_EQUAL((std::size_t)0, reader.Read(&ignored, 1));
   // Test double EOF call.
   BOOST_CHECK_EQUAL((std::size_t)0, reader.Read(&ignored, 1));
+}
+
+void TestRandom(const char *compressor) {
+  std::string name(WriteRandom());
+
+  char gzname[] = "tempXXXXXX";
+  scoped_fd gzipped(mkstemp(gzname));
+
+  std::string command(compressor);
+#ifdef __CYGWIN__
+  command += ".exe";
+#endif
+  command += " <\"";
+  command += name;
+  command += "\" >\"";
+  command += gzname;
+  command += "\"";
+  BOOST_REQUIRE_EQUAL(0, system(command.c_str()));
+
+  BOOST_CHECK_EQUAL(0, unlink(name.c_str()));
+  BOOST_CHECK_EQUAL(0, unlink(gzname));
+
+  ReadCompressed reader(gzipped.release());
+  VerifyRead(reader);
 }
 
 BOOST_AUTO_TEST_CASE(Uncompressed) {
@@ -86,6 +95,15 @@ BOOST_AUTO_TEST_CASE(ReadXZ) {
   TestRandom("xz");
 }
 #endif
+
+BOOST_AUTO_TEST_CASE(IStream) {
+  std::string name(WriteRandom());
+  std::fstream stream(name.c_str(), std::ios::in);
+  BOOST_CHECK_EQUAL(0, unlink(name.c_str()));
+  ReadCompressed reader;
+  reader.Reset(stream);
+  VerifyRead(reader);
+}
 
 } // namespace
 } // namespace util

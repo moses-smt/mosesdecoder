@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include "util/check.hh"
-#include "PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
-#include "PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
@@ -102,7 +102,7 @@ StaticData::StaticData()
   ,m_factorDelimiter("|") // default delimiter between factors
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
-
+  ,m_needAlignmentInfo(false)
 {
   m_maxFactorIdx[0] = 0;  // source side
   m_maxFactorIdx[1] = 0;  // target side
@@ -172,25 +172,17 @@ bool StaticData::LoadData(Parameter *parameter)
   }
 
   SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );
-
-  //word-to-word alignment
-  SetBooleanParameter( &m_UseAlignmentInfo, "use-alignment-info", false );
-  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
-  SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
-
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
-  if (!m_UseAlignmentInfo && m_PrintAlignmentInfo) {
-    TRACE_ERR("--print-alignment-info should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
-    m_PrintAlignmentInfo=false;
-  }
-  if (!m_UseAlignmentInfo && m_PrintAlignmentInfoNbest) {
-    TRACE_ERR("--print-alignment-info-in-n-best should only be used together with \"--use-alignment-info true\". Continue forcing to false.\n");
-    m_PrintAlignmentInfoNbest=false;
+  //word-to-word alignment
+  SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
+  if (m_PrintAlignmentInfoNbest) {
+    m_needAlignmentInfo = true;
   }
 
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
+    m_needAlignmentInfo = true;
   }
 
   // n-best
@@ -210,9 +202,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestFactor = 20;
   }
   
-  // explicit setting of distinct nbest
-  SetBooleanParameter( &m_onlyDistinctNBest, "distinct-nbest", false);
-
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
     m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
@@ -275,7 +264,7 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
 
   // include word alignment in the n-best list
-  SetBooleanParameter( &m_nBestIncludesAlignment, "include-alignment-in-n-best", false );
+  SetBooleanParameter( &m_nBestIncludesSegmentation, "include-segmentation-in-n-best", false );
 
   // printing source phrase spans
   SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
@@ -1671,7 +1660,7 @@ bool StaticData::LoadPhraseBoundaryFeature()
 {
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-pb"));
   if (weight.size() > 1) {
-	std::cerr << "only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
+	std::cerr << "Only one sparse producer weight allowed for the phrase boundary feature" << std::endl;
     return false;
   }
 
@@ -1798,10 +1787,7 @@ bool StaticData::LoadTargetWordInsertionFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-    UserMessage::Add("Target word insertion feature needs word alignments in phrase table.");
-    return false;
-  }
+  m_needAlignmentInfo = true;
 
   // set factor
   FactorType factorId = Scan<size_t>(tokens[0]);
@@ -1837,10 +1823,7 @@ bool StaticData::LoadSourceWordDeletionFeature()
     return false;
   }
 
-  if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-    UserMessage::Add("Source word deletion feature needs word alignments in phrase table.");
-    return false;
-  }
+  m_needAlignmentInfo = true;
 
   // set factor
   FactorType factorId = Scan<size_t>(tokens[0]);
@@ -1861,15 +1844,17 @@ bool StaticData::LoadSourceWordDeletionFeature()
 
 bool StaticData::LoadWordTranslationFeature()
 {
+  const vector<string> &parameters = m_parameter->GetParam("word-translation-feature");
+  if (parameters.empty())
+    return true;
+
   const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-wt"));
   if (weight.size() > 1) {
     std::cerr << "Only one sparse producer weight allowed for the word translation feature" << std::endl;
     return false;
   }
 	
-  const vector<string> &parameters = m_parameter->GetParam("word-translation-feature");
-  if (parameters.empty())
-    return true;
+  m_needAlignmentInfo = true;
 
   for (size_t i=0; i<parameters.size(); ++i) {
     vector<string> tokens = Tokenize(parameters[i]);
@@ -1879,11 +1864,6 @@ bool StaticData::LoadWordTranslationFeature()
       return false;
     }
     
-    if (!m_UseAlignmentInfo && GetSearchAlgorithm() != ChartDecoding) {
-      UserMessage::Add("Word translation feature needs word alignments in phrase table.");
-      return false;
-    }
-
     // set factor
     vector <string> factors = Tokenize(tokens[0],"-");
     FactorType factorIdSource = Scan<size_t>(factors[0]);

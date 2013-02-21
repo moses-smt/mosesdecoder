@@ -1,6 +1,5 @@
 from libcpp.string cimport string
 from libcpp.vector cimport vector
-from libcpp.pair cimport pair
 
 ctypedef string* str_pointer
 ctypedef string* const_str_pointer "const str_pointer"
@@ -16,12 +15,11 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
         Tokens fnames
         Scores fvalues
 
-
-
     cdef cppclass PhraseDictionaryTree:
         PhraseDictionaryTree(unsigned nscores)
-        void UseWordAlignment(bint use)
-        bint UseWordAlignment()
+        void NeedAlignmentInfo(bint value)
+        void PrintWordAlignment(bint value)
+        bint PrintWordAlignment()
         int Read(string& path)
         void GetTargetCandidates(vector[string]& fs, 
                 vector[StringTgtCand]& rv)

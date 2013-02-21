@@ -36,6 +36,7 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include <fstream>
 #include <vector>
+#include <set>
 #include "moses/TypeDef.h"
 #include "moses/Sentence.h"
 #include "moses/FactorTypeSet.h"
@@ -44,6 +45,7 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/OutputCollector.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartTrellisPath.h"
+#include "search/applied.hh"
 
 namespace Moses
 {
@@ -59,20 +61,34 @@ namespace MosesChartCmd
 class IOWrapper
 {
 protected:
+  typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
 
   long m_translationId;
 
   const std::vector<Moses::FactorType>	&m_inputFactorOrder;
   const std::vector<Moses::FactorType>	&m_outputFactorOrder;
   const Moses::FactorMask								&m_inputFactorUsed;
-  std::ostream 									*m_outputSearchGraphStream;
-  std::ostream                  *m_detailedTranslationReportingStream;
-  std::string										m_inputFilePath;
-  std::istream									*m_inputStream;
+  std::ostream 				        					*m_outputSearchGraphStream;
+  std::ostream                          *m_detailedTranslationReportingStream;
+  std::ostream                          *m_alignmentInfoStream;
+  std::string		        								m_inputFilePath;
+  std::istream					        				*m_inputStream;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
   Moses::OutputCollector                *m_searchGraphOutputCollector;
   Moses::OutputCollector                *m_singleBestOutputCollector;
+  Moses::OutputCollector                *m_alignmentInfoCollector;
+
+  typedef std::set< std::pair<size_t, size_t>  > Alignments;
+  size_t OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget);
+  size_t OutputAlignment(Alignments &retAlign, const Moses::ChartHypothesis *hypo, size_t startTarget);
+  void OutputAlignment(std::vector< std::set<size_t> > &retAlignmentsS2T, const Moses::AlignmentInfo &ai);
+  void OutputTranslationOptions(std::ostream &out, ApplicationContext &applicationContext, const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
+  void ReconstructApplicationContext(const Moses::ChartHypothesis &hypo,
+                                     const Moses::Sentence &sentence,
+                                     ApplicationContext &context);
+  void WriteApplicationContext(std::ostream &out,
+                               const ApplicationContext &context);
 
 public:
   IOWrapper(const std::vector<Moses::FactorType>	&inputFactorOrder
@@ -85,19 +101,21 @@ public:
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
   void OutputBestHypo(const Moses::ChartHypothesis *hypo, long translationId);
+  void OutputBestHypo(search::Applied applied, long translationId);
   void OutputBestHypo(const std::vector<const Moses::Factor*>&  mbrBestHypo, long translationId);
-  void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::ChartHypothesis *bestHypo, const Moses::TranslationSystem* system, long translationId);
-  void OutputSparseFeatureScores(std::ostream& out, const Moses::ChartTrellisPath &path, const Moses::FeatureFunction *ff, std::string &lastName);
+  void OutputBestNone(long translationId);
+  void OutputNBestList(const Moses::ChartTrellisPathList &nBestList, const Moses::TranslationSystem* system, long translationId);
+  void OutputNBestList(const std::vector<search::Applied> &nbest, const Moses::TranslationSystem &system, long translationId);
   void OutputDetailedTranslationReport(const Moses::ChartHypothesis *hypo, const Moses::Sentence &sentence, long translationId);
   void Backtrack(const Moses::ChartHypothesis *hypo);
-
-  Moses::OutputCollector *ExposeSingleBest() { return m_singleBestOutputCollector; }
 
   void ResetTranslationId();
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;
   }
+
+  void OutputAlignment(size_t translationId , const Moses::ChartHypothesis *hypo);
 
   static void FixPrecision(std::ostream &, size_t size=3);
 };

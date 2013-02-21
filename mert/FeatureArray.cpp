@@ -16,10 +16,10 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 FeatureArray::FeatureArray()
-    : m_index(""), m_num_features(0){}
+    : m_index(0), m_num_features(0){}
 
 FeatureArray::~FeatureArray() {}
 
@@ -115,7 +115,7 @@ void FeatureArray::load(istream* is, const SparseVector& sparseWeights)
     }
     getNextPound(stringBuf, substring);
     getNextPound(stringBuf, substring);
-    m_index = substring;
+    m_index = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
     number_of_entries = atoi(substring.c_str());
     getNextPound(stringBuf, substring);
@@ -160,4 +160,3 @@ bool FeatureArray::check_consistency() const
 }
 
 }
-

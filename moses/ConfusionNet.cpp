@@ -5,7 +5,7 @@
 
 #include "FactorCollection.h"
 #include "Util.h"
-#include "PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "StaticData.h"
 #include "Sentence.h"

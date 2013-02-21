@@ -337,7 +337,7 @@ int main(int argc, char* argv[])
       cout << "LOG: PHRASES_BEGIN:" << endl;
     }
 
-    if (sentence.create(targetString, sourceString, alignmentString, i, options.boundaryRules)) {
+    if (sentence.create(targetString, sourceString, alignmentString,"", i, options.boundaryRules)) {
       if (options.unknownWordLabelFlag) {
         collectWordLabelCounts(sentence);
       }
@@ -982,17 +982,15 @@ void ExtractTask::consolidateRules()
   }
 
   // consolidate counts
+  map<std::string, map< std::string, map< std::string, float> > > consolidatedCount;
   for(R rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
-    if (rule->count == 0)
-      continue;
-    for(R r2 = rule+1; r2 != m_extractedRules.end(); r2++ ) {
-      if (rule->source.compare( r2->source ) == 0 &&
-          rule->target.compare( r2->target ) == 0 &&
-          rule->alignment.compare( r2->alignment ) == 0) {
-        rule->count += r2->count;
-        r2->count = 0;
-      }
-    }
+    consolidatedCount[ rule->source ][ rule->target][ rule->alignment ] += rule->count;
+  }
+
+  for(R rule = m_extractedRules.begin(); rule != m_extractedRules.end(); rule++ ) {
+    float count = consolidatedCount[ rule->source ][ rule->target][ rule->alignment ];
+    rule->count = count;
+    consolidatedCount[ rule->source ][ rule->target][ rule->alignment ] = 0;
   }
 }
 

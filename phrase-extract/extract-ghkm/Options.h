@@ -39,7 +39,9 @@ struct Options {
       , minimal(false)
       , pcfg(false)
       , sentenceOffset(0)
-      , unpairedExtractFormat(false) {}
+      , unpairedExtractFormat(false)
+      , unknownWordMinRelFreq(0.03f)
+      , unknownWordUniform(false) {}
 
   // Positional options
   std::string targetFile;
@@ -61,6 +63,8 @@ struct Options {
   int sentenceOffset;
   bool unpairedExtractFormat;
   std::string unknownWordFile;
+  float unknownWordMinRelFreq;
+  bool unknownWordUniform;
 };
 
 }  // namespace GHKM

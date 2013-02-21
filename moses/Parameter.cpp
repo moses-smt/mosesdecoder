@@ -45,7 +45,6 @@ Parameter::Parameter()
   AddParam("dlm-model", "Order, factor and vocabulary file for discriminative LM. Use * for filename to indicate unlimited vocabulary.");
   AddParam("drop-unknown", "du", "drop unknown words instead of copying them");
   AddParam("disable-discarding", "dd", "disable hypothesis discarding");
-  AddParam("distinct-nbest", "only distinct translations in nbest list");
   AddParam("factor-delimiter", "fd", "specify a different factor delimiter than the default");
   AddParam("generation-file", "location and properties of the generation table");
   AddParam("global-lexical-file", "gl", "discriminatively trained global lexical translation model file");
@@ -54,7 +53,6 @@ Parameter::Parameter()
   AddParam("input-file", "i", "location of the input file to be translated");
   AddParam("inputtype", "text (0), confusion network (1), word lattice (2) (default = 0)");
   AddParam("labeled-n-best-list", "print out labels for each weight type in n-best list. default is true");
-  AddParam("include-alignment-in-n-best", "include word alignment in the n-best list. default is false");
   AddParam("lmodel-file", "location and properties of the language models");
   AddParam("lmodel-dub", "dictionary upper bounds of language models");
   AddParam("lmodel-oov-feature", "add language model oov feature, one per model");
@@ -70,7 +68,6 @@ Parameter::Parameter()
   AddParam("phrase-drop-allowed", "da", "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
   AddParam("report-all-factors", "report all factors in output, not just first");
   AddParam("report-all-factors-in-n-best", "Report all factors in n-best-lists. Default is false");
-  AddParam("report-segmentation", "t", "report phrase segmentation in the output");
 #ifdef HAVE_SYNLM
 	AddParam("slmodel-file", "location of the syntactic language model file(s)");
 	AddParam("weight-slm", "slm", "weight(s) for syntactic language model");
@@ -141,9 +138,6 @@ Parameter::Parameter()
 	AddParam("cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
 	AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing. (default = 0)");
 	AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
-	AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
-	AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are taken from the phrase table if any. Default is false");
-	AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
 	AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
 	AddParam("description", "Source language, target language, description");
 	AddParam("max-chart-span", "maximum num. of source word chart rules can consume (default 10)");
@@ -152,7 +146,6 @@ Parameter::Parameter()
 	AddParam("source-label-overlap", "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
 	AddParam("output-hypo-score", "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
 	AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
-	AddParam("enable-online-command", "enable online commands to change some decoder parameters (default false); if enabled, use-persistent-cache is disabled");
   AddParam("phrase-pair-feature", "Source and target factors for phrase pair feature");
   AddParam("phrase-boundary-source-feature", "Source factors for phrase boundary feature");
   AddParam("phrase-boundary-target-feature", "Target factors for phrase boundary feature");
@@ -165,9 +158,6 @@ Parameter::Parameter()
   AddParam("parsing-algorithm", "Which parsing algorithm to use. 0=CYK+, 1=scope-3. (default = 0)");
   AddParam("search-algorithm", "Which search algorithm to use. 0=normal stack, 1=cube pruning, 2=cube growing, 4=stack with batched lm requests (default = 0)");
   AddParam("constraint", "Location of the file with target sentences to produce constraining the search");
-  AddParam("use-alignment-info", "Use word-to-word alignment: actually it is only used to output the word-to-word alignment. Word-to-word alignments are taken from the phrase table if any. Default is false.");
-  AddParam("print-alignment-info", "Output word-to-word alignment into the log file. Word-to-word alignments are takne from the phrase table if any. Default is false");
-  AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam("description", "Source language, target language, description");
 
@@ -179,8 +169,6 @@ Parameter::Parameter()
   AddParam("unknown-lhs", "file containing target lhs of unknown words. 1 per line: LHS prob");
   AddParam("translation-systems", "specify multiple translation systems, each consisting of an id, followed by a set of models ids, eg '0 T1 R1 L0'");
   AddParam("show-weights", "print feature weights and exit");
-  AddParam("alignment-output-file", "print output word alignments into given file");
-  AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam("start-translation-id", "Id of 1st input. Default = 0");
   AddParam("text-type", "should be one of dev/devtest/test, used for domain adaptation features");
   AddParam("output-unknowns", "Output the unknown (OOV) words to the given file, one line per sentence");
@@ -188,6 +176,16 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.                                                                                  
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
+
+  AddParam("include-segmentation-in-n-best", "include phrasal segmentation in the n-best list. default is false");
+  AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  AddParam("alignment-output-file", "print output word alignments into given file");
+  AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
+
+  AddParam("report-segmentation", "t", "report phrase segmentation in the output");
+  AddParam("print-id", "prefix translations with id. Default if false");
+
+
 }
 
 Parameter::~Parameter()
@@ -368,6 +366,11 @@ bool Parameter::Validate()
   // input file
   if (noErrorFlag && m_setting["input-file"].size() == 1) {
     noErrorFlag = FileExists(m_setting["input-file"][0]);
+    if (!noErrorFlag) {
+      stringstream errorMsg("");
+      errorMsg << endl << "Input file " << m_setting["input-file"][0] << " does not exist";
+      UserMessage::Add(errorMsg.str());
+    }
   }
   // generation tables
   if (noErrorFlag) {

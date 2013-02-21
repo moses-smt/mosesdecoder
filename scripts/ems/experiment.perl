@@ -17,7 +17,7 @@ sub trim($)
 my $host = `hostname`; chop($host);
 print STDERR "STARTING UP AS PROCESS $$ ON $host AT ".`date`;
 
-my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$VERBOSE,$IGNORE_TIME);
+my ($CONFIG_FILE,$EXECUTE,$NO_GRAPH,$CONTINUE,$FINAL,$VERBOSE,$IGNORE_TIME);
 my $SLEEP = 2;
 my $META = "$RealBin/experiment.meta";
 
@@ -38,6 +38,7 @@ die("experiment.perl -config config-file [-exec] [-no-graph]")
 			'exec' => \$EXECUTE,
 			'cluster' => \$CLUSTER,
 			'multicore' => \$MULTICORE,
+		   	'final=s' => \$FINAL,
 		   	'meta=s' => \$META,
 			'verbose' => \$VERBOSE,
 			'sleep=i' => \$SLEEP,
@@ -194,6 +195,10 @@ sub read_meta {
     while(<META>) {
 	s/\#.*$//; # strip comments
 	next if /^\s*$/;	
+	while (/\\\s*$/) {
+	   $_ .= <META>;
+           s/\s*\\\s*[\n\r]*\s+/ /;
+        }
 	if (/^\[(.+)\]\s+(\S+)/) {
 	    $module = $1;
 	    push @MODULE,$module;
@@ -242,10 +247,18 @@ sub read_meta {
 		$MULTIREF{"$module:$step"} = $2;
 	    }
 	    elsif ($1 eq "template") {
-		$TEMPLATE{"$module:$step"} = $2;
+		my $escaped_template = $2;
+		$escaped_template =~ s/^IN/EMS_IN_EMS/;
+		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
+		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
+		$TEMPLATE{"$module:$step"} = $escaped_template;
 	    }
 	    elsif ($1 eq "template-if") {
-		my @IF = split(/\s+/,$2);
+		my $escaped_template = $2;
+		$escaped_template =~ s/^IN/EMS_IN_EMS/;
+		$escaped_template =~ s/ IN(\d*)/ EMS_IN$1_EMS/g;
+		$escaped_template =~ s/ OUT/ EMS_OUT_EMS/g;
+		my @IF = split(/\s+/,$escaped_template);
 		push @{$TEMPLATE_IF{"$module:$step"}}, \@IF;
 	    }
 	    elsif ($1 eq "parallelizable") {
@@ -284,6 +297,10 @@ sub read_config {
 	$line_count++;
 	s/\#.*$//; # strip comments
 	next if /^\#/ || /^\s*$/;
+        while (/\\\s*$/) { # merge with next line
+          s/\s*\\\s*$/ /;
+          $_ .= <INI>;
+        }
 	if (/^\[(.+)\]/) {
 	    $module = $1;
 	    $ignore = /ignore/i;
@@ -316,7 +333,7 @@ sub read_config {
     # resolve parameters used in values
     my $resolve = 1;
     my $loop_count = 0;
-    while($resolve && $loop_count++ < 10) {
+    while($resolve && $loop_count++ < 100) {
 	$resolve = 0;
 	foreach my $parameter (keys %CONFIG) {
 	    foreach (@{$CONFIG{$parameter}}) {
@@ -395,7 +412,12 @@ sub log_config {
 
 sub find_steps {
     # find final output to be produced by the experiment
-    push @{$NEEDED{"REPORTING:report"}}, "final";
+    if (defined($FINAL)) {
+      push @{$NEEDED{$FINAL}}, "final";
+    }
+    else {
+      push @{$NEEDED{"REPORTING:report"}}, "final";
+    }
 
     # go through each module
     for(my $m=$#MODULE; $m>=0; $m--) {
@@ -531,14 +553,16 @@ sub find_steps_for_module {
 
 	    # if multiple potential inputs, find first that matches
 	    if ($in =~ /=OR=/) {
-		foreach my $potential_in (split(/=OR=/,$in)) {
+    my @POTENTIAL_IN = split(/=OR=/,$in);
+		foreach my $potential_in (@POTENTIAL_IN) {
 		    if (&check_producability($module,$set,$potential_in)) {
 			$in = $potential_in;
 			last;
 		    }
+
 		}
-		die("ERROR: none of potential inputs $in possible for $step")
-		    if $in =~ /=OR=/;
+		#die("ERROR: none of potential inputs $in possible for $step")
+		$in = $POTENTIAL_IN[$#POTENTIAL_IN] if $in =~ /=OR=/;
 	    }
 
 	    # define input(s) as needed by this step
@@ -947,6 +971,10 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
         }
+	elsif ($DO_STEP[$i] eq 'TRAINING:sigtest-filter-ttable' ||
+	       $DO_STEP[$i] eq 'TRAINING:sigtest-filter-reordering') {
+            &define_training_sigtest_filter($i);
+        }
 	elsif ($DO_STEP[$i] eq 'TRAINING:create-config' || $DO_STEP[$i] eq 'TRAINING:create-config-interpolated-lm') {
 	    &define_training_create_config($i);
 	}
@@ -1322,6 +1350,7 @@ sub check_if_crashed {
 			     'no such file or directory','unknown option',
 			     'died at','exit code','permission denied',
            'segmentation fault','abort',
+           'no space left on device',
            'can\'t locate', 'unrecognized option') {
 	    if (/$pattern/i) {
 		my $not_error = 0;
@@ -1635,7 +1664,6 @@ sub define_tuning_tune {
 	my $decoder_settings = &backoff_and_get("TUNING:decoder-settings");
 	$decoder_settings = "" unless $decoder_settings;
 	$decoder_settings .= " -v 0 " unless $CLUSTER && $jobs;
-  $decoder_settings .= " -use-alignment-info " unless $hierarchical ||  defined($word_alignment) && $word_alignment eq "no";
 	
 	my $tuning_settings = &backoff_and_get("TUNING:tuning-settings");
 	$tuning_settings = "" unless $tuning_settings;
@@ -1899,11 +1927,16 @@ sub define_training_build_lex_trans {
     my ($step_id) = @_;
 
     my ($lex, $aligned,$corpus) = &get_output_and_input($step_id);
+    my $baseline_alignment = &get("TRAINING:baseline-alignment");
+    my $baseline_corpus = &get("TRAINING:baseline-corpus");
+
     my $cmd = &get_training_setting(4);
     $cmd .= "-lexical-file $lex ";
     $cmd .= "-alignment-file $aligned ";
     $cmd .= "-alignment-stem ".&versionize(&long_file_name("aligned","model",""))." ";
     $cmd .= "-corpus $corpus ";
+    $cmd .= "-baseline-corpus $baseline_corpus " if defined($baseline_corpus) && defined($baseline_alignment);
+    $cmd .= "-baseline-alignment $baseline_alignment " if defined($baseline_corpus) && defined($baseline_alignment);
 
     &create_step($step_id,$cmd);
 }
@@ -1938,6 +1971,9 @@ sub define_training_extract_phrases {
     $extract_settings .= " --IncludeSentenceId " if &get("TRAINING:domain-features");
     $cmd .= "-extract-options '".$extract_settings."' " if defined($extract_settings);
 
+    my $baseline_extract = &get("TRAINING:baseline-extract");
+    $cmd .= "-baseline-extract $baseline_extract" if defined($baseline_extract);
+
     &create_step($step_id,$cmd);
 }
 
@@ -1953,9 +1989,9 @@ sub define_training_build_ttable {
     $cmd .= "-lexical-file $lex ";
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table",$phrase_table);
 
-    $cmd .=  "-phrase-word-alignment " unless (defined($word_alignment) && $word_alignment eq "no");
+    $cmd .=  "-no-word-alignment " if  defined($word_alignment) && $word_alignment eq "no";
 
-    $cmd .= &define_domain_feature_score_option($domains) if $domains;
+    $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
     &create_step($step_id,$cmd);
 }
@@ -2009,6 +2045,37 @@ sub define_training_build_custom_generation {
     &create_step($step_id,$cmd);
 }
 
+sub define_training_sigtest_filter {
+    my ($step_id) = @_;
+    my ($filtered_table, $raw_table,$suffix_array) = &get_output_and_input($step_id);
+
+    my $hierarchical_flag = &get("TRAINING:hierarchical-rule-set") ? "-h" : "";
+    my $sigtest_filter = &get("TRAINING:sigtest-filter");
+    my $input_extension = &check_backoff_and_get("TRAINING:input-extension");
+    my $output_extension = &check_backoff_and_get("TRAINING:output-extension");
+    my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
+
+    if ($DO_STEP[$step_id] =~ /reordering/) {
+      $raw_table = &get_table_name_settings("reordering-factors","reordering-table", $raw_table);
+      $filtered_table = &get_table_name_settings("reordering-factors","reordering-table", $filtered_table);
+      chop($raw_table);
+      chop($filtered_table);
+      $raw_table .= ".wbe-".&get("TRAINING:lexicalized-reordering"); # a bit of a hack
+      $filtered_table .= ".wbe-".&get("TRAINING:lexicalized-reordering");
+    }
+    else {
+      $raw_table = &get_table_name_settings("translation-factors","phrase-translation-table", $raw_table);
+      $filtered_table = &get_table_name_settings("translation-factors","phrase-translation-table", $filtered_table);
+      chop($raw_table);
+      chop($filtered_table);
+    }
+    $raw_table =~ s/\s*\-\S+\s*//; # remove switch
+    $filtered_table =~ s/\s*\-\S+\s*//; 
+    
+    my $cmd = "zcat $raw_table.gz | $moses_src_dir/contrib/sigtest-filter/filter-pt -e $suffix_array.$output_extension -f $suffix_array.$input_extension $sigtest_filter $hierarchical_flag | gzip - > $filtered_table.gz\n";
+    &create_step($step_id,$cmd);
+}
+
 sub define_training_create_config {
     my ($step_id) = @_;
 
@@ -2040,7 +2107,7 @@ sub define_training_create_config {
     $ptCmd .= ":$ptImpl" if $ptImpl>0;
     $ptCmd .= ":$numFF" if defined($numFF);
     $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
-    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)	if $reordering_table;
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table;
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
 
@@ -2144,7 +2211,7 @@ sub define_training_create_config {
 
     # sparse lexical features provide additional content for config file
     $cmd .= "-additional-ini-file $sparse_lexical_features.ini " if $sparse_lexical_features;
-    $cmd .= &define_domain_feature_score_option($domains) if $domains;
+    $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
 
     &create_step($step_id,$cmd);
 }
@@ -2300,6 +2367,7 @@ sub get_training_setting {
     my $score_settings = &get("TRAINING:score-settings");
     my $parallel = &get("TRAINING:parallel");
     my $pcfg = &get("TRAINING:use-pcfg-feature");
+    my $baseline_alignment = &get("TRAINING:baseline-alignment-model");
 
     my $xml = $source_syntax || $target_syntax;
 
@@ -2323,6 +2391,7 @@ sub get_training_setting {
     $cmd .= "-score-options '".$score_settings."' " if $score_settings;
     $cmd .= "-parallel " if $parallel;
     $cmd .= "-pcfg " if $pcfg;
+    $cmd .= "-baseline-alignment-model $baseline_alignment " if defined($baseline_alignment) && ($step == 1 || $step == 2);
 
     # factored training
     if (&backoff_and_get("TRAINING:input-factors")) {
@@ -2450,7 +2519,7 @@ sub define_tuningevaluation_filter {
     $settings = &get("TUNING:filter-settings") if $tuning_flag;
     $settings = "" unless $settings;
 
-    $binarizer .= " -alignment-info" unless !defined ($binarizer) || $hierarchical || ( defined $word_alignment && $word_alignment eq "no");
+    $binarizer .= " -no-alignment-info" if defined ($binarizer) && !$hierarchical && defined $word_alignment && $word_alignment eq "no";
         
     $settings .= " -Binarizer \"$binarizer\"" if $binarizer;
     $settings .= " --Hierarchical" if $hierarchical;
@@ -2485,13 +2554,13 @@ sub define_tuningevaluation_filter {
       $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
       $delete_config = 1;
       $cmd = &get_training_setting(9);
-      $cmd .= &define_domain_feature_score_option($domains) if $domains;
+      $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
     
       my $ptCmd = $phrase_translation_table;
       $ptCmd .= ":$ptImpl" if $ptImpl>0;
       $ptCmd .= ":$numFF" if defined($numFF);
       $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
-      $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table)
+      $cmd .= &get_table_name_settings("reordering-factors","reordering-table", $reordering_table)
 	  if $reordering_table;
       # additional settings for hierarchical models
       if (&get("TRAINING:hierarchical-rule-set")) {
@@ -2552,7 +2621,6 @@ sub define_evaluation_decode {
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
 
-    $settings .= " -use-alignment-info" unless $hierarchical || ( defined($word_alignment) && $word_alignment eq "no");
     
     # specify additional output for analysis
     if (defined($report_precision_by_coverage) && $report_precision_by_coverage eq "yes") {
@@ -2656,7 +2724,10 @@ sub define_evaluation_analysis_precision {
       my $factors = &encode_factor_definition("translation-factors",\%IN,\%OUT);
       my @FACTOR = split(/\+/,$factors);
       my @SPECIFIED_NAME;
-      if (&backoff_and_get("TRAINING:phrase-translation-table")) {
+      if (&backoff_and_get("TRAINING:sigtest-filter-phrase-translation-table")) {
+        @SPECIFIED_NAME = @{$CONFIG{"TRAINING:sigtest-filter-phrase-translation-table"}};
+      }
+      elsif (&backoff_and_get("TRAINING:phrase-translation-table")) {
         @SPECIFIED_NAME = @{$CONFIG{"TRAINING:phrase-translation-table"}};
       }
       for(my $i=0;$i<scalar(split(/\+/,$factors));$i++) {
@@ -2706,7 +2777,10 @@ sub define_evaluation_analysis_coverage {
       my $factors = &encode_factor_definition("translation-factors",\%IN,\%OUT);
       my @FACTOR = split(/\+/,$factors);
       my @SPECIFIED_NAME;
-      if (&backoff_and_get("TRAINING:phrase-translation-table")) {
+      if (&backoff_and_get("TRAINING:sigtest-filter-phrase-translation-table")) {
+        @SPECIFIED_NAME = @{$CONFIG{"TRAINING:sigtest-filter-phrase-translation-table"}};
+      }
+      elsif (&backoff_and_get("TRAINING:phrase-translation-table")) {
         @SPECIFIED_NAME = @{$CONFIG{"TRAINING:phrase-translation-table"}};
       }
       my $surface_ttable;
@@ -2855,31 +2929,17 @@ sub define_template {
 		$new_cmd .= $single_cmd."\n";
 	    }
 	    elsif ($single_cmd =~ /^.+$/) {		
-    # find IN and OUT files
-    my $in;
-    if ($single_cmd =~ /(IN)$/ ||
-        $single_cmd =~ /(IN) / ||
-        $single_cmd =~ /(IN[^\d]\S*)/) {
-      $in = $1;
-    }
-    else {
-	    die("ERROR: could not find IN in $single_cmd");
-    }
-		$single_cmd =~ /(OUT\S*)/ 
+		# find IN and OUT files
+		$single_cmd =~ /(EMS_IN_EMS\S*)/
+		  || die("ERROR: could not find EMS_IN_EMS in $single_cmd");
+		my $in = $1;
+		$single_cmd =~ /(EMS_OUT_EMS\S*)/ 
 		    || die("ERROR: could not find OUT in $single_cmd");
 		my $out = $1;
-    #  replace IN* and OUT* with %s
-    if ($single_cmd =~ /IN$/) {
-      $single_cmd =~ s/IN$/\%s/;
-    }
-    elsif ($single_cmd =~ /IN /) {
-      $single_cmd =~ s/IN /\%s /;
-    }
-    else {
-      $single_cmd =~ s/IN[^\d]\S*/\%s/;
-    }
-		$single_cmd =~ s/OUT\S*/\%s/;
-    # build tmp
+		#  replace IN and OUT with %s
+		$single_cmd =~ s/EMS_IN_EMS\S*/\%s/;
+		$single_cmd =~ s/EMS_OUT_EMS\S*/\%s/;
+		# build tmp
 		my $tmp_dir = $module;
 		$tmp_dir =~ tr/A-Z/a-z/;
 		$tmp_dir .= "/tmp.$set.$stepname.$VERSION-".($i++);
@@ -2901,30 +2961,28 @@ sub define_template {
 
     # command to be run on multiple reference translations
     if (defined($multiref)) {
-      $cmd =~ s/^(.+)IN (.+)OUT(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' IN OUT/;
-      $cmd =~ s/^(.+)OUT(.+)IN (.*)$/$multiref '$1 mref-output-file $2 mref-input-file $3' IN OUT/;
+      $cmd =~ s/^(.*)EMS_IN_EMS (.+)EMS_OUT_EMS(.*)$/$multiref '$1 mref-input-file $2 mref-output-file $3' EMS_IN_EMS EMS_OUT_EMS/;
+      $cmd =~ s/^(.+)EMS_OUT_EMS(.+)EMS_IN_EMS (.*)$/$multiref '$1 mref-output-file $2 mref-input-file $3' EMS_IN_EMS EMS_OUT_EMS/;
     }
 
     # input is array, but just specified as IN
-    if ($cmd !~ /IN1/ && (scalar @INPUT) > 1 ) {
+    if ($cmd !~ /EMS_IN1_EMS/ && (scalar @INPUT) > 1 ) {
 	my $in = join(" ",@INPUT);
-	$cmd =~ s/([^AN])IN/$1$in/;
-	$cmd =~ s/^IN/$in/;
+	$cmd =~ s/EMS_IN_EMS/$in/;
     }
     # input is defined as IN or IN0, IN1, IN2
     else {
-  if ($cmd =~ /([^ANS])IN/ && scalar(@INPUT) == 0) {
-    die("ERROR: Step $step requires input from prior steps, but none defined.");
-  }
-	$cmd =~ s/([^ANS])IN(\d+)/$1$INPUT[$2]/g;  # a bit trickier to
-	$cmd =~ s/([^ANS])IN/$1$INPUT[0]/g;        # avoid matching TRAINING, RECASING
-	$cmd =~ s/^IN(\d+)/$INPUT[$2]/g;
-	$cmd =~ s/^IN/$INPUT[0]/g; 
+	if ($cmd =~ /EMS_IN\d*_EMS/ && scalar(@INPUT) == 0) {
+	    die("ERROR: Step $step requires input from prior steps, but none defined.");
+	}
+	$cmd =~ s/EMS_IN(\d)_EMS/$INPUT[$1]/g;
+	$cmd =~ s/EMS_IN_EMS/$INPUT[0]/g;
     }
-    $cmd =~ s/OUT/$output/g;
+    $cmd =~ s/EMS_OUT_EMS/$output/g;
     $cmd =~ s/VERSION/$VERSION/g;
     print "\tcmd is $cmd\n" if $VERBOSE;
-    while ($cmd =~ /^([\S\s]*)\$([^\s\/\"\']+)([\S\s]*)$/) {
+    while ($cmd =~ /^([\S\s]*)\$\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
+           $cmd =~ /^([\S\s]*)\$([^\s\/\"\']+)([\S\s]*)$/) {
 	my ($pre,$variable,$post) = ($1,$2,$3);
 	$cmd = $pre
 	    . &check_backoff_and_get(&extend_local_name($module,$set,$variable))

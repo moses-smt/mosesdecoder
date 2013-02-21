@@ -164,6 +164,10 @@ public:
             OutputInput(out, bestHypo);
             out << "||| ";
           }
+          if (staticData.GetParam("print-id").size() && Scan<bool>(staticData.GetParam("print-id")[0]) ) {
+            out << m_source->GetTranslationId() << " ";
+          }
+
           OutputBestSurface(
             out,
             bestHypo,
@@ -515,7 +519,7 @@ int main(int argc, char** argv)
   
     // main loop over set of input sentences
     InputType* source = NULL;
-    size_t lineCount = 0;
+    size_t lineCount = staticData.GetStartTranslationId();
     while(ReadInput(*ioWrapper,staticData.GetInputType(),source)) {
       IFVERBOSE(1) {
         ResetUserTime();

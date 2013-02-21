@@ -97,6 +97,9 @@ public:
     return (p == m_hypoColl.end()) ? NULL : &(p->second.GetSortedHypotheses());
   }
 
+  //! for n-best list
+  const HypoList *GetAllSortedHypotheses() const;
+
   bool AddHypothesis(ChartHypothesis *hypo);
 
   void SortHypotheses();

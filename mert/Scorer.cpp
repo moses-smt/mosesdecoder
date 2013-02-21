@@ -5,12 +5,18 @@
 #include "Util.h"
 #include "Singleton.h"
 #include "PreProcessFilter.h"
+#include "util/tokenize_piece.hh"
 
 using namespace std;
 
 namespace MosesTuning
 {
-  
+
+namespace {
+// For tokenizing a hypothesis translation, we may encounter unknown tokens which
+// do not exist in the corresponding reference translations.
+const int kUnknownToken = -1;
+} // namespace
 
 Scorer::Scorer(const string& name, const string& config)
     : m_name(name),
@@ -48,16 +54,44 @@ void Scorer::InitConfig(const string& config) {
 }
 
 void Scorer::TokenizeAndEncode(const string& line, vector<int>& encoded) {
-  std::istringstream in(line);
-  std::string token;
-  while (in >> token) {
+  for (util::TokenIter<util::AnyCharacter, true> it(line, util::AnyCharacter(" "));
+       it; ++it) {
     if (!m_enable_preserve_case) {
-      for (std::string::iterator it = token.begin();
-           it != token.end(); ++it) {
-        *it = tolower(*it);
+      string token = it->as_string();
+      for (std::string::iterator sit = token.begin();
+           sit != token.end(); ++sit) {
+        *sit = tolower(*sit);
+      }
+      encoded.push_back(m_vocab->Encode(token));
+    } else {
+      encoded.push_back(m_vocab->Encode(it->as_string()));
+    }
+  }
+}
+
+void Scorer::TokenizeAndEncodeTesting(const string& line, vector<int>& encoded) {
+  for (util::TokenIter<util::AnyCharacter, true> it(line, util::AnyCharacter(" "));
+       it; ++it) {
+    if (!m_enable_preserve_case) {
+      string token = it->as_string();
+      for (std::string::iterator sit = token.begin();
+           sit != token.end(); ++sit) {
+        *sit = tolower(*sit);
+      }
+      mert::Vocabulary::const_iterator cit = m_vocab->find(token);
+      if (cit == m_vocab->end()) {
+        encoded.push_back(kUnknownToken);
+      } else {
+        encoded.push_back(cit->second);
+      }
+    } else {
+      mert::Vocabulary::const_iterator cit = m_vocab->find(it->as_string());
+      if (cit == m_vocab->end()) {
+        encoded.push_back(kUnknownToken);
+      } else {
+        encoded.push_back(cit->second);
       }
     }
-    encoded.push_back(m_vocab->Encode(token));
   }
 }
 

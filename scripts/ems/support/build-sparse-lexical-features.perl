@@ -58,7 +58,6 @@ foreach my $feature_spec (split(/,\s*/,$specification)) {
 open(INI,">$outfile_prefix.ini");
 print INI $ini;
 print INI "\n[report-sparse-features]\n$report\n";
-print INI "\n[use-alignment-info]\ntrue\n\n";
 close(INI);
 
 sub create_top_words {

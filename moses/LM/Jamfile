@@ -85,7 +85,7 @@ if $(with-ldhtlm) {
 }
 
 #ORLM is always compiled but needs special headers
-obj ORLM.o : ORLM.cpp ..//headers ../DynSAInclude//dynsa : : : <include>../DynSAInclude ;
+obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 
 #The factory needs the macros LM_IRST etc to know which ones to use.  
 obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclude <dependency>$(LM-LOG) ;

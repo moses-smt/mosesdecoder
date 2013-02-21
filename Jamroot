@@ -18,8 +18,8 @@
 #Compact phrase table and compact lexical reordering table
 #--with-cmph=/path/to/cmph
 #
-#Thread-caching malloc (optional):
-#--with-tcmalloc
+#Thread-caching malloc (if present, used for multi-threaded builds by default)
+#--without-tcmalloc
 #
 #REGRESSION TESTING
 #--with-regtest=/path/to/moses-reg-test-data
@@ -75,9 +75,9 @@ include $(TOP)/jam-files/sanity.jam ;
 boost 103600 ;
 external-lib z ;
 
-if [ option.get "with-tcmalloc" : : "yes" ] {
-  external-lib tcmalloc ;
-  requirements += <library>tcmalloc ;
+if ! [ option.get "without-tcmalloc" : : "yes" ] && [ test_library "tcmalloc_minimal" ] {
+  external-lib tcmalloc_minimal ;
+  requirements += <threading>multi:<library>tcmalloc_minimal ;
 }
 
 if [ option.get "enable-mpi" : : "yes" ] {
@@ -111,6 +111,7 @@ project : requirements
   <threading>multi:<library>boost_thread
   <define>_FILE_OFFSET_BITS=64 <define>_LARGE_FILES
   $(requirements)
+  <include>.
   ;
 
 #Add directories here if you want their incidental targets too (i.e. tests).

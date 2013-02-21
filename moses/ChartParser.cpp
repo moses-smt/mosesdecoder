@@ -91,7 +91,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetScore(m_system.GetWordPenaltyProducer(), wordPenaltyScore);
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
-      
+      targetPhrase->SetAlignmentInfo("0-0");
+
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     } // for (iterLHS
@@ -114,7 +115,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
-      
+
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     }

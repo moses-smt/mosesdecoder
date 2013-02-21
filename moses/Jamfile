@@ -3,7 +3,7 @@ path-constant FACTOR-LOG : bin/factor.log ;
 update-if-changed $(FACTOR-LOG) $(max-factors) ;
 max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
-alias headers : ../util//kenutil : : : <include>. $(max-factors) ;
+alias headers : ../util//kenutil : : : $(max-factors) ;
 
 alias ThreadPool : ThreadPool.cpp ;
 
@@ -27,18 +27,18 @@ if $(have-clock[2]) = 0 {
 lib moses :
 [ glob 
   *.cpp
-  DynSAInclude/*.cpp
-  Scope3Parser/*.cpp
-  CYKPlusParser/*.cpp
-  RuleTable/*.cpp
-  fuzzy-match/*.cpp
-  Incremental/*.cpp
+  TranslationModel/*.cpp
+  TranslationModel/fuzzy-match/*.cpp
+  TranslationModel/DynSAInclude/*.cpp
+  TranslationModel/RuleTable/*.cpp
+  TranslationModel/Scope3Parser/*.cpp
+  TranslationModel/CYKPlusParser/*.cpp
 : #exceptions
   ThreadPool.cpp
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp
 ]
-headers LM//LM CompactPT//CompactPT synlm ThreadPool rt
+headers LM//LM TranslationModel/CompactPT//CompactPT synlm ThreadPool rt
 ..//search ../util/double-conversion//double-conversion ..//z ../OnDiskPt//OnDiskPt ;
 
 alias headers-to-install : [ glob-tree *.h ] ;

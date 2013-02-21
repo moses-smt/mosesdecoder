@@ -83,16 +83,16 @@ libmoses_la_HEADERS = \
         PartialTranslOptColl.h \
         Phrase.h \
         PhraseBoundaryFeature.h \
-        PhraseDictionary.h \
+        moses/TranslationModel/PhraseDictionary.h \
         PhraseDictionaryALSuffixArray.h \
-        PhraseDictionaryDynSuffixArray.h \
-        PhraseDictionaryMemory.h \
+        moses/TranslationModel/PhraseDictionaryDynSuffixArray.h \
+        moses/TranslationModel/PhraseDictionaryMemory.h \
         PhraseDictionarySCFG.h \
-        PhraseDictionaryNode.h \
+        moses/TranslationModel/PhraseDictionaryNode.h \
         PhraseDictionaryNodeSCFG.h \
         PhraseDictionaryOnDisk.h \
-        PhraseDictionaryTree.h \
-        PhraseDictionaryTreeAdaptor.h \
+        moses/TranslationModel/PhraseDictionaryTree.h \
+        moses/TranslationModel/PhraseDictionaryTreeAdaptor.h \
         PhraseLengthFeature.h \
         PhrasePairFeature.h \
         PrefixTree.h \

@@ -54,10 +54,11 @@ bool SentenceAlignment::processSourceSentence(const char * sourceString, int, bo
   return true;
 }
 
-bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID, bool boundaryRules)
+bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], char weightString[], int sentenceID, bool boundaryRules)
 {
   using namespace std;
   this->sentenceID = sentenceID;
+  this->weightString = std::string(weightString);
 
   // process sentence strings and store in target and source members.
   if (!processTargetSentence(targetString, sentenceID, boundaryRules)) {

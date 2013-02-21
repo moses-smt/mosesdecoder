@@ -4,8 +4,10 @@
 #include <boost/thread/thread.hpp>
 #endif 
 
-#include "TypeDef.h"
-#include "CompactPT/PhraseTableCreator.h"
+#include "moses/TypeDef.h"
+#include "moses/TranslationModel/CompactPT/PhraseTableCreator.h"
+
+#include "util/file.hh"
 
 using namespace Moses;
 
@@ -14,8 +16,9 @@ void printHelp(char **argv) {
             "  options: \n"
             "\t-in  string       -- input table file name\n"
             "\t-out string       -- prefix of binary table file\n"
+            "\t-T string         -- path to temporary directory (uses /tmp by default)\n"
             "\t-nscores int      -- number of score components in phrase table\n"
-            "\t-alignment-info   -- include alignment info in the binary phrase table\n"
+            "\t-no-alignment-info   -- do not include alignment info in the binary phrase table\n"
 #ifdef WITH_THREADS
             "\t-threads int|all  -- number of threads used for conversion\n"
 #endif 
@@ -49,12 +52,13 @@ int main(int argc, char **argv) {
     
   std::string inFilePath;
   std::string outFilePath("out");
+  std::string tempfilePath;
   PhraseTableCreator::Coding coding = PhraseTableCreator::PREnc;
   
   size_t numScoreComponent = 5;  
   size_t orderBits = 10;
   size_t fingerprintBits = 16;
-  bool useAlignmentInfo = false;
+  bool useAlignmentInfo = true;
   bool multipleScoreTrees = true;
   size_t quantize = 0;
   size_t maxRank = 100;
@@ -76,6 +80,11 @@ int main(int argc, char **argv) {
     else if("-out" == arg && i+1 < argc) {
       ++i;
       outFilePath = argv[i];
+    }
+    else if("-T" == arg && i+1 < argc) {
+      ++i;
+      tempfilePath = argv[i];
+      util::NormalizeTempPrefix(tempfilePath);
     }
     else if("-encoding" == arg && i+1 < argc) {
       ++i;
@@ -103,8 +112,8 @@ int main(int argc, char **argv) {
       sortScoreIndex = atoi(argv[i]);
       sortScoreIndexSet = true;
     }
-    else if("-alignment-info" == arg) {
-      useAlignmentInfo = true;
+    else if("-no-alignment-info" == arg) {
+      useAlignmentInfo = false;
     }
     else if("-landmark" == arg && i+1 < argc) {
       ++i;
@@ -166,7 +175,8 @@ int main(int argc, char **argv) {
   if(outFilePath.rfind(".minphr") != outFilePath.size() - 7)
     outFilePath += ".minphr";
   
-  PhraseTableCreator(inFilePath, outFilePath, numScoreComponent, sortScoreIndex,
+  PhraseTableCreator(inFilePath, outFilePath, tempfilePath,
+                     numScoreComponent, sortScoreIndex,
                      coding, orderBits, fingerprintBits,
                      useAlignmentInfo, multipleScoreTrees,
                      quantize, maxRank, warnMe

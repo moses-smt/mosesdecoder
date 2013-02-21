@@ -45,7 +45,7 @@ foreach my $lm (@LM) {
     open(LM,$lm) || die("ERROR: could not find language model file '$lm'");
   }
   while(<LM>) {
-    $lm_order = $1 if /ngram (\d+)/;
+    $lm_order = $1 if /ngram\s+(\d+)/;
     last if /1-grams/;
   }
   close(LM);

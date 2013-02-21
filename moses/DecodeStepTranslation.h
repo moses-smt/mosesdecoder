@@ -23,7 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_DecodeStepTranslation_h
 
 #include "DecodeStep.h"
-#include "PhraseDictionary.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {

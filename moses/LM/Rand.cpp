@@ -17,23 +17,22 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include "util/check.hh"
 #include <limits>
 #include <iostream>
 #include <fstream>
 #include <string>
 #include <vector>
-#include "Factor.h"
-#include "Util.h"
-#include "LM/SingleFactor.h"
+
+#include "SingleFactor.h"
 #include "RandLM.h"
-
-
-#include "LM/Rand.h"
-#include "FactorCollection.h"
-#include "Phrase.h"
-#include "InputFileStream.h"
-#include "StaticData.h"
+#include "Rand.h"
+#include "moses/Factor.h"
+#include "moses/Util.h"
+#include "moses/FactorCollection.h"
+#include "moses/Phrase.h"
+#include "moses/InputFileStream.h"
+#include "moses/StaticData.h"
+#include "util/check.hh"
 
 
 namespace Moses

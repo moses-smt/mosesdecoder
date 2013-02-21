@@ -18,7 +18,7 @@ class Vocabulary;
 
 namespace MosesTuning
 {
-  
+
 class PreProcessFilter;
 class ScoreStats;
 
@@ -83,7 +83,7 @@ class Scorer
    * Calculate the score of the sentences corresponding to the list of candidate
    * indices. Each index indicates the 1-best choice from the n-best list.
    */
-  float score(const candidates_t& candidates) const; 
+  float score(const candidates_t& candidates) const;
 
   const std::string& getName() const {
     return m_name;
@@ -165,6 +165,11 @@ class Scorer
    */
   void TokenizeAndEncode(const std::string& line, std::vector<int>& encoded);
 
+  /*
+   * Tokenize functions for testing only.
+   */
+  void TokenizeAndEncodeTesting(const std::string& line, std::vector<int>& encoded);
+
   /**
    * Every inherited scorer should call this function for each sentence
    */
@@ -176,7 +181,7 @@ class Scorer
 };
 
 namespace {
-  
+
   //regularisation strategies
   inline float score_min(const statscores_t& scores, size_t start, size_t end)
   {
@@ -188,7 +193,7 @@ namespace {
     }
     return min;
   }
-  
+
   inline float score_average(const statscores_t& scores, size_t start, size_t end)
   {
     if ((end - start) < 1) {
@@ -199,10 +204,10 @@ namespace {
     for (size_t j = start; j < end; ++j) {
       total += scores[j];
     }
-    
+
     return total / (end - start);
   }
-  
+
 } // namespace
 
 }

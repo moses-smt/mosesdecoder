@@ -46,6 +46,7 @@ class PhraseExtractionOptions {
   bool includeSentenceIdFlag; //include sentence id in extract file
   bool onlyOutputSpanInfo;
   bool gzOutput;
+  std::string instanceWeightsFile; //weights for each sentence
 
 public:  
   PhraseExtractionOptions(const int initmaxPhraseLength):
@@ -99,7 +100,11 @@ public:
     } 
     void initGzOutput (const bool initgzOutput){
         gzOutput= initgzOutput;
-    } 
+    }
+    void initInstanceWeightsFile(const char* initInstanceWeightsFile) {
+      instanceWeightsFile = std::string(initInstanceWeightsFile);
+    }
+     
     // functions for getting values
     bool isAllModelsOutputFlag() const {
         return allModelsOutputFlag;
@@ -136,7 +141,10 @@ public:
     } 
     bool isGzOutput () const {
         return gzOutput;
-   } 
+    }
+    std::string getInstanceWeightsFile() const {
+      return instanceWeightsFile;
+    }
 };
 
 }

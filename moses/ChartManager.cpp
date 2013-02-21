@@ -211,19 +211,19 @@ void ChartManager::CalcNBest(size_t count, ChartTrellisPathList &ret,bool onlyDi
   ChartTrellisDetourQueue contenders(popLimit);
 
   // Get all complete translations
-  Word *w = new Word();
-  //w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "TOP", true);
-  w->CreateFromString(Output, staticData.GetOutputFactorOrder(), "S", true);
-  const HypoList topHypos = *(lastCell.GetSortedHypotheses(*w));
+  const HypoList *topHypos = lastCell.GetAllSortedHypotheses();
   
   // Create a ChartTrellisDetour for each complete translation and add it to the queue
-  for (size_t i=0; i<topHypos.size(); ++i) {
-	  const ChartHypothesis &hypo = *(topHypos[i]);
+  HypoList::const_iterator iter;
+  for (iter = topHypos->begin(); iter != topHypos->end(); ++iter) {
+	  const ChartHypothesis &hypo = **iter;
 	  boost::shared_ptr<ChartTrellisPath> basePath(new ChartTrellisPath(hypo));
 	  ChartTrellisDetour *detour = new ChartTrellisDetour(basePath, basePath->GetFinalNode(), hypo);
 	  contenders.Push(detour);
   }
  	
+  delete topHypos;
+
   // Record the output phrase if distinct translations are required.
   set<Phrase> distinctHyps;
   

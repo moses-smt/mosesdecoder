@@ -44,7 +44,8 @@ std::auto_ptr<ParseTree> XmlTreeParser::Parse(const std::string &line)
   m_line = line;
   m_tree.Clear();
   try {
-    if (!ProcessAndStripXMLTags(m_line, m_tree, m_labelSet, m_topLabelSet)) {
+    if (!ProcessAndStripXMLTags(m_line, m_tree, m_labelSet, m_topLabelSet,
+                                false)) {
       throw Exception("");
     }
   } catch (const XmlException &e) {

@@ -50,25 +50,39 @@ BleuScorer::BleuScorer(const string& config)
 BleuScorer::~BleuScorer() {}
 
 size_t BleuScorer::CountNgrams(const string& line, NgramCounts& counts,
-                               unsigned int n)
+                               unsigned int n, bool is_testing)
 {
   assert(n > 0);
   vector<int> encoded_tokens;
-  TokenizeAndEncode(line, encoded_tokens);
+
+  // When performing tokenization of a hypothesis translation, we don't have
+  // to update the Scorer's word vocabulary. However, the tokenization of
+  // reference translations requires modifying the vocabulary, which means
+  // this procedure might be slower than the tokenization the hypothesis
+  // translation.
+  if (is_testing) {
+    TokenizeAndEncodeTesting(line, encoded_tokens);
+  } else {
+    TokenizeAndEncode(line, encoded_tokens);
+  }
+  const size_t len = encoded_tokens.size();
+  vector<int> ngram;
+
   for (size_t k = 1; k <= n; ++k) {
     //ngram order longer than sentence - no point
-    if (k > encoded_tokens.size()) {
+    if (k > len) {
       continue;
     }
-    for (size_t i = 0; i < encoded_tokens.size()-k+1; ++i) {
-      vector<int> ngram;
-      for (size_t j = i; j < i+k && j < encoded_tokens.size(); ++j) {
+    for (size_t i = 0; i < len - k + 1; ++i) {
+      ngram.clear();
+      ngram.reserve(len);
+      for (size_t j = i; j < i+k && j < len; ++j) {
         ngram.push_back(encoded_tokens[j]);
       }
       counts.Add(ngram);
     }
   }
-  return encoded_tokens.size();
+  return len;
 }
 
 void BleuScorer::setReferenceFiles(const vector<string>& referenceFiles)
@@ -146,7 +160,7 @@ void BleuScorer::prepareStats(size_t sid, const string& text, ScoreStats& entry)
   // stats for this line
   vector<ScoreStatsType> stats(kBleuNgramOrder * 2);
   string sentence = preprocessSentence(text);
-  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder);
+  const size_t length = CountNgrams(sentence, testcounts, kBleuNgramOrder, true);
 
   const int reference_len = CalcReferenceLength(sid, length);
   stats.push_back(reference_len);
@@ -223,15 +237,19 @@ void BleuScorer::DumpCounts(ostream* os,
   *os << endl;
 }
 
-float sentenceLevelBleuPlusOne(const vector<float>& stats) {
+float smoothedSentenceBleu
+  (const std::vector<float>& stats, float smoothing, bool smoothBP) {
+
   CHECK(stats.size() == kBleuNgramOrder * 2 + 1);
 
   float logbleu = 0.0;
   for (int j = 0; j < kBleuNgramOrder; j++) {
-    logbleu += log(stats[2 * j] + 1.0) - log(stats[2 * j + 1] + 1.0);
+    logbleu += log(stats[2 * j] + smoothing) - log(stats[2 * j + 1] + smoothing);
   }
   logbleu /= kBleuNgramOrder;
-  const float brevity = 1.0 - stats[(kBleuNgramOrder * 2)] / stats[1];
+  const float reflength = stats[(kBleuNgramOrder * 2)]  + 
+    (smoothBP ? smoothing : 0.0f);
+  const float brevity = 1.0 - reflength / stats[1];
 
   if (brevity < 0.0) {
     logbleu += brevity;
@@ -320,26 +338,12 @@ vector<float> BleuScorer::ScoreNbestList(const string& scoreFile, const string& 
 	vector<float> bleuScores;
 	for (size_t i=0; i < hypotheses.size(); ++i) {
 		pair<size_t,size_t> translation = hypotheses[i];
-		float bleu = sentenceLevelBleuPlusOne(scoreDataIters[translation.first]->operator[](translation.second));
+		float bleu = smoothedSentenceBleu(scoreDataIters[translation.first]->operator[](translation.second));
 		bleuScores.push_back(bleu);
 	}
 	return bleuScores;
 }
 
-float BleuScorer::sentenceLevelBleuPlusOne(const vector<float>& stats) {
-	float logbleu = 0.0;
-	const unsigned int bleu_order = 4;
-	for (unsigned int j=0; j<bleu_order; j++) {
-		//cerr << (stats.get(2*j)+1) << "/" << (stats.get(2*j+1)+1) << " ";
-		logbleu += log(stats[2*j]+1) - log(stats[2*j+1]+1);
-	}
-	logbleu /= bleu_order;
-	float brevity = 1.0 - (float)stats[(bleu_order*2)]/stats[1];
-	if (brevity < 0.0) {
-		logbleu += brevity;
-	}
-	//cerr << brevity << " -> " << exp(logbleu) << endl;
-	return exp(logbleu);
-}
+
 
 }
