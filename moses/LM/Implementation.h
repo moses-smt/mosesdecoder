@@ -68,11 +68,6 @@ public:
 
   virtual ~LanguageModelImplementation() {}
 
-  /* whether this LM can be used on a particular phrase.
-   * Should return false if phrase size = 0 or factor types required don't exists
-   */
-  virtual bool Useable(const Phrase &phrase) const = 0;
-
   /* get score of n-gram. n-gram should not be bigger than m_nGramOrder
    * Specific implementation can return State and len data to be used in hypothesis pruning
    * \param contextFactor n-gram to be scored
