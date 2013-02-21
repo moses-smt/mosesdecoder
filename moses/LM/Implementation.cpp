@@ -80,7 +80,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
 
   vector<const Word*> contextFactor;
   contextFactor.reserve(GetNGramOrder());
-  std::auto_ptr<FFState> state(NewState((phrase.GetWord(0) == GetSentenceStartArray()) ?
+  std::auto_ptr<FFState> state(NewState((phrase.GetWord(0) == GetSentenceStartWord()) ?
                                GetBeginSentenceState() : GetNullContextState()));
   size_t currPos = 0;
   while (currPos < phraseSize) {
@@ -97,7 +97,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
       ShiftOrPush(contextFactor, word);
       CHECK(contextFactor.size() <= GetNGramOrder());
 
-      if (word == GetSentenceStartArray()) {
+      if (word == GetSentenceStartWord()) {
         // do nothing, don't include prob for <s> unigram
         if (currPos != 0) {
           std::cerr << "Either your data contains <s> in a position other than the first word or your language model is missing <s>.  Did you build your ARPA using IRSTLM and forget to run add-start-end.sh?" << std::endl;
@@ -145,7 +145,7 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
     if (currPos >= 0)
       contextFactor[index++] = &hypo.GetWord(currPos);
     else {
-      contextFactor[index++] = &GetSentenceStartArray();
+      contextFactor[index++] = &GetSentenceStartWord();
     }
   }
   FFState *res = NewState(ps);
@@ -168,12 +168,12 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
   // end of sentence
   if (hypo.IsSourceCompleted()) {
     const size_t size = hypo.GetSize();
-    contextFactor.back() = &GetSentenceEndArray();
+    contextFactor.back() = &GetSentenceEndWord();
 
     for (size_t i = 0 ; i < GetNGramOrder() - 1 ; i ++) {
       int currPos = (int)(size - GetNGramOrder() + i + 1);
       if (currPos < 0)
-        contextFactor[i] = &GetSentenceStartArray();
+        contextFactor[i] = &GetSentenceStartWord();
       else
         contextFactor[i] = &hypo.GetWord((size_t)currPos);
     }
@@ -407,7 +407,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
       ShiftOrPush(contextFactor, word);
 
       // beginning of sentence symbol <s>? -> just update state
-      if (word == GetSentenceStartArray())
+      if (word == GetSentenceStartWord())
       {        
         CHECK(phrasePos == 0);
         delete lmState;

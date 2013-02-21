@@ -74,8 +74,8 @@ public:
     // sentence markers
     for (size_t index = 0 ; index < factorTypes.size() ; ++index) {
       FactorType factorType = factorTypes[index];
-      m_sentenceStartArray[factorType] 	= factorCollection.AddFactor(Output, factorType, BOS_);
-      m_sentenceEndArray[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
+      m_sentenceStartWord[factorType] 	= factorCollection.AddFactor(Output, factorType, BOS_);
+      m_sentenceEndWord[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
     }
 
     return m_lmImpl->Load(filePath, m_implFactor, nGramOrder);

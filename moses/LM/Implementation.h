@@ -58,7 +58,7 @@ class LanguageModelImplementation : public LanguageModel
 protected:
   std::string	m_filePath; //! for debugging purposes
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
-  Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM.
+  Word m_sentenceStartWord, m_sentenceEndWord; //! Contains factors which represents the beging and end words for this LM.
   //! Usually <s> and </s>
 
   LanguageModelImplementation(const std::string& description, const std::string &line)
@@ -106,11 +106,11 @@ public:
   }
 
   //! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
-  const Word &GetSentenceStartArray() const {
-    return m_sentenceStartArray;
+  const Word &GetSentenceStartWord() const {
+    return m_sentenceStartWord;
   }
-  const Word &GetSentenceEndArray() const {
-    return m_sentenceEndArray;
+  const Word &GetSentenceEndWord() const {
+    return m_sentenceEndWord;
   }
 
   //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading

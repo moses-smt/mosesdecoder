@@ -240,13 +240,13 @@ void LanguageModelParallelBackoff::CreateFactors()
   // sentence markers
   for (size_t index = 0 ; index < m_factorTypesOrdered.size() ; ++index) {
     FactorType factorType = m_factorTypesOrdered[index];
-    m_sentenceStartArray[index] 	= factorCollection.AddFactor(Output, factorType, BOS_);
+    m_sentenceStartWord[index] 	= factorCollection.AddFactor(Output, factorType, BOS_);
 
 
-    m_sentenceEndArray[index] 		= factorCollection.AddFactor(Output, factorType, EOS_);
+    m_sentenceEndWord[index] 		= factorCollection.AddFactor(Output, factorType, EOS_);
 
-    factorIdStart = m_sentenceStartArray[index]->GetId();
-    factorIdEnd = m_sentenceEndArray[index]->GetId();
+    factorIdStart = m_sentenceStartWord[index]->GetId();
+    factorIdEnd = m_sentenceEndWord[index]->GetId();
 
     /*for (size_t i = 0; i < 10; i++)
     {
@@ -293,9 +293,9 @@ LMResult LanguageModelParallelBackoff::GetValueForgotState(const std::vector<con
         widMatrix[i][j + 1] = GetLmID(factor, j);
     }
 
-    if (widMatrix[i][1] == GetLmID(m_sentenceStartArray[0], 0) ) {
+    if (widMatrix[i][1] == GetLmID(m_sentenceStartWord[0], 0) ) {
       widMatrix[i][0] = m_wtbid;
-    } else if (widMatrix[i][1] == GetLmID(m_sentenceEndArray[0], 0 )) {
+    } else if (widMatrix[i][1] == GetLmID(m_sentenceEndWord[0], 0 )) {
       widMatrix[i][0] = m_wteid;
     } else {
       widMatrix[i][0] = m_wtid;
