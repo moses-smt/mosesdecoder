@@ -13,7 +13,7 @@ namespace Moses {
 using namespace std;
 
 TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
-:StatelessFeatureFunction("twi", ScoreProducer::unlimited, line),
+:StatelessFeatureFunction("twi", FeatureFunction::unlimited, line),
 m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;

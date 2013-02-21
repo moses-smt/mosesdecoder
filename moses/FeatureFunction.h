@@ -2,8 +2,8 @@
 #define moses_FeatureFunction_h
 
 #include <vector>
-
-#include "ScoreProducer.h"
+#include <set>
+#include <string>
 
 namespace Moses
 {
@@ -72,12 +72,22 @@ public:
 
 /** base class for all feature functions.
  * @todo is this for pb & hiero too?
- * @todo what's the diff between FeatureFunction and ScoreProducer?
  */
-class FeatureFunction: public ScoreProducer
+class FeatureFunction
 {
+protected:
   /**< all the score producers in this run */
   static std::vector<FeatureFunction*> m_producers;
+
+  std::string m_description, m_argLine;
+  std::vector<std::vector<std::string> > m_args;
+  bool m_reportSparseFeatures;
+  size_t m_numScoreComponents;
+  //In case there's multiple producers with the same description
+  static std::multiset<std::string> description_counts;
+
+  void ParseLine(const std::string& description, const std::string &line);
+  size_t FindNumFeatures();
 
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() { return m_producers; }
@@ -87,7 +97,39 @@ public:
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
   
-  float GetSparseProducerWeight() const { return 1; }	
+  static const size_t unlimited;
+
+  static void ResetDescriptionCounts() {
+    description_counts.clear();
+  }
+
+  //! returns the number of scores that a subclass produces.
+  //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
+  //! sparse features returned unlimited
+  size_t GetNumScoreComponents() const {return m_numScoreComponents;}
+
+  //! returns a string description of this producer
+  const std::string& GetScoreProducerDescription() const
+  { return m_description; }
+
+  void SetSparseFeatureReporting() { m_reportSparseFeatures = true; }
+  bool GetSparseFeatureReporting() const { return m_reportSparseFeatures; }
+
+  virtual float GetSparseProducerWeight() const { return 1; }
+
+  virtual bool IsTuneable() const { return true; }
+
+  //!
+  virtual void InitializeForInput(InputType const& source)
+  {}
+
+  // clean up temporary memory, called after processing each sentence
+  virtual void CleanUpAfterSentenceProcessing(const InputType& source)
+  {}
+
+  const std::string &GetArgLine() const
+  { return m_argLine; }
+
 };
 
 /** base class for all stateless feature functions.

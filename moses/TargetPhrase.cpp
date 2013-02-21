@@ -92,7 +92,7 @@ void TargetPhrase::SetScore(float score)
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
 	//TODO: is this a good idea?
   const StaticData &staticData = StaticData::Instance();
-	const ScoreProducer* prod = staticData.GetPhraseDictionaries()[0];
+	const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
 	
 	vector<float> weights = staticData.GetWeights(prod);
 
@@ -117,7 +117,7 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
 {
 	//we use an existing score producer to figure out information for score setting (number of scores and weights)
   const StaticData &staticData = StaticData::Instance();
-  const ScoreProducer* prod = staticData.GetPhraseDictionaries()[0];
+  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
 
 	vector<float> weights = StaticData::Instance().GetWeights(prod);
 	
@@ -130,7 +130,7 @@ void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &score
 	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,StaticData::Instance().GetWeightWordPenalty(),lmList);
 }
 
-void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
+void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
                             const Scores &scoreVector,
                             const ScoreComponentCollection &sparseScoreVector,
                             const vector<float> &weightT,
@@ -183,7 +183,7 @@ void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
                 - (this->GetSize() * weightWP);	 // word penalty
 }
 
-void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
+void TargetPhrase::SetScoreChart(const FeatureFunction* translationScoreProducer,
                                  const Scores &scoreVector
                                  ,const vector<float> &weightT
                                  ,const LMList &languageModels
@@ -237,7 +237,7 @@ void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
   m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
 }
 
-void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
+void TargetPhrase::SetScore(const FeatureFunction* producer, const Scores &scoreVector)
 {
   // used when creating translations of unknown words (chart decoding)
   m_scoreBreakdown.Assign(producer, scoreVector);
@@ -245,7 +245,7 @@ void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVe
 }
 
 
-void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
+void TargetPhrase::SetWeights(const FeatureFunction* translationScoreProducer, const vector<float> &weightT)
 {
   // calling this function in case of confusion net input is undefined
   CHECK(StaticData::Instance().GetInputType()==SentenceInput);

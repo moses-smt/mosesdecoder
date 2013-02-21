@@ -38,7 +38,7 @@ namespace Moses
 {
 
 class LMList;
-class ScoreProducer;
+class FeatureFunction;
 class TranslationSystem;
 class WordPenaltyProducer;
 
@@ -83,26 +83,26 @@ public:
    *
    * @TODO should this be part of the constructor?  If not, add explanation why not.
   	*/
-  void SetScore(const ScoreProducer* translationScoreProducer,
+  void SetScore(const FeatureFunction* translationScoreProducer,
                 const Scores &scoreVector,
                 const ScoreComponentCollection &sparseScoreVector,
                 const std::vector<float> &weightT,
                 float weightWP,
                 const LMList &languageModels);
 
-  void SetScoreChart(const ScoreProducer* translationScoreProducer
+  void SetScoreChart(const FeatureFunction* translationScoreProducer
                      ,const Scores &scoreVector
                      ,const std::vector<float> &weightT
                      ,const LMList &languageModels
                      ,const WordPenaltyProducer* wpProducer);
 
   // used by for unknown word proc in chart decoding
-  void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
+  void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
 
 
   // used when creating translations of unknown words:
   void ResetScore();
-  void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
+  void SetWeights(const FeatureFunction*, const std::vector<float> &weightT);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
   // used for translation step

@@ -9,6 +9,7 @@
 #include "Manager.h"
 #include "TranslationOption.h"
 
+using namespace std;
 
 namespace Moses
 {
@@ -71,24 +72,85 @@ const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
   return m_targetPhrase;
 }
 
+multiset<string> FeatureFunction::description_counts;
+const size_t FeatureFunction::unlimited = -1;
+
 std::vector<FeatureFunction*> FeatureFunction::m_producers;
 std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
 std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_statefulFFs;
 
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
-: ScoreProducer(description, line)
+: m_reportSparseFeatures(false)
 {
+  ParseLine(description, line);
+  m_numScoreComponents = FindNumFeatures();
+  size_t index = description_counts.count(description);
+
+  ostringstream dstream;
+  dstream << description;
+  dstream << index;
+
+  description_counts.insert(description);
+
+  m_description = dstream.str();
+  if (m_numScoreComponents != unlimited)
+  {
+    ScoreComponentCollection::RegisterScoreProducer(this);
+  }
+
   m_producers.push_back(this);
 }
 
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-: ScoreProducer(description, numScoreComponents, line)
+: m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {
+  ParseLine(description, line);
+  size_t index = description_counts.count(description);
+
+  ostringstream dstream;
+  dstream << description;
+  dstream << index;
+
+  description_counts.insert(description);
+
+  m_description = dstream.str();
+  if (numScoreComponents != unlimited)
+  {
+    ScoreComponentCollection::RegisterScoreProducer(this);
+  }
+
   m_producers.push_back(this);
 }
 
 
 FeatureFunction::~FeatureFunction() {}
+
+void FeatureFunction::ParseLine(const std::string& description, const std::string &line)
+{
+  cerr << "line=" << line << endl;
+  vector<string> toks = Tokenize(line);
+
+  CHECK(toks.size());
+  //CHECK(toks[0] == description);
+
+  for (size_t i = 1; i < toks.size(); ++i) {
+    vector<string> args = Tokenize(toks[i], "=");
+    CHECK(args.size() == 2);
+    m_args.push_back(args);
+  }
+}
+
+size_t FeatureFunction::FindNumFeatures()
+{
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    if (m_args[i][0] == "num-features") {
+      size_t ret = Scan<size_t>(m_args[i][1]);
+      m_args.erase(m_args.begin() + i);
+      return ret;
+    }
+  }
+  abort();
+}
 
 StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, const std::string &line)
 :FeatureFunction(description, line)

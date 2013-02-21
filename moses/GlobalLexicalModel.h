@@ -9,7 +9,6 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"

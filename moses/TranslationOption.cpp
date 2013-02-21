@@ -53,7 +53,7 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
   , m_futureScore(0)
 {
   if (up) {
-		const ScoreProducer *scoreProducer = (const ScoreProducer *)up; // not sure why none of the c++ cast works
+		const FeatureFunction *scoreProducer = (const FeatureFunction *)up; // not sure why none of the c++ cast works
 		vector<float> score(1);
 		score[0] = FloorScore(-numeric_limits<float>::infinity());
 		m_scoreBreakdown.Assign(scoreProducer, score);
@@ -131,7 +131,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
-void TranslationOption::CacheScores(const ScoreProducer &producer, const Scores &score)
+void TranslationOption::CacheScores(const FeatureFunction &producer, const Scores &score)
 {
   m_cachedScores[&producer] = score;
 }

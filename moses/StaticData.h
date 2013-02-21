@@ -415,7 +415,7 @@ public:
     return m_outputWordGraph;
   }
 
-  //! Sets the global score vector weights for a given ScoreProducer.
+  //! Sets the global score vector weights for a given FeatureFunction.
   InputTypeEnum GetInputType() const {
     return m_inputType;
   }
@@ -457,16 +457,16 @@ public:
   }
 
   //Weight for a single-valued feature
-  float GetWeight(const ScoreProducer* sp) const {
+  float GetWeight(const FeatureFunction* sp) const {
     return m_allWeights.GetScoreForProducer(sp);
   }
 
   //Weight for a single-valued feature
-  void SetWeight(const ScoreProducer* sp, float weight) ;
+  void SetWeight(const FeatureFunction* sp, float weight) ;
 
 
   //Weights for feature with fixed number of values
-  std::vector<float> GetWeights(const ScoreProducer* sp) const {
+  std::vector<float> GetWeights(const FeatureFunction* sp) const {
     return m_allWeights.GetScoresForProducer(sp);
   }
 
@@ -475,7 +475,7 @@ public:
   }
   
   //Weights for feature with fixed number of values
-  void SetWeights(const ScoreProducer* sp, const std::vector<float>& weights);
+  void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
   bool GetDistinctNBest() const {
     return m_onlyDistinctNBest;

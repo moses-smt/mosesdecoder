@@ -742,13 +742,13 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
   }
 }
 
-void StaticData::SetWeight(const ScoreProducer* sp, float weight)
+void StaticData::SetWeight(const FeatureFunction* sp, float weight)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weight);
 }
 
-void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& weights)
+void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>& weights)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
@@ -757,7 +757,7 @@ void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& w
 StaticData::~StaticData()
 {
   /*
-  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
     ScoreProducer *ff = producers[i];
     cerr << endl << "Destroying" << ff << endl;

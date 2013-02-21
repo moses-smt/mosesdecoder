@@ -1960,7 +1960,7 @@ void applyPerFeatureLearningRates(vector<vector<ScoreComponentCollection> > &fea
       featureValues[i][j].MultiplyEqualsBackoff(featureLearningRates, sparse_r0);
 }
 
-void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
+void scaleFeatureScore(FeatureFunction *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
   string name = sp->GetScoreProducerDescription();
 
   // scale down score
@@ -1974,7 +1974,7 @@ void scaleFeatureScore(ScoreProducer *sp, float scaling_factor, vector<vector<Sc
   }
 }
 
-void scaleFeatureScores(ScoreProducer *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
+void scaleFeatureScores(FeatureFunction *sp, float scaling_factor, vector<vector<ScoreComponentCollection> > &featureValues, size_t rank, size_t epoch) {
   string name = sp->GetScoreProducerDescription();
 
   // scale down score
