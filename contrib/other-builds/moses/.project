@@ -1227,6 +1227,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Base.h</locationURI>
 		</link>
 		<link>
+			<name>LM/ChartState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ChartState.h</locationURI>
+		</link>
+		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>
