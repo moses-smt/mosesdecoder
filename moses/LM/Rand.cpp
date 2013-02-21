@@ -41,11 +41,13 @@ namespace
 {
 using namespace std;
 
-class LanguageModelRandLM : public LanguageModelPointerState
+class LanguageModelRandLM : public LanguageModelSingleFactor
 {
 public:
-  LanguageModelRandLM()
-    : m_lm(0) {}
+  LanguageModelRandLM(const std::string &line)
+  :LanguageModelSingleFactor("RandLM", line)
+  , m_lm(0)
+  {}
   bool Load(const std::string &filePath, FactorType factorType, size_t nGramOrder);
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   ~LanguageModelRandLM() {
@@ -107,12 +109,12 @@ void LanguageModelRandLM::CreateFactors(FactorCollection &factorCollection)   //
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, m_lm->getBOS());
   factorId = m_sentenceStart->GetId();
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceStartArray[m_factorType] = m_sentenceStart;
+  m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
   m_sentenceEnd	= factorCollection.AddFactor(Output, m_factorType, m_lm->getEOS());
   factorId = m_sentenceEnd->GetId();
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceEndArray[m_factorType] = m_sentenceEnd;
+  m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
   // add to lookup vector in object
   m_randlm_ids_vec.resize(maxFactorId+1);
@@ -152,10 +154,6 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   return ret;
 }
 
-}
-
-LanguageModelPointerState *NewRandLM() {
-  return new LanguageModelRandLM();
 }
 
 }

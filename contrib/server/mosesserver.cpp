@@ -72,7 +72,8 @@ public:
     map<vector<string>, int> ngSet;
     LMList lms = StaticData::Instance().GetLMList(); // get LM
     LMList::const_iterator lmIter = lms.begin();
-    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(static_cast<LMRefCount*>(*lmIter)->MosesServerCppShouldNotHaveLMCode());
+    LanguageModel *lm = *lmIter;
+    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(lm);
     if(orlm == 0) {
       cerr << "WARNING: Unable to add target sentence to ORLM\n";
       return;

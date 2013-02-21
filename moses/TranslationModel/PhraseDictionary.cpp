@@ -246,8 +246,8 @@ void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system)
     IFVERBOSE(1)
     PrintUserTime("Start loading phrase table from " +  m_filePath);
     m_threadSafePhraseDictionary.reset(LoadPhraseTable(system));
-    IFVERBOSE(1)
-    PrintUserTime("Finished loading phrase tables");
+    //IFVERBOSE(1)
+    //PrintUserTime("Finished loading phrase tables");
   }
   //Other types will be lazy loaded
 }
