@@ -121,13 +121,12 @@ my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
-# Use the phrase weighting framework. This argument specifies the script location
-my $__PHRASE_WEIGHTING = undef;
-my $__PHRASE_WEIGHTING_TRAINER = "pro"; # which type of trainer to use
-# For mixture modelling, require the phrase tables. These should be gzip text format.
-my @__PHRASE_WEIGHTING_TABLES;
+# Train phrase model mixture weights with PRO (Haddow, NAACL 2012)
+my $__PROMIX_TRAINING = undef; # Location of main script (contrib/promix/main.py)
+# The phrase tables. These should be gzip text format.
+my @__PROMIX_TABLES;
 # The tmcombine script
-my $__PHRASE_WEIGHTING_TMCOMBINE = "$SCRIPTS_ROOTDIR/../contrib/tmcombine/tmcombine.py";
+my $__TMCOMBINE = "$SCRIPTS_ROOTDIR/../contrib/tmcombine/tmcombine.py";
 # used to filter output
 my $__REMOVE_SEGMENTATION = "$SCRIPTS_ROOTDIR/ems/support/remove-segmentation-markup.perl";
 
@@ -233,10 +232,8 @@ GetOptions(
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
   "batch-mira-args=s" => \$batch_mira_args,
-  "phrase-weighting=s" => \$__PHRASE_WEIGHTING,
-  "phrase-weighting-trainer=s" => \$__PHRASE_WEIGHTING_TRAINER,
-  "phrase-weighting-table=s" => \@__PHRASE_WEIGHTING_TABLES,
-  "phrase-weighting-tmcombine=s" => \$__PHRASE_WEIGHTING_TMCOMBINE,
+  "promix-training=s" => \$__PROMIX_TRAINING,
+  "promix-table=s" => \@__PROMIX_TABLES,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -389,20 +386,16 @@ if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optim
   die("ERROR: Installation of megam_i686.opt failed! Install by hand from $megam_url") unless -x $pro_optimizer;
 }
 
-if ($__PHRASE_WEIGHTING) {
-  die "Not executable $__PHRASE_WEIGHTING" unless -x $__PHRASE_WEIGHTING;
-  die "Unknown phrase weighting trainer: $__PHRASE_WEIGHTING_TRAINER" unless
-    ($__PHRASE_WEIGHTING_TRAINER eq "mix" || $__PHRASE_WEIGHTING_TRAINER eq "pro");
-  if ($__PHRASE_WEIGHTING_TRAINER eq "mix") {
-    die "For mixture model training, specify the tables with --phrase-weighting-tables" unless @__PHRASE_WEIGHTING_TABLES;
-    die "For mixture model, need at least 2 tables" unless scalar(@__PHRASE_WEIGHTING_TABLES) > 1;
+if ($__PROMIX_TRAINING) {
+  die "Not executable $__PROMIX_TRAINING" unless -x $__PROMIX_TRAINING;
+  die "For mixture model training, specify the tables with --phrase-weighting-tables" unless @__PROMIX_TABLES;
+  die "For mixture model, need at least 2 tables" unless scalar(@__PROMIX_TABLES) > 1;
   
-    for my $TABLE (@__PHRASE_WEIGHTING_TABLES) {
-      die "Phrase table $TABLE not found" unless -r $TABLE;
-    }
-    die "Not executable: $__PHRASE_WEIGHTING_TMCOMBINE" unless -x $__PHRASE_WEIGHTING_TMCOMBINE;
-    die "To use phrase-weighting, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
+  for my $TABLE (@__PROMIX_TABLES) {
+    die "Phrase table $TABLE not found" unless -r $TABLE;
   }
+  die "Not executable: $__TMCOMBINE" unless -x $__TMCOMBINE;
+  die "To use phrase-weighting, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
 $mertargs = "" if !defined $mertargs;
@@ -530,25 +523,27 @@ my @allnbests;
 
 # If we're training mixture models, need to make sure the appropriate
 # tables are in place
-my @_PHRASE_WEIGHTING_TABLES_BIN;
-if ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
+my @_PROMIX_TABLES_BIN;
+if ($__PROMIX_TRAINING) {
   print STDERR "Training mixture model\n";
-  for (my $i = 0; $i < scalar(@__PHRASE_WEIGHTING_TABLES); ++$i) {
+  for (my $i = 0; $i < scalar(@__PROMIX_TABLES); ++$i) {
     # Create filtered, binarised tables
     my $filtered_config = "moses_$i.ini";
-    substitute_ttable($___CONFIG, $filtered_config, $__PHRASE_WEIGHTING_TABLES[$i]); 
+    substitute_ttable($___CONFIG, $filtered_config, $__PROMIX_TABLES[$i]); 
     my $filtered_path = "filtered_$i";
     my $___FILTER_F  = $___DEV_F;
     $___FILTER_F = $filterfile if (defined $filterfile);
     my $cmd = "$filtercmd ./$filtered_path $filtered_config $___FILTER_F";
     &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err");
-    push (@_PHRASE_WEIGHTING_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
+    push (@_PROMIX_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
 
     # Create directory structure for the text phrase tables required by tmcombine
     mkpath("model_$i/model") || die "Failed to create model_$i/model";
     safesystem("ln -s ../../$filtered_path/phrase-table.0-0.1.1 model_$i/model/phrase-table");
   }
-} elsif ($___FILTER_PHRASE_TABLE) {
+}
+ 
+if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
     print STDERR "Assuming the tables are already filtered, reusing $outdir/moses.ini\n";
@@ -703,7 +698,7 @@ my $nbest_file      = undef;
 my $lsamp_file      = undef; # Lattice samples
 my $orig_nbest_file = undef; # replaced if lattice sampling
 # For mixture modelling
-my @phrase_weighting_mix_weights;
+my @promix_weights;
 my $num_mixed_phrase_features;
 
 while (1) {
@@ -714,29 +709,29 @@ while (1) {
   }
   print "run $run start at ".`date`;
 
-  if ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
+  if ($__PROMIX_TRAINING) {
     # Need to interpolate the phrase tables with current weights, and binarise
-    if (!@phrase_weighting_mix_weights) {
+    if (!@promix_weights) {
       # total number of weights is 1 less than number of phrase features, multiplied
       # by the number of tables
       $num_mixed_phrase_features = (grep { $_ eq 'tm' } @{$featlist->{"names"}}) - 1;
   
-      @phrase_weighting_mix_weights = (1.0/scalar(@__PHRASE_WEIGHTING_TABLES)) x 
-        ($num_mixed_phrase_features * scalar(@__PHRASE_WEIGHTING_TABLES));
+      @promix_weights = (1.0/scalar(@__PROMIX_TABLES)) x 
+        ($num_mixed_phrase_features * scalar(@__PROMIX_TABLES));
     } 
 
     # make a backup copy of startup ini filepath
     $___CONFIG_ORIG = $___CONFIG unless defined($___CONFIG_ORIG);
     # Interpolation
     my $interpolated_phrase_table = "./phrase-table.interpolated.gz";
-    my $cmd = "$__PHRASE_WEIGHTING_TMCOMBINE combine_given_weights ";
-    $cmd .= join(" ", map {"model_$_"} (0..(scalar(@__PHRASE_WEIGHTING_TABLES)-1)));
+    my $cmd = "$__TMCOMBINE combine_given_weights ";
+    $cmd .= join(" ", map {"model_$_"} (0..(scalar(@__PROMIX_TABLES)-1)));
     # convert from table,feature ordering to feature,table ordering
     my @transposed_weights;
     for my $feature (0..($num_mixed_phrase_features-1)) {
       my @table_weights;
-      for my $table (0..(scalar(@__PHRASE_WEIGHTING_TABLES)-1)) {
-        push @table_weights, $phrase_weighting_mix_weights[$table * $num_mixed_phrase_features + $feature];
+      for my $table (0..(scalar(@__PROMIX_TABLES)-1)) {
+        push @table_weights, $promix_weights[$table * $num_mixed_phrase_features + $feature];
       }
       push @transposed_weights, join ",", @table_weights;
     }
@@ -744,6 +739,7 @@ while (1) {
     $cmd .= " -w \"" . join(";",@transposed_weights) . "\"";
     $cmd .= " -o $interpolated_phrase_table";
     &submit_or_exec($cmd, "interpolate.out", "interpolate.err");
+    print "finished interpolation at ".`date`;
 
     # Create an ini file for the interpolated phrase table
     my $interpolated_config ="moses.interpolated.ini"; 
@@ -817,9 +813,9 @@ while (1) {
   my $score_file        = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
-  $cmd .= " -d" if $__PHRASE_WEIGHTING; # Allow duplicates
+  $cmd .= " -d" if $__PROMIX_TRAINING; # Allow duplicates
   # remove segmentation
-  $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix";
+  $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PROMIX_TRAINING;
   $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
   &submit_or_exec($cmd, "extract.out","extract.err");
 
@@ -893,7 +889,7 @@ while (1) {
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
 
   push @allnbests, $nbest_file;
-  my $phrase_weight_file_settings = 
+  my $promix_file_settings = 
                           "--scfile " .  join(" --scfile ", split(/,/, $scfiles)) .
                           " --nbest " . join(" --nbest ", @allnbests);
 
@@ -915,7 +911,7 @@ while (1) {
     my $pro_cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
-    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights, \@phrase_weighting_mix_weights);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights, \@promix_weights);
     # Get the pro outputs ready for mert. Add the weight ranges,
     # and a weight and range for the single sparse feature
     $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
@@ -946,18 +942,13 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
-  } elsif ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix") {
-    # Phrase weighting, mixture model
+  } elsif ($__PROMIX_TRAINING) {
+    # PRO trained  mixture model
     safesystem("echo 'not used' > $weights_out_file") or die;
-    $cmd = "$__PHRASE_WEIGHTING $phrase_weight_file_settings";
+    $cmd = "$__PROMIX_TRAINING $promix_file_settings";
     $cmd .= " -t mix ";
-    $cmd .= join(" ", map {"-p $_"} @_PHRASE_WEIGHTING_TABLES_BIN);
+    $cmd .= join(" ", map {"-p $_"} @_PROMIX_TABLES_BIN);
     $cmd .= " -i $___DEV_F";
-    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
-  } elsif ($__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "pro") {
-    # Phrase weighting, PRO
-    safesystem("echo 'not used' > $weights_out_file") or die;
-    $cmd = "$__PHRASE_WEIGHTING $phrase_weight_file_settings";
     &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
@@ -976,9 +967,9 @@ while (1) {
 
   print "run $run end at ".`date`;
 
-  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@phrase_weighting_mix_weights);
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@promix_weights);
   my $merge_weight = 0;
-  print "New mixture weights: " . join(" ", @phrase_weighting_mix_weights) . "\n";
+  print "New mixture weights: " . join(" ", @promix_weights) . "\n";
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -1107,7 +1098,7 @@ if($___RETURN_BEST_DEV) {
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
     my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
-    $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PHRASE_WEIGHTING) && $__PHRASE_WEIGHTING_TRAINER eq "mix";
+    $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
     safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
     my $bleu = <$fh>;
@@ -1142,7 +1133,7 @@ sub get_weights_from_mert {
   my ($outfile, $logfile, $weight_count, $sparse_weights, $mix_weights) = @_;
   my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
-          || $___BATCH_MIRA || $__PHRASE_WEIGHTING) {
+          || $___BATCH_MIRA || $__PROMIX_TRAINING) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my @WEIGHT;
     @$mix_weights = ();
@@ -1220,7 +1211,7 @@ sub run_decoder {
     my $decoder_config = "";
     $decoder_config = join(" ", values %model_weights) unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
-    $decoder_config .= " -report-segmentation" if $__PHRASE_WEIGHTING && $__PHRASE_WEIGHTING_TRAINER eq "mix";
+    $decoder_config .= " -report-segmentation" if $__PROMIX_TRAINING;
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
 
