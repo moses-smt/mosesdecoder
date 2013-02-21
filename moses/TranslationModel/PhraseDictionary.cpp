@@ -86,6 +86,13 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 
+  if (m_implementation == Memory || m_implementation == SCFG || m_implementation == SuffixArray ||
+      m_implementation==Compact || m_implementation==FuzzyMatch ) {
+    m_useThreadSafePhraseDictionary = true;
+  } else {
+    m_useThreadSafePhraseDictionary = false;
+  }
+
 }
 
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
@@ -183,7 +190,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     CHECK(ret);
     return pdta;
   } else if (m_implementation == SuffixArray) {
-#ifndef WIN32
     PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(GetNumScoreComponents(), this);
     if(!(pd->Load(
            GetInput()
@@ -200,9 +206,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     }
     std::cerr << "Suffix array phrase table loaded" << std::endl;
     return pd;
-#else
-    CHECK(false);
-#endif
   } else if (m_implementation == FuzzyMatch) {
     
     PhraseDictionaryFuzzyMatch *dict = new PhraseDictionaryFuzzyMatch(GetNumScoreComponents(), this);
@@ -218,7 +221,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 
     return dict;    
   } else if (m_implementation == Compact) {
-#ifndef WIN32
     VERBOSE(2,"Using compact phrase table" << std::endl);                                                                                                                               
                                                                                                                                       
     PhraseDictionaryCompact* pd  = new PhraseDictionaryCompact(GetNumScoreComponents(), m_implementation, this);                         
@@ -230,9 +232,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , staticData.GetWeightWordPenalty());
     CHECK(ret);                                                                                                                      
     return pd;                                                                                                                       
-#else
-    CHECK(false);
-#endif
   }  
   else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
