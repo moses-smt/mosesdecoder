@@ -1317,6 +1317,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ParallelBackoff.h</locationURI>
 		</link>
 		<link>
+			<name>LM/PointerState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/PointerState.h</locationURI>
+		</link>
+		<link>
 			<name>LM/Rand.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Rand.cpp</locationURI>

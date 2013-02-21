@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <sstream>
 
 #include "SingleFactor.h"
+#include "PointerState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
@@ -35,19 +36,6 @@ using namespace std;
 
 namespace Moses
 {
-
-struct PointerState : public FFState {
-  const void* lmstate;
-  PointerState(const void* lms) {
-    lmstate = lms;
-  }
-  int Compare(const FFState& o) const {
-    const PointerState& other = static_cast<const PointerState&>(o);
-    if (other.lmstate > lmstate) return 1;
-    else if (other.lmstate < lmstate) return -1;
-    return 0;
-  }
-};
 
 LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
 :LanguageModelImplementation(description, line)
