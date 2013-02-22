@@ -84,7 +84,8 @@ public:
                   OutputCollector* detailedTranslationCollector,
                   OutputCollector* alignmentInfoCollector,
                   OutputCollector* unknownsCollector,
-                  std::ofstream* searchGraphSLFStream) :
+                  std::ofstream* searchGraphSLFStream,
+		  std::ofstream* searchGraphHypergraphStream) :
     m_source(source), m_lineNumber(lineNumber),
     m_outputCollector(outputCollector), m_nbestCollector(nbestCollector),
     m_latticeSamplesCollector(latticeSamplesCollector),
@@ -92,7 +93,8 @@ public:
     m_detailedTranslationCollector(detailedTranslationCollector),
     m_alignmentInfoCollector(alignmentInfoCollector),
     m_unknownsCollector(unknownsCollector),
-    m_searchGraphSLFStream(searchGraphSLFStream) {}
+    m_searchGraphSLFStream(searchGraphSLFStream),
+    m_searchGraphHypergraphStream(searchGraphHypergraphStream) {}
 
 	/** Translate one sentence
    * gets called by main function implemented at end of this source file */
@@ -155,6 +157,19 @@ public:
 	m_searchGraphSLFStream -> flush();
       } else {
 	TRACE_ERR("Cannot output HTK standard lattice for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
+      }
+    }
+
+    // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
+    if (m_searchGraphHypergraphStream) {
+      if (m_searchGraphHypergraphStream->is_open() && m_searchGraphHypergraphStream->good()) {
+	ostringstream out;
+	fix(out,PRECISION);
+	manager.OutputSearchGraphAsHypergraph(m_lineNumber, out);
+	*m_searchGraphHypergraphStream << out.str();
+	m_searchGraphHypergraphStream -> flush();
+      } else {
+	TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
     }
 
@@ -334,6 +349,7 @@ private:
   OutputCollector* m_alignmentInfoCollector;
   OutputCollector* m_unknownsCollector;
   std::ofstream  *m_searchGraphSLFStream;
+  std::ofstream  *m_searchGraphHypergraphStream;
   std::ofstream *m_alignmentStream;
 
 
@@ -558,7 +574,9 @@ int main(int argc, char** argv)
                             alignmentInfoCollector.get(),
                             unknownsCollector.get(),
 			    staticData.GetOutputSearchGraphSLF() ? 
-			    ioWrapper->GetOutputSearchGraphSLFStream(lineCount) : NULL);
+			    ioWrapper->GetOutputSearchGraphSLFStream(lineCount) : NULL,
+			    staticData.GetOutputSearchGraphHypergraph() ? 
+			    ioWrapper->GetOutputSearchGraphHypergraphStream(lineCount) : NULL);
       // execute task
 #ifdef WITH_THREADS
     pool.Submit(task);

@@ -118,6 +118,7 @@ public:
   }
 
   std::ofstream *GetOutputSearchGraphSLFStream(size_t sentenceNumber);
+  std::ofstream *GetOutputSearchGraphHypergraphStream(size_t sentenceNumber);
 
   std::ostream &GetDetailedTranslationReportingStream() {
     assert (m_detailedTranslationReportingStream);

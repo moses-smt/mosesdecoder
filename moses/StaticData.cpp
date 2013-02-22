@@ -240,6 +240,13 @@ bool StaticData::LoadData(Parameter *parameter)
   }
   if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
     m_outputSearchGraphSLF = true;
+  } else {
+    m_outputSearchGraphSLF = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
+    m_outputSearchGraphHypergraph = true;
+  } else {
+    m_outputSearchGraphHypergraph = false;
   }
 #ifdef HAVE_PROTOBUF
   if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {

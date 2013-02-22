@@ -663,6 +663,39 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
 
 }
 
+void Manager::OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream) const
+{
+  outputSearchGraphStream.setf(std::ios::fixed);
+  outputSearchGraphStream.precision(6);
+
+  const StaticData& staticData = StaticData::Instance();
+  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  size_t featureIndex = 1;
+  for (size_t i = 0; i < sff.size(); ++i) {
+    featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, sff[i], outputSearchGraphStream);
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
+          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
+          slf[i]->GetScoreProducerWeightShortName() != "I" &&
+          slf[i]->GetScoreProducerWeightShortName() != "g")
+    {
+      featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, slf[i], outputSearchGraphStream);
+    }
+  }
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  for( size_t i=0; i<pds.size(); i++ ) {
+    featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, pds[i], outputSearchGraphStream);
+  }
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for( size_t i=0; i<gds.size(); i++ ) {
+    featureIndex = OutputFeatureWeightsForHypergraph(featureIndex, gds[i], outputSearchGraphStream);
+  }
+
+}
+
 
 void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std::ostream &outputSearchGraphStream) const
 {
@@ -702,6 +735,39 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
 
 }
 
+void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostream &outputSearchGraphStream) const
+{
+  outputSearchGraphStream.setf(std::ios::fixed);
+  outputSearchGraphStream.precision(6);
+
+  const StaticData& staticData = StaticData::Instance();
+  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
+  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  size_t featureIndex = 1;
+  for (size_t i = 0; i < sff.size(); ++i) {
+    featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, sff[i], outputSearchGraphStream);
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
+          slf[i]->GetScoreProducerWeightShortName() != "tm" &&
+          slf[i]->GetScoreProducerWeightShortName() != "I" &&
+          slf[i]->GetScoreProducerWeightShortName() != "g")
+    {
+      featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
+    }
+  }
+  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  for( size_t i=0; i<pds.size(); i++ ) {
+    featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, pds[i], outputSearchGraphStream);
+  }
+  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  for( size_t i=0; i<gds.size(); i++ ) {
+    featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, gds[i], outputSearchGraphStream);
+  }
+
+}
+
 
 size_t Manager::OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
@@ -721,6 +787,30 @@ size_t Manager::OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* 
     return 0;
   }
 }
+
+size_t Manager::OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
+{
+  size_t numScoreComps = ff->GetNumScoreComponents();
+  if (numScoreComps != ScoreProducer::unlimited) {
+    vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
+    if (numScoreComps > 1) {
+      for (size_t i = 0; i < numScoreComps; ++i) {
+	outputSearchGraphStream << ff->GetScoreProducerWeightShortName()
+				<< i
+				<< "=" << values[i] << endl;
+      }
+    } else {
+	outputSearchGraphStream << ff->GetScoreProducerWeightShortName()
+				<< "=" << values[0] << endl;
+    }
+    return index+numScoreComps;
+  } else {
+    cerr << "Sparse features are not yet supported when outputting hypergraph format" << endl;
+    assert(false);
+    return 0;
+  }
+}
+
 
 size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
@@ -763,6 +853,120 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
   //   return 0;
   // }
 }
+
+size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
+{
+
+  const ScoreComponentCollection& scoreCollection = hypo->GetScoreBreakdown(); 
+
+  vector<float> featureValues = scoreCollection.GetScoresForProducer(ff);
+  size_t numScoreComps = featureValues.size();
+
+  if (numScoreComps > 1) {
+    for (size_t i = 0; i < numScoreComps; ++i) {
+      outputSearchGraphStream << ff->GetScoreProducerWeightShortName()  << i << "=" << featureValues[i] << " ";
+    }
+  } else {
+    outputSearchGraphStream << ff->GetScoreProducerWeightShortName()  << "=" << featureValues[0] << " ";
+  }
+
+  return index+numScoreComps;
+}
+
+void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
+                      const SearchGraphNode& searchNode);
+/**! Output search graph in hypergraph format of Kenneth Heafield's lazy hypergraph decoder */
+void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &outputSearchGraphStream) const
+{
+  vector<SearchGraphNode> searchGraph;
+  GetSearchGraph(searchGraph);
+outputSearchGraphStream << "searchGraph.size() == " << searchGraph.size() << endl;
+  //  long numArcs = 0;
+  long numNodes = 0;
+
+  map<int,int> nodes;
+  set<int> terminalNodes;
+  multimap<int,int> nodeToLines;
+
+  // Unique start node
+  //  nodes[0] = 0;
+  //numNodes += 1;
+  for (size_t arcNumber = 0, size=searchGraph.size(); arcNumber < size; ++arcNumber) {
+OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[arcNumber]);
+    // Record that this arc ends at this node
+    //    numArcs += 1;
+    nodeToLines.insert(pair<int,int>(numNodes,arcNumber));
+
+    int hypothesisID = searchGraph[arcNumber].hypo->GetId();
+    if (nodes.count(hypothesisID) == 0) {
+      
+      nodes[hypothesisID] = numNodes;
+      numNodes += 1;
+
+      bool terminalNode = (searchGraph[arcNumber].forward == -1);
+      if (terminalNode) {
+	terminalNodes.insert(numNodes);
+	//	numArcs += 1; // Final arc to end node, representing the end of the sentence </s>
+      }
+    }
+
+  }
+  
+  // Unique end node
+  nodes[numNodes] = numNodes;
+  numNodes += 1;
+
+  long numArcs = searchGraph.size() + terminalNodes.size();
+  // Unique start node
+  // numNodes += 1;
+
+  // Print number of nodes and arcs
+  outputSearchGraphStream << numNodes << " " << numArcs << "(" << searchGraph.size() << ", " << terminalNodes.size() << ")" << endl;
+
+  // Print node and arc for beginning of sentence <s>
+  //  outputSearchGraphStream << 1 << endl;
+  //  outputSearchGraphStream << "<s> ||| " << endl;
+
+  for (int nodeNumber=0; nodeNumber <= numNodes; nodeNumber+=1) {
+
+    size_t count = nodeToLines.count(nodeNumber);
+    if (count > 0) {
+      outputSearchGraphStream << count << endl;
+
+      pair<multimap<int,int>::iterator, multimap<int,int>::iterator> range = nodeToLines.equal_range(nodeNumber);
+      for (multimap<int,int>::iterator it=range.first; it!=range.second; ++it) {
+	int lineNumber = (*it).second;
+	const Hypothesis *thisHypo = searchGraph[lineNumber].hypo;
+	const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
+	if (prevHypo==NULL) {
+	  outputSearchGraphStream << "<s> ||| " << endl;
+	} else {
+	int startNode = nodes[prevHypo->GetId()];
+      
+	const TargetPhrase &targetPhrase = thisHypo->GetCurrTargetPhrase();
+	int targetWordCount = targetPhrase.GetSize();
+
+	outputSearchGraphStream << "[" << startNode << "]";
+	for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
+	  outputSearchGraphStream << " " << targetPhrase.GetWord(targetWordIndex);
+	}
+	outputSearchGraphStream << " ||| ";
+	OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
+	outputSearchGraphStream << endl;
+	}
+
+      }
+    }
+  }
+
+  // Print node and arc(s) for end of sentence </s>
+  outputSearchGraphStream << terminalNodes.size() << endl;
+  for (set<int>::iterator it=terminalNodes.begin(); it!=terminalNodes.end(); ++it) {
+    outputSearchGraphStream << "[" << (*it) << "] </s> ||| " << endl;
+  }
+
+}
+
 
 /**! Output search graph in HTK standard lattice format (SLF) */
 void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSearchGraphStream) const
