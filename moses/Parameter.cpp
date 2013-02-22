@@ -626,19 +626,19 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
       const string &line = models[lmIndex];
       vector<string> modelToks = Tokenize(line);
 
-      LMImplementation lmType = (LMImplementation) Scan<int>(modelToks[0]);
+      int lmType = Scan<int>(modelToks[0]);
 
       string newFeatureName;
       switch (lmType)
       {
-      case SRI:
+      case 0:
         newFeatureName = "SRILM";
         break;
-      case IRST:
+      case 1:
         newFeatureName = "IRSTLM";
         break;
-      case Ken:
-      case LazyKen:
+      case 8:
+      case 9:
         newFeatureName = "KENLM";
         break;
       default:
@@ -662,10 +662,10 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
       string featureLine = newFeatureName + " "
                         + "factor=" + modelToks[1] + " "  // factor
                         + "order="  + modelToks[2] + " "; // order
-      if (lmType == LazyKen) {
+      if (lmType == 9) {
         featureLine += "lazyken=1 ";
       }
-      else if (lmType == Ken) {
+      else if (lmType == 8) {
         featureLine += "lazyken=0 ";
       }
 

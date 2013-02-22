@@ -106,21 +106,6 @@ enum DistortionOrientationOptions {
 };
 }
 
-enum LMImplementation {
-  SRI			= 0
-  ,IRST		= 1
-//  ,Skip		= 2
-  ,Joint		= 3
-//  ,Internal	= 4
-  ,RandLM 	= 5
-  ,Remote 	= 6
-  ,ParallelBackoff	= 7
-  ,Ken			= 8
-  ,LazyKen	= 9
-  ,ORLM = 10
-  ,LDHTLM = 11
-};
-
 enum PhraseTableImplementation {
   Memory				= 0
   ,Binary				= 1
