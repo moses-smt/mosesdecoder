@@ -873,28 +873,21 @@ size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis*
   return index+numScoreComps;
 }
 
-void OutputSearchNode(long translationId, std::ostream &outputSearchGraphStream,
-                      const SearchGraphNode& searchNode);
 /**! Output search graph in hypergraph format of Kenneth Heafield's lazy hypergraph decoder */
 void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
   vector<SearchGraphNode> searchGraph;
   GetSearchGraph(searchGraph);
-  //outputSearchGraphStream << "searchGraph.size() == " << searchGraph.size() << endl;
-  //  long numArcs = 0;
+
   long numNodes = 0;
 
   map<int,int> nodes;
   set<int> terminalNodes;
   multimap<int,int> nodeToLines;
 
-  // Unique start node
-  //  nodes[0] = 0;
-  //numNodes += 1;
   for (size_t arcNumber = 0, size=searchGraph.size(); arcNumber < size; ++arcNumber) {
-    //OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[arcNumber]);
+
     // Record that this arc ends at this node
-    //    numArcs += 1;
     nodeToLines.insert(pair<int,int>(numNodes,arcNumber));
 
     int hypothesisID = searchGraph[arcNumber].hypo->GetId();
@@ -905,8 +898,8 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 
       bool terminalNode = (searchGraph[arcNumber].forward == -1);
       if (terminalNode) {
+	// Final arc to end node, representing the end of the sentence </s>
 	terminalNodes.insert(numNodes);
-	//	numArcs += 1; // Final arc to end node, representing the end of the sentence </s>
       }
     }
 
@@ -917,15 +910,9 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   numNodes += 1;
 
   long numArcs = searchGraph.size() + terminalNodes.size();
-  // Unique start node
-  // numNodes += 1;
 
   // Print number of nodes and arcs
-  outputSearchGraphStream << numNodes << " " << numArcs /*<< "(" << searchGraph.size() << ", " << terminalNodes.size() << ")"*/ << endl;
-
-  // Print node and arc for beginning of sentence <s>
-  //  outputSearchGraphStream << 1 << endl;
-  //  outputSearchGraphStream << "<s> ||| " << endl;
+  outputSearchGraphStream << numNodes << " " << numArcs << endl;
 
   for (int nodeNumber=0; nodeNumber <= numNodes; nodeNumber+=1) {
 
@@ -983,7 +970,6 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 
   // Unique start node
   nodes[0] = 0;
-  //  numNodes += 1;
 
   for (size_t arcNumber = 0; arcNumber < searchGraph.size(); ++arcNumber) {
 
@@ -1017,8 +1003,6 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 
   OutputFeatureWeightsForSLF(outputSearchGraphStream);
 
-  // const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-
   for (size_t arcNumber = 0, lineNumber = 0; lineNumber < searchGraph.size(); ++lineNumber) {
     const Hypothesis *thisHypo = searchGraph[lineNumber].hypo;
     const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
@@ -1031,16 +1015,9 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
       int targetWordCount = targetPhrase.GetSize();
 
       for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
-      // for (int startNode = nodes[prevHypo->GetId()] - targetWordCount + 1,
-      // 	     nextNode = startNode + 1;
-      // 	   nextNode < endNode; startNode+=1, nextNode+=1) {
 	int x = (targetWordCount-targetWordIndex);
 
 	outputSearchGraphStream <<  "J=" << arcNumber;
-	// outputSearchGraphStream <<  " startNode=" << startNode;
-	// outputSearchGraphStream <<  " endNode=" << endNode;
-	// outputSearchGraphStream <<  " targetWordCount=" << targetWordCount;
-	// outputSearchGraphStream <<  " targetWordIndex=" << targetWordIndex;
 
 	if (targetWordIndex==0) {
 	  outputSearchGraphStream << " S=" << startNode;
@@ -1048,7 +1025,7 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 	  outputSearchGraphStream << " S=" << endNode - x;
 	}
 
-	outputSearchGraphStream << " E=" << endNode - (x-1) //(startNode + targetWordIndex + 1)
+	outputSearchGraphStream << " E=" << endNode - (x-1)
 				<< " W=" << targetPhrase.GetWord(targetWordIndex);
 
 	OutputFeatureValuesForSLF(thisHypo, (targetWordIndex>0), outputSearchGraphStream);
