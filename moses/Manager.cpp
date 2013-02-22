@@ -880,7 +880,7 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 {
   vector<SearchGraphNode> searchGraph;
   GetSearchGraph(searchGraph);
-outputSearchGraphStream << "searchGraph.size() == " << searchGraph.size() << endl;
+  //outputSearchGraphStream << "searchGraph.size() == " << searchGraph.size() << endl;
   //  long numArcs = 0;
   long numNodes = 0;
 
@@ -892,7 +892,7 @@ outputSearchGraphStream << "searchGraph.size() == " << searchGraph.size() << end
   //  nodes[0] = 0;
   //numNodes += 1;
   for (size_t arcNumber = 0, size=searchGraph.size(); arcNumber < size; ++arcNumber) {
-OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[arcNumber]);
+    //OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[arcNumber]);
     // Record that this arc ends at this node
     //    numArcs += 1;
     nodeToLines.insert(pair<int,int>(numNodes,arcNumber));
@@ -921,7 +921,7 @@ OutputSearchNode(translationId,outputSearchGraphStream,searchGraph[arcNumber]);
   // numNodes += 1;
 
   // Print number of nodes and arcs
-  outputSearchGraphStream << numNodes << " " << numArcs << "(" << searchGraph.size() << ", " << terminalNodes.size() << ")" << endl;
+  outputSearchGraphStream << numNodes << " " << numArcs /*<< "(" << searchGraph.size() << ", " << terminalNodes.size() << ")"*/ << endl;
 
   // Print node and arc for beginning of sentence <s>
   //  outputSearchGraphStream << 1 << endl;

@@ -460,7 +460,7 @@ public:
     return m_nBestFilePath;
   }
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
+    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_outputSearchGraphSLF || m_outputSearchGraphHypergraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
 #ifdef HAVE_PROTOBUF
            || m_outputSearchGraphPB
 #endif
