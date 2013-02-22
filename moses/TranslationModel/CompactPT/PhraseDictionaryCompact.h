@@ -48,7 +48,6 @@ class PhraseDictionaryCompact : public PhraseDictionary
 protected:
   friend class PhraseDecoder;
 
-  PhraseTableImplementation m_implementation;
   bool m_inMemory;
   bool m_useAlignmentInfo;
   
@@ -75,19 +74,15 @@ protected:
   float m_weightWP;
 
 public:
-  PhraseDictionaryCompact(size_t numScoreComponent,
-                          PhraseTableImplementation implementation,
-                          PhraseDictionaryFeature* feature,
-                          bool inMemory = StaticData::Instance().UseMinphrInMemory(),
-                          bool useAlignmentInfo = StaticData::Instance().NeedAlignmentInfo())
-    : PhraseDictionary(numScoreComponent, feature),
-      m_implementation(implementation),
-      m_inMemory(inMemory),
-      m_useAlignmentInfo(useAlignmentInfo),
-      m_hash(10, 16),
-      m_phraseDecoder(0),
-      m_weight(0)
-  {}
+  PhraseDictionaryCompact(const std::string &line)
+  :PhraseDictionary("PhraseDictionaryCompact", line)
+  ,m_inMemory(true)
+  ,m_useAlignmentInfo(true)
+  ,m_hash(10, 16)
+  ,m_phraseDecoder(0)
+  ,m_weight(0)
+  {
+  }
 
   ~PhraseDictionaryCompact();
 

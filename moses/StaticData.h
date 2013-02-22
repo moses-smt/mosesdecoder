@@ -51,7 +51,7 @@ namespace Moses
 {
 
 class InputType;
-class PhraseDictionaryFeature;
+class PhraseDictionary;
 class SparsePhraseDictionaryFeature;
 class GenerationDictionary;
 class DecodeStep;
@@ -74,7 +74,7 @@ private:
 protected:
 
   std::map<long,Phrase> m_constraints;
-  std::vector<PhraseDictionaryFeature*>	m_phraseDictionary;
+  std::vector<PhraseDictionary*>	m_phraseDictionary;
   std::vector<SparsePhraseDictionaryFeature*>	m_sparsePhraseDictionary;
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
@@ -441,7 +441,7 @@ public:
   MetaFeatureProducer* GetMetaFeatureProducer() const {
     return m_metaFeatureProducer;
   }
-  std::vector<PhraseDictionaryFeature*> GetPhraseDictionaryModels() const {
+  std::vector<PhraseDictionary*> GetPhraseDictionaryModels() const {
     return m_phraseDictionary;
   }
   size_t GetNumInputScores() const {
@@ -671,11 +671,11 @@ public:
   float GetWeightWordPenalty() const;
   float GetWeightUnknownWordPenalty() const;
 
-  const std::vector<PhraseDictionaryFeature*>& GetPhraseDictionaries() const
+  const std::vector<PhraseDictionary*>& GetPhraseDictionaries() const
   { return m_phraseDictionary;}
   const std::vector<const GenerationDictionary*>& GetGenerationDictionaries() const
   { return m_generationDictionary;}
-  const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const
+  const PhraseDictionary*GetTranslationScoreProducer(size_t index) const
   { return GetPhraseDictionaries().at(index); }
   std::vector<float> GetTranslationWeights(size_t index) const {
     std::vector<float> weights = GetWeights(GetTranslationScoreProducer(index));
@@ -684,9 +684,6 @@ public:
 
   const std::vector<DecodeGraph*>& GetDecodeGraphs() const {return m_decodeGraphs;}
   const std::vector<size_t>& GetDecodeGraphBackoff() const {return m_decodeGraphBackoff;}
-
-  //Called after adding the tables in order to set up the dictionaries
-  void ConfigDictionaries();
 
   //sentence (and thread) specific initialisationn and cleanup
   void InitializeForInput(const InputType& source) const;

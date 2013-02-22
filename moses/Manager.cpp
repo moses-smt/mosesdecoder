@@ -448,10 +448,10 @@ void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo
 
   // phrase table scores
   const StaticData &staticData = StaticData::Instance();
-  const std::vector<PhraseDictionaryFeature*> &phraseTables = staticData.GetPhraseDictionaries();
-  std::vector<PhraseDictionaryFeature*>::const_iterator iterPhraseTable;
+  const std::vector<PhraseDictionary*> &phraseTables = staticData.GetPhraseDictionaries();
+  std::vector<PhraseDictionary*>::const_iterator iterPhraseTable;
   for (iterPhraseTable = phraseTables.begin() ; iterPhraseTable != phraseTables.end() ; ++iterPhraseTable) {
-    const PhraseDictionaryFeature *phraseTable = *iterPhraseTable;
+    const PhraseDictionary *phraseTable = *iterPhraseTable;
     vector<float> scores = hypo->GetScoreBreakdown().GetScoresForProducer(phraseTable);
 
     outputWordGraphStream << scores[0];

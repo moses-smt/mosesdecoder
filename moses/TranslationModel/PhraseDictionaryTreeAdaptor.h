@@ -30,7 +30,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
   void operator=(const PhraseDictionaryTreeAdaptor&);
 
 public:
-  PhraseDictionaryTreeAdaptor(size_t numScoreComponent, unsigned numInputScores, const PhraseDictionaryFeature* feature);
+  PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
 
   // enable/disable caching

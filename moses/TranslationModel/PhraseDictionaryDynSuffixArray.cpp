@@ -8,8 +8,8 @@ using namespace std;
 
 namespace Moses
 {
-PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(size_t numScoreComponent,
-    PhraseDictionaryFeature* feature): PhraseDictionary(numScoreComponent, feature)
+PhraseDictionaryDynSuffixArray::PhraseDictionaryDynSuffixArray(const std::string &line)
+:PhraseDictionary("PhraseDictionaryDynSuffixArray", line)
 {
   m_biSA = new BilingualDynSuffixArray();
 }
@@ -51,7 +51,7 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     TargetPhrase *targetPhrase = itr->second;
     //std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-    targetPhrase->SetScore(m_feature, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels);
+    targetPhrase->SetScore(this, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels);
     //cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
     ret->Add(targetPhrase);
   }

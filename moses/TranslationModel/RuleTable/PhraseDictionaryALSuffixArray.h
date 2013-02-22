@@ -21,8 +21,9 @@ namespace Moses {
 class PhraseDictionaryALSuffixArray : public PhraseDictionarySCFG
 {
 public:
-  PhraseDictionaryALSuffixArray(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-  : PhraseDictionarySCFG(numScoreComponent,feature) {}
+  PhraseDictionaryALSuffixArray(const std::string &line)
+  : PhraseDictionarySCFG("PhraseDictionaryALSuffixArray", line)
+  {}
 
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output

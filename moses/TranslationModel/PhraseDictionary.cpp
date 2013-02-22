@@ -42,23 +42,15 @@ using namespace std;
 namespace Moses
 {
 
-const TargetPhraseCollection *PhraseDictionary::
-GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
+PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
+:DecodeFeature(description, line)
 {
-  return GetTargetPhraseCollection(src.GetSubString(range));
-}
+  m_tableLimit= 20; // TODO default?
 
-PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
-:DecodeFeature("PhraseModel", line)
-,m_tableLimit(20) // TODO default?
-{
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
-    if (args[0] == "implementation") {
-      m_implementation = (PhraseTableImplementation) Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "input-factor") {
+    if (args[0] == "input-factor") {
       m_input =Tokenize<FactorType>(args[1]);
       m_inputFactors = FactorMask(m_input);
     }
@@ -86,14 +78,16 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 
-  if (m_implementation == Memory || m_implementation == SCFG || m_implementation == SuffixArray ||
-      m_implementation==Compact || m_implementation==FuzzyMatch ) {
-    m_useThreadSafePhraseDictionary = true;
-  } else {
-    m_useThreadSafePhraseDictionary = false;
-  }
-
 }
+
+
+const TargetPhraseCollection *PhraseDictionary::
+GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
+{
+  return GetTargetPhraseCollection(src.GetSubString(range));
+}
+
+/*
 
 PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
 {
@@ -252,75 +246,7 @@ void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system)
   //Other types will be lazy loaded
 }
 
-const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  return dict;
-}
 
-PhraseDictionary* PhraseDictionaryFeature::GetDictionary()
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  return dict;
-}
-
-
-PhraseDictionaryFeature::~PhraseDictionaryFeature()
-{}
-
-bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const
-{
-  return true;
-}
-
-const PhraseDictionaryFeature* PhraseDictionary::GetFeature() const
-{
-  return m_feature;
-}
-
-void PhraseDictionaryFeature::InitializeForInput(const InputType& source)
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    //thread safe dictionary should already be loaded
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    //thread-unsafe dictionary may need to be loaded if this is a new thread.
-    if (!m_threadUnsafePhraseDictionary.get()) {
-      m_threadUnsafePhraseDictionary.reset(LoadPhraseTable(NULL));
-    }
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  dict->InitializeForInput(source);
-
-}
-
-void PhraseDictionaryFeature::CleanUpAfterSentenceProcessing(const InputType& source)
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    //thread safe dictionary should already be loaded
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  dict->CleanUpAfterSentenceProcessing(source);
-
-}
-
+*/
 }
 

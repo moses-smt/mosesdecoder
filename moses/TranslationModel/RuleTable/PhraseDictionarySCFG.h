@@ -36,10 +36,15 @@ class PhraseDictionarySCFG : public RuleTableTrie
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionarySCFG&);
   friend class RuleTableLoader;
 
- public:
-  PhraseDictionarySCFG(size_t numScoreComponents,
-                       PhraseDictionaryFeature* feature)
-      : RuleTableTrie(numScoreComponents, feature) {}
+protected:
+  PhraseDictionarySCFG(const std::string &description, const std::string &line)
+      : RuleTableTrie(description, line)
+  {}
+
+public:
+  PhraseDictionarySCFG(const std::string &line)
+      : RuleTableTrie("PhraseDictionarySCFG", line)
+  {}
 
   const PhraseDictionaryNodeSCFG &GetRootNode() const { return m_collection; }
 

@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionaryFeature* pdf, const DecodeStep* prev)
+DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const DecodeStep* prev)
   : DecodeStep(pdf, prev)
 {
 }
@@ -64,7 +64,7 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const PhraseDictionary* phraseDictionary  =
-    decodeStep.GetPhraseDictionaryFeature()->GetDictionary(); ;
+    decodeStep.GetPhraseDictionaryFeature();
   const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
@@ -97,7 +97,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
     ,PartialTranslOptColl &outputPartialTranslOptColl
     , size_t startPos, size_t endPos, bool adhereTableLimit) const
 {
-  const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature()->GetDictionary();
+  const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);

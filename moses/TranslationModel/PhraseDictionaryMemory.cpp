@@ -78,7 +78,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
   Phrase sourcePhrase(0);
   std::vector<float> scv;
-  scv.reserve(m_numScoreComponent);
+  scv.reserve(m_numScoreComponents);
 
   TargetPhraseCollection *preSourceNode = NULL;
   std::string preSourceString;
@@ -119,9 +119,9 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
         abort();
       }
     }
-    if (scv.size() != m_numScoreComponent) {
+    if (scv.size() != m_numScoreComponents) {
       stringstream strme;
-      strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
+      strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponents<<") of score components on line " << line_num;
       UserMessage::Add(strme.str());
       abort();
     }
@@ -139,7 +139,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     if (pipes) {
       //sparse features
       SparsePhraseDictionaryFeature* spdf = 
-        GetFeature()->GetSparsePhraseDictionaryFeature();
+        GetSparsePhraseDictionaryFeature();
       if (spdf) {
         sparse.Assign(spdf,(pipes++)->as_string());
       }
@@ -147,7 +147,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
 
 
     // scv good to go sir!
-    targetPhrase->SetScore(m_feature, scv, sparse, weight, weightWP, languageModels);
+    targetPhrase->SetScore(this, scv, sparse, weight, weightWP, languageModels);
 
     // Check number of entries delimited by ||| agrees across all lines.  
     for (; pipes; ++pipes, ++consumed) {}

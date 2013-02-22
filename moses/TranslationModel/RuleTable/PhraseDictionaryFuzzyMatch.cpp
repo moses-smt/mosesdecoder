@@ -49,13 +49,9 @@ using namespace std;
 namespace Moses
 {
 
-  PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(size_t numScoreComponents,
-                            PhraseDictionaryFeature* feature)
-  : PhraseDictionary(numScoreComponents, feature) 
-  {
-    //const StaticData &staticData = StaticData::Instance();
-    //CHECK(staticData.ThreadCount() == 1);
-  }
+  PhraseDictionaryFuzzyMatch::PhraseDictionaryFuzzyMatch(const std::string &line)
+  : PhraseDictionary("PhraseDictionaryFuzzyMatch", line)
+  {}
 
   bool PhraseDictionaryFuzzyMatch::Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
@@ -214,7 +210,7 @@ namespace Moses
       }
       
       Tokenize<float>(scoreVector, scoreString);
-      const size_t numScoreComponents = GetFeature()->GetNumScoreComponents();
+      const size_t numScoreComponents = GetNumScoreComponents();
       if (scoreVector.size() != numScoreComponents) {
         stringstream strme;
         strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
@@ -246,7 +242,7 @@ namespace Moses
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
       
-      targetPhrase->SetScoreChart(GetFeature(), scoreVector, *m_weight, *m_languageModels, m_wpProducer);
+      targetPhrase->SetScoreChart(this, scoreVector, *m_weight, *m_languageModels, m_wpProducer);
       
       TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
       phraseColl.Add(targetPhrase);

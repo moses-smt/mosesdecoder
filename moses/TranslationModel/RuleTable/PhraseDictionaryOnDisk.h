@@ -52,9 +52,11 @@ protected:
   void LoadTargetLookup();
 
 public:
-  PhraseDictionaryOnDisk(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-    : MyBase(numScoreComponent, feature), m_languageModels(NULL)
+  PhraseDictionaryOnDisk(const std::string &line)
+    : MyBase("PhraseDictionaryOnDisk", line)
+    , m_languageModels(NULL)
   {}
+
   virtual ~PhraseDictionaryOnDisk();
 
   PhraseTableImplementation GetPhraseTableImplementation() const {

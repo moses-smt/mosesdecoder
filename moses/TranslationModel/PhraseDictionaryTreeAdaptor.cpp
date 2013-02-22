@@ -23,9 +23,10 @@ namespace Moses
 *************************************************************/
 
 PhraseDictionaryTreeAdaptor::
-PhraseDictionaryTreeAdaptor(size_t numScoreComponent, unsigned numInputScores, const PhraseDictionaryFeature* feature)
-  : PhraseDictionary(numScoreComponent,feature), imp(new PDTAimp(this,numInputScores))
+PhraseDictionaryTreeAdaptor(const std::string &line)
+  : PhraseDictionary("PhraseDictionaryTreeAdaptor", line)
 {
+  imp = new PDTAimp(this,m_numInputScores);
 }
 
 PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
@@ -43,10 +44,10 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
                                        , const LMList &languageModels
                                        , float weightWP)
 {
-  if(m_numScoreComponent!=weight.size()) {
+  if(m_numScoreComponents!=weight.size()) {
     std::stringstream strme;
     strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
-          <<" "<<m_numScoreComponent<<"\n";
+          <<" "<<m_numScoreComponents<<"\n";
     UserMessage::Add(strme.str());
     return false;
   }

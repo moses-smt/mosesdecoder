@@ -213,7 +213,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
       UTIL_THROW_IF(isnan(score), util::Exception, "Bad score " << *s << " on line " << count);
       scoreVector.push_back(FloorScore(TransformScore(score)));
     }
-    const size_t numScoreComponents = ruleTable.GetFeature()->GetNumScoreComponents();
+    const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       stringstream strme;
       strme << "Size of scoreVector != number (" << scoreVector.size() << "!="
@@ -240,7 +240,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
     
-    targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weight, languageModels,wpProducer);
+    targetPhrase->SetScoreChart(&ruleTable, scoreVector, weight, languageModels,wpProducer);
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

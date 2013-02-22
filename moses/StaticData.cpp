@@ -648,8 +648,17 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
+    /*
     else if (feature == "PhraseModel") {
       PhraseDictionaryFeature* model = new PhraseDictionaryFeature(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    */
+    else if (feature == "PhraseDictionaryMemory") {
+      cerr << endl << line << endl;
+      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
       vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
@@ -688,9 +697,6 @@ bool StaticData::LoadData(Parameter *parameter)
       }
     } // for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").
   }
-
-  //Instigate dictionary loading
-  ConfigDictionaries();
 
   for (int i = 0; i < m_phraseDictionary.size(); i++)
     cerr << m_phraseDictionary[i] << " ";
@@ -1102,23 +1108,6 @@ float StaticData::GetWeightUnknownWordPenalty() const {
   return GetWeight(m_unknownWordPenaltyProducer);
 }
 
-void StaticData::ConfigDictionaries() {
-  for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
-    i != m_decodeGraphs.end(); ++i) {
-      for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
-        const DecodeStep* step = *j;
-        PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
-        if (pdict) {
-          pdict->InitDictionary(NULL);
-        }
-        GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
-        if (gdict) {
-        }
-      }
-  }
-
-}
-
 void StaticData::InitializeForInput(const InputType& source) const {
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
@@ -1159,7 +1148,7 @@ void StaticData::CollectFeatureFunctions()
   // put sparse feature into normal pt. TODO redo this
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     if (i < m_sparsePhraseDictionary.size()) {
-      PhraseDictionaryFeature *pt = m_phraseDictionary[i];
+      PhraseDictionary *pt = m_phraseDictionary[i];
       SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
       pt->SetSparsePhraseDictionaryFeature(sparse);
     }

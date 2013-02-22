@@ -390,7 +390,7 @@ void Parameter::ConvertWeightArgsSingleWeight(const string &oldWeightName, const
   }
 }
 
-void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const string &newWeightName)
+void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 {
   // process input weights 1st
   if (isParamSpecified("weight-i")) {
@@ -407,7 +407,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
       numInputScores.push_back("1");
     }
 
-    SetWeight(newWeightName, 0, inputWeights);
+    SetWeight("", 0, inputWeights); ????
   }
 
   // real pt weights
@@ -450,7 +450,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
     }
   }
 
-  // convert actuall pt feature
+  // convert actually pt feature
   VERBOSE(2,"Creating phrase table features" << endl);
 
   size_t numInputScores = 0;
@@ -484,7 +484,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
     // MAIN LOOP
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
       stringstream ptLine;
-      ptLine << "PhraseModel ";
 
       vector<string> token = Tokenize(translationVector[currDict]);
 
@@ -495,7 +494,14 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName, const 
       CHECK(token.size() >= 5);
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-      ptLine << "implementation=" << implementation << " ";
+
+      switch (implementation)
+      {
+      case Memory:
+        ptLine << "PhraseDictionaryMemory ";
+        break;
+      }
+
       ptLine << "input-factor=" << token[1] << " ";
       ptLine << "output-factor=" << token[2] << " ";
       ptLine << "path=" << token[4] << " ";
@@ -759,7 +765,7 @@ void Parameter::ConvertWeightArgs()
   AddFeature("WordPenalty");
   AddFeature("UnknownWordPenalty");
 
-  ConvertWeightArgsPhraseModel("weight-t", "PhraseModel");
+  ConvertWeightArgsPhraseModel("weight-t");
 
 }
 

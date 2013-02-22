@@ -55,12 +55,11 @@ class SparsePhraseDictionaryFeature;
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
-class PhraseDictionary
+class PhraseDictionary :  public DecodeFeature
 {
 public:
-  PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature):
-    m_numScoreComponent(numScoreComponent), m_tableLimit(0), m_feature(feature)
-  {}
+  PhraseDictionary(const std::string &description, const std::string &line);
+
   virtual ~PhraseDictionary()
   {}
 
@@ -68,8 +67,6 @@ public:
   size_t GetTableLimit() const {
     return m_tableLimit;
   }
-
-  const PhraseDictionaryFeature* GetFeature() const;
 
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
@@ -88,30 +85,14 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-protected:
-  const size_t m_numScoreComponent;
-  size_t m_tableLimit;
-  const PhraseDictionaryFeature* m_feature;
-};
-
-
-/**
- * Represents a feature derived from a phrase table.
- */
-class PhraseDictionaryFeature :  public DecodeFeature
-{
-
-
-public:
-  PhraseDictionaryFeature(const std::string &line);
-
-  virtual ~PhraseDictionaryFeature();
-
-  virtual bool ComputeValueInTranslationOption() const;
-
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
     return m_sparsePhraseDictionaryFeature;
   }
+
+  virtual bool ComputeValueInTranslationOption() const
+  { return true; }
+
+
   void SetSparsePhraseDictionaryFeature(SparsePhraseDictionaryFeature *spdf) {
     m_sparsePhraseDictionaryFeature = spdf;
   }
@@ -125,7 +106,7 @@ public:
 
   //Usual feature function methods are not implemented
   virtual void Evaluate(const PhraseBasedFeatureContext& context,
-  											ScoreComponentCollection* accumulator) const 
+                        ScoreComponentCollection* accumulator) const
   {
     throw std::logic_error("PhraseDictionary.Evaluate() Not implemented");
   }
@@ -138,37 +119,18 @@ public:
 
   virtual bool ComputeValueInTranslationTable() const {return true;}
 
-  void InitializeForInput(const InputType& source);
-  // clean up temporary memory, called after processing each sentence
-  void CleanUpAfterSentenceProcessing(const InputType& source);
+protected:
+  size_t m_tableLimit;
 
-private:
-  /** Load the appropriate phrase table */
-  PhraseDictionary* LoadPhraseTable(const TranslationSystem* system);
 
   unsigned m_numInputScores;
   std::string m_filePath;
-  size_t m_tableLimit;
-  //We instantiate either the the thread-safe or non-thread-safe dictionary,
-  //but not both. The thread-safe one can be instantiated in the constructor and shared
-  //between threads, however the non-thread-safe one (eg PhraseDictionaryTree) must be instantiated
-  //on demand, and stored in thread-specific storage.
-  std::auto_ptr<PhraseDictionary> m_threadSafePhraseDictionary;
-#ifdef WITH_THREADS
-  boost::thread_specific_ptr<PhraseDictionary>  m_threadUnsafePhraseDictionary;
-#else
-  std::auto_ptr<PhraseDictionary> m_threadUnsafePhraseDictionary;
-#endif
 
-  bool m_useThreadSafePhraseDictionary;
-  PhraseTableImplementation m_implementation;
   std::string m_targetFile;
   std::string m_alignmentsFile;
   SparsePhraseDictionaryFeature* m_sparsePhraseDictionaryFeature;
 
 };
-
-
 
 }
 #endif

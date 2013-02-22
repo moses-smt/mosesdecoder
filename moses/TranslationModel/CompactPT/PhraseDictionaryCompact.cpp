@@ -80,8 +80,8 @@ bool PhraseDictionaryCompact::Load(const std::vector<FactorType> &input
     }
   }
 
-  m_phraseDecoder = new PhraseDecoder(*this, m_input, m_output, m_feature,
-                                  m_numScoreComponent, m_weight, m_weightWP,
+  m_phraseDecoder = new PhraseDecoder(*this, m_input, m_output,
+                                  m_numScoreComponents, m_weight, m_weightWP,
                                   m_languageModels);
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");

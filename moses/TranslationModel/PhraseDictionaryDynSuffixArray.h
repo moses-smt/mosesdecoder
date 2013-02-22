@@ -15,7 +15,7 @@ namespace Moses
 class PhraseDictionaryDynSuffixArray: public PhraseDictionary
 {
 public:
-  PhraseDictionaryDynSuffixArray(size_t m_numScoreComponent, PhraseDictionaryFeature* feature);
+  PhraseDictionaryDynSuffixArray(const std::string &line);
   ~PhraseDictionaryDynSuffixArray();
   bool Load( const std::vector<FactorType>& m_input
              , const std::vector<FactorType>& m_output

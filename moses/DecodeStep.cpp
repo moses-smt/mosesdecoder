@@ -50,9 +50,9 @@ DecodeStep::DecodeStep(const DecodeFeature *decodeFeature, const DecodeStep* pre
 DecodeStep::~DecodeStep() {}
 
 /** returns phrase feature (dictionary) for translation step */
-const PhraseDictionaryFeature* DecodeStep::GetPhraseDictionaryFeature() const
+const PhraseDictionary* DecodeStep::GetPhraseDictionaryFeature() const
 {
-  return dynamic_cast<const PhraseDictionaryFeature*>(m_decodeFeature);
+  return dynamic_cast<const PhraseDictionary*>(m_decodeFeature);
 }
 
 /** returns generation feature (dictionary) for generation step */

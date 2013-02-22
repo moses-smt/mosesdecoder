@@ -68,7 +68,7 @@ protected:
   void AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
   void ConvertWeightArgs();
   void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
-  void ConvertWeightArgsPhraseModel(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsPhraseModel(const std::string &oldWeightName);
   void ConvertWeightArgsLM(const std::string &oldWeightName);
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);

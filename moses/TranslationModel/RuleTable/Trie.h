@@ -42,8 +42,9 @@ class WordPenaltyProducer;
 class RuleTableTrie : public PhraseDictionary
 {
  public:
-  RuleTableTrie(size_t numScoreComponents, PhraseDictionaryFeature *feature)
-      : PhraseDictionary(numScoreComponents, feature) {}
+  RuleTableTrie(const std::string &description, const std::string &line)
+      : PhraseDictionary(description, line)
+ {}
 
   virtual ~RuleTableTrie();
 

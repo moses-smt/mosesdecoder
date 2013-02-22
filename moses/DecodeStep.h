@@ -30,7 +30,7 @@ namespace Moses
 {
 
 class DecodeFeature;
-class PhraseDictionaryFeature;
+class PhraseDictionary;
 class GenerationDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
@@ -89,7 +89,7 @@ public:
   }
 
   /*! returns phrase table feature for translation step */
-  const PhraseDictionaryFeature* GetPhraseDictionaryFeature() const;
+  const PhraseDictionary* GetPhraseDictionaryFeature() const;
 
   /*! returns generation table feature for generation step */
   const GenerationDictionary* GetGenerationDictionaryFeature() const;

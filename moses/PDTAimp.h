@@ -141,7 +141,7 @@ protected:
 
     //TODO: Multiple models broken here
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weights = StaticData::Instance().GetWeights(m_obj->GetFeature());
+    std::vector<float> weights = StaticData::Instance().GetWeights(m_obj);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     std::vector<TargetPhrase> tCands;
@@ -164,9 +164,9 @@ protected:
       //sparse features.
       //These are already in log-space
       ScoreComponentCollection sparseFeatures;
-      if (m_obj->GetFeature()->GetSparsePhraseDictionaryFeature()) {
+      if (m_obj->GetSparsePhraseDictionaryFeature()) {
         for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
-          sparseFeatures.Assign(m_obj->GetFeature()->GetSparsePhraseDictionaryFeature(),
+          sparseFeatures.Assign(m_obj->GetSparsePhraseDictionaryFeature(),
             *(cands[i].fnames[j]), cands[i].fvalues[j]);
         } 
       }
@@ -292,7 +292,7 @@ protected:
       }
     }
 
-    targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, sparseFeatures, weights, weightWP, *m_languageModels);
+    targetPhrase.SetScore(m_obj, scoreVector, sparseFeatures, weights, weightWP, *m_languageModels);
     targetPhrase.SetSourcePhrase(*srcPtr);
   }
 
@@ -375,7 +375,7 @@ protected:
       stack.push_back(State(i, i, m_dict->GetRoot(), std::vector<float>(m_numInputScores,0.0)));
 
     const TranslationSystem& system =  StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
-    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj->GetFeature());
+    std::vector<float> weightT = StaticData::Instance().GetWeights(m_obj);
     float weightWP = StaticData::Instance().GetWeightWordPenalty();
 
     while(!stack.empty()) {

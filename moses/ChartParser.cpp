@@ -129,12 +129,11 @@ ChartParser::ChartParser(InputType const &source, const TranslationSystem &syste
   const StaticData &staticData = StaticData::Instance();
 
   staticData.InitializeForInput(source);
-  const std::vector<PhraseDictionaryFeature*> &dictionaries = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &dictionaries = staticData.GetPhraseDictionaries();
   m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
+  for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
        p != dictionaries.end(); ++p) {
-    PhraseDictionaryFeature *pdf = *p;
-    const PhraseDictionary *dict = pdf->GetDictionary();
+    const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
     m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, cells));
   }
