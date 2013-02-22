@@ -407,7 +407,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       numInputScores.push_back("1");
     }
 
-    SetWeight("", 0, inputWeights); ????
+    SetWeight("newWeightName", 0, inputWeights);
   }
 
   // real pt weights
@@ -430,7 +430,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
         ++currOldInd;
       }
-      AddWeight(newWeightName, ttableInd, weights);
+      AddWeight("newWeightName", ttableInd, weights);
 
     }
   }

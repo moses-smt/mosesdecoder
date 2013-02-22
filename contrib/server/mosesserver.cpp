@@ -49,8 +49,8 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
-    const PhraseDictionaryFeature* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
-    PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary();
+    const PhraseDictionary* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
+    PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
     if(add2ORLM_) {       
