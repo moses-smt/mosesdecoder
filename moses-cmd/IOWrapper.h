@@ -124,6 +124,10 @@ public:
     return *m_outputSearchGraphStream;
   }
 
+  std::ofstream *GetOutputSearchGraphSLFStream(size_t sentenceNumber);
+  std::ofstream *GetOutputSearchGraphHypergraphStream(size_t sentenceNumber);
+  std::ofstream *GetOutputSearchGraphHypergraphWeightsStream();
+
   std::ostream &GetDetailedTranslationReportingStream() {
     assert (m_detailedTranslationReportingStream);
     return *m_detailedTranslationReportingStream;
