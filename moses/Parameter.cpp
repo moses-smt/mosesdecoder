@@ -412,34 +412,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     SetWeight("PhraseDictionaryTreeAdaptor", 0, inputWeights);
   }
 
-  // real pt weights
-  if (isParamSpecified(oldWeightName)) {
-    const PARAM_VEC &oldWeights = m_setting[oldWeightName];
-
-    size_t currOldInd = 0;
-    PARAM_VEC &ttable = m_setting["ttable-file"];
-    for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
-      string &line = ttable[ttableInd];
-      vector<string> toks = Tokenize(line);
-      size_t numFFInd = (toks.size() == 4) ? 2 : 3;
-      size_t numFF = Scan<size_t>(toks[numFFInd]);
-
-      vector<float> weights(numFF);
-      for (size_t currFF = 0; currFF < numFF; ++currFF) {
-        CHECK(currOldInd < oldWeights.size());
-        float weight = Scan<float>(oldWeights[currOldInd]);
-        weights[currFF] = weight;
-
-        ++currOldInd;
-      }
-      AddWeight("newWeightName", ttableInd, weights);
-
-    }
-  }
-
-  m_setting.erase("weight-i");
-  m_setting.erase(oldWeightName);
-
   // convert sparse pt feature
   if (isParamSpecified("ttable-file")) {
     PARAM_VEC &ttable = m_setting["ttable-file"];
@@ -484,6 +456,9 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     }
 
     // MAIN LOOP
+    const PARAM_VEC &oldWeights = m_setting[oldWeightName];
+
+    size_t currOldInd = 0;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
       stringstream ptLine;
 
@@ -497,13 +472,30 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
 
+      string ptType;
       switch (implementation)
       {
       case Memory:
-        ptLine << "PhraseDictionaryMemory ";
+        ptType = "PhraseDictionaryMemory";
         break;
       }
 
+      // weights
+      size_t numFFInd = (token.size() == 4) ? 2 : 3;
+      size_t numFF = Scan<size_t>(token[numFFInd]);
+
+      vector<float> weights(numFF);
+      for (size_t currFF = 0; currFF < numFF; ++currFF) {
+        CHECK(currOldInd < oldWeights.size());
+        float weight = Scan<float>(oldWeights[currOldInd]);
+        weights[currFF] = weight;
+
+        ++currOldInd;
+      }
+      AddWeight(ptType, currDict, weights);
+
+      // actual pt
+      ptLine << ptType << " ";
       ptLine << "input-factor=" << token[1] << " ";
       ptLine << "output-factor=" << token[2] << " ";
       ptLine << "path=" << token[4] << " ";
@@ -535,6 +527,8 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     } // for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
   } // if (GetParam("ttable-file").size() > 0) {
 
+  m_setting.erase("weight-i");
+  m_setting.erase(oldWeightName);
   m_setting.erase("ttable-file");
   m_setting.erase("ttable-limit");
 
