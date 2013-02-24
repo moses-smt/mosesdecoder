@@ -409,7 +409,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       numInputScores.push_back("1");
     }
 
-    SetWeight("newWeightName", 0, inputWeights);
+    SetWeight("PhraseDictionaryTreeAdaptor", 0, inputWeights);
   }
 
   // real pt weights

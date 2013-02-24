@@ -49,7 +49,6 @@ class ChartCellCollectionBase;
 class TranslationSystem;
 class ChartRuleLookupManager;
 
-class PhraseDictionaryFeature;
 class SparsePhraseDictionaryFeature;
 
 /**

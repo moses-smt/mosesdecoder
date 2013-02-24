@@ -443,9 +443,6 @@ public:
   MetaFeatureProducer* GetMetaFeatureProducer() const {
     return m_metaFeatureProducer;
   }
-  std::vector<PhraseDictionary*> GetPhraseDictionaryModels() const {
-    return m_phraseDictionary;
-  }
   size_t GetNumInputScores() const {
     return m_numInputScores;
   }

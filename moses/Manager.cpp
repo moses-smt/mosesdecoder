@@ -646,26 +646,28 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
 
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff   = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
   for (size_t i = 0; i < sff.size(); ++i) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, sff[i], outputSearchGraphStream);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
+    /*
     if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
           slf[i]->GetScoreProducerWeightShortName() != "tm" &&
           slf[i]->GetScoreProducerWeightShortName() != "I" &&
           slf[i]->GetScoreProducerWeightShortName() != "g")
+    */
     {
       featureIndex = OutputFeatureWeightsForSLF(featureIndex, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, pds[i], outputSearchGraphStream);
   }
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureWeightsForSLF(featureIndex, gds[i], outputSearchGraphStream);
   }
@@ -684,26 +686,28 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
 
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
   for (size_t i = 0; i < sff.size(); ++i) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, sff[i], outputSearchGraphStream);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
+    /*
     if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
           slf[i]->GetScoreProducerWeightShortName() != "tm" &&
           slf[i]->GetScoreProducerWeightShortName() != "I" &&
           slf[i]->GetScoreProducerWeightShortName() != "g")
+    */
     {
       featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForSLF(featureIndex, zeros, hypo, gds[i], outputSearchGraphStream);
   }
@@ -717,26 +721,28 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
 
   const StaticData& staticData = StaticData::Instance();
   const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
-  const vector<const StatelessFeatureFunction*>& slf =system.GetStatelessFeatureFunctions();
-  const vector<const StatefulFeatureFunction*>& sff = system.GetStatefulFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
   for (size_t i = 0; i < sff.size(); ++i) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, sff[i], outputSearchGraphStream);
   }
   for (size_t i = 0; i < slf.size(); ++i) {
+    /*
     if (slf[i]->GetScoreProducerWeightShortName() != "u" &&
           slf[i]->GetScoreProducerWeightShortName() != "tm" &&
           slf[i]->GetScoreProducerWeightShortName() != "I" &&
           slf[i]->GetScoreProducerWeightShortName() != "g")
+    */
     {
       featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, slf[i], outputSearchGraphStream);
     }
   }
-  const vector<PhraseDictionaryFeature*>& pds = system.GetPhraseDictionaries();
+  const vector<PhraseDictionary*>& pds = staticData.GetPhraseDictionaries();
   for( size_t i=0; i<pds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, pds[i], outputSearchGraphStream);
   }
-  const vector<GenerationDictionary*>& gds = system.GetGenerationDictionaries();
+  const vector<const GenerationDictionary*>& gds = staticData.GetGenerationDictionaries();
   for( size_t i=0; i<gds.size(); i++ ) {
     featureIndex = OutputFeatureValuesForHypergraph(featureIndex, hypo, gds[i], outputSearchGraphStream);
   }
@@ -747,11 +753,11 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
 size_t Manager::OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != ScoreProducer::unlimited) {
+  if (numScoreComps != FeatureFunction::unlimited) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     for (size_t i = 0; i < numScoreComps; ++i) {
       outputSearchGraphStream << "# " << ff->GetScoreProducerDescription() 
-			      << " "  << ff->GetScoreProducerWeightShortName()
+			      << " "  << ff->GetScoreProducerDescription()
 			      << " "  << (i+1) << " of " << numScoreComps << endl
 			      << "x"  << (index+i) << "scale=" << values[i] << endl;
     }
@@ -815,10 +821,10 @@ size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis*
 
   if (numScoreComps > 1) {
     for (size_t i = 0; i < numScoreComps; ++i) {
-      outputSearchGraphStream << ff->GetScoreProducerWeightShortName()  << i << "=" << featureValues[i] << " ";
+      outputSearchGraphStream << ff->GetScoreProducerDescription()  << i << "=" << featureValues[i] << " ";
     }
   } else {
-    outputSearchGraphStream << ff->GetScoreProducerWeightShortName()  << "=" << featureValues[0] << " ";
+    outputSearchGraphStream << ff->GetScoreProducerDescription()  << "=" << featureValues[0] << " ";
   }
 
   return index+numScoreComps;
