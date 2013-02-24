@@ -61,7 +61,13 @@ template <class It> StringPiece GrabOrDie(It &it, const std::string &file, size_
 PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
   : PhraseDictionary("PhraseDictionaryMemory", line)
 {
-  Load()
+  Load(m_input
+      ,m_output
+      ,m_filePath
+      ,weight
+      ,m_tableLimit
+      ,weightWP);
+
 }
 
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
