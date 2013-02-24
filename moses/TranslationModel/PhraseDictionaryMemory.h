@@ -43,9 +43,7 @@ protected:
   TargetPhraseCollection *CreateTargetPhraseCollection(const Phrase &source);
 
 public:
-  PhraseDictionaryMemory(const std::string &line)
-    : PhraseDictionary("PhraseDictionaryMemory", line)
-  {}
+  PhraseDictionaryMemory(const std::string &line);
   virtual ~PhraseDictionaryMemory();
 
   bool Load(const std::vector<FactorType> &input
