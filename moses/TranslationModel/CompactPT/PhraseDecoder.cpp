@@ -28,8 +28,8 @@ namespace Moses
 
 PhraseDecoder::PhraseDecoder(
   PhraseDictionaryCompact &phraseDictionary,
-  const std::vector<FactorType>* &input,
-  const std::vector<FactorType>* &output,
+  const std::vector<FactorType>* input,
+  const std::vector<FactorType>* output,
   size_t numScoreComponent,
   const std::vector<float>* weight,
   float weightWP,
