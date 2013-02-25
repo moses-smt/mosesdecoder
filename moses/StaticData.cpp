@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "util/check.hh"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -648,17 +649,15 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
-    /*
-    else if (feature == "PhraseModel") {
-      PhraseDictionaryFeature* model = new PhraseDictionaryFeature(line);
+    else if (feature == "PhraseDictionaryMemory") {
+      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
       vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
-    */
-    else if (feature == "PhraseDictionaryMemory") {
+    else if (feature == "PhraseDictionaryTreeAdaptor") {
       cerr << endl << line << endl;
-      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
+      PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
       vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
