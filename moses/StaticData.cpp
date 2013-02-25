@@ -1147,8 +1147,10 @@ void StaticData::CollectFeatureFunctions()
 
   // put sparse feature into normal pt. TODO redo this
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    PhraseDictionary *pt = m_phraseDictionary[i];
+    pt->InitDictionary();
+
     if (i < m_sparsePhraseDictionary.size()) {
-      PhraseDictionary *pt = m_phraseDictionary[i];
       SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
       pt->SetSparsePhraseDictionaryFeature(sparse);
     }

@@ -46,13 +46,7 @@ public:
   PhraseDictionaryMemory(const std::string &line);
   virtual ~PhraseDictionaryMemory();
 
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , const LMList &languageModels
-            , float weightWP);
+  bool InitDictionary();
 
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
 

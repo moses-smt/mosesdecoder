@@ -98,7 +98,8 @@ public:
   }
 
   //Initialises the dictionary (may involve loading from file)
-  void InitDictionary(const TranslationSystem* system);
+  virtual bool InitDictionary()
+  { return true; }
 
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
