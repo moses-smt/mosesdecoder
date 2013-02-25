@@ -15,6 +15,8 @@
 #include "moses/PDTAimp.h"
 #include "moses/UserMessage.h"
 
+using namespace std;
+
 namespace Moses
 {
 /*************************************************************
@@ -35,15 +37,13 @@ PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
   delete imp;
 }
 
-
-bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
-                                       , const std::vector<FactorType> &output
-                                       , const std::string &filePath
-                                       , const std::vector<float> &weight
-                                       , size_t tableLimit
-                                       , const LMList &languageModels
-                                       , float weightWP)
+bool PhraseDictionaryTreeAdaptor::InitDictionary()
 {
+  const StaticData &staticData = StaticData::Instance();
+
+  vector<float> weight = staticData.GetWeights(this);
+  const LMList &languageModels = staticData.GetLMList();
+
   if(m_numScoreComponents!=weight.size()) {
     std::stringstream strme;
     strme << "ERROR: mismatch of number of scaling factors: "<<weight.size()
@@ -52,11 +52,7 @@ bool PhraseDictionaryTreeAdaptor::Load(const std::vector<FactorType> &input
     return false;
   }
 
-
-  // set PhraseDictionary members
-  m_tableLimit=tableLimit;
-
-  imp->Create(input,output,filePath,weight,languageModels);
+  imp->Create(m_input, m_output, m_filePath, weight, languageModels);
   return true;
 }
 

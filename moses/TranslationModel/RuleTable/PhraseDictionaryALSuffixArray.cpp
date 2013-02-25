@@ -37,7 +37,7 @@ bool PhraseDictionaryALSuffixArray::Load(const std::vector<FactorType> &input
   }
   
   // file path is the directory of the rules for eacg, NOT the file of all the rules
-  SetFilePath(filePath);
+  //SetFilePath(filePath);
   m_tableLimit = tableLimit;
 
   m_input = &input;

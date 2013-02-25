@@ -429,6 +429,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
   size_t numInputScores = 0;
   size_t numRealWordsInInput = 0;
+  map<string, size_t> ptIndices;
 
   if (GetParam("input-scores").size()) {
     numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
@@ -478,6 +479,29 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       case Memory:
         ptType = "PhraseDictionaryMemory";
         break;
+      case Binary:
+        ptType = "PhraseDictionaryTreeAdaptor";
+        break;
+      case OnDisk:
+        ptType = "PhraseDictionaryOnDisk";
+        break;
+      case SCFG:
+        ptType = "PhraseDictionarySCFG";
+        break;
+      case Compact:
+        ptType = "PhraseDictionaryCompact";
+        break;
+      default:
+        break;
+      }
+
+      size_t ptInd;
+      if (ptIndices.find(ptType) == ptIndices.end()) {
+        ptIndices[ptType] = 0;
+        ptInd = 0;
+      }
+      else {
+        ptInd = ++ptIndices[ptType];
       }
 
       // weights
@@ -492,7 +516,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
         ++currOldInd;
       }
-      AddWeight(ptType, currDict, weights);
+      AddWeight(ptType, ptInd, weights);
 
       // actual pt
       ptLine << ptType << " ";

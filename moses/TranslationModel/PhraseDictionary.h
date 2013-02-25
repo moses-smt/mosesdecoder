@@ -87,17 +87,16 @@ public:
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
     return m_sparsePhraseDictionaryFeature;
   }
-
-  virtual bool ComputeValueInTranslationOption() const
-  { return true; }
-
-
   void SetSparsePhraseDictionaryFeature(SparsePhraseDictionaryFeature *spdf) {
     m_sparsePhraseDictionaryFeature = spdf;
   }
 
+  virtual bool ComputeValueInTranslationOption() const
+  { return true; }
+
   //Initialises the dictionary (may involve loading from file)
-  void InitDictionary(const TranslationSystem* system);
+  virtual bool InitDictionary()
+  { return true; }
 
   //Get the dictionary. Be sure to initialise it first.
   const PhraseDictionary* GetDictionary() const;
@@ -117,6 +116,8 @@ public:
   }
 
   virtual bool ComputeValueInTranslationTable() const {return true;}
+
+  const std::string &GetFilePath() const { return m_filePath; }
 
 protected:
   size_t m_tableLimit;

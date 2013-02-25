@@ -1,5 +1,7 @@
+#include <iostream>
 #include "SparsePhraseDictionaryFeature.h"
 
+using namespace std;
 
 namespace Moses 
 {

@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/WordsRange.h"
 #include "moses/UserMessage.h"
 #include "moses/SparsePhraseDictionaryFeature.h"
+#include "moses/DummyScoreProducers.h"
 
 using namespace std;
 
@@ -60,29 +61,18 @@ template <class It> StringPiece GrabOrDie(It &it, const std::string &file, size_
 
 PhraseDictionaryMemory::PhraseDictionaryMemory(const std::string &line)
   : PhraseDictionary("PhraseDictionaryMemory", line)
-{
-  Load(m_input
-      ,m_output
-      ,m_filePath
-      ,weight
-      ,m_tableLimit
-      ,weightWP);
+{}
 
-}
-
-bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
-                                  , const std::vector<FactorType> &output
-                                  , const string &filePath
-                                  , const vector<float> &weight
-                                  , size_t tableLimit
-                                  , const LMList &languageModels
-                                  , float weightWP)
+bool PhraseDictionaryMemory::InitDictionary()
 {
   const StaticData &staticData = StaticData::Instance();
 
-  m_tableLimit = tableLimit;
+  vector<float> weight = staticData.GetWeights(this);
+  float weightWP = staticData.GetWeight(staticData.GetWordPenaltyProducer());
+  const LMList &languageModels = staticData.GetLMList();
 
-  util::FilePiece inFile(filePath.c_str(), staticData.GetVerboseLevel() >= 1 ? &std::cerr : NULL);
+
+  util::FilePiece inFile(m_filePath.c_str(), staticData.GetVerboseLevel() >= 1 ? &std::cerr : NULL);
 
   size_t line_num = 0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
@@ -105,19 +95,19 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     }
 
     util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter("|||"));
-    StringPiece sourcePhraseString(GrabOrDie(pipes, filePath, line_num));
-    StringPiece targetPhraseString(GrabOrDie(pipes, filePath, line_num));
-    StringPiece scoreString(GrabOrDie(pipes, filePath, line_num));
+    StringPiece sourcePhraseString(GrabOrDie(pipes, m_filePath, line_num));
+    StringPiece targetPhraseString(GrabOrDie(pipes, m_filePath, line_num));
+    StringPiece scoreString(GrabOrDie(pipes, m_filePath, line_num));
 
     bool isLHSEmpty = !util::TokenIter<util::AnyCharacter, true>(sourcePhraseString, util::AnyCharacter(" \t"));
     if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
-      TRACE_ERR( filePath << ":" << line_num << ": pt entry contains empty source, skipping\n");
+      TRACE_ERR( m_filePath << ":" << line_num << ": pt entry contains empty source, skipping\n");
       continue;
     }
  
     //target
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase());
-    targetPhrase->CreateFromString(output, targetPhraseString, factorDelimiter);
+    targetPhrase->CreateFromString(m_output, targetPhraseString, factorDelimiter);
 
     scv.clear();
     for (util::TokenIter<util::AnyCharacter, true> token(scoreString, util::AnyCharacter(" \t")); token; ++token) {
@@ -150,8 +140,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     if (pipes) pipes++; //counts
     if (pipes) {
       //sparse features
-      SparsePhraseDictionaryFeature* spdf = 
-        GetSparsePhraseDictionaryFeature();
+      SparsePhraseDictionaryFeature* spdf = GetSparsePhraseDictionaryFeature();
       if (spdf) {
         sparse.Assign(spdf,(pipes++)->as_string());
       }
@@ -168,7 +157,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
         numElement = consumed;
       } else {
         stringstream strme;
-        strme << "Syntax error at " << filePath << ":" << line_num;
+        strme << "Syntax error at " << m_filePath << ":" << line_num;
         UserMessage::Add(strme.str());
         abort();
       }
@@ -177,7 +166,7 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
     //TODO: Would be better to reuse source phrases, but ownership has to be 
     //consistent across phrase table implementations
     sourcePhrase.Clear();
-    sourcePhrase.CreateFromString(input, sourcePhraseString, factorDelimiter);
+    sourcePhrase.CreateFromString(m_input, sourcePhraseString, factorDelimiter);
     //Now that the source phrase is ready, we give the target phrase a copy
     targetPhrase->SetSourcePhrase(sourcePhrase);
     if (preSourceString == sourcePhraseString && preSourceNode) {

@@ -26,12 +26,14 @@
 								<option id="gnu.cpp.compiler.exe.debug.option.debugging.level.811344734" name="Debug Level" superClass="gnu.cpp.compiler.exe.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.2118465683" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="/opt/local/include/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../cmph/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../..&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.849384962" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
+									<listOptionValue builtIn="false" value="HAVE_CMPH"/>
 									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 									<listOptionValue builtIn="false" value="HAVE_BOOST"/>
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
@@ -48,6 +50,7 @@
 								<option id="gnu.cpp.link.option.paths.523170942" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../cmph/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../irstlm/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../srilm/lib/macosx&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../srilm/lib/i686-m64&quot;"/>
@@ -76,8 +79,9 @@
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="z"/>
 									<listOptionValue builtIn="false" value="pthread"/>
+									<listOptionValue builtIn="false" value="cmph"/>
 								</option>
-								<option id="gnu.cpp.link.option.userobjs.1542590830" name="Other objects" superClass="gnu.cpp.link.option.userobjs" valueType="userObjs"/>
+								<option id="gnu.cpp.link.option.userobjs.1542590830" name="Other objects" superClass="gnu.cpp.link.option.userobjs"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.983725033" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
 									<additionalInput kind="additionalinput" paths="$(LIBS)"/>

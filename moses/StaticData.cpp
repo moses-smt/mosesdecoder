@@ -23,6 +23,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "util/check.hh"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -36,7 +40,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
@@ -636,7 +639,7 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     else if (feature == "SparsePhraseDictionaryFeature") {
       SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
       m_sparsePhraseDictionary.push_back(model);
     }
@@ -659,21 +662,37 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
-    /*
-    else if (feature == "PhraseModel") {
-      PhraseDictionaryFeature* model = new PhraseDictionaryFeature(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
-      SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
-    }
-    */
     else if (feature == "PhraseDictionaryMemory") {
-      cerr << endl << line << endl;
       PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
       vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
+    else if (feature == "PhraseDictionaryTreeAdaptor") {
+      PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryOnDisk") {
+      PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionarySCFG") {
+      PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryCompact") {
+      PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
@@ -1158,13 +1177,14 @@ void StaticData::CollectFeatureFunctions()
 
   // put sparse feature into normal pt. TODO redo this
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    PhraseDictionary *pt = m_phraseDictionary[i];
+
     if (i < m_sparsePhraseDictionary.size()) {
-      PhraseDictionary *pt = m_phraseDictionary[i];
       SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
       pt->SetSparsePhraseDictionaryFeature(sparse);
     }
+    pt->InitDictionary();
   }
-
 }
 
 bool StaticData::CheckWeights() const
