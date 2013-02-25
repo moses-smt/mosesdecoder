@@ -60,7 +60,7 @@ int main(int argc, char **argv)
   StaticData::InstanceNonConst().LoadData(parameter);
 
   PhraseDictionaryCompact pdc("input-factor=0 output-factor=0 num-features=5 path=" + ttable);
-  bool ret = pdc.Load(input, output, ttable, weight, 0, lmList, 0);                                                                           
+  bool ret = pdc.InitDictionary(); 
   assert(ret);
   
   std::string line;
