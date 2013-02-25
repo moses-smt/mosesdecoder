@@ -13,10 +13,10 @@ chomp(@OUT);
 while(<SRC>) {
     chomp;
     if (/^<srcset/) {
-	s/<srcset/<tstset trglang="$language"/i;
+	s/<srcset/<tstset trglang="$language"/;
     }
     elsif (/^<\/srcset/) {
-	s/<\/srcset/<\/tstset/i;
+	s/<\/srcset/<\/tstset/;
     }
     elsif (/^<doc/i) {
   s/ *sysid="[^\"]+"//;
@@ -26,10 +26,10 @@ while(<SRC>) {
 	my $line = shift(@OUT);
         $line = "" if $line =~ /NO BEST TRANSLATION/;
         if (/<\/seg>/) {
-	  s/(<seg[^>]+> *).*(<\/seg>)/$1$line$2/i;
+	  s/(<seg[^>]+> *).*(<\/seg>)/$1$line$2/;
         }
         else {
-	  s/(<seg[^>]+> *)[^<]*/$1$line/i;
+	  s/(<seg[^>]+> *)[^<]*/$1$line/;
         }
     }
     print $_."\n";
