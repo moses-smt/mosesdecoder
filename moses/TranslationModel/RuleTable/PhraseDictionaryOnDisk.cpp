@@ -34,31 +34,23 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
-                                  , const std::vector<FactorType> &output
-                                  , const std::string &filePath
-				  , const std::vector<float> &weight
-                                  , size_t tableLimit
-                                  , const LMList& languageModels
-                                  , const WordPenaltyProducer* wpProducer)
+bool PhraseDictionaryOnDisk::InitDictionary()
 {
   PrintUserTime("Start loading binary SCFG phrase table. ");
 
-  m_languageModels = &(languageModels);
-  m_wpProducer = wpProducer;
-  m_filePath = filePath;
-  m_tableLimit = tableLimit;
-  m_inputFactorsVec		= input;
-  m_outputFactorsVec	= output;
+  const StaticData &staticData = StaticData::Instance();
+  vector<float> weight = staticData.GetWeights(this);
+  m_languageModels = &staticData.GetLMList();
+  m_wpProducer = staticData.GetWordPenaltyProducer();
 
   LoadTargetLookup();
 
-  if (!m_dbWrapper.BeginLoad(filePath))
+  if (!m_dbWrapper.BeginLoad(m_filePath))
     return false;
 
   CHECK(m_dbWrapper.GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
-  CHECK(m_dbWrapper.GetMisc("NumSourceFactors") == input.size());
-  CHECK(m_dbWrapper.GetMisc("NumTargetFactors") == output.size());
+  CHECK(m_dbWrapper.GetMisc("NumSourceFactors") == m_input.size());
+  CHECK(m_dbWrapper.GetMisc("NumTargetFactors") == m_output.size());
   CHECK(m_dbWrapper.GetMisc("NumScores") == weight.size());
 
   return true;
@@ -84,8 +76,8 @@ ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
 {
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
                                           m_dbWrapper, m_languageModels,
-                                          m_wpProducer, m_inputFactorsVec,
-                                          m_outputFactorsVec, m_filePath);
+                                          m_wpProducer, m_input,
+                                          m_output, m_filePath);
 }
 
 }

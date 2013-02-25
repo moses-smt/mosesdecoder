@@ -332,7 +332,6 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
 LanguageModel *ConstructKenLM(const std::string &description, const std::string &line)
 {
-  cerr << "line=" << line << endl;
   FactorType factorType;
   size_t nGramOrder;
   string filePath;

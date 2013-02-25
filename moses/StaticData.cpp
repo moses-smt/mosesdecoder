@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/check.hh"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -37,7 +38,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
@@ -656,8 +656,13 @@ bool StaticData::LoadData(Parameter *parameter)
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionaryTreeAdaptor") {
-      cerr << endl << line << endl;
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryOnDisk") {
+      PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
       vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);

@@ -46,8 +46,6 @@ protected:
   OnDiskPt::OnDiskWrapper m_dbWrapper;
   const LMList* m_languageModels;
   const WordPenaltyProducer* m_wpProducer;
-  std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
-  std::string m_filePath;
 
   void LoadTargetLookup();
 
@@ -63,13 +61,7 @@ public:
     return OnDisk;
   }
 
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-	    , const std::vector<float> &weight
-            , size_t tableLimit,
-            const LMList& languageModels,
-            const WordPenaltyProducer* wpProducer);
+  bool InitDictionary();
 
   // PhraseDictionary impl
   //! find list of translations that can translates src. Only for phrase input
