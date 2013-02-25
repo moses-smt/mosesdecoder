@@ -120,6 +120,8 @@ public:
 
   virtual bool ComputeValueInTranslationTable() const {return true;}
 
+  const std::string &GetFilePath() const { return m_filePath; }
+
 protected:
   size_t m_tableLimit;
 

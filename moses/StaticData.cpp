@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -667,6 +668,13 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
+    else if (feature == "PhraseDictionarySCFG") {
+      PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
+      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
