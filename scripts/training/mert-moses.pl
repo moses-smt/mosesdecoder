@@ -323,10 +323,8 @@ Options:
   --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
                                 change MIRA's hyperparameters such as regularization parameter C,
                                 BLEU decay factor, and the number of iterations of MIRA.
-  --phrase-weighting        ... Phrase-weighting framework main script
-  --phrase-weighting-trainer... Training method for phrase weighting (pro or mix) 
-  --phrase-weighting-table  ... Phrase tables for training mixture models
-  --phrase-weighting-tmcombine  Script for combining ttables
+  --promix-training=STRING  ... PRO-based mixture model training (Haddow, NAACL 2013)
+  --promix-tables=STRING    ... Phrase tables for PRO-based mixture model training.
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -949,7 +947,9 @@ while (1) {
     $cmd .= " -t mix ";
     $cmd .= join(" ", map {"-p $_"} @_PROMIX_TABLES_BIN);
     $cmd .= " -i $___DEV_F";
+    print "Starting promix optimisation at " . `date`;
     &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
+    print "Finished promix optimisation at " . `date`;
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
   } 
