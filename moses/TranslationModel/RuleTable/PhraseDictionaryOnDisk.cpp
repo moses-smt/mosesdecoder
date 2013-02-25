@@ -39,7 +39,6 @@ bool PhraseDictionaryOnDisk::InitDictionary()
   PrintUserTime("Start loading binary SCFG phrase table. ");
 
   const StaticData &staticData = StaticData::Instance();
-  vector<float> weight = staticData.GetWeights(this);
   m_languageModels = &staticData.GetLMList();
   m_wpProducer = staticData.GetWordPenaltyProducer();
 
@@ -51,7 +50,7 @@ bool PhraseDictionaryOnDisk::InitDictionary()
   CHECK(m_dbWrapper.GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
   CHECK(m_dbWrapper.GetMisc("NumSourceFactors") == m_input.size());
   CHECK(m_dbWrapper.GetMisc("NumTargetFactors") == m_output.size());
-  CHECK(m_dbWrapper.GetMisc("NumScores") == weight.size());
+  CHECK(m_dbWrapper.GetMisc("NumScores") == m_numScoreComponents);
 
   return true;
 }
