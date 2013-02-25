@@ -427,6 +427,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
   size_t numInputScores = 0;
   size_t numRealWordsInInput = 0;
+  map<string, size_t> ptIndices;
 
   if (GetParam("input-scores").size()) {
     numInputScores = Scan<size_t>(GetParam("input-scores")[0]);
@@ -487,6 +488,15 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         break;
       }
 
+      size_t ptInd;
+      if (ptIndices.find(ptType) == ptIndices.end()) {
+        ptIndices[ptType] = 0;
+        ptInd = 0;
+      }
+      else {
+        ptInd = ++ptIndices[ptType];
+      }
+
       // weights
       size_t numFFInd = (token.size() == 4) ? 2 : 3;
       size_t numFF = Scan<size_t>(token[numFFInd]);
@@ -499,7 +509,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
         ++currOldInd;
       }
-      AddWeight(ptType, currDict, weights);
+      AddWeight(ptType, ptInd, weights);
 
       // actual pt
       ptLine << ptType << " ";
