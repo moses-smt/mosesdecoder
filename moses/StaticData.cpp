@@ -627,7 +627,7 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     else if (feature == "SparsePhraseDictionaryFeature") {
       SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      //const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
       m_sparsePhraseDictionary.push_back(model);
     }
@@ -1160,14 +1160,13 @@ void StaticData::CollectFeatureFunctions()
   // put sparse feature into normal pt. TODO redo this
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     PhraseDictionary *pt = m_phraseDictionary[i];
-    pt->InitDictionary();
 
     if (i < m_sparsePhraseDictionary.size()) {
       SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
       pt->SetSparsePhraseDictionaryFeature(sparse);
     }
+    pt->InitDictionary();
   }
-
 }
 
 bool StaticData::CheckWeights() const

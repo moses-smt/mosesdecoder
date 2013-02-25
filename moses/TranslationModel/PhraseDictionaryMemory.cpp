@@ -140,8 +140,7 @@ bool PhraseDictionaryMemory::InitDictionary()
     if (pipes) pipes++; //counts
     if (pipes) {
       //sparse features
-      SparsePhraseDictionaryFeature* spdf = 
-        GetSparsePhraseDictionaryFeature();
+      SparsePhraseDictionaryFeature* spdf = GetSparsePhraseDictionaryFeature();
       if (spdf) {
         sparse.Assign(spdf,(pipes++)->as_string());
       }

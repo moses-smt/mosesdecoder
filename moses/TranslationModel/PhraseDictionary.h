@@ -88,14 +88,12 @@ public:
   SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
     return m_sparsePhraseDictionaryFeature;
   }
-
-  virtual bool ComputeValueInTranslationOption() const
-  { return true; }
-
-
   void SetSparsePhraseDictionaryFeature(SparsePhraseDictionaryFeature *spdf) {
     m_sparsePhraseDictionaryFeature = spdf;
   }
+
+  virtual bool ComputeValueInTranslationOption() const
+  { return true; }
 
   //Initialises the dictionary (may involve loading from file)
   virtual bool InitDictionary()
