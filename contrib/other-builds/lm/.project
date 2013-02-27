@@ -142,11 +142,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/build_binary</locationURI>
 		</link>
 		<link>
-			<name>build_binary.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/build_binary.cc</locationURI>
-		</link>
-		<link>
 			<name>clean.sh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/clean.sh</locationURI>
