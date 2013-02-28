@@ -83,7 +83,6 @@ namespace Moses
         const float weight = boost::lexical_cast<float>(*tableWeights);
         m_weights.back().push_back(weight);
         sum += weight;
-        cerr << "Interpolation weight " << weight << endl;
       }
       UTIL_THROW_IF(m_weights.back().size() != m_dictionaries.size(), util::Exception,
         "Number of weights (" << m_weights.back().size() << 
