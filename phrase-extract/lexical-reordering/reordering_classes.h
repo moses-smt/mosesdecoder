@@ -12,6 +12,8 @@
 #include <string>
 #include <fstream>
 
+#include "util/string_piece.hh"
+
 
 enum ORIENTATION {MONO, SWAP, DRIGHT, DLEFT, OTHER, NOMONO};
 
@@ -27,12 +29,12 @@ private:
   std::vector<double> count_f_next;
 
 protected:
-  virtual ORIENTATION getType(const std::string& s);
+  virtual ORIENTATION getType(const StringPiece& s);
 
 public:
   ModelScore();
   virtual ~ModelScore();
-  void add_example(const std::string& previous, std::string& next);
+  void add_example(const StringPiece& previous, const StringPiece& next, float weight);
   void reset_fe();
   void reset_f();
   const std::vector<double>& get_scores_fe_prev() const;
@@ -46,25 +48,25 @@ public:
 class ModelScoreMSLR : public ModelScore
 {
 protected:
-  virtual ORIENTATION getType(const std::string& s);
+  virtual ORIENTATION getType(const StringPiece& s);
 };
 
 class ModelScoreLR : public ModelScore
 {
 protected:
-  virtual ORIENTATION getType(const std::string& s);
+  virtual ORIENTATION getType(const StringPiece& s);
 };
 
 class ModelScoreMSD : public ModelScore
 {
 protected:
-  virtual ORIENTATION getType(const std::string& s);
+  virtual ORIENTATION getType(const StringPiece& s);
 };
 
 class ModelScoreMonotonicity : public ModelScore
 {
 protected:
-  virtual ORIENTATION getType(const std::string& s);
+  virtual ORIENTATION getType(const StringPiece& s);
 };
 
 //Class for calculating total counts, and to calculate smoothing

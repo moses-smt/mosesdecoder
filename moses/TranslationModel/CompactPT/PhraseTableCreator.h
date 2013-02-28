@@ -196,6 +196,7 @@ class PhraseTableCreator
   private:
     std::string m_inPath;
     std::string m_outPath;
+    std::string m_tempfilePath;
     
     std::FILE* m_outFile;
     
@@ -252,10 +253,10 @@ class PhraseTableCreator
     std::vector<size_t> m_lexicalTableIndex;
     std::vector<SrcTrg> m_lexicalTable;
     
-    StringVector<unsigned char, unsigned long, MmapAllocator>
+    StringVector<unsigned char, unsigned long, MmapAllocator>*
     m_encodedTargetPhrases;
         
-    StringVector<unsigned char, unsigned long, MmapAllocator>
+    StringVector<unsigned char, unsigned long, MmapAllocator>*
     m_compressedTargetPhrases;
     
     boost::unordered_map<std::string, unsigned> m_targetSymbolsMap;
@@ -346,6 +347,7 @@ class PhraseTableCreator
     
     PhraseTableCreator(std::string inPath,
                        std::string outPath,
+                       std::string tempfilePath,
                        size_t numScoreComponent = 5,
                        size_t sortScoreIndex = 2,
                        Coding coding = PREnc,

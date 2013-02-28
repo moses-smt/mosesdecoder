@@ -35,15 +35,18 @@ vector<WORD_ID> Vocabulary::Tokenize( const char input[] ) {
 WORD_ID Vocabulary::StoreIfNew( const WORD& word ) {
 
   { // read=lock scope
+#ifdef WITH_THREADS
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-
+#endif
     map<WORD, WORD_ID>::iterator i = lookup.find( word );
 
     if( i != lookup.end() )
       return i->second;
   }
   
+#ifdef WITH_THREADS
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
   WORD_ID id = vocab.size();
   vocab.push_back( word );
   lookup[ word ] = id;
@@ -51,8 +54,9 @@ WORD_ID Vocabulary::StoreIfNew( const WORD& word ) {
 }
 
 WORD_ID Vocabulary::GetWordID( const WORD &word ) {
+#ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
-
+#endif
   map<WORD, WORD_ID>::iterator i = lookup.find( word );
   if( i == lookup.end() )
     return 0;

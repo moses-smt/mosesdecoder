@@ -79,11 +79,12 @@ template <typename ValueT = unsigned char, typename PosT = unsigned int,
 class StringVector
 {    
   protected:
-    std::vector<ValueT, Allocator<ValueT> > m_charArray;
-    MonotonicVector<PosT, unsigned int, 32, Allocator> m_positions;
     bool m_sorted;
     bool m_memoryMapped;
-
+    
+    std::vector<ValueT, Allocator<ValueT> >* m_charArray;
+    MonotonicVector<PosT, unsigned int, 32> m_positions; 
+    
     virtual const ValueT* value_ptr(PosT i) const;
     
   public:
@@ -148,12 +149,18 @@ class StringVector
     typedef StringIterator string_iterator;
     
     StringVector();
+    StringVector(Allocator<ValueT> alloc);
+    
+    virtual ~StringVector()
+    {
+      delete m_charArray;
+    }
     
     void swap(StringVector<ValueT, PosT, Allocator> &c)
     {
       m_positions.commit();
       m_positions.swap(c.m_positions);
-      m_charArray.swap(c.m_charArray);
+      m_charArray->swap(*c.m_charArray);
       
       bool temp = m_sorted;
       m_sorted = c.m_sorted;
@@ -176,7 +183,7 @@ class StringVector
     
     void clear()
     {
-      m_charArray.clear();
+      m_charArray->clear();
       m_sorted = true;
       m_positions = MonotonicVector<PosT, unsigned int, 32>();
     }
@@ -201,7 +208,7 @@ class StringVector
       size += std::fread(&m_sorted, sizeof(bool), 1, in) * sizeof(bool);
       size += m_positions.load(in, m_memoryMapped);
       
-      size += loadCharArray(m_charArray, in, m_memoryMapped);       
+      size += loadCharArray(*m_charArray, in, m_memoryMapped);       
       return size;
     }
     
@@ -272,7 +279,7 @@ class StringVector
     
       size_t valSize = size2();
       byteSize += ThrowingFwrite(&valSize, sizeof(size_t), 1, out) * sizeof(size_t);
-      byteSize += ThrowingFwrite(&m_charArray[0], sizeof(ValueT), valSize, out) * sizeof(ValueT);
+      byteSize += ThrowingFwrite(&(*m_charArray)[0], sizeof(ValueT), valSize, out) * sizeof(ValueT);
 
       return byteSize;
     }
@@ -374,7 +381,11 @@ OStream& operator<<(OStream &os, ValueIteratorRange<ValueIteratorT> cr)
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>
 StringVector<ValueT, PosT, Allocator>::StringVector()
- : m_sorted(true), m_memoryMapped(false) { }
+ : m_sorted(true), m_memoryMapped(false), m_charArray(new std::vector<ValueT, Allocator<ValueT> >()) { }
+
+template<typename ValueT, typename PosT, template <typename> class Allocator>
+StringVector<ValueT, PosT, Allocator>::StringVector(Allocator<ValueT> alloc)
+ : m_sorted(true), m_memoryMapped(false), m_charArray(new std::vector<ValueT, Allocator<ValueT> >(alloc)) { }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator> 
 template <typename StringT>
@@ -384,7 +395,7 @@ void StringVector<ValueT, PosT, Allocator>::push_back(StringT s)
         m_sorted = false;
 
     m_positions.push_back(size2());
-    std::copy(s.begin(), s.end(), std::back_inserter(m_charArray));
+    std::copy(s.begin(), s.end(), std::back_inserter(*m_charArray));
 }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator> 
@@ -435,7 +446,7 @@ PosT StringVector<ValueT, PosT, Allocator>::size() const
 template<typename ValueT, typename PosT, template <typename> class Allocator>
 PosT StringVector<ValueT, PosT, Allocator>::size2() const
 {
-    return m_charArray.size();
+    return m_charArray->size();
 }
     
 template<typename ValueT, typename PosT, template <typename> class Allocator>
@@ -468,7 +479,7 @@ PosT StringVector<ValueT, PosT, Allocator>::length(PosT i) const
 template<typename ValueT, typename PosT, template <typename> class Allocator>
 const ValueT* StringVector<ValueT, PosT, Allocator>::value_ptr(PosT i) const
 {
-    return &m_charArray[m_positions[i]];
+    return &(*m_charArray)[m_positions[i]];
 }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>

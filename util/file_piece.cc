@@ -1,13 +1,15 @@
 #include "util/file_piece.hh"
 
+#include "util/double-conversion/double-conversion.h"
 #include "util/exception.hh"
 #include "util/file.hh"
 #include "util/mmap.hh"
-#ifdef WIN32
+
+#if defined(_WIN32) || defined(_WIN64)
 #include <io.h>
 #else
 #include <unistd.h>
-#endif // WIN32
+#endif
 
 #include <iostream>
 #include <string>
@@ -34,10 +36,29 @@ FilePiece::FilePiece(const char *name, std::ostream *show_progress, std::size_t 
   Initialize(name, show_progress, min_buffer);
 }
 
-FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std::size_t min_buffer)  : 
+namespace {
+std::string NamePossiblyFind(int fd, const char *name) {
+  if (name) return name;
+  return NameFromFD(fd);
+}
+} // namespace
+
+FilePiece::FilePiece(int fd, const char *name, std::ostream *show_progress, std::size_t min_buffer) : 
   file_(fd), total_size_(SizeFile(file_.get())), page_(SizePage()),
-  progress_(total_size_, total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + name) {
-  Initialize(name, show_progress, min_buffer);
+  progress_(total_size_, total_size_ == kBadSize ? NULL : show_progress, std::string("Reading ") + NamePossiblyFind(fd, name)) {
+  Initialize(NamePossiblyFind(fd, name).c_str(), show_progress, min_buffer);
+}
+
+FilePiece::FilePiece(std::istream &stream, const char *name, std::size_t min_buffer) :
+  total_size_(kBadSize), page_(SizePage()) {
+  InitializeNoRead("istream", min_buffer);
+
+  fallback_to_read_ = true;
+  data_.reset(MallocOrThrow(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
+  position_ = data_.begin();
+  position_end_ = position_;
+  
+  fell_back_.Reset(stream);
 }
 
 FilePiece::~FilePiece() {}
@@ -74,7 +95,8 @@ unsigned long int FilePiece::ReadULong() {
   return ReadNumber<unsigned long int>();
 }
 
-void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer)  {
+// Factored out so that istream can call this.
+void FilePiece::InitializeNoRead(const char *name, std::size_t min_buffer) {
   file_name_ = name;
 
   default_map_size_ = page_ * std::max<std::size_t>((min_buffer / page_ + 1), 2);
@@ -82,6 +104,10 @@ void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::s
   position_end_ = NULL;
   mapped_offset_ = 0;
   at_end_ = false;
+}
+
+void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer) {
+  InitializeNoRead(name, min_buffer);
 
   if (total_size_ == kBadSize) {
     // So the assertion passes.  
@@ -94,7 +120,7 @@ void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::s
   }
   Shift();
   // gzip detect.
-  if ((position_end_ - position_) >= ReadCompressed::kMagicSize && ReadCompressed::DetectCompressedMagic(position_)) {
+  if ((position_end_ >= position_ + ReadCompressed::kMagicSize) && ReadCompressed::DetectCompressedMagic(position_)) {
     if (!fallback_to_read_) {
       at_end_ = false;
       TransitionToRead();
@@ -103,21 +129,33 @@ void FilePiece::Initialize(const char *name, std::ostream *show_progress, std::s
 }
 
 namespace {
-void ParseNumber(const char *begin, char *&end, float &out) {
-#if defined(sun) || defined(WIN32)
-  out = static_cast<float>(strtod(begin, &end));
-#else
-  out = strtof(begin, &end);
-#endif
+
+static const double_conversion::StringToDoubleConverter kConverter(
+    double_conversion::StringToDoubleConverter::ALLOW_TRAILING_JUNK | double_conversion::StringToDoubleConverter::ALLOW_LEADING_SPACES,
+    std::numeric_limits<double>::quiet_NaN(),
+    std::numeric_limits<double>::quiet_NaN(),
+    "inf",
+    "NaN");
+
+void ParseNumber(const char *begin, const char *&end, float &out) {
+  int count;
+  out = kConverter.StringToFloat(begin, end - begin, &count);
+  end = begin + count;
 }
-void ParseNumber(const char *begin, char *&end, double &out) {
-  out = strtod(begin, &end);
+void ParseNumber(const char *begin, const char *&end, double &out) {
+  int count;
+  out = kConverter.StringToDouble(begin, end - begin, &count);
+  end = begin + count;
 }
-void ParseNumber(const char *begin, char *&end, long int &out) {
-  out = strtol(begin, &end, 10);
+void ParseNumber(const char *begin, const char *&end, long int &out) {
+  char *silly_end;
+  out = strtol(begin, &silly_end, 10);
+  end = silly_end;
 }
-void ParseNumber(const char *begin, char *&end, unsigned long int &out) {
-  out = strtoul(begin, &end, 10);
+void ParseNumber(const char *begin, const char *&end, unsigned long int &out) {
+  char *silly_end;
+  out = strtoul(begin, &silly_end, 10);
+  end = silly_end;
 }
 } // namespace
 
@@ -127,16 +165,17 @@ template <class T> T FilePiece::ReadNumber() {
     if (at_end_) {
       // Hallucinate a null off the end of the file.
       std::string buffer(position_, position_end_);
-      char *end;
+      const char *buf = buffer.c_str();
+      const char *end = buf + buffer.size();
       T ret;
-      ParseNumber(buffer.c_str(), end, ret);
-      if (buffer.c_str() == end) throw ParseNumberException(buffer);
-      position_ += end - buffer.c_str();
+      ParseNumber(buf, end, ret);
+      if (buf == end) throw ParseNumberException(buffer);
+      position_ += end - buf;
       return ret;
     }
     Shift();
   }
-  char *end;
+  const char *end = last_space_;
   T ret;
   ParseNumber(position_, end, ret);
   if (end == position_) throw ParseNumberException(ReadDelimited());
@@ -217,8 +256,7 @@ void FilePiece::TransitionToRead() {
   assert(!fallback_to_read_);
   fallback_to_read_ = true;
   data_.reset();
-  data_.reset(malloc(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
-  UTIL_THROW_IF(!data_.get(), ErrnoException, "malloc failed for " << default_map_size_);
+  data_.reset(MallocOrThrow(default_map_size_), default_map_size_, scoped_memory::MALLOC_ALLOCATED);
   position_ = data_.begin();
   position_end_ = position_;
 

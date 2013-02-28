@@ -10,6 +10,9 @@
 // boost.  Also adds option to print nothing.  
 
 namespace util {
+
+extern const char kProgressBanner[];
+
 class ErsatzProgress {
   public:
     // No output.  
@@ -32,7 +35,6 @@ class ErsatzProgress {
 
     void Set(uint64_t to) {
       if ((current_ = to) >= next_) Milestone();
-      Milestone();
     }
 
     void Finished() {

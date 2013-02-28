@@ -1,10 +1,14 @@
 #include "lm/model.hh"
+#include "lm/sizes.hh"
 #include "util/file_piece.hh"
+#include "util/usage.hh"
 
+#include <algorithm>
 #include <cstdlib>
 #include <exception>
 #include <iostream>
 #include <iomanip>
+#include <limits>
 
 #include <math.h>
 #include <stdlib.h>
@@ -19,8 +23,8 @@ namespace lm {
 namespace ngram {
 namespace {
 
-void Usage(const char *name) {
-  std::cerr << "Usage: " << name << " [-u log10_unknown_probability] [-s] [-i] [-w mmap|after] [-p probing_multiplier] [-t trie_temporary] [-m trie_building_megabytes] [-q bits] [-b bits] [-a bits] [type] input.arpa [output.mmap]\n\n"
+void Usage(const char *name, const char *default_mem) {
+  std::cerr << "Usage: " << name << " [-u log10_unknown_probability] [-s] [-i] [-w mmap|after] [-p probing_multiplier] [-T trie_temporary] [-S trie_building_mem] [-q bits] [-b bits] [-a bits] [type] input.arpa [output.mmap]\n\n"
 "-u sets the log10 probability for <unk> if the ARPA file does not have one.\n"
 "   Default is -100.  The ARPA file will always take precedence.\n"
 "-s allows models to be built even if they do not have <s> and </s>.\n"
@@ -38,8 +42,11 @@ void Usage(const char *name) {
 "trie is a straightforward trie with bit-level packing.  It uses the least\n"
 "memory and is still faster than SRI or IRST.  Building the trie format uses an\n"
 "on-disk sort to save memory.\n"
-"-t is the temporary directory prefix.  Default is the output file name.\n"
-"-m limits memory use for sorting.  Measured in MB.  Default is 1024MB.\n"
+"-T is the temporary directory prefix.  Default is the output file name.\n"
+"-S determines memory use for sorting.  Default is " << default_mem << ".  This is compatible\n"
+"   with GNU sort.  The number is followed by a unit: \% for percent of physical\n"
+"   memory, b for bytes, K for Kilobytes, M for megabytes, then G,T,P,E,Z,Y.  \n"
+"   Default unit is K for Kilobytes.\n"
 "-q turns quantization on and sets the number of bits (e.g. -q 8).\n"
 "-b sets backoff quantization bits.  Requires -q and defaults to that value.\n"
 "-a compresses pointers using an array of offsets.  The parameter is the\n"
@@ -83,47 +90,6 @@ void ParseFileList(const char *from, std::vector<std::string> &to) {
   }
 }
 
-void ShowSizes(const char *file, const lm::ngram::Config &config) {
-  std::vector<uint64_t> counts;
-  util::FilePiece f(file);
-  lm::ReadARPACounts(f, counts);
-  uint64_t sizes[6];
-  sizes[0] = ProbingModel::Size(counts, config);
-  sizes[1] = RestProbingModel::Size(counts, config);
-  sizes[2] = TrieModel::Size(counts, config);
-  sizes[3] = QuantTrieModel::Size(counts, config);
-  sizes[4] = ArrayTrieModel::Size(counts, config);
-  sizes[5] = QuantArrayTrieModel::Size(counts, config);
-  uint64_t max_length = *std::max_element(sizes, sizes + sizeof(sizes) / sizeof(uint64_t));
-  uint64_t min_length = *std::min_element(sizes, sizes + sizeof(sizes) / sizeof(uint64_t));
-  uint64_t divide;
-  char prefix;
-  if (min_length < (1 << 10) * 10) {
-    prefix = ' ';
-    divide = 1;
-  } else if (min_length < (1 << 20) * 10) {
-    prefix = 'k';
-    divide = 1 << 10;
-  } else if (min_length < (1ULL << 30) * 10) {
-    prefix = 'M';
-    divide = 1 << 20;
-  } else {
-    prefix = 'G';
-    divide = 1 << 30;
-  }
-  long int length = std::max<long int>(2, static_cast<long int>(ceil(log10((double) max_length / divide))));
-  std::cout << "Memory estimate:\ntype    ";
-  // right align bytes.  
-  for (long int i = 0; i < length - 2; ++i) std::cout << ' ';
-  std::cout << prefix << "B\n"
-    "probing " << std::setw(length) << (sizes[0] / divide) << " assuming -p " << config.probing_multiplier << "\n"
-    "probing " << std::setw(length) << (sizes[1] / divide) << " assuming -r models -p " << config.probing_multiplier << "\n"
-    "trie    " << std::setw(length) << (sizes[2] / divide) << " without quantization\n"
-    "trie    " << std::setw(length) << (sizes[3] / divide) << " assuming -q " << (unsigned)config.prob_bits << " -b " << (unsigned)config.backoff_bits << " quantization \n"
-    "trie    " << std::setw(length) << (sizes[4] / divide) << " assuming -a " << (unsigned)config.pointer_bhiksha_bits << " array pointer compression\n"
-    "trie    " << std::setw(length) << (sizes[5] / divide) << " assuming -a " << (unsigned)config.pointer_bhiksha_bits << " -q " << (unsigned)config.prob_bits << " -b " << (unsigned)config.backoff_bits<< " array pointer compression and quantization\n";
-}
-
 void ProbingQuantizationUnsupported() {
   std::cerr << "Quantization is only implemented in the trie data structure." << std::endl;
   exit(1);
@@ -136,11 +102,14 @@ void ProbingQuantizationUnsupported() {
 int main(int argc, char *argv[]) {
   using namespace lm::ngram;
 
+  const char *default_mem = util::GuessPhysicalMemory() ? "80%" : "1G";
+
   try {
     bool quantize = false, set_backoff_bits = false, bhiksha = false, set_write_method = false, rest = false;
     lm::ngram::Config config;
+    config.building_memory = util::ParseSize(default_mem);
     int opt;
-    while ((opt = getopt(argc, argv, "q:b:a:u:p:t:m:w:sir:")) != -1) {
+    while ((opt = getopt(argc, argv, "q:b:a:u:p:t:T:m:S:w:sir:")) != -1) {
       switch(opt) {
         case 'q':
           config.prob_bits = ParseBitCount(optarg);
@@ -161,11 +130,15 @@ int main(int argc, char *argv[]) {
         case 'p':
           config.probing_multiplier = ParseFloat(optarg);
           break;
-        case 't':
+        case 't': // legacy
+        case 'T':
           config.temporary_directory_prefix = optarg;
           break;
-        case 'm':
+        case 'm': // legacy
           config.building_memory = ParseUInt(optarg) * 1048576;
+          break;
+        case 'S':
+          config.building_memory = std::min(static_cast<uint64_t>(std::numeric_limits<std::size_t>::max()), util::ParseSize(optarg));
           break;
         case 'w':
           set_write_method = true;
@@ -174,7 +147,7 @@ int main(int argc, char *argv[]) {
           } else if (!strcmp(optarg, "after")) {
             config.write_method = Config::WRITE_AFTER;
           } else {
-            Usage(argv[0]);
+            Usage(argv[0], default_mem);
           }
           break;
         case 's':
@@ -189,7 +162,7 @@ int main(int argc, char *argv[]) {
           config.rest_function = Config::REST_LOWER;
           break;
         default:
-          Usage(argv[0]);
+          Usage(argv[0], default_mem);
       }
     }
     if (!quantize && set_backoff_bits) {
@@ -212,7 +185,7 @@ int main(int argc, char *argv[]) {
       from_file = argv[optind + 1];
       config.write_mmap = argv[optind + 2];
     } else {
-      Usage(argv[0]);
+      Usage(argv[0], default_mem);
     }
     if (!strcmp(model_type, "probing")) {
       if (!set_write_method) config.write_method = Config::WRITE_AFTER;
@@ -242,7 +215,7 @@ int main(int argc, char *argv[]) {
         }
       }
     } else {
-      Usage(argv[0]);
+      Usage(argv[0], default_mem);
     }
   }
   catch (const std::exception &e) {

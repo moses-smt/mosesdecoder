@@ -148,6 +148,7 @@ my $mertdir = undef; # path to new mert directory
 my $mertargs = undef; # args to pass through to mert & extractor
 my $mertmertargs = undef; # args to pass through to mert only
 my $extractorargs = undef; # args to pass through to extractor only
+my $proargs = undef; # args to pass through to pro only
 
 # Args to pass through to batch mira only.  This flags is useful to
 # change MIRA's hyperparameters such as regularization parameter C,
@@ -197,6 +198,7 @@ GetOptions(
   "mertdir=s" => \$mertdir,
   "mertargs=s" => \$mertargs,
   "extractorargs=s" => \$extractorargs,
+  "proargs=s" => \$proargs,
   "mertmertargs=s" => \$mertmertargs,
   "rootdir=s" => \$SCRIPTS_ROOTDIR,
   "filtercmd=s" => \$filtercmd, # allow to override the default location
@@ -358,12 +360,12 @@ my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set t
 
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
   print "Could not find $pro_optimizer, installing it in $mertdir\n";
-  my $megam_url = "http://www.cs.utah.edu/~hal/megam/";
+  my $megam_url = "http://www.umiacs.umd.edu/~hal/megam/";
   if (&is_mac_osx()) {
     die "Error: Sorry for Mac OS X users! Please get the source code of megam and compile by hand. Please see $megam_url for details.";
   }
 
-  `cd $mertdir; wget http://www.cs.utah.edu/~hal/megam/megam_i686.opt.gz;`;
+  `cd $mertdir; wget $megam_url/megam_i686.opt.gz;`;
   `gunzip $pro_optimizer.gz`;
   `chmod +x $pro_optimizer`;
   die("ERROR: Installation of megam_i686.opt failed! Install by hand from $megam_url") unless -x $pro_optimizer;
@@ -397,6 +399,8 @@ $extractorargs = "" unless $extractorargs;
 $mert_extract_args .= " $extractorargs";
 
 $mertmertargs = "" if !defined $mertmertargs;
+
+$proargs = "" unless $proargs;
 
 my $mert_mert_args = "$mertargs $mertmertargs";
 $mert_mert_args =~ s/\-+(binary|b)\b//;
@@ -788,11 +792,11 @@ while (1) {
   my %sparse_weights; # sparse features
   my $pro_optimizer_cmd = "$pro_optimizer $megam_default_options run$run.pro.data";
   if ($___PAIRWISE_RANKED_OPTIMIZER) {  # pro optimization
-    $cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
+    $cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; echo 'not used' > $weights_out_file; $pro_optimizer_cmd";
     &submit_or_exec($cmd, $mert_outfile, $mert_logfile);
   } elsif ($___PRO_STARTING_POINT) {  # First, run pro, then mert
     # run pro...
-    my $pro_cmd = "$mert_pro_cmd $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
+    my $pro_cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
     ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);

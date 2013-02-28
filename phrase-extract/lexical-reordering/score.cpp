@@ -13,15 +13,28 @@
 #include <sstream>
 #include <cstdlib>
 #include <cstring>
-#include "InputFileStream.h"
 
+#include "util/exception.hh"
+#include "util/file_piece.hh"
+#include "util/string_piece.hh"
+#include "util/tokenize_piece.hh"
+
+#include "InputFileStream.h"
 #include "reordering_classes.h"
 
 using namespace std;
 
-void split_line(const string& line, string& foreign, string& english, string& wbe, string& phrase, string& hier);
-void get_orientations(const string& pair, string& previous, string& next);
+void split_line(const StringPiece& line, StringPiece& foreign, StringPiece& english, StringPiece& wbe, StringPiece& phrase, StringPiece& hier, float& weight);
+void get_orientations(const StringPiece& pair, StringPiece& previous, StringPiece& next);
 
+class FileFormatException : public util::Exception
+{
+  public:
+    FileFormatException() throw() {
+     *this << "Invalid extract file format: ";
+    }
+    ~FileFormatException() throw() {}
+};
 
 int main(int argc, char* argv[])
 {
@@ -38,11 +51,7 @@ int main(int argc, char* argv[])
   double smoothingValue = atof(argv[2]);
   string filepath = argv[3];
 
-  Moses::InputFileStream eFile(extractFileName);
-  if (!eFile) {
-    cerr << "Could not open the extract file " << extractFileName <<"for scoring of lexical reordering models\n";
-    exit(1);
-  }
+  util::FilePiece eFile(extractFileName);
 
   bool smoothWithCounts = false;
   map<string,ModelScore*> modelScores;
@@ -51,8 +60,8 @@ int main(int argc, char* argv[])
   bool phrase = false;
   bool wbe = false;
 
-  string e,f,w,p,h;
-  string prev, next;
+  StringPiece e,f,w,p,h;
+  StringPiece prev, next;
 
   int i = 4;
   while (i<argc) {
@@ -96,20 +105,27 @@ int main(int argc, char* argv[])
   ////////////////////////////////////
   //calculate smoothing
   if (smoothWithCounts) {
-    string line;
-    while (getline(eFile,line)) {
-      split_line(line,e,f,w,p,h);
+    util::FilePiece eFileForCounts(extractFileName);
+    while (true) {
+      StringPiece line;
+      try {
+        line = eFileForCounts.ReadLine();
+      } catch (util::EndOfFileException &e) {
+        break;
+      }
+      float weight = 1;
+      split_line(line,e,f,w,p,h,weight);
       if (hier) {
         get_orientations(h, prev, next);
-        modelScores["hier"]->add_example(prev,next);
+        modelScores["hier"]->add_example(prev,next,weight);
       }
       if (phrase) {
         get_orientations(p, prev, next);
-        modelScores["phrase"]->add_example(prev,next);
+        modelScores["phrase"]->add_example(prev,next,weight);
       }
       if (wbe) {
         get_orientations(w, prev, next);
-        modelScores["wbe"]->add_example(prev,next);
+        modelScores["wbe"]->add_example(prev,next,weight);
       }
     }
 
@@ -118,9 +134,6 @@ int main(int argc, char* argv[])
       models[i]->createSmoothing(smoothingValue);
     }
 
-    //reopen eFile
-    eFile.Close();
-    eFile.Open(extractFileName);
   } else {
     //constant smoothing
     for (size_t i=0; i<models.size(); ++i) {
@@ -130,14 +143,21 @@ int main(int argc, char* argv[])
 
   ////////////////////////////////////
   //calculate scores for reordering table
-  string line,f_current,e_current;
+  string f_current,e_current;
   bool first = true;
-  while (getline(eFile, line)) {
-    split_line(line,f,e,w,p,h);
+  while (true) {
+    StringPiece line;
+    try {
+      line = eFile.ReadLine();
+    } catch (util::EndOfFileException &e) {
+      break;
+    }
+    float weight = 1;
+    split_line(line,f,e,w,p,h,weight);
 
     if (first) {
-      f_current = f;
-      e_current = e;
+      f_current = f.as_string(); //FIXME: Avoid the copy.
+      e_current = e.as_string();
       first = false;
     } else if (f.compare(f_current) != 0 || e.compare(e_current) != 0) {
       //fe - score
@@ -159,30 +179,30 @@ int main(int argc, char* argv[])
           it->second->reset_f();
         }
       }
-      f_current = f;
-      e_current = e;
+      f_current = f.as_string();
+      e_current = e.as_string();
     }
 
     // uppdate counts
     if (hier) {
       get_orientations(h, prev, next);
-      modelScores["hier"]->add_example(prev,next);
+      modelScores["hier"]->add_example(prev,next,weight);
     }
     if (phrase) {
       get_orientations(p, prev, next);
-      modelScores["phrase"]->add_example(prev,next);
+      modelScores["phrase"]->add_example(prev,next,weight);
     }
     if (wbe) {
       get_orientations(w, prev, next);
-      modelScores["wbe"]->add_example(prev,next);
+      modelScores["wbe"]->add_example(prev,next,weight);
     }
   }
   //Score the last phrases
   for (size_t i=0; i<models.size(); ++i) {
-    models[i]->score_fe(f,e);
+    models[i]->score_fe(f_current,e_current);
   }
   for (size_t i=0; i<models.size(); ++i) {
-    models[i]->score_f(f);
+    models[i]->score_f(f_current);
   }
 
   //Zip all files
@@ -193,33 +213,57 @@ int main(int argc, char* argv[])
   return 0;
 }
 
-
-
-void split_line(const string& line, string& foreign, string& english, string& wbe, string& phrase, string& hier)
-{
-
-  int begin = 0;
-  int end = line.find(" ||| ");
-  foreign = line.substr(begin, end - begin);
-
-  begin = end+5;
-  end = line.find(" ||| ", begin);
-  english = line.substr(begin, end - begin);
-
-  begin = end+5;
-  end = line.find(" | ", begin);
-  wbe = line.substr(begin, end - begin);
-
-  begin = end+3;
-  end = line.find(" | ", begin);
-  phrase = line.substr(begin, end - begin);
-
-  begin = end+3;
-  hier = line.substr(begin, line.size() - begin);
+template <class It> StringPiece
+GrabOrDie(It &it, const StringPiece& line) {
+    UTIL_THROW_IF(!it, FileFormatException, line.as_string());
+    return *it++;
 }
 
-void get_orientations(const string& pair, string& previous, string& next)
+
+void split_line(
+  const StringPiece& line,
+  StringPiece& foreign,
+  StringPiece& english,
+  StringPiece& wbe,
+  StringPiece& phrase,
+  StringPiece& hier,
+  float& weight)
 {
-  istringstream is(pair);
-  is >> previous >> next;
+  /*Format is source ||| target ||| orientations
+    followed by one of the following 4 possibilities
+      eps
+       ||| weight
+       | phrase | hier
+       | phrase | hier ||| weight
+  */
+  
+  util::TokenIter<util::MultiCharacter> pipes(line, util::MultiCharacter(" ||| "));
+  foreign = GrabOrDie(pipes,line);
+  english = GrabOrDie(pipes,line);
+  StringPiece next = GrabOrDie(pipes,line);
+  
+  util::TokenIter<util::MultiCharacter> singlePipe(next, util::MultiCharacter(" | "));
+  wbe = GrabOrDie(singlePipe,line);
+  if (singlePipe) {
+    phrase = GrabOrDie(singlePipe, line);
+    hier = GrabOrDie(singlePipe, line);
+  } else {
+    phrase.clear();
+    hier.clear();
+  }
+
+  if (pipes) {
+    // read the weight
+    char* errIndex;
+    next = *pipes++;
+    weight = static_cast<float>(strtod(next.data(), &errIndex));
+    UTIL_THROW_IF(errIndex == next.data(), FileFormatException, line.as_string());
+  }
+}
+
+void get_orientations(const StringPiece& pair, StringPiece& previous, StringPiece& next)
+{
+  util::TokenIter<util::SingleCharacter> tok(pair, util::SingleCharacter(' '));
+  previous = GrabOrDie(tok,pair);
+  next  = GrabOrDie(tok,pair);
 }

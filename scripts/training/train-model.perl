@@ -39,7 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    $_SPARSE_TRANSLATION_TABLE, @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_CORPUS, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $IGNORE);
 my $_CORES = 1;
 
 my $debug = 0; # debug this script, do not delete any files in debug mode
@@ -132,7 +132,9 @@ $_HELP = 1
 		       'baseline-extract=s' => \$_BASELINE_EXTRACT,
 		       'baseline-corpus=s' => \$_BASELINE_CORPUS,
 		       'baseline-alignment=s' => \$_BASELINE_ALIGNMENT,
-		       'cores=i' => \$_CORES
+		       'cores=i' => \$_CORES,
+           'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
+           'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
                );
 
 if ($_HELP) {
@@ -244,7 +246,12 @@ if ($STEPS[1] || $STEPS[2])
 		}
 		print STDERR "Using single-thread GIZA\n";
 	} else {
-		$GIZA = "$_EXTERNAL_BINDIR/mgiza";
+	        # accept either "mgiza" or "mgizapp" and either "snt2cooc.out" or "snt2cooc"
+	        if (-x "$_EXTERNAL_BINDIR/mgiza") {
+		        $GIZA = "$_EXTERNAL_BINDIR/mgiza";
+ 	        } elsif (-x "$_EXTERNAL_BINDIR/mgizapp") {
+		        $GIZA = "$_EXTERNAL_BINDIR/mgizapp";
+	        }
 		if (-x "$_EXTERNAL_BINDIR/snt2cooc") {
 			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
 		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $_EXTERNAL_BINDIR
@@ -1253,7 +1260,8 @@ sub get_lexical_factored {
 		     $___LEXICAL_COUNTS,
                      $_BASELINE_CORPUS.".".$___F,
                      $_BASELINE_CORPUS.".".$___E,
-                     $_BASELINE_ALIGNMENT);
+                     $_BASELINE_ALIGNMENT,
+                     $_INSTANCE_WEIGHTS_FILE);
     }
     else {
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
@@ -1274,7 +1282,8 @@ sub get_lexical_factored {
 			 $___LEXICAL_COUNTS,
                          $_BASELINE_CORPUS.".".$factor_f.".".$___F,
                          $_BASELINE_CORPUS.".".$factor_e.".".$___E,
-                         $_BASELINE_ALIGNMENT);
+                         $_BASELINE_ALIGNMENT,
+                         $_INSTANCE_WEIGHTS_FILE);
 	}
     }
 }
@@ -1417,11 +1426,12 @@ sub extract_phrase {
         $cmd .= " orientation";
         $cmd .= get_extract_reordering_flags();
         $cmd .= " --NoTTable" if !$ttable_flag;
-        $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
       }
+      $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
     
     $cmd .= " --GZOutput ";
+    $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
     $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
     
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
@@ -1980,8 +1990,12 @@ sub create_ini {
   }
   print INI "\n# language model weights\n[weight-l]\n";
   my $lmweighttotal = 0.5;
+  my $lmoovweighttotal = 0.1;
   foreach(1..scalar @___LM) {
     printf INI "%.4f\n", $lmweighttotal / scalar @___LM;
+    if ($_LMODEL_OOV_FEATURE) {
+      printf INI "%.4f\n", $lmoovweighttotal / scalar @___LM;
+    }
   }
 
   print INI "\n\n# translation model weights\n[weight-t]\n";
@@ -2023,6 +2037,10 @@ sub create_ini {
   # only set the factor delimiter if it is non-standard
   unless ($___FACTOR_DELIMITER eq '|') {
     print INI "\n# delimiter between factors in input\n[factor-delimiter]\n$___FACTOR_DELIMITER\n\n"
+  }
+
+  if ($_LMODEL_OOV_FEATURE) {
+    print INI "\n# language model OOV feature enabled\n[lmodel-oov-feature]\n1\n\n";
   }
 
   # get addititional content for config file from switch or file

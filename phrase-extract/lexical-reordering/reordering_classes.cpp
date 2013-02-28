@@ -56,12 +56,13 @@ void ModelScore::reset_f()
   }
 }
 
-void ModelScore::add_example(const string& previous, string& next)
+void ModelScore::add_example
+  (const StringPiece& previous, const StringPiece& next, float weight)
 {
-  count_fe_prev[getType(previous)]++;
-  count_f_prev[getType(previous)]++;
-  count_fe_next[getType(next)]++;
-  count_f_next[getType(next)]++;
+  count_fe_prev[getType(previous)]+=weight;
+  count_f_prev[getType(previous)]+=weight;
+  count_fe_next[getType(next)]+=weight;
+  count_f_next[getType(next)]+=weight;
 }
 
 const vector<double>& ModelScore::get_scores_fe_prev() const
@@ -85,7 +86,7 @@ const vector<double>& ModelScore::get_scores_f_next() const
 }
 
 
-ORIENTATION ModelScore::getType(const string& s)
+ORIENTATION ModelScore::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -106,7 +107,7 @@ ORIENTATION ModelScore::getType(const string& s)
 }
 
 
-ORIENTATION ModelScoreMSLR::getType(const string& s)
+ORIENTATION ModelScoreMSLR::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -126,7 +127,7 @@ ORIENTATION ModelScoreMSLR::getType(const string& s)
 }
 
 
-ORIENTATION ModelScoreLR::getType(const string& s)
+ORIENTATION ModelScoreLR::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0 || s.compare("dright") == 0) {
     return DRIGHT;
@@ -142,7 +143,7 @@ ORIENTATION ModelScoreLR::getType(const string& s)
 }
 
 
-ORIENTATION ModelScoreMSD::getType(const string& s)
+ORIENTATION ModelScoreMSD::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -161,7 +162,7 @@ ORIENTATION ModelScoreMSD::getType(const string& s)
   }
 }
 
-ORIENTATION ModelScoreMonotonicity::getType(const string& s)
+ORIENTATION ModelScoreMonotonicity::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
