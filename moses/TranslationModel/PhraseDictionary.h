@@ -107,8 +107,7 @@ public:
                             , const std::vector<float> &weight
                             , size_t dictIndex
                             , size_t tableLimit
-                            , const std::string &targetFile
-                            , const std::string &alignmentsFile);
+                            , const std::vector<std::string>& config);
 
 
   virtual ~PhraseDictionaryFeature();
@@ -173,8 +172,7 @@ private:
 
   bool m_useThreadSafePhraseDictionary;
   PhraseTableImplementation m_implementation;
-  std::string m_targetFile;
-  std::string m_alignmentsFile;
+  const std::vector<std::string> m_config;
   SparsePhraseDictionaryFeature* m_sparsePhraseDictionaryFeature;
 
 };

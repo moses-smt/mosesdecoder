@@ -1334,12 +1334,6 @@ bool StaticData::LoadPhraseTables()
       weightAllOffset += numScoreComponent;
       numScoreComponent += tableInputScores;
 
-      string targetPath, alignmentsFile;
-      if (implementation == SuffixArray) {
-        targetPath		= token[5];
-        alignmentsFile= token[6];
-      }
-
       CHECK(numScoreComponent==weight.size());
 
 
@@ -1368,7 +1362,7 @@ bool StaticData::LoadPhraseTables()
         , weight
        	, currDict
         , maxTargetPhrase[index]
-        , targetPath, alignmentsFile);
+        , token);
 
       m_phraseDictionary.push_back(pdf);
 
