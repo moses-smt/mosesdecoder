@@ -47,7 +47,7 @@ my $l1input = "$corpus.$l1";
 if (-e $l1input) {
   $opn = $l1input;
 } elsif (-e $l1input.".gz") {
-  $opn = "zcat $l1input.gz |";
+  $opn = "gunzip -c $l1input.gz |";
 } else {
     die "Error: $l1input does not exist";
 }
@@ -57,7 +57,7 @@ my $l2input = "$corpus.$l2";
 if (-e $l2input) {
   $opn = $l2input;
 } elsif (-e $l2input.".gz") {
-  $opn = "zcat $l2input.gz |";
+  $opn = "gunzip -c $l2input.gz |";
 } else  {
  die "Error: $l2input does not exist";
 }
@@ -160,3 +160,4 @@ sub word_count {
   my @w = split(/ /,$line);
   return scalar @w;
 }
+
