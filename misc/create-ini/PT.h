@@ -9,7 +9,6 @@ class PT : public FF
 {
   static int s_index;
 
-  int implementation;
 
   float GetWeight() const
   { return 0.2; }
