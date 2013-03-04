@@ -189,24 +189,6 @@ InputType*IOWrapper::GetInput(InputType* inputType)
   }
 }
 
-  ofstream* IOWrapper::GetOutputSearchGraphSLFStream(size_t sentenceNumber) {
-    const StaticData &staticData = StaticData::Instance();
-    stringstream fileName;
-    fileName << staticData.GetParam("output-search-graph-slf")[0] << "/" << sentenceNumber << ".slf";
-    std::ofstream *file = new std::ofstream;
-    file->open(fileName.str().c_str());
-    return file;
-  }
-
-  ofstream* IOWrapper::GetOutputSearchGraphHypergraphStream(size_t sentenceNumber) {
-    const StaticData &staticData = StaticData::Instance();
-    stringstream fileName;
-    fileName << staticData.GetParam("output-search-graph-hypergraph")[0] << "/" << sentenceNumber;
-    std::ofstream *file = new std::ofstream;
-    file->open(fileName.str().c_str());
-    return file;
-  }
-
   ofstream* IOWrapper::GetOutputSearchGraphHypergraphWeightsStream() {
     const StaticData &staticData = StaticData::Instance();
     stringstream fileName;
