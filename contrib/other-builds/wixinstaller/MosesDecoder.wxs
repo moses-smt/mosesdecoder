@@ -1,0 +1,344 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Wix xmlns='http://schemas.microsoft.com/wix/2006/wi'>
+  <Product Name='MosesDecoder' Id='5488D48A-5E2A-4D4C-8ECC-776EF1E24105' UpgradeCode='6C521F19-CB1E-4B56-A3FB-60DCFFD584E6'
+    Language='1033' Codepage='1252' Version='1.0.0.1' Manufacturer='Moses Core Team'>
+
+    <Package Id='*' Keywords='Installer'
+      Description="Moses is a statistical machine translation system that allows you to automatically train translation models for any language pair."
+      Comments='This installer only contains Mosese decoder and sample models for Windows.' Manufacturer='Moses Core Team'
+      InstallerVersion='101' Languages='1033' Compressed='yes' SummaryCodepage='1252' />
+
+    <Media Id='1' Cabinet='MosesDecoder.cab' EmbedCab='yes' DiskPrompt="CD-ROM #1" CompressionLevel="high" />
+    <Property Id='DiskPrompt' Value="Latest Moses Decoder Installation [1]" />
+
+    <Directory Id='TARGETDIR' Name='SourceDir'>
+      <Directory Id='ProgramFilesFolder' Name='PFiles'>
+        <Directory Id='Moses' Name='Moses'>
+          <Directory Id='INSTALLDIR' Name='MosesDecoder'>
+
+            <Component Id='MosesCmdExecutable' Guid='267AF165-F5BA-42DE-A0EC-ED9A215CAB12'>
+              <File Id='MosesCmdEXE' Name='moses-cmd.exe' DiskId='1' Source='moses-cmd.exe' KeyPath='yes'/>
+            </Component>
+			
+			<Component Id='MosesChartCmdExecutable' Guid='7D950867-F85D-411E-986C-FA1284C82E6D'>
+              <File Id='MosesChartCmdEXE' Name='moses-chart-cmd.exe' DiskId='1' Source='moses-chart-cmd.exe' KeyPath='yes'/>
+            </Component>
+			
+			<Component Id='ProcessPhraseTableExecutable' Guid='A79E485C-6660-4CD4-8BA6-D70AD795B1D1'>
+              <File Id='ProcessPhraseTableEXE' Name='processPhraseTable.exe' DiskId='1' Source='processPhraseTable.exe' KeyPath='yes'/>
+            </Component>
+
+			<Component Id='ProcessLexicalTableExecutable' Guid='0670AA63-1D7E-4F21-A3AB-46BC6E2A4FCC'>
+              <File Id='ProcessLexicalTableEXE' Name='processLexicalTable.exe' DiskId='1' Source='processLexicalTable.exe' KeyPath='yes'/>
+            </Component>
+
+			<Component Id='BuildBinaryExecutable' Guid='BC2B42BA-D3B3-4E35-9766-E95A1658FECC'>
+              <File Id='BuildBinaryEXE' Name='build_binary.exe' DiskId='1' Source='build_binary.exe' KeyPath='yes'/>
+            </Component>
+
+            <Component Id='msvcp110DLL' Guid='7EAE8C25-F443-4291-B8EA-2024F9620002'>
+              <File Id='msvcp110DLL' Name='msvcp110.dll' DiskId='1' Source='msvcp110.dll' KeyPath='yes' />
+            </Component>
+			
+			<Component Id='msvcr110DLL' Guid='565E7353-5A56-4D92-B1BE-6AB7DF64B29D'>
+              <File Id='msvcr110DLL' Name='msvcr110.dll' DiskId='1' Source='msvcr110.dll' KeyPath='yes' />
+            </Component>
+
+			<Component Id='vccorlib110DLL' Guid='B9A29C30-9558-4191-824F-976543A081D7'>
+              <File Id='vccorlib110DLL' Name='vccorlib110.dll' DiskId='1' Source='vccorlib110.dll' KeyPath='yes' />
+            </Component>
+
+            <Component Id='Manual' Guid='67334D8D-AD0F-4DAA-900F-AE4733E32A2E'>
+              <File Id='Manual' Name='manual.pdf' DiskId='1' Source='manual.pdf' KeyPath='yes' >
+                <Shortcut Id="startmenuManual" Directory="ProgramMenuDir" Name="Moses Manual" Advertise="yes" Icon="manual.ico" />
+              </File>
+            </Component>
+			
+			<Component Id='recase' Guid='CF680F89-7D58-470A-B818-0045938BA493'>
+              <File Id='recase.exe' Name='recase.exe' DiskId='1' Source='recase.exe' KeyPath='yes' />
+            </Component>
+			
+			<Component Id='tokenizer' Guid='77AF7E65-711C-4216-93F0-2783488F0834'>
+              <File Id='tokenizer.exe' Name='tokenizer.exe' DiskId='1' Source='tokenizer.exe' KeyPath='yes' />
+            </Component>
+			
+			<Component Id='detokenizer' Guid='5B5DDFE0-CB2C-4C12-A359-794D3996C706'>
+              <File Id='detokenizer.exe' Name='detokenizer.exe' DiskId='1' Source='detokenizer.exe' KeyPath='yes' />
+            </Component>
+			
+			<Component Id='truecase' Guid='3498E8CB-4CE2-4BDB-8DDC-D30B10A2AC84'>
+              <File Id='truecase.exe' Name='truecase.exe' DiskId='1' Source='truecase.exe' KeyPath='yes' />
+            </Component>
+			
+			<Component Id='detruecase' Guid='4402833E-D409-440C-82D6-41B00F4CF75F'>
+              <File Id='detruecase.exe' Name='detruecase.exe' DiskId='1' Source='detruecase.exe' KeyPath='yes' />
+            </Component>
+			
+			<Component Id='lowercase' Guid='5DF78DCE-976A-4D0C-80F5-59DCC1C87C17'>
+              <File Id='lowercase.exe' Name='lowercase.exe' DiskId='1' Source='lowercase.exe' KeyPath='yes' />
+            </Component>
+			
+			<Directory Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD" Name="nonbreaking_prefixes" />
+			
+          </Directory>
+        </Directory>
+      </Directory>
+
+      <Directory Id="ProgramMenuFolder" Name="Programs">
+        <Directory Id="ProgramMenuDir" Name="Moses">
+          <Component Id="ProgramMenuDir" Guid="4EE418FC-C918-42ED-801B-D3C216F1296D">
+			<RemoveFolder Id='ProgramMenuDir' On='uninstall' />
+			<RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]' Name='Path' Type='string' Value='[INSTALLDIR]' KeyPath='yes'/>
+          </Component>
+        </Directory>
+      </Directory>
+
+      <Directory Id="DesktopFolder" Name="Desktop" />
+    </Directory>
+	
+	<DirectoryRef Id="ProgramMenuDir">
+		<Component Id="StartCmdExeShortCut" Guid="8A8E10DF-6E59-474B-8B0B-AF216F23E3B1">
+				<Shortcut Id="StartCmdExeMenuShortCut" 
+					  Name="Start Command Prompt in Moses Installation Directory"
+					  Directory="ProgramMenuDir"
+					  Target="[SystemFolder]cmd.exe"
+					  WorkingDirectory='INSTALLDIR'/>
+				<RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]\Shortcuts' Name="cmd" Type='integer' Value='1' KeyPath='yes'/>
+		</Component>
+		
+		<Component Id="Uninstallation" Guid="6235C8A0-7D8A-4DAD-BC62-4B9F10BDCDB3">
+				<Shortcut Id="UninstallationShortCut" 
+					  Name="Uninstall"
+					  Directory="ProgramMenuDir"
+					  Target="[SystemFolder]msiexec.exe"
+					  Arguments="/x [ProductCode]"
+					  WorkingDirectory='INSTALLDIR'/>
+				<RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]\Shortcuts' Name="uninstall" Type='integer' Value='1' KeyPath='yes'/>
+		</Component>
+	</DirectoryRef>
+	
+	<DirectoryRef Id="INSTALLDIR">
+		<Directory Id="ModelFolder" Name="Models">
+			<Directory Id="EnFrSampleModel" Name="EnFrSampleModel">
+			<Component Id="EnFrModel" Guid="18087E5B-A5B3-4837-8989-130D4AEB3676">
+				<CreateFolder Directory="EnFrSampleModel"/>
+				<RemoveFolder Id='EnFrSampleModel' On='uninstall' />
+				<RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]\Models' Name="EnFrModel" Type='string' Value='[EnFrSampleModel]' KeyPath='yes'/>
+			</Component>
+			</Directory>
+		</Directory>
+	</DirectoryRef>
+	
+	<DirectoryRef Id="ProgramMenuDir">
+		<Directory Id="EnFrSampleModelMenu" Name="EnFrSampleModel">
+			<Component Id="CompEnFrSampleModelMenu" Guid="0D1508DF-EFCD-4791-8919-6FC2886C0FBC">
+				<RemoveFolder Id='EnFrSampleModelMenu' On='uninstall' />
+				<Shortcut Id="ShotCutCompEnFrSampleModel" 
+					  Name="Start Command Prompt to Run Model"
+					  Directory="EnFrSampleModelMenu"
+					  Target="[SystemFolder]cmd.exe"
+					  Arguments="/K run.bat"
+					  WorkingDirectory='EnFrSampleModel'/>
+				<RegistryValue Root='HKCU' Key='Software\[Manufacturer]\[ProductName]\Shortcuts' Name="EnFrSampleModelCmd" Type='integer' Value='1' KeyPath='yes'/>
+			</Component>
+		</Directory>
+	</DirectoryRef>
+
+    <Feature Id='Complete' Title='Latest Moses Decoder' Description='The complete package.'
+      Display='expand' Level='1' ConfigurableDirectory='INSTALLDIR'>
+      <Feature Id='MainProgram' Title='Decoder' Description='Decoder and toolsets.' Level='1'>
+        <ComponentRef Id='MosesCmdExecutable' />
+		<ComponentRef Id='MosesChartCmdExecutable' />
+        <ComponentRef Id='ProcessPhraseTableExecutable' />
+		<ComponentRef Id='ProcessLexicalTableExecutable' />
+		<ComponentRef Id='BuildBinaryExecutable' />
+		<ComponentRef Id='msvcp110DLL' />
+		<ComponentRef Id='msvcr110DLL' />
+		<ComponentRef Id='vccorlib110DLL' />
+		<ComponentRef Id='ProgramMenuDir' />
+		<ComponentRef Id="StartCmdExeShortCut" />
+		<ComponentRef Id="Uninstallation" />
+		<ComponentRef Id='recase' />
+		<ComponentRef Id='tokenizer' />
+		<ComponentRef Id='detokenizer' />
+		<ComponentRef Id='truecase' />
+		<ComponentRef Id='detruecase' />
+		<ComponentRef Id='lowercase' />
+		<ComponentRef Id="cmp05480AAB4A77AAAE8686368D9D8B3358" />
+		<ComponentRef Id="cmp1ADC241FB414854E75C0F1AB6E5ACFF9" />
+		<ComponentRef Id="cmp270CDB8320A2E711DEFC3E2A963225FD" />
+		<ComponentRef Id="cmp2F3BC78D0F319292DFF556AB4B466C44" />
+		<ComponentRef Id="cmp3518434D5152874D5F9DD5600BE3D1D5" />
+		<ComponentRef Id="cmp367F22E783D3980C7083E93B3BA68AAE" />
+		<ComponentRef Id="cmp4338A81CDC724AC09BCEE9C26DEB334A" />
+		<ComponentRef Id="cmp6C22E1117BE1003C3057B5B0A6407B60" />
+		<ComponentRef Id="cmp87C4B463C781E70567E03A82B7BE581E" />
+		<ComponentRef Id="cmp8A1E82FD3434141CA53B03577D0AFFBF" />
+		<ComponentRef Id="cmp907A06F5B1335FFC774C360923190E43" />
+		<ComponentRef Id="cmpABF428CE5BAAF8CAC19943CF59B538C0" />
+		<ComponentRef Id="cmpBB60CA027A31F27A5CEBDFE633E4E473" />
+		<ComponentRef Id="cmpC97D09244C060720CDD981525F93AE1C" />
+		<ComponentRef Id="cmpCCF8F7762531DF36E1F8E0CC142A6BBA" />
+		<ComponentRef Id="cmpD142FBD335688C1B052DB405093A825E" />
+		<ComponentRef Id="cmpD5DC1FDA2D7247C24DECF0F2BEF89F07" />
+		<ComponentRef Id="cmpEC0C30ED3411B6966D41EAA25CD49AB8" />
+      </Feature>
+
+      <Feature Id='Documentation' Title='Description' Description='Moses manual.' Level='1'>
+        <ComponentRef Id='Manual' />
+      </Feature>
+	  
+	  <Feature Id='Models' Title='Models' Description='Optional models to install.' Level='1000'>
+		<Feature Id='EnFrModelFeature' Title='English to French Model' Description='English to French Model' Level='1000'>
+			<ComponentRef Id='EnFrModel' />
+			<ComponentRef Id='CompEnFrSampleModelMenu' />
+		</Feature>
+      </Feature>
+	  
+    </Feature>
+	
+	<UI Id='Mondo'>
+		<UIRef Id="WixUI_Mondo" />
+		<UIRef Id="WixUI_ErrorProgressText" />
+		<Publish Dialog="WelcomeDlg" Control="Next" Event="NewDialog" Value="SetupTypeDlg" Order="3">1</Publish>
+		<Publish Dialog="SetupTypeDlg" Control="Back" Event="NewDialog" Value="WelcomeDlg" Order="3">1</Publish>
+	</UI>
+
+	<!--
+    <UIRef Id="WixUI_Mondo" />
+    <UIRef Id="WixUI_ErrorProgressText" />
+	-->
+	
+	<WixVariable Id="WixUILicenseRtf" Value="lgpl-3.0.rtf" />
+	
+	<Icon Id="manual.ico" SourceFile="icons\manual.ico" />
+
+  </Product>
+  
+  <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp05480AAB4A77AAAE8686368D9D8B3358" Guid="6B1596F4-A9B2-42FE-8C19-D9BDE52D14A3">
+                <File Id="filDF3D4AFDFD3A5E5014651D2B3197F883" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.sk" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp1ADC241FB414854E75C0F1AB6E5ACFF9" Guid="8092CC59-15AE-491B-B337-21D28375E25E">
+                <File Id="fil14F951D42021CFE9DEA2F581C63B97D1" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.en" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp270CDB8320A2E711DEFC3E2A963225FD" Guid="0449E6C9-CE54-47A5-AD7B-F71F9072B795">
+                <File Id="filA7AD7090E22500CC6555A189AB94BBD7" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.is" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp2F3BC78D0F319292DFF556AB4B466C44" Guid="E2FFD252-812C-40C3-BE54-58BA04280CA3">
+                <File Id="filD555B7F1A8D50426114ABA92D3298182" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.pl" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp3518434D5152874D5F9DD5600BE3D1D5" Guid="C6CAF6AD-9A2A-4DBC-B482-7FBA6E667653">
+                <File Id="fil188F1ABBF42EA5C5357E6EE420761632" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.el" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp367F22E783D3980C7083E93B3BA68AAE" Guid="73D61AED-40D1-4323-8EC9-085836C41D6B">
+                <File Id="fil644696CF9C761307A8583AFE21FFBDED" KeyPath="yes" Source="nonbreaking_prefixes\README.txt" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp4338A81CDC724AC09BCEE9C26DEB334A" Guid="4FFD3F4F-BDF6-4413-B04A-E46998E0C567">
+                <File Id="filED8F38242E9A5E9F49F8EB13AE1992C6" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.de" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp6C22E1117BE1003C3057B5B0A6407B60" Guid="FD1BE9E2-D213-405F-895B-FA6D802F0DB4">
+                <File Id="fil285AF2377AEB0CBB30D813C5D4BB1499" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.es" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp87C4B463C781E70567E03A82B7BE581E" Guid="4550BBCC-0E79-443D-A2AA-9A0F5813F0CB">
+                <File Id="fil0F0404B01D54595B955B611B8C109DCE" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.ca" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp8A1E82FD3434141CA53B03577D0AFFBF" Guid="410713FB-12AE-4D50-86AB-26B8D6905D38">
+                <File Id="filD46E4E5062EC1113D87EB5D2862B0F4A" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.ro" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmp907A06F5B1335FFC774C360923190E43" Guid="3F0FBDBE-7107-44A6-8090-CB1F572BB805">
+                <File Id="filB928D372AD574F1AD75A8FF89237F67C" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.pt" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpABF428CE5BAAF8CAC19943CF59B538C0" Guid="A20174FD-605C-4F19-B892-220E477166DD">
+                <File Id="filB195A1E8479D3B40205E9FDC35301F4A" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.cs" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpBB60CA027A31F27A5CEBDFE633E4E473" Guid="3BDAF02E-74CC-4C26-A656-81E7EFAD3D6A">
+                <File Id="fil7B90ED837E88945788B14B995963F917" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.ru" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpC97D09244C060720CDD981525F93AE1C" Guid="706F7CAF-D434-492E-A646-4C3F12D197E0">
+                <File Id="fil903C88A9815B4569441ECA1E1C38AE1F" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.it" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpCCF8F7762531DF36E1F8E0CC142A6BBA" Guid="87D37A23-7AE0-4B7A-BE1C-628437505B4D">
+                <File Id="filD2A5024AE0A11B70FD94E76F63A0296F" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.sv" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpD142FBD335688C1B052DB405093A825E" Guid="7DA15147-867A-4930-820A-849E88C5D1A3">
+                <File Id="fil2A806DF8BA32B3CC134EFA9156B50033" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.nl" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpD5DC1FDA2D7247C24DECF0F2BEF89F07" Guid="2D44996C-A2A1-415F-BB72-04DBD31D2E79">
+                <File Id="fil7DFC180BE4E6EA47AA2E1B277EFC97AB" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.fr" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+    <Fragment>
+        <DirectoryRef Id="dir60BBA5DD3FA517E8EB8CD920500FFEAD">
+            <Component Id="cmpEC0C30ED3411B6966D41EAA25CD49AB8" Guid="DE07693E-F426-4A75-8A8E-D3014AB7ACD5">
+                <File Id="filEE4B5473AC42F64DB34FBC429A493C29" KeyPath="yes" Source="nonbreaking_prefixes\nonbreaking_prefix.sl" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>

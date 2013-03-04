@@ -1,0 +1,32 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Bundle Version="1.0.0.0" UpgradeCode="13A718A0-E09B-4EEF-BED3-311D33C7D387">
+	<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
+	<WixVariable Id="WixStdbaLicenseRtf" Value="..\..\lgpl-3.0.rtf" /> 
+	
+	<Chain DisableSystemRestore="yes">
+		<PackageGroupRef Id="ModelPackage"/>
+	</Chain>
+  </Bundle>
+  
+  <Fragment>
+	<util:RegistrySearch 
+            Root="HKCU" 
+            Key="SOFTWARE\Moses Core Team\MosesDecoder\Models" 
+			Value="EnFrModel"
+            Format="raw"
+			Variable="EnFrModelReg"/>
+			
+	<PackageGroup Id="ModelPackage">
+		<ExePackage
+			SourceFile = "..\..\unpacker.exe" Name="unpacker.exe"
+            PerMachine="yes" 
+			InstallCommand="unpacker.exe -regname EnFrModel -file EnFrModelInstall.zip"
+            Vital="yes"
+			DetectCondition="NOT EnFrModelReg">
+			<Payload SourceFile = "..\..\unpacker.exe" Name="unpacker.exe" Compressed = "yes" />
+			<Payload DownloadUrl="http://statmt.org/~jie/EnFrModelInstall.zip" SourceFile = "EnFrModelInstall.zip" Compressed = "no" /> 
+		</ExePackage>
+	</PackageGroup>
+  </Fragment>
+</Wix>

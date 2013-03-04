@@ -66,6 +66,9 @@ namespace Moses
     virtual DecodeType GetDecodeType() const
     {
       assert(false);
+#ifdef _MSC_VER
+	  return Translate;	//satisfy MSVC
+#endif
     }
     
     TO_STRING();

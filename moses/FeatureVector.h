@@ -42,6 +42,9 @@
 
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
+#ifdef _MSC_VER
+#include <boost/thread/locks.hpp>
+#endif
 #endif
 
 #include "util/check.hh"

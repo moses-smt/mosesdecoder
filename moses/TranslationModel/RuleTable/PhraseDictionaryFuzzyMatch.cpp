@@ -24,8 +24,38 @@
 #include <string.h>
 #include <limits.h>
 #include <sys/types.h>
+
+#ifdef WIN32
+#include <io.h>
+#include "dirent.h"
+
+#include <direct.h>
+#define rmdir _rmdir
+
+#include <stdarg.h>
+#ifdef _MSC_VER
+int slprintf(char *buffer, size_t bufsize, const char *fmt, ...)
+{
+  va_list ap;
+  int ret;
+  
+  if ((int)bufsize <= 0) return -1;
+  va_start(ap, fmt);
+  ret = _vsnprintf(buffer, bufsize-1, fmt, ap);
+  if (ret < 0)
+    buffer[bufsize-1] = '\0';
+  va_end(ap);
+  return ret;
+}
+#define snprintf slprintf
+#endif
+
+#include <boost\filesystem.hpp>
+
+#else
 #include <unistd.h>
 #include <dirent.h>
+#endif
 
 #include <fstream>
 #include <string>
@@ -143,11 +173,16 @@ namespace Moses
 
   void PhraseDictionaryFuzzyMatch::InitializeForInput(InputType const& inputSentence)
   {
+#ifdef WIN32
+	boost::filesystem::path _mypath = boost::filesystem::unique_path();
+	boost::filesystem::create_directories(_mypath);
+	string dirNameStr = boost::filesystem::canonical(_mypath).string();
+#else
     char dirName[] = "/tmp/moses.XXXXXX";
     char *temp = mkdtemp(dirName);
-    CHECK(temp);
+	CHECK(temp);
     string dirNameStr(dirName);
-    
+#endif
     string inFileName(dirNameStr + "/in");
     
     ofstream inFile(inFileName.c_str());

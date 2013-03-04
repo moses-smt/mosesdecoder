@@ -65,3 +65,10 @@ contrib/other-builds/*.xcodeproj/project.xcworkspace/
 contrib/other-builds/*.xcodeproj/xcuserdata/
 */*.xcodeproj/project.xcworkspace
 */*.xcodeproj/xcuserdata
+contrib/other-builds/Debug
+contrib/other-builds/Release
+contrib/other-builds/*.user
+contrib/other-builds/*.filters
+contrib/other-builds/*.sdf
+contrib/other-builds/*.suo
+contrib/other-builds/*.opensdf

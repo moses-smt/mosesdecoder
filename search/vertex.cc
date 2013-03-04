@@ -7,6 +7,10 @@
 
 #include <assert.h>
 
+#ifdef _MSC_VER
+#include "TypeDef.h"
+#endif
+
 namespace search {
 
 namespace {

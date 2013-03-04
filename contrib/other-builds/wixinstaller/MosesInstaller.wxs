@@ -1,0 +1,29 @@
+<?xml version='1.0' encoding='UTF-8'?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi" xmlns:util="http://schemas.microsoft.com/wix/UtilExtension">
+  <Bundle Version="1.0.0.0" UpgradeCode="5BC669C0-47DD-4D10-AE7B-F48E8A490AA3">
+	<BootstrapperApplicationRef Id="WixStandardBootstrapperApplication.RtfLicense" />
+	<WixVariable Id="WixStdbaLicenseRtf" Value="lgpl-3.0.rtf" /> 
+	
+	<Chain>
+		<MsiPackage
+			  Id="MosesDecoderId"
+			  Visible="yes"
+              SourceFile="MosesDecoder.msi"
+			  DisplayInternalUI="yes"
+			  EnableFeatureSelection="yes"
+			  Vital="yes"
+			  ForcePerMachine="yes"/>
+			  
+		<ExePackage	
+			SourceFile="stubs\EnFrModel.exe" 
+			Cache="yes" 
+            Compressed="yes" 
+            PerMachine="yes"
+            Vital="no" 
+			InstallCommand="/quiet /install"
+			UninstallCommand="/quiet /uninstall"
+			After="MosesDecoderId"/>
+		
+	</Chain>
+  </Bundle>
+</Wix>
