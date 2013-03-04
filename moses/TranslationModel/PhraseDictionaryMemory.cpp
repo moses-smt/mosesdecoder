@@ -219,10 +219,6 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
   return currNode->GetTargetPhraseCollection();
 }
 
-PhraseDictionaryMemory::~PhraseDictionaryMemory()
-{
-}
-
 TO_STRING_BODY(PhraseDictionaryMemory);
 
 // friend
