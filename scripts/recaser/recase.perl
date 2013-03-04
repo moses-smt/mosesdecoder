@@ -4,7 +4,7 @@
 use strict;
 use Getopt::Long "GetOptions";
 
-my ($SRC,$INFILE,$RECASE_MODEL);
+my ($SRC,$INFILE,$RECASE_MODEL,$UNBUFFERED);
 my $MOSES = "moses";
 my $LANGUAGE = "en"; # English by default;
 die("recase.perl --in file --model ini-file > out")
@@ -12,9 +12,11 @@ die("recase.perl --in file --model ini-file > out")
                        'headline=s' => \$SRC,
                        'lang=s' => \$LANGUAGE,
 		       'moses=s' => \$MOSES,
-                       'model=s' => \$RECASE_MODEL)
+                       'model=s' => \$RECASE_MODEL,
+                       'b|unbuffered' => \$UNBUFFERED)
     && defined($INFILE)
     && defined($RECASE_MODEL);
+if (defined($UNBUFFERED) && $UNBUFFERED) { $|=1; }
 
 my %treated_languages = map { ($_,1) } qw/en cs/;
 die "I don't know any rules for $LANGUAGE. Use 'en' as the default."
