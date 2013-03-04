@@ -48,6 +48,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "rule.pb.h"
 #endif
 
+#include "util/exception.hh"
+
 using namespace std;
 
 namespace Moses
@@ -846,7 +848,18 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 
     // Record that this arc ends at this node
     nodeToLines.insert(pair<int,int>(numNodes,arcNumber));
+    
+    // Get an id number for the previous hypothesis
+    const Hypothesis *prevHypo = searchGraph[arcNumber].hypo->GetPrevHypo();
+    if (prevHypo!=NULL) {
+      int prevID = prevHypo->GetId();
+      if (nodes.count(prevID) == 0) {
+	nodes[prevID] = numNodes;
+	numNodes += 1;
+      }
+    }
 
+    // Get an id number for this hypothesis
     int hypothesisID = searchGraph[arcNumber].hypo->GetId();
     if (nodes.count(hypothesisID) == 0) {
       
@@ -885,18 +898,25 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 	if (prevHypo==NULL) {
 	  outputSearchGraphStream << "<s> ||| " << endl;
 	} else {
-	int startNode = nodes[prevHypo->GetId()];
-      
-	const TargetPhrase &targetPhrase = thisHypo->GetCurrTargetPhrase();
-	int targetWordCount = targetPhrase.GetSize();
+	  int startNode = nodes[prevHypo->GetId()];
 
-	outputSearchGraphStream << "[" << startNode << "]";
-	for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
-	  outputSearchGraphStream << " " << targetPhrase.GetWord(targetWordIndex);
-	}
-	outputSearchGraphStream << " ||| ";
-	OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
-	outputSearchGraphStream << endl;
+	  UTIL_THROW_IF(
+			(startNode >= nodeNumber),
+			util::Exception,
+			"Error while writing search lattice as hypergraph for sentence" << translationId << "." <<
+			"The nodes must be output in topological order. The code attempted to violate this restriction."
+			);
+
+	  const TargetPhrase &targetPhrase = thisHypo->GetCurrTargetPhrase();
+	  int targetWordCount = targetPhrase.GetSize();
+
+	  outputSearchGraphStream << "[" << startNode << "]";
+	  for (int targetWordIndex=0; targetWordIndex<targetWordCount; targetWordIndex+=1) {
+	    outputSearchGraphStream << " " << targetPhrase.GetWord(targetWordIndex);
+	  }
+	  outputSearchGraphStream << " ||| ";
+	  OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
+	  outputSearchGraphStream << endl;
 	}
 
       }
