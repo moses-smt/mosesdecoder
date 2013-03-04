@@ -332,6 +332,10 @@ public:
       m_searchGraphSLFStream->close();
     }
 
+    if (m_searchGraphHypergraphStream) {
+      m_searchGraphHypergraphStream->close();
+    }
+
     delete m_searchGraphSLFStream;
     delete m_searchGraphHypergraphStream;
     delete m_source;
