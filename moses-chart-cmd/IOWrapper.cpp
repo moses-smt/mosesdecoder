@@ -683,14 +683,16 @@ void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothe
 {
   ostringstream out;
 
-  Alignments retAlign;
-  OutputAlignment(retAlign, hypo, 0);
+  if (hypo) {
+	Alignments retAlign;
+	OutputAlignment(retAlign, hypo, 0);
 
-  // output alignments
-  Alignments::const_iterator iter;
-  for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
-    const pair<size_t, size_t> &alignPoint = *iter;
-    out << alignPoint.first << "-" << alignPoint.second << " ";
+	// output alignments
+	Alignments::const_iterator iter;
+	for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
+	  const pair<size_t, size_t> &alignPoint = *iter;
+	  out << alignPoint.first << "-" << alignPoint.second << " ";
+	}
   }
   out << endl;
 
