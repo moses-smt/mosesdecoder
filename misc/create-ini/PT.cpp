@@ -32,7 +32,7 @@ PT::PT(const std::string &line, int numFeatures, bool isHierarchical)
 
 void PT::Output(std::ostream &out) const
 {
-  out << name << " "
+  out << name
       << " num-features=" << numFeatures
       << " path=" << path;
 
