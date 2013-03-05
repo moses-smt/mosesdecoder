@@ -31,8 +31,8 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
   PhraseDictionaryTreeAdaptor(const PhraseDictionaryTreeAdaptor&);
   void operator=(const PhraseDictionaryTreeAdaptor&);
 
-  PDTAimp* GetImplementation();
-  const PDTAimp* GetImplementation() const;
+  PDTAimp& GetImplementation();
+  const PDTAimp& GetImplementation() const;
 
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);

@@ -68,49 +68,49 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(InputType const& source)
 
 void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const& source)
 {
-  PDTAimp *obj = GetImplementation();
-  obj->CleanUp();
+  PDTAimp &obj = GetImplementation();
+  obj.CleanUp();
 }
 
 TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(Phrase const &src) const
 {
-  return GetImplementation()->GetTargetPhraseCollection(src);
+  return GetImplementation().GetTargetPhraseCollection(src);
 }
 
 TargetPhraseCollection const*
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollection(InputType const& src,WordsRange const &range) const
 {
-  if(GetImplementation()->m_rangeCache.empty()) {
-    return GetImplementation()->GetTargetPhraseCollection(src.GetSubString(range));
+  if(GetImplementation().m_rangeCache.empty()) {
+    return GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
   } else {
-    return GetImplementation()->m_rangeCache[range.GetStartPos()][range.GetEndPos()];
+    return GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
   }
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()
 {
-  GetImplementation()->useCache=1;
+  GetImplementation().useCache=1;
 }
 void PhraseDictionaryTreeAdaptor::DisableCache()
 {
-  GetImplementation()->useCache=0;
+  GetImplementation().useCache=0;
 }
 
-PDTAimp* PhraseDictionaryTreeAdaptor::GetImplementation()
+PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation()
 {
   PDTAimp* dict;
   dict = m_implementation.get();
   CHECK(dict);
-  return dict;
+  return *dict;
 }
 
-const PDTAimp* PhraseDictionaryTreeAdaptor::GetImplementation() const
+const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 {
   PDTAimp* dict;
   dict = m_implementation.get();
   CHECK(dict);
-  return dict;
+  return *dict;
 }
 
 }
