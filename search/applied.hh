@@ -5,6 +5,10 @@
 #include "search/header.hh"
 #include "util/pool.hh"
 
+#ifdef _MSC_VER
+#include "TypeDef.h"
+#endif
+
 #include <math.h>
 
 namespace search {

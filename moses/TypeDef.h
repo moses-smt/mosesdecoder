@@ -35,6 +35,11 @@ typedef uint32_t UINT32;
 typedef uint64_t UINT64;
 #endif
 
+#if (defined _MSC_VER)
+#include <float.h>
+#include <limits>
+#endif
+
 namespace Moses
 {
 
@@ -202,6 +207,12 @@ typedef std::vector<std::string> WordAlignments;
 typedef std::vector<FactorType> FactorList;
 
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
+
+#if (defined _MSC_VER)
+#define isnan(a) _isnan(a)
+#define INFINITY (std::numeric_limits<float>::infinity())
+#define NAN (std::numeric_limits<float>::quiet_NaN())
+#endif
 
 }
 #endif

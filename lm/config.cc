@@ -10,8 +10,13 @@ Config::Config() :
   messages(&std::cerr),
   enumerate_vocab(NULL),
   unknown_missing(COMPLAIN),
+#ifdef WIN32
+ sentence_marker_missing(SILENT),
+ positive_log_probability(SILENT),
+#else
   sentence_marker_missing(THROW_UP),
   positive_log_probability(THROW_UP),
+#endif
   unknown_missing_logprob(-100.0),
   probing_multiplier(1.5),
   building_memory(1073741824ULL), // 1 GB

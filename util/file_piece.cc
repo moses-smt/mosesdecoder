@@ -65,10 +65,17 @@ FilePiece::~FilePiece() {}
 
 StringPiece FilePiece::ReadLine(char delim) {
   std::size_t skip = 0;
+#ifdef WIN32
+  const char* _i_begin = position_;
+#endif
   while (true) {
     for (const char *i = position_ + skip; i < position_end_; ++i) {
       if (*i == delim) {
-        StringPiece ret(position_, i - position_);
+#ifdef WIN32 //get rid of carriage return
+		StringPiece ret(position_, i > _i_begin && *(i-1) == '\r' ? i - position_ -1 : i - position_);
+#else
+		StringPiece ret(position_, i - position_);
+#endif
         position_ = i + 1;
         return ret;
       }

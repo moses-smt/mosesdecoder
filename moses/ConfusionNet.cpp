@@ -72,8 +72,13 @@ ConfusionNet::~ConfusionNet()
 ConfusionNet::ConfusionNet(Sentence const& s)
 {
   data.resize(s.GetSize());
-  for(size_t i=0; i<s.GetSize(); ++i)
-    data[i].push_back(std::make_pair(s.GetWord(i),0.0));
+  for(size_t i=0; i<s.GetSize(); ++i) {
+#ifdef WIN32
+	  data[i].push_back(std::make_pair(s.GetWord(i), std::vector<float>(1, 0.0))); //changed to be compatible with VS 2012
+#else
+	  data[i].push_back(std::make_pair(s.GetWord(i),0.0));
+#endif
+  }
 }
 
 bool ConfusionNet::ReadF(std::istream& in,

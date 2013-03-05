@@ -119,7 +119,11 @@ class OverflowException : public Exception {
 };
 
 template <unsigned len> inline std::size_t CheckOverflowInternal(uint64_t value) {
+#ifdef _MSC_VER
+  UTIL_THROW_IF(value > static_cast<uint64_t>((std::numeric_limits<std::size_t>::max)()), OverflowException, "Integer overflow detected.  This model is too big for 32-bit code.");
+#else
   UTIL_THROW_IF(value > static_cast<uint64_t>(std::numeric_limits<std::size_t>::max()), OverflowException, "Integer overflow detected.  This model is too big for 32-bit code.");
+#endif
   return value;
 }
 

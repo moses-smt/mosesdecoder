@@ -741,6 +741,9 @@ public:
     return m_nBestIncludesSegmentation;
   }
 
+#ifdef WIN32
+  BOOST_THREAD_NO_COPYABLE(StaticData)
+#endif
 };
 
 }
