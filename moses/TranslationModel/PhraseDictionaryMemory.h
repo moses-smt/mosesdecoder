@@ -44,16 +44,10 @@ protected:
 
 public:
   PhraseDictionaryMemory(const std::string &line);
-  virtual ~PhraseDictionaryMemory();
 
   bool InitDictionary();
 
   const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &source) const;
-
-  // for mert
-  virtual void InitializeForInput(InputType const&) {
-    /* Don't do anything source specific here as this object is shared between threads.*/
-  }
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,

@@ -6,25 +6,33 @@ PT::PT(const std::string &line, int numFeatures, bool isHierarchical)
 :FF(line)
 {
   index = s_index++;
-  name = "PhraseModel";
   this->numFeatures = numFeatures;    
   path = toks[0];
 
   inFactors.push_back(0);
   outFactors.push_back(0);
 
+  int implementation;
   if (toks.size() > 1)
     implementation = Scan<int>(toks[1]);
   else if (isHierarchical)
     implementation = 6;
   else
     implementation = 0;
+
+  switch (implementation)
+  {
+  case 0: name = "PhraseDictionaryMemory"; break;
+  case 1: name = "PhraseDictionaryTreeAdaptor"; break;
+  case 2: name = "PhraseDictionaryOnDisk"; break;
+  case 6: name = "PhraseDictionarySCFG"; break;
+  default:name = "UnknownPtImplementation"; break;
+  }
 }
 
 void PT::Output(std::ostream &out) const
 {
   out << name
-      << " implementation=" << implementation
       << " num-features=" << numFeatures
       << " path=" << path;
 

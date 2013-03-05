@@ -36,21 +36,9 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 
 bool PhraseDictionaryOnDisk::InitDictionary()
 {
-  PrintUserTime("Start loading binary SCFG phrase table. ");
-
   const StaticData &staticData = StaticData::Instance();
   m_languageModels = &staticData.GetLMList();
   m_wpProducer = staticData.GetWordPenaltyProducer();
-
-  LoadTargetLookup();
-
-  if (!m_dbWrapper.BeginLoad(m_filePath))
-    return false;
-
-  CHECK(m_dbWrapper.GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
-  CHECK(m_dbWrapper.GetMisc("NumSourceFactors") == m_input.size());
-  CHECK(m_dbWrapper.GetMisc("NumTargetFactors") == m_output.size());
-  CHECK(m_dbWrapper.GetMisc("NumScores") == m_numScoreComponents);
 
   return true;
 }
@@ -64,19 +52,53 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
   return NULL;
 }
 
-void PhraseDictionaryOnDisk::LoadTargetLookup()
-{
-  // TODO
-}
-
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const InputType &sentence,
   const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
-                                          m_dbWrapper, m_languageModels,
+                                          GetImplementation(), m_languageModels,
                                           m_wpProducer, m_input,
                                           m_output, m_filePath);
+}
+
+OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()
+{
+  OnDiskPt::OnDiskWrapper* dict;
+  dict = m_implementation.get();
+  CHECK(dict);
+  return *dict;
+}
+
+const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
+{
+  OnDiskPt::OnDiskWrapper* dict;
+  dict = m_implementation.get();
+  CHECK(dict);
+  return *dict;
+}
+
+void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
+{
+  const StaticData &staticData = StaticData::Instance();
+
+  OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
+  if (!obj->BeginLoad(m_filePath))
+    return;
+
+  CHECK(obj->GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
+  CHECK(obj->GetMisc("NumSourceFactors") == m_input.size());
+  CHECK(obj->GetMisc("NumTargetFactors") == m_output.size());
+  CHECK(obj->GetMisc("NumScores") == m_numScoreComponents);
+
+  m_implementation.reset(obj);
+
+  return;
+}
+
+void PhraseDictionaryOnDisk::CleanUpAfterSentenceProcessing(InputType const& source)
+{
+
 }
 
 }

@@ -43,11 +43,13 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
 
 protected:
-  OnDiskPt::OnDiskWrapper m_dbWrapper;
+  boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
+
   const LMList* m_languageModels;
   const WordPenaltyProducer* m_wpProducer;
 
-  void LoadTargetLookup();
+  OnDiskPt::OnDiskWrapper &GetImplementation();
+  const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
 public:
   PhraseDictionaryOnDisk(const std::string &line)
@@ -70,6 +72,10 @@ public:
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &);
+
+  virtual void InitializeForInput(InputType const& source);
+  virtual void CleanUpAfterSentenceProcessing(InputType const& source);
+
 };
 
 }  // namespace Moses

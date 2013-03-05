@@ -23,11 +23,16 @@ class InputType;
 class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
-  PDTAimp *imp;
+
+  boost::thread_specific_ptr<PDTAimp> m_implementation;
+
   friend class PDTAimp;
   PhraseDictionaryTreeAdaptor();
   PhraseDictionaryTreeAdaptor(const PhraseDictionaryTreeAdaptor&);
   void operator=(const PhraseDictionaryTreeAdaptor&);
+
+  PDTAimp& GetImplementation();
+  const PDTAimp& GetImplementation() const;
 
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);
@@ -50,7 +55,8 @@ public:
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
   TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
-  virtual void InitializeForInput(InputType const& source);
+  void InitializeForInput(InputType const& source);
+  void CleanUpAfterSentenceProcessing(InputType const& source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
