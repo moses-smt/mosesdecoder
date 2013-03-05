@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "SpanLengthFeature.h"
 #include "CrossingFeature.h"
+#include "SyntaxTrivialCondProbFeature.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -81,6 +82,7 @@ StaticData StaticData::s_instance;
 StaticData::StaticData()
   :m_spanLengthFeature(NULL)
   ,m_crossingFeature(NULL)
+  ,m_syntaxTrivialCondProbFeature(NULL) 
   ,m_numLinkParams(1)
   ,m_fLMsLoaded(false)
   ,m_sourceStartPosMattersForRecombination(false)
@@ -523,6 +525,7 @@ bool StaticData::LoadData(Parameter *parameter)
 	
   if (!LoadSpanLengthFeature()) return false;
   if (!LoadCrossingFeature()) return false;
+  if (!LoadSyntaxTrivialCondProbFeature()) return false;
   if (!LoadLexicalReorderingModel()) return false;
   if (!LoadLanguageModels()) return false;
   if (!LoadGenerationTables()) return false;
@@ -625,6 +628,10 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_crossingFeature);
     }
 
+    if (m_syntaxTrivialCondProbFeature!=NULL){
+      m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntaxTrivialCondProbFeature);
+    }
+
   }
 
   m_scoreIndexManager.InitFeatureNames();
@@ -675,6 +682,7 @@ StaticData::~StaticData()
   delete m_unknownWordPenaltyProducer;
   delete m_spanLengthFeature;
   delete m_crossingFeature;
+  delete m_syntaxTrivialCondProbFeature;
 
   //delete m_parameter;
 
@@ -763,6 +771,18 @@ bool StaticData::LoadCrossingFeature()
     return true;
   }
   
+}
+
+bool StaticData::LoadSyntaxTrivialCondProbFeature()
+{
+  const vector<float> &weight = Scan<float>(m_parameter->GetParam("weight-syntax-trivial-cond-prob"));
+  if (weight.size()) {
+    m_syntaxTrivialCondProbFeature = new SyntaxTrivialCondProbFeature(m_scoreIndexManager, weight);
+    return (m_syntaxTrivialCondProbFeature != NULL);
+  } else {
+    m_syntaxTrivialCondProbFeature = NULL;
+    return true;
+  }
 }
 
 bool StaticData::LoadLexicalReorderingModel()

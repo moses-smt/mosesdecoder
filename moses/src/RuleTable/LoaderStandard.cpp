@@ -160,6 +160,9 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
   string lineOrig;
   size_t count = 0;
+  float ruleTotalCount = 1.0;
+  float rcnt =1.0;
+  vector<string> countStrings;
 
   while(getline(inStream, lineOrig)) {
     const string *line;
@@ -221,17 +224,24 @@ bool RuleTableLoaderStandard::Load(FormatType format
     sourcePhrase.CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, sourceLHS);
 
 
-    unsigned ruleTotalCount = 1;
+    ruleTotalCount = 1.0;
+    rcnt =1.0;
     if (tokens.size() >= 5) {
       //MARIA
       //get rule counts tokens[4] -> count(t) assume that extract was run with  --NoFractionalCounting flag
       const std::string &ruleCount = tokens[4];
-      vector<string> countStrings;
+      countStrings.clear();
 
       TokenizeMultiCharSeparator(countStrings,ruleCount," ");
-      if(countStrings.size()>=1)
-        sscanf(countStrings[0].c_str(), "%u", &ruleTotalCount);   
-      ruleTotalCount=floor(ruleTotalCount*scoreVector[0]+0.5);      
+      if(countStrings.size()>=1){
+        if(countStrings.size()==3)
+          sscanf(countStrings[2].c_str(), "%e", &ruleTotalCount);
+        else{
+          sscanf(countStrings[0].c_str(), "%e", &rcnt);//&ruleTotalCount);   
+          ruleTotalCount=floor(rcnt*scoreVector[0]+0.5);//ruleTotalCount*scoreVector[0]+0.5);     
+        }
+      //if(ruleTotalCount<=0.0) cerr<<"ERROR ruleTotalCount: "<<ruleTotalCount<< " " <<*line<<endl;
+      }
     }
 
     //read from rule table
@@ -247,24 +257,27 @@ bool RuleTableLoaderStandard::Load(FormatType format
       if (useISIFormat == true ){
 	vector<string> spanStatisticsSource; 
 	vector<string>::iterator itr_statistics;
-	unsigned count = 1;
-	float sum_len=0.0f, sum_square_len=0.0f;
+	float count = 1.0;
+	unsigned sum_len=0, sum_square_len=0;
 	
 	TokenizeMultiCharSeparator(spanStatisticsSource,spanLength,"||");
+	//if(spanStatisticsSource.size()<2) continue; //it either has an entry for LHS and some NT or it has nothing
+	//read all tuples but in SpanLengthFeature will only query the score given the LHS tuple
 	for(itr_statistics = spanStatisticsSource.begin(); itr_statistics != spanStatisticsSource.end(); itr_statistics++){
 	  vector<string> gaussParam;
 	  TokenizeMultiCharSeparator(gaussParam,*itr_statistics,"|");
 	  if(gaussParam.size()<3) continue;
-	  sscanf(gaussParam[0].c_str(),"%u", &count);
-	  sscanf(gaussParam[1].c_str(),"%f", &sum_len);
-	  sscanf(gaussParam[2].c_str(),"%f", &sum_square_len);
-	  
+	  sscanf(gaussParam[0].c_str(),"%f", &count);
+	  sscanf(gaussParam[1].c_str(),"%u", &sum_len);
+	  sscanf(gaussParam[2].c_str(),"%u", &sum_square_len);
+	 
+	  //first estimator added will correspond to the LHS statistics 
 	  std::auto_ptr<SpanLengthEstimator> estimatorSource;
 	  estimatorSource.reset(CreateGaussianSpanLengthEstimator());
 	  estimatorSource->AddSpanScore_ISI(count,sum_len,sum_square_len);
 	  estimatorSource->FinishedAdds(count);
 	  spanSourceEstimators.push_back(estimatorSource.release());
-	}
+       }
 	
       }
       // use (len=score) format for span_length information in rule table
@@ -360,6 +373,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
   // sort and prune each target phrase collection
   SortAndPrune(ruleTable);
+
 
   return true;
 }

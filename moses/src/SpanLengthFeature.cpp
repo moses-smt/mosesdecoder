@@ -113,9 +113,18 @@ FFState* SpanLengthFeature::EvaluateChart(
   const TargetPhrase& targetPhrase = chartHypothesis.GetCurrTargetPhrase();
   const SpanLengthEstimatorCollection& spanLengthEstimators = targetPhrase.GetSpanLengthEstimators();
   std::vector<float> scores(GetNumScoreComponents());
-  for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
-    scores[0] += spanLengthEstimators.GetScoreBySourceSpanLength(spanIndex, spans[spanIndex].SourceSpan);
+  //MARIA -> if ISI use only LHS rule span and ignore the rest at the moment
+  bool useISI = (StaticData::Instance().GetParam("isi-format-for-span-length").size() > 0);
+  if(useISI){
+    size_t spanIndex=0; //only the entire LHS span -> in the rule table first tuple (N,M,S) will be the statistics of the LHS
+    if(spans.size()>0)
+      scores[0]=spanLengthEstimators.GetScoreBySourceSpanLength(spanIndex,chartHypothesis.GetCurrSourceRange().GetNumWordsCovered());
   }
+  else{
+    for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {
+      scores[0] += spanLengthEstimators.GetScoreBySourceSpanLength(spanIndex, spans[spanIndex].SourceSpan);
+    }
+ }
   if (m_withTargetLength) {
     unsigned terminalCount = (unsigned)chartHypothesis.GetCurrTargetPhrase().GetSize();
     for (size_t spanIndex = 0; spanIndex < spans.size(); ++spanIndex) {

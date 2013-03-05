@@ -160,6 +160,7 @@ Parameter::Parameter()
   AddParam("weight-crossing", "CR", "weight for non-term crossing feature. Set this to activate it, if it is empty, feature will not be used");
   AddParam("crossing-file", "Data file for crossing feature. Line format: [span-length] [non-term] [is-crossing] [probability]");
 
+  AddParam("weight-syntax-trivial-cond-prob","STCP","Weight for SyntaxTrivialCondProb feature. Set this to activate it, if it is empty, feature will not be used");
 }
 
 Parameter::~Parameter()

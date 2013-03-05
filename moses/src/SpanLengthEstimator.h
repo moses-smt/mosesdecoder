@@ -11,9 +11,11 @@ class SpanLengthEstimator
 {
 public:
   virtual void AddSpanScore(unsigned spanLength, float score) = 0;
-  virtual void AddSpanScore_ISI(unsigned count, float sum_len, float sum_square_len){};
+  virtual void AddSpanScore_ISI(float count, unsigned sum_len, unsigned sum_square_len){};
+  //virtual float PDFWithPriorMean(unsigned spanLength, unsigned count, float prior_mean, float prior_variance){return 1.0;};
+  virtual void PosteriorParameters(float count, float prior_mean, float prior_variance){};
   virtual float GetScoreBySpanLength(unsigned spanLength) const = 0;
-  virtual void FinishedAdds(unsigned ruleCount) {}
+  virtual void FinishedAdds(float ruleCount) {}
   virtual ~SpanLengthEstimator() {}
 };
   

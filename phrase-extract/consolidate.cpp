@@ -240,6 +240,8 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     float countF = atof(directCounts[0].c_str());
     float countE = atof(indirectCounts[0].c_str());
     float countEF = atof(indirectCounts[1].c_str());
+    //MARIA
+    float countRule =  atof(directCounts[2].c_str()); //added 3rd count->rule coutn in f2e score file
     float n1_F, n1_E;
     if (kneserNeyFlag) {
       n1_F = atof(directCounts[2].c_str());
@@ -308,7 +310,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
     fileConsolidated << " ||| " << itemDirect[3];
 
     // counts, for debugging
-    fileConsolidated << "||| " << countE << " " << countF; // << " " << countEF;
+    fileConsolidated << "||| " << countE << " " << countF << " " <<countRule; // << " " << countEF; //MARIA -> countEF==countRule??; count EF from inverse file
 
     if (outputNTLengths)
     {

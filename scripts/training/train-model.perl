@@ -32,7 +32,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
    @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
    $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
+   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS, @_CONSOLIDATE_OPTIONS, $SPAN_LENGTH,
    $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2,
    $_PHRASE_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
    $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
@@ -113,6 +113,7 @@ $_HELP = 1
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
 		       'extract-options=s' => \@_EXTRACT_OPTIONS,
 		       'score-options=s' => \@_SCORE_OPTIONS,
+           'consolidate-options=s' => \@_CONSOLIDATE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
 		       'xml' => \$_XML,
@@ -174,6 +175,9 @@ $_GIZA_F2E = File::Spec->rel2abs($_GIZA_F2E) if defined($_GIZA_F2E);
 my $_SCORE_OPTIONS; # allow multiple switches
 foreach (@_SCORE_OPTIONS) { $_SCORE_OPTIONS .= $_." "; }
 chop($_SCORE_OPTIONS) if $_SCORE_OPTIONS;
+my $_CONSOLIDATE_OPTIONS; # allow multiple switches
+foreach (@_CONSOLIDATE_OPTIONS) { $_CONSOLIDATE_OPTIONS .= $_." "; }
+chop($_CONSOLIDATE_OPTIONS) if $_CONSOLIDATE_OPTIONS;
 my $_EXTRACT_OPTIONS; # allow multiple switches
 foreach (@_EXTRACT_OPTIONS) { $_EXTRACT_OPTIONS .= $_." "; }
 chop($_EXTRACT_OPTIONS) if $_EXTRACT_OPTIONS;
@@ -1411,6 +1415,7 @@ sub score_phrase_phrase_extract {
     my ($ttable_file,$lexical_file,$extract_file) = @_;
 
     # distinguish between score and consolidation options
+    my $SPAN_LENGTH = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OutputNTLengths/);
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
     my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
@@ -1479,6 +1484,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
+        $cmd .= " --OutputNTLengths" if $SPAN_LENGTH;
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
 
@@ -1528,7 +1534,10 @@ sub score_phrase_phrase_extract {
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
-    
+    #MARIA adding options for consolidate
+    $cmd .= " --OutputNTLengths" if $SPAN_LENGTH;
+    #$cmd .= $CORE_CONSOLIDATE_OPTIONS" if defined($_CONSOLIDATE_OPTIONS);
+
     $cmd .= " | gzip -c > $ttable_file.gz";
     
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";

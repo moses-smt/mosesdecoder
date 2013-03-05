@@ -87,7 +87,7 @@ double computeUnalignedPenalty( const PHRASE &, const PHRASE &, const PhraseAlig
 set<string> functionWordList;
 void loadFunctionWords( const string &fileNameFunctionWords );
 double computeUnalignedFWPenalty( const PHRASE &, const PHRASE &, const PhraseAlignment & );
-void calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
+size_t calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
                       , map<size_t, map<size_t, float> > &targetProb);
 void printSourcePhrase(const PHRASE &, const PHRASE &, const PhraseAlignment &, ostream &);
@@ -419,7 +419,10 @@ void calcNTLengthProb(const map<size_t, map<size_t, size_t> > &lengths
   }
 }
 
-void calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
+//MARIA
+//totals should have the rule count...print it with the source and target counts
+
+size_t calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
                       , map<size_t, map<size_t, float> > &sourceProb
                       , map<size_t, map<size_t, float> > &targetProb)
 {
@@ -456,7 +459,7 @@ void calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
 
   if (totals.size() == 0)
   { // no non-term. Don't bother
-    return;
+    return -1;
   }
 
   size_t total = totals.begin()->second;
@@ -467,7 +470,8 @@ void calcNTLengthProb(const PhraseAlignmentCollection &phrasePairs
 
   calcNTLengthProb(sourceLengths, total, sourceProb);
   calcNTLengthProb(targetLengths, total, targetProb);
-
+  
+  return total;
 }
 
 void outputNTLengthProbs(ostream &phraseTableFile, const map<size_t, map<size_t, float> > &probs, const string &prefix)
@@ -754,22 +758,26 @@ void outputPhrasePair(const PhraseAlignmentCollection &phrasePair, float totalCo
   phraseTableFile << " ||| " << totalCount << " " << count;
   if (kneserNeyFlag)
     phraseTableFile << " " << distinctCount;
-
+//MARIA -> should output also for rules without NTs -> now just prints 2^64 !!!!
   // nt lengths
   if (outputNTLengths)
   {
-    phraseTableFile << " ||| ";
+    //MARIA -> output rule count after source and target counts
+    //phraseTableFile << " ||| ";
 
     if (!inverseFlag)
     {
       map<size_t, map<size_t, float> > sourceProb, targetProb;
       // 1st sourcePos, 2nd = length, 3rd = prob
 
-      calcNTLengthProb(phrasePair, sourceProb, targetProb);
+      size_t count_rule = calcNTLengthProb(phrasePair, sourceProb, targetProb);
+      phraseTableFile << " " << count_rule <<  " ||| ";
       //MARIA -> output only Source prob
       outputNTLengthProbs(phraseTableFile, sourceProb, "S");
       outputNTLengthProbs(phraseTableFile, targetProb, "T");
     }
+    else
+      phraseTableFile << " ||| ";
 
   }
 
