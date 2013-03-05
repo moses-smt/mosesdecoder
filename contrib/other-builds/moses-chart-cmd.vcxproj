@@ -15,7 +15,6 @@
     <ClCompile Include="..\..\moses-chart-cmd\Main.cpp" />
     <ClCompile Include="..\..\moses-chart-cmd\mbr.cpp" />
     <ClCompile Include="..\..\moses-chart-cmd\TranslationAnalysis.cpp" />
-    <ClCompile Include="..\..\util\usage.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\moses-chart-cmd\IOWrapper.h" />
@@ -76,7 +75,7 @@
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
-      <AdditionalDependencies>C:\zlib\zlib-vs2012\Release\zlib-1.2.7-win32.lib;$(SolutionDir)$(Configuration)\moses\moses.lib;$(SolutionDir)$(Configuration)\kenlm\kenlm.lib;$(SolutionDir)$(Configuration)\OnDiskPt\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\zlib\zlib-vs2012\Release\zlib-1.2.7-win32.lib;$(SolutionDir)$(Configuration)\moses\moses.lib;$(SolutionDir)$(Configuration)\kenlm\kenlm.lib;$(SolutionDir)$(Configuration)\util\util.lib;$(SolutionDir)$(Configuration)\OnDiskPt\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -95,7 +94,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>C:\zlib\zlib-vs2012\Release\zlib-1.2.7-win32.lib;$(SolutionDir)$(Configuration)\moses\moses.lib;$(SolutionDir)$(Configuration)\kenlm\kenlm.lib;$(SolutionDir)$(Configuration)\OnDiskPt\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>C:\zlib\zlib-vs2012\Release\zlib-1.2.7-win32.lib;$(SolutionDir)$(Configuration)\moses\moses.lib;$(SolutionDir)$(Configuration)\kenlm\kenlm.lib;$(SolutionDir)$(Configuration)\util\util.lib;$(SolutionDir)$(Configuration)\OnDiskPt\OnDiskPt.lib;%(AdditionalDependencies)</AdditionalDependencies>
     </Link>
   </ItemDefinitionGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />

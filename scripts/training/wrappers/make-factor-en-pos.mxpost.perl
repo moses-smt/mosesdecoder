@@ -1,6 +1,7 @@
 #!/usr/bin/perl -w
 
 use strict;
+use FindBin qw($RealBin);
 
 use Getopt::Long "GetOptions";
 my ($IN,$OUT,$MXPOST);
@@ -14,8 +15,8 @@ if (!&GetOptions('mxpost=s' => \$MXPOST) ||
 
 my $pipeline = "perl -ne 'chop; tr/\\x20-\\x7f/\?/c; print \$_.\"\\n\";' | tee debug | ";
 $pipeline .= "$MXPOST/mxpost $MXPOST/tagger.project |";
-open(TAGGER,"cat $IN | $pipeline");
-open(OUT,">$OUT");
+open(TAGGER,"$RealBin/../../tokenizer/deescape-special-chars.perl < $IN | $pipeline");
+open(OUT,"| $RealBin/../../tokenizer/escape-special-chars.perl > $OUT");
 while(<TAGGER>) {
     foreach my $word_pos (split) {
 	$word_pos =~ s/\/([^\/]+)$/_$1/;

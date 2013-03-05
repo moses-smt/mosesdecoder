@@ -66,7 +66,7 @@ namespace Moses
            m_data_offset(0), m_fixed(false), m_count(new size_t(0))
         { }
         
-        MmapAllocator(std::FILE* f_ptr, size_t data_offset = 0) throw()
+        MmapAllocator(std::FILE* f_ptr, size_t data_offset) throw()
          : m_file_ptr(f_ptr), m_file_desc(fileno(m_file_ptr)),
            m_page_size(sysconf(_SC_PAGE_SIZE)), m_map_size(0), m_data_ptr(0),
            m_data_offset(data_offset), m_fixed(true), m_count(new size_t(0))

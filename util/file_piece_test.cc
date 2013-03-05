@@ -1,6 +1,7 @@
 // Tests might fail if you have creative characters in your path.  Sue me.  
 #include "util/file_piece.hh"
 
+#include "util/file.hh"
 #include "util/scoped.hh"
 
 #define BOOST_TEST_MODULE FilePieceTest
@@ -21,6 +22,20 @@ std::string FileLocation() {
   }
   std::string ret(boost::unit_test::framework::master_test_suite().argv[1]);
   return ret;
+}
+
+/* istream */
+BOOST_AUTO_TEST_CASE(IStream) {
+  std::fstream ref(FileLocation().c_str(), std::ios::in);
+  std::fstream backing(FileLocation().c_str(), std::ios::in);
+  FilePiece test(backing);
+  std::string ref_line;
+  while (getline(ref, ref_line)) {
+    StringPiece test_line(test.ReadLine());
+    BOOST_CHECK_EQUAL(ref_line, test_line);
+  }
+  BOOST_CHECK_THROW(test.get(), EndOfFileException);
+  BOOST_CHECK_THROW(test.get(), EndOfFileException);
 }
 
 /* mmap implementation */

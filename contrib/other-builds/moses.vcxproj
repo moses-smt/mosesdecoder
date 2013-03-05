@@ -175,15 +175,6 @@
     <ClCompile Include="..\..\search\nbest.cc" />
     <ClCompile Include="..\..\search\rule.cc" />
     <ClCompile Include="..\..\search\vertex.cc" />
-    <ClCompile Include="..\..\search\vertex_generator.cc" />
-    <ClCompile Include="..\..\util\double-conversion\bignum-dtoa.cc" />
-    <ClCompile Include="..\..\util\double-conversion\bignum.cc" />
-    <ClCompile Include="..\..\util\double-conversion\cached-powers.cc" />
-    <ClCompile Include="..\..\util\double-conversion\diy-fp.cc" />
-    <ClCompile Include="..\..\util\double-conversion\double-conversion.cc" />
-    <ClCompile Include="..\..\util\double-conversion\fast-dtoa.cc" />
-    <ClCompile Include="..\..\util\double-conversion\fixed-dtoa.cc" />
-    <ClCompile Include="..\..\util\double-conversion\strtod.cc" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\moses\AlignmentInfo.h" />

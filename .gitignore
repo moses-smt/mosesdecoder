@@ -72,3 +72,4 @@ contrib/other-builds/*.filters
 contrib/other-builds/*.sdf
 contrib/other-builds/*.suo
 contrib/other-builds/*.opensdf
+mert/sentence-bleu

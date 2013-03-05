@@ -105,7 +105,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   vertices.reserve(nts.size());
   float below_score = 0.0;
   for (StackVec::const_iterator i(nts.begin()); i != nts.end(); ++i) {
-    vertices.push_back((*i)->GetStack().incr->RootPartial());
+    vertices.push_back((*i)->GetStack().incr->RootAlternate());
     if (vertices.back().Empty()) return;
     below_score += vertices.back().Bound();
   }

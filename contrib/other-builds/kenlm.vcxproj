@@ -43,27 +43,6 @@
     <None Include="..\..\lm\vocab.hh" />
     <None Include="..\..\lm\weights.hh" />
     <None Include="..\..\lm\word_index.hh" />
-    <None Include="..\..\util\bit_packing.hh" />
-    <None Include="..\..\util\check.hh" />
-    <None Include="..\..\util\ersatz_progress.hh" />
-    <None Include="..\..\util\exception.hh" />
-    <None Include="..\..\util\file.hh" />
-    <None Include="..\..\util\file_piece.hh" />
-    <None Include="..\..\util\getopt.hh" />
-    <None Include="..\..\util\have.hh" />
-    <None Include="..\..\util\joint_sort.hh" />
-    <None Include="..\..\util\key_value_packing.hh" />
-    <None Include="..\..\util\mmap.hh" />
-    <None Include="..\..\util\murmur_hash.hh" />
-    <None Include="..\..\util\pool.hh" />
-    <None Include="..\..\util\probing_hash_table.hh" />
-    <None Include="..\..\util\proxy_iterator.hh" />
-    <None Include="..\..\util\read_compressed.hh" />
-    <None Include="..\..\util\scoped.hh" />
-    <None Include="..\..\util\sized_iterator.hh" />
-    <None Include="..\..\util\sorted_uniform.hh" />
-    <None Include="..\..\util\string_piece.hh" />
-    <None Include="..\..\util\tokenize_piece.hh" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\lm\bhiksha.cc" />
@@ -76,22 +55,12 @@
     <ClCompile Include="..\..\lm\read_arpa.cc" />
     <ClCompile Include="..\..\lm\search_hashed.cc" />
     <ClCompile Include="..\..\lm\search_trie.cc" />
+    <ClCompile Include="..\..\lm\sizes.cc" />
     <ClCompile Include="..\..\lm\trie.cc" />
     <ClCompile Include="..\..\lm\trie_sort.cc" />
     <ClCompile Include="..\..\lm\value_build.cc" />
     <ClCompile Include="..\..\lm\virtual_interface.cc" />
     <ClCompile Include="..\..\lm\vocab.cc" />
-    <ClCompile Include="..\..\util\bit_packing.cc" />
-    <ClCompile Include="..\..\util\ersatz_progress.cc" />
-    <ClCompile Include="..\..\util\exception.cc" />
-    <ClCompile Include="..\..\util\file.cc" />
-    <ClCompile Include="..\..\util\file_piece.cc" />
-    <ClCompile Include="..\..\util\getopt.c" />
-    <ClCompile Include="..\..\util\mmap.cc" />
-    <ClCompile Include="..\..\util\murmur_hash.cc" />
-    <ClCompile Include="..\..\util\pool.cc" />
-    <ClCompile Include="..\..\util\read_compressed.cc" />
-    <ClCompile Include="..\..\util\string_piece.cc" />
   </ItemGroup>
   <PropertyGroup Label="Globals">
     <ProjectGuid>{A5402E0B-6ED7-465C-9669-E4124A0CDDCB}</ProjectGuid>

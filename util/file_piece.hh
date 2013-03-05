@@ -9,6 +9,7 @@
 #include "util/string_piece.hh"
 
 #include <cstddef>
+#include <iosfwd>
 #include <string>
 
 #include <stdint.h>
@@ -23,17 +24,24 @@ class ParseNumberException : public Exception {
 
 extern const bool kSpaces[256];
 
-// Memory backing the returned StringPiece may vanish on the next call.  
+// Memory backing the returned StringPiece may vanish on the next call.
 class FilePiece {
   public:
     // 1 MB default.
     explicit FilePiece(const char *file, std::ostream *show_progress = NULL, std::size_t min_buffer = 1048576);
-    // Takes ownership of fd.  name is used for messages.  
-    explicit FilePiece(int fd, const char *name, std::ostream *show_progress = NULL, std::size_t min_buffer = 1048576);
+    // Takes ownership of fd.  name is used for messages.
+    explicit FilePiece(int fd, const char *name = NULL, std::ostream *show_progress = NULL, std::size_t min_buffer = 1048576);
+
+    /* Read from an istream.  Don't use this if you can avoid it.  Raw fd IO is
+     * much faster.  But sometimes you just have an istream like Boost's HTTP
+     * server and want to parse it the same way.
+     * name is just used for messages and FileName().
+     */
+    explicit FilePiece(std::istream &stream, const char *name = NULL, std::size_t min_buffer = 1048576);
 
     ~FilePiece();
-     
-    char get() { 
+
+    char get() {
       if (position_ == position_end_) {
         Shift();
         if (at_end_) throw EndOfFileException();
@@ -41,14 +49,14 @@ class FilePiece {
       return *(position_++);
     }
 
-    // Leaves the delimiter, if any, to be returned by get().  Delimiters defined by isspace().  
+    // Leaves the delimiter, if any, to be returned by get().  Delimiters defined by isspace().
     StringPiece ReadDelimited(const bool *delim = kSpaces) {
       SkipSpaces(delim);
       return Consume(FindDelimiterOrEOF(delim));
     }
 
     // Unlike ReadDelimited, this includes leading spaces and consumes the delimiter.
-    // It is similar to getline in that way.  
+    // It is similar to getline in that way.
     StringPiece ReadLine(char delim = '\n');
 
     float ReadFloat();
@@ -56,7 +64,7 @@ class FilePiece {
     long int ReadLong();
     unsigned long int ReadULong();
 
-    // Skip spaces defined by isspace.  
+    // Skip spaces defined by isspace.
     void SkipSpaces(const bool *delim = kSpaces) {
       for (; ; ++position_) {
         if (position_ == position_end_) Shift();
@@ -69,8 +77,10 @@ class FilePiece {
     }
 
     const std::string &FileName() const { return file_name_; }
-    
+
   private:
+    void InitializeNoRead(const char *name, std::size_t min_buffer);
+    // Calls InitializeNoRead, so don't call both.
     void Initialize(const char *name, std::ostream *show_progress, std::size_t min_buffer);
 
     template <class T> T ReadNumber();

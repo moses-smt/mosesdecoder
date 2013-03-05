@@ -202,9 +202,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestFactor = 20;
   }
   
-  // explicit setting of distinct nbest
-  SetBooleanParameter( &m_onlyDistinctNBest, "distinct-nbest", false);
-
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
     m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
@@ -238,8 +235,19 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_outputSearchGraph = true;
     m_outputSearchGraphExtended = true;
-  } else
+  } else {
     m_outputSearchGraph = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
+    m_outputSearchGraphSLF = true;
+  } else {
+    m_outputSearchGraphSLF = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
+    m_outputSearchGraphHypergraph = true;
+  } else {
+    m_outputSearchGraphHypergraph = false;
+  }
 #ifdef HAVE_PROTOBUF
   if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {
     if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {

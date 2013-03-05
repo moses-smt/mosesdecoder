@@ -23,21 +23,23 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ThrowingFwrite.h"
 #include "moses/Util.h"
 
+#include "util/file.hh"
+
 namespace Moses {
 
 LexicalReorderingTableCreator::LexicalReorderingTableCreator(
-  std::string inPath, std::string outPath,
+  std::string inPath, std::string outPath, std::string tempfilePath,
   size_t orderBits, size_t fingerPrintBits, bool multipleScoreTrees,
   size_t quantize
 #ifdef WITH_THREADS
   , size_t threads
 #endif
   )
-  : m_inPath(inPath), m_outPath(outPath), m_orderBits(orderBits),
-  m_fingerPrintBits(fingerPrintBits), m_numScoreComponent(0),
-  m_multipleScoreTrees(multipleScoreTrees), m_quantize(quantize),
-  m_separator(" ||| "), m_hash(m_orderBits, m_fingerPrintBits),
-  m_lastFlushedLine(-1)
+  : m_inPath(inPath), m_outPath(outPath), m_tempfilePath(tempfilePath),
+  m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
+  m_numScoreComponent(0), m_multipleScoreTrees(multipleScoreTrees),
+  m_quantize(quantize), m_separator(" ||| "),
+  m_hash(m_orderBits, m_fingerPrintBits), m_lastFlushedLine(-1)
 #ifdef WITH_THREADS  
   , m_threads(threads)
 #endif
@@ -48,12 +50,31 @@ LexicalReorderingTableCreator::LexicalReorderingTableCreator(
   
   std::cerr << "Pass 1/2: Creating phrase index + Counting scores" << std::endl;
   m_hash.BeginSave(m_outFile); 
+
+
+  if(tempfilePath.size()) {
+    MmapAllocator<unsigned char> allocEncoded(util::FMakeTemp(tempfilePath));
+    m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocEncoded);
+  }
+  else {
+    m_encodedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+  }
+  
   EncodeScores();
   
   std::cerr << "Intermezzo: Calculating Huffman code sets" << std::endl;
   CalcHuffmanCodes();
   
   std::cerr << "Pass 2/2: Compressing scores" << std::endl;
+  
+  
+    if(tempfilePath.size()) {
+    MmapAllocator<unsigned char> allocCompressed(util::FMakeTemp(tempfilePath));
+    m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>(allocCompressed);
+  }
+  else {
+    m_compressedScores = new StringVector<unsigned char, unsigned long, MmapAllocator>();
+  }
   CompressScores();
   
   std::cerr << "Saving to " << m_outPath << std::endl;
@@ -88,6 +109,9 @@ LexicalReorderingTableCreator::~LexicalReorderingTableCreator()
     delete m_scoreTrees[i];
     delete m_scoreCounters[i];
   }
+  
+  delete m_encodedScores;
+  delete m_compressedScores;
 }
 
 
@@ -134,12 +158,12 @@ void LexicalReorderingTableCreator::CompressScores()
 #ifdef WITH_THREADS
   boost::thread_group threads;
   for (size_t i = 0; i < m_threads; ++i) {
-    CompressionTaskReordering* ct = new CompressionTaskReordering(m_encodedScores, *this);    
+    CompressionTaskReordering* ct = new CompressionTaskReordering(*m_encodedScores, *this);    
     threads.create_thread(*ct);
   }
   threads.join_all();
 #else
-  CompressionTaskReordering* ct = new CompressionTaskReordering(m_encodedScores, *this);
+  CompressionTaskReordering* ct = new CompressionTaskReordering(*m_encodedScores, *this);
   (*ct)();
   delete ct;
 #endif
@@ -153,7 +177,7 @@ void LexicalReorderingTableCreator::Save()
   for(size_t i = 0; i < m_scoreTrees.size(); i++)
     m_scoreTrees[i]->Save(m_outFile);
   
-  m_compressedScores.save(m_outFile);
+  m_compressedScores->save(m_outFile);
 }
 
 std::string LexicalReorderingTableCreator::MakeSourceTargetKey(std::string &source, std::string &target)
@@ -218,7 +242,7 @@ void LexicalReorderingTableCreator::FlushEncodedQueue(bool force) {
       m_lastFlushedLine++;
       
       m_lastRange.push_back(pi.GetSrc());    
-      m_encodedScores.push_back(pi.GetTrg());
+      m_encodedScores->push_back(pi.GetTrg());
       
       if((pi.GetLine()+1) % 100000 == 0)
           std::cerr << ".";
@@ -293,7 +317,7 @@ void LexicalReorderingTableCreator::FlushCompressedQueue(bool force)
       m_queue.pop();
       m_lastFlushedLine++;
           
-      m_compressedScores.push_back(pi.GetTrg());
+      m_compressedScores->push_back(pi.GetTrg());
       
       if((pi.GetLine()+1) % 100000 == 0)
           std::cerr << ".";
