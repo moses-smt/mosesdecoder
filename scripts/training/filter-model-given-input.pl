@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w -d
+#!/usr/bin/perl -w 
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -84,6 +84,10 @@ safesystem("mkdir -p $dir") or die "Can't mkdir $dir";
 
 # get tables to be filtered (and modify config file)
 my (@TABLE,@TABLE_FACTORS,@TABLE_NEW_NAME,%CONSIDER_FACTORS,%KNOWN_TTABLE,@TABLE_WEIGHTS,%TABLE_NUMBER);
+
+my @PT_FEATURE_NAME;
+my $pt_weight_index = 0;
+
 my %new_name_used = ();
 open(INI_OUT,">$dir/moses.ini") or die "Can't write $dir/moses.ini";
 open(INI,$config) or die "Can't read $config";
@@ -136,24 +140,26 @@ while(my $line = <INI>) {
 		$new_name .= ".$cnt";
 		$new_name_used{$new_name} = 1;
 		if ($binarizer && $phrase_table_impl eq "PhraseDictionarySCFG") {
-		  $toks[0] = "PhraseDictionaryOnDisk";
+		  $phrase_table_impl = "PhraseDictionaryOnDisk";
 		  @toks = set_value(\@toks, "path", "$new_name.bin$table_flag");
 		}
 		elsif ($binarizer && $phrase_table_impl eq "PhraseDictionaryMemory") {
 			if ($binarizer =~ /processPhraseTableMin/) {
-  		  $toks[0] = "PhraseDictionaryCompact";
+  		  $phrase_table_impl = "PhraseDictionaryCompact";
   		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 			}
 			else {
-  		  $toks[0] = "PhraseDictionaryTreeAdaptor";
+  		  $phrase_table_impl = "PhraseDictionaryTreeAdaptor";
 			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 			}
 		}
 		else {
 			$new_name .= ".gz" if $opt_gzip;
- 		  $toks[0] = $phrase_table_impl;
 		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 		}
+
+    $toks[0] = $phrase_table_impl;
+    push @PT_FEATURE_NAME, $phrase_table_impl;
 
     print INI_OUT join_array(\@toks)."\n";
 
@@ -209,6 +215,17 @@ while(my $line = <INI>) {
 
 		
   } #elsif (/LexicalReordering /) {
+  elsif ($line =~ /PhraseDictionaryMemory[0-9]*= /
+     || $line =~ /PhraseDictionaryTreeAdaptor[0-9]*= /
+     || $line =~ /PhraseDictionaryOnDisk[0-9]*= /
+     || $line =~ /PhraseDictionarySCFG[0-9]*= /) {
+
+    my $newFeatureName = $PT_FEATURE_NAME[$pt_weight_index];
+    $line =~ s/PhraseDictionary[a-zA-Z]*/$newFeatureName/g;
+    print INI_OUT "$line\n";
+
+    ++$pt_weight_index;
+  }
   else {
     print INI_OUT "$line\n";  
   }
