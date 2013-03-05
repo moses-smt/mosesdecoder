@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/perl -w -d
 
 # $Id$
 # Given a moses.ini file and an input text prepare minimized translation
@@ -90,21 +90,23 @@ open(INI,$config) or die "Can't read $config";
 while(my $line = <INI>) {
   chomp($line);
   my @toks = split(/ /, $line);
-  if ($line =~ /PhraseModel /) {
+  if ($line =~ /PhraseDictionaryMemory /
+     || $line =~ /PhraseDictionaryTreeAdaptor /
+     || $line =~ /PhraseDictionaryOnDisk /
+     || $line =~ /PhraseDictionarySCFG /
+     ) {
     print STDERR "pt:$line\n";
 
 		my ($phrase_table_impl,$source_factor,$t,$w,$file,$table_flag); # = ($1,$2,$3,$4,$5,$6);
     $table_flag = "";
+    $phrase_table_impl = $toks[0];
     
     for (my $i = 1; $i < scalar(@toks); ++$i) {
       my @args = split(/=/, $toks[$i]);
       chomp($args[0]);
       chomp($args[1]);
 
-			if ($args[0] eq "implementation") {
-			  $phrase_table_impl = $args[1];
-			}
-			elsif ($args[0] eq "num-features") {
+      if ($args[0] eq "num-features") {
 			  $w = $args[1];
 			}
 			elsif ($args[0] eq "input-factor") {
@@ -118,7 +120,7 @@ while(my $line = <INI>) {
 			}
     } #for (my $i = 1; $i < scalar(@toks); ++$i) {
     
-		if (($phrase_table_impl ne "0" && $phrase_table_impl ne "6") || $file =~ /glue-grammar/) {
+		if (($phrase_table_impl ne "PhraseDictionaryMemory" && $phrase_table_impl ne "PhraseDictionarySCFG") || $file =~ /glue-grammar/) {
 				# Only Memory ("0") and NewFormat ("6") can be filtered.
 				print INI_OUT "$line\n";
 				next;
@@ -133,27 +135,23 @@ while(my $line = <INI>) {
 		$cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
 		$new_name .= ".$cnt";
 		$new_name_used{$new_name} = 1;
-		if ($binarizer && $phrase_table_impl == 6) {
-			#print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
-		  @toks = set_value(\@toks, "implementation", "2");
+		if ($binarizer && $phrase_table_impl eq "PhraseDictionarySCFG") {
+		  $toks[0] = "PhraseDictionaryOnDisk";
 		  @toks = set_value(\@toks, "path", "$new_name.bin$table_flag");
 		}
-		elsif ($binarizer && $phrase_table_impl == 0) {
+		elsif ($binarizer && $phrase_table_impl eq "PhraseDictionaryMemory") {
 			if ($binarizer =~ /processPhraseTableMin/) {
-				#print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
-  		  @toks = set_value(\@toks, "implementation", "12");
+  		  $toks[0] = "PhraseDictionaryCompact";
   		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 			}
 			else {
-  			#print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
-  		  @toks = set_value(\@toks, "implementation", "1");
+  		  $toks[0] = "PhraseDictionaryTreeAdaptor";
 			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 			}
 		}
 		else {
 			$new_name .= ".gz" if $opt_gzip;
-			#print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
- 		  @toks = set_value(\@toks, "implementation", "$phrase_table_impl");
+ 		  $toks[0] = $phrase_table_impl;
 		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 		}
 
@@ -448,4 +446,5 @@ sub set_value {
   }
   return @arr;
 }
+
 
