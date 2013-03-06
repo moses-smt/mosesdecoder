@@ -17,4 +17,6 @@ class PT : public FF
 
 public:
   PT(const std::string &line, int numFeatures, bool isHierarchical);
+
+  void OutputWeights(std::ostream &out) const;
 };

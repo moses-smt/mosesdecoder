@@ -324,16 +324,21 @@ bool Parameter::LoadParam(int argc, char* argv[])
   return Validate() && noErrorFlag;
 }
 
-std::vector<float> &Parameter::GetWeights(const std::string &name, size_t ind)
+std::vector<float> &Parameter::GetWeights(const std::string &name)
 {
-  std::vector<float> &ret = m_weights[name + SPrint(ind)];
+  std::vector<float> &ret = m_weights[name];
 
-  cerr << "WEIGHT " << name << ind << "=";
+  cerr << "WEIGHT " << name << "=";
   for (size_t i = 0; i < ret.size(); ++i) {
     cerr << ret[i] << ",";
   }
   cerr << endl;
   return ret;
+}
+
+std::vector<float> &Parameter::GetWeights(const std::string &name, size_t ind)
+{
+  return GetWeights(name + SPrint(ind));
 }
 
 void Parameter::SetWeight(const std::string &name, size_t ind, float weight)

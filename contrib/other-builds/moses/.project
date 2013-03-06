@@ -1357,6 +1357,11 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/CompactPT</name>
+			<type>2</type>
+			<locationURI>PARENT-8-PROJECT_LOC/home/s0565741/workspace/github/hh/moses/TranslationModel/CompactPT</locationURI>
+		</link>
+		<link>
 			<name>LM/bin/gcc-4.6</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>

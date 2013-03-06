@@ -33,12 +33,22 @@ PT::PT(const std::string &line, int numFeatures, bool isHierarchical)
 void PT::Output(std::ostream &out) const
 {
   out << name
+      << " name=TranslationModel" << index
       << " num-features=" << numFeatures
       << " path=" << path;
 
   out << " input-factor=" << OutputFactors(inFactors);
   out << " output-factor=" << OutputFactors(outFactors);
 
+  out << std::endl;
+}
+
+void PT::OutputWeights(std::ostream &out) const
+{
+  out << "TranslationModel" << index << "= ";
+  for (size_t i = 0; i < numFeatures; ++i) {
+    out << GetWeight() << " ";
+  }
   out << std::endl;
 }
 

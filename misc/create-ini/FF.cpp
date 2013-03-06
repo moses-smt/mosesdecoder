@@ -15,3 +15,13 @@ std::string FF::OutputFactors(const std::vector<int> &factors) const
   }
   return ret.str();
 }
+
+void FF::OutputWeights(std::ostream &out) const
+{
+  out << name << index << "= ";
+  for (size_t i = 0; i < numFeatures; ++i) {
+    out << GetWeight() << " ";
+  }
+  out << std::endl;
+}
+

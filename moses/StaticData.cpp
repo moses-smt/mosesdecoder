@@ -564,99 +564,98 @@ bool StaticData::LoadData(Parameter *parameter)
 
     if (feature == "GlobalLexicalModel") {
       GlobalLexicalModel *model = new GlobalLexicalModel(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "glm") {
       GlobalLexicalModelUnlimited *model = NULL; //new GlobalLexicalModelUnlimited(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "swd") {
       SourceWordDeletionFeature *model = new SourceWordDeletionFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "twi") {
       TargetWordInsertionFeature *model = new TargetWordInsertionFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "PhraseBoundaryFeature") {
       PhraseBoundaryFeature *model = new PhraseBoundaryFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "pl") {
       PhraseLengthFeature *model = new PhraseLengthFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "WordTranslationFeature") {
       WordTranslationFeature *model = new WordTranslationFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "TargetBigramFeature") {
-    	TargetBigramFeature *model = new TargetBigramFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      TargetBigramFeature *model = new TargetBigramFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "TargetNgramFeature") {
-    	TargetNgramFeature *model = new TargetNgramFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      TargetNgramFeature *model = new TargetNgramFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "PhrasePairFeature") {
       PhrasePairFeature *model = new PhrasePairFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "LexicalReordering") {
       LexicalReordering *model = new LexicalReordering(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "KENLM") {
       LanguageModel *model = ConstructKenLM(feature, line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "IRSTLM") {
       LanguageModelIRST *model = new LanguageModelIRST(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "Generation") {
       GenerationDictionary *model = new GenerationDictionary(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "BleuScoreFeature") {
       BleuScoreFeature *model = new BleuScoreFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "SparsePhraseDictionaryFeature") {
       SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
-      //const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
       //SetWeights(model, weights);
       m_sparsePhraseDictionary.push_back(model);
     }
     else if (feature == "Distortion") {
       DistortionScoreProducer *model = new DistortionScoreProducer(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "WordPenalty") {
       WordPenaltyProducer *model = new WordPenaltyProducer(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_wpProducer = model;
     }
     else if (feature == "UnknownWordPenalty") {
       UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       if (weights.size() == 0)
         weights.push_back(1.0f);
       SetWeights(model, weights);
@@ -664,31 +663,31 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     else if (feature == "PhraseDictionaryMemory") {
       PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionaryTreeAdaptor") {
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionaryOnDisk") {
       PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionarySCFG") {
       PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
     else if (feature == "PhraseDictionaryCompact") {
       PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
@@ -697,7 +696,7 @@ bool StaticData::LoadData(Parameter *parameter)
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
       SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
 #endif

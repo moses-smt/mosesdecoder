@@ -25,14 +25,7 @@ public:
   }
 
   virtual void Output(std::ostream &out) const = 0;
-  virtual void OutputWeights(std::ostream &out) const
-  {
-    out << name << index << "= ";
-    for (size_t i = 0; i < numFeatures; ++i) {
-      out << GetWeight() << " ";
-    }
-    out << std::endl;
-  }
+  virtual void OutputWeights(std::ostream &out) const;
 
 };
 
