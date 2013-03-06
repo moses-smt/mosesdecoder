@@ -336,11 +336,6 @@ std::vector<float> &Parameter::GetWeights(const std::string &name)
   return ret;
 }
 
-std::vector<float> &Parameter::GetWeights(const std::string &name, size_t ind)
-{
-  return GetWeights(name + SPrint(ind));
-}
-
 void Parameter::SetWeight(const std::string &name, size_t ind, float weight)
 {
   PARAM_VEC &newWeights = m_setting["weight"];

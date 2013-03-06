@@ -114,7 +114,6 @@ public:
 	}
 	
   std::vector<float> &GetWeights(const std::string &name);
-  std::vector<float> &GetWeights(const std::string &name, size_t ind);
   std::set<std::string> GetWeightNames() const;
 
   const PARAM_MAP &GetParams() const
