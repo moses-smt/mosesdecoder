@@ -932,7 +932,7 @@ apply-filter
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
-	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+	template: $moses-script-dir/ems/support/substitute-weights.perl IN1/moses.ini < IN > OUT
 decode
 	in: filtered-config input
 	out: system-output
