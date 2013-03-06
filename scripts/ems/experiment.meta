@@ -821,7 +821,7 @@ apply-filter
 	default-name: tuning/moses.filtered.ini
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
-	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+	template: cp IN1/moses.ini OUT
 apply-filter-devtest
 	in: TRAINING:config filtered-dir-devtest
 	out: filtered-config-devtest

@@ -2557,35 +2557,7 @@ sub define_tuningevaluation_filter {
       $config = $tuning_flag ? "$dir/tuning/moses.table.ini.$VERSION" : "$dir/evaluation/$set.moses.table.ini.$VERSION";
       $delete_config = 1;
       
-      my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
-      $cmd = "$moses_src_dir/bin/create-ini ";
-
-      $cmd .= "-hierarchical " if $hierarchical;
-
-      $cmd .= &define_domain_feature_score_option($domains) if &get("TRAINING:domain-features");
-    
-      my $ptCmd = $phrase_translation_table;
-      $ptCmd .= ":$ptImpl" if $ptImpl>0;
-      $ptCmd .= ":$numFF" if defined($numFF);
-      $cmd .= &get_table_name_settings("translation-factors","phrase-translation-table", $ptCmd);
-      $cmd .= &get_table_name_settings("reordering-factors","reordering-table", $reordering_table)
-	  if $reordering_table;
-      # additional settings for hierarchical models
-      if (&get("TRAINING:hierarchical-rule-set")) {
-        my $extract_version = $VERSION;
-        $extract_version = $RE_USE[$STEP_LOOKUP{"TRAINING:extract-phrases"}] 
-          if defined($STEP_LOOKUP{"TRAINING:extract-phrases"});
-        my $glue_grammar_file = &get("TRAINING:glue-grammar");
-        $glue_grammar_file = &versionize(&long_file_name("glue-grammar","model",""),$extract_version) 
-          unless $glue_grammar_file;
-        $cmd .= "-glue-grammar-file $glue_grammar_file ";
-      }
-      if (&get("TRAINING:score-settings") && 
-          &get("TRAINING:score-settings") =~ /SparseCountBinFeature/) {
-        $cmd .= "-sparse-translation-table ";
-      }
-      $cmd .= "-lm 0:3:$dir "; # dummy
-      $cmd .= "-config $config\n";
+      $cmd = "cp $dir/model/moses.ini.$VERSION $config \n";
     }
 
     # filter command

@@ -84,18 +84,21 @@ FeatureFunction::FeatureFunction(const std::string& description, const std::stri
 {
   ParseLine(description, line);
   m_numScoreComponents = FindNumFeatures();
-  size_t index = description_counts.count(description);
 
-  ostringstream dstream;
-  dstream << description;
-  dstream << index;
+  bool customName = FindName();
+  if (!customName) {
+    size_t index = description_counts.count(description);
 
-  description_counts.insert(description);
+    ostringstream dstream;
+    dstream << description;
+    dstream << index;
 
-  m_description = dstream.str();
-  if (m_numScoreComponents != unlimited)
-  {
-    ScoreComponentCollection::RegisterScoreProducer(this);
+    description_counts.insert(description);
+    m_description = dstream.str();
+  }
+
+  if (m_numScoreComponents != unlimited) {
+	ScoreComponentCollection::RegisterScoreProducer(this);
   }
 
   m_producers.push_back(this);
@@ -105,17 +108,19 @@ FeatureFunction::FeatureFunction(const std::string& description, size_t numScore
 : m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {
   ParseLine(description, line);
-  size_t index = description_counts.count(description);
+  bool customName = FindName();
+  if (!customName) {
+    size_t index = description_counts.count(description);
 
-  ostringstream dstream;
-  dstream << description;
-  dstream << index;
+    ostringstream dstream;
+    dstream << description;
+    dstream << index;
 
-  description_counts.insert(description);
+    description_counts.insert(description);
+    m_description = dstream.str();
+  }
 
-  m_description = dstream.str();
-  if (numScoreComponents != unlimited)
-  {
+  if (numScoreComponents != unlimited) {
     ScoreComponentCollection::RegisterScoreProducer(this);
   }
 
@@ -149,7 +154,19 @@ size_t FeatureFunction::FindNumFeatures()
       return ret;
     }
   }
-  abort();
+  CHECK(false);
+}
+
+bool FeatureFunction::FindName()
+{
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    if (m_args[i][0] == "name") {
+      m_description = m_args[i][1];
+      m_args.erase(m_args.begin() + i);
+      return true;
+    }
+  }
+  return false;
 }
 
 StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, const std::string &line)
