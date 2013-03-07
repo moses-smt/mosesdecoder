@@ -801,8 +801,11 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
 size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
 
-  const ScoreComponentCollection& scoreCollection = hypo->GetScoreBreakdown(); 
-
+  ScoreComponentCollection scoreCollection = hypo->GetScoreBreakdown(); 
+  const Hypothesis *prevHypo = hypo->GetPrevHypo();
+  if (prevHypo) {
+    scoreCollection.MinusEquals( prevHypo->GetScoreBreakdown() );
+  }
   vector<float> featureValues = scoreCollection.GetScoresForProducer(ff);
   size_t numScoreComps = featureValues.size();
 
