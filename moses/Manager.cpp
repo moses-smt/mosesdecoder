@@ -848,11 +848,14 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 	}
       }
 
-      // Record that this arc ends at this node
-      hypergraphIDToArcs.insert(pair<int,int>(hypergraphHypothesisID,arcNumber));
-
       // Get an id number for this hypothesis
-      int mosesHypothesisID = searchGraph[arcNumber].hypo->GetId();
+      int mosesHypothesisID;
+      if (searchGraph[arcNumber].recombinationHypo) {
+	mosesHypothesisID = searchGraph[arcNumber].recombinationHypo->GetId();
+      } else {
+	mosesHypothesisID = searchGraph[arcNumber].hypo->GetId();
+      }
+
       if (mosesIDToHypergraphID.count(mosesHypothesisID) == 0) {
       
 	mosesIDToHypergraphID[mosesHypothesisID] = hypergraphHypothesisID;
@@ -866,6 +869,10 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 
 	hypergraphHypothesisID += 1;
       }
+
+      // Record that this arc ends at this node
+      hypergraphIDToArcs.insert(pair<int,int>(mosesIDToHypergraphID[mosesHypothesisID],arcNumber));
+
     }
     
     // Unique end node
@@ -892,7 +899,12 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
       for (multimap<int,int>::iterator it=range.first; it!=range.second; ++it) {
 	int lineNumber = (*it).second;
 	const Hypothesis *thisHypo = searchGraph[lineNumber].hypo;
-	int mosesHypothesisID = thisHypo->GetId();
+	int mosesHypothesisID;// = thisHypo->GetId();
+	if (searchGraph[lineNumber].recombinationHypo) {
+	  mosesHypothesisID = searchGraph[lineNumber].recombinationHypo->GetId();
+	} else {
+	  mosesHypothesisID = searchGraph[lineNumber].hypo->GetId();
+	}
 	//	int actualHypergraphHypothesisID = mosesIDToHypergraphID[mosesHypothesisID];
 	UTIL_THROW_IF(
 		      (hypergraphHypothesisID != mosesIDToHypergraphID[mosesHypothesisID]),
