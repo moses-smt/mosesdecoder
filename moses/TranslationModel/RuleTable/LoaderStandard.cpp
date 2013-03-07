@@ -186,13 +186,17 @@ bool RuleTableLoaderStandard::Load(FormatType format
       line = hiero_after;
     }
 
-    cerr << "line=" << line << endl;
     util::TokenIter<util::MultiCharacter> pipes(line, "|||");
     StringPiece sourcePhraseString(*pipes);
     StringPiece targetPhraseString(*++pipes);
     StringPiece scoreString(*++pipes);
-    StringPiece alignString(*++pipes);
     
+    StringPiece alignString;
+    if (++pipes) {
+      StringPiece temp(*pipes);
+      alignString = temp;
+    }
+
     // Allow but ignore rule count.  
     if (++pipes && ++pipes) {
       stringstream strme;

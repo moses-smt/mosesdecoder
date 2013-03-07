@@ -54,5 +54,22 @@ bool RuleTableTrie::InitDictionary()
   return ret;
 }
 
+const TargetPhraseCollection *RuleTableTrie::GetTargetPhraseCollection(const Phrase &) const
+{
+  // exactly like CreateTargetPhraseCollection, but don't create
+ /*
+  const size_t size = source.GetSize();
+
+  const PhraseDictionaryNode *currNode = &m_collection;
+  for (size_t pos = 0 ; pos < size ; ++pos) {
+    const Word& word = source.GetWord(pos);
+    currNode = currNode->GetChild(word);
+    if (currNode == NULL)
+      return NULL;
+  }
+
+  return currNode->GetTargetPhraseCollection();
+*/
+}
 
 }  // namespace Moses

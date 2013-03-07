@@ -189,9 +189,26 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   //		to
   // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
 
-  m_words.reserve(annotatedWordVector.size()-1);
+  size_t numWords;
+  const StringPiece &annotatedWord = annotatedWordVector.back();
+  if (annotatedWord.size() >= 2
+      && *annotatedWord.data() == '['
+      && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
 
-  for (size_t phrasePos = 0 ; phrasePos < annotatedWordVector.size() -  1 ; phrasePos++) {
+    numWords = annotatedWordVector.size()-1;
+
+    // lhs
+    lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+    assert(lhs.IsNonTerminal());
+  }
+  else {
+    numWords = annotatedWordVector.size();
+  }
+
+  // parse each word
+  m_words.reserve(numWords);
+
+  for (size_t phrasePos = 0 ; phrasePos < numWords; phrasePos++) {
     StringPiece &annotatedWord = annotatedWordVector[phrasePos];
     bool isNonTerminal;
     if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
@@ -214,12 +231,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 
   }
 
-  // lhs
-  const StringPiece &annotatedWord = annotatedWordVector.back();
-  CHECK(annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']');
 
-  lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
-  assert(lhs.IsNonTerminal());
 }
 
 int Phrase::Compare(const Phrase &other) const
