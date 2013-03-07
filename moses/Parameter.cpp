@@ -477,7 +477,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       switch (implementation)
       {
       case Memory:
-        ptType = "PhraseDictionaryMemory";
+        ptType = "PhraseDictionarySCFG";
         break;
       case Binary:
         ptType = "PhraseDictionaryTreeAdaptor";
