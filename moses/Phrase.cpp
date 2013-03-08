@@ -178,7 +178,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
                                        , const StringPiece &phraseString
                                        , const std::string & /*factorDelimiter */
-                                       , Word &lhs)
+                                       , Word *lhs)
 {
   // parse
   vector<StringPiece> annotatedWordVector;
@@ -194,14 +194,18 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
   if (annotatedWord.size() >= 2
       && *annotatedWord.data() == '['
       && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
+    // hiero/syntax rule
+    CHECK(lhs);
 
     numWords = annotatedWordVector.size()-1;
 
     // lhs
-    lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
-    assert(lhs.IsNonTerminal());
+    lhs->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+    assert(lhs->IsNonTerminal());
   }
   else {
+    CHECK(lhs == NULL);
+
     numWords = annotatedWordVector.size();
   }
 
