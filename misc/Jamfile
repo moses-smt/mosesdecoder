@@ -6,8 +6,6 @@ exe queryPhraseTable : queryPhraseTable.cpp ../moses//moses ;
 
 exe queryLexicalTable : queryLexicalTable.cpp ../moses//moses ; 
 
-exe reuse-weights : reuse-weights.cpp ../moses//moses ; 
-
 local with-cmph = [ option.get "with-cmph" ] ;
 if $(with-cmph) {
     exe processPhraseTableMin : processPhraseTableMin.cpp ../moses//moses ;
@@ -21,4 +19,4 @@ else {
     alias programsMin ;
 }
 
-alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin reuse-weights create-ini//create-ini ;
+alias programs : processPhraseTable processLexicalTable queryPhraseTable queryLexicalTable programsMin create-ini//create-ini ;

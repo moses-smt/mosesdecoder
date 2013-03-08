@@ -1,0 +1,3 @@
+[submodule "contrib/arrow-pipelines/python/libs/pypeline"]
+	path = contrib/arrow-pipelines/python/libs/pypeline
+	url = git://github.com/ianj-als/pypeline.git
