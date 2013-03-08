@@ -216,7 +216,14 @@ const TargetPhraseCollection *PhraseDictionaryMemory::GetTargetPhraseCollection(
       return NULL;
   }
 
-  return currNode->GetTargetPhraseCollection();
+  const TargetPhraseCollection *coll = currNode->GetTargetPhraseCollection();
+  /*
+  if (coll) {
+    cerr << "source=" << source << endl
+        << *coll << endl;
+  }
+  */
+  return coll;
 }
 
 TO_STRING_BODY(PhraseDictionaryMemory);
