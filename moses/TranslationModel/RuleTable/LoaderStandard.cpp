@@ -234,10 +234,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
 
     // create target phrase obj
     TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromStringNewFormat(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
+    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
 
     // source
-    targetPhrase->MutableSourcePhrase().CreateFromStringNewFormat(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    targetPhrase->MutableSourcePhrase().CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
