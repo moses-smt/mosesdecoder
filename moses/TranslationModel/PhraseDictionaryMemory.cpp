@@ -107,7 +107,7 @@ bool PhraseDictionaryMemory::InitDictionary()
  
     //target
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase());
-    targetPhrase->CreateFromString(m_output, targetPhraseString, factorDelimiter);
+    targetPhrase->CreateFromString(Output, m_output, targetPhraseString, factorDelimiter);
 
     scv.clear();
     for (util::TokenIter<util::AnyCharacter, true> token(scoreString, util::AnyCharacter(" \t")); token; ++token) {
@@ -166,7 +166,7 @@ bool PhraseDictionaryMemory::InitDictionary()
     //TODO: Would be better to reuse source phrases, but ownership has to be 
     //consistent across phrase table implementations
     sourcePhrase.Clear();
-    sourcePhrase.CreateFromString(m_input, sourcePhraseString, factorDelimiter);
+    sourcePhrase.CreateFromString(Input, m_input, sourcePhraseString, factorDelimiter);
     //Now that the source phrase is ready, we give the target phrase a copy
     targetPhrase->SetSourcePhrase(sourcePhrase);
     if (preSourceString == sourcePhraseString && preSourceNode) {

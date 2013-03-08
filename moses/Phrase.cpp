@@ -152,7 +152,11 @@ void Phrase::PrependWord(const Word &newWord)
   m_words[0] = newWord;
 }
 
-void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const StringPiece &phraseString, const StringPiece &factorDelimiter)
+void Phrase::CreateFromString(FactorDirection direction
+                            ,const std::vector<FactorType> &factorOrder
+                            ,const StringPiece &phraseString
+                            ,const StringPiece &factorDelimiter
+                            ,Word *lhs)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 

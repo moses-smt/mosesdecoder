@@ -87,9 +87,9 @@ int main(int argc, char** argv)
     c_mask.push_back(0);
   }
   Phrase e( 0),f(0),c(0);
-  e.CreateFromString(e_mask, query_e, "|");
-  f.CreateFromString(f_mask, query_f, "|");
-  c.CreateFromString(c_mask,  query_c,"|");
+  e.CreateFromString(Output, e_mask, query_e, "|");
+  f.CreateFromString(Input, f_mask, query_f, "|");
+  c.CreateFromString(Input, c_mask,  query_c,"|");
   LexicalReorderingTable* table;
   if(FileExists(inFilePath+".binlexr.idx")) {
     std::cerr << "Loading binary table...\n";
