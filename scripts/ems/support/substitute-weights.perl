@@ -4,14 +4,14 @@
 # get filtered rule and reordering tables and place them into a configuration file
 
 if (scalar @ARGV < 1 || ! -e $ARGV[0]) {
-  die("ERROR: could not find pseudo-config with filtered tables");
+  die("ERROR: could not find base ini file");
 }
 
 # read initial ini file
 my @arr;
 my $inWeightSection = 0;
-open(FILTERED, $ARGV[0]) or die "Cannot open: $!";
-while(my $line = <FILTERED>) {
+open(BASEINI, $ARGV[0]) or die "Cannot open: $!";
+while(my $line = <BASEINI>) {
   chomp($line);
   if ($line =~ /\[weight\]/) {
    $inWeightSection = 1;
@@ -24,7 +24,7 @@ while(my $line = <FILTERED>) {
     print "$line\n";
   }
 }
-close(FILTERED);
+close(BASEINI);
 
 # read tuned ini file
 $inWeightSection = 0;
