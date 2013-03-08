@@ -158,23 +158,62 @@ void Phrase::CreateFromString(FactorDirection direction
                             ,const StringPiece &factorDelimiter
                             ,Word *lhs)
 {
-  FactorCollection &factorCollection = FactorCollection::Instance();
+  // parse
+  vector<StringPiece> annotatedWordVector;
+  for (util::TokenIter<util::AnyCharacter, true> it(phraseString, "\t "); it; ++it) {
+    annotatedWordVector.push_back(*it);
+  }
 
-  for (util::TokenIter<util::AnyCharacter, true> word_it(phraseString, util::AnyCharacter(" \t")); word_it; ++word_it) {
+  if (annotatedWordVector.size() == 0)
+    return;
+
+  // KOMMA|none ART|Def.Z NN|Neut.NotGen.Sg VVFIN|none
+  //    to
+  // "KOMMA|none" "ART|Def.Z" "NN|Neut.NotGen.Sg" "VVFIN|none"
+
+  size_t numWords;
+  const StringPiece &annotatedWord = annotatedWordVector.back();
+  if (annotatedWord.size() >= 2
+      && *annotatedWord.data() == '['
+      && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
+    // hiero/syntax rule
+    numWords = annotatedWordVector.size()-1;
+
+    // lhs
+    CHECK(lhs);
+    lhs->CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
+    assert(lhs->IsNonTerminal());
+  }
+  else {
+    CHECK(lhs == NULL);
+
+    numWords = annotatedWordVector.size();
+  }
+
+  // parse each word
+  m_words.reserve(numWords);
+
+  for (size_t phrasePos = 0 ; phrasePos < numWords; phrasePos++) {
+    StringPiece &annotatedWord = annotatedWordVector[phrasePos];
+    bool isNonTerminal;
+    if (annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']') {
+      // non-term
+      isNonTerminal = true;
+
+      size_t nextPos = annotatedWord.find('[', 1);
+      CHECK(nextPos != string::npos);
+
+      if (direction == Input)
+        annotatedWord = annotatedWord.substr(1, nextPos - 2);
+      else
+        annotatedWord = annotatedWord.substr(nextPos + 1, annotatedWord.size() - nextPos - 2);
+    } else {
+      isNonTerminal = false;
+    }
+
     Word &word = AddWord();
-    size_t index = 0;
-    for (util::TokenIter<util::MultiCharacter, false> factor_it(*word_it, util::MultiCharacter(factorDelimiter)); 
-        factor_it && (index < factorOrder.size()); 
-        ++factor_it, ++index) {
-      word[factorOrder[index]] = factorCollection.AddFactor(*factor_it);
-    }
-    if (index != factorOrder.size()) {
-      TRACE_ERR( "[ERROR] Malformed input: '" << *word_it << "'" <<  std::endl
-                 << "In '" << phraseString << "'" << endl
-                 << "  Expected input to have words composed of " << factorOrder.size() << " factor(s) (form FAC1|FAC2|...)" << std::endl
-                 << "  but instead received input with " << index << " factor(s).\n");
-      abort();
-    }
+    word.CreateFromString(direction, factorOrder, annotatedWord, isNonTerminal);
+
   }
 }
 
