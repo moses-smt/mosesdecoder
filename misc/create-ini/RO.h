@@ -23,19 +23,7 @@ class RO : public FF
   }
 public:
 
-  RO(const std::string &line)
-  :FF(line)
-  {
-    index = s_index++;
-    name = "LexicalReordering";
-    numFeatures = 6;
-    path = toks[0];
-    type = "wbe-msd-bidirectional-fe-allff"; // TODO what is this?
-    fileTypeSuffix = "wbe-msd-bidirectional-fe";
-    
-    inFactors.push_back(0);
-    outFactors.push_back(0);
-  }
+  RO(const std::string &line, const std::pair<Factors, Factors> *factors);
 
 };
 

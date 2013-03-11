@@ -11,8 +11,10 @@ PT::PT(const std::string &line, int numFeatures, bool isHierarchical, const pair
   this->numFeatures = numFeatures;    
   path = toks[0];
 
-  inFactors.push_back(0);
-  outFactors.push_back(0);
+  if (factors) {
+    inFactors = factors->first;
+    outFactors = factors->second;
+  }
 
   int implementation;
   if (toks.size() > 1)

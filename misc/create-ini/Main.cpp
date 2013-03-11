@@ -26,24 +26,35 @@ int main(int argc, char **argv)
 {
   vector< pair<Factors, Factors> > transFactors, roFactors;
 
+  int indTrans = 0, indRO = 0;
   FF *model;
   for (int i = 1; i < argc; ++i) {
     string key(argv[i]);
     
     if (key == "-phrase-translation-table") {
       ++i;
-      model = new PT(argv[i], 5, isHierarchical, NULL);
+
+      pair<Factors, Factors> *factors = transFactors.size() > indTrans ? &transFactors[indTrans] : NULL;
+      model = new PT(argv[i], 5, isHierarchical, factors);
       ffVec.push_back(model);
+
+      ++indTrans;
     }
     else if (key == "-glue-grammar-file") {
       ++i;
-      model = new PT(argv[i], 1, isHierarchical, NULL);
+      pair<Factors, Factors> *factors = transFactors.size() > indTrans ? &transFactors[indTrans] : NULL; 
+      model = new PT(argv[i], 1, isHierarchical, factors);
       ffVec.push_back(model);
+
+      ++indTrans;
     }
     else if (key == "-reordering-table") {
       ++i;
-      model = new RO(argv[i]);
+      pair<Factors, Factors> *factors = roFactors.size() > indRO ? &roFactors[indRO] : NULL; 
+      model = new RO(argv[i], factors);
       ffVec.push_back(model);
+
+      ++indRO;
     }
     else if (key == "-lm") {
       ++i;
