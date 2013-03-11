@@ -54,6 +54,8 @@ class RuleTableUTrie : public RuleTableTrie
                                                   const ChartCellCollectionBase &);
 
  private:
+  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
+
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
       const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
 

@@ -51,7 +51,11 @@ class RuleTableTrie : public PhraseDictionary
   bool InitDictionary();
 
   // Required by PhraseDictionary.
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
+  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const
+  {
+    CHECK(false);
+    return NULL;
+  }
 
  private:
   friend class RuleTableLoader;

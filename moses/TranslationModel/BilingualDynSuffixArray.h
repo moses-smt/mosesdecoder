@@ -119,7 +119,7 @@ private:
   mutable std::set<wordID_t> m_freqWordsCached;
 	const size_t m_maxPhraseLength, m_maxSampleSize;
 
-	int LoadCorpus(InputFileStream&, const std::vector<FactorType>& factors, 
+	int LoadCorpus(FactorDirection direction, InputFileStream&, const std::vector<FactorType>& factors,
 		std::vector<wordID_t>&, std::vector<wordID_t>&,
     Vocab*);
 	int LoadAlignments(InputFileStream& aligs);

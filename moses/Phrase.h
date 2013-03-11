@@ -70,15 +70,11 @@ public:
   	* \param phraseString formatted input string to parse
   	*	\param factorDelimiter delimiter between factors.  
   */
-  void CreateFromString(const std::vector<FactorType> &factorOrder
+  void CreateFromString(FactorDirection direction
+                        , const std::vector<FactorType> &factorOrder
   											, const StringPiece &phraseString
-  											, const StringPiece &factorDelimiter);
-
-  void CreateFromStringNewFormat(FactorDirection direction
-                                 , const std::vector<FactorType> &factorOrder
-                                 , const StringPiece &phraseString
-                                 , const std::string &factorDelimiter
-                                 , Word &lhs);
+  											, const StringPiece &factorDelimiter
+  											, Word *lhs = NULL);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten

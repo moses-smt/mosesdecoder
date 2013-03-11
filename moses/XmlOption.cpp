@@ -340,7 +340,7 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
 
               WordsRange range(startPos,endPos-1); // span covered by phrase
               TargetPhrase targetPhrase;
-              targetPhrase.CreateFromString(outputFactorOrder,altTexts[i],factorDelimiter);
+              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter);
               targetPhrase.SetScore(scoreValue);
               // TODO: targetPhrase.SetSourcePhrase() ?
 
