@@ -16,7 +16,7 @@ class PT : public FF
   void Output(std::ostream &out) const;
 
 public:
-  PT(const std::string &line, int numFeatures, bool isHierarchical);
+  PT(const std::string &line, int numFeatures, bool isHierarchical, const std::pair<Factors, Factors> *factors);
 
   void OutputWeights(std::ostream &out) const;
 };

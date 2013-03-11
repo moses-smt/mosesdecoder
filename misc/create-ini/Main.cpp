@@ -4,6 +4,7 @@
 #include <sstream>
 #include <cassert>
 #include <vector>
+#include <stdlib.h>
 #include "FF.h"
 #include "LM.h"
 #include "RO.h"
@@ -19,21 +20,24 @@ vector<FF*> ffVec;
 bool isHierarchical = false;
 
 void OutputIni();
+void ParseFactors(const string &line, vector< pair<Factors, Factors> > &ret);
 
 int main(int argc, char **argv)
 {
+  vector< pair<Factors, Factors> > transFactors, roFactors;
+
   FF *model;
-  for (int i = 0; i < argc; ++i) {
+  for (int i = 1; i < argc; ++i) {
     string key(argv[i]);
     
     if (key == "-phrase-translation-table") {
       ++i;
-      model = new PT(argv[i], 5, isHierarchical);
+      model = new PT(argv[i], 5, isHierarchical, NULL);
       ffVec.push_back(model);
     }
     else if (key == "-glue-grammar-file") {
       ++i;
-      model = new PT(argv[i], 1, isHierarchical);
+      model = new PT(argv[i], 1, isHierarchical, NULL);
       ffVec.push_back(model);
     }
     else if (key == "-reordering-table") {
@@ -53,6 +57,19 @@ int main(int argc, char **argv)
     else if (key == "-hierarchical") {
       isHierarchical = true;
     }
+    else if (key == "-translation-factors") {
+      ++i;
+      ParseFactors(argv[i], transFactors);
+    }
+    else if (key == "-reordering-factors") {
+      ++i;
+      ParseFactors(argv[i], roFactors);
+    }
+
+    else {
+      cerr << "Unknown arg " << key << endl;
+      abort();
+    }
   }
 
   model = new WP("");
@@ -69,6 +86,28 @@ int main(int argc, char **argv)
   OutputIni();
 }
 
+// parse input & output factors for 
+// -translation-factors & -reordering-factors
+void ParseFactorsPair(const string &line, vector< pair<Factors, Factors> > &ret)
+{
+  vector<string> toks = Tokenize(line, "-");
+  assert(toks.size() == 2);
+
+  Factors input, output;
+  input = Tokenize<size_t>(toks[0], ",");
+  output = Tokenize<size_t>(toks[1], ",");
+
+  ret.push_back(pair<Factors, Factors>(input, output) );
+}
+
+void ParseFactors(const string &line, vector< pair<Factors, Factors> > &ret)
+{
+  vector<string> toks = Tokenize(line, ":");
+  for (size_t i = 0; i < toks.size(); ++i) {
+    const string &tok = toks[i];
+    ParseFactorsPair(tok, ret);
+  }
+}
 
 // output ini file, with features and weights, and everything else
 void OutputIni()

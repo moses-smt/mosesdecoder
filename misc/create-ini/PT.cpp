@@ -1,8 +1,10 @@
 #include "PT.h"
 
+using namespace std;
+
 int PT::s_index = 0;
 
-PT::PT(const std::string &line, int numFeatures, bool isHierarchical)
+PT::PT(const std::string &line, int numFeatures, bool isHierarchical, const pair<Factors, Factors> *factors)
 :FF(line)
 {
   index = s_index++;

@@ -4,6 +4,8 @@
 #include <vector>
 #include <sstream>
 
+typedef std::vector<size_t> Factors;
+
 template<typename T>
 inline T Scan(const std::string &input)
 {
@@ -12,6 +14,17 @@ inline T Scan(const std::string &input)
   stream >> ret;
   return ret;
 }
+
+template<typename T>
+inline std::vector<T> Scan(const std::vector< std::string > &input)
+{
+  std::vector<T> output(input.size());
+  for (size_t i = 0 ; i < input.size() ; i++) {
+    output[i] = Scan<T>( input[i] );
+  }
+  return output;
+}
+
 
 inline std::vector<std::string> Tokenize(const std::string& str,
     const std::string& delimiters)
@@ -34,6 +47,14 @@ inline std::vector<std::string> Tokenize(const std::string& str,
   return tokens;
 }
 
+//! tokenise input string to vector of type T
+template<typename T>
+inline std::vector<T> Tokenize( const std::string &input
+                                , const std::string& delimiters = " \t")
+{
+  std::vector<std::string> stringVector = Tokenize(input, delimiters);
+  return Scan<T>( stringVector );
+}
 
 
 
