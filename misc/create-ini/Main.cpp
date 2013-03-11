@@ -18,6 +18,7 @@ using namespace std;
 string iniPath;
 vector<FF*> ffVec;
 bool isHierarchical = false;
+int inputFactorMax = 0;
 
 void OutputIni();
 void ParseFactors(const string &line, vector< pair<Factors, Factors> > &ret);
@@ -76,6 +77,10 @@ int main(int argc, char **argv)
       ++i;
       ParseFactors(argv[i], roFactors);
     }
+    else if (key == "-input-factor-max") {
+      ++i;
+      inputFactorMax = Scan<int>(argv[i]);
+    }
 
     else {
       cerr << "Unknown arg " << key << endl;
@@ -129,7 +134,10 @@ void OutputIni()
   weightStrme << "\n\n[weight]" << endl;
 
   strme << "[input-factors]" << endl;
-  strme << "0" << endl;
+  for (size_t i = 0; i <= inputFactorMax; ++i) {
+    strme << i << endl;
+  }
+  strme << endl;
 
   strme << "[mapping]" << endl;
   if (isHierarchical) {

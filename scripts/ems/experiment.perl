@@ -2087,6 +2087,9 @@ sub define_training_create_config {
 
   	my %IN = &get_factor_id("input");
 	  my %OUT = &get_factor_id("output");
+
+    $cmd .= "-input-factor-max ".((scalar keys %IN)-1)." ";
+
   	$cmd .= "-translation-factors ".
 	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." ";
     $cmd .= "-reordering-factors ".
