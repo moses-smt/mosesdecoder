@@ -4,7 +4,7 @@
 #include <vector>
 #include <sstream>
 
-typedef std::vector<size_t> Factors;
+typedef std::vector<int> Factors;
 
 template<typename T>
 inline T Scan(const std::string &input)

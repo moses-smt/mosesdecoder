@@ -94,8 +94,8 @@ void ParseFactorsPair(const string &line, vector< pair<Factors, Factors> > &ret)
   assert(toks.size() == 2);
 
   Factors input, output;
-  input = Tokenize<size_t>(toks[0], ",");
-  output = Tokenize<size_t>(toks[1], ",");
+  input = Tokenize<int>(toks[0], ",");
+  output = Tokenize<int>(toks[1], ",");
 
   ret.push_back(pair<Factors, Factors>(input, output) );
 }

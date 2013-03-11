@@ -14,7 +14,7 @@ protected:
 
 public:
   std::vector<std::string> toks;
-  std::vector<int> inFactors, outFactors;
+  Factors inFactors, outFactors;
   std::string name;
   std::string path;
   int index, numFeatures;
