@@ -29,9 +29,9 @@ TTableCollection::TTableCollection(const string &ttableArg)
   }
 }
 
-std::vector<PSD::Translation> TTableCollection::GetAllTranslations(const std::string &srcPhrase)
+std::vector<PSD::Translation> TTableCollection::GetAllTranslations(const std::string &srcPhrase, bool intersection)
 {
-  set<size_t> allIDs;
+  map<size_t, size_t> allIDs; // allIDs[translationID] = number of phrase tables where translationID occurs
   vector<TTableInfo>::const_iterator tableIt;
   map<string, map<size_t, TTableTranslation> > ttableTranslations;
 
@@ -41,24 +41,29 @@ std::vector<PSD::Translation> TTableCollection::GetAllTranslations(const std::st
       map<size_t, TTableTranslation> translations = tableIt->m_ttable->GetTranslations(srcPhrase);
       map<size_t, TTableTranslation>::const_iterator it;
       for (it = translations.begin(); it != translations.end(); it++)
-        allIDs.insert(it->first);
+        allIDs[it->first]++;
       ttableTranslations.insert(make_pair(tableIt->m_id, translations));
     }
   }
 
   // go over all translation IDs, over all phrase tables, create Translation entries
   vector<Translation> out;
-  set<size_t>::const_iterator idIt;
+  map<size_t, size_t>::const_iterator idIt;
   for (idIt = allIDs.begin(); idIt != allIDs.end(); idIt++) {
     Translation outTran;
-    outTran.m_index = *idIt;
+    outTran.m_index = idIt->first;
+
+    // if user wants phrase-table intersection, only return translations which occur in all phrase-tables
+    if (intersection && idIt->second != m_ttables.size())
+      continue;
+
     for (tableIt = m_ttables.begin(); tableIt != m_ttables.end(); tableIt++) {
       TTableEntry entry;
       entry.m_id = tableIt->m_id;
       if (tableIt->m_ttable->SrcExists(srcPhrase)) {
         map<size_t, TTableTranslation>::iterator it;
         // XXX inefficient, a multipath merge should be implemented here
-        it = ttableTranslations[tableIt->m_id].find(*idIt);
+        it = ttableTranslations[tableIt->m_id].find(outTran.m_index);
         if (it != ttableTranslations[tableIt->m_id].end()) {
           // this phrase table knows source phrase and translation *idIt
           entry.m_exists = true;

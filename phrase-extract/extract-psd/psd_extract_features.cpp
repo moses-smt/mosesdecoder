@@ -93,6 +93,7 @@ int main(int argc, char**argv)
   FeatureExtractor extractor(*ttables.GetTargetIndex(), config, true);
   VWFileTrainConsumer consumer(argv[5]);
   WritePhraseIndex(ttables.GetTargetIndex(), argv[6]);
+  bool ttable_intersection = false;
 
   // parse options 
   // TODO use some library to do this
@@ -105,6 +106,11 @@ int main(int argc, char**argv)
         exit(1);
       }
       toAnnotate = Scan<size_t>(Tokenize(argv[++i], ","));
+    } else if (opt == "--intersection") {
+      ttable_intersection = true;
+    } else {
+      cerr << "Unknown option: " << opt << endl;
+      exit(1);
     }
   }
 
@@ -162,7 +168,7 @@ int main(int argc, char**argv)
       spanStart = psdLine.GetSrcStart();
       spanEnd = psdLine.GetSrcEnd();
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
-      translations = ttables.GetAllTranslations(srcPhrase);
+      translations = ttables.GetAllTranslations(srcPhrase, ttable_intersection);
       losses.clear();
       losses.resize(translations.size(), 1);
       srcTotal++;

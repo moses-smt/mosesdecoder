@@ -23,7 +23,7 @@ public:
   inline const PSD::IndexType *GetTargetIndex() { return m_targetIndex; }
 
   // get translations of source phrase in all phrase tables
-  std::vector<PSD::Translation> GetAllTranslations(const std::string &srcPhrase);
+  std::vector<PSD::Translation> GetAllTranslations(const std::string &srcPhrase, bool intersection = false);
 
   // get ID of target phrase, set found to true if found, false otherwise
   size_t GetTgtPhraseID(const std::string &phrase, /* out */ bool *found);
