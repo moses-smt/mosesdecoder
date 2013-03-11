@@ -15,7 +15,7 @@ Moses is a statistical machine translation system that allows you to automatical
 %prep
 %setup -q
 
-mkdir -p $RPM_BUILD_ROOT/opt/moses/giza++-v2
+mkdir -p $RPM_BUILD_ROOT/opt/moses/giza++-v1.0.7
 
 wget -O $RPM_BUILD_DIR/irstlm-5.70.04.tgz http://moses-suite.googlecode.com/files/irstlm-5.70.04.tgz 
 wget -O $RPM_BUILD_DIR/giza-pp-v1.0.7.tgz http://moses-suite.googlecode.com/files/giza-pp-v1.0.7.tar.gz
@@ -33,9 +33,9 @@ make install
 
 cd ../giza-pp
 make
-cp $RPM_BUILD_DIR/giza-pp/GIZA++-v2/GIZA++ $RPM_BUILD_DIR/giza-pp/GIZA++-v2/snt2cooc.out $RPM_BUILD_DIR/giza-pp/mkcls-v2/mkcls $RPM_BUILD_ROOT/opt/moses/giza++-v2
+cp $RPM_BUILD_DIR/giza-pp/GIZA++-v2/GIZA++ $RPM_BUILD_DIR/giza-pp/GIZA++-v2/snt2cooc.out $RPM_BUILD_DIR/giza-pp/mkcls-v2/mkcls $RPM_BUILD_ROOT/opt/moses/giza++-v1.0.7
 %build
-./bjam --with-irstlm=$RPM_BUILD_ROOT/opt/moses/irstlm-5.70.04 --with-giza=$RPM_BUILD_ROOT/opt/moses/giza++-v2 -j2
+./bjam --with-irstlm=$RPM_BUILD_ROOT/opt/moses/irstlm-5.70.04 --with-giza=$RPM_BUILD_ROOT/opt/moses/giza++-v1.0.7 -j2
 %install
 mkdir -p $RPM_BUILD_ROOT/opt/moses/scripts
 cp -R bin $RPM_BUILD_ROOT/opt/moses
@@ -62,4 +62,4 @@ cp -R scripts/training $RPM_BUILD_ROOT/opt/moses/scripts
 /opt/moses/scripts/tokenizer/*
 /opt/moses/scripts/training/*
 /opt/moses/irstlm-5.70.04/*
-/opt/moses/giza++-v2/*
+/opt/moses/giza++-v1.0.7/*
