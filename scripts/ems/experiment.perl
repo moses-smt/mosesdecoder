@@ -2085,6 +2085,17 @@ sub define_training_create_config {
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $cmd = "$moses_src_dir/bin/create-ini ";
 
+  	my %IN = &get_factor_id("input");
+	  my %OUT = &get_factor_id("output");
+  	$cmd .= "-translation-factors ".
+	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." ";
+    $cmd .= "-reordering-factors ".
+	          &encode_factor_definition("reordering-factors",\%IN,\%OUT)." "
+	          if &get("TRAINING:reordering-factors");
+    $cmd .= "-generation-factors ".
+      	    &encode_factor_definition("generation-factors",\%OUT,\%OUT)." "
+      	    if &get("TRAINING:generation-factors");
+
     # get model, and whether suffix array is used. Determines the pt implementation.
     my $hierarchical = &get("TRAINING:hierarchical-rule-set");
     $cmd .= "-hierarchical " if $hierarchical;
