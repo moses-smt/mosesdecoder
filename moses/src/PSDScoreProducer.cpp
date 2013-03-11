@@ -147,7 +147,7 @@ bool PSDScoreProducer::LoadPhraseIndex(const string &indexFile)
   string line;
   size_t index = 0;
   while (getline(in, line)) {
-    m_phraseIndex.insert(TargetIndexType::value_type(line, ++index));
+    m_phraseIndex.insert(IndexType::value_type(line, ++index));
   }
   in.close();
 

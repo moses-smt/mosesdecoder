@@ -14,12 +14,12 @@ struct TTableTranslation
   std::vector<float> m_scores;
 };
 
-typedef std::map<std::string, std::map<size_t, TTableTranslation> > DictionaryType;
+typedef std::map<size_t, std::map<size_t, TTableTranslation> > DictionaryType;
 
 class TranslationTable
 {
 public:
-  TranslationTable(const std::string &fileName, PSD::TargetIndexType *targetIndex);
+  TranslationTable(const std::string &fileName, PSD::IndexType *targetIndex);
   bool SrcExists(const std::string &phrase);
 
   // get all translations of source phrase, assumes that srcPhrase is known 
@@ -28,7 +28,7 @@ public:
 
 private:
   DictionaryType m_ttable;
-  PSD::TargetIndexType *m_targetIndex;
+  PSD::IndexType *m_sourceIndex, *m_targetIndex;
 
   void AddPhrasePair(const std::string &src, const std::string &tgt,
       const std::vector<float> &scores, const PSD::AlignmentType &align); 
@@ -36,7 +36,7 @@ private:
   PSD::AlignmentType GetAlignment(const std::string &alignStr);
 
   // add phrase to index (if it does not exist yet), return its ID
-  size_t AddTargetPhrase(const std::string &phrase);
+  size_t AddPhrase(const std::string &phrase, PSD::IndexType *index);
 };
 
 #endif // _TranslationTable_h_

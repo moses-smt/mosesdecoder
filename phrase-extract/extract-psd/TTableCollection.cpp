@@ -7,7 +7,7 @@ using namespace PSD;
 
 TTableCollection::TTableCollection(const string &ttableArg)
 {
-  m_targetIndex = new TargetIndexType();
+  m_targetIndex = new IndexType();
 
   // parse specification of translation tables
   if (ttableArg.find(':') != string::npos) {
@@ -90,7 +90,7 @@ bool TTableCollection::SrcExists(const string &srcPhrase)
 size_t TTableCollection::GetTgtPhraseID(const string &phrase, /* out */ bool *found)
 {
   *found = false;
-  TargetIndexType::left_map::const_iterator it = m_targetIndex->left.find(phrase);
+  IndexType::left_map::const_iterator it = m_targetIndex->left.find(phrase);
   if (it != m_targetIndex->left.end()) {
     *found = true;
     return it->second;

@@ -39,14 +39,14 @@ private:
   string m_srcPhrase, m_tgtPhrase;
 };
 
-void WritePhraseIndex(const TargetIndexType *index, const string &outFile)
+void WritePhraseIndex(const IndexType *index, const string &outFile)
 {
   OutputFileStream out(outFile);
   if (! out.good()) {
     cerr << "error: Failed to open " << outFile << endl;
     exit(1);
   }
-  TargetIndexType::right_map::const_iterator it; // keys are sorted in the map
+  IndexType::right_map::const_iterator it; // keys are sorted in the map
   for (it = index->right.begin(); it != index->right.end(); it++)
     out << it->second << "\n";
   out.Close();

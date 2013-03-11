@@ -20,7 +20,7 @@ class TTableCollection
 public:
   TTableCollection(const std::string &ttableArg);
 
-  inline const PSD::TargetIndexType *GetTargetIndex() { return m_targetIndex; }
+  inline const PSD::IndexType *GetTargetIndex() { return m_targetIndex; }
 
   // get translations of source phrase in all phrase tables
   std::vector<PSD::Translation> GetAllTranslations(const std::string &srcPhrase);
@@ -31,7 +31,7 @@ public:
   bool SrcExists(const std::string &srcPhrase);
 
 private:
-  PSD::TargetIndexType *m_targetIndex;
+  PSD::IndexType *m_targetIndex;
   std::vector<TTableInfo> m_ttables;
 };
 

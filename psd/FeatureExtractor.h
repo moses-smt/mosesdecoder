@@ -78,13 +78,13 @@ struct Translation
 };
 
 // index of possible target spans
-typedef boost::bimaps::bimap<std::string, size_t> TargetIndexType;
+typedef boost::bimaps::bimap<std::string, size_t> IndexType;
 
 // extract features
 class FeatureExtractor
 {
 public:
-  FeatureExtractor(const TargetIndexType &targetIndex, const ExtractorConfig &config, bool train);
+  FeatureExtractor(const IndexType &targetIndex, const ExtractorConfig &config, bool train);
 
   // Generate features for current source phrase and all its translation options, based on 
   // configuration. Calls all auxiliary Generate* methods.
@@ -100,7 +100,7 @@ public:
     std::string extraFeature = "");
 
 private:
-  const TargetIndexType &m_targetIndex; // Target-phrase vocabulary.
+  const IndexType &m_targetIndex; // Target-phrase vocabulary.
   const ExtractorConfig &m_config;      // Configuration of features.
   bool m_train;                         // Train or predict.
 

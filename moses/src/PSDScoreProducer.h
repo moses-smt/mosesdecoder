@@ -63,7 +63,7 @@ private:
   void Normalize3(std::vector<float> &losses);
 
   std::vector<FactorType> m_tgtFactors; // which factors to use; XXX hard-coded for now
-  PSD::TargetIndexType m_phraseIndex;
+  PSD::IndexType m_phraseIndex;
   PSD::VWLibraryPredictConsumerFactory	*m_consumerFactory;
   PSD::FeatureExtractor *m_extractor;
   PSD::ExtractorConfig m_extractorConfig;

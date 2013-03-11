@@ -16,7 +16,7 @@ using namespace Moses;
 namespace PSD
 {
 
-FeatureExtractor::FeatureExtractor(const TargetIndexType &targetIndex, const ExtractorConfig &config, bool train)
+FeatureExtractor::FeatureExtractor(const IndexType &targetIndex, const ExtractorConfig &config, bool train)
   : m_targetIndex(targetIndex), m_config(config), m_train(train)
 {  
   if (! m_config.IsLoaded())
