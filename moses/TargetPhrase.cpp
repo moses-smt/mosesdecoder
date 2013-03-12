@@ -141,11 +141,9 @@ void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
   CHECK(weightT.size() == scoreVector.size());
   // calc average score if non-best
 
-  cerr << m_scoreBreakdown << endl;
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
   m_scoreBreakdown.PlusEquals(sparseScoreVector);
   float transScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights());
-  cerr << m_scoreBreakdown << endl;
 
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;
