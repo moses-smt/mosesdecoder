@@ -136,12 +136,16 @@ void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
                             const vector<float> &weightT,
                             float weightWP, const LMList &languageModels)
 {
+  const StaticData &staticData = StaticData::Instance();
+
   CHECK(weightT.size() == scoreVector.size());
   // calc average score if non-best
 
-  float transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
+  cerr << m_scoreBreakdown << endl;
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
   m_scoreBreakdown.PlusEquals(sparseScoreVector);
+  float transScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights());
+  cerr << m_scoreBreakdown << endl;
 
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;
