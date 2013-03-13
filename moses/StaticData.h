@@ -142,6 +142,7 @@ protected:
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
+  bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
@@ -652,6 +653,9 @@ public:
     return m_needAlignmentInfo; }
   const std::string &GetAlignmentOutputFile() const {
     return m_alignmentOutputFile;
+  }
+  bool PrintAlignmentInfo() const {
+    return m_PrintAlignmentInfo;
   }
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;
