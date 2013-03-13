@@ -197,7 +197,7 @@ public:
       // MAP decoding: best hypothesis
       const Hypothesis* bestHypo = NULL;
       if (!staticData.UseMBR()) 
-			{
+	  {
         bestHypo = manager.GetBestHypothesis();
         if (bestHypo) {
           if (staticData.IsPathRecoveryEnabled()) {
@@ -214,13 +214,18 @@ public:
             staticData.GetOutputFactorOrder(),
             staticData.GetReportSegmentation(),
             staticData.GetReportAllFactors());
+          if (staticData.PrintAlignmentInfo()) {
+        	out << "||| ";
+            OutputAlignment(out, bestHypo);
+          }
+
           OutputAlignment(m_alignmentInfoCollector, m_lineNumber, bestHypo);
           IFVERBOSE(1) {
             debug << "BEST TRANSLATION: " << *bestHypo << endl;
           }
         }
         out << endl;
-			}
+	  }
 
       // MBR decoding (n-best MBR, lattice MBR, consensus)
       else 
