@@ -59,8 +59,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
                      , size_t												nBestSize
                      , const std::string							&nBestFilePath
                      , const std::string							&inputFilePath
-                     //damt hiero : context file path
-                     , const std::string &contextFilePath)
+                     //damt hiero : psd context file path
+                     , const std::string &contextFilePath
+                     //damt hiero : parse context file path
+                     , const std::string &parseFilePath)
   :m_inputFactorOrder(inputFactorOrder)
   ,m_outputFactorOrder(outputFactorOrder)
   ,m_inputFactorUsed(inputFactorUsed)
@@ -72,8 +74,10 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   ,m_nBestOutputCollector(NULL)
   ,m_searchGraphOutputCollector(NULL)
   ,m_singleBestOutputCollector(NULL)
-  //damt hiero : input containing context
+  //damt hiero : input containing psd context
   ,m_contextFilePath(contextFilePath)
+  //damt hiero : input containing parse
+  ,m_parseFilePath(parseFilePath)
 {
   const StaticData &staticData = StaticData::Instance();
 
@@ -83,11 +87,19 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
     m_inputStream = new InputFileStream(inputFilePath);
   }
 
+  //damt hiero : psd context file
   if (m_contextFilePath.empty()) {
     m_contextStream = &std::cin;
   } else {
     m_contextStream = new InputFileStream(contextFilePath);
   }
+
+  //damt hiero : psd parse file
+  if (m_parseFilePath.empty()) {
+     m_parseStream = &std::cin;
+   } else {
+     m_parseStream = new InputFileStream(parseFilePath);
+   }
 
   m_surpressSingleBestOutput = false;
 
@@ -136,10 +148,15 @@ IOWrapper::~IOWrapper()
     delete m_inputStream;
   }
 
-  //damt hiero
+  //damt hiero : psd context file
   if (!m_contextFilePath.empty()) {
     delete m_contextStream;
   }
+
+  //damt hiero : file to parse
+  if (!m_parseFilePath.empty()) {
+      delete m_parseStream;
+    }
 
   if (!m_surpressSingleBestOutput) {
     // outputting n-best to file, rather than stdout. need to close file and delete obj
@@ -173,7 +190,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
     //damt hiero : also read context file
     if(!ReadContext(*m_contextStream, inputType))
     {
-        cerr << "Warning : If using DAMT, no context read"<< endl;
+        cerr << "Warning : If using DAMT, no context read" << endl;
     }
 
     return inputType;
@@ -183,7 +200,7 @@ InputType*IOWrapper::GetInput(InputType* inputType)
   }
 }
 
-//Damt hiero : read context
+//Damt hiero : read psd context file
 int IOWrapper::ReadContext(std::istream& in, InputType* input)
 {
     string line;
@@ -196,6 +213,23 @@ int IOWrapper::ReadContext(std::istream& in, InputType* input)
     for (size_t i = 0; i < words.size(); i++) {
     SetPSDContext(Tokenize(words[i], "|"),input);
     }
+    return 1;
+}
+
+//Damt hiero : read input parse tree
+int IOWrapper::ReadParse(std::istream& in, InputType* input)
+{
+    string line;
+    if (getline(in, line, '\n').eof())
+    return 0;
+
+    //std::cerr << "READING CONTEXT : " << line << std::endl;
+
+    //Read in parse tree
+    size_t sourceSize = input->GetSize();
+    input->m_parseTree->PopulateChart(sourceSize);
+    input->m_parseTree->Read(line);
+    //m_parseTree->Print(sourceSize);
     return 1;
 }
 

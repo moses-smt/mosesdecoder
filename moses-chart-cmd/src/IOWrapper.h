@@ -67,10 +67,16 @@ protected:
   std::ostream 									*m_nBestStream, *m_outputSearchGraphStream;
   std::ostream                  *m_detailedTranslationReportingStream;
   std::string										m_inputFilePath;
+  //damt hiero : psd context file
   std::string m_contextFilePath;
-  std::istream									*m_inputStream;
-  //damt hiero
+  //damt hiero : psd context file
+  std::string m_parseFilePath;
+  std::istream	*m_inputStream;
+  //damt hiero : psd context file
   std::istream *m_contextStream;
+  //damt hiero : psd parsed file
+  std::istream *m_parseStream;
+
   bool													m_surpressSingleBestOutput;
   Moses::OutputCollector                *m_detailOutputCollector;
   Moses::OutputCollector                *m_nBestOutputCollector;
@@ -87,8 +93,11 @@ public:
             , const Moses::FactorMask							&inputFactorUsed
             , size_t												nBestSize
             , const std::string							&nBestFilePath
-            , const std::string							&inputFilePath=""
-            , const std::string &contextFilePath="");
+            , const std::string &inputFilePath=""
+            //damt hiero : psd context file
+            , const std::string &contextFilePath=""
+            //damt hiero : parse file
+           , const std::string &parseFilePath="");
   ~IOWrapper();
 
   Moses::InputType* GetInput(Moses::InputType *inputType);
@@ -100,8 +109,11 @@ public:
 
   void ResetTranslationId();
 
-  //damt hiero
+  //damt hiero : read psd context
   int ReadContext(std::istream&, Moses::InputType *inputType);
+
+  //damt hiero : read parse file
+  int ReadParse(std::istream&, Moses::InputType *inputType);
 
   Moses::OutputCollector *GetSearchGraphOutputCollector() {
     return m_searchGraphOutputCollector;

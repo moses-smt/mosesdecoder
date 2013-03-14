@@ -22,22 +22,7 @@ namespace Moses
  */
 
 //TODO : remove
-/*void TreeInput::PopulateStringChart(string noTag)
-{
-  for (size_t startPos = 0; startPos < GetSize(); startPos++) {
-      //cerr << "startPos" << startPos << endl;
-      vector< vector< string > > internal;
-      for (size_t endPos = startPos; endPos < GetSize(); endPos++) {
-        //cerr << "endPos" << endPos << endl;
-        vector<string> oneCell;
-        oneCell.push_back(noTag);
-        internal.push_back(oneCell);
-    }
-    m_stringChart.push_back(internal);
-  }
-}
-
-void TreeInput::PrintStringChart()
+/*void TreeInput::PrintStringChart()
 {
  for (size_t startPos = 0; startPos < GetSize(); ++startPos) {
     for (size_t endPos = startPos; endPos < GetSize(); ++endPos) {
@@ -267,11 +252,6 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   //VERBOSE(0, "TREE INPUT : LINE : " << line << endl);
 
-  //SOLUTION : COPY LINE !!!
-   //construct chart for syntactic features
-  //hack : keep line with xml tags
-  string xmlLine = line;
-
   std::vector<XMLParseOutput> sourceLabels;
   std::vector<XmlOption*> xmlOptionsList;
   ProcessAndStripXMLTags(line, sourceLabels, xmlOptionsList);
@@ -289,12 +269,6 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   size_t sourceSize = GetSize();
   m_sourceChart.resize(sourceSize);
-
-  //Read in parse tree
-  m_parseTree->PopulateChart(sourceSize);
-  //m_parseTree->Print(sourceSize);
-  m_parseTree->Read(xmlLine);
-  //m_parseTree->Print(sourceSize);
 
   for (size_t pos = 0; pos < sourceSize; ++pos) {
     m_sourceChart[pos].resize(sourceSize - pos);
@@ -400,38 +374,6 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &labe
 
   AddChartLabel(startPos, endPos, word, factorOrder);
 }
-
-//damt hiero
-/*void TreeInput::AddChartString(size_t startPos, size_t endPos, const string &label)
-{
-  m_stringChart[startPos][endPos-startPos].push_back(label);
-}
-
-string TreeInput::GetParent(size_t startPos, size_t endPos)
-{
-    string isRoot = "ISROOT";
-    if(startPos == 0)
-    {
-        if(endPos == (m_sourceChart.front().size() -1) )
-        {
-            return isRoot;
-        }
-        else
-        {
-            if(GetRelLabels(startPos,endPos+1).size() > 1)
-            {return GetRelLabels(startPos,endPos+1)[1];}
-            else
-           {return GetRelLabels(startPos,endPos+1).front();}
-        }
-    }
-    else
-    {
-        if(GetRelLabels(startPos-1,endPos+1).size() > 1)
-        {return GetRelLabels(startPos-1,endPos+1)[1];}
-        else
-        {return GetRelLabels(startPos-1,endPos+1).front();}
-    }
-}*/
 
 std::ostream& operator<<(std::ostream &out, const TreeInput &input)
 {

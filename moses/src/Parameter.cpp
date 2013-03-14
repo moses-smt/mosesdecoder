@@ -149,6 +149,7 @@ Parameter::Parameter()
 
   //#ifdef HAVE_VW
   AddParam("sentence-cell-context", "Call psd classidier in each cell of parse chart");
+  AddParam("syntax-context", "Input data annotated with linguistic syntactic labels");
 
 //#ifdef HAVE_VW
   AddParam("weight-psd", "psd", "weight for phrase sense disambiguation");
