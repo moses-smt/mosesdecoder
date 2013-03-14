@@ -368,7 +368,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
   size_t numScoreComps = ff->GetNumScoreComponents();
   if (numScoreComps != FeatureFunction::unlimited) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
-    cout << ff->GetScoreProducerDescription() << ":";
+    cout << ff->GetScoreProducerDescription() << "=";
     for (size_t i = 0; i < numScoreComps; ++i) {
     	cout << " " << values[i];
     }
@@ -376,9 +376,9 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
   }
   else {
   	if (ff->GetSparseProducerWeight() == 1)
-  		cout << ff->GetScoreProducerDescription() << ": sparse" <<  endl;
+  		cout << ff->GetScoreProducerDescription() << "= sparse" <<  endl;
   	else
-  		cout << ff->GetScoreProducerDescription() << ": " << ff->GetSparseProducerWeight() << endl;
+  		cout << ff->GetScoreProducerDescription() << "= " << ff->GetSparseProducerWeight() << endl;
   }
 }
 
