@@ -139,7 +139,7 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   //CHECK(toks[0] == description);
 
   for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
+    vector<string> args = Tokenize(toks[i], ":");
     CHECK(args.size() == 2);
     m_args.push_back(args);
   }
