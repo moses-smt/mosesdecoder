@@ -125,8 +125,6 @@ my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 my $__PROMIX_TRAINING = undef; # Location of main script (contrib/promix/main.py)
 # The phrase tables. These should be gzip text format.
 my @__PROMIX_TABLES;
-# The tmcombine script
-my $__TMCOMBINE = "$SCRIPTS_ROOTDIR/../contrib/tmcombine/tmcombine.py";
 # used to filter output
 my $__REMOVE_SEGMENTATION = "$SCRIPTS_ROOTDIR/ems/support/remove-segmentation-markup.perl";
 
@@ -386,14 +384,13 @@ if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optim
 
 if ($__PROMIX_TRAINING) {
   die "Not executable $__PROMIX_TRAINING" unless -x $__PROMIX_TRAINING;
-  die "For mixture model training, specify the tables with --phrase-weighting-tables" unless @__PROMIX_TABLES;
+  die "For promix training, specify the tables using --promix-table arguments" unless @__PROMIX_TABLES;
   die "For mixture model, need at least 2 tables" unless scalar(@__PROMIX_TABLES) > 1;
   
   for my $TABLE (@__PROMIX_TABLES) {
     die "Phrase table $TABLE not found" unless -r $TABLE;
   }
-  die "Not executable: $__TMCOMBINE" unless -x $__TMCOMBINE;
-  die "To use phrase-weighting, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
+  die "To use promix training, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
 $mertargs = "" if !defined $mertargs;
@@ -519,25 +516,23 @@ my $prev_score_file = undef;
 my $prev_init_file = undef;
 my @allnbests;
 
-# If we're training mixture models, need to make sure the appropriate
+# If we're doing promix training, need to make sure the appropriate
 # tables are in place
 my @_PROMIX_TABLES_BIN;
 if ($__PROMIX_TRAINING) {
-  print STDERR "Training mixture model\n";
+  print STDERR "Training mixture model using promix\n";
   for (my $i = 0; $i < scalar(@__PROMIX_TABLES); ++$i) {
     # Create filtered, binarised tables
     my $filtered_config = "moses_$i.ini";
     substitute_ttable($___CONFIG, $filtered_config, $__PROMIX_TABLES[$i]); 
+    #TODO: Remove reordering table from config, as we don't need to filter
+    # and binarise it.
     my $filtered_path = "filtered_$i";
     my $___FILTER_F  = $___DEV_F;
     $___FILTER_F = $filterfile if (defined $filterfile);
     my $cmd = "$filtercmd ./$filtered_path $filtered_config $___FILTER_F";
     &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err");
     push (@_PROMIX_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
-
-    # Create directory structure for the text phrase tables required by tmcombine
-    mkpath("model_$i/model") || die "Failed to create model_$i/model";
-    safesystem("ln -s ../../$filtered_path/phrase-table.0-0.1.1 model_$i/model/phrase-table");
   }
 }
  
@@ -698,6 +693,8 @@ my $orig_nbest_file = undef; # replaced if lattice sampling
 # For mixture modelling
 my @promix_weights;
 my $num_mixed_phrase_features;
+my $interpolated_config;
+my $uninterpolated_config; # backup of config without interpolated ttable
 
 while (1) {
   $run++;
@@ -708,22 +705,23 @@ while (1) {
   print "run $run start at ".`date`;
 
   if ($__PROMIX_TRAINING) {
-    # Need to interpolate the phrase tables with current weights, and binarise
+    # Need to create an ini file for the interpolated phrase table
     if (!@promix_weights) {
+      # Create initial weights, distributing evenly between tables
       # total number of weights is 1 less than number of phrase features, multiplied
       # by the number of tables
       $num_mixed_phrase_features = (grep { $_ eq 'tm' } @{$featlist->{"names"}}) - 1;
   
       @promix_weights = (1.0/scalar(@__PROMIX_TABLES)) x 
         ($num_mixed_phrase_features * scalar(@__PROMIX_TABLES));
-    } 
+    }
+    
+    # backup orig config, so we always add the table into it
+    $uninterpolated_config= $___CONFIG unless $uninterpolated_config; 
 
-    # make a backup copy of startup ini filepath
-    $___CONFIG_ORIG = $___CONFIG unless defined($___CONFIG_ORIG);
     # Interpolation
-    my $interpolated_phrase_table = "./phrase-table.interpolated.gz";
-    my $cmd = "$__TMCOMBINE combine_given_weights ";
-    $cmd .= join(" ", map {"model_$_"} (0..(scalar(@__PROMIX_TABLES)-1)));
+    my $interpolated_phrase_table = "naive ";
+    $interpolated_phrase_table .= join(" ", @_PROMIX_TABLES_BIN);
     # convert from table,feature ordering to feature,table ordering
     my @transposed_weights;
     for my $feature (0..($num_mixed_phrase_features-1)) {
@@ -733,27 +731,15 @@ while (1) {
       }
       push @transposed_weights, join ",", @table_weights;
     }
-    
-    $cmd .= " -w \"" . join(";",@transposed_weights) . "\"";
-    $cmd .= " -o $interpolated_phrase_table";
-    &submit_or_exec($cmd, "interpolate.out", "interpolate.err");
-    print "finished interpolation at ".`date`;
+    $interpolated_phrase_table .= " ";
+    $interpolated_phrase_table .=  join(";",@transposed_weights);
 
     # Create an ini file for the interpolated phrase table
-    my $interpolated_config ="moses.interpolated.ini"; 
-    substitute_ttable($___CONFIG_ORIG, $interpolated_config, $interpolated_phrase_table);
+    $interpolated_config ="moses.interpolated.ini"; 
+    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "13");
 
-    # Filter and binarise
-    print STDERR "filtering the interpolated phrase table\n";
-    my $___FILTER_F  = $___DEV_F;
-    my $outdir = "filtered";
-    safesystem("rm -rf $outdir");
-    $___FILTER_F = $filterfile if (defined $filterfile);
-    $cmd = "$filtercmd ./$outdir $interpolated_config $___FILTER_F";
-    &submit_or_exec($cmd, "filterphrases.out", "filterphrases.err");
-
-    # the decoder should now use the filtered model
-    $___CONFIG = "$outdir/moses.ini";
+    # the decoder should now use the interpolated model
+    $___CONFIG = "$interpolated_config";
 
   }
 
@@ -964,6 +950,9 @@ while (1) {
   safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem("touch $mert_logfile run$run.$mert_logfile") or die;
   safesystem("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
+  if ($__PROMIX_TRAINING) {
+    safesystem("\\cp -f $interpolated_config run$run.$interpolated_config") or die;
+  }
 
   print "run $run end at ".`date`;
 
@@ -1488,7 +1477,8 @@ sub create_config {
 # Create a new ini file, with the first ttable replaced by the given one
 # and its type set to text
 sub substitute_ttable {
-  my ($old_ini, $new_ini, $new_ttable) = @_;
+  my ($old_ini, $new_ini, $new_ttable, $ttable_type) = @_;
+  $ttable_type = "0" unless defined($ttable_type);
   open(NEW_INI,">$new_ini") || die "Failed to create $new_ini";
   open(INI,$old_ini) || die "Failed to open $old_ini";
   while(<INI>) {
@@ -1497,7 +1487,7 @@ sub substitute_ttable {
       my $ttable_config = <INI>;
       chomp $ttable_config;
       my @ttable_fields = split /\s+/, $ttable_config;
-      $ttable_fields[0] = "0";
+      $ttable_fields[0] = $ttable_type;
       $ttable_fields[4] = $new_ttable;
       print NEW_INI join(" ", @ttable_fields) . "\n";
     } else {
