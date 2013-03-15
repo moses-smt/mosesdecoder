@@ -665,6 +665,8 @@ int main(int argc, char** argv)
     pool.Stop(true); //flush remaining jobs
 #endif
 
+    delete ioWrapper;
+
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;
     return EXIT_FAILURE;

@@ -55,6 +55,7 @@ class AlignmentInfoCollection
 
   //! Only a single static variable should be created.
   AlignmentInfoCollection();
+  ~AlignmentInfoCollection();
 
   static AlignmentInfoCollection s_instance;
 
