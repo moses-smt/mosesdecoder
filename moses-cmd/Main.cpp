@@ -488,20 +488,20 @@ int main(int argc, char** argv)
 
     // load all the settings into the Parameter class
     // (stores them as strings, or array of strings)
-    Parameter* params = new Parameter();
-    if (!params->LoadParam(argc,argv)) {
+    Parameter params;
+    if (!params.LoadParam(argc,argv)) {
       exit(1);
     }
 
 
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
-    if (!StaticData::LoadDataStatic(params, argv[0])) {
+    if (!StaticData::LoadDataStatic(&params, argv[0])) {
       exit(1);
     }
 
     // setting "-show-weights" -> just dump out weights and exit
-    if (params->isParamSpecified("show-weights")) {
+    if (params.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
@@ -657,6 +657,8 @@ int main(int argc, char** argv)
 #ifdef WITH_THREADS
     pool.Stop(true); //flush remaining jobs
 #endif
+
+    delete ioWrapper;
 
   } catch (const std::exception &e) {
     std::cerr << "Exception: " << e.what() << std::endl;
