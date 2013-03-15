@@ -162,10 +162,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  if(m_parameter->GetParam("sort-word-alignment").size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
-  }
-  
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -175,6 +171,16 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
   //word-to-word alignment
+  // alignments
+  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
+  if (m_PrintAlignmentInfo) {
+    m_needAlignmentInfo = true;
+  }
+
+  if(m_parameter->GetParam("sort-word-alignment").size()) {
+    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
+  }
+
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
   if (m_PrintAlignmentInfoNbest) {
     m_needAlignmentInfo = true;
@@ -235,8 +241,19 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_outputSearchGraph = true;
     m_outputSearchGraphExtended = true;
-  } else
+  } else {
     m_outputSearchGraph = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
+    m_outputSearchGraphSLF = true;
+  } else {
+    m_outputSearchGraphSLF = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
+    m_outputSearchGraphHypergraph = true;
+  } else {
+    m_outputSearchGraphHypergraph = false;
+  }
 #ifdef HAVE_PROTOBUF
   if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {
     if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {

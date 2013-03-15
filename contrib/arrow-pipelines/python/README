@@ -1,0 +1,32 @@
+Arrow Based Moses Training Pipeline
+===================================
+
+To use the demonstration you must first initialise the git submodules for this clone. Return to the top level directory and issue the following command:
+
+$ git submodule init
+
+This will clone the Pypeline submodule that is available on GitHub (https://github.com/ianj-als/pypeline). To install Pypeline:
+
+$ cd libs/pypeline
+$ python setup.py install
+
+Alternatively, you can set an appropriate PYTHONPATH enviornment variable to the Pypeline library.
+
+This demonstration implements a training pipeline that is shown in the Dia diagram in ../documentation/training-pipeline/moses-pypeline.dia.
+
+Three environment variables need to be set before the manager.py script can be run, they are:
+
+ - MOSES_HOME : The directory where Moses has been cloned, or installed,
+ - IRSTLM : The installation directory of your IRSTLM, and
+ - GIZA_HOME : The installation directory of GIZA++.
+
+The manager.py script takes four positional command-line arguments:
+
+ - The source language code,
+ - The target language code,
+ - The source corpus file. This file *must* be cleaned prior to use, and
+ - The target corpus file. This file *must* be cleaned prior to use.
+
+For example, run the manager.py script with:
+
+$ python manager.py en lt cleantrain.en cleantrain.lt

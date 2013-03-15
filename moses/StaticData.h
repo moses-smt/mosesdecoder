@@ -171,6 +171,7 @@ protected:
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
+  bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
 
@@ -216,6 +217,8 @@ protected:
   bool m_outputWordGraph; //! whether to output word graph
   bool m_outputSearchGraph; //! whether to output search graph
   bool m_outputSearchGraphExtended; //! ... in extended format
+  bool m_outputSearchGraphSLF; //! whether to output search graph in HTK standard lattice format (SLF)
+  bool m_outputSearchGraphHypergraph; //! whether to output search graph in hypergraph
 #ifdef HAVE_PROTOBUF
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
@@ -458,7 +461,7 @@ public:
     return m_nBestFilePath;
   }
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
+    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_outputSearchGraphSLF || m_outputSearchGraphHypergraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
 #ifdef HAVE_PROTOBUF
            || m_outputSearchGraphPB
 #endif
@@ -631,6 +634,12 @@ public:
   bool GetOutputSearchGraphExtended() const {
     return m_outputSearchGraphExtended;
   }
+  bool GetOutputSearchGraphSLF() const {
+    return m_outputSearchGraphSLF;
+  }
+  bool GetOutputSearchGraphHypergraph() const {
+    return m_outputSearchGraphHypergraph;
+  }
 #ifdef HAVE_PROTOBUF
   bool GetOutputSearchGraphPB() const {
     return m_outputSearchGraphPB;
@@ -721,6 +730,9 @@ public:
     return m_needAlignmentInfo; }
   const std::string &GetAlignmentOutputFile() const {
     return m_alignmentOutputFile;
+  }
+  bool PrintAlignmentInfo() const {
+    return m_PrintAlignmentInfo;
   }
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;

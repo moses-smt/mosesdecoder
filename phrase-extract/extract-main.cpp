@@ -712,6 +712,10 @@ for(int fi=startF; fi<=endF; fi++) {
   if (m_options.isOrientationFlag())
     outextractstrOrientation << orientationInfo;
 
+  if (m_options.isIncludeSentenceIdFlag()) {
+    outextractstr << " ||| " << sentence.sentenceID;
+  }
+
   if (m_options.getInstanceWeightsFile().length()) {
     if (m_options.isTranslationFlag()) {
       outextractstr << " ||| " << sentence.weightString;
@@ -722,9 +726,6 @@ for(int fi=startF; fi<=endF; fi++) {
     }
   }
 
-  if (m_options.isIncludeSentenceIdFlag()) {
-    outextractstr << " ||| " << sentence.sentenceID;
-  }
 
   if (m_options.isTranslationFlag()) outextractstr << "\n";
   if (m_options.isTranslationFlag()) outextractstrInv << "\n";

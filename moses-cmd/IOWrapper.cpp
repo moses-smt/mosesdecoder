@@ -189,6 +189,15 @@ InputType*IOWrapper::GetInput(InputType* inputType)
   }
 }
 
+  ofstream* IOWrapper::GetOutputSearchGraphHypergraphWeightsStream() {
+    const StaticData &staticData = StaticData::Instance();
+    stringstream fileName;
+    fileName << staticData.GetParam("output-search-graph-hypergraph")[1];
+    std::ofstream *file = new std::ofstream;
+    file->open(fileName.str().c_str());
+    return file;
+  }
+
 /***
  * print surface factor only for the given phrase
  */
@@ -260,6 +269,19 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
     targetOffset += tp.GetSize();
   }
   out << std::endl;
+}
+
+void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
+{
+  std::vector<const Hypothesis *> edges;
+  const Hypothesis *currentHypo = hypo;
+  while (currentHypo) {
+    edges.push_back(currentHypo);
+    currentHypo = currentHypo->GetPrevHypo();
+  }
+
+  OutputAlignment(out, edges);
+
 }
 
 void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
