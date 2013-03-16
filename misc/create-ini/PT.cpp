@@ -16,6 +16,13 @@ PT::PT(const std::string &line, int numFeatures, bool isHierarchical, const pair
     outFactors = factors->second;
   }
 
+  if (inFactors.size() == 0) {
+    inFactors.push_back(0);
+  }
+  if (outFactors.size() == 0) {
+    outFactors.push_back(0);
+  }
+
   int implementation;
   if (toks.size() > 1)
     implementation = Scan<int>(toks[1]);

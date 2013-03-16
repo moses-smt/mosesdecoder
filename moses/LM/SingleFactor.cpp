@@ -37,43 +37,14 @@ using namespace std;
 namespace Moses
 {
 
-<<<<<<< HEAD
 LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string& description, const std::string &line)
 :LanguageModelImplementation(description, line)
-=======
-LanguageModelSingleFactor::~LanguageModelSingleFactor()
-{
-}
-
-struct PointerState : public FFState {
-  const void* lmstate;
-  PointerState(const void* lms) {
-    lmstate = lms;
-  }
-  int Compare(const FFState& o) const {
-    const PointerState& other = static_cast<const PointerState&>(o);
-    if (other.lmstate > lmstate) return 1;
-    else if (other.lmstate < lmstate) return -1;
-    return 0;
-  }
-};
-
-LanguageModelPointerState::LanguageModelPointerState()
->>>>>>> df5f0934be559418177ffa9a68c2e561918a310f
 {
   m_nullContextState = new PointerState(NULL);
   m_beginSentenceState = new PointerState(NULL);
 }
 
-<<<<<<< HEAD
 LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
-=======
-LanguageModelPointerState::~LanguageModelPointerState()
-{
-  delete m_nullContextState;
-  delete m_beginSentenceState;
-}
->>>>>>> df5f0934be559418177ffa9a68c2e561918a310f
 
 const FFState *LanguageModelSingleFactor::GetNullContextState() const
 {

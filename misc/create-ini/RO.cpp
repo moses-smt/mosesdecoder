@@ -16,5 +16,12 @@ RO::RO(const std::string &line, const std::pair<Factors, Factors> *factors)
     inFactors = factors->first;
     outFactors = factors->second;
   }
+
+  if (inFactors.size() == 0) {
+    inFactors.push_back(0);
+  }
+  if (outFactors.size() == 0) {
+    outFactors.push_back(0);
+  }
 }
 
