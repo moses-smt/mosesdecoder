@@ -2085,13 +2085,27 @@ sub define_training_create_config {
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $cmd = "$moses_src_dir/bin/create-ini ";
 
-  	my %IN = &get_factor_id("input");
-	  my %OUT = &get_factor_id("output");
+    my %IN;
+    my %OUT;
+    if (&backoff_and_get("TRAINING:input-factors")) {
+      %IN = &get_factor_id("input");
+    }
+    else {
+      $IN{"word"} = 0;
+    }
+
+    if (&backoff_and_get("TRAINING:output-factors")) {
+      %OUT = &get_factor_id("output");
+    }
+    else {
+      $OUT{"word"} = 0;
+    }
 
     $cmd .= "-input-factor-max ".((scalar keys %IN)-1)." ";
 
-  	$cmd .= "-translation-factors ".
-	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." ";
+    $cmd .= "-translation-factors ".
+	          &encode_factor_definition("translation-factors",\%IN,\%OUT)." "
+	          if &get("TRAINING:translation-factors");
     $cmd .= "-reordering-factors ".
 	          &encode_factor_definition("reordering-factors",\%IN,\%OUT)." "
 	          if &get("TRAINING:reordering-factors");
