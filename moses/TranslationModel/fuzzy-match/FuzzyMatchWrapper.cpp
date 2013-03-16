@@ -552,7 +552,9 @@ namespace tmmt
   
   bool FuzzyMatchWrapper::GetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, unsigned int &value) const
   {
+#ifdef WITH_THREADS
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#endif
     map< pair< WORD_ID, WORD_ID >, unsigned int >::const_iterator lookup = m_lsed.find( key );
     if (lookup != m_lsed.end()) {
       value = lookup->second;
@@ -564,7 +566,9 @@ namespace tmmt
 
   void FuzzyMatchWrapper::SetLSEDCache(const std::pair< WORD_ID, WORD_ID > &key, const unsigned int &value)
   {
+#ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#endif
     m_lsed[ key ] = value;
   }
 
