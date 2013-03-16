@@ -52,11 +52,11 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
     const vector<string> &args = m_args[i];
 
     if (args[0] == "input-factor") {
-      m_input =Tokenize<FactorType>(args[1]);
+      m_input =Tokenize<FactorType>(args[1], ",");
       m_inputFactors = FactorMask(m_input);
     }
     else if (args[0] == "output-factor") {
-      m_output =Tokenize<FactorType>(args[1]);
+      m_output =Tokenize<FactorType>(args[1], ",");
       m_outputFactors = FactorMask(m_output);
     }
     else if (args[0] == "num-input-features") {
