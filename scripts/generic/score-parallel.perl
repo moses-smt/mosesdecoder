@@ -163,7 +163,7 @@ else
     $cmd .= "| LC_ALL=C $sortCmd -T $TMPDIR ";
   }
 
-  $cmd .= " | gzip -c > $ptHalf";
+  $cmd .= " | gzip -c > $ptHalf  2>> /dev/stderr ";
 }
 print STDERR $cmd;
 systemCheck($cmd);
