@@ -13,15 +13,8 @@ class LM : public FF
   float GetWeight() const
   { return 0.5; }
 
-  void Output(std::ostream &out) const
-  {
-    out << name
-        << " order=" << order 
-        << " factor=" << OutputFactors(outFactors)
-        << " path=" << path
-        << " " << otherArgs
-        << std::endl;
-  }
+  void Output(std::ostream &out) const;
+  void OutputWeights(std::ostream &out) const;
 
 public:
   std::string otherArgs;
