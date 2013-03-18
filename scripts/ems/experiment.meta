@@ -1000,6 +1000,7 @@ lowercase-reference
 	out: reference
 	default-name: evaluation/reference
 	pass-unless: output-lowercaser
+  pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 nist-bleu
