@@ -42,15 +42,12 @@ namespace Moses
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
 :LanguageModelSingleFactor("IRSTLM", line)
 {
-  cerr << "line=" << line << endl;
   FactorType factorType;
   size_t nGramOrder;
   string filePath;
 
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    CHECK(args.size() == 2);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+	const vector<string> &args = m_args[i];
 
     if (args[0] == "factor") {
       factorType = Scan<FactorType>(args[1]);
