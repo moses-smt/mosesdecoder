@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * Moses main, for single-threaded and multi-threaded.
  **/
 
+#include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
 #include <boost/iostreams/filter/gzip.hpp>
@@ -171,30 +172,76 @@ public:
 
     // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
     if (m_outputSearchGraphHypergraph) {
-      stringstream fileName;
-      fileName << staticData.GetParam("output-search-graph-hypergraph")[1] << "/" << m_lineNumber;
-      boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
-      //      file->open(fileName.str().c_str());
-      string compression = staticData.GetParam("output-search-graph-hypergraph")[0];
-      if ( compression == "gzip" || compression == "gz" ) {
-	file->push( boost::iostreams::gzip_compressor() );
-      } else if ( compression == "bzip2" || compression == "bz2" ) {
-	file->push( boost::iostreams::bzip2_compressor() );
-      } 
-      file->push( boost::iostreams::file_sink(fileName.str(), ios_base::out) );
-      //      if (file->is_open() && file->good()) {
-      if (file->is_complete() && file->good()) {
-	//	ostringstream out;
-	//	fix(out,PRECISION);
-	fix(*file,PRECISION);
-	manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
-	//	*file << out.str();
-	file -> flush();
+
+      vector<string> hypergraphParameters = staticData.GetParam("output-search-graph-hypergraph");
+
+      bool appendSuffix;
+      if (hypergraphParameters.size() > 0 && hypergraphParameters[0] == "true") {
+	appendSuffix = true;
       } else {
-	TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
+	appendSuffix = false;
       }
-      file -> pop();
-      delete file;
+
+      string compression;
+      if (hypergraphParameters.size() > 1) {
+	compression = hypergraphParameters[1];
+      } else {
+	compression = "txt";
+      }
+
+      string hypergraphDir;
+      if ( hypergraphParameters.size() > 2 ) {
+	hypergraphDir = hypergraphParameters[2];
+      } else {
+	string nbestFile = staticData.GetNBestFilePath();
+	if ( ! nbestFile.empty()) {
+	  boost::filesystem::path nbestPath(nbestFile);
+	  hypergraphDir = nbestPath.parent_path().filename();
+	} else {
+	  stringstream hypergraphDirName;
+	  hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
+	  hypergraphDir = hypergraphDirName.str();
+	}
+      }
+
+      if ( ! boost::filesystem::exists(hypergraphDir) ) {
+	boost::filesystem::create_directory(hypergraphDir);
+      } 
+
+      if ( ! boost::filesystem::exists(hypergraphDir) ) {
+	TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because the directory does not exist" << std::endl);
+      } else if ( ! boost::filesystem::is_directory(hypergraphDir) ) {
+	TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because that path exists, but is not a directory" << std::endl);
+      } else {
+	
+	stringstream fileName;
+	fileName << hypergraphDir << "/" << m_lineNumber;
+	if ( appendSuffix ) {
+	  fileName << "." << compression;
+	}
+	boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
+
+	if ( compression == "gz" ) {
+	  file->push( boost::iostreams::gzip_compressor() );
+	} else if ( compression == "bz2" ) {
+	  file->push( boost::iostreams::bzip2_compressor() );
+	} else if ( compression != "txt" ) {
+	  TRACE_ERR("Unrecognized hypergraph compression format (" << compression << ") - using uncompressed plain txt" << std::endl);
+	  compression = "txt";
+	}
+
+	file->push( boost::iostreams::file_sink(fileName.str(), ios_base::out) );
+
+	if (file->is_complete() && file->good()) {
+	  fix(*file,PRECISION);
+	  manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
+	  file -> flush();
+	} else {
+	  TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file " << fileName.str() << " is not open or not ready for writing" << std::endl);
+	}
+	file -> pop();
+	delete file;
+      }
     }
 
     // apply decision rule and output best translation(s)
@@ -548,8 +595,10 @@ int main(int argc, char** argv)
       TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
-    if (staticData.GetOutputSearchGraphHypergraph() && staticData.GetParam("output-search-graph-hypergraph").size() > 1) {
-      ofstream* weightsOut = ioWrapper->GetOutputSearchGraphHypergraphWeightsStream();
+    if (staticData.GetOutputSearchGraphHypergraph() && staticData.GetParam("output-search-graph-hypergraph").size() > 3) {
+      ofstream* weightsOut = new std::ofstream;
+      string weightsFilename = staticData.GetParam("output-search-graph-hypergraph")[3];
+      weightsOut->open(weightsFilename.c_str());
       OutputFeatureWeightsForHypergraph(*weightsOut);
       weightsOut->flush();
       weightsOut->close();
