@@ -23,6 +23,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * Moses main, for single-threaded and multi-threaded.
  **/
 
+#include <boost/iostreams/device/file.hpp>
+#include <boost/iostreams/filter/bzip2.hpp>
+#include <boost/iostreams/filter/gzip.hpp>
+#include <boost/iostreams/filtering_stream.hpp>
+
 #include <exception>
 #include <fstream>
 #include <sstream>
@@ -167,10 +172,18 @@ public:
     // Output search graph in hypergraph format for Kenneth Heafield's lazy hypergraph decoder
     if (m_outputSearchGraphHypergraph) {
       stringstream fileName;
-      fileName << staticData.GetParam("output-search-graph-hypergraph")[0] << "/" << m_lineNumber;
-      std::ofstream *file = new std::ofstream;
-      file->open(fileName.str().c_str());
-      if (file->is_open() && file->good()) {
+      fileName << staticData.GetParam("output-search-graph-hypergraph")[1] << "/" << m_lineNumber;
+      boost::iostreams::filtering_ostream *file = new boost::iostreams::filtering_ostream;
+      //      file->open(fileName.str().c_str());
+      string compression = staticData.GetParam("output-search-graph-hypergraph")[0];
+      if ( compression == "gzip" || compression == "gz" ) {
+	file->push( boost::iostreams::gzip_compressor() );
+      } else if ( compression == "bzip2" || compression == "bz2" ) {
+	file->push( boost::iostreams::bzip2_compressor() );
+      } 
+      file->push( boost::iostreams::file_sink(fileName.str(), ios_base::out) );
+      //      if (file->is_open() && file->good()) {
+      if (file->is_complete() && file->good()) {
 	//	ostringstream out;
 	//	fix(out,PRECISION);
 	fix(*file,PRECISION);
@@ -180,7 +193,7 @@ public:
       } else {
 	TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
       }
-      file -> close();
+      file -> pop();
       delete file;
     }
 
