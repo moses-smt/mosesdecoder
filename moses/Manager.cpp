@@ -800,7 +800,6 @@ size_t Manager::OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypoth
 
 size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
-
   ScoreComponentCollection scoreCollection = hypo->GetScoreBreakdown(); 
   const Hypothesis *prevHypo = hypo->GetPrevHypo();
   if (prevHypo) {
@@ -823,13 +822,19 @@ size_t Manager::OutputFeatureValuesForHypergraph(size_t index, const Hypothesis*
 /**! Output search graph in hypergraph format of Kenneth Heafield's lazy hypergraph decoder */
 void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &outputSearchGraphStream) const
 {
+
+  VERBOSE(2,"Getting search graph to output as hypergraph for sentence " << translationId << std::endl)
+
   vector<SearchGraphNode> searchGraph;
   GetSearchGraph(searchGraph);
+
 
   map<int,int> mosesIDToHypergraphID;
   // map<int,int> hypergraphIDToMosesID;
   set<int> terminalNodes;
   multimap<int,int> hypergraphIDToArcs;
+
+  VERBOSE(2,"Gathering information about search graph to output as hypergraph for sentence " << translationId << std::endl)
 
   long numNodes = 0;
   long endNode = 0;
@@ -888,11 +893,21 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
   // Print number of nodes and arcs
   outputSearchGraphStream << numNodes << " " << numArcs << endl;
 
+  VERBOSE(2,"Search graph to output as hypergraph for sentence " << translationId 
+	  << " contains " << numArcs << " arcs and " << numNodes << " nodes" << std::endl)
+
+  VERBOSE(2,"Outputting search graph to output as hypergraph for sentence " << translationId << std::endl)
+
+
   for (int hypergraphHypothesisID=0; hypergraphHypothesisID < endNode; hypergraphHypothesisID+=1) {
+    if (hypergraphHypothesisID % 100000 == 0) {
+      VERBOSE(2,"Processed " << hypergraphHypothesisID << " of " << numNodes << " hypergraph nodes for sentence " << translationId << std::endl);
+    }
     //    int mosesID = hypergraphIDToMosesID[hypergraphHypothesisID];
     size_t count = hypergraphIDToArcs.count(hypergraphHypothesisID);
+    //    VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has " << count << " incoming arcs" << std::endl)
     if (count > 0) {
-      outputSearchGraphStream << count << endl;
+      outputSearchGraphStream << count << "\n";
 
       pair<multimap<int,int>::iterator, multimap<int,int>::iterator> range =
 	hypergraphIDToArcs.equal_range(hypergraphHypothesisID);
@@ -917,10 +932,11 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 
 	const Hypothesis *prevHypo = thisHypo->GetPrevHypo();
 	if (prevHypo==NULL) {
-	  outputSearchGraphStream << "<s> ||| " << endl;
+	  //	VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " start of sentence" << std::endl)
+	  outputSearchGraphStream << "<s> ||| \n";
 	} else {
 	  int startNode = mosesIDToHypergraphID[prevHypo->GetId()];
-
+	  //	  VERBOSE(2,"Hypergraph node " << hypergraphHypothesisID << " has parent node " << startNode << std::endl)
 	  UTIL_THROW_IF(
 			(startNode >= hypergraphHypothesisID),
 			util::Exception,
@@ -937,17 +953,16 @@ void Manager::OutputSearchGraphAsHypergraph(long translationId, std::ostream &ou
 	  }
 	  outputSearchGraphStream << " ||| ";
 	  OutputFeatureValuesForHypergraph(thisHypo, outputSearchGraphStream);
-	  outputSearchGraphStream << endl;
+	  outputSearchGraphStream << "\n";
 	}
-
       }
     }
   }
 
   // Print node and arc(s) for end of sentence </s>
-  outputSearchGraphStream << terminalNodes.size() << endl;
+  outputSearchGraphStream << terminalNodes.size() << "\n";
   for (set<int>::iterator it=terminalNodes.begin(); it!=terminalNodes.end(); ++it) {
-    outputSearchGraphStream << "[" << (*it) << "] </s> ||| " << endl;
+    outputSearchGraphStream << "[" << (*it) << "] </s> ||| \n";
   }
 
 }

@@ -171,10 +171,11 @@ public:
       std::ofstream *file = new std::ofstream;
       file->open(fileName.str().c_str());
       if (file->is_open() && file->good()) {
-	ostringstream out;
-	fix(out,PRECISION);
-	manager.OutputSearchGraphAsHypergraph(m_lineNumber, out);
-	*file << out.str();
+	//	ostringstream out;
+	//	fix(out,PRECISION);
+	fix(*file,PRECISION);
+	manager.OutputSearchGraphAsHypergraph(m_lineNumber, *file);
+	//	*file << out.str();
 	file -> flush();
       } else {
 	TRACE_ERR("Cannot output hypergraph for line " << m_lineNumber << " because the output file is not open or not ready for writing" << std::endl);
