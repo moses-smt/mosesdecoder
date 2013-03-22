@@ -64,8 +64,8 @@ class Config:
     if self.trainer == "mix":
       if not self.input_file or not self.ttables:
         self.parser.error("Need to specify input file and ttables for mix training")
-      if len(self.ttables) != 2:
-        self.parser.error("Can only train mix model with 2 ttables at the moment")
+      #if len(self.ttables) != 2:
+      #  self.parser.error("Can only train mix model with 2 ttables at the moment")
 
 def main():
   config = Config()
