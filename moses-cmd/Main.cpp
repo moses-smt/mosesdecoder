@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  * Moses main, for single-threaded and multi-threaded.
  **/
 
+#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -194,7 +195,7 @@ public:
 	hypergraphDir = hypergraphParameters[2];
       } else {
 	string nbestFile = staticData.GetNBestFilePath();
-	if ( ! nbestFile.empty()) {
+	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
 	  boost::filesystem::path nbestPath(nbestFile);
 	  hypergraphDir = nbestPath.parent_path().filename();
 	} else {
@@ -595,10 +596,26 @@ int main(int argc, char** argv)
       TRACE_ERR(weights);
       TRACE_ERR("\n");
     }
-    if (staticData.GetOutputSearchGraphHypergraph() && staticData.GetParam("output-search-graph-hypergraph").size() > 3) {
+    if (staticData.GetOutputSearchGraphHypergraph()) {
       ofstream* weightsOut = new std::ofstream;
-      string weightsFilename = staticData.GetParam("output-search-graph-hypergraph")[3];
-      weightsOut->open(weightsFilename.c_str());
+      stringstream weightsFilename;
+      if (staticData.GetParam("output-search-graph-hypergraph").size() > 3) { 
+	weightsFilename << staticData.GetParam("output-search-graph-hypergraph")[3];
+      } else {
+	string nbestFile = staticData.GetNBestFilePath();
+	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
+	  boost::filesystem::path nbestPath(nbestFile);
+	  weightsFilename << nbestPath.parent_path().filename() << "/weights";
+	} else {
+	  weightsFilename << boost::filesystem::current_path() << "/hypergraph/weights";
+	}
+      }
+      boost::filesystem::path weightsFilePath(weightsFilename.str());
+      if ( ! boost::filesystem::exists(weightsFilePath.parent_path()) ) {
+	boost::filesystem::create_directory(weightsFilePath.parent_path());
+      }
+      TRACE_ERR("The weights file is " << weightsFilename.str() << "\n");
+      weightsOut->open(weightsFilename.str().c_str());
       OutputFeatureWeightsForHypergraph(*weightsOut);
       weightsOut->flush();
       weightsOut->close();
