@@ -192,12 +192,12 @@ public:
 
       string hypergraphDir;
       if ( hypergraphParameters.size() > 2 ) {
-	hypergraphDir = hypergraphParameters[2];
+        hypergraphDir = hypergraphParameters[2];
       } else {
 	string nbestFile = staticData.GetNBestFilePath();
 	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
 	  boost::filesystem::path nbestPath(nbestFile);
-	  hypergraphDir = nbestPath.parent_path().filename();
+	  //hypergraphDir = nbestPath.parent_path().filename();
 	} else {
 	  stringstream hypergraphDirName;
 	  hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
