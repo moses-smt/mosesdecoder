@@ -197,7 +197,7 @@ public:
 	string nbestFile = staticData.GetNBestFilePath();
 	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
 	  boost::filesystem::path nbestPath(nbestFile);
-	  //hypergraphDir = nbestPath.parent_path().filename();
+	  hypergraphDir = nbestPath.parent_path().filename().native();
 	} else {
 	  stringstream hypergraphDirName;
 	  hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
@@ -214,7 +214,6 @@ public:
       } else if ( ! boost::filesystem::is_directory(hypergraphDir) ) {
 	TRACE_ERR("Cannot output hypergraphs to " << hypergraphDir << " because that path exists, but is not a directory" << std::endl);
       } else {
-	
 	stringstream fileName;
 	fileName << hypergraphDir << "/" << m_lineNumber;
 	if ( appendSuffix ) {
