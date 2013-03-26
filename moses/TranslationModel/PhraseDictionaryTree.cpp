@@ -168,13 +168,11 @@ public:
   std::vector<OFF_T> srcOffsets;
 
   FILE *os,*ot;
-  WordVoc* sv;
-  WordVoc* tv;
+  WordVoc sv;
+  WordVoc tv;
 
   ObjectPool<PPimp> pPool;
   // a comparison with the Boost MemPools might be useful
-
-  std::map<std::string,WordVoc*> vocs;
 
   bool needwordalign, haswordAlign;
   bool printwordalign;
@@ -186,12 +184,6 @@ public:
     if(os) fClose(os);
     if(ot) fClose(ot);
     FreeMemory();
-
-    std::map<std::string,WordVoc*>::iterator iter;
-    for (iter = vocs.begin(); iter != vocs.end(); ++iter) {
-      WordVoc *voc = iter->second;
-      delete voc;
-    }
   }
 
   inline void NeedAlignmentInfo(bool a) {
@@ -261,12 +253,12 @@ public:
 
       rv.back().tokens.reserve(iphrase.size());
       for(size_t j=0; j<iphrase.size(); ++j) {
-        rv.back().tokens.push_back(&tv->symbol(iphrase[j]));
+        rv.back().tokens.push_back(&tv.symbol(iphrase[j]));
       }
       rv.back().scores = i->GetScores();
       const IPhrase& fnames = i->GetFeatureNames();
       for (size_t j = 0; j < fnames.size(); ++j) {
-        rv.back().fnames.push_back(&tv->symbol(fnames[j]));
+        rv.back().fnames.push_back(&tv.symbol(fnames[j]));
       }
       rv.back().fvalues = i->GetFeatureValues();
       if (wa) wa->push_back(i->GetAlignment());
@@ -281,7 +273,7 @@ public:
     CHECK(p);
     if(w.empty() || w==EPSILON) return p;
 
-    LabelId wi=sv->index(w);
+    LabelId wi=sv.index(w);
 
     if(wi==InvalidLabelId) return PPtr(); // unknown word
     else if(p.imp->isRoot()) {
@@ -344,10 +336,8 @@ int PDTimp::Read(const std::string& fn)
   for(size_t i=0; i<data.size(); ++i)
     data[i]=CPT(os,srcOffsets[i]);
 
-  sv = ReadVoc(ifsv);
-  tv = ReadVoc(iftv);
-  //sv.Read(ifsv);
-  //tv.Read(iftv);
+  sv.Read(ifsv);
+  tv.Read(iftv);
 
   TRACE_ERR("binary phrasefile loaded, default OFF_T: "<<PTF::getDefault()
             <<"\n");
@@ -364,25 +354,10 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
     const IPhrase& iphr=tcand[i].GetPhrase();
 
     out << i << " -- " << sc << " -- ";
-    for(size_t j=0; j<iphr.size(); ++j)			out << tv->symbol(iphr[j])<<" ";
+    for(size_t j=0; j<iphr.size(); ++j)			out << tv.symbol(iphr[j])<<" ";
     out<< " -- " << trgAlign;
     out << std::endl;
   }
-}
-
-WordVoc* PDTimp::ReadVoc(const std::string& filename)
-{
-	#ifdef WITH_THREADS
-	boost::mutex mutex;
-	boost::mutex::scoped_lock lock(mutex);
-	#endif
-	std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
-	if (vi == vocs.end()) {
-	  WordVoc* voc = new WordVoc();
-	  voc->Read(filename);
-	  vocs[filename] = voc;
-	}
-	return vocs[filename];
 }
 
 ////////////////////////////////////////////////////////////
@@ -432,7 +407,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 {
   IPhrase f(src.size());
   for(size_t i=0; i<src.size(); ++i) {
-    f[i]=imp->sv->index(src[i]);
+    f[i]=imp->sv.index(src[i]);
     if(f[i]==InvalidLabelId) return;
   }
 
@@ -448,7 +423,7 @@ GetTargetCandidates(const std::vector<std::string>& src,
 {
   IPhrase f(src.size());
   for(size_t i=0; i<src.size(); ++i) {
-    f[i]=imp->sv->index(src[i]);
+    f[i]=imp->sv.index(src[i]);
     if(f[i]==InvalidLabelId) return;
   }
 
@@ -464,7 +439,7 @@ PrintTargetCandidates(const std::vector<std::string>& src,
 {
   IPhrase f(src.size());
   for(size_t i=0; i<src.size(); ++i) {
-    f[i]=imp->sv->index(src[i]);
+    f[i]=imp->sv.index(src[i]);
     if(f[i]==InvalidLabelId) {
       TRACE_ERR("the source phrase '"<<src<<"' contains an unknown word '"
                 <<src[i]<<"'\n");
@@ -506,8 +481,6 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   std::vector<OFF_T> vo;
   size_t lnc=0;
   size_t numElement = NOT_FOUND; // 3=old format, 5=async format which include word alignment info
-  imp->sv = new WordVoc();
-  imp->tv = new WordVoc();
   size_t missingAlignmentCount = 0; 
 
   while(getline(inFile, line)) {
@@ -541,11 +514,11 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
 
     std::vector<std::string> wordVec = Tokenize(sourcePhraseString);
     for (size_t i = 0 ; i < wordVec.size() ; ++i)
-      f.push_back(imp->sv->add(wordVec[i]));
+      f.push_back(imp->sv.add(wordVec[i]));
 
     wordVec = Tokenize(targetPhraseString);
     for (size_t i = 0 ; i < wordVec.size() ; ++i)
-      e.push_back(imp->tv->add(wordVec[i]));
+      e.push_back(imp->tv.add(wordVec[i]));
 
     //			while(is>>w && w!="|||") sc.push_back(atof(w.c_str()));
     // Mauro: to handle 0 probs in phrase tables
@@ -585,7 +558,7 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
         abort();  
       }
       for (size_t i = 0; i < sparseTokens.size(); i+=2) {
-        fnames.push_back(imp->tv->add(sparseTokens[i]));
+        fnames.push_back(imp->tv.add(sparseTokens[i]));
         fvalues.push_back(Scan<FValue>(sparseTokens[i+1]));
       }
     }
@@ -672,8 +645,8 @@ int PhraseDictionaryTree::Create(std::istream& inFile,const std::string& out)
   fWriteVector(oi,vo);
   fClose(oi);
 
-  imp->sv->Write(ofsv);
-  imp->tv->Write(oftv);
+  imp->sv.Write(ofsv);
+  imp->tv.Write(oftv);
 
   return 1;
 }
