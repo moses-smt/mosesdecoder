@@ -186,6 +186,12 @@ public:
     if(os) fClose(os);
     if(ot) fClose(ot);
     FreeMemory();
+
+    std::map<std::string,WordVoc*>::iterator iter;
+    for (iter = vocs.begin(); iter != vocs.end(); ++iter) {
+      WordVoc *voc = iter->second;
+      delete voc;
+    }
   }
 
   inline void NeedAlignmentInfo(bool a) {
