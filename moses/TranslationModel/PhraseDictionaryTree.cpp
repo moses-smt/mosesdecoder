@@ -156,22 +156,6 @@ PhraseDictionaryTree::PrefixPtr::operator bool() const
 
 typedef LVoc<std::string> WordVoc;
 
-static WordVoc* ReadVoc(const std::string& filename)
-{
-  static std::map<std::string,WordVoc*> vocs;
-#ifdef WITH_THREADS
-  boost::mutex mutex;
-  boost::mutex::scoped_lock lock(mutex);
-#endif
-  std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
-  if (vi == vocs.end()) {
-    WordVoc* voc = new WordVoc();
-    voc->Read(filename);
-    vocs[filename] = voc;
-  }
-  return vocs[filename];
-}
-
 
 class PDTimp {
 public:
@@ -189,6 +173,8 @@ public:
 
   ObjectPool<PPimp> pPool;
   // a comparison with the Boost MemPools might be useful
+
+  std::map<std::string,WordVoc*> vocs;
 
   bool needwordalign, haswordAlign;
   bool printwordalign;
@@ -304,6 +290,8 @@ public:
 
     return PPtr();
   }
+
+  WordVoc* ReadVoc(const std::string& filename);
 };
 
 
@@ -374,6 +362,21 @@ void PDTimp::PrintTgtCand(const TgtCands& tcand,std::ostream& out) const
     out<< " -- " << trgAlign;
     out << std::endl;
   }
+}
+
+WordVoc* PDTimp::ReadVoc(const std::string& filename)
+{
+	#ifdef WITH_THREADS
+	boost::mutex mutex;
+	boost::mutex::scoped_lock lock(mutex);
+	#endif
+	std::map<std::string,WordVoc*>::iterator vi = vocs.find(filename);
+	if (vi == vocs.end()) {
+	  WordVoc* voc = new WordVoc();
+	  voc->Read(filename);
+	  vocs[filename] = voc;
+	}
+	return vocs[filename];
 }
 
 ////////////////////////////////////////////////////////////
