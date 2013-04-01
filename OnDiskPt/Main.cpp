@@ -174,6 +174,7 @@ OnDiskPt::PhrasePtr Tokenize(SourcePhrase &sourcePhrase, TargetPhrase &targetPhr
         break;
 	}
       default:
+        cerr << "ERROR in line " << line << endl;
         assert(false);
         break;
       }
