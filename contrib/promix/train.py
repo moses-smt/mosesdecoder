@@ -269,6 +269,7 @@ class MixtureModelTrainer:
     # TODO: Better vectorisation
     grad_list = []
     for i, sample in enumerate(interpolated):
+      print>>sys.stderr,interp, sample[0],sample[1]
       f_A = np.sum(np.log(sample[0]), axis=0)
       f_B = np.sum(np.log(sample[1]), axis=0) 
       grad_list.append(f_A - f_B)
@@ -312,7 +313,9 @@ class MixtureModelTrainer:
       #print "hyp0",np.sum(phrase * (df_by_dlambda(sample[0])), axis=0)
       #print "q1", df_by_dlambda(sample[1])
       #print "hyp1",np.sum(phrase * (df_by_dlambda(sample[1])), axis=0),"\n"
-      grad_list[k] = np.sum(phrase * (df_by_dlambda(sample[0]) - df_by_dlambda(sample[1])), axis = 0).flatten()
+      #TODO: Check if the sum is required here. With 4 ttables and 4 features
+      # it gives lhs as (12) and rhs as (4)
+      grad_list[k] = (phrase * (df_by_dlambda(sample[0]) - df_by_dlambda(sample[1]))).flatten()
     #grad_list = np.vstack(grad_list)
     return grad_list
 
