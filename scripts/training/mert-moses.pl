@@ -360,7 +360,7 @@ my $pro_optimizer = File::Spec->catfile($mertdir, "megam_i686.opt");  # or set t
 
 if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optimizer) {
   print "Could not find $pro_optimizer, installing it in $mertdir\n";
-  my $megam_url = "http://www.umiacs.umd.edu/~hal/megam/";
+  my $megam_url = "http://hal3.name/megam";
   if (&is_mac_osx()) {
     die "Error: Sorry for Mac OS X users! Please get the source code of megam and compile by hand. Please see $megam_url for details.";
   }
