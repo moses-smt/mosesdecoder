@@ -92,7 +92,7 @@ obj Factory.o : Factory.cpp ..//headers $(dependencies) : <include>../DynSAInclu
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
+alias LM : Backward.cpp Base.cpp Factory.o Implementation.cpp Joint.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp ORLM.o
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 

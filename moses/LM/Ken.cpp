@@ -57,71 +57,22 @@ struct KenLMState : public FFState {
   }
 };
 
-/*
- * An implementation of single factor LM using Ken's code.
- */
-template <class Model> class LanguageModelKen : public LanguageModel {
+class LanguageModelChartStateKenLM : public FFState {
   public:
-    LanguageModelKen(const std::string &file, FactorType factorType, bool lazy);
+    LanguageModelChartStateKenLM() {}
 
-    LanguageModel *Duplicate() const;
+    const lm::ngram::ChartState &GetChartState() const { return m_state; }
+    lm::ngram::ChartState &GetChartState() { return m_state; }
 
-    bool Useable(const Phrase &phrase) const {
-      return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
-    }
-
-    std::string GetScoreProducerDescription(unsigned) const {
-      std::ostringstream oss;
-      oss << "LM_" << (unsigned)m_ngram->Order() << "gram";
-      return oss.str();
-    }
-
-    const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
-      KenLMState *ret = new KenLMState();
-      ret->state = m_ngram->BeginSentenceState();
+    int Compare(const FFState& o) const
+    {
+      const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
+      int ret = m_state.Compare(other.m_state);
       return ret;
     }
 
-    void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
-
-    FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
-
-    FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
-
-    void IncrementalCallback(Incremental::Manager &manager) const {
-      manager.LMCallback(*m_ngram, m_lmIdLookup);
-    }
-
   private:
-    LanguageModelKen(const LanguageModelKen<Model> &copy_from);
-
-    lm::WordIndex TranslateID(const Word &word) const {
-      std::size_t factor = word.GetFactor(m_factorType)->GetId();
-      return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-    }
-
-    // Convert last words of hypothesis into vocab ids, returning an end pointer.  
-    lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
-      lm::WordIndex *index = indices;
-      lm::WordIndex *end = indices + m_ngram->Order() - 1;
-      int position = hypo.GetCurrTargetWordsRange().GetEndPos();
-      for (; ; ++index, --position) {
-        if (index == end) return index;
-        if (position == -1) {
-          *index = m_ngram->GetVocabulary().BeginSentence();
-          return index + 1;
-        }
-        *index = TranslateID(hypo.GetWord(position));
-      }
-    }
-
-    boost::shared_ptr<Model> m_ngram;
-    
-    std::vector<lm::WordIndex> m_lmIdLookup;
-
-    FactorType m_factorType;
-
-    const Factor *m_beginSentenceFactor;
+    lm::ngram::ChartState m_state;
 };
 
 class MappingBuilder : public lm::EnumerateVocab {
@@ -143,6 +94,8 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
 
+} // namespace
+
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &file, FactorType factorType, bool lazy) : m_factorType(factorType) {
   lm::ngram::Config config;
   IFVERBOSE(1) {
@@ -160,8 +113,48 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   m_beginSentenceFactor = collection.AddFactor(BOS_);
 }
 
+template <class Model> bool LanguageModelKen<Model>::Useable(const Phrase &phrase) const {
+  return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
+}
+
+template <class Model> std::string LanguageModelKen<Model>::GetScoreProducerDescription(unsigned) const {
+  std::ostringstream oss;
+  oss << "LM_" << (unsigned)m_ngram->Order() << "gram";
+  return oss.str();
+}
+
+template <class Model> const FFState *LanguageModelKen<Model>::EmptyHypothesisState(const InputType &/*input*/) const {
+  KenLMState *ret = new KenLMState();
+  ret->state = m_ngram->BeginSentenceState();
+  return ret;
+}
+
+template <class Model> lm::WordIndex LanguageModelKen<Model>::TranslateID(const Word &word) const {
+  std::size_t factor = word.GetFactor(m_factorType)->GetId();
+  return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+}
+
+template <class Model> lm::WordIndex *LanguageModelKen<Model>::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
+  lm::WordIndex *index = indices;
+  lm::WordIndex *end = indices + m_ngram->Order() - 1;
+  int position = hypo.GetCurrTargetWordsRange().GetEndPos();
+  for (; ; ++index, --position) {
+    if (index == end) return index;
+    if (position == -1) {
+      *index = m_ngram->GetVocabulary().BeginSentence();
+      return index + 1;
+    }
+    *index = TranslateID(hypo.GetWord(position));
+  }
+}
+
+
 template <class Model> LanguageModel *LanguageModelKen<Model>::Duplicate() const {
   return new LanguageModelKen<Model>(*this);
+}
+
+template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Incremental::Manager &manager) const {
+  manager.LMCallback(*m_ngram, m_lmIdLookup);
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from) :
@@ -277,24 +270,6 @@ template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothes
   return ret.release();
 }
 
-class LanguageModelChartStateKenLM : public FFState {
-  public:
-    LanguageModelChartStateKenLM() {}
-
-    const lm::ngram::ChartState &GetChartState() const { return m_state; }
-    lm::ngram::ChartState &GetChartState() { return m_state; }
-
-    int Compare(const FFState& o) const
-    {
-      const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
-      int ret = m_state.Compare(other.m_state);
-      return ret;
-    }
-
-  private:
-    lm::ngram::ChartState m_state;
-};
-
 template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
@@ -334,8 +309,6 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
   accumulator->Assign(this, ruleScore.Finish());
   return newState;
 }
-
-} // namespace
 
 LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy) {
   try {

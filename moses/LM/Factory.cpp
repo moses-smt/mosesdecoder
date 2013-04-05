@@ -45,6 +45,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "Ken.h"
+#include "Backward.h"
 
 #ifdef LM_LDHT
 #   include "LDHT.h"
@@ -112,6 +113,9 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                            scoreIndexManager,
                            factorTypes[0]);
 #endif
+    break;
+  case BackwardLM:
+    return ConstructBackwardLM(languageModelFile, factorTypes[0], lmImplementation == LazyKen);
     break;
   default:
     break;
