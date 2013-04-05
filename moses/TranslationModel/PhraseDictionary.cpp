@@ -76,8 +76,10 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_alignmentsFile(alignmentsFile),
   m_sparsePhraseDictionaryFeature(spdf)
 {
+  //Fabienne Braune
+  //Make MBOT rule table a thread safe dictionary
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
-      implementation==Compact || implementation==FuzzyMatch ) {
+      implementation==Compact || implementation==FuzzyMatch || implementation == MBOT) {
     m_useThreadSafePhraseDictionary = true;
   } else {
     m_useThreadSafePhraseDictionary = false;
@@ -166,6 +168,26 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , system->GetWordPenaltyProducer());
     CHECK(ret);
     return pdm;
+    //Fabienne Braune
+    //Register l_MBOT rules dictionary
+    } else if (m_implementation == MBOT) {
+    // memory phrase table
+    VERBOSE(2,"using MBOT format phrase tables" << std::endl);
+    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
+    m_filePath += ".gz";
+    VERBOSE(2,"Using gzipped file" << std::endl);
+    }
+    PhraseDictionaryMBOT* pdmbot  = new PhraseDictionaryMBOT(m_numScoreComponent,this);
+    bool ret = pdmbot->Load(GetInput()
+                             , GetOutput()
+                             , m_filePath
+                             , weightT
+                             , m_tableLimit
+                             , system->GetLanguageModels()
+                             , system->GetWordPenaltyProducer());
+        CHECK(ret);
+        return pdmbot;
+
   } else if (m_implementation == OnDisk) {
 
     PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(GetNumScoreComponents(), this);

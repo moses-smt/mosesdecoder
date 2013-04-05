@@ -296,7 +296,6 @@ void TargetPhrase::SetAlignmentInfo(const StringPiece &alignString)
     UTIL_THROW_IF(endptr != dash->data() + dash->size(), util::ErrnoException, "Error parsing alignment" << *dash);
     UTIL_THROW_IF(++dash, util::Exception, "Extra gunk in alignment " << *token);
 
-
     if (GetWord(targetPos).IsNonTerminal()) {
     	alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
     }

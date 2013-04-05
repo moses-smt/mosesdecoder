@@ -52,7 +52,7 @@ protected:
   ScoreComponentCollection m_scoreBreakdown;
 
 	// in case of confusion net, ptr to source phrase
-	Phrase m_sourcePhrase; 
+	Phrase m_sourcePhrase;
 	const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
 	Word m_lhsTarget;
 
@@ -151,16 +151,17 @@ public:
     return m_lhsTarget;
   }
 
-  void SetAlignmentInfo(const StringPiece &alignString);
-  void SetAlignTerm(const AlignmentInfo *alignTerm) {
+  //Fabienne Braune : make this methods overridable
+  virtual void SetAlignmentInfo(const StringPiece &alignString);
+  virtual void SetAlignTerm(const AlignmentInfo *alignTerm) {
     m_alignTerm = alignTerm;
   }
-  void SetAlignNonTerm(const AlignmentInfo *alignNonTerm) {
+  virtual void SetAlignNonTerm(const AlignmentInfo *alignNonTerm) {
     m_alignNonTerm = alignNonTerm;
   }
 
-  void SetAlignTerm(const AlignmentInfo::CollType &coll);
-  void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
+  virtual void SetAlignTerm(const AlignmentInfo::CollType &coll);
+  virtual void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
 
   const AlignmentInfo &GetAlignTerm() const
 	{ return *m_alignTerm; }

@@ -139,6 +139,7 @@ enum PhraseTableImplementation {
   ,ALSuffixArray = 10
   ,FuzzyMatch    = 11
   ,Compact      = 12
+  ,MBOT = 13
 };
 
 enum InputTypeEnum {

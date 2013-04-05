@@ -25,6 +25,7 @@
 #include "LoaderCompact.h"
 #include "LoaderHiero.h"
 #include "LoaderStandard.h"
+#include "LoaderMBOT.h"
 
 #include <sstream>
 #include <iostream>
@@ -61,6 +62,14 @@ std::auto_ptr<RuleTableLoader> RuleTableLoaderFactory::Create(
       
     }
     
+    else if (tokens[0] == "[MBOT]" && tokens[1] == "|||") {
+
+        //std::cout << "RULE TABLE FACTORY : Loading MBOT table" << std::endl;
+
+      return std::auto_ptr<RuleTableLoader>(new
+      RuleTableLoaderMBOT());
+    }
+
     return std::auto_ptr<RuleTableLoader>(new RuleTableLoaderStandard());
   }
   else
