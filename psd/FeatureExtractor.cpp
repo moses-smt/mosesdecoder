@@ -582,6 +582,9 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
            fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "ins^" + parent);
            fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^synt^" + "cmp^ins^" + parent);
        }
+
+   //for debugging
+   std::cerr << "Extracting from Rule ( " << parent << ") -> <" <<indicStringSource << "( "<< *it << " )"<< " , " << indicStringTarget << ">" << std::endl;
     }
 }
 
@@ -1078,7 +1081,6 @@ void GenerateRhsSyntaxFeatures(const std::vector<std::vector<std::string> > &syn
 		stringstream ss;
 		ss << i;
 		string stri = ss.str();
-
 
 		fc->AddFeature("RhsNt^" + stri);
 

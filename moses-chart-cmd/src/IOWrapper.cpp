@@ -182,6 +182,7 @@ void IOWrapper::ResetTranslationId() {
 
 InputType*IOWrapper::GetInput(InputType* inputType)
 {
+
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
       if (x>=m_translationId) m_translationId = x+1;
@@ -190,9 +191,14 @@ InputType*IOWrapper::GetInput(InputType* inputType)
     //damt hiero : also read context file
     if(!ReadContext(*m_contextStream, inputType))
     {
-        cerr << "Warning : If using DAMT, no context read" << endl;
+    	cerr << "Warning : If using psd, no context read" << endl;
     }
 
+    //std::cerr << "Reading input parse tree... " << std::endl;
+    if(!ReadParse(*m_parseStream, inputType))
+    {
+    	cerr << "Warning : If using soft syntax, no context read" << endl;
+    }
     return inputType;
   } else {
     delete inputType;
@@ -223,13 +229,16 @@ int IOWrapper::ReadParse(std::istream& in, InputType* input)
     if (getline(in, line, '\n').eof())
     return 0;
 
-    //std::cerr << "READING CONTEXT : " << line << std::endl;
+    //std::cerr << "READING PARSE : " << line << std::endl;
 
     //Read in parse tree
     size_t sourceSize = input->GetSize();
     input->m_parseTree->PopulateChart(sourceSize);
     input->m_parseTree->Read(line);
-    //m_parseTree->Print(sourceSize);
+
+    //std::cerr << "Read in parse tree : "<< std::endl;
+    input->m_parseTree->Print(sourceSize);
+
     return 1;
 }
 

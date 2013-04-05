@@ -173,8 +173,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
           {psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));}
         }
 
-        VERBOSE(3, "Extracting features for source : " << sourceSide << endl);
-        VERBOSE(3, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
+        VERBOSE(0, "Extracting features for source : " << sourceSide << endl);
+        VERBOSE(0, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
 
         //std::cerr << "GETTING SYNTAX LABELS" << std::endl;
         bool IsBegin = false;
@@ -221,20 +221,20 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         //std::cerr << "LOOKING FOR SPAN : " << startSpan << " : " << endSpan << std::endl;
         m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         m_consumerFactory->Release(p_consumer);
-        Normalize0(losses);
+        //Normalize0(losses);
         //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
         vector<float>::iterator lossIt;
-        VERBOSE(3, "VW losses after normalization : " << std::endl);
+        VERBOSE(0, "VW losses after normalization : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-        VERBOSE(3, *lossIt << " ");
+        VERBOSE(0, *lossIt << " ");
         float logScore = Equals(*lossIt, 0) ? LOWEST_SCORE : log(*lossIt);
         *lossIt = logScore;
         //FB : maybe we should floor log score before adding to scores
         //Remove when making example
         //FloorScore(logScore);
         scores.push_back(ScoreFactory(logScore));
-        VERBOSE(3, std::endl;);
+        VERBOSE(0, std::endl;);
         }
     }
     else //make sure that when sum is zero, then all factors are 0

@@ -21,23 +21,6 @@ namespace Moses
  * \param walls reordering constraint walls specified by xml
  */
 
-//TODO : remove
-/*void TreeInput::PrintStringChart()
-{
- for (size_t startPos = 0; startPos < GetSize(); ++startPos) {
-    for (size_t endPos = startPos; endPos < GetSize(); ++endPos) {
-      vector<string> labelSet = m_stringChart[startPos][endPos - startPos];
-      vector<string>::iterator iter;
-      for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
-        string sLabel = *iter;
-        std::cout << "[" << startPos <<"," << endPos-startPos << "]="
-            << sLabel;
-      }
-    }
-    std::cout << std::endl;
-  }
-}*/
-
 bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
 {
   //parse XML markup in translation line
@@ -250,7 +233,7 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   // remove extra spaces
   //line = Trim(line);
 
-  //VERBOSE(0, "TREE INPUT : LINE : " << line << endl);
+  VERBOSE(3, "TREE INPUT : LINE : " << line << endl);
 
   std::vector<XMLParseOutput> sourceLabels;
   std::vector<XmlOption*> xmlOptionsList;
@@ -260,9 +243,9 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   stringstream strme;
   strme << line << endl;
 
-  //VERBOSE(0, "TREE INPUT : SENTENCE : " << line << endl);
+  VERBOSE(3 , "TREE INPUT : SENTENCE : " << line << endl);
 
-  std::vector<std::string> sentTokens = Tokenize(" ",line);
+  //std::vector<std::string> sentTokens = Tokenize(" ",line);
 
   //damt hiero : when reading sentence, also read in factors, see Read method in Sentence
   Sentence::Read(strme, factorOrder);
@@ -325,7 +308,6 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
 
   }
-
   return 1;
 }
 
@@ -338,7 +320,6 @@ void TreeInput::Print(std::ostream &out) const
 //! create trans options specific to this InputType
 TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() const
 {
-
   return NULL;
 }
 

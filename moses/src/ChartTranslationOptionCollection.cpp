@@ -91,6 +91,8 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     srcFactors.push_back(0);
     string nonTermRep = "[X][X]";
 
+    VERBOSE(0, "Computing vw scores for source context : " << m_source << endl);     
+
     for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
 
         ChartTranslationOption &transOpt = m_translationOptionList.Get(i);
@@ -224,20 +226,21 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
                 CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
                 itr_rep = targetRepMap.find(*itr_targetRep);
-                VERBOSE(3, "Looking at target phrase : " << *itr_rep->second << std::endl);
-                VERBOSE(3, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
-                VERBOSE(3, "Score component collection : " << *iterLCSP << std::endl);
+                VERBOSE(0, "Looking at target phrase : " << *itr_rep->second << std::endl);
+		VERBOSE(0, "Target Phrase score vector before adding stateless : " << (itr_rep->second)->GetScoreBreakdown() << std::endl);
+                VERBOSE(0, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(0, "Score component collection : " << *iterLCSP << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
-                VERBOSE(3, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(0, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }
         }
         //sort target phrase collection again
         transOpt.SortTargetPhrases();
 
         //NOTE : What happens with the stack vector?
-        VERBOSE(3, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(0, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
         transOpt.CalcEstimateOfBestScore();
-        VERBOSE(3, "Estimate of best score after computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(0, "Estimate of best score after computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
   }//end of ifs
 //    #endif // HAVE_VW

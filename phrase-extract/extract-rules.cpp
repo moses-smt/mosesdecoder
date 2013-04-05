@@ -1088,7 +1088,12 @@ void writeRulesToFile(int sentID)
         Tokenize(tokenizedAlignments, rule->alignment);
         string newTarget = "";
 
-       for (int wordPos = 0 ; wordPos < tokenizedSource.size() - 1 ; wordPos++) {
+
+       //Annotation for soft syntax : only count non-terminals in the source
+       int nonTermPos = 0;
+       int wordPos = 0;
+       while(wordPos < tokenizedSource.size() - 1)
+       {
     	   	   string &sourceWord = tokenizedSource[wordPos];
     	   	   if (sourceWord.substr(0, 1) == "[" && sourceWord.substr(sourceWord.size()-1, 1) == "]") {
     	   		   //std::cout << "Found word position : " << wordPos << std::endl;
@@ -1100,10 +1105,12 @@ void writeRulesToFile(int sentID)
         		 		{
         		 			int targetAlign = atoi(tokenizedAlignments[alignPos].substr(tokenizedAlignments[alignPos].size()-1,1).c_str());
         		 			//std::cout << "Found target align : " << targetAlign << std::endl;
-        		 			tokenizedTarget[targetAlign].append(IntToString(wordPos));
+        		 			tokenizedTarget[targetAlign].append(IntToString(nonTermPos));
         		 		}
         		 	}
+        		 	nonTermPos++;
         	  }
+    	   	  wordPos++;
        }
        for (int wordPos = 0 ; wordPos < tokenizedTarget.size(); wordPos++) {
           	 newTarget.append(tokenizedTarget[wordPos]);
