@@ -19,8 +19,12 @@ int main(int argc, char* argv[])
   int saveFlag = false;
   int createFlag = false;
   int queryFlag = false;
-  int htmlFlag = false;
-  string info = "usage: suffix-query\n\t[--load file]\n\t[--save file]\n\t[--create source-corpus]\n\t[--query string]\n\t[--target target-corpus]\n\t[--alignment file]\n";
+  int htmlFlag = false;   // output as HTML
+  int prettyFlag = false; // output readable on screen
+  int stdioFlag = false;  // receive requests from STDIN, respond to STDOUT
+  int max_translation = 20;
+  int max_example = 50;
+  string info = "usage: biconcor\n\t[--load model-file]\n\t[--save model-file]\n\t[--create source-corpus]\n\t[--query string]\n\t[--target target-corpus]\n\t[--alignment file]\n\t[--translations count]\n\t[--examples count]\n\t[--html]\n\t[--stdio]\n";
   while(1) {
     static struct option long_options[] = {
       {"load", required_argument, 0, 'l'},
@@ -29,11 +33,15 @@ int main(int argc, char* argv[])
       {"query", required_argument, 0, 'q'},
       {"target", required_argument, 0, 't'},
       {"alignment", required_argument, 0, 'a'},
-      {"html", no_argument, &htmlFlag, 0},
+      {"html", no_argument, 0, 'h'},
+      {"pretty", no_argument, 0, 'p'},
+      {"stdio", no_argument, 0, 'i'},
+      {"translations", required_argument, 0, 'o'},
+      {"examples", required_argument, 0, 'e'},
       {0, 0, 0, 0}
     };
     int option_index = 0;
-    int c = getopt_long (argc, argv, "l:s:c:q:Q:t:a:h", long_options, &option_index);
+    int c = getopt_long (argc, argv, "l:s:c:q:Q:t:a:hpio:e:", long_options, &option_index);
     if (c == -1) break;
     switch (c) {
     case 'l':
@@ -62,10 +70,28 @@ int main(int argc, char* argv[])
       query = string(optarg);
       queryFlag = true;
       break;
+    case 'o':
+      max_translation = atoi(optarg);
+      break;
+    case 'e':
+      max_example = atoi(optarg);
+      break;
+    case 'p':
+      prettyFlag = true;
+      break;
+    case 'h':
+      htmlFlag = true;
+      break;
+    case 'i':
+      stdioFlag = true;
+      break;
     default:
       cerr << info;
       exit(1);
     }
+  }
+  if (stdioFlag) {
+    queryFlag = true;
   }
 
   // check if parameter settings are legal
@@ -111,12 +137,37 @@ int main(int argc, char* argv[])
     targetCorpus.Load( fileNameSuffix );
     alignment.Load( fileNameSuffix );
   }
-  if (queryFlag) {
+  if (stdioFlag) {
+    cout << "-|||- BICONCOR START -|||-" << endl << flush;
+    while(true) {
+      string query;
+      if (getline(cin, query, '\n').eof()) {
+        return 0;
+      }
+      vector< string > queryString = alignment.Tokenize( query.c_str() );
+      PhrasePairCollection ppCollection( &suffixArray, &targetCorpus, &alignment, max_translation, max_example );
+      int total = ppCollection.GetCollection( queryString );
+      cout << "TOTAL: " << total << endl;
+      if (htmlFlag) {
+        ppCollection.PrintHTML();
+      }
+      else {
+	ppCollection.Print(prettyFlag);
+      }
+      cout << "-|||- BICONCOR END -|||-" << endl << flush;
+    }
+  }
+  else if (queryFlag) {
     cerr << "query is " << query << endl;
     vector< string > queryString = alignment.Tokenize( query.c_str() );
-    PhrasePairCollection ppCollection( &suffixArray, &targetCorpus, &alignment );
+    PhrasePairCollection ppCollection( &suffixArray, &targetCorpus, &alignment, max_translation, max_example );
     ppCollection.GetCollection( queryString );
-    ppCollection.PrintHTML();
+    if (htmlFlag) {
+      ppCollection.PrintHTML();
+    }
+    else {
+      ppCollection.Print(prettyFlag);
+    }
   }
 
   return 0;
