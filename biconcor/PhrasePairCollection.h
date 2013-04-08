@@ -22,19 +22,19 @@ private:
   std::vector< Mismatch* > m_mismatch, m_unaligned;
   int m_size;
   int m_max_lookup;
-  int m_max_pp_target;
-  int m_max_pp;
+  int m_max_translation;
+  int m_max_example;
 
   // No copying allowed.
   PhrasePairCollection(const PhrasePairCollection&);
   void operator=(const PhrasePairCollection&);
 
 public:
-  PhrasePairCollection ( SuffixArray *, TargetCorpus *, Alignment * );
+  PhrasePairCollection ( SuffixArray *, TargetCorpus *, Alignment *, int, int );
   ~PhrasePairCollection ();
 
-  bool GetCollection( const std::vector<std::string >& sourceString );
-  void Print() const;
+  int GetCollection( const std::vector<std::string >& sourceString );
+  void Print(bool pretty) const;
   void PrintHTML() const;
 };
 
