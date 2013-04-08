@@ -38,8 +38,21 @@ template <class Model> class BackwardLanguageModel : public LanguageModelKen<Mod
   public:
     BackwardLanguageModel(const std::string &file, FactorType factorType, bool lazy);
 
+    virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
+
+  private:
+ 
+    // This line is required to make the parent class's protected member visible to this class
+    using LanguageModelKen<Model>::m_ngram;
+   
 };
 
 } // namespace Moses
 
 #endif
+
+// To create a sample backward language model using SRILM:
+// 
+// (ngram-count and reverse-text are SRILM programs)
+//
+// head -n 49 ./contrib/synlm/hhmm/LICENSE | tail -n 45 | tr '\n' ' ' | ./scripts/ems/support/split-sentences.perl | ./scripts/tokenizer/lowercase.perl | ./scripts/tokenizer/tokenizer.perl | reverse-text | ngram-count -order 3 -text - -lm - > lm/backward.arpa

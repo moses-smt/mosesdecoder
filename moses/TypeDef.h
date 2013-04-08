@@ -124,6 +124,7 @@ enum LMImplementation {
   ,ORLM = 10
   ,LDHTLM = 11
   ,BackwardLM = 12
+  ,LazyBackwardLM = 13
 };
 
 enum PhraseTableImplementation {

@@ -70,7 +70,9 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
 {
   if (lmImplementation == Ken || lmImplementation == LazyKen) {
     return ConstructKenLM(languageModelFile, factorTypes[0], lmImplementation == LazyKen);
-  }
+  } else if (lmImplementation == BackwardLM || lmImplementation == LazyBackwardLM) {
+    return ConstructBackwardLM(languageModelFile, factorTypes[0], lmImplementation == LazyBackwardLM);
+  } 
   LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
   case RandLM:
@@ -113,9 +115,6 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
                            scoreIndexManager,
                            factorTypes[0]);
 #endif
-    break;
-  case BackwardLM:
-    return ConstructBackwardLM(languageModelFile, factorTypes[0], lmImplementation == LazyKen);
     break;
   default:
     break;

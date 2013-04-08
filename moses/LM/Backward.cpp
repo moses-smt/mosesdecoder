@@ -24,10 +24,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "lm/left.hh"
 #include "lm/model.hh"
 
+#include "moses/FFState.h"
 #include "moses/LM/Ken.h"
 #include "moses/LM/Backward.h"
 
 namespace Moses {
+  
+  // By placing BackwardLMState inside an anonymous namespace,
+  // it is visible *only* within this file
+  namespace {
+
+    struct BackwardLMState : public FFState {
+      lm::ngram::ChartState state;
+      int Compare(const FFState &o) const {
+	const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
+ 	return state.left.Compare(other.state.left);
+      }
+    };
+
+  }
 
   template <class Model> BackwardLanguageModel<Model>::BackwardLanguageModel(const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(file,factorType,lazy) {
     //
@@ -35,6 +50,13 @@ namespace Moses {
     //
   }
 
+  template <class Model> const FFState *BackwardLanguageModel<Model>::EmptyHypothesisState(const InputType &/*input*/) const {
+    BackwardLMState *ret = new BackwardLMState();
+    lm::ngram::RuleScore<Model> ruleScore(*m_ngram, ret->state);
+    ruleScore.Terminal(m_ngram->GetVocabulary().EndSentence());
+    ruleScore.Finish();
+    return ret;
+  }
 
   LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy) {
     try {

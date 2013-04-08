@@ -43,22 +43,26 @@ template <class Model> class LanguageModelKen : public LanguageModel {
   public:
     LanguageModelKen(const std::string &file, FactorType factorType, bool lazy);
 
-    LanguageModel *Duplicate() const;
+    virtual LanguageModel *Duplicate() const;
 
-    bool Useable(const Phrase &phrase) const;
+    virtual bool Useable(const Phrase &phrase) const;
 
     std::string GetScoreProducerDescription(unsigned) const;
 							    
-    const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
+    virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
-    void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+    virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
-    FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+    virtual FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
-    FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+    virtual FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
 
-    void IncrementalCallback(Incremental::Manager &manager) const;
-								 
+    virtual void IncrementalCallback(Incremental::Manager &manager) const;
+
+  protected:
+
+    boost::shared_ptr<Model> m_ngram;
+
   private:
     LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
@@ -66,8 +70,6 @@ template <class Model> class LanguageModelKen : public LanguageModel {
 
     // Convert last words of hypothesis into vocab ids, returning an end pointer.  
     lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
-
-    boost::shared_ptr<Model> m_ngram;
     
     std::vector<lm::WordIndex> m_lmIdLookup;
 
