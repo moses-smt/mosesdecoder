@@ -129,11 +129,6 @@ template <class Model> const FFState *LanguageModelKen<Model>::EmptyHypothesisSt
   return ret;
 }
 
-template <class Model> lm::WordIndex LanguageModelKen<Model>::TranslateID(const Word &word) const {
-  std::size_t factor = word.GetFactor(m_factorType)->GetId();
-  return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-}
-
 template <class Model> lm::WordIndex *LanguageModelKen<Model>::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
   lm::WordIndex *index = indices;
   lm::WordIndex *end = indices + m_ngram->Order() - 1;
@@ -159,10 +154,10 @@ template <class Model> void LanguageModelKen<Model>::IncrementalCallback(Increme
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from) :
     m_ngram(copy_from.m_ngram),
-    // TODO: don't copy this.  
-    m_lmIdLookup(copy_from.m_lmIdLookup),
+    // TODO: don't copy this.      
+    m_beginSentenceFactor(copy_from.m_beginSentenceFactor),
     m_factorType(copy_from.m_factorType),
-    m_beginSentenceFactor(copy_from.m_beginSentenceFactor) {
+    m_lmIdLookup(copy_from.m_lmIdLookup) {
 }
 
 template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {

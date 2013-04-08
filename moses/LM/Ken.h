@@ -63,19 +63,23 @@ template <class Model> class LanguageModelKen : public LanguageModel {
 
     boost::shared_ptr<Model> m_ngram;
 
+    const Factor *m_beginSentenceFactor;
+
+    FactorType m_factorType;
+
+    lm::WordIndex TranslateID(const Word &word) const {
+      std::size_t factor = word.GetFactor(m_factorType)->GetId();
+      return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+    }
+
   private:
     LanguageModelKen(const LanguageModelKen<Model> &copy_from);
-
-    lm::WordIndex TranslateID(const Word &word) const;
 
     // Convert last words of hypothesis into vocab ids, returning an end pointer.  
     lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
     
     std::vector<lm::WordIndex> m_lmIdLookup;
 
-    FactorType m_factorType;
-
-    const Factor *m_beginSentenceFactor;
 };
 
 } // namespace Moses

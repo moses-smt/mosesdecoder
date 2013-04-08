@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses {
 
-//! This will also load. Returns a templated KenLM class
+//! This will also load. Returns a templated backward LM.
 LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy);
 
 /*
@@ -40,11 +40,16 @@ template <class Model> class BackwardLanguageModel : public LanguageModelKen<Mod
 
     virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
+    virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+
   private:
  
-    // This line is required to make the parent class's protected member visible to this class
+    // These lines are required to make the parent class's protected members visible to this class
     using LanguageModelKen<Model>::m_ngram;
-   
+    using LanguageModelKen<Model>::m_beginSentenceFactor;
+    using LanguageModelKen<Model>::m_factorType;
+    using LanguageModelKen<Model>::TranslateID;
+
 };
 
 } // namespace Moses

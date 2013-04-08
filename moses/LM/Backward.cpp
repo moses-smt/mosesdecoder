@@ -25,6 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "lm/model.hh"
 
 #include "moses/FFState.h"
+#include "moses/Phrase.h"
+
 #include "moses/LM/Ken.h"
 #include "moses/LM/Backward.h"
 
@@ -56,6 +58,51 @@ namespace Moses {
     ruleScore.Terminal(m_ngram->GetVocabulary().EndSentence());
     ruleScore.Finish();
     return ret;
+  }
+
+  template <class Model> void BackwardLanguageModel<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+    fullScore = 0;
+    ngramScore = 0;
+    oovCount = 0;
+    
+    if (!phrase.GetSize()) return;
+
+    lm::ngram::ChartState discarded_sadly;
+    lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
+    
+    UTIL_THROW_IF(
+		  (m_beginSentenceFactor == phrase.GetWord(0).GetFactor(m_factorType)),
+		  util::Exception,
+		  "BackwardLanguageModel does not currently support rules that include <s>"
+		  );
+  
+    float before_boundary = 0.0f;
+    for (size_t position = phrase.GetSize() - 1,
+	   ngramBoundary = m_ngram->Order() - 1; position >= 0; position-=1) {
+	   
+	   const Word &word = phrase.GetWord(position);
+
+	   UTIL_THROW_IF(
+			 (word.IsNonTerminal()),
+			 util::Exception,
+			 "BackwardLanguageModel does not currently support rules that include non-terminals"
+			 );
+  
+	   lm::WordIndex index = TranslateID(word);
+	   scorer.Terminal(index);
+	   if (!index) ++oovCount;
+
+	   if (position==ngramBoundary) {
+	     before_boundary = scorer.Finish();
+	   }
+
+    }
+
+    fullScore += scorer.Finish();
+    
+    ngramScore = TransformLMScore(fullScore - before_boundary);
+    fullScore = TransformLMScore(fullScore);
+
   }
 
   LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy) {
