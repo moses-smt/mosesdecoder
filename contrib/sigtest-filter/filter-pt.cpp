@@ -287,24 +287,24 @@ SentIdSet find_occurrences(const std::string& rule, C_SuffixArraySearchApplicati
     if (hierarchical) {
         //   std::cerr << "splitting up phrase: " << phrase << "\n";
         int pos = 0;
-        int endPos = 0;
+        int NTStartPos, NTEndPos;
         vector<std::string> phrases;
-
-        while (rule.find("[X][X] ", pos) < rule.size()) {
-            endPos = rule.find("[X][X] ",pos) - 1; // -1 to cut space before NT
-            if (endPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
-                pos += 7; 
+        while (rule.find("] ", pos) < rule.size()) {
+            NTStartPos = rule.find("[",pos) - 1; // -1 to cut space before NT
+            NTEndPos = rule.find("] ",pos);
+            if (NTStartPos < pos) { // no space: NT at start of rule (or two consecutive NTs)
+                pos = NTEndPos + 2;
                 continue;
             }
-            phrases.push_back(rule.substr(pos,endPos-pos));
-            pos = endPos + 8;
+            phrases.push_back(rule.substr(pos,NTStartPos-pos));
+            pos = NTEndPos + 2;
         }
 
-        // cut LHS of rule
-        endPos = rule.size()-4;
-        if (endPos > pos) {
-            phrases.push_back(rule.substr(pos,endPos-pos));
+        NTStartPos = rule.find("[",pos) - 1; // LHS of rule
+        if (NTStartPos > pos) {
+            phrases.push_back(rule.substr(pos,NTStartPos-pos));
         }
+
         sa_set = lookup_multiple_phrases(phrases, my_sa, rule, cache);
     }
     else {

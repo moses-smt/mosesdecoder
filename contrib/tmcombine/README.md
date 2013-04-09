@@ -58,7 +58,7 @@ Regression tests (check if the output files (`test/phrase-table_testN`) differ f
 FURTHER NOTES
 -------------
 
- - Different combination algorithms require different statistics. To be on the safe side, use the options `-phrase-word-alignment` and `-write-lexical-counts` when training models.
+ - Different combination algorithms require different statistics. To be on the safe side, use the option and `-write-lexical-counts` when training models.
 
  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). Sort the tables with `LC_ALL=C`. Phrase tables produced by Moses are sorted correctly.
 
