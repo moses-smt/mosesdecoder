@@ -75,25 +75,15 @@
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
-									<listOptionValue builtIn="false" value="z"/>
-									<listOptionValue builtIn="false" value="boost_filesystem-mt"/>
 									<listOptionValue builtIn="false" value="boost_iostreams-mt"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
-<<<<<<< HEAD
 									<listOptionValue builtIn="false" value="boost_filesystem-mt"/>
-<<<<<<< HEAD
 									<listOptionValue builtIn="false" value="cmph"/>
 									<listOptionValue builtIn="false" value="pthread"/>
-=======
->>>>>>> db005f6503a5179e0427b460d8039e8920c8d65b
-=======
+									<listOptionValue builtIn="false" value="z"/>
 									<listOptionValue builtIn="false" value="bz2"/>
-<<<<<<< HEAD
->>>>>>> eeeda717a41b41db784564c88020f15a2f5bef57
-=======
 									<listOptionValue builtIn="false" value="rt"/>
->>>>>>> 44a0e52e3052371a850f7ee463279f4cc0522ea5
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.128214028" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>
