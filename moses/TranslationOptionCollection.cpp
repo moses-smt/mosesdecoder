@@ -420,9 +420,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
-
-  // stateless feature scores
-  PreCalculateScores();
 }
 
 void TranslationOptionCollection::IncorporateDLMScores() {
@@ -715,54 +712,6 @@ void TranslationOptionCollection::CacheLexReordering()
       } // for (size_t startPos = 0 ; startPos < size ; startPos++) {
     } // if (typeid(ff) == typeid(LexicalReordering)) {
   } // for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-}
-
-void TranslationOptionCollection::PreCalculateScores() 
-{
-  //Figure out which features need to be precalculated
-  const vector<const StatelessFeatureFunction*>& sfs =
-      StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  vector<const StatelessFeatureFunction*> precomputedFeatures;
-  for (unsigned i = 0; i < sfs.size(); ++i) {
-    if (sfs[i]->ComputeValueInTranslationOption() && 
-        !sfs[i]->ComputeValueInTranslationTable()) {
-      precomputedFeatures.push_back(sfs[i]);
-    }
-  }
-  //empty coverage vector
-  WordsBitmap coverage(m_source.GetSize());
-
-  if (precomputedFeatures.size()) {
-    //Go through translation options and precompute features
-    for (size_t i = 0; i < m_collection.size(); ++i) {
-      for (size_t j = 0; j < m_collection[i].size(); ++j) {
-        for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
-          const TranslationOption* toption =  m_collection[i][j].Get(k);
-          ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
-          PhraseBasedFeatureContext context(*toption, m_source);
-          for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
-            precomputedFeatures[si]->Evaluate(context, &breakdown);
-          }
-        }
-      }
-    }
-  }
-}
-
-void TranslationOptionCollection::InsertPreCalculatedScores
-  (const TranslationOption& translationOption, ScoreComponentCollection* scoreBreakdown) 
-    const
-{
-  if (m_precalculatedScores.size()) {
-    boost::unordered_map<TranslationOption,ScoreComponentCollection>::const_iterator scoreIter = 
-      m_precalculatedScores.find(translationOption);
-    if (scoreIter != m_precalculatedScores.end()) {
-      scoreBreakdown->PlusEquals(scoreIter->second);
-    } else {
-      TRACE_ERR("ERROR: " << translationOption << " missing from precalculation cache" << endl);
-      assert(0);  
-    }
-  }
 }
 
 //! list of trans opt for a particular span

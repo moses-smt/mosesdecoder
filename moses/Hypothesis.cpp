@@ -288,19 +288,14 @@ void Hypothesis::CalculateFinalScore() {
  */
 void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 {
+  const StaticData &staticData = StaticData::Instance();
+  clock_t t=0; // used to track time
+
   // some stateless score producers cache their values in the translation
   // option: add these here
   // language model scores for n-grams completely contained within a target
   // phrase are also included here
   m_currScoreBreakdown = m_transOpt->GetScoreBreakdown();
-
-  // other stateless features have their scores cached in the 
-  // TranslationOptionsCollection
-  m_manager.getSntTranslationOptions()->InsertPreCalculatedScores
-    (*m_transOpt, &m_currScoreBreakdown);
-
-  const StaticData &staticData = StaticData::Instance();
-  clock_t t=0; // used to track time
 
   // compute values of stateless feature functions that were not
   // cached in the translation option
