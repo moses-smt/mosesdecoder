@@ -269,7 +269,6 @@ class MixtureModelTrainer:
     # TODO: Better vectorisation
     grad_list = []
     for i, sample in enumerate(interpolated):
-      print>>sys.stderr,interp, sample[0],sample[1]
       f_A = np.sum(np.log(sample[0]), axis=0)
       f_B = np.sum(np.log(sample[1]), axis=0) 
       grad_list.append(f_A - f_B)

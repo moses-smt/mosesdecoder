@@ -166,7 +166,7 @@ class PhraseCache:
 class CachedPhraseTable:
   def __init__(self,ttable_file,nscores=5,cache_size=20000):
     wa = False
-    if binpt.PhraseDictionaryTree.isValidBinaryTable(ttable_file,True):
+    if binpt.PhraseDictionaryTree.canLoad(ttable_file,True):
       # assume word alignment is included
       wa = True
     self.ttable = binpt.PhraseDictionaryTree(ttable_file,nscores,wa)
