@@ -4,7 +4,7 @@ import sys
 import os
 
 mosesdir = os.path.abspath('../../')
-includes = [mosesdir, os.path.join(mosesdir, 'moses'), os.path.join(mosesdir, 'OnDiskPt')] 
+includes = [mosesdir, os.path.join(mosesdir, 'moses'), os.path.join(mosesdir, 'OnDiskPt'), os.path.join(mosesdir, 'moses/TranslationModel')] 
 libdir = os.path.join(mosesdir, 'lib')
 
 # options

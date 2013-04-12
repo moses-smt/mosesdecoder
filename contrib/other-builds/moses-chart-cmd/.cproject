@@ -60,7 +60,6 @@
 								</option>
 								<option id="gnu.cpp.link.option.libs.1177721357" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
 									<listOptionValue builtIn="false" value="dstruct"/>
-									<listOptionValue builtIn="false" value="rt"/>
 									<listOptionValue builtIn="false" value="flm"/>
 									<listOptionValue builtIn="false" value="oolm"/>
 									<listOptionValue builtIn="false" value="lattice"/>
@@ -77,6 +76,7 @@
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="bz2"/>
+									<listOptionValue builtIn="false" value="rt"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.128214028" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

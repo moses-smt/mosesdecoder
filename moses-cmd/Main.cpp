@@ -431,7 +431,7 @@ static void PrintFeatureWeight(const FeatureFunction* ff)
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     for (size_t i = 0; i < numScoreComps; ++i) 
       cout << ff->GetScoreProducerDescription() <<  " "
-           << ff->GetScoreProducerWeightShortName() << " "
+           << ff->GetScoreProducerWeightShortName(i) << " "
            << values[i] << endl;
   }
   else {

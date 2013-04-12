@@ -745,7 +745,8 @@ sub hierarchical_segmentation {
     open(OUTPUT_TREE,">$dir/output-tree") or die "Cannot open: $!";
     open(NODE,">$dir/node") or die "Cannot open: $!";
     while(<TRACE>) {
-	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ || die("cannot scan line $_");
+	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ ||
+	/^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): c=/ || die("cannot scan line $_");
 	my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
 	if ($last_sentence >= 0 && $sentence != $last_sentence) {
 	    &hs_process($last_sentence,\@DERIVATION,\%STATS);
@@ -1137,9 +1138,17 @@ sub process_search_graph {
   `mkdir -p $dir/search-graph`;
   my $last_sentence = -1;
   while(<OSG>) {
-    /^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): pC=([\de\-\.]+), c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] \<\</ || die("ERROR: buggy search graph line: $_"); 
-    my ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score) 
-      = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
+    my ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score);
+    if (/^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): pC=([\de\-\.]+), c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] \<\</) {
+      ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score) = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
+    }
+    elsif (/^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] core/) {
+      ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$from,$to,$children,$hyp_score) = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
+      $heuristic_rule_score = $rule_score; # hmmmm....
+    }
+    else {
+      die("ERROR: buggy search graph line: $_"); 
+    }
     chop($alignment) if $alignment;
     chop($children) if $children;
     $recomb = 0 unless $recomb;

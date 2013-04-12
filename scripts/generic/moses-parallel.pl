@@ -64,6 +64,7 @@ my $wordgraphfile=undef;
 my $wordgraphflag=0;
 my $robust=5; # resubmit crashed jobs robust-times
 my $alifile=undef;
+my $detailsfile=undef;
 my $logfile="";
 my $logflag="";
 my $searchgraphlist="";
@@ -93,6 +94,7 @@ sub init(){
 	     'output-search-graph|osg=s'=> \$searchgraphlist,
              'output-word-graph|owg=s'=> \$wordgraphlist,
              'alignment-output-file=s'=> \$alifile,
+             'translation-details|T=s'=> \$detailsfile,
 	     'qsub-prefix=s'=> \$qsubname,
 	     'queue-parameters=s'=> \$queueparameters,
 	     'inputtype=i'=> \$inputtype,
@@ -539,6 +541,7 @@ while ($robust && scalar @idx_todo) {
 concatenate_1best();
 concatenate_logs() if $logflag;
 concatenate_ali() if defined $alifile;  
+concatenate_details() if defined $detailsfile;  
 concatenate_nbest() if $nbestflag;  
 safesystem("cat nbest$$ >> /dev/stdout") if $nbestlist[0] eq '-';
 
@@ -580,6 +583,11 @@ sub preparing_script(){
       $tmpalioutfile="-alignment-output-file $tmpdir/$alifile.$splitpfx$idx";
     }
 
+    my $tmpdetailsoutfile = "";
+    if (defined $detailsfile){
+      $tmpdetailsoutfile="-translation-details $tmpdir/$detailsfile.$splitpfx$idx";
+    }
+
     my $tmpsearchgraphlist="";
     if ($searchgraphflag){
       $tmpsearchgraphlist="-output-search-graph $tmpdir/$searchgraphfile.$splitpfx$idx";
@@ -592,11 +600,15 @@ sub preparing_script(){
 
 	my $tmpStartTranslationId = ""; # "-start-translation-id $currStartTranslationId";
 
-    print OUT "$mosescmd $mosesparameters $tmpStartTranslationId $tmpalioutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
+    print OUT "$mosescmd $mosesparameters $tmpStartTranslationId $tmpalioutfile $tmpdetailsoutfile $tmpwordgraphlist $tmpsearchgraphlist $tmpnbestlist $inputmethod ${inputfile}.$splitpfx$idx > $tmpdir/${inputfile}.$splitpfx$idx.trans\n\n";
     print OUT "echo exit status \$\?\n\n";
 
     if (defined $alifile){
       print OUT "\\mv -f $tmpdir/${alifile}.$splitpfx$idx .\n\n";
+      print OUT "echo exit status \$\?\n\n";
+    }
+    if (defined $detailsfile){
+      print OUT "\\mv -f $tmpdir/${detailsfile}.$splitpfx$idx .\n\n";
       print OUT "echo exit status \$\?\n\n";
     }
     if ($nbestflag){
@@ -827,6 +839,18 @@ sub concatenate_ali(){
   close(OUT);
 }
 
+sub concatenate_details(){
+  open (OUT, "> ${detailsfile}");
+  foreach my $idx (@idxlist){
+    my @in=();
+    open (IN, "$detailsfile.$splitpfx$idx");
+    @in=<IN>;
+    print OUT "@in";
+    close(IN);
+  }
+  close(OUT);
+}
+
 
 sub check_exit_status(){
   print STDERR "check_exit_status\n";
@@ -925,6 +949,7 @@ sub remove_temporary_files(){
     unlink("${inputfile}.${splitpfx}${idx}.trans");
     unlink("${inputfile}.${splitpfx}${idx}");
     if (defined $alifile){ unlink("${alifile}.${splitpfx}${idx}"); }
+    if (defined $detailsfile){ unlink("${detailsfile}.${splitpfx}${idx}"); }
     if ($nbestflag){ unlink("${nbestfile}.${splitpfx}${idx}"); }
     if ($searchgraphflag){ unlink("${searchgraphfile}.${splitpfx}${idx}"); }
     if ($wordgraphflag){ unlink("${wordgraphfile}.${splitpfx}${idx}"); }
