@@ -160,6 +160,46 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageM
     m_lmIdLookup(copy_from.m_lmIdLookup) {
 }
 
+/**
+ * Pre-calculate the n-gram probabilities for the words in the specified phrase.
+ * 
+ * Note that when this method is called, we do not have access to the context
+ * in which this phrase will eventually be applied. 
+ *
+ * In other words, we know what words are in this phrase,
+ * but we do not know what words will come before or after this phrase.
+ *
+ * The parameters fullScore, ngramScore, and oovCount are all output parameters.
+ *
+ * The value stored in oovCount is the number of words in the phrase
+ * that are not in the language model's vocabulary.
+ *
+ * The sum of the ngram scores for all words in this phrase are stored in fullScore.
+ *
+ * The value stored in ngramScore is similar, but only full-order ngram scores are included.
+ *
+ * This is best shown by example:
+ * 
+ * Assume a trigram language model and a phrase "a b c d e f g"
+ *
+ * fullScore would represent the sum of the logprob scores for the following values:
+ *
+ * p(a)
+ * p(b | a)
+ * p(c | a b)
+ * p(d | b c)
+ * p(e | c d)
+ * p(f | d e)
+ * p(g | e f)
+ *
+ * ngramScore would represent the sum of the logprob scores for the following values:
+ *
+ * p(c | a b)
+ * p(d | b c)
+ * p(e | c d)
+ * p(f | d e)
+ * p(g | e f)
+ */
 template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
   fullScore = 0;
   ngramScore = 0;
@@ -210,6 +250,39 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
   fullScore = TransformLMScore(fullScore);
 }
 
+/**
+ * Calculate the ngram probabilities for the words at the beginning 
+ * (and under some circumstances, also at the end)
+ * of the phrase represented by the provided hypothesis.
+ *
+ * Additionally, calculate a new language model state.
+ *
+ * This is best shown by example:
+ *
+ * Assume a trigram language model.
+ *
+ * Assume the previous phrase was "w x y z", 
+ * which means the previous language model state is "y z".
+ *
+ * Assume the provided hypothesis contains the new phrase "a b c d e f g"
+ * 
+ * Given these assumptions, this method is responsible 
+ * for calculating the scores for the following:
+ * 
+ * p(a | y z)
+ * p(b | z a)
+ *
+ * This method must also calculate and return a new language model state.
+ *
+ * In this example, the returned language model state would be "f g"
+ *
+ * If the provided hypothesis represents the end of a completed translation
+ * (all source words have been translated)
+ * then this method is additionally responsible for calculating the following:
+ *
+ * p(</s> | f g)
+ *
+ */
 template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 

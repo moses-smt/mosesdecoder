@@ -1,0 +1,566 @@
+
+\data\
+ngram 1=167
+ngram 2=361
+ngram 3=25
+
+\1-grams:
+-2.059753	&apos;	-0.1382608
+-2.184691	(	-0.08246645
+-2.184691	)	-0.1039416
+-1.281601	,	-0.07104895
+-1.457693	.	-0.07898764
+-2.661813	/	-0.09528423
+-2.661813	1	-0.1039416
+-2.661813	2	-0.1039416
+-2.360783	:	-0.09722306
+-2.661813	;	-0.09625472
+-1.457693	</s>
+-99	<s>	-1.21504
+-2.059753	a	-0.08046046
+-2.360783	all	-0.09431157
+-2.661813	allowed	-0.1039416
+-2.661813	also	-0.1058422
+-1.582631	and	-0.09122989
+-2.661813	any	-0.09039898
+-2.661813	applies	-0.09818922
+-2.661813	apply	-0.1020326
+-2.184691	are	-0.09818923
+-2.661813	as	-0.1058422
+-2.661813	asking	-0.1001151
+-2.661813	assert	-0.1039416
+-2.661813	attributed	-0.1048929
+-2.059753	authors	-0.115528
+-2.661813	away	-0.1058422
+-2.360783	be	-0.1010749
+-2.661813	both	-0.09722305
+-2.661813	but	-0.08346596
+-2.360783	by	-0.09039899
+-1.962843	can	-0.2305826
+-2.661813	certain	-0.1048929
+-2.184691	change	-0.1433661
+-2.661813	changed	-0.1058422
+-2.661813	changing	-0.1058422
+-2.661813	charge	-0.09528423
+-2.661813	clearly	-0.1039416
+-2.360783	code	-0.1869811
+-2.661813	contrast	-0.1048929
+-2.059753	copies	-0.2432623
+-2.360783	copy	-0.1724872
+-2.661813	copyleft	-0.08346596
+-2.661813	copyright	-0.1058422
+-2.661813	denying	-0.1058422
+-2.360783	designed	-0.1860298
+-2.360783	developers	-0.07234257
+-1.962843	distribute	-0.06256323
+-2.661813	do	-0.1020326
+-2.661813	document	-0.1010749
+-2.661813	erroneously	-0.1058422
+-2.661813	everyone	-0.09138044
+-2.661813	example	-0.09722305
+-2.661813	explains	-0.1058422
+-2.661813	fee	-0.1029881
+-1.661813	for	-0.1316313
+-2.661813	foundation	-0.09625472
+-1.816715	free	-0.08910497
+-1.962843	freedom	-0.1305353
+-2.661813	freedoms	-0.1058422
+-2.661813	from	-0.1048929
+-2.059753	general	-0.2432623
+-2.360783	get	-0.1841208
+-2.661813	giving	-0.1010749
+-2.059753	gnu	-1.163784
+-2.184691	gpl	-0.1374303
+-2.661813	gratis	-0.1058422
+-2.661813	guarantee	-0.09039898
+-2.360783	have	-0.1695295
+-1.962843	if	-0.06302482
+-2.661813	in	-0.09818922
+-2.661813	intended	-0.1020326
+-1.962843	is	-0.1213982
+-1.70757	it	-0.1024061
+-2.360783	its	-0.1029881
+-2.661813	kinds	-0.1039416
+-2.360783	know	-0.08545816
+-2.661813	legal	-0.08744124
+-1.883661	license	-0.2194058
+-2.360783	licenses	-0.08446321
+-2.184691	make	-0.08645083
+-2.661813	marked	-0.1048929
+-2.661813	modified	-0.09722305
+-2.360783	modify	-0.08046047
+-2.360783	most	-0.1793113
+-2.184691	must	-0.2896693
+-2.661813	need	-0.1029881
+-2.661813	new	-0.1058422
+-2.661813	no	-0.1020326
+-2.184691	not	-0.07743401
+-1.62042	of	-0.2623674
+-2.661813	offer	-0.1039416
+-2.360783	on	-0.1048929
+-1.816715	or	-0.06092677
+-2.184691	other	-0.1472787
+-2.360783	others	-0.09528424
+-2.360783	our	-0.08046047
+-2.661813	pass	-0.1039416
+-2.661813	permission	-0.1058422
+-2.661813	permitted	-0.1020326
+-2.661813	pieces	-0.1039416
+-2.661813	practical	-0.1039416
+-2.661813	preamble	-0.09138044
+-2.661813	prevent	-0.09039898
+-2.661813	previous	-0.09625472
+-2.661813	price	-0.1039416
+-2.661813	problems	-0.1048929
+-2.661813	program	-0.1029881
+-2.661813	program--to	-0.1029881
+-2.360783	programs	-0.09528424
+-2.360783	protect	-0.08744124
+-2.661813	protection	-0.1029881
+-2.059753	public	-1.178343
+-2.360783	receive	-0.06302482
+-2.661813	received	-0.08744124
+-2.661813	recipients	-0.08842939
+-2.661813	referring	-0.1039416
+-2.661813	released	-0.1058422
+-2.661813	remains	-0.09818922
+-2.661813	requires	-0.1039416
+-2.661813	respect	-0.09039898
+-2.360783	responsibilities	-0.1039416
+-1.962843	rights	-0.1094444
+-2.661813	sake	-0.1029881
+-2.661813	same	-0.08842939
+-2.360783	share	-0.1724872
+-2.661813	show	-0.1039416
+-2.360783	so	-0.08246645
+-1.62042	software	-0.4198802
+-2.360783	source	-0.08645083
+-2.661813	speak	-0.1029881
+-2.661813	steps	-0.1058422
+-2.661813	such	-0.09625472
+-2.184691	sure	-0.3061696
+-2.661813	surrender	-0.09039898
+-2.661813	take	-0.09039898
+-2.661813	terms	-0.1039416
+-1.661813	that	-0.09192596
+-1.383059	the	-0.1202633
+-2.360783	their	-0.09528424
+-2.360783	them	-0.09625473
+-2.661813	there	-0.09722305
+-2.661813	therefore	-0.09138044
+-2.184691	these	-0.08446321
+-2.360783	they	-0.09528424
+-2.661813	things	-0.1039416
+-2.059753	this	-0.06511277
+-1.431364	to	-0.08170523
+-2.360783	too	-0.1655542
+-2.661813	two	-0.1058422
+-2.184691	use	-0.066153
+-2.360783	users	-0.1039416
+-2.661813	verbatim	-0.1020326
+-2.184691	versions	-0.1029881
+-2.661813	want	-0.08744124
+-2.661813	warranty	-0.1058422
+-2.661813	way	-0.1029881
+-2.059753	we	-0.1052605
+-2.661813	when	-0.09138044
+-2.661813	whether	-0.08346596
+-2.661813	will	-0.1058422
+-2.661813	wish	-0.08744124
+-2.661813	with	-0.1020326
+-2.661813	work	-0.1039416
+-2.184691	works	-0.07642049
+-1.360783	you	-0.3635932
+-1.962843	your	-0.11745
+
+\2-grams:
+-0.7536553	&apos; authors	-0.04826907
+-1.263617	&apos; developers
+-1.263617	&apos; users
+-1.138679	( :
+-1.138679	( and
+-1.138679	( software
+-1.138679	) 1
+-1.138679	) 2
+-1.138679	) wish
+-2.041769	, )
+-2.041769	, changed
+-2.041769	, contrast
+-2.041769	, copy
+-2.041769	, document
+-2.041769	, example
+-2.041769	, fee
+-2.041769	, foundation
+-2.041769	, free
+-2.041769	, freedom
+-2.041769	, it
+-2.041769	, program
+-1.531807	, programs
+-2.041769	, protection
+-2.041769	, rights
+-2.041769	, sake
+-1.196277	, software	-0.01879344
+-2.041769	, therefore
+-2.041769	, they
+-2.041769	, too
+-2.041769	, we
+-1.865677	. allowed
+-1.865677	. authors
+-1.865677	. code
+-1.865677	. it
+-1.865677	. others
+-1.865677	. price
+-1.865677	. received
+-1.355715	. rights
+-1.865677	. software
+-1.865677	. things
+-1.865677	. too
+-1.865677	. users
+-1.865677	. versions
+-1.355715	. works
+-0.6615573	/ and
+-0.6615573	1 (
+-0.6615573	2 (
+-0.9625873	: it
+-0.9625873	: steps
+-0.6615573	; software
+-0.02632894	<s> .	0.01055115
+-1.263617	a for
+-1.263617	a is
+-1.263617	a of
+-1.263617	a such
+-0.9625873	all change
+-0.9625873	all for
+-0.6615573	allowed not
+-0.6615573	also applies
+-1.230777	and &apos;
+-1.740739	and (
+-1.230777	and ,
+-1.740739	and </s>
+-1.740739	and copy
+-1.740739	and distribute
+-1.230777	and share	0.05635785
+-1.230777	and software
+-0.6615573	any to
+-0.6615573	applies it
+-0.6615573	apply can
+-1.138679	are licenses
+-1.138679	are we
+-1.138679	are works
+-0.6615573	as marked
+-0.6615573	asking or
+-0.6615573	assert )
+-0.6615573	attributed be
+-0.7536553	authors and	-0.1062113
+-1.263617	authors its
+-1.263617	authors to
+-0.6615573	away take
+-0.9625873	be not
+-0.9625873	be versions
+-0.6615573	both for
+-0.6615573	but ,
+-0.9625873	by </s>
+-0.9625873	by way
+-0.8505653	can or
+-0.5150355	can you
+-0.6615573	certain have
+-0.6287166	change and	-0.1062113
+-1.138679	change can
+-0.6615573	changed as
+-0.6615573	changing but
+-0.6615573	charge and
+-0.6615573	clearly gpl
+-0.4526253	code source
+-0.6615573	contrast by
+-0.4181255	copies distribute	-0.01767175
+-1.263617	copies verbatim
+-0.4526253	copy to
+-0.6615573	copyleft ,
+-0.6615573	copyright assert
+-0.6615573	denying from
+-0.4526253	designed are
+-0.9625873	developers </s>
+-0.9625873	developers the
+-1.360527	distribute ,
+-1.360527	distribute and
+-1.360527	distribute to
+-0.8505653	distribute you	-0.007581055
+-0.6615573	do can
+-0.6615573	document license
+-0.6615573	erroneously attributed
+-0.6615573	everyone </s>
+-0.6615573	example for
+-0.6615573	explains clearly
+-0.6615573	fee a
+-0.8160655	for </s>
+-1.661557	for charge
+-1.151595	for license
+-1.661557	for licenses
+-1.661557	for or
+-1.661557	for software
+-1.661557	for warranty
+-0.6615573	foundation software
+-1.506655	free a
+-1.506655	free new
+-0.9966934	free of
+-1.506655	free remains
+-1.506655	free the
+-1.506655	free this
+-0.8505653	freedom the
+-1.360527	freedom to
+-0.8505653	freedom your
+-0.6615573	freedoms same
+-0.6615573	from others
+-0.4181255	general gnu	0.5800843
+-1.263617	general our
+-0.4526253	get can	-0.06647755
+-0.6615573	giving license
+-0.02953408	gnu the	-0.04479528
+-1.138679	gpl gnu
+-0.6287166	gpl the	-0.03740539
+-0.6615573	gratis whether
+-0.6615573	guarantee to
+-0.4526253	have you
+-1.360527	if ,
+-1.360527	if it
+-1.360527	if or
+-1.360527	if responsibilities
+-1.360527	if them
+-0.6615573	in it
+-0.6615573	intended is
+-1.360527	is everyone
+-1.360527	is it
+-0.8505653	is license	-0.004934847
+-1.360527	is there
+-1.6158	it ;
+-1.6158	it apply
+-1.6158	it changing
+-1.6158	it get
+-1.105838	it modify
+-1.6158	it of
+-1.6158	it sure
+-1.6158	it want
+-0.9625873	its all
+-0.9625873	its by
+-0.6615573	kinds other
+-0.9625873	know they
+-0.9625873	know you
+-0.6615573	legal you
+-1.439709	license copyleft
+-0.5942168	license public	0.5800843
+-0.9297466	license this
+-0.9625873	licenses public
+-0.9625873	licenses the
+-1.138679	make must
+-1.138679	make program--to
+-1.138679	make to
+-0.6615573	marked be
+-0.6615573	modified that
+-0.9625873	modify or
+-0.9625873	modify you
+-0.4526253	most for
+-0.2931868	must you
+-0.6615573	need we
+-0.6615573	new in
+-0.6615573	no is
+-1.138679	not ,
+-1.138679	not is
+-1.138679	not will
+-1.70295	of authors
+-0.4688668	of copies	-0.3931652
+-1.70295	of freedom
+-1.70295	of kinds
+-1.70295	of most
+-1.70295	of pieces
+-1.70295	of speak
+-1.70295	of versions
+-0.6615573	offer )
+-0.9625873	on copyright
+-0.9625873	on pass
+-1.506655	or ,
+-1.506655	or /
+-1.506655	or code
+-1.506655	or gratis
+-1.506655	or receive
+-1.506655	or rights
+-1.506655	or software
+-0.6287166	other and	-0.1062113
+-1.138679	other any
+-0.9625873	others of
+-0.9625873	others prevent
+-0.9625873	our </s>
+-0.9625873	our of
+-0.6615573	pass must
+-0.6615573	permission legal
+-0.6615573	permitted is
+-0.6615573	pieces use
+-0.6615573	practical other
+-0.6615573	preamble </s>
+-0.6615573	prevent to
+-0.6615573	previous of
+-0.6615573	price not
+-0.6615573	problems their
+-0.6615573	program a
+-0.6615573	program--to a
+-0.9625873	programs free
+-0.9625873	programs your
+-0.9625873	protect gpl
+-0.9625873	protect to
+-0.6615573	protection &apos;
+-0.02953408	public general	-0.3931652
+-0.9625873	receive ,
+-0.9625873	receive you
+-0.6615573	received you
+-0.6615573	recipients the
+-0.6615573	referring are
+-0.6615573	released work
+-0.6615573	remains it
+-0.6615573	requires gpl
+-0.6615573	respect to
+-0.9625873	responsibilities :
+-0.9625873	responsibilities certain
+-1.360527	rights the
+-1.360527	rights their
+-1.360527	rights these
+-0.8505653	rights your	-0.06647755
+-0.6615573	sake &apos;
+-0.6615573	same the
+-0.4526253	share to	-0.09163596
+-0.6615573	show must
+-0.9625873	so ,
+-0.9625873	so terms
+-1.70295	software for
+-0.3424227	software free	-0.002143376
+-1.70295	software most
+-1.70295	software our
+-0.8574582	software the
+-0.9625873	source receive
+-0.9625873	source the
+-0.6615573	speak we
+-0.6615573	steps two
+-0.6615573	such of
+-0.2931868	sure make
+-0.6615573	surrender to
+-0.6615573	take to
+-0.6615573	terms these
+-1.151595	that ,
+-1.661557	that and
+-1.661557	that developers
+-1.661557	that explains
+-1.661557	that freedoms
+-1.661557	that requires
+-1.661557	that so
+-1.151595	that sure	0.1764977
+-0.7062277	the ,
+-1.940311	the </s>
+-1.430349	the change
+-1.940311	the for
+-1.940311	the get
+-1.940311	the have
+-1.940311	the of
+-1.940311	the on
+-1.940311	the preamble
+-1.940311	the recipients
+-1.940311	the respect
+-1.940311	the surrender
+-1.940311	the to
+-1.430349	the use
+-0.9625873	their know
+-0.9625873	their that
+-0.9625873	them for
+-0.9625873	them show
+-0.6615573	there that
+-0.6615573	therefore </s>
+-1.138679	these do
+-1.138679	these them
+-1.138679	these you
+-0.9625873	they so
+-0.9625873	they that
+-0.6615573	things these
+-1.263617	this for
+-1.263617	this of
+-1.263617	this released
+-1.263617	this you
+-1.892006	to </s>
+-1.892006	to also
+-1.382044	to designed	0.05635785
+-1.892006	to erroneously
+-1.046514	to freedom	-0.01767175
+-1.892006	to intended
+-1.892006	to it
+-1.892006	to need
+-1.892006	to on
+-1.892006	to permission
+-1.892006	to permitted
+-1.892006	to referring
+-1.892006	to responsibilities
+-1.892006	to you
+-0.4526253	too ,
+-0.6615573	two with
+-1.138679	use ,
+-1.138679	use or
+-1.138679	use that
+-0.9625873	users both
+-0.9625873	users its
+-0.6615573	verbatim distribute
+-1.138679	versions all
+-1.138679	versions modified
+-1.138679	versions previous
+-0.6615573	want you
+-0.6615573	warranty no
+-0.6615573	way this
+-0.7536553	we ,
+-1.263617	we </s>
+-1.263617	we when
+-0.6615573	when </s>
+-0.6615573	whether ,
+-0.6615573	will problems
+-0.6615573	wish you
+-0.6615573	with rights
+-0.6615573	work other
+-1.138679	works of
+-1.138679	works practical
+-1.138679	works the
+-1.452625	you ,
+-1.452625	you </s>
+-1.962587	you and
+-1.962587	you asking
+-1.962587	you denying
+-1.962587	you giving
+-0.60206	you if
+-1.962587	you know
+-1.962587	you offer
+-0.60206	you that	-0.01650287
+-1.360527	your away
+-1.360527	your guarantee
+-0.8505653	your protect
+-1.360527	your to
+
+\3-grams:
+-1.48317	<s> . rights
+-1.48317	<s> . works
+-0.5800799	authors and &apos;
+-0.5800799	change and share
+-0.5800799	other and software
+-0.5800799	&apos; authors and
+-0.5800799	get can or
+-0.1249387	of copies distribute
+-0.5800799	to designed are
+-0.7561712	copies distribute you
+-0.97802	software free of
+-0.7561712	to freedom your
+-0.1249387	public general gnu
+-0.1249387	general gnu the
+-0.5800799	is license public
+-0.1249387	license public general
+-0.5800799	and share to
+-0.7561712	, software the
+-0.5800799	that sure make
+-0.97802	you that ,
+-0.8811099	gnu the use
+-0.5800799	gpl the ,
+-0.5800799	share to freedom
+-0.5800799	distribute you if
+-0.5800799	rights your protect
+
+\end\
