@@ -86,73 +86,132 @@ class BackwardLanguageModelTest {
       FFState *ffState = const_cast< FFState * >(backwardLM->EmptyHypothesisState( *dummyInput ));
 
       BOOST_CHECK( ffState != NULL );
-      /*
-      //      lm::ngram::ChartState &state = static_cast< const BackwardLMState >(*ffState).state;
-      BackwardLMState *lmState = static_cast< BackwardLMState* >(ffState);
-      //const lm::ngram::ChartState &state = static_cast< const BackwardLMState* >(ffState)->state;
-      //lm::ngram::ChartState &state = lmState->state;
 
-      //      BOOST_CHECK( state.left.length == 1 );
-      //      BOOST_CHECK( state.right.Length() == 0 );
-
-      BackwardLanguageModel<lm::ngram::ProbingModel> *lm = static_cast< BackwardLanguageModel<lm::ngram::ProbingModel> *>(backwardLM);
-    lm::ngram::ChartState &state = lmState->state;
-    lm::ngram::RuleScore<lm::ngram::ProbingModel> ruleScore(*(lm->m_ngram), state);
-    double score = ruleScore.Finish();
-    SLOPPY_CHECK_CLOSE(-1.457693, score, 0.001);
-      */
       delete ffState;
     }
 
     void testCalcScore() {
-      //std::vector<WordIndex> words
 
-      Phrase phrase;
-      BOOST_CHECK( phrase.GetSize() == 0 );
+      double p_the      = -1.383059;
+      double p_licenses = -2.360783;
+      double p_for      = -1.661813;
+      double p_most     = -2.360783;
+      double p_software = -1.62042;
 
-      std::vector<FactorType> outputFactorOrder;
-      outputFactorOrder.push_back(0);
+      double p_the_licenses  = -0.9625873;
+      double p_licenses_for  = -1.661557;
+      double p_for_most      = -0.4526253;
+      double p_most_software = -1.70295; 
 
-      phrase.CreateFromString(
-			      //StaticData::Instance().GetOutputFactorOrder(), 
-			      outputFactorOrder,
-			      "the", 
-			      StaticData::Instance().GetFactorDelimiter());
+      double p_the_licenses_for  = p_the_licenses + p_licenses_for;
+      double p_licenses_for_most = p_licenses_for + p_for_most;
+ 
+      // the
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
 
-      BOOST_CHECK( phrase.GetSize() == 1 );
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"the", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 1 );
       
-      // BackwardLanguageModel<lm::ngram::ProbingModel> *lm = static_cast< BackwardLanguageModel<lm::ngram::ProbingModel> *>(backwardLM);
+	float fullScore;
+	float ngramScore;
+	size_t oovCount;
+	backwardLM->CalcScore(phrase, fullScore, ngramScore, oovCount);
 
-      //Word &word = phrase.GetWord(0);
-      //Word
-      //      BOOST_CHECK( word == lm->m_ngram->GetVocabulary().Index("the") );
-      
+	BOOST_CHECK( oovCount == 0 );
+	SLOPPY_CHECK_CLOSE( TransformLMScore(p_the), fullScore, 0.01);
+	SLOPPY_CHECK_CLOSE( TransformLMScore( 0.0 ), ngramScore, 0.01);
+      }
 
-      
-      float fullScore;
-      float ngramScore;
-      size_t oovCount;
-      backwardLM->CalcScore(phrase, fullScore, ngramScore, oovCount);
+      // the licenses
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
 
-      BOOST_CHECK( oovCount == 0 );
-      SLOPPY_CHECK_CLOSE( TransformLMScore(-1.383059), fullScore, 0.01);
-      SLOPPY_CHECK_CLOSE( TransformLMScore( 0.0 ), ngramScore, 0.01);
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"the licenses", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 2 );
       
+	float fullScore;
+	float ngramScore;
+	size_t oovCount;
+	backwardLM->CalcScore(phrase, fullScore, ngramScore, oovCount);
+
+	BOOST_CHECK( oovCount == 0 );
+	SLOPPY_CHECK_CLOSE( TransformLMScore(p_licenses + p_the_licenses), fullScore, 0.01);
+	SLOPPY_CHECK_CLOSE( TransformLMScore( 0.0 ), ngramScore, 0.01);
+      }
+      
+      // the licenses for
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
+
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"the licenses for", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 3 );
+      
+	float fullScore;
+	float ngramScore;
+	size_t oovCount;
+	backwardLM->CalcScore(phrase, fullScore, ngramScore, oovCount);
+
+	BOOST_CHECK( oovCount == 0 );
+	SLOPPY_CHECK_CLOSE( TransformLMScore( p_the_licenses_for ), ngramScore, 0.01);
+	SLOPPY_CHECK_CLOSE( TransformLMScore(p_for + p_licenses_for + p_the_licenses), fullScore, 0.01);
+      }
+     
+      // the licenses for most
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
+
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"the licenses for most", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 4 );
+      
+	float fullScore;
+	float ngramScore;
+	size_t oovCount;
+	backwardLM->CalcScore(phrase, fullScore, ngramScore, oovCount);
+
+	BOOST_CHECK( oovCount == 0 );
+	SLOPPY_CHECK_CLOSE( TransformLMScore( p_the_licenses + p_licenses_for ), ngramScore, 0.01);
+	SLOPPY_CHECK_CLOSE( TransformLMScore(p_most + p_for_most + p_licenses_for + p_the_licenses), fullScore, 0.01);
+      }
+ 
     }
 
   private:
     const Sentence *dummyInput;
-  //    BackwardLanguageModel<Model> *backwardLM;
     LanguageModel *backwardLM;
-  /*
-    void LookupVocab(const StringPiece &str, std::vector<WordIndex *> &out) {
 
-      out.clear();
-      for (util::TokenIter<util::SingleCharacter, true> i(str, ' '); i; ++i) {
-	out.push_back(lm->m_ngram.GetVocabulary().Index(*i));
-      }
-    }
-  */
 };
 
 
@@ -166,25 +225,9 @@ const char *FileLocation() {
 }
 
 BOOST_AUTO_TEST_CASE(ProbingAll) {
-  //  Everything<lm::ngram::Model>();
-  /*
-  const std::string filename( boost::unit_test::framework::master_test_suite().argv[1] );
-  size_t factorType = 0;
-  bool lazy = false;
 
-  LanguageModel *backwardLM = ConstructBackwardLM( filename, factorType, lazy );
-  const Sentence *dummyInput = new Sentence();
-
-  const FFState *ffState = backwardLM->EmptyHypothesisState( *dummyInput );
-  
-  //new BackwardLanguageModel<lm::ngram::Model>( filename, factorType, lazy );
-
-  delete dummyInput;
-  delete backwardLM;
-  */
-  //BackwardLanguageModelTest<lm::ngram::TrieModel> test;
-BackwardLanguageModelTest test;
+  BackwardLanguageModelTest test;
   test.testEmptyHypothesis();
   test.testCalcScore();
-  //  test->testEmptyHypothesis();
+
 }
