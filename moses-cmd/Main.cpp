@@ -686,7 +686,7 @@ int main(int argc, char** argv)
       detailedTranslationCollector.reset(new OutputCollector(&(ioWrapper->GetDetailedTranslationReportingStream())));
     }
   
-    // initialize stram for word alignment between input and output
+    // initialize stream for word alignment between input and output
     auto_ptr<OutputCollector> alignmentInfoCollector;
     if (!staticData.GetAlignmentOutputFile().empty()) {
       alignmentInfoCollector.reset(new OutputCollector(ioWrapper->GetAlignmentOutputStream()));
