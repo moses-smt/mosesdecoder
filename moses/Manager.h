@@ -56,6 +56,10 @@ struct SearchGraphNode {
     hypo(theHypo), recombinationHypo(theRecombinationHypo),
     forward(theForward), fscore(theFscore) {}
 
+    bool operator<(const SearchGraphNode& sgn) const {
+        return this->hypo->GetId() < sgn.hypo->GetId();
+    }
+
 };
 
 /** The Manager class implements a stack decoding algorithm for phrase-based decoding
@@ -93,6 +97,19 @@ class Manager
   Manager(Manager const&);
   void operator=(Manager const&);
   const TranslationSystem* m_system;
+private:
+
+  // Helper functions to output search graph in HTK standard lattice format
+  void OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) const;
+  size_t OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const;
+  void OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std::ostream &outputSearchGraphStream) const;
+  size_t OutputFeatureValuesForSLF(size_t index, bool zeros, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const;
+
+  // Helper functions to output search graph in the hypergraph format of Kenneth Heafield's lazy hypergraph decoder
+  void OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostream &outputSearchGraphStream) const;
+  size_t OutputFeatureValuesForHypergraph(size_t index, const Hypothesis* hypo, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const;
+
+
 protected:
   // data
 //	InputType const& m_source; /**< source sentence to be translated */
@@ -103,6 +120,7 @@ protected:
   size_t interrupted_flag;
   std::auto_ptr<SentenceStats> m_sentenceStats;
   int m_hypoId; //used to number the hypos as they are created.
+  size_t m_lineNumber;
 
   void GetConnectedGraph(
     std::map< int, bool >* pConnected,
@@ -113,7 +131,6 @@ protected:
 
 
 public:
-  size_t m_lineNumber;
   InputType const& m_source; /**< source sentence to be translated */
   Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system);
   ~Manager();
@@ -137,6 +154,8 @@ public:
 #endif
 
   void OutputSearchGraph(long translationId, std::ostream &outputSearchGraphStream) const;
+  void OutputSearchGraphAsSLF(long translationId, std::ostream &outputSearchGraphStream) const;
+  void OutputSearchGraphAsHypergraph(long translationId, std::ostream &outputSearchGraphStream) const;
   void GetSearchGraph(std::vector<SearchGraphNode>& searchGraph) const;
   const InputType& GetSource() const {
     return m_source;

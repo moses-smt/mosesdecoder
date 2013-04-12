@@ -137,7 +137,7 @@ void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,bool 
 void OutputInput(std::ostream& os, const Moses::Hypothesis* hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo, const Moses::Hypothesis *hypo);
 void OutputAlignment(Moses::OutputCollector* collector, size_t lineNo,  const Moses::TrellisPath &path);
-
+void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
 
 }
 

@@ -620,10 +620,27 @@ void IOWrapper::FixPrecision(std::ostream &stream, size_t size)
 template <class T>
 void ShiftOffsets(vector<T> &offsets, T shift)
 {
+  T currPos = shift;
   for (size_t i = 0; i < offsets.size(); ++i) {
-    shift += offsets[i];
-    offsets[i] += shift;
+    if (offsets[i] == 0) {
+	  offsets[i] = currPos;
+	  ++currPos;
+	}
+	else {
+	  currPos += offsets[i];
+	}
   }
+}
+
+size_t CalcSourceSize(const Moses::ChartHypothesis *hypo)
+{
+  size_t ret = hypo->GetCurrSourceRange().GetNumWordsCovered();
+  const std::vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
+  for (size_t i = 0; i < prevHypos.size(); ++i) {
+    size_t childSize = prevHypos[i]->GetCurrSourceRange().GetNumWordsCovered();
+    ret -= (childSize - 1);
+  }
+  return ret;
 }
 
 size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartTrellisNode &node, size_t startTarget)
@@ -635,7 +652,11 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
 
   const TargetPhrase &tp = hypo->GetCurrTargetPhrase();
 
-  vector<size_t> sourceOffsets(hypo->GetCurrSourceRange().GetNumWordsCovered(), 0);
+  size_t thisSourceSize = CalcSourceSize(hypo);
+
+  // position of each terminal word in translation rule, irrespective of alignment
+  // if non-term, number is undefined
+  vector<size_t> sourceOffsets(thisSourceSize, 0);
   vector<size_t> targetOffsets(tp.GetSize(), 0);
 
   const ChartTrellisNode::NodeChildren &prevNodes = node.GetChildren();
@@ -655,11 +676,12 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
 
       const ChartTrellisNode &prevNode = *prevNodes[sourceInd];
 
-      // 1st. calc source size
+      // calc source size
       size_t sourceSize = prevNode.GetHypothesis().GetCurrSourceRange().GetNumWordsCovered();
       sourceOffsets[sourcePos] = sourceSize;
 
-      // 2nd. calc target size. Recursively look thru child hypos
+      // calc target size.
+      // Recursively look thru child hypos
       size_t currStartTarget = startTarget + totalTargetSize;
       size_t targetSize = OutputAlignmentNBest(retAlign, prevNode, currStartTarget);
       targetOffsets[targetPos] = targetSize;
@@ -672,27 +694,26 @@ size_t IOWrapper::OutputAlignmentNBest(Alignments &retAlign, const Moses::ChartT
     }
   }
 
-  // 3rd. shift offsets
+  // convert position within translation rule to absolute position within
+  // source sentence / output sentence
   ShiftOffsets(sourceOffsets, startSource);
   ShiftOffsets(targetOffsets, startTarget);
 
   // get alignments from this hypo
-  vector< set<size_t> > retAlignmentsS2T(hypo->GetCurrSourceRange().GetNumWordsCovered());
   const AlignmentInfo &aiTerm = hypo->GetCurrTargetPhrase().GetAlignTerm();
-  OutputAlignment(retAlignmentsS2T, aiTerm);
 
   // add to output arg, offsetting by source & target
-  for (size_t source = 0; source < retAlignmentsS2T.size(); ++source) {
-    const set<size_t> &targets = retAlignmentsS2T[source];
-    set<size_t>::const_iterator iter;
-    for (iter = targets.begin(); iter != targets.end(); ++iter) {
-      size_t target = *iter;
-      pair<size_t, size_t> alignPoint(source + sourceOffsets[source]
-                                     ,target + targetOffsets[target]);
-      pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-      CHECK(ret.second);
+  AlignmentInfo::const_iterator iter;
+  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    size_t relSource = align.first;
+    size_t relTarget = align.second;
+    size_t absSource = sourceOffsets[relSource];
+    size_t absTarget = targetOffsets[relTarget];
 
-    }
+    pair<size_t, size_t> alignPoint(absSource, absTarget);
+    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+    CHECK(ret.second);
   }
 
   return totalTargetSize;
@@ -702,14 +723,16 @@ void IOWrapper::OutputAlignment(size_t translationId , const Moses::ChartHypothe
 {
   ostringstream out;
 
-  Alignments retAlign;
-  OutputAlignment(retAlign, hypo, 0);
+  if (hypo) {
+	Alignments retAlign;
+	OutputAlignment(retAlign, hypo, 0);
 
-  // output alignments
-  Alignments::const_iterator iter;
-  for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
-    const pair<size_t, size_t> &alignPoint = *iter;
-    out << alignPoint.first << "-" << alignPoint.second << " ";
+	// output alignments
+	Alignments::const_iterator iter;
+	for (iter = retAlign.begin(); iter != retAlign.end(); ++iter) {
+	  const pair<size_t, size_t> &alignPoint = *iter;
+	  out << alignPoint.first << "-" << alignPoint.second << " ";
+	}
   }
   out << endl;
 
@@ -723,7 +746,11 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
 
   const TargetPhrase &tp = hypo->GetCurrTargetPhrase();
 
-  vector<size_t> sourceOffsets(hypo->GetCurrSourceRange().GetNumWordsCovered(), 0);
+  size_t thisSourceSize = CalcSourceSize(hypo);
+
+  // position of each terminal word in translation rule, irrespective of alignment
+  // if non-term, number is undefined
+  vector<size_t> sourceOffsets(thisSourceSize, 0);
   vector<size_t> targetOffsets(tp.GetSize(), 0);
 
   const vector<const ChartHypothesis*> &prevHypos = hypo->GetPrevHypos();
@@ -743,11 +770,12 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
 
       const ChartHypothesis *prevHypo = prevHypos[sourceInd];
 
-      // 1st. calc source size
+      // calc source size
       size_t sourceSize = prevHypo->GetCurrSourceRange().GetNumWordsCovered();
       sourceOffsets[sourcePos] = sourceSize;
 
-      // 2nd. calc target size. Recursively look thru child hypos
+      // calc target size.
+      // Recursively look thru child hypos
       size_t currStartTarget = startTarget + totalTargetSize;
       size_t targetSize = OutputAlignment(retAlign, prevHypo, currStartTarget);
       targetOffsets[targetPos] = targetSize;
@@ -760,27 +788,27 @@ size_t IOWrapper::OutputAlignment(Alignments &retAlign, const Moses::ChartHypoth
     }
   }
 
-  // 3rd. shift offsets
+  // convert position within translation rule to absolute position within
+  // source sentence / output sentence
   ShiftOffsets(sourceOffsets, startSource);
   ShiftOffsets(targetOffsets, startTarget);
 
   // get alignments from this hypo
-  vector< set<size_t> > retAlignmentsS2T(hypo->GetCurrSourceRange().GetNumWordsCovered());
   const AlignmentInfo &aiTerm = hypo->GetCurrTargetPhrase().GetAlignTerm();
-  OutputAlignment(retAlignmentsS2T, aiTerm);
 
   // add to output arg, offsetting by source & target
-  for (size_t source = 0; source < retAlignmentsS2T.size(); ++source) {
-    const set<size_t> &targets = retAlignmentsS2T[source];
-    set<size_t>::const_iterator iter;
-    for (iter = targets.begin(); iter != targets.end(); ++iter) {
-      size_t target = *iter;
-      pair<size_t, size_t> alignPoint(source + sourceOffsets[source]
-                                     ,target + targetOffsets[target]);
-      pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
-      CHECK(ret.second);
+  AlignmentInfo::const_iterator iter;
+  for (iter = aiTerm.begin(); iter != aiTerm.end(); ++iter) {
+    const std::pair<size_t,size_t> &align = *iter;
+    size_t relSource = align.first;
+    size_t relTarget = align.second;
+    size_t absSource = sourceOffsets[relSource];
+    size_t absTarget = targetOffsets[relTarget];
 
-    }
+    pair<size_t, size_t> alignPoint(absSource, absTarget);
+    pair<Alignments::iterator, bool> ret = retAlign.insert(alignPoint);
+    CHECK(ret.second);
+
   }
 
   return totalTargetSize;

@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "Timer.h"
+#include "util/exception.hh"
 #include "util/file.hh"
 
 using namespace std;
@@ -65,6 +66,8 @@ const std::string ToLower(const std::string& str)
   return lc;
 }
 
+class BoolValueException : public util::Exception {};
+
 template<>
 bool Scan<bool>(const std::string &input)
 {
@@ -73,8 +76,7 @@ bool Scan<bool>(const std::string &input)
     return true;
   if (lc == "no" || lc == "n" || lc =="false" || lc == "0")
     return false;
-  TRACE_ERR( "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl);
-  return false;
+  UTIL_THROW(BoolValueException, "Could not interpret " << input << " as a boolean.  After lowercasing, valid values are yes, y, true, 1, no, n, false, and 0.");
 }
 
 bool FileExists(const std::string& filePath)

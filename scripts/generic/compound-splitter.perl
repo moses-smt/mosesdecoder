@@ -16,15 +16,15 @@ $HELP = 1
     unless &GetOptions('corpus=s' => \$CORPUS,
 		       'model=s' => \$MODEL,
 		       'filler=s' => \$FILLER,
-           'factored' => \$FACTORED,
+		       'factored' => \$FACTORED,
 		       'min-size=i' => \$MIN_SIZE,
 		       'min-count=i' => \$MIN_COUNT,
 		       'max-count=i' => \$MAX_COUNT,
 		       'help' => \$HELP,
 		       'verbose' => \$VERBOSE,
-           'syntax' => \$SYNTAX,
-           'binarize' => \$BINARIZE,
-           'mark-split' => \$MARK_SPLIT,
+		       'syntax' => \$SYNTAX,
+		       'binarize' => \$BINARIZE,
+		       'mark-split' => \$MARK_SPLIT,
 		       'train' => \$TRAIN);
 
 if ($HELP ||
@@ -155,34 +155,37 @@ sub apply {
         next if defined($COUNT{$lc}) && $COUNT{$lc} > $count;
 	$COUNT{$lc} = $count;
 	$TRUECASE{$lc} = $factored_word;
-  $LABEL{$lc} = $label if $SYNTAX;
+	$LABEL{$lc} = $label if $SYNTAX;
     }
     close(MODEL);
 
     while(<STDIN>) {
 	my $first = 1;
 	chop; s/\s+/ /g; s/^ //; s/ $//;
-  my @BUFFER; # for xml tags
+	my @BUFFER; # for xml tags
 	foreach my $factored_word (split) {
 	    print " " unless $first;	    
 	    $first = 0;
 
-      # syntax: don't split xml
-      if ($SYNTAX && ($factored_word =~ /^</ || $factored_word =~ />$/)) {
-        push @BUFFER,$factored_word;
-        $first = 1;
-        next;
-      }
-
-      # get case class
-      my $word = $factored_word;
-      $word =~ s/\|.+//g; # just first factor
-      my $lc = lc($word);
-
+	    # syntax: don't split xml
+	    if ($SYNTAX && ($factored_word =~ /^</ || $factored_word =~ />$/)) {
+		push @BUFFER,$factored_word;
+		$first = 1;
+		next;
+	    }
+	    
+	    # get case class
+	    my $word = $factored_word;
+	    $word =~ s/\|.+//g; # just first factor
+	    my $lc = lc($word);
+	    
+	    print STDERR "considering $word ($lc)...\n" if $VERBOSE;
 	    # don't split frequent words
-	    if (defined($COUNT{$lc}) && $COUNT{$lc}>=$MAX_COUNT) {
-    print join(" ",@BUFFER)." " if scalar(@BUFFER); @BUFFER = (); # clear buffer
+	    if ((defined($COUNT{$lc}) && $COUNT{$lc}>=$MAX_COUNT) ||
+	        $lc !~ /[a-zA-Z]/) {; # has to have at least one letter
+		print join(" ",@BUFFER)." " if scalar(@BUFFER); @BUFFER = (); # clear buffer
 		print $factored_word;
+		print STDERR "\tfrequent word ($COUNT{$lc}>=$MAX_COUNT), skipping\n" if $VERBOSE;
 		next;
 	    }
 

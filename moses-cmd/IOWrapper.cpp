@@ -262,6 +262,19 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
   out << std::endl;
 }
 
+void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
+{
+  std::vector<const Hypothesis *> edges;
+  const Hypothesis *currentHypo = hypo;
+  while (currentHypo) {
+    edges.push_back(currentHypo);
+    currentHypo = currentHypo->GetPrevHypo();
+  }
+
+  OutputAlignment(out, edges);
+
+}
+
 void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<const Hypothesis *> &edges)
 {
   ostringstream out;

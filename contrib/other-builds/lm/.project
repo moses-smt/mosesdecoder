@@ -142,11 +142,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/build_binary</locationURI>
 		</link>
 		<link>
-			<name>build_binary.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/build_binary.cc</locationURI>
-		</link>
-		<link>
 			<name>clean.sh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/clean.sh</locationURI>
@@ -175,11 +170,6 @@
 			<name>facade.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/facade.hh</locationURI>
-		</link>
-		<link>
-			<name>fragment.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/fragment.cc</locationURI>
 		</link>
 		<link>
 			<name>left.hh</name>
@@ -212,11 +202,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/lm/lm_exception.hh</locationURI>
 		</link>
 		<link>
-			<name>max_order.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/max_order.cc</locationURI>
-		</link>
-		<link>
 			<name>max_order.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/max_order.hh</locationURI>
@@ -240,11 +225,6 @@
 			<name>model_type.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/lm/model_type.hh</locationURI>
-		</link>
-		<link>
-			<name>ngram_query.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/lm/ngram_query.cc</locationURI>
 		</link>
 		<link>
 			<name>ngram_query.hh</name>

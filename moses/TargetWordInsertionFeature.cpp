@@ -56,12 +56,7 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
   // handle special case: unknown words (they have no word alignment)
   size_t targetLength = targetPhrase.GetSize();
   size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
-  if (targetLength == 1 && sourceLength == 1) {
-		const Factor* f1 = targetPhrase.GetWord(0).GetFactor(1);
-		if (f1 && f1->GetString().compare(UNKNOWN_FACTOR) == 0) {
-			return;
-		}
-  }
+  if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
   bool aligned[16];

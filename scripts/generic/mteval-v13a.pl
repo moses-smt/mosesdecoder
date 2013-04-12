@@ -1009,7 +1009,7 @@ sub extract_sgml_tag_and_span
 sub extract_sgml_tag_attribute
 {
 	my ($name, $data) = @_;
-	($data =~ m|$name\s*=\s*\"([^\"]*)\"|si) ? ($1) : ();
+	($data =~ m|$name\s*=\s*\"?([^\"]*)\"?|si) ? ($1) : ();
 }
 
 #################################

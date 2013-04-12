@@ -6,11 +6,12 @@ use Getopt::Long "GetOptions";
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 
-
-my ($SRC,$INFILE);
+my ($SRC,$INFILE,$UNBUFFERED);
 die("detruecase.perl < in > out")
     unless &GetOptions('headline=s' => \$SRC,
-		       'in=s' => \$INFILE);
+		       'in=s' => \$INFILE,
+                       'b|unbuffered' => \$UNBUFFERED);
+if (defined($UNBUFFERED) && $UNBUFFERED) { $|=1; }
 
 my %SENTENCE_END = ("."=>1,":"=>1,"?"=>1,"!"=>1);
 my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1,"&quot;"=>1,"&apos;"=>1,"&#91;"=>1,"&#93;"=>1);

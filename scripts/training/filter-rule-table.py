@@ -40,7 +40,8 @@ def printUsage():
 def main():
     parser = optparse.OptionParser()
     parser.add_option("-c", "--min-non-initial-rule-count",
-                      action="store", dest="minCount", type="int", default="1",
+                      action="store", dest="minCount",
+                      type="float", default="0.0",
                       help="prune non-initial rules where count is below N",
                       metavar="N")
     (options, args) = parser.parse_args()

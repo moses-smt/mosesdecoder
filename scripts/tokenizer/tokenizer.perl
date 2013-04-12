@@ -171,7 +171,7 @@ if ($TIMING)
 
 # tokenize a batch of texts saved in an array
 # input: an array containing a batch of texts
-# return: another array cotaining a batch of tokenized texts for the input array
+# return: another array containing a batch of tokenized texts for the input array
 sub tokenize_batch
 {
     my(@text_list) = @_;
