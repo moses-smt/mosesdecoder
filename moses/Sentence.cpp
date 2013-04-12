@@ -113,6 +113,12 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
     }
   }
 
+  // if sentence contains passthrough info "<passthrough tag1=""/>"
+  if (1 || staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
+    std::string passthrough = PassthroughSGML(line,"passthrough");
+    this->SetPassthroughInformation(passthrough);
+  }
+
   // parse XML markup in translation line
   //const StaticData &staticData = StaticData::Instance();
   std::vector<XmlOption*> xmlOptionsList(0);

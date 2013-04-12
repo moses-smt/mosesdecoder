@@ -174,6 +174,8 @@ protected:
   bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
+  bool m_PrintPassthroughInformation;
+  bool m_PrintPassthroughInformationInNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -736,6 +738,12 @@ public:
   }
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;
+  }
+  bool IsPassthroughEnabled() const {
+    return m_PrintPassthroughInformation;
+  }
+  bool IsPassthroughInNBestEnabled() const {
+    return m_PrintPassthroughInformationInNBest;
   }
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;

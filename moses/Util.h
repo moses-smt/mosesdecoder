@@ -344,6 +344,8 @@ double GetUserTime();
 // dump SGML parser for <seg> tags
 std::map<std::string, std::string> ProcessAndStripSGML(std::string &line);
 
+std::string PassthroughSGML(std::string &line, const std::string tagName,const std::string& lbrackStr="<", const std::string& rbrackStr=">");
+
 /**
  * Returns the first string bounded by the delimiters (default delimiters are " " and "\t")i starting from position first_pos
  * and and stores the starting position of the next string (in first_str)
@@ -382,6 +384,7 @@ T log_sum (T log_a, T log_b)
   }
   return ( v );
 }
+
 
 }
 

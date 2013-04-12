@@ -187,6 +187,8 @@ Parameter::Parameter()
 
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
   AddParam("print-id", "prefix translations with id. Default if false");
+  AddParam("print-passthrough", "output the sgml tag <passthrough> without any computation on that. Default is false");
+  AddParam("print-passthrough-in-n-best", "output the sgml tag <passthrough> without any computation on that in each entry of the n-best-list. Default is false");
 
 
 }

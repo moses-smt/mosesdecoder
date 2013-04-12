@@ -8,6 +8,7 @@
 #include "moses/ChartManager.h"
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
+#include "moses/Phrase.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
 #include "moses/TranslationSystem.h"
@@ -177,11 +178,9 @@ public:
     const TranslationSystem& system = getTranslationSystem(params);
     stringstream out, graphInfo, transCollOpts;
     map<string, xmlrpc_c::value> retData;
-
     if (staticData.IsChart()) {
-       TreeInput tinput;
-        const vector<FactorType> &inputFactorOrder =
-          staticData.GetInputFactorOrder();
+        TreeInput tinput;
+        const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
         ChartManager manager(tinput, &system);
@@ -190,11 +189,12 @@ public:
         outputChartHypo(out,hypo);
     } else {
         Sentence sentence;
-        const vector<FactorType> &inputFactorOrder =
-          staticData.GetInputFactorOrder();
+        const vector<FactorType> &inputFactorOrder = staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
-	size_t lineNumber = 0; // TODO: Include sentence request number here?
+        size_t lineNumber = 0; // TODO: Include sentence request number here?
+        const string passthrough_data = sentence.GetPassthroughInformation();
+        out << passthrough_data;
         Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm(), &system);
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
@@ -213,8 +213,7 @@ public:
           insertTranslationOptions(manager,retData);
         }
     }
-    pair<string, xmlrpc_c::value>
-    text("text", xmlrpc_c::value_string(out.str()));
+    pair<string, xmlrpc_c::value> text("text", xmlrpc_c::value_string(out.str()));
     retData.insert(text);
     cerr << "Output: " << out.str() << endl;
     *retvalP = xmlrpc_c::value_struct(retData);
