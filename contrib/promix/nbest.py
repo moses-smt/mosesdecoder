@@ -169,7 +169,7 @@ class CachedPhraseTable:
     if binpt.PhraseDictionaryTree.canLoad(ttable_file,True):
       # assume word alignment is included
       wa = True
-    self.ttable = binpt.PhraseDictionaryTree(ttable_file,nscores,wa)
+    self.ttable = binpt.PhraseDictionaryTree(ttable_file,nscores = nscores,wa = wa)
     self.cache = PhraseCache(cache_size)
     self.nscores = nscores
 
@@ -181,10 +181,10 @@ class CachedPhraseTable:
     if not scores:
       # cache miss
       scores = [0] * (self.nscores-1) # ignore penalty
-      entries = self.ttable.query(source)
+      entries = self.ttable.query(source, converter=None)
       # find correct target
       for entry in entries:
-        if entry.words  == target_tuple:
+        if entry.rhs  == target_tuple:
           scores = entry.scores[:-1]
           break
       #print "QUERY",source,"|||",target,"|||",scores

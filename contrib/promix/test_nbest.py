@@ -73,12 +73,7 @@ class TestMosesPhraseScorer(unittest.TestCase):
        [0.62585,0.00702384,0.836364,0.0687874]]\
       ])
 
-    for i in range(2):
-      self.assertEqual(len(hyp0.phrase_scores[i]),4)
-      for j in range(4):
-        self.assertEqual(len(hyp0.phrase_scores[i][j]),4)
-        for k in range(4):
-          self.assertAlmostEqual(hyp0.phrase_scores[i][j][k], expected[i][j][k], places =5)
+    nptest.assert_almost_equal(hyp0.phrase_scores, expected)
 
     # These are the interpolation weights reported by tmcombine
     weights = np.array([[0.54471993730312251, 0.45528006269687754],\
