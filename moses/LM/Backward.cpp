@@ -31,6 +31,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/LM/Ken.h"
 #include "moses/LM/Backward.h"
 
+//#include "moses/Util.h"
+//#include "moses/StaticData.h"
 //#include <iostream>
 
 namespace Moses {
@@ -58,7 +60,9 @@ namespace Moses {
     BackwardLMState *ret = new BackwardLMState();
     lm::ngram::RuleScore<Model> ruleScore(*m_ngram, ret->state);
     ruleScore.Terminal(m_ngram->GetVocabulary().EndSentence());
+    //    float score = 
     ruleScore.Finish();
+    //    VERBOSE(1, "BackwardLM EmptyHypothesisState has score " << score);
     return ret;
   }
   /*
@@ -151,32 +155,7 @@ namespace Moses {
       }
 
     }
-    /*
-    before_boundary = scorer.Finish();
 
-
-
-    for (int position = phrase.GetSize() - 1,
-	   ngramBoundary = m_ngram->Order() - 1; position >= 0; position-=1) {
-	   
-	   const Word &word = phrase.GetWord(position);
-
-	   UTIL_THROW_IF(
-			 (word.IsNonTerminal()),
-			 util::Exception,
-			 "BackwardLanguageModel does not currently support rules that include non-terminals "
-			 );
-  
-	   lm::WordIndex index = TranslateID(word);
-	   scorer.Terminal(index);
-	   if (!index) ++oovCount;
-
-	   if (position==ngramBoundary) {
-	     before_boundary = scorer.Finish();
-	   }
-
-    }
-    */
     fullScore = scorer.Finish();
     
     ngramScore = TransformLMScore(fullScore - before_boundary);
@@ -237,23 +216,48 @@ namespace Moses {
    */
   template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
 
-    const lm::ngram::ChartState &in_state = static_cast<const BackwardLMState&>(*ps).state;
+    const lm::ngram::ChartState &previous = static_cast<const BackwardLMState&>(*ps).state;
 
     std::auto_ptr<BackwardLMState> ret(new BackwardLMState());
-
+    /*
     // If the current hypothesis contains zero target words
     if (!hypo.GetCurrTargetLength()) {
       // reuse and return the previous state
-      ret->state = in_state;
+      ret->state = previous;
       return ret.release();
     }
 
-    UTIL_THROW_IF(
-		  (1==1),
-		  util::Exception,
-		  "This method (BackwardLanguageModel<Model>::Evaluate) is not yet fully implemented"
-		  );   
+    lm::ngram::RuleScore<Model> scorer(*m_ngram, ret->state);
 
+    const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+    int ngramBoundary = m_ngram->Order() - 1;
+    int lastWord = phrase.GetSize() - 1;
+
+    // Get scores for words at the end of the previous phrase
+    // that are now adjacent to words at the the beginning of this phrase
+    for (int position=std::min( lastWord,  ngramBoundary - 1); position >= 0; position-=1) {
+      const Word &word = phrase.GetWord(position);
+      UTIL_THROW_IF(
+		    (word.IsNonTerminal()),
+		    util::Exception,
+		    "BackwardLanguageModel does not currently support rules that include non-terminals "
+		    );
+  
+      lm::WordIndex index = TranslateID(word);
+      scorer.Terminal(index);
+    }
+    scorer.NonTerminal(previous);
+    float score = scorer.Finish();
+      
+    out->PlusEquals(this, score);
+    */
+    
+      UTIL_THROW_IF(
+		    (1==1),
+		    util::Exception,
+		    "This method (BackwardLanguageModel<Model>::Evaluate) is not yet fully implemented"
+		    );   
+    
     return ret.release();
 
   }

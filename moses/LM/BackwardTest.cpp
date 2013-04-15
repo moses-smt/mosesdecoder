@@ -96,15 +96,15 @@ class BackwardLanguageModelTest {
       double p_licenses = -2.360783;
       double p_for      = -1.661813;
       double p_most     = -2.360783;
-      double p_software = -1.62042;
+      //      double p_software = -1.62042;
 
       double p_the_licenses  = -0.9625873;
       double p_licenses_for  = -1.661557;
       double p_for_most      = -0.4526253;
-      double p_most_software = -1.70295; 
+      //      double p_most_software = -1.70295; 
 
       double p_the_licenses_for  = p_the_licenses + p_licenses_for;
-      double p_licenses_for_most = p_licenses_for + p_for_most;
+      //      double p_licenses_for_most = p_licenses_for + p_for_most;
  
       // the
       {
@@ -207,7 +207,20 @@ class BackwardLanguageModelTest {
       }
  
     }
+  /*
+  void testEvaluate() {
 
+    ScoreComponentCollection out;
+    out.RegisterScoreProducer(backwardLM);
+
+    FFState *prevState = const_cast< FFState * >(backwardLM->EmptyHypothesisState( *dummyInput ));
+
+
+
+    delete ffState;
+
+  }
+  */
   private:
     const Sentence *dummyInput;
     LanguageModel *backwardLM;
@@ -229,5 +242,6 @@ BOOST_AUTO_TEST_CASE(ProbingAll) {
   BackwardLanguageModelTest test;
   test.testEmptyHypothesis();
   test.testCalcScore();
+  //  test.testEvaluate();
 
 }
