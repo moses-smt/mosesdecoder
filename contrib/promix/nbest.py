@@ -1,13 +1,15 @@
 #!/usr/bin/env python
 
 import gzip
+import os
 import re
 import numpy as np
 import sys
 
 from bleu import BleuScorer
 from coll import OrderedDict
-sys.path.append("/home/bhaddow/code/mixture-models/moses/contrib/python")
+# Edit to set moses python path
+sys.path.append(os.path.dirname(__file__) + "/../python")
 import moses.dictree as binpt
 
 class DataFormatException(Exception):
@@ -169,7 +171,7 @@ class CachedPhraseTable:
     if binpt.PhraseDictionaryTree.canLoad(ttable_file,True):
       # assume word alignment is included
       wa = True
-    self.ttable = binpt.PhraseDictionaryTree(ttable_file,nscores = nscores,wa = wa)
+    self.ttable = binpt.PhraseDictionaryTree(ttable_file,nscores = nscores,wa = wa, tableLimit=0)
     self.cache = PhraseCache(cache_size)
     self.nscores = nscores
 
