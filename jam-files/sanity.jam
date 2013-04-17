@@ -265,6 +265,26 @@ rule add-post-hook ( names * ) {
   post-hooks += $(names) ;
 }
 
+rule failure-message ( ok ? ) {
+  if $(ok) != "ok" {
+    local args = [ modules.peek : ARGV ] ;
+    local args = $(args:J=" ") ;
+    if --debug-configuration in [ modules.peek : ARGV ] {
+      echo "The build failed with command line: " ;
+      echo "  $(args)" ;
+      echo "If you need support, attach the full output to your e-mail." ;
+    } else {
+      echo "The build failed.  If you need support, run:" ;
+      echo "  $(args) --debug-configuration -d2 >build.log" ;
+      echo "then attach build.log to your e-mail." ;
+    }
+    echo "ERROR" ;
+  } else {
+    echo "SUCCESS" ;
+  }
+}
+add-post-hook failure-message ;
+
 import feature : feature ;
 feature options-to-write : : free ;
 import toolset : flags ;
