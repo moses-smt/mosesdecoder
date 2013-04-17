@@ -16,10 +16,6 @@ class TestConfig(unittest.TestCase):
     self.assertEqual(self.config.nbest_files, nbests)
     self.assertEqual(self.config.score_files, scores)
 
-  def test_moses_bin_dir(self):
-    self.config.parse([])
-    self.assertEqual(self.config.moses_bin_dir, "/home/bhaddow/moses/bin")
-
 
 if __name__ == "__main__":
     unittest.main()
