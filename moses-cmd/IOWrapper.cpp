@@ -259,7 +259,6 @@ void OutputAlignment(ostream &out, const vector<const Hypothesis *> &edges)
 
     targetOffset += tp.GetSize();
   }
-  out << std::endl;
 }
 
 void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo)
@@ -279,7 +278,8 @@ void OutputAlignment(OutputCollector* collector, size_t lineNo , const vector<co
 {
   ostringstream out;
   OutputAlignment(out, edges);
-  
+  out << std::endl;
+
   collector->Write(lineNo,out.str());
 }
 
