@@ -49,8 +49,8 @@ class TestMosesPhraseScorer(unittest.TestCase):
 
   def setUp(self):
     self.scorer = MosesPhraseScorer\
-      (("data/esen.nc.model.unfiltered/phrase-table", \
-                      "data/esen.ep.model.unfiltered/phrase-table"))
+      (("test_data/esen.nc.model.filtered/phrase-table.0-0.1.1", \
+                      "test_data/esen.ep.model.filtered/phrase-table.0-0.1.1"))
 
   def test_phrase_scores(self):
     hyp0 = Hypothesis("taming |0-1| politicians |2-3| on both |4-5| sides of the Atlantic |6-8|", [0, -1.51037,0, 0, -2.60639, 0, 0, -36.0562,-8,-5.97082,-14.8327,-2.41162,\
