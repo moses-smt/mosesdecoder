@@ -19,9 +19,9 @@ The scripts require the Moses Python interface (in contrib/python). It should be
 first, following the instructions in that directory. 
 
 The scripts also require scipy and numpy. They have been tested with the following versions:
-  Python 2.7
-  Scipy 0.11.0
-  Numpy 1.6.2
+*  Python 2.7
+*  Scipy 0.11.0
+*  Numpy 1.6.2
 
 Run the test.py script to check that everything is functioning correctly.
 
@@ -33,18 +33,18 @@ it is run from the increasingly inaccurately named mert-moses.pl. If you want to
 the optimiser directly, run `main.py -h` for usage.
 
 A sample command for mert-moses.pl is as follows:
-MOSES/scripts/training/mert-moses.pl \
-   input-file ref-file \
-   decoder  \
-   ini-file  \
-    --promix-training MOSES/contrib/promix/main.py \
-    --maximum-iterations 15 \
-    --promix-table phrase-table-1 \
-    --promix-table phrase-table-2 \
-    --filtercmd "MOSES/scripts/training/filter-model-given-input.pl --Binarizer MOSES/bin/processPhraseTable" \
-    --nbest 100 --working-dir ./tmp  --decoder-flags "-threads 4 -v 0 " \
-    --rootdir MOSES/scripts -mertdir MOSES/bin \
-    --return-best-dev 
+    MOSES/scripts/training/mert-moses.pl \
+       input-file ref-file \
+       decoder  \
+       ini-file  \
+        --promix-training MOSES/contrib/promix/main.py \
+        --maximum-iterations 15 \
+        --promix-table phrase-table-1 \
+        --promix-table phrase-table-2 \
+        --filtercmd "MOSES/scripts/training/filter-model-given-input.pl --Binarizer MOSES/bin/processPhraseTable" \
+        --nbest 100 --working-dir ./tmp  --decoder-flags "-threads 4 -v 0 " \
+        --rootdir MOSES/scripts -mertdir MOSES/bin \
+        --return-best-dev 
 
 Note that promix training requires a filter and binarise script, and that the phrase table
 referenced in the ini file is not used. The argument `--return-best-dev` is not essential,
