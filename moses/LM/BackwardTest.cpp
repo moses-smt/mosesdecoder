@@ -66,12 +66,12 @@ class BackwardLanguageModelTest {
     BackwardLanguageModelTest() : 
       dummyInput(new Sentence()),
       backwardLM(
-	       //           BackwardLanguageModel
-		 //		 new Moses::BackwardLanguageModel<Model>(
-	      ConstructBackwardLM( 
-		  		     boost::unit_test::framework::master_test_suite().argv[1], 
-		 		     0,
-		 		     false)
+		 static_cast< BackwardLanguageModel<lm::ngram::ProbingModel> * >(
+			 ConstructBackwardLM( 
+				boost::unit_test::framework::master_test_suite().argv[1], 
+				0,
+				false)
+			 )
 		 )
     {
       // This space intentionally left blank
@@ -207,23 +207,47 @@ class BackwardLanguageModelTest {
       }
  
     }
-  /*
+  
   void testEvaluate() {
-
-    ScoreComponentCollection out;
-    out.RegisterScoreProducer(backwardLM);
 
     FFState *prevState = const_cast< FFState * >(backwardLM->EmptyHypothesisState( *dummyInput ));
 
+    double p_the      = -1.383059;
+    double p_eos      = -1.457693;
+
+    double p_the_eos = -1.940311;
+    
+
+      // the
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
+
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"the", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 1 );
+      
+	float score;
+	backwardLM->Evaluate(phrase, prevState, score);
+
+	SLOPPY_CHECK_CLOSE( (p_the + p_the_eos - p_eos), score, 0.01);
+
+      }
 
 
-    delete ffState;
+    delete prevState;
 
   }
-  */
+  
   private:
     const Sentence *dummyInput;
-    LanguageModel *backwardLM;
+    BackwardLanguageModel<lm::ngram::ProbingModel> *backwardLM;
 
 };
 
@@ -242,6 +266,6 @@ BOOST_AUTO_TEST_CASE(ProbingAll) {
   BackwardLanguageModelTest test;
   test.testEmptyHypothesis();
   test.testCalcScore();
-  //  test.testEvaluate();
+  test.testEvaluate();
 
 }

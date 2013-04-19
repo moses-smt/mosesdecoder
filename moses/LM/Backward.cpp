@@ -216,20 +216,38 @@ namespace Moses {
    */
   template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
 
+    // If the current hypothesis contains zero target words
+    if (!hypo.GetCurrTargetLength()) {
+
+      // reuse and return the previous state
+      std::auto_ptr<BackwardLMState> ret(new BackwardLMState());
+      ret->state = static_cast<const BackwardLMState&>(*ps).state;
+      return ret.release();
+
+    } else {
+
+      float returnedScore;
+
+      FFState *returnedState = this->Evaluate(hypo.GetCurrTargetPhrase(), ps, returnedScore);
+
+      out->PlusEquals(this, returnedScore);
+
+      return returnedState;
+
+    }
+  }
+
+
+  template <class Model> FFState *BackwardLanguageModel<Model>::Evaluate(const Phrase &phrase, const FFState *ps, float &returnedScore) const {
+    
+    returnedScore = 0.0f;
+
     const lm::ngram::ChartState &previous = static_cast<const BackwardLMState&>(*ps).state;
 
     std::auto_ptr<BackwardLMState> ret(new BackwardLMState());
-    /*
-    // If the current hypothesis contains zero target words
-    if (!hypo.GetCurrTargetLength()) {
-      // reuse and return the previous state
-      ret->state = previous;
-      return ret.release();
-    }
-
+    
     lm::ngram::RuleScore<Model> scorer(*m_ngram, ret->state);
 
-    const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
     int ngramBoundary = m_ngram->Order() - 1;
     int lastWord = phrase.GetSize() - 1;
 
@@ -247,22 +265,22 @@ namespace Moses {
       scorer.Terminal(index);
     }
     scorer.NonTerminal(previous);
-    float score = scorer.Finish();
-      
+    returnedScore = scorer.Finish();
+    /*      
     out->PlusEquals(this, score);
-    */
+    
     
       UTIL_THROW_IF(
 		    (1==1),
 		    util::Exception,
 		    "This method (BackwardLanguageModel<Model>::Evaluate) is not yet fully implemented"
 		    );   
-    
+    */
     return ret.release();
 
+    
+
   }
-
-
 
   LanguageModel *ConstructBackwardLM(const std::string &file, FactorType factorType, bool lazy) {
     try {

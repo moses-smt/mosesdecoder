@@ -51,8 +51,10 @@ template <class Model> class BackwardLanguageModel : public LanguageModelKen<Mod
 
     virtual FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
+    FFState *Evaluate(const Phrase &phrase, const FFState *ps, float &returnedScore) const;
+
   private:
- 
+
     // These lines are required to make the parent class's protected members visible to this class
     using LanguageModelKen<Model>::m_ngram;
     using LanguageModelKen<Model>::m_beginSentenceFactor;
