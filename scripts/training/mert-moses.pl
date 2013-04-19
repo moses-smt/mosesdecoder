@@ -98,6 +98,13 @@ my $megam_default_options = "-fvals -maxi 30 -nobias binary";
 # Flags related to Batch MIRA (Cherry & Foster, 2012)
 my $___BATCH_MIRA = 0; # flg to enable batch MIRA
 
+# Train phrase model mixture weights with PRO (Haddow, NAACL 2012)
+my $__PROMIX_TRAINING = undef; # Location of main script (contrib/promix/main.py)
+# The phrase tables. These should be gzip text format.
+my @__PROMIX_TABLES;
+# used to filter output
+my $__REMOVE_SEGMENTATION = "$SCRIPTS_ROOTDIR/ems/support/remove-segmentation-markup.perl";
+
 my $__THREADS = 0;
 
 # Parameter for effective reference length when computing BLEU score
@@ -200,6 +207,8 @@ GetOptions(
   "historic-interpolation=f" => \$___HISTORIC_INTERPOLATION,
   "batch-mira" => \$___BATCH_MIRA,
   "batch-mira-args=s" => \$batch_mira_args,
+  "promix-training=s" => \$__PROMIX_TRAINING,
+  "promix-table=s" => \@__PROMIX_TABLES,
   "threads=i" => \$__THREADS
 ) or exit(1);
 
@@ -289,6 +298,8 @@ Options:
   --batch-mira-args=STRING  ... args to pass through to batch MIRA. This flag is useful to
                                 change MIRA's hyperparameters such as regularization parameter C,
                                 BLEU decay factor, and the number of iterations of MIRA.
+  --promix-training=STRING  ... PRO-based mixture model training (Haddow, NAACL 2013)
+  --promix-tables=STRING    ... Phrase tables for PRO-based mixture model training.
   --threads=NUMBER          ... Use multi-threaded mert (must be compiled in).
   --historic-interpolation  ... Interpolate optimized weights with prior iterations' weight
                                 (parameter sets factor [0;1] given to current weights)
@@ -346,6 +357,17 @@ if (($___PAIRWISE_RANKED_OPTIMIZER || $___PRO_STARTING_POINT) && ! -x $pro_optim
   `gunzip $pro_optimizer.gz`;
   `chmod +x $pro_optimizer`;
   die("ERROR: Installation of megam_i686.opt failed! Install by hand from $megam_url") unless -x $pro_optimizer;
+}
+
+if ($__PROMIX_TRAINING) {
+  die "Not executable $__PROMIX_TRAINING" unless -x $__PROMIX_TRAINING;
+  die "For promix training, specify the tables using --promix-table arguments" unless @__PROMIX_TABLES;
+  die "For mixture model, need at least 2 tables" unless scalar(@__PROMIX_TABLES) > 1;
+  
+  for my $TABLE (@__PROMIX_TABLES) {
+    die "Phrase table $TABLE not found" unless -r $TABLE;
+  }
+  die "To use promix training, need to specify a filter and binarisation command" unless   $filtercmd =~ /Binarizer/;
 }
 
 $mertargs = "" if !defined $mertargs;
@@ -469,7 +491,28 @@ my $sparse_weights_file = undef;
 my $prev_feature_file = undef;
 my $prev_score_file = undef;
 my $prev_init_file = undef;
+my @allnbests;
 
+# If we're doing promix training, need to make sure the appropriate
+# tables are in place
+my @_PROMIX_TABLES_BIN;
+if ($__PROMIX_TRAINING) {
+  print STDERR "Training mixture model using promix\n";
+  for (my $i = 0; $i < scalar(@__PROMIX_TABLES); ++$i) {
+    # Create filtered, binarised tables
+    my $filtered_config = "moses_$i.ini";
+    substitute_ttable($___CONFIG, $filtered_config, $__PROMIX_TABLES[$i]); 
+    #TODO: Remove reordering table from config, as we don't need to filter
+    # and binarise it.
+    my $filtered_path = "filtered_$i";
+    my $___FILTER_F  = $___DEV_F;
+    $___FILTER_F = $filterfile if (defined $filterfile);
+    my $cmd = "$filtercmd ./$filtered_path $filtered_config $___FILTER_F";
+    &submit_or_exec($cmd, "filterphrases_$i.out", "filterphrases_$i.err");
+    push (@_PROMIX_TABLES_BIN,"$filtered_path/phrase-table.0-0.1.1");
+  }
+}
+ 
 if ($___FILTER_PHRASE_TABLE) {
   my $outdir = "filtered";
   if (-e "$outdir/moses.ini") {
@@ -624,6 +667,11 @@ my $allsorted       = undef;
 my $nbest_file      = undef;
 my $lsamp_file      = undef; # Lattice samples
 my $orig_nbest_file = undef; # replaced if lattice sampling
+# For mixture modelling
+my @promix_weights;
+my $num_mixed_phrase_features;
+my $interpolated_config;
+my $uninterpolated_config; # backup of config without interpolated ttable
 
 while (1) {
   $run++;
@@ -631,10 +679,50 @@ while (1) {
     print "Maximum number of iterations exceeded - stopping\n";
     last;
   }
+  print "run $run start at ".`date`;
+
+  if ($__PROMIX_TRAINING) {
+    # Need to create an ini file for the interpolated phrase table
+    if (!@promix_weights) {
+      # Create initial weights, distributing evenly between tables
+      # total number of weights is 1 less than number of phrase features, multiplied
+      # by the number of tables
+      $num_mixed_phrase_features = (grep { $_ eq 'tm' } @{$featlist->{"names"}}) - 1;
+  
+      @promix_weights = (1.0/scalar(@__PROMIX_TABLES)) x 
+        ($num_mixed_phrase_features * scalar(@__PROMIX_TABLES));
+    }
+    
+    # backup orig config, so we always add the table into it
+    $uninterpolated_config= $___CONFIG unless $uninterpolated_config; 
+
+    # Interpolation
+    my $interpolated_phrase_table = "naive ";
+    $interpolated_phrase_table .= join(" ", @_PROMIX_TABLES_BIN);
+    # convert from table,feature ordering to feature,table ordering
+    my @transposed_weights;
+    for my $feature (0..($num_mixed_phrase_features-1)) {
+      my @table_weights;
+      for my $table (0..(scalar(@__PROMIX_TABLES)-1)) {
+        push @table_weights, $promix_weights[$table * $num_mixed_phrase_features + $feature];
+      }
+      push @transposed_weights, join ",", @table_weights;
+    }
+    $interpolated_phrase_table .= " ";
+    $interpolated_phrase_table .=  join(";",@transposed_weights);
+
+    # Create an ini file for the interpolated phrase table
+    $interpolated_config ="moses.interpolated.ini"; 
+    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "13");
+
+    # the decoder should now use the interpolated model
+    $___CONFIG = "$interpolated_config";
+
+  }
+
   # run beamdecoder with option to output nbestlists
   # the end result should be (1) @NBEST_LIST, a list of lists; (2) @SCORE, a list of lists of lists
 
-  print "run $run start at ".`date`;
 
   # In case something dies later, we might wish to have a copy
   create_config($___CONFIG, "./run$run.moses.ini", $featlist, $run, (defined $devbleu ? $devbleu : "--not-estimated--"), $sparse_weights_file);
@@ -686,6 +774,9 @@ while (1) {
   my $score_file        = "run$run.${base_score_file}";
 
   my $cmd = "$mert_extract_cmd $mert_extract_args --scfile $score_file --ffile $feature_file -r " . join(",", @references) . " -n $nbest_file";
+  $cmd .= " -d" if $__PROMIX_TRAINING; # Allow duplicates
+  # remove segmentation
+  $cmd .= " -l $__REMOVE_SEGMENTATION" if  $__PROMIX_TRAINING;
   $cmd = &create_extractor_script($cmd, $___WORKING_DIR);
   &submit_or_exec($cmd, "extract.out","extract.err");
 
@@ -758,6 +849,11 @@ while (1) {
   my $pro_file_settings = "--ffile " . join(" --ffile ", split(/,/, $ffiles)) .
                           " --scfile " .  join(" --scfile ", split(/,/, $scfiles));
 
+  push @allnbests, $nbest_file;
+  my $promix_file_settings = 
+                          "--scfile " .  join(" --scfile ", split(/,/, $scfiles)) .
+                          " --nbest " . join(" --nbest ", @allnbests);
+
   if ($___START_WITH_HISTORIC_BESTS && defined $prev_init_file) {
     $file_settings .= " --ifile $prev_init_file,run$run.$weights_in_file";
   } else {
@@ -776,7 +872,7 @@ while (1) {
     my $pro_cmd = "$mert_pro_cmd $proargs $seed_settings $pro_file_settings -o run$run.pro.data ; $pro_optimizer_cmd";
     &submit_or_exec($pro_cmd, "run$run.pro.out", "run$run.pro.err");
     # ... get results ...
-    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights);
+    ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.pro.out","run$run.pro.err",scalar @{$featlist->{"names"}},\%sparse_weights, \@promix_weights);
     # Get the pro outputs ready for mert. Add the weight ranges,
     # and a weight and range for the single sparse feature
     $cmd =~ s/--ifile (\S+)/--ifile run$run.init.pro/;
@@ -807,9 +903,19 @@ while (1) {
     safesystem("echo 'not used' > $weights_out_file") or die;
     $cmd = "$mert_mira_cmd $mira_settings $seed_settings $pro_file_settings -o $mert_outfile";
     &submit_or_exec($cmd, "run$run.mira.out", $mert_logfile);
+  } elsif ($__PROMIX_TRAINING) {
+    # PRO trained  mixture model
+    safesystem("echo 'not used' > $weights_out_file") or die;
+    $cmd = "$__PROMIX_TRAINING $promix_file_settings";
+    $cmd .= " -t mix ";
+    $cmd .= join(" ", map {"-p $_"} @_PROMIX_TABLES_BIN);
+    $cmd .= " -i $___DEV_F";
+    print "Starting promix optimisation at " . `date`;
+    &submit_or_exec($cmd, "$mert_outfile", $mert_logfile);
+    print "Finished promix optimisation at " . `date`;
   } else {  # just mert
     &submit_or_exec($cmd . $mert_settings, $mert_outfile, $mert_logfile);
-  }
+  } 
 
   die "Optimization failed, file $weights_out_file does not exist or is empty"
     if ! -s $weights_out_file;
@@ -821,11 +927,15 @@ while (1) {
   safesystem("\\cp -f $mert_logfile run$run.$mert_logfile") or die;
   safesystem("touch $mert_logfile run$run.$mert_logfile") or die;
   safesystem("\\cp -f $weights_out_file run$run.$weights_out_file") or die; # this one is needed for restarts, too
+  if ($__PROMIX_TRAINING) {
+    safesystem("\\cp -f $interpolated_config run$run.$interpolated_config") or die;
+  }
 
   print "run $run end at ".`date`;
 
-  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights);
+  ($bestpoint,$devbleu) = &get_weights_from_mert("run$run.$mert_outfile","run$run.$mert_logfile",scalar @{$featlist->{"names"}},\%sparse_weights,\@promix_weights);
   my $merge_weight = 0;
+  print "New mixture weights: " . join(" ", @promix_weights) . "\n";
 
   die "Failed to parse mert.log, missed Best point there."
     if !defined $bestpoint || !defined $devbleu;
@@ -953,7 +1063,9 @@ if($___RETURN_BEST_DEV) {
   my $bestbleu=0;
   my $evalout = "eval.out";
   for (my $i = 1; $i < $run; $i++) {
-    safesystem("$mert_eval_cmd --reference " . join(",", @references) . " --candidate run$i.out 2> /dev/null 1> $evalout");
+    my $cmd = "$mert_eval_cmd --reference " . join(",", @references) . " -s BLEU --candidate run$i.out";
+    $cmd .= " -l $__REMOVE_SEGMENTATION" if defined( $__PROMIX_TRAINING);
+    safesystem("$cmd 2> /dev/null 1> $evalout");
     open my $fh, '<', $evalout or die "Can't read $evalout : $!";
     my $bleu = <$fh>;
     chomp $bleu;
@@ -984,25 +1096,28 @@ print "Training finished at " . `date`;
 } # end of local scope
 
 sub get_weights_from_mert {
-  my ($outfile, $logfile, $weight_count, $sparse_weights) = @_;
+  my ($outfile, $logfile, $weight_count, $sparse_weights, $mix_weights) = @_;
   my ($bestpoint, $devbleu);
   if ($___PAIRWISE_RANKED_OPTIMIZER || ($___PRO_STARTING_POINT && $logfile =~ /pro/)
-          || $___BATCH_MIRA) {
+          || $___BATCH_MIRA || $__PROMIX_TRAINING) {
     open my $fh, '<', $outfile or die "Can't open $outfile: $!";
     my @WEIGHT;
+    @$mix_weights = ();
     for (my $i = 0; $i < $weight_count; $i++) { push @WEIGHT, 0; }
     my $sum = 0.0;
     while (<$fh>) {
       if (/^F(\d+) ([\-\.\de]+)/) {     # regular features
         $WEIGHT[$1] = $2;
         $sum += abs($2);
+      } elsif (/^M(\d+_\d+) ([\-\.\de]+)/) {     # mix weights
+        push @$mix_weights,$2;
       } elsif (/^(.+_.+) ([\-\.\de]+)/) { # sparse features
         $$sparse_weights{$1} = $2;
       }
     }
     close $fh;
     die "It seems feature values are invalid or unable to read $outfile." if $sum < 1e-09;
-
+  
     $devbleu = "unknown";
     foreach (@WEIGHT) { $_ /= $sum; }
     foreach (keys %{$sparse_weights}) { $$sparse_weights{$_} /= $sum; }
@@ -1062,6 +1177,7 @@ sub run_decoder {
     my $decoder_config = "";
     $decoder_config = "-weight-overwrite '" . join(" ", values %model_weights) ."'" unless $___USE_CONFIG_WEIGHTS_FIRST && $run==1;
     $decoder_config .= " -weight-file run$run.sparse-weights" if -e "run$run.sparse-weights";
+    $decoder_config .= " -report-segmentation" if $__PROMIX_TRAINING;
     print STDERR "DECODER_CFG = $decoder_config\n";
     print "decoder_config = $decoder_config\n";
 
@@ -1341,6 +1457,31 @@ sub create_config {
   close $out;
   print STDERR "Saved: $outfn\n";
 }
+
+# Create a new ini file, with the first ttable replaced by the given one
+# and its type set to text
+sub substitute_ttable {
+  my ($old_ini, $new_ini, $new_ttable, $ttable_type) = @_;
+  $ttable_type = "0" unless defined($ttable_type);
+  open(NEW_INI,">$new_ini") || die "Failed to create $new_ini";
+  open(INI,$old_ini) || die "Failed to open $old_ini";
+  while(<INI>) {
+    if (/\[ttable-file\]/) {
+      print NEW_INI "[ttable-file]\n";
+      my $ttable_config = <INI>;
+      chomp $ttable_config;
+      my @ttable_fields = split /\s+/, $ttable_config;
+      $ttable_fields[0] = $ttable_type;
+      $ttable_fields[4] = $new_ttable;
+      print NEW_INI join(" ", @ttable_fields) . "\n";
+    } else {
+      print NEW_INI;
+    }
+  }
+  close NEW_INI;
+  close INI;
+}
+
 
 sub safesystem {
   print STDERR "Executing: @_\n";
