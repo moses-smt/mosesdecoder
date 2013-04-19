@@ -19,6 +19,7 @@ The scripts require the Moses Python interface (in contrib/python). It should be
 first, following the instructions in that directory. 
 
 The scripts also require scipy and numpy. They have been tested with the following versions:
+
 *  Python 2.7
 *  Scipy 0.11.0
 *  Numpy 1.6.2
@@ -33,6 +34,7 @@ it is run from the increasingly inaccurately named mert-moses.pl. If you want to
 the optimiser directly, run `main.py -h` for usage.
 
 A sample command for mert-moses.pl is as follows:
+
     MOSES/scripts/training/mert-moses.pl \
        input-file ref-file \
        decoder  \
