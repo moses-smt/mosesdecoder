@@ -180,5 +180,21 @@ inline size_t hash_value(const Phrase& phrase) {
   return seed;
 }
 
+struct PhrasePtrComparator {
+  inline bool operator()(const Phrase* lhs, const Phrase* rhs) const {
+    return *lhs == *rhs;
+  }
+};
+
+struct PhrasePtrHasher {
+  inline size_t operator()(const Phrase* phrase) const {
+    size_t seed = 0;
+    boost::hash_combine(seed,*phrase);
+    return seed;
+  }
+
+};
+
 }
+
 #endif

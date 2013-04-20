@@ -596,13 +596,6 @@ local rule should-clean-project ( project )
             }                        
         }
 
-        ECHO "warning: No toolsets are configured." ;
-        ECHO "warning: Configuring default toolset" \"$(default-toolset)\". ;
-        ECHO "warning: If the default is wrong, your build may not work correctly." ;
-        ECHO "warning: Use the \"toolset=xxxxx\" option to override our guess." ;
-        ECHO "warning: For more configuration options, please consult" ;
-        ECHO "warning: http://boost.org/boost-build2/doc/html/bbv2/advanced/configuration.html" ;
-
         toolset.using $(default-toolset) : $(default-toolset-version) ;
     }
 

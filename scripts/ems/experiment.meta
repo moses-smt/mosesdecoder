@@ -956,7 +956,7 @@ remove-markup
 	default-name: evaluation/cleaned
 	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
-	template: $moses-script-dir/ems/support/remove-segmenation-markup.perl < IN > OUT
+	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
 recase-output
 	in: cleaned-output RECASING:recase-config
 	out: recased-output
