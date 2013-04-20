@@ -40,7 +40,7 @@ const TranslationSystem& getTranslationSystem(params_t params)
 class Updater: public xmlrpc_c::method
 {
 public:
-  Updater() {
+  Updater() : bounded_(false), add2ORLM_(false) {
     // signature and help strings are documentation -- the client
     // can query this information with a system.methodSignature and
     // system.methodHelp RPC.
@@ -89,7 +89,7 @@ public:
     // insert BOS and EOS
     vl.insert(vl.begin(), sBOS);
     vl.insert(vl.end(), sEOS);
-    for(int j=0; j < vl.size(); ++j) {
+    for(int j=0; j < (int) vl.size(); ++j) {
       int i = (j<ngOrder) ? 0 : j-ngOrder+1;
       for(int t=j; t >= i; --t) {
         vector<string> ngVec;
@@ -105,7 +105,7 @@ public:
     cerr << "Inserting " << ngSet.size() << " ngrams into ORLM...\n";
     for(int i=1; i <= ngOrder; ++i) {
       iterate(ngSet, it) {
-        if(it->first.size() == i)
+        if((int) it->first.size() == i)
           orlm->UpdateORLM(it->first, it->second);
       }
     }
