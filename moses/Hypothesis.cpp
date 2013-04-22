@@ -261,17 +261,17 @@ void Hypothesis::IncorporateTransOptScores() {
   m_currScoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
 }
 
-void Hypothesis::EvaluateWith(StatefulFeatureFunction* sfff,
+void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
                               int state_idx) {
-  m_ffStates[state_idx] = sfff->Evaluate(
+  m_ffStates[state_idx] = sfff.Evaluate(
       *this,
       m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL,
       &m_currScoreBreakdown);
             
 }
 
-void Hypothesis::EvaluateWith(const StatelessFeatureFunction* slff) {
-  slff->Evaluate(PhraseBasedFeatureContext(this), &m_currScoreBreakdown);
+void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff) {
+  slff.Evaluate(PhraseBasedFeatureContext(this), &m_currScoreBreakdown);
 }
 
 void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
@@ -302,15 +302,17 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   const vector<const StatelessFeatureFunction*>& sfs =
       StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
-    if (!sfs[i]->ComputeValueInTranslationOption()) {
-      EvaluateWith(sfs[i]);
+	const StatelessFeatureFunction &ff = *sfs[i];
+    if (!ff.ComputeValueInTranslationOption()) {
+      EvaluateWith(ff);
     }
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
       StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
-    m_ffStates[i] = ffs[i]->Evaluate(
+    const StatefulFeatureFunction &ff = *ffs[i];
+    m_ffStates[i] = ff.Evaluate(
                       *this,
                       m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL,
                       &m_currScoreBreakdown);

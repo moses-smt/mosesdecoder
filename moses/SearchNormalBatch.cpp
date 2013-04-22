@@ -1,6 +1,7 @@
 #include "SearchNormalBatch.h"
 #include "LM/Base.h"
 #include "Manager.h"
+#include "Hypothesis.h"
 
 //#include <google/profiler.h>
 
@@ -163,13 +164,15 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
         for (sfff_iter = m_stateful_ffs.begin();
              sfff_iter != m_stateful_ffs.end();
              ++sfff_iter) {
-            hypo->EvaluateWith((*sfff_iter).second, (*sfff_iter).first);
+          const StatefulFeatureFunction &ff = *(sfff_iter->second);
+          int state_idx = sfff_iter->first;
+          hypo->EvaluateWith(ff, state_idx);
         }
         std::vector<const StatelessFeatureFunction*>::iterator slff_iter;
         for (slff_iter = m_stateless_ffs.begin();
              slff_iter != m_stateless_ffs.end();
              ++slff_iter) {
-            hypo->EvaluateWith(*slff_iter);
+            hypo->EvaluateWith(**slff_iter);
         }
 
         // Calculate future score.
@@ -196,7 +199,8 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
         for (dlm_iter = m_dlm_ffs.begin();
              dlm_iter != m_dlm_ffs.end();
              ++dlm_iter) {
-            hypo->EvaluateWith((*dlm_iter).second, (*dlm_iter).first);
+          LanguageModel &lm = *(dlm_iter->second);
+          hypo->EvaluateWith(lm, (*dlm_iter).first);
         }
 
         // Calculate the final score.
