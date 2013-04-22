@@ -62,6 +62,8 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   , m_arcList(NULL)
   , m_transOpt(NULL)
   , m_manager(manager)
+,	m_totalScore(0.0f)
+,	m_futureScore(0.0f)
 
   , m_id(m_manager.GetNextHypoId())
 {
@@ -69,7 +71,6 @@ Hypothesis::Hypothesis(Manager& manager, InputType const& source, const TargetPh
   // initialize scores
   //_hash_computed = false;
   //s_HypothesesCreated = 1;
-  ResetScore();
   const vector<const StatefulFeatureFunction*>& ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
     m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
@@ -248,13 +249,6 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
   }
   
   return 0;
-}
-
-void Hypothesis::ResetScore()
-{
-  m_currScoreBreakdown.ZeroAll();
-  m_scoreBreakdown.reset(0);
-  m_futureScore = m_totalScore = 0.0f;
 }
 
 void Hypothesis::IncorporateTransOptScores() {

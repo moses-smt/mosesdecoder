@@ -100,8 +100,6 @@ public:
   void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
 
 
-  // used when creating translations of unknown words:
-  void ResetScore();
   void SetWeights(const FeatureFunction*, const std::vector<float> &weightT);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;

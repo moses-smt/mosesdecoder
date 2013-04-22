@@ -258,12 +258,6 @@ void TargetPhrase::SetWeights(const FeatureFunction* translationScoreProducer, c
   */
 }
 
-void TargetPhrase::ResetScore()
-{
-  m_fullScore = 0;
-  m_scoreBreakdown.ZeroAll();
-}
-
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 {
   if (! IsCompatible(inputPhrase)) {

@@ -144,8 +144,6 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void ResetScore();
-
   void CalcScore(const SquareMatrix &futureScore);
 
   float CalcExpectedScore( const SquareMatrix &futureScore );
