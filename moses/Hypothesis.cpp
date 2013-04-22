@@ -326,15 +326,14 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 
   // Apply sparse producer weights
-  ScoreComponentCollection tempScoreBreakdown = m_currScoreBreakdown;
   const vector<const FeatureFunction*>& sparseProducers = StaticData::Instance().GetSparseProducers();
   for (unsigned i = 0; i < sparseProducers.size(); ++i) {
     float weight = sparseProducers[i]->GetSparseProducerWeight();
-    tempScoreBreakdown.MultiplyEquals(sparseProducers[i], weight);
+    m_currScoreBreakdown.MultiplyEquals(sparseProducers[i], weight);
   }
 
   // TOTAL
-  m_totalScore = tempScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  m_totalScore = m_currScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
   if (m_prevHypo) {
     m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
   }
