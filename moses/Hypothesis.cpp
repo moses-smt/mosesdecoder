@@ -97,7 +97,9 @@ Hypothesis::Hypothesis(const Hypothesis &prevHypo, const TranslationOption &tran
   , m_transOpt(&transOpt)
   , m_manager(prevHypo.GetManager())
   , m_id(m_manager.GetNextHypoId())
+  , m_currScoreBreakdown(transOpt.GetScoreBreakdown())
 {
+
   // assert that we are not extending our hypothesis by retranslating something
   // that this hypothesis has already translated!
   CHECK(!m_sourceCompleted.Overlap(m_currSourceWordsRange));
@@ -289,7 +291,6 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   // option: add these here
   // language model scores for n-grams completely contained within a target
   // phrase are also included here
-  m_currScoreBreakdown = m_transOpt->GetScoreBreakdown();
 
   // compute values of stateless feature functions that were not
   // cached in the translation option
@@ -327,7 +328,7 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
   }
 
   // TOTAL
-  m_totalScore = m_currScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
+  m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
   if (m_prevHypo) {
     m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
   }
