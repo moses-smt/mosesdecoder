@@ -140,6 +140,8 @@ enum PhraseTableImplementation {
   ,FuzzyMatch    = 11
   ,Compact      = 12
   ,Interpolated = 13
+  ,MultiModelCounts = 98
+  ,MultiModel   = 99
 };
 
 enum InputTypeEnum {

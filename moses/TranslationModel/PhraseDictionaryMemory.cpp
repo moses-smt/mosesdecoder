@@ -122,10 +122,17 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
     if (scv.size() != m_numScoreComponent) {
-      stringstream strme;
-      strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
-      UserMessage::Add(strme.str());
-      abort();
+      //PhraseDictionaryMultiModel may use input phrase dictionaries with a different number of features than it is assigned in the log-linear model;
+      //filling extra slots with zeroes to prevent error messages on the way
+      if (m_numScoreComponentMultiModel > 0 && scv.size() == m_numScoreComponentMultiModel && m_numScoreComponentMultiModel < m_numScoreComponent) {
+          scv.resize(m_numScoreComponent);
+      }
+      else {
+        stringstream strme;
+        strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
+        UserMessage::Add(strme.str());
+        abort();
+      }
     }
 
 

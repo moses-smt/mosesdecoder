@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 
 #ifdef WITH_THREADS
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #endif
 
@@ -246,7 +247,13 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-  
+
+  std::vector<float> m_multimodelweights;
+#ifdef WITH_THREADS
+  mutable std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
+#else
+  mutable std::vector<float> m_multimodelweights_tmp;
+#endif
   StaticData();
 
 
@@ -728,6 +735,34 @@ public:
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
 
+  const std::vector<float>* GetMultiModelWeightsVector() const {
+    return &m_multimodelweights;
+  }
+
+  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
+#ifdef WITH_THREADS
+    m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
+#else
+    m_multimodelweights_tmp = weights;
+#endif
+  }
+
+  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const {
+#ifdef WITH_THREADS
+    if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
+      return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
+    }
+    else {
+      return NULL;
+    }
+#else
+    return &m_multimodelweights_tmp;
+#endif
+  }
+
+  void SetNeedAlignmentInfo(bool needAlignmentInfo) {
+      m_needAlignmentInfo = needAlignmentInfo;
+  }
   bool NeedAlignmentInfo() const {
     return m_needAlignmentInfo; }
   const std::string &GetAlignmentOutputFile() const {

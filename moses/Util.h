@@ -310,7 +310,7 @@ inline float CalcTranslationScore(const std::vector<float> &probVector,
 		return out.str();						\
 	}															\
  
-//! delete and remove every element of a collection object such as map, set, list etc
+//! delete and remove every element of a collection object such as set, list etc
 template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
@@ -319,6 +319,17 @@ void RemoveAllInColl(COLL &coll)
   }
   coll.clear();
 }
+
+//! delete and remove every element of map
+template<class COLL>
+void RemoveAllInMap(COLL &coll)
+{
+  for (typename COLL::const_iterator iter = coll.begin() ; iter != coll.end() ; ++iter) {
+    delete (iter->second);
+  }
+  coll.clear();
+}
+
 
 //! x-platform reference to temp folder
 std::string GetTempFolder();

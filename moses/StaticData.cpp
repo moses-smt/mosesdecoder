@@ -355,6 +355,8 @@ bool StaticData::LoadData(Parameter *parameter)
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
+  m_multimodelweights = Scan<float>( m_parameter->GetParam("weight-t-multimodel") );
+
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
                     Scan<int>(m_parameter->GetParam("distortion-limit")[0])

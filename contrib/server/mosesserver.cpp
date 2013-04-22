@@ -11,10 +11,15 @@
 #include "moses/Phrase.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
+#include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 #include "moses/TranslationSystem.h"
 #include "moses/TreeInput.h"
 #include "moses/LMList.h"
 #include "moses/LM/ORLM.h"
+
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
 
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
@@ -133,6 +138,61 @@ public:
   }
 };
 
+class Optimizer : public xmlrpc_c::method
+{
+public:
+  Optimizer() {
+    // signature and help strings are documentation -- the client
+    // can query this information with a system.methodSignature and
+    // system.methodHelp RPC.
+    this->_signature = "S:S";
+    this->_help = "Optimizes multi-model translation model";
+  }
+
+  void
+  execute(xmlrpc_c::paramList const& paramList,
+          xmlrpc_c::value *   const  retvalP) {
+#ifdef WITH_DLIB
+    const params_t params = paramList.getStruct(0);
+    const TranslationSystem& system = getTranslationSystem(params);
+    const PhraseDictionaryFeature* pdf = system.GetPhraseDictionaries()[0];
+    PhraseDictionaryMultiModel* pdmm = (PhraseDictionaryMultiModel*) pdf->GetDictionary();
+
+    params_t::const_iterator si = params.find("phrase_pairs");
+    if (si == params.end()) {
+      throw xmlrpc_c::fault(
+        "Missing list of phrase pairs",
+        xmlrpc_c::fault::CODE_PARSE);
+    }
+
+    vector<pair<string, string> > phrase_pairs;
+
+    xmlrpc_c::value_array phrase_pairs_array = xmlrpc_c::value_array(si->second);
+    vector<xmlrpc_c::value> phrasePairValueVector(phrase_pairs_array.vectorValueValue());
+    for (size_t i=0;i < phrasePairValueVector.size();i++) {
+        vector<xmlrpc_c::value> phrasePair(xmlrpc_c::value_array(phrasePairValueVector[i]).vectorValueValue());
+        string L1 = xmlrpc_c::value_string(phrasePair[0]);
+        string L2 = xmlrpc_c::value_string(phrasePair[1]);
+        phrase_pairs.push_back(make_pair(L1,L2));
+    }
+
+    vector<float> weight_vector;
+    weight_vector = pdmm->MinimizePerplexity(phrase_pairs);
+
+    vector<xmlrpc_c::value> weight_vector_ret;
+    for (size_t i=0;i < weight_vector.size();i++) {
+        weight_vector_ret.push_back(xmlrpc_c::value_double(weight_vector[i]));
+    }
+    *retvalP = xmlrpc_c::value_array(weight_vector_ret);
+#else
+    string errmsg = "Error: Perplexity minimization requires dlib (compilation option --with-dlib)";
+    cerr << errmsg << endl;
+    *retvalP = xmlrpc_c::value_string(errmsg);
+#endif
+  }
+};
+
+
 class Translator : public xmlrpc_c::method
 {
 public:
@@ -173,10 +233,27 @@ public:
     si = params.find("nbest-distinct");
     bool nbest_distinct = (si != params.end());
 
+    vector<float> multiModelWeights;
+    si = params.find("weight-t-multimodel");
+    if (si != params.end()) {
+        xmlrpc_c::value_array multiModelArray = xmlrpc_c::value_array(si->second);
+        vector<xmlrpc_c::value> multiModelValueVector(multiModelArray.vectorValueValue());
+        for (size_t i=0;i < multiModelValueVector.size();i++) {
+            multiModelWeights.push_back(xmlrpc_c::value_double(multiModelValueVector[i]));
+        }
+    }
+
     const StaticData &staticData = StaticData::Instance();
 
     if (addGraphInfo) {
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
+    }
+
+    if (multiModelWeights.size() > 0) {
+      staticData.SetTemporaryMultiModelWeightsVector(multiModelWeights);
+      if (staticData.GetUseTransOptCache()) {
+          cerr << "Warning: -use-persistent-cache is set to true; sentence-specific weights may be ignored. Disable cache for true results.\n";
+      }
     }
 
     const TranslationSystem& system = getTranslationSystem(params);
@@ -425,13 +502,18 @@ int main(int argc, char** argv)
     exit(1);
   }
 
+  //512 MB data limit (512KB is not enough for optimization)
+  xmlrpc_limit_set(XMLRPC_XML_SIZE_LIMIT_ID, 512*1024*1024);
+
   xmlrpc_c::registry myRegistry;
 
   xmlrpc_c::methodPtr const translator(new Translator);
   xmlrpc_c::methodPtr const updater(new Updater);
+  xmlrpc_c::methodPtr const optimizer(new Optimizer);
 
   myRegistry.addMethod("translate", translator);
   myRegistry.addMethod("updater", updater);
+  myRegistry.addMethod("optimize", optimizer);
 
   xmlrpc_c::serverAbyss myAbyssServer(
     myRegistry,

@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
+#include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
+#include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 
 #ifndef WIN32
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
@@ -76,7 +78,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_sparsePhraseDictionaryFeature(spdf)
 {
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
-      implementation==Compact || implementation==FuzzyMatch ) {
+      implementation==Compact || implementation==FuzzyMatch || implementation == MultiModel || implementation == MultiModelCounts) {
     m_useThreadSafePhraseDictionary = true;
   } else {
     m_useThreadSafePhraseDictionary = false;
@@ -241,7 +243,43 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
-  }  
+  } else if (m_implementation == MultiModel ) {
+    // memory phrase table
+    VERBOSE(2,"multi-model mode" << std::endl);
+    if (staticData.GetInputType() != SentenceInput) {
+      UserMessage::Add("Must use binary phrase table for this input type");
+      CHECK(false);
+    }
+
+    PhraseDictionaryMultiModel* pd  = new PhraseDictionaryMultiModel(GetNumScoreComponents(),this);
+    bool ret = pd->Load(GetInput(), GetOutput()
+                         , m_config
+                         , weightT
+                         , m_tableLimit
+                         , system->GetLanguageModels()
+                         , system->GetWeightWordPenalty());
+    CHECK(ret);
+    return pd;
+  } else if (m_implementation == MultiModelCounts) {
+    // memory phrase table
+    VERBOSE(2,"multi-model mode (count tables)" << std::endl);
+    if (staticData.GetInputType() != SentenceInput) {
+      UserMessage::Add("Must use binary phrase table for this input type");
+      CHECK(false);
+    }
+
+    (const_cast<StaticData&>(staticData)).SetNeedAlignmentInfo(true); //needed for lexical weight computation
+
+    PhraseDictionaryMultiModelCounts* pd  = new PhraseDictionaryMultiModelCounts(GetNumScoreComponents(),this);
+    bool ret = pd->Load(GetInput(), GetOutput()
+                         , m_config
+                         , weightT
+                         , m_tableLimit
+                         , system->GetLanguageModels()
+                         , system->GetWeightWordPenalty());
+    CHECK(ret);
+    return pd;
+  }
   else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
     CHECK(false);
@@ -259,6 +297,16 @@ void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system)
     PrintUserTime("Finished loading phrase tables");
   }
   //Other types will be lazy loaded
+}
+
+void PhraseDictionary::SetNumScoreComponentMultiModel(size_t num)
+{
+  m_numScoreComponentMultiModel = num;
+}
+
+size_t PhraseDictionary::GetNumScoreComponentMultiModel() const
+{
+  return m_numScoreComponentMultiModel;
 }
 
 //Called when we start translating a new sentence
