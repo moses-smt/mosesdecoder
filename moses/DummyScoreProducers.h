@@ -58,7 +58,7 @@ public:
       //required but does nothing.
     }
 
-
+  bool ComputeValueInTranslationTable() const {return true;}
 
 };
 
