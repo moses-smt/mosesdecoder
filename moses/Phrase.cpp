@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "StaticData.h"  // GetMaxNumFactors
 
+#include "util/exception.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 
@@ -174,6 +175,8 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
   }
 }
 
+class NonTerminalParseException : public util::Exception {};
+
 void Phrase::CreateFromStringNewFormat(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
                                        , const StringPiece &phraseString
@@ -199,6 +202,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
       isNonTerminal = true;
 
       size_t nextPos = annotatedWord.find('[', 1);
+      UTIL_THROW_IF(nextPos == string::npos, NonTerminalParseException, "The string " << annotatedWord << " was parsed as a non-terminal but does not take the form [source][target].");
       CHECK(nextPos != string::npos);
 
       if (direction == Input)
@@ -216,8 +220,7 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 
   // lhs
   const StringPiece &annotatedWord = annotatedWordVector.back();
-  CHECK(annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']');
-
+  UTIL_THROW_IF(annotatedWord.size() < 2 || *annotatedWord.data() != '[' || annotatedWord.data()[annotatedWord.size() - 1] != ']', NonTerminalParseException, "The last entry should be a single non-terminal but was given as " << annotatedWord);
   lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
   assert(lhs.IsNonTerminal());
 }
