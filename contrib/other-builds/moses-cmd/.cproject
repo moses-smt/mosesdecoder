@@ -72,13 +72,13 @@
 									<listOptionValue builtIn="false" value="lattice"/>
 									<listOptionValue builtIn="false" value="misc"/>
 									<listOptionValue builtIn="false" value="moses"/>
+									<listOptionValue builtIn="false" value="cmph"/>
 									<listOptionValue builtIn="false" value="search"/>
 									<listOptionValue builtIn="false" value="irstlm"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
 									<listOptionValue builtIn="false" value="pthread"/>
-									<listOptionValue builtIn="false" value="cmph"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
 									<listOptionValue builtIn="false" value="boost_iostreams-mt"/>
