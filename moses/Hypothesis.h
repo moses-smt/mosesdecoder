@@ -146,9 +146,6 @@ public:
 
   void CalcScore(const SquareMatrix &futureScore);
 
-  float CalcExpectedScore( const SquareMatrix &futureScore );
-  void CalcRemainingScore();
-
   int GetId()const {
     return m_id;
   }
@@ -267,7 +264,6 @@ public:
   void EvaluateWith(const StatefulFeatureFunction &sfff, int state_idx);
   void EvaluateWith(const StatelessFeatureFunction &slff);
   void CalculateFutureScore(const SquareMatrix& futureScore);
-  void CalculateFinalScore();
 
   //! target span that trans opt would populate if applied to this hypo. Used for alignment check
   size_t GetNextStartPos(const TranslationOption &transOpt) const;

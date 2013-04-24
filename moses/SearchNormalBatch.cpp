@@ -203,9 +203,6 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
           hypo->EvaluateWith(lm, (*dlm_iter).first);
         }
 
-        // Calculate the final score.
-        hypo->CalculateFinalScore();
-
         // Put completed hypothesis onto its stack.
         size_t wordsTranslated = hypo->GetWordsBitmap().GetNumWordsCovered();
         m_hypoStackColl[wordsTranslated]->AddPrune(hypo);

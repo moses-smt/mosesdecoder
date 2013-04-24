@@ -274,10 +274,6 @@ void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
   m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
 }
 
-void Hypothesis::CalculateFinalScore() {
-  m_totalScore = GetScoreBreakdown().InnerProduct(
-        StaticData::Instance().GetAllWeights()) + m_futureScore;
-}
 
 /***
  * calculate the logarithm of our total translation score (sum up components)
@@ -329,66 +325,6 @@ void Hypothesis::CalcScore(const SquareMatrix &futureScore)
 
   // TOTAL
   m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
-  if (m_prevHypo) {
-    m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
-  }
-
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().AddTimeOtherScore( clock()-t );
-  }
-}
-
-/** Calculates the expected score of extending this hypothesis with the
- * specified translation option. Includes actual costs for everything
- * except for expensive actual language model score.
- * This function is used by early discarding.
- * /param transOpt - translation option being considered
- */
-float Hypothesis::CalcExpectedScore( const SquareMatrix &futureScore )
-{
-  const StaticData &staticData = StaticData::Instance();
-  clock_t t=0;
-  IFVERBOSE(2) {
-    t = clock();  // track time excluding LM
-  }
-
-  CHECK(!"Need to add code to get the distortion scores");
-  //CalcDistortionScore();
-
-  // LANGUAGE MODEL ESTIMATE (includes word penalty cost)
-  float estimatedLMScore = m_transOpt->GetFutureScore() - m_transOpt->GetScoreBreakdown().InnerProduct(staticData.GetAllWeights());
-
-  // FUTURE COST
-  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
-
-  // TOTAL
-  float total = m_totalScore + estimatedLMScore;
-
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().AddTimeEstimateScore( clock()-t );
-  }
-  return total;
-}
-
-void Hypothesis::CalcRemainingScore()
-{
-  const StaticData &staticData = StaticData::Instance();
-  clock_t t=0; // used to track time
-
-  // LANGUAGE MODEL COST
-  CHECK(!"Need to add code to get the LM score(s)");
-  //CalcLMScore(staticData.GetAllLM());
-
-  IFVERBOSE(2) {
-    t = clock();  // track time excluding LM
-  }
-
-  // WORD PENALTY
-  m_currScoreBreakdown.PlusEquals(staticData.GetWordPenaltyProducer()
-                              , - (float)m_currTargetWordsRange.GetNumWordsCovered());
-
-  // TOTAL
-  m_totalScore = m_currScoreBreakdown.InnerProduct(staticData.GetAllWeights()) + m_futureScore;
   if (m_prevHypo) {
     m_totalScore += m_prevHypo->m_totalScore - m_prevHypo->m_futureScore;
   }
