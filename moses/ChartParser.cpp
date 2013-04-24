@@ -44,7 +44,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
+  vector<float> wordPenaltyScore(1, -1);
   
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {

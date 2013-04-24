@@ -752,6 +752,42 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName, co
   m_setting.erase(oldFeatureName);
 }
 
+void Parameter::ConvertWeightArgsWordPenalty()
+{
+  const std::string oldWeightName = "weight-w";
+  const std::string newWeightName = "WordPenalty";
+
+  bool isChartDecoding = true;
+  if (!isParamSpecified("search-algorithm") ||
+	 (GetParam("search-algorithm").size() > 0
+	   && (Trim(GetParam("search-algorithm")[0]) == "0"
+		 ||Trim(GetParam("search-algorithm")[0]) == "1"
+		  )
+	 )
+   ) {
+    isChartDecoding = false;
+  }
+
+  PARAM_MAP::iterator iterMap;
+
+  iterMap = m_setting.find(oldWeightName);
+  if (iterMap != m_setting.end())
+  {
+    const PARAM_VEC &weights = iterMap->second;
+    for (size_t i = 0; i < weights.size(); ++i)
+    {
+      float weight = Scan<float>(weights[i]);
+      if (isChartDecoding) {
+        weight *= 0.434294482;
+      }
+      SetWeight(newWeightName, i, weight);
+    }
+
+    m_setting.erase(iterMap);
+  }
+
+}
+
 void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
@@ -767,7 +803,7 @@ void Parameter::ConvertWeightArgs()
     cerr << "Do not mix old and new format for specify weights";
   }
 
-  ConvertWeightArgsSingleWeight("weight-w", "WordPenalty");
+  ConvertWeightArgsWordPenalty();
   ConvertWeightArgsLM("weight-l");
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
   ConvertWeightArgsSingleWeight("weight-u", "UnknownWordPenalty");

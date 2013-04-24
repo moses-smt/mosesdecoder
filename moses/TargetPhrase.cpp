@@ -234,7 +234,7 @@ void TargetPhrase::SetScoreChart(const FeatureFunction* translationScoreProducer
 
   // word penalty
   size_t wordCount = GetNumTerminals();
-  m_scoreBreakdown.Assign(wpProducer, - (float) wordCount * 0.434294482); // TODO log -> ln ??
+  m_scoreBreakdown.Assign(wpProducer, - wordCount);
 
   m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
 }

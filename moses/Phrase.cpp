@@ -185,7 +185,7 @@ void Phrase::CreateFromString(FactorDirection direction
     assert(lhs->IsNonTerminal());
   }
   else {
-    CHECK(lhs == NULL);
+    //CHECK(lhs == NULL);
 
     numWords = annotatedWordVector.size();
   }

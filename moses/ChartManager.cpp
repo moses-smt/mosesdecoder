@@ -135,7 +135,7 @@ void ChartManager::AddXmlChartOptions() {
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    Moses::Scores wordPenaltyScore(1, -0.434294482); // TODO what is this number?
+    Moses::Scores wordPenaltyScore(1, -1);
     opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((FeatureFunction*)staticData.GetWordPenaltyProducer(), wordPenaltyScore);
 
     const WordsRange &range = opt->GetSourceWordsRange();
