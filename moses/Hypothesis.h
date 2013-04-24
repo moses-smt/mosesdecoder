@@ -263,7 +263,6 @@ public:
   void IncorporateTransOptScores();
   void EvaluateWith(const StatefulFeatureFunction &sfff, int state_idx);
   void EvaluateWith(const StatelessFeatureFunction &slff);
-  void CalculateFutureScore(const SquareMatrix& futureScore);
 
   //! target span that trans opt would populate if applied to this hypo. Used for alignment check
   size_t GetNextStartPos(const TranslationOption &transOpt) const;

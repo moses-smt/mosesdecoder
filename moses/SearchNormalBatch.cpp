@@ -174,9 +174,6 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
              ++slff_iter) {
             hypo->EvaluateWith(**slff_iter);
         }
-
-        // Calculate future score.
-        hypo->CalculateFutureScore(m_transOptColl.GetFutureScore());
     }
 
     // Wait for all requests from the distributed LM to come back.

@@ -270,11 +270,6 @@ void Hypothesis::EvaluateWith(const StatelessFeatureFunction& slff) {
   slff.Evaluate(PhraseBasedFeatureContext(this), &m_currScoreBreakdown);
 }
 
-void Hypothesis::CalculateFutureScore(const SquareMatrix& futureScore) {
-  m_futureScore = futureScore.CalcFutureScore( m_sourceCompleted );
-}
-
-
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
