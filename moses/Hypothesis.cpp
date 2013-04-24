@@ -253,10 +253,6 @@ int Hypothesis::RecombineCompare(const Hypothesis &compare) const
   return 0;
 }
 
-void Hypothesis::IncorporateTransOptScores() {
-  m_currScoreBreakdown.PlusEquals(m_transOpt->GetScoreBreakdown());
-}
-
 void Hypothesis::EvaluateWith(const StatefulFeatureFunction &sfff,
                               int state_idx) {
   m_ffStates[state_idx] = sfff.Evaluate(

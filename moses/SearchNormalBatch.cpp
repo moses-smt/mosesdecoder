@@ -156,9 +156,6 @@ void SearchNormalBatch::EvalAndMergePartialHypos() {
          ++partial_hypo_iter) {
         Hypothesis* hypo = *partial_hypo_iter;
 
-        // Incorporate the translation option scores.
-        hypo->IncorporateTransOptScores();
-
         // Evaluate with other ffs.
         std::map<int, StatefulFeatureFunction*>::iterator sfff_iter;
         for (sfff_iter = m_stateful_ffs.begin();

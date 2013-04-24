@@ -260,7 +260,6 @@ public:
   }
 
   // Added by oliver.wilson@ed.ac.uk for async lm stuff.
-  void IncorporateTransOptScores();
   void EvaluateWith(const StatefulFeatureFunction &sfff, int state_idx);
   void EvaluateWith(const StatelessFeatureFunction &slff);
 
