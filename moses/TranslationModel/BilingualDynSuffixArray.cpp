@@ -456,9 +456,9 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		itrLexW = lexicalWeights.find(iterPhrases->first);
 		CHECK(itrLexW != lexicalWeights.end());
 		Scores scoreVector(3);
-		scoreVector[0] = trg2SrcMLE; 
-		scoreVector[1] = itrLexW->second.first;
-		scoreVector[2] = 2.718; // exp(1); 
+		scoreVector[0] = std::log(trg2SrcMLE); 
+		scoreVector[1] = std::log(itrLexW->second.first);
+		scoreVector[2] = 1; //log(2.718); 
 		phraseScores.insert(make_pair(scoreVector, &iterPhrases->first));
 	}
 	// return top scoring phrases
