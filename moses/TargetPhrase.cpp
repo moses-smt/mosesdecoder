@@ -70,12 +70,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
 {
 }
 
-void TargetPhrase::SetScore(const TranslationSystem* system)
-{
-  // used when creating translations of unknown words:
-  m_fullScore = - StaticData::Instance().GetWeightWordPenalty();
-}
-
 #ifdef HAVE_PROTOBUF
 void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 {
@@ -181,8 +175,7 @@ void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
     }
   }
 
-  m_fullScore = transScore + totalFullScore + totalOOVScore
-                - (this->GetSize() * weightWP);	 // word penalty
+  m_fullScore = transScore + totalFullScore + totalOOVScore;
 }
 
 void TargetPhrase::SetScoreChart(const FeatureFunction* translationScoreProducer,

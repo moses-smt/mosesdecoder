@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -201,6 +202,11 @@ void TranslationOptionCollection::ProcessUnknownWord()
 void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,size_t sourcePos, size_t length, const Scores *inputScores)
 
 {
+  const StaticData &staticData = StaticData::Instance();
+  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  vector<float> wordPenaltyScore(1, -1);
+  vector<float> unknownScore(1, FloorScore(TransformScore(0)));
+
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -228,13 +234,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	TranslationOption *transOpt;
 	TargetPhrase targetPhrase;
 	targetPhrase.SetSourcePhrase(*m_unksrc);
-	if (inputScores != NULL) {
-		targetPhrase.SetScore(m_system,*inputScores);
-	} else {
-		targetPhrase.SetScore(m_system);
-	}
 	
-	if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit)
+	if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit)
 	{
 		// add to dictionary
 
@@ -262,9 +263,20 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		//targetPhrase.SetAlignment();
 
 	}
+
+    targetPhrase.SetScore(unknownWordPenaltyProducer, unknownScore);
+    targetPhrase.SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
+cerr << targetPhrase << endl;
+
+	if (inputScores != NULL) {
+		targetPhrase.SetScore(m_system,*inputScores);
+	}
+	cerr << targetPhrase << endl;
+
 	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
 	                              , StaticData::Instance().GetUnknownWordPenaltyProducer());
 	transOpt->CalcScore(m_system);
+	cerr << *transOpt << endl;
 	Add(transOpt);
 
 

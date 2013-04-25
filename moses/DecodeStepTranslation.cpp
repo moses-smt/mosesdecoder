@@ -116,7 +116,8 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
 
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-      outputPartialTranslOptColl.Add (system, new TranslationOption(wordsRange, targetPhrase, source) );
+      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase, source);
+      outputPartialTranslOptColl.Add (system, transOpt);
 
       VERBOSE(3,"\t" << targetPhrase << "\n");
     }

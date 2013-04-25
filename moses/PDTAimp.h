@@ -11,6 +11,7 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "Util.h"
+#include "DummyScoreProducers.h"
 #include "util/tokenize_piece.hh"
 
 namespace Moses
@@ -274,15 +275,15 @@ protected:
     targetPhrase.SetAlignmentInfo(alignmentString);
   }
 
-
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
                           Scores const& scoreVector,
                           const ScoreComponentCollection& sparseFeatures,
-			  std::vector<float> &weights,
-			  float weightWP,
-                          Phrase const* srcPtr=0) const {
-    FactorCollection &factorCollection = FactorCollection::Instance();
+  		  std::vector<float> &weights,
+  		  float weightWP,
+                          Phrase const* srcPtr) const {
+  const StaticData &staticData = StaticData::Instance();
+  FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
       util::TokenIter<util::MultiCharacter, false> word(*factorStrings[k], StaticData::Instance().GetFactorDelimiter());
@@ -292,12 +293,11 @@ protected:
       }
     }
 
+  	std::vector<float> wpScore(1, -(float)targetPhrase.GetSize());
+    targetPhrase.SetScore(staticData.GetWordPenaltyProducer(), wpScore);
     targetPhrase.SetScore(m_obj, scoreVector, sparseFeatures, weights, weightWP, *m_languageModels);
     targetPhrase.SetSourcePhrase(*srcPtr);
   }
-
-
-
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,
       std::vector<std::pair<float,size_t> >& costs) const {

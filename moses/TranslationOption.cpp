@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "LexicalReordering.h"
 #include "StaticData.h"
 #include "InputType.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -51,13 +52,8 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange	(wordsRange)
   , m_futureScore(0)
+  ,m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
 {
-  if (up) {
-		const FeatureFunction *scoreProducer = (const FeatureFunction *)up; // not sure why none of the c++ cast works
-		vector<float> score(1);
-		score[0] = FloorScore(-numeric_limits<float>::infinity());
-		m_scoreBreakdown.Assign(scoreProducer, score);
-	}
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
@@ -80,6 +76,9 @@ void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreCompon
     m_targetPhrase.MergeFactors(phrase, featuresToAdd);
   }
   m_scoreBreakdown.PlusEquals(score);
+
+  // override word penalty, otherwise it doubles up when there are >1 translation models
+  m_scoreBreakdown.Assign(StaticData::Instance().GetWordPenaltyProducer(), -m_targetPhrase.GetSize());
 }
 
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
@@ -110,13 +109,10 @@ void TranslationOption::CalcScore(const TranslationSystem* system)
   const LMList &lmList = StaticData::Instance().GetLMList();
 
   lmList.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, oovScore, &m_scoreBreakdown);
-
-  size_t phraseSize = GetTargetPhrase().GetSize();
   
   // future score
   m_futureScore = retFullScore - ngramScore + oovScore
-                  + m_scoreBreakdown.InnerProduct(StaticData::Instance().GetAllWeights()) - phraseSize *
-                  StaticData::Instance().GetWeightWordPenalty();
+                  + m_scoreBreakdown.GetWeightedScore();
 }
 
 TO_STRING_BODY(TranslationOption);
