@@ -207,7 +207,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	size_t isDigit = 0;
 	
 	const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-	const string &s = f->GetString();
+	const StringPiece &s = f->GetString();
 	bool isEpsilon = (s=="" || s==EPSILON);
 	if (StaticData::Instance().GetDropUnknown())
 	{

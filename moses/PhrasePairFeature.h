@@ -1,6 +1,7 @@
 #ifndef moses_PhrasePairFeature_h
 #define moses_PhrasePairFeature_h
 
+#include <boost/unordered_set.hpp>
 #include <stdexcept>
 
 #include "Factor.h"
@@ -13,11 +14,11 @@ namespace Moses {
   * Phrase pair feature: complete source/target phrase pair
   **/
 class PhrasePairFeature: public StatelessFeatureFunction {
-    
+    // TODO(ehasler): This should be bool ispunct[256];
     typedef std::map< char, short > CharHash;
     typedef std::vector< std::set<std::string> > DocumentVector;
        
-    std::set<std::string> m_vocabSource;
+    boost::unordered_set<std::string> m_vocabSource;
     //std::set<std::string> m_vocabTarget;
     DocumentVector m_vocabDomain;
     FactorType m_sourceFactorId;

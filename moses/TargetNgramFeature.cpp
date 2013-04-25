@@ -5,6 +5,8 @@
 #include "ScoreComponentCollection.h"
 #include "ChartHypothesis.h"
 
+#include "util/string_piece_hash.hh"
+
 namespace Moses {
 
 using namespace std;
@@ -94,9 +96,9 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
   for (size_t n = m_n; n >= smallest_n; --n) { // iterate over ngram size
   	for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
 //  		const string& curr_w = targetPhrase.GetWord(i).GetFactor(m_factorType)->GetString();
-  		const string& curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
+  		const StringPiece& curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
 
-  		if (m_vocab.size() && (m_vocab.find(curr_w) == m_vocab.end())) continue; // skip ngrams
+  		if (m_vocab.size() && (FindStringPiece(m_vocab, curr_w) == m_vocab.end())) continue; // skip ngrams
 
   		if (n > 1) {
   			// can we build an ngram at this position? ("<s> this" --> cannot build 3gram at this position)
@@ -172,8 +174,8 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
 void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream &ngram) const {
 //	const string& w = word.GetFactor(m_factorType)->GetString();
-	const string& w = word.GetString(m_factorType);
-	if (m_vocab.size() && (m_vocab.find(w) == m_vocab.end())) skip = true;
+	const StringPiece& w = word.GetString(m_factorType);
+	if (m_vocab.size() && (FindStringPiece(m_vocab, w) == m_vocab.end())) skip = true;
 	else {
 		ngram << w;
 		ngram << ":";
@@ -215,7 +217,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       	makeSuffix = true;
       
       // beginning/end of sentence symbol <s>,</s>?
-      string factorZero = word.GetString(0);
+      StringPiece factorZero = word.GetString(0);
       if (factorZero.compare("<s>") == 0)
       	prefixTerminals++;
       // end of sentence symbol </s>?
@@ -396,7 +398,7 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
     	for (size_t i=k+offset; i <= end_pos; ++i) {
       	if (i > k+offset)
       		ngram << ":";
-        string factorZero = (*contextFactor[i]).GetString(0);
+        StringPiece factorZero = (*contextFactor[i]).GetString(0);
         if (m_factorType == 0 || factorZero.compare("<s>") == 0 || factorZero.compare("</s>") == 0)
       		ngram << factorZero;
       	else
@@ -417,7 +419,7 @@ void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFacto
     for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < m_n); --start_pos) {
     	ngram << m_baseName;
     	for (size_t j=start_pos; j <= end_pos; ++j){
-    		string factorZero = (*contextFactor[j]).GetString(0);
+    		StringPiece factorZero = (*contextFactor[j]).GetString(0);
     		if (m_factorType == 0 || factorZero.compare("<s>") == 0 || factorZero.compare("</s>") == 0)
     			ngram << factorZero;
     		else
