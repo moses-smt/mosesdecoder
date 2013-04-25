@@ -210,11 +210,18 @@ class BackwardLanguageModelTest {
   
   void testEvaluate() {
 
+    FFState *nextState;
     FFState *prevState = const_cast< FFState * >(backwardLM->EmptyHypothesisState( *dummyInput ));
 
+    double p_most     = -2.360783;
+    double p_for      = -1.661813;
+    double p_licenses = -2.360783;
     double p_the      = -1.383059;
     double p_eos      = -1.457693;
 
+    double p_most_for      = -0.4526253;
+    double p_for_licenses  = -1.661557;
+    double p_licenses_the = -0.9625873;
     double p_the_eos = -1.940311;
     
 
@@ -234,15 +241,95 @@ class BackwardLanguageModelTest {
 	BOOST_CHECK( phrase.GetSize() == 1 );
       
 	float score;
-	backwardLM->Evaluate(phrase, prevState, score);
+	nextState = backwardLM->Evaluate(phrase, prevState, score);
 
+	// p(the) * p(</s> | the) / p(</s>)
 	SLOPPY_CHECK_CLOSE( (p_the + p_the_eos - p_eos), score, 0.01);
+	
+	delete prevState;
+	prevState = nextState;
 
       }
 
+      // the licenses
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
 
-    delete prevState;
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
 
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"licenses", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 1 );
+      
+	float score;
+	nextState = backwardLM->Evaluate(phrase, prevState, score);
+
+	// p(licenses) * p(licenses | the) / p(the)
+	SLOPPY_CHECK_CLOSE( (p_licenses + p_licenses_the - p_the), score, 0.01);
+	
+	delete prevState;
+	prevState = nextState;
+
+      }
+
+      // the licenses for
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
+
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"for", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 1 );
+      
+	float score;
+	nextState = backwardLM->Evaluate(phrase, prevState, score);
+
+	// p(for) * p(for | licenses) / p(licenses)
+	SLOPPY_CHECK_CLOSE( (p_for + p_for_licenses - p_licenses), score, 0.01);
+	
+	delete prevState;
+	prevState = nextState;
+
+      }
+
+      // the licenses for most
+      {
+	Phrase phrase;
+	BOOST_CHECK( phrase.GetSize() == 0 );
+
+	std::vector<FactorType> outputFactorOrder;
+	outputFactorOrder.push_back(0);
+
+	phrase.CreateFromString(
+				outputFactorOrder,
+				"most", 
+				StaticData::Instance().GetFactorDelimiter());
+
+	BOOST_CHECK( phrase.GetSize() == 1 );
+      
+	float score;
+	nextState = backwardLM->Evaluate(phrase, prevState, score);
+
+	// p(most) * p(most | for) / p(for)
+	SLOPPY_CHECK_CLOSE( (p_most + p_most_for - p_for), score, 0.01);
+	
+	delete prevState;
+	prevState = nextState;
+
+      }
+
+      delete prevState;
   }
   
   private:
