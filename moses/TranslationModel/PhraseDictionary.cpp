@@ -85,7 +85,9 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
 const TargetPhraseCollection *PhraseDictionary::
 GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 {
-  return GetTargetPhraseCollection(src.GetSubString(range));
+  Phrase phrase = src.GetSubString(range);
+  phrase.OnlyTheseFactors(m_inputFactors);
+  return GetTargetPhraseCollection(phrase);
 }
 
 }

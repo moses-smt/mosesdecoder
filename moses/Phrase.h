@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+class FactorMask;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -166,6 +167,9 @@ public:
 	{
 		return Compare(compare) == 0;
 	}
+
+	void OnlyTheseFactors(const FactorMask &factors);
+
 };
 
 inline size_t hash_value(const Phrase& phrase) {

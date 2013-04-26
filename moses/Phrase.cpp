@@ -342,6 +342,17 @@ void Phrase::FinalizeMemPool()
 {
 }
 
+void Phrase::OnlyTheseFactors(const FactorMask &factors)
+{
+  for (unsigned int currFactor = 0 ; currFactor < MAX_NUM_FACTORS ; currFactor++) {
+    if (!factors[currFactor]) {
+      for (size_t pos = 0; pos < GetSize(); ++pos) {
+        SetFactor(pos, currFactor, NULL);
+      }
+    }
+  }
+}
+
 TO_STRING_BODY(Phrase);
 
 // friend

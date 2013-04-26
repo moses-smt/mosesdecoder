@@ -266,17 +266,14 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
     targetPhrase.SetScore(unknownWordPenaltyProducer, unknownScore);
     targetPhrase.SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
-cerr << targetPhrase << endl;
 
 	if (inputScores != NULL) {
 		targetPhrase.SetScore(m_system,*inputScores);
 	}
-	cerr << targetPhrase << endl;
 
 	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
 	                              , StaticData::Instance().GetUnknownWordPenaltyProducer());
 	transOpt->CalcScore(m_system);
-	cerr << *transOpt << endl;
 	Add(transOpt);
 
 
