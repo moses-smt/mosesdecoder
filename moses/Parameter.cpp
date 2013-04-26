@@ -488,7 +488,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         ptType = "PhraseDictionaryOnDisk";
         break;
       case SCFG:
-        ptType = "PhraseDictionarySCFG";
+        ptType = "PhraseDictionaryMemory";
         break;
       case Compact:
         ptType = "PhraseDictionaryCompact";

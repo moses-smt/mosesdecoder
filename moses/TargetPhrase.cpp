@@ -236,18 +236,6 @@ void TargetPhrase::SetScore(const FeatureFunction* producer, const Scores &score
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
 }
 
-
-void TargetPhrase::SetWeights(const FeatureFunction* translationScoreProducer, const vector<float> &weightT)
-{
-  // calling this function in case of confusion net input is undefined
-  CHECK(StaticData::Instance().GetInputType()==SentenceInput);
-
-  /* one way to fix this, you have to make sure the weightT contains (in
-     addition to the usual phrase translation scaling factors) the input
-     weight factor as last element
-  */
-}
-
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
 {
   if (! IsCompatible(inputPhrase)) {

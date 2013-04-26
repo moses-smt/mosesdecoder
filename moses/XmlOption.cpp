@@ -28,6 +28,7 @@
 #include "StaticData.h"
 #include "WordsRange.h"
 #include "TargetPhrase.h"
+#include "DummyScoreProducers.h"
 
 namespace Moses
 {
@@ -341,7 +342,11 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               WordsRange range(startPos,endPos-1); // span covered by phrase
               TargetPhrase targetPhrase;
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter);
+
               targetPhrase.SetScore(scoreValue);
+
+              vector<float> wp(1, - targetPhrase.GetSize());
+              targetPhrase.SetScore(StaticData::Instance().GetWordPenaltyProducer() , wp);
               // TODO: targetPhrase.SetSourcePhrase() ?
 
               XmlOption *option = new XmlOption(range,targetPhrase);

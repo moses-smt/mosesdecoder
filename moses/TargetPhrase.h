@@ -95,9 +95,6 @@ public:
   // used by for unknown word proc in chart decoding
   void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
 
-
-  void SetWeights(const FeatureFunction*, const std::vector<float> &weightT);
-
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
   // used for translation step
 
