@@ -113,8 +113,6 @@ void TranslationOption::CalcScore(const TranslationSystem* system)
   // future score
   m_futureScore = retFullScore - ngramScore + oovScore
                   + m_scoreBreakdown.GetWeightedScore();
-
-  cerr << *this << endl;
 }
 
 TO_STRING_BODY(TranslationOption);

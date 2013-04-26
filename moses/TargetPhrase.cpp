@@ -206,8 +206,6 @@ void TargetPhrase::SetScoreChart(const FeatureFunction* translationScoreProducer
       size_t oovCount;
 
       lm.CalcScore(*this, fullScore, nGramScore, oovCount);
-      fullScore = UntransformLMScore(fullScore);
-      nGramScore = UntransformLMScore(nGramScore);
 
       if (StaticData::Instance().GetLMEnableOOVFeature()) {
         vector<float> scores(2);

@@ -26,6 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 
+using namespace std;
+
 namespace Moses
 {
 DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const DecodeStep* prev)
@@ -117,6 +119,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase, source);
+
       outputPartialTranslOptColl.Add (system, transOpt);
 
       VERBOSE(3,"\t" << targetPhrase << "\n");
