@@ -292,7 +292,7 @@ void PhraseAndFeatures(const TranslationSystem &system, const search::Applied fi
   const LanguageModel &model = **lmList.begin();
   model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
   // CalcScore transforms, but EvaluateChart doesn't.  
-  features.Assign(&model, UntransformLMScore(full));
+  features.Assign(&model, full);
 }
 
 } // namespace Incremental

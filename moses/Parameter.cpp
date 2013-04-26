@@ -631,9 +631,21 @@ void Parameter::ConvertWeightArgsDistortion()
 
 }
 
-void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
+void Parameter::ConvertWeightArgsLM()
 {
-  string oldFeatureName = "lmodel-file";
+  const string oldWeightName = "weight-l";
+  const string oldFeatureName = "lmodel-file";
+
+  bool isChartDecoding = true;
+  if (!isParamSpecified("search-algorithm") ||
+	 (GetParam("search-algorithm").size() > 0
+	   && (Trim(GetParam("search-algorithm")[0]) == "0"
+		 ||Trim(GetParam("search-algorithm")[0]) == "1"
+		  )
+	 )
+   ) {
+    isChartDecoding = false;
+  }
 
   vector<int> oovWeights;
   if (isParamSpecified("lmodel-oov-feature")) {
@@ -682,6 +694,10 @@ void Parameter::ConvertWeightArgsLM(const string &oldWeightName)
       {
         CHECK(currOldInd < weights.size());
         weightsLM[currFF] = Scan<float>(weights[currOldInd]);
+        if (isChartDecoding) {
+        	weightsLM[currFF] = UntransformLMScore(weightsLM[currFF]);
+        }
+
         ++currOldInd;
       }
 
@@ -803,7 +819,7 @@ void Parameter::ConvertWeightArgs()
   }
 
   ConvertWeightArgsWordPenalty();
-  ConvertWeightArgsLM("weight-l");
+  ConvertWeightArgsLM();
   ConvertWeightArgsSingleWeight("weight-slm", "SyntacticLM");
   ConvertWeightArgsSingleWeight("weight-u", "UnknownWordPenalty");
   ConvertWeightArgsGeneration("weight-generation", "Generation");

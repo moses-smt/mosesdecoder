@@ -69,7 +69,7 @@ protected:
   void ConvertWeightArgs();
   void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsPhraseModel(const std::string &oldWeightName);
-  void ConvertWeightArgsLM(const std::string &oldWeightName);
+  void ConvertWeightArgsLM();
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
   void ConvertWeightArgsWordPenalty();

@@ -249,7 +249,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
       // score a regular word added by the rule
       else
       {
-        updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
+        updateChartScore( &prefixScore, &finalizedScore, GetValueGivenState(contextFactor, *lmState).score, ++wordPos );
       }
     }
 
@@ -298,7 +298,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
         {
           const Word &word = prevState->GetPrefix().GetWord(prefixPos);
           ShiftOrPush(contextFactor, word);
-          updateChartScore( &prefixScore, &finalizedScore, UntransformLMScore(GetValueGivenState(contextFactor, *lmState).score), ++wordPos );
+          updateChartScore( &prefixScore, &finalizedScore, GetValueGivenState(contextFactor, *lmState).score, ++wordPos );
         }
 
         // check if we are dealing with a large sub-phrase
