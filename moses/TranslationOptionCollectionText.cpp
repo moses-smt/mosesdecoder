@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollectionText.h"
 #include "Sentence.h"
 #include "DecodeStep.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "WordsRange.h"
 

@@ -22,7 +22,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include "util/check.hh"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
@@ -667,12 +666,6 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
-    else if (feature == "PhraseDictionaryMemory") {
-      PhraseDictionaryMemory* model = new PhraseDictionaryMemory(line);
-      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
-      SetWeights(model, weights);
-      m_phraseDictionary.push_back(model);
-    }
     else if (feature == "PhraseDictionaryTreeAdaptor") {
       PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
@@ -685,7 +678,7 @@ bool StaticData::LoadData(Parameter *parameter)
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);
     }
-    else if (feature == "PhraseDictionarySCFG") {
+    else if (feature == "PhraseDictionaryMemory") {
       PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);

@@ -46,6 +46,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionList.h"
 #include "TranslationSystem.h"
 #include "ScoreComponentCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {

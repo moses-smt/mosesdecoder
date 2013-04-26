@@ -3,7 +3,6 @@
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "ConfusionNet.h"
 #include "DecodeStep.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 
 namespace Moses

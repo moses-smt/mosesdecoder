@@ -129,8 +129,11 @@ PhraseDictionaryCompact::GetTargetPhraseCollection(const Phrase &sourcePhrase) c
       (m_tableLimit == 0 || tpv->size() < m_tableLimit) ?
       tpv->end() : tpv->begin() + m_tableLimit;
     std::nth_element(tpv->begin(), nth, tpv->end(), CompareTargetPhrase());
-    for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++)
-      phraseColl->Add(new TargetPhrase(*it));
+    for(TargetPhraseVector::iterator it = tpv->begin(); it != nth; it++) {
+      TargetPhrase *tp = new TargetPhrase(*it);
+      cerr << *tp << endl;
+      phraseColl->Add(tp);
+    }
     
     // Cache phrase pair for for clean-up or retrieval with PREnc
     const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);

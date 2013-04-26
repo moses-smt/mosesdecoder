@@ -7,7 +7,7 @@
 #include "util/check.hh"
 #include "moses/TypeDef.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {

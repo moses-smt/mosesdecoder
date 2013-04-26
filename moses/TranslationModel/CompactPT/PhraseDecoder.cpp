@@ -22,6 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <deque>
 
 #include "PhraseDecoder.h"
+#include "moses/StaticData.h"
+#include "moses/DummyScoreProducers.h"
+
+using namespace std;
 
 namespace Moses
 {
@@ -435,8 +439,10 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
+    	std::vector<float> wp(1, -targetPhrase->GetSize());
+    	targetPhrase->SetScore(StaticData::Instance().GetWordPenaltyProducer(), wp);
         targetPhrase->SetScore(&m_phraseDictionary, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
-        
+
         if(m_containsAlignmentInfo)
           state = Alignment;
         else

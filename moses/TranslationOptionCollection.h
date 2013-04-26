@@ -37,7 +37,6 @@ namespace Moses
 
 class LanguageModel;
 class FactorCollection;
-class PhraseDictionaryMemory;
 class GenerationDictionary;
 class InputType;
 class LMList;

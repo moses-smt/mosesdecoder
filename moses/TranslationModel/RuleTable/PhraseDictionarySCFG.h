@@ -43,7 +43,7 @@ protected:
 
 public:
   PhraseDictionarySCFG(const std::string &line)
-      : RuleTableTrie("PhraseDictionarySCFG", line)
+      : RuleTableTrie("PhraseDictionaryMemory", line)
   {}
 
   const PhraseDictionaryNodeSCFG &GetRootNode() const { return m_collection; }
