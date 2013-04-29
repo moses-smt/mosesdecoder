@@ -256,6 +256,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , m_config
                          , weightT
                          , m_tableLimit
+                         , m_numInputScores
                          , system->GetLanguageModels()
                          , system->GetWeightWordPenalty());
     CHECK(ret);

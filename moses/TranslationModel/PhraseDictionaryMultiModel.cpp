@@ -16,6 +16,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#include "util/exception.hh"
 
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 
@@ -40,6 +41,7 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
                                   , const std::vector<std::string> &config
                                   , const vector<float> &weight
                                   , size_t tableLimit
+                                  , size_t numInputScores
                                   , const LMList &languageModels
                                   , float weightWP)
 {
@@ -75,10 +77,7 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
 
       std::string delim = ":";
       size_t delim_pos = files[i].find(delim);
-      if (delim_pos >= files[i].size()) {
-        UserMessage::Add("Phrase table must be specified in this format: Implementation:Path");
-        CHECK(false);
-      }
+      UTIL_THROW_IF(delim_pos >= files[i].size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
 
       impl = files[i].substr(0,delim_pos);
       file = files[i].substr(delim_pos+1,files[i].size());
@@ -93,20 +92,22 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
             pdm->SetNumScoreComponentMultiModel(numPtScores); //instead of complaining about inequal number of scores, silently fill up the score vector with zeroes
             pdm->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
             m_pd.push_back(pdm);
-      }
-      else if (implementation == Compact) {
+      } else if (implementation == Binary) {
+            PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, numInputScores , m_feature_load);
+            pdta->Load(input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
+            m_pd.push_back(pdta);
+      } else if (implementation == Compact) {
 #ifndef WIN32
             PhraseDictionaryCompact* pdc = new PhraseDictionaryCompact(m_numScoreComponent, implementation, m_feature_load);
             pdc->SetNumScoreComponentMultiModel(m_numScoreComponent); //for compact models, we need to pass number of log-linear components to correctly resize the score vector
             pdc->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
             m_pd.push_back(pdc);
 #else
-            CHECK(false);
+            UTIL_THROW(util::Exception, "Compact phrase table not supported in windows");
 #endif
       }
       else {
-        UserMessage::Add("phrase table type unknown to multi-model mode");
-        CHECK(false);
+        UTIL_THROW(util::Exception,"PhraseDictionaryMultiModel does not support phrase table type " << implementation);
       }
   }
 
@@ -129,7 +130,7 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
 
   CollectSufficientStatistics(src, allStats);
 
-  TargetPhraseCollection *ret;
+  TargetPhraseCollection *ret = NULL;
   if (m_mode == "interpolate") {
     ret = CreateTargetPhraseCollectionLinearInterpolation(allStats, multimodelweights);
   }
@@ -246,8 +247,7 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
   else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
     std::stringstream strme;
     strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ".";
-    UserMessage::Add(strme.str());
-    CHECK(false);
+    UTIL_THROW(util::Exception, strme.str());
   }
   else {
       raw_weights = *weights_ptr;
@@ -287,8 +287,7 @@ std::vector<float> PhraseDictionaryMultiModel::normalizeWeights(std::vector<floa
 
 ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const InputType&, const ChartCellCollectionBase&)
 {
-  CHECK(false);
-  return 0;
+  UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
 
 
