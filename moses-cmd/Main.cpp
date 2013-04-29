@@ -197,7 +197,29 @@ public:
 	string nbestFile = staticData.GetNBestFilePath();
 	if ( ! nbestFile.empty() && nbestFile!="-" && !boost::starts_with(nbestFile,"/dev/stdout") ) {
 	  boost::filesystem::path nbestPath(nbestFile);
-	  //hypergraphDir = nbestPath.parent_path().filename().native();
+
+	  // In the Boost filesystem API version 2, 
+	  //   which was the default prior to Boost 1.46,
+	  //   the filename() method returned a string.
+	  //
+	  // In the Boost filesystem API version 3,
+	  //   which is the default starting with Boost 1.46,
+	  //   the filename() method returns a path object.
+	  //
+	  // To get a string from the path object, 
+	  //   the native() method must be called.
+	  //	  hypergraphDir = nbestPath.parent_path().filename()
+	  //#if BOOST_VERSION >= 104600
+	  //	    .native()
+	  //#endif
+	  //;
+
+	  // Hopefully the following compiles under all versions of Boost.
+	  //
+	  // If this line gives you compile errors,
+	  //   contact Lane Schwartz on the Moses mailing list
+	  hypergraphDir = nbestPath.parent_path().string();
+
 	} else {
 	  stringstream hypergraphDirName;
 	  hypergraphDirName << boost::filesystem::current_path() << "/hypergraph";
