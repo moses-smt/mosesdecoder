@@ -73,7 +73,7 @@ struct SearchGraphNode {
  *   (and also the first mapping step in the factored model) is a phrase translation
  *   from the source to the target. Given a specific input sentence, only a limited
  *   number of phrase translation can be applied. For efficient lookup of the
- *   translation options later, these optuions are first collected in the function
+ *   translation options later, these options are first collected in the function
  *   CreateTranslationOption (for more information check the class
  *   TranslationOptionCollection)
  * - Create initial hypothesis: Hypothesis stack 0 contains only one empty hypothesis.

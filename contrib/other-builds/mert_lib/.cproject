@@ -30,14 +30,7 @@
 								<option id="gnu.cpp.compiler.lib.debug.option.debugging.level.1050747398" name="Debug Level" superClass="gnu.cpp.compiler.lib.debug.option.debugging.level" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1565260476" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" valueType="includePath">
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../&quot;"/>
-<<<<<<< HEAD
-<<<<<<< HEAD
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
-=======
->>>>>>> master
-=======
-									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
->>>>>>> 3013227385ac6db1aa07702c115d2c512967e461
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.1183866856" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>

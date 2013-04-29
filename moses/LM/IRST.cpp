@@ -175,7 +175,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
-      std::string s = factor->GetString();
+      std::string s = factor->GetString().as_string();
       int code = d->encode(s.c_str());
 
       //////////

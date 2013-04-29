@@ -24,11 +24,7 @@
 					<folderInfo id="cdt.managedbuild.config.gnu.macosx.exe.debug.1869657447." name="/" resourcePath="">
 						<toolChain id="cdt.managedbuild.toolchain.gnu.macosx.exe.debug.1388624938" name="MacOSX GCC" superClass="cdt.managedbuild.toolchain.gnu.macosx.exe.debug">
 							<targetPlatform binaryParser="org.eclipse.cdt.core.MachO64;org.eclipse.cdt.core.ELF" id="cdt.managedbuild.target.gnu.platform.macosx.exe.debug.1873607607" name="Debug Platform" superClass="cdt.managedbuild.target.gnu.platform.macosx.exe.debug"/>
-<<<<<<< HEAD
 							<builder buildPath="${workspace_loc:/util/Debug}" id="cdt.managedbuild.target.gnu.builder.macosx.exe.debug.2045214944" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="3" superClass="cdt.managedbuild.target.gnu.builder.macosx.exe.debug"/>
-=======
-							<builder buildPath="${workspace_loc:/util/Debug}" id="cdt.managedbuild.target.gnu.builder.macosx.exe.debug.2045214944" keepEnvironmentInBuildfile="false" managedBuildOn="true" name="Gnu Make Builder" parallelBuildOn="true" parallelizationNumber="optimal" superClass="cdt.managedbuild.target.gnu.builder.macosx.exe.debug"/>
->>>>>>> df5f0934be559418177ffa9a68c2e561918a310f
 							<tool id="cdt.managedbuild.tool.macosx.c.linker.macosx.exe.debug.589471640" name="MacOS X C Linker" superClass="cdt.managedbuild.tool.macosx.c.linker.macosx.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug.1543780089" name="MacOS X C++ Linker" superClass="cdt.managedbuild.tool.macosx.cpp.linker.macosx.exe.debug">
 								<inputType id="cdt.managedbuild.tool.macosx.cpp.linker.input.635667684" superClass="cdt.managedbuild.tool.macosx.cpp.linker.input">

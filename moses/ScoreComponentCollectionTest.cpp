@@ -103,7 +103,7 @@ BOOST_FIXTURE_TEST_CASE(sparse_feature, MockProducers)
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"third"), 0.0f);
   scc.Assign(&sparse, "first", -1.9f);
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -1.9f);
-  scc.PlusEquals(&sparse, "first", -1.9f);
+  scc.PlusEquals(&sparse, StringPiece("first"), -1.9f);
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -3.8f);
 }
 

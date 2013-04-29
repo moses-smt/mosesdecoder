@@ -93,9 +93,9 @@ public:
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
-	void AddFeature(ScoreComponentCollection* accumulator, StringHash alreadyScored,
-			std::string sourceTrigger, std::string sourceWord, std::string targetTrigger,
-			std::string targetWord) const;
+	void AddFeature(ScoreComponentCollection* accumulator,
+			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
+			StringPiece targetWord) const;
 };
 
 }
