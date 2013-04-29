@@ -24,7 +24,7 @@ VWLibraryPredictConsumerFactory::VWLibraryPredictConsumerFactory(
     const string & modelFile,
     const int poolSize)
 {
-  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile)));
+  m_VWInstance = VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile));
 
   if (poolSize < 1)
     throw runtime_error("VWLibraryPredictConsumerFactory pool size must be greater than zero!");
@@ -66,7 +66,6 @@ VWLibraryPredictConsumerFactory::~VWLibraryPredictConsumerFactory()
   }
   m_consumers.clear();
   VW::finish(*m_VWInstance);
-  delete m_VWInstance;
 }
 
 VWLibraryPredictConsumer * VWLibraryPredictConsumerFactory::Acquire()
@@ -142,7 +141,7 @@ VWLibraryConsumer::~VWLibraryConsumer()
 {
   delete m_ex;
   if (!m_sharedVwInstance)
-    delete m_VWInstance;
+    VW::finish(*m_VWInstance);
 }
 
 //
@@ -152,7 +151,7 @@ VWLibraryConsumer::~VWLibraryConsumer()
 VWLibraryTrainConsumer::VWLibraryTrainConsumer(const string &modelFile)
 {
   m_shared = true;
-  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" --csoaa_ldf m -f " + modelFile)));
+  m_VWInstance = VW::initialize(VW_INIT_OPTIONS + (" --csoaa_ldf m -f " + modelFile));
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
@@ -180,7 +179,7 @@ float VWLibraryTrainConsumer::Predict(const string &label)
 VWLibraryPredictConsumer::VWLibraryPredictConsumer(const string &modelFile)
 {
   m_shared = true;
-  m_VWInstance = new ::vw(VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile)));
+  m_VWInstance = VW::initialize(VW_INIT_OPTIONS + (" -i " + modelFile));
   m_sharedVwInstance = false;
   m_ex = new ::ezexample(m_VWInstance, false);
 }
