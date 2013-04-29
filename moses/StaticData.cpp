@@ -726,13 +726,6 @@ bool StaticData::LoadData(Parameter *parameter)
     } // for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").
   }
 
-  for (int i = 0; i < m_phraseDictionary.size(); i++)
-    cerr << m_phraseDictionary[i] << " ";
-  cerr << endl;
-  for (int i = 0; i < m_generationDictionary.size(); i++)
-      cerr << m_generationDictionary[i] << " ";
-    cerr << endl;
-
   //Add any other features here.
 
   //Load extra feature weights

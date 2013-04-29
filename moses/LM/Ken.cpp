@@ -308,7 +308,8 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
       // Non-terminal is first so we can copy instead of rescoring.  
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      ruleScore.BeginNonTerminal(prevState, prob);
       phrasePos++;
     }
   }
@@ -318,13 +319,16 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
     if (word.IsNonTerminal()) {
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));
     }
   }
 
-  accumulator->Assign(this, ruleScore.Finish());
+  float score = ruleScore.Finish();
+  score = TransformLMScore(score);
+  accumulator->Assign(this, score);
   return newState;
 }
 
