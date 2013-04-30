@@ -243,7 +243,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
-  } else if (m_implementation == MultiModel ) {
+  } else if (m_implementation == MultiModel || m_implementation == MultiModelThreadUnsafe ) {
     // memory phrase table
     VERBOSE(2,"multi-model mode" << std::endl);
     if (staticData.GetInputType() != SentenceInput) {
@@ -257,6 +257,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , weightT
                          , m_tableLimit
                          , m_numInputScores
+                         , m_implementation == MultiModel
                          , system->GetLanguageModels()
                          , system->GetWeightWordPenalty());
     CHECK(ret);
