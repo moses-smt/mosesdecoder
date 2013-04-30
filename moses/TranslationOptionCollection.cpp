@@ -155,11 +155,7 @@ void TranslationOptionCollection::Prune()
 *		Base::ProcessUnknownWord()
 *			Inherited::ProcessUnknownWord(position)
 *				Base::ProcessOneUnknownWord()
-*
-* \param decodeStepList list of decoding steps
-* \param factorCollection input sentence with all factors
 */
-
 void TranslationOptionCollection::ProcessUnknownWord()
 {
   const vector<DecodeGraph*>& decodeGraphList = m_system->GetDecodeGraphs();
@@ -356,8 +352,6 @@ void TranslationOptionCollection::CalcFutureScore()
 /** Create all possible translations from the phrase tables
  * for a particular input sentence. This implies applying all
  * translation and generation steps. Also computes future cost matrix.
- * \param decodeStepList list of decoding steps
- * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions()
 {
