@@ -197,12 +197,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
       alignString = temp;
     }
 
-    // Allow but ignore rule count.  
-    if (++pipes && ++pipes) {
-      stringstream strme;
-      strme << "Syntax error at " << ruleTable.GetFilePath() << ":" << count;
-      UserMessage::Add(strme.str());
-      abort();
+    if (++pipes) {
+      StringPiece str(*pipes); //counts
     }
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
@@ -245,6 +241,11 @@ bool RuleTableLoaderStandard::Load(FormatType format
     
     //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
     
+    if (++pipes) {
+      StringPiece sparseString(*pipes);
+      targetPhrase->SetSparseScore(&ruleTable, sparseString);
+    }
+
     targetPhrase->SetScoreChart(&ruleTable, scoreVector, weight, languageModels,wpProducer);
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);

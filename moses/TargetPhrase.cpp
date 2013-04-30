@@ -298,6 +298,11 @@ void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
 	m_alignNonTerm = alignmentInfo;
 }
 
+void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString)
+{
+  m_scoreBreakdown.Assign(translationScoreProducer, sparseString.as_string());
+}
+
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)

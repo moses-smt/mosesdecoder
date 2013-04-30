@@ -185,7 +185,6 @@ void ScoreComponentCollection::Save(const string& filename) const {
 }
 
 void ScoreComponentCollection::Assign(const FeatureFunction* sp, const string line) {
-  CHECK(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
   istringstream istr(line);
   while(istr) {
     string namestring;

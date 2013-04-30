@@ -92,6 +92,8 @@ public:
                      ,const LMList &languageModels
                      ,const WordPenaltyProducer* wpProducer);
 
+  void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
+
   // used by for unknown word proc in chart decoding
   void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
 
