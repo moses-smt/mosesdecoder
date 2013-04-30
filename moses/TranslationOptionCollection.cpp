@@ -156,8 +156,6 @@ void TranslationOptionCollection::Prune()
 *			Inherited::ProcessUnknownWord(position)
 *				Base::ProcessOneUnknownWord()
 *
-* \param decodeStepList list of decoding steps
-* \param factorCollection input sentence with all factors
 */
 
 void TranslationOptionCollection::ProcessUnknownWord()
@@ -364,8 +362,6 @@ void TranslationOptionCollection::CalcFutureScore()
 /** Create all possible translations from the phrase tables
  * for a particular input sentence. This implies applying all
  * translation and generation steps. Also computes future cost matrix.
- * \param decodeStepList list of decoding steps
- * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions()
 {
@@ -379,7 +375,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
   const vector <size_t> &decodeGraphBackoff = StaticData::Instance().GetDecodeGraphBackoff();
 
   // length of the sentence
-  size_t size = m_source.GetSize();
+  const size_t size = m_source.GetSize();
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
