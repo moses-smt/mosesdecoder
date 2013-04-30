@@ -365,7 +365,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
   const vector <size_t> &decodeGraphBackoff = m_system->GetDecodeGraphBackoff();
 
   // length of the sentence
-  size_t size = m_source.GetSize();
+  const size_t size = m_source.GetSize();
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
@@ -376,9 +376,8 @@ void TranslationOptionCollection::CreateTranslationOptions()
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
-      size_t maxSize = size - startPos; // don't go over end of sentence
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, maxSizePhrase);
+      const size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      const size_t maxSize = std::min(size - startPos, maxSizePhrase); // don't go over end of sentence
 
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {
