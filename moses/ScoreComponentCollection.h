@@ -200,7 +200,7 @@ public:
   }
 
   //For features which have an unbounded number of components
-  void SparseMinusEquals(const StringPiece &full_name, float score)
+  void SparseMinusEquals(const std::string& full_name, float score)
   {
     FName fname(full_name);
     m_scores[fname] -= score;
@@ -240,7 +240,7 @@ public:
 	}
 
   //For features which have an unbounded number of components
-  void PlusEquals(const ScoreProducer*sp, const StringPiece &name, float score)
+  void PlusEquals(const ScoreProducer*sp, const std::string& name, float score)
   {
     CHECK(sp->GetNumScoreComponents() == ScoreProducer::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
@@ -248,7 +248,7 @@ public:
   }
 
   //For features which have an unbounded number of components
-  void SparsePlusEquals(const StringPiece &full_name, float score)
+  void SparsePlusEquals(const std::string& full_name, float score)
   {
   	FName fname(full_name);
     m_scores[fname] += score;

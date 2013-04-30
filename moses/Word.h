@@ -102,7 +102,7 @@ public:
   * these debugging functions.
   */
   std::string GetString(const std::vector<FactorType> factorType,bool endWithBlank) const;
-  StringPiece  GetString(FactorType factorType) const;
+  std::string GetString(FactorType factorType) const;
   TO_STRING();
 
   //! transitive comparison of Word objects

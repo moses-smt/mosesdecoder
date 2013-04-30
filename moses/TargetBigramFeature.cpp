@@ -3,7 +3,6 @@
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
 #include "ScoreComponentCollection.h"
-#include "util/string_piece_hash.hh"
 
 namespace Moses {
 
@@ -72,26 +71,24 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
       f1 = targetPhrase.GetWord(i-1).GetFactor(m_factorType);
     }
     const Factor* f2 = targetPhrase.GetWord(i).GetFactor(m_factorType);
-    StringPiece w1(f1->GetString()), w2(f2->GetString());
+    const string& w1 = f1->GetString();
+    const string& w2 = f2->GetString();
 
     // skip bigrams if they don't belong to a given restricted vocabulary
-    if (m_vocab.size() &&
-        (FindStringPiece(m_vocab, w1) == m_vocab.end() || FindStringPiece(m_vocab, w2) == m_vocab.end())) {
+    if (m_vocab.size() && 
+        (m_vocab.find(w1) == m_vocab.end() || m_vocab.find(w2) == m_vocab.end())) {
       continue;
     }
-    string name(w1.data(), w1.size());
-    name += ':';
-    name.append(w2.data(), w2.size());
+
+    string name(w1 +":"+w2);
     accumulator->PlusEquals(this,name,1);
   }
 
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
-    StringPiece w1(targetPhrase.GetWord(targetPhrase.GetSize()-1).GetFactor(m_factorType)->GetString());
+    const string& w1 = targetPhrase.GetWord(targetPhrase.GetSize()-1).GetFactor(m_factorType)->GetString();
     const string& w2 = EOS_;
-    if (m_vocab.empty() || (FindStringPiece(m_vocab, w1) != m_vocab.end())) {
-      string name(w1.data(), w1.size());
-      name += ':';
-      name += w2;
+    if (m_vocab.empty() || (m_vocab.find(w1) != m_vocab.end())) {
+      string name(w1 +":"+w2);
       accumulator->PlusEquals(this,name,1);
     }
     return NULL;

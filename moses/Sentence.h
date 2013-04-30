@@ -37,7 +37,6 @@ class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
 
-
 /**
  * A Phrase class with an ID. Used specifically as source input so contains functionality to read
  *	from IODevice and create trans opt
@@ -57,7 +56,6 @@ private:
   NonTerminalSet m_defaultLabelSet;
 
   void InitStartEndWord();
-
 
 public:
   Sentence();
@@ -99,7 +97,7 @@ public:
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
     return m_defaultLabelSet;
   }
-
+  void split_marker_perl(std::string& str, std::string marker, std::vector<std::string> &array);
 };
 
 

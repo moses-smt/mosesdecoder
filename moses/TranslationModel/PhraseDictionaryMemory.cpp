@@ -58,6 +58,9 @@ template <class It> StringPiece GrabOrDie(It &it, const std::string &file, size_
 }
 } // namespace
 
+PhraseDictionaryMemory::PhraseDictionaryMemory(size_t numScoreComponent, PhraseDictionaryFeature* feature)
+	: PhraseDictionary(numScoreComponent,feature) {}
+
 bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
                                   , const std::vector<FactorType> &output
                                   , const string &filePath
@@ -122,17 +125,10 @@ bool PhraseDictionaryMemory::Load(const std::vector<FactorType> &input
       }
     }
     if (scv.size() != m_numScoreComponent) {
-      //PhraseDictionaryMultiModel may use input phrase dictionaries with a different number of features than it is assigned in the log-linear model;
-      //filling extra slots with zeroes to prevent error messages on the way
-      if (m_numScoreComponentMultiModel > 0 && scv.size() == m_numScoreComponentMultiModel && m_numScoreComponentMultiModel < m_numScoreComponent) {
-          scv.resize(m_numScoreComponent);
-      }
-      else {
-        stringstream strme;
-        strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
-        UserMessage::Add(strme.str());
-        abort();
-      }
+      stringstream strme;
+      strme << "Size of scoreVector != number (" <<scv.size() << "!=" <<m_numScoreComponent<<") of score components on line " << line_num;
+      UserMessage::Add(strme.str());
+      abort();
     }
 
 

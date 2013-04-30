@@ -45,7 +45,6 @@
 #endif
 
 #include "util/check.hh"
-#include "util/string_piece.hh"
 
 namespace Moses {
 	
@@ -69,13 +68,9 @@ namespace Moses {
     //A feature name can either be initialised as a pair of strings,
     //which will be concatenated with a SEP between them, or as
     //a single string, which will be used as-is.
-    FName(const StringPiece &root, const StringPiece &name) {
-      std::string assembled(root.data(), root.size());
-      assembled += SEP;
-      assembled.append(name.data(), name.size());
-      init(assembled);
-    }
-    explicit FName(const StringPiece &name)
+    explicit FName(const std::string root, const std::string name)
+		{init(root + SEP + name);}
+    explicit FName(const std::string& name)
 		{init(name);}
     
     const std::string& name() const;
@@ -94,7 +89,7 @@ namespace Moses {
     static void eraseId(size_t id);
         
   private:
-    void init(const StringPiece& name);
+    void init(const std::string& name);
     size_t m_id;
 #ifdef WITH_THREADS
     //reader-writer lock

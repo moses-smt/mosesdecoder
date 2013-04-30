@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "TypeDef.h"
 #include "Util.h"
-#include "util/string_piece.hh"
 
 namespace Moses
 {
@@ -45,9 +44,8 @@ class Factor
   friend class FactorCollection;
   friend struct FactorFriend;
 
-  // FactorCollection writes here.
-  // This is mutable so the pointer can be changed to pool-backed memory.
-  mutable StringPiece m_string;
+  // FactorCollection writes here.  
+  std::string m_string;
   size_t			m_id;
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
@@ -61,7 +59,7 @@ class Factor
 
 public:
   //! original string representation of the factor
-  StringPiece GetString() const {
+  inline const std::string &GetString() const {
     return m_string;
   }
   //! contiguous ID

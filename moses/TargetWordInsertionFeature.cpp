@@ -6,7 +6,6 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
-#include "util/string_piece_hash.hh"
 
 namespace Moses {
 
@@ -57,7 +56,12 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
   // handle special case: unknown words (they have no word alignment)
   size_t targetLength = targetPhrase.GetSize();
   size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
-  if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
+  if (targetLength == 1 && sourceLength == 1) {
+		const Factor* f1 = targetPhrase.GetWord(0).GetFactor(1);
+		if (f1 && f1->GetString().compare(UNKNOWN_FACTOR) == 0) {
+			return;
+		}
+  }
 
   // flag aligned words
   bool aligned[16];
@@ -74,9 +78,9 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
     if (!aligned[i]) {
       Word w = targetPhrase.GetWord(i);
       if (!w.IsNonTerminal()) {
-    	const StringPiece &word = w.GetFactor(m_factorType)->GetString();
+    	const string &word = w.GetFactor(m_factorType)->GetString();
     	if (word != "<s>" && word != "</s>") {
-      	  if (!m_unrestricted && FindStringPiece(m_vocab, word) == m_vocab.end()) {
+      	  if (!m_unrestricted && m_vocab.find( word ) == m_vocab.end()) {
       		accumulator->PlusEquals(this,"OTHER",1);
       	  }
       	  else {

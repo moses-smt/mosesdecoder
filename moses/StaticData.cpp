@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
 #include "DummyScoreProducers.h"
+#include "CacheBasedLanguageModel.h"
+#include "OnlineLearner.h"
 #include "StaticData.h"
 #include "Util.h"
 #include "FactorCollection.h"
@@ -89,6 +91,8 @@ StaticData::StaticData()
   :m_targetBigramFeature(NULL)
   ,m_phraseBoundaryFeature(NULL)
   ,m_phraseLengthFeature(NULL)
+  ,m_CacheBasedLanguageModel(NULL)
+  ,m_onlinelearner(NULL)
   ,m_targetWordInsertionFeature(NULL)
   ,m_sourceWordDeletionFeature(NULL)
   ,m_numLinkParams(1)
@@ -162,6 +166,10 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
+  if(m_parameter->GetParam("sort-word-alignment").size()) {
+    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
+  }
+  
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -171,23 +179,10 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
   //word-to-word alignment
-  // alignments
-  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
-  if (m_PrintAlignmentInfo) {
-    m_needAlignmentInfo = true;
-  }
-
-  if(m_parameter->GetParam("sort-word-alignment").size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
-  }
-
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
   if (m_PrintAlignmentInfoNbest) {
     m_needAlignmentInfo = true;
   }
-
-  SetBooleanParameter( &m_PrintPassthroughInformation, "print-passthrough", false );
-  SetBooleanParameter( &m_PrintPassthroughInformationInNBest, "print-passthrough-in-n-best", false );
 
   if (m_parameter->GetParam("alignment-output-file").size() > 0) {
     m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
@@ -244,19 +239,8 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_outputSearchGraph = true;
     m_outputSearchGraphExtended = true;
-  } else {
+  } else
     m_outputSearchGraph = false;
-  }
-  if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
-    m_outputSearchGraphSLF = true;
-  } else {
-    m_outputSearchGraphSLF = false;
-  }
-  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
-    m_outputSearchGraphHypergraph = true;
-  } else {
-    m_outputSearchGraphHypergraph = false;
-  }
 #ifdef HAVE_PROTOBUF
   if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {
     if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
@@ -330,6 +314,9 @@ bool StaticData::LoadData(Parameter *parameter)
   //Disable discarding
   SetBooleanParameter(&m_disableDiscarding, "disable-discarding", false);
 
+  //Print Translation Options
+  SetBooleanParameter( &m_printTranslationOptions, "print-translation-option", false );
+
   //Print All Derivations
   SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
 
@@ -351,11 +338,9 @@ bool StaticData::LoadData(Parameter *parameter)
     SetWeight(m_wordPenaltyProducers.back(), weightWordPenalty);
   }
 
-  float weightUnknownWord				= (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
+  float weightUnknownWord = (m_parameter->GetParam("weight-u").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-u")[0]) : 1;
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
-
-  m_multimodelweights = Scan<float>( m_parameter->GetParam("weight-t-multimodel") );
 
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
@@ -429,6 +414,11 @@ bool StaticData::LoadData(Parameter *parameter)
     exit(1);
   }
   
+  // cache base TM
+  PhraseDictionaryCacheIndex = -1; //dummy value to consider as undefined
+  PhraseDictionaryCacheScoreType = 1000; //dummy value to consider as undefined
+  PhraseDictionaryCacheMaxAge = 1000; //default value for maximum age of the entries in the cache-based- translation model
+
   //mira training
   SetBooleanParameter( &m_mira, "mira", false );
 
@@ -566,6 +556,8 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!LoadGlobalLexicalModel()) return false;
   if (!LoadGlobalLexicalModelUnlimited()) return false;
   if (!LoadDecodeGraphs()) return false;
+  if (!LoadCacheBasedLanguageModel()) return false;
+  if (!LoadOnlineLearningModel()) return false;
   if (!LoadReferences()) return  false;
   if (!LoadDiscrimLMFeature()) return false;
   if (!LoadPhrasePairFeature()) return false;
@@ -724,6 +716,15 @@ bool StaticData::LoadData(Parameter *parameter)
       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_syntacticLanguageModel);
     }
 #endif
+    if (m_CacheBasedLanguageModel != NULL) {
+       m_translationSystems.find(config[0])->second.AddFeatureFunction(m_CacheBasedLanguageModel);
+       m_translationSystems.find(config[0])->second.SetCacheBasedLanguageModel(m_CacheBasedLanguageModel);
+    }
+    if (m_onlinelearner != NULL) {
+    	cerr<<"Adding Online learning Model from StaticData::LoadData\n";
+    	m_translationSystems.find(config[0])->second.AddFeatureFunction(m_onlinelearner);
+    	m_translationSystems.find(config[0])->second.SetOnlineLearningModel(m_onlinelearner);
+    }
     for (size_t i = 0; i < m_sparsePhraseDictionary.size(); ++i) {
       if (m_sparsePhraseDictionary[i]) {
         m_translationSystems.find(config[0])->second.AddFeatureFunction(m_sparsePhraseDictionary[i]);
@@ -859,6 +860,14 @@ StaticData::~StaticData()
 
   // small score producers
   delete m_unknownWordPenaltyProducer;
+
+  // delete Cache-Based Language Model
+  if (m_CacheBasedLanguageModel) {// check if CacheBasedLanguageModel is used
+    delete m_CacheBasedLanguageModel;
+  }
+  if(m_onlinelearner){
+	  delete m_onlinelearner;
+  }
   delete m_targetBigramFeature;
   for (size_t i=0; i < m_targetNgramFeatures.size(); ++i)
   	delete m_targetNgramFeatures[i];
@@ -1284,8 +1293,25 @@ bool StaticData::LoadPhraseTables()
         token[1] = token[0];
         token[0] = "1";
         implementation = Binary;
-      } else
+      } else {
         implementation = (PhraseTableImplementation) Scan<int>(token[0]);
+			}
+      if (implementation == CacheMemory)
+      {
+    	  if (PhraseDictionaryCacheIndex != -1)
+    	  {
+    		  UserMessage::Add("Only one PhraseDictionayCache is allowed");
+    		  CHECK(false);
+    	  }
+    	  PhraseDictionaryCacheIndex = index;
+          if (m_parameter->GetParam("cbtm-score-type").size() > 0) {
+                PhraseDictionaryCacheScoreType = Scan<size_t>(m_parameter->GetParam("cbtm-score-type")[0]);
+          }
+          if (m_parameter->GetParam("cbtm-imax-age").size() > 0) {
+                PhraseDictionaryCacheMaxAge = Scan<size_t>(m_parameter->GetParam("cbtm-max-age")[0]);
+          }
+
+      }
 
       CHECK(token.size() >= 5);
       //characteristics of the phrase table
@@ -1356,6 +1382,12 @@ bool StaticData::LoadPhraseTables()
       weightAllOffset += numScoreComponent;
       numScoreComponent += tableInputScores;
 
+      string targetPath, alignmentsFile;
+      if (implementation == SuffixArray) {
+        targetPath		= token[5];
+        alignmentsFile= token[6];
+      }
+
       CHECK(numScoreComponent==weight.size());
 
 
@@ -1384,14 +1416,11 @@ bool StaticData::LoadPhraseTables()
         , weight
        	, currDict
         , maxTargetPhrase[index]
-        , token);
+        , targetPath, alignmentsFile);
 
       m_phraseDictionary.push_back(pdf);
 
       SetWeights(m_phraseDictionary.back(),weight);
-
-
-
 
       index++;
     }
@@ -1402,6 +1431,69 @@ bool StaticData::LoadPhraseTables()
   return true;
 }
 
+
+OnlineLearner* StaticData::GetOnlineLearningModel() const
+{
+	return m_onlinelearner;
+}
+
+int StaticData::GetNumIterationsOnlineLearning() const
+{
+    const int numIter = (m_parameter->GetParam("numIterations").size() > 0) ?
+						Scan<int>(m_parameter->GetParam("numIterations")[0]) : 0;
+		return numIter;
+}
+
+bool StaticData::LoadOnlineLearningModel()
+{
+	PrintUserTime("Loading Online Learning Model");
+	const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
+	const float learningrate = (m_parameter->GetParam("learningrate").size() > 0) ?
+			Scan<float>(m_parameter->GetParam("learningrate")[0]) : 0.8;
+	if(weights.size()>1)
+	{
+		UserMessage::Add("Can only specify one weight for the online learning feature");
+		return false;
+	}
+	else if(weights.size()==1)
+	{
+		m_onlinelearner = new OnlineLearner(learningrate);
+		SetWeight(m_onlinelearner, weights[0]);
+		IFVERBOSE(1)
+		PrintUserTime("Adding online learning feature");
+	}
+	return true;
+}
+bool StaticData::LoadCacheBasedLanguageModel()
+{
+	const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-cblm"));
+	const vector<std::string> &files = m_parameter->GetParam("cblm-file");
+//	const vector<size_t> &types = Scan<size_t>(m_parameter->GetParam("cblm-type"));
+	const size_t q_type = (m_parameter->GetParam("cblm-query-type").size() > 0) ?
+                      Scan<size_t>(m_parameter->GetParam("cblm-query-type")[0]) : 0;
+	const size_t s_type = (m_parameter->GetParam("cblm-score-type").size() > 0) ?
+                      Scan<size_t>(m_parameter->GetParam("cblm-score-type")[0]) : 0;
+        const size_t age = (m_parameter->GetParam("cblm-max-age").size() > 0) ?
+                      Scan<size_t>(m_parameter->GetParam("cblm-max-age")[0]) : 1000;
+
+	
+	if (weights.size() > 1) {
+		UserMessage::Add("Can only specify one weight for the cache-based LM feature");
+		return false;
+	}
+	
+	if (weights.size() == 1) // check if feature is used
+	{
+		//m_CacheBasedLanguageModel = new CacheBasedLanguageModel(files, q_type, s_type); // create the feature
+		m_CacheBasedLanguageModel = new CacheBasedLanguageModel(files, q_type, s_type, age); // create the feature
+		SetWeight(m_CacheBasedLanguageModel,weights[0]);
+		
+		IFVERBOSE(1)
+		PrintUserTime("Finished loading cache-based LM");
+	}
+	return true;
+}
+	
 void StaticData::LoadNonTerminals()
 {
   string defaultNonTerminals;

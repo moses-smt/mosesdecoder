@@ -115,6 +115,7 @@ Hypothesis::~Hypothesis()
   if (m_arcList) {
     ArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
+//      cerr<<"REMOVING destructor : "<<(*iter)->ToString()<<"\n";
       FREEHYPO(*iter);
     }
     m_arcList->clear();
@@ -462,7 +463,7 @@ void Hypothesis::CleanupArcList()
    */
   const StaticData &staticData = StaticData::Instance();
   size_t nBestSize = staticData.GetNBestSize();
-  bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph() || staticData.GetOutputSearchGraphSLF() || staticData.GetOutputSearchGraphHypergraph() || staticData.UseLatticeMBR() ;
+  bool distinctNBest = staticData.GetDistinctNBest() || staticData.UseMBR() || staticData.GetOutputSearchGraph() || staticData.UseLatticeMBR() ;
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
@@ -475,6 +476,7 @@ void Hypothesis::CleanupArcList()
     ArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
       Hypothesis *arc = *iter;
+//      cerr<<"REMOVING CleanupArcList : "<<arc->ToString()<<"\n";
       FREEHYPO(arc);
     }
     m_arcList->erase(m_arcList->begin() + nBestSize

@@ -13,8 +13,6 @@
 #include "ChartHypothesis.h"
 #include "ChartManager.h"
 
-#include <boost/unordered_set.hpp>
-
 namespace Moses
 {
 
@@ -215,7 +213,7 @@ public:
 private:
   FactorType m_factorType;
   Word m_bos;
-  boost::unordered_set<std::string> m_vocab;
+	std::set<std::string> m_vocab;
 	size_t m_n;
 	bool m_lower_ngrams;
 

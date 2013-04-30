@@ -56,7 +56,7 @@ protected:
   long m_segId;
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
-  std::string m_passthrough;
+
 
 public:
 
@@ -64,6 +64,7 @@ public:
   std::vector<bool> m_sourceCompleted;
   std::string m_initialTargetPhrase;
   size_t m_frontSpanCoveredLength;
+  std::string m_postedited;
   // how many words from the beginning are covered
 
   InputType(long translationId = 0);
@@ -76,6 +77,9 @@ public:
   }
   void SetTranslationId(long translationId) {
     m_translationId = translationId;
+  }
+  void SetPostEditedSentence(std::string s) {
+	  m_postedited = s;
   }
   long GetDocumentId() const {
     return m_documentId;
@@ -113,12 +117,6 @@ public:
   void SetTextType(std::string type) {
     m_textType = type;
   }  
-  std::string GetPassthroughInformation() const {
-    return m_passthrough;
-  }
-  void SetPassthroughInformation(std::string &passthrough) {
-    m_passthrough = passthrough;
-  }
   //! returns the number of words moved
   virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 

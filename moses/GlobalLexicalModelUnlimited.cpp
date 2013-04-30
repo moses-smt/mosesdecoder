@@ -3,8 +3,6 @@
 #include "StaticData.h"
 #include "InputFileStream.h"
 #include "UserMessage.h"
-#include "util/string_piece_hash.hh"
-#include "util/murmur_hash.hh"
 
 using namespace std;
 
@@ -59,11 +57,11 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
 	const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
 
 	for(int targetIndex = 0; targetIndex < targetPhrase.GetSize(); targetIndex++ ) {
-  	StringPiece targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
+  	string targetString = targetPhrase.GetWord(targetIndex).GetString(0); // TODO: change for other factors
 
   	if (m_ignorePunctuation) {
   		// check if first char is punctuation
-  		char firstChar = targetString[0];
+  		char firstChar = targetString.at(0);
   		CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
   		if(charIterator != m_punctuationHash.end())
   			continue;
@@ -78,24 +76,23 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   		accumulator->SparsePlusEquals(feature.str(), 1);
   	}
 
-    boost::unordered_set<uint64_t> alreadyScored;
+  	StringHash alreadyScored;
   	for(int sourceIndex = 0; sourceIndex < input.GetSize(); sourceIndex++ ) {
-  		const StringPiece sourceString = input.GetWord(sourceIndex).GetString(0); // TODO: change for other factors
+  		string sourceString = input.GetWord(sourceIndex).GetString(0); // TODO: change for other factors
 
   		if (m_ignorePunctuation) {
   			// check if first char is punctuation
-  			char firstChar = sourceString[0];
+  			char firstChar = sourceString.at(0);
   			CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
   			if(charIterator != m_punctuationHash.end()) 
 			  continue;			
   		}
-      const uint64_t sourceHash = util::MurmurHashNative(sourceString.data(), sourceString.size());
 
-  		if (alreadyScored.find(sourceHash) == alreadyScored.end()) {
+  		if ( alreadyScored.find(sourceString) == alreadyScored.end()) {
   			bool sourceExists, targetExists;
   			if (!m_unrestricted) {
-  				sourceExists = FindStringPiece(m_vocabSource, sourceString) != m_vocabSource.end();
-  			  targetExists = FindStringPiece(m_vocabTarget, targetString) != m_vocabTarget.end();
+  				sourceExists = m_vocabSource.find( sourceString ) != m_vocabSource.end();
+  			  targetExists = m_vocabTarget.find( targetString) != m_vocabTarget.end();
   			}
 
   			// no feature if vocab is in use and both words are not in restricted vocabularies
@@ -110,15 +107,15 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
 	  					feature << "<s>,";
 	  					feature << sourceString;
 	  					accumulator->SparsePlusEquals(feature.str(), 1);
-	  					alreadyScored.insert(sourceHash);
+	  					alreadyScored[sourceString] = 1;
   					}
 
   					// add source words to the right of current source word as context
   					for(int contextIndex = sourceIndex+1; contextIndex < input.GetSize(); contextIndex++ ) {
-  						StringPiece contextString = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  						string contextString = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
   						bool contextExists;
   						if (!m_unrestricted)
-  							contextExists = FindStringPiece(m_vocabSource, contextString ) != m_vocabSource.end();
+  							contextExists = m_vocabSource.find( contextString ) != m_vocabSource.end();
 
   						if (m_unrestricted || contextExists) {
   	  					stringstream feature;
@@ -129,7 +126,7 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   	  					feature << ",";
   	  					feature << contextString;
   	  					accumulator->SparsePlusEquals(feature.str(), 1);
-  	  					alreadyScored.insert(sourceHash);
+  	  					alreadyScored[sourceString] = 1;
   						}
   					}
   				}
@@ -138,7 +135,7 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   					int globalTargetIndex = cur_hypo.GetSize() - targetPhrase.GetSize() + targetIndex;
 
   					// 1) source-target pair, trigger source word (can be discont.) and adjacent target word (bigram)
-						StringPiece targetContext;
+						string targetContext;
 						if (globalTargetIndex > 0)
 							targetContext = cur_hypo.GetWord(globalTargetIndex-1).GetString(0); // TODO: change for other factors
 						else
@@ -146,23 +143,23 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
 
   					if (sourceIndex == 0) {
   						string sourceTrigger = "<s>";
-  						AddFeature(accumulator, sourceTrigger, sourceString,
+  						AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
   						  										targetContext, targetString);
   					}
   					else
   						for(int contextIndex = sourceIndex-1; contextIndex >= 0; contextIndex-- ) {
-  							StringPiece sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  							string sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
   							bool sourceTriggerExists = false;
   							if (!m_unrestricted)
-  								sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger) != m_vocabSource.end();
+  								sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
 
   							if (m_unrestricted || sourceTriggerExists)
-  								AddFeature(accumulator, sourceTrigger, sourceString,
+  								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
   										targetContext, targetString);
   						}
 
   					// 2) source-target pair, adjacent source word (bigram) and trigger target word (can be discont.)
-  					StringPiece sourceContext;
+  					string sourceContext;
   					if (sourceIndex-1 >= 0)
   						sourceContext = input.GetWord(sourceIndex-1).GetString(0); // TODO: change for other factors
   					else
@@ -170,18 +167,18 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
 
   					if (globalTargetIndex == 0) {
 	  					string targetTrigger = "<s>";
-	  					AddFeature(accumulator, sourceContext, sourceString,
+	  					AddFeature(accumulator, alreadyScored, sourceContext, sourceString,
 	  					  										targetTrigger, targetString);
   					}
   					else
   						for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-  							StringPiece targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+  							string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
   							bool targetTriggerExists = false;
   							if (!m_unrestricted)
-  								targetTriggerExists = FindStringPiece(m_vocabTarget, targetTrigger) != m_vocabTarget.end();
+  								targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
 
   							if (m_unrestricted || targetTriggerExists)
-  								AddFeature(accumulator, sourceContext, sourceString,
+  								AddFeature(accumulator, alreadyScored, sourceContext, sourceString,
   										targetTrigger, targetString);
   						}
   				}
@@ -198,19 +195,19 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   							bool targetTriggerExists = true;
 
   							if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
-  								AddFeature(accumulator, sourceTrigger, sourceString,
+  								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
   										targetTrigger, targetString);
   						}
   						else {
   							// iterate backwards over target
   							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-  								StringPiece targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+  								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
   								bool targetTriggerExists = false;
   								if (!m_unrestricted)
-  									targetTriggerExists = FindStringPiece(m_vocabTarget, targetTrigger) != m_vocabTarget.end();
+  									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
 
   								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
-  									AddFeature(accumulator, sourceTrigger, sourceString,
+  									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
   											targetTrigger, targetString);
   							}
   						}
@@ -219,29 +216,29 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   					else {
   						// iterate backwards over source
   						for(int contextIndex = sourceIndex-1; contextIndex >= 0; contextIndex-- ) {
-  							StringPiece sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
+  							string sourceTrigger = input.GetWord(contextIndex).GetString(0); // TODO: change for other factors
   							bool sourceTriggerExists = false;
   							if (!m_unrestricted)
-  								sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger) != m_vocabSource.end();
+  								sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
 
     						if (globalTargetIndex == 0) {
     							string targetTrigger = "<s>";
     							bool targetTriggerExists = true;
 
     							if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
-    								AddFeature(accumulator, sourceTrigger, sourceString,
+    								AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
     										targetTrigger, targetString);
     						}
     						else {
     							// iterate backwards over target
     							for(int globalContextIndex = globalTargetIndex-1; globalContextIndex >= 0; globalContextIndex-- ) {
-    								StringPiece targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
+    								string targetTrigger = cur_hypo.GetWord(globalContextIndex).GetString(0); // TODO: change for other factors
     								bool targetTriggerExists = false;
     								if (!m_unrestricted)
-    									targetTriggerExists = FindStringPiece(m_vocabTarget, targetTrigger) != m_vocabTarget.end();
+    									targetTriggerExists = m_vocabTarget.find( targetTrigger ) != m_vocabTarget.end();
 
     								if (m_unrestricted || (sourceTriggerExists && targetTriggerExists))
-    									AddFeature(accumulator, sourceTrigger, sourceString,
+    									AddFeature(accumulator, alreadyScored, sourceTrigger, sourceString,
     											targetTrigger, targetString);
     							}
     						}
@@ -255,7 +252,8 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
   					feature << "~";
   					feature << sourceString;
   					accumulator->SparsePlusEquals(feature.str(), 1);
-  					alreadyScored.insert(sourceHash);
+  					//alreadyScored.insert( &inputWord );
+  					alreadyScored[sourceString] = 1;
   				}
   			}
   		}
@@ -264,8 +262,8 @@ void GlobalLexicalModelUnlimited::Evaluate(const Hypothesis& cur_hypo, ScoreComp
 }
 
 void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulator,
-		StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
-		StringPiece targetWord) const {
+		StringHash alreadyScored, string sourceTrigger, string sourceWord, string targetTrigger,
+		string targetWord) const {
 	stringstream feature;
 	feature << "glm_";
 	feature << targetTrigger;
@@ -276,8 +274,7 @@ void GlobalLexicalModelUnlimited::AddFeature(ScoreComponentCollection* accumulat
 	feature << ",";
 	feature << sourceWord;
 	accumulator->SparsePlusEquals(feature.str(), 1);
-  // BUG(ehasler): this did nothing because alreadyScored was passed by value not reference.
-	//alreadyScored[sourceWord] = 1;
+	alreadyScored[sourceWord] = 1;
 }
 
 }

@@ -35,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "Util.h"
 #include "Timer.h"
-#include "util/exception.hh"
 #include "util/file.hh"
 
 using namespace std;
@@ -66,8 +65,6 @@ const std::string ToLower(const std::string& str)
   return lc;
 }
 
-class BoolValueException : public util::Exception {};
-
 template<>
 bool Scan<bool>(const std::string &input)
 {
@@ -76,7 +73,8 @@ bool Scan<bool>(const std::string &input)
     return true;
   if (lc == "no" || lc == "n" || lc =="false" || lc == "0")
     return false;
-  UTIL_THROW(BoolValueException, "Could not interpret " << input << " as a boolean.  After lowercasing, valid values are yes, y, true, 1, no, n, false, and 0.");
+  TRACE_ERR( "Scan<bool>: didn't understand '" << lc << "', returning false" << std::endl);
+  return false;
 }
 
 bool FileExists(const std::string& filePath)
@@ -164,43 +162,6 @@ std::map<std::string, std::string> ProcessAndStripSGML(std::string &line)
       seg = Trim(seg);
       meta[label] = val;
     }
-  }
-  return meta;
-}
-
-std::string PassthroughSGML(std::string &line, const std::string tagName, const std::string& lbrackStr, const std::string& rbrackStr)
-{
-  string lbrack = lbrackStr; // = "<";
-  string rbrack = rbrackStr; // = ">";
-
-  std::string meta = "";
-
-  std::string lline = ToLower(line);
-  size_t open = lline.find(lbrack+tagName);
-  //check whether the tag exists; if not return the empty string
-  if (open == std::string::npos) return meta;
-
-  size_t close = lline.find(rbrack, open);
-  //check whether the tag is closed with '/>'; if not return the empty string
-  if (close == std::string::npos)
-  {
-    TRACE_ERR("PassthroughSGML error: the <passthrough info/> tag does not end properly\n");
-    return meta;
-  }
-  // extract the tag
-  std::string tmp = line.substr(open, close - open + 1);
-  meta = line.substr(open, close - open + 1);
-
-  // strip the tag from the line
-  line = line.substr(0, open) + line.substr(close + 1, std::string::npos);
-
-  TRACE_ERR("The input contains a <passthrough info/> tag:" << meta << std::endl);
-
-  lline = ToLower(line);
-  open = lline.find(lbrack+tagName);
-  if (open != std::string::npos)
-  {
-    TRACE_ERR("PassthroughSGML error: there are two <passthrough> tags\n");
   }
   return meta;
 }

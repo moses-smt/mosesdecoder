@@ -49,7 +49,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-    isDigit = f->GetString().find_first_of("0123456789");
+    const string &s = f->GetString();
+    isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
     else
@@ -90,8 +91,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetScore(m_system.GetWordPenaltyProducer(), wordPenaltyScore);
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
-      targetPhrase->SetAlignmentInfo("0-0");
-
+      
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     } // for (iterLHS
@@ -114,7 +114,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
-
+      
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     }

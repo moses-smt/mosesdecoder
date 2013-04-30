@@ -5,7 +5,7 @@
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
 #include "TranslationOption.h"
-#include "util/string_piece_hash.hh"
+#include <boost/algorithm/string.hpp>
 
 using namespace std;
 
@@ -182,10 +182,10 @@ void PhrasePairFeature::Evaluate(
     
     // range over source words to get context
     for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
-      StringPiece sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
+      string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_sourceFactorId)->GetString();
       if (m_ignorePunctuation) {
 	// check if trigger is punctuation
-	char firstChar = sourceTrigger.data()[0];
+	char firstChar = sourceTrigger.at(0);
 	CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
 	if(charIterator != m_punctuationHash.end())
 	  continue;
@@ -193,7 +193,7 @@ void PhrasePairFeature::Evaluate(
       
       bool sourceTriggerExists = false;
       if (!m_unrestricted)
-	sourceTriggerExists = (FindStringPiece(m_vocabSource, sourceTrigger) != m_vocabSource.end());
+	sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
       
       if (m_unrestricted || sourceTriggerExists) {
 	ostringstream namestr;

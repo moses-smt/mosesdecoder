@@ -100,7 +100,6 @@ Parameter::Parameter()
 	AddParam("weight-w", "w", "weight for word penalty");
 	AddParam("weight-u", "u", "weight for unknown word penalty");
 	AddParam("weight-e", "e", "weight for word deletion"); 
-  AddParam("weight-t-multimodel", "tmo", "weights for multi-model mode");
   AddParam("weight-file", "wf", "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
 	AddParam("output-factors", "list if factors in the output");
 	AddParam("cache-path", "?");
@@ -108,7 +107,6 @@ Parameter::Parameter()
 	AddParam("monotone-at-punctuation", "mp", "do not reorder over punctuation");
 	AddParam("distortion-file", "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
  	AddParam("distortion", "configurations for each factorized/lexicalized reordering model.");
- 	AddParam("early-distortion-cost", "edc", "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
 	AddParam("xml-input", "xi", "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'ignore'");
   AddParam("xml-brackets", "xb", "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode" );
  	AddParam("minimum-bayes-risk", "mbr", "use miminum Bayes risk to determine best translation");
@@ -132,8 +130,6 @@ Parameter::Parameter()
   AddParam("output-search-graph", "osg", "Output connected hypotheses of search into specified filename");
   AddParam("output-search-graph-extended", "osgx", "Output connected hypotheses of search into specified filename, in extended format");
   AddParam("unpruned-search-graph", "usg", "When outputting chart search graph, do not exclude dead ends. Note: stack pruning may have eliminated some hypotheses");
-  AddParam("output-search-graph-slf", "slf", "Output connected hypotheses of search into specified directory, one file per sentence, in HTK standard lattice format (SLF)");
-  AddParam("output-search-graph-hypergraph", "Output connected hypotheses of search into specified directory, one file per sentence, in a hypergraph format (see Kenneth Heafield's lazy hypergraph decoder)");
   AddParam("include-lhs-in-search-graph", "lhssg", "When outputting chart search graph, include the label of the LHS of the rule (useful when using syntax)");
 #ifdef HAVE_PROTOBUF
   AddParam("output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
@@ -181,17 +177,26 @@ Parameter::Parameter()
   AddParam("minlexr-memory", "Load lexical reordering table in minlexr format into memory");                                          
   AddParam("minphr-memory", "Load phrase table in minphr format into memory");
 
-  AddParam("print-alignment-info", "Output word-to-word alignment to standard out, separated from translation by |||. Word-to-word alignments are takne from the phrase table if any. Default is false");
   AddParam("include-segmentation-in-n-best", "include phrasal segmentation in the n-best list. default is false");
-  AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  AddParam("print-alignment-info-in-n-best", "Include word-to-word alignment in the n-best list. Word-to-word alignments are taken from the phrase table if any. Default is false");
   AddParam("alignment-output-file", "print output word alignments into given file");
   AddParam("sort-word-alignment", "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
 
   AddParam("report-segmentation", "t", "report phrase segmentation in the output");
-  AddParam("print-id", "prefix translations with id. Default if false");
-  AddParam("print-passthrough", "output the sgml tag <passthrough> without any computation on that. Default is false");
-  AddParam("print-passthrough-in-n-best", "output the sgml tag <passthrough> without any computation on that in each entry of the n-best-list. Default is false");
 
+  AddParam("cblm-file", "location of the initialization data for cache-based language model");
+  AddParam("weight-cblm", "cblm", "weight for cache-based language model");
+  AddParam("cblm-query-type", "way of querying the cache-based Language model: 0=looks for all sub-string, 1=look for the whole string; default is 0");
+  AddParam("cblm-score-type", "scoring type for the cache-based language model: 0=hyperbola, 1=power, 2=negative exponential, 3=cosine, 10=hyperbola_reward, 11=power_reward, 12=negative exponential_reward; default is 0");
+  AddParam("cblm-max-age", "maximum age for entries in the cache-based language model; default is 1000");
+  AddParam("cbtm-score-type", "scoring type for the cache-based translation model: 0=hyperbola, 1=power, 2=negative exponential, 3=cosine, 10=hyperbola_reward, 11=power_reward, 12=negative exponential_reward; default is 0");
+  AddParam("cbtm-max-age", "maximum age for entries in the cache-based translation model; default is 1000");
+
+  AddParam("print-translation-option", "pto", "print translation option (without setting verbosity)");
+  AddParam("print-id", "prefix translations with id. Default if false");
+  AddParam("learningrate", "online learning rate");
+  AddParam("weight-ol", "ol", "weight for online learning feature");
+  AddParam("numIterations", "number of iterations for online learning feature");
 
 }
 

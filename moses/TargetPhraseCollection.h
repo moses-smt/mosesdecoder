@@ -58,6 +58,7 @@ public:
   }
 
   const std::vector<TargetPhrase*> &GetCollection() const { return m_collection; }
+  TargetPhrase* GetTargetPhrase(size_t pos) const { return m_collection[pos]; }
 
   //! divide collection into 2 buckets using std::nth_element, the top & bottom according to table limit
   void NthElement(size_t tableLimit);

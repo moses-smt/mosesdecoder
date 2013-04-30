@@ -27,6 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DummyScoreProducers.h"
 #include "GlobalLexicalModel.h"
 #include "GlobalLexicalModelUnlimited.h"
+#include "CacheBasedLanguageModel.h"
+#include "OnlineLearner.h"
 #include "WordTranslationFeature.h"
 #include "PhrasePairFeature.h"
 #include "LexicalReordering.h"
@@ -44,7 +46,7 @@ namespace Moses {
                       const WordPenaltyProducer* wpProducer,
                       const UnknownWordPenaltyProducer* uwpProducer,
                       const DistortionScoreProducer* distortionProducer)
-    : m_id(id), m_wpProducer(wpProducer), m_unknownWpProducer(uwpProducer), m_distortionScoreProducer(distortionProducer)
+    : m_id(id), m_wpProducer(wpProducer), m_unknownWpProducer(uwpProducer), m_distortionScoreProducer(distortionProducer), m_CacheBasedLanguageModel(NULL), m_onlinelearner(NULL)
     {
       AddFeatureFunction(wpProducer);
       AddFeatureFunction(uwpProducer);
@@ -73,7 +75,18 @@ namespace Moses {
       m_globalLexicalModels.push_back(globalLexicalModel);
       AddFeatureFunction(globalLexicalModel);
     }
-    
+
+    void TranslationSystem::AddCacheBasedLanguageModel(CacheBasedLanguageModel* cblm) {
+      m_CacheBasedLanguageModel = cblm;
+      AddFeatureFunction(cblm);
+    }
+
+    void TranslationSystem::AddOnlineLearningModel(OnlineLearner* ol) {
+    	cerr<<"Adding Online learning feature function from TranslationSystem::AddOnlineLearningModel\n";
+    	m_onlinelearner = ol;
+    	AddFeatureFunction(ol);
+    }
+
     void TranslationSystem::AddFeatureFunction(const FeatureFunction* ff) {
 			m_producers.push_back(ff);
 

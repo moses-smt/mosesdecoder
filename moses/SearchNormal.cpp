@@ -1,7 +1,6 @@
 #include "Manager.h"
 #include "Timer.h"
 #include "SearchNormal.h"
-#include "Phrase.h"
 
 using namespace std;
 
@@ -310,6 +309,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
     // worst possible score may have changed -> recompute
     size_t wordsTranslated = hypothesis.GetWordsBitmap().GetNumWordsCovered() + transOpt.GetSize();
     float allowedScore = m_hypoStackColl[wordsTranslated]->GetWorstScore();
+    cerr<<"MIN HYPO STACK DIVERSITY : "<<staticData.GetMinHypoStackDiversity()<<"\n";
     if (staticData.GetMinHypoStackDiversity()) {
       WordsBitmapID id = hypothesis.GetWordsBitmap().GetIDPlus(transOpt.GetStartPos(), transOpt.GetEndPos());
       float allowedScoreForBitmap = m_hypoStackColl[wordsTranslated]->GetWorstScoreForBitmap( id );
@@ -346,6 +346,7 @@ void SearchNormal::ExpandHypothesis(const Hypothesis &hypothesis, const Translat
       IFVERBOSE(2) {
         stats.AddEarlyDiscarded();
       }
+//      cerr<<"REMOVING 1 : "<<newHypo->ToString()<<"\n";
       FREEHYPO( newHypo );
       return;
     }

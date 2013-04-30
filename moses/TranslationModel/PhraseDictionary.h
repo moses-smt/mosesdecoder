@@ -59,8 +59,10 @@ class SparsePhraseDictionaryFeature;
 class PhraseDictionary: public Dictionary
 {
 public:
-  PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature):
-    Dictionary(numScoreComponent), m_tableLimit(0), m_feature(feature), m_numScoreComponentMultiModel(0) {}
+  PhraseDictionary(size_t numScoreComponent, const PhraseDictionaryFeature* feature);
+	
+  virtual ~PhraseDictionary();
+	
   //! table limit number.
   size_t GetTableLimit() const {
     return m_tableLimit;
@@ -71,6 +73,18 @@ public:
   const PhraseDictionaryFeature* GetFeature() const;
   size_t GetDictIndex() const;
 
+	// virtual functions for PhraseDictionaryCache - had to give in!
+  virtual void Insert(std::string sourceString, std::string targetString, std::string ageString){
+		std::cerr << "void PhraseDictionary::Insert(std::string...)|" << std::endl;
+	};
+  virtual void Update(std::string sourceString, std::string targetString){
+		std::cerr << "void PhraseDictionary::Update(std::string...)|" << std::endl;
+	};
+	virtual void Execute(std::vector<std::string> commands) {
+		std::cerr << "void PhraseDictionary::Execute(std::string...)|" << std::endl;
+	};
+
+	
   //! find list of translations that can translates src. Only for phrase input
   virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const=0;
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
@@ -83,14 +97,9 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  //PhraseDictionaryMultiModel may use input phrase dictionaries with a different number of features than it is assigned in the log-linear model
-  void SetNumScoreComponentMultiModel(size_t num);
-  size_t GetNumScoreComponentMultiModel() const;
-
 protected:
   size_t m_tableLimit;
   const PhraseDictionaryFeature* m_feature;
-  size_t m_numScoreComponentMultiModel;
 };
 
 
@@ -112,7 +121,8 @@ public:
                             , const std::vector<float> &weight
                             , size_t dictIndex
                             , size_t tableLimit
-                            , const std::vector<std::string>& config);
+                            , const std::string &targetFile
+                            , const std::string &alignmentsFile);
 
 
   virtual ~PhraseDictionaryFeature();
@@ -177,9 +187,10 @@ private:
 
   bool m_useThreadSafePhraseDictionary;
   PhraseTableImplementation m_implementation;
-  const std::vector<std::string> m_config;
+  std::string m_targetFile;
+  std::string m_alignmentsFile;
   SparsePhraseDictionaryFeature* m_sparsePhraseDictionaryFeature;
-  std::vector<std::string> m_allPaths;
+
 };
 
 

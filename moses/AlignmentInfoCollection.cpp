@@ -30,9 +30,6 @@ AlignmentInfoCollection::AlignmentInfoCollection()
   m_emptyAlignmentInfo = Add(pairs);
 }
 
-AlignmentInfoCollection::~AlignmentInfoCollection()
-{}
-
 const AlignmentInfo &AlignmentInfoCollection::GetEmptyAlignmentInfo() const
 {
   return *m_emptyAlignmentInfo;

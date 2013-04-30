@@ -36,9 +36,8 @@ using namespace std;
 namespace Moses
 {
 
-LanguageModelSingleFactor::~LanguageModelSingleFactor()
-{
-}
+LanguageModelSingleFactor::~LanguageModelSingleFactor() {}
+
 
 struct PointerState : public FFState {
   const void* lmstate;
@@ -59,11 +58,7 @@ LanguageModelPointerState::LanguageModelPointerState()
   m_beginSentenceState = new PointerState(NULL);
 }
 
-LanguageModelPointerState::~LanguageModelPointerState()
-{
-  delete m_nullContextState;
-  delete m_beginSentenceState;
-}
+LanguageModelPointerState::~LanguageModelPointerState() {}
 
 const FFState *LanguageModelPointerState::GetNullContextState() const
 {

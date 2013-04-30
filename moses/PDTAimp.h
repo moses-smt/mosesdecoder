@@ -11,7 +11,6 @@
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "SparsePhraseDictionaryFeature.h"
 #include "Util.h"
-#include "util/tokenize_piece.hh"
 
 namespace Moses
 {
@@ -285,10 +284,11 @@ protected:
     FactorCollection &factorCollection = FactorCollection::Instance();
 
     for(size_t k=0; k<factorStrings.size(); ++k) {
-      util::TokenIter<util::MultiCharacter, false> word(*factorStrings[k], StaticData::Instance().GetFactorDelimiter());
+      std::vector<std::string> factors=TokenizeMultiCharSeparator(*factorStrings[k],StaticData::Instance().GetFactorDelimiter());
+      CHECK(factors.size()==m_output.size());
       Word& w=targetPhrase.AddWord();
-      for(size_t l=0; l<m_output.size(); ++l, ++word) {
-        w[m_output[l]]= factorCollection.AddFactor(*word);
+      for(size_t l=0; l<m_output.size(); ++l) {
+        w[m_output[l]]= factorCollection.AddFactor(Output, m_output[l], factors[l]);
       }
     }
 

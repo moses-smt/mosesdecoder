@@ -4,8 +4,6 @@
 #include <string>
 #include <map>
 
-#include <boost/unordered_set.hpp>
-
 #include "FactorCollection.h"
 #include "FeatureFunction.h"
 #include "FFState.h"
@@ -58,7 +56,7 @@ public:
 private:
   FactorType m_factorType;
   Word m_bos;
-  boost::unordered_set<std::string> m_vocab;
+	std::set<std::string> m_vocab;
 };
 
 }

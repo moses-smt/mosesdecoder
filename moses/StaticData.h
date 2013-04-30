@@ -33,7 +33,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 
 #ifdef WITH_THREADS
-#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #endif
 
@@ -71,6 +70,8 @@ class UnknownWordPenaltyProducer;
 class MetaScoreProducer;
 class TargetBigramFeature;
 class TargetNgramFeature;
+class CacheBasedLanguageModel;
+class OnlineLearner;
 #ifdef HAVE_SYNLM
 class SyntacticLanguageModel;
 #endif
@@ -103,6 +104,8 @@ protected:
 #ifdef HAVE_SYNLM
 	SyntacticLanguageModel* m_syntacticLanguageModel;
 #endif
+  CacheBasedLanguageModel* m_CacheBasedLanguageModel;
+  OnlineLearner* m_onlinelearner;
   std::vector<DecodeGraph*> m_decodeGraphs;
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
@@ -150,6 +153,7 @@ protected:
   bool m_wordDeletionEnabled;
 
   bool m_disableDiscarding;
+  bool m_printTranslationOptions;
   bool m_printAllDerivations;
 
   bool m_sourceStartPosMattersForRecombination;
@@ -172,11 +176,8 @@ protected:
   bool m_reportAllFactorsNBest;
   std::string m_detailedTranslationReportingFilePath;
   bool m_onlyDistinctNBest;
-  bool m_PrintAlignmentInfo;
   bool m_needAlignmentInfo;
   bool m_PrintAlignmentInfoNbest;
-  bool m_PrintPassthroughInformation;
-  bool m_PrintPassthroughInformationInNBest;
 
   std::string m_alignmentOutputFile;
 
@@ -186,6 +187,10 @@ protected:
 
   XmlInputType m_xmlInputType; //! method for handling sentence XML input
   std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
+
+  int PhraseDictionaryCacheIndex; //Index of the PhraseDictionarCache
+  size_t PhraseDictionaryCacheScoreType; //scoring type for PhraseDictionaryCache
+  unsigned int PhraseDictionaryCacheMaxAge; //maximum age of the entries in PhraseDictionaryCache
 
   bool m_mbr; //! use MBR decoder
   bool m_useLatticeMBR; //! use MBR decoder
@@ -220,8 +225,6 @@ protected:
   bool m_outputWordGraph; //! whether to output word graph
   bool m_outputSearchGraph; //! whether to output search graph
   bool m_outputSearchGraphExtended; //! ... in extended format
-  bool m_outputSearchGraphSLF; //! whether to output search graph in HTK standard lattice format (SLF)
-  bool m_outputSearchGraphHypergraph; //! whether to output search graph in hypergraph
 #ifdef HAVE_PROTOBUF
   bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
 #endif
@@ -247,13 +250,7 @@ protected:
 
   int m_threadCount;
   long m_startTranslationId;
-
-  std::vector<float> m_multimodelweights;
-#ifdef WITH_THREADS
-  mutable std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
-#else
-  mutable std::vector<float> m_multimodelweights_tmp;
-#endif
+  
   StaticData();
 
 
@@ -270,6 +267,8 @@ protected:
   //! load syntactic language model
 	bool LoadSyntacticLanguageModel();
 #endif
+  //! load a cache-based language model
+  bool LoadCacheBasedLanguageModel();
   //! load not only the main phrase table but also any auxiliary tables that depend on which features are being used (e.g., word-deletion, word-insertion tables)
   bool LoadPhraseTables();
   //! load all generation tables as specified in ini file
@@ -295,6 +294,11 @@ protected:
   std::string m_binPath;
   
 public:
+
+  std::string m_postedited;
+  bool LoadOnlineLearningModel();
+  OnlineLearner* GetOnlineLearningModel() const;
+  int GetNumIterationsOnlineLearning() const;
 
   bool IsAlwaysCreateDirectTranslationOption() const {
     return m_isAlwaysCreateDirectTranslationOption;
@@ -338,6 +342,10 @@ public:
   const std::vector<FactorType> &GetOutputFactorOrder() const {
     return m_outputFactorOrder;
   }
+
+  inline int GetPhraseDictionaryCacheIndex() const { return PhraseDictionaryCacheIndex; }
+  inline size_t GetPhraseDictionaryCacheScoreType() const { return PhraseDictionaryCacheScoreType; }
+  inline unsigned int GetPhraseDictionaryCacheMaxAge() const { return PhraseDictionaryCacheMaxAge; }
 
   inline bool GetSourceStartPosMattersForRecombination() const {
     return m_sourceStartPosMattersForRecombination;
@@ -470,7 +478,7 @@ public:
     return m_nBestFilePath;
   }
   bool IsNBestEnabled() const {
-    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_outputSearchGraphSLF || m_outputSearchGraphHypergraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
+    return (!m_nBestFilePath.empty()) || m_mbr || m_useLatticeMBR || m_mira || m_outputSearchGraph || m_useConsensusDecoding || !m_latticeSamplesFilePath.empty()
 #ifdef HAVE_PROTOBUF
            || m_outputSearchGraphPB
 #endif
@@ -643,12 +651,6 @@ public:
   bool GetOutputSearchGraphExtended() const {
     return m_outputSearchGraphExtended;
   }
-  bool GetOutputSearchGraphSLF() const {
-    return m_outputSearchGraphSLF;
-  }
-  bool GetOutputSearchGraphHypergraph() const {
-    return m_outputSearchGraphHypergraph;
-  }
 #ifdef HAVE_PROTOBUF
   bool GetOutputSearchGraphPB() const {
     return m_outputSearchGraphPB;
@@ -684,6 +686,10 @@ public:
 
 
   const TranslationOptionList* FindTransOptListInCache(const DecodeGraph &decodeGraph, const Phrase &sourcePhrase) const;
+
+  bool PrintTranslationOptions() const {
+    return m_printTranslationOptions;
+  }
 
   bool PrintAllDerivations() const {
     return m_printAllDerivations;
@@ -735,50 +741,13 @@ public:
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
 
-  const std::vector<float>* GetMultiModelWeightsVector() const {
-    return &m_multimodelweights;
-  }
-
-  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
-#ifdef WITH_THREADS
-    m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
-#else
-    m_multimodelweights_tmp = weights;
-#endif
-  }
-
-  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const {
-#ifdef WITH_THREADS
-    if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
-      return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
-    }
-    else {
-      return NULL;
-    }
-#else
-    return &m_multimodelweights_tmp;
-#endif
-  }
-
-  void SetNeedAlignmentInfo(bool needAlignmentInfo) {
-      m_needAlignmentInfo = needAlignmentInfo;
-  }
   bool NeedAlignmentInfo() const {
     return m_needAlignmentInfo; }
   const std::string &GetAlignmentOutputFile() const {
     return m_alignmentOutputFile;
   }
-  bool PrintAlignmentInfo() const {
-    return m_PrintAlignmentInfo;
-  }
   bool PrintAlignmentInfoInNbest() const {
     return m_PrintAlignmentInfoNbest;
-  }
-  bool IsPassthroughEnabled() const {
-    return m_PrintPassthroughInformation;
-  }
-  bool IsPassthroughInNBestEnabled() const {
-    return m_PrintPassthroughInformationInNBest;
   }
   WordAlignmentSort GetWordAlignmentSort() const {
     return m_wordAlignmentSort;

@@ -41,6 +41,8 @@ class DistortionScoreProducer;
 class UnknownWordPenaltyProducer;
 class MetaFeatureProducer;
 class GlobalLexicalModel;
+class CacheBasedLanguageModel;
+class OnlineLearner;
 
 /**
  * Enables the configuration of multiple translation systems.
@@ -59,6 +61,8 @@ class TranslationSystem {
       void AddDecodeGraph(DecodeGraph* decodeGraph, size_t backoff);
       void AddReorderModel(LexicalReordering* reorderModel);
       void AddGlobalLexicalModel(GlobalLexicalModel* globalLexicalModel);
+      void AddCacheBasedLanguageModel(CacheBasedLanguageModel* CacheBasedLanguageModel);
+      void AddOnlineLearningModel(OnlineLearner* ol);
       
       //Insert non-core feature function
       void AddFeatureFunction(const FeatureFunction* featureFunction);
@@ -86,8 +90,14 @@ class TranslationSystem {
       
       const WordPenaltyProducer *GetWordPenaltyProducer() const { return m_wpProducer; }
       const UnknownWordPenaltyProducer *GetUnknownWordPenaltyProducer() const { return m_unknownWpProducer; }
-      const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer;}
+      const DistortionScoreProducer* GetDistortionProducer() const {return m_distortionScoreProducer; }
+
+      CacheBasedLanguageModel* GetCacheBasedLanguageModel() const { return m_CacheBasedLanguageModel; }
+      void SetCacheBasedLanguageModel(CacheBasedLanguageModel* cblm) { m_CacheBasedLanguageModel = cblm; }
       
+      OnlineLearner* GetOnlineLearningModel() const {return m_onlinelearner;}
+      void SetOnlineLearningModel(OnlineLearner* ol){m_onlinelearner = ol;}
+
       const PhraseDictionaryFeature *GetTranslationScoreProducer(size_t index) const { return GetPhraseDictionaries().at(index); }
       
       float GetWeightWordPenalty() const;
@@ -126,6 +136,8 @@ class TranslationSystem {
         const UnknownWordPenaltyProducer* m_unknownWpProducer;
         const DistortionScoreProducer* m_distortionScoreProducer;
 	
+        CacheBasedLanguageModel* m_CacheBasedLanguageModel;
+        OnlineLearner* m_onlinelearner;
 	std::vector<const ScoreProducer*> m_producers; /**< all the score producers in this run */
 
 };

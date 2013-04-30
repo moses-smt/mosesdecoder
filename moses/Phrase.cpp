@@ -29,7 +29,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "StaticData.h"  // GetMaxNumFactors
 
-#include "util/exception.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 
@@ -175,8 +174,6 @@ void Phrase::CreateFromString(const std::vector<FactorType> &factorOrder, const 
   }
 }
 
-class NonTerminalParseException : public util::Exception {};
-
 void Phrase::CreateFromStringNewFormat(FactorDirection direction
                                        , const std::vector<FactorType> &factorOrder
                                        , const StringPiece &phraseString
@@ -202,7 +199,6 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
       isNonTerminal = true;
 
       size_t nextPos = annotatedWord.find('[', 1);
-      UTIL_THROW_IF(nextPos == string::npos, NonTerminalParseException, "The string " << annotatedWord << " was parsed as a non-terminal but does not take the form [source][target].");
       CHECK(nextPos != string::npos);
 
       if (direction == Input)
@@ -220,7 +216,8 @@ void Phrase::CreateFromStringNewFormat(FactorDirection direction
 
   // lhs
   const StringPiece &annotatedWord = annotatedWordVector.back();
-  UTIL_THROW_IF(annotatedWord.size() < 2 || *annotatedWord.data() != '[' || annotatedWord.data()[annotatedWord.size() - 1] != ']', NonTerminalParseException, "The last entry should be a single non-terminal but was given as " << annotatedWord);
+  CHECK(annotatedWord.size() >= 2 && *annotatedWord.data() == '[' && annotatedWord.data()[annotatedWord.size() - 1] == ']');
+
   lhs.CreateFromString(direction, factorOrder, annotatedWord.substr(1, annotatedWord.size() - 2), true);
   assert(lhs.IsNonTerminal());
 }
@@ -265,8 +262,9 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
       FactorType factorType = inputFactor[currFactorIndex];
       for (size_t currSubPos = 0 ; currSubPos < subSize ; currSubPos++) {
         size_t currThisPos = currSubPos + currStartPos;
-        const string &subStr	= subPhraseVector[currSubPos][currFactorIndex];
-        if (subStr != GetFactor(currThisPos, factorType)->GetString()) {
+        const string &subStr	= subPhraseVector[currSubPos][currFactorIndex]
+                                ,&thisStr	= GetFactor(currThisPos, factorType)->GetString();
+        if (subStr != thisStr) {
           match = false;
           break;
         }

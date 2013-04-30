@@ -11,6 +11,9 @@ namespace Moses
 {
 
 class TranslationOption;
+class CacheBasedLanguageModel;
+class PhraseDictionary;
+class PhraseDictionaryCache;
 
 /** This struct is used for storing XML force translation data for a given range in the sentence
  */

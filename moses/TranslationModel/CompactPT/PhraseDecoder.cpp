@@ -433,13 +433,9 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       size_t idx = m_multipleScoreTrees ? scores.size() : 0;
       float score = m_scoreTrees[idx]->Read(encodedBitStream);
       scores.push_back(score);
+      
       if(scores.size() == m_numScoreComponent)
       {
-        //PhraseDictionaryMultiModel may use input phrase dictionaries with a different number of features than it is assigned in the log-linear model;
-        //filling extra slots with zeroes to prevent error messages on the way
-        if (m_phraseDictionary.GetNumScoreComponentMultiModel() > 0 && m_phraseDictionary.GetNumScoreComponentMultiModel() > m_numScoreComponent) {
-          scores.resize(m_phraseDictionary.GetNumScoreComponentMultiModel());
-        }
         targetPhrase->SetScore(m_feature, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
         
         if(m_containsAlignmentInfo)

@@ -1,0 +1,83 @@
+/*
+ * OnlineLearner.h
+ *
+ */
+
+/*
+ * I need a pointer to Manager of current sentence
+ * from that manager I can get all the hypothesis
+ * and I need post edited sentence
+ * 			- I concatenate the sentence with source e.g src_#_tgt
+ *
+ * This is a stateless feature because rescoring of the feature
+ * does not depend on partial hypothesis, we just change it at the
+ * end of translating sentence.
+*/
+
+#include "Util.h"
+#include "FeatureFunction.h"
+#include "Hypothesis.h"
+#include "Factor.h"
+#include "TrellisPath.h"
+#include "TrellisPathList.h"
+#include "Manager.h"
+
+#include "Optimiser.h"
+
+#ifndef ONLINELEARNER_H_
+#define ONLINELEARNER_H_
+
+typedef std::map<std::string, std::map<std::string, float> > pp_feature;
+typedef std::map<std::string, std::map<std::string, int> > pp_list;
+typedef float learningrate;
+
+
+using namespace std;
+using namespace Optimizer;
+namespace Moses {
+
+class Optimiser;
+class Phrase;
+class Search;
+
+class OnlineLearner : public StatelessFeatureFunction {
+private:
+	pp_feature m_feature;
+	pp_list PP_ORACLE, PP_BEST;
+	learningrate lr;
+	std::string m_postedited;
+	bool m_learn;
+	MiraOptimiser* optimiser;
+	std::vector<std::string> function_words_english;
+	std::vector<std::string> function_words_italian;
+	void Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const;
+	void ShootUp(std::string sp, std::string tp, float margin);
+	void ShootDown(std::string sp, std::string tp, float margin);
+	float calcMargin(Hypothesis* oracle, Hypothesis* bestHyp);
+	void PrintHypo(const Hypothesis* hypo, ostream& HypothesisStringStream);
+	bool has_only_spaces(const std::string& str);
+	float GetBleu(std::string hypothesis, std::string reference);
+	void compareNGrams(map<string, int>& hyp, map<string, int>& ref, map<int, float>& countNgrams, map<int, float>& TotalNgrams);
+	int getNGrams(std::string str, map<string, int>& ngrams);
+	int split_marker_perl(string str, string marker, vector<string> &array);
+	void ReadFunctionWords();
+	void chop(string &str);
+	void Decay(int);
+public:
+	OnlineLearner(float learningrate);
+	bool SetPostEditedSentence(std::string s);
+	void RunOnlineLearning(Manager& manager);
+	void RemoveJunk();
+	virtual ~OnlineLearner();
+
+	inline size_t GetNumScoreComponents() const { return 1; };
+
+	void SetOnlineLearning() { m_learn=true; };
+	bool GetOnlineLearning() const { return m_learn; };
+
+	inline std::string GetScoreProducerWeightShortName(unsigned) const { return "ol"; };
+	void Evaluate(const PhraseBasedFeatureContext& context,	ScoreComponentCollection* accumulator) const;
+	void EvaluateChart(const ChartBasedFeatureContext& context, ScoreComponentCollection* accumulator) const;
+};
+}
+#endif /* ONLINELEARNER_H_ */

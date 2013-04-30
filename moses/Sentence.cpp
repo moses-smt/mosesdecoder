@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdexcept>
 
 #include "Sentence.h"
+#include "OnlineLearner.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
@@ -31,9 +32,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 using namespace std;
 
+
+
+
 namespace Moses
 {
-
+void Sentence::split_marker_perl(std::string& str, std::string marker, std::vector<std::string> &array) {
+        int found = str.find(marker), prev = 0;
+        while (found != std::string::npos) // warning!
+        {
+                array.push_back(str.substr(prev, found - prev));
+                prev = found + marker.length();
+                found = str.find(marker, found + marker.length());
+        }
+        array.push_back(str.substr(prev));
+        return;
+}
 Sentence::Sentence()
   : Phrase(0)
   , InputType()
@@ -52,9 +66,26 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   if (getline(in, line, '\n').eof())
     return 0;
-
-  //get covered words - if continual-partial-translation is switched on, parse input
   const StaticData &staticData = StaticData::Instance();
+  if(staticData.GetOnlineLearningModel()!=NULL)
+  {
+	  VERBOSE(1,"I am in the if statement");
+	  std::vector<string> strs;
+	  split_marker_perl(line, "_#_", strs);
+	  OnlineLearner* ol=StaticData::InstanceNonConst().GetOnlineLearningModel();
+	  if(ol!=NULL)
+	  {
+		  if(!ol->SetPostEditedSentence(strs[1])) return 0;
+	  }
+	  else
+	  {
+		  VERBOSE(1, "online learning module not activated!!");
+		  return 0;
+	  }
+	  line=strs[0];
+  }
+  //get covered words - if continual-partial-translation is switched on, parse input
+
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
   if (staticData.ContinuePartialTranslation()) {
@@ -111,12 +142,6 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       this->SetUseTopicId(false);
       this->SetUseTopicIdAndProb(true);
     }
-  }
-
-  // if sentence contains passthrough info "<passthrough tag1=""/>"
-  if (1 || staticData.IsPassthroughEnabled() || staticData.IsPassthroughInNBestEnabled()) {
-    std::string passthrough = PassthroughSGML(line,"passthrough");
-    this->SetPassthroughInformation(passthrough);
   }
 
   // parse XML markup in translation line

@@ -155,7 +155,11 @@ void TranslationOptionCollection::Prune()
 *		Base::ProcessUnknownWord()
 *			Inherited::ProcessUnknownWord(position)
 *				Base::ProcessOneUnknownWord()
+*
+* \param decodeStepList list of decoding steps
+* \param factorCollection input sentence with all factors
 */
+
 void TranslationOptionCollection::ProcessUnknownWord()
 {
   const vector<DecodeGraph*>& decodeGraphList = m_system->GetDecodeGraphs();
@@ -203,7 +207,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	size_t isDigit = 0;
 	
 	const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-	const StringPiece &s = f->GetString();
+	const string &s = f->GetString();
 	bool isEpsilon = (s=="" || s==EPSILON);
 	if (StaticData::Instance().GetDropUnknown())
 	{
@@ -352,6 +356,8 @@ void TranslationOptionCollection::CalcFutureScore()
 /** Create all possible translations from the phrase tables
  * for a particular input sentence. This implies applying all
  * translation and generation steps. Also computes future cost matrix.
+ * \param decodeStepList list of decoding steps
+ * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions()
 {
@@ -365,7 +371,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
   const vector <size_t> &decodeGraphBackoff = m_system->GetDecodeGraphBackoff();
 
   // length of the sentence
-  const size_t size = m_source.GetSize();
+  size_t size = m_source.GetSize();
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
@@ -376,8 +382,9 @@ void TranslationOptionCollection::CreateTranslationOptions()
     const DecodeGraph &decodeGraph = *decodeGraphList[graphInd];
     // generate phrases that start at startPos ...
     for (size_t startPos = 0 ; startPos < size; startPos++) {
-      const size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      const size_t maxSize = std::min(size - startPos, maxSizePhrase); // don't go over end of sentence
+      size_t maxSize = size - startPos; // don't go over end of sentence
+      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      maxSize = std::min(maxSize, maxSizePhrase);
 
       // ... and that end at endPos
       for (size_t endPos = startPos ; endPos < startPos + maxSize ; endPos++) {

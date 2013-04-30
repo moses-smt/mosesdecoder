@@ -32,23 +32,22 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "ParallelBackoff.h"
 #endif
 #ifdef LM_IRST
-#  include "IRST.h"
+#include "IRST.h"
 #endif
 #ifdef LM_RAND
-#  include "Rand.h"
+#include "Rand.h"
 #endif
 
 #include "ORLM.h"
 
 #ifdef LM_REMOTE
-#	include "Remote.h"
+#include "Remote.h"
 #endif
 
 #include "Ken.h"
-#include "Backward.h"
 
 #ifdef LM_LDHT
-#   include "LDHT.h"
+#include "LDHT.h"
 #endif
 
 #include "Base.h"
@@ -70,9 +69,7 @@ LanguageModel* CreateLanguageModel(LMImplementation lmImplementation
 {
   if (lmImplementation == Ken || lmImplementation == LazyKen) {
     return ConstructKenLM(languageModelFile, factorTypes[0], lmImplementation == LazyKen);
-  } else if (lmImplementation == BackwardLM || lmImplementation == LazyBackwardLM) {
-    return ConstructBackwardLM(languageModelFile, factorTypes[0], lmImplementation == LazyBackwardLM);
-  } 
+  }
   LanguageModelImplementation *lm = NULL;
   switch (lmImplementation) {
   case RandLM:

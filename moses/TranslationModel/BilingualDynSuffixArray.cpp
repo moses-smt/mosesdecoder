@@ -133,6 +133,7 @@ int BilingualDynSuffixArray::LoadRawAlignments(InputFileStream& align)
 int BilingualDynSuffixArray::LoadRawAlignments(string& align) {
   // stores the alignments in the raw file format 
   vector<int> vtmp;
+  VERBOSE(1, "alignment : "<<align);
   Utils::splitToInt(align, vtmp, "- ");
   CHECK(vtmp.size() % 2 == 0);
   vector<short> vAlgn;  // store as short ints for memory
@@ -456,9 +457,9 @@ void BilingualDynSuffixArray::GetTargetPhrasesByLexicalWeight(const Phrase& src,
 		itrLexW = lexicalWeights.find(iterPhrases->first);
 		CHECK(itrLexW != lexicalWeights.end());
 		Scores scoreVector(3);
-		scoreVector[0] = std::log(trg2SrcMLE); 
-		scoreVector[1] = std::log(itrLexW->second.first);
-		scoreVector[2] = 1; //log(2.718); 
+		scoreVector[0] = trg2SrcMLE; 
+		scoreVector[1] = itrLexW->second.first;
+		scoreVector[2] = 2.718; // exp(1); 
 		phraseScores.insert(make_pair(scoreVector, &iterPhrases->first));
 	}
 	// return top scoring phrases

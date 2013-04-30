@@ -27,7 +27,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include "FactorCollection.h"
 #include "Util.h"
-#include "util/pool.hh"
 
 using namespace std;
 
@@ -37,23 +36,42 @@ FactorCollection FactorCollection::s_instance;
 
 const Factor *FactorCollection::AddFactor(const StringPiece &factorString)
 {
-  FactorFriend to_ins;
-  to_ins.in.m_string = factorString; 
-  to_ins.in.m_id = m_factorId;
-  // If we're threaded, hope a read-only lock is sufficient.
+// Sorry this is so complicated.  Can't we just require everybody to use Boost >= 1.42?  The issue is that I can't check BOOST_VERSION unless we have Boost.  
 #ifdef WITH_THREADS
+
+#if BOOST_VERSION < 104200
+  FactorFriend to_ins;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
+#endif // BOOST_VERSION
   { // read=lock scope
     boost::shared_lock<boost::shared_mutex> read_lock(m_accessLock);
+#if BOOST_VERSION >= 104200
+    // If this line doesn't compile, upgrade your Boost.  
+    Set::const_iterator i = m_set.find(factorString, HashFactor(), EqualsFactor());
+#else // BOOST_VERSION
     Set::const_iterator i = m_set.find(to_ins);
+#endif // BOOST_VERSION
     if (i != m_set.end()) return &i->in;
   }
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+#if BOOST_VERSION >= 104200
+  FactorFriend to_ins;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
+#endif // BOOST_VERSION
+
+#else // WITH_THREADS
+
+#if BOOST_VERSION >= 104200
+  Set::const_iterator i = m_set.find(factorString, HashFactor(), EqualsFactor());
+  if (i != m_set.end()) return &i->in;
+#endif
+  FactorFriend to_ins;
+  to_ins.in.m_string.assign(factorString.data(), factorString.size());
+
 #endif // WITH_THREADS
+  to_ins.in.m_id = m_factorId;
   std::pair<Set::iterator, bool> ret(m_set.insert(to_ins));
   if (ret.second) {
-    ret.first->in.m_string.set(
-        memcpy(m_string_backing.Allocate(factorString.size()), factorString.data(), factorString.size()),
-        factorString.size());
     m_factorId++;
   }
   return &ret.first->in;
