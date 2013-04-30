@@ -175,6 +175,13 @@ enum FormatType
   ,HieroFormat
 };
 
+enum StatelessFeatureType
+{
+  CacheableInPhraseTable // simplest. eg. phrase table scores. word penalty, phrase penalty.
+  ,DependsOnSource // can't be pre-computed during training, but can't be computed before search.eg. source bag-of-word features
+  ,NotCacheable // can't be pre-computed. Depends on segmentation during search. eg. span-length feature
+};
+
 // typedef
 typedef size_t FactorType;
 

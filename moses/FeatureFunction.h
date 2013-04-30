@@ -158,15 +158,22 @@ public:
   virtual void EvaluateChart(const ChartBasedFeatureContext& context,
                              ScoreComponentCollection* accumulator) const  = 0;
 
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return CacheableInPhraseTable; }
+
   //If true, then the feature is evaluated before search begins, and stored in
   //the TranslationOptionCollection.
-  virtual bool ComputeValueInTranslationOption() const;
+  virtual bool ComputeValueInTranslationOption() const
+  { return false; }
 
   //!If true, the feature is stored in the ttable, so gets copied into the 
   //TargetPhrase and does not need cached in the TranslationOption
-  virtual bool ComputeValueInTranslationTable() const {return false;}
+  virtual bool ComputeValueInTranslationTable() const
+  { return false;}
 
-  bool IsStateless() const;
+  bool IsStateless() const
+  { return true; }
+
 };
 
 /** base class for all stateful feature functions.

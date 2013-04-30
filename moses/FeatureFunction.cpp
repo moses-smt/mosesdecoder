@@ -181,16 +181,6 @@ StatelessFeatureFunction::StatelessFeatureFunction(const std::string& descriptio
   m_statelessFFs.push_back(this);
 }
 
-bool StatelessFeatureFunction::IsStateless() const
-{
-  return true;
-}
-
-bool StatelessFeatureFunction::ComputeValueInTranslationOption() const
-{
-  return false;
-}
-
 StatefulFeatureFunction::StatefulFeatureFunction(const std::string& description, const std::string &line)
 : FeatureFunction(description, line)
 {
