@@ -109,9 +109,4 @@ void WordPenaltyProducer::Evaluate(
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
 }
 
-bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
-{
-  return true;
-}
-
 }

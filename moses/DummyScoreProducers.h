@@ -57,10 +57,6 @@ public:
     {
       //required but does nothing.
     }
-
-  bool ComputeValueInTranslationOption() const {return true;}
-  bool ComputeValueInTranslationTable() const {return true;}
-
 };
 
 /** unknown word penalty */
@@ -69,7 +65,6 @@ class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 public:
 	UnknownWordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("UnknownWordPenalty",1, line) {}
 
-  virtual bool ComputeValueInTranslationOption() const;
   void Evaluate(  const PhraseBasedFeatureContext& context,
   								ScoreComponentCollection* accumulator) const 
   {
@@ -82,8 +77,6 @@ public:
   {
     //do nothing - not a real feature
   }
-
-  bool ComputeValueInTranslationTable() const {return true;}
 
   virtual bool IsTuneable() const { return false; }
 

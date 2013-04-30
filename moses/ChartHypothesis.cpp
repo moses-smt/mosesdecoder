@@ -168,7 +168,7 @@ void ChartHypothesis::CalcScore()
   const std::vector<const StatelessFeatureFunction*>& sfs =
       StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i)
-  	if (sfs[i]->ComputeValueInTranslationOption() == false)
+  	if (sfs[i]->GetStatelessFeatureType() == NotCacheable)
   		sfs[i]->EvaluateChart(ChartBasedFeatureContext(this),&m_scoreBreakdown);
 
   const std::vector<const StatefulFeatureFunction*>& ffs =

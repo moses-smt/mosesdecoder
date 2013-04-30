@@ -40,9 +40,7 @@ class PhrasePairFeature: public StatelessFeatureFunction {
                        ScoreComponentCollection*) const {
       throw std::logic_error("PhrasePairFeature not valid in chart decoder");
     }
-    
-    bool ComputeValueInTranslationOption() const;
-    
+
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 
     void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }

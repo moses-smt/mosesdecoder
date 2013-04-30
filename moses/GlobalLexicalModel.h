@@ -78,6 +78,10 @@ public:
   	std::cerr << "EvaluateChart not implemented." << std::endl;
   	exit(1);
   }
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return DependsOnSource; }
+
 };
 
 }

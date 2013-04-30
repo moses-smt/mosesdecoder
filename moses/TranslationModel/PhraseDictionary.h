@@ -91,9 +91,6 @@ public:
     m_sparsePhraseDictionaryFeature = spdf;
   }
 
-  virtual bool ComputeValueInTranslationOption() const
-  { return true; }
-
   //Initialises the dictionary (may involve loading from file)
   virtual bool InitDictionary()
   { return true; }
@@ -114,8 +111,6 @@ public:
   {
     throw std::logic_error("PhraseDictionary.EvaluateChart() Not implemented");
   }
-
-  virtual bool ComputeValueInTranslationTable() const {return true;}
 
   const std::string &GetFilePath() const { return m_filePath; }
 

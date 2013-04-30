@@ -4,6 +4,7 @@
 #include <vector>
 #include <set>
 #include <string>
+#include "TypeDef.h"
 
 namespace Moses
 {
@@ -160,16 +161,6 @@ public:
 
   virtual StatelessFeatureType GetStatelessFeatureType() const
   { return CacheableInPhraseTable; }
-
-  //If true, then the feature is evaluated before search begins, and stored in
-  //the TranslationOptionCollection.
-  virtual bool ComputeValueInTranslationOption() const
-  { return false; }
-
-  //!If true, the feature is stored in the ttable, so gets copied into the 
-  //TargetPhrase and does not need cached in the TranslationOption
-  virtual bool ComputeValueInTranslationTable() const
-  { return false;}
 
   bool IsStateless() const
   { return true; }

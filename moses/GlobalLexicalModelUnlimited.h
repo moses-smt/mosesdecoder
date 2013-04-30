@@ -96,6 +96,10 @@ public:
 	void AddFeature(ScoreComponentCollection* accumulator,
 			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
 			StringPiece targetWord) const;
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return DependsOnSource; }
+
 };
 
 }

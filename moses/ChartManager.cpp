@@ -355,7 +355,7 @@ void ChartManager::PreCalculateScores()
             StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
-          if (!sfs[k]->ComputeValueInTranslationTable()) {
+          if (sfs[k]->GetStatelessFeatureType() == DependsOnSource) {
             sfs[k]->EvaluateChart(context,&breakdown);
           }
         }

@@ -244,7 +244,4 @@ void PhrasePairFeature::Evaluate(
   }
 }
 
-bool PhrasePairFeature::ComputeValueInTranslationOption() const {
-  return true;
-} 
 }

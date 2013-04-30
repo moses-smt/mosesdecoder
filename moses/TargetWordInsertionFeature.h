@@ -33,6 +33,9 @@ public:
 		           	   ScoreComponentCollection* accumulator,
 		           	   const AlignmentInfo &alignmentInfo) const;
 
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return NotCacheable; }
+
 };
 
 }
