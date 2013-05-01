@@ -9,7 +9,6 @@
 #include "UniqueObject.h"
 #include "InputFileStream.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "SparsePhraseDictionaryFeature.h"
 #include "Util.h"
 #include "DummyScoreProducers.h"
 #include "util/tokenize_piece.hh"
@@ -166,12 +165,6 @@ protected:
       //sparse features.
       //These are already in log-space
       ScoreComponentCollection sparseFeatures;
-      if (m_obj->GetSparsePhraseDictionaryFeature()) {
-        for (size_t j = 0; j < cands[i].fnames.size(); ++j) {
-          sparseFeatures.Assign(m_obj->GetSparsePhraseDictionaryFeature(),
-            *(cands[i].fnames[j]), cands[i].fvalues[j]);
-        } 
-      }
       CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, sparseFeatures, wacands[i], weights, weightWP, &src);
       costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
       tCands.push_back(targetPhrase);

@@ -44,7 +44,6 @@ namespace Moses
 
 PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
 :DecodeFeature(description, line)
-,m_sparsePhraseDictionaryFeature(NULL)
 {
   m_tableLimit= 20; // TODO default?
 

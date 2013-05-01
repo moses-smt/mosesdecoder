@@ -39,7 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
-#include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
 #include "TargetWordInsertionFeature.h"
@@ -642,11 +641,6 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-    else if (feature == "SparsePhraseDictionaryFeature") {
-      SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
-      //SetWeights(model, weights);
-      m_sparsePhraseDictionary.push_back(model);
-    }
     else if (feature == "Distortion") {
       DistortionScoreProducer *model = new DistortionScoreProducer(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
@@ -1154,14 +1148,8 @@ void StaticData::CollectFeatureFunctions()
     }
   }
 
-  // put sparse feature into normal pt. TODO redo this
   for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
     PhraseDictionary *pt = m_phraseDictionary[i];
-
-    if (i < m_sparsePhraseDictionary.size()) {
-      SparsePhraseDictionaryFeature *sparse = m_sparsePhraseDictionary[i];
-      pt->SetSparsePhraseDictionaryFeature(sparse);
-    }
     pt->InitDictionary();
   }
 }

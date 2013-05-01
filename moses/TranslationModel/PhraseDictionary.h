@@ -49,8 +49,6 @@ class ChartCellCollectionBase;
 class TranslationSystem;
 class ChartRuleLookupManager;
 
-class SparsePhraseDictionaryFeature;
-
 /**
   * Abstract base class for phrase dictionaries (tables).
   **/
@@ -84,13 +82,6 @@ public:
     const InputType &,
     const ChartCellCollectionBase &) = 0;
 
-  SparsePhraseDictionaryFeature* GetSparsePhraseDictionaryFeature() const {
-    return m_sparsePhraseDictionaryFeature;
-  }
-  void SetSparsePhraseDictionaryFeature(SparsePhraseDictionaryFeature *spdf) {
-    m_sparsePhraseDictionaryFeature = spdf;
-  }
-
   //Initialises the dictionary (may involve loading from file)
   virtual bool InitDictionary()
   { return true; }
@@ -123,8 +114,6 @@ protected:
 
   std::string m_targetFile;
   std::string m_alignmentsFile;
-  SparsePhraseDictionaryFeature* m_sparsePhraseDictionaryFeature;
-
 };
 
 }

@@ -413,18 +413,6 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     SetWeight("PhraseDictionaryTreeAdaptor", 0, inputWeights);
   }
 
-  // convert sparse pt feature
-  if (isParamSpecified("ttable-file")) {
-    PARAM_VEC &ttable = m_setting["ttable-file"];
-    for (size_t ttableInd = 0; ttableInd < ttable.size(); ++ttableInd) {
-      string &line = ttable[ttableInd];
-      vector<string> toks = Tokenize(line);
-      if (toks.size() == 6 && toks[5] == "sparse") {
-        AddFeature("SparsePhraseDictionaryFeature");
-      }
-    }
-  }
-
   // convert actually pt feature
   VERBOSE(2,"Creating phrase table features" << endl);
 

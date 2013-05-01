@@ -53,7 +53,6 @@ namespace Moses
 
 class InputType;
 class PhraseDictionary;
-class SparsePhraseDictionaryFeature;
 class GenerationDictionary;
 class DecodeStep;
 class UnknownWordPenaltyProducer;
@@ -76,7 +75,6 @@ protected:
 
   std::map<long,Phrase> m_constraints;
   std::vector<PhraseDictionary*>	m_phraseDictionary;
-  std::vector<SparsePhraseDictionaryFeature*>	m_sparsePhraseDictionary;
   std::vector<const GenerationDictionary*>	m_generationDictionary;
   Parameter *m_parameter;
   std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
