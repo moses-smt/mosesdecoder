@@ -174,11 +174,16 @@ enum ParsingAlgorithm {
 };
 
 enum SearchAlgorithm {
-  Normal				= 0
-  ,CubePruning	= 1
-  ,CubeGrowing	= 2
-  ,ChartDecoding= 3
-  ,NormalBatch  = 4
+  // standard beam search for phrase-based models.
+  Normal            = 0
+
+  ,CubePruning      = 1
+
+  // N.B. not implemented.
+  ,CubeGrowing      = 2
+
+  ,ChartDecoding    = 3
+  ,NormalBatch      = 4
   ,ChartIncremental = 5
 };
 

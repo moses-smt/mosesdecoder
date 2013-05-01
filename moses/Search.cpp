@@ -1,4 +1,3 @@
-
 #include "Manager.h"
 #include "SearchCubePruning.h"
 #include "SearchNormal.h"
@@ -7,7 +6,6 @@
 
 namespace Moses
 {
-
 
 Search *Search::CreateSearch(Manager& manager, const InputType &source,
                              SearchAlgorithm searchAlgorithm, const TranslationOptionCollection &transOptColl)
@@ -26,9 +24,6 @@ Search *Search::CreateSearch(Manager& manager, const InputType &source,
     abort();
     return NULL;
   }
-
 }
 
 }
-
-
