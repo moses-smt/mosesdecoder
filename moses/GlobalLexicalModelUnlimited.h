@@ -12,8 +12,11 @@
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"
-
 #include "FFState.h"
+
+#include "util/string_piece.hh"
+#include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -35,8 +38,8 @@ class InputType;
 
 class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
 {
+  // TODO(ehasler): This should be an array of size 256.
 	typedef std::map< char, short > CharHash;
-	typedef std::map< std::string, short > StringHash;
 
   struct ThreadLocalStorage
   {
@@ -64,8 +67,8 @@ private:
   float m_sparseProducerWeight;
   bool m_ignorePunctuation;
 
-  std::set<std::string> m_vocabSource;
-  std::set<std::string> m_vocabTarget;
+  boost::unordered_set<std::string> m_vocabSource;
+  boost::unordered_set<std::string> m_vocabTarget;
 
 public:
   GlobalLexicalModelUnlimited(const std::vector< FactorType >& inFactors, const std::vector< FactorType >& outFactors,
@@ -137,9 +140,9 @@ public:
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
-	void AddFeature(ScoreComponentCollection* accumulator, StringHash alreadyScored,
-			std::string sourceTrigger, std::string sourceWord, std::string targetTrigger,
-			std::string targetWord) const;
+	void AddFeature(ScoreComponentCollection* accumulator,
+			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
+			StringPiece targetWord) const;
 };
 
 }

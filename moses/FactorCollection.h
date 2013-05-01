@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 
 #include "util/string_piece.hh"
+#include "util/pool.hh"
 #include "Factor.h"
 
 namespace Moses
@@ -62,26 +63,19 @@ class FactorCollection
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
 
   struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
-    std::size_t operator()(const StringPiece &str) const {
-      return util::MurmurHashNative(str.data(), str.size());
-    }
     std::size_t operator()(const FactorFriend &factor) const {
-      return (*this)(factor.in.GetString());
+      return util::MurmurHashNative(factor.in.m_string.data(), factor.in.m_string.size());
     }
   };
   struct EqualsFactor : public std::binary_function<const FactorFriend &, const FactorFriend &, bool> {
     bool operator()(const FactorFriend &left, const FactorFriend &right) const {
       return left.in.GetString() == right.in.GetString();
     }
-    bool operator()(const FactorFriend &left, const StringPiece &right) const {
-      return left.in.GetString() == right;
-    }
-    bool operator()(const StringPiece &left, const FactorFriend &right) const {
-      return left == right.in.GetString();
-    }
   };
   typedef boost::unordered_set<FactorFriend, HashFactor, EqualsFactor> Set;
   Set m_set;
+
+  util::Pool m_string_backing;
 
   static FactorCollection s_instance;
 #ifdef WITH_THREADS
@@ -116,7 +110,6 @@ public:
   TO_STRING();
 
 };
-
 
 }
 #endif

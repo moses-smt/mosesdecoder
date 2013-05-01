@@ -21,7 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/TranslationModel/PhraseDictionary.h"
 #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#include "moses/TranslationModel/PhraseDictionaryInterpolated.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
@@ -122,19 +121,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                , system->GetWeightWordPenalty());
     CHECK(ret);
     return pdta;
-  } else if (m_implementation == Interpolated) {
-    PhraseDictionaryInterpolated* pdi = new PhraseDictionaryInterpolated(GetNumScoreComponents(), m_numInputScores,this);
-    bool ret = pdi->Load(
-                 GetInput()
-               , GetOutput()
-               , m_config
-               , weightT
-               , m_tableLimit
-               , system->GetLanguageModels()
-               , system->GetWeightWordPenalty());
-    CHECK(ret);
-    return pdi;
-  } else if (m_implementation == SCFG || m_implementation == Hiero) {
+  }  else if (m_implementation == SCFG || m_implementation == Hiero) {
     // memory phrase table
     if (m_implementation == Hiero) {
       VERBOSE(2,"using Hiero format phrase tables" << std::endl);
@@ -243,7 +230,7 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
-  } else if (m_implementation == MultiModel ) {
+  } else if (m_implementation == MultiModel || m_implementation == MultiModelThreadUnsafe ) {
     // memory phrase table
     VERBOSE(2,"multi-model mode" << std::endl);
     if (staticData.GetInputType() != SentenceInput) {
@@ -256,6 +243,8 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
                          , m_config
                          , weightT
                          , m_tableLimit
+                         , m_numInputScores
+                         , m_implementation == MultiModel
                          , system->GetLanguageModels()
                          , system->GetWeightWordPenalty());
     CHECK(ret);

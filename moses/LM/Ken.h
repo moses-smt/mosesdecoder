@@ -24,14 +24,63 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 
-#include "moses/TypeDef.h"
+#include "lm/word_index.hh"
+
+#include "moses/Word.h"
+#include "moses/LM/Base.h"
 
 namespace Moses {
 
-class LanguageModel;
+  class FFState;
 
 //! This will also load. Returns a templated KenLM class
 LanguageModel *ConstructKenLM(const std::string &file, FactorType factorType, bool lazy);
+
+/*
+ * An implementation of single factor LM using Kenneth's code.
+ */
+template <class Model> class LanguageModelKen : public LanguageModel {
+  public:
+    LanguageModelKen(const std::string &file, FactorType factorType, bool lazy);
+
+    virtual LanguageModel *Duplicate() const;
+
+    virtual bool Useable(const Phrase &phrase) const;
+
+    std::string GetScoreProducerDescription(unsigned) const;
+							    
+    virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
+
+    virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+
+    virtual FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+
+    virtual FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
+
+    virtual void IncrementalCallback(Incremental::Manager &manager) const;
+
+  protected:
+
+    boost::shared_ptr<Model> m_ngram;
+
+    const Factor *m_beginSentenceFactor;
+
+    FactorType m_factorType;
+
+    lm::WordIndex TranslateID(const Word &word) const {
+      std::size_t factor = word.GetFactor(m_factorType)->GetId();
+      return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+    }
+
+  private:
+    LanguageModelKen(const LanguageModelKen<Model> &copy_from);
+
+    // Convert last words of hypothesis into vocab ids, returning an end pointer.  
+    lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
+    
+    std::vector<lm::WordIndex> m_lmIdLookup;
+
+};
 
 } // namespace Moses
 

@@ -26,6 +26,7 @@
 #include <stdexcept>
 
 #include "FeatureVector.h"
+#include "util/string_piece_hash.hh"
 
 using namespace std;
 
@@ -41,12 +42,12 @@ namespace Moses {
   boost::shared_mutex FName::m_idLock;
 #endif
   
-  void FName::init(const string& name)  {
+  void FName::init(const StringPiece &name)  {
 #ifdef WITH_THREADS
     //reader lock
     boost::shared_lock<boost::shared_mutex> lock(m_idLock);
 #endif
-    Name2Id::iterator i = name2id.find(name);
+    Name2Id::iterator i = FindStringPiece(name2id, name);
     if (i != name2id.end()) {
       m_id = i->second;
     } else {
@@ -55,15 +56,15 @@ namespace Moses {
       lock.unlock();
       boost::unique_lock<boost::shared_mutex> write_lock(m_idLock);
 #endif
-      //Need to check again if the id is in the map, as someone may have added
-      //it while we were waiting on the writer lock.
-      if (i != name2id.end()) {
-        m_id = i->second;
-      } else {
-        m_id = name2id.size();
-        name2id[name] = m_id;
-        id2name.push_back(name);
+      std::pair<std::string, size_t> to_ins;
+      to_ins.first.assign(name.data(), name.size());
+      to_ins.second = name2id.size();
+      std::pair<Name2Id::iterator, bool> res(name2id.insert(to_ins));
+      if (res.second) {
+        // TODO this should be string pointers backed by the hash table.
+        id2name.push_back(to_ins.first);
       }
+      m_id = res.first->second;
     }
   }
   
