@@ -576,12 +576,12 @@ bool StaticData::LoadData(Parameter *parameter)
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-    else if (feature == "swd") {
+    else if (feature == "SourceWordDeletionFeature") {
       SourceWordDeletionFeature *model = new SourceWordDeletionFeature(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
-    else if (feature == "twi") {
+    else if (feature == "TargetWordInsertionFeature") {
       TargetWordInsertionFeature *model = new TargetWordInsertionFeature(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
