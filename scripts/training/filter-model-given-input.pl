@@ -35,11 +35,13 @@ my $ZCAT = "gzip -cd";
 
 # get optional parameters
 my $opt_hierarchical = 0;
+my $tempdir = undef;
 my $binarizer = undef;
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 
 GetOptions(
+    "tempdir=s" => \$tempdir, # for sorting etc.
     "gzip!" => \$opt_gzip,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
@@ -56,6 +58,8 @@ if (!defined $dir || !defined $config || !defined $input) {
   exit 1;
 }
 $dir = ensure_full_path($dir);
+
+$tempdir = $dir if !defined $tempdir;
 
 # buggy directory in place?
 if (-d $dir && ! -e "$dir/info") {
@@ -115,18 +119,21 @@ while(<INI>) {
         $cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
         $new_name .= ".$cnt";
         $new_name_used{$new_name} = 1;
-	if ($binarizer && $phrase_table_impl == 6) {
-    	  print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
-        }
-        elsif ($binarizer && $phrase_table_impl == 0) {
-          if ($binarizer =~ /processPhraseTableMin/) {
-            print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
+	if ($binarizer) {
+          if ($phrase_table_impl == 6) {
+    	    print INI_OUT "2 $source_factor $t $w $new_name.bin$table_flag\n";
+          } elsif ($phrase_table_impl == 0) {
+            if ($binarizer =~ /processPhraseTableMin/) {
+              print INI_OUT "12 $source_factor $t $w $new_name$table_flag\n";
+            } else {
+    	      print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
+            }
           } else {
-    	    print INI_OUT "1 $source_factor $t $w $new_name$table_flag\n";
+            die "Can't binarize ttable of type $phrase_table_impl";
           }
         } else {
           $new_name .= ".gz" if $opt_gzip;
-    	    print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
+    	  print INI_OUT "$phrase_table_impl $source_factor $t $w $new_name$table_flag\n";
         }
     	push @TABLE_NEW_NAME,$new_name;
 
@@ -236,17 +243,21 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     my $new_file = $TABLE_NEW_NAME[$i];
     print STDERR "filtering $file -> $new_file...\n";
 
+    my $mid_file = $new_file; # used when both filtering and binarizing
+    $mid_file .= ".gz"
+      if $mid_file !~ /\.gz/
+         && $binarizer && $binarizer =~ /processPhraseTable/;
+
     my $openstring = mk_open_string($file);
 
-    my $new_openstring;
-    if ($new_file =~ /\.gz$/) {
-      $new_openstring = "| gzip -c > $new_file";
+    my $mid_openstring;
+    if ($mid_file =~ /\.gz$/) {
+      $mid_openstring = "| gzip -c > $mid_file";
     } else {
-      $new_openstring = ">$new_file";
+      $mid_openstring = ">$mid_file";
     }
 
-    open(FILE_OUT,$new_openstring) or die "Can't write to $new_openstring";
-
+    open(FILE_OUT,$mid_openstring) or die "Can't write to $mid_openstring";
     if ($opt_hierarchical) {
         my $tmp_input = $TMP_INPUT_FILENAME{$factors};
         my $options = "";
@@ -256,7 +267,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
             print FILE_OUT $line
         }
         close(FILEHANDLE);
-    } else {
+    } else { # standard binarization
         open(FILE,$openstring) or die "Can't open '$openstring'";
         while(my $entry = <FILE>) {
             my ($foreign,$rest) = split(/ \|\|\| /,$entry,2);
@@ -271,6 +282,7 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         die "No phrases found in $file!" if $total == 0;
         printf STDERR "$used of $total phrases pairs used (%.2f%s) - note: max length $MAX_LENGTH\n",(100*$used/$total),'%';
     }
+    close(FILE_OUT);
 
     if(defined($binarizer)) {
       print STDERR "binarizing...";
@@ -278,18 +290,19 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       if ($KNOWN_TTABLE{$i}) {
         # ... hierarchical translation model
         if ($opt_hierarchical) {
-          my $cmd = "$binarizer $new_file $new_file.bin";
+          my $cmd = "$binarizer $mid_file $new_file.bin";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         }
         # ... phrase translation model
         elsif ($binarizer =~ /processPhraseTableMin/) {
           #compact phrase table
-          my $cmd = "LC_ALL=C sort -T $dir $new_file > $new_file.sorted; $binarizer -in $new_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $new_file.sorted";
+          my $cmd = "LC_ALL=C sort -T $tempdir $mid_file > $mid_file.sorted; $binarizer -in $mid_file.sorted -out $new_file -nscores $TABLE_WEIGHTS[$i]; rm $mid_file.sorted";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         } else { 
-          my $cmd = "cat $new_file | LC_ALL=C sort -T $dir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
+          my $catcmd = ($mid_file =~ /\.gz$/ ? "zcat" : "cat");
+          my $cmd = "$catcmd $mid_file | LC_ALL=C sort -T $tempdir | $binarizer -ttable 0 0 - -nscores $TABLE_WEIGHTS[$i] -out $new_file";
           print STDERR $cmd."\n";
           print STDERR `$cmd`;
         }
@@ -300,17 +313,16 @@ for(my $i=0;$i<=$#TABLE;$i++) {
         $lexbin =~ s/PhraseTable/LexicalTable/;
         my $cmd;
         if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "LC_ALL=C sort -T $dir $new_file > $new_file.sorted;  $lexbin -in $new_file.sorted -out $new_file; rm $new_file.sorted";
+          $cmd = "LC_ALL=C sort -T $tempdir $mid_file > $mid_file.sorted;  $lexbin -in $mid_file.sorted -out $new_file; rm $mid_file.sorted";
         } else {
           $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
-          $cmd = "$lexbin -in $new_file -out $new_file";
+          $cmd = "$lexbin -in $mid_file -out $new_file";
         }
         print STDERR $cmd."\n";
         print STDERR `$cmd`;
       }
     }
 
-    close(FILE_OUT);
 }
 
 if ($opt_hierarchical)
