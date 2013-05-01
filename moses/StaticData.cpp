@@ -714,18 +714,6 @@ bool StaticData::LoadData(Parameter *parameter)
     return false;
   }
 
-  // report individual sparse features in n-best list
-  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-    for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
-      const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
-        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerDescription()) == 0) {
-          m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();
-        }
-      }
-    } // for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").
-  }
-
   //Add any other features here.
 
   //Load extra feature weights

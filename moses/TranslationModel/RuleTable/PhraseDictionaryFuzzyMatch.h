@@ -62,10 +62,6 @@ namespace Moses
       assert(false);
       return NULL;
     }
-    virtual DecodeType GetDecodeType() const
-    {
-      assert(false);
-    }
     
     TO_STRING();
     
