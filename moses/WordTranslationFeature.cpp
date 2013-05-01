@@ -7,7 +7,7 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
-#include <boost/algorithm/string.hpp>
+#include "util/string_piece_hash.hh"
 
 namespace Moses {
 
@@ -25,14 +25,11 @@ bool WordTranslationFeature::Load(const std::string &filePathSource, const std::
     
     std::string line;
     while (getline(inFileSource, line)) {
-      std::set<std::string> terms;
+      m_vocabDomain.resize(m_vocabDomain.size() + 1);
       vector<string> termVector;
       boost::split(termVector, line, boost::is_any_of("\t "));
       for (size_t i=0; i < termVector.size(); ++i) 
-	terms.insert(termVector[i]);	
-      
-      // add term set for current document
-      m_vocabDomain.push_back(terms);
+	m_vocabDomain.back().insert(termVector[i]);  
     }
     
     inFileSource.close();
@@ -89,24 +86,24 @@ void WordTranslationFeature::Evaluate
     if (m_factorTypeSource == 0 && ws.IsNonTerminal()) continue;
     Word wt = targetPhrase.GetWord(targetIndex);
     if (m_factorTypeSource == 0 && wt.IsNonTerminal()) continue;
-    string sourceWord = ws.GetFactor(m_factorTypeSource)->GetString();
-    string targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
+    StringPiece sourceWord = ws.GetFactor(m_factorTypeSource)->GetString();
+    StringPiece targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
     if (m_ignorePunctuation) {
       // check if source or target are punctuation
-      char firstChar = sourceWord.at(0);
+      char firstChar = sourceWord.data()[0];
       CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
       if(charIterator != m_punctuationHash.end())
       	continue;
-      firstChar = targetWord.at(0);
+      firstChar = targetWord.data()[0];
       charIterator = m_punctuationHash.find( firstChar );
       if(charIterator != m_punctuationHash.end())
         continue;
     }
 
     if (!m_unrestricted) {
-      if (m_vocabSource.find(sourceWord) == m_vocabSource.end())
+      if (FindStringPiece(m_vocabSource, sourceWord) == m_vocabSource.end())
 	sourceWord = "OTHER";
-      if (m_vocabTarget.find(targetWord) == m_vocabTarget.end())
+      if (FindStringPiece(m_vocabTarget, targetWord) == m_vocabTarget.end())
 	targetWord = "OTHER";
     }
 
@@ -167,7 +164,7 @@ void WordTranslationFeature::Evaluate
       else {
 	// range over domain trigger words (keywords)
 	const long docid = input.GetDocumentId();
-	for (set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
+	for (boost::unordered_set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
 	  string sourceTrigger = *p;
 	  stringstream feature;
 	  feature << "wt_";
@@ -196,10 +193,10 @@ void WordTranslationFeature::Evaluate
       // range over source words to get context
       for(size_t contextIndex = 0; contextIndex < input.GetSize(); contextIndex++ ) {
 	if (contextIndex == globalSourceIndex) continue;
-	string sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
+	StringPiece sourceTrigger = input.GetWord(contextIndex).GetFactor(m_factorTypeSource)->GetString();
 	if (m_ignorePunctuation) {
 	  // check if trigger is punctuation
-	  char firstChar = sourceTrigger.at(0);
+	  char firstChar = sourceTrigger.data()[0];
 	  CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
 	  if(charIterator != m_punctuationHash.end())
 	    continue;
@@ -208,9 +205,9 @@ void WordTranslationFeature::Evaluate
 	const long docid = input.GetDocumentId();
 	bool sourceTriggerExists = false;
 	if (m_domainTrigger)
-	  sourceTriggerExists = m_vocabDomain[docid].find( sourceTrigger ) != m_vocabDomain[docid].end();
+	  sourceTriggerExists = FindStringPiece(m_vocabDomain[docid], sourceTrigger) != m_vocabDomain[docid].end();
 	else if (!m_unrestricted)
-	  sourceTriggerExists = m_vocabSource.find( sourceTrigger ) != m_vocabSource.end();
+	  sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger) != m_vocabSource.end();
 	
 	if (m_domainTrigger) {
 	  if (sourceTriggerExists) {
@@ -304,24 +301,24 @@ void WordTranslationFeature::EvaluateChart(
     if (m_factorTypeSource == 0 && ws.IsNonTerminal()) continue;
     Word wt = targetPhrase.GetWord(targetIndex);
     if (m_factorTypeSource == 0 && wt.IsNonTerminal()) continue;
-    string sourceWord = ws.GetFactor(m_factorTypeSource)->GetString();
-    string targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
+    StringPiece sourceWord = ws.GetFactor(m_factorTypeSource)->GetString();
+    StringPiece targetWord = wt.GetFactor(m_factorTypeTarget)->GetString();
     if (m_ignorePunctuation) {
       // check if source or target are punctuation
-      char firstChar = sourceWord.at(0);
+      char firstChar = sourceWord[0];
       CharHash::const_iterator charIterator = m_punctuationHash.find( firstChar );
       if(charIterator != m_punctuationHash.end())
       	continue;
-      firstChar = targetWord.at(0);
+      firstChar = targetWord[0];
       charIterator = m_punctuationHash.find( firstChar );
       if(charIterator != m_punctuationHash.end())
         continue;
     }
 
     if (!m_unrestricted) {
-    	if (m_vocabSource.find(sourceWord) == m_vocabSource.end())
+    	if (FindStringPiece(m_vocabSource, sourceWord) == m_vocabSource.end())
     		sourceWord = "OTHER";
-    	if (m_vocabTarget.find(targetWord) == m_vocabTarget.end())
+    	if (FindStringPiece(m_vocabTarget, targetWord) == m_vocabTarget.end())
     		targetWord = "OTHER";
     }
     

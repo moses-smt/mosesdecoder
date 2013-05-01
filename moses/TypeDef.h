@@ -123,6 +123,8 @@ enum LMImplementation {
   ,LazyKen	= 9
   ,ORLM = 10
   ,LDHTLM = 11
+  ,BackwardLM = 12
+  ,LazyBackwardLM = 13
 };
 
 enum PhraseTableImplementation {
@@ -139,7 +141,7 @@ enum PhraseTableImplementation {
   ,ALSuffixArray = 10
   ,FuzzyMatch    = 11
   ,Compact      = 12
-  ,Interpolated = 13
+  ,MultiModelThreadUnsafe = 97
   ,MultiModelCounts = 98
   ,MultiModel   = 99
 };
@@ -171,11 +173,16 @@ enum ParsingAlgorithm {
 };
 
 enum SearchAlgorithm {
-  Normal				= 0
-  ,CubePruning	= 1
-  ,CubeGrowing	= 2
-  ,ChartDecoding= 3
-  ,NormalBatch  = 4
+  // standard beam search for phrase-based models.
+  Normal            = 0
+
+  ,CubePruning      = 1
+
+  // N.B. not implemented.
+  ,CubeGrowing      = 2
+
+  ,ChartDecoding    = 3
+  ,NormalBatch      = 4
   ,ChartIncremental = 5
 };
 

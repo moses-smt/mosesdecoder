@@ -2,7 +2,7 @@
 #define moses_TargetWordInsertionFeature_h
 
 #include <string>
-#include <map>
+#include <boost/unordered_set.hpp>
 
 #include "FeatureFunction.h"
 #include "FactorCollection.h"
@@ -15,7 +15,7 @@ namespace Moses
  */
 class TargetWordInsertionFeature : public StatelessFeatureFunction {
 private:
-  std::set<std::string> m_vocab;
+  boost::unordered_set<std::string> m_vocab;
   FactorType m_factorType;
   bool m_unrestricted;
 

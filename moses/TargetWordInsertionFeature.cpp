@@ -6,6 +6,7 @@
 #include "ChartHypothesis.h"
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
+#include "util/string_piece_hash.hh"
 
 namespace Moses {
 
@@ -73,9 +74,9 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
     if (!aligned[i]) {
       Word w = targetPhrase.GetWord(i);
       if (!w.IsNonTerminal()) {
-    	const string &word = w.GetFactor(m_factorType)->GetString();
+    	const StringPiece &word = w.GetFactor(m_factorType)->GetString();
     	if (word != "<s>" && word != "</s>") {
-      	  if (!m_unrestricted && m_vocab.find( word ) == m_vocab.end()) {
+      	  if (!m_unrestricted && FindStringPiece(m_vocab, word) == m_vocab.end()) {
       		accumulator->PlusEquals(this,"OTHER",1);
       	  }
       	  else {

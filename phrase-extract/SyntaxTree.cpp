@@ -50,6 +50,7 @@ SyntaxNode *SyntaxTree::AddNode( int startPos, int endPos, std::string label )
   SyntaxNode* newNode = new SyntaxNode( startPos, endPos, label );
   m_nodes.push_back( newNode );
   m_index[ startPos ][ endPos ].push_back( newNode );
+  m_size = std::max(endPos+1, m_size);
   return newNode;
 }
 
@@ -57,11 +58,9 @@ ParentNodes SyntaxTree::Parse()
 {
   ParentNodes parents;
 
-  int size = m_index.size();
-
   // looping through all spans of size >= 2
-  for( int length=2; length<=size; length++ ) {
-    for( int startPos = 0; startPos <= size-length; startPos++ ) {
+  for( int length=2; length<=m_size; length++ ) {
+    for( int startPos = 0; startPos <= m_size-length; startPos++ ) {
       if (HasNode( startPos, startPos+length-1 )) {
         // processing one (parent) span
 
@@ -72,15 +71,18 @@ ParentNodes SyntaxTree::Parse()
 
         int first = 1;
         int covered = 0;
-        while( covered < length ) {
+        int found_somehing = 1; // break loop if nothing found
+        while( covered < length && found_somehing ) {
           // find largest covering subspan (child)
           // starting at last covered position
+          found_somehing = 0;
           for( int midPos=length-first; midPos>covered; midPos-- ) {
             if( HasNode( startPos+covered, startPos+midPos-1 ) ) {
               covered = midPos;
               splitPoints.push_back( startPos+covered );
               // std::cerr << " " << ( startPos+covered );
               first = 0;
+              found_somehing = 1;
             }
           }
         }

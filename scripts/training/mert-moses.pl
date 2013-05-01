@@ -720,23 +720,30 @@ while (1) {
     $uninterpolated_config= $___CONFIG unless $uninterpolated_config; 
 
     # Interpolation
-    my $interpolated_phrase_table = "naive ";
-    $interpolated_phrase_table .= join(" ", @_PROMIX_TABLES_BIN);
-    # convert from table,feature ordering to feature,table ordering
-    my @transposed_weights;
-    for my $feature (0..($num_mixed_phrase_features-1)) {
-      my @table_weights;
-      for my $table (0..(scalar(@__PROMIX_TABLES)-1)) {
-        push @table_weights, $promix_weights[$table * $num_mixed_phrase_features + $feature];
-      }
-      push @transposed_weights, join ",", @table_weights;
+    my $interpolated_phrase_table = "interpolate";
+    for my $itable (@_PROMIX_TABLES_BIN) {
+      $interpolated_phrase_table .= " 1:$itable";
     }
-    $interpolated_phrase_table .= " ";
-    $interpolated_phrase_table .=  join(";",@transposed_weights);
-
+    
     # Create an ini file for the interpolated phrase table
     $interpolated_config ="moses.interpolated.ini"; 
-    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "13");
+    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "97");
+
+    # Append the multimodel weights
+    open(ITABLE,">>$interpolated_config") || die "Failed to append weights to $interpolated_config";
+    print ITABLE "\n";
+    print ITABLE "[weight-t-multimodel]\n";
+    #for my $feature (0..($num_mixed_phrase_features-1)) {
+    #  for my $table (0..(scalar(@__PROMIX_TABLES)-1)) {
+    #    print ITABLE $promix_weights[$table * $num_mixed_phrase_features + $feature];
+    #    print ITABLE "\n";
+    #  }
+    #}
+    for my $iweight (@promix_weights) {
+      print ITABLE $iweight . "\n";
+    }
+
+    close ITABLE;
 
     # the decoder should now use the interpolated model
     $___CONFIG = "$interpolated_config";

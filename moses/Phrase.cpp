@@ -265,9 +265,8 @@ bool Phrase::Contains(const vector< vector<string> > &subPhraseVector
       FactorType factorType = inputFactor[currFactorIndex];
       for (size_t currSubPos = 0 ; currSubPos < subSize ; currSubPos++) {
         size_t currThisPos = currSubPos + currStartPos;
-        const string &subStr	= subPhraseVector[currSubPos][currFactorIndex]
-                                ,&thisStr	= GetFactor(currThisPos, factorType)->GetString();
-        if (subStr != thisStr) {
+        const string &subStr	= subPhraseVector[currSubPos][currFactorIndex];
+        if (subStr != GetFactor(currThisPos, factorType)->GetString()) {
           match = false;
           break;
         }
