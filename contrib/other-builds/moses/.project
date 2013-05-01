@@ -872,16 +872,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SourceWordDeletionFeature.h</locationURI>
 		</link>
 		<link>
-			<name>SparsePhraseDictionaryFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SparsePhraseDictionaryFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>SparsePhraseDictionaryFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SparsePhraseDictionaryFeature.h</locationURI>
-		</link>
-		<link>
 			<name>SquareMatrix.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SquareMatrix.cpp</locationURI>

@@ -52,6 +52,9 @@ public:
   
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
+
+  StatelessFeatureType GetStatelessFeatureType() const
+  { return NotCacheable; }
 };
 
 }
