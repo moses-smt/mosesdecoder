@@ -37,6 +37,7 @@ my $ZCAT = "gzip -cd";
 my $opt_hierarchical = 0;
 my $tempdir = undef;
 my $binarizer = undef;
+my $binarize_distortion_model = 1; # if some binarizer is given!
 my $opt_min_non_initial_rule_count = undef;
 my $opt_gzip = 1; # gzip output files (so far only phrase-based ttable until someone tests remaining models and formats)
 
@@ -45,6 +46,7 @@ GetOptions(
     "gzip!" => \$opt_gzip,
     "Hierarchical" => \$opt_hierarchical,
     "Binarizer=s" => \$binarizer,
+    "binarize-distortion-model!" => \$binarize_distortion_model, # (dis)allow (the given) binarizer for distortion models
     "MinNonInitialRuleCount=i" => \$opt_min_non_initial_rule_count
 ) or exit(1);
 
@@ -158,7 +160,12 @@ while(<INI>) {
 
     	$file =~ s/^.*\/+([^\/]+)/$1/g;
     	my $new_name = "$dir/$file";
-	    $new_name =~ s/\.gz//;
+	$new_name =~ s/\.gz//;
+        if ($binarizer && $binarize_distortion_model) {
+          # the filename should not include .gz for binarized models
+        } else {
+          $new_name .= ".gz" if $opt_gzip;
+        }
     	print INI_OUT "$factors $t $w $new_name\n";
     	push @TABLE_NEW_NAME,$new_name;
 
@@ -309,17 +316,19 @@ for(my $i=0;$i<=$#TABLE;$i++) {
       }
       # reordering model
       else {
-        my $lexbin = $binarizer; 
-        $lexbin =~ s/PhraseTable/LexicalTable/;
-        my $cmd;
-        if ($lexbin =~ /processLexicalTableMin/) {
-          $cmd = "LC_ALL=C sort -T $tempdir $mid_file > $mid_file.sorted;  $lexbin -in $mid_file.sorted -out $new_file; rm $mid_file.sorted";
-        } else {
-          $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
-          $cmd = "$lexbin -in $mid_file -out $new_file";
+        if ($binarize_distortion_model) {
+          my $lexbin = $binarizer; 
+          $lexbin =~ s/PhraseTable/LexicalTable/;
+          my $cmd;
+          if ($lexbin =~ /processLexicalTableMin/) {
+            $cmd = "LC_ALL=C sort -T $tempdir $mid_file > $mid_file.sorted;  $lexbin -in $mid_file.sorted -out $new_file; rm $mid_file.sorted";
+          } else {
+            $lexbin =~ s/^\s*(\S+)\s.+/$1/; # no options
+            $cmd = "$lexbin -in $mid_file -out $new_file";
+          }
+          print STDERR $cmd."\n";
+          print STDERR `$cmd`;
         }
-        print STDERR $cmd."\n";
-        print STDERR `$cmd`;
       }
     }
 
