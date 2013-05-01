@@ -290,6 +290,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
 	const StaticData& staticData = StaticData::Instance();
 	const std::vector<Moses::FactorType>& outputFactorOrder=staticData.GetOutputFactorOrder();
+//	ScoreComponentCollection& weightUpdate = const_cast<ScoreComponentCollection&>(staticData.GetAllWeights());
 	ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
 	std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
 	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
@@ -443,9 +444,11 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	BleuScores.push_back(BleuScore);
 	losses.push_back(loss);
 	oracleModelScores.push_back(maxScore);
+	cerr<<"Weight before : "<<weightUpdate.GetScoreForProducer(sp)<<endl;
 	size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
 			BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,lr);
-
+	cerr<<"Weight after  : "<<weightUpdate.GetScoreForProducer(sp)<<endl;
+//	StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
 	return;
 }
 

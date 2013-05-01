@@ -53,7 +53,7 @@ size_t MiraOptimiser::updateWeights(
 
 		    if (loss > modelScoreDiff)
 		    	diff = loss - modelScoreDiff;
-//		    cerr<<"Loss ("<<loss<<") - modelScoreDiff ("<<modelScoreDiff<<") = "<<diff<<"\n";
+		    cerr<<"Loss ("<<loss<<") - modelScoreDiff ("<<modelScoreDiff<<") = "<<diff<<"\n";
 		    if (diff > epsilon)
 		    	violated = true;
 		    if (m_normaliseMargin) {
@@ -83,7 +83,7 @@ size_t MiraOptimiser::updateWeights(
 	vector<float> alphas;
 	ScoreComponentCollection summedUpdate;
 	if (violatedConstraintsBefore > 0) {
-//		cerr<<"Features values diff size : "<<featureValueDiffs.size() << " (of which violated: " << violatedConstraintsBefore << ")" << endl;
+		cerr<<"Features values diff size : "<<featureValueDiffs.size() << " (of which violated: " << violatedConstraintsBefore << ")" << endl;
 	  if (m_slack != 0) {
 	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
 	  } else {
