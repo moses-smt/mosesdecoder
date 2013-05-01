@@ -15,36 +15,49 @@ my %ALREADY;
 
 foreach my $feature_spec (split(/,\s*/,$specification)) {
   my @SPEC = split(/\s+/,$feature_spec);
+
+  my $factor = ($SPEC[0] eq 'word-translation') ? "0-0" : "0";
+  $factor = $1 if $feature_spec =~ / factor ([\d\-]+)/; 
+
   if ($SPEC[0] eq 'target-word-insertion') {
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/) {
       my $file = &create_top_words($output_extension, $SPEC[2]);
-      $ini .= "[target-word-insertion-feature]\n0 $file\n\n";
-      $report .= "twi\n";
+      $ini .= "[target-word-insertion-feature]\n$factor $file\n\n";
+    }
+    elsif ($SPEC[1] eq 'all') {
+      $ini .= "[target-word-insertion-feature]\n$factor\n\n";
     }
     else {
       die("ERROR: Unknown parameter specification in '$feature_spec'\n");
     }
+    $report .= "twi\n";
   }
   elsif ($SPEC[0] eq 'source-word-deletion') {
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/) {
       my $file = &create_top_words($input_extension, $SPEC[2]);
-      $ini .= "[source-word-deletion-feature]\n0 $file\n\n";
-      $report .= "swd\n";
+      $ini .= "[source-word-deletion-feature]\n$factor $file\n\n";
+    }
+    elsif ($SPEC[1] eq 'all') {
+      $ini .= "[source-word-deletion-feature]\n$factor\n\n";
     }
     else {
       die("ERROR: Unknown parameter specification in '$feature_spec'\n");
     }
+    $report .= "swd\n";
   }
   elsif ($SPEC[0] eq 'word-translation') {
     if ($SPEC[1] eq 'top' && $SPEC[2] =~ /^\d+$/ && $SPEC[3] =~ /^\d+$/) {
       my $file_in  = &create_top_words($input_extension,  $SPEC[2]);
       my $file_out = &create_top_words($output_extension, $SPEC[3]);
-      $ini .= "[word-translation-feature]\n0-0 0 0 0 $file_in $file_out\n\n";
-      $report .= "wt\n";
+      $ini .= "[word-translation-feature]\n0-0 1 0 0 0 0 $file_in $file_out\n\n";
+    }
+    elsif ($SPEC[1] eq 'all') {
+      $ini .= "[word-translation-feature]\n$factor 1 0 0\n\n";
     }
     else {
       die("ERROR: Unknown parameter specification in '$feature_spec'\n");
     }
+    $report .= "wt\n";
   }
   elsif ($SPEC[0] eq 'phrase-length') {
     $ini .= "[phrase-length-feature]\ntrue\n\n";

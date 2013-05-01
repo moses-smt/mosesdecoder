@@ -1468,21 +1468,23 @@ sub score_phrase_factored {
 	&score_phrase($file,$___LEXICAL_FILE,$___EXTRACT_FILE);
     }
     else {
+	my $table_id = 0;
 	foreach my $factor (split(/\+/,$___TRANSLATION_FACTORS)) {
 	    print STDERR "(6) [$factor] score phrases @ ".`date`;
 	    my ($factor_f,$factor_e) = split(/\-/,$factor);
 	    my $file = "$___MODEL_DIR/".($_HIERARCHICAL?"rule-table":"phrase-table").".$factor";
 	    $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
-	    &score_phrase($file,$___LEXICAL_FILE.".".$factor,$___EXTRACT_FILE.".".$factor);
+	    &score_phrase($file,$___LEXICAL_FILE.".".$factor,$___EXTRACT_FILE.".".$factor,$table_id);
+	    $table_id++;
 	}
     }
 }
 
 sub score_phrase {
-    my ($ttable_file,$lexical_file,$extract_file) = @_;
+    my ($ttable_file,$lexical_file,$extract_file,$table_id) = @_;
 
     if ($___PHRASE_SCORER eq "phrase-extract") {
-        &score_phrase_phrase_extract($ttable_file,$lexical_file,$extract_file);
+        &score_phrase_phrase_extract($ttable_file,$lexical_file,$extract_file,$table_id);
     } elsif ($___PHRASE_SCORER eq "memscore") {
         &score_phrase_memscore($ttable_file,$lexical_file,$extract_file);
     } else {
@@ -1491,7 +1493,7 @@ sub score_phrase {
 }
 
 sub score_phrase_phrase_extract {
-    my ($ttable_file,$lexical_file,$extract_file) = @_;
+    my ($ttable_file,$lexical_file,$extract_file,$table_id) = @_;
 
     # distinguish between score and consolidation options
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
@@ -1502,6 +1504,13 @@ sub score_phrase_phrase_extract {
     $COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /\-CountBinFeature ([\s\d]*\d)/;
     $DOMAIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /(\-+[a-z]*Domain[a-z]+ .+)/i;
     $DOMAIN =~ s/ \-.+//g;
+    if ($DOMAIN =~ /^(.+) table ([\d\,]+) *$/) {
+      my ($main_spec,$specified_tables) = ($1,$2);
+      $DOMAIN = "--IgnoreSentenceId";
+      foreach my $specified_table_id (split(/,/,$specified_tables)) {
+	$DOMAIN = $main_spec if $specified_table_id == $table_id;
+      }
+    }
     my $SINGLETON = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /Singleton/);
     my $CROSSEDNONTERM = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /CrossedNonTerm/);
 
