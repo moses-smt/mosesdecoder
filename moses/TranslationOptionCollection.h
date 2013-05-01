@@ -80,8 +80,6 @@ protected:
   //! special handling of ONE unknown words.
   virtual void ProcessOneUnknownWord(const Word &sourceWord, size_t sourcePos, size_t length = 1, const Scores *inputScores = NULL);
 
-  void IncorporateDLMScores();
-
   //! pruning: only keep the top n (m_maxNoTransOptPerCoverage) elements */
   void Prune();
 

@@ -409,9 +409,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   VERBOSE(2,"Translation Option Collection\n " << *this << endl);
 
-  // Incorporate distributed lm scores.
-  IncorporateDLMScores();
-
   ProcessUnknownWord();
 
   // Prune
@@ -424,72 +421,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
-}
-
-void TranslationOptionCollection::IncorporateDLMScores() {
-    // Build list of dlms.
-    const vector<const StatefulFeatureFunction*>& ffs =
-        StatefulFeatureFunction::GetStatefulFeatureFunctions();
-    std::map<int, LanguageModel*> dlm_ffs;
-    for (unsigned i = 0; i < ffs.size(); ++i) {
-        if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WTF
-            dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
-            dlm_ffs[i]->SetFFStateIdx(i);
-        }
-    }
-
-    // Don't need to do anything if we don't have any distributed
-    // language models.
-    if (dlm_ffs.size() == 0) {
-        return;
-    }
-
-    // Iterate over all translation options in the collection.
-    std::vector< std::vector< TranslationOptionList > >::iterator start_iter; 
-    for (start_iter = m_collection.begin();
-         start_iter != m_collection.end();
-         ++start_iter) {
-        std::vector< TranslationOptionList >::iterator end_iter;
-        for (end_iter = (*start_iter).begin();
-             end_iter != (*start_iter).end();
-             ++end_iter) {
-            std::vector< TranslationOption* >::iterator option_iter;
-            for (option_iter = (*end_iter).begin();
-                 option_iter != (*end_iter).end();
-                 ++option_iter) {
-
-                // Get a handle on the current translation option.
-                TranslationOption* option = *option_iter;
-
-                std::map<int, LanguageModel*>::iterator dlm_iter;
-                for (dlm_iter = dlm_ffs.begin();
-                     dlm_iter != dlm_ffs.end();
-                     ++dlm_iter) {
-                    LanguageModel* dlm = (*dlm_iter).second;
-
-
-                    float full_score;
-                    float ngram_score;
-                    size_t oov_count;
-                    TargetPhrase& phrase =
-                        const_cast<TargetPhrase&>(option->GetTargetPhrase());
-                    dlm->CalcScoreFromCache(phrase,
-                                            full_score,
-                                            ngram_score,
-                                            oov_count);
-                    ScoreComponentCollection& option_scores = 
-                        const_cast<ScoreComponentCollection&>(option->GetScoreBreakdown());
-                    option_scores.Assign(dlm, ngram_score);
-                    ScoreComponentCollection& phrase_scores =
-                        const_cast<ScoreComponentCollection&>(phrase.GetScoreBreakdown());
-                    phrase_scores.Assign(dlm, ngram_score);
-
-                    float weighted_score = full_score * dlm->GetWeight();
-                    phrase.SetFutureScore(phrase.GetFutureScore() + weighted_score);
-                }
-            }
-        }
-    }
 }
 
 void TranslationOptionCollection::Sort()

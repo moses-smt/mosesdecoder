@@ -113,9 +113,7 @@ public:
   inline float GetFutureScore() const {
     return m_fullScore;
   }
-  inline void SetFutureScore(float fullScore) {
-    m_fullScore = fullScore;
-  }
+
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;
