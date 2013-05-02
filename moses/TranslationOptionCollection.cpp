@@ -261,11 +261,10 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 	}
 
-    targetPhrase.SetScore(unknownWordPenaltyProducer, unknownScore);
-    targetPhrase.SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
+  targetPhrase.SetScore(unknownWordPenaltyProducer, unknownScore);
 
 	if (inputScores != NULL) {
-		targetPhrase.SetScore(m_system,*inputScores);
+		targetPhrase.SetInputScore(*inputScores);
 	}
 
 	targetPhrase.Evaluate();

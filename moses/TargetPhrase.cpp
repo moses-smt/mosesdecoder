@@ -103,25 +103,18 @@ void TargetPhrase::SetXMLScore(float score)
   SetScore(prod, scoreVector);
 }
 
-/**
- * used for setting scores for unknown words with input link features (lattice/conf. nets)
- * \param scoreVector input scores
- */
-void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &scoreVector)
+void TargetPhrase::SetInputScore(const Scores &scoreVector)
 {
-	//we use an existing score producer to figure out information for score setting (number of scores and weights)
+  //we use an existing score producer to figure out information for score setting (number of scores and weights)
   const StaticData &staticData = StaticData::Instance();
   const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
 
-	vector<float> weights = StaticData::Instance().GetWeights(prod);
-	
-	//expand the input weight vector
-	CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
-	Scores sizedScoreVector = scoreVector;
-	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
+  //expand the input weight vector
+  CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
+  Scores sizedScoreVector = scoreVector;
+  sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
 
-	const LMList &lmList = StaticData::Instance().GetLMList();
-	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,StaticData::Instance().GetWeightWordPenalty(),lmList);
+  SetScore(prod, sizedScoreVector);
 }
 
 void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
