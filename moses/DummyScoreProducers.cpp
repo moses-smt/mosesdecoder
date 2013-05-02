@@ -112,15 +112,17 @@ void WordPenaltyProducer::Evaluate(
     const PhraseBasedFeatureContext& context,
     ScoreComponentCollection* out) const
 {
-	const TargetPhrase& tp = context.GetTargetPhrase();
-  out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+  float score = - targetPhrase.GetNumTerminals();
+
+  out->PlusEquals(this, score);
 }
 
 void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
                     , ScoreComponentCollection &scoreBreakdown
                     , ScoreComponentCollection &estimatedFutureScore) const
 {
-  float score = - targetPhrase.GetSize();
+  float score = - targetPhrase.GetNumTerminals();
   scoreBreakdown.Assign(this, score);
 }
 

@@ -80,30 +80,18 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::Evaluate()
 {
-  return;
-
-  ScoreComponentCollection temp;
   ScoreComponentCollection estimatedFutureScore;
 
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
-    cerr << ff.GetScoreProducerDescription() << endl;
     if (!ff.IsDecodeFeature()) {
-      ff.Evaluate(*this, temp, estimatedFutureScore);
+      ff.Evaluate(*this, m_scoreBreakdown, estimatedFutureScore);
     }
   }
 
-  /*
-  cerr << *this << endl;
-  cerr << "total=" << (estimatedFutureScore.GetWeightedScore() + temp.GetWeightedScore()) << endl;
-  cerr << "estimatedFutureScore=" << estimatedFutureScore.GetWeightedScore()
-        << " " << estimatedFutureScore << endl;
-  cerr << "temp=" << temp.GetWeightedScore() << " " << temp << endl;
-  cerr << "m_fullScore="<< m_fullScore<< " " << m_scoreBreakdown << endl;
-  cerr << flush;
-  */
+  m_fullScore = m_scoreBreakdown.GetWeightedScore() + estimatedFutureScore.GetWeightedScore();
 }
 
 void TargetPhrase::SetScore(float score)

@@ -88,7 +88,7 @@ void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
-  CHECK(false);
+
 }
 
 void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,

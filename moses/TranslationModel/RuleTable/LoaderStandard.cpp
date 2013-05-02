@@ -246,7 +246,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
       targetPhrase->SetSparseScore(&ruleTable, sparseString);
     }
 
-    targetPhrase->SetScoreChart(&ruleTable, scoreVector, weight, languageModels,wpProducer);
+    targetPhrase->SetScore(&ruleTable, scoreVector);
     targetPhrase->Evaluate();
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);

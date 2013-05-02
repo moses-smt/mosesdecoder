@@ -234,9 +234,9 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
-    targetPhrase->SetScoreChart(&ruleTable, scoreVector, weights,
-                                languageModels, wpProducer);
     targetPhrase->SetSourcePhrase(sourcePhrase);
+
+    targetPhrase->Evaluate();
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(

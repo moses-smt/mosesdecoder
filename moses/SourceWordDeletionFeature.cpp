@@ -84,7 +84,7 @@ void SourceWordDeletionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const
 {
-  CHECK(false);
+
 }
 
 void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
