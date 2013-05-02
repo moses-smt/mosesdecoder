@@ -39,7 +39,7 @@ my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_
    $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
    @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
    $_SPARSE_TRANSLATION_TABLE, @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $IGNORE);
+   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE);
 my $_BASELINE_CORPUS = "";
 my $_CORES = 1;
 
@@ -136,6 +136,7 @@ $_HELP = 1
 		       'cores=i' => \$_CORES,
            'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
            'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
+           'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
                );
 
 if ($_HELP) {
@@ -2018,6 +2019,14 @@ sub create_ini {
     } else {
       print INI "\n# no generation models, no weight-generation section\n";
     }
+
+  if ($_NUM_LATTICE_FEATURES) {
+    print INI "\n\n#lattice or confusion net weights\n[weight-i]\n";
+    for (1..$_NUM_LATTICE_FEATURES) {
+      print INI "0.1\n";
+    }
+    print "\n";
+  }
 
   print INI "\n# word penalty\n[weight-w]\n-1\n\n";
 
