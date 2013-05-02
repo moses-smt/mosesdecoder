@@ -27,6 +27,7 @@
 #include "DummyScoreProducers.h"
 #include "Util.h"
 #include "RuleMap.h"
+#include "AlignmentInfo.h"
 
 #include "CellContextScoreProducer.h"
 
@@ -91,7 +92,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
     srcFactors.push_back(0);
     string nonTermRep = "[X][X]";
 
-    VERBOSE(0, "Computing vw scores for source context : " << m_source << endl);     
+    VERBOSE(5, "Computing vw scores for source context : " << m_source << endl);
 
     for (size_t i = 0; i < m_translationOptionList.GetSize(); ++i) {
 
@@ -161,19 +162,26 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                     //Debugging : everything OK in non term index map
                     //for(int i=0; i < 3; i++)
                     //{std::cout << "TEST : Non Term index map : " << i << "=" << ntim[i] << std::endl;}
+
                     const AlignmentInfo alignInfo = (*itr_targets)->GetAlignmentInfo();
-                    AlignmentInfo::const_iterator itr_align;
+                    const AlignmentInfo::NonTermIndexMap alignInfoIndex = (*itr_targets)->GetAlignmentInfo().GetNonTermIndexMap();
                     string alignInd;
-                    //damt hiero : not nice. TODO : better implementation
+
+                    //To get the annotation corresponding to the source, iterate through targets and get source representation
+                    AlignmentInfo::const_iterator itr_align;
+
+                    //Do not use the positions
                     for(itr_align = alignInfo.begin(); itr_align != alignInfo.end(); itr_align++)
                     {
-                        //look for current target
-                        if( itr_align->second == wordCounter)
-                        {
-                            stringstream s;
-                            s << itr_align->first;
-                            alignInd = s.str();
-                        }
+
+                    	//look for current target
+                    	if( itr_align->second == wordCounter)
+                    	{
+                    		//target annotation is source corresponding to this target
+                    		stringstream s;
+                        	s << alignInfoIndex[itr_align->second];
+                        	alignInd = s.str();
+                    	}
                     }
                     targetRepresentation += alignInd;
                 }
@@ -192,7 +200,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
             targetRepresentation += " ";
             targetRepresentation += parentNonTerm;
 
-            VERBOSE(3, "Strings put in rule map : " << sourceSide << "::" << targetRepresentation << endl);
+            VERBOSE(5, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
             ruleMap.AddRule(sourceSide,targetRepresentation);
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
             targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
@@ -226,21 +234,23 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 std::map<std::string,TargetPhrase*> :: iterator itr_rep;
                 CHECK(targetRepMap.find(*itr_targetRep) != targetRepMap.end());
                 itr_rep = targetRepMap.find(*itr_targetRep);
-                VERBOSE(0, "Looking at target phrase : " << *itr_rep->second << std::endl);
-		VERBOSE(0, "Target Phrase score vector before adding stateless : " << (itr_rep->second)->GetScoreBreakdown() << std::endl);
-                VERBOSE(0, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
-                VERBOSE(0, "Score component collection : " << *iterLCSP << std::endl);
+                VERBOSE(5, "Looking at target phrase : " << *itr_rep->second << std::endl);
+                //VERBOSE(5, "Target Phrase score vector before adding stateless : ");
+                //StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(std::cerr,(itr_rep->second)->GetScoreBreakdown());
+                //std::cerr << std::endl;
+                VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(5, "Score component collection : " << *iterLCSP << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
-                VERBOSE(0, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
+                VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }
         }
         //sort target phrase collection again
         transOpt.SortTargetPhrases();
 
         //NOTE : What happens with the stack vector?
-        VERBOSE(0, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(5, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
         transOpt.CalcEstimateOfBestScore();
-        VERBOSE(0, "Estimate of best score after computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
+        VERBOSE(5, "Estimate of best score after computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
   }//end of ifs
 //    #endif // HAVE_VW

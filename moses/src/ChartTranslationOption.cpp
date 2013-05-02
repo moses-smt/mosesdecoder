@@ -20,6 +20,7 @@
 #include "ChartTranslationOption.h"
 
 #include "ChartHypothesis.h"
+#include "StaticData.h"
 
 namespace Moses
 {
@@ -46,6 +47,8 @@ void ChartTranslationOption::CalcEstimateOfBestScore()
 {
   const TargetPhrase * targetPhrase = (*m_targetPhraseCollection->begin());
   float estimateOfBestScore = targetPhrase->GetFutureScore();
+  VERBOSE(5, "Computing Estimate of Best score... Best target " << estimateOfBestScore << std::endl);
+  VERBOSE(5, "Adding hypos... ");
   for (StackVec::const_iterator p = m_stackVec.begin(); p != m_stackVec.end();
        ++p) {
     const HypoList *stack = *p;
@@ -53,7 +56,9 @@ void ChartTranslationOption::CalcEstimateOfBestScore()
     assert(!stack->empty());
     const ChartHypothesis &bestHypo = **(stack->begin());
     estimateOfBestScore += bestHypo.GetTotalScore();
+    VERBOSE(5, bestHypo.GetTotalScore() << " : " << estimateOfBestScore);
   }
+  VERBOSE(5, std::endl);
   m_estimateOfBestScore = estimateOfBestScore;
 }
 

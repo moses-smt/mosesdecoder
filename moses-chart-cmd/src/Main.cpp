@@ -300,20 +300,20 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
       ,&outputFactorOrder = staticData.GetOutputFactorOrder();
   FactorMask inputFactorUsed(inputFactorOrder);
 
-  VERBOSE(0,"MAKING IO" << endl);
+  VERBOSE(5,"MAKING IO" << endl);
 
   // io
   if ( (staticData.GetParam("input-file").size() == 1) && (staticData.GetParam("psd-context").size() > 0 ) && (staticData.GetParam("syntax-context").size() > 0) )
   {
-      VERBOSE(0,"IO from File" << endl);
-      VERBOSE(0,"Context and syntax from File" << endl);
+      VERBOSE(2,"IO from File" << endl);
+      VERBOSE(2,"Context and syntax from File" << endl);
       string filePath1 = staticData.GetParam("input-file")[0];
       //damt hiero : psd context file
       string filePath2 = staticData.GetParam("psd-context")[0];
       //damt hiero : parse file
       string filePath3 = staticData.GetParam("syntax-context")[0];
 
-      std::cerr << "Syntax file parse : " << filePath3 << std::endl;
+      //std::cerr << "Syntax file parse : " << filePath3 << std::endl;
 
       ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
                               , staticData.GetNBestSize()
@@ -326,8 +326,8 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
   {
 	  if ( (staticData.GetParam("input-file").size() == 1) && (staticData.GetParam("psd-context").size() > 0 ) && (staticData.GetParam("syntax-context").size() == 0) )
 	  {
-		   VERBOSE(0,"IO from File" << endl);
-		   VERBOSE(0,"Context from File" << endl);
+		   VERBOSE(5,"IO from File" << endl);
+		   VERBOSE(5,"Context from File" << endl);
 		   string filePath1 = staticData.GetParam("input-file")[0];
 		   //damt hiero : psd context file
 		   string filePath2 = staticData.GetParam("psd-context")[0];
@@ -342,8 +342,8 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
 	  {
 		  if(staticData.GetParam("input-file").size() == 1 && staticData.GetParam("psd-context").size() == 0 && staticData.GetParam("syntax-context").size() == 0)
 		    {
-		      VERBOSE(1,"IO from File : " << endl);
-		      VERBOSE(1,"Context from STDIN" << endl);
+		      VERBOSE(5,"IO from File : " << endl);
+		      VERBOSE(5,"Context from STDIN" << endl);
 		      string filePath = staticData.GetParam("input-file")[0];
 
 		      ioWrapper = new IOWrapper(inputFactorOrder, outputFactorOrder, inputFactorUsed
@@ -361,6 +361,7 @@ IOWrapper *GetIOWrapper(const StaticData &staticData)
 
 	  }
    }
+  ioWrapper->ResetTranslationId();
   IFVERBOSE(1)
   PrintUserTime("Created input-output object");
 

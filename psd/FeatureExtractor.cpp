@@ -163,7 +163,8 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
   size_t spanStart,
   size_t spanEnd,
   const vector<ChartTranslation> &translations,
-  vector<float> &losses)
+  vector<float> &losses,
+  vector<float> &pEgivenF)
 {
 
   //std::cerr << "Generating chart features..." << std::endl;
@@ -189,7 +190,9 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
 
   vector<ChartTranslation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
-  for (; transIt != translations.end(); transIt++, lossIt++) {
+  //Fabienne Braune : compute a vector containing p(e|f) for interpolation
+  vector<float>::iterator pEgivenFit =  pEgivenF.begin();
+  for (; transIt != translations.end(); transIt++, lossIt++, pEgivenFit++) {
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
 
@@ -231,6 +234,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     }
   }
   fc->FinishExample();
+  *pEgivenFit = transIt->m_scores[P_E_F_INDEX];
 }
 
 
@@ -296,7 +300,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorMostFrequent(const vector<st
   string indicStringSource = "";
   string indicStringTarget = "";
   string nonTerm = "[X][X]";
-  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfsourceSpan = sourceSpan.size();
@@ -320,7 +323,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorMostFrequent(const vector<st
         found = targetSpan[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            size_t newTerm = nonTermAlign.lower_bound(i)->second;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -329,7 +332,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorMostFrequent(const vector<st
              {indicStringTarget += "_";}
             indicStringTarget += nonTerm;
             indicStringTarget += sourceAlign;
-            nonTermCounter++;
         }
         else{
         if (indicStringTarget.size()>0)
@@ -388,7 +390,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithContext(const vec
   string indicStringSource = "";
   string indicStringTarget = "";
   string nonTerm = "[X][X]";
-  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfsourceSpan = sourceSpan.size();
@@ -411,7 +412,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithContext(const vec
         found = targetSpan[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            size_t newTerm = nonTermAlign.lower_bound(i)->second;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -420,7 +421,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithContext(const vec
              {indicStringTarget += "_";}
             indicStringTarget += nonTerm;
             indicStringTarget += sourceAlign;
-            nonTermCounter++;
         }
         else{
         if (indicStringTarget.size()>0)
@@ -471,7 +471,6 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
   string parent = "[X]";
   string indicString = "";
   string nonTerm = "[X][X]";
-  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfSpan = span.size();
@@ -481,7 +480,7 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
         found = span[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            size_t newTerm = nonTermAlign.lower_bound(i)->second;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -490,7 +489,6 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
              {indicString += "_";}
             indicString += nonTerm;
             indicString += sourceAlign;
-            nonTermCounter++;
         }
         else{
         if (indicString.size()>0)
@@ -501,6 +499,7 @@ void FeatureExtractor::GenerateIndicatorFeatureChart(const vector<string> &span,
   fc->AddFeature("p^" + indicString);
 }
 
+//TODO : modify to indicate 0 and 1 instead of the numbers for the non-terminals
 void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
 		const vector<string> &sourceSpan, const vector<string> &targetSpan, FeatureConsumer *fc,AlignmentType nonTermAlign,
 		const vector<string> &syntaxLabel, const string parent, const string span)
@@ -514,7 +513,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
   string indicStringSource = "";
   string indicStringTarget = "";
   string nonTerm = "[X][X]";
-  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfsourceSpan = sourceSpan.size();
@@ -537,7 +535,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
         found = targetSpan[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            size_t newTerm = nonTermAlign.lower_bound(i)->second;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -546,7 +544,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
              {indicStringTarget += "_";}
             indicStringTarget += nonTerm;
             indicStringTarget += sourceAlign;
-            nonTermCounter++;
         }
         else{
         if (indicStringTarget.size()>0)
@@ -584,7 +581,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
        }
 
    //for debugging
-   std::cerr << "Extracting from Rule ( " << parent << ") -> <" <<indicStringSource << "( "<< *it << " )"<< " , " << indicStringTarget << ">" << std::endl;
+  //std::cerr << "Extracting from Rule ( " << parent << ") -> <" <<indicStringSource << "( "<< *it << " )"<< " , " << indicStringTarget << ">" << std::endl;
     }
 }
 
@@ -605,7 +602,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithInternalFeaturesC
   string indicStringSource = "";
   string indicStringTarget = "";
   string nonTerm = "[X][X]";
-  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfsourceSpan = sourceSpan.size();
@@ -629,7 +625,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithInternalFeaturesC
         found = targetSpan[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            size_t newTerm = nonTermAlign.lower_bound(i)->second;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -638,7 +634,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithInternalFeaturesC
              {indicStringTarget += "_";}
             indicStringTarget += nonTerm;
             indicStringTarget += sourceAlign;
-            nonTermCounter++;
         }
         else{
         if (indicStringTarget.size()>0)
@@ -647,8 +642,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithInternalFeaturesC
     }
   }
 
-  nonTermCounter = 0;
-
+  int nonTermCounter = 0;
   //generate source indicator features
   vector<string>::const_iterator it;
   for (it = sourceSpan.begin(); it != sourceSpan.end(); it++) {
@@ -662,12 +656,14 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithInternalFeaturesC
               s1 << newTerm;
               string sourceAlign1 =s1.str();
               fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^w^" + nonTerm + sourceAlign1);
-              nonTermCounter++;
           }
           else{
           fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^w^" + *it);}
       }
+      nonTermCounter++;
     }
+
+  nonTermCounter = 0;
 
   //generate target indicator features
   for (it = targetSpan.begin(); it != targetSpan.end(); it++) {
@@ -681,11 +677,11 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithInternalFeaturesC
             s2 << newTerm;
             string sourceAlign2 =s2.str();
             fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^w^" + nonTerm + sourceAlign2);
-            nonTermCounter++;
         }
         else{
         fc->AddFeature("rule^s^" + indicStringSource + "^t^" + indicStringTarget + "^w^" + *it);}
     }
+    nonTermCounter++;
   }
 }
 
@@ -709,11 +705,11 @@ void FeatureExtractor::GenerateInternalFeaturesChart(const vector<string> &span,
             string sourceAlign =s1.str();
 
             fc->AddFeature("w^" + nonTerm + sourceAlign);
-            nonTermCounter++;
         }
         else{
         fc->AddFeature("w^" + *it);}
     }
+    nonTermCounter++;
   }
 }
 
@@ -726,7 +722,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithBagOfWords(const 
   string indicStringSource = "";
   string indicStringTarget = "";
   string nonTerm = "[X][X]";
-  size_t nonTermCounter = 0;
 
   size_t found;
   size_t sizeOfsourceSpan = sourceSpan.size();
@@ -749,7 +744,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithBagOfWords(const 
         found = targetSpan[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(nonTermCounter)->second;
+            size_t newTerm = nonTermAlign.lower_bound(i)->second;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -758,7 +753,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithBagOfWords(const 
              {indicStringTarget += "_";}
             indicStringTarget += nonTerm;
             indicStringTarget += sourceAlign;
-            nonTermCounter++;
         }
         else{
         if (indicStringTarget.size()>0)
@@ -811,7 +805,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithPairedFeatures(co
 	  string indicStringSource = "";
 	  string indicStringTarget = "";
 	  string nonTerm = "[X][X]";
-	  size_t nonTermCounter = 0;
 
 	  size_t found;
 	  size_t sizeOfsourceSpan = sourceSpan.size();
@@ -834,7 +827,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithPairedFeatures(co
 	        found = targetSpan[i].find(nonTerm);
 	        if(found != string::npos)
 	        {
-	            size_t newTerm = alignNonTerm.lower_bound(nonTermCounter)->second;
+	            size_t newTerm = alignNonTerm.lower_bound(i)->second;
 	            ostringstream s1;
 	            s1 << newTerm;
 	            string sourceAlign =s1.str();
@@ -843,7 +836,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithPairedFeatures(co
 	             {indicStringTarget += "_";}
 	            indicStringTarget += nonTerm;
 	            indicStringTarget += sourceAlign;
-	            nonTermCounter++;
 	        }
 	        else{
 	        if (indicStringTarget.size()>0)
@@ -956,7 +948,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithScoreFeatures(con
 	  string indicStringSource = "";
 	  string indicStringTarget = "";
 	  string nonTerm = "[X][X]";
-	  size_t nonTermCounter = 0;
 
 	  size_t found;
 	  size_t sizeOfsourceSpan = sourceSpan.size();
@@ -979,7 +970,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithScoreFeatures(con
 	        found = targetSpan[i].find(nonTerm);
 	        if(found != string::npos)
 	        {
-	            size_t newTerm = alignNonTerm.lower_bound(nonTermCounter)->second;
+	            size_t newTerm = alignNonTerm.lower_bound(i)->second;
 	            ostringstream s1;
 	            s1 << newTerm;
 	            string sourceAlign =s1.str();
@@ -988,7 +979,6 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithScoreFeatures(con
 	             {indicStringTarget += "_";}
 	            indicStringTarget += nonTerm;
 	            indicStringTarget += sourceAlign;
-	            nonTermCounter++;
 	        }
 	        else{
 	        if (indicStringTarget.size()>0)

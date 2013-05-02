@@ -159,6 +159,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
   size_t count = 0;
 
   while(getline(inStream, lineOrig)) {
+
     const string *line;
     if (format == HieroFormat) { // reformat line
       line = ReformatHieroRule(lineOrig);

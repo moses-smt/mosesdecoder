@@ -116,6 +116,7 @@ IOWrapper::IOWrapper(const std::vector<FactorType>	&inputFactorOrder
   }
 
   if (!m_surpressSingleBestOutput) {
+	VERBOSE(2,"CREATING OUTPUT COLLECTOR" << endl);
     m_singleBestOutputCollector = new Moses::OutputCollector(&std::cout);
   }
 
@@ -186,7 +187,8 @@ InputType*IOWrapper::GetInput(InputType* inputType)
   if(inputType->Read(*m_inputStream, m_inputFactorOrder)) {
     if (long x = inputType->GetTranslationId()) {
       if (x>=m_translationId) m_translationId = x+1;
-    } else inputType->SetTranslationId(m_translationId++);
+    } else
+    	inputType->SetTranslationId(m_translationId++);
 
     //damt hiero : also read context file
     if(!ReadContext(*m_contextStream, inputType))
@@ -237,7 +239,7 @@ int IOWrapper::ReadParse(std::istream& in, InputType* input)
     input->m_parseTree->Read(line);
 
     //std::cerr << "Read in parse tree : "<< std::endl;
-    input->m_parseTree->Print(sourceSize);
+    //input->m_parseTree->Print(sourceSize);
 
     return 1;
 }

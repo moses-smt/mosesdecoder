@@ -51,7 +51,7 @@ bool CellContextScoreProducer::Initialize(const string &modelFile, const string 
 
   m_extractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, false);
   m_debugExtractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, true);
-  m_debugConsumer = new VWFileTrainConsumer("/mount/arbeitsdaten26/users/braunefe/hiero_science_filtered_on_dev_and_test/softSyntaxScripts/hiero-feature-debug");
+  m_debugConsumer = new VWFileTrainConsumer("/projekte/morphosynt/braune/MyPerlScripts/softSyntax/hiero-feature-debug");
   isGood = true;
   VERBOSE(4, "Constructing score producers : " << isGood << endl);
   return isGood;
@@ -97,11 +97,16 @@ ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string target
 
   //alignment between non-terminals
   const AlignmentInfo &alignInfoNonTerm = tp->GetAlignmentInfo();
+  const vector<size_t> &alignInfoNonTermIndex = tp->GetAlignmentInfo().GetNonTermIndexMap();
   VERBOSE(5, "Added alignment Info between non terms : " << alignInfoNonTerm << std::endl);
-  VERBOSE(5, "Added alignment Info between terms : " << alignInfoTerm << std::endl);
+  //TODO : modify implementation here : count the number of non-terminals and search
+  //Do not use the positions
   for (it = alignInfoNonTerm.begin(); it != alignInfoNonTerm.end(); it++)
-    //cerr << "Added Alignment : " << (*it) << endl;
-    psdOpt.m_nonTermAlignment.insert(*it);
+  {
+	  std:pair<size_t,size_t> nonTermIndexMapPair = std::make_pair(it->second,alignInfoNonTermIndex[it->second]);
+	  VERBOSE(5,std::cerr << "Inserted alignment : " <<  it->second << ": " << alignInfoNonTermIndex[it->second] << std::endl);
+	  psdOpt.m_nonTermAlignment.insert(nonTermIndexMapPair);
+  }
 
   // scores
   const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
@@ -112,6 +117,15 @@ ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string target
   {
       psdOpt.m_scores[i] = exp(psdOpt.m_scores[i]);
   }
+
+  std::multimap<size_t, size_t>::iterator itr_align;
+  /*std::cerr << "Created Translation Option : ";
+  for(itr_align = psdOpt.m_nonTermAlignment.begin(); itr_align != psdOpt.m_nonTermAlignment.end(); itr_align++)
+  {
+	  std::cerr << itr_align->first << " : " <<  itr_align->second << "\t";
+  }
+  std::cerr << std::endl;*/
+
   return psdOpt;
 }
 
@@ -158,7 +172,11 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
 
     if(targetRepresentations->size() > 1)
     {
+
         vector<float> losses(targetRepresentations->size());
+
+        //Fabienne Braune : vector of pEgivenF for interpolation
+        vector<float> pEgivenF(targetRepresentations->size());
         vector<ChartTranslation> psdOptions;
 
         map<string,TargetPhrase*> :: iterator itr_rep;
@@ -166,26 +184,22 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         for (tgtRepIt = targetRepresentations->begin(); tgtRepIt != targetRepresentations->end(); tgtRepIt++) {
           CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
           itr_rep = targetMap->find(*tgtRepIt);
-          VERBOSE(6, "CHECKING INDEX FOR : " << *tgtRepIt << endl);
+          VERBOSE(5, "CHECKING INDEX FOR : " << *tgtRepIt << endl);
 
           bool DoesIndexExist = CheckIndex(*tgtRepIt);
           if(DoesIndexExist)
           {psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));}
         }
 
-        VERBOSE(0, "Extracting features for source : " << sourceSide << endl);
-        VERBOSE(0, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
+        VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
+        VERBOSE(5, "Extracting features for spans : " << startSpan << " : " << endSpan << endl);
 
         //std::cerr << "GETTING SYNTAX LABELS" << std::endl;
         bool IsBegin = false;
         //skip first symbol in sentence which is <s>
         vector<SyntaxLabel> syntaxLabels = source.GetInputTreeRep()->GetLabels(startSpan-1,endSpan-1);
-        //std::cerr << "GETTING PARENT" << std::endl;
         SyntaxLabel parentLabel = source.GetInputTreeRep()->GetParent(startSpan-1,endSpan-1,IsBegin);
         vector<string> syntFeats;
-
-
-        //std::cerr << "LOOPING THROUGH PARENT : " << startSpan << " : " << endSpan << std::endl;
 
         //damt hiero : TODO : use GetNoTag : also in extract-syntax features
         string noTag = "NOTAG";
@@ -219,22 +233,23 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         }
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
         //std::cerr << "LOOKING FOR SPAN : " << startSpan << " : " << endSpan << std::endl;
-        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
+        m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
         m_consumerFactory->Release(p_consumer);
-        //Normalize0(losses);
+        Normalize0(losses);
+        Interpolate(losses,pEgivenF,0.1);
         //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
         //Normalize(losses);
         vector<float>::iterator lossIt;
-        VERBOSE(0, "VW losses after normalization : " << std::endl);
+        VERBOSE(5, "VW losses after normalization : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
-        VERBOSE(0, *lossIt << " ");
+        VERBOSE(5, *lossIt << " ");
         float logScore = Equals(*lossIt, 0) ? LOWEST_SCORE : log(*lossIt);
         *lossIt = logScore;
         //FB : maybe we should floor log score before adding to scores
         //Remove when making example
         //FloorScore(logScore);
         scores.push_back(ScoreFactory(logScore));
-        VERBOSE(0, std::endl;);
+        VERBOSE(5, std::endl;);
         }
     }
     else //make sure that when sum is zero, then all factors are 0
@@ -294,6 +309,20 @@ void CellContextScoreProducer::Normalize0(vector<float> &losses)
 }
 
 
+void CellContextScoreProducer::Interpolate(vector<float> &losses, vector<float> &pEgivenF, float interpolParam)
+{
+	vector<float>::iterator lossIt;
+	vector<float>::iterator pEgivenFit;
+
+	CHECK(losses.size() == pEgivenF.size());
+
+	 vector<float>::iterator itLosses;
+	 vector<float>::iterator itEgivenF;
+
+	 for (itLosses = losses.begin(), itEgivenF = pEgivenF.begin(); itLosses != losses.end(), itEgivenF != pEgivenF.end(); itLosses++,itEgivenF++) {
+		 *itLosses = interpolParam*(*itEgivenF) + ( (1.0 - interpolParam) * (*itLosses));
+	    }
+}
 
 void CellContextScoreProducer::Normalize(std::vector<float> &losses)
 {

@@ -75,6 +75,7 @@ public:
   virtual InputTypeEnum GetType() const = 0;
 
   long GetTranslationId() const {
+	  std::cerr << "TRANSLATION ID : " << m_translationId << std::endl;
     return m_translationId;
   }
   void SetTranslationId(long translationId) {

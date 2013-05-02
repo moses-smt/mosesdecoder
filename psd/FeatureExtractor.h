@@ -103,6 +103,7 @@ public:
     const std::vector<Translation> &translations,
     std::vector<float> &losses);
 
+  //FB: This has to be redone !
   void GenerateFeaturesChartLhs(FeatureConsumer *fc,
     const ContextType &context,
     const std::string &sourceSide,
@@ -123,7 +124,9 @@ public:
      size_t spanStart,
      size_t spanEnd,
      const std::vector<ChartTranslation> &translations,
-     std::vector<float> &losses);
+     std::vector<float> &losses,
+     std::vector<float> &pEgivenF
+     );
 
 private:
   const TargetIndexType &m_targetIndex;
