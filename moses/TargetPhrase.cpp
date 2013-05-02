@@ -136,7 +136,7 @@ void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
 
   m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
   m_scoreBreakdown.PlusEquals(sparseScoreVector);
-  float transScore = m_scoreBreakdown.InnerProduct(staticData.GetAllWeights());
+  float transScore = m_scoreBreakdown.GetWeightedScore();
 
   // Replicated from TranslationOptions.cpp
   float totalNgramScore  = 0;
