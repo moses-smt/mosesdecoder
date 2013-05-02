@@ -77,7 +77,7 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   m_sparsePhraseDictionaryFeature(spdf)
 {
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
-      implementation==Compact || implementation==FuzzyMatch || implementation == MultiModel || implementation == MultiModelCounts) {
+      implementation==Compact || implementation==FuzzyMatch) {
     m_useThreadSafePhraseDictionary = true;
   } else {
     m_useThreadSafePhraseDictionary = false;
@@ -230,45 +230,58 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
 #else
     CHECK(false);
 #endif
-  } else if (m_implementation == MultiModel || m_implementation == MultiModelThreadUnsafe ) {
-    // memory phrase table
-    VERBOSE(2,"multi-model mode" << std::endl);
-    if (staticData.GetInputType() != SentenceInput) {
-      UserMessage::Add("Must use binary phrase table for this input type");
-      CHECK(false);
-    }
+  } else if (m_implementation == MultiModel || m_implementation == MultiModelCounts) {
 
-    PhraseDictionaryMultiModel* pd  = new PhraseDictionaryMultiModel(GetNumScoreComponents(),this);
-    bool ret = pd->Load(GetInput(), GetOutput()
-                         , m_config
-                         , weightT
-                         , m_tableLimit
-                         , m_numInputScores
-                         , m_implementation == MultiModel
-                         , system->GetLanguageModels()
-                         , system->GetWeightWordPenalty());
-    CHECK(ret);
-    return pd;
-  } else if (m_implementation == MultiModelCounts) {
-    // memory phrase table
-    VERBOSE(2,"multi-model mode (count tables)" << std::endl);
-    if (staticData.GetInputType() != SentenceInput) {
-      UserMessage::Add("Must use binary phrase table for this input type");
-      CHECK(false);
-    }
+      // one not-threadsafe component model makes the whole model not-threadsafe
+      m_useThreadSafePhraseDictionary = true;
+      for (std::vector<std::string>::const_iterator it = m_config.begin()+5; it != m_config.end(); ++it) {
+        string delim = ":";
+        size_t delim_pos = it->find(delim);
+        UTIL_THROW_IF(delim_pos >= it->size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
+        string impl = it->substr(0,delim_pos);
+        PhraseTableImplementation component_impl = (PhraseTableImplementation) Scan<int>(impl);
 
-    (const_cast<StaticData&>(staticData)).SetNeedAlignmentInfo(true); //needed for lexical weight computation
+        if (!(component_impl == Memory || component_impl == SCFG || component_impl == SuffixArray ||
+                component_impl==Compact || component_impl==FuzzyMatch)) {
+          m_useThreadSafePhraseDictionary = false;
+          }
+        }
 
-    PhraseDictionaryMultiModelCounts* pd  = new PhraseDictionaryMultiModelCounts(GetNumScoreComponents(),this);
-    bool ret = pd->Load(GetInput(), GetOutput()
-                         , m_config
-                         , weightT
-                         , m_tableLimit
-                         , m_numInputScores
-                         , system->GetLanguageModels()
-                         , system->GetWeightWordPenalty());
-    CHECK(ret);
-    return pd;
+
+      if (staticData.GetInputType() != SentenceInput) {
+        UserMessage::Add("Must use binary phrase table for this input type");
+        CHECK(false);
+      }
+
+      if (m_implementation == MultiModel) {
+        VERBOSE(2,"multi-model mode" << std::endl);
+
+        PhraseDictionaryMultiModel* pd  = new PhraseDictionaryMultiModel(GetNumScoreComponents(),this);
+        bool ret = pd->Load(GetInput(), GetOutput()
+                            , m_config
+                            , weightT
+                            , m_tableLimit
+                            , m_numInputScores
+                            , system->GetLanguageModels()
+                            , system->GetWeightWordPenalty());
+        CHECK(ret);
+        return pd;
+      } else if (m_implementation == MultiModelCounts) {
+        VERBOSE(2,"multi-model mode (count tables)" << std::endl);
+
+        (const_cast<StaticData&>(staticData)).SetNeedAlignmentInfo(true); //needed for lexical weight computation
+
+        PhraseDictionaryMultiModelCounts* pd  = new PhraseDictionaryMultiModelCounts(GetNumScoreComponents(),this);
+        bool ret = pd->Load(GetInput(), GetOutput()
+                            , m_config
+                            , weightT
+                            , m_tableLimit
+                            , m_numInputScores
+                            , system->GetLanguageModels()
+                            , system->GetWeightWordPenalty());
+        CHECK(ret);
+        return pd;
+      }
   }
   else {
     std::cerr << "Unknown phrase table type " << m_implementation << endl;
