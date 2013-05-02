@@ -132,6 +132,13 @@ public:
   const std::string &GetArgLine() const
   { return m_argLine; }
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const = 0;
+
+  virtual bool IsDecodeFeature() const
+  { return false; }
+
 };
 
 /** base class for all stateless feature functions.

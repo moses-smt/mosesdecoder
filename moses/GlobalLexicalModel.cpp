@@ -178,11 +178,19 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
   return score;
 }
 
-  void GlobalLexicalModel::Evaluate
+void GlobalLexicalModel::Evaluate
                (const PhraseBasedFeatureContext& context,
   							ScoreComponentCollection* accumulator) const
 {
   accumulator->PlusEquals( this,  
       GetFromCacheOrScorePhrase(context.GetTargetPhrase()) );
 }
+
+void GlobalLexicalModel::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 }

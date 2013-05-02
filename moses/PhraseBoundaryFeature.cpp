@@ -94,5 +94,12 @@ FFState* PhraseBoundaryFeature::Evaluate
   return new PhraseBoundaryState(endSourceWord,endTargetWord);
 }
 
+void PhraseBoundaryFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 
 }

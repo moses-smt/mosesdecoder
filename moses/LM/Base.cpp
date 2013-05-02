@@ -60,4 +60,11 @@ void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const {
   UTIL_THROW(util::Exception, "Incremental search is only supported by KenLM.");
 }
 
+void LanguageModel::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 } // namespace Moses

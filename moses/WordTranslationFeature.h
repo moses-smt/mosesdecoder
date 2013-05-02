@@ -50,6 +50,10 @@ public:
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection* accumulator) const;
   
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 

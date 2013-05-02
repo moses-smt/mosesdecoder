@@ -29,6 +29,10 @@ public:
   void EvaluateChart( const ChartBasedFeatureContext& context, 
                       ScoreComponentCollection* accumulator) const;
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
   void ComputeFeatures(const TargetPhrase& targetPhrase,
 		           	   ScoreComponentCollection* accumulator,
 		           	   const AlignmentInfo &alignmentInfo) const;

@@ -222,7 +222,6 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
   float finalizedScore = 0.0; // finalized, has sufficient context
 
   // get index map for underlying hypotheses
-  const TargetPhrase &target = hypo.GetCurrTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
       hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap();
 

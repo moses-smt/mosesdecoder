@@ -40,4 +40,11 @@ void PhraseLengthFeature::Evaluate(
   //cerr << nameSource.str() << " " << nameTarget.str() << " " << nameBoth.str() << endl;
 }
 
+void PhraseLengthFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 }

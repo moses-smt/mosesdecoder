@@ -118,6 +118,10 @@ public:
     float GetTargetLengthHistory() { return m_target_length_history; }
     float GetAverageInputLength() { return m_avg_input_length; }
 
+    virtual void Evaluate(const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , float &estimatedFutureScore) const;
+
 private:
     bool m_enabled;
     bool m_sentence_bleu;

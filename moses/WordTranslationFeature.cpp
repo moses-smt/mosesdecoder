@@ -528,4 +528,11 @@ void WordTranslationFeature::EvaluateChart(
 
 }
 
+void WordTranslationFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 }

@@ -37,6 +37,11 @@ public:
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
 	}
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
 };
 
 /** Doesn't do anything but provide a key into the global
@@ -57,6 +62,11 @@ public:
     {
       //required but does nothing.
     }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
 };
 
 /** unknown word penalty */
@@ -78,6 +88,10 @@ public:
     //do nothing - not a real feature
   }
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
   virtual bool IsTuneable() const { return false; }
 
 };
@@ -98,6 +112,10 @@ class MetaFeatureProducer : public StatelessFeatureFunction
 		     ScoreComponentCollection*) const {
     //do nothing - not a real feature
   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
 };
 
 }

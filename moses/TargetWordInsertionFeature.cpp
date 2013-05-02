@@ -84,6 +84,13 @@ void TargetWordInsertionFeature::EvaluateChart(
 	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
+void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
     											 ScoreComponentCollection* accumulator,
     											 const AlignmentInfo &alignmentInfo) const

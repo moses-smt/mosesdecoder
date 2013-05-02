@@ -41,6 +41,11 @@ public:
                                   {
                                     abort();
                                   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
 private:
   FactorType m_factorType;
   Word m_bos;

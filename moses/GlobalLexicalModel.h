@@ -79,6 +79,11 @@ public:
   	exit(1);
   }
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
+
   virtual StatelessFeatureType GetStatelessFeatureType() const
   { return DependsOnSource; }
 

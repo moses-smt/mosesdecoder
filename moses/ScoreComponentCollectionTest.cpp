@@ -36,6 +36,10 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction {
       StatelessFeatureFunction(desc,n, line) {}
     virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
     virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
+    virtual void Evaluate(const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , float &estimatedFutureScore) const
+    { }
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction {
@@ -52,6 +56,7 @@ class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
     MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", FeatureFunction::unlimited, "MockSparse") {}
 };
+
 
 
 struct MockProducers {

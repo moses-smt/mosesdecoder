@@ -61,6 +61,8 @@ public:
   explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
 
+  void Evaluate();
+
   //!Set score for Sentence XML target options
   void SetScore(float score);
 

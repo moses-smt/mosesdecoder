@@ -80,6 +80,13 @@ void SourceWordDeletionFeature::EvaluateChart(
 	ComputeFeatures(context.GetTargetPhrase(), accumulator, alignmentInfo);
 }
 
+void SourceWordDeletionFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 void SourceWordDeletionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
 		                   	 	 	 	 	 	ScoreComponentCollection* accumulator,
 		                   	 	 	 	 	 	const AlignmentInfo &alignmentInfo) const

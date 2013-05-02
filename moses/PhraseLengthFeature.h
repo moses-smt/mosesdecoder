@@ -27,6 +27,10 @@ public:
     throw std::logic_error("PhraseLengthFeature not valid in chart decoder");
 	}
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
 };
 
 }

@@ -101,12 +101,33 @@ FFState* DistortionScoreProducer::Evaluate(
   return res;
 }
 
+void DistortionScoreProducer::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
 void WordPenaltyProducer::Evaluate(
     const PhraseBasedFeatureContext& context,
     ScoreComponentCollection* out) const
 {
 	const TargetPhrase& tp = context.GetTargetPhrase();
   out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
+}
+
+void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , float &estimatedFutureScore) const
+{
+  CHECK(false);
+}
+
+void UnknownWordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const
+{
+  CHECK(false);
 }
 
 }

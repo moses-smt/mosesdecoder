@@ -78,7 +78,21 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
+void TargetPhrase::Evaluate()
+{
+  float totalEstFutureScore = 0;
 
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    if (!ff.IsDecodeFeature()) {
+      float estimatedFutureScore = 0;
+      ff.Evaluate(*this, m_scoreBreakdown, estimatedFutureScore);
+      totalEstFutureScore += estimatedFutureScore;
+    }
+  }
+}
 
 void TargetPhrase::SetScore(float score)
 {

@@ -195,6 +195,10 @@ public:
   virtual FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureId,
                                   ScoreComponentCollection* accumulator) const;
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , float &estimatedFutureScore) const;
+
 private:
   FactorType m_factorType;
   Word m_bos;
