@@ -16,6 +16,7 @@ You should have received a copy of the GNU Lesser General Public
 License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
+#include "util/exception.hh"
 
 #include "moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"
 
@@ -73,6 +74,7 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
                                   , const vector<string> &config
                                   , const vector<float> &weight
                                   , size_t tableLimit
+                                  , size_t numInputScores
                                   , const LMList &languageModels
                                   , float weightWP)
 {
@@ -104,10 +106,7 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
 
       string delim = ":";
       size_t delim_pos = files[i].find(delim);
-      if (delim_pos >= files[i].size()) {
-        UserMessage::Add("Phrase table must be specified in this format: Implementation:Path");
-        CHECK(false);
-      }
+      UTIL_THROW_IF(delim_pos >= files[i].size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
 
       impl = files[i].substr(0,delim_pos);
       file = files[i].substr(delim_pos+1,files[i].size());
@@ -119,11 +118,11 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
 
       PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(impl);
 
-      if (implementation == Memory) {
+      //how many actual scores there are in the phrase tables
+      size_t numScoresCounts = 3;
+      size_t numScoresTargetCounts = 1;
 
-            //how many actual scores there are in the phrase tables
-            size_t numScoresCounts = 3;
-            size_t numScoresTargetCounts = 1;
+      if (implementation == Memory) {
 
             if (!FileExists(main_table) && FileExists(main_table + ".gz")) main_table += ".gz";
             if (!FileExists(target_table) && FileExists(target_table + ".gz")) target_table += ".gz";
@@ -137,8 +136,17 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
             pdm_inverse->SetNumScoreComponentMultiModel(numScoresTargetCounts);
             pdm_inverse->Load( input, output, target_table, m_weight, componentTableLimit, languageModels, m_weightWP);
             m_inverse_pd.push_back(pdm_inverse);
-      }
-      else if (implementation == Compact) {
+      } else if (implementation == Binary) {
+            PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, numInputScores , m_feature_load);
+            pdta->SetNumScoreComponentMultiModel(m_numScoreComponent); //for binary models, we need to pass number of log-linear components to correctly resize the score vector
+            pdta->Load(input, output, main_table, m_weight, m_componentTableLimit, languageModels, m_weightWP);
+            m_pd.push_back(pdta);
+
+            PhraseDictionaryTreeAdaptor* pdta_inverse = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, numInputScores , m_feature_load);
+            pdta_inverse->SetNumScoreComponentMultiModel(m_numScoreComponent);
+            pdta_inverse->Load(input, output, target_table, m_weight, m_componentTableLimit, languageModels, m_weightWP);
+            m_inverse_pd.push_back(pdta_inverse);
+      } else if (implementation == Compact) { 
 #ifndef WIN32
             PhraseDictionaryCompact* pdc = new PhraseDictionaryCompact(m_numScoreComponent, implementation, m_feature_load);
             pdc->SetNumScoreComponentMultiModel(m_numScoreComponent); //for compact models, we need to pass number of log-linear components to correctly resize the score vector
@@ -150,12 +158,11 @@ bool PhraseDictionaryMultiModelCounts::Load(const vector<FactorType> &input
             pdc_inverse->Load( input, output, target_table, m_weight, componentTableLimit, languageModels, m_weightWP);
             m_inverse_pd.push_back(pdc_inverse);
 #else
-            CHECK(false);
+            UTIL_THROW(util::Exception, "Compact phrase table not supported in windows"); 
 #endif
       }
       else {
-        UserMessage::Add("phrase table type unknown to multi-model mode");
-        CHECK(false);
+        UTIL_THROW(util::Exception,"PhraseDictionaryMultiModel does not support phrase table type " << implementation);
       }
 
       lexicalTable* e2f = new lexicalTable;
@@ -257,8 +264,7 @@ TargetPhraseCollection* PhraseDictionaryMultiModelCounts::CreateTargetPhraseColl
     multiModelCountsStatistics * statistics = iter->second;
 
     if (statistics->targetPhrase->GetAlignTerm().GetSize() == 0) {
-        UserMessage::Add(" alignment information empty\ncount-tables need to include alignment information for computation of lexical weights.\nUse --phrase-word-alignment during training; for on-disk tables, also set -alignment-info when creating on-disk tables.");
-        CHECK(false);
+        UTIL_THROW(util::Exception, " alignment information empty\ncount-tables need to include alignment information for computation of lexical weights.\nUse --phrase-word-alignment during training; for on-disk tables, also set -alignment-info when creating on-disk tables."); 
     }
 
     try {
@@ -619,8 +625,7 @@ double CrossEntropyCounts::operator() ( const dlib::matrix<double,0,1>& arg) con
         }
         else {
             score = 0;
-            UserMessage::Add("Trying to optimize feature that I don't know. Aborting");
-            CHECK(false);
+            UTIL_THROW(util::Exception, "Trying to optimize feature that I don't know. Aborting");
         }
         total -= (FloorScore(TransformScore(score))/TransformScore(2))*f;
         n += f;

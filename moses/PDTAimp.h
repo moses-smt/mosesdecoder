@@ -292,6 +292,14 @@ protected:
       }
     }
 
+    if (scoreVector.size() != m_obj->GetNumScoreComponentMultiModel()) {
+    //PhraseDictionaryMultiModel may use input phrase dictionaries with a different number of features than it is assigned in the log-linear model;
+    //filling extra slots with zeroes to prevent error messages on the way
+      if (m_obj->GetNumScoreComponentMultiModel() > 0 && scoreVector.size() < m_obj->GetNumScoreComponentMultiModel()) {
+        const_cast<Scores &>(scoreVector).resize(m_obj->GetNumScoreComponentMultiModel());
+      }
+    }
+
     targetPhrase.SetScore(m_obj->GetFeature(), scoreVector, sparseFeatures, weights, weightWP, *m_languageModels);
     targetPhrase.SetSourcePhrase(*srcPtr);
   }

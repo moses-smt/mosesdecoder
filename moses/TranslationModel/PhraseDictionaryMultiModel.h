@@ -70,7 +70,6 @@ public:
             , const std::vector<float> &weight
             , size_t tableLimit
             , size_t numInputScores
-            , bool isThreadSafe //does Moses assume that table is thread-safe?
             , const LMList &languageModels
             , float weightWP);
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
