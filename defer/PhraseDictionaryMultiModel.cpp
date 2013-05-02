@@ -42,7 +42,6 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
                                   , const vector<float> &weight
                                   , size_t tableLimit
                                   , size_t numInputScores
-                                  , bool isThreadSafe
                                   , const LMList &languageModels
                                   , float weightWP)
 {
@@ -94,7 +93,6 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
             pdm->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
             m_pd.push_back(pdm);
       } else if (implementation == Binary) {
-            UTIL_THROW_IF(isThreadSafe, util::Exception, "Binarised phrase table is not thread-safe - use phrase table type " << MultiModelThreadUnsafe << " for a thread-unsafe multimodel table"); 
             PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponent, numInputScores , m_feature_load);
             pdta->Load(input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
             m_pd.push_back(pdta);

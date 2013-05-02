@@ -704,7 +704,7 @@ while (1) {
     
     # Create an ini file for the interpolated phrase table
     $interpolated_config ="moses.interpolated.ini"; 
-    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "97");
+    substitute_ttable($uninterpolated_config, $interpolated_config, $interpolated_phrase_table, "99");
 
     # Append the multimodel weights
     open(ITABLE,">>$interpolated_config") || die "Failed to append weights to $interpolated_config";

@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h" 
 #ifndef WIN32
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
@@ -90,6 +91,7 @@ public:
             , const std::vector<std::string> &files
             , const std::vector<float> &weight
             , size_t tableLimit
+            , size_t numInputScores
             , const LMList &languageModels
             , float weightWP);
   TargetPhraseCollection* CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
