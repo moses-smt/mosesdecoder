@@ -37,7 +37,7 @@ using namespace std;
 
 namespace Moses
 {
-void Sentence::split_marker_perl(std::string& str, std::string marker, std::vector<std::string> &array) {
+int Sentence::split_marker_perl(std::string& str, std::string marker, std::vector<std::string> &array) {
         int found = str.find(marker), prev = 0;
         while (found != std::string::npos) // warning!
         {
@@ -46,7 +46,7 @@ void Sentence::split_marker_perl(std::string& str, std::string marker, std::vect
                 found = str.find(marker, found + marker.length());
         }
         array.push_back(str.substr(prev));
-        return;
+        return array.size();
 }
 Sentence::Sentence()
   : Phrase(0)
@@ -69,18 +69,26 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
   const StaticData &staticData = StaticData::Instance();
   if(staticData.GetOnlineLearningModel()!=NULL)
   {
-	  VERBOSE(1,"I am in the if statement");
+	  VERBOSE(1,"I am in the if statement\n");
 	  std::vector<string> strs;
-	  split_marker_perl(line, "_#_", strs);
+	  int splits=split_marker_perl(line, "_#_", strs);
 	  OnlineLearner* ol=StaticData::InstanceNonConst().GetOnlineLearningModel();
-	  if(ol!=NULL)
-	  {
-		  if(!ol->SetPostEditedSentence(strs[1])) return 0;
+	  cerr<<"No of splits : "<<splits<<endl;
+	  if(splits>1){
+		  ol->SetOnlineLearningTrue();
+		  if(ol!=NULL)
+		  {
+			  if(!ol->SetPostEditedSentence(strs[1])) return 0;
+		  }
+		  else
+		  {
+			  VERBOSE(1, "online learning module not activated!!");
+			  return 0;
+		  }
 	  }
-	  else
-	  {
-		  VERBOSE(1, "online learning module not activated!!");
-		  return 0;
+	  else{
+		  ol->SetOnlineLearningFalse();
+		  cerr<<"There is no post edited sentence, so I am just decoding!\n";
 	  }
 	  line=strs[0];
   }

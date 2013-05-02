@@ -71,8 +71,8 @@ public:
 	virtual ~OnlineLearner();
 
 	inline size_t GetNumScoreComponents() const { return 1; };
-
-	void SetOnlineLearning() { m_learn=true; };
+	void SetOnlineLearningTrue() { m_learn=true; };
+	void SetOnlineLearningFalse() { m_learn=false; };
 	bool GetOnlineLearning() const { return m_learn; };
 
 	inline std::string GetScoreProducerWeightShortName(unsigned) const { return "ol"; };

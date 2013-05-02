@@ -295,7 +295,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
 	for(int i=0;i<sps.size();i++)
 	{
-		if(sps[i]->GetScoreProducerDescription().compare("weight-ol")==0)
+		if(sps[i]->GetScoreProducerDescription().compare("OnlineLearner")==0)
 		{
 			sp=const_cast<ScoreProducer*>(sps[i]);
 			break;
@@ -447,7 +447,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
 			BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,lr);
 	cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
-
+	StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
 	return;
 }
 
