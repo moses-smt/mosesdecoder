@@ -82,8 +82,8 @@ public:
     }
     // break out new ngrams from sentence
     const int ngOrder(orlm->GetNGramOrder());
-    const std::string sBOS = orlm->GetSentenceStart()->GetString();
-    const std::string sEOS = orlm->GetSentenceEnd()->GetString();
+    const std::string sBOS = orlm->GetSentenceStart()->GetString().as_string();
+    const std::string sEOS = orlm->GetSentenceEnd()->GetString().as_string();
     Utils::splitToStr(target_, vl, " ");
     // insert BOS and EOS
     vl.insert(vl.begin(), sBOS);
