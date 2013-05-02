@@ -90,7 +90,7 @@ public:
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
-  // used by for unknown word proc in chart decoding
+  // used to set translation or gen score
   void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;

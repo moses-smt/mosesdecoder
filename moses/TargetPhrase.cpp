@@ -192,7 +192,7 @@ void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
 }
 
 
-
+// used to set translation or gen score
 void TargetPhrase::SetScore(const FeatureFunction* producer, const Scores &scoreVector)
 {
   // used when creating translations of unknown words (chart decoding)
