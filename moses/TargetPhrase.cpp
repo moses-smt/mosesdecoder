@@ -191,58 +191,7 @@ void TargetPhrase::SetScore(const FeatureFunction* translationScoreProducer,
   m_fullScore = transScore + totalFullScore + totalOOVScore;
 }
 
-void TargetPhrase::SetScoreChart(const FeatureFunction* translationScoreProducer,
-                                 const Scores &scoreVector
-                                 ,const vector<float> &weightT
-                                 ,const LMList &languageModels
-                                 ,const WordPenaltyProducer* wpProducer)
-{
-  //cerr << *this << endl;
-  CHECK(weightT.size() == scoreVector.size());
-  
-  // calc average score if non-best
-  m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
 
-  // Replicated from TranslationOptions.cpp
-  float totalNgramScore  = 0;
-  float totalFullScore   = 0;
-  float totalOOVScore    = 0;
-
-  LMList::const_iterator lmIter;
-  for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter) {
-    const LanguageModel &lm = **lmIter;
-
-    if (lm.Useable(*this)) {
-      // contains factors used by this LM
-      const float weightLM = lm.GetWeight();
-      const float oovWeightLM = lm.GetOOVWeight();
-      float fullScore, nGramScore;
-      size_t oovCount;
-
-      lm.CalcScore(*this, fullScore, nGramScore, oovCount);
-
-      if (StaticData::Instance().GetLMEnableOOVFeature()) {
-        vector<float> scores(2);
-        scores[0] = nGramScore;
-        scores[1] = oovCount;
-        m_scoreBreakdown.Assign(&lm, scores);
-        totalOOVScore += oovCount * oovWeightLM;
-      } else {
-        m_scoreBreakdown.Assign(&lm, nGramScore);
-      }
-
-      // total LM score so far
-      totalNgramScore  += nGramScore * weightLM;
-      totalFullScore   += fullScore * weightLM;
-    }
-  }
-
-  // word penalty
-  size_t wordCount = GetNumTerminals();
-  m_scoreBreakdown.Assign(wpProducer, - wordCount);
-
-  m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
-}
 
 void TargetPhrase::SetScore(const FeatureFunction* producer, const Scores &scoreVector)
 {

@@ -88,12 +88,6 @@ public:
                 float weightWP,
                 const LMList &languageModels);
 
-  void SetScoreChart(const FeatureFunction* translationScoreProducer
-                     ,const Scores &scoreVector
-                     ,const std::vector<float> &weightT
-                     ,const LMList &languageModels
-                     ,const WordPenaltyProducer* wpProducer);
-
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used by for unknown word proc in chart decoding

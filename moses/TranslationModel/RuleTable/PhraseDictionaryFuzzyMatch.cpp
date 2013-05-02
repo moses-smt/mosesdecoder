@@ -242,7 +242,8 @@ namespace Moses
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),TransformScore);
       std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
       
-      targetPhrase->SetScoreChart(this, scoreVector, *m_weight, *m_languageModels, m_wpProducer);
+      targetPhrase->SetScore(this, scoreVector);
+      targetPhrase->Evaluate();
       
       TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
       phraseColl.Add(targetPhrase);
