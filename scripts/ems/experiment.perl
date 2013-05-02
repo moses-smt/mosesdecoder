@@ -1611,7 +1611,8 @@ sub define_tuning_tune {
     my $word_alignment = &backoff_and_get("TRAINING:include-word-alignment-in-rules");
     
     # the last 3 variables are only used for mira tuning 
-    my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest) = &get_output_and_input($step_id); 
+    my ($tuned_config,$config,$input,$reference,$config_devtest,$input_devtest,$reference_devtest, $filtered_config) = &get_output_and_input($step_id); 
+    $config = $filtered_config if $filtered_config;
 
     my $cmd = "";
     if ($use_mira) {

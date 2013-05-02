@@ -832,7 +832,7 @@ apply-filter-devtest
   ignore-unless: use-mira
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 tune
-	in: TRAINING:bin-config=OR=filtered-config input reference filtered-config-devtest input-devtest reference-devtest
+	in: bin-config input reference filtered-config-devtest input-devtest reference-devtest filtered-config 
 	out: weight-config
 	ignore-if: use-hiero
 	qsub-script: yes
