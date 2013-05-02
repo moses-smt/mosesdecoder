@@ -134,7 +134,7 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const = 0;
+                      , ScoreComponentCollection &estimatedFutureScore) const = 0;
 
   virtual bool IsDecodeFeature() const
   { return false; }

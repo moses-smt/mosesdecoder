@@ -97,7 +97,7 @@ const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) c
 
 void LexicalReordering::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
   CHECK(false);
 }

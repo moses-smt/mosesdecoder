@@ -48,7 +48,7 @@ public:
                                   }
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }

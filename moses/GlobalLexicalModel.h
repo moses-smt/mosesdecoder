@@ -81,7 +81,7 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 
   virtual StatelessFeatureType GetStatelessFeatureType() const

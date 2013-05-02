@@ -86,7 +86,7 @@ void TargetWordInsertionFeature::EvaluateChart(
 
 void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
   CHECK(false);
 }

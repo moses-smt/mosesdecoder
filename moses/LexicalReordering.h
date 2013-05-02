@@ -49,7 +49,7 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 private:
     bool DecodeCondition(std::string s);

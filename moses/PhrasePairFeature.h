@@ -43,7 +43,7 @@ class PhrasePairFeature: public StatelessFeatureFunction {
 
     virtual void Evaluate(const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , float &estimatedFutureScore) const;
+                        , ScoreComponentCollection &estimatedFutureScore) const;
 
     bool Load(const std::string &filePathSource/*, const std::string &filePathTarget*/);
 

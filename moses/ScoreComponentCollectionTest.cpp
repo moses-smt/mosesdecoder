@@ -38,7 +38,7 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction {
     virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
     virtual void Evaluate(const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , float &estimatedFutureScore) const
+                        , ScoreComponentCollection &estimatedFutureScore) const
     { }
 };
 

@@ -103,9 +103,9 @@ FFState* DistortionScoreProducer::Evaluate(
 
 void DistortionScoreProducer::Evaluate(const TargetPhrase &targetPhrase
                     , ScoreComponentCollection &scoreBreakdown
-                    , float &estimatedFutureScore) const
+                    , ScoreComponentCollection &estimatedFutureScore) const
 {
-  CHECK(false);
+  // no score
 }
 
 void WordPenaltyProducer::Evaluate(
@@ -118,15 +118,17 @@ void WordPenaltyProducer::Evaluate(
 
 void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
                     , ScoreComponentCollection &scoreBreakdown
-                    , float &estimatedFutureScore) const
+                    , ScoreComponentCollection &estimatedFutureScore) const
 {
-  CHECK(false);
+  float score = - targetPhrase.GetSize();
+  scoreBreakdown.Assign(this, score);
 }
 
 void UnknownWordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
+  // shouldn't be called
   CHECK(false);
 }
 

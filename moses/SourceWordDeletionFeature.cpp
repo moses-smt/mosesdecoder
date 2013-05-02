@@ -82,7 +82,7 @@ void SourceWordDeletionFeature::EvaluateChart(
 
 void SourceWordDeletionFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
   CHECK(false);
 }

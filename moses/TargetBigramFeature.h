@@ -44,7 +44,7 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 private:
   FactorType m_factorType;

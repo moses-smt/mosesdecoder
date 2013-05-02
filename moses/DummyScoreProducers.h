@@ -40,7 +40,7 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 
@@ -65,7 +65,7 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 
@@ -90,9 +90,14 @@ public:
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
-  virtual bool IsTuneable() const { return false; }
+  virtual bool IsTuneable() const
+  { return false; }
+
+  bool IsDecodeFeature() const
+  { return true; }
+
 
 };
 
@@ -115,7 +120,7 @@ class MetaFeatureProducer : public StatelessFeatureFunction
 
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const;
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 };
 
 }

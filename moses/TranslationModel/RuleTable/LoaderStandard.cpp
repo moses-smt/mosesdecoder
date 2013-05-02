@@ -247,6 +247,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
 
     targetPhrase->SetScoreChart(&ruleTable, scoreVector, weight, languageModels,wpProducer);
+    targetPhrase->Evaluate();
 
     TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, targetPhrase->GetSourcePhrase(), *targetPhrase, sourceLHS);
     phraseColl.Add(targetPhrase);

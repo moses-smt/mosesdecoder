@@ -80,18 +80,30 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::Evaluate()
 {
-  float totalEstFutureScore = 0;
+  return;
+
+  ScoreComponentCollection temp;
+  ScoreComponentCollection estimatedFutureScore;
 
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
+    cerr << ff.GetScoreProducerDescription() << endl;
     if (!ff.IsDecodeFeature()) {
-      float estimatedFutureScore = 0;
-      ff.Evaluate(*this, m_scoreBreakdown, estimatedFutureScore);
-      totalEstFutureScore += estimatedFutureScore;
+      ff.Evaluate(*this, temp, estimatedFutureScore);
     }
   }
+
+  /*
+  cerr << *this << endl;
+  cerr << "total=" << (estimatedFutureScore.GetWeightedScore() + temp.GetWeightedScore()) << endl;
+  cerr << "estimatedFutureScore=" << estimatedFutureScore.GetWeightedScore()
+        << " " << estimatedFutureScore << endl;
+  cerr << "temp=" << temp.GetWeightedScore() << " " << temp << endl;
+  cerr << "m_fullScore="<< m_fullScore<< " " << m_scoreBreakdown << endl;
+  cerr << flush;
+  */
 }
 
 void TargetPhrase::SetScore(float score)
@@ -197,6 +209,7 @@ void TargetPhrase::SetScoreChart(const FeatureFunction* translationScoreProducer
                                  ,const LMList &languageModels
                                  ,const WordPenaltyProducer* wpProducer)
 {
+  //cerr << *this << endl;
   CHECK(weightT.size() == scoreVector.size());
   
   // calc average score if non-best

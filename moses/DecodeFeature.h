@@ -61,7 +61,7 @@ class DecodeFeature : public StatelessFeatureFunction {
 
     virtual void Evaluate(const TargetPhrase &targetPhrase
                         , ScoreComponentCollection &scoreBreakdown
-                        , float &estimatedFutureScore) const
+                        , ScoreComponentCollection &estimatedFutureScore) const
     {}
     
     bool IsDecodeFeature() const

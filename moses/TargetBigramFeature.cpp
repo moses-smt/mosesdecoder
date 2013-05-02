@@ -114,7 +114,7 @@ FFState* TargetBigramFeature::Evaluate(const Hypothesis& cur_hypo,
 
 void TargetBigramFeature::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
   CHECK(false);
 }

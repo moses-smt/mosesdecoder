@@ -860,7 +860,7 @@ const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) co
 
 void BleuScoreFeature::Evaluate(const TargetPhrase &targetPhrase
                     , ScoreComponentCollection &scoreBreakdown
-                    , float &estimatedFutureScore) const
+                    , ScoreComponentCollection &estimatedFutureScore) const
 {
   CHECK(false);
 }

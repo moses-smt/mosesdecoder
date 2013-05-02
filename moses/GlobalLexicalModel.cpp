@@ -188,7 +188,7 @@ void GlobalLexicalModel::Evaluate
 
 void GlobalLexicalModel::Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
-                      , float &estimatedFutureScore) const
+                      , ScoreComponentCollection &estimatedFutureScore) const
 {
   CHECK(false);
 }
