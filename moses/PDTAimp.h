@@ -286,10 +286,10 @@ protected:
       }
     }
 
-  	std::vector<float> wpScore(1, -(float)targetPhrase.GetSize());
-    targetPhrase.SetScore(staticData.GetWordPenaltyProducer(), wpScore);
-    targetPhrase.SetScore(m_obj, scoreVector, sparseFeatures, weights, weightWP, *m_languageModels);
     targetPhrase.SetSourcePhrase(*srcPtr);
+
+    targetPhrase.SetScore(m_obj, scoreVector);
+    targetPhrase.Evaluate();
   }
 
   TargetPhraseCollection* PruneTargetCandidates(std::vector<TargetPhrase> const & tCands,

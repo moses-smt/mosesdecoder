@@ -439,9 +439,8 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
-    	std::vector<float> wp(1, -targetPhrase->GetSize());
-    	targetPhrase->SetScore(StaticData::Instance().GetWordPenaltyProducer(), wp);
-        targetPhrase->SetScore(&m_phraseDictionary, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
+        targetPhrase->SetScore(&m_phraseDictionary, scores);
+        targetPhrase->Evaluate();
 
         if(m_containsAlignmentInfo)
           state = Alignment;

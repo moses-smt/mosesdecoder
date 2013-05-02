@@ -63,25 +63,6 @@ public:
 
   void Evaluate();
 
-
-  /*** Called immediately after creation to initialize scores.
-   *
-   * @param translationScoreProducer The PhraseDictionaryMemory that this TargetPhrase is contained by.
-   *        Used to identify where the scores for this phrase belong in the list of all scores.
-   * @param scoreVector the vector of scores (log probs) associated with this translation
-   * @param weighT the weights for the individual scores (t-weights in the .ini file)
-   * @param languageModels all the LanguageModels that should be used to compute the LM scores
-   * @param weightWP the weight of the word penalty
-   *
-   * @TODO should this be part of the constructor?  If not, add explanation why not.
-  	*/
-  void SetScore(const FeatureFunction* translationScoreProducer,
-                const Scores &scoreVector,
-                const ScoreComponentCollection &sparseScoreVector,
-                const std::vector<float> &weightT,
-                float weightWP,
-                const LMList &languageModels);
-
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
   // used to set translation or gen score

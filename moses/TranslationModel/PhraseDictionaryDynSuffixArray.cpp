@@ -51,7 +51,10 @@ const TargetPhraseCollection *PhraseDictionaryDynSuffixArray::GetTargetPhraseCol
     TargetPhrase *targetPhrase = itr->second;
     //std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),NegateScore);
     std::transform(scoreVector.begin(),scoreVector.end(),scoreVector.begin(),FloorScore);
-    targetPhrase->SetScore(this, scoreVector, ScoreComponentCollection(), m_weight, m_weightWP, *m_languageModels);
+
+    targetPhrase->SetScore(this, scoreVector);
+    targetPhrase->Evaluate();
+
     //cout << *targetPhrase << "\t" << std::setprecision(8) << scoreVector[2] << endl;
     ret->Add(targetPhrase);
   }
