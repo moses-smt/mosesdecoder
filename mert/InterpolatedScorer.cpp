@@ -164,7 +164,7 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
 {
   stringstream buff;
   string align = text;
-  string sentence = "";
+  string sentence = text;
   size_t alignmentData = text.find("|||");
   //Get sentence and alignment parts
   if(alignmentData != string::npos) {

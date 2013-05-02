@@ -106,25 +106,6 @@ enum DistortionOrientationOptions {
 };
 }
 
-enum LMType {
-  SingleFactor
-  ,MultiFactor
-};
-enum LMImplementation {
-  SRI			= 0
-  ,IRST		= 1
-//  ,Skip		= 2
-  ,Joint		= 3
-//  ,Internal	= 4
-  ,RandLM 	= 5
-  ,Remote 	= 6
-  ,ParallelBackoff	= 7
-  ,Ken			= 8
-  ,LazyKen	= 9
-  ,ORLM = 10
-  ,LDHTLM = 11
-};
-
 enum PhraseTableImplementation {
   Memory				= 0
   ,Binary				= 1
@@ -139,6 +120,7 @@ enum PhraseTableImplementation {
   ,ALSuffixArray = 10
   ,FuzzyMatch    = 11
   ,Compact      = 12
+  ,Interpolated = 13
 };
 
 enum InputTypeEnum {
@@ -191,6 +173,13 @@ enum FormatType
 {
   MosesFormat
   ,HieroFormat
+};
+
+enum StatelessFeatureType
+{
+  CacheableInPhraseTable // simplest. eg. phrase table scores. word penalty, phrase penalty.
+  ,DependsOnSource // can't be pre-computed during training, but can be computed before search.eg. source bag-of-word features
+  ,NotCacheable // can't be pre-computed. Depends on segmentation during search. eg. span-length feature
 };
 
 // typedef

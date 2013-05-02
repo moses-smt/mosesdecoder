@@ -189,7 +189,7 @@ bool ReadInput(IOWrapper &ioWrapper, InputTypeEnum inputType, InputType*& source
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != ScoreProducer::unlimited) {
+  if (numScoreComps != FeatureFunction::unlimited) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     cout << ff->GetScoreProducerDescription() << "=";
     for (size_t i = 0; i < numScoreComps; ++i) {

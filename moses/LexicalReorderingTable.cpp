@@ -308,13 +308,6 @@ Scores LexicalReorderingTableTree::auxFindScoreForContext(const Candidates& cand
   }
 }
 
-/*
-void LexicalReorderingTableTree::DbgDump(std::ostream* pout){
-  std::ostream& out = *pout;
-  //TODO!
-}
-*/
-
 void LexicalReorderingTableTree::InitializeForInput(const InputType& input)
 {
   ClearCache();

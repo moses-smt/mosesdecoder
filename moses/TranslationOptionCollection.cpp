@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Sentence.h"
 #include "DecodeStep.h"
 #include "LM/Base.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "FactorCollection.h"
 #include "InputType.h"
 #include "LexicalReordering.h"
@@ -33,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "StaticData.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeGraph.h"
+#include "DummyScoreProducers.h"
 
 using namespace std;
 
@@ -156,8 +156,6 @@ void TranslationOptionCollection::Prune()
 *			Inherited::ProcessUnknownWord(position)
 *				Base::ProcessOneUnknownWord()
 *
-* \param decodeStepList list of decoding steps
-* \param factorCollection input sentence with all factors
 */
 
 void TranslationOptionCollection::ProcessUnknownWord()
@@ -201,13 +199,18 @@ void TranslationOptionCollection::ProcessUnknownWord()
 void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,size_t sourcePos, size_t length, const Scores *inputScores)
 
 {
+  const StaticData &staticData = StaticData::Instance();
+  const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
+  vector<float> wordPenaltyScore(1, -1);
+  vector<float> unknownScore(1, FloorScore(TransformScore(0)));
+
 	// unknown word, add as trans opt
 	FactorCollection &factorCollection = FactorCollection::Instance();
 
 	size_t isDigit = 0;
 	
 	const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-	const string &s = f->GetString();
+	const StringPiece s = f->GetString();
 	bool isEpsilon = (s=="" || s==EPSILON);
 	if (StaticData::Instance().GetDropUnknown())
 	{
@@ -228,13 +231,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 	TranslationOption *transOpt;
 	TargetPhrase targetPhrase;
 	targetPhrase.SetSourcePhrase(*m_unksrc);
-	if (inputScores != NULL) {
-		targetPhrase.SetScore(m_system,*inputScores);
-	} else {
-		targetPhrase.SetScore(m_system);
-	}
 	
-	if (!(StaticData::Instance().GetDropUnknown() || isEpsilon) || isDigit)
+	if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit)
 	{
 		// add to dictionary
 
@@ -262,6 +260,15 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 		//targetPhrase.SetAlignment();
 
 	}
+
+  targetPhrase.SetScore(unknownWordPenaltyProducer, unknownScore);
+
+	if (inputScores != NULL) {
+		targetPhrase.SetInputScore(*inputScores);
+	}
+
+	targetPhrase.Evaluate();
+
 	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
 	                              , StaticData::Instance().GetUnknownWordPenaltyProducer());
 	transOpt->CalcScore(m_system);
@@ -356,8 +363,6 @@ void TranslationOptionCollection::CalcFutureScore()
 /** Create all possible translations from the phrase tables
  * for a particular input sentence. This implies applying all
  * translation and generation steps. Also computes future cost matrix.
- * \param decodeStepList list of decoding steps
- * \param factorCollection input sentence with all factors
  */
 void TranslationOptionCollection::CreateTranslationOptions()
 {
@@ -371,7 +376,7 @@ void TranslationOptionCollection::CreateTranslationOptions()
   const vector <size_t> &decodeGraphBackoff = StaticData::Instance().GetDecodeGraphBackoff();
 
   // length of the sentence
-  size_t size = m_source.GetSize();
+  const size_t size = m_source.GetSize();
 
   // loop over all decoding graphs, each generates translation options
   for (size_t graphInd = 0 ; graphInd < decodeGraphList.size() ; graphInd++) {
@@ -405,9 +410,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   VERBOSE(2,"Translation Option Collection\n " << *this << endl);
 
-  // Incorporate distributed lm scores.
-  IncorporateDLMScores();
-
   ProcessUnknownWord();
 
   // Prune
@@ -420,75 +422,6 @@ void TranslationOptionCollection::CreateTranslationOptions()
 
   // Cached lex reodering costs
   CacheLexReordering();
-
-  // stateless feature scores
-  PreCalculateScores();
-}
-
-void TranslationOptionCollection::IncorporateDLMScores() {
-    // Build list of dlms.
-    const vector<const StatefulFeatureFunction*>& ffs =
-        StatefulFeatureFunction::GetStatefulFeatureFunctions();
-    std::map<int, LanguageModel*> dlm_ffs;
-    for (unsigned i = 0; i < ffs.size(); ++i) {
-        if (ffs[i]->GetScoreProducerDescription() == "DLM_5gram") { // TODO WTF
-            dlm_ffs[i] = const_cast<LanguageModel*>(static_cast<const LanguageModel* const>(ffs[i]));
-            dlm_ffs[i]->SetFFStateIdx(i);
-        }
-    }
-
-    // Don't need to do anything if we don't have any distributed
-    // language models.
-    if (dlm_ffs.size() == 0) {
-        return;
-    }
-
-    // Iterate over all translation options in the collection.
-    std::vector< std::vector< TranslationOptionList > >::iterator start_iter; 
-    for (start_iter = m_collection.begin();
-         start_iter != m_collection.end();
-         ++start_iter) {
-        std::vector< TranslationOptionList >::iterator end_iter;
-        for (end_iter = (*start_iter).begin();
-             end_iter != (*start_iter).end();
-             ++end_iter) {
-            std::vector< TranslationOption* >::iterator option_iter;
-            for (option_iter = (*end_iter).begin();
-                 option_iter != (*end_iter).end();
-                 ++option_iter) {
-
-                // Get a handle on the current translation option.
-                TranslationOption* option = *option_iter;
-
-                std::map<int, LanguageModel*>::iterator dlm_iter;
-                for (dlm_iter = dlm_ffs.begin();
-                     dlm_iter != dlm_ffs.end();
-                     ++dlm_iter) {
-                    LanguageModel* dlm = (*dlm_iter).second;
-
-
-                    float full_score;
-                    float ngram_score;
-                    size_t oov_count;
-                    TargetPhrase& phrase =
-                        const_cast<TargetPhrase&>(option->GetTargetPhrase());
-                    dlm->CalcScoreFromCache(phrase,
-                                            full_score,
-                                            ngram_score,
-                                            oov_count);
-                    ScoreComponentCollection& option_scores = 
-                        const_cast<ScoreComponentCollection&>(option->GetScoreBreakdown());
-                    option_scores.Assign(dlm, ngram_score);
-                    ScoreComponentCollection& phrase_scores =
-                        const_cast<ScoreComponentCollection&>(phrase.GetScoreBreakdown());
-                    phrase_scores.Assign(dlm, ngram_score);
-
-                    float weighted_score = full_score * dlm->GetWeight();
-                    phrase.SetFutureScore(phrase.GetFutureScore() + weighted_score);
-                }
-            }
-        }
-    }
 }
 
 void TranslationOptionCollection::Sort()
@@ -691,8 +624,6 @@ void TranslationOptionCollection::CacheLexReordering()
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     const StatefulFeatureFunction &ff = **iter;
     if (typeid(ff) == typeid(LexicalReordering)) {
-      cerr << "in=" << ff.GetScoreProducerDescription() << endl;
-
       const LexicalReordering &lexreordering = static_cast<const LexicalReordering&>(ff);
       for (size_t startPos = 0 ; startPos < size ; startPos++) {
         size_t maxSize =  size - startPos;
@@ -717,54 +648,6 @@ void TranslationOptionCollection::CacheLexReordering()
       } // for (size_t startPos = 0 ; startPos < size ; startPos++) {
     } // if (typeid(ff) == typeid(LexicalReordering)) {
   } // for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
-}
-
-void TranslationOptionCollection::PreCalculateScores() 
-{
-  //Figure out which features need to be precalculated
-  const vector<const StatelessFeatureFunction*>& sfs =
-      StatelessFeatureFunction::GetStatelessFeatureFunctions();
-  vector<const StatelessFeatureFunction*> precomputedFeatures;
-  for (unsigned i = 0; i < sfs.size(); ++i) {
-    if (sfs[i]->ComputeValueInTranslationOption() && 
-        !sfs[i]->ComputeValueInTranslationTable()) {
-      precomputedFeatures.push_back(sfs[i]);
-    }
-  }
-  //empty coverage vector
-  WordsBitmap coverage(m_source.GetSize());
-
-  if (precomputedFeatures.size()) {
-    //Go through translation options and precompute features
-    for (size_t i = 0; i < m_collection.size(); ++i) {
-      for (size_t j = 0; j < m_collection[i].size(); ++j) {
-        for (size_t k = 0; k < m_collection[i][j].size(); ++k) {
-          const TranslationOption* toption =  m_collection[i][j].Get(k);
-          ScoreComponentCollection& breakdown = m_precalculatedScores[*toption];
-          PhraseBasedFeatureContext context(*toption, m_source);
-          for (size_t si = 0; si < precomputedFeatures.size(); ++si) {
-            precomputedFeatures[si]->Evaluate(context, &breakdown);
-          }
-        }
-      }
-    }
-  }
-}
-
-void TranslationOptionCollection::InsertPreCalculatedScores
-  (const TranslationOption& translationOption, ScoreComponentCollection* scoreBreakdown) 
-    const
-{
-  if (m_precalculatedScores.size()) {
-    boost::unordered_map<TranslationOption,ScoreComponentCollection>::const_iterator scoreIter = 
-      m_precalculatedScores.find(translationOption);
-    if (scoreIter != m_precalculatedScores.end()) {
-      scoreBreakdown->PlusEquals(scoreIter->second);
-    } else {
-      TRACE_ERR("ERROR: " << translationOption << " missing from precalculation cache" << endl);
-      assert(0);  
-    }
-  }
 }
 
 //! list of trans opt for a particular span

@@ -34,6 +34,9 @@ LexicalReordering::LexicalReordering(const std::string &line)
     else if (args[0] == "path") {
       filePath = args[1];
     }
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 
   switch(m_configuration->GetCondition()) {
@@ -90,6 +93,13 @@ FFState* LexicalReordering::Evaluate(const Hypothesis& hypo,
 const FFState* LexicalReordering::EmptyHypothesisState(const InputType &input) const
 {
   return m_configuration->CreateLexicalReorderingState(input);
+}
+
+void LexicalReordering::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+
 }
 
 }

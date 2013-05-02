@@ -20,15 +20,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "DecodeStepTranslation.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "TranslationOption.h"
 #include "TranslationOptionCollection.h"
 #include "PartialTranslOptColl.h"
 #include "FactorCollection.h"
 
+using namespace std;
+
 namespace Moses
 {
-DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionaryFeature* pdf, const DecodeStep* prev)
+DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const DecodeStep* prev)
   : DecodeStep(pdf, prev)
 {
 }
@@ -64,7 +65,7 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
   // normal trans step
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const PhraseDictionary* phraseDictionary  =
-    decodeStep.GetPhraseDictionaryFeature()->GetDictionary(); ;
+    decodeStep.GetPhraseDictionaryFeature();
   const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
@@ -97,7 +98,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
     ,PartialTranslOptColl &outputPartialTranslOptColl
     , size_t startPos, size_t endPos, bool adhereTableLimit) const
 {
-  const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature()->GetDictionary();
+  const PhraseDictionary* phraseDictionary = GetPhraseDictionaryFeature();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const WordsRange wordsRange(startPos, endPos);
@@ -116,7 +117,9 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
 
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-      outputPartialTranslOptColl.Add (system, new TranslationOption(wordsRange, targetPhrase, source) );
+      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase, source);
+
+      outputPartialTranslOptColl.Add (system, transOpt);
 
       VERBOSE(3,"\t" << targetPhrase << "\n");
     }

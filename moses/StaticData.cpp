@@ -22,7 +22,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include "util/check.hh"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
+#include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -36,8 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "GlobalLexicalModelUnlimited.h"
 #include "SentenceStats.h"
 #include "PhraseBoundaryFeature.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
-#include "SparsePhraseDictionaryFeature.h"
 #include "PhrasePairFeature.h"
 #include "PhraseLengthFeature.h"
 #include "TargetWordInsertionFeature.h"
@@ -110,10 +111,9 @@ StaticData::StaticData()
   ,m_lmEnableOOVFeature(false)
   ,m_isAlwaysCreateDirectTranslationOption(false)
   ,m_needAlignmentInfo(false)
+  ,m_numInputScores(0)
+  ,m_numRealWordsInInput(0)
 {
-  m_maxFactorIdx[0] = 0;  // source side
-  m_maxFactorIdx[1] = 0;  // target side
-
   m_xmlBrackets.first="<";
   m_xmlBrackets.second=">";
 
@@ -167,10 +167,6 @@ bool StaticData::LoadData(Parameter *parameter)
     }
   }
 
-  if(m_parameter->GetParam("sort-word-alignment").size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
-  }
-  
   // factor delimiter
   if (m_parameter->GetParam("factor-delimiter").size() > 0) {
     m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
@@ -180,6 +176,16 @@ bool StaticData::LoadData(Parameter *parameter)
   SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
 
   //word-to-word alignment
+  // alignments
+  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
+  if (m_PrintAlignmentInfo) {
+    m_needAlignmentInfo = true;
+  }
+
+  if(m_parameter->GetParam("sort-word-alignment").size()) {
+    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
+  }
+
   SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
   if (m_PrintAlignmentInfoNbest) {
     m_needAlignmentInfo = true;
@@ -207,9 +213,6 @@ bool StaticData::LoadData(Parameter *parameter)
     m_nBestFactor = 20;
   }
   
-  // explicit setting of distinct nbest
-  SetBooleanParameter( &m_onlyDistinctNBest, "distinct-nbest", false);
-
   //lattice samples
   if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
     m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
@@ -243,8 +246,19 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     m_outputSearchGraph = true;
     m_outputSearchGraphExtended = true;
-  } else
+  } else {
     m_outputSearchGraph = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
+    m_outputSearchGraphSLF = true;
+  } else {
+    m_outputSearchGraphSLF = false;
+  }
+  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
+    m_outputSearchGraphHypergraph = true;
+  } else {
+    m_outputSearchGraphHypergraph = false;
+  }
 #ifdef HAVE_PROTOBUF
   if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {
     if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
@@ -492,17 +506,26 @@ bool StaticData::LoadData(Parameter *parameter)
       if (vecStr.size() == 1) {
         sentenceID++;
         Phrase phrase(0);
-        phrase.CreateFromString(GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
+        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[0], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else if (vecStr.size() == 2) {
         sentenceID = Scan<long>(vecStr[0]);
         Phrase phrase(0);
-        phrase.CreateFromString(GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
+        phrase.CreateFromString(Output, GetOutputFactorOrder(), vecStr[1], GetFactorDelimiter());
         m_constraints.insert(make_pair(sentenceID,phrase));
       } else {
         CHECK(false);
       }
     }
+  }
+
+  // input scores for lattices & confusion network input. TODO - get rid of this
+  if (m_parameter->GetParam("input-scores").size() > 0) {
+    m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
+  }
+
+  if (m_parameter->GetParam("input-scores").size() > 1) {
+    m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
   }
 
   // use of xml in input
@@ -533,7 +556,11 @@ bool StaticData::LoadData(Parameter *parameter)
 
   const vector<string> &features = m_parameter->GetParam("feature");
   for (size_t i = 0; i < features.size(); ++i) {
-    const string &line = features[i];
+    const string &line = Trim(features[i]);
+    cerr << "line=" << line << endl;
+    if (line.empty())
+      continue;
+
     vector<string> toks = Tokenize(line);
 
     const string &feature = toks[0];
@@ -541,116 +568,133 @@ bool StaticData::LoadData(Parameter *parameter)
 
     if (feature == "GlobalLexicalModel") {
       GlobalLexicalModel *model = new GlobalLexicalModel(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "glm") {
       GlobalLexicalModelUnlimited *model = NULL; //new GlobalLexicalModelUnlimited(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
-    else if (feature == "swd") {
+    else if (feature == "SourceWordDeletionFeature") {
       SourceWordDeletionFeature *model = new SourceWordDeletionFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
-    else if (feature == "twi") {
+    else if (feature == "TargetWordInsertionFeature") {
       TargetWordInsertionFeature *model = new TargetWordInsertionFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "PhraseBoundaryFeature") {
       PhraseBoundaryFeature *model = new PhraseBoundaryFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "pl") {
       PhraseLengthFeature *model = new PhraseLengthFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "WordTranslationFeature") {
       WordTranslationFeature *model = new WordTranslationFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "TargetBigramFeature") {
-    	TargetBigramFeature *model = new TargetBigramFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      TargetBigramFeature *model = new TargetBigramFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "TargetNgramFeature") {
-    	TargetNgramFeature *model = new TargetNgramFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      TargetNgramFeature *model = new TargetNgramFeature(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "PhrasePairFeature") {
       PhrasePairFeature *model = new PhrasePairFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       //SetWeights(model, weights);
     }
     else if (feature == "LexicalReordering") {
       LexicalReordering *model = new LexicalReordering(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "KENLM") {
       LanguageModel *model = ConstructKenLM(feature, line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "IRSTLM") {
-      LanguageModelIRST *irstlm = new LanguageModelIRST(line);
-      LanguageModel *model = new LMRefCount(irstlm, feature, line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      LanguageModelIRST *model = new LanguageModelIRST(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "Generation") {
       GenerationDictionary *model = new GenerationDictionary(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
     else if (feature == "BleuScoreFeature") {
       BleuScoreFeature *model = new BleuScoreFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-    }
-    else if (feature == "SparsePhraseDictionaryFeature") {
-      SparsePhraseDictionaryFeature *model = new SparsePhraseDictionaryFeature(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
-      //SetWeights(model, weights);
-      m_sparsePhraseDictionary.push_back(model);
     }
     else if (feature == "Distortion") {
       DistortionScoreProducer *model = new DistortionScoreProducer(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
-      m_distortionScoreProducer = model;
     }
     else if (feature == "WordPenalty") {
       WordPenaltyProducer *model = new WordPenaltyProducer(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_wpProducer = model;
     }
     else if (feature == "UnknownWordPenalty") {
       UnknownWordPenaltyProducer *model = new UnknownWordPenaltyProducer(line);
-      vector<float> weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       if (weights.size() == 0)
         weights.push_back(1.0f);
       SetWeights(model, weights);
       m_unknownWordPenaltyProducer = model;
     }
+    else if (feature == "PhraseDictionaryTreeAdaptor") {
+      PhraseDictionaryTreeAdaptor* model = new PhraseDictionaryTreeAdaptor(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryOnDisk") {
+      PhraseDictionaryOnDisk* model = new PhraseDictionaryOnDisk(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryMemory") {
+      PhraseDictionarySCFG* model = new PhraseDictionarySCFG(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+    else if (feature == "PhraseDictionaryCompact") {
+      PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+
 
 #ifdef HAVE_SYNLM
     else if (feature == "SyntacticLanguageModel") {
       SyntacticLanguageModel *model = new SyntacticLanguageModel(line);
-      const vector<float> &weights = m_parameter->GetWeights(feature, featureIndex);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
     }
 #endif
     else {
-      UserMessage::Add("Unknown feature function");
+      UserMessage::Add("Unknown feature function:" + feature);
       return false;
     }
 
@@ -658,34 +702,11 @@ bool StaticData::LoadData(Parameter *parameter)
 
   CollectFeatureFunctions();
 
-  if (!LoadPhraseTables()) return false;
   if (!LoadDecodeGraphs()) return false;
 
   if (!CheckWeights()) {
     return false;
   }
-
-  // report individual sparse features in n-best list
-  if (m_parameter->GetParam("report-sparse-features").size() > 0) {
-    for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").size(); i++) {
-      const std::string &name = m_parameter->GetParam("report-sparse-features")[i];
-      for (size_t j = 0; j < m_sparsePhraseDictionary.size(); ++j) {
-        if (m_sparsePhraseDictionary[j] && name.compare(m_sparsePhraseDictionary[j]->GetScoreProducerDescription()) == 0) {
-          m_sparsePhraseDictionary[j]->SetSparseFeatureReporting();
-        }
-      }
-    } // for(size_t i=0; i<m_parameter->GetParam("report-sparse-features").
-  }
-
-  //Instigate dictionary loading
-  ConfigDictionaries();
-
-  for (int i = 0; i < m_phraseDictionary.size(); i++)
-    cerr << m_phraseDictionary[i] << " ";
-  cerr << endl;
-  for (int i = 0; i < m_generationDictionary.size(); i++)
-      cerr << m_generationDictionary[i] << " ";
-    cerr << endl;
 
   //Add any other features here.
 
@@ -730,13 +751,13 @@ void StaticData::SetBooleanParameter( bool *parameter, string parameterName, boo
   }
 }
 
-void StaticData::SetWeight(const ScoreProducer* sp, float weight)
+void StaticData::SetWeight(const FeatureFunction* sp, float weight)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weight);
 }
 
-void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& weights)
+void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>& weights)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
@@ -745,7 +766,7 @@ void StaticData::SetWeights(const ScoreProducer* sp, const std::vector<float>& w
 StaticData::~StaticData()
 {
   /*
-  const std::vector<ScoreProducer*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
     ScoreProducer *ff = producers[i];
     cerr << endl << "Destroying" << ff << endl;
@@ -755,125 +776,6 @@ StaticData::~StaticData()
 
   // memory pools
   Phrase::FinalizeMemPool();
-}
-
-/* Doesn't load phrase tables any more. Just creates the features. */
-bool StaticData::LoadPhraseTables()
-{
-  VERBOSE(2,"Creating phrase table features" << endl);
-
-  // language models must be loaded prior to loading phrase tables
-
-  // load phrase translation tables
-  if (m_parameter->GetParam("ttable-file").size() > 0) {
-    // weights
-    const vector<string> &translationVector = m_parameter->GetParam("ttable-file");
-    vector<size_t>	maxTargetPhrase					= Scan<size_t>(m_parameter->GetParam("ttable-limit"));
-
-    if(maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
-      VERBOSE(1, "Using uniform ttable-limit of " << maxTargetPhrase[0] << " for all translation tables." << endl);
-      for(size_t i = 1; i < translationVector.size(); i++)
-        maxTargetPhrase.push_back(maxTargetPhrase[0]);
-    } else if(maxTargetPhrase.size() != 1 && maxTargetPhrase.size() < translationVector.size()) {
-      stringstream strme;
-      strme << "You specified " << translationVector.size() << " translation tables, but only " << maxTargetPhrase.size() << " ttable-limits.";
-      UserMessage::Add(strme.str());
-      return false;
-    }
-
-    // MAIN LOOP
-    for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      stringstream ptLine;
-      ptLine << "PhraseModel ";
-
-      vector<string> token = Tokenize(translationVector[currDict]);
-
-      if(currDict == 0 && token.size() == 4) {
-        UserMessage::Add("Phrase table specification in old 4-field format. No longer supported");
-        return false;
-      }
-      CHECK(token.size() >= 5);
-
-      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(token[0]);
-      ptLine << "implementation=" << implementation << " ";
-      ptLine << "input-factor=" << token[1] << " ";
-      ptLine << "output-factor=" << token[2] << " ";
-      ptLine << "path=" << token[4] << " ";
-
-      //characteristics of the phrase table
-
-      vector<FactorType>  input		= Tokenize<FactorType>(token[1], ",")
-                         ,output  = Tokenize<FactorType>(token[2], ",");
-      m_maxFactorIdx[0] = CalcMax(m_maxFactorIdx[0], input);
-      m_maxFactorIdx[1] = CalcMax(m_maxFactorIdx[1], output);
-      m_maxNumFactors = std::max(m_maxFactorIdx[0], m_maxFactorIdx[1]) + 1;
-      size_t numScoreComponent = Scan<size_t>(token[3]);
-      string filePath= token[4];
-
-      if(m_inputType == ConfusionNetworkInput || m_inputType == WordLatticeInput) {
-        if (currDict==0) { // only the 1st pt. THis is shit
-          // TODO. find what the assumptions made by confusion network about phrase table output which makes
-          // it only work with binary file. This is a hack
-          CHECK(implementation == Binary);
-
-          if (m_parameter->GetParam("input-scores").size()) {
-            m_numInputScores = Scan<size_t>(m_parameter->GetParam("input-scores")[0]);
-          }
-          else {
-            m_numInputScores = 1;
-          }
-          numScoreComponent += m_numInputScores;
-
-          if (m_parameter->GetParam("input-scores").size() > 1) {
-            m_numRealWordsInInput = Scan<size_t>(m_parameter->GetParam("input-scores")[1]);
-          }
-          else {
-            m_numRealWordsInInput = 0;
-          }
-          numScoreComponent += m_numRealWordsInInput;
-        }
-      }
-      else { // not confusion network or lattice input
-        m_numInputScores = 0;
-        m_numRealWordsInInput = 0;
-      }
-
-      ptLine << "num-features=" << numScoreComponent << " ";
-      ptLine << "num-input-features=" << (currDict==0 ? m_numInputScores + m_numRealWordsInInput : 0) << " ";
-      ptLine << "table-limit=" << maxTargetPhrase[currDict] << " ";
-
-      if (implementation == SuffixArray) {
-        ptLine << "target-path=" << token[5] << " ";
-        ptLine << "alignment-path=" << token[6] << " ";
-      }
-
-      //This is needed for regression testing, but the phrase table
-      //might not really be loading here
-      IFVERBOSE(1)
-      PrintUserTime(string("Start loading PhraseTable ") + filePath);
-      VERBOSE(1,"filePath: " << filePath <<endl);
-
-      PhraseDictionaryFeature* pdf = new PhraseDictionaryFeature(ptLine.str());
-
-      //optional create sparse phrase feature
-      if (m_sparsePhraseDictionary.size() > currDict) {
-        SparsePhraseDictionaryFeature* spdf = m_sparsePhraseDictionary[currDict];
-        pdf->SetSparsePhraseDictionaryFeature(spdf);
-      }
-
-      m_phraseDictionary.push_back(pdf);
-
-      const vector<float> &weights  = m_parameter->GetWeights("PhraseModel", currDict);
-      CHECK(weights.size() >= numScoreComponent);
-
-      SetWeights(m_phraseDictionary.back(),weights);
-
-    }
-  }
-
-  IFVERBOSE(1)
-  PrintUserTime("Finished loading phrase tables");
-  return true;
 }
 
 void StaticData::LoadNonTerminals()
@@ -1209,28 +1111,6 @@ float StaticData::GetWeightUnknownWordPenalty() const {
   return GetWeight(m_unknownWordPenaltyProducer);
 }
 
-float StaticData::GetWeightDistortion() const {
-  CHECK(m_distortionScoreProducer);
-  return StaticData::Instance().GetWeight(m_distortionScoreProducer);
-}
-
-void StaticData::ConfigDictionaries() {
-  for (vector<DecodeGraph*>::const_iterator i = m_decodeGraphs.begin();
-    i != m_decodeGraphs.end(); ++i) {
-      for (DecodeGraph::const_iterator j = (*i)->begin(); j != (*i)->end(); ++j) {
-        const DecodeStep* step = *j;
-        PhraseDictionaryFeature* pdict = const_cast<PhraseDictionaryFeature*>(step->GetPhraseDictionaryFeature());
-        if (pdict) {
-          pdict->InitDictionary(NULL);
-        }
-        GenerationDictionary* gdict = const_cast<GenerationDictionary*>(step->GetGenerationDictionaryFeature());
-        if (gdict) {
-        }
-      }
-  }
-
-}
-
 void StaticData::InitializeForInput(const InputType& source) const {
   const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0;i<producers.size();++i) {
@@ -1244,7 +1124,6 @@ void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const {
   for(size_t i=0;i<producers.size();++i) {
     FeatureFunction &ff = *producers[i];
     ff.CleanUpAfterSentenceProcessing(source);
-    cerr << endl << "Cleaning " << &ff << endl;
   }
 }
 
@@ -1254,7 +1133,6 @@ void StaticData::CollectFeatureFunctions()
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     const FeatureFunction *ff = *iter;
-    cerr << ff->GetScoreProducerDescription() << endl;
 
     const LanguageModel *lm = dynamic_cast<const LanguageModel*>(ff);
     if (lm) {
@@ -1268,9 +1146,12 @@ void StaticData::CollectFeatureFunctions()
       m_generationDictionary.push_back(generation);
       continue;
     }
-
   }
 
+  for (size_t i = 0; i < m_phraseDictionary.size(); ++i) {
+    PhraseDictionary *pt = m_phraseDictionary[i];
+    pt->InitDictionary();
+  }
 }
 
 bool StaticData::CheckWeights() const

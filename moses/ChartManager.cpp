@@ -135,8 +135,8 @@ void ChartManager::AddXmlChartOptions() {
       i != xmlChartOptionsList.end(); ++i) {
     ChartTranslationOptions* opt = *i;
 
-    Moses::Scores wordPenaltyScore(1, -0.434294482); // TODO what is this number?
-    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((ScoreProducer*)staticData.GetWordPenaltyProducer(), wordPenaltyScore);
+    Moses::Scores wordPenaltyScore(1, -1);
+    opt->GetTargetPhraseCollection().GetCollection()[0]->SetScore((FeatureFunction*)staticData.GetWordPenaltyProducer(), wordPenaltyScore);
 
     const WordsRange &range = opt->GetSourceWordsRange();
     RuleCubeItem* item = new RuleCubeItem( *opt, m_hypoStackColl );
@@ -355,7 +355,7 @@ void ChartManager::PreCalculateScores()
             StatelessFeatureFunction::GetStatelessFeatureFunctions();
         ScoreComponentCollection& breakdown = m_precalculatedScores[*targetPhrase];
         for (size_t k = 0; k < sfs.size(); ++k) {
-          if (!sfs[k]->ComputeValueInTranslationTable()) {
+          if (sfs[k]->GetStatelessFeatureType() == DependsOnSource) {
             sfs[k]->EvaluateChart(context,&breakdown);
           }
         }

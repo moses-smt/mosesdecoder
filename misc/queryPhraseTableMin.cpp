@@ -59,15 +59,14 @@ int main(int argc, char **argv)
   
   StaticData::InstanceNonConst().LoadData(parameter);
 
-  PhraseDictionaryFeature pdf("implementation=12 input-factor=0 output-factor=0 num-features=5 path=" + ttable);
-  PhraseDictionaryCompact pdc(nscores, Compact, &pdf, false, useAlignments);
-  bool ret = pdc.Load(input, output, ttable, weight, 0, lmList, 0);                                                                           
+  PhraseDictionaryCompact pdc("input-factor=0 output-factor=0 num-features=5 path=" + ttable);
+  bool ret = pdc.InitDictionary(); 
   assert(ret);
   
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;
-    sourcePhrase.CreateFromString(input, line, "||dummy_string||");
+    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||");
     
     TargetPhraseVectorPtr decodedPhraseColl
       = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
@@ -84,7 +83,7 @@ int main(int argc, char **argv)
           if(useAlignments)
             std::cout << " " << tp.GetAlignTerm() << "|||"; 
           
-          std::vector<float> scores = tp.GetScoreBreakdown().GetScoresForProducer(&pdf);
+          std::vector<float> scores = tp.GetScoreBreakdown().GetScoresForProducer(&pdc);
           for(size_t i = 0; i < scores.size(); i++)
             std::cout << " " << exp(scores[i]);
           std::cout << std::endl;

@@ -73,8 +73,6 @@ public:
     LDHT::Client* getClientSafe();
     LDHT::Client* initTSSClient();
     virtual ~LanguageModelLDHT();
-    virtual LanguageModel* Duplicate(
-            ScoreIndexManager& scoreIndexManager) const;
     virtual void InitializeForInput(InputType const& source);
     virtual void CleanUpAfterSentenceProcessing(const InputType &source);
     virtual const FFState* EmptyHypothesisState(const InputType& input) const;
@@ -140,11 +138,6 @@ LanguageModelLDHT::LanguageModelLDHT(const std::string& path,
 LanguageModelLDHT::~LanguageModelLDHT() {
     // TODO(wilson): should cleanup for each individual thread.
     //delete getClientSafe();
-}
-
-LanguageModel* LanguageModelLDHT::Duplicate(
-            ScoreIndexManager& scoreIndexManager) const {
-    return NULL;
 }
 
 // Check that there is a TSS Client instance, and instantiate one if

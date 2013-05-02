@@ -37,7 +37,7 @@ public:
   void SetAdditionalScoreComponents(size_t number);
   size_t GetNumberOfTypes() const;
 
-  ScoreProducer *GetScoreProducer() const {
+  FeatureFunction *GetScoreProducer() const {
     return m_scoreProducer;
   }
 
@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  void SetScoreProducer(ScoreProducer* scoreProducer) {
+  void SetScoreProducer(FeatureFunction* scoreProducer) {
     m_scoreProducer = scoreProducer;
   }
 
@@ -72,7 +72,7 @@ private:
   }
 
   std::string m_modelString;
-  ScoreProducer *m_scoreProducer;
+  FeatureFunction *m_scoreProducer;
   ModelType m_modelType;
   bool m_phraseBased;
   bool m_collapseScores;

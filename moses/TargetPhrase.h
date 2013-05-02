@@ -38,7 +38,7 @@ namespace Moses
 {
 
 class LMList;
-class ScoreProducer;
+class FeatureFunction;
 class TranslationSystem;
 class WordPenaltyProducer;
 
@@ -61,48 +61,14 @@ public:
   explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
 
-  //! used by the unknown word handler- these targets
-  //! don't have a translation score, so wp is the only thing used
-  void SetScore(const TranslationSystem* system);
+  void Evaluate();
 
-  //!Set score for Sentence XML target options
-  void SetScore(float score);
+  void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
-  //! Set score for unknown words with input weights
-  void SetScore(const TranslationSystem* system, const Scores &scoreVector);
-
-
-  /*** Called immediately after creation to initialize scores.
-   *
-   * @param translationScoreProducer The PhraseDictionaryMemory that this TargetPhrase is contained by.
-   *        Used to identify where the scores for this phrase belong in the list of all scores.
-   * @param scoreVector the vector of scores (log probs) associated with this translation
-   * @param weighT the weights for the individual scores (t-weights in the .ini file)
-   * @param languageModels all the LanguageModels that should be used to compute the LM scores
-   * @param weightWP the weight of the word penalty
-   *
-   * @TODO should this be part of the constructor?  If not, add explanation why not.
-  	*/
-  void SetScore(const ScoreProducer* translationScoreProducer,
-                const Scores &scoreVector,
-                const ScoreComponentCollection &sparseScoreVector,
-                const std::vector<float> &weightT,
-                float weightWP,
-                const LMList &languageModels);
-
-  void SetScoreChart(const ScoreProducer* translationScoreProducer
-                     ,const Scores &scoreVector
-                     ,const std::vector<float> &weightT
-                     ,const LMList &languageModels
-                     ,const WordPenaltyProducer* wpProducer);
-
-  // used by for unknown word proc in chart decoding
-  void SetScore(const ScoreProducer* producer, const Scores &scoreVector);
-
-
-  // used when creating translations of unknown words:
-  void ResetScore();
-  void SetWeights(const ScoreProducer*, const std::vector<float> &weightT);
+  // used to set translation or gen score
+  void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
+  void SetXMLScore(float score);
+  void SetInputScore(const Scores &scoreVector);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
   // used for translation step
@@ -120,9 +86,7 @@ public:
   inline float GetFutureScore() const {
     return m_fullScore;
   }
-  inline void SetFutureScore(float fullScore) {
-    m_fullScore = fullScore;
-  }
+
 	inline const ScoreComponentCollection &GetScoreBreakdown() const
 	{
 		return m_scoreBreakdown;

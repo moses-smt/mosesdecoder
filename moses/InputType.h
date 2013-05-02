@@ -56,6 +56,7 @@ protected:
   long m_segId;
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   std::string m_textType;
+  std::string m_passthrough;
 
 public:
 
@@ -112,6 +113,12 @@ public:
   void SetTextType(std::string type) {
     m_textType = type;
   }  
+  std::string GetPassthroughInformation() const {
+    return m_passthrough;
+  }
+  void SetPassthroughInformation(std::string &passthrough) {
+    m_passthrough = passthrough;
+  }
   //! returns the number of words moved
   virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
 

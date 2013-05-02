@@ -44,8 +44,9 @@ class Word;
 class RuleTableUTrie : public RuleTableTrie
 {
  public:
-  RuleTableUTrie(size_t numScoreComponents, PhraseDictionaryFeature *feature)
-      : RuleTableTrie(numScoreComponents, feature) {}
+  RuleTableUTrie(const std::string &line)
+      : RuleTableTrie("RuleTableUTrie", line)
+  {}
 
   const UTrieNode &GetRootNode() const { return m_root; }
 
@@ -53,6 +54,8 @@ class RuleTableUTrie : public RuleTableTrie
                                                   const ChartCellCollectionBase &);
 
  private:
+  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const;
+
   TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
       const Phrase &source, const TargetPhrase &target, const Word &sourceLHS);
 

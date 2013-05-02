@@ -528,11 +528,13 @@ sigtest-filter-ttable
 	out: sigtest-filter-phrase-translation-table
 	default-name: model/phrase-table-sigtest-filter
 	pass-unless: sigtest-filter
+  ignore-if: TRAINING:config
 sigtest-filter-reordering
 	in: reordering-table sigtest-filter-suffix-array
 	out: sigtest-filter-reordering-table
 	default-name: model/reordering-table-sigtest-filter
 	pass-unless: sigtest-filter
+  ignore-if: TRAINING:config
 	ignore-unless: lexicalized-reordering
 build-generation
 	in: corpus-mml-postfilter=OR=corpus-mml-prefilter=OR=corpus
@@ -821,7 +823,7 @@ apply-filter
 	default-name: tuning/moses.filtered.ini
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
-	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+	template: cp IN1/moses.ini OUT
 apply-filter-devtest
 	in: TRAINING:config filtered-dir-devtest
 	out: filtered-config-devtest
@@ -842,7 +844,7 @@ apply-weights
 	out: config-with-reused-weights
 	ignore-if: use-hiero
 	default-name: tuning/moses.tuned.ini
-	template: $moses-bin-dir/reuse-weights IN1 < IN > OUT
+	template: $moses-script-dir/ems/support/substitute-weights.perl IN < IN1 > OUT
 	error: cannot open
 hiero-tune
 	in: TRAINING:hiero-config input reference
@@ -932,7 +934,7 @@ apply-filter
 	default-name: evaluation/filtered.ini
 	pass-if: TRAINING:binarize-all
 	ignore-if: use-hiero
-	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
+	template: $moses-script-dir/ems/support/substitute-weights.perl IN1/moses.ini < IN > OUT
 decode
 	in: filtered-config input
 	out: system-output
@@ -956,7 +958,7 @@ remove-markup
 	default-name: evaluation/cleaned
 	pass-if: TRAINING:hierarchical-rule-set
 	pass-unless: report-segmentation
-	template: $moses-script-dir/ems/support/remove-segmenation-markup.perl < IN > OUT
+	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
 recase-output
 	in: cleaned-output RECASING:recase-config
 	out: recased-output
@@ -1000,6 +1002,7 @@ lowercase-reference
 	out: reference
 	default-name: evaluation/reference
 	pass-unless: output-lowercaser
+  pass-if: recaser
 	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
 	template: $output-lowercaser < IN > OUT	
 nist-bleu

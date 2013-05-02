@@ -13,7 +13,7 @@ namespace Moses
 
 /** @todo ask miles
  */
-class LanguageModelRemote : public LanguageModelPointerState
+class LanguageModelRemote : public LanguageModelSingleFactor
 {
 private:
   struct Cache {

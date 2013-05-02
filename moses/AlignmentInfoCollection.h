@@ -33,7 +33,6 @@ namespace Moses
 
 /** Singleton collection of all AlignmentInfo objects.
  *  Used as a cache of all alignment info to save space.
- * @todo Check whether this needs locking in threaded environment 
  */
 class AlignmentInfoCollection
 {
@@ -55,6 +54,7 @@ class AlignmentInfoCollection
 
   //! Only a single static variable should be created.
   AlignmentInfoCollection();
+  ~AlignmentInfoCollection();
 
   static AlignmentInfoCollection s_instance;
 

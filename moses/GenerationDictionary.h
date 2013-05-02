@@ -69,7 +69,6 @@ public:
 	*	Or NULL if the input word isn't found. The search function used is the WordComparer functor
 	*/
 	const OutputWordCollection *FindWord(const Word &word) const;
-	virtual bool ComputeValueInTranslationOption() const;
 
   //Usual feature function methods are not implemented
   virtual void Evaluate(const PhraseBasedFeatureContext& context,
@@ -83,8 +82,6 @@ public:
   {
     throw std::logic_error("GenerationDictionary.Evaluate() Not implemented");
   }
-
-  virtual bool ComputeValueInTranslationTable() const {return true;}
 
 };
 

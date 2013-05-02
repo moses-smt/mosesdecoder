@@ -48,7 +48,6 @@ class PhraseDictionaryCompact : public PhraseDictionary
 protected:
   friend class PhraseDecoder;
 
-  PhraseTableImplementation m_implementation;
   bool m_inMemory;
   bool m_useAlignmentInfo;
   
@@ -66,38 +65,25 @@ protected:
   
   StringVector<unsigned char, size_t, MmapAllocator>  m_targetPhrasesMapped;
   StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
-  
-  const std::vector<FactorType>* m_input;
-  const std::vector<FactorType>* m_output;
-  
-  const std::vector<float>* m_weight;
+
+  std::vector<float> m_weight;
   const LMList* m_languageModels;
   float m_weightWP;
 
 public:
-  PhraseDictionaryCompact(size_t numScoreComponent,
-                          PhraseTableImplementation implementation,
-                          PhraseDictionaryFeature* feature,
-                          bool inMemory = StaticData::Instance().UseMinphrInMemory(),
-                          bool useAlignmentInfo = StaticData::Instance().NeedAlignmentInfo())
-    : PhraseDictionary(numScoreComponent, feature),
-      m_implementation(implementation),
-      m_inMemory(inMemory),
-      m_useAlignmentInfo(useAlignmentInfo),
-      m_hash(10, 16),
-      m_phraseDecoder(0),
-      m_weight(0)
-  {}
+  PhraseDictionaryCompact(const std::string &line)
+  :PhraseDictionary("PhraseDictionaryCompact", line)
+  ,m_inMemory(true)
+  ,m_useAlignmentInfo(true)
+  ,m_hash(10, 16)
+  ,m_phraseDecoder(0)
+  ,m_weight(0)
+  {
+  }
 
   ~PhraseDictionaryCompact();
 
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , const LMList &languageModels
-            , float weightWP);
+  bool InitDictionary();
 
   const TargetPhraseCollection* GetTargetPhraseCollection(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;

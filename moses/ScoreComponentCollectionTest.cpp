@@ -36,6 +36,10 @@ class MockStatelessFeatureFunction : public StatelessFeatureFunction {
       StatelessFeatureFunction(desc,n, line) {}
     virtual void Evaluate(const PhraseBasedFeatureContext&, ScoreComponentCollection*) const {}
     virtual void EvaluateChart(const ChartBasedFeatureContext&, ScoreComponentCollection*) const {}
+    virtual void Evaluate(const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+    { }
 };
 
 class MockSingleFeature : public MockStatelessFeatureFunction {
@@ -50,8 +54,9 @@ class MockMultiFeature : public MockStatelessFeatureFunction {
 
 class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
-    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", ScoreProducer::unlimited, "MockSparse") {}
+    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", FeatureFunction::unlimited, "MockSparse") {}
 };
+
 
 
 struct MockProducers {
@@ -103,7 +108,7 @@ BOOST_FIXTURE_TEST_CASE(sparse_feature, MockProducers)
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"third"), 0.0f);
   scc.Assign(&sparse, "first", -1.9f);
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -1.9f);
-  scc.PlusEquals(&sparse, "first", -1.9f);
+  scc.PlusEquals(&sparse, StringPiece("first"), -1.9f);
   BOOST_CHECK_EQUAL( scc.GetScoreForProducer(&sparse,"first"), -3.8f);
 }
 

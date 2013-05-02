@@ -15,7 +15,7 @@
 
 
 # Some general things to note:
-#  - Different combination algorithms require different statistics. To be on the safe side, use the options `-phrase-word-alignment` and `-write-lexical-counts` when training models.
+#  - Different combination algorithms require different statistics. To be on the safe side, use the option `-write-lexical-counts` when training models.
 #  - The script assumes that phrase tables are sorted (to allow incremental, more memory-friendly processing). sort with LC_ALL=C.
 #  - Some configurations require additional statistics that are loaded in memory (lexical tables; complete list of target phrases). If memory consumption is a problem, use the option --lowmem (slightly slower and writes temporary files to disk), or consider pruning your phrase table before combining (e.g. using Johnson et al. 2007).
 #  - The script can read/write gzipped files, but the Python implementation is slow. You're better off unzipping the files on the command line and working with the unzipped files.
@@ -306,7 +306,7 @@ class Moses():
         # assuming that alignment is empty
         elif len(line) == 4:
             if self.require_alignment:
-                sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment\n')
+                sys.stderr.write('Error: unexpected phrase table format. Your current configuration requires alignment information. Make sure you trained your model with -phrase-word-alignment (default in newer Moses versions)\n')
                 exit()
             
             self.phrase_pairs[src][target][1] = [b'',line[3].lstrip(b'| ')]

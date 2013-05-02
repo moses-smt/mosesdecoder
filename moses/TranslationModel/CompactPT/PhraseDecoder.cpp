@@ -22,15 +22,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <deque>
 
 #include "PhraseDecoder.h"
+#include "moses/StaticData.h"
+#include "moses/DummyScoreProducers.h"
+
+using namespace std;
 
 namespace Moses
 {
 
 PhraseDecoder::PhraseDecoder(
   PhraseDictionaryCompact &phraseDictionary,
-  const std::vector<FactorType>* &input,
-  const std::vector<FactorType>* &output,
-  const PhraseDictionaryFeature* feature,
+  const std::vector<FactorType>* input,
+  const std::vector<FactorType>* output,
   size_t numScoreComponent,
   const std::vector<float>* weight,
   float weightWP,
@@ -41,7 +44,7 @@ PhraseDecoder::PhraseDecoder(
   m_symbolTree(0), m_multipleScoreTrees(false),
   m_scoreTrees(1), m_alignTree(0),
   m_phraseDictionary(phraseDictionary), m_input(input), m_output(output),
-  m_feature(feature), m_weight(weight),
+  m_weight(weight),
   m_weightWP(weightWP), m_languageModels(languageModels),
   m_separator(" ||| ")
 { }
@@ -436,8 +439,9 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
       
       if(scores.size() == m_numScoreComponent)
       {
-        targetPhrase->SetScore(m_feature, scores, ScoreComponentCollection() /*sparse*/,*m_weight, m_weightWP, *m_languageModels);
-        
+        targetPhrase->SetScore(&m_phraseDictionary, scores);
+        targetPhrase->Evaluate();
+
         if(m_containsAlignmentInfo)
           state = Alignment;
         else

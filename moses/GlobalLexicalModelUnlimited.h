@@ -8,7 +8,6 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"
@@ -90,13 +89,20 @@ public:
     assert(0);
   }
 
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
 
-	void AddFeature(ScoreComponentCollection* accumulator, StringHash alreadyScored,
-			std::string sourceTrigger, std::string sourceWord, std::string targetTrigger,
-			std::string targetWord) const;
+	void AddFeature(ScoreComponentCollection* accumulator,
+			StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,
+			StringPiece targetWord) const;
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return DependsOnSource; }
+
 };
 
 }

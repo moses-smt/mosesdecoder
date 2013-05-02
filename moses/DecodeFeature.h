@@ -32,8 +32,7 @@ namespace Moses
 {
 
 /**
-  * A feature on the decoding path (Generation or Translation)
-  * @todo don't quite understand what this is
+  * Baseclass for phrase-table or generation table feature function
  **/
 class DecodeFeature : public StatelessFeatureFunction {
 
@@ -59,7 +58,15 @@ class DecodeFeature : public StatelessFeatureFunction {
     
     const std::vector<FactorType>& GetInput() const;
     const std::vector<FactorType>& GetOutput() const;
+
+    virtual void Evaluate(const TargetPhrase &targetPhrase
+                        , ScoreComponentCollection &scoreBreakdown
+                        , ScoreComponentCollection &estimatedFutureScore) const
+    {}
     
+    bool IsDecodeFeature() const
+    { return true; }
+
   protected:
     std::vector<FactorType> m_input;
     std::vector<FactorType> m_output;

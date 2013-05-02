@@ -4,6 +4,7 @@
 #define moses_DummyScoreProducers_h
 
 #include "FeatureFunction.h"
+#include "util/check.hh"
 
 namespace Moses
 {
@@ -19,8 +20,8 @@ public:
 	: StatefulFeatureFunction("Distortion", 1, line)
 	{}
 
-  float CalculateDistortionScore(const Hypothesis& hypo,
-                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition) const;
+  static float CalculateDistortionScore(const Hypothesis& hypo,
+                                 const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -36,6 +37,11 @@ public:
 		CHECK(0); // feature function not valid in chart decoder
 		return NULL;
 	}
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 };
 
 /** Doesn't do anything but provide a key into the global
@@ -57,7 +63,9 @@ public:
       //required but does nothing.
     }
 
-
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 };
 
@@ -67,7 +75,6 @@ class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 public:
 	UnknownWordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("UnknownWordPenalty",1, line) {}
 
-  virtual bool ComputeValueInTranslationOption() const;
   void Evaluate(  const PhraseBasedFeatureContext& context,
   								ScoreComponentCollection* accumulator) const 
   {
@@ -81,9 +88,16 @@ public:
     //do nothing - not a real feature
   }
 
-  bool ComputeValueInTranslationTable() const {return true;}
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
-  virtual bool IsTuneable() const { return false; }
+  virtual bool IsTuneable() const
+  { return false; }
+
+  bool IsDecodeFeature() const
+  { return true; }
+
 
 };
 
@@ -103,6 +117,10 @@ class MetaFeatureProducer : public StatelessFeatureFunction
 		     ScoreComponentCollection*) const {
     //do nothing - not a real feature
   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 };
 
 }

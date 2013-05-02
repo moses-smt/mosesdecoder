@@ -7,7 +7,7 @@
 #include "util/check.hh"
 #include "moses/TypeDef.h"
 #include "moses/TargetPhraseCollection.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 namespace Moses
 {
@@ -23,14 +23,19 @@ class InputType;
 class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
-  PDTAimp *imp;
+
+  boost::thread_specific_ptr<PDTAimp> m_implementation;
+
   friend class PDTAimp;
   PhraseDictionaryTreeAdaptor();
   PhraseDictionaryTreeAdaptor(const PhraseDictionaryTreeAdaptor&);
   void operator=(const PhraseDictionaryTreeAdaptor&);
 
+  PDTAimp& GetImplementation();
+  const PDTAimp& GetImplementation() const;
+
 public:
-  PhraseDictionaryTreeAdaptor(size_t numScoreComponent, unsigned numInputScores, const PhraseDictionaryFeature* feature);
+  PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
 
   // enable/disable caching
@@ -43,20 +48,15 @@ public:
   void DisableCache();
 
   // initialize ...
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , const LMList &languageModels
-            , float weightWP);
+  bool InitDictionary();
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
   TargetPhraseCollection const* GetTargetPhraseCollection(Phrase const &src) const;
   TargetPhraseCollection const* GetTargetPhraseCollection(InputType const& src,WordsRange const & srcRange) const;
 
-  virtual void InitializeForInput(InputType const& source);
+  void InitializeForInput(InputType const& source);
+  void CleanUpAfterSentenceProcessing(InputType const& source);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,

@@ -43,31 +43,27 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
 
 protected:
-  OnDiskPt::OnDiskWrapper m_dbWrapper;
+  boost::thread_specific_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
+
   const LMList* m_languageModels;
   const WordPenaltyProducer* m_wpProducer;
-  std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
-  std::string m_filePath;
 
-  void LoadTargetLookup();
+  OnDiskPt::OnDiskWrapper &GetImplementation();
+  const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
 public:
-  PhraseDictionaryOnDisk(size_t numScoreComponent, PhraseDictionaryFeature* feature)
-    : MyBase(numScoreComponent, feature), m_languageModels(NULL)
+  PhraseDictionaryOnDisk(const std::string &line)
+    : MyBase("PhraseDictionaryOnDisk", line)
+    , m_languageModels(NULL)
   {}
+
   virtual ~PhraseDictionaryOnDisk();
 
   PhraseTableImplementation GetPhraseTableImplementation() const {
     return OnDisk;
   }
 
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::string &filePath
-	    , const std::vector<float> &weight
-            , size_t tableLimit,
-            const LMList& languageModels,
-            const WordPenaltyProducer* wpProducer);
+  bool InitDictionary();
 
   // PhraseDictionary impl
   //! find list of translations that can translates src. Only for phrase input
@@ -76,6 +72,10 @@ public:
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
     const ChartCellCollectionBase &);
+
+  virtual void InitializeForInput(InputType const& source);
+  virtual void CleanUpAfterSentenceProcessing(InputType const& source);
+
 };
 
 }  // namespace Moses

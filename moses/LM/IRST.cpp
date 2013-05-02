@@ -40,16 +40,14 @@ using namespace std;
 namespace Moses
 {
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
+:LanguageModelSingleFactor("IRSTLM", line)
 {
-  cerr << "line=" << line << endl;
   FactorType factorType;
   size_t nGramOrder;
   string filePath;
 
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    CHECK(args.size() == 2);
+  for (size_t i = 0; i < m_args.size(); ++i) {
+	const vector<string> &args = m_args[i];
 
     if (args[0] == "factor") {
       factorType = Scan<FactorType>(args[1]);
@@ -61,17 +59,11 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
       filePath = args[1];
     }
     else {
-      UserMessage::Add("Unknown argument " + args[0]);
-      abort();
+      throw "Unknown argument " + args[0];
     }
   }
 
   Load(filePath, factorType, nGramOrder);
-}
-
-LanguageModelIRST::LanguageModelIRST(int dub)
-  :m_lmtb(0),m_lmtb_dub(dub)
-{
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -154,13 +146,13 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   factorId = m_sentenceStart->GetId();
   m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceStartArray[m_factorType] = m_sentenceStart;
+  m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
   m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
   factorId = m_sentenceEnd->GetId();
   m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceEndArray[m_factorType] = m_sentenceEnd;
+  m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
   // add to lookup vector in object
   m_lmIdLookup.resize(maxFactorId+1);
@@ -183,7 +175,7 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
-      std::string s = factor->GetString();
+      std::string s = factor->GetString().as_string();
       int code = d->encode(s.c_str());
 
       //////////

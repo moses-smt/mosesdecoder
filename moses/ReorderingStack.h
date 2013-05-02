@@ -13,8 +13,6 @@
 //#include "TypeDef.h"
 //#include "Util.h"
 #include "WordsRange.h"
-//#include "ScoreProducer.h"
-//#include "FeatureFunction.h"
 
 namespace Moses
 {

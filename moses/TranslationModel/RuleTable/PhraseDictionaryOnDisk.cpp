@@ -34,32 +34,11 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-bool PhraseDictionaryOnDisk::Load(const std::vector<FactorType> &input
-                                  , const std::vector<FactorType> &output
-                                  , const std::string &filePath
-				  , const std::vector<float> &weight
-                                  , size_t tableLimit
-                                  , const LMList& languageModels
-                                  , const WordPenaltyProducer* wpProducer)
+bool PhraseDictionaryOnDisk::InitDictionary()
 {
-  PrintUserTime("Start loading binary SCFG phrase table. ");
-
-  m_languageModels = &(languageModels);
-  m_wpProducer = wpProducer;
-  m_filePath = filePath;
-  m_tableLimit = tableLimit;
-  m_inputFactorsVec		= input;
-  m_outputFactorsVec	= output;
-
-  LoadTargetLookup();
-
-  if (!m_dbWrapper.BeginLoad(filePath))
-    return false;
-
-  CHECK(m_dbWrapper.GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
-  CHECK(m_dbWrapper.GetMisc("NumSourceFactors") == input.size());
-  CHECK(m_dbWrapper.GetMisc("NumTargetFactors") == output.size());
-  CHECK(m_dbWrapper.GetMisc("NumScores") == weight.size());
+  const StaticData &staticData = StaticData::Instance();
+  m_languageModels = &staticData.GetLMList();
+  m_wpProducer = staticData.GetWordPenaltyProducer();
 
   return true;
 }
@@ -73,19 +52,53 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
   return NULL;
 }
 
-void PhraseDictionaryOnDisk::LoadTargetLookup()
-{
-  // TODO
-}
-
 ChartRuleLookupManager *PhraseDictionaryOnDisk::CreateRuleLookupManager(
   const InputType &sentence,
   const ChartCellCollectionBase &cellCollection)
 {
   return new ChartRuleLookupManagerOnDisk(sentence, cellCollection, *this,
-                                          m_dbWrapper, m_languageModels,
-                                          m_wpProducer, m_inputFactorsVec,
-                                          m_outputFactorsVec, m_filePath);
+                                          GetImplementation(), m_languageModels,
+                                          m_wpProducer, m_input,
+                                          m_output, m_filePath);
+}
+
+OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation()
+{
+  OnDiskPt::OnDiskWrapper* dict;
+  dict = m_implementation.get();
+  CHECK(dict);
+  return *dict;
+}
+
+const OnDiskPt::OnDiskWrapper &PhraseDictionaryOnDisk::GetImplementation() const
+{
+  OnDiskPt::OnDiskWrapper* dict;
+  dict = m_implementation.get();
+  CHECK(dict);
+  return *dict;
+}
+
+void PhraseDictionaryOnDisk::InitializeForInput(InputType const& source)
+{
+  const StaticData &staticData = StaticData::Instance();
+
+  OnDiskPt::OnDiskWrapper *obj = new OnDiskPt::OnDiskWrapper();
+  if (!obj->BeginLoad(m_filePath))
+    return;
+
+  CHECK(obj->GetMisc("Version") == OnDiskPt::OnDiskWrapper::VERSION_NUM);
+  CHECK(obj->GetMisc("NumSourceFactors") == m_input.size());
+  CHECK(obj->GetMisc("NumTargetFactors") == m_output.size());
+  CHECK(obj->GetMisc("NumScores") == m_numScoreComponents);
+
+  m_implementation.reset(obj);
+
+  return;
+}
+
+void PhraseDictionaryOnDisk::CleanUpAfterSentenceProcessing(InputType const& source)
+{
+
 }
 
 }

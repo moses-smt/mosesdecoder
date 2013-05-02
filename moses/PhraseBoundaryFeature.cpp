@@ -15,7 +15,7 @@ int PhraseBoundaryState::Compare(const FFState& other) const
 }
 
 PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
-: StatefulFeatureFunction("PhraseBoundaryFeature", ScoreProducer::unlimited, line)
+: StatefulFeatureFunction("PhraseBoundaryFeature", FeatureFunction::unlimited, line)
 {
   std::cerr << "Initializing source word deletion feature.." << std::endl;
 
@@ -28,7 +28,9 @@ PhraseBoundaryFeature::PhraseBoundaryFeature(const std::string &line)
     else if (args[0] == "target") {
       m_targetFactors = Tokenize<FactorType>(args[1], ",");
     }
-
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 }
 
@@ -90,6 +92,13 @@ FFState* PhraseBoundaryFeature::Evaluate
   }
 
   return new PhraseBoundaryState(endSourceWord,endTargetWord);
+}
+
+void PhraseBoundaryFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  CHECK(false);
 }
 
 

@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "TypeDef.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
+#include "util/exception.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace std;
@@ -86,14 +87,11 @@ std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlan
   return strme.str();
 }
 
-std::string Word::GetString(FactorType factorType) const
-{
-	const Factor *factor = m_factorArray[factorType];
-  if (factor != NULL)
-  	return factor->GetString();
-  else
-  	return NULL;
+StringPiece Word::GetString(FactorType factorType) const {
+  return m_factorArray[factorType]->GetString();
 }
+
+class StrayFactorException : public util::Exception {};
 
 void Word::CreateFromString(FactorDirection direction
                             , const std::vector<FactorType> &factorOrder
@@ -106,7 +104,7 @@ void Word::CreateFromString(FactorDirection direction
   for (size_t ind = 0; ind < factorOrder.size() && fit; ++ind, ++fit) {
     m_factorArray[factorOrder[ind]] = factorCollection.AddFactor(*fit);
   }
-  CHECK(!fit);
+  UTIL_THROW_IF(fit, StrayFactorException, "You have configured " << factorOrder.size() << " factors but the word " << str << " contains factor delimiter " << StaticData::Instance().GetFactorDelimiter() << " too many times.");
 
   // assume term/non-term same for all factors
   m_isNonTerminal = isNonTerminal;

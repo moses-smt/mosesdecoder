@@ -105,7 +105,7 @@ template <class Model> void Fill<Model>::Add(const TargetPhraseCollection &targe
   vertices.reserve(nts.size());
   float below_score = 0.0;
   for (StackVec::const_iterator i(nts.begin()); i != nts.end(); ++i) {
-    vertices.push_back((*i)->GetStack().incr->RootPartial());
+    vertices.push_back((*i)->GetStack().incr->RootAlternate());
     if (vertices.back().Empty()) return;
     below_score += vertices.back().Bound();
   }
@@ -292,7 +292,7 @@ void PhraseAndFeatures(const TranslationSystem &system, const search::Applied fi
   const LanguageModel &model = **lmList.begin();
   model.CalcScore(phrase, full, ignored_ngram, ignored_oov);
   // CalcScore transforms, but EvaluateChart doesn't.  
-  features.Assign(&model, UntransformLMScore(full));
+  features.Assign(&model, full);
 }
 
 } // namespace Incremental

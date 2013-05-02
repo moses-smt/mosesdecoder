@@ -74,6 +74,16 @@ void TargetPhraseCollection::Sort(bool adhereTableLimit, size_t tableLimit)
   }
 }
 
+std::ostream& operator<<(std::ostream &out, const TargetPhraseCollection &obj)
+{
+  TargetPhraseCollection::const_iterator iter;
+  for (iter = obj.begin(); iter != obj.end(); ++iter) {
+    const TargetPhrase &tp = **iter;
+    out << tp << endl;
+  }
+  return out;
 }
+
+} // namespace
 
 

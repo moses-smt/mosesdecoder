@@ -68,10 +68,11 @@ protected:
   void AddWeight(const std::string &name, size_t ind, const std::vector<float> &weights);
   void ConvertWeightArgs();
   void ConvertWeightArgsSingleWeight(const std::string &oldWeightName, const std::string &newWeightName);
-  void ConvertWeightArgsPhraseModel(const std::string &oldWeightName, const std::string &newWeightName);
-  void ConvertWeightArgsLM(const std::string &oldWeightName);
+  void ConvertWeightArgsPhraseModel(const std::string &oldWeightName);
+  void ConvertWeightArgsLM();
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string &newWeightName);
+  void ConvertWeightArgsWordPenalty();
   void CreateWeightsMap();
   void WeightOverwrite();
   void AddFeature(const std::string &line);
@@ -113,7 +114,7 @@ public:
 		OverwriteParam(GetFullName(paramShortName),values);
 	}
 	
-  std::vector<float> &GetWeights(const std::string &name, size_t ind);
+  std::vector<float> &GetWeights(const std::string &name);
   std::set<std::string> GetWeightNames() const;
 
   const PARAM_MAP &GetParams() const

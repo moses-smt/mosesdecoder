@@ -256,7 +256,7 @@ void processFiles( char* fileNameDirect, char* fileNameIndirect, char* fileNameC
    if (kneserNeyFlag) {
      float D = kneserNey_D3;
      if (countEF < 2) D = kneserNey_D1;
-     if (countEF < 3) D = kneserNey_D2;
+     else if (countEF < 3) D = kneserNey_D2;
      if (D > countEF) D = countEF - 0.01; // sanity constraint
 
      float p_b_E = n1_E / totalCount; // target phrase prob based on distinct

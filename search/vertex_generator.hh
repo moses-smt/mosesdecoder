@@ -5,13 +5,6 @@
 #include "search/types.hh"
 #include "search/vertex.hh"
 
-#include <boost/unordered_map.hpp>
-#include <boost/version.hpp>
-
-#if BOOST_VERSION <= 104200
-#include "util/exception.hh"
-#endif
-
 namespace lm {
 namespace ngram {
 class ChartState;
@@ -22,45 +15,25 @@ namespace search {
 
 class ContextBase;
 
-#if BOOST_VERSION > 104200
-// Parallel structure to VertexNode.  
-struct Trie {
-  Trie() : under(NULL) {}
-
-  VertexNode *under;
-  boost::unordered_map<uint64_t, Trie> extend;
-};
-
-void AddHypothesis(ContextBase &context, Trie &root, const NBestComplete &end);
-
-#endif // BOOST_VERSION
-
 // Output makes the single-best or n-best list.   
 template <class Output> class VertexGenerator {
   public:
-    VertexGenerator(ContextBase &context, Vertex &gen, Output &nbest) : context_(context), gen_(gen), nbest_(nbest) {
-      gen.root_.InitRoot();
-    }
+    VertexGenerator(ContextBase &context, Vertex &gen, Output &nbest) : context_(context), gen_(gen), nbest_(nbest) {}
 
     void NewHypothesis(PartialEdge partial) {
       nbest_.Add(existing_[hash_value(partial.CompletedState())], partial);
     }
 
     void FinishedSearch() {
-#if BOOST_VERSION > 104200
-      Trie root;
-      root.under = &gen_.root_;
+      gen_.root_.InitRoot();
       for (typename Existing::iterator i(existing_.begin()); i != existing_.end(); ++i) {
-        AddHypothesis(context_, root, nbest_.Complete(i->second));
+        gen_.root_.AppendHypothesis(nbest_.Complete(i->second));
       }
       existing_.clear();
-      root.under->SortAndSet(context_);
-#else
-      UTIL_THROW(util::Exception, "Upgrade Boost to >= 1.42.0 to use incremental search.");
-#endif
+      gen_.root_.FinishRoot();
     }
 
-    const Vertex &Generating() const { return gen_; }
+    Vertex &Generating() { return gen_; }
 
   private:
     ContextBase &context_;
@@ -87,8 +60,8 @@ template <class Output> class RootVertexGenerator {
 
     void FinishedSearch() {
       gen_.root_.InitRoot();
-      NBestComplete completed(out_.Complete(combine_));
-      gen_.root_.SetEnd(completed.history, completed.score);
+      gen_.root_.AppendHypothesis(out_.Complete(combine_));
+      gen_.root_.FinishRoot();
     }
 
   private:

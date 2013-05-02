@@ -73,7 +73,7 @@ protected:
   //! possible to estimate, it is included here.
   ScoreComponentCollection	m_scoreBreakdown;
 
-  typedef std::map<const ScoreProducer *, Scores> _ScoreCacheMap;
+  typedef std::map<const FeatureFunction *, Scores> _ScoreCacheMap;
   _ScoreCacheMap m_cachedScores;
 
 public:
@@ -146,7 +146,7 @@ public:
   }
 
   /** returns cached scores */
-  inline const Scores *GetCachedScores(const ScoreProducer *scoreProducer) const {
+  inline const Scores *GetCachedScores(const FeatureFunction *scoreProducer) const {
     _ScoreCacheMap::const_iterator it = m_cachedScores.find(scoreProducer);
     if(it == m_cachedScores.end())
       return NULL;
@@ -157,7 +157,7 @@ public:
   /** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
   void CalcScore(const TranslationSystem* system);
 
-  void CacheScores(const ScoreProducer &scoreProducer, const Scores &score);
+  void CacheScores(const FeatureFunction &scoreProducer, const Scores &score);
 
   TO_STRING();
 	

@@ -48,9 +48,6 @@ protected:
 public:
   virtual ~LanguageModel();
 
-  // Make another feature without copying the underlying model data.  
-  virtual LanguageModel *Duplicate() const = 0;
-
   bool OOVFeatureEnabled() const {
     return m_enableOOVFeature;
   }
@@ -88,6 +85,11 @@ public:
 
   // KenLM only (others throw an exception): call incremental search with the model and mapping.
   virtual void IncrementalCallback(Incremental::Manager &manager) const;
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
 };
 
 }

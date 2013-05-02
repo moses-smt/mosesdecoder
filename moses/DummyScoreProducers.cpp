@@ -39,7 +39,7 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
 }
 
 float DistortionScoreProducer::CalculateDistortionScore(const Hypothesis& hypo,
-    const WordsRange &prev, const WordsRange &curr, const int FirstGap) const
+    const WordsRange &prev, const WordsRange &curr, const int FirstGap)
 {
   if(!StaticData::Instance().UseEarlyDistortionCost()) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
@@ -101,17 +101,37 @@ FFState* DistortionScoreProducer::Evaluate(
   return res;
 }
 
+void DistortionScoreProducer::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , ScoreComponentCollection &estimatedFutureScore) const
+{
+  // no score
+}
+
 void WordPenaltyProducer::Evaluate(
     const PhraseBasedFeatureContext& context,
     ScoreComponentCollection* out) const
 {
-	const TargetPhrase& tp = context.GetTargetPhrase();
-  out->PlusEquals(this, -static_cast<float>(tp.GetSize()));
+	const TargetPhrase& targetPhrase = context.GetTargetPhrase();
+  float score = - targetPhrase.GetNumTerminals();
+
+  out->PlusEquals(this, score);
 }
 
-bool UnknownWordPenaltyProducer::ComputeValueInTranslationOption() const
+void WordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
+                    , ScoreComponentCollection &scoreBreakdown
+                    , ScoreComponentCollection &estimatedFutureScore) const
 {
-  return true;
+  float score = - targetPhrase.GetNumTerminals();
+  scoreBreakdown.Assign(this, score);
+}
+
+void UnknownWordPenaltyProducer::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+  // shouldn't be called
+  CHECK(false);
 }
 
 }

@@ -1,4 +1,4 @@
-#!/usr/bin/perl -w
+#!/usr/bin/perl -w 
 
 # experiment.perl support script
 # get filtered rule and reordering tables and place them into a configuration file
@@ -8,42 +8,34 @@ if (scalar @ARGV < 1 || ! -e $ARGV[0]) {
 }
 
 # read config sections about filtered tables
-my %CONFIG;
-my $status = 0;
-my $section;
+my @arr;
 open(FILTERED, $ARGV[0]) or die "Cannot open: $!";
-while(<FILTERED>) {
-  if (/^\[(.+)\]\s*$/) {
-    if ($1 eq "ttable-file" || $1 eq "distortion-file") {
-      $section = $1;
-      $status = 1;
-      print STDERR "found $section\n";
-    }
-    else {
-      $status = 0;
-    }
+while(my $line = <FILTERED>) {
+  chomp($line);
+  if ($line =~ /PhraseModel /) {
+   print STDERR "pt:$line \n";
+   push(@arr, $line);
   }
-  elsif ($status) {
-    $CONFIG{$section} .= $_;
-  }
+  elsif ($line =~ /LexicalReordering /) {
+   print STDERR "ro:$line \n";
+   push(@arr, $line);
+  }  
 }
 close(FILTERED);
 
 # pass through master config file and replace table sections
-($status,$section) = (0);
-while(<STDIN>) {
-  if (/^\[(.+)\]\s*$/) {
-    print $_;
-    if ($1 eq "ttable-file" || $1 eq "distortion-file") {
-      print STDERR "replacing $1\n";
-      print $CONFIG{$1};
-      $status = 1;
-    }
-    else {
-      $status = 0;
-    }
+my $ind = 0;
+while(my $line = <STDIN>) {
+  chomp($line);
+  if ($line =~ /PhraseModel /) {
+   print $arr[$ind]."\n";
+   ++$ind;
   }
-  elsif (!$status) {
-    print $_;
+  elsif ($line =~ /LexicalReordering /) {
+   print $arr[$ind]."\n";
+   ++$ind;
+  }  
+  else {
+    print "$line\n";
   }
 }

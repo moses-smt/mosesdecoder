@@ -38,7 +38,7 @@ int main(int argc, char **argv)
   vector<ScoreStats>::const_iterator sentIt;
   for (sentIt = entries.begin(); sentIt != entries.end(); sentIt++) {
     vector<float> stats(sentIt->getArray(), sentIt->getArray() + sentIt->size());
-    cout << BleuScorer::sentenceLevelBleuPlusOne(stats) << "\n";
+    cout << smoothedSentenceBleu(stats) << "\n";
   }
   return 0;
 }

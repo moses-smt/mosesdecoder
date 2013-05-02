@@ -154,11 +154,5 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
   return ret;
 }
 
-bool GenerationDictionary::ComputeValueInTranslationOption() const
-{
-  return true;
-}
-
-
 }
 

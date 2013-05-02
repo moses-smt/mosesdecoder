@@ -36,8 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class LanguageModel;
-
 class FactorCollection;
 class Factor;
 class Phrase;
@@ -51,7 +49,7 @@ struct LMResult {
 };
 
 //! Abstract base class which represent a language model on a contiguous phrase
-class LanguageModelImplementation
+class LanguageModelImplementation : public LanguageModel
 {
   // default constructor is ok
 
@@ -60,19 +58,15 @@ class LanguageModelImplementation
 protected:
   std::string	m_filePath; //! for debugging purposes
   size_t			m_nGramOrder; //! max n-gram length contained in this LM
-  Word m_sentenceStartArray, m_sentenceEndArray; //! Contains factors which represents the beging and end words for this LM.
+  Word m_sentenceStartWord, m_sentenceEndWord; //! Contains factors which represents the beging and end words for this LM.
   //! Usually <s> and </s>
 
+  LanguageModelImplementation(const std::string& description, const std::string &line)
+  :LanguageModel(description, line)
+  {}
 public:
+
   virtual ~LanguageModelImplementation() {}
-
-  //! Single or multi-factor
-  virtual LMType GetLMType() const = 0;
-
-  /* whether this LM can be used on a particular phrase.
-   * Should return false if phrase size = 0 or factor types required don't exists
-   */
-  virtual bool Useable(const Phrase &phrase) const = 0;
 
   /* get score of n-gram. n-gram should not be bigger than m_nGramOrder
    * Specific implementation can return State and len data to be used in hypothesis pruning
@@ -95,9 +89,9 @@ public:
 
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
-  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const;
+  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
 
-  FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator, const LanguageModel *feature) const;
+  FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator) const;
 
   void updateChartScore(float *prefixScore, float *finalScore, float score, size_t wordPos) const;
 
@@ -107,65 +101,18 @@ public:
   }
 
   //! Contains factors which represents the beging and end words for this LM. Usually <s> and </s>
-  const Word &GetSentenceStartArray() const {
-    return m_sentenceStartArray;
+  const Word &GetSentenceStartWord() const {
+    return m_sentenceStartWord;
   }
-  const Word &GetSentenceEndArray() const {
-    return m_sentenceEndArray;
+  const Word &GetSentenceEndWord() const {
+    return m_sentenceEndWord;
   }
 
-  //! overrideable funtions for IRST LM to cleanup. Maybe something to do with on demand/cache loading/unloading
-  virtual void InitializeBeforeSentenceProcessing() {};
-  virtual void CleanUpAfterSentenceProcessing(const InputType& source) {};
-};
+  const FFState* EmptyHypothesisState(const InputType &/*input*/) const
+  {
+    return NewState(GetBeginSentenceState());
+  }
 
-class LMRefCount : public LanguageModel {
-  public:
-    LMRefCount(LanguageModelImplementation *impl, const std::string& description, const std::string &line)
-    : LanguageModel(description, line)
-    , m_impl(impl) {}
-
-    LanguageModel *Duplicate() const {
-      return new LMRefCount(*this);
-    }
-
-    void InitializeBeforeSentenceProcessing() {
-      m_impl->InitializeBeforeSentenceProcessing();
-    }
-
-    void CleanUpAfterSentenceProcessing(const InputType& source) {
-      m_impl->CleanUpAfterSentenceProcessing(source);
-    }
-
-    const FFState* EmptyHypothesisState(const InputType &/*input*/) const {
-      return m_impl->NewState(m_impl->GetBeginSentenceState());
-    }
-
-    bool Useable(const Phrase &phrase) const {
-      return m_impl->Useable(phrase);
-    }
-
-    void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
-      return m_impl->CalcScore(phrase, fullScore, ngramScore, oovCount);
-    }
-
-    FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state, ScoreComponentCollection* accumulator) const {
-      return m_impl->Evaluate(cur_hypo, prev_state, accumulator, this);
-    }
-
-    FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator) const {
-      return m_impl->EvaluateChart(cur_hypo, featureID, accumulator, this);
-    }
-
-
-    LanguageModelImplementation *MosesServerCppShouldNotHaveLMCode() { return m_impl.get(); }
-
-  private:
-    LMRefCount(const LMRefCount &copy_from)
-    : LanguageModel(copy_from.GetScoreProducerDescription(), copy_from.GetArgLine())
-    , m_impl(copy_from.m_impl) {}
-
-    boost::shared_ptr<LanguageModelImplementation> m_impl;
 };
 
 }

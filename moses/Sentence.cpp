@@ -23,7 +23,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <stdexcept>
 
 #include "Sentence.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "TranslationOptionCollectionText.h"
 #include "StaticData.h"
 #include "Util.h"
@@ -124,7 +123,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
       throw runtime_error(msg);
     }
   }
-  Phrase::CreateFromString(factorOrder, line, factorDelimiter);
+  Phrase::CreateFromString(Input, factorOrder, line, factorDelimiter);
 
   if (staticData.IsChart()) {
     InitStartEndWord();
@@ -230,7 +229,7 @@ void Sentence::CreateFromString(const std::vector<FactorType> &factorOrder
                                 , const std::string &phraseString
                                 , const std::string &factorDelimiter)
 {
-  Phrase::CreateFromString(factorOrder, phraseString, factorDelimiter);
+  Phrase::CreateFromString(Input, factorOrder, phraseString, factorDelimiter);
 }
 
 

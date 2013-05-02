@@ -2,7 +2,7 @@
 #define moses_WordTranslationFeature_h
 
 #include <string>
-#include <map>
+#include <boost/unordered_set.hpp>
 
 #include "FeatureFunction.h"
 #include "FactorCollection.h"
@@ -18,11 +18,11 @@ namespace Moses
 class WordTranslationFeature : public StatelessFeatureFunction {
 
   typedef std::map< char, short > CharHash;
-  typedef std::vector< std::set<std::string> > DocumentVector;
+  typedef std::vector< boost::unordered_set<std::string> > DocumentVector;
 	
 private:
-  std::set<std::string> m_vocabSource;
-  std::set<std::string> m_vocabTarget;
+  boost::unordered_set<std::string> m_vocabSource;
+  boost::unordered_set<std::string> m_vocabTarget;
   DocumentVector m_vocabDomain;
   FactorType m_factorTypeSource;
   FactorType m_factorTypeTarget;
@@ -49,11 +49,16 @@ public:
 
   void EvaluateChart(const ChartBasedFeatureContext& context,
                      ScoreComponentCollection* accumulator) const;
-
-  bool ComputeValueInTranslationOption() const {return true;}
   
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
   void SetSparseProducerWeight(float weight) { m_sparseProducerWeight = weight; }
   float GetSparseProducerWeight() const { return m_sparseProducerWeight; }
+
+  StatelessFeatureType GetStatelessFeatureType() const
+  { return NotCacheable; }
 };
 
 }

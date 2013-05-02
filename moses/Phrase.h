@@ -39,6 +39,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses
 {
+class FactorMask;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -70,15 +71,11 @@ public:
   	* \param phraseString formatted input string to parse
   	*	\param factorDelimiter delimiter between factors.  
   */
-  void CreateFromString(const std::vector<FactorType> &factorOrder
+  void CreateFromString(FactorDirection direction
+                        , const std::vector<FactorType> &factorOrder
   											, const StringPiece &phraseString
-  											, const StringPiece &factorDelimiter);
-
-  void CreateFromStringNewFormat(FactorDirection direction
-                                 , const std::vector<FactorType> &factorOrder
-                                 , const StringPiece &phraseString
-                                 , const std::string &factorDelimiter
-                                 , Word &lhs);
+  											, const StringPiece &factorDelimiter
+  											, Word *lhs = NULL);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
@@ -170,6 +167,9 @@ public:
 	{
 		return Compare(compare) == 0;
 	}
+
+	void OnlyTheseFactors(const FactorMask &factors);
+
 };
 
 inline size_t hash_value(const Phrase& phrase) {
@@ -180,5 +180,21 @@ inline size_t hash_value(const Phrase& phrase) {
   return seed;
 }
 
+struct PhrasePtrComparator {
+  inline bool operator()(const Phrase* lhs, const Phrase* rhs) const {
+    return *lhs == *rhs;
+  }
+};
+
+struct PhrasePtrHasher {
+  inline size_t operator()(const Phrase* phrase) const {
+    size_t seed = 0;
+    boost::hash_combine(seed,*phrase);
+    return seed;
+  }
+
+};
+
 }
+
 #endif

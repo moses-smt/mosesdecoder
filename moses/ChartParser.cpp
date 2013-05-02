@@ -44,12 +44,12 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer *unknownWordPenaltyProducer = staticData.GetUnknownWordPenaltyProducer();
-  vector<float> wordPenaltyScore(1, -0.434294482); // TODO what is this number?
+  vector<float> wordPenaltyScore(1, -1);
   
   size_t isDigit = 0;
   if (staticData.GetDropUnknown()) {
     const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
-    const string &s = f->GetString();
+    const StringPiece s = f->GetString();
     isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
@@ -91,7 +91,8 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetScore(staticData.GetWordPenaltyProducer(), wordPenaltyScore);
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetTargetLHS(targetLHS);
-      
+      targetPhrase->SetAlignmentInfo("0-0");
+
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     } // for (iterLHS
@@ -114,7 +115,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
       targetPhrase->SetSourcePhrase(*unksrc);
       targetPhrase->SetScore(unknownWordPenaltyProducer, unknownScore);
       targetPhrase->SetTargetLHS(targetLHS);
-      
+
       // chart rule
       to.AddPhraseOOV(*targetPhrase, m_cacheTargetPhraseCollection, range);
     }
@@ -128,12 +129,11 @@ ChartParser::ChartParser(InputType const &source, const TranslationSystem &syste
   const StaticData &staticData = StaticData::Instance();
 
   staticData.InitializeForInput(source);
-  const std::vector<PhraseDictionaryFeature*> &dictionaries = staticData.GetPhraseDictionaries();
+  const std::vector<PhraseDictionary*> &dictionaries = staticData.GetPhraseDictionaries();
   m_ruleLookupManagers.reserve(dictionaries.size());
-  for (std::vector<PhraseDictionaryFeature*>::const_iterator p = dictionaries.begin();
+  for (std::vector<PhraseDictionary*>::const_iterator p = dictionaries.begin();
        p != dictionaries.end(); ++p) {
-    PhraseDictionaryFeature *pdf = *p;
-    const PhraseDictionary *dict = pdf->GetDictionary();
+    const PhraseDictionary *dict = *p;
     PhraseDictionary *nonConstDict = const_cast<PhraseDictionary*>(dict);
     m_ruleLookupManagers.push_back(nonConstDict->CreateRuleLookupManager(source, cells));
   }

@@ -9,7 +9,6 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 #include "FactorTypeSet.h"
 #include "Sentence.h"
@@ -79,6 +78,15 @@ public:
   	std::cerr << "EvaluateChart not implemented." << std::endl;
   	exit(1);
   }
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
+
+
+  virtual StatelessFeatureType GetStatelessFeatureType() const
+  { return DependsOnSource; }
+
 };
 
 }

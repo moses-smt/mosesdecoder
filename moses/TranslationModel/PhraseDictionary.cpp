@@ -42,28 +42,20 @@ using namespace std;
 namespace Moses
 {
 
-const TargetPhraseCollection *PhraseDictionary::
-GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
+PhraseDictionary::PhraseDictionary(const std::string &description, const std::string &line)
+:DecodeFeature(description, line)
 {
-  return GetTargetPhraseCollection(src.GetSubString(range));
-}
+  m_tableLimit= 20; // TODO default?
 
-PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
-:DecodeFeature("PhraseModel", line)
-,m_tableLimit(20) // TODO default?
-{
   for (size_t i = 0; i < m_args.size(); ++i) {
     const vector<string> &args = m_args[i];
 
-    if (args[0] == "implementation") {
-      m_implementation = (PhraseTableImplementation) Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "input-factor") {
-      m_input =Tokenize<FactorType>(args[1]);
+    if (args[0] == "input-factor") {
+      m_input =Tokenize<FactorType>(args[1], ",");
       m_inputFactors = FactorMask(m_input);
     }
     else if (args[0] == "output-factor") {
-      m_output =Tokenize<FactorType>(args[1]);
+      m_output =Tokenize<FactorType>(args[1], ",");
       m_outputFactors = FactorMask(m_output);
     }
     else if (args[0] == "num-input-features") {
@@ -82,246 +74,19 @@ PhraseDictionaryFeature::PhraseDictionaryFeature(const std::string &line)
       m_alignmentsFile = args[1];
     }
     else {
-      UserMessage::Add("Unknown argument " + args[0]);
-      abort();
+      throw "Unknown argument " + args[0];
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 
 }
 
-PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSystem* system)
+
+const TargetPhraseCollection *PhraseDictionary::
+GetTargetPhraseCollection(InputType const& src,WordsRange const& range) const
 {
-  const StaticData& staticData = StaticData::Instance();
-  std::vector<float> weightT = staticData.GetWeights(this);
-  
-  if (m_implementation == Memory) {
-    // memory phrase table
-    VERBOSE(2,"using standard phrase tables" << std::endl);
-    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-      m_filePath += ".gz";
-      VERBOSE(2,"Using gzipped file" << std::endl);
-    }
-    if (staticData.GetInputType() != SentenceInput) {
-      UserMessage::Add("Must use binary phrase table for this input type");
-      CHECK(false);
-    }
-
-    PhraseDictionaryMemory* pdm  = new PhraseDictionaryMemory(GetNumScoreComponents(),this);
-    bool ret = pdm->Load(GetInput(), GetOutput()
-                         , m_filePath
-                         , weightT
-                         , m_tableLimit
-                         , staticData.GetLMList()
-                         , staticData.GetWeightWordPenalty());
-    CHECK(ret);
-    return pdm;
-  } else if (m_implementation == Binary) {
-    PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(GetNumScoreComponents(), m_numInputScores,this);
-    bool ret = pdta->Load(                    GetInput()
-               , GetOutput()
-               , m_filePath
-               , weightT
-               , m_tableLimit
-               , staticData.GetLMList()
-               , staticData.GetWeightWordPenalty());
-    CHECK(ret);
-    return pdta;
-  } else if (m_implementation == SCFG || m_implementation == Hiero) {
-    // memory phrase table
-    if (m_implementation == Hiero) {
-      VERBOSE(2,"using Hiero format phrase tables" << std::endl);
-    } else {
-      VERBOSE(2,"using Moses-formatted SCFG phrase tables" << std::endl);
-    }
-    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-      m_filePath += ".gz";
-      VERBOSE(2,"Using gzipped file" << std::endl);
-    }
-
-    RuleTableTrie *dict;
-    if (staticData.GetParsingAlgorithm() == ParseScope3) {
-      dict = new RuleTableUTrie(GetNumScoreComponents(), this);
-    } else {
-      dict = new PhraseDictionarySCFG(GetNumScoreComponents(), this);
-    }
-    bool ret = dict->Load(GetInput()
-                         , GetOutput()
-                         , m_filePath
-                         , weightT
-                         , m_tableLimit
-                         , staticData.GetLMList()
-                         , staticData.GetWordPenaltyProducer());
-    CHECK(ret);
-    return dict;
-  } else if (m_implementation == ALSuffixArray) {
-    // memory phrase table
-    VERBOSE(2,"using Hiero format phrase tables" << std::endl);
-    if (!FileExists(m_filePath) && FileExists(m_filePath + ".gz")) {
-      m_filePath += ".gz";
-      VERBOSE(2,"Using gzipped file" << std::endl);
-    }
-    
-    PhraseDictionaryALSuffixArray* pdm  = new PhraseDictionaryALSuffixArray(GetNumScoreComponents(),this);
-    bool ret = pdm->Load(GetInput()
-                         , GetOutput()
-                         , m_filePath
-                         , weightT
-                         , m_tableLimit
-                         , staticData.GetLMList()
-                         , staticData.GetWordPenaltyProducer());
-    CHECK(ret);
-    return pdm;
-  } else if (m_implementation == OnDisk) {
-
-    PhraseDictionaryOnDisk* pdta = new PhraseDictionaryOnDisk(GetNumScoreComponents(), this);
-    bool ret = pdta->Load(GetInput()
-                          , GetOutput()
-                          , m_filePath
-                          , weightT
-                          , m_tableLimit
-                          , staticData.GetLMList()
-                          , staticData.GetWordPenaltyProducer());
-    CHECK(ret);
-    return pdta;
-  } else if (m_implementation == SuffixArray) {
-#ifndef WIN32
-    PhraseDictionaryDynSuffixArray *pd = new PhraseDictionaryDynSuffixArray(GetNumScoreComponents(), this);
-    if(!(pd->Load(
-           GetInput()
-           ,GetOutput()
-           ,m_filePath
-           ,m_targetFile
-           ,m_alignmentsFile
-           ,weightT, m_tableLimit
-           ,staticData.GetLMList()
-	   ,staticData.GetWeightWordPenalty()))) {
-      std::cerr << "FAILED TO LOAD\n" << endl;
-      delete pd;
-      pd = NULL;
-    }
-    std::cerr << "Suffix array phrase table loaded" << std::endl;
-    return pd;
-#else
-    CHECK(false);
-#endif
-  } else if (m_implementation == FuzzyMatch) {
-    
-    PhraseDictionaryFuzzyMatch *dict = new PhraseDictionaryFuzzyMatch(GetNumScoreComponents(), this);
-
-    bool ret = dict->Load(GetInput()
-                          , GetOutput()
-                          , m_filePath
-                          , weightT
-                          , m_tableLimit
-                          , staticData.GetLMList()
-                          , staticData.GetWordPenaltyProducer());
-    CHECK(ret);
-
-    return dict;    
-  } else if (m_implementation == Compact) {
-#ifndef WIN32
-    VERBOSE(2,"Using compact phrase table" << std::endl);                                                                                                                               
-                                                                                                                                      
-    PhraseDictionaryCompact* pd  = new PhraseDictionaryCompact(GetNumScoreComponents(), m_implementation, this);                         
-    bool ret = pd->Load(GetInput(), GetOutput()                                                                                      
-                         , m_filePath                                                                                                 
-                         , weightT                                                                                                  
-                         , m_tableLimit                                                                                               
-                         , staticData.GetLMList()
-                         , staticData.GetWeightWordPenalty());
-    CHECK(ret);                                                                                                                      
-    return pd;                                                                                                                       
-#else
-    CHECK(false);
-#endif
-  }  
-  else {
-    std::cerr << "Unknown phrase table type " << m_implementation << endl;
-    CHECK(false);
-  }
-}
-
-void PhraseDictionaryFeature::InitDictionary(const TranslationSystem* system)
-{
-  //Thread-safe phrase dictionaries get loaded now
-  if (m_useThreadSafePhraseDictionary && !m_threadSafePhraseDictionary.get()) {
-    IFVERBOSE(1)
-    PrintUserTime("Start loading phrase table from " +  m_filePath);
-    m_threadSafePhraseDictionary.reset(LoadPhraseTable(system));
-    IFVERBOSE(1)
-    PrintUserTime("Finished loading phrase tables");
-  }
-  //Other types will be lazy loaded
-}
-
-const PhraseDictionary* PhraseDictionaryFeature::GetDictionary() const
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  return dict;
-}
-
-PhraseDictionary* PhraseDictionaryFeature::GetDictionary()
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  return dict;
-}
-
-
-PhraseDictionaryFeature::~PhraseDictionaryFeature()
-{}
-
-bool PhraseDictionaryFeature::ComputeValueInTranslationOption() const
-{
-  return true;
-}
-
-const PhraseDictionaryFeature* PhraseDictionary::GetFeature() const
-{
-  return m_feature;
-}
-
-void PhraseDictionaryFeature::InitializeForInput(const InputType& source)
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    //thread safe dictionary should already be loaded
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    //thread-unsafe dictionary may need to be loaded if this is a new thread.
-    if (!m_threadUnsafePhraseDictionary.get()) {
-      m_threadUnsafePhraseDictionary.reset(LoadPhraseTable(NULL));
-    }
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  dict->InitializeForInput(source);
-
-}
-
-void PhraseDictionaryFeature::CleanUpAfterSentenceProcessing(const InputType& source)
-{
-  PhraseDictionary* dict;
-  if (m_useThreadSafePhraseDictionary) {
-    //thread safe dictionary should already be loaded
-    dict = m_threadSafePhraseDictionary.get();
-  } else {
-    dict = m_threadUnsafePhraseDictionary.get();
-  }
-  CHECK(dict);
-  dict->CleanUpAfterSentenceProcessing(source);
-
+  Phrase phrase = src.GetSubString(range);
+  phrase.OnlyTheseFactors(m_inputFactors);
+  return GetTargetPhraseCollection(phrase);
 }
 
 }

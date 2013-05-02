@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/tokenize_piece.hh"
 
 #include "TargetPhrase.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
 #include "GenerationDictionary.h"
 #include "LM/Base.h"
 #include "StaticData.h"
@@ -48,7 +47,7 @@ TargetPhrase::TargetPhrase( std::string out_string)
 
   //ACAT
   const StaticData &staticData = StaticData::Instance();
-  CreateFromString(staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
+  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string, staticData.GetFactorDelimiter());
 }
 
 
@@ -70,12 +69,6 @@ TargetPhrase::TargetPhrase(const Phrase &phrase)
 {
 }
 
-void TargetPhrase::SetScore(const TranslationSystem* system)
-{
-  // used when creating translations of unknown words:
-  m_fullScore = - StaticData::Instance().GetWeightWordPenalty();
-}
-
 #ifdef HAVE_PROTOBUF
 void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 {
@@ -85,181 +78,51 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 }
 #endif
 
-
-
-void TargetPhrase::SetScore(float score)
+void TargetPhrase::Evaluate()
 {
-	//we use an existing score producer to figure out information for score setting (number of scores and weights)
-	//TODO: is this a good idea?
-  const StaticData &staticData = StaticData::Instance();
-	const ScoreProducer* prod = staticData.GetPhraseDictionaries()[0];
-	
-	vector<float> weights = staticData.GetWeights(prod);
+  ScoreComponentCollection estimatedFutureScore;
 
-	
-	//find out how many items are in the score vector for this producer	
-	size_t numScores = prod->GetNumScoreComponents();
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
-	//divide up the score among all of the score vectors
-	vector <float> scoreVector(numScores,score/numScores);
-	
-	//Now we have what we need to call the full SetScore method
-	const LMList &lmList = StaticData::Instance().GetLMList();
-
-	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, staticData.GetWeightWordPenalty(), lmList);
-}
-
-/**
- * used for setting scores for unknown words with input link features (lattice/conf. nets)
- * \param scoreVector input scores
- */
-void TargetPhrase::SetScore(const TranslationSystem* system, const Scores &scoreVector)
-{
-	//we use an existing score producer to figure out information for score setting (number of scores and weights)
-  const StaticData &staticData = StaticData::Instance();
-  const ScoreProducer* prod = staticData.GetPhraseDictionaries()[0];
-
-	vector<float> weights = StaticData::Instance().GetWeights(prod);
-	
-	//expand the input weight vector
-	CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
-	Scores sizedScoreVector = scoreVector;
-	sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
-
-	const LMList &lmList = StaticData::Instance().GetLMList();
-	SetScore(prod,sizedScoreVector, ScoreComponentCollection(),weights,StaticData::Instance().GetWeightWordPenalty(),lmList);
-}
-
-void TargetPhrase::SetScore(const ScoreProducer* translationScoreProducer,
-                            const Scores &scoreVector,
-                            const ScoreComponentCollection &sparseScoreVector,
-                            const vector<float> &weightT,
-                            float weightWP, const LMList &languageModels)
-{
-  CHECK(weightT.size() == scoreVector.size());
-  // calc average score if non-best
-
-  float transScore = std::inner_product(scoreVector.begin(), scoreVector.end(), weightT.begin(), 0.0f);
-  m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
-  m_scoreBreakdown.PlusEquals(sparseScoreVector);
-
-  // Replicated from TranslationOptions.cpp
-  float totalNgramScore  = 0;
-  float totalFullScore   = 0;
-  float totalOOVScore    = 0;
-
-  LMList::const_iterator lmIter;
-  for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter) {
-    const LanguageModel &lm = **lmIter;
-
-    if (lm.Useable(*this)) {
-      // contains factors used by this LM
-      const float weightLM = lm.GetWeight();
-      const float oovWeightLM = lm.GetOOVWeight();
-      float fullScore, nGramScore;
-      size_t oovCount;
-
-      lm.CalcScore(*this, fullScore, nGramScore, oovCount);
-
-      if (StaticData::Instance().GetLMEnableOOVFeature()) {
-        vector<float> scores(2);
-        scores[0] = nGramScore;
-        scores[1] = oovCount;
-        m_scoreBreakdown.Assign(&lm, scores);
-        totalOOVScore += oovCount * oovWeightLM;
-      } else {
-        m_scoreBreakdown.Assign(&lm, nGramScore);
-      }
-
-
-      // total LM score so far
-      totalNgramScore  += nGramScore * weightLM;
-      totalFullScore   += fullScore * weightLM;
-
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const FeatureFunction &ff = *ffs[i];
+    if (!ff.IsDecodeFeature()) {
+      ff.Evaluate(*this, m_scoreBreakdown, estimatedFutureScore);
     }
   }
 
-  m_fullScore = transScore + totalFullScore + totalOOVScore
-                - (this->GetSize() * weightWP);	 // word penalty
+  m_fullScore = m_scoreBreakdown.GetWeightedScore() + estimatedFutureScore.GetWeightedScore();
 }
 
-void TargetPhrase::SetScoreChart(const ScoreProducer* translationScoreProducer,
-                                 const Scores &scoreVector
-                                 ,const vector<float> &weightT
-                                 ,const LMList &languageModels
-                                 ,const WordPenaltyProducer* wpProducer)
+void TargetPhrase::SetXMLScore(float score)
 {
-  CHECK(weightT.size() == scoreVector.size());
-  
-  // calc average score if non-best
-  m_scoreBreakdown.PlusEquals(translationScoreProducer, scoreVector);
-
-  // Replicated from TranslationOptions.cpp
-  float totalNgramScore  = 0;
-  float totalFullScore   = 0;
-  float totalOOVScore    = 0;
-
-  LMList::const_iterator lmIter;
-  for (lmIter = languageModels.begin(); lmIter != languageModels.end(); ++lmIter) {
-    const LanguageModel &lm = **lmIter;
-
-    if (lm.Useable(*this)) {
-      // contains factors used by this LM
-      const float weightLM = lm.GetWeight();
-      const float oovWeightLM = lm.GetOOVWeight();
-      float fullScore, nGramScore;
-      size_t oovCount;
-
-      lm.CalcScore(*this, fullScore, nGramScore, oovCount);
-      fullScore = UntransformLMScore(fullScore);
-      nGramScore = UntransformLMScore(nGramScore);
-
-      if (StaticData::Instance().GetLMEnableOOVFeature()) {
-        vector<float> scores(2);
-        scores[0] = nGramScore;
-        scores[1] = oovCount;
-        m_scoreBreakdown.Assign(&lm, scores);
-        totalOOVScore += oovCount * oovWeightLM;
-      } else {
-        m_scoreBreakdown.Assign(&lm, nGramScore);
-      }
-
-      // total LM score so far
-      totalNgramScore  += nGramScore * weightLM;
-      totalFullScore   += fullScore * weightLM;
-    }
-  }
-
-  // word penalty
-  size_t wordCount = GetNumTerminals();
-  m_scoreBreakdown.Assign(wpProducer, - (float) wordCount * 0.434294482); // TODO log -> ln ??
-
-  m_fullScore = m_scoreBreakdown.GetWeightedScore() - totalNgramScore + totalFullScore + totalOOVScore;
+  const StaticData &staticData = StaticData::Instance();
+  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
+  size_t numScores = prod->GetNumScoreComponents();
+  vector <float> scoreVector(numScores,score/numScores);
+  SetScore(prod, scoreVector);
 }
 
-void TargetPhrase::SetScore(const ScoreProducer* producer, const Scores &scoreVector)
+void TargetPhrase::SetInputScore(const Scores &scoreVector)
+{
+  //we use an existing score producer to figure out information for score setting (number of scores and weights)
+  const StaticData &staticData = StaticData::Instance();
+  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
+
+  //expand the input weight vector
+  CHECK(scoreVector.size() <= prod->GetNumScoreComponents());
+  Scores sizedScoreVector = scoreVector;
+  sizedScoreVector.resize(prod->GetNumScoreComponents(),0.0f);
+
+  SetScore(prod, sizedScoreVector);
+}
+
+// used to set translation or gen score
+void TargetPhrase::SetScore(const FeatureFunction* producer, const Scores &scoreVector)
 {
   // used when creating translations of unknown words (chart decoding)
   m_scoreBreakdown.Assign(producer, scoreVector);
   m_fullScore = m_scoreBreakdown.GetWeightedScore();
-}
-
-
-void TargetPhrase::SetWeights(const ScoreProducer* translationScoreProducer, const vector<float> &weightT)
-{
-  // calling this function in case of confusion net input is undefined
-  CHECK(StaticData::Instance().GetInputType()==SentenceInput);
-
-  /* one way to fix this, you have to make sure the weightT contains (in
-     addition to the usual phrase translation scaling factors) the input
-     weight factor as last element
-  */
-}
-
-void TargetPhrase::ResetScore()
-{
-  m_fullScore = 0;
-  m_scoreBreakdown.ZeroAll();
 }
 
 TargetPhrase *TargetPhrase::MergeNext(const TargetPhrase &inputPhrase) const
@@ -324,12 +187,19 @@ void TargetPhrase::SetAlignNonTerm(const AlignmentInfo::CollType &coll)
 	m_alignNonTerm = alignmentInfo;
 }
 
+void TargetPhrase::SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString)
+{
+  m_scoreBreakdown.Assign(translationScoreProducer, sparseString.as_string());
+}
+
 TO_STRING_BODY(TargetPhrase);
 
 std::ostream& operator<<(std::ostream& os, const TargetPhrase& tp)
 {
-  os << static_cast<const Phrase&>(tp) << ":" << tp.GetAlignNonTerm();
-  os << ": c=" << tp.m_fullScore;
+  os << static_cast<const Phrase&>(tp) << ":" << flush;
+  os << tp.GetAlignNonTerm() << flush;
+  os << ": c=" << tp.m_fullScore << flush;
+  os << " " << tp.m_scoreBreakdown << flush;
 
   return os;
 }

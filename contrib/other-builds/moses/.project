@@ -802,16 +802,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ScoreComponentCollectionTest.cpp</locationURI>
 		</link>
 		<link>
-			<name>ScoreProducer.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ScoreProducer.cpp</locationURI>
-		</link>
-		<link>
-			<name>ScoreProducer.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/ScoreProducer.h</locationURI>
-		</link>
-		<link>
 			<name>Search.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Search.cpp</locationURI>
@@ -880,16 +870,6 @@
 			<name>SourceWordDeletionFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SourceWordDeletionFeature.h</locationURI>
-		</link>
-		<link>
-			<name>SparsePhraseDictionaryFeature.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SparsePhraseDictionaryFeature.cpp</locationURI>
-		</link>
-		<link>
-			<name>SparsePhraseDictionaryFeature.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/SparsePhraseDictionaryFeature.h</locationURI>
 		</link>
 		<link>
 			<name>SquareMatrix.cpp</name>
@@ -1227,6 +1207,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Base.h</locationURI>
 		</link>
 		<link>
+			<name>LM/ChartState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ChartState.h</locationURI>
+		</link>
+		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>
@@ -1310,6 +1295,11 @@
 			<name>LM/ParallelBackoff.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ParallelBackoff.h</locationURI>
+		</link>
+		<link>
+			<name>LM/PointerState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/PointerState.h</locationURI>
 		</link>
 		<link>
 			<name>LM/Rand.cpp</name>

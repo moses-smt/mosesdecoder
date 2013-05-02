@@ -43,12 +43,12 @@ void LanguageModelORLM::CreateFactors() {
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, "<s>");
   factorId = m_sentenceStart->GetId();
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceStartArray[m_factorType] = m_sentenceStart;
+  m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
   m_sentenceEnd	= factorCollection.AddFactor(Output, m_factorType, "</s>");
   factorId = m_sentenceEnd->GetId();
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
-  m_sentenceEndArray[m_factorType] = m_sentenceEnd;
+  m_sentenceEndWord[m_factorType] = m_sentenceEnd;
   // add to lookup vector in object
  lm_ids_vec_.resize(maxFactorId+1);
   // fill with OOV code

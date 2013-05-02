@@ -7,13 +7,14 @@
 #include "ScoreComponentCollection.h"
 #include "TranslationOption.h"
 #include "UserMessage.h"
+#include "util/string_piece_hash.hh"
 
 namespace Moses {
 
 using namespace std;
 
 TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
-:StatelessFeatureFunction("twi", ScoreProducer::unlimited, line),
+:StatelessFeatureFunction("TargetWordInsertionFeature", FeatureFunction::unlimited, line),
 m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;
@@ -29,7 +30,9 @@ m_unrestricted(true)
     else if (args[0] == "path") {
       filename = args[1];
     }
-
+    else {
+      throw "Unknown argument " + args[0];
+    }
   }
 
   // load word list for restricted feature set
@@ -81,6 +84,13 @@ void TargetWordInsertionFeature::EvaluateChart(
 	ComputeFeatures(targetPhrase, accumulator, alignmentInfo);
 }
 
+void TargetWordInsertionFeature::Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const
+{
+
+}
+
 void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhrase,
     											 ScoreComponentCollection* accumulator,
     											 const AlignmentInfo &alignmentInfo) const
@@ -88,12 +98,7 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
   // handle special case: unknown words (they have no word alignment)
   size_t targetLength = targetPhrase.GetSize();
   size_t sourceLength = targetPhrase.GetSourcePhrase().GetSize();
-  if (targetLength == 1 && sourceLength == 1) {
-		const Factor* f1 = targetPhrase.GetWord(0).GetFactor(1);
-		if (f1 && f1->GetString().compare(UNKNOWN_FACTOR) == 0) {
-			return;
-		}
-  }
+  if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
   bool aligned[16];
@@ -110,10 +115,10 @@ void TargetWordInsertionFeature::ComputeFeatures(const TargetPhrase& targetPhras
     if (!aligned[i]) {
       Word w = targetPhrase.GetWord(i);
       if (!w.IsNonTerminal()) {
-    	const string &word = w.GetFactor(m_factorType)->GetString();
+    	const StringPiece word = w.GetFactor(m_factorType)->GetString();
     	if (word != "<s>" && word != "</s>") {
-      	  if (!m_unrestricted && m_vocab.find( word ) == m_vocab.end()) {
-      		accumulator->PlusEquals(this,"OTHER",1);
+      	  if (!m_unrestricted && FindStringPiece(m_vocab, word ) == m_vocab.end()) {
+      		accumulator->PlusEquals(this,StringPiece("OTHER"),1);
       	  }
       	  else {
       		accumulator->PlusEquals(this,word,1);

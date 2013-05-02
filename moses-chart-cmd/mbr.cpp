@@ -110,7 +110,7 @@ vector<const Factor*> doMBR(const TrellisPathList& nBestList)
   //TrellisPath* hyp = NULL;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
-    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().InnerProduct(StaticData::Instance().GetAllWeights()));
+    joint_prob = UntransformScore(StaticData::Instance().GetMBRScale() * path.GetScoreBreakdown().GetWeightedScore());
     marginal += joint_prob;
     joint_prob_vec.push_back(joint_prob);
     //Cache ngram counts

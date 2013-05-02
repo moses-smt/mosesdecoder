@@ -40,7 +40,7 @@ class ChartCellLabel
  public:
   union Stack {
     const HypoList *cube; // cube pruning
-    const search::Vertex *incr; // incremental search after filling.  
+    search::Vertex *incr; // incremental search after filling.  
     void *incr_generator; // incremental search during filling.  
   };
 

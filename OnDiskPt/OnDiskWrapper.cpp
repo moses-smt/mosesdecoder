@@ -207,8 +207,7 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
   size_t factorType = factorsVec[0];  
   const Moses::Factor *factor = origWord.GetFactor(factorType);
   CHECK(factor);  
-  string str = factor->GetString();
-  strme << str;
+  strme << factor->GetString();
 
   for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
     size_t factorType = factorsVec[ind];
@@ -218,8 +217,7 @@ Word *OnDiskWrapper::ConvertFromMoses(Moses::FactorDirection /* direction */
       break;
     }
     CHECK(factor);
-    string str = factor->GetString();
-    strme << "|" << str;    
+    strme << "|" << factor->GetString();
   } // for (size_t factorType
 
   bool found;

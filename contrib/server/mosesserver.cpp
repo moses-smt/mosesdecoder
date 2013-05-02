@@ -1,6 +1,8 @@
 #include "util/check.hh"
 #include <stdexcept>
 #include <iostream>
+#include <vector>
+#include <algorithm>
 
 
 #include "moses/ChartManager.h"
@@ -49,11 +51,11 @@ public:
           xmlrpc_c::value *   const  retvalP) {
     const params_t params = paramList.getStruct(0);
     breakOutParams(params);
-    const PhraseDictionaryFeature* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
-    PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf->GetDictionary();
+    const PhraseDictionary* pdf = StaticData::Instance().GetPhraseDictionaries()[0];
+    PhraseDictionaryDynSuffixArray* pdsa = (PhraseDictionaryDynSuffixArray*) pdf;
     cerr << "Inserting into address " << pdsa << endl;
     pdsa->insertSnt(source_, target_, alignment_);
-    if(add2ORLM_) {       
+    if(add2ORLM_) {
       updateORLM();
     }
     cerr << "Done inserting\n";
@@ -72,7 +74,8 @@ public:
     map<vector<string>, int> ngSet;
     LMList lms = StaticData::Instance().GetLMList(); // get LM
     LMList::const_iterator lmIter = lms.begin();
-    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(static_cast<LMRefCount*>(*lmIter)->MosesServerCppShouldNotHaveLMCode());
+    LanguageModel *lm = *lmIter;
+    LanguageModelORLM* orlm = static_cast<LanguageModelORLM*>(lm);
     if(orlm == 0) {
       cerr << "WARNING: Unable to add target sentence to ORLM\n";
       return;
@@ -82,8 +85,8 @@ public:
     const std::string sBOS = orlm->GetSentenceStart()->GetString();
     const std::string sEOS = orlm->GetSentenceEnd()->GetString();
     Utils::splitToStr(target_, vl, " ");
-    // insert BOS and EOS 
-    vl.insert(vl.begin(), sBOS); 
+    // insert BOS and EOS
+    vl.insert(vl.begin(), sBOS);
     vl.insert(vl.end(), sEOS);
     for(int j=0; j < vl.size(); ++j) {
       int i = (j<ngOrder) ? 0 : j-ngOrder+1;
@@ -176,7 +179,7 @@ public:
     map<string, xmlrpc_c::value> retData;
 
     if (staticData.IsChart()) {
-       TreeInput tinput; 
+       TreeInput tinput;
         const vector<FactorType> &inputFactorOrder =
           staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
@@ -259,10 +262,16 @@ public:
 
   }
 
+
+  bool compareSearchGraphNode(const SearchGraphNode& a, const SearchGraphNode b) {
+    return a.hypo->GetId() < b.hypo->GetId();
+  }
+
   void insertGraphInfo(Manager& manager, map<string, xmlrpc_c::value>& retData) {
     vector<xmlrpc_c::value> searchGraphXml;
     vector<SearchGraphNode> searchGraph;
     manager.GetSearchGraph(searchGraph);
+    std::sort(searchGraph.begin(), searchGraph.end());
     for (vector<SearchGraphNode>::const_iterator i = searchGraph.begin(); i != searchGraph.end(); ++i) {
       map<string, xmlrpc_c::value> searchGraphXmlNode;
       searchGraphXmlNode["forward"] = xmlrpc_c::value_double(i->forward);

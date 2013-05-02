@@ -65,8 +65,6 @@ template <class Model> class LanguageModelKen : public LanguageModel {
   public:
     LanguageModelKen(const std::string &description, const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
-    LanguageModel *Duplicate() const;
-
     bool Useable(const Phrase &phrase) const {
       return (phrase.GetSize()>0 && phrase.GetFactor(0, m_factorType) != NULL);
     }
@@ -156,10 +154,6 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   m_ngram.reset(new Model(file.c_str(), config));
 
   m_beginSentenceFactor = collection.AddFactor(BOS_);
-}
-
-template <class Model> LanguageModel *LanguageModelKen<Model>::Duplicate() const {
-  return new LanguageModelKen<Model>(*this);
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
@@ -314,7 +308,8 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
       // Non-terminal is first so we can copy instead of rescoring.  
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      ruleScore.BeginNonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      ruleScore.BeginNonTerminal(prevState, prob);
       phrasePos++;
     }
   }
@@ -324,13 +319,16 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
     if (word.IsNonTerminal()) {
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      ruleScore.NonTerminal(prevState, prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
+      ruleScore.NonTerminal(prevState, prob);
     } else {
       ruleScore.Terminal(TranslateID(word));
     }
   }
 
-  accumulator->Assign(this, ruleScore.Finish());
+  float score = ruleScore.Finish();
+  score = TransformLMScore(score);
+  accumulator->Assign(this, score);
   return newState;
 }
 
@@ -338,7 +336,6 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
 LanguageModel *ConstructKenLM(const std::string &description, const std::string &line)
 {
-  cerr << "line=" << line << endl;
   FactorType factorType;
   size_t nGramOrder;
   string filePath;
@@ -361,9 +358,11 @@ LanguageModel *ConstructKenLM(const std::string &description, const std::string 
     else if (args[0] == "lazyken") {
       lazy = Scan<bool>(args[1]);
     }
+    else if (args[0] == "name") {
+      // that's ok. do nothing, passes onto LM constructor
+    }
     else {
-      UserMessage::Add("Unknown argument " + args[0]);
-      abort();
+      throw "Unknown argument " + args[0];
     }
   }
 

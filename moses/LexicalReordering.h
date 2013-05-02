@@ -8,7 +8,6 @@
 #include "TypeDef.h"
 #include "Util.h"
 #include "WordsRange.h"
-#include "ScoreProducer.h"
 #include "FeatureFunction.h"
 
 #include "LexicalReorderingState.h"
@@ -29,10 +28,6 @@ public:
   LexicalReordering(const std::string &line);
   virtual ~LexicalReordering();
 
-  virtual FFState* Evaluate(const Hypothesis& cur_hypo,
-                            const FFState* prev_state,
-                            ScoreComponentCollection* accumulator) const;
-
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
   void InitializeForInput(const InputType& i){
@@ -41,12 +36,20 @@ public:
 
   Scores GetProb(const Phrase& f, const Phrase& e) const;
 
+  virtual FFState* Evaluate(const Hypothesis& cur_hypo,
+                            const FFState* prev_state,
+                            ScoreComponentCollection* accumulator) const;
+
   virtual FFState* EvaluateChart(const ChartHypothesis&,
                                  int /* featureID */,
 																 ScoreComponentCollection*) const {
 		CHECK(0); // not valid for chart decoder
 		return NULL;
 	}
+
+  virtual void Evaluate(const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedFutureScore) const;
 
 private:
     bool DecodeCondition(std::string s);

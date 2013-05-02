@@ -191,8 +191,7 @@ bool RuleTableLoaderCompact::LoadRuleSection(
   const size_t ruleCount = std::atoi(reader.m_line.c_str());
 
   // Read rules and add to table.
-  const size_t numScoreComponents =
-      ruleTable.GetFeature()->GetNumScoreComponents();
+  const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
   std::vector<float> scoreVector(numScoreComponents);
   std::vector<size_t> tokenPositions;
   for (size_t i = 0; i < ruleCount; ++i) {
@@ -235,9 +234,9 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
-    targetPhrase->SetScoreChart(ruleTable.GetFeature(), scoreVector, weights,
-                                languageModels, wpProducer);
     targetPhrase->SetSourcePhrase(sourcePhrase);
+
+    targetPhrase->Evaluate();
 
     // Insert rule into table.
     TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(

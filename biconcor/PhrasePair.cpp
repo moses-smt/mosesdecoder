@@ -8,7 +8,42 @@
 
 using namespace std;
 
-void PhrasePair::Print( ostream* out, int width ) const
+void PhrasePair::Print( ostream* out ) const
+{
+  // source
+  int sentence_start = m_source_position - m_source_start;
+  char source_length = m_suffixArray->GetSentenceLength( m_suffixArray->GetSentence( m_source_position ) );
+
+  for( char i=0; i<source_length; i++ ) {
+    if (i>0) *out << " ";
+    *out << m_suffixArray->GetWord( sentence_start + i );
+  }
+
+  // target
+  *out << " |||";
+  for( char i=0; i<m_target_length; i++ ) {
+    *out << " " << m_targetCorpus->GetWord( m_sentence_id, i);
+  }
+
+  // source span
+  *out << " ||| " << (int)m_source_start << " " << (int)m_source_end;
+
+  // target span
+  *out << " ||| " << (int)m_target_start << " " << (int)m_target_end;
+
+  // word alignment
+  *out << " |||";
+
+  INDEX ap_points = m_alignment->GetNumberOfAlignmentPoints( m_sentence_id );
+  for( INDEX i=0; i<ap_points; i++) {
+    *out << " " << m_alignment->GetSourceWord( m_sentence_id, i )
+	 << "-" << m_alignment->GetTargetWord( m_sentence_id, i );
+  }
+
+  *out << endl;
+}
+
+void PhrasePair::PrintPretty( ostream* out, int width ) const
 {
   vector< WORD_ID >::const_iterator t;
 

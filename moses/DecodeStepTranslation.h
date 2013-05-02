@@ -28,7 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class PhraseDictionaryFeature;
+class PhraseDictionary;
 class TargetPhrase;
 
 //! subclass of DecodeStep for translation step
@@ -36,7 +36,7 @@ class DecodeStepTranslation : public DecodeStep
 {
 public:
   DecodeStepTranslation(); //! not implemented
-  DecodeStepTranslation(const PhraseDictionaryFeature* phraseFeature, const DecodeStep* prev);
+  DecodeStepTranslation(const PhraseDictionary* phraseFeature, const DecodeStep* prev);
 
 
   virtual void Process(const TranslationSystem* system

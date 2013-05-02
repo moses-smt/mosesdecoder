@@ -42,26 +42,18 @@ class WordPenaltyProducer;
 class RuleTableTrie : public PhraseDictionary
 {
  public:
-  RuleTableTrie(size_t numScoreComponents, PhraseDictionaryFeature *feature)
-      : PhraseDictionary(numScoreComponents, feature) {}
+  RuleTableTrie(const std::string &description, const std::string &line)
+      : PhraseDictionary(description, line)
+ {}
 
   virtual ~RuleTableTrie();
 
-  virtual bool Load(const std::vector<FactorType> &input,
-                    const std::vector<FactorType> &output,
-                    const std::string &filePath,
-                    const std::vector<float> &weight,
-                    size_t tableLimit,
-                    const LMList &languageModels,
-                    const WordPenaltyProducer *wpProducer);
-
-  const std::string &GetFilePath() const { return m_filePath; }
-  void SetFilePath(const std::string &path) { m_filePath = path; }
+  bool InitDictionary();
 
   // Required by PhraseDictionary.
-  const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const
+  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase &) const
   {
-    assert(false);
+    CHECK(false);
     return NULL;
   }
 
@@ -74,7 +66,6 @@ class RuleTableTrie : public PhraseDictionary
 
   virtual void SortAndPrune() = 0;
 
-  std::string m_filePath;
 };
 
 }  // namespace Moses

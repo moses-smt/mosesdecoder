@@ -45,7 +45,7 @@ ADVICE ON INSTALLING EXTERNAL LIBRARIES
 Generally, for trouble installing external libraries, you should get support
 directly from the library maker:
 
-Boost: http://www.boost.org/doc/libs/1_48_0/more/getting_started/unix-variants.html
+Boost: http://www.boost.org/doc/libs/release/more/getting_started/unix-variants.html
 IRSTLM: https://list.fbk.eu/sympa/subscribe/user-irstlm
 SRILM: http://www.speech.sri.com/projects/srilm/#srilm-user
 
