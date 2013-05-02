@@ -94,26 +94,13 @@ void TargetPhrase::Evaluate()
   m_fullScore = m_scoreBreakdown.GetWeightedScore() + estimatedFutureScore.GetWeightedScore();
 }
 
-void TargetPhrase::SetScore(float score)
+void TargetPhrase::SetXMLScore(float score)
 {
-	//we use an existing score producer to figure out information for score setting (number of scores and weights)
-	//TODO: is this a good idea?
   const StaticData &staticData = StaticData::Instance();
-	const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
-	
-	vector<float> weights = staticData.GetWeights(prod);
-
-	
-	//find out how many items are in the score vector for this producer	
-	size_t numScores = prod->GetNumScoreComponents();
-
-	//divide up the score among all of the score vectors
-	vector <float> scoreVector(numScores,score/numScores);
-	
-	//Now we have what we need to call the full SetScore method
-	const LMList &lmList = StaticData::Instance().GetLMList();
-
-	SetScore(prod, scoreVector, ScoreComponentCollection(), weights, staticData.GetWeightWordPenalty(), lmList);
+  const FeatureFunction* prod = staticData.GetPhraseDictionaries()[0];
+  size_t numScores = prod->GetNumScoreComponents();
+  vector <float> scoreVector(numScores,score/numScores);
+  SetScore(prod, scoreVector);
 }
 
 /**

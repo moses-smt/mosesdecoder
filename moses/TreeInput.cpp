@@ -193,7 +193,8 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             }
             // convert from prob to log-prob
             float scoreValue = FloorScore(TransformScore(probValue));
-            targetPhrase.SetScore(scoreValue);
+            targetPhrase.SetXMLScore(scoreValue);
+            targetPhrase.Evaluate();
 
             // set span and create XmlOption
             WordsRange range(startPos+1,endPos);

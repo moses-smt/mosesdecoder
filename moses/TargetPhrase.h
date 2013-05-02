@@ -63,9 +63,6 @@ public:
 
   void Evaluate();
 
-  //!Set score for Sentence XML target options
-  void SetScore(float score);
-
   //! Set score for unknown words with input weights
   void SetScore(const TranslationSystem* system, const Scores &scoreVector);
 
@@ -92,6 +89,7 @@ public:
 
   // used to set translation or gen score
   void SetScore(const FeatureFunction* producer, const Scores &scoreVector);
+  void SetXMLScore(float score);
 
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
   // used for translation step

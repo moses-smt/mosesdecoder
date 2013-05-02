@@ -343,11 +343,8 @@ bool ProcessAndStripXMLTags(string &line, vector<XmlOption*> &res, ReorderingCon
               TargetPhrase targetPhrase;
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter);
 
-              targetPhrase.SetScore(scoreValue);
-
-              vector<float> wp(1, - targetPhrase.GetSize());
-              targetPhrase.SetScore(StaticData::Instance().GetWordPenaltyProducer() , wp);
-              // TODO: targetPhrase.SetSourcePhrase() ?
+              targetPhrase.SetXMLScore(scoreValue);
+              targetPhrase.Evaluate();
 
               XmlOption *option = new XmlOption(range,targetPhrase);
               CHECK(option);
