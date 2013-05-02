@@ -2607,7 +2607,8 @@ sub define_evaluation_decode {
     my $dir = &check_and_get("GENERAL:working-dir");
     
     my ($system_output,
-	$config,$input) = &get_output_and_input($step_id);
+	$config,$input,$filtered_config) = &get_output_and_input($step_id);
+    $config = $filtered_config if $filtered_config;
 
     my $jobs = &backoff_and_get("EVALUATION:$set:jobs");
     my $decoder = &check_backoff_and_get("EVALUATION:$set:decoder");
