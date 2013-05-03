@@ -806,23 +806,21 @@ filter
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings
-	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero
+	ignore-if: TRAINING:binarize-all
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
 	out: filtered-dir-devtest
 	default-name: tuning/filtered.devtest
  	rerun-on-change: filter-settings
-	pass-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all
 	ignore-unless: use-mira	
 	error: already exists. Please delete
 apply-filter
 	in: TRAINING:bin-config filtered-dir
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-	pass-if: TRAINING:binarize-all
-	ignore-if: use-hiero
+	ignore-if: TRAINING:binarize-all
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 apply-filter-devtest
 	in: TRAINING:bin-config filtered-dir-devtest
@@ -832,7 +830,7 @@ apply-filter-devtest
   ignore-unless: use-mira
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 tune
-	in: bin-config input reference filtered-config-devtest input-devtest reference-devtest filtered-config 
+	in: TRAINING:bin-config input reference filtered-config-devtest input-devtest reference-devtest filtered-config 
 	out: weight-config
 	ignore-if: use-hiero
 	qsub-script: yes
