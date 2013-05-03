@@ -79,6 +79,21 @@ PhraseDictionaryFeature::PhraseDictionaryFeature
   if (implementation == Memory || implementation == SCFG || implementation == SuffixArray ||
       implementation==Compact || implementation==FuzzyMatch) {
     m_useThreadSafePhraseDictionary = true;
+  } else if (m_implementation == MultiModel || m_implementation == MultiModelCounts) {
+    // one not-threadsafe component model makes the whole model not-threadsafe
+    m_useThreadSafePhraseDictionary = true;
+    for (std::vector<std::string>::const_iterator it = config.begin()+5; it != config.end(); ++it) {
+      string delim = ":";
+      size_t delim_pos = it->find(delim);
+      UTIL_THROW_IF(delim_pos >= it->size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
+      string impl = it->substr(0,delim_pos);
+      PhraseTableImplementation component_impl = (PhraseTableImplementation) Scan<int>(impl);
+
+      if (!(component_impl == Memory || component_impl == SCFG || component_impl == SuffixArray ||
+        component_impl==Compact || component_impl==FuzzyMatch)) {
+        m_useThreadSafePhraseDictionary = false;
+      }
+    }
   } else {
     m_useThreadSafePhraseDictionary = false;
   }
@@ -231,23 +246,6 @@ PhraseDictionary* PhraseDictionaryFeature::LoadPhraseTable(const TranslationSyst
     CHECK(false);
 #endif
   } else if (m_implementation == MultiModel || m_implementation == MultiModelCounts) {
-
-      // one not-threadsafe component model makes the whole model not-threadsafe
-      m_useThreadSafePhraseDictionary = true;
-      for (std::vector<std::string>::const_iterator it = m_config.begin()+5; it != m_config.end(); ++it) {
-        string delim = ":";
-        size_t delim_pos = it->find(delim);
-        UTIL_THROW_IF(delim_pos >= it->size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
-        string impl = it->substr(0,delim_pos);
-        PhraseTableImplementation component_impl = (PhraseTableImplementation) Scan<int>(impl);
-
-        if (!(component_impl == Memory || component_impl == SCFG || component_impl == SuffixArray ||
-                component_impl==Compact || component_impl==FuzzyMatch)) {
-          m_useThreadSafePhraseDictionary = false;
-          }
-        }
-
-
       if (staticData.GetInputType() != SentenceInput) {
         UserMessage::Add("Must use binary phrase table for this input type");
         CHECK(false);
