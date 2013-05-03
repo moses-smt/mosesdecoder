@@ -74,7 +74,7 @@ private:
   // subs
   void addRule( int, int, int, int, int, RuleExist &ruleExist);
   void addHieroRule( int startT, int endT, int startS, int endS
-                    , RuleExist &ruleExist, const HoleCollection &holeColl, int numHoles, int initStartF, int wordCountT, int wordCountS);
+                    , RuleExist &ruleExist, HoleCollection &holeColl, int numHoles, int initStartF, int wordCountT, int wordCountS);
   void saveHieroPhrase( int startT, int endT, int startS, int endS
                         , HoleCollection &holeColl, LabelIndex &labelIndex, int countS);
   string saveTargetHieroPhrase(  int startT, int endT, int startS, int endS
@@ -754,7 +754,7 @@ void ExtractTask::saveAllHieroPhrases( int startT, int endT, int startS, int end
 // this function is called recursively
 // it pokes a new hole into the phrase pair, and then calls itself for more holes
 void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
-                   , RuleExist &ruleExist, const HoleCollection &holeColl
+                   , RuleExist &ruleExist, HoleCollection &holeColl
                    , int numHoles, int initStartT, int wordCountT, int wordCountS)
 {
   // done, if already the maximum number of non-terminals in phrase pair
@@ -850,9 +850,7 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
         }
 
         // update list of holes in this phrase pair
-        HoleCollection copyHoleColl(holeColl);
-        copyHoleColl.Add(startHoleT, endHoleT, sourceHole.GetStart(0), sourceHole.GetEnd(0));
-
+        holeColl.Add(startHoleT, endHoleT, sourceHole.GetStart(0), sourceHole.GetEnd(0));
         // now some checks that disallow this phrase pair, but not further recursion
         bool allowablePhrase = true;
 
@@ -864,14 +862,16 @@ void ExtractTask::addHieroRule( int startT, int endT, int startS, int endS
           allowablePhrase = false;
 
         // passed all checks...
-        if (allowablePhrase)
-          saveAllHieroPhrases(startT, endT, startS, endS, copyHoleColl, wordCountS);
+        if (allowablePhrase) 
+          saveAllHieroPhrases(startT, endT, startS, endS, holeColl, wordCountS);
 
         // recursively search for next hole
         int nextInitStartT = m_options.nonTermConsecTarget ? endHoleT + 1 : endHoleT + 2;
         addHieroRule(startT, endT, startS, endS
-                     , ruleExist, copyHoleColl, numHoles + 1, nextInitStartT
+                     , ruleExist, holeColl, numHoles + 1, nextInitStartT
                      , newWordCountT, newWordCountS);
+
+        holeColl.RemoveLast();
       }
     }
   }
