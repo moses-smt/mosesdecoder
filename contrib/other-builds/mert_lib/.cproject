@@ -46,20 +46,6 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-<<<<<<< HEAD
-<<<<<<< HEAD
-<<<<<<< HEAD
-=======
-					<fileInfo id="cdt.managedbuild.config.gnu.lib.debug.1721952013.626295813" name="extractor.cpp" rcbsApplicability="disable" resourcePath="mert/extractor.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537.1550378460">
-						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537.1550378460" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537"/>
-=======
-					<fileInfo id="cdt.managedbuild.config.gnu.lib.debug.1721952013.646822372" name="UtilTest.cpp" rcbsApplicability="disable" resourcePath="mert/UtilTest.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537.967030373">
-						<tool id="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537.967030373" name="GCC C++ Compiler" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.lib.debug.329920537"/>
->>>>>>> 3013227385ac6db1aa07702c115d2c512967e461
-					</fileInfo>
->>>>>>> master
-=======
->>>>>>> df5f0934be559418177ffa9a68c2e561918a310f
 					<sourceEntries>
 						<entry excluding="mert/UtilTest.cpp|mert/TimerTest.cpp|mert/SingletonTest.cpp|mert/PointTest.cpp|mert/OptimizerFactoryTest.cpp|mert/NgramTest.cpp|mert/FeatureDataTest.cpp|mert/DataTest.cpp|mert/ReferenceTest.cpp|mert/VocabularyTest.cpp|mert/extractor.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
