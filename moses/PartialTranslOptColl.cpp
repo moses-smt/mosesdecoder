@@ -21,6 +21,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "PartialTranslOptColl.h"
 #include <algorithm>
+#include <iostream>
+
+using namespace std;
 
 namespace Moses
 {
@@ -94,6 +97,17 @@ void PartialTranslOptColl::Prune()
   m_list.resize(m_maxSize);
   //	TRACE_ERR( "pruned to size " << m_list.size() << ", total pruned: " << m_totalPruned << std::endl);
 }
+
+// friend
+ostream& operator<<(ostream& out, const PartialTranslOptColl& possibleTranslation)
+{
+  for (size_t i = 0; i < possibleTranslation.m_list.size(); ++i) {
+    const TranslationOption &transOpt = *possibleTranslation.m_list[i];
+    out << transOpt << endl;
+  }
+  return out;
+}
+
 
 }
 

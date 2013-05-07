@@ -75,6 +75,7 @@
 									<listOptionValue builtIn="false" value="boost_iostreams-mt"/>
 									<listOptionValue builtIn="false" value="boost_system-mt"/>
 									<listOptionValue builtIn="false" value="boost_thread-mt"/>
+									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="bz2"/>
 									<listOptionValue builtIn="false" value="rt"/>
 								</option>
