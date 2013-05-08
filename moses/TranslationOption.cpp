@@ -39,18 +39,6 @@ TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange(wordsRange)
-  , m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
-  , m_futureScore(targetPhrase.GetFutureScore())
-{
-}
-
-//TODO this should be a factory function!
-TranslationOption::TranslationOption(const WordsRange &wordsRange
-                                     , const TargetPhrase &targetPhrase
-                                     , const UnknownWordPenaltyProducer* up)
-  : m_targetPhrase(targetPhrase)
-  , m_sourceWordsRange	(wordsRange)
-  , m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
   , m_futureScore(targetPhrase.GetFutureScore())
 {
 }
@@ -59,26 +47,9 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 : m_targetPhrase(copy.m_targetPhrase)
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
 , m_sourceWordsRange(sourceWordsRange)
-, m_scoreBreakdown(copy.m_scoreBreakdown)
 , m_futureScore(copy.m_futureScore)
 , m_cachedScores(copy.m_cachedScores)
 {}
-
-void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
-{
-  CHECK(phrase.GetSize() == m_targetPhrase.GetSize());
-  if (featuresToAdd.size() == 1) {
-    m_targetPhrase.MergeFactors(phrase, featuresToAdd[0]);
-  } else if (featuresToAdd.empty()) {
-    /* features already there, just update score */
-  } else {
-    m_targetPhrase.MergeFactors(phrase, featuresToAdd);
-  }
-  m_scoreBreakdown.PlusEquals(score);
-
-  // override word penalty, otherwise it doubles up when there are >1 translation models
-  m_scoreBreakdown.Assign(StaticData::Instance().GetWordPenaltyProducer(), -m_targetPhrase.GetSize());
-}
 
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
 {

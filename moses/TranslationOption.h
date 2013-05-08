@@ -67,12 +67,6 @@ protected:
   const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
-  //! in TranslationOption, m_scoreBreakdown is not complete.  It cannot,
-  //! for example, know the full n-gram score since the length of the
-  //! TargetPhrase may be shorter than the n-gram order.  But, if it is
-  //! possible to estimate, it is included here.
-  ScoreComponentCollection	m_scoreBreakdown;
-
   typedef std::map<const FeatureFunction *, Scores> _ScoreCacheMap;
   _ScoreCacheMap m_cachedScores;
 
@@ -80,10 +74,6 @@ public:
   /** constructor. Used by initial translation step */
   TranslationOption(const WordsRange &wordsRange
                     , const TargetPhrase &targetPhrase);
-  /** constructor. Used to create trans opt from unknown word */
-  TranslationOption(const WordsRange &wordsRange
-                    , const TargetPhrase &targetPhrase
-                    , const UnknownWordPenaltyProducer* uwpProducer);
 
   /** copy constructor, but change words range. used by caching */
   TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange);
@@ -91,9 +81,6 @@ public:
 
   /** returns true if all feature types in featuresToCheck are compatible between the two phrases */
   bool IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const;
-
-  /** used when precomputing (composing) translation options */
-  void MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToMerge);
 
   /** returns target phrase */
   inline const TargetPhrase &GetTargetPhrase() const {
@@ -140,7 +127,7 @@ public:
 
   /** returns detailed component scores */
   inline const ScoreComponentCollection &GetScoreBreakdown() const {
-    return m_scoreBreakdown;
+    return m_targetPhrase.GetScoreBreakdown();
   }
 
   /** returns cached scores */
