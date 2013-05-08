@@ -73,7 +73,6 @@ const TargetPhrase& ChartBasedFeatureContext::GetTargetPhrase() const
 }
 
 multiset<string> FeatureFunction::description_counts;
-const size_t FeatureFunction::unlimited = -1;
 
 std::vector<FeatureFunction*> FeatureFunction::m_producers;
 std::vector<const StatelessFeatureFunction*> StatelessFeatureFunction::m_statelessFFs;
@@ -97,10 +96,7 @@ FeatureFunction::FeatureFunction(const std::string& description, const std::stri
     m_description = dstream.str();
   }
 
-  if (m_numScoreComponents != unlimited) {
 	ScoreComponentCollection::RegisterScoreProducer(this);
-  }
-
   m_producers.push_back(this);
 }
 
@@ -120,10 +116,7 @@ FeatureFunction::FeatureFunction(const std::string& description, size_t numScore
     m_description = dstream.str();
   }
 
-  if (numScoreComponents != unlimited) {
-    ScoreComponentCollection::RegisterScoreProducer(this);
-  }
-
+  ScoreComponentCollection::RegisterScoreProducer(this);
   m_producers.push_back(this);
 }
 

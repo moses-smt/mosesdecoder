@@ -14,7 +14,7 @@ namespace Moses {
 using namespace std;
 
 TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
-:StatelessFeatureFunction("TargetWordInsertionFeature", FeatureFunction::unlimited, line),
+:StatelessFeatureFunction("TargetWordInsertionFeature", 0, line),
 m_unrestricted(true)
 {
   std::cerr << "Initializing target word insertion feature.." << std::endl;

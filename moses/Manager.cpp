@@ -754,7 +754,7 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
 size_t Manager::OutputFeatureWeightsForSLF(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream) const
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != FeatureFunction::unlimited) {
+  if (numScoreComps != 0) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     for (size_t i = 0; i < numScoreComps; ++i) {
       outputSearchGraphStream << "# " << ff->GetScoreProducerDescription() 

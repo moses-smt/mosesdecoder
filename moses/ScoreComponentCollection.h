@@ -106,7 +106,6 @@ public:
     * be allocated space in the dense part of the feature vector.
     **/
   static void RegisterScoreProducer(const FeatureFunction* scoreProducer);
-  static void UnregisterScoreProducer(const FeatureFunction* scoreProducer);
 
   /** Load from file */
   bool Load(const std::string& filename) 
@@ -194,7 +193,6 @@ public:
   //For features which have an unbounded number of components
   void MinusEquals(const FeatureFunction*sp, const std::string& name, float score)
   {
-    assert(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] -= score;
   }
@@ -242,7 +240,6 @@ public:
   //For features which have an unbounded number of components
   void PlusEquals(const FeatureFunction*sp, const std::string& name, float score)
   {
-    CHECK(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] += score;
   }
@@ -250,7 +247,6 @@ public:
   //For features which have an unbounded number of components
   void PlusEquals(const FeatureFunction*sp, const StringPiece& name, float score)
   {
-    CHECK(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] += score;
   }
@@ -289,7 +285,6 @@ public:
   //For features which have an unbounded number of components
   void Assign(const FeatureFunction*sp, const std::string name, float score)
   {
-    CHECK(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     m_scores[fname] = score;
   }
@@ -321,7 +316,8 @@ public:
 	std::vector<float> GetScoresForProducer(const FeatureFunction* sp) const
 	{
     size_t components = sp->GetNumScoreComponents();
-    if (components == FeatureFunction::unlimited) return std::vector<float>();
+    assert(components > 0);
+
     std::vector<float> res(components);
     IndexPair indexes = GetIndexes(sp);
     for (size_t i = 0; i < res.size(); ++i) {
@@ -386,7 +382,6 @@ public:
   float GetScoreForProducer
     (const FeatureFunction* sp, const std::string& name) const
   {
-    CHECK(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
     FName fname(sp->GetScoreProducerDescription(),name);
     return m_scores[fname];
   }

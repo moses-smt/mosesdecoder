@@ -9,7 +9,7 @@ namespace Moses {
 using namespace std;
 
 PhraseLengthFeature::PhraseLengthFeature(const std::string &line)
-:StatelessFeatureFunction("pl", FeatureFunction::unlimited, line)
+:StatelessFeatureFunction("pl", 0, line)
 {
 
 }

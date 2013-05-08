@@ -449,7 +449,7 @@ private:
 static void PrintFeatureWeight(const FeatureFunction* ff)
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != FeatureFunction::unlimited) {
+  if (numScoreComps != 0) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     cout << ff->GetScoreProducerDescription() << "=";
     for (size_t i = 0; i < numScoreComps; ++i) {
@@ -491,7 +491,7 @@ static void ShowWeights()
 size_t OutputFeatureWeightsForHypergraph(size_t index, const FeatureFunction* ff, std::ostream &outputSearchGraphStream)
 {
   size_t numScoreComps = ff->GetNumScoreComponents();
-  if (numScoreComps != FeatureFunction::unlimited) {
+  if (numScoreComps != 0) {
     vector<float> values = StaticData::Instance().GetAllWeights().GetScoresForProducer(ff);
     if (numScoreComps > 1) {
       for (size_t i = 0; i < numScoreComps; ++i) {

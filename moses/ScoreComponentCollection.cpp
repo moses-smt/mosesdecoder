@@ -19,7 +19,6 @@ ScoreComponentCollection::ScoreComponentCollection() : m_scores(s_denseVectorSiz
 void ScoreComponentCollection::RegisterScoreProducer
   (const FeatureFunction* scoreProducer)
 {
-  CHECK(scoreProducer->GetNumScoreComponents() != FeatureFunction::unlimited);
   size_t start = s_denseVectorSize;
   size_t end = start + scoreProducer->GetNumScoreComponents();
   VERBOSE(1, "FeatureFunction: " << scoreProducer->GetScoreProducerDescription() << " start: " << start << " end: " << end << endl);
@@ -27,14 +26,6 @@ void ScoreComponentCollection::RegisterScoreProducer
   s_denseVectorSize = end;
 }
 
-void ScoreComponentCollection::UnregisterScoreProducer
-  (const FeatureFunction* scoreProducer)
-{
-  CHECK(scoreProducer->GetNumScoreComponents() != FeatureFunction::unlimited);
-  ScoreIndexMap::iterator iter = s_scoreIndexes.find(scoreProducer);
-  CHECK(iter != s_scoreIndexes.end());
-  s_scoreIndexes.erase(iter);
-}
 
 float ScoreComponentCollection::GetWeightedScore() const
 {
@@ -62,7 +53,6 @@ void ScoreComponentCollection::MultiplyEquals(float scalar)
 
 // Multiply all weights of this sparse producer by a given scalar
 void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float scalar) {
-	assert(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
@@ -74,7 +64,6 @@ void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float s
 
 // Count weights belonging to this sparse producer
 size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp) {
-	assert(sp->GetNumScoreComponents() == FeatureFunction::unlimited);
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   size_t weights = 0;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {

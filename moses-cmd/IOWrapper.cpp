@@ -484,7 +484,7 @@ void OutputFeatureScores( std::ostream& out
   bool labeledOutput = staticData.IsLabeledNBestList();
 
   // regular features (not sparse)
-  if (ff->GetNumScoreComponents() != FeatureFunction::unlimited) {
+  if (ff->GetNumScoreComponents() != 0) {
     if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
       lastName = ff->GetScoreProducerDescription();
       out << " " << lastName << "=";

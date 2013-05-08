@@ -54,7 +54,7 @@ class MockMultiFeature : public MockStatelessFeatureFunction {
 
 class MockSparseFeature : public MockStatelessFeatureFunction {
   public:
-    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", FeatureFunction::unlimited, "MockSparse") {}
+    MockSparseFeature(): MockStatelessFeatureFunction("MockSparse", 0, "MockSparse") {}
 };
 
 

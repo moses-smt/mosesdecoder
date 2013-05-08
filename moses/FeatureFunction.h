@@ -99,15 +99,12 @@ public:
   virtual bool IsStateless() const = 0;	
   virtual ~FeatureFunction();
   
-  static const size_t unlimited;
-
   static void ResetDescriptionCounts() {
     description_counts.clear();
   }
 
   //! returns the number of scores that a subclass produces.
   //! For example, a language model conventionally produces 1, a translation table some arbitrary number, etc
-  //! sparse features returned unlimited
   size_t GetNumScoreComponents() const {return m_numScoreComponents;}
 
   //! returns a string description of this producer
