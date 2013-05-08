@@ -269,8 +269,7 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 	targetPhrase.Evaluate();
 
-	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase
-	                              , StaticData::Instance().GetUnknownWordPenaltyProducer());
+	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase);
 	Add(transOpt);
 
 
