@@ -69,7 +69,7 @@ protected:
   const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
-  typedef std::map<const FeatureFunction*, Scores> _ScoreCacheMap;
+  typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
   _ScoreCacheMap m_lexReorderingScores;
 
 public:
@@ -133,7 +133,7 @@ public:
   }
 
   /** returns cached scores */
-  inline const Scores *GetLexReorderingScores(const FeatureFunction *scoreProducer) const {
+  inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {
     _ScoreCacheMap::const_iterator it = m_lexReorderingScores.find(scoreProducer);
     if(it == m_lexReorderingScores.end())
       return NULL;

@@ -37,7 +37,7 @@ public:
   void SetAdditionalScoreComponents(size_t number);
   size_t GetNumberOfTypes() const;
 
-  FeatureFunction *GetScoreProducer() const {
+  LexicalReordering *GetScoreProducer() const {
     return m_scoreProducer;
   }
 
@@ -63,7 +63,7 @@ public:
   }
 
 private:
-  void SetScoreProducer(FeatureFunction* scoreProducer) {
+  void SetScoreProducer(LexicalReordering* scoreProducer) {
     m_scoreProducer = scoreProducer;
   }
 
@@ -72,7 +72,7 @@ private:
   }
 
   std::string m_modelString;
-  FeatureFunction *m_scoreProducer;
+  LexicalReordering *m_scoreProducer;
   ModelType m_modelType;
   bool m_phraseBased;
   bool m_collapseScores;
