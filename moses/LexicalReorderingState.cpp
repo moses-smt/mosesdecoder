@@ -128,7 +128,7 @@ void LexicalReorderingState::CopyScores(Scores& scores, const TranslationOption 
   // don't call this on a bidirectional object
   CHECK(m_direction == LexicalReorderingConfiguration::Backward || m_direction == LexicalReorderingConfiguration::Forward);
   const Scores *cachedScores = (m_direction == LexicalReorderingConfiguration::Backward) ?
-                               topt.GetCachedScores(m_configuration.GetScoreProducer()) : m_prevScore;
+                               topt.GetLexReorderingScores(m_configuration.GetScoreProducer()) : m_prevScore;
 
   // No scores available. TODO: Using a good prior distribution would be nicer.
   if(cachedScores == NULL)

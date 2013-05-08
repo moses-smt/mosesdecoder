@@ -103,7 +103,7 @@ protected:
 
   inline LexicalReorderingState(const LexicalReorderingState *prev, const TranslationOption &topt) :
     m_configuration(prev->m_configuration), m_direction(prev->m_direction), m_offset(prev->m_offset),
-    m_prevScore(topt.GetCachedScores(m_configuration.GetScoreProducer())) {}
+    m_prevScore(topt.GetLexReorderingScores(m_configuration.GetScoreProducer())) {}
 
   inline LexicalReorderingState(const LexicalReorderingConfiguration &config, LexicalReorderingConfiguration::Direction dir, size_t offset)
     : m_configuration(config), m_direction(dir), m_offset(offset), m_prevScore(NULL) {}

@@ -48,7 +48,7 @@ TranslationOption::TranslationOption(const TranslationOption &copy, const WordsR
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
 , m_sourceWordsRange(sourceWordsRange)
 , m_futureScore(copy.m_futureScore)
-, m_cachedScores(copy.m_cachedScores)
+, m_lexReorderingScores(copy.m_lexReorderingScores)
 {}
 
 bool TranslationOption::IsCompatible(const Phrase& phrase, const std::vector<FactorType>& featuresToCheck) const
@@ -81,9 +81,9 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
-void TranslationOption::CacheScores(const FeatureFunction &producer, const Scores &score)
+void TranslationOption::CacheLexReorderingScores(const FeatureFunction &producer, const Scores &score)
 {
-  m_cachedScores[&producer] = score;
+  m_lexReorderingScores[&producer] = score;
 }
 
 }

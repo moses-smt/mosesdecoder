@@ -641,7 +641,7 @@ void TranslationOptionCollection::CacheLexReordering()
               Scores score = lexreordering.GetProb(*sourcePhrase
                                                    , transOpt.GetTargetPhrase());
               if (!score.empty())
-                transOpt.CacheScores(lexreordering, score);
+                transOpt.CacheLexReorderingScores(lexreordering, score);
             } // if (sourcePhrase) {
           } // for(iterTransOpt
         } // for (size_t endPos = startPos ; endPos < startPos + maxSize; endPos++) {

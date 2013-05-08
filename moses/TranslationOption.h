@@ -40,7 +40,7 @@ namespace Moses
 
 class PhraseDictionary;
 class GenerationDictionary;
-class LexicalReordering;
+class FeatureFunction;
 
 /** Available phrase translation for a particular sentence pair.
  * In a multi-factor model, this is expanded from the entries in the
@@ -67,8 +67,8 @@ protected:
   const WordsRange		m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float               m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
-  typedef std::map<const FeatureFunction *, Scores> _ScoreCacheMap;
-  _ScoreCacheMap m_cachedScores;
+  typedef std::map<const FeatureFunction*, Scores> _ScoreCacheMap;
+  _ScoreCacheMap m_lexReorderingScores;
 
 public:
   /** constructor. Used by initial translation step */
@@ -131,15 +131,15 @@ public:
   }
 
   /** returns cached scores */
-  inline const Scores *GetCachedScores(const FeatureFunction *scoreProducer) const {
-    _ScoreCacheMap::const_iterator it = m_cachedScores.find(scoreProducer);
-    if(it == m_cachedScores.end())
+  inline const Scores *GetLexReorderingScores(const FeatureFunction *scoreProducer) const {
+    _ScoreCacheMap::const_iterator it = m_lexReorderingScores.find(scoreProducer);
+    if(it == m_lexReorderingScores.end())
       return NULL;
     else
       return &(it->second);
   }
 
-  void CacheScores(const FeatureFunction &scoreProducer, const Scores &score);
+  void CacheLexReorderingScores(const FeatureFunction &scoreProducer, const Scores &score);
 
   TO_STRING();
 	
