@@ -62,12 +62,12 @@ int HoleCollection::Scope(const Hole &proposedHole) const
 {
   const int holeStart = proposedHole.GetStart(0);
   const int holeEnd = proposedHole.GetEnd(0);
-  int scope = m_scope[-1];
-  if (holeStart == m_sourcePhraseStart[-1] ||
+  int scope = m_scope.back();
+  if (holeStart == m_sourcePhraseStart.back() ||
      find(m_sourceHoleEndPoints.begin(), m_sourceHoleEndPoints.end(), holeStart-1) != m_sourceHoleEndPoints.end()) {
     ++scope; // Adding hole would introduce choice point at start of hole.
   }
-  if (holeEnd == m_sourcePhraseEnd[-1] ||
+  if (holeEnd == m_sourcePhraseEnd.back() ||
       find(m_sourceHoleStartPoints.begin(), m_sourceHoleStartPoints.end(), holeEnd-1) != m_sourceHoleStartPoints.end()) {
     ++scope; // Adding hole would introduce choice point at end of hole.
   }
