@@ -454,8 +454,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
-  cerr << "range=" << startPos << " to " << endPos << endl;
-
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
@@ -502,7 +500,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
         for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
           TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
-          cerr << inputPartialTranslOpt << endl;
 
           decodeStep.Process(m_system, inputPartialTranslOpt
                              , decodeStep
@@ -525,7 +522,6 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       vector<TranslationOption*>::const_iterator iterColl;
       for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
         TranslationOption *transOpt = *iterColl;
-        cerr << *transOpt << endl;
         Add(transOpt);
       }
 

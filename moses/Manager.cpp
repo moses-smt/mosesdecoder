@@ -533,7 +533,6 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
   size_t stackNo = 1;
   std::vector < HypothesisStack* >::const_iterator iterStack;
   for (iterStack = ++hypoStackColl.begin() ; iterStack != hypoStackColl.end() ; ++iterStack) {
-    cerr << endl << stackNo++ << endl;
     const HypothesisStack &stack = **iterStack;
     HypothesisStack::const_iterator iterHypo;
     for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo) {

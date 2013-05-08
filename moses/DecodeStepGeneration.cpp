@@ -35,27 +35,6 @@ DecodeStepGeneration::DecodeStepGeneration(const GenerationDictionary* dict, con
 {
 }
 
-
-TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption& oldTO, Phrase &mergePhrase
-    , const ScoreComponentCollection& generationScore) const
-{
-  if (IsFilteringStep()) {
-    if (!oldTO.IsCompatible(mergePhrase, m_conflictFactors))
-      return NULL;
-  }
-
-  const TargetPhrase &inPhrase = oldTO.GetTargetPhrase();
-  TargetPhrase outPhrase(inPhrase);
-  outPhrase.SetScore(generationScore);
-
-  outPhrase.MergeFactors(mergePhrase, m_newOutputFactors);
-
-  const WordsRange &sourceWordsRange = oldTO.GetSourceWordsRange();
-
-  TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
-  return newTransOpt;
-}
-
 // helpers
 typedef pair<Word, ScoreComponentCollection> WordPair;
 typedef list< WordPair > WordList;
@@ -98,7 +77,6 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
 
   // normal generation step
   const GenerationDictionary* generationDictionary  = decodeStep.GetGenerationDictionaryFeature();
-//  const WordsRange &sourceWordsRange                = inputPartialTranslOpt.GetSourceWordsRange();
 
   const Phrase &targetPhrase  = inputPartialTranslOpt.GetTargetPhrase();
   size_t targetLength         = targetPhrase.GetSize();
@@ -157,10 +135,23 @@ void DecodeStepGeneration::Process(const TranslationSystem* system
 
     // merge with existing trans opt
     Phrase genPhrase( mergeWords);
-    TranslationOption *newTransOpt = MergeGeneration(inputPartialTranslOpt, genPhrase, generationScore);
-    if (newTransOpt != NULL) {
-      outputPartialTranslOptColl.Add(system, newTransOpt);
+
+    if (IsFilteringStep()) {
+      if (!inputPartialTranslOpt.IsCompatible(genPhrase, m_conflictFactors))
+        continue;
     }
+
+    const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();
+    TargetPhrase outPhrase(inPhrase);
+    outPhrase.SetScore(generationScore);
+
+    outPhrase.MergeFactors(genPhrase, m_newOutputFactors);
+    const WordsRange &sourceWordsRange = inputPartialTranslOpt.GetSourceWordsRange();
+
+    TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
+    assert(newTransOpt);
+
+    outputPartialTranslOptColl.Add(system, newTransOpt);
 
     // increment iterators
     IncrementIterators(wordListIterVector, wordListVector);
