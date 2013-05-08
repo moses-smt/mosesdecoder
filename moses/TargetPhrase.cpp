@@ -80,18 +80,21 @@ void TargetPhrase::WriteToRulePB(hgmert::Rule* pb) const
 
 void TargetPhrase::Evaluate()
 {
-  ScoreComponentCollection estimatedFutureScore;
+  ScoreComponentCollection futureScoreBreakdown;
 
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
 
   for (size_t i = 0; i < ffs.size(); ++i) {
     const FeatureFunction &ff = *ffs[i];
     if (!ff.IsDecodeFeature()) {
-      ff.Evaluate(*this, m_scoreBreakdown, estimatedFutureScore);
+      ff.Evaluate(*this, m_scoreBreakdown, futureScoreBreakdown);
     }
   }
 
-  m_fullScore = m_scoreBreakdown.GetWeightedScore() + estimatedFutureScore.GetWeightedScore();
+  float weightedScore = m_scoreBreakdown.GetWeightedScore();
+  float futureScore = futureScoreBreakdown.GetWeightedScore();
+
+  m_fullScore = weightedScore + futureScore;
 }
 
 void TargetPhrase::SetXMLScore(float score)

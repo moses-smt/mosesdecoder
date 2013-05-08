@@ -79,12 +79,10 @@ protected:
 public:
   /** constructor. Used by initial translation step */
   TranslationOption(const WordsRange &wordsRange
-                    , const TargetPhrase &targetPhrase
-                    , const InputType &inputType);
+                    , const TargetPhrase &targetPhrase);
   /** constructor. Used to create trans opt from unknown word */
   TranslationOption(const WordsRange &wordsRange
                     , const TargetPhrase &targetPhrase
-                    , const InputType &inputType
                     , const UnknownWordPenaltyProducer* uwpProducer);
 
   /** copy constructor, but change words range. used by caching */
@@ -153,9 +151,6 @@ public:
     else
       return &(it->second);
   }
-
-  /** Calculate future score and n-gram score of this trans option, plus the score breakdowns */
-  void CalcScore(const TranslationSystem* system);
 
   void CacheScores(const FeatureFunction &scoreProducer, const Scores &score);
 

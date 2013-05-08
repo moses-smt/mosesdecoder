@@ -34,19 +34,6 @@ DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const 
 {
 }
 
-
-TranslationOption *DecodeStepTranslation::MergeTranslation(const TranslationOption& oldTO, const TargetPhrase &targetPhrase) const
-{
-  if (IsFilteringStep()) {
-    if (!oldTO.IsCompatible(targetPhrase, m_conflictFactors)) return 0;
-  }
-
-  TranslationOption *newTransOpt = new TranslationOption(oldTO);
-  newTransOpt->MergeNewFeatures(targetPhrase, targetPhrase.GetScoreBreakdown(), m_newOutputFactors);
-  return newTransOpt;
-}
-
-
 void DecodeStepTranslation::Process(const TranslationSystem* system
                                     , const TranslationOption &inputPartialTranslOpt
                                     , const DecodeStep &decodeStep
@@ -66,7 +53,8 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
   const WordsRange &sourceWordsRange        = inputPartialTranslOpt.GetSourceWordsRange();
   const PhraseDictionary* phraseDictionary  =
     decodeStep.GetPhraseDictionaryFeature();
-  const size_t currSize = inputPartialTranslOpt.GetTargetPhrase().GetSize();
+  const TargetPhrase &inPhrase = inputPartialTranslOpt.GetTargetPhrase();
+  const size_t currSize = inPhrase.GetSize();
   const size_t tableLimit = phraseDictionary->GetTableLimit();
 
   const TargetPhraseCollection *phraseColl=
@@ -78,13 +66,27 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
 
     for (iterTargetPhrase = phraseColl->begin(); iterTargetPhrase != iterEnd; ++iterTargetPhrase) {
       const TargetPhrase& targetPhrase = **iterTargetPhrase;
+      const ScoreComponentCollection &transScores = targetPhrase.GetScoreBreakdown();
       // skip if the
       if (targetPhrase.GetSize() != currSize) continue;
 
-      TranslationOption *newTransOpt = MergeTranslation(inputPartialTranslOpt, targetPhrase);
-      if (newTransOpt != NULL) {
-        outputPartialTranslOptColl.Add(system, newTransOpt );
+      TargetPhrase outPhrase(inPhrase);
+
+      if (IsFilteringStep()) {
+        if (!inputPartialTranslOpt.IsCompatible(targetPhrase, m_conflictFactors))
+          continue;
       }
+
+      outPhrase.SetScore(transScores);
+      outPhrase.Evaluate(); // need to do this as all non-transcores would be screwed up
+
+      outPhrase.MergeFactors(targetPhrase, m_newOutputFactors);
+
+      TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
+      assert(newTransOpt != NULL);
+
+      outputPartialTranslOptColl.Add(system, newTransOpt );
+
     }
   } else if (sourceWordsRange.GetNumWordsCovered() == 1) {
     // unknown handler
@@ -117,7 +119,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
 
     for (iterTargetPhrase = phraseColl->begin() ; iterTargetPhrase != iterEnd ; ++iterTargetPhrase) {
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
-      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase, source);
+      TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
 
       outputPartialTranslOptColl.Add (system, transOpt);
 

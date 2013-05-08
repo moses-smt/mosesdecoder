@@ -269,9 +269,8 @@ void TranslationOptionCollection::ProcessOneUnknownWord(const Word &sourceWord,s
 
 	targetPhrase.Evaluate();
 
-	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase, m_source
+	transOpt = new TranslationOption(WordsRange(sourcePos, sourcePos + length - 1), targetPhrase
 	                              , StaticData::Instance().GetUnknownWordPenaltyProducer());
-	transOpt->CalcScore(m_system);
 	Add(transOpt);
 
 
@@ -455,6 +454,8 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
   , bool adhereTableLimit
   , size_t graphInd)
 {
+  cerr << "range=" << startPos << " to " << endPos << endl;
+
   if ((StaticData::Instance().GetXmlInputType() != XmlExclusive) || !HasXmlOptionsOverlappingRange(startPos,endPos)) {
     Phrase *sourcePhrase = NULL; // can't initialise with substring, in case it's confusion network
 
@@ -501,12 +502,16 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         vector<TranslationOption*>::const_iterator iterPartialTranslOpt;
         for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
           TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
+          cerr << inputPartialTranslOpt << endl;
+
           decodeStep.Process(m_system, inputPartialTranslOpt
                              , decodeStep
                              , *newPtoc
                              , this
                              , adhereTableLimit);
         }
+
+
         // last but 1 partial trans not required anymore
         totalEarlyPruned += newPtoc->GetPrunedCount();
         delete oldPtoc;
@@ -520,7 +525,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       vector<TranslationOption*>::const_iterator iterColl;
       for (iterColl = partTransOptList.begin() ; iterColl != partTransOptList.end() ; ++iterColl) {
         TranslationOption *transOpt = *iterColl;
-        transOpt->CalcScore(m_system);
+        cerr << *transOpt << endl;
         Add(transOpt);
       }
 

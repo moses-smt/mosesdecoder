@@ -145,7 +145,7 @@ int Sentence::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
       const XmlOption *xmlOption = *iterXmlOpts;
 
-      TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase, *this);
+      TranslationOption *transOpt = new TranslationOption(xmlOption->range, xmlOption->targetPhrase);
       m_xmlOptionsList.push_back(transOpt);
 
       for(size_t j=transOpt->GetSourceWordsRange().GetStartPos(); j<=transOpt->GetSourceWordsRange().GetEndPos(); j++) {

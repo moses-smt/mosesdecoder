@@ -44,8 +44,15 @@ TranslationOption *DecodeStepGeneration::MergeGeneration(const TranslationOption
       return NULL;
   }
 
-  TranslationOption *newTransOpt = new TranslationOption(oldTO);
-  newTransOpt->MergeNewFeatures(mergePhrase, generationScore, m_newOutputFactors);
+  const TargetPhrase &inPhrase = oldTO.GetTargetPhrase();
+  TargetPhrase outPhrase(inPhrase);
+  outPhrase.SetScore(generationScore);
+
+  outPhrase.MergeFactors(mergePhrase, m_newOutputFactors);
+
+  const WordsRange &sourceWordsRange = oldTO.GetSourceWordsRange();
+
+  TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
   return newTransOpt;
 }
 

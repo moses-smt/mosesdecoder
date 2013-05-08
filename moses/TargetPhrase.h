@@ -70,6 +70,11 @@ public:
   void SetXMLScore(float score);
   void SetInputScore(const Scores &scoreVector);
 
+  void SetScore(const ScoreComponentCollection &scores)
+  {
+    m_scoreBreakdown.PlusEquals(scores);
+  }
+
   TargetPhrase *MergeNext(const TargetPhrase &targetPhrase) const;
   // used for translation step
 

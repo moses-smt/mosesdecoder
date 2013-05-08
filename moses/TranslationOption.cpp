@@ -36,32 +36,32 @@ namespace Moses
 
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
-                                     , const TargetPhrase &targetPhrase
-                                     , const InputType &inputType)
+                                     , const TargetPhrase &targetPhrase)
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange(wordsRange)
   , m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
-{}
+  , m_futureScore(targetPhrase.GetFutureScore())
+{
+}
 
 //TODO this should be a factory function!
 TranslationOption::TranslationOption(const WordsRange &wordsRange
                                      , const TargetPhrase &targetPhrase
-                                     , const InputType &inputType
                                      , const UnknownWordPenaltyProducer* up)
   : m_targetPhrase(targetPhrase)
   , m_sourceWordsRange	(wordsRange)
-  , m_futureScore(0)
-  ,m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
+  , m_scoreBreakdown(targetPhrase.GetScoreBreakdown())
+  , m_futureScore(targetPhrase.GetFutureScore())
 {
 }
 
 TranslationOption::TranslationOption(const TranslationOption &copy, const WordsRange &sourceWordsRange)
-  : m_targetPhrase(copy.m_targetPhrase)
+: m_targetPhrase(copy.m_targetPhrase)
 //, m_sourcePhrase(new Phrase(*copy.m_sourcePhrase)) // TODO use when confusion network trans opt for confusion net properly implemented
-  , m_sourceWordsRange(sourceWordsRange)
-  , m_futureScore(copy.m_futureScore)
-  , m_scoreBreakdown(copy.m_scoreBreakdown)
-  , m_cachedScores(copy.m_cachedScores)
+, m_sourceWordsRange(sourceWordsRange)
+, m_scoreBreakdown(copy.m_scoreBreakdown)
+, m_futureScore(copy.m_futureScore)
+, m_cachedScores(copy.m_cachedScores)
 {}
 
 void TranslationOption::MergeNewFeatures(const Phrase& phrase, const ScoreComponentCollection& score, const std::vector<FactorType>& featuresToAdd)
@@ -96,22 +96,6 @@ bool TranslationOption::Overlap(const Hypothesis &hypothesis) const
 {
   const WordsBitmap &bitmap = hypothesis.GetWordsBitmap();
   return bitmap.Overlap(GetSourceWordsRange());
-}
-
-void TranslationOption::CalcScore(const TranslationSystem* system)
-{
-  // LM scores
-  float ngramScore = 0;
-  float retFullScore = 0;
-  float oovScore = 0;
-
-  const LMList &lmList = StaticData::Instance().GetLMList();
-
-  lmList.CalcScore(GetTargetPhrase(), retFullScore, ngramScore, oovScore, &m_scoreBreakdown);
-  
-  // future score
-  m_futureScore = retFullScore - ngramScore + oovScore
-                  + m_scoreBreakdown.GetWeightedScore();
 }
 
 TO_STRING_BODY(TranslationOption);
