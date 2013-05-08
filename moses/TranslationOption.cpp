@@ -81,7 +81,7 @@ ostream& operator<<(ostream& out, const TranslationOption& possibleTranslation)
   return out;
 }
 
-void TranslationOption::CacheLexReorderingScores(const FeatureFunction &producer, const Scores &score)
+void TranslationOption::CacheLexReorderingScores(const LexicalReordering &producer, const Scores &score)
 {
   m_lexReorderingScores[&producer] = score;
 }
