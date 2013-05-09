@@ -36,7 +36,7 @@ PT::PT(const std::string &line, int numFeatures, bool isHierarchical, const pair
   case 0: name = "PhraseDictionaryMemory"; break;
   case 1: name = "PhraseDictionaryTreeAdaptor"; break;
   case 2: name = "PhraseDictionaryOnDisk"; break;
-  case 6: name = "PhraseDictionarySCFG"; break;
+  case 6: name = "PhraseDictionaryMemory"; break;
   default:name = "UnknownPtImplementation"; break;
   }
 }
