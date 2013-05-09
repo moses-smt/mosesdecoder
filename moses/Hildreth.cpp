@@ -1,188 +1,386 @@
 #include "Hildreth.h"
-
+#include "SparseVec.h"
 using namespace Moses;
 using namespace std;
 
 namespace Optimizer {
 
-  vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
 
-    size_t i;
-    int max_iter = 10000;
-    float eps = 0.00000001;
-    float zero = 0.000000000001;
-
-    vector<float> alpha ( b.size() );
-    vector<float> F ( b.size() );
-    vector<float> kkt ( b.size() );
-
-    float max_kkt = -1e100;
-
-    size_t K = b.size();
-
-    float A[K][K];
-    bool is_computed[K];
-    for ( i = 0; i < K; i++ )
-    {
-      A[i][i] = a[i].InnerProduct(a[i]);
-      is_computed[i] = false;
-    }
-
-    int max_kkt_i = -1;
+float Hildreth::inner_product(const SparseVec& a, const SparseVec& b)
+{
+	CHECK(a.GetSize()==b.GetSize());
+	float product=0.0;
+	for(size_t x=0; x<=a.GetSize(); x++)
+	{
+		if(a.getElement(x)!=0 && b.getElement(x)!=0){
+			product+=(a.getElement(x)*b.getElement(x));
+		}
+	}
+	return product;
+}
 
 
-    for ( i = 0; i < b.size(); i++ )
-    {
-      F[i] = b[i];
-      kkt[i] = F[i];
-      if ( kkt[i] > max_kkt )
-      {
-        max_kkt = kkt[i];
-        max_kkt_i = i;
-      }
-    }
 
-    int iter = 0;
-    float diff_alpha;
-    float try_alpha;
-    float add_alpha;
+vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b) {
 
-    while ( max_kkt >= eps && iter < max_iter )
-    {
+	size_t i;
+	int max_iter = 10000;
+	float eps = 0.00000001;
+	float zero = 0.000000000001;
 
-      diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
-      try_alpha = alpha[max_kkt_i] + diff_alpha;
-      add_alpha = 0.0;
+	vector<float> alpha ( b.size() );
+	vector<float> F ( b.size() );
+	vector<float> kkt ( b.size() );
 
-      if ( try_alpha < 0.0 )
-        add_alpha = -1.0 * alpha[max_kkt_i];
-      else
-        add_alpha = diff_alpha;
+	float max_kkt = -1e100;
 
-      alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
+	size_t K = b.size();
 
-      if ( !is_computed[max_kkt_i] )
-      {
-        for ( i = 0; i < K; i++ )
-        {
-          A[i][max_kkt_i] = a[i].InnerProduct(a[max_kkt_i] ); // for version 1
-          //A[i][max_kkt_i] = 0; // for version 1
-          is_computed[max_kkt_i] = true;
-        }
-      }
+	float A[K][K];
+	bool is_computed[K];
+	for ( i = 0; i < K; i++ )
+	{
+		A[i][i] = a[i].InnerProduct(a[i]);
+		is_computed[i] = false;
+	}
 
-      for ( i = 0; i < F.size(); i++ )
-      {
-        F[i] -= add_alpha * A[i][max_kkt_i];
-        kkt[i] = F[i];
-        if ( alpha[i] > zero )
-          kkt[i] = abs ( F[i] );
-      }
-      max_kkt = -1e100;
-      max_kkt_i = -1;
-      for ( i = 0; i < F.size(); i++ )
-        if ( kkt[i] > max_kkt )
-        {
-          max_kkt = kkt[i];
-          max_kkt_i = i;
-        }
-
-      iter++;
-    }
-
-    return alpha;
-  }
-
-  vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b, float C) {
-
-    size_t i;
-    int max_iter = 10000;
-    float eps = 0.00000001;
-    float zero = 0.000000000001;
-
-    vector<float> alpha ( b.size() );
-    vector<float> F ( b.size() );
-    vector<float> kkt ( b.size() );
-
-    float max_kkt = -1e100;
-
-    size_t K = b.size();
-
-    float A[K][K];
-    bool is_computed[K];
-    for ( i = 0; i < K; i++ )
-    {
-      A[i][i] = a[i].InnerProduct(a[i]);
-      is_computed[i] = false;
-    }
-
-    int max_kkt_i = -1;
+	int max_kkt_i = -1;
 
 
-    for ( i = 0; i < b.size(); i++ )
-    {
-      F[i] = b[i];
-      kkt[i] = F[i];
-      if ( kkt[i] > max_kkt )
-      {
-        max_kkt = kkt[i];
-        max_kkt_i = i;
-      }
-    }
+	for ( i = 0; i < b.size(); i++ )
+	{
+		F[i] = b[i];
+		kkt[i] = F[i];
+		if ( kkt[i] > max_kkt )
+		{
+			max_kkt = kkt[i];
+			max_kkt_i = i;
+		}
+	}
 
-    int iter = 0;
-    float diff_alpha;
-    float try_alpha;
-    float add_alpha;
+	int iter = 0;
+	float diff_alpha;
+	float try_alpha;
+	float add_alpha;
 
-    while ( max_kkt >= eps && iter < max_iter )
-    {
+	while ( max_kkt >= eps && iter < max_iter )
+	{
 
-      diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
-      try_alpha = alpha[max_kkt_i] + diff_alpha;
-      add_alpha = 0.0;
+		diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
+		try_alpha = alpha[max_kkt_i] + diff_alpha;
+		add_alpha = 0.0;
 
-      if ( try_alpha < 0.0 )
-        add_alpha = -1.0 * alpha[max_kkt_i];
-      else if (try_alpha > C)
-				add_alpha = C - alpha[max_kkt_i];
-      else
-        add_alpha = diff_alpha;
+		if ( try_alpha < 0.0 )
+			add_alpha = -1.0 * alpha[max_kkt_i];
+		else
+			add_alpha = diff_alpha;
 
-      alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
+		alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
 
-      if ( !is_computed[max_kkt_i] )
-      {
-        for ( i = 0; i < K; i++ )
-        {
-          A[i][max_kkt_i] = a[i].InnerProduct(a[max_kkt_i] ); // for version 1
-          //A[i][max_kkt_i] = 0; // for version 1
-          is_computed[max_kkt_i] = true;
-        }
-      }
+		if ( !is_computed[max_kkt_i] )
+		{
+			for ( i = 0; i < K; i++ )
+			{
+				A[i][max_kkt_i] = a[i].InnerProduct(a[max_kkt_i] ); // for version 1
+				//A[i][max_kkt_i] = 0; // for version 1
+				is_computed[max_kkt_i] = true;
+			}
+		}
 
-      for ( i = 0; i < F.size(); i++ )
-      {
-        F[i] -= add_alpha * A[i][max_kkt_i];
-        kkt[i] = F[i];
-        if (alpha[i] > C - zero)
-					kkt[i]=-kkt[i];
-				else if (alpha[i] > zero)
-					kkt[i] = abs(F[i]);
+		for ( i = 0; i < F.size(); i++ )
+		{
+			F[i] -= add_alpha * A[i][max_kkt_i];
+			kkt[i] = F[i];
+			if ( alpha[i] > zero )
+				kkt[i] = abs ( F[i] );
+		}
+		max_kkt = -1e100;
+		max_kkt_i = -1;
+		for ( i = 0; i < F.size(); i++ )
+			if ( kkt[i] > max_kkt )
+			{
+				max_kkt = kkt[i];
+				max_kkt_i = i;
+			}
 
-      }
-      max_kkt = -1e100;
-      max_kkt_i = -1;
-      for ( i = 0; i < F.size(); i++ )
-        if ( kkt[i] > max_kkt )
-        {
-          max_kkt = kkt[i];
-          max_kkt_i = i;
-        }
+		iter++;
+	}
 
-      iter++;
-    }
+	return alpha;
+}
 
-    return alpha;
-  }
+vector<float> Hildreth::optimise (const vector<ScoreComponentCollection>& a, const vector<float>& b, float C) {
+
+	size_t i;
+	int max_iter = 10000;
+	float eps = 0.00000001;
+	float zero = 0.000000000001;
+
+	vector<float> alpha ( b.size() );
+	vector<float> F ( b.size() );
+	vector<float> kkt ( b.size() );
+
+	float max_kkt = -1e100;
+
+	size_t K = b.size();
+
+	float A[K][K];
+	bool is_computed[K];
+	for ( i = 0; i < K; i++ )
+	{
+		A[i][i] = a[i].InnerProduct(a[i]);
+		is_computed[i] = false;
+	}
+
+	int max_kkt_i = -1;
+
+
+	for ( i = 0; i < b.size(); i++ )
+	{
+		F[i] = b[i];
+		kkt[i] = F[i];
+		if ( kkt[i] > max_kkt )
+		{
+			max_kkt = kkt[i];
+			max_kkt_i = i;
+		}
+	}
+
+	int iter = 0;
+	float diff_alpha;
+	float try_alpha;
+	float add_alpha;
+
+	while ( max_kkt >= eps && iter < max_iter )
+	{
+
+		diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
+		try_alpha = alpha[max_kkt_i] + diff_alpha;
+		add_alpha = 0.0;
+
+		if ( try_alpha < 0.0 )
+			add_alpha = -1.0 * alpha[max_kkt_i];
+		else if (try_alpha > C)
+			add_alpha = C - alpha[max_kkt_i];
+		else
+			add_alpha = diff_alpha;
+
+		alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
+
+		if ( !is_computed[max_kkt_i] )
+		{
+			for ( i = 0; i < K; i++ )
+			{
+				A[i][max_kkt_i] = a[i].InnerProduct(a[max_kkt_i] ); // for version 1
+				//A[i][max_kkt_i] = 0; // for version 1
+				is_computed[max_kkt_i] = true;
+			}
+		}
+
+		for ( i = 0; i < F.size(); i++ )
+		{
+			F[i] -= add_alpha * A[i][max_kkt_i];
+			kkt[i] = F[i];
+			if (alpha[i] > C - zero)
+				kkt[i]=-kkt[i];
+			else if (alpha[i] > zero)
+				kkt[i] = abs(F[i]);
+
+		}
+		max_kkt = -1e100;
+		max_kkt_i = -1;
+		for ( i = 0; i < F.size(); i++ )
+			if ( kkt[i] > max_kkt )
+			{
+				max_kkt = kkt[i];
+				max_kkt_i = i;
+			}
+
+		iter++;
+	}
+
+	return alpha;
+}
+
+vector<float> Hildreth::optimise (const vector<Moses::SparseVec>& a, const vector<float>& b, float C) {
+
+	size_t i;
+	int max_iter = 10000;
+	float eps = 0.00000001;
+	float zero = 0.000000000001;
+
+	vector<float> alpha ( b.size() );
+	vector<float> F ( b.size() );
+	vector<float> kkt ( b.size() );
+
+	float max_kkt = -1e100;
+
+	size_t K = b.size();
+
+	float A[K][K];
+	bool is_computed[K];
+	for ( i = 0; i < K; i++ )
+	{
+		A[i][i] = inner_product(a[i], a[i]);
+		is_computed[i] = false;
+	}
+
+	int max_kkt_i = -1;
+
+
+	for ( i = 0; i < b.size(); i++ )
+	{
+		F[i] = b[i];
+		kkt[i] = F[i];
+		if ( kkt[i] > max_kkt )
+		{
+			max_kkt = kkt[i];
+			max_kkt_i = i;
+		}
+	}
+
+	int iter = 0;
+	float diff_alpha;
+	float try_alpha;
+	float add_alpha;
+
+	while ( max_kkt >= eps && iter < max_iter )
+	{
+
+		diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
+		try_alpha = alpha[max_kkt_i] + diff_alpha;
+		add_alpha = 0.0;
+
+		if ( try_alpha < 0.0 )
+			add_alpha = -1.0 * alpha[max_kkt_i];
+		else if (try_alpha > C)
+			add_alpha = C - alpha[max_kkt_i];
+		else
+			add_alpha = diff_alpha;
+
+		alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
+
+		if ( !is_computed[max_kkt_i] )
+		{
+			for ( i = 0; i < K; i++ )
+			{
+				A[i][max_kkt_i] = inner_product(a[i],a[max_kkt_i] ); // for version 1
+				//A[i][max_kkt_i] = 0; // for version 1
+				is_computed[max_kkt_i] = true;
+			}
+		}
+
+		for ( i = 0; i < F.size(); i++ )
+		{
+			F[i] -= add_alpha * A[i][max_kkt_i];
+			kkt[i] = F[i];
+			if (alpha[i] > C - zero)
+				kkt[i]=-kkt[i];
+			else if (alpha[i] > zero)
+				kkt[i] = abs(F[i]);
+
+		}
+		max_kkt = -1e100;
+		max_kkt_i = -1;
+		for ( i = 0; i < F.size(); i++ )
+			if ( kkt[i] > max_kkt )
+			{
+				max_kkt = kkt[i];
+				max_kkt_i = i;
+			}
+
+		iter++;
+	}
+
+	return alpha;
+}
+
+vector<float> Hildreth::optimise (const vector<SparseVec>& a, const vector<float>& b) {
+
+	size_t i;
+	int max_iter = 10000;
+	float eps = 0.00000001;
+	float zero = 0.000000000001;
+
+	vector<float> alpha ( b.size() );
+	vector<float> F ( b.size() );
+	vector<float> kkt ( b.size() );
+
+	float max_kkt = -1e100;
+
+	size_t K = b.size();
+
+	float A[K][K];
+	bool is_computed[K];
+	for ( i = 0; i < K; i++ )
+	{
+		A[i][i] = inner_product(a[i], a[i]);
+		is_computed[i] = false;
+	}
+
+	int max_kkt_i = -1;
+
+
+	for ( i = 0; i < b.size(); i++ )
+	{
+		F[i] = b[i];
+		kkt[i] = F[i];
+		if ( kkt[i] > max_kkt )
+		{
+			max_kkt = kkt[i];
+			max_kkt_i = i;
+		}
+	}
+
+	int iter = 0;
+	float diff_alpha;
+	float try_alpha;
+	float add_alpha;
+
+	while ( max_kkt >= eps && iter < max_iter )
+	{
+
+		diff_alpha = A[max_kkt_i][max_kkt_i] <= zero ? 0.0 : F[max_kkt_i]/A[max_kkt_i][max_kkt_i];
+		try_alpha = alpha[max_kkt_i] + diff_alpha;
+		add_alpha = 0.0;
+
+		if ( try_alpha < 0.0 )
+			add_alpha = -1.0 * alpha[max_kkt_i];
+		else
+			add_alpha = diff_alpha;
+
+		alpha[max_kkt_i] = alpha[max_kkt_i] + add_alpha;
+
+		if ( !is_computed[max_kkt_i] )
+		{
+			for ( i = 0; i < K; i++ )
+			{
+				A[i][max_kkt_i] = inner_product(a[i], a[max_kkt_i]); // for version 1
+				//A[i][max_kkt_i] = 0; // for version 1
+				is_computed[max_kkt_i] = true;
+			}
+		}
+
+		for ( i = 0; i < F.size(); i++ )
+		{
+			F[i] -= add_alpha * A[i][max_kkt_i];
+			kkt[i] = F[i];
+			if ( alpha[i] > zero )
+				kkt[i] = abs ( F[i] );
+		}
+		max_kkt = -1e100;
+		max_kkt_i = -1;
+		for ( i = 0; i < F.size(); i++ )
+			if ( kkt[i] > max_kkt )
+			{
+				max_kkt = kkt[i];
+				max_kkt_i = i;
+			}
+
+		iter++;
+	}
+
+	return alpha;
+}
+
 }

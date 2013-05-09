@@ -39,7 +39,7 @@ size_t MiraOptimiser::updateWeights(
 			ScoreComponentCollection featureValueDiff = oracleFeatureValues[i];
 			featureValueDiff.MinusEquals(featureValues[i][j]);
 
-			if (featureValueDiff.GetL1Norm() == 0) {
+			if (featureValueDiff.GetL1Norm() == 0) { // over sparse & core features values
 				continue;
 			}
 
@@ -86,6 +86,12 @@ size_t MiraOptimiser::updateWeights(
 		cerr<<"Features values diff size : "<<featureValueDiffs.size() << " (of which violated: " << violatedConstraintsBefore << ")" << endl;
 	  if (m_slack != 0) {
 	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
+	    cerr<<"Alphas : ";
+	    for (int i=0;i<alphas.size();i++)
+	    {
+	    	cerr<<alphas[i]<<" ";
+	    }
+	    cerr<<"\n";
 	  } else {
 	    alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
 	  }
@@ -120,6 +126,97 @@ size_t MiraOptimiser::updateWeights(
 
 	return 0;
 }
+
+size_t MiraOptimiser::updateFeatures(
+	SparseVec& UpdateVector,			// sparse vector
+	const vector<vector<int> >& FeatureValues,	// index to hypothesis feature values in UpdateVector
+    const vector<float>& losses,
+    const vector<float>& bleuScores,
+    const vector<float>& modelScores,
+    const vector<vector<int> >& oracleFeatureValues,	// index to oracle feature values
+    const float oracleBleuScores,
+    const float oracleModelScores,
+    float learning_rate) {
+
+	vector<SparseVec> featureValueDiffs;
+	vector<float> lossMinusModelScoreDiffs;
+	vector<float> all_losses;
+	// Make constraints for new hypothesis translations
+	float epsilon = 0.0001;
+	int violatedConstraintsBefore = 0;
+	SparseVec featureValueDiff(UpdateVector.GetSize());
+
+	// loop iterating over all oracles.
+	for(int j=0;j<FeatureValues.size();j++){
+
+		for(int i=0;i<oracleFeatureValues[0].size();i++)
+			featureValueDiff.Assign(oracleFeatureValues[0][i],UpdateVector.getElement(oracleFeatureValues[0][i]));
+
+		for(int i=0;i<FeatureValues[j].size();i++)
+			featureValueDiff.MinusEqualsFeat(FeatureValues[j][i],UpdateVector.getElement(FeatureValues[j][i]));
+
+		if (featureValueDiff.GetL1Norm() == 0) { // over sparse features values only
+			continue;
+		}
+
+		float loss=losses[j];
+		bool violated = false;
+		float modelScoreDiff = oracleModelScores - modelScores[j];
+		float diff = 0;
+		if (loss > modelScoreDiff)
+			diff = loss - modelScoreDiff;
+		if (diff > epsilon)
+			violated = true;
+
+		if (m_normaliseMargin) {
+			modelScoreDiff = (2*m_sigmoidParam/(1 + exp(-modelScoreDiff))) - m_sigmoidParam;
+			loss = (2*m_sigmoidParam/(1 + exp(-loss))) - m_sigmoidParam;
+			diff = 0;
+			if (loss > modelScoreDiff) {
+				diff = loss - modelScoreDiff;
+			}
+		}
+		if (m_scale_margin) {
+			diff *= oracleBleuScores;
+		}
+		featureValueDiffs.push_back(featureValueDiff);
+		lossMinusModelScoreDiffs.push_back(diff);
+		all_losses.push_back(loss);
+		if (violated) {
+			++violatedConstraintsBefore;
+		}
+	}
+	vector<float> alphas;
+	SparseVec summedUpdate;
+	if (violatedConstraintsBefore > 0) {
+		if (m_slack != 0) {
+			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs, m_slack);
+		} else {
+			alphas = Hildreth::optimise(featureValueDiffs, lossMinusModelScoreDiffs);
+		}
+		for (size_t k = 0; k < featureValueDiffs.size(); ++k) {
+			float alpha = alphas[k];
+			SparseVec update(featureValueDiffs[k]);
+			update.MultiplyEquals(alpha);
+			// sum updates
+			summedUpdate.PlusEquals(update);
+		}
+	}
+	else {
+		return 1;
+	}
+	if (learning_rate != 1) {
+		summedUpdate.MultiplyEquals(learning_rate);
+	}
+
+	if (m_scale_update) {
+		summedUpdate.MultiplyEquals(oracleBleuScores);
+	}
+	UpdateVector.PlusEquals(summedUpdate);
+
+	return 0;
+}
+
 
 
 }

@@ -194,9 +194,19 @@ Parameter::Parameter()
 
   AddParam("print-translation-option", "pto", "print translation option (without setting verbosity)");
   AddParam("print-id", "prefix translations with id. Default if false");
-  AddParam("learningrate", "online learning rate");
-  AddParam("weight-ol", "ol", "weight for online learning feature");
+
+  AddParam("algorithm","algorithm to be used for online learning : mira or perceptron");
+  AddParam("w_learningrate", "online learning rate for weights");
+  AddParam("f_learningrate", "online learning rate for features");
+  AddParam("weight-ol", "ol", "initial weight for online learning feature");
   AddParam("numIterations", "number of iterations for online learning feature");
+  AddParam("scale-margin", "Scale the margin by the Bleu score of the oracle translation");
+  AddParam("scale-margin-precision", "Scale margin by precision of oracle");
+  AddParam("scale-update", "Scale update by Bleu score of oracle");
+  AddParam("scale-update-precision", "Scale update by precision of oracle");
+  AddParam("slack", "Use slack in optimiser");
+  AddParam("sigmoid-param", "y=sigmoidParam is the axis that this sigmoid approaches");
+
 
 }
 

@@ -21,7 +21,7 @@
 #include "TrellisPath.h"
 #include "TrellisPathList.h"
 #include "Manager.h"
-
+#include "SparseVec.h"
 #include "Optimiser.h"
 
 #ifndef ONLINELEARNER_H_
@@ -30,7 +30,6 @@
 typedef std::map<std::string, std::map<std::string, float> > pp_feature;
 typedef std::map<std::string, std::map<std::string, int> > pp_list;
 typedef float learningrate;
-
 
 using namespace std;
 using namespace Optimizer;
@@ -41,12 +40,15 @@ class Phrase;
 class Search;
 
 class OnlineLearner : public StatelessFeatureFunction {
+
 private:
 	pp_feature m_feature;
+	pp_list m_featureIdx;
 	pp_list PP_ORACLE, PP_BEST;
-	learningrate lr;
+	learningrate flr, wlr;
+	int m_PPindex;
 	std::string m_postedited;
-	bool m_learn;
+	bool m_learn, update_weights, update_features, m_perceptron, m_mira;
 	MiraOptimiser* optimiser;
 	std::vector<std::string> function_words_english;
 	std::vector<std::string> function_words_italian;
@@ -63,21 +65,28 @@ private:
 	void ReadFunctionWords();
 	void chop(string &str);
 	void Decay(int);
+	void Insert(std::string sp, std::string tp);
 public:
+	SparseVec sparsevector;
 	OnlineLearner(float learningrate);
+	OnlineLearner(float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
+			float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam);
 	bool SetPostEditedSentence(std::string s);
 	void RunOnlineLearning(Manager& manager);
 	void RemoveJunk();
 	virtual ~OnlineLearner();
 
 	inline size_t GetNumScoreComponents() const { return 1; };
-
-	void SetOnlineLearning() { m_learn=true; };
+	void SetOnlineLearningTrue() { m_learn=true; };
+	void SetOnlineLearningFalse() { m_learn=false; };
 	bool GetOnlineLearning() const { return m_learn; };
 
 	inline std::string GetScoreProducerWeightShortName(unsigned) const { return "ol"; };
 	void Evaluate(const PhraseBasedFeatureContext& context,	ScoreComponentCollection* accumulator) const;
 	void EvaluateChart(const ChartBasedFeatureContext& context, ScoreComponentCollection* accumulator) const;
+
+	int RetrieveIdx(std::string sp, std::string tp);
+
 };
 }
 #endif /* ONLINELEARNER_H_ */

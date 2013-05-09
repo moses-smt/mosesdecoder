@@ -22,6 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 
 #include "ScoreComponentCollection.h"
+#include "SparseVec.h"
 
 
 namespace Optimizer {
@@ -54,6 +55,17 @@ namespace Optimizer {
 	   const std::vector<float> oracleBleuScores,
 	   const std::vector<float> oracleModelScores,
 	   float learning_rate);
+
+      size_t updateFeatures(
+    		  Moses::SparseVec& UpdateVector,
+    		  const std::vector<std::vector<int> >& FeatureValues,	// index to hypothesis feature values in UpdateVector
+    		  const std::vector<float>& losses,
+    		  const std::vector<float>& bleuScores,
+    		  const std::vector<float>& modelScores,
+    		  const std::vector<std::vector<int> >& oracleFeatureValues,	// index to oracle feature values in UpdateVector
+    		  const float oracleBleuScores,
+    		  const float oracleModelScores,
+    		  float learning_rate);
 
      void setSlack(float slack) {
        m_slack = slack;

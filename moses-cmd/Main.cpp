@@ -118,17 +118,9 @@ public:
     //       we still need to apply the decision rule (MAP, MBR, ...)
     // I know what I am doing!
     StaticData &SD = StaticData::InstanceNonConst();
-//    if(SD.GetOnlineLearning()) // if the option is set to true
-//    {
-//    	VERBOSE(1,"YES THE POINTER IS NULL\n");
-//    	SD.LoadOnlineLearningModel(); // calls constructor
-//    }
-//    else{
-//    	VERBOSE(1,"Online learning not loaded!!\n");
-//    }
 
     manager.ProcessSentence();
-    if(SD.GetOnlineLearningModel()!=NULL){
+    if(SD.GetOnlineLearningModel()!=NULL && SD.GetOnlineLearningModel()->GetOnlineLearning()){
     	SD.GetOnlineLearningModel()->RunOnlineLearning(manager);
         SD.GetOnlineLearningModel()->RemoveJunk();
     }

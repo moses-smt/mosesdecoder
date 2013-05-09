@@ -8,6 +8,7 @@
 #include "math.h"
 
 using namespace Optimizer;
+
 namespace Moses {
 
 void OnlineLearner::chop(string &str) {
@@ -133,17 +134,33 @@ bool OnlineLearner::SetPostEditedSentence(std::string s)
 }
 
 OnlineLearner::OnlineLearner(float learningrate):StatelessFeatureFunction("OnlineLearner",1){
-	lr = learningrate;
-	m_learn=true;
+	flr = learningrate;
+	m_learn=false;
+	m_PPindex=0;
+	update_weights=false;
+	update_features=true;
+	m_perceptron=true;
+	m_mira=false;
 	ReadFunctionWords();
-	float slack=0.01, scale_margin=0, scale_margin_precision=0, scale_update=0, scale_update_precision=0;
-	bool boost=false, normaliseMargin=false;
-	int sigmoidParam=1;
-	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision,
-			scale_update, scale_update_precision, boost, normaliseMargin, sigmoidParam);
-//	optimiser = new MiraOptimiser(0.01, 0, 0, 0, 0, false, false, 1);
 	cerr<<"Initialization Online Learning Model\n";
 }
+
+OnlineLearner::OnlineLearner(float w_learningrate, float f_learningrate, float slack, float scale_margin, float scale_margin_precision,	float scale_update,
+		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
+	flr = f_learningrate;
+	wlr = w_learningrate;
+	update_weights=true;
+	update_features=true;
+	m_PPindex=0;
+	m_learn=false;
+	m_mira=true;
+	m_perceptron=false;
+	optimiser = new Optimizer::MiraOptimiser(slack, scale_margin, scale_margin_precision, scale_update,
+			scale_update_precision, boost, normaliseMargin, sigmoidParam);
+	cerr<<"Initialization Online Learning Model\n";
+}
+
+
 void OnlineLearner::ShootUp(std::string sp, std::string tp, float margin)
 {
 	if (binary_search(function_words_italian.begin(),function_words_italian.end(), sp) ||
@@ -155,17 +172,17 @@ void OnlineLearner::ShootUp(std::string sp, std::string tp, float margin)
 		if(m_feature[sp].find(tp)!=m_feature[sp].end())
 		{
 			float val=m_feature[sp][tp];
-			val += lr * margin;
+			val += flr * margin;
 			m_feature[sp][tp]=val;
 		}
 		else
 		{
-			m_feature[sp][tp]=lr*margin;
+			m_feature[sp][tp]=flr*margin;
 		}
 	}
 	else
 	{
-		m_feature[sp][tp]=lr*margin;
+		m_feature[sp][tp]=flr*margin;
 	}
 	//if(m_feature[sp][tp]>1){m_feature[sp][tp]==1;}
 }
@@ -180,7 +197,7 @@ void OnlineLearner::ShootDown(std::string sp, std::string tp, float margin)
 		if(m_feature[sp].find(tp)!=m_feature[sp].end())
 		{
 			float val=m_feature[sp][tp];
-			val -= lr * margin;
+			val -= flr * margin;
 			m_feature[sp][tp]=val;
 		}
 		else
@@ -205,6 +222,42 @@ void OnlineLearner::RemoveJunk()
 	PP_ORACLE.clear();
 	PP_BEST.clear();
 }
+// insertion of sparse features .. for now its the phrase pair
+// have to generalize this later !
+void OnlineLearner::Insert(std::string sp, std::string tp)
+{
+	if(m_featureIdx.find(sp)==m_featureIdx.end())
+	{
+		if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
+		{
+			m_featureIdx[sp][tp]=sparsevector.GetSize();
+			sparsevector.AddFeat(0.0);
+			m_PPindex++;
+			return;
+		}
+	}
+	else if(m_featureIdx[sp].find(tp)==m_featureIdx[sp].end())
+	{
+		m_featureIdx[sp][tp]=sparsevector.GetSize();
+		sparsevector.AddFeat(0.0);
+		m_PPindex++;
+		return;
+	}
+	return;
+}
+
+int OnlineLearner::RetrieveIdx(std::string sp,std::string tp)
+{
+	if(m_featureIdx.find(sp)!=m_featureIdx.end())
+	{
+		if(m_featureIdx[sp].find(tp)!=m_featureIdx[sp].end())
+		{
+			return m_featureIdx[sp][tp];
+		}
+	}
+	return m_PPindex;
+}
+
 OnlineLearner::~OnlineLearner() {
 	pp_feature::iterator iter;
 	for(iter=m_feature.begin(); iter!=m_feature.end(); iter++)
@@ -216,32 +269,51 @@ OnlineLearner::~OnlineLearner() {
 void OnlineLearner::Evaluate(const TargetPhrase& tp, ScoreComponentCollection* out) const
 {
 	float score=0.0;
-	std::string t = "";
+	std::string s="",t="";
 	size_t endpos = tp.GetSize();
 	for (size_t pos = 0 ; pos < endpos ; ++pos) {
 		if (pos > 0){ t += " "; }
 		t += tp.GetWord(pos).GetFactor(0)->GetString();
 	}
-	std::string s = "";
 	endpos = tp.GetSourcePhrase().GetSize();
 	for (size_t pos = 0 ; pos < endpos ; ++pos) {
 		if (pos > 0){ s += " "; }
 		s += tp.GetSourcePhrase().GetWord(pos).GetFactor(0)->GetString();
 	}
-	pp_feature::const_iterator it;
-	it=m_feature.find(s);
-	if(it!=m_feature.end())
+
+	if(update_features && m_mira)
 	{
-		std::map<std::string, float>::const_iterator it2;
-		it2=it->second.find(t);
-		if(it2!=it->second.end())
+		size_t idx;
+		pp_list::const_iterator it;
+		it=m_featureIdx.find(s);
+		if(it!=m_featureIdx.end())
 		{
-			score=it2->second;
+			std::map<std::string, int>::const_iterator it2;
+			it2=it->second.find(t);
+			if(it2!=it->second.end())
+			{
+				score=sparsevector.getElement(it2->second);
+			}
+		}
+	}
+	else if(update_features && m_perceptron)
+	{
+		pp_feature::const_iterator it;
+		it=m_feature.find(s);
+		if(it!=m_feature.end())
+		{
+			std::map<std::string, float>::const_iterator it2;
+			it2=it->second.find(t);
+			if(it2!=it->second.end())
+			{
+				score=it2->second;
+			}
 		}
 	}
 	//cerr<<"Source : "<<s<<"\tTarget : "<<t<<"\tScore : "<<score<<endl;
 	out->PlusEquals(this, score);
 }
+
 
 void OnlineLearner::Evaluate(const PhraseBasedFeatureContext& context, ScoreComponentCollection* accumulator) const
 {
@@ -266,6 +338,7 @@ void OnlineLearner::PrintHypo(const Hypothesis* hypo, ostream& HypothesisStringS
 		std::string sourceP = hypo->GetSourcePhraseStringRep();
 		std::string targetP = hypo->GetTargetPhraseStringRep();
 		PP_BEST[sourceP][targetP]=1;
+		Insert(sourceP, targetP);
 	}
 }
 void OnlineLearner::Decay(int lineNum)
@@ -290,7 +363,6 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	const TranslationSystem &trans_sys = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
 	const StaticData& staticData = StaticData::Instance();
 	const std::vector<Moses::FactorType>& outputFactorOrder=staticData.GetOutputFactorOrder();
-//	ScoreComponentCollection& weightUpdate = const_cast<ScoreComponentCollection&>(staticData.GetAllWeights());
 	ScoreComponentCollection weightUpdate = staticData.GetAllWeights();
 	std::vector<const ScoreProducer*> sps = trans_sys.GetFeatureFunctions();
 	ScoreProducer* sp = const_cast<ScoreProducer*>(sps[0]);
@@ -321,10 +393,9 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 	std::vector<std::vector<float> > losses, BleuScores, BleuScoresHope, BleuScoresFear, lossesHope, lossesFear, modelScores;
 	std::vector<ScoreComponentCollection> featureValue,featureValueHope, featureValueFear, oraclefeatureScore;
 	std::vector<std::vector<ScoreComponentCollection> > featureValues, featureValuesHope, featureValuesFear;
-
-
+	vector<pp_list> OracleList;
 	TrellisPathList::const_iterator iter;
-	pp_list ShootemUp, ShootemDown;
+	pp_list BestOracle,ShootemUp, ShootemDown;
 	float maxBleu=0.0, maxScore=0.0,oracleScore=0.0;
 	for (iter = nBestList.begin(); iter != nBestList.end(); ++iter) {
 		const TrellisPath &path = **iter;
@@ -345,17 +416,20 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			if(!has_only_spaces(sourceP) && !has_only_spaces(targetP) )
 			{
 				PP_ORACLE[sourceP][targetP]=1;
+				Insert(sourceP, targetP);
 			}
 		}
 		oracleScore=path.GetTotalScore();
-//		float realBleu = m_bleuScoreFeature->CalculateBleu(path.GetTargetPhrase());
+		OracleList.push_back(PP_ORACLE);
 		float oraclebleu = GetBleu(oracle.str(), m_postedited);
-		HypothesisList.push_back(oracle.str());
-		BleuScore.push_back(oraclebleu);
-		featureValue.push_back(path.GetScoreBreakdown());
-		modelScore.push_back(oracleScore);
-//		cerr<<"My calculated BLEU : "<<oraclebleu<<"\nMOSES BLEU SCORE : "<<realBleu<<"\n";
-		if(oraclebleu > maxBleu) // && (oracleScore-bestScore > oraclebleu-bestbleu))
+		if(m_mira || update_weights){
+			HypothesisList.push_back(oracle.str());
+			BleuScore.push_back(oraclebleu);
+			featureValue.push_back(path.GetScoreBreakdown());
+			modelScore.push_back(oracleScore);
+		}
+
+		if(oraclebleu > maxBleu)
 		{
 			cerr<<"NBEST : "<<oracle.str()<<"\t|||\tBLEU : "<<oraclebleu<<endl;
 			maxBleu=oraclebleu;
@@ -368,7 +442,8 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 				std::map<std::string, int>::const_iterator itr1;
 				for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
 				{
-					if(PP_BEST[it1->first][itr1->first]!=1){
+					if(PP_BEST[it1->first][itr1->first]!=1)
+					{
 						ShootemUp[it1->first][itr1->first]=1;
 					}
 				}
@@ -378,77 +453,100 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 				std::map<std::string, int>::const_iterator itr1;
 				for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
 				{
-					if(PP_ORACLE[it1->first][itr1->first]!=1){
+					if(PP_ORACLE[it1->first][itr1->first]!=1)
+					{
 						ShootemDown[it1->first][itr1->first]=1;
 					}
 				}
 			}
 			oracleBleuScores.clear();
 			oraclefeatureScore.clear();
+			BestOracle=PP_ORACLE;
 			oracleBleuScores.push_back(oraclebleu);
 			oraclefeatureScore.push_back(path.GetScoreBreakdown());
 		}
 	}
 //	Update the features
-	pp_list::const_iterator it1;
-	for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)
-	{
-		std::map<std::string, int>::const_iterator itr1;
-		for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+	if(update_features && m_perceptron){
+		pp_list::const_iterator it1;
+		for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)
 		{
-			ShootUp(it1->first, itr1->first, abs(maxScore-bestScore));
-			cerr<<"SHOOTING UP : "<<it1->first<<" ||| "<<itr1->first<<" ||| "<<maxScore-bestScore<<"\n";
+			std::map<std::string, int>::const_iterator itr1;
+			for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+			{
+				ShootUp(it1->first, itr1->first, abs(maxScore-bestScore));
+				cerr<<"SHOOTING UP : "<<it1->first<<" ||| "<<itr1->first<<" ||| "<<maxScore-bestScore<<"\n";
+			}
+		}
+		for(it1=ShootemDown.begin(); it1!=ShootemDown.end(); it1++)
+		{
+			std::map<std::string, int>::const_iterator itr1;
+			for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+			{
+				ShootDown(it1->first, itr1->first, abs(maxScore-bestScore));
+				cerr<<"SHOOTING DOWN : "<<it1->first<<" ||| "<<itr1->first<<" ||| "<<maxScore-bestScore<<"\n";
+			}
 		}
 	}
-	for(it1=ShootemDown.begin(); it1!=ShootemDown.end(); it1++)
+//	---------------------------------------------------------------------------------- //
+
+	if(update_features && m_mira)
 	{
-		std::map<std::string, int>::const_iterator itr1;
-		for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
-			ShootDown(it1->first, itr1->first, abs(maxScore-bestScore));
-			cerr<<"SHOOTING DOWN : "<<it1->first<<" ||| "<<itr1->first<<" ||| "<<maxScore-bestScore<<"\n";
+			float bleuscore = BleuScore[i];
+			loss.push_back(maxBleu-bleuscore);
 		}
+		vector<vector<int> > FeatureIdxVec, oracleFeatureIdxVec;
+		pp_list::const_iterator it1;
+		for(int i=0;i<OracleList.size();i++){
+			for(it1=OracleList[i].begin(); it1!=OracleList[i].end(); it1++)
+			{
+				std::map<std::string, int>::const_iterator itr1;
+				for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+				{
+					int idx=RetrieveIdx(it1->first, itr1->first);
+					if(idx!=m_featureIdx.size()){
+						FeatureIdxVec[i].push_back(idx);
+					}
+				}
+			}
+		}
+		for(it1=BestOracle.begin(); it1!=BestOracle.end(); it1++)
+		{
+			std::map<std::string, int>::const_iterator itr1;
+			for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
+			{
+				int idx=RetrieveIdx(it1->first, itr1->first);
+				if(idx!=m_featureIdx.size()){
+					oracleFeatureIdxVec[0].push_back(idx);
+				}
+			}
+		}
+		size_t update_status=optimiser->updateFeatures(sparsevector, FeatureIdxVec, loss, BleuScore,
+				modelScore, oracleFeatureIdxVec, oracleBleuScores[0], maxScore, flr);
 	}
+
+//	---------------------------------------------------------------------------------- //
 
 //	Update the weights
-	for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
+	if(update_weights)
 	{
-		float bleuscore = BleuScore[i];
-		if(bleuscore!=maxBleu && bestScore!=modelScore[i]) // its not the best Oracle
+		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
-			if(bleuscore > maxBleu)
-			{
-				HypothesisHope.push_back(HypothesisList[i]);
-				BleuScoreHope.push_back(bleuscore);
-				featureValueHope.push_back(featureValue[i]);
-				lossHope.push_back(maxScore-modelScore[i]);
-			}
-			else
-			{
-				HypothesisFear.push_back(HypothesisList[i]);
-				BleuScoreFear.push_back(bleuscore);
-				featureValueFear.push_back(featureValue[i]);
-				lossFear.push_back(maxScore-modelScore[i]);
-			}
+			float bleuscore = BleuScore[i];
+			loss.push_back(maxBleu-bleuscore);
 		}
-		loss.push_back(maxBleu-bleuscore);
+		modelScores.push_back(modelScore);
+		featureValues.push_back(featureValue);
+		BleuScores.push_back(BleuScore);
+		losses.push_back(loss);
+		oracleModelScores.push_back(maxScore);
+		size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
+				BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,wlr);
+		cerr<<"\nWeight : "<<weightUpdate.GetScoreForProducer(sp)<<"\n";
+		StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
 	}
-
-	// there is no batch, only one sentence.. this is a hack for using already implemented Hildreth::Optimizer
-//	BleuScoresHope.push_back(BleuScoreHope);
-//	BleuScoresFear.push_back(BleuScoreFear);
-//	featureValuesHope.push_back(featureValueHope);
-//	featureValuesFear.push_back(featureValueFear);
-	modelScores.push_back(modelScore);
-	featureValues.push_back(featureValue);
-	BleuScores.push_back(BleuScore);
-	losses.push_back(loss);
-	oracleModelScores.push_back(maxScore);
-	cerr<<"Weight before : "<<weightUpdate.GetScoreForProducer(sp)<<endl;
-	size_t update_status = optimiser->updateWeights(weightUpdate,sp,featureValues, losses,
-			BleuScores, modelScores, oraclefeatureScore,oracleBleuScores, oracleModelScores,lr);
-	cerr<<"Weight after  : "<<weightUpdate.GetScoreForProducer(sp)<<endl;
-//	StaticData::InstanceNonConst().SetAllWeights(weightUpdate);
 	return;
 }
 

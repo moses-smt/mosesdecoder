@@ -97,7 +97,7 @@ public:
   const NonTerminalSet &GetLabelSet(size_t /*startPos*/, size_t /*endPos*/) const {
     return m_defaultLabelSet;
   }
-  void split_marker_perl(std::string& str, std::string marker, std::vector<std::string> &array);
+  int split_marker_perl(std::string& str, std::string marker, std::vector<std::string> &array);
 };
 
 
