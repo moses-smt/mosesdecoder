@@ -71,9 +71,9 @@ BOOST_AUTO_TEST_CASE(evaluate) {
   stringstream in("the input sentence has 6 words");
   sentence.Read(in, order);
 
-  TranslationOption topt1(WordsRange(0,0), tp1, sentence);
-  TranslationOption topt2(WordsRange(1,3), tp2, sentence);
-  TranslationOption topt3(WordsRange(2,3), tp3, sentence);
+  TranslationOption topt1(WordsRange(0,0), tp1);
+  TranslationOption topt2(WordsRange(1,3), tp2);
+  TranslationOption topt3(WordsRange(2,3), tp3);
 
   PhraseBasedFeatureContext context1(topt1,sentence);
   PhraseBasedFeatureContext context2(topt2,sentence);

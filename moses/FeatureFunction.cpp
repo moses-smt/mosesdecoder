@@ -80,6 +80,7 @@ std::vector<const StatefulFeatureFunction*>  StatefulFeatureFunction::m_stateful
 
 FeatureFunction::FeatureFunction(const std::string& description, const std::string &line)
 : m_reportSparseFeatures(false)
+, m_tuneable(true)
 {
   ParseLine(description, line);
 
@@ -100,7 +101,9 @@ FeatureFunction::FeatureFunction(const std::string& description, const std::stri
 }
 
 FeatureFunction::FeatureFunction(const std::string& description, size_t numScoreComponents, const std::string &line)
-: m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
+: m_reportSparseFeatures(false)
+, m_numScoreComponents(numScoreComponents)
+, m_tuneable(true)
 {
   ParseLine(description, line);
 
@@ -139,6 +142,9 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
     }
     else if (args[0] == "name") {
       m_description = args[1];
+    }
+    else if (args[0] == "tuneable") {
+      m_tuneable = Scan<bool>(args[1]);
     }
     else {
       m_args.push_back(args);

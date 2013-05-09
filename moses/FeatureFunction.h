@@ -83,6 +83,7 @@ protected:
   std::string m_description, m_argLine;
   std::vector<std::vector<std::string> > m_args;
   bool m_reportSparseFeatures;
+  bool m_tuneable;
   size_t m_numScoreComponents;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
@@ -114,7 +115,7 @@ public:
 
   virtual float GetSparseProducerWeight() const { return 1; }
 
-  virtual bool IsTuneable() const { return true; }
+  virtual bool IsTuneable() const { return m_tuneable; }
 
   //!
   virtual void InitializeForInput(InputType const& source)

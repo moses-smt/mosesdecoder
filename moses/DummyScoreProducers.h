@@ -73,7 +73,11 @@ public:
 class UnknownWordPenaltyProducer : public StatelessFeatureFunction
 {
 public:
-	UnknownWordPenaltyProducer(const std::string &line) : StatelessFeatureFunction("UnknownWordPenalty",1, line) {}
+	UnknownWordPenaltyProducer(const std::string &line)
+  : StatelessFeatureFunction("UnknownWordPenalty",1, line)
+  {
+	  m_tuneable = false;
+  }
 
   void Evaluate(  const PhraseBasedFeatureContext& context,
   								ScoreComponentCollection* accumulator) const 
@@ -91,9 +95,6 @@ public:
   virtual void Evaluate(const TargetPhrase &targetPhrase
                       , ScoreComponentCollection &scoreBreakdown
                       , ScoreComponentCollection &estimatedFutureScore) const;
-
-  virtual bool IsTuneable() const
-  { return false; }
 
   bool IsDecodeFeature() const
   { return true; }
