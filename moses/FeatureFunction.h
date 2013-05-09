@@ -88,8 +88,6 @@ protected:
   static std::multiset<std::string> description_counts;
 
   void ParseLine(const std::string& description, const std::string &line);
-  size_t FindNumFeatures();
-  bool FindName();
 
 public:
   static const std::vector<FeatureFunction*>& GetFeatureFunctions() { return m_producers; }

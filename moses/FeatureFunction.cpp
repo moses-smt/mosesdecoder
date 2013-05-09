@@ -82,10 +82,9 @@ FeatureFunction::FeatureFunction(const std::string& description, const std::stri
 : m_reportSparseFeatures(false)
 {
   ParseLine(description, line);
-  m_numScoreComponents = FindNumFeatures();
 
-  bool customName = FindName();
-  if (!customName) {
+  if (m_description == "") {
+    // not been given a name. Make a unique name
     size_t index = description_counts.count(description);
 
     ostringstream dstream;
@@ -104,8 +103,8 @@ FeatureFunction::FeatureFunction(const std::string& description, size_t numScore
 : m_reportSparseFeatures(false), m_numScoreComponents(numScoreComponents)
 {
   ParseLine(description, line);
-  bool customName = FindName();
-  if (!customName) {
+
+  if (m_description == "") {
     size_t index = description_counts.count(description);
 
     ostringstream dstream;
@@ -134,32 +133,17 @@ void FeatureFunction::ParseLine(const std::string& description, const std::strin
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = Tokenize(toks[i], "=");
     CHECK(args.size() == 2);
-    m_args.push_back(args);
-  }
-}
 
-size_t FeatureFunction::FindNumFeatures()
-{
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    if (m_args[i][0] == "num-features") {
-      size_t ret = Scan<size_t>(m_args[i][1]);
-      m_args.erase(m_args.begin() + i);
-      return ret;
+    if (args[0] == "num-features") {
+      m_numScoreComponents = Scan<size_t>(args[1]);
+    }
+    else if (args[0] == "name") {
+      m_description = args[1];
+    }
+    else {
+      m_args.push_back(args);
     }
   }
-  CHECK(false);
-}
-
-bool FeatureFunction::FindName()
-{
-  for (size_t i = 0; i < m_args.size(); ++i) {
-    if (m_args[i][0] == "name") {
-      m_description = m_args[i][1];
-      m_args.erase(m_args.begin() + i);
-      return true;
-    }
-  }
-  return false;
 }
 
 StatelessFeatureFunction::StatelessFeatureFunction(const std::string& description, const std::string &line)
