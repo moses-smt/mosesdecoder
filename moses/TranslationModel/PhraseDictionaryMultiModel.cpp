@@ -47,7 +47,6 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
     }
   } // for
 
-
   CHECK(m_pdStr.size() == m_multimodelweights.size());
 }
 
@@ -118,8 +117,9 @@ const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollect
 void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const
 {
   for(size_t i = 0; i < m_numModels; ++i){
+    const PhraseDictionary &pd = *m_pd[i];
 
-    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  m_pd[i]->GetTargetPhraseCollection( src);
+    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollection( src);
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::iterator iterTargetPhrase, iterLast;
@@ -132,7 +132,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
 
       for (iterTargetPhrase = ret_raw->begin(); iterTargetPhrase != iterLast;  ++iterTargetPhrase) {
         TargetPhrase * targetPhrase = *iterTargetPhrase;
-        std::vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(this);
+        std::vector<float> raw_scores = targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
         std::string targetString = targetPhrase->GetStringRep(m_output);
         if (allStats->find(targetString) == allStats->end()) {
@@ -180,6 +180,9 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
 
         //assuming that last value is phrase penalty
         scoreVector[m_numScoreComponents-1] = 1.0;
+
+        for (size_t i = 0; i < scoreVector.size(); ++i) cerr << scoreVector[i] << " ";
+        cerr << endl;
 
         statistics->targetPhrase->SetScore(this, scoreVector);
         ret->Add(new TargetPhrase(*statistics->targetPhrase));
