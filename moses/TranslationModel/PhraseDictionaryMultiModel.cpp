@@ -47,6 +47,7 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
     }
   } // for
 
+
   CHECK(m_pdStr.size() == m_multimodelweights.size());
 }
 
