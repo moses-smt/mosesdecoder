@@ -159,6 +159,8 @@ type = 8
 #
 #get-corpus-script = ""
 
+type = 8
+
 ### raw corpus (untokenized)
 #
 raw-corpus = $toy-data/nc-5k.$output-extension
