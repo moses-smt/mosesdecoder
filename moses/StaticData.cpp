@@ -1446,15 +1446,14 @@ int StaticData::GetNumIterationsOnlineLearning() const
 
 bool StaticData::LoadOnlineLearningModel()
 {
-//	float slack=0.01, scale_margin=0, scale_margin_precision=0, scale_update=0, scale_update_precision=0;
-//	bool boost=false, normaliseMargin=false;
-//	int sigmoidParam=1;
 	const std::string algorithm = (m_parameter->GetParam("algorithm").size()>0) ? Scan<std::string>(m_parameter->GetParam("algorithm")[0]) : "perceptron";
-	if(algorithm.compare("perceptron"))
+	if(algorithm.compare("perceptron")==0)
 	{
+		cerr<<"Using perceptron as online learning algorithm\n";
 		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
-		const float learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ?
+		const float f_learningrate = (m_parameter->GetParam("f_learningrate").size() > 0) ?
 				Scan<float>(m_parameter->GetParam("f_learningrate")[0]) : 0.8;
+		const float w_learningrate = (m_parameter->GetParam("w_learningrate").size() > 0) ? Scan<float>(m_parameter->GetParam("w_learningrate")[0]) : 0;
 		if(weights.size()>1)
 		{
 			UserMessage::Add("Can only specify one weight for the online learning feature");
@@ -1462,14 +1461,15 @@ bool StaticData::LoadOnlineLearningModel()
 		}
 		else if(weights.size()==1)
 		{
-			m_onlinelearner = new OnlineLearner(learningrate);
+			m_onlinelearner = new OnlineLearner(f_learningrate, w_learningrate);
 			SetWeight(m_onlinelearner, weights[0]);
 			IFVERBOSE(1)
 			PrintUserTime("Adding online learning feature");
 		}
 	}
-	else if(algorithm.compare("mira"))
+	else if(algorithm.compare("mira")==0)
 	{
+		cerr<<"Using MIRA as online learning algorithm\n";
 		const vector<float> &weights = Scan<float>(m_parameter->GetParam("weight-ol"));
 		if(weights.size()>1)
 		{

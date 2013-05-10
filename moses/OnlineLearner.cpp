@@ -133,12 +133,19 @@ bool OnlineLearner::SetPostEditedSentence(std::string s)
 	}
 }
 
-OnlineLearner::OnlineLearner(float learningrate):StatelessFeatureFunction("OnlineLearner",1){
-	flr = learningrate;
+OnlineLearner::OnlineLearner(float f_learningrate, float w_learningrate):StatelessFeatureFunction("OnlineLearner",1){
+	flr = f_learningrate;
+	wlr = w_learningrate;
 	m_learn=false;
 	m_PPindex=0;
-	update_weights=false;
-	update_features=true;
+	if(w_learningrate>0)
+		update_weights=true;
+	else
+		update_weights=false;
+	if(f_learningrate>0)
+		update_features=true;
+	else
+		update_features=false;
 	m_perceptron=true;
 	m_mira=false;
 	ReadFunctionWords();
@@ -149,8 +156,14 @@ OnlineLearner::OnlineLearner(float w_learningrate, float f_learningrate, float s
 		float scale_update_precision, bool boost, bool normaliseMargin, int sigmoidParam):StatelessFeatureFunction("OnlineLearner",1){
 	flr = f_learningrate;
 	wlr = w_learningrate;
-	update_weights=true;
-	update_features=true;
+	if(w_learningrate>0)
+		update_weights=true;
+	else
+		update_weights=false;
+	if(f_learningrate>0)
+		update_features=true;
+	else
+		update_features=false;
 	m_PPindex=0;
 	m_learn=false;
 	m_mira=true;
@@ -423,6 +436,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 		OracleList.push_back(PP_ORACLE);
 		float oraclebleu = GetBleu(oracle.str(), m_postedited);
 		if(m_mira || update_weights){
+			cerr<<"Mira is activated and update weights is activated\n";
 			HypothesisList.push_back(oracle.str());
 			BleuScore.push_back(oraclebleu);
 			featureValue.push_back(path.GetScoreBreakdown());
@@ -466,8 +480,11 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 			oraclefeatureScore.push_back(path.GetScoreBreakdown());
 		}
 	}
+	cerr<<"Read all the oracles in the list!\n";
+
 //	Update the features
 	if(update_features && m_perceptron){
+		cerr<<"update_features is activated and m_perceptron is activated\n";
 		pp_list::const_iterator it1;
 		for(it1=ShootemUp.begin(); it1!=ShootemUp.end(); it1++)
 		{
@@ -492,6 +509,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 
 	if(update_features && m_mira)
 	{
+		cerr<<"update_features is activated and m_mira is activated\n";
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
 			float bleuscore = BleuScore[i];
@@ -502,6 +520,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 		for(int i=0;i<OracleList.size();i++){
 			for(it1=OracleList[i].begin(); it1!=OracleList[i].end(); it1++)
 			{
+				cerr<<"Phrase : "<<it1->first<<" : ";
 				std::map<std::string, int>::const_iterator itr1;
 				for(itr1=(it1->second).begin(); itr1!=(it1->second).end(); itr1++)
 				{
@@ -509,6 +528,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 					if(idx!=m_featureIdx.size()){
 						FeatureIdxVec[i].push_back(idx);
 					}
+					cerr<<it1->first<<" : ";
 				}
 			}
 		}
@@ -523,6 +543,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 				}
 			}
 		}
+		cerr<<"constructed the index vectors for the sparsevector\n";
 		size_t update_status=optimiser->updateFeatures(sparsevector, FeatureIdxVec, loss, BleuScore,
 				modelScore, oracleFeatureIdxVec, oracleBleuScores[0], maxScore, flr);
 	}
@@ -532,6 +553,7 @@ void OnlineLearner::RunOnlineLearning(Manager& manager)
 //	Update the weights
 	if(update_weights)
 	{
+		cerr<<"update_weights is activated\n";
 		for (int i=0;i<HypothesisList.size();i++) // same loop used for feature values, modelscores
 		{
 			float bleuscore = BleuScore[i];
