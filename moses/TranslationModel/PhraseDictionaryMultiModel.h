@@ -83,6 +83,7 @@ protected:
   std::vector<std::string> m_pdStr;
   std::vector<PhraseDictionary*> m_pd;
   size_t m_numModels;
+  std::vector<float> m_multimodelweights;
 
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS

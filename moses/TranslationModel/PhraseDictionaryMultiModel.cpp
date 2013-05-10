@@ -42,8 +42,12 @@ PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
       m_pdStr = Tokenize(args[1], ",");
       m_numModels = m_pdStr.size();
     }
-
+    else if (args[0] == "lambda") {
+      m_multimodelweights = Tokenize<float>(args[1], ",");
+    }
   } // for
+
+  CHECK(m_pdStr.size() == m_multimodelweights.size());
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
@@ -192,16 +196,17 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
 
   weights_ptr = staticData.GetTemporaryMultiModelWeightsVector();
 
+  // HIEU - uninitialised variable.
   //checking weights passed to mosesserver; only valid for this sentence; *don't* raise exception if client weights are malformed
   if (weights_ptr == NULL || weights_ptr->size() == 0) {
-    weights_ptr = staticData.GetMultiModelWeightsVector(); //fall back to weights defined in config
+    weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
   else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
     //TODO: can we pass error message to client if weights are malformed?
     std::stringstream strme;
     strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
     UserMessage::Add(strme.str());
-    weights_ptr = staticData.GetMultiModelWeightsVector(); //fall back to weights defined in config
+    weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
 
   //checking weights defined in config; only valid for this sentence; raise exception if config weights are malformed

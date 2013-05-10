@@ -711,16 +711,11 @@ public:
   }
 
   // multimodel
-  std::vector<float> m_multimodelweights;
 #ifdef WITH_THREADS
   mutable std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
 #else
   mutable std::vector<float> m_multimodelweights_tmp;
 #endif
-
-  const std::vector<float>* GetMultiModelWeightsVector() const {
-    return &m_multimodelweights;
-  }
 
   const std::vector<float>* GetTemporaryMultiModelWeightsVector() const {
 #ifdef WITH_THREADS
