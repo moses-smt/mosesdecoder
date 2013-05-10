@@ -1442,6 +1442,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynSuffixArray.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryMultiModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMultiModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModel.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryTree.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTree.cpp</locationURI>

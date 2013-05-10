@@ -21,11 +21,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_PhraseDictionaryMultiModel_h
 
 #include "moses/TranslationModel/PhraseDictionary.h"
-#include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-#ifndef WIN32
-#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
-#endif
 
 
 #include <boost/unordered_map.hpp>
@@ -62,7 +57,7 @@ friend class CrossEntropy;
 #endif
 
 public:
-  PhraseDictionaryMultiModel(size_t m_numScoreComponent, PhraseDictionaryFeature* feature);
+  PhraseDictionaryMultiModel(const std::string &line);
   ~PhraseDictionaryMultiModel();
   bool Load(const std::vector<FactorType> &input
             , const std::vector<FactorType> &output
@@ -77,7 +72,7 @@ public:
   std::vector<std::vector<float> > getWeights(size_t numWeights, bool normalize) const;
   std::vector<float> normalizeWeights(std::vector<float> &weights) const;
   void CacheForCleanup(TargetPhraseCollection* tpc);
-  void CleanUp(const InputType &source);
+  void CleanUpAfterSentenceProcessing(const InputType &source);
   virtual void CleanUpComponentModels(const InputType &source);
 #ifdef WITH_DLIB
   virtual std::vector<float> MinimizePerplexity(std::vector<std::pair<std::string, std::string> > &phrase_pair_vector);
@@ -100,7 +95,6 @@ protected:
   std::vector<FactorType> m_output;
   size_t m_numModels;
   size_t m_componentTableLimit;
-  PhraseDictionaryFeature* m_feature_load;
 
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS

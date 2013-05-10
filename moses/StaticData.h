@@ -33,6 +33,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 
 #ifdef WITH_THREADS
+#include <boost/thread.hpp>
 #include <boost/thread/mutex.hpp>
 #endif
 
@@ -699,6 +700,40 @@ public:
 
   void CollectFeatureFunctions();
   bool CheckWeights() const;
+
+
+  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights) const {
+#ifdef WITH_THREADS
+    m_multimodelweights_tmp[boost::this_thread::get_id()] = weights;
+#else
+    m_multimodelweights_tmp = weights;
+#endif
+  }
+
+  // multimodel
+  std::vector<float> m_multimodelweights;
+#ifdef WITH_THREADS
+  mutable std::map<boost::thread::id, std::vector<float> > m_multimodelweights_tmp;
+#else
+  mutable std::vector<float> m_multimodelweights_tmp;
+#endif
+
+  const std::vector<float>* GetMultiModelWeightsVector() const {
+    return &m_multimodelweights;
+  }
+
+  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const {
+#ifdef WITH_THREADS
+    if (m_multimodelweights_tmp.find(boost::this_thread::get_id()) != m_multimodelweights_tmp.end()) {
+      return &m_multimodelweights_tmp.find(boost::this_thread::get_id())->second;
+    }
+    else {
+      return NULL;
+    }
+#else
+    return &m_multimodelweights_tmp;
+#endif
+  }
 
 };
 
