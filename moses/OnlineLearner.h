@@ -21,8 +21,8 @@
 #include "TrellisPath.h"
 #include "TrellisPathList.h"
 #include "Manager.h"
-#include "SparseVec.h"
-#include "Optimiser.h"
+#include "OnlineLearning/SparseVec.h"
+#include "OnlineLearning/Optimiser.h"
 
 #ifndef ONLINELEARNER_H_
 #define ONLINELEARNER_H_
