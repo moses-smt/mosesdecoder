@@ -59,14 +59,7 @@ friend class CrossEntropy;
 public:
   PhraseDictionaryMultiModel(const std::string &line);
   ~PhraseDictionaryMultiModel();
-  bool Load(const std::vector<FactorType> &input
-            , const std::vector<FactorType> &output
-            , const std::vector<std::string> &files
-            , const std::vector<float> &weight
-            , size_t tableLimit
-            , size_t numInputScores
-            , const LMList &languageModels
-            , float weightWP);
+  bool InitDictionary();
   virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
   virtual TargetPhraseCollection* CreateTargetPhraseCollectionLinearInterpolation(std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
   std::vector<std::vector<float> > getWeights(size_t numWeights, bool normalize) const;
@@ -90,7 +83,6 @@ protected:
   std::vector<std::string> m_pdStr;
   std::vector<PhraseDictionary*> m_pd;
   size_t m_numModels;
-  size_t m_componentTableLimit;
 
   typedef std::vector<TargetPhraseCollection*> PhraseCache;
 #ifdef WITH_THREADS

@@ -74,7 +74,7 @@ PhraseDictionary::PhraseDictionary(const std::string &description, const std::st
       m_alignmentsFile = args[1];
     }
     else {
-      throw "Unknown argument " + args[0];
+      //throw "Unknown argument " + args[0];
     }
   } // for (size_t i = 0; i < toks.size(); ++i) {
 

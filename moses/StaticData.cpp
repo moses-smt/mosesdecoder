@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionarySCFG.h"
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
 #include "GenerationDictionary.h"
@@ -685,6 +686,13 @@ bool StaticData::LoadData(Parameter *parameter)
     }
     else if (feature == "PhraseDictionaryCompact") {
       PhraseDictionaryCompact* model = new PhraseDictionaryCompact(line);
+      vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
+      SetWeights(model, weights);
+      m_phraseDictionary.push_back(model);
+    }
+
+    else if (feature == "PhraseDictionaryMultiModel") {
+      PhraseDictionaryMultiModel* model = new PhraseDictionaryMultiModel(line);
       vector<float> weights = m_parameter->GetWeights(model->GetScoreProducerDescription());
       SetWeights(model, weights);
       m_phraseDictionary.push_back(model);

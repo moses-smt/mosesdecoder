@@ -51,24 +51,12 @@ PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
     RemoveAllInColl(m_pd);
 }
 
-bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
-                                  , const std::vector<FactorType> &output
-                                  , const std::vector<std::string> &config
-                                  , const vector<float> &weight
-                                  , size_t tableLimit
-                                  , size_t numInputScores
-                                  , const LMList &languageModels
-                                  , float weightWP)
+bool PhraseDictionaryMultiModel::InitDictionary()
 {
   const StaticData &staticData = StaticData::Instance();
 
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
-  m_componentTableLimit = tableLimit;
-
-  //how many actual scores there are in the phrase tables
-  //so far, equal to number of log-linear scores, but it is allowed to be smaller (for other combination types)
-  size_t numPtScores = m_numScoreComponents;
 
   const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
@@ -130,8 +118,8 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
     if (ret_raw != NULL) {
 
       TargetPhraseCollection::iterator iterTargetPhrase, iterLast;
-      if (m_componentTableLimit != 0 && ret_raw->GetSize() > m_componentTableLimit) {
-          iterLast = ret_raw->begin() + m_componentTableLimit;
+      if (m_tableLimit != 0 && ret_raw->GetSize() > m_tableLimit) {
+          iterLast = ret_raw->begin() + m_tableLimit;
       }
       else {
           iterLast = ret_raw->end();
