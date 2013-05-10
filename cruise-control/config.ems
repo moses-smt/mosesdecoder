@@ -139,7 +139,7 @@ order = 5
 
 # kenlm, also set type to 8
 #lm-binarizer = $moses-src-dir/kenlm/build_binary
-#type = 8
+type = 8
 
 ### script to create quantized language model format (irstlm)
 # (default: no quantization)
