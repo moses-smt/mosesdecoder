@@ -87,12 +87,8 @@ public:
 
 protected:
   std::string m_mode;
+  std::vector<std::string> m_pdStr;
   std::vector<PhraseDictionary*> m_pd;
-  std::vector<float> m_weight;
-  const LMList *m_languageModels;
-  float m_weightWP;
-  std::vector<FactorType> m_input;
-  std::vector<FactorType> m_output;
   size_t m_numModels;
   size_t m_componentTableLimit;
 

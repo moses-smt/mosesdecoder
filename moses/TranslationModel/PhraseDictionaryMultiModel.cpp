@@ -28,6 +28,22 @@ namespace Moses
 PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
 :PhraseDictionary("PhraseDictionaryMultiModel", line)
 {
+  for (size_t i = 0; i < m_args.size(); ++i) {
+    const vector<string> &args = m_args[i];
+    if (args[0] == "mode") {
+      m_mode =args[1];
+      if (m_mode != "interpolate") {
+        ostringstream msg;
+        msg << "combination mode unknown: " << m_mode;
+        throw runtime_error(msg.str());
+      }
+    }
+    else if (args[0] == "components") {
+      m_pdStr = Tokenize(args[1], ",");
+      m_numModels = m_pdStr.size();
+    }
+
+  } // for
 }
 
 PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
@@ -44,18 +60,7 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
                                   , const LMList &languageModels
                                   , float weightWP)
 {
-  /*
-  m_languageModels = &languageModels;
-  m_weight = weight;
-  m_weightWP = weightWP;
-  m_input = input;
-  m_output = output;
-  m_tableLimit = tableLimit;
-
-  m_mode = config[4];
-  std::vector<std::string> files(config.begin()+5,config.end());
-
-  m_numModels = files.size();
+  const StaticData &staticData = StaticData::Instance();
 
   // since the top X target phrases of the final model are not the same as the top X phrases of each component model,
   // one could choose a higher value than tableLimit (or 0) here for maximal precision, at a cost of speed.
@@ -65,52 +70,24 @@ bool PhraseDictionaryMultiModel::Load(const std::vector<FactorType> &input
   //so far, equal to number of log-linear scores, but it is allowed to be smaller (for other combination types)
   size_t numPtScores = m_numScoreComponents;
 
-  if (m_mode != "interpolate") {
-    ostringstream msg;
-    msg << "combination mode unknown: " << m_mode;
-    throw runtime_error(msg.str());
-  }
+  const std::vector<PhraseDictionary*> &pts = staticData.GetPhraseDictionaries();
 
   for(size_t i = 0; i < m_numModels; ++i){
+    const string &ptName = m_pdStr[i];
 
-      std::string impl, file, main_table;
-
-      std::string delim = ":";
-      size_t delim_pos = files[i].find(delim);
-      UTIL_THROW_IF(delim_pos >= files[i].size(), util::Exception, "Phrase table must be specified in this format: Implementation:Path");
-
-      impl = files[i].substr(0,delim_pos);
-      file = files[i].substr(delim_pos+1,files[i].size());
-
-      PhraseTableImplementation implementation = (PhraseTableImplementation) Scan<int>(impl);
-
-      if (implementation == Memory) {
-
-            if (!FileExists(file) && FileExists(file + ".gz")) file += ".gz";
-
-            PhraseDictionaryMemory* pdm = new PhraseDictionaryMemory(m_numScoreComponents, m_feature_load);
-            pdm->SetNumScoreComponentMultiModel(numPtScores); //instead of complaining about inequal number of scores, silently fill up the score vector with zeroes
-            pdm->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
-            m_pd.push_back(pdm);
-      } else if (implementation == Binary) {
-            PhraseDictionaryTreeAdaptor* pdta = new PhraseDictionaryTreeAdaptor(m_numScoreComponents, numInputScores , m_feature_load);
-            pdta->Load(input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
-            m_pd.push_back(pdta);
-      } else if (implementation == Compact) {
-#ifndef WIN32
-            PhraseDictionaryCompact* pdc = new PhraseDictionaryCompact(m_numScoreComponents, implementation, m_feature_load);
-            pdc->SetNumScoreComponentMultiModel(m_numScoreComponents); //for compact models, we need to pass number of log-linear components to correctly resize the score vector
-            pdc->Load( input, output, file, m_weight, m_componentTableLimit, languageModels, m_weightWP);
-            m_pd.push_back(pdc);
-#else
-            UTIL_THROW(util::Exception, "Compact phrase table not supported in windows");
-#endif
+    PhraseDictionary *pt = NULL;
+    std::vector<PhraseDictionary*>::const_iterator iter;
+    for (iter = pts.begin(); iter != pts.end(); ++iter) {
+      PhraseDictionary *currPt = *iter;
+      if (currPt->GetScoreProducerDescription() == ptName) {
+        pt = currPt;
+        break;
       }
-      else {
-        UTIL_THROW(util::Exception,"PhraseDictionaryMultiModel does not support phrase table type " << implementation);
-      }
+    }
+
+    CHECK(pt);
+    m_pd.push_back(pt);
   }
-*/
 
   return true;
 }
