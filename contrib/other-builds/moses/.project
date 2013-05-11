@@ -547,11 +547,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>LMList.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LMList.cpp</locationURI>
-		</link>
-		<link>
 			<name>LMList.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LMList.h</locationURI>
