@@ -145,6 +145,10 @@ while(my $line = <INI>) {
   		  $phrase_table_impl = "PhraseDictionaryCompact";
   		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
 			}
+			elsif ($binarizer =~ /CreateOnDiskPt/) {
+  		  $phrase_table_impl = "PhraseDictionaryOnDisk";
+  		  @toks = set_value(\@toks, "path", "$new_name$table_flag");
+			}
 			else {
   		  $phrase_table_impl = "PhraseDictionaryTreeAdaptor";
 			  @toks = set_value(\@toks, "path", "$new_name$table_flag");
