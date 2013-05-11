@@ -10,7 +10,6 @@
 #include "moses/Manager.h"
 #include "moses/StaticData.h"
 #include "moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"
-#include "moses/TranslationSystem.h"
 #include "moses/TreeInput.h"
 #include "moses/LMList.h"
 #include "moses/LM/ORLM.h"
@@ -23,18 +22,6 @@ using namespace Moses;
 using namespace std;
 
 typedef std::map<std::string, xmlrpc_c::value> params_t;
-
-/** Find out which translation system to use */
-const TranslationSystem& getTranslationSystem(params_t params)
-{
-  string system_id = TranslationSystem::DEFAULT;
-  params_t::const_iterator pi = params.find("system");
-  if (pi != params.end()) {
-    system_id = xmlrpc_c::value_string(pi->second);
-  }
-  VERBOSE(1, "Using translation system " << system_id << endl;)
-  return StaticData::Instance().GetTranslationSystem(system_id);
-}
 
 class Updater: public xmlrpc_c::method
 {
@@ -174,7 +161,6 @@ public:
       (const_cast<StaticData&>(staticData)).SetOutputSearchGraph(true);
     }
 
-    const TranslationSystem& system = getTranslationSystem(params);
     stringstream out, graphInfo, transCollOpts;
     map<string, xmlrpc_c::value> retData;
 
@@ -184,7 +170,7 @@ public:
           staticData.GetInputFactorOrder();
         stringstream in(source + "\n");
         tinput.Read(in,inputFactorOrder);
-        ChartManager manager(tinput, &system);
+        ChartManager manager(tinput);
         manager.ProcessSentence();
         const ChartHypothesis *hypo = manager.GetBestHypothesis();
         outputChartHypo(out,hypo);
@@ -195,7 +181,7 @@ public:
         stringstream in(source + "\n");
         sentence.Read(in,inputFactorOrder);
 	size_t lineNumber = 0; // TODO: Include sentence request number here?
-        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm(), &system);
+        Manager manager(lineNumber, sentence, staticData.GetSearchAlgorithm());
         manager.ProcessSentence();
         const Hypothesis* hypo = manager.GetBestHypothesis();
 

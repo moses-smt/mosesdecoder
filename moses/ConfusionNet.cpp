@@ -243,11 +243,11 @@ std::ostream& operator<<(std::ostream& out,const ConfusionNet& cn)
 }
 
 TranslationOptionCollection*
-ConfusionNet::CreateTranslationOptionCollection(const TranslationSystem* system) const
+ConfusionNet::CreateTranslationOptionCollection() const
 {
   size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
   float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-  TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(system, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
+  TranslationOptionCollection *rv= new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
   CHECK(rv);
   return rv;
 }

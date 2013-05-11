@@ -4,7 +4,6 @@
 #include "moses/ChartParserCallback.h"
 #include "moses/FeatureVector.h"
 #include "moses/StaticData.h"
-#include "moses/TranslationSystem.h"
 #include "moses/Util.h"
 
 #include "lm/model.hh"
@@ -172,11 +171,10 @@ struct ChartCellBaseFactory {
 
 } // namespace
 
-Manager::Manager(const InputType &source, const TranslationSystem &system) :
+Manager::Manager(const InputType &source) :
   source_(source),
-  system_(system),
   cells_(source, ChartCellBaseFactory()),
-  parser_(source, system, cells_),
+  parser_(source, cells_),
   n_best_(search::NBestConfig(StaticData::Instance().GetNBestSize())) {}
 
 Manager::~Manager() {
@@ -279,7 +277,7 @@ void ToPhrase(const search::Applied final, Phrase &out) {
   AppendToPhrase(final, out, NoOp());
 }
 
-void PhraseAndFeatures(const TranslationSystem &system, const search::Applied final, Phrase &phrase, ScoreComponentCollection &features) {
+void PhraseAndFeatures(const search::Applied final, Phrase &phrase, ScoreComponentCollection &features) {
   phrase.Clear();
   features.ZeroAll();
   AppendToPhrase(final, phrase, AccumScore(features));

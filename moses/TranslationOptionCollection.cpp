@@ -47,10 +47,9 @@ bool CompareTranslationOption(const TranslationOption *a, const TranslationOptio
 /** constructor; since translation options are indexed by coverage span, the corresponding data structure is initialized here
 	* This fn should be called by inherited classes
 */
-TranslationOptionCollection::TranslationOptionCollection(const TranslationSystem* system,
+TranslationOptionCollection::TranslationOptionCollection(
     InputType const& src, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : m_system(system),
-    m_source(src)
+  : m_source(src)
     ,m_futureScore(src.GetSize())
     ,m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
     ,m_translationOptionThreshold(translationOptionThreshold)
@@ -485,7 +484,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
       const DecodeStep &decodeStep = **iterStep;
 
       static_cast<const DecodeStepTranslation&>(decodeStep).ProcessInitialTranslation
-      (m_system, m_source, *oldPtoc
+      (m_source, *oldPtoc
        , startPos, endPos, adhereTableLimit );
 
       // do rest of decode steps
@@ -500,7 +499,7 @@ void TranslationOptionCollection::CreateTranslationOptionsForRange(
         for (iterPartialTranslOpt = partTransOptList.begin() ; iterPartialTranslOpt != partTransOptList.end() ; ++iterPartialTranslOpt) {
           TranslationOption &inputPartialTranslOpt = **iterPartialTranslOpt;
 
-          decodeStep.Process(m_system, inputPartialTranslOpt
+          decodeStep.Process(inputPartialTranslOpt
                              , decodeStep
                              , *newPtoc
                              , this

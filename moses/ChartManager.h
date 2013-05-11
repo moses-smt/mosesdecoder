@@ -28,7 +28,6 @@
 #include "InputType.h"
 #include "WordsRange.h"
 #include "SentenceStats.h"
-#include "TranslationSystem.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartParser.h"
 
@@ -58,7 +57,6 @@ private:
   InputType const& m_source; /**< source sentence to be translated */
   ChartCellCollection m_hypoStackColl;
   std::auto_ptr<SentenceStats> m_sentenceStats;
-  const TranslationSystem* m_system;
   clock_t m_start; /**< starting time, used for logging */
   unsigned m_hypothesisId; /* For handing out hypothesis ids to ChartHypothesis */
 
@@ -73,7 +71,7 @@ private:
   void PreCalculateScores();
 
 public:
-  ChartManager(InputType const& source, const TranslationSystem* system);
+  ChartManager(InputType const& source);
   ~ChartManager();
   void ProcessSentence();
   void AddXmlChartOptions();
@@ -88,11 +86,6 @@ public:
     return m_source;
   }
   
-  //! which particular set of models is in use
-  const TranslationSystem* GetTranslationSystem() const {
-    return m_system;
-  }
-
   //! debug data collected when decoding sentence
   SentenceStats& GetSentenceStats() const {
     return *m_sentenceStats;

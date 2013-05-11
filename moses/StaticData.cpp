@@ -1018,7 +1018,6 @@ void StaticData::ReLoadParameter()
   }
 
   //loop over all ScoreProducer to update weights
-  const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
 
   std::vector<const ScoreProducer*>::const_iterator iterSP;
   for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP) {
@@ -1071,7 +1070,6 @@ void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
   assert(false);
   /*
   //loop over ScoreProducers to update weights of BleuScoreFeature
-  const TranslationSystem &transSystem = GetTranslationSystem(TranslationSystem::DEFAULT);
 
   std::vector<const ScoreProducer*>::const_iterator iterSP;
   for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP) {

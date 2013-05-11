@@ -9,7 +9,6 @@
 
 #include <iostream>
 #include "moses/Hypothesis.h"
-#include "moses/TranslationSystem.h"
 
 namespace TranslationAnalysis
 {
@@ -18,7 +17,7 @@ namespace TranslationAnalysis
  * print details about the translation represented in hypothesis to
  * os.  Included information: phrase alignment, words dropped, scores
  */
-void PrintTranslationAnalysis(const Moses::TranslationSystem* system, std::ostream &os, const Moses::Hypothesis* hypo);
+void PrintTranslationAnalysis(std::ostream &os, const Moses::Hypothesis* hypo);
 
 }
 

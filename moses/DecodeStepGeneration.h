@@ -38,8 +38,7 @@ public:
   DecodeStepGeneration(const GenerationDictionary* dict, const DecodeStep* prev);
 
 
-  virtual void Process(const TranslationSystem* system
-                       , const TranslationOption &inputPartialTranslOpt
+  virtual void Process(const TranslationOption &inputPartialTranslOpt
                        , const DecodeStep &decodeStep
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc

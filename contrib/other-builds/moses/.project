@@ -1047,16 +1047,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationOptionList.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationSystem.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationSystem.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationSystem.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationSystem.h</locationURI>
-		</link>
-		<link>
 			<name>TreeInput.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TreeInput.cpp</locationURI>

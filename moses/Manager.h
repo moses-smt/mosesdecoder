@@ -96,7 +96,6 @@ class Manager
   Manager();
   Manager(Manager const&);
   void operator=(Manager const&);
-  const TranslationSystem* m_system;
 private:
 
   // Helper functions to output search graph in HTK standard lattice format
@@ -132,12 +131,9 @@ protected:
 
 public:
   InputType const& m_source; /**< source sentence to be translated */
-  Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system);
+  Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm);
   ~Manager();
   const  TranslationOptionCollection* getSntTranslationOptions();
-  const TranslationSystem* GetTranslationSystem() {
-    return m_system;
-  }
 
   void ProcessSentence();
   const Hypothesis *GetBestHypothesis() const;

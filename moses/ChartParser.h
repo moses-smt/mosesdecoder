@@ -33,7 +33,6 @@ namespace Moses
 class ChartParserCallback;
 class ChartRuleLookupManager;
 class InputType;
-class TranslationSystem;
 class ChartCellCollectionBase;
 class Word;
 class Phrase;
@@ -42,13 +41,12 @@ class DecodeGraph;
 
 class ChartParserUnknown {
   public:
-    ChartParserUnknown(const TranslationSystem &system);
+    ChartParserUnknown();
     ~ChartParserUnknown();
 
     void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
 
   private:
-    const TranslationSystem &m_system;
     std::vector<Phrase*> m_unksrcs;
     std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
     StackVec m_emptyStackVec;
@@ -56,7 +54,7 @@ class ChartParserUnknown {
 
 class ChartParser {
   public:
-    ChartParser(const InputType &source, const TranslationSystem &system, ChartCellCollectionBase &cells);
+    ChartParser(const InputType &source, ChartCellCollectionBase &cells);
     ~ChartParser();
 
     void Create(const WordsRange &range, ChartParserCallback &to);

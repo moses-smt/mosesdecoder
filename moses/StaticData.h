@@ -45,7 +45,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "SentenceStats.h"
 #include "DecodeGraph.h"
 #include "TranslationOptionList.h"
-#include "TranslationSystem.h"
 #include "ScoreComponentCollection.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
 
@@ -59,7 +58,6 @@ class DecodeStep;
 class UnknownWordPenaltyProducer;
 class MetaScoreProducer;
 class MetaFeatureProducer;
-class TranslationSystem;
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -86,7 +84,6 @@ protected:
   std::vector<size_t> m_decodeGraphBackoff;
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
-  TranslationSystem m_translationSystem;
   float
   m_beamWidth,
   m_earlyDiscardingThreshold,
@@ -346,9 +343,6 @@ public:
     return m_translationOptionThreshold;
   }
 
-  const TranslationSystem& GetTranslationSystem(std::string id) const {
-    return m_translationSystem;
-  }
   size_t GetVerboseLevel() const {
     return m_verboseLevel;
   }

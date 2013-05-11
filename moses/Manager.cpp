@@ -54,9 +54,8 @@ using namespace std;
 
 namespace Moses
 {
-Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm, const TranslationSystem* system)
-  :m_system(system)
-  ,m_transOptColl(source.CreateTranslationOptionCollection(system))
+Manager::Manager(size_t lineNumber, InputType const& source, SearchAlgorithm searchAlgorithm)
+  :m_transOptColl(source.CreateTranslationOptionCollection())
   ,m_search(Search::CreateSearch(*this, source, searchAlgorithm, *m_transOptColl))
   ,interrupted_flag(0)
   ,m_hypoId(0)
@@ -439,7 +438,7 @@ void Manager::CalcDecoderStatistics() const
   }
 }
 
-void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId, const TranslationSystem* system)
+void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId)
 {
 
   const Hypothesis *prevHypo = hypo->GetPrevHypo();
@@ -537,7 +536,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
     HypothesisStack::const_iterator iterHypo;
     for (iterHypo = stack.begin() ; iterHypo != stack.end() ; ++iterHypo) {
       const Hypothesis *hypo = *iterHypo;
-      OutputWordGraph(outputWordGraphStream, hypo, linkId, m_system);
+      OutputWordGraph(outputWordGraphStream, hypo, linkId);
 
       if (outputNBest) {
         const ArcList *arcList = hypo->GetArcList();
@@ -545,7 +544,7 @@ void Manager::GetWordGraph(long translationId, std::ostream &outputWordGraphStre
           ArcList::const_iterator iterArcList;
           for (iterArcList = arcList->begin() ; iterArcList != arcList->end() ; ++iterArcList) {
             const Hypothesis *loserHypo = *iterArcList;
-            OutputWordGraph(outputWordGraphStream, loserHypo, linkId,m_system);
+            OutputWordGraph(outputWordGraphStream, loserHypo, linkId);
           }
         }
       } //if (outputNBest)
@@ -646,7 +645,6 @@ void Manager::OutputFeatureWeightsForSLF(std::ostream &outputSearchGraphStream) 
   outputSearchGraphStream.precision(6);
 
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff   = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -686,7 +684,6 @@ void Manager::OutputFeatureValuesForSLF(const Hypothesis* hypo, bool zeros, std:
   // outputSearchGraphStream << scoreCollection << endl;
 
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;
@@ -721,7 +718,6 @@ void Manager::OutputFeatureValuesForHypergraph(const Hypothesis* hypo, std::ostr
   outputSearchGraphStream.precision(6);
 
   const StaticData& staticData = StaticData::Instance();
-  const TranslationSystem& system = staticData.GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<const StatelessFeatureFunction*>& slf =StatelessFeatureFunction::GetStatelessFeatureFunctions();
   const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   size_t featureIndex = 1;

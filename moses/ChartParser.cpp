@@ -33,7 +33,7 @@ namespace Moses
 {
 extern bool g_debug;
 
-ChartParserUnknown::ChartParserUnknown(const TranslationSystem &system) : m_system(system) {}
+ChartParserUnknown::ChartParserUnknown() {}
 
 ChartParserUnknown::~ChartParserUnknown() {
   RemoveAllInColl(m_unksrcs);
@@ -122,8 +122,7 @@ void ChartParserUnknown::Process(const Word &sourceWord, const WordsRange &range
   }
 }
 
-ChartParser::ChartParser(InputType const &source, const TranslationSystem &system, ChartCellCollectionBase &cells) : 
-  m_unknown(system),
+ChartParser::ChartParser(InputType const &source, ChartCellCollectionBase &cells) :
   m_decodeGraphList(StaticData::Instance().GetDecodeGraphs()),
   m_source(source) {
   const StaticData &staticData = StaticData::Instance();

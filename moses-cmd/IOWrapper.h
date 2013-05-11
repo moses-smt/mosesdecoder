@@ -55,7 +55,6 @@ POSSIBILITY OF SUCH DAMAGE.
 
 namespace Moses
 {
-class TranslationSystem;
 class ScoreComponentCollection;
 }
 
@@ -145,11 +144,9 @@ void OutputAlignment(std::ostream &out, const Moses::Hypothesis *hypo);
 void OutputNBest(std::ostream& out
                   , const Moses::TrellisPathList &nBestList
                   , const std::vector<Moses::FactorType>& outputFactorOrder
-                  , const Moses::TranslationSystem &system
                   , long translationId
                   , bool reportSegmentation);
-void OutputAllFeatureScores(const Moses::TranslationSystem &system
-                              , const Moses::ScoreComponentCollection &features
+void OutputAllFeatureScores(const Moses::ScoreComponentCollection &features
                               , std::ostream &out);
 void OutputFeatureScores( std::ostream& out
                           , const Moses::ScoreComponentCollection &features

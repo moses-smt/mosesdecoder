@@ -34,8 +34,7 @@ DecodeStepTranslation::DecodeStepTranslation(const PhraseDictionary* pdf, const 
 {
 }
 
-void DecodeStepTranslation::Process(const TranslationSystem* system
-                                    , const TranslationOption &inputPartialTranslOpt
+void DecodeStepTranslation::Process(const TranslationOption &inputPartialTranslOpt
                                     , const DecodeStep &decodeStep
                                     , PartialTranslOptColl &outputPartialTranslOptColl
                                     , TranslationOptionCollection *toc
@@ -44,7 +43,7 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
   if (inputPartialTranslOpt.GetTargetPhrase().GetSize() == 0) {
     // word deletion
 
-    outputPartialTranslOptColl.Add(system, new TranslationOption(inputPartialTranslOpt));
+    outputPartialTranslOptColl.Add(new TranslationOption(inputPartialTranslOpt));
 
     return;
   }
@@ -85,7 +84,7 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
       TranslationOption *newTransOpt = new TranslationOption(sourceWordsRange, outPhrase);
       assert(newTransOpt != NULL);
 
-      outputPartialTranslOptColl.Add(system, newTransOpt );
+      outputPartialTranslOptColl.Add(newTransOpt );
 
     }
   } else if (sourceWordsRange.GetNumWordsCovered() == 1) {
@@ -95,8 +94,8 @@ void DecodeStepTranslation::Process(const TranslationSystem* system
 }
 
 
-void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* system
-    , const InputType &source
+void DecodeStepTranslation::ProcessInitialTranslation(
+    const InputType &source
     ,PartialTranslOptColl &outputPartialTranslOptColl
     , size_t startPos, size_t endPos, bool adhereTableLimit) const
 {
@@ -121,7 +120,7 @@ void DecodeStepTranslation::ProcessInitialTranslation(const TranslationSystem* s
       const TargetPhrase	&targetPhrase = **iterTargetPhrase;
       TranslationOption *transOpt = new TranslationOption(wordsRange, targetPhrase);
 
-      outputPartialTranslOptColl.Add (system, transOpt);
+      outputPartialTranslOptColl.Add (transOpt);
 
       VERBOSE(3,"\t" << targetPhrase << "\n");
     }
