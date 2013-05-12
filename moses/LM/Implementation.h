@@ -19,6 +19,14 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+
+//Fabienne Braune : Added all computations of the l-MBOT language model (to score discontiguous units)
+//Added class :
+//LanguageModelChartState
+//Added methods
+//CalcScoreMBOT
+//EvaluateMBOT
+
 #ifndef moses_LanguageModelImplementation_h
 #define moses_LanguageModelImplementation_h
 
@@ -94,10 +102,12 @@ public:
   virtual FFState *NewState(const FFState *from = NULL) const = 0;
 
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
+  void CalcScoreMBOT(const TargetPhraseMBOT &phrase, float &fullScore, float &ngramScore, size_t &oovCount);
 
   FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out, const LanguageModel *feature) const;
 
   FFState* EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection* accumulator, const LanguageModel *feature) const;
+  FFState* EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection* accumulator, const LanguageModel *feature) const;
 
   void updateChartScore(float *prefixScore, float *finalScore, float score, size_t wordPos) const;
 
@@ -152,6 +162,10 @@ class LMRefCount : public LanguageModel {
       return m_impl->CalcScore(phrase, fullScore, ngramScore, oovCount);
     }
 
+    void CalcScoreMBOT(const TargetPhraseMBOT &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+          return m_impl->CalcScoreMBOT(phrase, fullScore, ngramScore, oovCount);
+        }
+
     FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state, ScoreComponentCollection* accumulator) const {
       return m_impl->Evaluate(cur_hypo, prev_state, accumulator, this);
     }
@@ -160,6 +174,9 @@ class LMRefCount : public LanguageModel {
       return m_impl->EvaluateChart(cur_hypo, featureID, accumulator, this);
     }
 
+    FFState* EvaluateMBOT(const ChartHypothesisMBOT& cur_hypo, int featureID, ScoreComponentCollection* accumulator) const {
+        return m_impl->EvaluateMBOT(cur_hypo, featureID, accumulator, this);
+      }
 
     LanguageModelImplementation *MosesServerCppShouldNotHaveLMCode() { return m_impl.get(); }
 

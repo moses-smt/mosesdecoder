@@ -61,6 +61,7 @@ public:
   explicit TargetPhrase(std::string out_string);
   explicit TargetPhrase(const Phrase &targetPhrase);
 
+
   //! used by the unknown word handler- these targets
   //! don't have a translation score, so wp is the only thing used
   void SetScore(const TranslationSystem* system);

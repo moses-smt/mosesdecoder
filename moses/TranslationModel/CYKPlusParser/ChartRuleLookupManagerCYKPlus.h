@@ -28,6 +28,7 @@ namespace Moses
 {
 
 class DottedRule;
+class DottedRuleMBOT;
 class TargetPhraseCollection;
 class WordsRange;
 
@@ -46,6 +47,13 @@ class ChartRuleLookupManagerCYKPlus : public ChartRuleLookupManager
     const TargetPhraseCollection &tpc,
     const WordsRange &range,
     ChartParserCallback &outColl);
+
+//Fabienne Braune : Needed to work with l-MBOT dotted rules
+  void AddCompletedRuleMBOT(
+      const DottedRuleMBOT &dottedRule,
+      const TargetPhraseCollection &tpc,
+      const WordsRange &range,
+      ChartParserCallback &outColl);
 
   StackVec m_stackVec;
 };

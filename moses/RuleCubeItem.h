@@ -20,6 +20,7 @@
 #pragma once
 
 #include "StackVec.h"
+#include "TargetPhraseMBOT.h"
 
 #include <vector>
 
@@ -31,6 +32,9 @@ class ChartHypothesis;
 class ChartManager;
 class ChartTranslationOptions;
 class TargetPhrase;
+
+//Fabienne Braune : l-MBOT target phrase (discontiguous)
+class TargetPhraseMBOT;
 
 typedef std::vector<const ChartHypothesis*> HypoList;
 
@@ -46,6 +50,10 @@ class TranslationDimension
     , m_orderedTargetPhrases(&orderedTargetPhrases)
   {}
 
+  //Fabienne Braune : Need to know the current position when checking for matching source sides (see RuleCubeMBOT)
+  std::size_t GetPosition() const
+  {return m_pos;};
+
   std::size_t IncrementPos() { return m_pos++; }
 
   bool HasMoreTranslations() const {
@@ -55,6 +63,45 @@ class TranslationDimension
   const TargetPhrase *GetTargetPhrase() const {
     return (*m_orderedTargetPhrases)[m_pos];
   }
+
+  const TargetPhraseMBOT *GetTargetPhraseMBOT() const {
+      	const TargetPhrase * tpConst = (*m_orderedTargetPhrases)[m_pos];
+      	TargetPhrase * tp = const_cast<TargetPhrase*>(tpConst);
+      	TargetPhraseMBOT * tpmbot = static_cast<TargetPhraseMBOT*>(tp);
+      	const TargetPhraseMBOT * targetPhrase = const_cast<TargetPhraseMBOT*>(tpmbot);
+      	return targetPhrase;
+  }
+
+  //Fabienne Braune : check if target phrase matches input parse tree
+  //In the current version, the input parse tree is matched when selecting applicable rules ( ChartRuleLookupManager )
+  //Here we check during chart parsing if the used rules match the input parse
+  bool HasMoreMatchingTargetPhrase() const {
+	size_t index_to_check = m_pos;
+  	while(index_to_check < m_orderedTargetPhrases->size())
+  	{
+  	    if(static_cast<TargetPhraseMBOT*>((*m_orderedTargetPhrases)[index_to_check])->isMatchesSource())
+  	    {
+  	    	return true;
+  	    }
+  	    index_to_check++;
+  	}
+  	return false;
+  }
+
+  size_t GetPositionOfMatchingTargetPhrase() const {
+      size_t index_to_check = m_pos;
+      	    while(index_to_check < m_orderedTargetPhrases->size())
+      	    {
+      	    		if(static_cast<TargetPhraseMBOT*>((*m_orderedTargetPhrases)[index_to_check])->isMatchesSource())
+      	    		{
+      	    			return index_to_check;
+      	    		}
+      	    		 index_to_check++;
+      	    }
+      	    return 0;
+       }
+
+
 
   bool operator<(const TranslationDimension &compare) const {
     return GetTargetPhrase() < compare.GetTargetPhrase();

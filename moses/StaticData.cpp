@@ -352,6 +352,12 @@ bool StaticData::LoadData(Parameter *parameter)
   m_unknownWordPenaltyProducer = new UnknownWordPenaltyProducer();
   SetWeight(m_unknownWordPenaltyProducer, weightUnknownWord);
 
+  //Fabienne Braune : instantiate gap penalty producer (class GapPenaltyProducer)
+  float weightGap				= (m_parameter->GetParam("weight-gap").size() > 0) ? Scan<float>(m_parameter->GetParam("weight-gap")[0]) : 1;
+    //make new Gap Penalty Producer
+  	m_gapPenaltyProducer = new GapPenaltyProducer(m_scoreIndexManager);
+    m_allWeights.push_back(weightGap);
+
   // reordering constraints
   m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
                     Scan<int>(m_parameter->GetParam("distortion-limit")[0])

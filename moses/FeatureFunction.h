@@ -5,13 +5,17 @@
 
 #include "ScoreProducer.h"
 
+//Fabienne Braune : Added forward references to TargetPhraseMBOT and ChartHypothesisMBOT
+
 namespace Moses
 {
 
+class TargetPhraseMBOT;
 class TargetPhrase;
 class TranslationOption;
 class Hypothesis;
 class ChartHypothesis;
+class ChartHypothesisMBOT;
 class FFState;
 class InputType;
 class ScoreComponentCollection;
@@ -144,6 +148,11 @@ public:
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const = 0;
+
+  virtual FFState* EvaluateMBOT(
+     const ChartHypothesisMBOT& /* cur_hypo */,
+     int /* featureID - used to index the state in the previous hypotheses */,
+     ScoreComponentCollection* accumulator) const = 0;
 
   //! return the state associated with the empty hypothesis for a given sentence
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;

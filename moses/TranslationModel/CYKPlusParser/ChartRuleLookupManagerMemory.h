@@ -49,7 +49,7 @@ class ChartRuleLookupManagerMemory : public ChartRuleLookupManagerCYKPlus
                                const ChartCellCollectionBase &cellColl,
                                const PhraseDictionarySCFG &ruleTable);
 
-  ~ChartRuleLookupManagerMemory();
+  virtual ~ChartRuleLookupManagerMemory();
 
   virtual void GetChartRuleCollection(
     const WordsRange &range,

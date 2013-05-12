@@ -53,7 +53,7 @@ ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   m_nBestIsEnabled = staticData.IsNBestEnabled();
 }
 
-ChartCell::~ChartCell() {}
+virtual ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell. 
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
@@ -81,7 +81,7 @@ void ChartCell::PruneToSize()
  * \param transOptList list of applicable rules to create hypotheses for the cell
  * \param allChartCells entire chart - needed to look up underlying hypotheses
  */
-void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
+virtual void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
                                 , const ChartCellCollection &allChartCells)
 {
   const StaticData &staticData = StaticData::Instance();

@@ -61,12 +61,12 @@ class ChartTranslationOptions
   const StackVec &GetStackVec() const { return m_stackVec; }
 
   //! @todo isn't the translation suppose to just contain 1 target phrase, not a whole collection of them?
-  const TargetPhraseCollection &GetTargetPhraseCollection() const { 
+  virtual const TargetPhraseCollection &GetTargetPhraseCollection() const {
     return *m_targetPhraseCollection;
   }
 
   //! the range in the source sentence this translation option covers
-  const WordsRange &GetSourceWordsRange() const {
+  virtual const WordsRange &GetSourceWordsRange() const {
     return *m_wordsRange;
   }
 

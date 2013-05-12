@@ -75,6 +75,9 @@ class SyntacticLanguageModel;
 #endif
 class TranslationSystem;
 
+//Fabienne Braune : Feature giving a penalty to l-MBOT rules with discontiguous rules
+class GapPenaltyProducer;
+
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 
@@ -164,6 +167,13 @@ protected:
   std::vector<WordPenaltyProducer*> m_wordPenaltyProducers;
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
+
+  //Fabienne Braune : Feature giving a penalty to l-MBOT rules with discontiguous rules
+  GapPenaltyProducer *m_gapPenaltyProducer;
+
+  //Fabienne Braune : allows to pass a list of source side labels to avoid matching the input parse tree
+  std::vector<std::string> m_sourceSideLabels;
+
   MetaFeatureProducer *m_metaFeatureProducer;
   BleuScoreFeature* m_bleuScoreFeature;
   bool m_reportSegmentation;
@@ -282,6 +292,11 @@ protected:
 
   void ReduceTransOptCache() const;
   bool m_continuePartialTranslation;
+
+  //Fabienne Braune : Option to match source side of rules to input parse tree during decoding and not only at rule selection
+  //1 : do match input parse tree
+  //2 : do match input parse tree
+  int m_matchingSourceAtRuleApplication;
 
   std::string m_binPath;
   
@@ -743,6 +758,21 @@ public:
 
   bool NBestIncludesSegmentation() const {
     return m_nBestIncludesSegmentation;
+  }
+
+  //Fabienne Braune :
+  GapPenaltyProducer *GetGapPenaltyProducer() const
+  {
+  	  return m_gapPenaltyProducer;
+  }
+
+  //Fabienne Braune : Option to match source side of rules to input parse tree during decoding
+  int IsMatchingSourceAtRuleApplication() const
+  { return m_matchingSourceAtRuleApplication;}
+
+  //Fabienne Braune : all source non-terminals : needed for the no-match semantics
+  const std::vector<std::string> &GetSourceNonTerminals() const {
+ 	 return m_sourceSideLabels;
   }
 
 };

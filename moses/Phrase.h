@@ -62,6 +62,9 @@ public:
   /** create phrase from vectors of words	*/
   explicit Phrase(const std::vector< const Word* > &mergeWords);
 
+  //Fabienne Braune : copy constructor for constructing source phrase in TargetPhraseMBOT
+  Phrase(const Phrase &copy);
+
   /** destructor */
   virtual ~Phrase();
 

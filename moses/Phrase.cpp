@@ -39,6 +39,7 @@ namespace Moses
 
 Phrase::Phrase() {}
 
+
 Phrase::Phrase(size_t reserveSize)
 {
   m_words.reserve(reserveSize);
@@ -50,6 +51,17 @@ Phrase::Phrase(const vector< const Word* > &mergeWords)
   for (size_t currPos = 0 ; currPos < mergeWords.size() ; currPos++) {
     AddWord(*mergeWords[currPos]);
   }
+}
+
+//Fabienen Braune : copy constructor for creating source phrase in TargetPhraseMBOT
+Phrase::Phrase(const Phrase &copy)
+{
+    //go through word vectors and populate
+   m_words.reserve(copy.GetSize());
+   for(int i=0; i<copy.GetSize();i++)
+   {
+        m_words.push_back(copy.GetWord(i));
+   }
 }
 
 Phrase::~Phrase()

@@ -19,6 +19,8 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+//Fabienne Braune : Added method CalcScoreMBOT for scoring l-MBOT language model (discontiguous units)
+
 #ifndef moses_LanguageModel_h
 #define moses_LanguageModel_h
 
@@ -84,6 +86,8 @@ public:
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
   virtual void CalcScoreFromCache(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
   }
+
+  virtual void CalcScoreMBOT(const TargetPhraseMBOT &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
 
   virtual void IssueRequestsFor(Hypothesis& hypo,
                                 const FFState* input_state) {
