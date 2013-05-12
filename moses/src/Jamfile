@@ -13,12 +13,10 @@ if [ option.get "with-synlm" : no : yes ] = yes
 
 obj CellContextScoreProducer.o : CellContextScoreProducer.cpp headers : <include>..//..//psd <include>..//..//phrase-extract//extract-syntax-features ;
 
-obj PSDScoreProducer.o : PSDScoreProducer.cpp headers : <include>..//..//psd ;
-
 lib moses_internal :
 #All cpp files except those listed
 [ glob *.cpp DynSAInclude/*.cpp : PhraseDictionary.cpp ThreadPool.cpp SyntacticLanguageModel.cpp CellContextScoreProducer.cpp PSDScoreProducer.cpp ]
-CellContextScoreProducer.o PSDScoreProducer.o synlm ThreadPool headers ;
+CellContextScoreProducer.o synlm ThreadPool headers ;
 
 alias moses : PhraseDictionary.cpp moses_internal ..//..//phrase-extract//SyntaxTree.o ..//..//phrase-extract//XmlTree.o CYKPlusParser//CYKPlusParser LM//LM RuleTable//RuleTable Scope3Parser//Scope3Parser headers ../..//z ../../OnDiskPt//OnDiskPt ;
 

@@ -32,16 +32,16 @@ float FeatureExtractor::GetMaxProb(const vector<Translation> &translations)
   return maxProb;
 }
 
-float FeatureExtractor::GetMaxProbChart(const vector<ChartTranslation> &translations)
+double FeatureExtractor::GetMaxProbChart(const vector<ChartTranslation> &translations)
 {
-  float maxProb = 0;
+  long double maxProb = 0;
   vector<ChartTranslation>::const_iterator it;
   for (it = translations.begin(); it != translations.end(); it++)
     maxProb = max(it->m_scores[P_E_F_INDEX], maxProb);
   return maxProb;
 }
 
-void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
+/*void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
   const ContextType &context,
   size_t spanStart,
   size_t spanEnd,
@@ -71,7 +71,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     fc->SetNamespace('t', false);
 
     // get words in target phrase
-    vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
+    vvector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
     // cerr << "Predicting score for phrase " << Join(" ", targetForms) << endl;
 
     if (m_config.GetTargetInternal()) GenerateInternalFeatures(targetForms, fc);
@@ -91,7 +91,7 @@ void FeatureExtractor::GenerateFeatures(FeatureConsumer *fc,
     }
   }
   fc->FinishExample();
-}
+}*/
 
 void FeatureExtractor::GenerateFeaturesChartLhs(FeatureConsumer *fc,
   const ContextType &context,
@@ -129,8 +129,6 @@ void FeatureExtractor::GenerateFeaturesChartLhs(FeatureConsumer *fc,
     assert(lossIt != losses.end());
     fc->SetNamespace('t', false);
 
-    // get words in target phrase
-    //WRONG INDEX !!!
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
     if (m_config.GetTargetInternal()) GenerateInternalFeaturesChart(targetForms, fc, transIt->m_nonTermAlignment);
@@ -197,7 +195,6 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     fc->SetNamespace('t', false);
 
     // get words in target phrase
-    // TODO : check that index is right
     vector<string> targetForms = Tokenize(m_targetIndex.right.find(transIt->m_index)->second, " ");
 
     if (m_config.GetTargetInternal()) GenerateInternalFeaturesChart(targetForms, fc, transIt->m_nonTermAlignment);
@@ -232,9 +229,9 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
     } else {
       *lossIt = fc->Predict(SPrint(transIt->m_index));
     }
+    *pEgivenFit = transIt->m_scores[P_E_F_INDEX];
   }
   fc->FinishExample();
-  *pEgivenFit = transIt->m_scores[P_E_F_INDEX];
 }
 
 
@@ -517,6 +514,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
   size_t found;
   size_t sizeOfsourceSpan = sourceSpan.size();
   size_t sizeOftargetSpan = targetSpan.size();
+  size_t nonTermCount = 0;
 
   //Generate source indicator features
   for (int i=0; i < sizeOfsourceSpan; i++) {
@@ -529,13 +527,17 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
     }
 
   //Generate target indicator features
+  //Fabienne Braune : TODO : the alignment should already be encoded in the non-terms so why do we lookup the alignment again?
   for (int i=0; i < sizeOftargetSpan; i++) {
     if( targetSpan[i].compare(indicParent) )
     {
+    	//std::cerr << "LOOKING AT SPAN : " <<  targetSpan[i] << std::endl;
         found = targetSpan[i].find(nonTerm);
         if(found != string::npos)
         {
-            size_t newTerm = nonTermAlign.lower_bound(i)->second;
+            size_t newTerm = nonTermAlign.lower_bound(nonTermCount)->second;
+            //std::cerr << "LOOKING FOR : " << i << std::endl;
+            //std::cerr << "FOUND LOWER BOUND : " << newTerm << std::endl;
             ostringstream s1;
             s1 << newTerm;
             string sourceAlign =s1.str();
@@ -544,6 +546,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithLhsSyntax(
              {indicStringTarget += "_";}
             indicStringTarget += nonTerm;
             indicStringTarget += sourceAlign;
+            nonTermCount++;
         }
         else{
         if (indicStringTarget.size()>0)
@@ -942,7 +945,7 @@ void FeatureExtractor::GeneratePairedFeaturesChart(const vector<string> &srcPhra
 
 }
 
-void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithScoreFeatures(const vector<string> &sourceSpan, const vector<string> &targetSpan, const AlignmentType &alignNonTerm, const std::vector<float> scores, FeatureConsumer *fc)
+void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithScoreFeatures(const vector<string> &sourceSpan, const vector<string> &targetSpan, const AlignmentType &alignNonTerm, const std::vector<long double> scores, FeatureConsumer *fc)
 {
 	  string indicParent = "[X]";
 	  string indicStringSource = "";
@@ -1003,7 +1006,7 @@ void FeatureExtractor::GenerateSourceTargetIndicatorFeatureWithScoreFeatures(con
 }
 
 
-void FeatureExtractor::GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc)
+void FeatureExtractor::GenerateScoreFeatures(const std::vector<long double> scores, FeatureConsumer *fc)
 {
   vector<size_t>::const_iterator scoreIt;
   vector<float>::const_iterator binIt;

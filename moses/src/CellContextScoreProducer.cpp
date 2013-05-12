@@ -41,16 +41,16 @@ CellContextScoreProducer::~CellContextScoreProducer()
 
 bool CellContextScoreProducer::Initialize(const string &modelFile, const string &indexFile, const string &configFile)
 {
-  bool isGood = LoadRuleIndex(indexFile);
+
+  bool isGood = false;
 
   m_consumerFactory = new VWLibraryPredictConsumerFactory(modelFile, 255);
   if (! LoadRuleIndex(indexFile))
   isGood = false;
 
   m_extractorConfig.Load(configFile);
-
-  m_extractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, false);
-  m_debugExtractor = new FeatureExtractor(m_ruleIndex, m_extractorConfig, true);
+  m_extractor = new FeatureExtractor(m_ruleIndex,m_extractorConfig, false);
+  m_debugExtractor = new FeatureExtractor(m_ruleIndex,m_extractorConfig, true);
   m_debugConsumer = new VWFileTrainConsumer("/projekte/morphosynt/braune/MyPerlScripts/softSyntax/hiero-feature-debug");
   isGood = true;
   VERBOSE(4, "Constructing score producers : " << isGood << endl);
@@ -64,15 +64,10 @@ ScoreComponentCollection CellContextScoreProducer::ScoreFactory(float score)
   return out;
 }
 
-bool CellContextScoreProducer::CheckIndex(const std::string &targetRep)
+void CellContextScoreProducer::CheckIndex(const std::string &targetRep)
 {
-  bool returnValue = true;
   if (m_ruleIndex.left.find(targetRep) == m_ruleIndex.left.end())
-  { std::cerr << "POTENTIAL ERROR : Phrase not in index: " + targetRep << std::endl;
-    returnValue = false;
-  }
-	  //throw runtime_error("Phrase not in index: " + targetRep);
-  return returnValue;
+    throw runtime_error("Phrase not in index: " + targetRep);
 }
 
 ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string targetRep, const TargetPhrase *tp)
@@ -81,10 +76,10 @@ ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string target
   ChartTranslation psdOpt;
 
   // phrase ID
-  VERBOSE(6, "LOOKED UP TARGET REP : " << targetRep << endl);
-  CHECK(m_ruleIndex.left.find(targetRep) != m_ruleIndex.left.end());
-  psdOpt.m_index = m_ruleIndex.left.find(targetRep)->second;
-  VERBOSE(6, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
+   VERBOSE(6, "LOOKED UP TARGET REP : " << targetRep << endl);
+   CHECK(m_ruleIndex.left.find(targetRep) != m_ruleIndex.left.end());
+   psdOpt.m_index = m_ruleIndex.left.find(targetRep)->second;
+   VERBOSE(6, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
 
   //alignment between terminals and non-terminals
   // alignment between terminals
@@ -112,23 +107,16 @@ ChartTranslation CellContextScoreProducer::GetPSDTranslation(const string target
   const TranslationSystem& system = StaticData::Instance().GetTranslationSystem(TranslationSystem::DEFAULT);
   const vector<PhraseDictionaryFeature*>& ttables = system.GetPhraseDictionaries();
   const ScoreComponentCollection &scoreCollection = tp->GetScoreBreakdown();
-  psdOpt.m_scores = scoreCollection.GetScoresForProducer(ttables[0]); // assuming one translation step!
-  for(size_t i=0; i<psdOpt.m_scores.size();i++)
+  //std::cerr << "SCORE COMPONENT COLLECTION STORED INTO SCORES : " << scoreCollection << std::endl;
+
+  for(size_t i=0; i< scoreCollection.GetScoresForProducer(ttables[0]).size();i++)
   {
-      psdOpt.m_scores[i] = exp(psdOpt.m_scores[i]);
+      psdOpt.m_scores.push_back( expl( (long double) scoreCollection.GetScoresForProducer(ttables[0])[i]));
   }
 
   std::multimap<size_t, size_t>::iterator itr_align;
-  /*std::cerr << "Created Translation Option : ";
-  for(itr_align = psdOpt.m_nonTermAlignment.begin(); itr_align != psdOpt.m_nonTermAlignment.end(); itr_align++)
-  {
-	  std::cerr << itr_align->first << " : " <<  itr_align->second << "\t";
-  }
-  std::cerr << std::endl;*/
-
   return psdOpt;
 }
-
 
 bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
 {
@@ -144,6 +132,7 @@ bool CellContextScoreProducer::LoadRuleIndex(const string &indexFile)
   return true;
 }
 
+
 vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                         size_t startSpan,
                                                                         size_t endSpan,
@@ -153,12 +142,6 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
                                                                         map<string,TargetPhrase*> * targetMap
                                                                       )
 {
-  //debugging : check that everything is fine in index map
-  //RuleIndexType :: iterator itr_rule_index;
-  //for(itr_rule_index = m_ruleIndex.begin(); itr_rule_index != m_ruleIndex.end(); itr_rule_index++)
-  //{
-  //    std::cout << "Index : " << itr_rule_index->first << " : " << itr_rule_index->second << std::endl;
-  //}
 
     vector<ScoreComponentCollection> scores;
     float sum = 0.0;
@@ -184,11 +167,8 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         for (tgtRepIt = targetRepresentations->begin(); tgtRepIt != targetRepresentations->end(); tgtRepIt++) {
           CHECK(targetMap->find(*tgtRepIt) != targetMap->end());
           itr_rep = targetMap->find(*tgtRepIt);
-          VERBOSE(5, "CHECKING INDEX FOR : " << *tgtRepIt << endl);
 
-          bool DoesIndexExist = CheckIndex(*tgtRepIt);
-          if(DoesIndexExist)
-          {psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));}
+          psdOptions.push_back(GetPSDTranslation(*tgtRepIt,itr_rep->second));
         }
 
         VERBOSE(5, "Extracting features for source : " << sourceSide << endl);
@@ -233,21 +213,23 @@ vector<ScoreComponentCollection> CellContextScoreProducer::ScoreRules(
         }
         VWLibraryPredictConsumer * p_consumer = m_consumerFactory->Acquire();
         //std::cerr << "LOOKING FOR SPAN : " << startSpan << " : " << endSpan << std::endl;
+
         m_extractor->GenerateFeaturesChart(p_consumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
         m_consumerFactory->Release(p_consumer);
         Normalize0(losses);
-        Interpolate(losses,pEgivenF,0.1);
-        //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses);
-        //Normalize(losses);
+        VERBOSE(5, "VW losses BEFORE interpolation : " << std::endl);
         vector<float>::iterator lossIt;
-        VERBOSE(5, "VW losses after normalization : " << std::endl);
+        for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
+           VERBOSE(5, *lossIt << " ");}
+        Interpolate(losses,pEgivenF,0.1);
+        //m_debugExtractor->GenerateFeaturesChart(m_debugConsumer,source.m_PSDContext,sourceSide,syntFeats,parentLabel.GetString(),span,startSpan,endSpan,psdOptions,losses,pEgivenF);
+        //Normalize(losses);
+        VERBOSE(5, "VW losses after interpolation : " << std::endl);
         for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
         VERBOSE(5, *lossIt << " ");
-        float logScore = Equals(*lossIt, 0) ? LOWEST_SCORE : log(*lossIt);
+        float logScore = PreciseEquals( (long double) *lossIt, 0.0) ? LOWEST_SCORE : log(*lossIt);
         *lossIt = logScore;
-        //FB : maybe we should floor log score before adding to scores
-        //Remove when making example
-        //FloorScore(logScore);
+        VERBOSE(5, "Interpolated loss : " << *lossIt << " ");
         scores.push_back(ScoreFactory(logScore));
         VERBOSE(5, std::endl;);
         }
@@ -320,7 +302,12 @@ void CellContextScoreProducer::Interpolate(vector<float> &losses, vector<float> 
 	 vector<float>::iterator itEgivenF;
 
 	 for (itLosses = losses.begin(), itEgivenF = pEgivenF.begin(); itLosses != losses.end(), itEgivenF != pEgivenF.end(); itLosses++,itEgivenF++) {
-		 *itLosses = interpolParam*(*itEgivenF) + ( (1.0 - interpolParam) * (*itLosses));
+		 VERBOSE(5, "Loss before interpolation : " <<  *itLosses  << endl);
+		 VERBOSE(5, "Interpol param : " <<  interpolParam  << " : " << 1.0 - interpolParam << endl);
+		 VERBOSE(5, "E given F : " <<  *itEgivenF << endl);
+		 *itLosses = (interpolParam*(*itEgivenF)) + ( (1.0 - interpolParam) * (*itLosses) );
+		 //*itLosses = LogAddition(interpolParam*(*itEgivenF) , ( (1.0 - interpolParam) * (log(*itLosses))) , 5.0);
+		 VERBOSE(5, "Loss after interpolation : " <<  *itLosses  << endl);
 	    }
 }
 
@@ -338,25 +325,28 @@ void CellContextScoreProducer::Normalize(std::vector<float> &losses)
       for (lossIt = losses.begin(); lossIt != losses.end(); lossIt++) {
           *lossIt /= sum;
         }
+}
 
-      // handle case where sum is 0
-      /*if (sum != 0) {
-          vector<ScoreComponentCollection>::iterator colIt;
-          for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-          VERBOSE(5, "Score before normalizing : " << *colIt << std::endl);
-          colIt->Assign(this, log(colIt->GetScoreForProducer(this) / sum));
-          VERBOSE(5, "Score after normalizing : " << *colIt << std::endl);
-          }
-          else
-        {
-            VERBOSE(5, "SUM IS ZERO : SCORES PUT TO 0 " << std::endl);
-            vector<ScoreComponentCollection>::iterator colIt;
-            for (colIt = scores.begin(); colIt != scores.end(); colIt++) {
-            colIt->ZeroAll();
-            }
-        }
-      }*/
+double CellContextScoreProducer::LogAddition(double logA, double logB, double logAddPrecision)
+{
 
+	if (logA == logB) {
+		return (logA+log(2.0));}
+
+	  if (logA > logB) {
+	    if (logA - logB > logAddPrecision) {
+	        return(logA);
+	    }
+	    else {
+	        return(logA + log(1.0 + pow(2.718,logB - logA)));
+	    }
+	  }
+
+	  if (logB - logA > logAddPrecision) {
+	        return(logB);
+	  }
+
+	  return(logB + log(1 + pow(2.718,logA - logB)));
 }
 
 size_t CellContextScoreProducer::GetNumScoreComponents() const

@@ -43,7 +43,6 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "StaticData.h"
 #include "DummyScoreProducers.h"
 #include "InputFileStream.h"
-#include "PSDScoreProducer.h"
 
 using namespace std;
 using namespace Moses;
@@ -445,15 +444,6 @@ void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList, con
           }
           out << " " << scores[j];
         }
-      }
-    }
-
-    PSDScoreProducer *psdProducer = staticData.GetPSDScoreProducer();
-    if (psdProducer != NULL) {
-      out << " " << psdProducer->GetScoreProducerWeightShortName(0) << ":";
-      vector<float> scores = path.GetScoreBreakdown().GetScoresForProducer(psdProducer);
-      for (size_t j = 0; j<scores.size(); ++j) {
-        out << " " << scores[j];
       }
     }
 

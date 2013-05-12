@@ -215,7 +215,7 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
         {
             CellContextScoreProducer *ccsp = StaticData::Instance().GetCellContextScoreProducer();
             CHECK(ccsp != NULL);
-            VERBOSE(3, "Calling vw for rule : " << itr_ruleMap->first << " : " << itr_ruleMap->second << endl);
+            VERBOSE(3, "Calling vw for source side : " << itr_ruleMap->first << endl);
             VERBOSE(3, "Calling vw for source context : " << m_source << endl);
 
             vector<ScoreComponentCollection> scores = ccsp->ScoreRules(
@@ -237,21 +237,18 @@ void ChartTranslationOptionCollection::CreateTranslationOptionsForRange(
                 VERBOSE(5, "Looking at target phrase : " << *itr_rep->second << std::endl);
                 //VERBOSE(5, "Target Phrase score vector before adding stateless : ");
                 //StaticData::Instance().GetScoreIndexManager().PrintLabeledScores(std::cerr,(itr_rep->second)->GetScoreBreakdown());
-                //std::cerr << std::endl;
+                // std::cerr << std::endl;
                 VERBOSE(5, "Target Phrase score before adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 VERBOSE(5, "Score component collection : " << *iterLCSP << std::endl);
                 (itr_rep->second)->AddStatelessScore(*iterLCSP++);
                 VERBOSE(5, "Target Phrase score after adding stateless : " << (itr_rep->second)->GetFutureScore() << std::endl);
                 }
         }
-        //sort target phrase collection again
-        transOpt.SortTargetPhrases();
-
-        //NOTE : What happens with the stack vector?
         VERBOSE(5, "Estimate of best score before computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
         transOpt.CalcEstimateOfBestScore();
         VERBOSE(5, "Estimate of best score after computing context : " << transOpt.GetEstimateOfBestScore() << std::endl);
     }
+
   }//end of ifs
 //    #endif // HAVE_VW
 

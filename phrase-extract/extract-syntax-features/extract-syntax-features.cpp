@@ -109,6 +109,10 @@ int main(int argc, char**argv)
   string srcPhrase = "";
   ContextType context;
   vector<float> losses;
+
+  //Fabienne Braune : vector for holding p(e|f)
+  vector<float> pEgivenF;
+
   vector<string> syntFeats;
   vector<ChartTranslation> translations;
   vector<SyntaxLabel> syntLabels;
@@ -165,7 +169,7 @@ int main(int argc, char**argv)
       if (hasTranslation) { //ignore first round
     	//cerr << "EXTRACTING FEATURES FOR : " << srcPhrase << std::endl;
         srcSurvived++;
-        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);}
+        extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses, pEgivenF);}
       // set new source phrase, context, translations and losses
       srcPhrase = psdLine.GetSrcPhrase();
       spanStart = psdLine.GetSrcStart();
@@ -173,9 +177,11 @@ int main(int argc, char**argv)
       context = ReadFactoredLine(corpusLine, config.GetFactors().size());
       translations = rtable.GetTranslations(srcPhrase);
       losses.clear();
+      pEgivenF.clear();
       syntFeats.clear();
       parentLabel.clear();
       losses.resize(translations.size(), 1);
+      pEgivenF.resize(translations.size(), 1);
       srcTotal++;
 
       // after extraction, set translation to false again
@@ -259,6 +265,7 @@ int main(int argc, char**argv)
 			if (translations[i].m_index == tgtPhraseID) {
 				//std::cerr << "ID for target found : " << tgtPhraseID << " : " << translations[i].m_index << std::endl;
 				losses[i] = 0;
+				pEgivenF[i] = 0;
 				hasTranslation = true;
 				tgtSurvived++;
 			  	break;
@@ -274,7 +281,7 @@ int main(int argc, char**argv)
    // generate features for the last source phrase
   if (hasTranslation) {
     srcSurvived++;
-    extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses);
+    extractor.GenerateFeaturesChart(&consumer, context, srcPhrase, syntFeats, parentLabel.GetString(), span, spanStart, spanEnd, translations, losses, pEgivenF);
   }
 
     // output statistics about filtering

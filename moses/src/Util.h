@@ -64,6 +64,13 @@ inline bool Equals(float a, float b)
   return fabs(a - b) < EPS;
 }
 
+//Fabienne Braune
+const long double VerySmallDiff = 0.0000000001; // for very precise comparisons
+inline bool PreciseEquals(float a, float b)
+{
+  return fabs(a - b) < VerySmallDiff;
+}
+
 //! delete white spaces at beginning and end of string
 const std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r");
 const std::string ToLower(const std::string& str);

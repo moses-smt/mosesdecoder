@@ -29,9 +29,9 @@ private:
   PSD::TargetIndexType m_targetIndex;
 
 void AddRulePair(const std::string &src, const std::string &tgt,
-    const std::vector<float> &scores, const PSD::AlignmentType &termAlign,
+    const std::vector<long double> &scores, const PSD::AlignmentType &termAlign,
     const PSD::AlignmentType &nonTermAlign);
-  std::vector<float> GetScores(const std::string &scoreStr);
+  std::vector<long double> GetScores(const std::string &scoreStr);
   PSD::AlignmentType GetTermAlignment(const std::string &alignStr, const std::string &targetStr);
   PSD::AlignmentType GetNonTermAlignment(const std::string &alignStr, const std::string &targetStr, const std::string &sourceStr);
 

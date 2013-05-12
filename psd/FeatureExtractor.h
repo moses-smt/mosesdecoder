@@ -84,7 +84,7 @@ struct ChartTranslation
   size_t m_index;
   AlignmentType m_termAlignment;
   AlignmentType m_nonTermAlignment;
-  std::vector<float> m_scores;
+  std::vector<long double> m_scores;
 };
 
 // index of possible target spans
@@ -96,12 +96,12 @@ class FeatureExtractor
 public:
   FeatureExtractor(const TargetIndexType &targetIndex, const ExtractorConfig &config, bool train);
 
-  void GenerateFeatures(FeatureConsumer *fc,
+  /*void GenerateFeatures(FeatureConsumer *fc,
     const ContextType &context,
     size_t spanStart,
     size_t spanEnd,
     const std::vector<Translation> &translations,
-    std::vector<float> &losses);
+    std::vector<float> &losses);*/
 
   //FB: This has to be redone !
   void GenerateFeaturesChartLhs(FeatureConsumer *fc,
@@ -134,7 +134,7 @@ private:
   bool m_train;
 
   float GetMaxProb(const std::vector<Translation> &translations);
-  float GetMaxProbChart(const std::vector<ChartTranslation> &translations);
+  double GetMaxProbChart(const std::vector<ChartTranslation> &translations);
   void GenerateContextFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc);
   void GenerateInternalFeatures(const std::vector<std::string> &span, FeatureConsumer *fc);
   void GenerateInternalFeaturesChart(const std::vector<std::string> &span, FeatureConsumer *fc, AlignmentType a);
@@ -153,7 +153,7 @@ private:
   void GenerateSourceTargetIndicatorFeatureWithPairedFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignTerm, const AlignmentType &alignNonTerm, FeatureConsumer *fc);
   void GenerateSourceTargetIndicatorFeatureWithContext(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const ContextType &context, size_t spanStart, size_t spanEnd, FeatureConsumer *fc, AlignmentType nonTermAlign);
   void GenerateSourceTargetIndicatorMostFrequent(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, FeatureConsumer *fc,AlignmentType nonTermAlign);
-  void GenerateSourceTargetIndicatorFeatureWithScoreFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignNonTerm, const std::vector<float> scores, FeatureConsumer *fc);
+  void GenerateSourceTargetIndicatorFeatureWithScoreFeatures(const std::vector<std::string> &sourceSpan, const std::vector<std::string> &targetSpan, const AlignmentType &alignNonTerm, const std::vector<long double> scores, FeatureConsumer *fc);
   void GenerateSourceTopicFeatures(const std::vector<std::string> &wordSpan, const std::vector<std::string> &sourceTopics, FeatureConsumer *fc);
   void GenerateBagOfWordsFeatures(const ContextType &context, size_t spanStart, size_t spanEnd, size_t factorID, FeatureConsumer *fc);
   void GeneratePairedFeatures(const std::vector<std::string> &srcPhrase,
@@ -165,7 +165,7 @@ private:
       const AlignmentType &termAligns,
       const AlignmentType &nonTermAligns,
       FeatureConsumer *fc);
-  void GenerateScoreFeatures(const std::vector<float> scores, FeatureConsumer *fc);
+  void GenerateScoreFeatures(const std::vector<long double> scores, FeatureConsumer *fc);
   std::string BuildContextFeature(size_t factor, int index, const std::string &value);
 };
 

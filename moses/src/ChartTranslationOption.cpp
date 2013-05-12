@@ -31,6 +31,8 @@ float ChartTranslationOption::CalcEstimateOfBestScore(
 {
   const TargetPhrase &targetPhrase = **(tpc.begin());
   float estimateOfBestScore = targetPhrase.GetFutureScore();
+  VERBOSE(5, "Computing Estimate of Best score (1). Best Target :  " << targetPhrase << " : " << estimateOfBestScore << std::endl);
+  VERBOSE(5, "Adding hypos... ");
   for (StackVec::const_iterator p = stackVec.begin(); p != stackVec.end();
        ++p) {
     const HypoList *stack = *p;
@@ -38,7 +40,10 @@ float ChartTranslationOption::CalcEstimateOfBestScore(
     assert(!stack->empty());
     const ChartHypothesis &bestHypo = **(stack->begin());
     estimateOfBestScore += bestHypo.GetTotalScore();
+    VERBOSE(5, bestHypo.GetCurrTargetPhrase() << " : " << bestHypo.GetCurrTargetPhrase().GetScoreBreakdown());
+    VERBOSE(5, bestHypo.GetTotalScore() << " : " << estimateOfBestScore);
   }
+  VERBOSE(5, std::endl);
   return estimateOfBestScore;
 }
 
@@ -47,7 +52,7 @@ void ChartTranslationOption::CalcEstimateOfBestScore()
 {
   const TargetPhrase * targetPhrase = (*m_targetPhraseCollection->begin());
   float estimateOfBestScore = targetPhrase->GetFutureScore();
-  VERBOSE(5, "Computing Estimate of Best score... Best target " << estimateOfBestScore << std::endl);
+  VERBOSE(5, "Computing Estimate of Best score (2). Best Target :  " << estimateOfBestScore << std::endl);
   VERBOSE(5, "Adding hypos... ");
   for (StackVec::const_iterator p = m_stackVec.begin(); p != m_stackVec.end();
        ++p) {
@@ -56,6 +61,7 @@ void ChartTranslationOption::CalcEstimateOfBestScore()
     assert(!stack->empty());
     const ChartHypothesis &bestHypo = **(stack->begin());
     estimateOfBestScore += bestHypo.GetTotalScore();
+    VERBOSE(5, bestHypo.GetCurrTargetPhrase() << " : " << bestHypo.GetCurrTargetPhrase().GetScoreBreakdown());
     VERBOSE(5, bestHypo.GetTotalScore() << " : " << estimateOfBestScore);
   }
   VERBOSE(5, std::endl);

@@ -42,19 +42,20 @@ class CellContextScoreProducer : public StatelessFeatureFunction
                                                     std::map<std::string,TargetPhrase*> * targetMap);
 
 
-    bool CheckIndex(const std::string &targetRep);
+    void CheckIndex(const std::string &targetRep);
     PSD::ChartTranslation GetPSDTranslation(const std::string targetRep, const TargetPhrase * tp);
     virtual bool ComputeValueInTranslationOption() const { return true; }
     void Normalize(std::vector<float> &losses);
     void Normalize0(std::vector<float> &losses);
+    double LogAddition(double logA, double logB, double logAddPrecision);
     void Interpolate(std::vector<float> &losses, std::vector<float> &pEgivenF, float interpolParam);
 
     private :
+    PSD::TargetIndexType m_ruleIndex; //FB : this target index type remains empty during decoding
     PSD::FeatureExtractor *m_extractor, *m_debugExtractor;
     PSD::VWLibraryPredictConsumerFactory  *m_consumerFactory;
     PSD::VWFileTrainConsumer      *m_debugConsumer;
     PSD::ExtractorConfig m_extractorConfig;
-    PSD::TargetIndexType m_ruleIndex;
     bool IsOOV(const std::string &targetRep);
     bool LoadRuleIndex(const std::string &indexFile);
     std::vector<FactorType> m_srcFactors, m_tgtFactors; // which factors to use; XXX hard-coded for now

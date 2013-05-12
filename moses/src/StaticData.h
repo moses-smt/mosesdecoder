@@ -67,9 +67,6 @@ class SyntacticLanguageModel;
 #endif
 class TranslationSystem;
 class LeftContextScoreProducer;
-//#ifdef HAVE_VW
-class PSDScoreProducer;
-//#endif
 
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
@@ -153,9 +150,7 @@ protected:
   std::vector<DistortionScoreProducer *> m_distortionScoreProducers;
   UnknownWordPenaltyProducer *m_unknownWordPenaltyProducer;
   LeftContextScoreProducer * m_leftContextScoreProducer;
-//#ifdef HAVE_VW
-  PSDScoreProducer * m_PSDScoreProducer;
-//#endif
+
   bool m_reportSegmentation;
   bool m_reportAllFactors;
   bool m_reportAllFactorsNBest;
@@ -637,12 +632,6 @@ public:
     {
         return m_cellContext;
     }
-
-//#ifdef HAVE_VW
-  PSDScoreProducer *GetPSDScoreProducer() const {
-    return m_PSDScoreProducer;
-  }
-//#endif
 
 };
 

@@ -63,7 +63,7 @@ const vector<ChartTranslation> &RuleTable::GetTranslations(const string &srcPhra
 //
 
 void RuleTable::AddRulePair(const std::string &src, const std::string &tgt,
-    const std::vector<float> &scores, const PSD::AlignmentType &termAlign, const PSD::AlignmentType &nonTermAlign)
+    const std::vector<long double> &scores, const PSD::AlignmentType &termAlign, const PSD::AlignmentType &nonTermAlign)
 {
 
   //std::cerr << "Adding rule pair "<< src << " : "<< tgt << std::endl;
@@ -79,9 +79,9 @@ void RuleTable::AddRulePair(const std::string &src, const std::string &tgt,
   translations.push_back(t);
 }
 
-std::vector<float> RuleTable::GetScores(const std::string &scoreStr)
+std::vector<long double> RuleTable::GetScores(const std::string &scoreStr)
 {
-  return Scan<float>(Tokenize(scoreStr, " "));
+  return Scan<long double>(Tokenize(scoreStr, " "));
 }
 
 PSD::AlignmentType RuleTable::GetTermAlignment(const std::string &alignStr, const std::string &targetStr)
@@ -164,6 +164,7 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
         if(found != string::npos)
         {
             targetAligns.insert(make_pair(targetCounter,targetNonTermCounter));
+            //std::cerr << "TARGET ALIGN : " << targetCounter << " : " << targetNonTermCounter << std::endl;
             targetNonTermCounter++;
         }
         targetCounter++;
@@ -175,6 +176,7 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
         if(found != string::npos)
         {
             sourceAligns.insert(make_pair(sourceCounter,sourceNonTermCounter));
+            //std::cerr << "SOURCE ALIGN : " << sourceCounter << " : " << sourceNonTermCounter << std::endl;
             sourceNonTermCounter++;
         }
         sourceCounter++;
@@ -194,13 +196,15 @@ PSD::AlignmentType RuleTable::GetNonTermAlignment(const std::string &alignStr, c
         //look at size of source and target non term vectors
         if (point.size() == 2) {
 
-        //std::cerr << "CHECKING FOR POINT : " << point[0] << " : " << std::endl;
+        //std::cerr << "CHECKING FOR POINT ON SOURCE : " << point[0] << " : " << std::endl;
+        //std::cerr << "CHECKING FOR POINT ON TARGET : " << point[1] << " : " << std::endl;
         CHECK(sourceAligns.find(Scan<size_t>(point[0])) != sourceAligns.end());
         CHECK(targetAligns.find(Scan<size_t>(point[1])) != targetAligns.end());
 
         //cerr << "INSERTING : " << point[0] <<  " : " << point[1] << endl;
         out.insert( make_pair(sourceAligns.find(Scan<size_t>(point[0]))->second,
                                targetAligns.find(Scan<size_t>(point[1]))->second ) );
+        //std:cerr << "INSERTED PAIR : " << sourceAligns.find(Scan<size_t>(point[0]))->second << "  : " << targetAligns.find(Scan<size_t>(point[1]))->second << std::endl;
         numberOfNonTerms--;
         if(numberOfNonTerms == 0){break;}
         }
